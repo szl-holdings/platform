@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Api
-  version: 0.1.0
-  description: API specification
+  title: SZL Holdings DreamStack API
+  version: 0.2.0
+  description: Platform API for the SZL Holdings DreamStack suite
 servers:
   - url: /api
     description: Base API path
@@ -11,6 +11,32 @@ tags:
     description: Health operations
   - name: projects
     description: Project operations
+  - name: auth
+    description: Authentication and user management
+  - name: connectors
+    description: Integration connector management
+  - name: notifications
+    description: Notification management
+  - name: audit
+    description: Activity logs and audit events
+  - name: billing
+    description: Billing plans, subscriptions, and invoices
+  - name: feature-flags
+    description: Feature flag management
+  - name: files
+    description: File and asset management
+  - name: stephen
+    description: Stephen L. portfolio site
+  - name: vessels
+    description: Vessel tracking and cargo management
+  - name: firestorm
+    description: Campaign and lead management
+  - name: lyte
+    description: E-commerce products and orders
+  - name: dreamscape
+    description: Creative project management
+  - name: readiness
+    description: Readiness assessments and compliance
 paths:
   /healthz:
     get:
@@ -118,6 +144,654 @@ paths:
           description: Project deleted
         "404":
           description: Project not found
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Authenticate with a credential and receive a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credential]
+              properties:
+                credential:
+                  type: string
+      responses:
+        "201":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+                  user:
+                    $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+  /auth/providers:
+    get:
+      operationId: getAuthProviders
+      tags: [auth]
+      summary: List available authentication providers
+      responses:
+        "200":
+          description: Available providers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      type: string
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+  /auth/sessions:
+    post:
+      operationId: createSession
+      tags: [auth]
+      summary: Create a new session token
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionToken"
+  /auth/sessions/current:
+    delete:
+      operationId: deleteCurrentSession
+      tags: [auth]
+      summary: Revoke the current session (from Authorization header)
+      responses:
+        "204":
+          description: Session revoked
+  /auth/sessions/{id}:
+    delete:
+      operationId: deleteSession
+      tags: [auth]
+      summary: Revoke a session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Session revoked
+  /auth/roles:
+    get:
+      operationId: listRoles
+      tags: [auth]
+      summary: List all roles
+      responses:
+        "200":
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Role"
+  /auth/users:
+    get:
+      operationId: listUsers
+      tags: [auth]
+      summary: List all users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserSummary"
+  /connectors:
+    get:
+      operationId: listConnectors
+      tags: [connectors]
+      summary: List all connectors
+      responses:
+        "200":
+          description: List of connectors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Connector"
+    post:
+      operationId: createConnector
+      tags: [connectors]
+      summary: Create a new connector
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConnector"
+      responses:
+        "201":
+          description: Connector created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connector"
+  /connectors/{id}:
+    get:
+      operationId: getConnector
+      tags: [connectors]
+      summary: Get a connector by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Connector details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connector"
+        "404":
+          description: Connector not found
+    patch:
+      operationId: updateConnector
+      tags: [connectors]
+      summary: Update a connector
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConnector"
+      responses:
+        "200":
+          description: Connector updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connector"
+    delete:
+      operationId: deleteConnector
+      tags: [connectors]
+      summary: Delete a connector
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Connector deleted
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+    post:
+      operationId: createNotification
+      tags: [notifications]
+      summary: Create a notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNotification"
+      responses:
+        "201":
+          description: Notification created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Notification updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+  /audit/activity:
+    get:
+      operationId: listActivityLogs
+      tags: [audit]
+      summary: List activity logs
+      responses:
+        "200":
+          description: List of activity log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityLog"
+  /audit/events:
+    get:
+      operationId: listAuditEvents
+      tags: [audit]
+      summary: List audit events
+      responses:
+        "200":
+          description: List of audit events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditEvent"
+  /billing/plans:
+    get:
+      operationId: listBillingPlans
+      tags: [billing]
+      summary: List billing plans
+      responses:
+        "200":
+          description: List of billing plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BillingPlan"
+  /billing/subscriptions:
+    get:
+      operationId: listSubscriptions
+      tags: [billing]
+      summary: List subscriptions
+      responses:
+        "200":
+          description: List of subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subscription"
+  /billing/invoices:
+    get:
+      operationId: listInvoices
+      tags: [billing]
+      summary: List invoices
+      responses:
+        "200":
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+  /feature-flags:
+    get:
+      operationId: listFeatureFlags
+      tags: [feature-flags]
+      summary: List feature flags
+      responses:
+        "200":
+          description: List of feature flags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeatureFlag"
+    post:
+      operationId: createFeatureFlag
+      tags: [feature-flags]
+      summary: Create a feature flag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeatureFlag"
+      responses:
+        "201":
+          description: Feature flag created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureFlag"
+  /feature-flags/{id}:
+    patch:
+      operationId: updateFeatureFlag
+      tags: [feature-flags]
+      summary: Update a feature flag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFeatureFlag"
+      responses:
+        "200":
+          description: Feature flag updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureFlag"
+    delete:
+      operationId: deleteFeatureFlag
+      tags: [feature-flags]
+      summary: Delete a feature flag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Feature flag deleted
+  /files:
+    get:
+      operationId: listFiles
+      tags: [files]
+      summary: List files
+      responses:
+        "200":
+          description: List of files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileRecord"
+  /files/{id}:
+    get:
+      operationId: getFile
+      tags: [files]
+      summary: Get a file by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: File details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileRecord"
+        "404":
+          description: File not found
+  /assets:
+    get:
+      operationId: listAssets
+      tags: [files]
+      summary: List assets
+      responses:
+        "200":
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Asset"
+  /stephen/contacts:
+    get:
+      operationId: listStephenContacts
+      tags: [stephen]
+      summary: List contact submissions
+      responses:
+        "200":
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StephenContact"
+    post:
+      operationId: createStephenContact
+      tags: [stephen]
+      summary: Submit a contact form
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStephenContact"
+      responses:
+        "201":
+          description: Contact submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StephenContact"
+  /stephen/testimonials:
+    get:
+      operationId: listStephenTestimonials
+      tags: [stephen]
+      summary: List testimonials
+      responses:
+        "200":
+          description: List of testimonials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StephenTestimonial"
+  /stephen/case-studies:
+    get:
+      operationId: listStephenCaseStudies
+      tags: [stephen]
+      summary: List case studies
+      responses:
+        "200":
+          description: List of case studies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StephenCaseStudy"
+  /vessels:
+    get:
+      operationId: listVessels
+      tags: [vessels]
+      summary: List all vessels
+      responses:
+        "200":
+          description: List of vessels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vessel"
+  /vessels/{id}:
+    get:
+      operationId: getVessel
+      tags: [vessels]
+      summary: Get vessel details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vessel details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vessel"
+        "404":
+          description: Vessel not found
+  /firestorm/campaigns:
+    get:
+      operationId: listFirestormCampaigns
+      tags: [firestorm]
+      summary: List campaigns
+      responses:
+        "200":
+          description: List of campaigns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FirestormCampaign"
+  /firestorm/leads:
+    get:
+      operationId: listFirestormLeads
+      tags: [firestorm]
+      summary: List leads
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FirestormLead"
+  /firestorm/analytics:
+    get:
+      operationId: listFirestormAnalytics
+      tags: [firestorm]
+      summary: List campaign analytics
+      parameters:
+        - name: campaignId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Campaign analytics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FirestormAnalytics"
+  /lyte/products:
+    get:
+      operationId: listLyteProducts
+      tags: [lyte]
+      summary: List products
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LyteProduct"
+  /lyte/orders:
+    get:
+      operationId: listLyteOrders
+      tags: [lyte]
+      summary: List orders
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LyteOrder"
+  /dreamscape/projects:
+    get:
+      operationId: listDreamscapeProjects
+      tags: [dreamscape]
+      summary: List creative projects
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DreamscapeProject"
+  /readiness/assessments:
+    get:
+      operationId: listReadinessAssessments
+      tags: [readiness]
+      summary: List readiness assessments
+      responses:
+        "200":
+          description: List of assessments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReadinessAssessment"
 components:
   schemas:
     HealthStatus:
@@ -177,3 +851,669 @@ components:
         status:
           type: string
           enum: [active, completed, on-hold, archived]
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        displayName:
+          type: string
+        email:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        roles:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - displayName
+        - roles
+    SessionToken:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+        - token
+        - expiresAt
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        displayName:
+          type: string
+        email:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - displayName
+        - isActive
+    Connector:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+          nullable: true
+        name:
+          type: string
+        type:
+          type: string
+          enum: [stripe, slack, twilio, google, notion, github, shopify, custom]
+        status:
+          type: string
+          enum: [active, inactive, error, pending]
+        isEnabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+        - status
+    CreateConnector:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [stripe, slack, twilio, google, notion, github, shopify, custom]
+        orgId:
+          type: integer
+        config:
+          type: object
+      required:
+        - name
+        - type
+    UpdateConnector:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, error, pending]
+        config:
+          type: object
+        isEnabled:
+          type: boolean
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+          enum: [info, success, warning, error, action_required]
+        channel:
+          type: string
+          enum: [in_app, email, sms, slack]
+        title:
+          type: string
+        message:
+          type: string
+        actionUrl:
+          type: string
+          nullable: true
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - type
+        - channel
+        - title
+        - message
+        - isRead
+    CreateNotification:
+      type: object
+      properties:
+        userId:
+          type: integer
+        type:
+          type: string
+          enum: [info, success, warning, error, action_required]
+        channel:
+          type: string
+          enum: [in_app, email, sms, slack]
+        title:
+          type: string
+        message:
+          type: string
+        actionUrl:
+          type: string
+      required:
+        - userId
+        - type
+        - title
+        - message
+    ActivityLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+          nullable: true
+        action:
+          type: string
+        resource:
+          type: string
+        resourceId:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - action
+        - resource
+    AuditEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+          nullable: true
+        action:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - action
+        - entityType
+    BillingPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        priceMonthly:
+          type: string
+        priceYearly:
+          type: string
+          nullable: true
+        features:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - slug
+        - priceMonthly
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        planId:
+          type: integer
+        status:
+          type: string
+          enum: [active, trialing, past_due, canceled, paused]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - planId
+        - status
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        orgId:
+          type: integer
+        amount:
+          type: string
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [draft, open, paid, void, uncollectible]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orgId
+        - amount
+        - status
+    FeatureFlag:
+      type: object
+      properties:
+        id:
+          type: integer
+        key:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        isEnabled:
+          type: boolean
+        rolloutPercentage:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - key
+        - name
+        - isEnabled
+        - rolloutPercentage
+    CreateFeatureFlag:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        isEnabled:
+          type: boolean
+          default: false
+        rolloutPercentage:
+          type: integer
+          default: 0
+      required:
+        - key
+        - name
+    UpdateFeatureFlag:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        isEnabled:
+          type: boolean
+        rolloutPercentage:
+          type: integer
+    FileRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        filename:
+          type: string
+        originalName:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+        category:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - filename
+        - originalName
+        - mimeType
+        - size
+    Asset:
+      type: object
+      properties:
+        id:
+          type: integer
+        fileId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - fileId
+        - name
+    StephenContact:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        company:
+          type: string
+          nullable: true
+        message:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - message
+    CreateStephenContact:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        company:
+          type: string
+        message:
+          type: string
+      required:
+        - name
+        - email
+        - message
+    StephenTestimonial:
+      type: object
+      properties:
+        id:
+          type: integer
+        clientName:
+          type: string
+        clientTitle:
+          type: string
+          nullable: true
+        clientCompany:
+          type: string
+          nullable: true
+        content:
+          type: string
+        rating:
+          type: integer
+        isPublished:
+          type: boolean
+      required:
+        - id
+        - clientName
+        - content
+        - rating
+    StephenCaseStudy:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        client:
+          type: string
+        industry:
+          type: string
+          nullable: true
+        summary:
+          type: string
+        technologies:
+          type: array
+          items:
+            type: string
+        isPublished:
+          type: boolean
+      required:
+        - id
+        - title
+        - slug
+        - client
+        - summary
+    Vessel:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        imo:
+          type: string
+          nullable: true
+        vesselType:
+          type: string
+        flag:
+          type: string
+          nullable: true
+        status:
+          type: string
+      required:
+        - id
+        - name
+        - vesselType
+        - status
+    FirestormCampaign:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        budget:
+          type: string
+          nullable: true
+        spent:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - type
+        - status
+    FirestormLead:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        company:
+          type: string
+          nullable: true
+        score:
+          type: integer
+        status:
+          type: string
+      required:
+        - id
+        - email
+        - status
+    FirestormAnalytics:
+      type: object
+      properties:
+        id:
+          type: integer
+        campaignId:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        conversions:
+          type: integer
+      required:
+        - id
+        - campaignId
+        - date
+    LyteProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sku:
+          type: string
+          nullable: true
+        price:
+          type: string
+        stockQuantity:
+          type: integer
+        isActive:
+          type: boolean
+      required:
+        - id
+        - name
+        - price
+    LyteOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderNumber:
+          type: string
+        customerEmail:
+          type: string
+        customerName:
+          type: string
+          nullable: true
+        status:
+          type: string
+        total:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - orderNumber
+        - customerEmail
+        - status
+        - total
+    DreamscapeProject:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        clientName:
+          type: string
+          nullable: true
+        status:
+          type: string
+        mood:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - type
+        - status
+    ReadinessAssessment:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        overallScore:
+          type: string
+          nullable: true
+        assessorName:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - category
+        - status

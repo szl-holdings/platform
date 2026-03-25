@@ -1,15 +1,12 @@
 import { Router, type IRouter } from "express";
-import {
-  CreateProjectBody,
-  GetProjectParams,
-  UpdateProjectParams,
-  UpdateProjectBody,
-  DeleteProjectParams,
-} from "@workspace/api-zod";
-import { db, projectsTable } from "@workspace/db";
+import { db, projectsTable, insertProjectSchema } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
+import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
+import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
+
+const validStatuses = ["active", "completed", "on-hold", "archived"] as const;
 
 function serializeProject(p: typeof projectsTable.$inferSelect) {
   return {
@@ -22,23 +19,23 @@ function serializeProject(p: typeof projectsTable.$inferSelect) {
   };
 }
 
-router.get("/projects", async (req, res) => {
+router.get("/projects", authMiddleware(), async (req, res) => {
   try {
     const projects = await db
       .select()
       .from(projectsTable)
       .orderBy(desc(projectsTable.createdAt));
 
-    res.json(projects.map(serializeProject));
+    sendSuccess(res, projects.map(serializeProject));
   } catch (err) {
-    req.log.error({ err }, "Failed to list projects");
-    res.status(500).json({ error: "Failed to list projects" });
+    req.log?.error({ err }, "Failed to list projects");
+    handleRouteError(res, err, "Failed to list projects");
   }
 });
 
-router.post("/projects", async (req, res) => {
+router.post("/projects", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
   try {
-    const body = CreateProjectBody.parse(req.body);
+    const body = insertProjectSchema.parse(req.body);
     const [project] = await db
       .insert(projectsTable)
       .values({
@@ -48,42 +45,57 @@ router.post("/projects", async (req, res) => {
       })
       .returning();
 
-    res.status(201).json(serializeProject(project));
-  } catch (err) {
-    req.log.error({ err }, "Failed to create project");
-    res.status(500).json({ error: "Failed to create project" });
+    sendCreated(res, serializeProject(project));
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "issues" in err) {
+      sendBadRequest(res, "Invalid project data");
+      return;
+    }
+    req.log?.error({ err }, "Failed to create project");
+    handleRouteError(res, err, "Failed to create project");
   }
 });
 
-router.get("/projects/:id", async (req, res) => {
+router.get("/projects/:id", authMiddleware(), async (req, res) => {
   try {
-    const { id } = GetProjectParams.parse({ id: req.params.id });
+    const id = parseIdParam(req.params.id);
     const [project] = await db
       .select()
       .from(projectsTable)
       .where(eq(projectsTable.id, id));
 
     if (!project) {
-      res.status(404).json({ error: "Project not found" });
+      sendNotFound(res, "Project");
       return;
     }
 
-    res.json(serializeProject(project));
+    sendSuccess(res, serializeProject(project));
   } catch (err) {
-    req.log.error({ err }, "Failed to get project");
-    res.status(500).json({ error: "Failed to get project" });
+    req.log?.error({ err }, "Failed to get project");
+    handleRouteError(res, err, "Failed to get project");
   }
 });
 
-router.patch("/projects/:id", async (req, res) => {
+router.patch("/projects/:id", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
   try {
-    const { id } = UpdateProjectParams.parse({ id: req.params.id });
-    const body = UpdateProjectBody.parse(req.body);
-
+    const id = parseIdParam(req.params.id);
+    const { name, description, status } = req.body;
+    if (name !== undefined && (typeof name !== "string" || name.trim().length === 0)) {
+      sendBadRequest(res, "Name must be a non-empty string");
+      return;
+    }
+    if (status !== undefined && !validStatuses.includes(status)) {
+      sendBadRequest(res, `Status must be one of: ${validStatuses.join(", ")}`);
+      return;
+    }
+    if (description !== undefined && typeof description !== "string") {
+      sendBadRequest(res, "Description must be a string");
+      return;
+    }
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
-    if (body.name !== undefined) updateData.name = body.name;
-    if (body.description !== undefined) updateData.description = body.description;
-    if (body.status !== undefined) updateData.status = body.status;
+    if (name !== undefined) updateData.name = name.trim();
+    if (description !== undefined) updateData.description = description;
+    if (status !== undefined) updateData.status = status;
 
     const [project] = await db
       .update(projectsTable)
@@ -92,34 +104,34 @@ router.patch("/projects/:id", async (req, res) => {
       .returning();
 
     if (!project) {
-      res.status(404).json({ error: "Project not found" });
+      sendNotFound(res, "Project");
       return;
     }
 
-    res.json(serializeProject(project));
+    sendSuccess(res, serializeProject(project));
   } catch (err) {
-    req.log.error({ err }, "Failed to update project");
-    res.status(500).json({ error: "Failed to update project" });
+    req.log?.error({ err }, "Failed to update project");
+    handleRouteError(res, err, "Failed to update project");
   }
 });
 
-router.delete("/projects/:id", async (req, res) => {
+router.delete("/projects/:id", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
   try {
-    const { id } = DeleteProjectParams.parse({ id: req.params.id });
+    const id = parseIdParam(req.params.id);
     const [project] = await db
       .delete(projectsTable)
       .where(eq(projectsTable.id, id))
       .returning();
 
     if (!project) {
-      res.status(404).json({ error: "Project not found" });
+      sendNotFound(res, "Project");
       return;
     }
 
-    res.status(204).send();
+    sendNoContent(res);
   } catch (err) {
-    req.log.error({ err }, "Failed to delete project");
-    res.status(500).json({ error: "Failed to delete project" });
+    req.log?.error({ err }, "Failed to delete project");
+    handleRouteError(res, err, "Failed to delete project");
   }
 });
 
