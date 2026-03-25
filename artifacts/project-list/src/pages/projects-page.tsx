@@ -1,291 +1,579 @@
-import { useState, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { 
-  useListProjects, 
-  useCreateProject, 
-  useUpdateProject, 
-  useDeleteProject,
-  getListProjectsQueryKey,
-  Project
-} from "@workspace/api-client-react";
-import { Button } from "@/components/shared";
-import { ProjectCard } from "@/components/project-card";
-import { ProjectFormModal, DeleteConfirmModal } from "@/components/project-modals";
-import { Plus, FolderKanban, Loader2, Briefcase, CheckCircle2, PauseCircle, Archive, TrendingUp, Mail, Linkedin, Globe, ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { useListProjects, Project } from "@workspace/api-client-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { Linkedin, Mail, ArrowRight, ExternalLink, Loader2, ChevronDown } from "lucide-react";
 
-type FilterStatus = "all" | "active" | "completed" | "on-hold" | "archived";
+const statusLabels: Record<string, string> = {
+  active: "In Progress",
+  completed: "Delivered",
+  "on-hold": "Paused",
+  archived: "Legacy",
+};
 
-export default function ProjectsPage() {
-  const queryClient = useQueryClient();
-  const { data: projects, isLoading, isError } = useListProjects();
-  const [activeFilter, setActiveFilter] = useState<FilterStatus>("all");
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+const statusColors: Record<string, string> = {
+  active: "from-blue-500 to-cyan-400",
+  completed: "from-emerald-500 to-green-400",
+  "on-hold": "from-amber-500 to-yellow-400",
+  archived: "from-zinc-500 to-zinc-400",
+};
 
-  const createMutation = useCreateProject({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
-        setIsFormOpen(false);
-      }
-    }
-  });
+function ParticleField() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const updateMutation = useUpdateProject({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
-        setIsFormOpen(false);
-        setSelectedProject(null);
-      }
-    }
-  });
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
 
-  const deleteMutation = useDeleteProject({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
-        setIsDeleteOpen(false);
-        setSelectedProject(null);
-      }
-    }
-  });
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-  const stats = useMemo(() => {
-    if (!projects) return { total: 0, active: 0, completed: 0, onHold: 0, archived: 0 };
-    return {
-      total: projects.length,
-      active: projects.filter(p => p.status === "active").length,
-      completed: projects.filter(p => p.status === "completed").length,
-      onHold: projects.filter(p => p.status === "on-hold").length,
-      archived: projects.filter(p => p.status === "archived").length,
+    let animationId: number;
+    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number }[] = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
-  }, [projects]);
+    resize();
+    window.addEventListener("resize", resize);
 
-  const filteredProjects = useMemo(() => {
-    if (!projects) return [];
-    if (activeFilter === "all") return projects;
-    return projects.filter(p => p.status === activeFilter);
-  }, [projects, activeFilter]);
-
-  const handleOpenCreate = () => { setSelectedProject(null); setIsFormOpen(true); };
-  const handleOpenEdit = (project: Project) => { setSelectedProject(project); setIsFormOpen(true); };
-  const handleOpenDelete = (project: Project) => { setSelectedProject(project); setIsDeleteOpen(true); };
-  const handleFormSubmit = (data: any) => {
-    if (selectedProject) {
-      updateMutation.mutate({ id: selectedProject.id, data });
-    } else {
-      createMutation.mutate({ data });
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 40 : 80;
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 2 + 0.5,
+        opacity: Math.random() * 0.5 + 0.1,
+      });
     }
-  };
-  const handleDeleteConfirm = () => {
-    if (selectedProject) deleteMutation.mutate({ id: selectedProject.id });
-  };
 
-  const filterTabs: { label: string; value: FilterStatus; count: number }[] = [
-    { label: "All", value: "all", count: stats.total },
-    { label: "Active", value: "active", count: stats.active },
-    { label: "Completed", value: "completed", count: stats.completed },
-    { label: "On Hold", value: "on-hold", count: stats.onHold },
-    { label: "Archived", value: "archived", count: stats.archived },
-  ];
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(139, 92, 246, ${p.opacity})`;
+        ctx.fill();
+      });
+
+      particles.forEach((a, i) => {
+        particles.slice(i + 1).forEach((b) => {
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(139, 92, 246, ${0.08 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+      });
+
+      animationId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />;
+}
+
+const navItems = [
+  { label: "About", href: "#about" },
+  { label: "Work", href: "#work" },
+  { label: "Contact", href: "#contact" },
+];
+
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setMobileOpen(false);
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/10 border-b border-border/40">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-accent/10 rounded-full blur-3xl" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
-            <div className="flex-1">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <span className="text-2xl font-display font-bold text-primary">SL</span>
-                  </div>
-                  <div className="h-8 w-px bg-border/60" />
-                  <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Consulting Portfolio</span>
-                </div>
-                <h1 className="text-4xl sm:text-5xl font-display font-bold text-foreground mb-3">
-                  Stephen L
-                </h1>
-                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                  Full-stack consulting &amp; development. Turning ideas into polished, production-ready products — from architecture to launch.
-                </p>
-                <div className="flex items-center gap-4 mt-6">
-                  <a href="mailto:contact@stephenl.dev" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                    <Mail className="w-4 h-4" />
-                    <span className="hidden sm:inline">contact@stephenl.dev</span>
-                  </a>
-                  <a href="#" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                    <Linkedin className="w-4 h-4" />
-                    <span className="hidden sm:inline">LinkedIn</span>
-                  </a>
-                  <a href="#" className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                    <Globe className="w-4 h-4" />
-                    <span className="hidden sm:inline">stephenl.dev</span>
-                  </a>
-                </div>
-              </motion.div>
-            </div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Button onClick={handleOpenCreate} size="lg" className="gap-2 shadow-lg shadow-primary/20">
-                <Plus className="w-5 h-5" />
-                New Project
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-background/60 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-black/10"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+        <a
+          href="#hero"
+          onClick={(e) => handleNavClick(e, "#hero")}
+          className="text-xl sm:text-2xl font-display font-bold gradient-text"
+        >
+          Stephen L.
+        </a>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+        <div className="hidden md:flex items-center gap-8">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {item.label}
+            </a>
+          ))}
+          <a
+            href="https://linkedin.com/in/stephen-l-279315240"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/25"
+          >
+            Let's Connect
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+          aria-label="Toggle menu"
+        >
+          <div className="w-6 h-5 flex flex-col justify-between">
+            <span className={`block h-0.5 bg-current transition-all ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
+            <span className={`block h-0.5 bg-current transition-all ${mobileOpen ? "opacity-0" : ""}`} />
+            <span className={`block h-0.5 bg-current transition-all ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+          </div>
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border/50"
+          >
+            <div className="px-4 py-4 flex flex-col gap-3">
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className="text-base font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
+                >
+                  {item.label}
+                </a>
+              ))}
+              <a
+                href="https://linkedin.com/in/stephen-l-279315240"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold mt-2"
+              >
+                Let's Connect
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
+  );
+}
+
+function HeroSection() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  return (
+    <section id="hero" ref={ref} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <ParticleField />
+
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse-glow" />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-purple-500/15 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 sm:w-[600px] sm:h-[600px] bg-violet-600/10 rounded-full blur-[150px] animate-float" />
+      </div>
+
+      <motion.div style={{ y, opacity }} className="relative z-10 text-center px-4 max-w-5xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mb-6"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs sm:text-sm font-semibold tracking-wide uppercase">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Available for Consulting
+          </span>
+        </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-extrabold leading-[1.05] mb-6"
+        >
+          Stephen L.
+          <br />
+          <span className="gradient-text">Building the Future</span>
+          <br />
+          of Technology
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+        >
+          Technology consultant delivering enterprise solutions, digital transformation, and innovative software that drives real business results.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <a
+            href="#work"
+            onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#work")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 transition-all"
+          >
+            View My Work
+            <ArrowRight className="w-5 h-5" />
+          </a>
+          <a
+            href="#contact"
+            onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-border hover:border-primary/50 text-foreground font-semibold text-base sm:text-lg hover:bg-primary/5 transition-all"
+          >
+            Get in Touch
+          </a>
+        </motion.div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+      >
+        <a
+          href="#about"
+          onClick={(e) => {
+            e.preventDefault();
+            document.querySelector("#about")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <span className="text-xs font-medium tracking-widest uppercase">Scroll</span>
+          <ChevronDown className="w-5 h-5 animate-bounce" />
+        </a>
+      </motion.div>
+    </section>
+  );
+}
+
+function AboutSection() {
+  return (
+    <section id="about" className="relative py-24 sm:py-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="max-w-3xl"
+        >
+          <span className="text-primary font-semibold text-sm tracking-widest uppercase mb-4 block">About</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-8 leading-tight">
+            Turning complex challenges into{" "}
+            <span className="gradient-text">elegant solutions</span>
+          </h2>
+          <div className="space-y-5 text-muted-foreground text-base sm:text-lg leading-relaxed">
+            <p>
+              I'm Stephen L., a technology consultant specializing in enterprise software architecture, digital transformation, and full-stack development. I partner with organizations to design and build systems that scale — from cloud infrastructure to customer-facing applications.
+            </p>
+            <p>
+              With deep expertise across modern tech stacks, I bring a hands-on, results-driven approach to every engagement. Whether it's leading a greenfield build, modernizing legacy systems, or optimizing development workflows, I deliver solutions that create lasting impact.
+            </p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-16"
         >
           {[
-            { label: "Active Projects", value: stats.active, icon: Briefcase, color: "text-blue-600 bg-blue-50 border-blue-100", accent: "text-blue-600" },
-            { label: "Completed", value: stats.completed, icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50 border-emerald-100", accent: "text-emerald-600" },
-            { label: "On Hold", value: stats.onHold, icon: PauseCircle, color: "text-amber-600 bg-amber-50 border-amber-100", accent: "text-amber-600" },
-            { label: "Total Delivered", value: stats.total, icon: TrendingUp, color: "text-violet-600 bg-violet-50 border-violet-100", accent: "text-violet-600" },
+            { metric: "10+", label: "Years Experience" },
+            { metric: "50+", label: "Projects Delivered" },
+            { metric: "100%", label: "Client Satisfaction" },
+            { metric: "24/7", label: "Dedicated Support" },
           ].map((stat, i) => (
-            <div key={stat.label} className="bg-card rounded-2xl border border-border/60 p-5 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border", stat.color)}>
-                  <stat.icon className="w-5 h-5" />
-                </div>
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 * i }}
+              className="p-6 rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all group"
+            >
+              <div className="text-3xl sm:text-4xl font-display font-extrabold gradient-text mb-2">
+                {stat.metric}
               </div>
-              <p className={cn("text-3xl font-display font-bold", stat.accent)}>{stat.value}</p>
-              <p className="text-sm text-muted-foreground font-medium mt-1">{stat.label}</p>
-            </div>
+              <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+            </motion.div>
           ))}
         </motion.div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h2 className="text-2xl font-display font-bold text-foreground">Project Portfolio</h2>
-            <p className="text-muted-foreground text-sm mt-1">All consulting &amp; development work</p>
-          </div>
-          <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-xl border border-border/50">
-            {filterTabs.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setActiveFilter(tab.value)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-                  activeFilter === tab.value
-                    ? "bg-card text-foreground shadow-sm border border-border/60"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {tab.label}
-                <span className={cn(
-                  "ml-1.5 text-xs",
-                  activeFilter === tab.value ? "text-primary" : "text-muted-foreground/60"
-                )}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
+function ProjectPortfolioCard({ project, index }: { project: Project; index: number }) {
+  const label = statusLabels[project.status] || project.status;
+  const gradient = statusColors[project.status] || "from-violet-500 to-purple-400";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      whileHover={{ y: -8 }}
+      className="group relative flex flex-col rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
+    >
+      <div className={`h-1 w-full bg-gradient-to-r ${gradient}`} />
+
+      <div className="p-6 sm:p-8 flex flex-col flex-grow">
+        <div className="flex items-center justify-between mb-4">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${gradient} text-white`}>
+            {label}
+          </span>
+          <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
+
+        <h3 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">
+          {project.name}
+        </h3>
+
+        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6 flex-grow line-clamp-3">
+          {project.description || "A meticulously crafted project delivering cutting-edge solutions."}
+        </p>
+
+        <div className="pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            {new Date(project.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short" })}
+          </span>
+          <span className="flex items-center gap-1 text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+            View Details <ArrowRight className="w-3 h-3" />
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function WorkSection() {
+  const { data: projects, isLoading, isError } = useListProjects();
+
+  return (
+    <section id="work" className="relative py-24 sm:py-32">
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-[150px]" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-16"
+        >
+          <span className="text-primary font-semibold text-sm tracking-widest uppercase mb-4 block">Portfolio</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-6">
+            Selected <span className="gradient-text">Work</span>
+          </h2>
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+            A curated showcase of projects spanning enterprise architecture, digital products, and technology consulting engagements.
+          </p>
+        </motion.div>
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
             <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-            <p className="font-medium">Loading your projects...</p>
+            <p className="font-medium">Loading projects...</p>
           </div>
         ) : isError ? (
-          <div className="bg-destructive/10 border-2 border-destructive/20 text-destructive rounded-2xl p-6 text-center max-w-md mx-auto">
-            <p className="font-semibold text-lg mb-2">Failed to load projects</p>
-            <p className="text-sm opacity-90">Please check your connection and try again.</p>
+          <div className="text-center text-muted-foreground py-16">
+            <p className="text-lg">Unable to load projects at this time.</p>
           </div>
-        ) : filteredProjects.length > 0 ? (
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence mode="popLayout">
-              {filteredProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onEdit={handleOpenEdit}
-                  onDelete={handleOpenDelete}
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
+        ) : projects && projects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {projects.map((project, i) => (
+              <ProjectPortfolioCard key={project.id} project={project} index={i} />
+            ))}
+          </div>
         ) : (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center text-center max-w-lg mx-auto mt-12 p-8"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center text-muted-foreground py-16"
           >
-            <div className="w-20 h-20 rounded-2xl bg-muted/50 flex items-center justify-center mb-6">
-              <FolderKanban className="w-10 h-10 text-muted-foreground/50" />
-            </div>
-            <h2 className="text-2xl font-display font-bold mb-3 text-foreground">
-              {activeFilter === "all" ? "No projects yet" : `No ${activeFilter} projects`}
-            </h2>
-            <p className="text-muted-foreground text-base mb-8">
-              {activeFilter === "all" 
-                ? "Get started by creating your first project."
-                : "Try selecting a different filter or create a new project."}
-            </p>
-            {activeFilter === "all" && (
-              <Button size="lg" onClick={handleOpenCreate} className="gap-2">
-                <Plus className="w-5 h-5" />
-                Create First Project
-              </Button>
-            )}
+            <p className="text-lg">Projects coming soon.</p>
           </motion.div>
         )}
-      </main>
+      </div>
+    </section>
+  );
+}
 
-      <footer className="border-t border-border/40 bg-muted/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <span className="text-sm font-display font-bold text-primary">SL</span>
-              </div>
-              <span className="text-sm text-muted-foreground">Stephen L — Consulting &amp; Development</span>
-            </div>
-            <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} Stephen L. All rights reserved.</p>
+function ContactSection() {
+  return (
+    <section id="contact" className="relative py-24 sm:py-32">
+      <div className="absolute inset-0">
+        <div className="absolute bottom-0 left-1/4 w-[600px] h-[400px] bg-primary/8 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-purple-500/5 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+        >
+          <span className="text-primary font-semibold text-sm tracking-widest uppercase mb-4 block">Contact</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-6">
+            Let's build something{" "}
+            <span className="gradient-text">extraordinary</span>
+          </h2>
+          <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mb-12">
+            Ready to transform your technology landscape? I'd love to hear about your project and explore how we can work together.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+            <a
+              href="https://linkedin.com/in/stephen-l-279315240"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#0A66C2] text-white font-semibold text-base sm:text-lg shadow-xl shadow-[#0A66C2]/25 hover:shadow-2xl hover:shadow-[#0A66C2]/35 hover:scale-105 transition-all w-full sm:w-auto justify-center"
+            >
+              <Linkedin className="w-5 h-5" />
+              Connect on LinkedIn
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a
+              href="mailto:contact@stephenl.dev"
+              className="group inline-flex items-center gap-3 px-8 py-4 rounded-full border-2 border-border hover:border-primary/50 text-foreground font-semibold text-base sm:text-lg hover:bg-primary/5 transition-all w-full sm:w-auto justify-center"
+            >
+              <Mail className="w-5 h-5" />
+              Send an Email
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </a>
           </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-border/50 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-lg font-display font-bold gradient-text">Stephen L.</span>
+            <span className="text-muted-foreground text-sm hidden sm:inline">|</span>
+            <span className="text-muted-foreground text-sm hidden sm:inline">Technology Consulting</span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <a
+              href="https://linkedin.com/in/stephen-l-279315240"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="LinkedIn"
+            >
+              <Linkedin className="w-5 h-5" />
+            </a>
+            <a
+              href="mailto:contact@stephenl.dev"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              aria-label="Email"
+            >
+              <Mail className="w-5 h-5" />
+            </a>
+          </div>
+
+          <p className="text-muted-foreground text-xs sm:text-sm">
+            &copy; {new Date().getFullYear()} Stephen L. All rights reserved.
+          </p>
         </div>
-      </footer>
+      </div>
+    </footer>
+  );
+}
 
-      <ProjectFormModal
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        isPending={createMutation.isPending || updateMutation.isPending}
-        project={selectedProject}
-      />
-
-      <DeleteConfirmModal
-        isOpen={isDeleteOpen}
-        onClose={() => setIsDeleteOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        isPending={deleteMutation.isPending}
-        projectName={selectedProject?.name}
-      />
+export default function ProjectsPage() {
+  return (
+    <div className="relative min-h-screen bg-background">
+      <Navbar />
+      <HeroSection />
+      <AboutSection />
+      <WorkSection />
+      <ContactSection />
+      <Footer />
     </div>
   );
 }

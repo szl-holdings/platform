@@ -93,13 +93,17 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 ### `artifacts/project-list` (`@workspace/project-list`)
 
-React + Vite web app displaying a list of projects. Features include:
-- View all projects in a card grid layout
-- Create new projects via dialog
-- Edit and delete projects
-- Status badges (active, completed, on-hold, archived)
-- Timestamps with relative time display
-- Depends on: `@workspace/api-client-react`
+React + Vite single-page career portfolio for Stephen L. Features include:
+- Dark-themed, premium portfolio design with gradient accents and particle animations
+- Hero section with animated background, consulting tagline, and CTAs
+- About section with professional summary and stats
+- Projects/Work showcase section fetching from API, displaying as portfolio cards
+- Contact section with LinkedIn and email call-to-action buttons
+- Sticky glassmorphism navigation bar with smooth-scroll links
+- Footer with LinkedIn, email, and copyright
+- Fully responsive (mobile, tablet, desktop)
+- Reduced-motion accessibility support
+- Depends on: `@workspace/api-client-react`, `framer-motion`, `lucide-react`
 
 ### Database Schema
 
