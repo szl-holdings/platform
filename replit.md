@@ -27,6 +27,7 @@ artifacts-monorepo/
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
 │   ├── api-zod/            # Generated Zod schemas from OpenAPI
+│   ├── services/           # Shared service adapters (AI, weather, shipping, payments, etc.)
 │   └── db/                 # Drizzle ORM schema + DB connection
 ├── scripts/                # Utility scripts (single workspace package)
 │   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
@@ -58,7 +59,7 @@ Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` 
 - Entry: `src/index.ts` — reads `PORT`, starts Express
 - App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
 - Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
+- Depends on: `@workspace/db`, `@workspace/api-zod`, `@workspace/services`
 - `pnpm --filter @workspace/api-server run dev` — run the dev server
 - `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
 - Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
@@ -74,6 +75,17 @@ Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client insta
 - Exports: `.` (pool, db, schema), `./schema` (schema only)
 
 Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
+
+### `lib/services` (`@workspace/services`)
+
+Shared backend service adapter library. Provides a consistent pattern for integrating with third-party services. Each adapter auto-detects environment variables and falls back to mock/demo mode when keys are missing.
+
+- `src/base.ts` — abstract `ServiceAdapter` class with status reporting (LIVE_CONFIGURED / MOCKED_DEMO_MODE / MANUAL_REQUIRED)
+- `src/adapters/` — individual adapters: ai, weather, shipping, stripe, slack, twilio, google, notion, storage, monitoring
+- `src/registry.ts` — `ServiceRegistry` aggregates all adapters, exports singleton `services` instance
+- `src/index.ts` — barrel export of all adapters, types, and registry
+- API endpoint: `GET /api/services/health` returns the full integration health matrix
+- `.env.example` at project root documents all supported environment variables
 
 ### `lib/api-spec` (`@workspace/api-spec`)
 
