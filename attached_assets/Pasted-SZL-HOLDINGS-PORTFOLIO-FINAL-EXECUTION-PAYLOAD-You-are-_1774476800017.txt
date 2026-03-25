@@ -1,0 +1,316 @@
+SZL HOLDINGS PORTFOLIO - FINAL EXECUTION PAYLOAD
+
+You are an execution agent inside Replit with repo, file, shell, runtime, and network access.
+
+MISSION
+Turn this entire portfolio into a real, premium, working ecosystem of apps and websites with safe, tangible integrations and verifiable runtime behavior.
+
+Do not narrate.
+Do not plan.
+Do not summarize.
+Inspect, patch, run, verify.
+Do not claim success without proof.
+If blocked, show exact blocker.
+If an integration requires OAuth, billing, or UI steps, mark it MANUAL_REQUIRED.
+
+PORTFOLIO SCOPE
+- Stephen Lutar website/app
+- SZL Holdings main site
+- Carlota Jo Consulting
+- Vessels
+- Lyte Command Center
+- Dreamscape
+- Readiness Report
+- ROSIE
+- Beacon
+- Nimbus
+- Zeus
+- INCA
+- Dream Era
+- Firestorm
+- any discovered admin, portal, login, or demo apps
+
+GLOBAL EXECUTION RULES
+
+1. RUNTIME
+- one stable runtime per app/workspace
+- port 3000 only
+- bind 0.0.0.0
+- no random exposed ports
+- no localhost or replit.dev in frontend logic
+- clean `.replit`
+- working build/start scripts
+
+2. BACKEND
+- all integrations must run through backend service adapters
+- no API keys in frontend
+- `/health` must return: { "status": "ok" }
+- APIs under `/api`
+- Express backend if needed
+
+3. SECRETS
+- move ALL credentials to env vars
+- remove ALL hardcoded secrets
+- create `.env.example` if needed
+- list required secrets per app
+
+4. AUTH
+- env-based auth only
+- no hardcoded credentials
+- login/logout/protected routing
+- redirect to `/login` if unauthenticated
+
+5. FRONTEND
+- premium design
+- responsive
+- no dead buttons
+- no placeholders
+- no fake features
+
+6. INTEGRATION STATES (MANDATORY)
+Each integration must be:
+- LIVE_CONFIGURED
+- MOCKED_DEMO_MODE
+- MANUAL_REQUIRED
+- NOT_NEEDED
+
+7. SAFETY (CRITICAL)
+Firestorm MUST be:
+- lab-only
+- simulation-only
+- NO exploits
+- NO phishing
+- NO credential capture
+- NO malware
+- NO C2
+- NO real-host targeting
+
+INTEGRATION ARCHITECTURE
+
+Create shared backend adapters:
+
+/server/services/
+- ai.js
+- weather.js
+- shipping.js
+- market.js
+- stripe.js
+- slack.js
+- twilio.js
+- google.js
+- notion.js
+- storage.js
+- monitoring.js
+
+RULES:
+- env vars only
+- graceful failure
+- mock mode if no keys
+- NEVER expose secrets to frontend
+
+ENV VARIABLES
+
+PORT=3000
+SESSION_SECRET=
+DEMO_USERNAME=
+DEMO_PASSWORD=
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+GITHUB_TOKEN=
+NOTION_API_KEY=
+DROPBOX_ACCESS_TOKEN=
+ONEDRIVE_CLIENT_ID=
+ONEDRIVE_CLIENT_SECRET=
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM_NUMBER=
+SLACK_WEBHOOK_URL=
+SENTRY_DSN=
+POSTHOG_API_KEY=
+WEATHER_API_KEY=
+SHIPPING_API_KEY=
+LAB_MODE=true
+
+APP REQUIREMENTS
+
+SZL HOLDINGS
+- premium umbrella site
+- links to all apps
+- polished brand
+
+STEPHEN LUTAR
+- flagship personal site
+- portfolio + ventures + leadership
+- integration showcase via backend
+
+CARLOTA JO CONSULTING
+- elegant consulting site
+- services + founder + contact
+- premium UX
+
+VESSELS
+- maritime intelligence platform
+- weather + shipping adapters
+- mock data if no keys
+- NO fake claims
+
+LYTE COMMAND CENTER
+- ops intelligence dashboard
+- recommendations + signals
+- Slack/email adapter ready
+
+DREAMSCAPE
+- AI storytelling platform
+- backend AI adapter only
+- mock mode if no key
+
+READINESS REPORT
+- portfolio status dashboard
+- real state only (no fake metrics)
+
+ROSIE
+- security platform
+- landing + login + portal
+- mock command center
+
+BEACON
+- observability dashboard
+
+NIMBUS
+- predictions + alerts
+
+ZEUS
+- infra control + logs
+
+INCA
+- analytics + experiments
+
+DREAM ERA
+- cinematic creative site
+
+FIRESTORM
+- LAB ONLY simulation platform
+- synthetic scenarios
+- visible LAB MODE banner
+
+EXECUTION STEPS
+
+1. INSPECT
+pwd
+ls -la
+find . -maxdepth 5 -type f
+cat package.json
+cat .replit
+grep for:
+auth, health, localhost, replit.dev, api keys, integrations
+
+2. DISCOVER
+for each app:
+- frontend
+- backend
+- missing health
+- broken auth
+- hardcoded secrets
+- integrations
+
+3. PATCH
+- fix `.replit`
+- fix scripts
+- add `/health`
+- remove secrets
+- add env system
+- build adapters
+- add mock mode
+- fix auth
+- enforce port 3000
+
+4. VERIFY
+- install deps
+- build
+- run
+- curl homepage
+- curl /health
+- test login
+- show logs
+- show ports
+
+OUTPUT FORMAT
+
+BLOCKED:
+{
+  "STATUS": "BLOCKED",
+  "REASON": "",
+  "FAILED_COMMAND": "",
+  "ERROR_OUTPUT": ""
+}
+
+WORKING or DONE:
+
+STATUS: WORKING or DONE
+
+APPS_DISCOVERED:
+- list
+
+FILES_EDITED:
+- paths
+
+FILE_CONTENTS_OR_DIFF:
+<real code>
+
+COMMANDS_RUN:
+<real commands>
+
+COMMAND_OUTPUT:
+<real output>
+
+INTEGRATION_MATRIX:
+[
+  {
+    "app": "",
+    "health": "",
+    "auth": "",
+    "ai": "",
+    "weather": "",
+    "shipping": "",
+    "stripe": "",
+    "slack": "",
+    "twilio": "",
+    "google": "",
+    "notion": ""
+  }
+]
+
+MANUAL_HANDOFF:
+[
+  {
+    "app": "",
+    "required_secrets": [],
+    "required_ui_steps": [],
+    "required_external_steps": []
+  }
+]
+
+VERIFIED_RESULTS:
+- homepage status
+- health status
+- auth status
+- integrations status
+- port
+- startup command
+
+SUCCESS CRITERIA
+
+DONE ONLY IF:
+- all apps inspected
+- all apps working
+- `/health` works
+- auth works where needed
+- NO hardcoded secrets
+- NO frontend API keys
+- integrations properly classified
+- Firestorm safe
+- REAL proof shown
+
+Do the work.

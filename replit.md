@@ -22,6 +22,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 artifacts-monorepo/
 ├── artifacts/              # Deployable applications
 │   └── api-server/         # Express API server
+│   └── project-list/       # React + Vite portfolio site
 ├── lib/                    # Shared libraries
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
@@ -93,16 +94,37 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 ### `artifacts/project-list` (`@workspace/project-list`)
 
-React + Vite single-page career portfolio for Stephen L. Features include:
-- Dark-themed, premium portfolio design with gradient accents and particle animations
-- Hero section with animated background, consulting tagline, and CTAs
-- About section with professional summary and stats
-- Projects/Work showcase section fetching from API, displaying as portfolio cards
-- Contact section with LinkedIn and email call-to-action buttons
-- Sticky glassmorphism navigation bar with smooth-scroll links
-- Footer with LinkedIn, email, and copyright
-- Fully responsive (mobile, tablet, desktop)
+React + Vite single-page career portfolio for Stephen L. — Technology Consultant.
+
+**Sections:**
+- Hero: particle animation background, animated gradient text, "Available for Consulting" badge, CTA buttons, social links (LinkedIn, GitHub, Twitter, Email)
+- About: professional summary, stat cards (10+ Years, 50+ Projects, 100% Satisfaction, 24/7 Support), technologies/tools tag cloud
+- Services: 6 consulting service cards (Full-Stack Dev, Cloud/Infrastructure, Digital Products, Data Architecture, Security/Compliance, Performance Optimization)
+- Portfolio/Work: project cards fetched from API with status badges (In Progress, Delivered, Paused, Legacy)
+- Testimonials: 3 client testimonial cards with star ratings
+- Contact: LinkedIn connect button, email CTA, full social links row
+- Footer: brand, social icons, copyright
+
+**Design:**
+- Dark theme: navy background (`220 20% 4%`), primary indigo/violet (`250 90% 65%`)
+- Fonts: Plus Jakarta Sans (display), Inter (body)
+- Gradient text via `.gradient-text` class
+- Particle canvas animation with connection lines
+- Framer Motion animations: fade-ins, parallax, scroll-triggered reveals, hover effects
+- Glassmorphism sticky navbar
+- Fully responsive (mobile/tablet/desktop)
 - Reduced-motion accessibility support
+
+**SEO:**
+- Open Graph + Twitter Card meta tags
+- JSON-LD structured data (Person schema)
+- Canonical URL, meta description, keywords
+
+**Contact info:**
+- LinkedIn: https://linkedin.com/in/stephen-l-279315240
+- Email: contact@stephenl.dev
+- Website: stephenl.dev
+
 - Depends on: `@workspace/api-client-react`, `framer-motion`, `lucide-react`
 
 ### Database Schema
