@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: projects
+    description: Project operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,99 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      description: Returns all projects ordered by creation date
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a new project
+      description: Creates a new project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProject"
+      responses:
+        "201":
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProject"
+      responses:
+        "200":
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Project not found
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Project deleted
+        "404":
+          description: Project not found
 components:
   schemas:
     HealthStatus:
@@ -33,4 +127,53 @@ components:
           type: string
       required:
         - status
-
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, completed, on-hold, archived]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - status
+        - createdAt
+        - updatedAt
+    CreateProject:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, completed, on-hold, archived]
+          default: active
+      required:
+        - name
+    UpdateProject:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, completed, on-hold, archived]

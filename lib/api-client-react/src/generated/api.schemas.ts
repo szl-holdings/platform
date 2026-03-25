@@ -8,3 +8,53 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus];
+
+export const ProjectStatus = {
+  active: "active",
+  completed: "completed",
+  "on-hold": "on-hold",
+  archived: "archived",
+} as const;
+
+export interface Project {
+  id: number;
+  name: string;
+  description?: string | null;
+  status: ProjectStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateProjectStatus =
+  (typeof CreateProjectStatus)[keyof typeof CreateProjectStatus];
+
+export const CreateProjectStatus = {
+  active: "active",
+  completed: "completed",
+  "on-hold": "on-hold",
+  archived: "archived",
+} as const;
+
+export interface CreateProject {
+  name: string;
+  description?: string | null;
+  status?: CreateProjectStatus;
+}
+
+export type UpdateProjectStatus =
+  (typeof UpdateProjectStatus)[keyof typeof UpdateProjectStatus];
+
+export const UpdateProjectStatus = {
+  active: "active",
+  completed: "completed",
+  "on-hold": "on-hold",
+  archived: "archived",
+} as const;
+
+export interface UpdateProject {
+  name?: string;
+  description?: string | null;
+  status?: UpdateProjectStatus;
+}

@@ -1,0 +1,17 @@
+packages:
+  "framer-motion": "For stunning page transitions, modal animations, and list staggering"
+  "date-fns": "For formatting timestamps into human-readable relative times"
+  "react-hook-form": "For robust form state management"
+  "@hookform/resolvers": "For Zod validation integration with react-hook-form"
+  "clsx": "For conditional class merging"
+  "tailwind-merge": "For resolving Tailwind class conflicts"
+
+images:
+  - path: "artifacts/project-list/public/images/empty-state.png"
+    description: "A clean, minimal, abstract 3D illustration of an empty desk or floating geometric shapes in soft blue and white tones, representing an empty workspace or blank canvas"
+    aspect_ratio: "1:1"
+
+notes:
+  - React Query hooks are imported directly from @workspace/api-client-react as instructed
+  - Using custom Framer Motion modals to ensure premium, animated overlay experiences
+  - All styling utilizes Tailwind v4 CSS variables with space-separated HSL values

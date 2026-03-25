@@ -6,4 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./createProject";
+export * from "./createProjectStatus";
 export * from "./healthStatus";
+export * from "./project";
+export * from "./projectStatus";
+export * from "./updateProject";
+export * from "./updateProjectStatus";

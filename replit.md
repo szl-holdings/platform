@@ -91,6 +91,20 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/project-list` (`@workspace/project-list`)
+
+React + Vite web app displaying a list of projects. Features include:
+- View all projects in a card grid layout
+- Create new projects via dialog
+- Edit and delete projects
+- Status badges (active, completed, on-hold, archived)
+- Timestamps with relative time display
+- Depends on: `@workspace/api-client-react`
+
+### Database Schema
+
+- `projects` table: id (serial PK), name (text), description (text nullable), status (text enum), created_at (timestamp), updated_at (timestamp)
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

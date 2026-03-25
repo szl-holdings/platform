@@ -14,3 +14,76 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Returns all projects ordered by creation date
+ * @summary List all projects
+ */
+export const ListProjectsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  description: zod.string().nullish(),
+  status: zod.enum(["active", "completed", "on-hold", "archived"]),
+  createdAt: zod.date(),
+  updatedAt: zod.date(),
+});
+export const ListProjectsResponse = zod.array(ListProjectsResponseItem);
+
+/**
+ * Creates a new project
+ * @summary Create a new project
+ */
+export const createProjectBodyStatusDefault = `active`;
+
+export const CreateProjectBody = zod.object({
+  name: zod.string(),
+  description: zod.string().nullish(),
+  status: zod
+    .enum(["active", "completed", "on-hold", "archived"])
+    .default(createProjectBodyStatusDefault),
+});
+
+/**
+ * @summary Get a project by ID
+ */
+export const GetProjectParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetProjectResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  description: zod.string().nullish(),
+  status: zod.enum(["active", "completed", "on-hold", "archived"]),
+  createdAt: zod.date(),
+  updatedAt: zod.date(),
+});
+
+/**
+ * @summary Update a project
+ */
+export const UpdateProjectParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateProjectBody = zod.object({
+  name: zod.string().optional(),
+  description: zod.string().nullish(),
+  status: zod.enum(["active", "completed", "on-hold", "archived"]).optional(),
+});
+
+export const UpdateProjectResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  description: zod.string().nullish(),
+  status: zod.enum(["active", "completed", "on-hold", "archived"]),
+  createdAt: zod.date(),
+  updatedAt: zod.date(),
+});
+
+/**
+ * @summary Delete a project
+ */
+export const DeleteProjectParams = zod.object({
+  id: zod.coerce.number(),
+});
