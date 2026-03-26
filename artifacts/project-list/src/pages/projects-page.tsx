@@ -381,9 +381,9 @@ function ServicesSection() {
 const projectAppUrls: Record<string, string> = {
   "Vessels Maritime Intelligence": "/vessels/",
   "Firestorm Security Simulation": "/firestorm/",
-  "Lyte Command Center": "/lyte/",
+  "Lyte Command Center": "/lyte-command-center/",
   "Dreamscape Creative Engine": "/dreamscape/",
-  "Readiness Report": "/readiness/",
+  "Readiness Report": "/readiness-report/",
   "Admin Control Plane": "/admin/",
   "Service Integration Layer": "/admin/",
   "Stephen L. Portfolio": "/",

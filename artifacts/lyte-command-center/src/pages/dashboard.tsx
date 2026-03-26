@@ -1,27 +1,39 @@
-import { useExecutiveSummary } from "@/hooks/use-lyte";
+import { useState, useEffect } from "react";
 import { Activity, AlertTriangle, Lightbulb, ShieldAlert, ArrowUpRight, TrendingUp } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import * as mockDb from "@/lib/mock-data";
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
-};
+function buildSummary() {
+  const openIncidents = mockDb.incidents.filter((i) => !["resolved", "closed"].includes(i.status));
+  const criticalSignals = mockDb.signals.filter((s) => s.severity === "critical" && s.status === "new");
+  const pendingRecs = mockDb.recommendations.filter((r) => r.status === "suggested");
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-};
+  return {
+    totalSignals: mockDb.signals.length,
+    criticalSignalCount: criticalSignals.length,
+    openIncidentCount: openIncidents.length,
+    pendingRecommendationCount: pendingRecs.length,
+    recentSignals: [...mockDb.signals].sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime()).slice(0, 5),
+    recentIncidents: [...mockDb.incidents].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
+    chartData: Array.from({ length: 7 }).map((_, i) => ({
+      name: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'short' }),
+      signals: Math.floor(Math.random() * 50) + 10,
+      incidents: Math.floor(Math.random() * 5)
+    }))
+  };
+}
 
 export default function Dashboard() {
-  const { data, isLoading } = useExecutiveSummary();
+  const [data, setData] = useState<ReturnType<typeof buildSummary> | null>(null);
 
-  if (isLoading) {
+  useEffect(() => {
+    const timer = setTimeout(() => setData(buildSummary()), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!data) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="w-8 h-8 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
@@ -29,15 +41,8 @@ export default function Dashboard() {
     );
   }
 
-  if (!data) return null;
-
   return (
-    <motion.div 
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h2 className="text-3xl font-display font-bold text-white mb-2">Executive Overview</h2>
@@ -52,41 +57,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard 
-          title="Total Signals (24h)" 
-          value={data.totalSignals} 
-          icon={Activity} 
-          trend="+12%" 
-          color="cyan" 
-        />
-        <MetricCard 
-          title="Critical Signals" 
-          value={data.criticalSignalCount} 
-          icon={ShieldAlert} 
-          trend="+2" 
-          color="red" 
-        />
-        <MetricCard 
-          title="Open Incidents" 
-          value={data.openIncidentCount} 
-          icon={AlertTriangle} 
-          trend="-1" 
-          color="orange" 
-        />
-        <MetricCard 
-          title="Pending Actions" 
-          value={data.pendingRecommendationCount} 
-          icon={Lightbulb} 
-          trend="0" 
-          color="blue" 
-        />
+        <MetricCard title="Total Signals (24h)" value={data.totalSignals} icon={Activity} trend="+12%" color="cyan" />
+        <MetricCard title="Critical Signals" value={data.criticalSignalCount} icon={ShieldAlert} trend="+2" color="red" />
+        <MetricCard title="Open Incidents" value={data.openIncidentCount} icon={AlertTriangle} trend="-1" color="orange" />
+        <MetricCard title="Pending Actions" value={data.pendingRecommendationCount} icon={Lightbulb} trend="0" color="blue" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Chart */}
-        <motion.div variants={item} className="lg:col-span-2 bg-glass rounded-2xl p-6 relative overflow-hidden">
+        <div className="lg:col-span-2 bg-glass rounded-2xl p-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-32 bg-cyan-500/5 blur-[100px] rounded-full pointer-events-none" />
           <div className="flex justify-between items-center mb-6 relative z-10">
             <div>
@@ -113,10 +92,9 @@ export default function Dashboard() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Priority Feed */}
-        <motion.div variants={item} className="bg-glass rounded-2xl p-6 flex flex-col">
+        <div className="bg-glass rounded-2xl p-6 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-display font-semibold text-white">Attention Required</h3>
             <Link href="/incidents" className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors">
@@ -125,7 +103,7 @@ export default function Dashboard() {
           </div>
           
           <div className="space-y-4 flex-1">
-            {data.recentIncidents.slice(0,4).map((incident, i) => (
+            {data.recentIncidents.slice(0,4).map((incident) => (
               <div key={incident.id} className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2">
@@ -144,9 +122,9 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -159,7 +137,7 @@ function MetricCard({ title, value, icon: Icon, trend, color }: any) {
   };
 
   return (
-    <motion.div variants={item} className="bg-glass rounded-2xl p-6 flex flex-col justify-between group hover:border-white/10 transition-all">
+    <div className="bg-glass rounded-2xl p-6 flex flex-col justify-between group hover:border-white/10 transition-all">
       <div className="flex justify-between items-start mb-4">
         <div className={cn("p-3 rounded-xl border", colors[color as keyof typeof colors])}>
           <Icon className="w-6 h-6" />
@@ -172,6 +150,6 @@ function MetricCard({ title, value, icon: Icon, trend, color }: any) {
         <h4 className="text-slate-400 text-sm font-medium mb-1">{title}</h4>
         <div className="text-3xl font-display font-bold text-white tracking-tight">{value}</div>
       </div>
-    </motion.div>
+    </div>
   );
 }

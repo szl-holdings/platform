@@ -73,7 +73,7 @@ export function EcosystemSection() {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs text-muted-foreground font-mono hidden sm:block">
-                    Pinged: {format(new Date(app.lastChecked), "HH:mm:ss")}
+                    Pinged: {app.lastChecked ? format(new Date(app.lastChecked), "HH:mm:ss") : "--:--:--"}
                   </span>
                   <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium capitalize ${getStatusColor(app.status)}`}>
                     {getStatusIcon(app.status)}
