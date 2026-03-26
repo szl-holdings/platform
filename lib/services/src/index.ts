@@ -65,5 +65,7 @@ export {
   type HFChatMessage,
   type HFChatResult,
   type HFHealthStatus,
+  type HFTranscriptionResult,
+  type HFReasoningResult,
   type ModelTier,
 } from "./adapters/huggingface.js";

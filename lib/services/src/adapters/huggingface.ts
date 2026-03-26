@@ -108,8 +108,24 @@ export interface HFHealthStatus {
   activeTier: ModelTier;
   modelsAvailable: Record<string, string>;
   cacheStats: { hits: number; misses: number; size: number; hitRate: string };
+  runtimeTiers: Record<string, ModelTier>;
   freeTierAvailable: boolean;
   apiKeyConfigured: boolean;
+}
+
+export interface HFTranscriptionResult {
+  text: string;
+  model: string;
+  tier: ModelTier;
+  cached: boolean;
+}
+
+export interface HFReasoningResult {
+  text: string;
+  model: string;
+  tier: ModelTier;
+  cached: boolean;
+  steps?: string[];
 }
 
 export type ModelTier = "primary" | "secondary" | "tertiary" | "mock";
@@ -124,6 +140,11 @@ const MODEL_REGISTRY: Record<string, ModelChain> = {
   textGeneration: {
     primary: "mistralai/Mistral-7B-Instruct-v0.3",
     secondary: "microsoft/Phi-3-mini-4k-instruct",
+    tertiary: "google/flan-t5-base",
+  },
+  reasoning: {
+    primary: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+    secondary: "mistralai/Mistral-7B-Instruct-v0.3",
     tertiary: "google/flan-t5-base",
   },
   summarization: {
@@ -157,9 +178,9 @@ const MODEL_REGISTRY: Record<string, ModelChain> = {
     tertiary: "deepset/tinyroberta-squad2",
   },
   imageGeneration: {
-    primary: "stabilityai/stable-diffusion-xl-base-1.0",
-    secondary: "runwayml/stable-diffusion-v1-5",
-    tertiary: "stabilityai/stable-diffusion-2-1",
+    primary: "stabilityai/sdxl-turbo",
+    secondary: "stabilityai/stable-diffusion-xl-base-1.0",
+    tertiary: "runwayml/stable-diffusion-v1-5",
   },
   embedding: {
     primary: "sentence-transformers/all-MiniLM-L6-v2",
@@ -171,10 +192,16 @@ const MODEL_REGISTRY: Record<string, ModelChain> = {
     secondary: "Helsinki-NLP/opus-mt-en-de",
     tertiary: "Helsinki-NLP/opus-mt-en-es",
   },
+  transcription: {
+    primary: "openai/whisper-large-v3",
+    secondary: "openai/whisper-medium",
+    tertiary: "openai/whisper-small",
+  },
 };
 
 const CACHE_TTL: Record<string, number> = {
   textGeneration: 5 * 60 * 1000,
+  reasoning: 5 * 60 * 1000,
   summarization: 10 * 60 * 1000,
   classification: 15 * 60 * 1000,
   ner: 15 * 60 * 1000,
@@ -184,7 +211,10 @@ const CACHE_TTL: Record<string, number> = {
   questionAnswering: 5 * 60 * 1000,
   embedding: 60 * 60 * 1000,
   imageGeneration: 30 * 60 * 1000,
+  transcription: 10 * 60 * 1000,
 };
+
+const RETRYABLE_STATUS_CODES = [503, 429, 504];
 
 const MAX_CACHE_SIZE = 500;
 
@@ -223,6 +253,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
   private _cacheHits = 0;
   private _cacheMisses = 0;
   private readonly _chatSessions = new Map<string, ChatSession>();
+  private readonly _runtimeTiers = new Map<string, ModelTier>();
   private static readonly MAX_CHAT_TURNS = 20;
   private static readonly CHAT_SESSION_TTL = 30 * 60 * 1000;
 
@@ -251,10 +282,25 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     return [];
   }
 
+  private trackRuntimeTier(taskType: string, tier: ModelTier): void {
+    this._runtimeTiers.set(taskType, tier);
+  }
+
+  private resolveActiveTier(): ModelTier {
+    if (this._runtimeTiers.size === 0) {
+      return this.apiKey ? "primary" : this._freeTierAvailable !== false ? "primary" : "mock";
+    }
+    const tiers = [...this._runtimeTiers.values()];
+    if (tiers.every(t => t === "mock")) return "mock";
+    if (tiers.some(t => t === "primary")) return "primary";
+    if (tiers.some(t => t === "secondary")) return "secondary";
+    return "tertiary";
+  }
+
   getHealthStatus(): HFHealthStatus {
     const totalReqs = this._cacheHits + this._cacheMisses;
     return {
-      activeTier: this.apiKey ? "primary" : this._freeTierAvailable ? "primary" : "mock",
+      activeTier: this.resolveActiveTier(),
       modelsAvailable: Object.fromEntries(
         Object.entries(MODEL_REGISTRY).map(([k, v]) => [k, v.primary])
       ),
@@ -264,6 +310,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
         size: this._cache.size,
         hitRate: totalReqs > 0 ? `${((this._cacheHits / totalReqs) * 100).toFixed(1)}%` : "0%",
       },
+      runtimeTiers: Object.fromEntries(this._runtimeTiers),
       freeTierAvailable: this._freeTierAvailable ?? true,
       apiKeyConfigured: !!this.apiKey,
     };
@@ -367,6 +414,11 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     }
   }
 
+  private isRetryableError(err: unknown): boolean {
+    const msg = err instanceof Error ? err.message : String(err);
+    return RETRYABLE_STATUS_CODES.some(code => msg.includes(String(code)));
+  }
+
   private async callWithFallback(
     taskType: string,
     body: unknown | ((model: string) => unknown),
@@ -380,21 +432,23 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       { model: chain.tertiary, tier: "tertiary" },
     ];
 
+    let lastError: unknown;
     for (const { model, tier } of tiers) {
       try {
         const requestBody = typeof body === "function" ? body(model) : body;
         const data = await this.callHF(model, requestBody);
+        this.trackRuntimeTier(taskType, tier);
         return { data, model, tier };
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (msg.includes("503") || msg.includes("429") || msg.includes("504")) {
+        lastError = err;
+        if (this.isRetryableError(err)) {
           continue;
         }
-        if (tier === "tertiary") throw err;
+        if (tier === "tertiary") break;
         continue;
       }
     }
-    throw new Error(`All models failed for ${taskType}`);
+    throw lastError ?? new Error(`All models failed for ${taskType}`);
   }
 
   private mockTextGen(prompt: string): HFTextGenerationResult {
@@ -433,8 +487,84 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.textGeneration);
       return result;
     } catch {
+      this.trackRuntimeTier("textGeneration", "mock");
       return this.mockTextGen(prompt);
     }
+  }
+
+  async reasoning(
+    prompt: string,
+    options?: { maxTokens?: number; steps?: boolean },
+  ): Promise<HFReasoningResult> {
+    const cacheKey = this.getCacheKey("reasoning", { prompt, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFReasoningResult), cached: true };
+
+    const systemPrompt = "You are an expert analyst. Think step by step. Break down your reasoning into clear steps before arriving at a conclusion.";
+    const fullPrompt = `${systemPrompt}\n\nQuestion: ${prompt}\n\nStep-by-step analysis:`;
+
+    try {
+      const { data, model, tier } = await this.callWithFallback(
+        "reasoning",
+        { inputs: fullPrompt, parameters: { max_new_tokens: options?.maxTokens ?? 1024, temperature: 0.3 } },
+      );
+      const rawText = Array.isArray(data) ? (data[0]?.generated_text ?? "") : String(data);
+      const steps = options?.steps ? rawText.split(/\n(?=Step \d|[0-9]+\.)/).filter(Boolean) : undefined;
+      const result: HFReasoningResult = { text: rawText, model, tier, cached: false, steps };
+      this.setCache(cacheKey, result, CACHE_TTL.reasoning);
+      return result;
+    } catch {
+      this.trackRuntimeTier("reasoning", "mock");
+      const mockText = `[Mixtral Reasoning] Analysis of "${prompt.slice(0, 40)}...": Step 1: Identify key variables and constraints. Step 2: Cross-reference with available intelligence data. Step 3: Evaluate multiple hypotheses against evidence. Conclusion: Based on systematic analysis, the most likely scenario involves continued operational activity with moderate risk escalation.`;
+      return { text: mockText, model: "mock-hf-model", tier: "mock", cached: false, steps: options?.steps ? ["Step 1: Identify variables", "Step 2: Cross-reference data", "Step 3: Evaluate hypotheses"] : undefined };
+    }
+  }
+
+  async transcription(
+    audioBuffer: Buffer,
+    options?: { model?: string; language?: string },
+  ): Promise<HFTranscriptionResult> {
+    const cacheKey = this.getCacheKey("transcription", { size: audioBuffer.length, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFTranscriptionResult), cached: true };
+
+    const chain = MODEL_REGISTRY.transcription;
+    const models = options?.model
+      ? [options.model, chain.secondary, chain.tertiary]
+      : [chain.primary, chain.secondary, chain.tertiary];
+
+    for (const model of models) {
+      try {
+        const headers: Record<string, string> = { "Content-Type": "audio/wav" };
+        if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 60000);
+        try {
+          const response = await fetch(
+            `https://api-inference.huggingface.co/models/${model}`,
+            { method: "POST", headers, body: new Uint8Array(audioBuffer), signal: controller.signal },
+          );
+          if (!response.ok) {
+            const statusStr = String(response.status);
+            if (RETRYABLE_STATUS_CODES.some(c => statusStr.includes(String(c)))) continue;
+            throw new Error(`Whisper API error: ${response.status}`);
+          }
+          const data = await response.json() as { text: string };
+          const tier: ModelTier = model === chain.primary ? "primary" : model === chain.secondary ? "secondary" : "tertiary";
+          this.trackRuntimeTier("transcription", tier);
+          const result: HFTranscriptionResult = { text: data.text ?? "", model, tier, cached: false };
+          this.setCache(cacheKey, result, CACHE_TTL.transcription);
+          return result;
+        } finally {
+          clearTimeout(timer);
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    this.trackRuntimeTier("transcription", "mock");
+    return { text: "[Transcription unavailable — mock mode]", model: "mock-hf-model", tier: "mock", cached: false };
   }
 
   async summarization(
@@ -460,6 +590,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.summarization);
       return result;
     } catch {
+      this.trackRuntimeTier("summarization", "mock");
       return {
         summary: `Executive Summary: ${text.slice(0, 100)}... Key findings indicate significant developments requiring immediate attention across multiple operational domains.`,
         model: "mock-hf-model",
@@ -492,6 +623,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.classification);
       return result;
     } catch {
+      this.trackRuntimeTier("classification", "mock");
       return { labels: [...MOCK_CLASSIFICATIONS], model: "mock-hf-model", tier: "mock", cached: false };
     }
   }
@@ -525,6 +657,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.ner);
       return result;
     } catch {
+      this.trackRuntimeTier("ner", "mock");
       return { entities: [...MOCK_ENTITIES], model: "mock-hf-model", tier: "mock", cached: false };
     }
   }
@@ -578,6 +711,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       }
     }
 
+    this.trackRuntimeTier("translation", "mock");
     return {
       translatedText: `[Translated ${langPair}] ${text}`,
       model: "mock-hf-model",
@@ -611,6 +745,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.zeroShot);
       return result;
     } catch {
+      this.trackRuntimeTier("zeroShot", "mock");
       const scores = candidateLabels.map(
         (_, i) => Math.max(0.1, 0.95 - i * 0.15 + (Math.random() * 0.1 - 0.05)),
       );
@@ -643,6 +778,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.sentiment);
       return result;
     } catch {
+      this.trackRuntimeTier("sentiment", "mock");
       const isNeg = /threat|attack|critical|danger|warning|breach|risk/i.test(text);
       return {
         label: isNeg ? "NEGATIVE" : "POSITIVE",
@@ -679,6 +815,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.questionAnswering);
       return result;
     } catch {
+      this.trackRuntimeTier("questionAnswering", "mock");
       return {
         answer: `Based on available intelligence, the answer to "${question.slice(0, 40)}..." relates to ongoing operational patterns detected across monitored systems.`,
         score: 0.85,
@@ -713,6 +850,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.imageGeneration);
       return result;
     } catch {
+      this.trackRuntimeTier("imageGeneration", "mock");
       return {
         imageBase64: createPlaceholderImage(prompt),
         mimeType: "image/svg+xml",
@@ -756,6 +894,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       this.setCache(cacheKey, result, CACHE_TTL.embedding);
       return result;
     } catch {
+      this.trackRuntimeTier("embedding", "mock");
       const mockDim = 384;
       const mockEmb = Array.from({ length: mockDim }, () => (Math.random() - 0.5) * 2);
       const norm = Math.sqrt(mockEmb.reduce((s, v) => s + v * v, 0));
@@ -858,6 +997,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
         sessionId,
       };
     } catch {
+      this.trackRuntimeTier("chat", "mock");
       const mockReply = this.generateMockChatReply(userMessage);
       session.messages.push({ role: "assistant", content: mockReply });
       return {

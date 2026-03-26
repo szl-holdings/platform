@@ -575,8 +575,15 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
     const { sessionId, message, messages, systemPrompt, model, maxTokens } = req.body;
 
     if (messages && Array.isArray(messages)) {
-      const result = await services.ai.chatCompletion(messages, { model, maxTokens });
-      sendSuccess(res, result);
+      const lastUserMsg = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user");
+      if (lastUserMsg) {
+        const sid = sessionId || `legacy-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const hfResult = await services.huggingface.chat(sid, lastUserMsg.content, { systemPrompt: messages.find((m: { role: string }) => m.role === "system")?.content, maxTokens });
+        sendSuccess(res, { content: hfResult.reply, model: hfResult.model, tier: hfResult.tier, sessionId: hfResult.sessionId });
+      } else {
+        const result = await services.ai.chatCompletion(messages, { model, maxTokens });
+        sendSuccess(res, result);
+      }
       return;
     }
 
@@ -599,6 +606,26 @@ router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ 
     const cleared = services.huggingface.clearChatSession(req.params.sessionId);
     sendSuccess(res, { sessionId: req.params.sessionId, cleared });
   } catch (err) { handleRouteError(res, err, "Failed to clear chat session"); }
+});
+
+router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { prompt, maxTokens, steps } = req.body;
+    if (!prompt) { sendError(res, "Prompt is required", 400); return; }
+    const result = await services.huggingface.reasoning(prompt, { maxTokens, steps: steps ?? true });
+    sendSuccess(res, result);
+  } catch (err) { handleRouteError(res, err, "Failed to generate reasoning response"); }
+});
+
+router.post("/intelligence/ai/transcribe", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    if (!req.body || !Buffer.isBuffer(req.body)) {
+      sendError(res, "Audio data is required (send raw audio buffer)", 400); return;
+    }
+    const language = (req.query as Record<string, string>).language;
+    const result = await services.huggingface.transcription(req.body, { language });
+    sendSuccess(res, result);
+  } catch (err) { handleRouteError(res, err, "Failed to transcribe audio"); }
 });
 
 router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
