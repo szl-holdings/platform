@@ -1,84 +1,78 @@
-# Workspace
+This pnpm workspace monorepo, developed with TypeScript, forms the foundation of the **SZL Holdings DreamStack** platform. DreamStack is a comprehensive suite of seven applications designed to share a common PostgreSQL database, a unified authentication system, and a consistent design system.
 
-## Overview
+## Architecture
 
-This pnpm workspace monorepo, built with TypeScript, is the **SZL Holdings DreamStack** platform. It's a comprehensive suite of 7 applications designed to share a common PostgreSQL database, a unified authentication system, and a consistent design language. The platform aims to provide a robust, scalable, and integrated solution for various business needs, from maritime intelligence and security simulations to e-commerce and creative project management.
+- **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging
+- **Frontend:** React, Vite, TanStack React Query, wouter, Tailwind CSS, Framer Motion, Lucide React
+- **Auth:** Session-based + Replit Auth fallback; 6 RBAC roles (`super_admin`, `operator`, `analyst`, `seller`, `client_viewer`, `creative_user`); `super_admin` bypasses all checks. Admin panel routes (`/api/admin/*`) are unauthenticated by design (internal dev tool); production deployment should add auth middleware to the admin router mount
+- **Services:** 23 third-party adapters in `lib/services` with auto env var detection and mock fallback
 
-## User Preferences
+## Packages
 
-The user prefers an iterative development approach.
-The user wants clear communication and detailed explanations for complex changes.
-The user wants to be asked before making major architectural changes or introducing new dependencies.
+### `lib/db` (`@workspace/db`)
 
-## System Architecture
+The monorepo uses pnpm workspaces with Node.js 24 and TypeScript 5.9. The backend is built with Express 5, utilizing PostgreSQL and Drizzle ORM for data persistence. Zod is used for validation, with `drizzle-zod` for Drizzle schema integration. API codegen is handled by Orval from an OpenAPI specification. Bundling is managed by esbuild (for CJS bundles). Authentication is session-based with Replit Auth fallback, implementing Role-Based Access Control (RBAC) across 6 distinct roles (`super_admin`, `operator`, `analyst`, `seller`, `client_viewer`, `creative_user`). `super_admin` role bypasses all permission checks.
 
-The project is a pnpm workspace monorepo utilizing Node.js 24 and TypeScript 5.9. It follows a modular architecture where each package manages its own dependencies.
-
-**Core Technologies:**
-- **Monorepo Tool:** pnpm workspaces
-- **API Framework:** Express 5
-- **Database:** PostgreSQL with Drizzle ORM
-- **Validation:** Zod (`zod/v4`) and `drizzle-zod`
-- **API Codegen:** Orval (from OpenAPI spec)
-- **Build System:** esbuild (for CJS bundles)
-- **Auth System:** Session-based authentication with Replit Auth fallback and an RBAC system supporting 6 roles (`super_admin`, `operator`, `analyst`, `seller`, `client_viewer`, `creative_user`). `super_admin` role bypasses all permission checks.
-
-**Project Structure:**
-The monorepo is divided into `artifacts/` (deployable applications) and `lib/` (shared libraries).
-- `artifacts/`: Contains applications like `api-server`, `project-list`, and `mockup-sandbox`.
-- `lib/`: Houses shared components such as `api-spec`, `api-client-react`, `api-zod`, `services`, `db`, `shared-ui`, `config`, `shared-types`, and `utils`.
+**Schema files** (`lib/db/src/schema/`):
+- `auth.ts` — users, roles, user_roles, sessions
+- `organizations.ts` — organizations, org_members
+- `connectors.ts` — connectors, connector_logs
+- `notifications.ts` — notifications, notification_preferences
+- `activity.ts` — activity_log, audit_events
+- `api_keys.ts` — api_keys
+- `feature_flags.ts` — feature_flags, feature_flag_overrides
+- `billing.ts` — billing_plans, subscriptions, invoices, entitlements, usage_events
+- `files.ts` — files, assets
+- `health_checks.ts` — health_checks
+- `webhook_events.ts` — webhook_events
+- `apps_registry.ts` — apps_registry
+- `projects.ts` — projects
+- `stephen_site.ts` — stephen_site_testimonials, stephen_site_case_studies, stephen_site_contacts
+- `stephen.ts` — stephen_content_blocks, stephen_case_studies, stephen_booking_requests
+- `vessels.ts` — vessels_fleets, vessels, vessels_positions, vessels_cargo, vessels_routes, vessels_alert_rules, vessels_alerts, vessels_weather_snapshots, vessels_simulations
+- `firestorm.ts` — firestorm_scenarios, firestorm_assessments, firestorm_simulation_runs, firestorm_findings, firestorm_risk_scores, firestorm_campaigns, firestorm_leads, firestorm_analytics
+- `lyte.ts` — lyte_workspaces, lyte_signals, lyte_command_cards, lyte_incidents, lyte_playbooks, lyte_recommendations
+- `dreamscape.ts` — dreamscape_campaigns, dreamscape_scripts, dreamscape_storyboards, dreamscape_voice_assets, dreamscape_campaign_assets, dreamscape_reviews
+- `readiness.ts` — readiness_programs, readiness_dimensions, readiness_score_history, readiness_milestones, readiness_risks, readiness_alerts
 
 **TypeScript & Composite Projects:**
 All packages extend a base `tsconfig.json` with `composite: true` and are listed as project references in the root `tsconfig.json`. This enables cross-package type-checking and efficient incremental builds. Type-checking (`tsc --build --emitDeclarationOnly`) is performed from the root, emitting only `.d.ts` files, with actual JS bundling handled by esbuild/Vite.
 
-**Database Schema:**
-The `lib/db` package manages a PostgreSQL database schema using Drizzle ORM. It includes 18 schema files defining over 40 tables, organized by domain:
-- **Core Platform:** `auth`, `organizations`, `connectors`, `notifications`, `activity`, `api_keys`, `feature_flags`, `billing`, `files`, `health_checks`, `webhook_events`, `apps_registry`, `projects`.
-- **App-Specific:** `stephen_site`, `vessels`, `firestorm`, `lyte`, `dreamscape`, `readiness`.
+**UI/UX Decisions:**
+A premium dark-mode-forward design system is implemented via `@workspace/shared-ui`. This includes a specific color palette (navy/indigo/violet), typography (Plus Jakarta Sans, Inter), spacing, glassmorphism effects, gradients, and shadows. Animations leverage Framer Motion for fade-ins, parallax, scroll-triggered reveals, and hover effects. All applications are designed to be fully responsive and support reduced-motion accessibility. Includes `cn()` for class merging.
 
-**API Design (`artifacts/api-server`):**
-The Express API server features modular routes organized by domain (e.g., `health.ts`, `projects.ts`, `auth.ts`, `connectors.ts`, `vessels.ts`). It uses `@workspace/api-zod` for request/response validation and `@workspace/db` for data persistence.
-
-**UI/UX Design (`lib/shared-ui`):**
-A premium dark-mode-first design system provides:
-- **Tokens:** Color palette (navy/indigo/violet), typography, spacing, glassmorphism, gradients, shadows.
-- **Animations:** Framer Motion presets for fade-ins, stagger, scroll-reveal, hover effects, and parallax.
-- **Utilities:** `cn()` for class merging.
-
-**Key Applications:**
-- **`api-server`**: Main Express API, handling all backend logic and data interactions.
-- **`project-list`**: A React + Vite portfolio site featuring a dark theme, gradient text, particle animations, Framer Motion, and full responsiveness. Includes sections for Hero, About, Services, Portfolio, Testimonials, and Contact.
-- **`admin-panel`**: An executive dashboard for managing the SZL ecosystem. Features pages for System Overview, App Registry, Connectors, Integration Health (unified health dashboard with per-connector test buttons, status badges, search, and alerting), Integration Activity Feed (filterable event log), Users & Roles, Audit Log, Webhooks, Feature Flags, Billing, Files, Environment, and Seed Data. Includes a demo mode top banner and sidebar health warning badges.
-- **`vessels`**: React + Vite maritime intelligence app with a dark executive theme (navy/cyan). Pages include Fleet Dashboard, Vessel Detail, Route Planning, Weather Impact, Simulations, and Alert Center. Includes demo mode banner and integration status sidebar footer.
-- **`firestorm`**: React + Vite security simulation app with a dark executive theme (charcoal/orange). Pages cover Assessment Dashboard, Scenario Library, Simulation Runner, Findings, Risk Scoring, and Executive Reports. Includes demo mode banner and integration status sidebar footer.
-- **`stephen-site`**: Portfolio/personal site with demo mode banner and integration status sidebar footer.
+**Technical Implementations & Feature Specifications:**
+- **Database:** Over 40 tables across 18 schema files in `lib/db`, organized by domain (auth, organizations, billing, projects, and app-specific schemas like `vessels`, `firestorm`, `lyte`, `dreamscape`, `readiness`).
+- **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Six roles control access, with `super_admin` bypassing all checks.
+- **API Server:** Modular routes in `artifacts/api-server`, one file per domain (e.g., `health.ts`, `projects.ts`, `auth.ts`, `connectors.ts`, `vessels.ts`), utilizing Zod for request/response validation and Drizzle for persistence. Binds to 0.0.0.0 for deployment readiness.
+- **Service Adapters:** `lib/services` provides a consistent pattern for integrating 23 third-party services (AI, weather, shipping, Stripe, Slack, Twilio, Google, etc.), with automatic environment variable detection and fallback to mock modes. ServiceAdapter base includes `runHealthCheck()`, health metrics tracking (lastChecked, errorCount, responseTimeMs, lastSuccessfulCheck, consecutiveFailures, retryState). ServiceRegistry exposes per-app health matrix, connection testing, and unhealthy/demo mode counts.
+- **Observability:** Structured logging via pino. System health endpoint (`/api/admin/system-health`) monitors DB (real probes), storage, auth, connectors, webhooks, notifications, billing status, and parallelized HTTP app route probes via REPLIT_DEV_DOMAIN with 5s timeouts.
+- **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` in `artifacts/api-server/src/lib/feature-gate.ts` to manage access based on entitlements (org-level) and usage limits.
+- **Admin Panel:** A dedicated premium dark-mode executive dashboard (`artifacts/admin-panel`) providing management for System Health (grouped checks, auto-refresh), App Registry, Connectors, Integration Health (unified dashboard with per-connector enable/disable, test buttons, retry state badges, and alerting), Integration Activity Feed (4 filter dropdowns: connector, app, type, status), Users & Roles, Audit Log, Webhooks, Feature Flags, Billing (plans/subscriptions/invoices/entitlements/usage), File browsing, Environment readiness, and a Seed Manager with integrity checking (validating 63 tables). Includes a demo mode top banner and sidebar health warning badges.
+- **Portfolio Site (`project-list`):** A React + Vite single-page portfolio for Stephen L., featuring a hero section with particle animations, gradient text, professional summary, services, project portfolio, testimonials, and contact information. Optimized for SEO with Open Graph, Twitter Card, and JSON-LD.
+- **Vessels:** Maritime intelligence app with Fleet Dashboard, Vessel Detail, Route Planning, Weather, Simulations, and Alert Center. Includes demo mode banner and integration status sidebar footer.
+- **Firestorm:** Security simulation app with Assessment Dashboard, Scenario Library, Simulation Runner, Findings, Risk Scoring, and Executive Reports. Includes demo mode banner and integration status sidebar footer.
+- **Dreamscape:** Creative project management/studio app with demo mode banner and integration status sidebar footer.
+- **Readiness Report:** Readiness assessment app with demo mode banner and integration status sidebar footer.
+- **Lyte Command Center:** Incident/Signal command center with demo mode banner and integration status sidebar footer.
+- **Stephen-site:** Additional portfolio/personal site with demo mode banner and integration status sidebar footer.
 
 **Shared Libraries:**
-- **`lib/db`**: Drizzle ORM layer for PostgreSQL.
-- **`lib/shared-ui`**: Design system with tokens, animations, and utilities.
-- **`lib/config`**: Platform constants, app registry, role definitions, and environment helpers.
-- **`lib/shared-types`**: Common TypeScript interfaces.
-- **`lib/utils`**: General utility functions.
-- **`lib/services`**: Adapter library for third-party integrations, supporting mock/demo modes. ServiceAdapter base includes `runHealthCheck()`, health metrics tracking (lastChecked, errorCount, responseTimeMs). ServiceRegistry exposes per-app health matrix, connection testing, and unhealthy/demo mode counts.
-- **`lib/config`** includes `APP_INTEGRATIONS` mapping all 7 apps to their connector dependencies.
-- **`lib/api-spec`**: OpenAPI 3.1 specification.
-- **`lib/api-zod`**: Generated Zod schemas from the OpenAPI spec.
-- **`lib/api-client-react`**: Generated React Query hooks and fetch client.
+- `lib/config` includes `APP_INTEGRATIONS` mapping all 7 apps to their connector dependencies.
+- `lib/api-spec`: OpenAPI 3.1 specification.
+- `lib/api-zod`: Generated Zod schemas from the OpenAPI spec.
+- `lib/api-client-react`: Generated React Query hooks and fetch client.
 
-## External Dependencies
+### `artifacts/api-server` (`@workspace/api-server`)
 
 - **Database:** PostgreSQL
 - **ORM:** Drizzle ORM
+- **Validation:** Zod (`zod/v4`) and `drizzle-zod`
+- **API Codegen:** Orval
+- **Frontend Frameworks/Libraries:** React, Vite, TanStack React Query, wouter (for routing), Framer Motion, Lucide React, Tailwind CSS
 - **Authentication:** Replit Auth (fallback), internal session-based system
-- **API Documentation:** OpenAPI 3.1
-- **API Client Generation:** Orval
-- **Frontend Frameworks:** React, Vite
-- **State Management/Data Fetching:** TanStack React Query
-- **Routing:** Wouter
-- **Animation Library:** Framer Motion
-- **Icon Library:** Lucide React
-- **Styling:** Tailwind CSS (implied by utility class usage and design descriptions)
-- **Third-Party Service Integrations (via `lib/services` adapters):**
+- **Logging:** Pino
+- **Third-party Services (integrated via `@workspace/services` adapters):**
     - AI
     - Weather (Stormglass)
     - Shipping

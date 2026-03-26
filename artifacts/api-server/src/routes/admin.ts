@@ -1,17 +1,19 @@
 import { Router, type IRouter } from "express";
 import { services } from "@workspace/services";
 import { APP_INTEGRATIONS, PLATFORM_APPS } from "@workspace/config";
+import { db, pool, billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable } from "@workspace/db";
+import { desc, sql } from "drizzle-orm";
 
 const adminRouter: IRouter = Router();
 
 const SZL_APPS = [
   { id: "project-list", name: "Project List", description: "Portfolio project management", status: "active", url: "/" },
   { id: "admin-panel", name: "Admin Control Plane", description: "System administration dashboard", status: "active", url: "/admin/" },
-  { id: "api-server", name: "API Server", description: "REST API backend", status: "active", url: "/api" },
-  { id: "vessel-tracker", name: "Vessel Tracker", description: "Maritime fleet tracking", status: "planned", url: "/vessels/" },
-  { id: "weather-dash", name: "Weather Dashboard", description: "Weather monitoring", status: "planned", url: "/weather/" },
-  { id: "comms-hub", name: "Communications Hub", description: "Messaging and notifications", status: "planned", url: "/comms/" },
-  { id: "doc-center", name: "Document Center", description: "Document management", status: "planned", url: "/docs/" },
+  { id: "api-server", name: "API Server", description: "REST API backend", status: "active", url: "/api/healthz" },
+  { id: "vessel-tracker", name: "Vessel Tracker", description: "Maritime fleet tracking", status: "active", url: "/vessels/" },
+  { id: "firestorm", name: "Firestorm Security", description: "Security simulation platform", status: "active", url: "/firestorm/" },
+  { id: "stephen-site", name: "Stephen Lutar", description: "Personal portfolio site", status: "active", url: "/stephen/" },
+  { id: "mockup-sandbox", name: "Component Preview", description: "Design system preview", status: "active", url: "/__mockup/" },
 ];
 
 const MOCK_USERS = [
@@ -66,6 +68,96 @@ const MOCK_BILLING = {
   ],
 };
 
+const VALID_TABLE_NAMES = new Set([
+  "roles", "users", "organizations", "org_members", "user_roles",
+  "connectors", "connector_logs", "notifications", "notification_preferences",
+  "activity_log", "audit_events", "sessions", "api_keys",
+  "feature_flags", "feature_flag_overrides",
+  "billing_plans", "subscriptions", "invoices", "entitlements", "usage_events",
+  "files", "assets", "apps_registry", "health_checks", "webhook_events",
+  "projects",
+  "stephen_site_testimonials", "stephen_site_case_studies", "stephen_site_contacts",
+  "stephen_content_blocks", "stephen_case_studies", "stephen_booking_requests",
+  "vessels_fleets", "vessels", "vessels_positions", "vessels_cargo",
+  "vessels_routes", "vessels_alert_rules", "vessels_alerts",
+  "vessels_weather_snapshots", "vessels_simulations",
+  "firestorm_scenarios", "firestorm_assessments", "firestorm_simulation_runs",
+  "firestorm_findings", "firestorm_risk_scores",
+  "firestorm_campaigns", "firestorm_leads", "firestorm_analytics",
+  "lyte_workspaces", "lyte_signals", "lyte_command_cards",
+  "lyte_incidents", "lyte_playbooks", "lyte_recommendations",
+  "dreamscape_campaigns", "dreamscape_scripts", "dreamscape_storyboards",
+  "dreamscape_voice_assets", "dreamscape_campaign_assets", "dreamscape_reviews",
+  "readiness_programs", "readiness_dimensions", "readiness_score_history",
+  "readiness_milestones", "readiness_risks", "readiness_alerts",
+]);
+
+const SEED_TABLE_EXPECTATIONS = [
+  { table: "roles", minRows: 6, description: "RBAC roles" },
+  { table: "users", minRows: 6, description: "Platform users" },
+  { table: "organizations", minRows: 1, description: "Organizations" },
+  { table: "org_members", minRows: 6, description: "Organization members" },
+  { table: "connectors", minRows: 5, description: "Integration connectors" },
+  { table: "connector_logs", minRows: 4, description: "Connector logs" },
+  { table: "notifications", minRows: 4, description: "Notifications" },
+  { table: "notification_preferences", minRows: 3, description: "Notification preferences" },
+  { table: "activity_log", minRows: 3, description: "Activity log entries" },
+  { table: "audit_events", minRows: 3, description: "Audit events" },
+  { table: "sessions", minRows: 2, description: "User sessions" },
+  { table: "api_keys", minRows: 2, description: "API keys" },
+  { table: "feature_flags", minRows: 6, description: "Feature flags" },
+  { table: "feature_flag_overrides", minRows: 2, description: "Feature flag overrides" },
+  { table: "billing_plans", minRows: 4, description: "Billing plans" },
+  { table: "subscriptions", minRows: 1, description: "Subscriptions" },
+  { table: "invoices", minRows: 3, description: "Invoices" },
+  { table: "entitlements", minRows: 8, description: "Plan entitlements" },
+  { table: "usage_events", minRows: 6, description: "Usage events" },
+  { table: "files", minRows: 3, description: "Uploaded files" },
+  { table: "assets", minRows: 3, description: "File assets" },
+  { table: "apps_registry", minRows: 7, description: "Registered apps" },
+  { table: "health_checks", minRows: 4, description: "Health check records" },
+  { table: "webhook_events", minRows: 3, description: "Webhook events" },
+  { table: "projects", minRows: 6, description: "Portfolio projects" },
+  { table: "stephen_site_testimonials", minRows: 3, description: "Testimonials" },
+  { table: "stephen_site_case_studies", minRows: 2, description: "Case studies" },
+  { table: "stephen_site_contacts", minRows: 2, description: "Site contacts" },
+  { table: "vessels_fleets", minRows: 3, description: "Vessel fleets" },
+  { table: "vessels", minRows: 5, description: "Vessels" },
+  { table: "vessels_positions", minRows: 6, description: "Vessel positions" },
+  { table: "vessels_cargo", minRows: 4, description: "Vessel cargo" },
+  { table: "vessels_routes", minRows: 4, description: "Vessel routes" },
+  { table: "vessels_alert_rules", minRows: 5, description: "Vessel alert rules" },
+  { table: "vessels_alerts", minRows: 4, description: "Vessel alerts" },
+  { table: "vessels_weather_snapshots", minRows: 5, description: "Weather snapshots" },
+  { table: "vessels_simulations", minRows: 3, description: "Vessel simulations" },
+  { table: "firestorm_scenarios", minRows: 8, description: "Security scenarios" },
+  { table: "firestorm_assessments", minRows: 4, description: "Security assessments" },
+  { table: "firestorm_simulation_runs", minRows: 4, description: "Simulation runs" },
+  { table: "firestorm_findings", minRows: 8, description: "Security findings" },
+  { table: "firestorm_risk_scores", minRows: 8, description: "Risk scores" },
+  { table: "firestorm_campaigns", minRows: 2, description: "Firestorm campaigns" },
+  { table: "firestorm_leads", minRows: 3, description: "Firestorm leads" },
+  { table: "firestorm_analytics", minRows: 4, description: "Firestorm analytics" },
+  { table: "lyte_workspaces", minRows: 1, description: "Lyte workspaces" },
+  { table: "lyte_signals", minRows: 5, description: "Lyte signals" },
+  { table: "lyte_command_cards", minRows: 3, description: "Lyte command cards" },
+  { table: "lyte_incidents", minRows: 2, description: "Lyte incidents" },
+  { table: "lyte_playbooks", minRows: 2, description: "Lyte playbooks" },
+  { table: "lyte_recommendations", minRows: 2, description: "Lyte recommendations" },
+  { table: "dreamscape_campaigns", minRows: 4, description: "Dreamscape campaigns" },
+  { table: "dreamscape_scripts", minRows: 3, description: "Dreamscape scripts" },
+  { table: "dreamscape_storyboards", minRows: 3, description: "Dreamscape storyboards" },
+  { table: "dreamscape_voice_assets", minRows: 3, description: "Dreamscape voice assets" },
+  { table: "dreamscape_campaign_assets", minRows: 3, description: "Dreamscape campaign assets" },
+  { table: "dreamscape_reviews", minRows: 3, description: "Dreamscape reviews" },
+  { table: "readiness_programs", minRows: 1, description: "Readiness programs" },
+  { table: "readiness_dimensions", minRows: 5, description: "Readiness dimensions" },
+  { table: "readiness_score_history", minRows: 10, description: "Readiness score history" },
+  { table: "readiness_milestones", minRows: 2, description: "Readiness milestones" },
+  { table: "readiness_risks", minRows: 3, description: "Readiness risks" },
+  { table: "readiness_alerts", minRows: 3, description: "Readiness alerts" },
+];
+
 adminRouter.get("/admin/overview", (_req, res) => {
   const matrix = services.getHealthMatrix();
   const dbStatus = { status: "healthy", latency: 12, connections: 5, maxConnections: 100 };
@@ -92,6 +184,246 @@ adminRouter.get("/admin/overview", (_req, res) => {
       activeUsers: MOCK_USERS.filter((u) => u.status === "active").length,
     },
   });
+});
+
+adminRouter.get("/admin/system-health", async (_req, res) => {
+  const checks: { name: string; category: string; status: "healthy" | "degraded" | "down"; latencyMs: number | null; details: string }[] = [];
+  const dbStart = Date.now();
+  try {
+    const dbResult = await pool.query("SELECT COUNT(*)::int as tbl_count FROM pg_tables WHERE schemaname = 'public'");
+    const tblCount = dbResult.rows[0]?.tbl_count ?? 0;
+    checks.push({ name: "PostgreSQL", category: "Database", status: "healthy", latencyMs: Date.now() - dbStart, details: `Connection pool active, ${tblCount} tables` });
+  } catch {
+    checks.push({ name: "PostgreSQL", category: "Database", status: "down", latencyMs: Date.now() - dbStart, details: "Connection failed" });
+  }
+
+  const storageAdapter = services.storage;
+  checks.push({
+    name: "Object Storage",
+    category: "Storage",
+    status: storageAdapter.isLive ? "healthy" : "degraded",
+    latencyMs: null,
+    details: storageAdapter.isLive ? "Live configured" : "Demo mode (local fallback)",
+  });
+
+  const authStart = Date.now();
+  try {
+    const sessionResult = await pool.query("SELECT COUNT(*)::int as cnt FROM sessions WHERE expires_at > NOW()");
+    const activeSessions = sessionResult.rows[0]?.cnt ?? 0;
+    checks.push({
+      name: "Session Auth",
+      category: "Auth",
+      status: "healthy",
+      latencyMs: Date.now() - authStart,
+      details: `${activeSessions} active sessions, Replit Auth fallback available`,
+    });
+  } catch {
+    checks.push({
+      name: "Session Auth",
+      category: "Auth",
+      status: "degraded",
+      latencyMs: Date.now() - authStart,
+      details: "Session table query failed",
+    });
+  }
+
+  const matrix = services.getHealthMatrix();
+  const liveCount = matrix.summary.liveConfigured;
+  const totalCount = matrix.summary.total;
+  checks.push({
+    name: "Connectors",
+    category: "Integrations",
+    status: liveCount > 0 ? "healthy" : "degraded",
+    latencyMs: null,
+    details: `${liveCount}/${totalCount} live, ${matrix.summary.mockedDemoMode} in demo mode`,
+  });
+
+  try {
+    const whResult = await pool.query(`
+      SELECT 
+        COUNT(*)::int as total,
+        COUNT(*) FILTER (WHERE status = 'processed')::int as processed,
+        COUNT(*) FILTER (WHERE status = 'failed')::int as failed
+      FROM webhook_events
+    `);
+    const wh = whResult.rows[0];
+    checks.push({
+      name: "Webhook Processing",
+      category: "Webhooks",
+      status: wh.failed > 0 ? "degraded" : "healthy",
+      latencyMs: null,
+      details: `${wh.processed} processed, ${wh.failed} failed of ${wh.total} total`,
+    });
+  } catch {
+    checks.push({
+      name: "Webhook Processing",
+      category: "Webhooks",
+      status: "degraded",
+      latencyMs: null,
+      details: "Unable to query webhook events",
+    });
+  }
+
+  try {
+    const notifResult = await pool.query(`
+      SELECT 
+        COUNT(*)::int as total,
+        COUNT(*) FILTER (WHERE is_read = true)::int as read_count
+      FROM notifications
+    `);
+    const n = notifResult.rows[0];
+    checks.push({
+      name: "Notifications",
+      category: "Notifications",
+      status: "healthy",
+      latencyMs: null,
+      details: `${n.total} notifications (${n.read_count} read)`,
+    });
+  } catch {
+    checks.push({
+      name: "Notifications",
+      category: "Notifications",
+      status: "degraded",
+      latencyMs: null,
+      details: "Unable to query notifications",
+    });
+  }
+
+  const stripeAdapter = services.stripe;
+  checks.push({
+    name: "Billing (Stripe)",
+    category: "Billing",
+    status: stripeAdapter.isLive ? "healthy" : "degraded",
+    latencyMs: null,
+    details: stripeAdapter.isLive ? "Stripe connected" : "Demo mode — no live payments",
+  });
+
+  const devDomain = process.env.REPLIT_DEV_DOMAIN;
+
+  if (devDomain) {
+    const probeBaseUrl = `https://${devDomain}`;
+    const probeResults = await Promise.allSettled(
+      SZL_APPS.map(async (app) => {
+        const appStart = Date.now();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        try {
+          const response = await fetch(`${probeBaseUrl}${app.url}`, { signal: controller.signal });
+          clearTimeout(timeout);
+          const latency = Date.now() - appStart;
+          return {
+            name: app.name,
+            category: "Apps" as const,
+            status: (response.ok || response.status === 304 ? "healthy" : "degraded") as "healthy" | "degraded",
+            latencyMs: latency,
+            details: response.ok || response.status === 304 ? `Serving at ${app.url} (${response.status})` : `HTTP ${response.status} at ${app.url}`,
+          };
+        } catch {
+          clearTimeout(timeout);
+          return {
+            name: app.name,
+            category: "Apps" as const,
+            status: "down" as const,
+            latencyMs: Date.now() - appStart,
+            details: `Unreachable at ${app.url}`,
+          };
+        }
+      })
+    );
+    for (const result of probeResults) {
+      checks.push(result.status === "fulfilled" ? result.value : { name: "Unknown", category: "Apps", status: "down", latencyMs: null, details: "Probe failed" });
+    }
+  } else {
+    for (const app of SZL_APPS) {
+      checks.push({
+        name: app.name,
+        category: "Apps",
+        status: "degraded",
+        latencyMs: null,
+        details: `Unverified — no REPLIT_DEV_DOMAIN (registered at ${app.url})`,
+      });
+    }
+  }
+
+  const overallStatus = checks.some((c) => c.status === "down") ? "down" : checks.some((c) => c.status === "degraded") ? "degraded" : "healthy";
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    status: overallStatus,
+    checks,
+    summary: {
+      total: checks.length,
+      healthy: checks.filter((c) => c.status === "healthy").length,
+      degraded: checks.filter((c) => c.status === "degraded").length,
+      down: checks.filter((c) => c.status === "down").length,
+    },
+  });
+});
+
+adminRouter.get("/admin/seed/validate", async (_req, res) => {
+  const results: { table: string; description: string; expected: number; actual: number; status: "pass" | "fail" | "error" }[] = [];
+
+  for (const expectation of SEED_TABLE_EXPECTATIONS) {
+    if (!VALID_TABLE_NAMES.has(expectation.table)) {
+      results.push({ table: expectation.table, description: expectation.description, expected: expectation.minRows, actual: 0, status: "error" });
+      continue;
+    }
+    try {
+      const result = await pool.query(`SELECT COUNT(*)::int as count FROM "${expectation.table}"`);
+      const actual = result.rows[0]?.count ?? 0;
+      results.push({
+        table: expectation.table,
+        description: expectation.description,
+        expected: expectation.minRows,
+        actual,
+        status: actual >= expectation.minRows ? "pass" : "fail",
+      });
+    } catch {
+      results.push({
+        table: expectation.table,
+        description: expectation.description,
+        expected: expectation.minRows,
+        actual: 0,
+        status: "error",
+      });
+    }
+  }
+
+  const passed = results.filter((r) => r.status === "pass").length;
+  const failed = results.filter((r) => r.status === "fail").length;
+  const errors = results.filter((r) => r.status === "error").length;
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    overallStatus: errors > 0 ? "error" : failed > 0 ? "incomplete" : "complete",
+    results,
+    summary: { total: results.length, passed, failed, errors },
+  });
+});
+
+adminRouter.get("/admin/billing/settings", async (_req, res) => {
+  try {
+    const plans = await db.select().from(billingPlansTable).orderBy(billingPlansTable.id);
+    const subs = await db.select().from(subscriptionsTable).orderBy(desc(subscriptionsTable.createdAt)).limit(10);
+    const invs = await db.select().from(invoicesTable).orderBy(desc(invoicesTable.createdAt)).limit(20);
+    const ents = await db.select().from(entitlementsTable).orderBy(entitlementsTable.planId);
+    const usageResult = await db.select({
+      featureKey: usageEventsTable.featureKey,
+      totalQuantity: sql<number>`SUM(${usageEventsTable.quantity})::int`,
+      eventCount: sql<number>`COUNT(*)::int`,
+    }).from(usageEventsTable).groupBy(usageEventsTable.featureKey);
+
+    res.json({
+      stripeConfigured: services.stripe.isLive,
+      plans,
+      subscriptions: subs,
+      invoices: invs,
+      entitlements: ents,
+      usageSummary: usageResult,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load billing settings" });
+  }
 });
 
 adminRouter.get("/admin/apps", (_req, res) => {

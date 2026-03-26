@@ -15,6 +15,7 @@ import BillingPage from "@/pages/billing";
 import FilesPage from "@/pages/files";
 import EnvironmentPage from "@/pages/environment";
 import SeedManagerPage from "@/pages/seed-manager";
+import SystemHealthPage from "@/pages/system-health";
 import NotFound from "@/pages/not-found";
 import { api } from "@/lib/api";
 import {
@@ -56,6 +57,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { path: "/", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" />, section: "System" },
+  { path: "/health", label: "System Health", icon: <HeartPulse className="w-4 h-4" /> },
   { path: "/apps", label: "App Registry", icon: <Layers className="w-4 h-4" /> },
   { path: "/connectors", label: "Connectors", icon: <Plug className="w-4 h-4" /> },
   { path: "/integration-health", label: "Integration Health", icon: <HeartPulse className="w-4 h-4" />, badge: "health" },
@@ -188,6 +190,7 @@ function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={DashboardPage} />
+      <Route path="/health" component={SystemHealthPage} />
       <Route path="/apps" component={AppsPage} />
       <Route path="/connectors" component={ConnectorsPage} />
       <Route path="/integration-health" component={IntegrationHealthPage} />

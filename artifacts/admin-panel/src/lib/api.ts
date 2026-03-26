@@ -52,6 +52,9 @@ export const api = {
   testAppConnectors: (appSlug: string) => apiFetch<{ app: string; results: ConnectionTestResult[] }>(`/services/health/app/${appSlug}/test`, { method: "POST" }),
   setConnectorEnabled: (name: string, enabled: boolean) => apiFetch<{ name: string; enabled: boolean; status: string }>(`/admin/connectors/${name}/enable`, { method: "PUT", body: JSON.stringify({ enabled }) }),
   verifyAll: () => apiFetch<VerifyAllResult>("/services/health/verify-all", { method: "POST" }),
+  getSystemHealth: () => apiFetch<SystemHealthResponse>("/admin/system-health"),
+  validateSeedData: () => apiFetch<SeedValidationResponse>("/admin/seed/validate"),
+  getBillingSettings: () => apiFetch<BillingSettingsResponse>("/admin/billing/settings"),
 };
 
 export interface AdminOverview {
@@ -247,4 +250,93 @@ export interface VerifyAllResult {
     fallbackCount: number;
     failedCount: number;
   }>;
+}
+
+export interface SystemHealthCheck {
+  name: string;
+  category: string;
+  status: "healthy" | "degraded" | "down";
+  latencyMs: number | null;
+  details: string;
+}
+
+export interface SystemHealthResponse {
+  timestamp: string;
+  status: "healthy" | "degraded" | "down";
+  checks: SystemHealthCheck[];
+  summary: { total: number; healthy: number; degraded: number; down: number };
+}
+
+export interface SeedValidationResult {
+  table: string;
+  description: string;
+  expected: number;
+  actual: number;
+  status: "pass" | "fail" | "error";
+}
+
+export interface SeedValidationResponse {
+  timestamp: string;
+  overallStatus: "complete" | "incomplete" | "error";
+  results: SeedValidationResult[];
+  summary: { total: number; passed: number; failed: number; errors: number };
+}
+
+export interface BillingPlan {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  priceMonthly: string;
+  priceYearly: string | null;
+  features: unknown;
+  stripePriceId: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface BillingSubscription {
+  id: number;
+  orgId: number;
+  planId: number;
+  status: string;
+  stripeSubscriptionId: string | null;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  canceledAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BillingInvoiceRecord {
+  id: number;
+  orgId: number;
+  subscriptionId: number | null;
+  stripeInvoiceId: string | null;
+  amount: string;
+  currency: string;
+  status: string;
+  paidAt: string | null;
+  dueDate: string | null;
+  createdAt: string;
+}
+
+export interface BillingEntitlement {
+  id: number;
+  planId: number;
+  featureKey: string;
+  featureName: string;
+  type: string;
+  limitValue: number | null;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface BillingSettingsResponse {
+  stripeConfigured: boolean;
+  plans: BillingPlan[];
+  subscriptions: BillingSubscription[];
+  invoices: BillingInvoiceRecord[];
+  entitlements: BillingEntitlement[];
+  usageSummary: { featureKey: string; totalQuantity: number; eventCount: number }[];
 }

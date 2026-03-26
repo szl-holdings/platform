@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { CreditCard, CheckCircle, Calendar, Users, Sparkles } from "lucide-react";
+import { CreditCard, CheckCircle, Calendar, Users, Sparkles, Shield, BarChart3, AlertTriangle } from "lucide-react";
 
 function formatAmount(cents: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
@@ -10,6 +10,11 @@ export default function BillingPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-billing"],
     queryFn: api.getBilling,
+  });
+
+  const { data: settings } = useQuery({
+    queryKey: ["admin-billing-settings"],
+    queryFn: api.getBillingSettings,
   });
 
   if (isLoading || !data) {
@@ -24,8 +29,18 @@ export default function BillingPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Billing & Subscription</h1>
-        <p className="text-sm text-muted-foreground mt-1">Plan details and payment history</p>
+        <p className="text-sm text-muted-foreground mt-1">Plan details, entitlements, and usage</p>
       </div>
+
+      {settings && !settings.stripeConfigured && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-400">Stripe Not Connected</p>
+            <p className="text-xs text-muted-foreground mt-1">Billing is running in demo mode. Connect Stripe to enable live payments.</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 to-card p-5">
@@ -93,6 +108,57 @@ export default function BillingPage() {
           </div>
         </div>
       </div>
+
+      {settings && settings.entitlements.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className="w-4 h-4 text-cyan-400" />
+            <span className="text-sm font-medium">Plan Entitlements</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {settings.entitlements.map((ent, i) => (
+              <div key={i} className="rounded-md border border-border/50 bg-muted/30 p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium">{ent.featureKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded ${ent.type === "boolean" ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-500/10 text-blue-400"}`}>
+                    {ent.type}
+                  </span>
+                </div>
+                {ent.limitValue && (
+                  <span className="text-xs text-muted-foreground">Limit: {ent.limitValue.toLocaleString()}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {settings && settings.usageSummary.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="w-4 h-4 text-violet-400" />
+            <span className="text-sm font-medium">Usage Summary</span>
+          </div>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider pb-3">Feature</th>
+                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider pb-3">Total Usage</th>
+                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider pb-3">Events</th>
+              </tr>
+            </thead>
+            <tbody>
+              {settings.usageSummary.map((u) => (
+                <tr key={u.featureKey} className="border-b border-border/50">
+                  <td className="py-3 text-sm">{u.featureKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</td>
+                  <td className="py-3 text-sm font-mono">{u.totalQuantity.toLocaleString()}</td>
+                  <td className="py-3 text-sm text-muted-foreground">{u.eventCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="rounded-lg border border-border bg-card p-5">
         <h3 className="text-sm font-medium mb-4">Invoice History</h3>

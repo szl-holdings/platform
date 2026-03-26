@@ -81,6 +81,50 @@ export const firestormRiskScoresTable = pgTable("firestorm_risk_scores", {
   calculatedAt: timestamp("calculated_at").notNull().defaultNow(),
 });
 
+export const firestormCampaignsTable = pgTable("firestorm_campaigns", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  campaignType: text("campaign_type").notNull(),
+  status: text("status", { enum: ["draft", "active", "paused", "completed", "archived"] }).notNull().default("draft"),
+  targetAudience: text("target_audience"),
+  channels: jsonb("channels"),
+  budget: numeric("budget", { precision: 12, scale: 2 }),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const firestormLeadsTable = pgTable("firestorm_leads", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").references(() => firestormCampaignsTable.id, { onDelete: "set null" }),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  company: text("company"),
+  role: text("role"),
+  source: text("source").notNull(),
+  status: text("status", { enum: ["new", "contacted", "engaged", "qualified", "disqualified"] }).notNull().default("new"),
+  score: integer("score").default(0),
+  notes: text("notes"),
+  metadata: jsonb("metadata"),
+  contactedAt: timestamp("contacted_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const firestormAnalyticsTable = pgTable("firestorm_analytics", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").references(() => firestormCampaignsTable.id, { onDelete: "cascade" }),
+  metricName: text("metric_name").notNull(),
+  metricValue: numeric("metric_value", { precision: 12, scale: 2 }).notNull(),
+  dimension: text("dimension"),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertFirestormScenarioSchema = createInsertSchema(firestormScenariosTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertFirestormScenario = z.infer<typeof insertFirestormScenarioSchema>;
 export type FirestormScenario = typeof firestormScenariosTable.$inferSelect;

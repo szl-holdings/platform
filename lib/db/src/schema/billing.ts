@@ -42,6 +42,26 @@ export const invoicesTable = pgTable("invoices", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const entitlementsTable = pgTable("entitlements", {
+  id: serial("id").primaryKey(),
+  planId: integer("plan_id").notNull().references(() => billingPlansTable.id, { onDelete: "cascade" }),
+  featureKey: text("feature_key").notNull(),
+  featureName: text("feature_name").notNull(),
+  type: text("type", { enum: ["boolean", "limit", "usage"] }).notNull().default("boolean"),
+  limitValue: integer("limit_value"),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const usageEventsTable = pgTable("usage_events", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").notNull().references(() => organizationsTable.id, { onDelete: "cascade" }),
+  featureKey: text("feature_key").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  metadata: jsonb("metadata"),
+  recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+});
+
 export const insertBillingPlanSchema = createInsertSchema(billingPlansTable).omit({ id: true, createdAt: true });
 export type InsertBillingPlan = z.infer<typeof insertBillingPlanSchema>;
 export type BillingPlan = typeof billingPlansTable.$inferSelect;
@@ -53,3 +73,11 @@ export type Subscription = typeof subscriptionsTable.$inferSelect;
 export const insertInvoiceSchema = createInsertSchema(invoicesTable).omit({ id: true, createdAt: true });
 export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type Invoice = typeof invoicesTable.$inferSelect;
+
+export const insertEntitlementSchema = createInsertSchema(entitlementsTable).omit({ id: true, createdAt: true });
+export type InsertEntitlement = z.infer<typeof insertEntitlementSchema>;
+export type Entitlement = typeof entitlementsTable.$inferSelect;
+
+export const insertUsageEventSchema = createInsertSchema(usageEventsTable).omit({ id: true, recordedAt: true });
+export type InsertUsageEvent = z.infer<typeof insertUsageEventSchema>;
+export type UsageEvent = typeof usageEventsTable.$inferSelect;

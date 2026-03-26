@@ -20,6 +20,8 @@ import {
   billingPlansTable,
   subscriptionsTable,
   invoicesTable,
+  entitlementsTable,
+  usageEventsTable,
   filesTable,
   assetsTable,
   appsRegistryTable,
@@ -221,6 +223,32 @@ async function seed() {
   ]);
   console.log("  ✓ invoices");
 
+  await db.insert(entitlementsTable).values([
+    { planId: plans[0].id, featureKey: "apps", featureName: "Applications", type: "limit", limitValue: 1, description: "Number of apps allowed" },
+    { planId: plans[0].id, featureKey: "users", featureName: "Team Members", type: "limit", limitValue: 2, description: "Number of team members" },
+    { planId: plans[1].id, featureKey: "apps", featureName: "Applications", type: "limit", limitValue: 3, description: "Number of apps allowed" },
+    { planId: plans[1].id, featureKey: "users", featureName: "Team Members", type: "limit", limitValue: 5, description: "Number of team members" },
+    { planId: plans[2].id, featureKey: "apps", featureName: "Applications", type: "limit", limitValue: 7, description: "Number of apps allowed" },
+    { planId: plans[2].id, featureKey: "audit_logs", featureName: "Audit Logs", type: "boolean", description: "Access to audit log history" },
+    { planId: plans[3].id, featureKey: "apps", featureName: "Applications", type: "limit", limitValue: 999, description: "Unlimited apps" },
+    { planId: plans[3].id, featureKey: "sso", featureName: "Single Sign-On", type: "boolean", description: "SSO integration support" },
+    { planId: plans[3].id, featureKey: "webhooks", featureName: "Webhooks", type: "boolean", description: "Webhook delivery support" },
+    { planId: plans[3].id, featureKey: "api_requests", featureName: "API Requests", type: "usage", limitValue: 100000, description: "Monthly API request limit" },
+  ]);
+  console.log("  ✓ entitlements");
+
+  await db.insert(usageEventsTable).values([
+    { orgId: org.id, featureKey: "api_requests", quantity: 1250, metadata: { endpoint: "/api/vessels" } },
+    { orgId: org.id, featureKey: "api_requests", quantity: 840, metadata: { endpoint: "/api/firestorm" } },
+    { orgId: org.id, featureKey: "api_requests", quantity: 320, metadata: { endpoint: "/api/projects" } },
+    { orgId: org.id, featureKey: "api_requests", quantity: 95, metadata: { endpoint: "/api/admin" } },
+    { orgId: org.id, featureKey: "api_requests", quantity: 560, metadata: { endpoint: "/api/billing" } },
+    { orgId: org.id, featureKey: "api_requests", quantity: 420, metadata: { endpoint: "/api/auth" } },
+    { orgId: org.id, featureKey: "webhooks", quantity: 15, metadata: { source: "stripe" } },
+    { orgId: org.id, featureKey: "webhooks", quantity: 8, metadata: { source: "github" } },
+  ]);
+  console.log("  ✓ usage events");
+
   await db.insert(appsRegistryTable).values([
     { slug: "stephen-site", name: "Stephen L. Portfolio", description: "Personal portfolio and consulting showcase", icon: "Globe", color: "#6366f1", status: "active", version: "1.0.0", isPublic: true },
     { slug: "vessels", name: "Vessels Tracker", description: "Maritime vessel tracking and cargo management", icon: "Ship", color: "#06b6d4", status: "active", version: "0.5.0" },
@@ -416,6 +444,30 @@ async function seed() {
     { assessmentId: fsAssessments[2].id, category: "Identity & Access", likelihood: 4, impact: 5, currentScore: "80.00", residualScore: "50.00", trend: "degrading", notes: "IAM role sprawl needs attention" },
   ]);
   console.log("  ✓ firestorm risk scores");
+
+  const fsCampaigns = await db.insert(firestormCampaignsTable).values([
+    { name: "Q1 Security Awareness", description: "Quarterly security awareness and phishing simulation campaign", campaignType: "awareness", status: "active", targetAudience: "All employees", channels: ["email", "slack"], startDate: new Date("2026-01-15"), endDate: new Date("2026-03-31") },
+    { name: "Executive Threat Briefing", description: "Monthly executive threat intelligence briefing series", campaignType: "briefing", status: "active", targetAudience: "C-Suite and VPs", channels: ["email", "meeting"], startDate: new Date("2026-02-01"), endDate: new Date("2026-06-30") },
+    { name: "Vendor Risk Communication", description: "Supply chain and vendor risk notification campaign", campaignType: "notification", status: "draft", targetAudience: "Procurement team", channels: ["email"] },
+  ]).returning();
+  console.log(`  ✓ ${fsCampaigns.length} firestorm campaigns`);
+
+  await db.insert(firestormLeadsTable).values([
+    { campaignId: fsCampaigns[0].id, name: "IT Security Team", email: "security@szlholdings.com", company: "SZL Holdings", role: "Security Analyst", source: "internal", status: "contacted", score: 90 },
+    { campaignId: fsCampaigns[0].id, name: "HR Department", email: "hr@szlholdings.com", company: "SZL Holdings", role: "HR Manager", source: "internal", status: "engaged", score: 75 },
+    { campaignId: fsCampaigns[1].id, name: "Stephen L.", email: "stephen@szlholdings.com", company: "SZL Holdings", role: "CEO", source: "internal", status: "contacted", score: 95 },
+    { campaignId: fsCampaigns[1].id, name: "Alex Rivera", email: "alex@szlholdings.com", company: "SZL Holdings", role: "COO", source: "internal", status: "new", score: 80 },
+  ]);
+  console.log("  ✓ firestorm leads");
+
+  await db.insert(firestormAnalyticsTable).values([
+    { campaignId: fsCampaigns[0].id, metricName: "email_open_rate", metricValue: "72.50", dimension: "overall", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-15") },
+    { campaignId: fsCampaigns[0].id, metricName: "phishing_click_rate", metricValue: "8.30", dimension: "overall", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-15") },
+    { campaignId: fsCampaigns[0].id, metricName: "report_rate", metricValue: "45.00", dimension: "overall", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-15") },
+    { campaignId: fsCampaigns[1].id, metricName: "attendance_rate", metricValue: "88.00", dimension: "executive", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-31") },
+    { campaignId: fsCampaigns[1].id, metricName: "engagement_score", metricValue: "91.20", dimension: "executive", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-31") },
+  ]);
+  console.log("  ✓ firestorm analytics");
 
   const [lyteWorkspace] = await db.insert(lyteWorkspacesTable).values([
     { name: "SZL Operations Hub", description: "Primary command center for SZL Holdings portfolio operations", ownerId: String(users[0].id), settings: { timezone: "America/New_York", alertThreshold: "medium" } },
