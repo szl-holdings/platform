@@ -605,7 +605,8 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
 
 router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
   try {
-    const requesterId = (req as any).user?.id || (req as any).userId;
+    const rawId = (req as any).user?.id || (req as any).userId;
+    const requesterId: string = Array.isArray(rawId) ? rawId[0] : String(rawId || "");
     const history = services.huggingface.getChatHistory(req.params.sessionId, requesterId);
     sendSuccess(res, { sessionId: req.params.sessionId, messages: history });
   } catch (err) { handleRouteError(res, err, "Failed to get chat history"); }
@@ -613,7 +614,8 @@ router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddlewa
 
 router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
   try {
-    const requesterId = (req as any).user?.id || (req as any).userId;
+    const rawId = (req as any).user?.id || (req as any).userId;
+    const requesterId: string = Array.isArray(rawId) ? rawId[0] : String(rawId || "");
     const cleared = services.huggingface.clearChatSession(req.params.sessionId, requesterId);
     if (!cleared) { sendError(res, "Session not found or access denied", 403); return; }
     sendSuccess(res, { sessionId: req.params.sessionId, cleared });

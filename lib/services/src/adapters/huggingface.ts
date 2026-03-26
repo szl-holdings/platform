@@ -617,14 +617,19 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFSummarizationResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "summarization",
-        { inputs: text, parameters: { max_length: options?.maxLength ?? 200, min_length: 30 } },
-      );
+      const body = { inputs: text, parameters: { max_length: options?.maxLength ?? 200, min_length: 30 } };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("summarization", body));
+      }
       const arr = data as Array<{ summary_text: string }>;
       const result: HFSummarizationResult = {
         summary: arr[0]?.summary_text ?? "",
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
@@ -650,14 +655,19 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFClassificationResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "classification",
-        { inputs: text },
-      );
+      const body = { inputs: text };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("classification", body));
+      }
       const arr = data as Array<Array<{ label: string; score: number }>>;
       const result: HFClassificationResult = {
         labels: arr[0] ?? [],
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
@@ -678,10 +688,15 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFNERResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "ner",
-        { inputs: text },
-      );
+      const body = { inputs: text };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("ner", body));
+      }
       const arr = data as Array<{ entity_group: string; word: string; score: number; start: number; end: number }>;
       const result: HFNERResult = {
         entities: (arr ?? []).map((e) => ({
@@ -691,7 +706,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
           start: e.start,
           end: e.end,
         })),
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
@@ -742,7 +757,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
         const result: HFTranslationResult = {
           translatedText: arr[0]?.translation_text ?? "",
           model,
-          tier: model === dynamicModels[0] ? "primary" : "secondary",
+          tier: model === dynamicModels[0] ? "primary" : model === dynamicModels[1] ? "secondary" : "tertiary",
           cached: false,
         };
         this.setCache(cacheKey, result, CACHE_TTL.translation);
@@ -771,15 +786,20 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFZeroShotResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "zeroShot",
-        { inputs: text, parameters: { candidate_labels: candidateLabels } },
-      );
+      const body = { inputs: text, parameters: { candidate_labels: candidateLabels } };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("zeroShot", body));
+      }
       const res = data as { labels: string[]; scores: number[] };
       const result: HFZeroShotResult = {
         labels: res.labels,
         scores: res.scores,
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
@@ -803,16 +823,21 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFSentimentResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "sentiment",
-        { inputs: text },
-      );
+      const body = { inputs: text };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("sentiment", body));
+      }
       const arr = data as Array<Array<{ label: string; score: number }>>;
       const top = arr[0]?.[0];
       const result: HFSentimentResult = {
         label: top?.label ?? "NEUTRAL",
         score: top?.score ?? 0,
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
@@ -841,15 +866,20 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFQuestionAnswerResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "questionAnswering",
-        { inputs: { question, context } },
-      );
+      const body = { inputs: { question, context } };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("questionAnswering", body));
+      }
       const res = data as { answer: string; score: number };
       const result: HFQuestionAnswerResult = {
         answer: res.answer,
         score: res.score,
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
@@ -876,15 +906,20 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFImageResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "imageGeneration",
-        { inputs: prompt },
-      );
+      const body = { inputs: prompt };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("imageGeneration", body));
+      }
       const res = data as { __imageBase64: string; __mimeType: string };
       const result: HFImageResult = {
         imageBase64: res.__imageBase64,
         mimeType: res.__mimeType,
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
@@ -912,10 +947,15 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     if (cached) return { ...(cached as HFEmbeddingResult), cached: true };
 
     try {
-      const { data, model, tier } = await this.callWithFallback(
-        "embedding",
-        { inputs: inputText },
-      );
+      const body = { inputs: inputText };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("embedding", body));
+      }
       let embeddingVector: number[];
       if (Array.isArray(data) && Array.isArray(data[0])) {
         embeddingVector = data[0] as number[];
@@ -928,7 +968,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
       const result: HFEmbeddingResult = {
         embedding: embeddingVector,
         dimensions: embeddingVector.length,
-        model: options?.model ?? model,
+        model,
         tier,
         cached: false,
       };
