@@ -19,7 +19,7 @@ function serializeProject(p: typeof projectsTable.$inferSelect) {
   };
 }
 
-router.get("/projects", authMiddleware(), async (req, res) => {
+router.get("/projects", authMiddleware({ required: false }), async (req, res) => {
   try {
     const projects = await db
       .select()

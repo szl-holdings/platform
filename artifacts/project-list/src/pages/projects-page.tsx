@@ -378,33 +378,63 @@ function ServicesSection() {
   );
 }
 
+const projectAppUrls: Record<string, string> = {
+  "Vessels Maritime Intelligence": "/vessels/",
+  "Firestorm Security Simulation": "/firestorm/",
+  "Lyte Command Center": "/lyte/",
+  "Dreamscape Creative Engine": "/dreamscape/",
+  "Readiness Report": "/readiness/",
+  "Admin Control Plane": "/admin/",
+  "Service Integration Layer": "/admin/",
+  "Stephen L. Portfolio": "/",
+};
+
 function ProjectPortfolioCard({ project, index }: { project: Project; index: number }) {
   const label = statusLabels[project.status] || project.status;
   const gradient = statusColors[project.status] || "from-violet-500 to-purple-400";
+  const appUrl = projectAppUrls[project.name];
+
+  const CardWrapper = appUrl
+    ? ({ children, className }: { children: React.ReactNode; className: string }) => (
+        <a href={appUrl} className={className} target={appUrl === "/" ? undefined : "_blank"} rel="noopener noreferrer">
+          {children}
+        </a>
+      )
+    : ({ children, className }: { children: React.ReactNode; className: string }) => (
+        <div className={className}>{children}</div>
+      );
 
   return (
-    <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.6, delay: index * 0.1 }} whileHover={{ y: -8 }} className="group relative flex flex-col rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500">
-      <div className={`h-1 w-full bg-gradient-to-r ${gradient}`} />
-      <div className="p-6 sm:p-8 flex flex-col flex-grow">
-        <div className="flex items-center justify-between mb-4">
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${gradient} text-white`}>
-            {label}
-          </span>
-          <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+    <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.6, delay: index * 0.1 }} whileHover={{ y: -8 }}>
+      <CardWrapper className="group relative flex flex-col rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 h-full cursor-pointer no-underline">
+        <div className={`h-1 w-full bg-gradient-to-r ${gradient}`} />
+        <div className="p-6 sm:p-8 flex flex-col flex-grow">
+          <div className="flex items-center justify-between mb-4">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${gradient} text-white`}>
+              {label}
+            </span>
+            {appUrl && <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />}
+          </div>
+          <h3 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">
+            {project.name}
+          </h3>
+          <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6 flex-grow line-clamp-3">
+            {project.description || "A meticulously crafted project delivering cutting-edge solutions."}
+          </p>
+          <div className="pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+            <span>{new Date(project.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short" })}</span>
+            {appUrl ? (
+              <span className="flex items-center gap-1 text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                Launch App <ArrowRight className="w-3 h-3" />
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                View Details <ArrowRight className="w-3 h-3" />
+              </span>
+            )}
+          </div>
         </div>
-        <h3 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">
-          {project.name}
-        </h3>
-        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6 flex-grow line-clamp-3">
-          {project.description || "A meticulously crafted project delivering cutting-edge solutions."}
-        </p>
-        <div className="pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
-          <span>{new Date(project.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short" })}</span>
-          <span className="flex items-center gap-1 text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-            View Details <ArrowRight className="w-3 h-3" />
-          </span>
-        </div>
-      </div>
+      </CardWrapper>
     </motion.div>
   );
 }
