@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/vessels/"
+title = "Vessels Maritime Intelligence"
+version = "1.0.0"
+id = "artifacts/vessels"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/vessels/" ]
+localPort = 18485
+
+[services.development]
+run = "pnpm --filter @workspace/vessels run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vessels", "run", "build" ]
+publicDir = "artifacts/vessels/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18485"
+BASE_PATH = "/vessels/"

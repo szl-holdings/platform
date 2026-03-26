@@ -77,8 +77,8 @@ Schema files are organized by domain in `lib/db/src/schema/`:
 
 **App-Specific Tables:**
 - `stephen_site.ts` — stephen_site_contacts, stephen_site_testimonials, stephen_site_case_studies
-- `vessels.ts` — vessels, vessels_positions, vessels_cargo, vessels_routes
-- `firestorm.ts` — firestorm_campaigns, firestorm_leads, firestorm_analytics
+- `vessels.ts` — vessels_fleets, vessels, vessels_positions, vessels_cargo, vessels_routes, vessels_alert_rules, vessels_alerts, vessels_weather_snapshots, vessels_simulations
+- `firestorm.ts` — firestorm_scenarios, firestorm_assessments, firestorm_simulation_runs, firestorm_findings, firestorm_risk_scores
 - `lyte.ts` — lyte_products, lyte_orders, lyte_order_items
 - `dreamscape.ts` — dreamscape_projects, dreamscape_assets, dreamscape_reviews
 - `readiness.ts` — readiness_assessments, readiness_checklists, readiness_findings
@@ -110,8 +110,8 @@ Routes are modular, one file per domain in `artifacts/api-server/src/routes/`:
 - `feature-flags.ts` — CRUD /api/feature-flags
 - `files.ts` — GET /api/files, /api/assets
 - `stephen.ts` — /api/stephen/contacts, /api/stephen/testimonials, /api/stephen/case-studies
-- `vessels.ts` — /api/vessels, /api/vessels/:id/positions, /api/vessels/:id/cargo, /api/vessels/:id/routes
-- `firestorm.ts` — /api/firestorm/campaigns, /api/firestorm/leads, /api/firestorm/analytics
+- `vessels.ts` — /api/vessels (CRUD), /api/vessels/fleets (CRUD), /api/vessels/routes/all, /api/vessels/alert-rules/all, /api/vessels/alerts/all, /api/vessels/weather/snapshots, /api/vessels/simulations/all, /api/vessels/:id/positions, /api/vessels/:id/cargo, /api/vessels/:id/routes
+- `firestorm.ts` — /api/firestorm/scenarios (CRUD), /api/firestorm/assessments (CRUD), /api/firestorm/simulations (CRUD), /api/firestorm/findings (CRUD), /api/firestorm/risk-scores, /api/firestorm/reports/:assessmentId
 - `lyte.ts` — /api/lyte/products, /api/lyte/orders
 - `dreamscape.ts` — /api/dreamscape/projects, /api/dreamscape/projects/:id/assets, reviews
 - `readiness.ts` — /api/readiness/assessments, checklists, findings
@@ -179,6 +179,14 @@ Generated Zod schemas from the OpenAPI spec.
 ### `lib/api-client-react` (`@workspace/api-client-react`)
 
 Generated React Query hooks and fetch client from the OpenAPI spec.
+
+### `artifacts/vessels` (`@workspace/vessels`)
+
+React + Vite maritime intelligence app. Dark executive theme (navy/cyan accent). Pages: Fleet Dashboard, Vessel Detail, Route Planning, Weather Impact, Simulations, Alert Center. Uses wouter for routing, TanStack React Query for data. Preview: /vessels/
+
+### `artifacts/firestorm` (`@workspace/firestorm`)
+
+React + Vite security simulation app. Dark executive theme (charcoal/orange accent). Pages: Assessment Dashboard, Scenario Library, Simulation Runner, Findings, Risk Scoring, Executive Reports. Framed as defensive security assessment — controlled simulation mode. Preview: /firestorm/
 
 ### `artifacts/project-list` (`@workspace/project-list`)
 

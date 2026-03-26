@@ -2,58 +2,101 @@ import { pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb } fr
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const firestormCampaignsTable = pgTable("firestorm_campaigns", {
+export const firestormScenariosTable = pgTable("firestorm_scenarios", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  type: text("type", { enum: ["email", "social", "ppc", "display", "content", "multi_channel"] }).notNull(),
-  status: text("status", { enum: ["draft", "scheduled", "active", "paused", "completed", "archived"] }).notNull().default("draft"),
-  budget: numeric("budget", { precision: 12, scale: 2 }),
-  spent: numeric("spent", { precision: 12, scale: 2 }).default("0"),
+  category: text("category", { enum: ["network", "application", "social_engineering", "physical", "insider_threat", "supply_chain", "cloud", "iot"] }).notNull(),
+  severity: text("severity", { enum: ["low", "medium", "high", "critical"] }).notNull().default("medium"),
+  complexity: text("complexity", { enum: ["basic", "intermediate", "advanced", "expert"] }).notNull().default("intermediate"),
+  attackVector: text("attack_vector"),
+  mitreTechnique: text("mitre_technique"),
+  prerequisites: jsonb("prerequisites"),
+  expectedDuration: integer("expected_duration"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const firestormAssessmentsTable = pgTable("firestorm_assessments", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  assessmentType: text("assessment_type", { enum: ["penetration_test", "vulnerability_scan", "red_team", "blue_team", "purple_team", "tabletop"] }).notNull(),
+  status: text("status", { enum: ["draft", "scheduled", "in_progress", "completed", "canceled"] }).notNull().default("draft"),
+  scope: text("scope"),
+  targetEnvironment: text("target_environment"),
+  assessorName: text("assessor_name"),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
-  targetAudience: jsonb("target_audience"),
+  overallRiskScore: numeric("overall_risk_score", { precision: 5, scale: 2 }),
+  executiveSummary: text("executive_summary"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const firestormLeadsTable = pgTable("firestorm_leads", {
+export const firestormSimulationRunsTable = pgTable("firestorm_simulation_runs", {
   id: serial("id").primaryKey(),
-  campaignId: integer("campaign_id").references(() => firestormCampaignsTable.id, { onDelete: "set null" }),
-  email: text("email").notNull(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
-  company: text("company"),
-  title: text("title"),
-  phone: text("phone"),
-  source: text("source"),
-  score: integer("score").default(0),
-  status: text("status", { enum: ["new", "contacted", "qualified", "converted", "lost"] }).notNull().default("new"),
-  metadata: jsonb("metadata"),
+  assessmentId: integer("assessment_id").references(() => firestormAssessmentsTable.id, { onDelete: "cascade" }),
+  scenarioId: integer("scenario_id").references(() => firestormScenariosTable.id, { onDelete: "set null" }),
+  name: text("name").notNull(),
+  status: text("status", { enum: ["pending", "running", "completed", "failed", "aborted"] }).notNull().default("pending"),
+  mode: text("mode", { enum: ["demo", "controlled", "full"] }).notNull().default("demo"),
+  parameters: jsonb("parameters"),
+  results: jsonb("results"),
+  durationSeconds: integer("duration_seconds"),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const firestormFindingsTable = pgTable("firestorm_findings", {
+  id: serial("id").primaryKey(),
+  assessmentId: integer("assessment_id").notNull().references(() => firestormAssessmentsTable.id, { onDelete: "cascade" }),
+  simulationRunId: integer("simulation_run_id").references(() => firestormSimulationRunsTable.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  severity: text("severity", { enum: ["info", "low", "medium", "high", "critical"] }).notNull(),
+  status: text("status", { enum: ["open", "confirmed", "mitigated", "accepted", "false_positive"] }).notNull().default("open"),
+  category: text("category"),
+  affectedAsset: text("affected_asset"),
+  impact: text("impact"),
+  recommendation: text("recommendation"),
+  cvssScore: numeric("cvss_score", { precision: 4, scale: 2 }),
+  evidence: jsonb("evidence"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const firestormAnalyticsTable = pgTable("firestorm_analytics", {
+export const firestormRiskScoresTable = pgTable("firestorm_risk_scores", {
   id: serial("id").primaryKey(),
-  campaignId: integer("campaign_id").notNull().references(() => firestormCampaignsTable.id, { onDelete: "cascade" }),
-  date: timestamp("date").notNull(),
-  impressions: integer("impressions").default(0),
-  clicks: integer("clicks").default(0),
-  conversions: integer("conversions").default(0),
-  spend: numeric("spend", { precision: 10, scale: 2 }).default("0"),
-  revenue: numeric("revenue", { precision: 10, scale: 2 }).default("0"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  assessmentId: integer("assessment_id").notNull().references(() => firestormAssessmentsTable.id, { onDelete: "cascade" }),
+  category: text("category").notNull(),
+  likelihood: integer("likelihood").notNull(),
+  impact: integer("impact").notNull(),
+  currentScore: numeric("current_score", { precision: 5, scale: 2 }).notNull(),
+  residualScore: numeric("residual_score", { precision: 5, scale: 2 }),
+  trend: text("trend", { enum: ["improving", "stable", "degrading"] }).notNull().default("stable"),
+  notes: text("notes"),
+  calculatedAt: timestamp("calculated_at").notNull().defaultNow(),
 });
 
-export const insertFirestormCampaignSchema = createInsertSchema(firestormCampaignsTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertFirestormCampaign = z.infer<typeof insertFirestormCampaignSchema>;
-export type FirestormCampaign = typeof firestormCampaignsTable.$inferSelect;
+export const insertFirestormScenarioSchema = createInsertSchema(firestormScenariosTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormScenario = z.infer<typeof insertFirestormScenarioSchema>;
+export type FirestormScenario = typeof firestormScenariosTable.$inferSelect;
 
-export const insertFirestormLeadSchema = createInsertSchema(firestormLeadsTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertFirestormLead = z.infer<typeof insertFirestormLeadSchema>;
-export type FirestormLead = typeof firestormLeadsTable.$inferSelect;
+export const insertFirestormAssessmentSchema = createInsertSchema(firestormAssessmentsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormAssessment = z.infer<typeof insertFirestormAssessmentSchema>;
+export type FirestormAssessment = typeof firestormAssessmentsTable.$inferSelect;
 
-export const insertFirestormAnalyticsSchema = createInsertSchema(firestormAnalyticsTable).omit({ id: true, createdAt: true });
-export type InsertFirestormAnalytics = z.infer<typeof insertFirestormAnalyticsSchema>;
-export type FirestormAnalytics = typeof firestormAnalyticsTable.$inferSelect;
+export const insertFirestormSimulationRunSchema = createInsertSchema(firestormSimulationRunsTable).omit({ id: true, createdAt: true });
+export type InsertFirestormSimulationRun = z.infer<typeof insertFirestormSimulationRunSchema>;
+export type FirestormSimulationRun = typeof firestormSimulationRunsTable.$inferSelect;
+
+export const insertFirestormFindingSchema = createInsertSchema(firestormFindingsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormFinding = z.infer<typeof insertFirestormFindingSchema>;
+export type FirestormFinding = typeof firestormFindingsTable.$inferSelect;
+
+export const insertFirestormRiskScoreSchema = createInsertSchema(firestormRiskScoresTable).omit({ id: true });
+export type InsertFirestormRiskScore = z.infer<typeof insertFirestormRiskScoreSchema>;
+export type FirestormRiskScore = typeof firestormRiskScoresTable.$inferSelect;

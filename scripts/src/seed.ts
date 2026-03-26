@@ -28,13 +28,20 @@ import {
   stephenSiteTestimonialsTable,
   stephenSiteCaseStudiesTable,
   stephenSiteContactsTable,
+  vesselsFleetsTable,
   vesselsTable,
   vesselsPositionsTable,
   vesselsCargoTable,
   vesselsRoutesTable,
-  firestormCampaignsTable,
-  firestormLeadsTable,
-  firestormAnalyticsTable,
+  vesselsAlertRulesTable,
+  vesselsAlertsTable,
+  vesselsWeatherSnapshotsTable,
+  vesselsSimulationsTable,
+  firestormScenariosTable,
+  firestormAssessmentsTable,
+  firestormSimulationRunsTable,
+  firestormFindingsTable,
+  firestormRiskScoresTable,
   lyteProductsTable,
   lyteOrdersTable,
   lyteOrderItemsTable,
@@ -205,7 +212,7 @@ async function seed() {
   await db.insert(appsRegistryTable).values([
     { slug: "stephen-site", name: "Stephen L. Portfolio", description: "Personal portfolio and consulting showcase", icon: "Globe", color: "#6366f1", status: "active", version: "1.0.0", isPublic: true },
     { slug: "vessels", name: "Vessels Tracker", description: "Maritime vessel tracking and cargo management", icon: "Ship", color: "#06b6d4", status: "active", version: "0.5.0" },
-    { slug: "firestorm", name: "Firestorm Marketing", description: "Campaign management and lead generation", icon: "Flame", color: "#f97316", status: "active", version: "0.3.0" },
+    { slug: "firestorm", name: "Firestorm Security", description: "Security assessment simulation and risk scoring", icon: "Flame", color: "#f97316", status: "active", version: "0.3.0" },
     { slug: "lyte", name: "Lyte Commerce", description: "E-commerce product and order management", icon: "ShoppingBag", color: "#a855f7", status: "coming_soon", version: "0.1.0" },
     { slug: "dreamscape", name: "Dreamscape Creative", description: "Creative asset management and review", icon: "Palette", color: "#ec4899", status: "coming_soon", version: "0.1.0" },
     { slug: "readiness", name: "Readiness Assessments", description: "Compliance and readiness assessment tools", icon: "Shield", color: "#10b981", status: "active", version: "0.4.0" },
@@ -271,53 +278,132 @@ async function seed() {
   ]);
   console.log("  ✓ stephen site contacts");
 
+  const fleets = await db.insert(vesselsFleetsTable).values([
+    { name: "Pacific Fleet", description: "Trans-Pacific shipping operations", region: "Pacific Ocean", status: "active", vesselCount: 2 },
+    { name: "Atlantic Fleet", description: "North Atlantic trade routes", region: "Atlantic Ocean", status: "active", vesselCount: 1 },
+    { name: "Indian Ocean Fleet", description: "Middle East and South Asia routes", region: "Indian Ocean", status: "active", vesselCount: 1 },
+  ]).returning();
+  console.log(`  ✓ ${fleets.length} vessel fleets`);
+
   const vessels = await db.insert(vesselsTable).values([
-    { name: "MV Atlantic Voyager", imo: "9876543", vesselType: "container", flag: "Panama", yearBuilt: 2019, status: "at_sea" },
-    { name: "SS Pacific Guardian", imo: "9876544", vesselType: "tanker", flag: "Liberia", yearBuilt: 2021, status: "in_port" },
-    { name: "MV Northern Star", imo: "9876545", vesselType: "bulk", flag: "Marshall Islands", yearBuilt: 2017, status: "at_sea" },
-    { name: "SS Gulf Explorer", imo: "9876546", vesselType: "cargo", flag: "Singapore", yearBuilt: 2020, status: "anchored" },
+    { fleetId: fleets[1].id, name: "MV Atlantic Voyager", imo: "9876543", vesselType: "container", flag: "Panama", yearBuilt: 2019, grossTonnage: "85000.00", status: "at_sea" },
+    { fleetId: fleets[0].id, name: "SS Pacific Guardian", imo: "9876544", vesselType: "tanker", flag: "Liberia", yearBuilt: 2021, grossTonnage: "120000.00", status: "in_port" },
+    { fleetId: fleets[0].id, name: "MV Northern Star", imo: "9876545", vesselType: "bulk", flag: "Marshall Islands", yearBuilt: 2017, grossTonnage: "75000.00", status: "at_sea" },
+    { fleetId: fleets[2].id, name: "SS Gulf Explorer", imo: "9876546", vesselType: "cargo", flag: "Singapore", yearBuilt: 2020, grossTonnage: "45000.00", status: "anchored" },
+    { fleetId: fleets[1].id, name: "MV Coral Breeze", imo: "9876547", vesselType: "container", flag: "Hong Kong", yearBuilt: 2022, grossTonnage: "92000.00", status: "at_sea" },
   ]).returning();
   console.log(`  ✓ ${vessels.length} vessels`);
 
   await db.insert(vesselsPositionsTable).values([
     { vesselId: vessels[0].id, latitude: "40.7128000", longitude: "-74.0060000", heading: "45.00", speed: "12.50", recordedAt: new Date() },
+    { vesselId: vessels[0].id, latitude: "39.9526000", longitude: "-70.1233000", heading: "48.00", speed: "13.20", recordedAt: new Date(Date.now() - 6 * 60 * 60 * 1000) },
     { vesselId: vessels[1].id, latitude: "1.3521000", longitude: "103.8198000", heading: "0.00", speed: "0.00", recordedAt: new Date() },
     { vesselId: vessels[2].id, latitude: "51.5074000", longitude: "-0.1278000", heading: "180.00", speed: "15.30", recordedAt: new Date() },
+    { vesselId: vessels[3].id, latitude: "25.2760000", longitude: "55.2962000", heading: "90.00", speed: "0.00", recordedAt: new Date() },
+    { vesselId: vessels[4].id, latitude: "35.6762000", longitude: "-45.3210000", heading: "270.00", speed: "14.80", recordedAt: new Date() },
   ]);
   console.log("  ✓ vessel positions");
 
   await db.insert(vesselsCargoTable).values([
     { vesselId: vessels[0].id, cargoType: "Electronics", quantity: "2500.00", unit: "TEU", origin: "Shanghai", destination: "New York", status: "in_transit" },
     { vesselId: vessels[2].id, cargoType: "Iron Ore", quantity: "45000.00", unit: "MT", origin: "Sydney", destination: "Rotterdam", status: "in_transit" },
+    { vesselId: vessels[3].id, cargoType: "Crude Oil", quantity: "80000.00", unit: "BBL", origin: "Dubai", destination: "Mumbai", status: "loading" },
+    { vesselId: vessels[4].id, cargoType: "Automobiles", quantity: "1200.00", unit: "TEU", origin: "Hamburg", destination: "Baltimore", status: "in_transit" },
   ]);
   console.log("  ✓ vessel cargo");
 
-  await db.insert(vesselsRoutesTable).values([
-    { vesselId: vessels[0].id, originPort: "Shanghai", destinationPort: "New York", departureAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), arrivalAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), status: "active" },
-    { vesselId: vessels[1].id, originPort: "Singapore", destinationPort: "Singapore", departureAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), status: "completed" },
-    { vesselId: vessels[2].id, originPort: "Sydney", destinationPort: "Rotterdam", departureAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), arrivalAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), status: "active" },
-  ]);
+  const routes = await db.insert(vesselsRoutesTable).values([
+    { vesselId: vessels[0].id, originPort: "Shanghai", destinationPort: "New York", departureAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), arrivalAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), distanceNm: "11500.00", waypoints: [{ lat: 35.0, lng: 139.0, name: "Tokyo Bay" }, { lat: 21.3, lng: -157.8, name: "Honolulu" }, { lat: 9.0, lng: -79.5, name: "Panama Canal" }], status: "active" },
+    { vesselId: vessels[1].id, originPort: "Singapore", destinationPort: "Singapore", departureAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), distanceNm: "0.00", status: "completed" },
+    { vesselId: vessels[2].id, originPort: "Sydney", destinationPort: "Rotterdam", departureAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000), arrivalAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), distanceNm: "12200.00", waypoints: [{ lat: -33.9, lng: 18.4, name: "Cape Town" }, { lat: 36.1, lng: -5.3, name: "Gibraltar" }], status: "active" },
+    { vesselId: vessels[4].id, originPort: "Hamburg", destinationPort: "Baltimore", departureAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), arrivalAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), distanceNm: "3800.00", status: "active" },
+  ]).returning();
   console.log("  ✓ vessel routes");
 
-  const campaigns = await db.insert(firestormCampaignsTable).values([
-    { name: "Q4 Product Launch", type: "multi_channel", status: "active", budget: "25000.00", spent: "12450.00", startDate: new Date(), endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) },
-    { name: "Holiday Email Blast", type: "email", status: "scheduled", budget: "5000.00", spent: "0.00" },
-    { name: "LinkedIn Thought Leadership", type: "social", status: "active", budget: "8000.00", spent: "3200.00" },
+  const alertRules = await db.insert(vesselsAlertRulesTable).values([
+    { name: "Speed Limit Violation", description: "Alert when vessel exceeds 18 knots in restricted zone", ruleType: "speed", conditions: { maxSpeed: 18, zone: "coastal" }, severity: "high" },
+    { name: "Weather Warning", description: "Alert for severe weather along route", ruleType: "weather", conditions: { windSpeed: 40, waveHeight: 4.0 }, severity: "critical" },
+    { name: "Geofence Breach", description: "Alert when vessel exits designated corridor", ruleType: "geofence", conditions: { corridorWidth: 50 }, severity: "medium" },
+    { name: "Schedule Delay", description: "Alert when ETA exceeds 12 hours past schedule", ruleType: "schedule", conditions: { delayHours: 12 }, severity: "medium" },
+    { name: "Maintenance Due", description: "Alert for upcoming maintenance schedule", ruleType: "maintenance", conditions: { daysBefore: 30 }, severity: "low" },
   ]).returning();
-  console.log(`  ✓ ${campaigns.length} campaigns`);
+  console.log(`  ✓ ${alertRules.length} alert rules`);
 
-  await db.insert(firestormLeadsTable).values([
-    { campaignId: campaigns[0].id, email: "lead1@techcorp.com", firstName: "Maria", lastName: "Santos", company: "TechCorp", score: 85, status: "qualified" },
-    { campaignId: campaigns[0].id, email: "lead2@innovate.io", firstName: "James", lastName: "Wilson", company: "Innovate.io", score: 62, status: "contacted" },
-    { campaignId: campaigns[2].id, email: "lead3@startup.co", firstName: "Emma", lastName: "Chen", company: "Startup Co", score: 91, status: "new" },
+  await db.insert(vesselsAlertsTable).values([
+    { ruleId: alertRules[1].id, vesselId: vessels[0].id, title: "Severe Weather Warning", message: "Storm system detected ahead on planned route. Wind speeds expected to reach 45 knots.", severity: "critical", status: "active", metadata: { windSpeed: 45, waveHeight: 5.2, location: "North Atlantic" } },
+    { ruleId: alertRules[0].id, vesselId: vessels[2].id, title: "Speed Limit Exceeded", message: "MV Northern Star recorded 19.2 knots in Strait of Gibraltar restricted zone.", severity: "high", status: "acknowledged", metadata: { recordedSpeed: 19.2, limit: 18 } },
+    { ruleId: alertRules[3].id, vesselId: vessels[4].id, title: "Schedule Deviation", message: "MV Coral Breeze is running 14 hours behind schedule due to port congestion.", severity: "medium", status: "active", metadata: { delayHours: 14, cause: "port congestion" } },
+    { ruleId: alertRules[2].id, vesselId: vessels[0].id, title: "Route Deviation Detected", message: "MV Atlantic Voyager deviated 12nm from planned corridor near Azores.", severity: "medium", status: "resolved", metadata: { deviationNm: 12 }, resolvedAt: new Date(Date.now() - 2 * 60 * 60 * 1000) },
   ]);
-  console.log("  ✓ leads");
+  console.log("  ✓ vessel alerts");
 
-  await db.insert(firestormAnalyticsTable).values([
-    { campaignId: campaigns[0].id, date: new Date(), impressions: 45000, clicks: 2250, conversions: 180, spend: "1200.00", revenue: "8500.00" },
-    { campaignId: campaigns[2].id, date: new Date(), impressions: 12000, clicks: 960, conversions: 48, spend: "400.00", revenue: "2100.00" },
+  await db.insert(vesselsWeatherSnapshotsTable).values([
+    { routeId: routes[0].id, location: "Mid-Atlantic", latitude: "38.5000000", longitude: "-55.0000000", temperature: "14.00", windSpeed: "35.00", windDirection: "NW", waveHeight: "3.50", visibility: "8.00", description: "Strong winds, moderate seas", riskLevel: "moderate" },
+    { routeId: routes[0].id, location: "North Atlantic Storm", latitude: "42.0000000", longitude: "-50.0000000", temperature: "8.00", windSpeed: "48.00", windDirection: "W", waveHeight: "5.50", visibility: "3.00", description: "Storm system with heavy seas", riskLevel: "severe" },
+    { routeId: routes[2].id, location: "Cape of Good Hope", latitude: "-34.3500000", longitude: "18.4700000", temperature: "20.00", windSpeed: "22.00", windDirection: "SE", waveHeight: "2.00", visibility: "15.00", description: "Fair conditions", riskLevel: "low" },
+    { routeId: routes[2].id, location: "Bay of Biscay", latitude: "45.0000000", longitude: "-5.0000000", temperature: "12.00", windSpeed: "30.00", windDirection: "SW", waveHeight: "3.00", visibility: "10.00", description: "Moderate winds", riskLevel: "moderate" },
+    { routeId: routes[3].id, location: "English Channel", latitude: "50.5000000", longitude: "-1.5000000", temperature: "10.00", windSpeed: "15.00", windDirection: "W", waveHeight: "1.20", visibility: "12.00", description: "Calm conditions", riskLevel: "low" },
   ]);
-  console.log("  ✓ campaign analytics");
+  console.log("  ✓ weather snapshots");
+
+  await db.insert(vesselsSimulationsTable).values([
+    { routeId: routes[0].id, vesselId: vessels[0].id, name: "Atlantic Route Risk Analysis", description: "Full route risk assessment for Shanghai-New York passage", simulationType: "route_risk", status: "completed", riskScore: "62.50", parameters: { includeWeather: true, includeTraffic: true }, results: { overallRisk: "62.50", weatherRisk: "35.00", routeRisk: "20.00", scheduleRisk: "7.50", recommendations: ["Consider southern route to avoid storm system", "Reduce speed in approach to Panama Canal"] }, startedAt: new Date(Date.now() - 24 * 60 * 60 * 1000), completedAt: new Date(Date.now() - 23 * 60 * 60 * 1000) },
+    { routeId: routes[2].id, vesselId: vessels[2].id, name: "Sydney-Rotterdam Weather Impact", description: "Weather impact analysis for bulk carrier route", simulationType: "weather_impact", status: "completed", riskScore: "38.00", parameters: { forecastDays: 14 }, results: { overallRisk: "38.00", weatherRisk: "22.00", routeRisk: "10.00", scheduleRisk: "6.00", recommendations: ["Current conditions favorable", "Monitor Bay of Biscay forecast updates"] }, startedAt: new Date(Date.now() - 12 * 60 * 60 * 1000), completedAt: new Date(Date.now() - 11 * 60 * 60 * 1000) },
+    { routeId: routes[3].id, vesselId: vessels[4].id, name: "Hamburg-Baltimore Fuel Optimization", simulationType: "fuel_optimization", status: "completed", riskScore: "28.00", parameters: { optimizeFor: "fuel" }, results: { overallRisk: "28.00", fuelSavings: "4.2%", recommendedSpeed: "13.5 knots" }, startedAt: new Date(Date.now() - 6 * 60 * 60 * 1000), completedAt: new Date(Date.now() - 5 * 60 * 60 * 1000) },
+  ]);
+  console.log("  ✓ vessel simulations");
+
+  const fsScenarios = await db.insert(firestormScenariosTable).values([
+    { name: "Phishing Campaign Simulation", description: "Controlled phishing email simulation to test employee awareness and response protocols", category: "social_engineering", severity: "high", complexity: "intermediate", attackVector: "Email", mitreTechnique: "T1566", expectedDuration: 48 },
+    { name: "Network Perimeter Assessment", description: "Simulated external network scan and penetration attempt against public-facing infrastructure", category: "network", severity: "critical", complexity: "advanced", attackVector: "Network", mitreTechnique: "T1595", expectedDuration: 72 },
+    { name: "Web Application Security Test", description: "OWASP Top 10 vulnerability assessment against web applications", category: "application", severity: "high", complexity: "intermediate", attackVector: "Web", mitreTechnique: "T1190", expectedDuration: 24 },
+    { name: "Insider Threat Simulation", description: "Controlled simulation of insider threat scenarios including data exfiltration attempts", category: "insider_threat", severity: "critical", complexity: "expert", attackVector: "Internal", mitreTechnique: "T1567", expectedDuration: 96 },
+    { name: "Cloud Infrastructure Review", description: "Assessment of cloud configuration security including IAM, networking, and storage", category: "cloud", severity: "medium", complexity: "intermediate", attackVector: "Cloud", mitreTechnique: "T1078", expectedDuration: 36 },
+    { name: "Supply Chain Risk Analysis", description: "Evaluation of third-party dependencies and supply chain attack surfaces", category: "supply_chain", severity: "high", complexity: "advanced", attackVector: "Supply Chain", mitreTechnique: "T1195", expectedDuration: 120 },
+    { name: "IoT Device Security Audit", description: "Security assessment of connected devices and IoT infrastructure", category: "iot", severity: "medium", complexity: "intermediate", attackVector: "Physical/Network", mitreTechnique: "T1200", expectedDuration: 48 },
+    { name: "Physical Security Walkthrough", description: "Controlled physical security assessment including access control and surveillance", category: "physical", severity: "low", complexity: "basic", attackVector: "Physical", expectedDuration: 8 },
+  ]).returning();
+  console.log(`  ✓ ${fsScenarios.length} firestorm scenarios`);
+
+  const fsAssessments = await db.insert(firestormAssessmentsTable).values([
+    { name: "Q1 2026 Penetration Test", description: "Comprehensive quarterly penetration test of production environment", assessmentType: "penetration_test", status: "completed", scope: "Production infrastructure and web applications", targetEnvironment: "Production", assessorName: "Stephen L.", startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), endDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000), overallRiskScore: "68.50", executiveSummary: "The assessment identified several areas requiring attention. Critical findings include unpatched systems and weak access controls. Immediate remediation recommended for critical and high severity findings." },
+    { name: "Red Team Exercise Alpha", description: "Full-scope red team exercise simulating advanced persistent threat", assessmentType: "red_team", status: "in_progress", scope: "Entire organization including physical and digital assets", targetEnvironment: "All", assessorName: "Alex Rivera", startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), overallRiskScore: "72.00" },
+    { name: "Cloud Security Assessment", description: "Focused assessment of AWS and Azure cloud infrastructure", assessmentType: "vulnerability_scan", status: "completed", scope: "Cloud infrastructure across AWS and Azure", targetEnvironment: "Cloud", assessorName: "Jordan Chen", startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), endDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), overallRiskScore: "45.00", executiveSummary: "Cloud infrastructure is generally well-configured. Minor findings related to over-permissive IAM roles and public S3 bucket policies." },
+    { name: "Tabletop Exercise: Ransomware", description: "Executive tabletop exercise simulating ransomware incident response", assessmentType: "tabletop", status: "draft", scope: "Executive team incident response capabilities", targetEnvironment: "N/A", assessorName: "Stephen L." },
+  ]).returning();
+  console.log(`  ✓ ${fsAssessments.length} firestorm assessments`);
+
+  const fsSimRuns = await db.insert(firestormSimulationRunsTable).values([
+    { assessmentId: fsAssessments[0].id, scenarioId: fsScenarios[1].id, name: "External Perimeter Scan", status: "completed", mode: "controlled", durationSeconds: 3600, parameters: { ports: "1-65535", protocols: ["tcp", "udp"] }, results: { vulnerabilitiesFound: 7, criticalFindings: 1, highFindings: 3, mediumFindings: 3, controlsValidated: 12, overallScore: "65.00" }, startedAt: new Date(Date.now() - 29 * 24 * 60 * 60 * 1000), completedAt: new Date(Date.now() - 29 * 24 * 60 * 60 * 1000 + 3600000) },
+    { assessmentId: fsAssessments[0].id, scenarioId: fsScenarios[2].id, name: "Web App OWASP Scan", status: "completed", mode: "demo", durationSeconds: 1800, parameters: { targetUrls: ["app.example.com"] }, results: { vulnerabilitiesFound: 4, criticalFindings: 0, highFindings: 2, mediumFindings: 2, controlsValidated: 8, overallScore: "72.00" }, startedAt: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000), completedAt: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000 + 1800000) },
+    { assessmentId: fsAssessments[1].id, scenarioId: fsScenarios[0].id, name: "Phishing Test Wave 1", status: "completed", mode: "controlled", durationSeconds: 7200, parameters: { targets: 50, emailTemplate: "standard" }, results: { vulnerabilitiesFound: 12, criticalFindings: 2, highFindings: 4, mediumFindings: 6, controlsValidated: 5, overallScore: "55.00", clickRate: "24%", reportRate: "38%" }, startedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), completedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000 + 7200000) },
+    { assessmentId: fsAssessments[1].id, scenarioId: fsScenarios[3].id, name: "Insider Threat Sim", status: "running", mode: "demo", startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+  ]).returning();
+  console.log(`  ✓ ${fsSimRuns.length} firestorm simulation runs`);
+
+  await db.insert(firestormFindingsTable).values([
+    { assessmentId: fsAssessments[0].id, simulationRunId: fsSimRuns[0].id, title: "Unpatched Apache Server", description: "Apache HTTP Server version 2.4.49 with known path traversal vulnerability (CVE-2021-41773)", severity: "critical", status: "confirmed", category: "Vulnerability", affectedAsset: "web-server-01.prod", impact: "Remote code execution possible through path traversal", recommendation: "Immediately upgrade Apache to latest stable version. Apply WAF rules as interim mitigation.", cvssScore: "9.80" },
+    { assessmentId: fsAssessments[0].id, simulationRunId: fsSimRuns[0].id, title: "Weak SSH Configuration", description: "SSH server allows password-based authentication and outdated key exchange algorithms", severity: "high", status: "mitigated", category: "Configuration", affectedAsset: "bastion-01.prod", impact: "Potential brute-force attacks and downgrade attacks", recommendation: "Enforce key-based authentication only. Disable weak ciphers and key exchange algorithms.", cvssScore: "7.50" },
+    { assessmentId: fsAssessments[0].id, simulationRunId: fsSimRuns[1].id, title: "Cross-Site Scripting (Reflected)", description: "Reflected XSS vulnerability in search parameter of main application", severity: "high", status: "open", category: "Web Application", affectedAsset: "app.example.com/search", impact: "Session hijacking, credential theft via crafted URLs", recommendation: "Implement proper input sanitization and Content Security Policy headers.", cvssScore: "6.10" },
+    { assessmentId: fsAssessments[0].id, simulationRunId: fsSimRuns[1].id, title: "Missing Security Headers", description: "Application missing X-Content-Type-Options, X-Frame-Options, and Strict-Transport-Security headers", severity: "medium", status: "open", category: "Configuration", affectedAsset: "app.example.com", impact: "Increased risk of clickjacking and MIME type confusion attacks", recommendation: "Configure appropriate security headers in web server and application responses.", cvssScore: "4.30" },
+    { assessmentId: fsAssessments[1].id, simulationRunId: fsSimRuns[2].id, title: "High Phishing Susceptibility", description: "24% of targeted employees clicked phishing links. 8% entered credentials on fake login page.", severity: "high", status: "confirmed", category: "Human Factor", affectedAsset: "Organization-wide", impact: "Significant credential compromise risk across organization", recommendation: "Implement mandatory security awareness training. Deploy additional email filtering controls.", cvssScore: "7.00" },
+    { assessmentId: fsAssessments[1].id, simulationRunId: fsSimRuns[2].id, title: "Low Incident Reporting Rate", description: "Only 38% of employees reported the phishing email to the security team", severity: "medium", status: "open", category: "Process", affectedAsset: "Security Operations", impact: "Delayed incident detection and response", recommendation: "Simplify phishing reporting process. Add one-click report button to email client.", cvssScore: "5.00" },
+    { assessmentId: fsAssessments[2].id, title: "Over-Permissive IAM Roles", description: "3 IAM roles with AdministratorAccess policy attached to service accounts", severity: "high", status: "confirmed", category: "Access Control", affectedAsset: "AWS IAM", impact: "Privilege escalation and lateral movement risk", recommendation: "Apply principle of least privilege. Create specific policies per service account.", cvssScore: "8.00" },
+    { assessmentId: fsAssessments[2].id, title: "Public S3 Bucket", description: "S3 bucket 'company-backups' has public read access enabled", severity: "critical", status: "mitigated", category: "Data Exposure", affectedAsset: "s3://company-backups", impact: "Potential exposure of sensitive backup data", recommendation: "Remove public access. Enable S3 Block Public Access at account level.", cvssScore: "9.10" },
+  ]);
+  console.log("  ✓ firestorm findings");
+
+  await db.insert(firestormRiskScoresTable).values([
+    { assessmentId: fsAssessments[0].id, category: "Network Security", likelihood: 4, impact: 5, currentScore: "80.00", residualScore: "45.00", trend: "improving", notes: "Significant improvement after patching campaign" },
+    { assessmentId: fsAssessments[0].id, category: "Application Security", likelihood: 3, impact: 4, currentScore: "60.00", residualScore: "35.00", trend: "stable", notes: "Web application vulnerabilities being addressed" },
+    { assessmentId: fsAssessments[0].id, category: "Access Control", likelihood: 3, impact: 5, currentScore: "75.00", residualScore: "40.00", trend: "improving" },
+    { assessmentId: fsAssessments[0].id, category: "Data Protection", likelihood: 2, impact: 5, currentScore: "50.00", residualScore: "30.00", trend: "stable" },
+    { assessmentId: fsAssessments[1].id, category: "Human Factor", likelihood: 4, impact: 4, currentScore: "64.00", residualScore: "40.00", trend: "degrading", notes: "Phishing susceptibility higher than expected" },
+    { assessmentId: fsAssessments[1].id, category: "Incident Response", likelihood: 3, impact: 4, currentScore: "48.00", residualScore: "28.00", trend: "stable" },
+    { assessmentId: fsAssessments[2].id, category: "Cloud Security", likelihood: 3, impact: 4, currentScore: "48.00", residualScore: "25.00", trend: "improving", notes: "Cloud posture improving with automated remediation" },
+    { assessmentId: fsAssessments[2].id, category: "Identity & Access", likelihood: 4, impact: 5, currentScore: "80.00", residualScore: "50.00", trend: "degrading", notes: "IAM role sprawl needs attention" },
+  ]);
+  console.log("  ✓ firestorm risk scores");
 
   const products = await db.insert(lyteProductsTable).values([
     { name: "Premium Wireless Headphones", sku: "LYTE-WH-001", description: "Noise-canceling over-ear headphones", category: "Electronics", price: "29900", stockQuantity: 150, isActive: true },
