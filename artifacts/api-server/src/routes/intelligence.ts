@@ -578,15 +578,20 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
     const sid = sessionId || crypto.randomUUID();
 
     if (messages && Array.isArray(messages)) {
-      const lastUserMsg = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user");
       const systemMsg = messages.find((m: { role: string }) => m.role === "system");
-      if (lastUserMsg) {
-        const hfResult = await services.huggingface.chat(sid, lastUserMsg.content, {
-          systemPrompt: systemMsg?.content,
-          maxTokens,
-          ownerId,
-        });
-        sendSuccess(res, { content: hfResult.reply, model: hfResult.model, provider: "huggingface", tier: hfResult.tier, usage: { promptTokens: 0, completionTokens: 0 } });
+      const conversationMsgs = messages.filter((m: { role: string }) => m.role !== "system");
+      let lastResult: any = null;
+      for (const msg of conversationMsgs) {
+        if (msg.role === "user") {
+          lastResult = await services.huggingface.chat(sid, msg.content, {
+            systemPrompt: systemMsg?.content,
+            maxTokens,
+            ownerId,
+          });
+        }
+      }
+      if (lastResult) {
+        sendSuccess(res, { content: lastResult.reply, model: lastResult.model, provider: "huggingface", tier: lastResult.tier, sessionId: sid, usage: { promptTokens: 0, completionTokens: 0 } });
       } else {
         const result = await services.ai.chatCompletion(messages, { maxTokens });
         sendSuccess(res, result);

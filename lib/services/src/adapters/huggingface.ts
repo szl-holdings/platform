@@ -1055,14 +1055,16 @@ export class HuggingFaceAdapter extends ServiceAdapter {
   getChatHistory(sessionId: string, requesterId?: string): HFChatMessage[] {
     const session = this._chatSessions.get(sessionId);
     if (!session) return [];
-    if (session.ownerId && requesterId && session.ownerId !== requesterId) return [];
+    if (!session.ownerId) return [];
+    if (!requesterId || session.ownerId !== requesterId) return [];
     return [...session.messages];
   }
 
   clearChatSession(sessionId: string, requesterId?: string): boolean {
     const session = this._chatSessions.get(sessionId);
     if (!session) return false;
-    if (session.ownerId && requesterId && session.ownerId !== requesterId) return false;
+    if (!session.ownerId) return false;
+    if (!requesterId || session.ownerId !== requesterId) return false;
     return this._chatSessions.delete(sessionId);
   }
 
@@ -1109,8 +1111,31 @@ export class HuggingFaceAdapter extends ServiceAdapter {
           const reader = response.body?.getReader();
           if (!reader) throw new Error("No response body reader");
 
+          const contentType = response.headers.get("content-type") || "";
+          const isSSE = contentType.includes("text/event-stream");
+
+          if (!isSSE) {
+            const text = await response.text();
+            try {
+              const parsed = JSON.parse(text);
+              const generated = Array.isArray(parsed)
+                ? (parsed[0]?.generated_text ?? "")
+                : (parsed.generated_text ?? String(parsed));
+              if (generated) {
+                const words = generated.split(" ");
+                for (const word of words) {
+                  yield word + " ";
+                }
+              }
+            } catch {
+              if (text) yield text;
+            }
+            return;
+          }
+
           const decoder = new TextDecoder();
           let buffer = "";
+          let emittedTokens = false;
 
           while (true) {
             const { done, value } = await reader.read();
@@ -1127,10 +1152,32 @@ export class HuggingFaceAdapter extends ServiceAdapter {
                 try {
                   const parsed = JSON.parse(trimmed.slice(6));
                   const token = parsed.token?.text ?? parsed.generated_text ?? "";
-                  if (token) yield token;
+                  if (token) { yield token; emittedTokens = true; }
                 } catch {
-                  if (trimmed.length > 6) yield trimmed.slice(6);
+                  if (trimmed.length > 6) { yield trimmed.slice(6); emittedTokens = true; }
                 }
+              }
+            }
+          }
+
+          if (buffer.trim()) {
+            const trimmed = buffer.trim();
+            if (trimmed.startsWith("data: ") && trimmed.length > 6) {
+              try {
+                const parsed = JSON.parse(trimmed.slice(6));
+                const token = parsed.token?.text ?? parsed.generated_text ?? "";
+                if (token) { yield token; emittedTokens = true; }
+              } catch {
+                yield trimmed.slice(6);
+                emittedTokens = true;
+              }
+            } else if (!emittedTokens) {
+              try {
+                const parsed = JSON.parse(trimmed);
+                const text = Array.isArray(parsed) ? (parsed[0]?.generated_text ?? "") : (parsed.generated_text ?? "");
+                if (text) yield text;
+              } catch {
+                yield trimmed;
               }
             }
           }
