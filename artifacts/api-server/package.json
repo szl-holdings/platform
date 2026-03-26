@@ -11,14 +11,16 @@
   },
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
+    "@workspace/auth": "workspace:*",
     "@workspace/config": "workspace:*",
     "@workspace/db": "workspace:*",
-    "@workspace/auth": "workspace:*",
     "@workspace/services": "workspace:*",
     "cookie-parser": "^1.4.7",
     "cors": "^2",
     "drizzle-orm": "catalog:",
     "express": "^5",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
     "pino": "^9",
     "pino-http": "^10"
   },

@@ -20,6 +20,12 @@ const CATEGORY_COLORS: Record<string, string> = {
   Other: "text-gray-400 bg-gray-500/10 border-gray-500/30",
 };
 
+const STATUS_BORDER: Record<string, string> = {
+  LIVE_CONFIGURED: "border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-emerald-500/5",
+  MOCKED_DEMO_MODE: "border-amber-500/20 hover:border-amber-500/40 hover:shadow-amber-500/5",
+  MANUAL_REQUIRED: "border-red-500/20 hover:border-red-500/40 hover:shadow-red-500/5",
+};
+
 function StatusIcon({ status }: { status: string }) {
   if (status === "LIVE_CONFIGURED") return <Wifi className="w-4 h-4 text-emerald-400" />;
   if (status === "MOCKED_DEMO_MODE") return <Server className="w-4 h-4 text-amber-400" />;
@@ -32,10 +38,34 @@ function statusLabel(status: string) {
   return "Not Configured";
 }
 
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="h-7 w-32 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-52 bg-muted/60 rounded animate-pulse mt-2" />
+        </div>
+        <div className="flex gap-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-7 w-16 bg-muted rounded-md animate-pulse" />
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-border bg-card p-5 h-44 animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ConnectorsPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [testingConnector, setTestingConnector] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -58,23 +88,18 @@ export default function ConnectorsPage() {
     },
   });
 
-  if (isLoading || !data) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading || !data) return <LoadingSkeleton />;
 
   const categories = Array.from(new Set(data.connectors.map((c) => c.category)));
   const filtered = data.connectors.filter((c) => {
     if (search && !c.name.toLowerCase().includes(search.toLowerCase()) && !c.description.toLowerCase().includes(search.toLowerCase())) return false;
     if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
+    if (statusFilter !== "all" && c.status !== statusFilter) return false;
     return true;
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Connectors</h1>
@@ -87,7 +112,7 @@ export default function ConnectorsPage() {
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -95,7 +120,7 @@ export default function ConnectorsPage() {
             placeholder="Search connectors..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-md border border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-border bg-muted/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
         </div>
         <div className="relative">
@@ -103,28 +128,48 @@ export default function ConnectorsPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="pl-9 pr-8 py-2 text-sm rounded-md border border-border bg-muted/40 text-foreground focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+            className="pl-9 pr-8 py-2 text-sm rounded-lg border border-border bg-muted/40 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer transition-all"
           >
             <option value="all">All Categories</option>
             {categories.sort().map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 text-sm rounded-lg border border-border bg-muted/40 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer transition-all"
+        >
+          <option value="all">All Status</option>
+          <option value="LIVE_CONFIGURED">Live</option>
+          <option value="MOCKED_DEMO_MODE">Demo</option>
+          <option value="MANUAL_REQUIRED">Not Configured</option>
+        </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map((connector) => (
-          <ConnectorCard
-            key={connector.name}
-            connector={connector}
-            isTesting={testingConnector === connector.name}
-            onTest={() => {
-              setTestingConnector(connector.name);
-              testMutation.mutate(connector.name);
-            }}
-            onSync={() => syncMutation.mutate(connector.name)}
-          />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+            <Wifi className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-sm font-medium mb-1">No connectors found</h3>
+          <p className="text-xs text-muted-foreground">Try adjusting your search or filters.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map((connector) => (
+            <ConnectorCard
+              key={connector.name}
+              connector={connector}
+              isTesting={testingConnector === connector.name}
+              onTest={() => {
+                setTestingConnector(connector.name);
+                testMutation.mutate(connector.name);
+              }}
+              onSync={() => syncMutation.mutate(connector.name)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -141,15 +186,21 @@ function ConnectorCard({
   onSync: () => void;
 }) {
   const catStyle = CATEGORY_COLORS[connector.category] ?? CATEGORY_COLORS["Other"];
+  const borderStyle = STATUS_BORDER[connector.status] ?? "";
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/20 transition-colors">
+    <div className={`rounded-xl border bg-card p-5 transition-all hover:shadow-lg group ${borderStyle}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <StatusIcon status={connector.status} />
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+            connector.status === "LIVE_CONFIGURED" ? "bg-emerald-500/10" :
+            connector.status === "MOCKED_DEMO_MODE" ? "bg-amber-500/10" : "bg-red-500/10"
+          }`}>
+            <StatusIcon status={connector.status} />
+          </div>
           <span className="text-sm font-medium">{connector.name}</span>
         </div>
-        <span className={`text-xs px-2 py-0.5 rounded-full border ${catStyle}`}>
+        <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${catStyle}`}>
           {connector.category}
         </span>
       </div>
@@ -157,21 +208,30 @@ function ConnectorCard({
       <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{connector.description}</p>
 
       <div className="flex items-center justify-between mb-3">
-        <span className={`text-xs font-medium ${
-          connector.status === "LIVE_CONFIGURED" ? "text-emerald-400"
-            : connector.status === "MOCKED_DEMO_MODE" ? "text-amber-400"
-            : "text-red-400"
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ${
+          connector.status === "LIVE_CONFIGURED" ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/30"
+            : connector.status === "MOCKED_DEMO_MODE" ? "text-amber-400 bg-amber-500/10 border border-amber-500/30"
+            : "text-red-400 bg-red-500/10 border border-red-500/30"
         }`}>
+          <span className="relative">
+            <span className={`block w-1.5 h-1.5 rounded-full ${
+              connector.status === "LIVE_CONFIGURED" ? "bg-emerald-400" :
+              connector.status === "MOCKED_DEMO_MODE" ? "bg-amber-400" : "bg-red-400"
+            }`} />
+            {connector.status === "LIVE_CONFIGURED" && (
+              <span className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping opacity-40" />
+            )}
+          </span>
           {statusLabel(connector.status)}
         </span>
         {connector.missingEnvVars.length > 0 && (
-          <span className="text-xs text-muted-foreground">{connector.missingEnvVars.length} missing</span>
+          <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{connector.missingEnvVars.length} missing</span>
         )}
       </div>
 
       {connector.missingEnvVars.length > 0 && (
-        <div className="mb-3 p-2 rounded bg-muted/40 border border-border/50">
-          <div className="text-xs text-muted-foreground mb-1">Missing env vars:</div>
+        <div className="mb-3 p-2.5 rounded-lg bg-red-500/5 border border-red-500/10">
+          <div className="text-xs text-muted-foreground mb-1.5 font-medium">Missing env vars:</div>
           <div className="flex flex-wrap gap-1">
             {connector.missingEnvVars.map((v) => (
               <code key={v} className="text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-mono">{v}</code>
@@ -184,14 +244,14 @@ function ConnectorCard({
         <button
           onClick={onTest}
           disabled={isTesting}
-          className="flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 px-3 rounded-md border border-border bg-muted/40 hover:bg-muted transition-colors disabled:opacity-50"
+          className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 px-3 rounded-lg border border-border bg-muted/40 hover:bg-muted transition-all disabled:opacity-50"
         >
           {isTesting ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
           Test
         </button>
         <button
           onClick={onSync}
-          className="flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 px-3 rounded-md border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 px-3 rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-all"
         >
           <RefreshCw className="w-3 h-3" />
           Sync
@@ -203,7 +263,7 @@ function ConnectorCard({
 
 function SummaryBadge({ label, count, color }: { label: string; count: number; color: string }) {
   return (
-    <span className={`text-xs px-2.5 py-1 rounded-md ${color}`}>
+    <span className={`text-xs font-medium px-2.5 py-1 rounded-md ${color}`}>
       {count} {label}
     </span>
   );
