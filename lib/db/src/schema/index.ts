@@ -12,6 +12,7 @@ export * from "./health_checks";
 export * from "./webhook_events";
 export * from "./apps_registry";
 export * from "./stephen_site";
+export * from "./stephen";
 export * from "./vessels";
 export * from "./firestorm";
 export * from "./lyte";

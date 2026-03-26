@@ -27,7 +27,10 @@ import type {
   CreateFeatureFlag,
   CreateNotification,
   CreateProject,
+  CreateStephenBookingRequest,
   CreateStephenContact,
+  CreateStephenContentBlock,
+  CreateStephenPortfolioCaseStudy,
   DreamscapeProject,
   FeatureFlag,
   FileRecord,
@@ -39,6 +42,7 @@ import type {
   Invoice,
   ListFirestormAnalyticsParams,
   ListNotificationsParams,
+  ListStephenContentBlocksParams,
   Login201,
   LoginBody,
   LyteOrder,
@@ -48,13 +52,20 @@ import type {
   ReadinessAssessment,
   Role,
   SessionToken,
+  StephenBookingRequest,
   StephenCaseStudy,
   StephenContact,
+  StephenContentBlock,
+  StephenEcosystemStatus,
+  StephenPortfolioCaseStudy,
+  StephenProfile,
   StephenTestimonial,
   Subscription,
   UpdateConnector,
   UpdateFeatureFlag,
   UpdateProject,
+  UpdateStephenContentBlock,
+  UpdateStephenPortfolioCaseStudy,
   UserSummary,
   Vessel,
 } from "./api.schemas";
@@ -3094,6 +3105,1137 @@ export function useListStephenCaseStudies<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListStephenCaseStudiesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get Stephen's profile data
+ */
+export const getGetStephenProfileUrl = () => {
+  return `/api/stephen/profile`;
+};
+
+export const getStephenProfile = async (
+  options?: RequestInit,
+): Promise<StephenProfile> => {
+  return customFetch<StephenProfile>(getGetStephenProfileUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStephenProfileQueryKey = () => {
+  return [`/api/stephen/profile`] as const;
+};
+
+export const getGetStephenProfileQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStephenProfile>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getStephenProfile>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetStephenProfileQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStephenProfile>>
+  > = ({ signal }) => getStephenProfile({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStephenProfile>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStephenProfileQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStephenProfile>>
+>;
+export type GetStephenProfileQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get Stephen's profile data
+ */
+
+export function useGetStephenProfile<
+  TData = Awaited<ReturnType<typeof getStephenProfile>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getStephenProfile>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStephenProfileQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List all content blocks
+ */
+export const getListStephenContentBlocksUrl = (
+  params?: ListStephenContentBlocksParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/stephen/content-blocks?${stringifiedParams}`
+    : `/api/stephen/content-blocks`;
+};
+
+export const listStephenContentBlocks = async (
+  params?: ListStephenContentBlocksParams,
+  options?: RequestInit,
+): Promise<StephenContentBlock[]> => {
+  return customFetch<StephenContentBlock[]>(
+    getListStephenContentBlocksUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListStephenContentBlocksQueryKey = (
+  params?: ListStephenContentBlocksParams,
+) => {
+  return [`/api/stephen/content-blocks`, ...(params ? [params] : [])] as const;
+};
+
+export const getListStephenContentBlocksQueryOptions = <
+  TData = Awaited<ReturnType<typeof listStephenContentBlocks>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListStephenContentBlocksParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listStephenContentBlocks>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListStephenContentBlocksQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listStephenContentBlocks>>
+  > = ({ signal }) =>
+    listStephenContentBlocks(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listStephenContentBlocks>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListStephenContentBlocksQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listStephenContentBlocks>>
+>;
+export type ListStephenContentBlocksQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all content blocks
+ */
+
+export function useListStephenContentBlocks<
+  TData = Awaited<ReturnType<typeof listStephenContentBlocks>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListStephenContentBlocksParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listStephenContentBlocks>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListStephenContentBlocksQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a content block
+ */
+export const getCreateStephenContentBlockUrl = () => {
+  return `/api/stephen/content-blocks`;
+};
+
+export const createStephenContentBlock = async (
+  createStephenContentBlock: CreateStephenContentBlock,
+  options?: RequestInit,
+): Promise<StephenContentBlock> => {
+  return customFetch<StephenContentBlock>(getCreateStephenContentBlockUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createStephenContentBlock),
+  });
+};
+
+export const getCreateStephenContentBlockMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createStephenContentBlock>>,
+    TError,
+    { data: BodyType<CreateStephenContentBlock> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createStephenContentBlock>>,
+  TError,
+  { data: BodyType<CreateStephenContentBlock> },
+  TContext
+> => {
+  const mutationKey = ["createStephenContentBlock"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createStephenContentBlock>>,
+    { data: BodyType<CreateStephenContentBlock> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createStephenContentBlock(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateStephenContentBlockMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createStephenContentBlock>>
+>;
+export type CreateStephenContentBlockMutationBody =
+  BodyType<CreateStephenContentBlock>;
+export type CreateStephenContentBlockMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a content block
+ */
+export const useCreateStephenContentBlock = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createStephenContentBlock>>,
+    TError,
+    { data: BodyType<CreateStephenContentBlock> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createStephenContentBlock>>,
+  TError,
+  { data: BodyType<CreateStephenContentBlock> },
+  TContext
+> => {
+  return useMutation(getCreateStephenContentBlockMutationOptions(options));
+};
+
+/**
+ * @summary Update a content block
+ */
+export const getUpdateStephenContentBlockUrl = (id: number) => {
+  return `/api/stephen/content-blocks/${id}`;
+};
+
+export const updateStephenContentBlock = async (
+  id: number,
+  updateStephenContentBlock: UpdateStephenContentBlock,
+  options?: RequestInit,
+): Promise<StephenContentBlock> => {
+  return customFetch<StephenContentBlock>(getUpdateStephenContentBlockUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateStephenContentBlock),
+  });
+};
+
+export const getUpdateStephenContentBlockMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateStephenContentBlock>>,
+    TError,
+    { id: number; data: BodyType<UpdateStephenContentBlock> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateStephenContentBlock>>,
+  TError,
+  { id: number; data: BodyType<UpdateStephenContentBlock> },
+  TContext
+> => {
+  const mutationKey = ["updateStephenContentBlock"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateStephenContentBlock>>,
+    { id: number; data: BodyType<UpdateStephenContentBlock> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateStephenContentBlock(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateStephenContentBlockMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateStephenContentBlock>>
+>;
+export type UpdateStephenContentBlockMutationBody =
+  BodyType<UpdateStephenContentBlock>;
+export type UpdateStephenContentBlockMutationError = ErrorType<void>;
+
+/**
+ * @summary Update a content block
+ */
+export const useUpdateStephenContentBlock = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateStephenContentBlock>>,
+    TError,
+    { id: number; data: BodyType<UpdateStephenContentBlock> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateStephenContentBlock>>,
+  TError,
+  { id: number; data: BodyType<UpdateStephenContentBlock> },
+  TContext
+> => {
+  return useMutation(getUpdateStephenContentBlockMutationOptions(options));
+};
+
+/**
+ * @summary Delete a content block
+ */
+export const getDeleteStephenContentBlockUrl = (id: number) => {
+  return `/api/stephen/content-blocks/${id}`;
+};
+
+export const deleteStephenContentBlock = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteStephenContentBlockUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteStephenContentBlockMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteStephenContentBlock>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteStephenContentBlock>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteStephenContentBlock"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteStephenContentBlock>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteStephenContentBlock(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteStephenContentBlockMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteStephenContentBlock>>
+>;
+
+export type DeleteStephenContentBlockMutationError = ErrorType<void>;
+
+/**
+ * @summary Delete a content block
+ */
+export const useDeleteStephenContentBlock = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteStephenContentBlock>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteStephenContentBlock>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteStephenContentBlockMutationOptions(options));
+};
+
+/**
+ * @summary List portfolio case studies
+ */
+export const getListStephenPortfolioCaseStudiesUrl = () => {
+  return `/api/stephen/portfolio-case-studies`;
+};
+
+export const listStephenPortfolioCaseStudies = async (
+  options?: RequestInit,
+): Promise<StephenPortfolioCaseStudy[]> => {
+  return customFetch<StephenPortfolioCaseStudy[]>(
+    getListStephenPortfolioCaseStudiesUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListStephenPortfolioCaseStudiesQueryKey = () => {
+  return [`/api/stephen/portfolio-case-studies`] as const;
+};
+
+export const getListStephenPortfolioCaseStudiesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListStephenPortfolioCaseStudiesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>
+  > = ({ signal }) =>
+    listStephenPortfolioCaseStudies({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListStephenPortfolioCaseStudiesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>
+>;
+export type ListStephenPortfolioCaseStudiesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List portfolio case studies
+ */
+
+export function useListStephenPortfolioCaseStudies<
+  TData = Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStephenPortfolioCaseStudies>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListStephenPortfolioCaseStudiesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a portfolio case study
+ */
+export const getCreateStephenPortfolioCaseStudyUrl = () => {
+  return `/api/stephen/portfolio-case-studies`;
+};
+
+export const createStephenPortfolioCaseStudy = async (
+  createStephenPortfolioCaseStudy: CreateStephenPortfolioCaseStudy,
+  options?: RequestInit,
+): Promise<StephenPortfolioCaseStudy> => {
+  return customFetch<StephenPortfolioCaseStudy>(
+    getCreateStephenPortfolioCaseStudyUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createStephenPortfolioCaseStudy),
+    },
+  );
+};
+
+export const getCreateStephenPortfolioCaseStudyMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createStephenPortfolioCaseStudy>>,
+    TError,
+    { data: BodyType<CreateStephenPortfolioCaseStudy> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createStephenPortfolioCaseStudy>>,
+  TError,
+  { data: BodyType<CreateStephenPortfolioCaseStudy> },
+  TContext
+> => {
+  const mutationKey = ["createStephenPortfolioCaseStudy"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createStephenPortfolioCaseStudy>>,
+    { data: BodyType<CreateStephenPortfolioCaseStudy> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createStephenPortfolioCaseStudy(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateStephenPortfolioCaseStudyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createStephenPortfolioCaseStudy>>
+>;
+export type CreateStephenPortfolioCaseStudyMutationBody =
+  BodyType<CreateStephenPortfolioCaseStudy>;
+export type CreateStephenPortfolioCaseStudyMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a portfolio case study
+ */
+export const useCreateStephenPortfolioCaseStudy = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createStephenPortfolioCaseStudy>>,
+    TError,
+    { data: BodyType<CreateStephenPortfolioCaseStudy> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createStephenPortfolioCaseStudy>>,
+  TError,
+  { data: BodyType<CreateStephenPortfolioCaseStudy> },
+  TContext
+> => {
+  return useMutation(
+    getCreateStephenPortfolioCaseStudyMutationOptions(options),
+  );
+};
+
+/**
+ * @summary Get a portfolio case study by slug
+ */
+export const getGetStephenPortfolioCaseStudyUrl = (slug: string) => {
+  return `/api/stephen/portfolio-case-studies/${slug}`;
+};
+
+export const getStephenPortfolioCaseStudy = async (
+  slug: string,
+  options?: RequestInit,
+): Promise<StephenPortfolioCaseStudy> => {
+  return customFetch<StephenPortfolioCaseStudy>(
+    getGetStephenPortfolioCaseStudyUrl(slug),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetStephenPortfolioCaseStudyQueryKey = (slug: string) => {
+  return [`/api/stephen/portfolio-case-studies/${slug}`] as const;
+};
+
+export const getGetStephenPortfolioCaseStudyQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStephenPortfolioCaseStudy>>,
+  TError = ErrorType<void>,
+>(
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStephenPortfolioCaseStudy>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetStephenPortfolioCaseStudyQueryKey(slug);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStephenPortfolioCaseStudy>>
+  > = ({ signal }) =>
+    getStephenPortfolioCaseStudy(slug, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!slug,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStephenPortfolioCaseStudy>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStephenPortfolioCaseStudyQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStephenPortfolioCaseStudy>>
+>;
+export type GetStephenPortfolioCaseStudyQueryError = ErrorType<void>;
+
+/**
+ * @summary Get a portfolio case study by slug
+ */
+
+export function useGetStephenPortfolioCaseStudy<
+  TData = Awaited<ReturnType<typeof getStephenPortfolioCaseStudy>>,
+  TError = ErrorType<void>,
+>(
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStephenPortfolioCaseStudy>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStephenPortfolioCaseStudyQueryOptions(
+    slug,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update a portfolio case study
+ */
+export const getUpdateStephenPortfolioCaseStudyUrl = (slug: string) => {
+  return `/api/stephen/portfolio-case-studies/${slug}`;
+};
+
+export const updateStephenPortfolioCaseStudy = async (
+  slug: string,
+  updateStephenPortfolioCaseStudy: UpdateStephenPortfolioCaseStudy,
+  options?: RequestInit,
+): Promise<StephenPortfolioCaseStudy> => {
+  return customFetch<StephenPortfolioCaseStudy>(
+    getUpdateStephenPortfolioCaseStudyUrl(slug),
+    {
+      ...options,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(updateStephenPortfolioCaseStudy),
+    },
+  );
+};
+
+export const getUpdateStephenPortfolioCaseStudyMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateStephenPortfolioCaseStudy>>,
+    TError,
+    { slug: string; data: BodyType<UpdateStephenPortfolioCaseStudy> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateStephenPortfolioCaseStudy>>,
+  TError,
+  { slug: string; data: BodyType<UpdateStephenPortfolioCaseStudy> },
+  TContext
+> => {
+  const mutationKey = ["updateStephenPortfolioCaseStudy"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateStephenPortfolioCaseStudy>>,
+    { slug: string; data: BodyType<UpdateStephenPortfolioCaseStudy> }
+  > = (props) => {
+    const { slug, data } = props ?? {};
+
+    return updateStephenPortfolioCaseStudy(slug, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateStephenPortfolioCaseStudyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateStephenPortfolioCaseStudy>>
+>;
+export type UpdateStephenPortfolioCaseStudyMutationBody =
+  BodyType<UpdateStephenPortfolioCaseStudy>;
+export type UpdateStephenPortfolioCaseStudyMutationError = ErrorType<void>;
+
+/**
+ * @summary Update a portfolio case study
+ */
+export const useUpdateStephenPortfolioCaseStudy = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateStephenPortfolioCaseStudy>>,
+    TError,
+    { slug: string; data: BodyType<UpdateStephenPortfolioCaseStudy> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateStephenPortfolioCaseStudy>>,
+  TError,
+  { slug: string; data: BodyType<UpdateStephenPortfolioCaseStudy> },
+  TContext
+> => {
+  return useMutation(
+    getUpdateStephenPortfolioCaseStudyMutationOptions(options),
+  );
+};
+
+/**
+ * @summary Delete a portfolio case study
+ */
+export const getDeleteStephenPortfolioCaseStudyUrl = (slug: string) => {
+  return `/api/stephen/portfolio-case-studies/${slug}`;
+};
+
+export const deleteStephenPortfolioCaseStudy = async (
+  slug: string,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteStephenPortfolioCaseStudyUrl(slug), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteStephenPortfolioCaseStudyMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteStephenPortfolioCaseStudy>>,
+    TError,
+    { slug: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteStephenPortfolioCaseStudy>>,
+  TError,
+  { slug: string },
+  TContext
+> => {
+  const mutationKey = ["deleteStephenPortfolioCaseStudy"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteStephenPortfolioCaseStudy>>,
+    { slug: string }
+  > = (props) => {
+    const { slug } = props ?? {};
+
+    return deleteStephenPortfolioCaseStudy(slug, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteStephenPortfolioCaseStudyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteStephenPortfolioCaseStudy>>
+>;
+
+export type DeleteStephenPortfolioCaseStudyMutationError = ErrorType<void>;
+
+/**
+ * @summary Delete a portfolio case study
+ */
+export const useDeleteStephenPortfolioCaseStudy = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteStephenPortfolioCaseStudy>>,
+    TError,
+    { slug: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteStephenPortfolioCaseStudy>>,
+  TError,
+  { slug: string },
+  TContext
+> => {
+  return useMutation(
+    getDeleteStephenPortfolioCaseStudyMutationOptions(options),
+  );
+};
+
+/**
+ * @summary List booking requests
+ */
+export const getListStephenBookingRequestsUrl = () => {
+  return `/api/stephen/booking-requests`;
+};
+
+export const listStephenBookingRequests = async (
+  options?: RequestInit,
+): Promise<StephenBookingRequest[]> => {
+  return customFetch<StephenBookingRequest[]>(
+    getListStephenBookingRequestsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListStephenBookingRequestsQueryKey = () => {
+  return [`/api/stephen/booking-requests`] as const;
+};
+
+export const getListStephenBookingRequestsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listStephenBookingRequests>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStephenBookingRequests>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListStephenBookingRequestsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listStephenBookingRequests>>
+  > = ({ signal }) => listStephenBookingRequests({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listStephenBookingRequests>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListStephenBookingRequestsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listStephenBookingRequests>>
+>;
+export type ListStephenBookingRequestsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List booking requests
+ */
+
+export function useListStephenBookingRequests<
+  TData = Awaited<ReturnType<typeof listStephenBookingRequests>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStephenBookingRequests>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListStephenBookingRequestsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Submit a booking request
+ */
+export const getCreateStephenBookingRequestUrl = () => {
+  return `/api/stephen/booking-requests`;
+};
+
+export const createStephenBookingRequest = async (
+  createStephenBookingRequest: CreateStephenBookingRequest,
+  options?: RequestInit,
+): Promise<StephenBookingRequest> => {
+  return customFetch<StephenBookingRequest>(
+    getCreateStephenBookingRequestUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(createStephenBookingRequest),
+    },
+  );
+};
+
+export const getCreateStephenBookingRequestMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createStephenBookingRequest>>,
+    TError,
+    { data: BodyType<CreateStephenBookingRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createStephenBookingRequest>>,
+  TError,
+  { data: BodyType<CreateStephenBookingRequest> },
+  TContext
+> => {
+  const mutationKey = ["createStephenBookingRequest"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createStephenBookingRequest>>,
+    { data: BodyType<CreateStephenBookingRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createStephenBookingRequest(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateStephenBookingRequestMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createStephenBookingRequest>>
+>;
+export type CreateStephenBookingRequestMutationBody =
+  BodyType<CreateStephenBookingRequest>;
+export type CreateStephenBookingRequestMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Submit a booking request
+ */
+export const useCreateStephenBookingRequest = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createStephenBookingRequest>>,
+    TError,
+    { data: BodyType<CreateStephenBookingRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createStephenBookingRequest>>,
+  TError,
+  { data: BodyType<CreateStephenBookingRequest> },
+  TContext
+> => {
+  return useMutation(getCreateStephenBookingRequestMutationOptions(options));
+};
+
+/**
+ * @summary Get ecosystem status
+ */
+export const getGetStephenEcosystemStatusUrl = () => {
+  return `/api/stephen/ecosystem-status`;
+};
+
+export const getStephenEcosystemStatus = async (
+  options?: RequestInit,
+): Promise<StephenEcosystemStatus> => {
+  return customFetch<StephenEcosystemStatus>(
+    getGetStephenEcosystemStatusUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetStephenEcosystemStatusQueryKey = () => {
+  return [`/api/stephen/ecosystem-status`] as const;
+};
+
+export const getGetStephenEcosystemStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStephenEcosystemStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getStephenEcosystemStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetStephenEcosystemStatusQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStephenEcosystemStatus>>
+  > = ({ signal }) => getStephenEcosystemStatus({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStephenEcosystemStatus>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStephenEcosystemStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStephenEcosystemStatus>>
+>;
+export type GetStephenEcosystemStatusQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get ecosystem status
+ */
+
+export function useGetStephenEcosystemStatus<
+  TData = Awaited<ReturnType<typeof getStephenEcosystemStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getStephenEcosystemStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStephenEcosystemStatusQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

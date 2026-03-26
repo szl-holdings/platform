@@ -1,7 +1,28 @@
 import { Router, type IRouter } from "express";
-import { db, stephenSiteContactsTable, stephenSiteTestimonialsTable, stephenSiteCaseStudiesTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
-import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendError, handleRouteError } from "../lib/api-response";
+import {
+  db,
+  stephenSiteContactsTable,
+  stephenSiteTestimonialsTable,
+  stephenSiteCaseStudiesTable,
+  stephenContentBlocksTable,
+  stephenCaseStudiesTable,
+  stephenBookingRequestsTable,
+} from "@workspace/db";
+import {
+  CreateStephenContentBlockBody,
+  UpdateStephenContentBlockParams,
+  UpdateStephenContentBlockBody,
+  DeleteStephenContentBlockParams,
+  ListStephenContentBlocksQueryParams,
+  CreateStephenPortfolioCaseStudyBody,
+  GetStephenPortfolioCaseStudyParams,
+  UpdateStephenPortfolioCaseStudyParams,
+  UpdateStephenPortfolioCaseStudyBody,
+  DeleteStephenPortfolioCaseStudyParams,
+  CreateStephenBookingRequestBody,
+} from "@workspace/api-zod";
+import { eq, desc, asc } from "drizzle-orm";
+import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -74,5 +95,318 @@ router.get("/stephen/case-studies/:slug", authMiddleware(), async (req, res) => 
     handleRouteError(res, err, "Failed to get case study");
   }
 });
+
+router.get("/stephen/profile", async (_req, res) => {
+  res.json({
+    name: "Stephen Lutar",
+    title: "Founder & CEO, SZL Holdings",
+    tagline: "Building the future of integrated technology",
+    bio: "Visionary technologist and entrepreneur with over 15 years of experience building enterprise-grade platforms, leading cross-functional teams, and delivering innovative solutions across fintech, logistics, defense, and SaaS. Founder of SZL Holdings — a portfolio of interconnected technology products designed to streamline operations and drive measurable impact.",
+    avatarUrl: null,
+    email: "stephen@szlholdings.com",
+    location: "Washington, D.C. Metro",
+    linkedinUrl: "https://linkedin.com/in/stephenlutar",
+    githubUrl: "https://github.com/stephenlutar",
+    websiteUrl: "https://stephenlutar.com",
+  });
+});
+
+router.get("/stephen/content-blocks", async (req, res) => {
+  try {
+    const query = ListStephenContentBlocksQueryParams.parse(req.query);
+    if (query.type) {
+      const blocks = await db
+        .select()
+        .from(stephenContentBlocksTable)
+        .where(eq(stephenContentBlocksTable.type, query.type))
+        .orderBy(asc(stephenContentBlocksTable.sortOrder));
+      res.json(blocks.map(serializeContentBlock));
+    } else {
+      const blocks = await db
+        .select()
+        .from(stephenContentBlocksTable)
+        .orderBy(asc(stephenContentBlocksTable.sortOrder));
+      res.json(blocks.map(serializeContentBlock));
+    }
+  } catch (err) {
+    handleError(err, req, res, "Failed to list content blocks");
+  }
+});
+
+router.post("/stephen/content-blocks", async (req, res) => {
+  try {
+    const body = CreateStephenContentBlockBody.parse(req.body);
+    const [block] = await db
+      .insert(stephenContentBlocksTable)
+      .values({
+        type: body.type,
+        title: body.title,
+        content: body.content,
+        icon: body.icon ?? null,
+        date: body.date ?? null,
+        sortOrder: body.sortOrder ?? 0,
+        featured: body.featured ?? false,
+        metadata: body.metadata ?? null,
+      })
+      .returning();
+    res.status(201).json(serializeContentBlock(block));
+  } catch (err) {
+    handleError(err, req, res, "Failed to create content block");
+  }
+});
+
+router.patch("/stephen/content-blocks/:id", async (req, res) => {
+  try {
+    const { id } = UpdateStephenContentBlockParams.parse({ id: req.params.id });
+    const body = UpdateStephenContentBlockBody.parse(req.body);
+    const updateData: Record<string, unknown> = {};
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.content !== undefined) updateData.content = body.content;
+    if (body.icon !== undefined) updateData.icon = body.icon;
+    if (body.date !== undefined) updateData.date = body.date;
+    if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder;
+    if (body.featured !== undefined) updateData.featured = body.featured;
+    if (body.metadata !== undefined) updateData.metadata = body.metadata;
+
+    const [updated] = await db
+      .update(stephenContentBlocksTable)
+      .set(updateData)
+      .where(eq(stephenContentBlocksTable.id, id))
+      .returning();
+    if (!updated) {
+      res.status(404).json({ error: "Content block not found" });
+      return;
+    }
+    res.json(serializeContentBlock(updated));
+  } catch (err) {
+    handleError(err, req, res, "Failed to update content block");
+  }
+});
+
+router.delete("/stephen/content-blocks/:id", async (req, res) => {
+  try {
+    const { id } = DeleteStephenContentBlockParams.parse({ id: req.params.id });
+    const [deleted] = await db
+      .delete(stephenContentBlocksTable)
+      .where(eq(stephenContentBlocksTable.id, id))
+      .returning();
+    if (!deleted) {
+      res.status(404).json({ error: "Content block not found" });
+      return;
+    }
+    res.status(204).send();
+  } catch (err) {
+    handleError(err, req, res, "Failed to delete content block");
+  }
+});
+
+router.get("/stephen/portfolio-case-studies", async (_req, res) => {
+  try {
+    const studies = await db
+      .select()
+      .from(stephenCaseStudiesTable)
+      .orderBy(desc(stephenCaseStudiesTable.createdAt));
+    res.json(studies.map(serializeCaseStudy));
+  } catch (err) {
+    res.status(500).json({ error: "Failed to list portfolio case studies" });
+  }
+});
+
+router.post("/stephen/portfolio-case-studies", async (req, res) => {
+  try {
+    const body = CreateStephenPortfolioCaseStudyBody.parse(req.body);
+    const [study] = await db
+      .insert(stephenCaseStudiesTable)
+      .values({
+        title: body.title,
+        slug: body.slug,
+        summary: body.summary,
+        content: body.content,
+        coverImageUrl: body.coverImageUrl ?? null,
+        tags: body.tags ?? [],
+        featured: body.featured ?? false,
+        client: body.client ?? null,
+        duration: body.duration ?? null,
+        outcome: body.outcome ?? null,
+      })
+      .returning();
+    res.status(201).json(serializeCaseStudy(study));
+  } catch (err) {
+    handleError(err, req, res, "Failed to create portfolio case study");
+  }
+});
+
+router.get("/stephen/portfolio-case-studies/:slug", async (req, res) => {
+  try {
+    const { slug } = GetStephenPortfolioCaseStudyParams.parse({ slug: req.params.slug });
+    const [study] = await db
+      .select()
+      .from(stephenCaseStudiesTable)
+      .where(eq(stephenCaseStudiesTable.slug, slug));
+    if (!study) {
+      res.status(404).json({ error: "Portfolio case study not found" });
+      return;
+    }
+    res.json(serializeCaseStudy(study));
+  } catch (err) {
+    handleError(err, req, res, "Failed to get portfolio case study");
+  }
+});
+
+router.patch("/stephen/portfolio-case-studies/:slug", async (req, res) => {
+  try {
+    const { slug } = UpdateStephenPortfolioCaseStudyParams.parse({ slug: req.params.slug });
+    const body = UpdateStephenPortfolioCaseStudyBody.parse(req.body);
+    const updateData: Record<string, unknown> = {};
+    if (body.title !== undefined) updateData.title = body.title;
+    if (body.summary !== undefined) updateData.summary = body.summary;
+    if (body.content !== undefined) updateData.content = body.content;
+    if (body.coverImageUrl !== undefined) updateData.coverImageUrl = body.coverImageUrl;
+    if (body.tags !== undefined) updateData.tags = body.tags;
+    if (body.featured !== undefined) updateData.featured = body.featured;
+    if (body.client !== undefined) updateData.client = body.client;
+    if (body.duration !== undefined) updateData.duration = body.duration;
+    if (body.outcome !== undefined) updateData.outcome = body.outcome;
+
+    const [updated] = await db
+      .update(stephenCaseStudiesTable)
+      .set(updateData)
+      .where(eq(stephenCaseStudiesTable.slug, slug))
+      .returning();
+    if (!updated) {
+      res.status(404).json({ error: "Portfolio case study not found" });
+      return;
+    }
+    res.json(serializeCaseStudy(updated));
+  } catch (err) {
+    handleError(err, req, res, "Failed to update portfolio case study");
+  }
+});
+
+router.delete("/stephen/portfolio-case-studies/:slug", async (req, res) => {
+  try {
+    const { slug } = DeleteStephenPortfolioCaseStudyParams.parse({ slug: req.params.slug });
+    const [deleted] = await db
+      .delete(stephenCaseStudiesTable)
+      .where(eq(stephenCaseStudiesTable.slug, slug))
+      .returning();
+    if (!deleted) {
+      res.status(404).json({ error: "Portfolio case study not found" });
+      return;
+    }
+    res.status(204).send();
+  } catch (err) {
+    handleError(err, req, res, "Failed to delete portfolio case study");
+  }
+});
+
+router.get("/stephen/booking-requests", async (_req, res) => {
+  try {
+    const requests = await db
+      .select()
+      .from(stephenBookingRequestsTable)
+      .orderBy(desc(stephenBookingRequestsTable.createdAt));
+    res.json(requests.map(serializeBookingRequest));
+  } catch (err) {
+    res.status(500).json({ error: "Failed to list booking requests" });
+  }
+});
+
+router.post("/stephen/booking-requests", async (req, res) => {
+  try {
+    const body = CreateStephenBookingRequestBody.parse(req.body);
+    const [request] = await db
+      .insert(stephenBookingRequestsTable)
+      .values({
+        name: body.name,
+        email: body.email,
+        company: body.company ?? null,
+        role: body.role ?? null,
+        type: body.type,
+        message: body.message,
+        preferredDate: body.preferredDate ?? null,
+        status: "pending",
+      })
+      .returning();
+    res.status(201).json(serializeBookingRequest(request));
+  } catch (err) {
+    handleError(err, req, res, "Failed to create booking request");
+  }
+});
+
+router.get("/stephen/ecosystem-status", async (_req, res) => {
+  const apps = [
+    { name: "Vessels", slug: "vessels", status: "operational", description: "Fleet & cargo management" },
+    { name: "Firestorm", slug: "firestorm", status: "operational", description: "Campaign & lead management" },
+    { name: "Lyte", slug: "lyte", status: "operational", description: "E-commerce platform" },
+    { name: "Dreamscape", slug: "dreamscape", status: "operational", description: "Creative project management" },
+    { name: "Readiness Report", slug: "readiness", status: "operational", description: "Compliance & assessments" },
+  ];
+  const connectors = [
+    { name: "GitHub", status: "connected" },
+    { name: "Stripe", status: "connected" },
+    { name: "Google Calendar", status: "connected" },
+    { name: "Notion", status: "disconnected" },
+    { name: "Dropbox", status: "connected" },
+    { name: "OneDrive", status: "disconnected" },
+  ];
+  res.json({ apps, connectors, lastChecked: new Date().toISOString() });
+});
+
+function handleError(err: unknown, req: any, res: any, label: string) {
+  if (err && typeof err === "object" && "issues" in err && Array.isArray((err as any).issues)) {
+    res.status(400).json({ error: "Validation failed", details: (err as any).issues });
+    return;
+  }
+  req.log?.error({ err }, label);
+  res.status(500).json({ error: label });
+}
+
+function serializeContentBlock(b: typeof stephenContentBlocksTable.$inferSelect) {
+  return {
+    id: b.id,
+    type: b.type,
+    title: b.title,
+    content: b.content,
+    icon: b.icon,
+    date: b.date,
+    sortOrder: b.sortOrder,
+    featured: b.featured,
+    metadata: b.metadata,
+    createdAt: b.createdAt.toISOString(),
+  };
+}
+
+function serializeCaseStudy(s: typeof stephenCaseStudiesTable.$inferSelect) {
+  return {
+    id: s.id,
+    title: s.title,
+    slug: s.slug,
+    summary: s.summary,
+    content: s.content,
+    coverImageUrl: s.coverImageUrl,
+    tags: s.tags,
+    featured: s.featured,
+    client: s.client,
+    duration: s.duration,
+    outcome: s.outcome,
+    createdAt: s.createdAt.toISOString(),
+  };
+}
+
+function serializeBookingRequest(r: typeof stephenBookingRequestsTable.$inferSelect) {
+  return {
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    company: r.company,
+    role: r.role,
+    type: r.type,
+    message: r.message,
+    preferredDate: r.preferredDate,
+    status: r.status,
+    createdAt: r.createdAt.toISOString(),
+  };
+}
 
 export default router;

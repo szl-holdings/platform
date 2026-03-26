@@ -542,6 +542,267 @@ export const ListStephenCaseStudiesResponse = zod.array(
 );
 
 /**
+ * @summary Get Stephen's profile data
+ */
+export const GetStephenProfileResponse = zod.object({
+  name: zod.string(),
+  title: zod.string(),
+  tagline: zod.string().optional(),
+  bio: zod.string(),
+  avatarUrl: zod.string().nullish(),
+  email: zod.string(),
+  location: zod.string().optional(),
+  linkedinUrl: zod.string().optional(),
+  githubUrl: zod.string().optional(),
+  websiteUrl: zod.string().optional(),
+});
+
+/**
+ * @summary List all content blocks
+ */
+export const ListStephenContentBlocksQueryParams = zod.object({
+  type: zod
+    .enum(["achievement", "about", "service", "stat", "skill"])
+    .optional(),
+});
+
+export const ListStephenContentBlocksResponseItem = zod.object({
+  id: zod.number(),
+  type: zod.enum(["achievement", "about", "service", "stat", "skill"]),
+  title: zod.string(),
+  content: zod.string(),
+  icon: zod.string().nullish(),
+  date: zod.string().nullish(),
+  sortOrder: zod.number(),
+  featured: zod.boolean(),
+  metadata: zod.object({}).passthrough().nullish(),
+  createdAt: zod.date(),
+});
+export const ListStephenContentBlocksResponse = zod.array(
+  ListStephenContentBlocksResponseItem,
+);
+
+/**
+ * @summary Create a content block
+ */
+export const CreateStephenContentBlockBody = zod.object({
+  type: zod.enum(["achievement", "about", "service", "stat", "skill"]),
+  title: zod.string(),
+  content: zod.string(),
+  icon: zod.string().optional(),
+  date: zod.string().optional(),
+  sortOrder: zod.number().optional(),
+  featured: zod.boolean().optional(),
+  metadata: zod.object({}).passthrough().optional(),
+});
+
+/**
+ * @summary Update a content block
+ */
+export const UpdateStephenContentBlockParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateStephenContentBlockBody = zod.object({
+  title: zod.string().optional(),
+  content: zod.string().optional(),
+  icon: zod.string().optional(),
+  date: zod.string().optional(),
+  sortOrder: zod.number().optional(),
+  featured: zod.boolean().optional(),
+  metadata: zod.object({}).passthrough().optional(),
+});
+
+export const UpdateStephenContentBlockResponse = zod.object({
+  id: zod.number(),
+  type: zod.enum(["achievement", "about", "service", "stat", "skill"]),
+  title: zod.string(),
+  content: zod.string(),
+  icon: zod.string().nullish(),
+  date: zod.string().nullish(),
+  sortOrder: zod.number(),
+  featured: zod.boolean(),
+  metadata: zod.object({}).passthrough().nullish(),
+  createdAt: zod.date(),
+});
+
+/**
+ * @summary Delete a content block
+ */
+export const DeleteStephenContentBlockParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List portfolio case studies
+ */
+export const ListStephenPortfolioCaseStudiesResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  summary: zod.string(),
+  content: zod.string(),
+  coverImageUrl: zod.string().nullish(),
+  tags: zod.array(zod.string()).optional(),
+  featured: zod.boolean(),
+  client: zod.string().nullish(),
+  duration: zod.string().nullish(),
+  outcome: zod.string().nullish(),
+  createdAt: zod.date(),
+});
+export const ListStephenPortfolioCaseStudiesResponse = zod.array(
+  ListStephenPortfolioCaseStudiesResponseItem,
+);
+
+/**
+ * @summary Create a portfolio case study
+ */
+export const CreateStephenPortfolioCaseStudyBody = zod.object({
+  title: zod.string(),
+  slug: zod.string(),
+  summary: zod.string(),
+  content: zod.string(),
+  coverImageUrl: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
+  featured: zod.boolean().optional(),
+  client: zod.string().optional(),
+  duration: zod.string().optional(),
+  outcome: zod.string().optional(),
+});
+
+/**
+ * @summary Get a portfolio case study by slug
+ */
+export const GetStephenPortfolioCaseStudyParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+export const GetStephenPortfolioCaseStudyResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  summary: zod.string(),
+  content: zod.string(),
+  coverImageUrl: zod.string().nullish(),
+  tags: zod.array(zod.string()).optional(),
+  featured: zod.boolean(),
+  client: zod.string().nullish(),
+  duration: zod.string().nullish(),
+  outcome: zod.string().nullish(),
+  createdAt: zod.date(),
+});
+
+/**
+ * @summary Update a portfolio case study
+ */
+export const UpdateStephenPortfolioCaseStudyParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+export const UpdateStephenPortfolioCaseStudyBody = zod.object({
+  title: zod.string().optional(),
+  summary: zod.string().optional(),
+  content: zod.string().optional(),
+  coverImageUrl: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
+  featured: zod.boolean().optional(),
+  client: zod.string().optional(),
+  duration: zod.string().optional(),
+  outcome: zod.string().optional(),
+});
+
+export const UpdateStephenPortfolioCaseStudyResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  summary: zod.string(),
+  content: zod.string(),
+  coverImageUrl: zod.string().nullish(),
+  tags: zod.array(zod.string()).optional(),
+  featured: zod.boolean(),
+  client: zod.string().nullish(),
+  duration: zod.string().nullish(),
+  outcome: zod.string().nullish(),
+  createdAt: zod.date(),
+});
+
+/**
+ * @summary Delete a portfolio case study
+ */
+export const DeleteStephenPortfolioCaseStudyParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+/**
+ * @summary List booking requests
+ */
+export const ListStephenBookingRequestsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  email: zod.string(),
+  company: zod.string().nullish(),
+  role: zod.string().nullish(),
+  type: zod.enum([
+    "consultation",
+    "partnership",
+    "investment",
+    "speaking",
+    "other",
+  ]),
+  message: zod.string(),
+  preferredDate: zod.string().nullish(),
+  status: zod.enum(["pending", "confirmed", "declined", "completed"]),
+  createdAt: zod.date(),
+});
+export const ListStephenBookingRequestsResponse = zod.array(
+  ListStephenBookingRequestsResponseItem,
+);
+
+/**
+ * @summary Submit a booking request
+ */
+export const CreateStephenBookingRequestBody = zod.object({
+  name: zod.string(),
+  email: zod.string(),
+  company: zod.string().optional(),
+  role: zod.string().optional(),
+  type: zod.enum([
+    "consultation",
+    "partnership",
+    "investment",
+    "speaking",
+    "other",
+  ]),
+  message: zod.string(),
+  preferredDate: zod.string().optional(),
+});
+
+/**
+ * @summary Get ecosystem status
+ */
+export const GetStephenEcosystemStatusResponse = zod.object({
+  apps: zod
+    .array(
+      zod.object({
+        name: zod.string().optional(),
+        slug: zod.string().optional(),
+        status: zod.string().optional(),
+        description: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  connectors: zod
+    .array(
+      zod.object({
+        name: zod.string().optional(),
+        status: zod.string().optional(),
+      }),
+    )
+    .optional(),
+  lastChecked: zod.date().optional(),
+});
+
+/**
  * @summary List all vessels
  */
 export const ListVesselsResponseItem = zod.object({

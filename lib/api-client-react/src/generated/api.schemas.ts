@@ -379,6 +379,194 @@ export interface StephenCaseStudy {
   isPublished?: boolean;
 }
 
+export interface StephenProfile {
+  name: string;
+  title: string;
+  tagline?: string;
+  bio: string;
+  avatarUrl?: string | null;
+  email: string;
+  location?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  websiteUrl?: string;
+}
+
+export type StephenContentBlockType =
+  (typeof StephenContentBlockType)[keyof typeof StephenContentBlockType];
+
+export const StephenContentBlockType = {
+  achievement: "achievement",
+  about: "about",
+  service: "service",
+  stat: "stat",
+  skill: "skill",
+} as const;
+
+export type StephenContentBlockMetadata = { [key: string]: unknown } | null;
+
+export interface StephenContentBlock {
+  id: number;
+  type: StephenContentBlockType;
+  title: string;
+  content: string;
+  icon?: string | null;
+  date?: string | null;
+  sortOrder: number;
+  featured: boolean;
+  metadata?: StephenContentBlockMetadata;
+  createdAt: string;
+}
+
+export type CreateStephenContentBlockType =
+  (typeof CreateStephenContentBlockType)[keyof typeof CreateStephenContentBlockType];
+
+export const CreateStephenContentBlockType = {
+  achievement: "achievement",
+  about: "about",
+  service: "service",
+  stat: "stat",
+  skill: "skill",
+} as const;
+
+export type CreateStephenContentBlockMetadata = { [key: string]: unknown };
+
+export interface CreateStephenContentBlock {
+  type: CreateStephenContentBlockType;
+  title: string;
+  content: string;
+  icon?: string;
+  date?: string;
+  sortOrder?: number;
+  featured?: boolean;
+  metadata?: CreateStephenContentBlockMetadata;
+}
+
+export type UpdateStephenContentBlockMetadata = { [key: string]: unknown };
+
+export interface UpdateStephenContentBlock {
+  title?: string;
+  content?: string;
+  icon?: string;
+  date?: string;
+  sortOrder?: number;
+  featured?: boolean;
+  metadata?: UpdateStephenContentBlockMetadata;
+}
+
+export interface StephenPortfolioCaseStudy {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  coverImageUrl?: string | null;
+  tags?: string[];
+  featured: boolean;
+  client?: string | null;
+  duration?: string | null;
+  outcome?: string | null;
+  createdAt: string;
+}
+
+export interface CreateStephenPortfolioCaseStudy {
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  coverImageUrl?: string;
+  tags?: string[];
+  featured?: boolean;
+  client?: string;
+  duration?: string;
+  outcome?: string;
+}
+
+export interface UpdateStephenPortfolioCaseStudy {
+  title?: string;
+  summary?: string;
+  content?: string;
+  coverImageUrl?: string;
+  tags?: string[];
+  featured?: boolean;
+  client?: string;
+  duration?: string;
+  outcome?: string;
+}
+
+export type StephenBookingRequestType =
+  (typeof StephenBookingRequestType)[keyof typeof StephenBookingRequestType];
+
+export const StephenBookingRequestType = {
+  consultation: "consultation",
+  partnership: "partnership",
+  investment: "investment",
+  speaking: "speaking",
+  other: "other",
+} as const;
+
+export type StephenBookingRequestStatus =
+  (typeof StephenBookingRequestStatus)[keyof typeof StephenBookingRequestStatus];
+
+export const StephenBookingRequestStatus = {
+  pending: "pending",
+  confirmed: "confirmed",
+  declined: "declined",
+  completed: "completed",
+} as const;
+
+export interface StephenBookingRequest {
+  id: number;
+  name: string;
+  email: string;
+  company?: string | null;
+  role?: string | null;
+  type: StephenBookingRequestType;
+  message: string;
+  preferredDate?: string | null;
+  status: StephenBookingRequestStatus;
+  createdAt: string;
+}
+
+export type CreateStephenBookingRequestType =
+  (typeof CreateStephenBookingRequestType)[keyof typeof CreateStephenBookingRequestType];
+
+export const CreateStephenBookingRequestType = {
+  consultation: "consultation",
+  partnership: "partnership",
+  investment: "investment",
+  speaking: "speaking",
+  other: "other",
+} as const;
+
+export interface CreateStephenBookingRequest {
+  name: string;
+  email: string;
+  company?: string;
+  role?: string;
+  type: CreateStephenBookingRequestType;
+  message: string;
+  preferredDate?: string;
+}
+
+export type StephenEcosystemStatusAppsItem = {
+  name?: string;
+  slug?: string;
+  status?: string;
+  description?: string;
+};
+
+export type StephenEcosystemStatusConnectorsItem = {
+  name?: string;
+  status?: string;
+};
+
+export interface StephenEcosystemStatus {
+  apps?: StephenEcosystemStatusAppsItem[];
+  connectors?: StephenEcosystemStatusConnectorsItem[];
+  lastChecked?: string;
+}
+
 export interface Vessel {
   id: number;
   name: string;
@@ -470,6 +658,21 @@ export type GetAuthProviders200 = {
 export type ListNotificationsParams = {
   userId?: number;
 };
+
+export type ListStephenContentBlocksParams = {
+  type?: ListStephenContentBlocksType;
+};
+
+export type ListStephenContentBlocksType =
+  (typeof ListStephenContentBlocksType)[keyof typeof ListStephenContentBlocksType];
+
+export const ListStephenContentBlocksType = {
+  achievement: "achievement",
+  about: "about",
+  service: "service",
+  stat: "stat",
+  skill: "skill",
+} as const;
 
 export type ListFirestormAnalyticsParams = {
   campaignId?: number;
