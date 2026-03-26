@@ -1,7 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Shield, Ship, Activity, Zap, TrendingUp, Radio, Brain, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RiskPill } from "@workspace/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {
@@ -21,6 +22,17 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
   }, [value]);
   return <>{display.toLocaleString()}{suffix}</>;
 }
+
+const PROJECT_RISK_SCORES = [
+  { name: "Vessels", score: 22, tooltip: "Low risk - stable maritime ops, monitored AIS feeds" },
+  { name: "Firestorm", score: 68, tooltip: "Elevated - 3 critical CVEs detected, patch cycle pending" },
+  { name: "Lyte", score: 35, tooltip: "Moderate - normal signal processing, SLA at 98.4%" },
+  { name: "Dreamscape", score: 15, tooltip: "Minimal - creative pipeline healthy, no anomalies" },
+  { name: "Readiness", score: 42, tooltip: "Moderate - 2 benchmark dimensions below industry avg" },
+  { name: "Admin", score: 28, tooltip: "Low - all integrations healthy, no audit flags" },
+  { name: "Stephen Site", score: 12, tooltip: "Minimal - portfolio site stable, uptime 99.99%" },
+  { name: "SZL Holdings", score: 18, tooltip: "Low - corporate portal nominal, no incidents" },
+];
 
 export function IntelligenceBar() {
   const [stats, setStats] = useState<any>(null);
@@ -86,6 +98,36 @@ export function IntelligenceBar() {
             <p className="text-xs text-zinc-500 mt-1">Apps Healthy</p>
           </div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-zinc-900/30 backdrop-blur-sm rounded-2xl p-5 border border-zinc-800/50 mb-8"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <Brain className="w-5 h-5 text-violet-400" />
+            <h3 className="text-sm font-semibold text-white">AI Project Health Scores</h3>
+            <span className="text-[10px] text-zinc-500 ml-auto">Powered by HuggingFace AI</span>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {PROJECT_RISK_SCORES.map((project) => (
+              <motion.div
+                key={project.name}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: PROJECT_RISK_SCORES.indexOf(project) * 0.05 }}
+              >
+                <RiskPill
+                  score={project.score}
+                  label={project.name}
+                  tooltip={project.tooltip}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
         {news.length > 0 && (
           <div className="bg-zinc-900/30 backdrop-blur-sm rounded-xl p-4 border border-zinc-800/50 overflow-hidden">

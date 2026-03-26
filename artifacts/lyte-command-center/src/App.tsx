@@ -10,6 +10,7 @@ import Incidents from "@/pages/incidents";
 import Playbooks from "@/pages/playbooks";
 import Commerce from "@/pages/commerce";
 import IntelligencePage from "@/pages/intelligence";
+import AIOps from "@/pages/ai-ops";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/playbooks" component={Playbooks} />
       <Route path="/commerce" component={Commerce} />
       <Route path="/intelligence" component={IntelligencePage} />
+      <Route path="/ai-ops" component={AIOps} />
       <Route component={NotFound} />
     </Switch>
   );

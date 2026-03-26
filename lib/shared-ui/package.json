@@ -11,7 +11,8 @@
     "./themes": "./src/themes.ts",
     "./premium-components": "./src/premium-components.ts",
     "./copilot": "./src/copilot.tsx",
-    "./copilot-configs": "./src/copilot-configs.ts"
+    "./copilot-configs": "./src/copilot-configs.ts",
+    "./ai-components": "./src/ai-components.tsx"
   },
   "dependencies": {
     "framer-motion": "catalog:",

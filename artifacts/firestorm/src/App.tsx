@@ -12,6 +12,7 @@ import FindingsPage from "@/pages/findings-page";
 import RiskScoringPage from "@/pages/risk-scoring";
 import ReportsPage from "@/pages/reports-page";
 import ThreatIntelligence from "@/pages/threat-intelligence";
+import ThreatIntelAI from "@/pages/threat-intel";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -20,6 +21,7 @@ const queryClient = new QueryClient({
 const navItems = [
   { path: "/", label: "Assessments", icon: LayoutDashboard },
   { path: "/threat-intel", label: "Threat Intelligence", icon: AlertTriangle },
+  { path: "/ai-command", label: "AI Command Wall", icon: Shield },
   { path: "/scenarios", label: "Scenario Library", icon: Target },
   { path: "/simulations", label: "Simulation Runner", icon: Search },
   { path: "/findings", label: "Findings", icon: Shield },
@@ -151,6 +153,7 @@ function AppRouter() {
     <Switch>
       <Route path="/" component={AssessmentDashboard} />
       <Route path="/threat-intel" component={ThreatIntelligence} />
+      <Route path="/ai-command" component={ThreatIntelAI} />
       <Route path="/scenarios" component={ScenarioLibrary} />
       <Route path="/simulations" component={SimulationRunner} />
       <Route path="/findings" component={FindingsPage} />

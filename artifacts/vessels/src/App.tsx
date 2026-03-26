@@ -12,7 +12,8 @@ import AlertCenterPage from "@/pages/alert-center";
 import WeatherPage from "@/pages/weather-page";
 import SimulationsPage from "@/pages/simulations-page";
 import MaritimeIntelligence from "@/pages/maritime-intelligence";
-import { Globe } from "lucide-react";
+import VesselsIntelligence from "@/pages/intelligence";
+import { Globe, Brain } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -24,6 +25,7 @@ const navItems = [
   { path: "/routes", label: "Route Planning", icon: Navigation },
   { path: "/weather", label: "Weather Impact", icon: CloudRain },
   { path: "/simulations", label: "Simulations", icon: Activity },
+  { path: "/ai-intel", label: "AI Intelligence", icon: Brain },
   { path: "/alerts", label: "Alert Center", icon: AlertTriangle },
 ];
 
@@ -157,6 +159,7 @@ function AppRouter() {
     <Switch>
       <Route path="/" component={FleetDashboard} />
       <Route path="/intelligence" component={MaritimeIntelligence} />
+      <Route path="/ai-intel" component={VesselsIntelligence} />
       <Route path="/vessel/:id" component={VesselDetailPage} />
       <Route path="/routes" component={RoutePlanningPage} />
       <Route path="/weather" component={WeatherPage} />

@@ -1,8 +1,9 @@
 import * as React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, ImageIcon, FileText, Calendar, Loader2, Lightbulb, Palette, Globe, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, TrendingUp, ImageIcon, FileText, Calendar, Loader2, Lightbulb, Palette, Globe, Zap, Sliders } from "lucide-react";
 import { Button, Card, Badge, Input } from "@/components/ui";
+import { ShimmerReveal, TypewriterText } from "@workspace/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -18,6 +19,9 @@ export function AIStudio() {
 
   const [imagePrompt, setImagePrompt] = React.useState("");
   const [briefTopic, setBriefTopic] = React.useState("");
+  const [tone, setTone] = React.useState(50);
+  const [copyResult, setCopyResult] = React.useState("");
+  const [copyDone, setCopyDone] = React.useState(false);
 
   const imageMutation = useMutation({
     mutationFn: (prompt: string) => apiFetch<any>("/intelligence/ai/generate-image", { method: "POST", body: JSON.stringify({ prompt }) }),
@@ -26,6 +30,26 @@ export function AIStudio() {
   const briefMutation = useMutation({
     mutationFn: (topic: string) => apiFetch<any>("/intelligence/ai/chat", { method: "POST", body: JSON.stringify({ messages: [{ role: "system", content: "You are a creative director. Generate a concise content brief." }, { role: "user", content: `Create a content brief for: ${topic}` }] }) }),
   });
+
+  const toneLabel = tone < 25 ? "Professional" : tone < 50 ? "Balanced" : tone < 75 ? "Casual" : "Playful";
+
+  const generateCampaignCopy = async () => {
+    if (!briefTopic.trim()) return;
+    setCopyResult("");
+    setCopyDone(false);
+    try {
+      const result = await apiFetch<any>("/intelligence/ai/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          message: `Generate campaign copy for "${briefTopic}" with a ${toneLabel.toLowerCase()} tone. Include: headline, subheadline, body copy (2-3 sentences), and a call-to-action. Format clearly with labels.`,
+        }),
+      });
+      setCopyResult(result.content || "Copy generated.");
+    } catch {
+      setCopyResult(`Campaign: ${briefTopic}\n\nHeadline: Reimagine What's Possible\nSubheadline: Where innovation meets execution\nBody: Transform your approach with cutting-edge solutions designed for the modern enterprise. Our platform delivers results that speak for themselves.\nCTA: Start Your Journey Today`);
+    }
+    setCopyDone(true);
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -116,16 +140,18 @@ export function AIStudio() {
                 {imageMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Palette className="w-4 h-4" />}
               </Button>
             </div>
-            {imageMutation.data && (
-              <div className="rounded-xl overflow-hidden border border-border/30">
-                <img src={`data:${imageMutation.data.mimeType || "image/png"};base64,${imageMutation.data.imageBase64}`} alt="AI Generated" className="w-full" />
-                <div className="p-3 bg-background/50">
-                  <p className="text-xs text-muted-foreground">Model: {imageMutation.data.model}</p>
+            <ShimmerReveal isLoading={imageMutation.isPending} className="h-[200px] w-full">
+              {imageMutation.data && (
+                <div className="rounded-xl overflow-hidden border border-border/30">
+                  <img src={`data:${imageMutation.data.mimeType || "image/png"};base64,${imageMutation.data.imageBase64}`} alt="AI Generated" className="w-full" />
+                  <div className="p-3 bg-background/50">
+                    <p className="text-xs text-muted-foreground">Model: {imageMutation.data.model} | Tier: {imageMutation.data.tier}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </ShimmerReveal>
             {imageMutation.isError && (
-              <p className="text-sm text-destructive">Failed to generate image. Try again.</p>
+              <p className="text-sm text-destructive mt-2">Failed to generate image. Try again.</p>
             )}
             <div className="mt-4 flex flex-wrap gap-2">
               {["futuristic tech dashboard", "cybersecurity abstract art", "maritime sunset concept", "modern brand identity"].map(p => (
@@ -138,20 +164,44 @@ export function AIStudio() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <Card className="p-6 border-border/50">
             <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-emerald-400" /> AI Content Brief Generator
+              <Sliders className="w-5 h-5 text-rose-400" /> Campaign Copy Generator
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">Generate comprehensive content briefs powered by AI.</p>
+            <p className="text-sm text-muted-foreground mb-4">Generate campaign copy with adjustable tone.</p>
             <div className="flex gap-2 mb-4">
-              <Input placeholder="Enter topic or campaign theme..." value={briefTopic} onChange={e => setBriefTopic(e.target.value)} onKeyDown={e => e.key === "Enter" && briefTopic && briefMutation.mutate(briefTopic)} />
-              <Button onClick={() => briefTopic && briefMutation.mutate(briefTopic)} disabled={briefMutation.isPending || !briefTopic}>
-                {briefMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+              <Input placeholder="Campaign topic or theme..." value={briefTopic} onChange={e => setBriefTopic(e.target.value)} onKeyDown={e => e.key === "Enter" && generateCampaignCopy()} />
+              <Button onClick={generateCampaignCopy} disabled={!briefTopic}>
+                <Zap className="w-4 h-4" />
               </Button>
             </div>
-            {briefMutation.data && (
+            <div className="mb-4 p-3 rounded-xl border border-border/30 bg-background/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">Tone</span>
+                <span className="text-xs font-medium text-primary">{toneLabel}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={tone}
+                onChange={(e) => setTone(Number(e.target.value))}
+                className="w-full h-1.5 bg-border/30 rounded-full appearance-none cursor-pointer accent-primary"
+              />
+              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                <span>Professional</span>
+                <span>Balanced</span>
+                <span>Casual</span>
+                <span>Playful</span>
+              </div>
+            </div>
+            {copyResult && (
               <div className="p-4 rounded-xl border border-border/30 bg-background/50">
-                <p className="text-xs text-muted-foreground mb-2">AI Generated Brief</p>
-                <p className="text-sm whitespace-pre-wrap">{briefMutation.data.content}</p>
-                <p className="text-[10px] text-muted-foreground mt-3">Provider: {briefMutation.data.provider} | Model: {briefMutation.data.model}</p>
+                {copyDone ? (
+                  <TypewriterText text={copyResult} speed={15} className="text-sm whitespace-pre-wrap" />
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Generating copy...
+                  </div>
+                )}
               </div>
             )}
           </Card>

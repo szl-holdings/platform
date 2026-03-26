@@ -19,6 +19,7 @@ import EnvironmentPage from "@/pages/environment";
 import SeedManagerPage from "@/pages/seed-manager";
 import SystemHealthPage from "@/pages/system-health";
 import IntelligenceOverview from "@/pages/intelligence-overview";
+import AIIntelligence from "@/pages/ai-intelligence";
 import NotFound from "@/pages/not-found";
 import { api } from "@/lib/api";
 import {
@@ -74,6 +75,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/environment", label: "Environment", icon: <Settings className="w-4 h-4" /> },
   { path: "/seed", label: "Seed Data", icon: <Database className="w-4 h-4" /> },
   { path: "/intelligence", label: "Intelligence", icon: <Activity className="w-4 h-4" />, section: "Intelligence" },
+  { path: "/ai-analyzer", label: "AI Analyzer", icon: <Activity className="w-4 h-4" /> },
 ];
 
 function HealthBadge() {
@@ -208,6 +210,7 @@ function AppRouter() {
       <Route path="/environment" component={EnvironmentPage} />
       <Route path="/seed" component={SeedManagerPage} />
       <Route path="/intelligence" component={IntelligenceOverview} />
+      <Route path="/ai-analyzer" component={AIIntelligence} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -89,6 +89,7 @@ const NAV_ITEMS = [
   { href: "/playbooks", label: "Playbooks", icon: BookOpen },
   { href: "/commerce", label: "Commerce", icon: CreditCard },
   { href: "/intelligence", label: "Intelligence", icon: Brain },
+  { href: "/ai-ops", label: "AI Ops Center", icon: Activity },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

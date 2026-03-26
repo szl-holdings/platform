@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { Activity, Cpu, Globe, MessageSquare, Send, Loader2, TrendingUp, Zap, Shield, Ship, Brain } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Activity, Cpu, Globe, MessageSquare, Send, Loader2, TrendingUp, Zap, Shield, Ship, Brain, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChatBubble } from "@workspace/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -27,12 +29,18 @@ export function IntelligenceSection() {
   const [chatMessages, setChatMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [streamingText, setStreamingText] = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     apiFetch<any[]>("/intelligence/ecosystem-health").then(setEcosystemHealth).catch(() => {});
     apiFetch<any>("/intelligence/platform-stats").then(setPlatformStats).catch(() => {});
     apiFetch<any[]>("/intelligence/tech-trends").then(setTechTrends).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, streamingText]);
 
   const sendChat = async () => {
     if (!chatInput.trim()) return;
@@ -41,22 +49,68 @@ export function IntelligenceSection() {
     setChatMessages(newMessages);
     setChatInput("");
     setChatLoading(true);
+    setStreamingText("");
+
     try {
-      const result = await apiFetch<any>("/intelligence/ai/chat", {
+      const response = await fetch(`${API_BASE}/intelligence/ai/chat/stream`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
             { role: "system", content: "You are Stephen Lutar's AI assistant. You help visitors learn about SZL Holdings, its portfolio of technology products, and Stephen's expertise in enterprise technology, cybersecurity, and maritime intelligence. Be concise, professional, and helpful." },
             ...newMessages.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
           ],
         }),
+        credentials: "include",
       });
-      setChatMessages([...newMessages, { role: "assistant", content: result.content }]);
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const ct = response.headers.get("content-type") || "";
+      if (ct.includes("text/event-stream") && response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        let accumulated = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() || "";
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const payload = line.slice(6).trim();
+              if (payload === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(payload);
+                const token = parsed.choices?.[0]?.delta?.content || parsed.token || parsed.content || "";
+                if (token) {
+                  accumulated += token;
+                  setStreamingText(accumulated);
+                }
+              } catch {}
+            }
+          }
+        }
+        setChatMessages([...newMessages, { role: "assistant", content: accumulated || "I'm here to help! Ask me about SZL Holdings." }]);
+      } else {
+        const json = await response.json();
+        setChatMessages([...newMessages, { role: "assistant", content: json.content || "I'm here to help!" }]);
+      }
     } catch {
       setChatMessages([...newMessages, { role: "assistant", content: "I'm currently in demo mode. Ask me about SZL Holdings' technology portfolio, cybersecurity capabilities, or maritime intelligence solutions!" }]);
     }
     setChatLoading(false);
+    setStreamingText("");
   };
+
+  const suggestedQuestions = [
+    "What is SZL Holdings?",
+    "Tell me about Firestorm",
+    "What maritime solutions do you offer?",
+  ];
 
   const statusColors: Record<string, string> = {
     operational: "bg-emerald-500",
@@ -69,7 +123,12 @@ export function IntelligenceSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.02] to-background" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
           <span className="inline-flex items-center gap-2 text-sm font-medium text-primary bg-primary/10 px-4 py-2 rounded-full mb-4">
             <Zap className="w-4 h-4" /> Live Intelligence
           </span>
@@ -77,35 +136,41 @@ export function IntelligenceSection() {
           <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
             Real-time health monitoring across all SZL Holdings applications and AI-powered insights.
           </p>
-        </div>
+        </motion.div>
 
         {platformStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 text-center group hover:border-primary/30 transition-all">
-              <Shield className="w-8 h-8 text-red-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <div className="text-3xl font-display font-bold text-foreground"><AnimatedCounter value={platformStats.threatsAnalyzed} /></div>
-              <p className="text-sm text-muted-foreground mt-1">Threats Analyzed</p>
-            </div>
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 text-center group hover:border-primary/30 transition-all">
-              <Ship className="w-8 h-8 text-blue-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <div className="text-3xl font-display font-bold text-foreground"><AnimatedCounter value={platformStats.vesselsTracked} /></div>
-              <p className="text-sm text-muted-foreground mt-1">Vessels Tracked</p>
-            </div>
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 text-center group hover:border-primary/30 transition-all">
-              <Activity className="w-8 h-8 text-cyan-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <div className="text-3xl font-display font-bold text-foreground"><AnimatedCounter value={platformStats.signalsProcessed} /></div>
-              <p className="text-sm text-muted-foreground mt-1">Signals Processed</p>
-            </div>
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 text-center group hover:border-primary/30 transition-all">
-              <Cpu className="w-8 h-8 text-emerald-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <div className="text-3xl font-display font-bold text-foreground"><AnimatedCounter value={platformStats.uptime} suffix="%" /></div>
-              <p className="text-sm text-muted-foreground mt-1">Platform Uptime</p>
-            </div>
+            {[
+              { icon: Shield, color: "text-red-400", label: "Threats Analyzed", value: platformStats.threatsAnalyzed },
+              { icon: Ship, color: "text-blue-400", label: "Vessels Tracked", value: platformStats.vesselsTracked },
+              { icon: Activity, color: "text-cyan-400", label: "Signals Processed", value: platformStats.signalsProcessed },
+              { icon: Cpu, color: "text-emerald-400", label: "Platform Uptime", value: platformStats.uptime, suffix: "%" },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 text-center group hover:border-primary/30 transition-all"
+              >
+                <stat.icon className={`w-8 h-8 ${stat.color} mx-auto mb-3 group-hover:scale-110 transition-transform`} />
+                <div className="text-3xl font-display font-bold text-foreground">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+              </motion.div>
+            ))}
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <div className="lg:col-span-1 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="lg:col-span-1 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50"
+          >
             <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" /> App Health
             </h3>
@@ -123,9 +188,15 @@ export function IntelligenceSection() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="lg:col-span-1 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="lg:col-span-1 bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50"
+          >
             <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-cyan-400" /> Tech Trend Radar
             </h3>
@@ -137,53 +208,89 @@ export function IntelligenceSection() {
                     <span className="text-xs text-primary font-bold">{trend.momentum}%</span>
                   </div>
                   <div className="h-1.5 bg-border/30 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-primary to-cyan-400 rounded-full transition-all duration-1000" style={{ width: `${trend.momentum}%` }} />
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${trend.momentum}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: i * 0.1 }}
+                      className="h-full bg-gradient-to-r from-primary to-cyan-400 rounded-full"
+                    />
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="lg:col-span-1 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 flex flex-col">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-1 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 flex flex-col"
+          >
             <div className="p-6 pb-3">
               <h3 className="text-lg font-display font-bold text-foreground flex items-center gap-2">
                 <Brain className="w-5 h-5 text-purple-400" /> Ask Stephen AI
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">AI-powered assistant</p>
+              <p className="text-xs text-muted-foreground mt-1">AI-powered conversational assistant</p>
             </div>
             <div className="flex-1 px-6 overflow-y-auto max-h-[300px] space-y-3">
               {chatMessages.length === 0 && (
-                <div className="text-center py-8">
-                  <MessageSquare className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                  <p className="text-xs text-muted-foreground">Ask about SZL Holdings, our technology portfolio, or capabilities.</p>
+                <div className="text-center py-6">
+                  <Sparkles className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-xs text-muted-foreground mb-3">Ask about SZL Holdings, our technology portfolio, or capabilities.</p>
+                  <div className="space-y-2">
+                    {suggestedQuestions.map((q) => (
+                      <button
+                        key={q}
+                        onClick={() => { setChatInput(q); }}
+                        className="block w-full text-left text-xs px-3 py-2 rounded-lg border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all text-muted-foreground"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={`p-3 rounded-lg text-sm ${msg.role === "user" ? "bg-primary/10 text-foreground ml-6" : "bg-background/50 border border-border/30 mr-6"}`}>
-                  {msg.content}
-                </div>
-              ))}
-              {chatLoading && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground p-3">
-                  <Loader2 className="w-3 h-3 animate-spin" /> Thinking...
-                </div>
+              <AnimatePresence>
+                {chatMessages.map((msg, i) => (
+                  <ChatBubble key={i} role={msg.role as "user" | "assistant"} content={msg.content} />
+                ))}
+              </AnimatePresence>
+              {chatLoading && streamingText && (
+                <ChatBubble role="assistant" content={streamingText} isStreaming />
               )}
+              {chatLoading && !streamingText && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-white/5 rounded-2xl rounded-bl-sm mr-auto border border-white/10"
+                >
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                  Thinking...
+                </motion.div>
+              )}
+              <div ref={chatEndRef} />
             </div>
             <div className="p-4 border-t border-border/30">
               <div className="flex gap-2">
                 <input
-                  className="flex-1 bg-background/50 border border-border/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                  className="flex-1 bg-background/50 border border-border/30 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-primary/50 transition-colors"
                   placeholder="Ask anything..."
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && sendChat()}
                 />
-                <button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50">
+                <button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} className="p-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50">
                   <Send className="w-4 h-4" />
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
