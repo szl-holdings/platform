@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Brain, Activity, AlertTriangle, Radio, Loader2, Zap, TrendingUp, FileText } from "lucide-react";
 import { AnomalySparkline, SeverityMeter, TypewriterText, AnimatedGauge } from "@workspace/shared-ui/ai-components";
 
@@ -22,7 +22,11 @@ export default function AIOps() {
     setSitrepDone(false);
     try {
       const result = await apiFetch<any>("/intelligence/ai/situation-report", { method: "POST" });
-      setSitrepText(result.report || result.content || "Situation report generated.");
+      const summaryText = result.summary?.summary || result.summary || "";
+      const statsLine = result.stats
+        ? `\n\nStats: ${result.stats.totalThreats} threats, ${result.stats.criticalCves} critical CVEs, ${result.stats.activeAnomalies} active anomalies, ${result.stats.geoEvents} geo events.`
+        : "";
+      setSitrepText((summaryText + statsLine) || "Situation report generated.");
     } catch {
       setSitrepText("Unable to generate situation report at this time.");
     }

@@ -1,7 +1,7 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Shield, AlertTriangle, Brain, Radio, Crosshair, Activity, Loader2, Zap, FileText } from "lucide-react";
-import { SeverityMeter, TypewriterText, AnomalySparkline, useStreamingText, StreamingText } from "@workspace/shared-ui/ai-components";
+import { SeverityMeter, TypewriterText, AnomalySparkline } from "@workspace/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -15,10 +15,6 @@ export default function ThreatIntelAI() {
   const { data: threats = [] } = useQuery({ queryKey: ["threat-data"], queryFn: () => apiFetch<any[]>("/intelligence/threats") });
   const { data: anomalies = [] } = useQuery({ queryKey: ["threat-anomalies"], queryFn: () => apiFetch<any[]>("/intelligence/anomalies") });
 
-  const briefingMutation = useMutation({
-    mutationFn: () => apiFetch<any>("/intelligence/ai/threat-briefing", { method: "POST" }),
-  });
-
   const [briefingText, setBriefingText] = useState("");
   const [briefingDone, setBriefingDone] = useState(false);
 
@@ -27,7 +23,9 @@ export default function ThreatIntelAI() {
     setBriefingDone(false);
     try {
       const result = await apiFetch<any>("/intelligence/ai/threat-briefing", { method: "POST" });
-      setBriefingText(result.briefing || result.content || "Briefing generated.");
+      const summary = result.analysis?.summary?.summary || result.analysis?.summary || "";
+      const threatNames = (result.threats || []).map((t: any) => `${t.name} (${t.severity})`).join(", ");
+      setBriefingText(summary || `Active threats: ${threatNames}` || "Briefing generated.");
     } catch {
       setBriefingText("Unable to generate briefing at this time.");
     }
@@ -36,13 +34,6 @@ export default function ThreatIntelAI() {
 
   const criticalCves = cves.filter((c: any) => c.severity === "CRITICAL");
   const highCves = cves.filter((c: any) => c.severity === "HIGH");
-  const criticalThreats = threats.filter((t: any) => t.severity === "critical");
-
-  const anomalyData = anomalies.map((a: any) => a.value || Math.random() * 100);
-  const anomalyPeaks = anomalies.reduce((acc: number[], a: any, i: number) => {
-    if (a.severity === "high" || a.severity === "critical") acc.push(i);
-    return acc;
-  }, []);
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">

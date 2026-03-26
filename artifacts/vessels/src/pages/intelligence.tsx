@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import { Shield, Anchor, AlertTriangle, Brain, Radio, Ship, Globe, Activity, Loader2, Navigation } from "lucide-react";
-import { NERHighlight, AnimatedGauge, SeverityMeter, useStreamingText, StreamingText } from "@workspace/shared-ui/ai-components";
+import { useState } from "react";
+import { Shield, AlertTriangle, Brain, Radio, Ship, Loader2, Navigation } from "lucide-react";
+import { NERHighlight, AnimatedGauge, SeverityMeter } from "@workspace/shared-ui/ai-components";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -37,8 +37,11 @@ export default function VesselsIntelligence() {
     { label: "Chokepoint Risk", value: 78, color: "red" as const },
   ];
 
-  const sanctionEntities = sanctions?.entities || [];
-  const sanctionText = sanctions?.text || "Loading sanctions data...";
+  const sanctionsArray: any[] = Array.isArray(sanctions) ? sanctions : [];
+  const allEntities = sanctionsArray.flatMap((v: any) => v.entities || []);
+  const sanctionText = sanctionsArray.length > 0
+    ? sanctionsArray.map((v: any) => `${v.name} flagged under ${v.flag} for ${v.reason}`).join(". ")
+    : "Loading sanctions data...";
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -69,13 +72,13 @@ export default function VesselsIntelligence() {
           </h3>
           <p className="text-xs text-slate-500 mb-3">NER-highlighted entities detected in sanctions data</p>
           <div className="bg-black/30 rounded-xl p-4 border border-white/5 max-h-[300px] overflow-y-auto">
-            <NERHighlight text={sanctionText} entities={sanctionEntities} className="text-sm text-slate-300" />
+            <NERHighlight text={sanctionText} entities={allEntities} className="text-sm text-slate-300" />
           </div>
-          {sanctionEntities.length > 0 && (
+          {allEntities.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="text-[10px] text-slate-500">Detected:</span>
               {["PER", "ORG", "LOC", "MISC"].map((type) => {
-                const count = sanctionEntities.filter((e: any) => e.entity === type).length;
+                const count = allEntities.filter((e: any) => e.entity === type).length;
                 if (!count) return null;
                 return (
                   <span key={type} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-400">

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Brain, Search, Activity, AlertTriangle, Loader2, Zap, Server, Database, Shield } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Brain, Search, Activity, AlertTriangle, Loader2, Zap, Server } from "lucide-react";
 import { AnomalySparkline, SeverityMeter, TypewriterText } from "@workspace/shared-ui/ai-components";
 
 const API_BASE = "/api";
