@@ -1,6 +1,6 @@
 import { Shell } from "@/components/layout/shell";
 import { useScoreHistory, useDimensions } from "@/hooks/use-readiness";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from "date-fns";
@@ -15,14 +15,15 @@ export default function Trends() {
     return (
       <Shell>
         <div className="h-full flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <span className="text-sm text-muted-foreground animate-pulse">Analyzing trends...</span>
+          </div>
         </div>
       </Shell>
     );
   }
 
-  // Process data for charts
-  // Create a map of dates to scores for each dimension
   const dateMap = new Map<string, any>();
   
   history?.forEach(h => {
@@ -37,23 +38,58 @@ export default function Trends() {
     }
   });
 
-  const chartData = Array.from(dateMap.values()).reverse(); // Sort oldest to newest roughly
+  const chartData = Array.from(dateMap.values()).reverse();
   
-  // Pick top 3 dimensions to graph so it's not too cluttered
   const topDims = dimensions?.slice(0, 3) || [];
   const colors = ['hsl(var(--primary))', 'hsl(var(--warning))', 'hsl(var(--destructive))'];
+  const colorNames = ['text-primary', 'text-warning', 'text-destructive'];
 
   return (
     <Shell>
       <div className="p-8 pb-20 space-y-8">
-        <header>
-          <h1 className="text-4xl font-display font-bold text-white tracking-tight">Trend History</h1>
-          <p className="text-muted-foreground mt-2 text-lg">Readiness score progression over time.</p>
+        <header className="flex items-end justify-between">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Trend History</h1>
+            <p className="text-muted-foreground mt-2 text-lg">Readiness score progression over time.</p>
+          </motion.div>
         </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {topDims.map((d, i) => {
+            const latestScores = history?.filter(h => h.dimensionId === d.id).sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime());
+            const latest = latestScores?.[0]?.score || d.currentScore;
+            const prev = latestScores?.[1]?.score || latest;
+            const diff = latest - prev;
+
+            return (
+              <motion.div
+                key={d.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="glass-panel rounded-2xl p-5 relative overflow-hidden"
+              >
+                <div className={`absolute right-0 top-0 w-16 h-16 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2 pointer-events-none`} style={{ backgroundColor: colors[i], opacity: 0.1 }} />
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[i] }} />
+                  <span className="text-sm text-muted-foreground font-medium truncate">{d.name}</span>
+                </div>
+                <div className="flex items-end gap-2">
+                  <span className="text-3xl font-display font-bold text-white">{latest}</span>
+                  <div className={`flex items-center gap-0.5 text-xs font-semibold mb-1 ${diff > 0 ? 'text-success' : diff < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {diff > 0 ? <TrendingUp className="w-3 h-3" /> : diff < 0 ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                    {diff > 0 ? '+' : ''}{diff.toFixed(1)}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
           className="glass-panel rounded-3xl p-8"
         >
           <h3 className="text-xl font-bold text-white font-display mb-8">Score Trajectory (Key Dimensions)</h3>
@@ -97,7 +133,9 @@ export default function Trends() {
                     stroke={colors[i]} 
                     strokeWidth={3}
                     fillOpacity={1} 
-                    fill={`url(#color-${i})`} 
+                    fill={`url(#color-${i})`}
+                    animationDuration={1500}
+                    animationEasing="ease-out"
                   />
                 ))}
               </AreaChart>
