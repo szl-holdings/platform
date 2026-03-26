@@ -286,6 +286,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -545,6 +548,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -737,6 +743,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -929,6 +938,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1304,6 +1316,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1496,6 +1511,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1688,6 +1706,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1880,6 +1901,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/shared-ui':
+        specifier: workspace:*
+        version: link:../../lib/shared-ui
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -2044,6 +2068,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
 
   lib/utils:
     devDependencies:

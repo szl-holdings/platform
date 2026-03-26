@@ -1,6 +1,8 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
+import { AgentCopilot } from "@workspace/shared-ui/copilot";
+import { museConfig } from "@workspace/shared-ui/copilot-configs";
 import { Workspace } from "@/pages/workspace";
 import { CampaignDetail } from "@/pages/campaign-detail";
 import { AIStudio } from "@/pages/ai-studio";
@@ -28,6 +30,7 @@ function App() {
           <Router />
         </Layout>
       </WouterRouter>
+      <AgentCopilot config={museConfig} />
     </QueryClientProvider>
   );
 }

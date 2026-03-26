@@ -2,6 +2,8 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AgentCopilot } from "@workspace/shared-ui/copilot";
+import { compassConfig } from "@workspace/shared-ui/copilot-configs";
 
 // Pages
 import Dashboard from "@/pages/dashboard";
@@ -48,6 +50,7 @@ function App() {
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
+      <AgentCopilot config={compassConfig} />
     </QueryClientProvider>
   );
 }

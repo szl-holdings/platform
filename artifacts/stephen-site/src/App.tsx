@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-quer
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import { AgentCopilot } from "@workspace/shared-ui/copilot";
+import { stephenAIConfig } from "@workspace/shared-ui/copilot-configs";
 import { Home } from "@/pages/Home";
 import CheckoutSuccess from "@/pages/checkout-success";
 import CheckoutCancel from "@/pages/checkout-cancel";
@@ -80,6 +82,7 @@ function App() {
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
+      <AgentCopilot config={stephenAIConfig} />
     </QueryClientProvider>
   );
 }

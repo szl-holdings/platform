@@ -9,7 +9,9 @@
     "./animations": "./src/animations.ts",
     "./components": "./src/components.ts",
     "./themes": "./src/themes.ts",
-    "./premium-components": "./src/premium-components.ts"
+    "./premium-components": "./src/premium-components.ts",
+    "./copilot": "./src/copilot.tsx",
+    "./copilot-configs": "./src/copilot-configs.ts"
   },
   "dependencies": {
     "framer-motion": "catalog:",
@@ -17,7 +19,16 @@
     "clsx": "catalog:",
     "tailwind-merge": "catalog:"
   },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": false },
+    "react-dom": { "optional": false }
+  },
   "devDependencies": {
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:"
   }
 }

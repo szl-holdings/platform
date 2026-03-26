@@ -253,6 +253,196 @@ export class AIAdapter extends ServiceAdapter {
     };
   }
 
+  async *streamChatCompletion(
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): AsyncGenerator<string, void, unknown> {
+    if (!this.isLive) {
+      yield* this.mockStreamCompletion();
+      return;
+    }
+
+    const streamProviders: Array<() => AsyncGenerator<string, void, unknown>> = [];
+
+    if (this.hasReplitProxy) {
+      streamProviders.push(() => this.replitProxyStream(messages, options));
+    }
+    if (this.openaiKey) {
+      streamProviders.push(() => this.openaiStream(messages, options));
+    }
+    if (this.anthropicKey) {
+      streamProviders.push(() => this.anthropicStream(messages, options));
+    }
+
+    for (const tryProvider of streamProviders) {
+      try {
+        yield* tryProvider();
+        return;
+      } catch {
+        continue;
+      }
+    }
+
+    yield* this.mockStreamCompletion();
+  }
+
+  private async *replitProxyStream(
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): AsyncGenerator<string, void, unknown> {
+    yield* this.openaiCompatibleStream(
+      `${this.replitProxyUrl}/chat/completions`,
+      this.replitProxyKey!,
+      messages,
+      options,
+    );
+  }
+
+  private async *openaiStream(
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): AsyncGenerator<string, void, unknown> {
+    yield* this.openaiCompatibleStream(
+      "https://api.openai.com/v1/chat/completions",
+      this.openaiKey!,
+      messages,
+      options,
+    );
+  }
+
+  private async *anthropicStream(
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): AsyncGenerator<string, void, unknown> {
+    const model = options?.model ?? "claude-sonnet-4-20250514";
+    const systemMessage = messages.find((m) => m.role === "system");
+    const nonSystemMessages = messages.filter((m) => m.role !== "system");
+
+    const body: Record<string, unknown> = {
+      model,
+      max_tokens: options?.maxTokens ?? 1024,
+      messages: nonSystemMessages,
+      stream: true,
+    };
+    if (systemMessage) {
+      body["system"] = systemMessage.content;
+    }
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": this.anthropicKey!,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Anthropic stream error: ${response.status} ${response.statusText}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No response body");
+
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        const data = trimmed.slice(6);
+        if (data === "[DONE]") return;
+        try {
+          const parsed = JSON.parse(data) as {
+            type?: string;
+            delta?: { type?: string; text?: string };
+          };
+          if (parsed.type === "content_block_delta" && parsed.delta?.text) {
+            yield parsed.delta.text;
+          }
+          if (parsed.type === "message_stop") return;
+        } catch {
+          continue;
+        }
+      }
+    }
+  }
+
+  private async *openaiCompatibleStream(
+    url: string,
+    apiKey: string,
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): AsyncGenerator<string, void, unknown> {
+    const model = options?.model ?? "gpt-4o-mini";
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: options?.maxTokens ?? 1024,
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Stream error: ${response.status} ${response.statusText}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No response body");
+
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith("data: ")) continue;
+        const data = trimmed.slice(6);
+        if (data === "[DONE]") return;
+        try {
+          const parsed = JSON.parse(data) as {
+            choices: Array<{ delta: { content?: string } }>;
+          };
+          const content = parsed.choices[0]?.delta?.content;
+          if (content) yield content;
+        } catch {
+          continue;
+        }
+      }
+    }
+  }
+
+  private async *mockStreamCompletion(): AsyncGenerator<string, void, unknown> {
+    const response = MOCK_RESPONSES[Math.floor(Math.random() * MOCK_RESPONSES.length)]!;
+    const words = response.split(" ");
+    for (const word of words) {
+      yield word + " ";
+      await new Promise((r) => setTimeout(r, 50));
+    }
+  }
+
   private async mockChatCompletion(
     _messages: ChatMessage[],
   ): Promise<ChatCompletionResult> {

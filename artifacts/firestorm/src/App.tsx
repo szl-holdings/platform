@@ -2,6 +2,8 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { Flame, Shield, Target, Search, BarChart3, FileText, LayoutDashboard, Server, AlertTriangle, Wifi, WifiOff } from "lucide-react";
+import { AgentCopilot } from "@workspace/shared-ui/copilot";
+import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
 import AssessmentDashboard from "@/pages/assessment-dashboard";
 import ScenarioLibrary from "@/pages/scenario-library";
@@ -178,6 +180,7 @@ function App() {
         </div>
         <Toaster />
       </WouterRouter>
+      <AgentCopilot config={sentinelConfig} />
     </QueryClientProvider>
   );
 }

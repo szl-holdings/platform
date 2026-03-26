@@ -707,6 +707,38 @@ router.get("/intelligence/ai/health", intelRateLimit, authMiddleware({ required:
   } catch (err) { handleRouteError(res, err, "Failed to get AI health status"); }
 });
 
+router.post("/intelligence/ai/chat/stream", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { messages, model, maxTokens } = req.body;
+    if (!messages || !Array.isArray(messages)) { sendError(res, "Messages array is required", 400); return; }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders();
+
+    let closed = false;
+    req.on("close", () => { closed = true; });
+
+    try {
+      for await (const chunk of services.ai.streamChatCompletion(messages, { model, maxTokens })) {
+        if (closed) break;
+        res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+      }
+    } catch {
+      if (!closed) {
+        res.write(`data: ${JSON.stringify({ error: "Stream interrupted" })}\n\n`);
+      }
+    }
+
+    if (!closed) {
+      res.write("data: [DONE]\n\n");
+      res.end();
+    }
+  } catch (err) { handleRouteError(res, err, "Failed to stream chat completion"); }
+});
+
 router.post("/intelligence/ai/threat-briefing", aiRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
     const threats = await getCached("threats", 300000, fetchOtxThreats);

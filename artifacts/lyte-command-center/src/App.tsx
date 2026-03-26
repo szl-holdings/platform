@@ -1,6 +1,8 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
+import { AgentCopilot } from "@workspace/shared-ui/copilot";
+import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import Dashboard from "@/pages/dashboard";
 import Signals from "@/pages/signals";
 import Recommendations from "@/pages/recommendations";
@@ -43,6 +45,7 @@ function App() {
           <Router />
         </Layout>
       </WouterRouter>
+      <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>
   );
 }

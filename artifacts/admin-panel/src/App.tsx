@@ -2,6 +2,8 @@ import { Switch, Route, Router as WouterRouter, useLocation, Link } from "wouter
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AgentCopilot } from "@workspace/shared-ui/copilot";
+import { nexusConfig } from "@workspace/shared-ui/copilot-configs";
 import DashboardPage from "@/pages/dashboard";
 import AppsPage from "@/pages/apps";
 import ConnectorsPage from "@/pages/connectors";
@@ -228,6 +230,7 @@ function App() {
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
+      <AgentCopilot config={nexusConfig} />
     </QueryClientProvider>
   );
 }

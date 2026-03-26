@@ -2,6 +2,8 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff } from "lucide-react";
+import { AgentCopilot } from "@workspace/shared-ui/copilot";
+import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
 import FleetDashboard from "@/pages/fleet-dashboard";
 import VesselDetailPage from "@/pages/vessel-detail";
@@ -184,6 +186,7 @@ function App() {
         </div>
         <Toaster />
       </WouterRouter>
+      <AgentCopilot config={helmsmanConfig} />
     </QueryClientProvider>
   );
 }
