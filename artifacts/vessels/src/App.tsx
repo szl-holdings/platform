@@ -1,10 +1,11 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
-import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff } from "lucide-react";
+import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
+import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import FleetDashboard from "@/pages/fleet-dashboard";
 import VesselDetailPage from "@/pages/vessel-detail";
 import RoutePlanningPage from "@/pages/route-planning";
@@ -13,20 +14,64 @@ import WeatherPage from "@/pages/weather-page";
 import SimulationsPage from "@/pages/simulations-page";
 import MaritimeIntelligence from "@/pages/maritime-intelligence";
 import VesselsIntelligence from "@/pages/intelligence";
-import { Globe, Brain } from "lucide-react";
+import FleetAPMPage from "@/pages/fleet-apm";
+import InfrastructurePage from "@/pages/infrastructure";
+import LogsExplorerPage from "@/pages/logs-explorer";
+import DigitalExperiencePage from "@/pages/digital-experience";
+import SyntheticsCompliancePage from "@/pages/synthetics-compliance";
+import CO2EmissionsPage from "@/pages/co2-emissions";
+import AppliedIntelligencePage from "@/pages/applied-intelligence";
+import { useState } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
-const navItems = [
-  { path: "/", label: "Fleet Dashboard", icon: LayoutDashboard },
-  { path: "/intelligence", label: "Maritime Intel", icon: Globe },
-  { path: "/routes", label: "Route Planning", icon: Navigation },
-  { path: "/weather", label: "Weather Impact", icon: CloudRain },
-  { path: "/simulations", label: "Simulations", icon: Activity },
-  { path: "/ai-intel", label: "AI Intelligence", icon: Brain },
-  { path: "/alerts", label: "Alert Center", icon: AlertTriangle },
+interface NavSection {
+  title: string;
+  items: { path: string; label: string; icon: typeof LayoutDashboard; roles?: UserRole[] }[];
+}
+
+const navSections: NavSection[] = [
+  {
+    title: "Overview",
+    items: [
+      { path: "/", label: "Command Center", icon: LayoutDashboard },
+      { path: "/intelligence", label: "Maritime Intel", icon: Globe },
+      { path: "/fleet-apm", label: "Fleet APM", icon: BarChart3 },
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      { path: "/infrastructure", label: "Infrastructure", icon: Cog, roles: ["ops", "maintenance", "exec"] },
+      { path: "/routes", label: "Route Planning", icon: Navigation, roles: ["ops", "exec"] },
+      { path: "/weather", label: "Weather Impact", icon: CloudRain, roles: ["ops", "exec"] },
+      { path: "/simulations", label: "Simulations", icon: Activity, roles: ["ops", "exec"] },
+    ],
+  },
+  {
+    title: "Monitoring",
+    items: [
+      { path: "/logs", label: "Logs Explorer", icon: ScrollText },
+      { path: "/alerts", label: "Alert Center", icon: AlertTriangle },
+      { path: "/digital-experience", label: "Digital Experience", icon: Package, roles: ["ops", "exec"] },
+    ],
+  },
+  {
+    title: "Compliance & Environment",
+    items: [
+      { path: "/synthetics", label: "Synthetics/Compliance", icon: ShieldCheck, roles: ["compliance", "exec"] },
+      { path: "/co2-emissions", label: "CO2 & Emissions", icon: Leaf, roles: ["compliance", "exec", "ops"] },
+    ],
+  },
+  {
+    title: "Intelligence",
+    items: [
+      { path: "/applied-intelligence", label: "Applied Intelligence", icon: Brain },
+      { path: "/ai-intel", label: "AI Intelligence", icon: Brain },
+    ],
+  },
 ];
 
 interface AppHealthSummary {
@@ -107,8 +152,53 @@ function DemoModeBanner() {
   );
 }
 
+function RoleSelector() {
+  const { user, setRole } = useAuth();
+  const [open, setOpen] = useState(false);
+  const roles: UserRole[] = ["exec", "ops", "compliance", "maintenance"];
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 w-full p-2.5 rounded-lg hover:bg-muted transition-colors text-left"
+      >
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+          <User className="w-4 h-4 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold truncate">{user.name}</p>
+          <p className="text-[10px] text-muted-foreground">{roleLabels[user.role]}</p>
+        </div>
+        <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-0 right-0 mb-1 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="p-2 border-b border-border">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider px-2">Switch Role</p>
+          </div>
+          {roles.map(r => (
+            <button
+              key={r}
+              onClick={() => { setRole(r); setOpen(false); }}
+              className={cn(
+                "w-full text-left px-3 py-2 text-xs transition-colors",
+                user.role === r ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              {roleLabels[r]}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Sidebar() {
   const [location] = useLocation();
+  const { user } = useAuth();
+
   return (
     <aside className="w-64 bg-card border-r border-border flex flex-col h-screen sticky top-0">
       <div className="p-5 border-b border-border">
@@ -122,28 +212,42 @@ function Sidebar() {
           </div>
         </div>
       </div>
-      <nav className="flex-1 p-3 space-y-1">
-        {navItems.map(({ path, label, icon: Icon }) => {
-          const isActive = path === "/" ? location === "/" : location.startsWith(path);
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+        {navSections.map((section) => {
+          const visibleItems = section.items.filter(item => !item.roles || item.roles.includes(user.role));
+          if (visibleItems.length === 0) return null;
           return (
-            <Link key={path} href={path}>
-              <div className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
-                isActive
-                  ? "bg-primary/10 text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted hover:translate-x-0.5"
-              )}>
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
-                )}
-                <Icon className={cn("w-4 h-4 transition-transform duration-200", isActive && "scale-110")} />
-                {label}
+            <div key={section.title}>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider px-3 mb-1.5 font-medium">{section.title}</p>
+              <div className="space-y-0.5">
+                {visibleItems.map(({ path, label, icon: Icon }) => {
+                  const isActive = path === "/" ? location === "/" : location.startsWith(path);
+                  return (
+                    <Link key={path} href={path}>
+                      <div className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
+                        isActive
+                          ? "bg-primary/10 text-primary shadow-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted hover:translate-x-0.5"
+                      )}>
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
+                        )}
+                        <Icon className={cn("w-4 h-4 transition-transform duration-200", isActive && "scale-110")} />
+                        {label}
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
-            </Link>
+            </div>
           );
         })}
       </nav>
       <IntegrationStatusFooter />
+      <div className="border-t border-border">
+        <RoleSelector />
+      </div>
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Anchor className="w-3 h-3" />
@@ -160,6 +264,13 @@ function AppRouter() {
       <Route path="/" component={FleetDashboard} />
       <Route path="/intelligence" component={MaritimeIntelligence} />
       <Route path="/ai-intel" component={VesselsIntelligence} />
+      <Route path="/fleet-apm" component={FleetAPMPage} />
+      <Route path="/infrastructure" component={InfrastructurePage} />
+      <Route path="/logs" component={LogsExplorerPage} />
+      <Route path="/digital-experience" component={DigitalExperiencePage} />
+      <Route path="/synthetics" component={SyntheticsCompliancePage} />
+      <Route path="/co2-emissions" component={CO2EmissionsPage} />
+      <Route path="/applied-intelligence" component={AppliedIntelligencePage} />
       <Route path="/vessel/:id" component={VesselDetailPage} />
       <Route path="/routes" component={RoutePlanningPage} />
       <Route path="/weather" component={WeatherPage} />
@@ -177,18 +288,20 @@ function AppRouter() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex h-screen bg-background">
-          <Sidebar />
-          <div className="flex-1 flex flex-col overflow-auto">
-            <DemoModeBanner />
-            <main className="flex-1 overflow-auto">
-              <AppRouter />
-            </main>
+      <AuthProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <div className="flex h-screen bg-background">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-auto">
+              <DemoModeBanner />
+              <main className="flex-1 overflow-auto">
+                <AppRouter />
+              </main>
+            </div>
           </div>
-        </div>
-        <Toaster />
-      </WouterRouter>
+          <Toaster />
+        </WouterRouter>
+      </AuthProvider>
       <AgentCopilot config={helmsmanConfig} />
     </QueryClientProvider>
   );
