@@ -63,3 +63,16 @@ All frontends use:
 - Never commit `package-lock.json` or `yarn.lock`.
 - Run `pnpm run typecheck` before committing to catch type errors across the monorepo.
 - Each artifact reads its port from the `PORT` environment variable.
+
+## General Guidelines
+
+- Never hardcode secrets or credentials — use environment variables or a secrets manager.
+- Use explicit error handling — avoid swallowing errors silently. Throw or log with context.
+- Use strict TypeScript typing — avoid `any`. Prefer narrowing, generics, and discriminated unions.
+- Keep functions focused — each function should do one thing well.
+- Write self-documenting code — use descriptive variable and function names over comments.
+- Prefer immutable data patterns — use `const`, `readonly`, and spread operators over mutation.
+- Validate external inputs — never trust data from APIs, forms, or query parameters without validation.
+- Follow the principle of least privilege — request only the permissions and access you need.
+- Keep dependencies minimal — avoid adding packages for trivial functionality.
+- Use consistent naming conventions — camelCase for variables/functions, PascalCase for types/components.

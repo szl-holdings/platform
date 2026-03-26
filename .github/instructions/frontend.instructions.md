@@ -24,3 +24,13 @@ applyTo: "artifacts/**/*.{ts,tsx,jsx,css}"
 - Use `catalog:` version references in `package.json` for shared dependencies.
 - Use `workspace:*` for internal `@workspace/*` packages.
 - Port is read from the `PORT` environment variable.
+
+### Accessibility & best practices
+
+- Use semantic HTML elements (`<nav>`, `<main>`, `<section>`, `<article>`, `<button>`) over generic `<div>`.
+- Ensure all interactive elements are keyboard-accessible and have visible focus indicators.
+- Provide `aria-label` or `aria-labelledby` for non-text interactive elements.
+- Use Radix UI primitives for built-in accessibility (focus trapping, screen reader support).
+- Build reusable components — extract repeated UI patterns into `src/components/ui/` or `@workspace/shared-ui`.
+- Co-locate component logic, styles, and tests — keep related files together.
+- Prefer composition over prop drilling — use React context or component composition patterns.
