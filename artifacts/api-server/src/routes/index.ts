@@ -37,6 +37,7 @@ router.use("/vessels", readLimiter);
 router.use("/intelligence", readLimiter);
 router.use("/inca", readLimiter);
 router.use("/booking", readLimiter);
+router.use("/holdings/inquiries", writeLimiter);
 router.use("/holdings", readLimiter);
 router.use("/audit", readLimiter);
 

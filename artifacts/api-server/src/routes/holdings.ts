@@ -47,4 +47,32 @@ router.get("/holdings/search", async (req, res) => {
   });
 });
 
+router.post("/holdings/inquiries", (req, res) => {
+  const { name, email, subject, message, company } = req.body || {};
+  const errors: string[] = [];
+  if (!name || typeof name !== "string" || !name.trim()) errors.push("Name is required");
+  if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push("Valid email is required");
+  if (!subject || typeof subject !== "string" || !subject.trim()) errors.push("Subject is required");
+  if (!message || typeof message !== "string" || message.trim().length < 10) errors.push("Message must be at least 10 characters");
+  if (company != null && typeof company !== "string") errors.push("Company must be a string");
+  if (errors.length > 0) {
+    res.status(400).json({ error: "Validation failed", details: errors });
+    return;
+  }
+  const companyValue = typeof company === "string" ? company.trim() : null;
+  console.log(`[holdings] New inquiry received - subject: ${subject}`);
+  res.status(201).json({
+    success: true,
+    data: {
+      id: `inq_${Date.now()}`,
+      name: name.trim(),
+      email: email.trim(),
+      company: companyValue || null,
+      subject: subject.trim(),
+      message: message.trim(),
+      receivedAt: new Date().toISOString(),
+    },
+  });
+});
+
 export default router;

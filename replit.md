@@ -62,6 +62,7 @@ A premium dark-mode-forward design system is implemented via `@workspace/shared-
 - **Readiness Report:** Readiness assessment app with demo mode banner and integration status sidebar footer.
 - **Lyte Command Center:** Incident/Signal command center with demo mode banner and integration status sidebar footer.
 - **Stephen-site:** Additional portfolio/personal site with demo mode banner and integration status sidebar footer.
+- **SZL Holdings (`szl-holdings`):** Premium corporate umbrella portal at `/szl-holdings/` serving as the investor/client-facing entry point for the SZL ecosystem. Features: animated hero section, interactive constellation/network canvas visualization of portfolio companies, filterable portfolio catalog with status badges (Live/Beta/In Development), animated milestone timeline, innovation pillars section (AI/ML, Cybersecurity, Maritime, Creative Tech, Consulting), leadership/vision section, validated inquiry contact form (posts to `/api/holdings/inquiries`), and full footer. All content is config-driven via JSON files in `src/data/` (portfolio.json, milestones.json, pillars.json, site.json). Uses Framer Motion for scroll-triggered animations. Fully mobile responsive with hamburger navigation. Open Graph and social preview metadata configured.
 
 **Shared Libraries:**
 - `lib/config` includes `APP_INTEGRATIONS` mapping all 10 apps to their connector dependencies (including SZL Holdings, INCA, Carlota Jo).

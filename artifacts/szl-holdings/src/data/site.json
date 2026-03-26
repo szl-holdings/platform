@@ -1,0 +1,105 @@
+{
+  "company": {
+    "name": "SZL Holdings",
+    "tagline": "Strategic Innovation. Unified Technology.",
+    "description": "A premier technology holding company building the future through AI-powered platforms across maritime intelligence, cybersecurity, creative technology, and strategic consulting.",
+    "founded": "2021",
+    "headquarters": "Global Operations",
+    "email": "info@szlholdings.com"
+  },
+  "nav": {
+    "links": [
+      { "label": "Ecosystem", "href": "#ecosystem" },
+      { "label": "Portfolio", "href": "#portfolio" },
+      { "label": "Timeline", "href": "#timeline" },
+      { "label": "Innovation", "href": "#pillars" },
+      { "label": "Leadership", "href": "#leadership" },
+      { "label": "Contact", "href": "#contact" }
+    ],
+    "ctaLabel": "Get in Touch"
+  },
+  "hero": {
+    "headline": "Building Tomorrow's",
+    "headlineAccent": "Technology Ecosystem",
+    "subheadline": "SZL Holdings unites a portfolio of innovative technology companies driving transformation across maritime intelligence, cybersecurity, creative production, and AI-powered consulting.",
+    "cta": "Explore Our Ecosystem",
+    "ctaSecondary": "Contact Us",
+    "badge": "Est. 2021 \u00b7 Global Operations"
+  },
+  "ecosystem": {
+    "title": "The SZL Ecosystem",
+    "subtitle": "An interconnected network of technology platforms, each amplifying the capabilities of the others.",
+    "legendLabels": {
+      "live": "Live",
+      "beta": "Beta",
+      "inDevelopment": "In Development"
+    },
+    "canvasAriaLabel": "Interactive ecosystem visualization showing SZL Holdings connected to portfolio companies"
+  },
+  "portfolio": {
+    "title": "Portfolio Companies",
+    "subtitle": "Each platform is purpose-built for its domain while sharing infrastructure and intelligence across the ecosystem.",
+    "filterAllLabel": "All",
+    "visitLabel": "Visit",
+    "comingSoonLabel": "Coming Soon"
+  },
+  "timeline": {
+    "title": "Our Journey",
+    "subtitle": "From founding vision to global technology ecosystem — key milestones in the SZL Holdings story."
+  },
+  "pillars": {
+    "title": "Innovation Pillars",
+    "subtitle": "Five strategic domains where SZL Holdings drives measurable impact through technology and expertise."
+  },
+  "leadership": {
+    "title": "Vision & Leadership",
+    "quote": "We believe the most impactful technology companies are built at the intersection of deep domain expertise and cutting-edge innovation. SZL Holdings exists to find those intersections and build category-defining platforms.",
+    "attribution": "SZL Holdings Executive Team",
+    "vision": "Our vision is to create an interconnected ecosystem where each portfolio company amplifies the capabilities of the others — sharing data, infrastructure, and intelligence to deliver solutions greater than the sum of their parts.",
+    "values": [
+      { "title": "Innovation First", "description": "We invest in technologies that don't just improve processes — they redefine what's possible." },
+      { "title": "Domain Mastery", "description": "Every portfolio company is built by teams with deep expertise in their respective industries." },
+      { "title": "Ecosystem Thinking", "description": "Our platforms are designed to interoperate, creating compounding value across the entire portfolio." },
+      { "title": "Measured Impact", "description": "We track outcomes relentlessly, ensuring every initiative delivers measurable results for our stakeholders." }
+    ]
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "subtitle": "Whether you're an investor, potential partner, or exploring collaboration opportunities, we'd love to hear from you.",
+    "fields": ["name", "email", "company", "subject", "message"],
+    "labels": {
+      "name": "Name *",
+      "email": "Email *",
+      "company": "Company",
+      "subject": "Subject *",
+      "message": "Message *"
+    },
+    "placeholders": {
+      "name": "Your full name",
+      "email": "your@email.com",
+      "company": "Your company (optional)",
+      "subject": "Inquiry subject",
+      "message": "Tell us how we can help..."
+    },
+    "submitLabel": "Send Inquiry",
+    "submittingLabel": "Sending...",
+    "successMessage": "Thank you! Your inquiry has been submitted. We'll be in touch soon.",
+    "errorMessage": "Something went wrong. Please try again or email us directly."
+  },
+  "footer": {
+    "sections": {
+      "portfolio": "Portfolio",
+      "company": "Company",
+      "connect": "Connect"
+    },
+    "companyLinks": [
+      { "label": "Ecosystem", "href": "#ecosystem" },
+      { "label": "Portfolio", "href": "#portfolio" },
+      { "label": "Timeline", "href": "#timeline" },
+      { "label": "Innovation", "href": "#pillars" },
+      { "label": "Leadership", "href": "#leadership" }
+    ],
+    "contactUsLabel": "Contact Us",
+    "rightsReserved": "All rights reserved."
+  }
+}

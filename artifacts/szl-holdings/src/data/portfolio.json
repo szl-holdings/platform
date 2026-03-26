@@ -1,0 +1,74 @@
+[
+  {
+    "id": "vessels",
+    "name": "Vessels",
+    "tagline": "Maritime Intelligence Platform",
+    "description": "AI-powered maritime tracking and intelligence platform delivering real-time vessel monitoring, route optimization, and predictive analytics for global shipping operations.",
+    "status": "Live",
+    "category": "Maritime",
+    "link": "/vessels/",
+    "icon": "Ship",
+    "color": "#3b82f6",
+    "metrics": { "label": "Vessels Tracked", "value": "50K+" }
+  },
+  {
+    "id": "dreamscape",
+    "name": "Dreamscape",
+    "tagline": "Creative Technology Engine",
+    "description": "Next-generation creative production suite combining AI-driven design tools with collaborative workflows, empowering teams to produce world-class visual content at scale.",
+    "status": "Live",
+    "category": "Creative Tech",
+    "link": "/dreamscape/",
+    "icon": "Sparkles",
+    "color": "#a855f7",
+    "metrics": { "label": "Projects Delivered", "value": "10K+" }
+  },
+  {
+    "id": "firestorm",
+    "name": "Firestorm",
+    "tagline": "Cybersecurity Simulation Platform",
+    "description": "Enterprise-grade cybersecurity simulation and red-team training platform, enabling organizations to stress-test defenses through realistic threat scenarios.",
+    "status": "Live",
+    "category": "Cybersecurity",
+    "link": "/firestorm/",
+    "icon": "Shield",
+    "color": "#ef4444",
+    "metrics": { "label": "Simulations Run", "value": "25K+" }
+  },
+  {
+    "id": "lyte",
+    "name": "Lyte",
+    "tagline": "AI Command Center",
+    "description": "Centralized AI operations command center for orchestrating machine learning pipelines, model deployment, and intelligent automation across the enterprise.",
+    "status": "Beta",
+    "category": "AI/ML",
+    "link": "/lyte-command-center/",
+    "icon": "Zap",
+    "color": "#f59e0b",
+    "metrics": { "label": "Models Deployed", "value": "500+" }
+  },
+  {
+    "id": "inca",
+    "name": "INCA",
+    "tagline": "Intelligent Consulting Analytics",
+    "description": "Data-driven consulting platform leveraging predictive analytics and machine learning to deliver actionable insights for strategic business transformation.",
+    "status": "In Development",
+    "category": "Consulting",
+    "link": "#",
+    "icon": "BarChart3",
+    "color": "#10b981",
+    "metrics": { "label": "Insights Generated", "value": "Coming Soon" }
+  },
+  {
+    "id": "carlota-jo",
+    "name": "Carlota Jo",
+    "tagline": "Brand Intelligence Suite",
+    "description": "AI-enhanced brand strategy and market intelligence platform that synthesizes consumer data, competitive landscapes, and creative positioning into unified brand narratives.",
+    "status": "In Development",
+    "category": "Creative Tech",
+    "link": "#",
+    "icon": "Palette",
+    "color": "#ec4899",
+    "metrics": { "label": "Brands Analyzed", "value": "Coming Soon" }
+  }
+]
