@@ -21,6 +21,7 @@ import intelligenceRouter from "./intelligence";
 import incaRouter from "./inca";
 import bookingRouter from "./booking";
 import holdingsRouter from "./holdings";
+import carlotaJoRouter from "./carlota-jo";
 
 const router: IRouter = Router();
 
@@ -62,5 +63,6 @@ router.use(intelligenceRouter);
 router.use(incaRouter);
 router.use(bookingRouter);
 router.use(holdingsRouter);
+router.use(carlotaJoRouter);
 
 export default router;

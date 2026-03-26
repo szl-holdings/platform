@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "industry": "Financial Services",
+    "client": "A leading European private bank",
+    "challenge": "Declining market share in wealth management amid fintech disruption and shifting client demographics, with legacy technology infrastructure limiting digital engagement capabilities.",
+    "approach": "Conducted a comprehensive digital maturity assessment and competitive landscape analysis. Developed a three-phase transformation roadmap prioritizing client-facing digital capabilities while modernizing core banking infrastructure. Facilitated executive alignment workshops and established a dedicated transformation office.",
+    "results": "32% increase in digital client engagement within 18 months. Acquired 2,400 new high-net-worth clients through enhanced digital onboarding. Achieved $14M in operational cost savings through process automation.",
+    "duration": "18 months",
+    "service": "Technology Transformation"
+  },
+  {
+    "id": 2,
+    "industry": "Industrial Manufacturing",
+    "client": "A global specialty chemicals conglomerate",
+    "challenge": "Portfolio of 12 business units with varying growth profiles and margin structures, lacking a cohesive capital allocation strategy and carrying two underperforming divisions that were diluting overall returns.",
+    "approach": "Applied our proprietary portfolio valuation framework to assess each business unit across strategic fit, market attractiveness, competitive position, and financial performance. Modeled multiple portfolio configurations and developed a phased restructuring plan including targeted divestitures and reinvestment priorities.",
+    "results": "Successful divestiture of two non-core divisions generating $890M in proceeds. Reinvestment into three high-growth segments increased portfolio ROIC from 11.2% to 16.8%. Total shareholder return exceeded peer index by 24% over two years.",
+    "duration": "24 months",
+    "service": "Portfolio Optimization"
+  },
+  {
+    "id": 3,
+    "industry": "Healthcare & Life Sciences",
+    "client": "A mid-market pharmaceutical company",
+    "challenge": "Seeking to expand into adjacent therapeutic areas through acquisition but lacking in-house M&A capabilities and facing a compressed timeline due to patent cliff pressures on core revenue streams.",
+    "approach": "Built a strategic acquisition thesis aligned with the client's R&D pipeline and commercial capabilities. Identified and screened 40+ targets, shortlisting five for deep evaluation. Led commercial due diligence on the preferred target, developed the integration blueprint, and supported negotiation strategy through to close.",
+    "results": "Completed acquisition at a 12% discount to initial valuation. Integration delivered $45M in commercial synergies within first year. New therapeutic area now represents 28% of total revenue and is growing at 19% annually.",
+    "duration": "14 months",
+    "service": "M&A Advisory"
+  },
+  {
+    "id": 4,
+    "industry": "Technology & SaaS",
+    "client": "A Series D enterprise software company",
+    "challenge": "Plateauing growth at $180M ARR with enterprise sales cycles lengthening and increasing customer acquisition costs threatening path to profitability and upcoming IPO timeline.",
+    "approach": "Conducted deep customer segmentation analysis and win/loss review across 200+ enterprise opportunities. Redesigned the go-to-market model with differentiated approaches for each segment. Restructured pricing architecture and introduced a product-led growth motion for mid-market penetration.",
+    "results": "Reignited growth to 34% YoY from 18%. Reduced enterprise CAC by 28% through improved targeting. Mid-market segment grew from 12% to 31% of new bookings. Successfully completed IPO at $4.2B valuation.",
+    "duration": "12 months",
+    "service": "Growth Strategy"
+  }
+]

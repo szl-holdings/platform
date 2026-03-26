@@ -1,0 +1,61 @@
+[
+  {
+    "id": "strategy-session",
+    "name": "Strategy Session",
+    "type": "One-Time",
+    "price": "$4,500",
+    "priceNote": "per session",
+    "description": "A focused half-day engagement designed for executives seeking expert perspective on a specific strategic question or decision.",
+    "features": [
+      "4-hour executive workshop",
+      "Pre-session briefing & research",
+      "Dedicated senior partner",
+      "Strategic options analysis",
+      "Written executive summary",
+      "30-day follow-up call"
+    ],
+    "highlighted": false,
+    "cta": "Book Session"
+  },
+  {
+    "id": "portfolio-review",
+    "name": "Portfolio Review",
+    "type": "Engagement",
+    "price": "$45,000",
+    "priceNote": "per engagement",
+    "description": "A comprehensive 6-8 week engagement delivering deep analytical insight and actionable recommendations across your portfolio or strategic challenge.",
+    "features": [
+      "Dedicated engagement team",
+      "Comprehensive market analysis",
+      "Proprietary valuation framework",
+      "Stakeholder interview program",
+      "Board-ready deliverables",
+      "Implementation roadmap",
+      "60-day post-delivery support",
+      "Quarterly check-in for 12 months"
+    ],
+    "highlighted": true,
+    "cta": "Start Engagement"
+  },
+  {
+    "id": "advisory-retainer",
+    "name": "Advisory Retainer",
+    "type": "Ongoing",
+    "price": "$18,000",
+    "priceNote": "per month",
+    "description": "An ongoing advisory partnership providing continuous access to senior strategic counsel, ideal for organizations navigating sustained periods of transformation or growth.",
+    "features": [
+      "Named senior partner advisor",
+      "Monthly strategy sessions",
+      "Unlimited advisory calls",
+      "Priority engagement scheduling",
+      "Annual strategic review",
+      "Board meeting preparation",
+      "Executive team coaching",
+      "Industry intelligence briefings",
+      "Peer network introductions"
+    ],
+    "highlighted": false,
+    "cta": "Retain Advisory"
+  }
+]
