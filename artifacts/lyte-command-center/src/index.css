@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --animate-in: animate-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-out: animate-out 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  /* Enforce Dark Theme Globally for Executive Feel */
+  --background: 224 35% 6%;
+  --foreground: 210 40% 98%;
+
+  --card: 224 35% 8%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 224 35% 8%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 191 97% 47%;
+  --primary-foreground: 222 47% 11%;
+
+  --secondary: 220 25% 15%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 220 25% 15%;
+  --muted-foreground: 215 20.2% 65.1%;
+
+  --accent: 191 97% 47%;
+  --accent-foreground: 210 40% 98%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+
+  --warning: 38 92% 50%;
+  --warning-foreground: 48 96% 15%;
+
+  --success: 142 71% 45%;
+  --success-foreground: 144 80% 10%;
+
+  --border: 220 25% 18%;
+  --input: 220 25% 18%;
+  --ring: 191 97% 47%;
+
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased font-sans selection:bg-primary/30 selection:text-primary-foreground min-h-screen;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(6, 182, 212, 0.04), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.04), transparent 25%);
+    background-attachment: fixed;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer utilities {
+  .bg-glass {
+    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/60;
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+}

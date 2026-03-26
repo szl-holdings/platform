@@ -1,0 +1,12 @@
+packages:
+  "framer-motion": "For premium smooth layout transitions, modal animations, and staggered reveals"
+  "date-fns": "For formatting campaign deadlines and script version timestamps"
+
+images:
+  - path: "artifacts/dreamscape/public/images/studio-logo.png"
+    description: "Minimalist modern logo for a creative media studio named Dreamscape, striking gold geometric shape on dark transparent background"
+    aspect_ratio: "1:1"
+
+notes:
+  - "Using in-memory mock database for demo data as requested, accessed via standard TanStack Query hooks to match production API consumption patterns."
+  - "App forces a dark executive theme with warm amber/gold accents to fit the creative studio media production aesthetic."

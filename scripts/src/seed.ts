@@ -42,15 +42,27 @@ import {
   firestormSimulationRunsTable,
   firestormFindingsTable,
   firestormRiskScoresTable,
-  lyteProductsTable,
-  lyteOrdersTable,
-  lyteOrderItemsTable,
-  dreamscapeProjectsTable,
-  dreamscapeAssetsTable,
+  firestormCampaignsTable,
+  firestormLeadsTable,
+  firestormAnalyticsTable,
+  lyteWorkspacesTable,
+  lyteSignalsTable,
+  lyteCommandCardsTable,
+  lyteIncidentsTable,
+  lytePlaybooksTable,
+  lyteRecommendationsTable,
+  dreamscapeCampaignsTable,
+  dreamscapeScriptsTable,
+  dreamscapeStoryboardsTable,
+  dreamscapeVoiceAssetsTable,
+  dreamscapeCampaignAssetsTable,
   dreamscapeReviewsTable,
-  readinessAssessmentsTable,
-  readinessChecklistsTable,
-  readinessFindingsTable,
+  readinessProgramsTable,
+  readinessDimensionsTable,
+  readinessScoreHistoryTable,
+  readinessMilestonesTable,
+  readinessRisksTable,
+  readinessAlertsTable,
 } from "@workspace/db";
 import { randomBytes } from "crypto";
 
@@ -177,7 +189,7 @@ async function seed() {
     { key: "ai_assistant", name: "AI Assistant", description: "Enable AI-powered assistant in dashboard", isEnabled: true, rolloutPercentage: 50 },
     { key: "vessel_live_tracking", name: "Live Vessel Tracking", description: "Real-time AIS vessel position updates", isEnabled: false, rolloutPercentage: 0 },
     { key: "firestorm_ab_testing", name: "A/B Testing", description: "Campaign A/B testing features", isEnabled: true, rolloutPercentage: 25 },
-    { key: "lyte_checkout_v2", name: "Checkout V2", description: "New streamlined checkout experience", isEnabled: false, rolloutPercentage: 0 },
+    { key: "lyte_command_center", name: "Lyte Command Center", description: "Business observability command center", isEnabled: true, rolloutPercentage: 100 },
     { key: "readiness_pdf_export", name: "PDF Export", description: "Export readiness reports as PDF", isEnabled: true, rolloutPercentage: 100 },
   ]).returning();
   console.log(`  ✓ ${featureFlags.length} feature flags`);
@@ -212,10 +224,10 @@ async function seed() {
   await db.insert(appsRegistryTable).values([
     { slug: "stephen-site", name: "Stephen L. Portfolio", description: "Personal portfolio and consulting showcase", icon: "Globe", color: "#6366f1", status: "active", version: "1.0.0", isPublic: true },
     { slug: "vessels", name: "Vessels Tracker", description: "Maritime vessel tracking and cargo management", icon: "Ship", color: "#06b6d4", status: "active", version: "0.5.0" },
-    { slug: "firestorm", name: "Firestorm Security", description: "Security assessment simulation and risk scoring", icon: "Flame", color: "#f97316", status: "active", version: "0.3.0" },
-    { slug: "lyte", name: "Lyte Commerce", description: "E-commerce product and order management", icon: "ShoppingBag", color: "#a855f7", status: "coming_soon", version: "0.1.0" },
-    { slug: "dreamscape", name: "Dreamscape Creative", description: "Creative asset management and review", icon: "Palette", color: "#ec4899", status: "coming_soon", version: "0.1.0" },
-    { slug: "readiness", name: "Readiness Assessments", description: "Compliance and readiness assessment tools", icon: "Shield", color: "#10b981", status: "active", version: "0.4.0" },
+    { slug: "firestorm", name: "Firestorm Marketing", description: "Campaign management and lead generation", icon: "Flame", color: "#f97316", status: "active", version: "0.3.0" },
+    { slug: "lyte-command-center", name: "Lyte Command Center", description: "Business observability and operational decisions", icon: "Monitor", color: "#0ea5e9", status: "active", version: "1.0.0" },
+    { slug: "dreamscape", name: "Dreamscape Creative", description: "Creative campaign engine for storytelling and media", icon: "Palette", color: "#f59e0b", status: "active", version: "1.0.0" },
+    { slug: "readiness-report", name: "Readiness Report", description: "Maturity scoring and project status visibility", icon: "Shield", color: "#10b981", status: "active", version: "1.0.0" },
     { slug: "control-plane", name: "Admin Control Plane", description: "Platform administration and configuration", icon: "Settings", color: "#64748b", status: "active", version: "0.2.0" },
   ]);
   console.log("  ✓ apps registry");
@@ -253,9 +265,9 @@ async function seed() {
     { name: "SZL Portfolio Redesign", description: "Complete redesign of the SZL Holdings portfolio site", status: "active" },
     { name: "Vessels API Integration", description: "Integrate MarineTraffic API for live vessel data", status: "active" },
     { name: "Firestorm Campaign Engine", description: "Build automated campaign management system", status: "active" },
-    { name: "Lyte E-commerce MVP", description: "Minimum viable product for Lyte online store", status: "on-hold" },
-    { name: "Dreamscape Asset Pipeline", description: "Creative asset ingestion and review workflow", status: "active" },
-    { name: "Readiness Compliance Audit", description: "Q1 operational readiness audit framework", status: "completed" },
+    { name: "Lyte Command Center Build", description: "Business observability command center for portfolio operations", status: "active" },
+    { name: "Dreamscape Creative Pipeline", description: "Creative campaign engine for storytelling and media workflows", status: "active" },
+    { name: "Readiness Report Platform", description: "Portfolio-wide maturity scoring and readiness tracking", status: "completed" },
   ]).returning();
   console.log(`  ✓ ${projects.length} projects`);
 
@@ -405,68 +417,166 @@ async function seed() {
   ]);
   console.log("  ✓ firestorm risk scores");
 
-  const products = await db.insert(lyteProductsTable).values([
-    { name: "Premium Wireless Headphones", sku: "LYTE-WH-001", description: "Noise-canceling over-ear headphones", category: "Electronics", price: "29900", stockQuantity: 150, isActive: true },
-    { name: "Minimalist Desk Lamp", sku: "LYTE-DL-001", description: "LED desk lamp with adjustable brightness", category: "Home Office", price: "7900", stockQuantity: 300, isActive: true },
-    { name: "Organic Cotton T-Shirt", sku: "LYTE-TS-001", description: "Sustainably sourced cotton t-shirt", category: "Apparel", price: "3500", stockQuantity: 500, isActive: true },
-    { name: "Smart Water Bottle", sku: "LYTE-WB-001", description: "Temperature-tracking insulated bottle", category: "Accessories", price: "4900", stockQuantity: 200, isActive: true },
+  const [lyteWorkspace] = await db.insert(lyteWorkspacesTable).values([
+    { name: "SZL Operations Hub", description: "Primary command center for SZL Holdings portfolio operations", ownerId: String(users[0].id), settings: { timezone: "America/New_York", alertThreshold: "medium" } },
   ]).returning();
-  console.log(`  ✓ ${products.length} Lyte products`);
+  console.log("  ✓ Lyte workspace");
 
-  const orders = await db.insert(lyteOrdersTable).values([
-    { orderNumber: "LYTE-2024-0001", customerEmail: "customer1@example.com", customerName: "Alice Johnson", status: "delivered", subtotal: "33400", tax: "2672", total: "36072" },
-    { orderNumber: "LYTE-2024-0002", customerEmail: "customer2@example.com", customerName: "Bob Smith", status: "processing", subtotal: "29900", tax: "2392", total: "32292" },
-  ]).returning();
-
-  await db.insert(lyteOrderItemsTable).values([
-    { orderId: orders[0].id, productId: products[1].id, productName: "Minimalist Desk Lamp", quantity: 1, unitPrice: "7900" },
-    { orderId: orders[0].id, productId: products[2].id, productName: "Organic Cotton T-Shirt", quantity: 2, unitPrice: "3500" },
-    { orderId: orders[1].id, productId: products[0].id, productName: "Premium Wireless Headphones", quantity: 1, unitPrice: "29900" },
+  await db.insert(lyteSignalsTable).values([
+    { workspaceId: lyteWorkspace.id, source: "Stripe", sourceType: "connector", severity: "info", title: "Payment volume spike detected", body: "Transaction volume increased 35% over the last 4 hours compared to baseline", status: "new", metadata: { volumeIncrease: "35%", timeframe: "4h" } },
+    { workspaceId: lyteWorkspace.id, source: "Slack", sourceType: "connector", severity: "medium", title: "Slack API rate limit warning", body: "Approaching Slack API rate limits. 12 remaining calls in current window.", status: "acknowledged", metadata: { remainingCalls: 12 } },
+    { workspaceId: lyteWorkspace.id, source: "Monitoring", sourceType: "monitoring", severity: "critical", title: "API response time degradation", body: "P95 latency has exceeded 2000ms on the /api/projects endpoint for 15 minutes", status: "new", metadata: { endpoint: "/api/projects", p95: "2340ms" } },
+    { workspaceId: lyteWorkspace.id, source: "Scheduler", sourceType: "scheduler", severity: "low", title: "Scheduled backup completed", body: "Daily database backup completed successfully. Size: 2.4GB", status: "resolved", metadata: { backupSize: "2.4GB" } },
+    { workspaceId: lyteWorkspace.id, source: "GitHub", sourceType: "webhook", severity: "info", title: "Deployment succeeded", body: "Production deployment v2.4.1 completed on main branch", status: "resolved", metadata: { version: "v2.4.1", branch: "main" } },
+    { workspaceId: lyteWorkspace.id, source: "Monitoring", sourceType: "monitoring", severity: "high", title: "Error rate spike on vessel service", body: "Error rate on Vessels API exceeded 5% threshold. Currently at 8.2%", status: "new", metadata: { errorRate: "8.2%", threshold: "5%" } },
+    { workspaceId: lyteWorkspace.id, source: "Google", sourceType: "connector", severity: "medium", title: "Google OAuth token refresh failed", body: "Unable to refresh OAuth token for Google Workspace integration", status: "new", metadata: { error: "invalid_grant" } },
   ]);
-  console.log("  ✓ Lyte orders");
+  console.log("  ✓ Lyte signals");
 
-  const dProjects = await db.insert(dreamscapeProjectsTable).values([
-    { name: "SZL Brand Identity", type: "brand_identity", clientName: "SZL Holdings", status: "approved", mood: "Professional, Modern, Bold", colorPalette: { primary: "#6366f1", secondary: "#a855f7", accent: "#06b6d4" } },
-    { name: "Lyte Product Packaging", type: "packaging", clientName: "Lyte Commerce", status: "in_progress", mood: "Clean, Minimal, Premium" },
-    { name: "Firestorm Landing Pages", type: "web_design", clientName: "Firestorm Marketing", status: "review", mood: "Energetic, Conversion-focused" },
-  ]).returning();
-  console.log(`  ✓ ${dProjects.length} Dreamscape projects`);
-
-  await db.insert(dreamscapeAssetsTable).values([
-    { projectId: dProjects[0].id, name: "Logo Primary", type: "vector", width: 800, height: 400 },
-    { projectId: dProjects[0].id, name: "Brand Guidelines PDF", type: "other" },
-    { projectId: dProjects[1].id, name: "Box Design Mockup", type: "mockup", width: 1200, height: 900 },
+  await db.insert(lyteCommandCardsTable).values([
+    { workspaceId: lyteWorkspace.id, title: "Investigate API latency spike", description: "P95 latency on projects endpoint exceeds SLA. Root cause analysis needed.", category: "operations", priority: "critical", status: "in_progress", assignee: "Alex Rivera" },
+    { workspaceId: lyteWorkspace.id, title: "Review Q1 revenue projections", description: "Quarterly revenue forecast needs executive review before board meeting", category: "finance", priority: "high", status: "pending", assignee: "Stephen L.", dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+    { workspaceId: lyteWorkspace.id, title: "Update compliance documentation", description: "Annual SOC 2 compliance docs need refresh with new service additions", category: "compliance", priority: "medium", status: "pending", assignee: "Jordan Chen" },
+    { workspaceId: lyteWorkspace.id, title: "Scale vessel tracking ingestion", description: "AIS data volume increasing. Need to evaluate scaling options.", category: "strategy", priority: "medium", status: "pending" },
+    { workspaceId: lyteWorkspace.id, title: "Launch Firestorm campaign analytics v2", description: "New analytics dashboard ready for production deployment", category: "growth", priority: "high", status: "completed", assignee: "Morgan Blake" },
   ]);
-  console.log("  ✓ Dreamscape assets");
+  console.log("  ✓ Lyte command cards");
+
+  await db.insert(lyteIncidentsTable).values([
+    { workspaceId: lyteWorkspace.id, title: "API Gateway 503 errors", description: "Intermittent 503 errors on API gateway affecting 2% of requests. Load balancer health checks failing on node-3.", severity: "high", status: "investigating", assignee: "Alex Rivera", impactArea: "API Infrastructure" },
+    { workspaceId: lyteWorkspace.id, title: "Stripe webhook delivery delay", description: "Stripe webhooks delayed by 5-10 minutes. Payment status updates not reflecting in real-time.", severity: "medium", status: "mitigating", assignee: "Stephen L.", impactArea: "Payments" },
+    { workspaceId: lyteWorkspace.id, title: "Database connection pool exhaustion", description: "Connection pool reached maximum capacity during peak hours. Implemented connection pooling with PgBouncer.", severity: "critical", status: "resolved", assignee: "Alex Rivera", impactArea: "Database", rootCause: "Missing connection pool limits", resolution: "Added PgBouncer and set max connections to 100", resolvedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
+  ]);
+  console.log("  ✓ Lyte incidents");
+
+  await db.insert(lytePlaybooksTable).values([
+    { workspaceId: lyteWorkspace.id, title: "API Outage Response", description: "Step-by-step guide for handling API outages", category: "incident_response", content: "# API Outage Response\n\n## 1. Triage\n- Check API gateway health dashboard\n- Verify database connectivity\n- Check upstream service status\n\n## 2. Communication\n- Post in #incidents Slack channel\n- Notify on-call team lead\n\n## 3. Mitigation\n- Enable circuit breaker if needed\n- Scale up API pods\n- Redirect traffic if regional\n\n## 4. Resolution\n- Deploy hotfix if code issue\n- Restart services if transient\n- Document timeline\n\n## 5. Post-mortem\n- Schedule within 48 hours\n- Document root cause\n- Create follow-up tasks", version: 2, isPublished: true, tags: ["api", "outage", "critical"] },
+    { workspaceId: lyteWorkspace.id, title: "New Connector Onboarding", description: "Process for adding a new third-party connector", category: "onboarding", content: "# Connector Onboarding\n\n## Prerequisites\n- API documentation reviewed\n- Security assessment completed\n- Data mapping defined\n\n## Steps\n1. Create connector entry in admin panel\n2. Configure OAuth or API key\n3. Set up webhook endpoints\n4. Test data flow in staging\n5. Deploy to production\n6. Monitor for 24 hours", version: 1, isPublished: true, tags: ["connector", "integration"] },
+    { workspaceId: lyteWorkspace.id, title: "Security Incident Escalation", description: "Escalation procedures for security incidents", category: "escalation", content: "# Security Incident Escalation\n\n## Severity Levels\n- P1: Data breach, unauthorized access\n- P2: Vulnerability exploitation\n- P3: Suspicious activity, failed attacks\n\n## Escalation Path\n1. Security team on-call\n2. VP of Engineering\n3. CEO (P1 only)\n\n## Actions\n- Isolate affected systems\n- Preserve evidence\n- Notify legal if P1", version: 1, isPublished: true, tags: ["security", "escalation"] },
+    { workspaceId: lyteWorkspace.id, title: "Daily Operations Checklist", description: "Morning operations verification checklist", category: "operations", content: "# Daily Ops Checklist\n\n- [ ] Verify all services healthy\n- [ ] Check error rates < 1%\n- [ ] Review overnight alerts\n- [ ] Confirm backups succeeded\n- [ ] Check API response times\n- [ ] Review pending deployments\n- [ ] Check disk space usage", version: 3, isPublished: true, tags: ["daily", "operations", "checklist"] },
+  ]);
+  console.log("  ✓ Lyte playbooks");
+
+  await db.insert(lyteRecommendationsTable).values([
+    { workspaceId: lyteWorkspace.id, title: "Implement auto-scaling for API servers", description: "Based on recurring latency spikes during peak hours, implementing horizontal auto-scaling could reduce P95 latency by 40% and prevent SLA breaches.", category: "operational", impact: "high", effort: "medium", status: "suggested", actionItems: ["Evaluate Kubernetes HPA", "Set CPU threshold at 70%", "Configure min/max replicas"] },
+    { workspaceId: lyteWorkspace.id, title: "Consolidate monitoring tools", description: "Currently using 3 separate monitoring solutions. Consolidating to a single observability platform could save $2,400/month and reduce context switching.", category: "cost_optimization", impact: "medium", effort: "high", status: "suggested", actionItems: ["Evaluate Grafana Cloud", "Migration plan", "Team training"] },
+    { workspaceId: lyteWorkspace.id, title: "Enable MFA for all admin accounts", description: "3 admin accounts lack multi-factor authentication. This is a critical security gap that should be addressed immediately.", category: "risk_mitigation", impact: "high", effort: "low", status: "accepted", actionItems: ["Audit admin accounts", "Enable TOTP/WebAuthn", "Update security policy"] },
+    { workspaceId: lyteWorkspace.id, title: "Launch customer feedback loop", description: "Implementing a structured feedback collection process could increase customer retention by 15% based on industry benchmarks.", category: "growth", impact: "medium", effort: "medium", status: "suggested", actionItems: ["Choose survey tool", "Design feedback forms", "Set up automation"] },
+  ]);
+  console.log("  ✓ Lyte recommendations");
+
+  const dCampaigns = await db.insert(dreamscapeCampaignsTable).values([
+    { name: "SZL Brand Story 2026", description: "Full brand narrative video series showcasing SZL Holdings evolution and vision", clientName: "SZL Holdings", status: "production", category: "brand_story", targetAudience: "Investors, Partners, Enterprise Clients", deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000) },
+    { name: "Vessels Fleet Showcase", description: "Commercial video highlighting maritime fleet capabilities and tracking technology", clientName: "Vessels Division", status: "pre_production", category: "commercial", targetAudience: "Shipping companies, logistics partners" },
+    { name: "Firestorm Product Launch", description: "Social media campaign assets for Firestorm marketing platform launch", clientName: "Firestorm Team", status: "review", category: "product_launch", targetAudience: "Marketing professionals, SMBs" },
+    { name: "Internal Culture Documentary", description: "Documentary-style video about SZL company culture and team", clientName: "HR Department", status: "concept", category: "documentary", targetAudience: "Internal employees, recruits" },
+  ]).returning();
+  console.log(`  ✓ ${dCampaigns.length} Dreamscape campaigns`);
+
+  const dScripts = await db.insert(dreamscapeScriptsTable).values([
+    { campaignId: dCampaigns[0].id, title: "Brand Story - Episode 1: Origins", content: "FADE IN:\n\nEXT. CITY SKYLINE - DAWN\n\nNARRATOR (V.O.)\nEvery great journey begins with a single step. For SZL Holdings, that step was taken in a small office in 2020...\n\nCUT TO:\nINT. MODERN OFFICE - DAY\n\nStephen sits at his desk, multiple monitors displaying code and dashboards.\n\nNARRATOR (V.O.)\nWhat started as a vision to unify technology consulting has grown into a portfolio of innovative solutions...\n\nMONTAGE: Various SZL products in action - Vessels tracking ships, Firestorm campaigns running, Dreamscape creative workflows...", version: 3, status: "approved", notes: "Final approved version after client feedback" },
+    { campaignId: dCampaigns[0].id, title: "Brand Story - Episode 2: Innovation", content: "FADE IN:\n\nINT. TECH LAB - DAY\n\nNARRATOR (V.O.)\nInnovation isn't just about technology. It's about understanding what businesses truly need...\n\nSequence showing development of each platform tool...", version: 1, status: "draft" },
+    { campaignId: dCampaigns[2].id, title: "Firestorm Launch - 30s Spot", content: "OPEN ON:\nFast-paced montage of marketing dashboards, lead scoring, campaign analytics.\n\nVO: \"Your campaigns. Supercharged.\"\n\nProduct demo footage. Clean UI. Data flowing.\n\nVO: \"Firestorm by SZL Holdings. Marketing intelligence, reimagined.\"\n\nLOGO + CTA", version: 2, status: "review", notes: "Pending final voiceover recording" },
+  ]).returning();
+  console.log(`  ✓ ${dScripts.length} Dreamscape scripts`);
+
+  await db.insert(dreamscapeStoryboardsTable).values([
+    { campaignId: dCampaigns[0].id, scriptId: dScripts[0].id, title: "Opening skyline shot", sceneNumber: 1, visualDescription: "Wide aerial drone shot of city skyline at dawn. Golden hour lighting. Camera slowly pushes forward.", dialogue: "", duration: "8s" },
+    { campaignId: dCampaigns[0].id, scriptId: dScripts[0].id, title: "Office introduction", sceneNumber: 2, visualDescription: "Medium shot of modern office. Founder at desk with multiple monitors. Clean, professional environment.", dialogue: "Every great journey begins with a single step...", duration: "12s" },
+    { campaignId: dCampaigns[0].id, scriptId: dScripts[0].id, title: "Product montage", sceneNumber: 3, visualDescription: "Quick cuts between different SZL products. Screen recordings of dashboards. Fast-paced editing.", dialogue: "What started as a vision to unify technology...", duration: "15s" },
+    { campaignId: dCampaigns[0].id, scriptId: dScripts[0].id, title: "Team collaboration", sceneNumber: 4, visualDescription: "Team meeting in conference room. Whiteboard with diagrams. Collaborative energy.", dialogue: "", duration: "10s" },
+    { campaignId: dCampaigns[2].id, title: "Firestorm hero shot", sceneNumber: 1, visualDescription: "Screen capture of Firestorm dashboard with animated data. Dark theme with orange accents.", duration: "5s" },
+    { campaignId: dCampaigns[2].id, title: "Feature highlights", sceneNumber: 2, visualDescription: "Split screen showing lead scoring, campaign analytics, A/B testing features", duration: "10s" },
+  ]);
+  console.log("  ✓ Dreamscape storyboards");
+
+  await db.insert(dreamscapeVoiceAssetsTable).values([
+    { campaignId: dCampaigns[0].id, name: "Brand Story Narrator - Ep1", voiceId: "narrator_professional_1", provider: "placeholder", text: "Every great journey begins with a single step. For SZL Holdings, that step was taken in a small office in 2020...", status: "ready", duration: "45s" },
+    { campaignId: dCampaigns[0].id, name: "Brand Story Narrator - Ep2", voiceId: "narrator_professional_1", provider: "placeholder", text: "Innovation isn't just about technology. It's about understanding what businesses truly need...", status: "pending", duration: "30s" },
+    { campaignId: dCampaigns[2].id, name: "Firestorm VO - 30s Spot", provider: "placeholder", text: "Your campaigns. Supercharged. Firestorm by SZL Holdings. Marketing intelligence, reimagined.", status: "pending", duration: "8s" },
+  ]);
+  console.log("  ✓ Dreamscape voice assets");
+
+  await db.insert(dreamscapeCampaignAssetsTable).values([
+    { campaignId: dCampaigns[0].id, name: "SZL Logo Pack", type: "image", mimeType: "image/svg+xml", fileSize: 45200, tags: ["logo", "branding"] },
+    { campaignId: dCampaigns[0].id, name: "Brand Color Palette", type: "document", mimeType: "application/pdf", fileSize: 128000, tags: ["branding", "colors"] },
+    { campaignId: dCampaigns[0].id, name: "Drone Footage - City", type: "video", mimeType: "video/mp4", fileSize: 234000000, tags: ["footage", "aerial"] },
+    { campaignId: dCampaigns[2].id, name: "Firestorm UI Screenshots", type: "image", mimeType: "image/png", fileSize: 3200000, tags: ["product", "screenshots"] },
+    { campaignId: dCampaigns[2].id, name: "Background Music - Energetic", type: "audio", mimeType: "audio/mp3", fileSize: 8500000, tags: ["music", "background"] },
+    { campaignId: dCampaigns[3].id, name: "Interview Template", type: "template", mimeType: "application/pdf", fileSize: 67000, tags: ["template", "interview"] },
+  ]);
+  console.log("  ✓ Dreamscape campaign assets");
 
   await db.insert(dreamscapeReviewsTable).values([
-    { projectId: dProjects[0].id, reviewerName: "Stephen L.", status: "approved", comment: "Brand identity looks excellent. Colors and typography align perfectly with our vision." },
-    { projectId: dProjects[1].id, reviewerName: "Morgan Blake", status: "changes_requested", comment: "The packaging design is good but needs more contrast on the label text for accessibility." },
-    { projectId: dProjects[2].id, reviewerName: "Casey Torres", status: "pending", comment: "Reviewing the landing page wireframes for conversion optimization." },
+    { campaignId: dCampaigns[0].id, reviewerName: "Stephen L.", reviewerRole: "Executive Producer", comment: "Brand story narrative is compelling. The opening sequence sets the right tone. Approved for production.", status: "approved", section: "Script" },
+    { campaignId: dCampaigns[0].id, reviewerName: "Casey Torres", reviewerRole: "Creative Director", comment: "Storyboard flow is solid. Consider adding a customer testimonial segment between scenes 3 and 4.", status: "changes_requested", section: "Storyboard" },
+    { campaignId: dCampaigns[2].id, reviewerName: "Morgan Blake", reviewerRole: "Marketing Director", comment: "The 30s spot script is punchy and on-brand. Ready for voiceover recording.", status: "approved", section: "Script" },
+    { campaignId: dCampaigns[2].id, reviewerName: "Stephen L.", reviewerRole: "Executive Producer", comment: "Would like to see more product detail in the feature highlights scene.", status: "changes_requested", section: "Storyboard" },
   ]);
   console.log("  ✓ Dreamscape reviews");
 
-  const assessments = await db.insert(readinessAssessmentsTable).values([
-    { name: "Q1 Operational Readiness", category: "operational", status: "completed", overallScore: "87.50", assessorName: "Alex Rivera", completedAt: new Date() },
-    { name: "Security Compliance Audit", category: "security", status: "in_progress", overallScore: "72.00", assessorName: "Stephen L." },
-    { name: "Financial Health Check", category: "financial", status: "draft", assessorName: "Jordan Chen" },
+  const [readinessProgram] = await db.insert(readinessProgramsTable).values([
+    { name: "SZL Portfolio Readiness Q1 2026", description: "Comprehensive readiness assessment across the entire SZL Holdings portfolio", overallScore: "76.50", targetScore: "85.00", status: "active", owner: "Stephen L." },
   ]).returning();
-  console.log(`  ✓ ${assessments.length} readiness assessments`);
+  console.log("  ✓ Readiness program");
 
-  await db.insert(readinessChecklistsTable).values([
-    { assessmentId: assessments[0].id, title: "Backup & Recovery Plan", priority: "critical", isCompleted: true, completedAt: new Date() },
-    { assessmentId: assessments[0].id, title: "Incident Response Procedures", priority: "high", isCompleted: true, completedAt: new Date() },
-    { assessmentId: assessments[0].id, title: "Staff Training Records", priority: "medium", isCompleted: false },
-    { assessmentId: assessments[1].id, title: "Penetration Testing", priority: "critical", isCompleted: false },
-    { assessmentId: assessments[1].id, title: "Access Control Review", priority: "high", isCompleted: true, completedAt: new Date() },
-  ]);
-  console.log("  ✓ readiness checklists");
+  const dimensions = await db.insert(readinessDimensionsTable).values([
+    { programId: readinessProgram.id, name: "Technical Infrastructure", category: "technical", weight: "1.5", currentScore: "82.00", targetScore: "90.00", assessorName: "Alex Rivera", lastAssessedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) },
+    { programId: readinessProgram.id, name: "Security & Compliance", category: "security", weight: "2.0", currentScore: "71.00", targetScore: "90.00", assessorName: "Stephen L.", lastAssessedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
+    { programId: readinessProgram.id, name: "Operational Processes", category: "operational", weight: "1.0", currentScore: "85.00", targetScore: "85.00", assessorName: "Alex Rivera", lastAssessedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+    { programId: readinessProgram.id, name: "Financial Health", category: "financial", weight: "1.5", currentScore: "78.00", targetScore: "80.00", assessorName: "Jordan Chen", lastAssessedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
+    { programId: readinessProgram.id, name: "Strategic Alignment", category: "strategic", weight: "1.0", currentScore: "72.00", targetScore: "85.00", assessorName: "Stephen L.", lastAssessedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
+    { programId: readinessProgram.id, name: "Team & People", category: "people", weight: "1.0", currentScore: "80.00", targetScore: "85.00", assessorName: "Casey Torres", lastAssessedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) },
+    { programId: readinessProgram.id, name: "Process Maturity", category: "process", weight: "1.0", currentScore: "68.00", targetScore: "80.00", assessorName: "Alex Rivera", lastAssessedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000) },
+    { programId: readinessProgram.id, name: "Compliance Framework", category: "compliance", weight: "1.5", currentScore: "74.00", targetScore: "90.00", assessorName: "Jordan Chen", lastAssessedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+  ]).returning();
+  console.log(`  ✓ ${dimensions.length} readiness dimensions`);
 
-  await db.insert(readinessFindingsTable).values([
-    { assessmentId: assessments[1].id, title: "Outdated SSL Certificates", description: "Two internal services have SSL certificates expiring within 30 days", severity: "high", status: "in_progress", recommendation: "Implement automated certificate renewal with Let's Encrypt" },
-    { assessmentId: assessments[1].id, title: "Missing MFA on Admin Accounts", description: "3 admin accounts do not have multi-factor authentication enabled", severity: "critical", status: "open", recommendation: "Enforce MFA for all admin-level accounts immediately" },
+  const scoreEntries = [];
+  for (const dim of dimensions) {
+    const baseScore = parseFloat(dim.currentScore ?? "70");
+    for (let weekAgo = 12; weekAgo >= 0; weekAgo--) {
+      const variance = (Math.random() - 0.3) * 8;
+      const score = Math.max(40, Math.min(100, baseScore - (weekAgo * 1.5) + variance));
+      scoreEntries.push({
+        dimensionId: dim.id,
+        programId: readinessProgram.id,
+        score: score.toFixed(2),
+        recordedAt: new Date(Date.now() - weekAgo * 7 * 24 * 60 * 60 * 1000),
+      });
+    }
+  }
+  await db.insert(readinessScoreHistoryTable).values(scoreEntries);
+  console.log(`  ✓ ${scoreEntries.length} readiness score history entries`);
+
+  await db.insert(readinessMilestonesTable).values([
+    { programId: readinessProgram.id, title: "SOC 2 Type II Certification", description: "Complete SOC 2 Type II audit and receive certification", status: "in_progress", dueDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), owner: "Stephen L." },
+    { programId: readinessProgram.id, title: "DR Plan Testing", description: "Execute full disaster recovery plan test across all services", status: "pending", dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), owner: "Alex Rivera" },
+    { programId: readinessProgram.id, title: "API Gateway Migration", description: "Migrate from legacy API gateway to new cloud-native solution", status: "completed", dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), completedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), owner: "Alex Rivera" },
+    { programId: readinessProgram.id, title: "Team Security Training", description: "Complete annual security awareness training for all team members", status: "overdue", dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), owner: "Casey Torres" },
+    { programId: readinessProgram.id, title: "Financial Audit Prep", description: "Prepare all documentation for annual financial audit", status: "in_progress", dueDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000), owner: "Jordan Chen" },
+    { programId: readinessProgram.id, title: "Process Documentation Update", description: "Update all operational process documentation to current state", status: "pending", dueDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), owner: "Alex Rivera" },
   ]);
-  console.log("  ✓ readiness findings");
+  console.log("  ✓ readiness milestones");
+
+  await db.insert(readinessRisksTable).values([
+    { programId: readinessProgram.id, dimensionId: dimensions[1].id, title: "Missing MFA on admin accounts", description: "3 admin accounts do not have multi-factor authentication enabled, creating a critical security vulnerability", severity: "critical", likelihood: "likely", status: "open", mitigation: "Enforce MFA for all admin-level accounts. Deadline: 7 days.", owner: "Stephen L." },
+    { programId: readinessProgram.id, dimensionId: dimensions[0].id, title: "Single point of failure in database", description: "Primary database lacks automated failover. Manual intervention required during outages.", severity: "high", likelihood: "possible", status: "mitigating", mitigation: "Implementing PostgreSQL streaming replication with automatic failover", owner: "Alex Rivera" },
+    { programId: readinessProgram.id, dimensionId: dimensions[6].id, title: "Outdated runbook documentation", description: "Several operational runbooks reference deprecated tools and processes", severity: "medium", likelihood: "likely", status: "open", mitigation: "Schedule documentation sprint to update all runbooks", owner: "Alex Rivera" },
+    { programId: readinessProgram.id, dimensionId: dimensions[3].id, title: "Revenue concentration risk", description: "Top 3 clients represent 65% of revenue. Need diversification strategy.", severity: "high", likelihood: "possible", status: "open", owner: "Jordan Chen" },
+    { programId: readinessProgram.id, dimensionId: dimensions[7].id, title: "GDPR data retention gaps", description: "Data retention policies not fully implemented for all services", severity: "medium", likelihood: "possible", status: "mitigating", mitigation: "Implementing automated data lifecycle management", owner: "Jordan Chen" },
+  ]);
+  console.log("  ✓ readiness risks");
+
+  await db.insert(readinessAlertsTable).values([
+    { programId: readinessProgram.id, dimensionId: dimensions[1].id, type: "score_drop", title: "Security score dropped below target", message: "Security & Compliance score dropped to 71.0, which is 19 points below the target of 90.0", severity: "critical" },
+    { programId: readinessProgram.id, type: "milestone_overdue", title: "Team Security Training is overdue", message: "The 'Team Security Training' milestone was due 5 days ago and is still not completed", severity: "warning" },
+    { programId: readinessProgram.id, dimensionId: dimensions[6].id, type: "target_missed", title: "Process Maturity below target", message: "Process Maturity score of 68.0 is 12 points below the target of 80.0", severity: "warning" },
+    { programId: readinessProgram.id, dimensionId: dimensions[2].id, type: "improvement", title: "Operational Processes reached target", message: "Operational Processes score of 85.0 has reached the target score of 85.0", severity: "info", isRead: true },
+    { programId: readinessProgram.id, type: "risk_escalation", title: "Critical risk requires immediate attention", message: "Missing MFA on admin accounts has been open for 14 days. Escalating to leadership.", severity: "critical" },
+    { programId: readinessProgram.id, type: "general", title: "Quarterly assessment due", message: "Q2 2026 readiness assessment cycle begins in 30 days. Prepare assessment materials.", severity: "info" },
+  ]);
+  console.log("  ✓ readiness alerts");
 
   console.log("\n✅ Seed complete!");
 }
