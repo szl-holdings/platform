@@ -1,0 +1,303 @@
+PROJECT: SZL SUITE
+MODE: REAL IMPLEMENTATION IN CURRENT REPLIT WORKSPACE
+INTENT: ENHANCE WHAT EXISTS AND MAKE IT TANGIBLE NOW
+
+Use the current Replit workspace filesystem as the source of truth.
+Do not ask for a GitHub repo.
+Do not stop at analysis.
+Inspect the workspace, determine the real structure, then implement the upgrades directly in code.
+
+PRIMARY OBJECTIVE
+Turn the current workspace into a polished, investor-ready, client-ready multi-app product suite with:
+
+* premium front-end experiences
+* believable seeded data
+* clean shared architecture
+* real backend boundaries
+* observability-minded foundations
+* production-minded security and configuration
+
+EXECUTION RULES
+
+1. Preserve working architecture where it is sound.
+2. Treat the workspace as a monorepo if multiple apps/packages exist.
+3. Do not overwrite working files blindly.
+4. Refactor safely and make meaningful improvements.
+5. Prefer real code changes over placeholder comments.
+6. Where integrations are not live yet, build production-ready stubs with clear env-based boundaries.
+7. Use mock/live provider patterns where needed.
+8. Keep the design premium, cohesive, and differentiated by brand.
+9. Make everything demoable immediately.
+10. At the end, provide a complete summary of changes, mocks, live-ready boundaries, and required env vars.
+
+STEP 1: DISCOVER THE WORKSPACE
+First inspect the current workspace and identify:
+
+* all apps, packages, sites, and services
+* routing structure
+* shared component libraries
+* existing backend server(s)
+* package manager and workspace config
+* where Vessels, INCA, SZL Holdings, Carlota Jo, and API server currently live if they already exist
+* what is already implemented vs incomplete
+
+Then proceed without asking me for clarification.
+
+STEP 2: IMPLEMENT OR ENHANCE THESE PRODUCTS
+
+1. SZL HOLDINGS — PREMIUM CORPORATE PORTAL
+   Purpose:
+   The premium umbrella site and front door for the entire ecosystem.
+
+Required outcomes:
+
+* premium hero section with elegant visual authority
+* animated SVG or canvas constellation showing ecosystem relationships
+* clickable nodes for major platforms and services
+* product portfolio catalog with status badges:
+
+  * Live
+  * Beta
+  * In Development
+* timeline section with animated or hover-based milestones
+* innovation pillars section:
+
+  * AI/ML
+  * Cybersecurity
+  * Maritime
+  * Creative Tech
+  * Consulting
+* leadership / vision section
+* validated inquiry/contact form
+* content driven by config or JSON so updates do not require structural rewrites
+* strong mobile responsiveness
+* strong metadata, open graph, and social preview handling
+
+Design tone:
+premium innovation platform, modern, restrained, strategic, executive-grade
+
+2. VESSELS — MARITIME INTELLIGENCE COMMAND CENTER
+   Purpose:
+   Flagship maritime fleet observability platform.
+
+Required outcomes:
+
+* command center dashboard with:
+
+  * fleet map using Leaflet or Mapbox if available, otherwise a clean modular map abstraction
+  * KPI ribbons
+  * fleet health score pillars
+  * live alert feed
+* fleet APM views:
+
+  * TCE
+  * utilization
+  * vessel ranking
+  * market trend panels
+* infrastructure views:
+
+  * engine/system status
+  * hull condition
+  * maintenance backlog
+  * component monitoring cards
+* logs explorer:
+
+  * severity filtering
+  * search
+  * timestamped event stream
+* digital experience view:
+
+  * shipment tracking
+  * delivery reliability
+  * customer satisfaction style metrics
+  * demurrage risk indicators
+* synthetics/compliance view:
+
+  * expiring certificates
+  * port state control deficiencies
+  * compliance alerts
+  * sanctions risk indicators
+* CO2 and emissions view:
+
+  * fuel consumption
+  * emissions
+  * CII rating
+  * compliance pathway indicators
+* applied intelligence view:
+
+  * AI executive briefing cards
+  * predictive maintenance summaries
+  * forecast modules
+* auth shell with logged-in state scaffolding
+* role-aware UI scaffolding:
+
+  * Exec
+  * Ops
+  * Compliance
+  * Maintenance
+* realistic maritime seed data that feels believable and useful for demos
+* clean data provider layer so mock data can later be replaced with live APIs
+
+Design tone:
+high-trust operational command center, premium, technical, strategic, mission-critical
+
+3. INCA — AI RESEARCH COMMAND CENTER
+   Purpose:
+   AI project, experiment, model, and insight management system.
+
+Required outcomes:
+
+* executive dashboard with meaningful summary cards
+* project pipeline views for:
+
+  * Research
+  * Development
+  * Testing
+  * Deployed
+* grid and list project views
+* search and filter controls
+* project detail pages with metrics and related experiments
+* experiments area:
+
+  * comparisons
+  * metrics charts
+  * expandable hypothesis/results panels
+* insights area:
+
+  * Success
+  * Warning
+  * Trend
+  * Discovery
+* models area:
+
+  * performance trends
+  * architecture comparisons
+  * multidimensional scoring/radar style visualization if the charting stack supports it
+* enterprise-style seeded data with realistic project names, experiment results, and model metrics
+* refined visual identity distinct from Vessels but same product quality tier
+
+Design tone:
+intelligent, cerebral, refined, research-lab executive polish
+
+4. CARLOTA JO CONSULTING — LUXURY ADVISORY WEBSITE
+   Purpose:
+   A luxury-branded digital storefront for advisory services.
+
+Required outcomes:
+
+* elegant luxury home page with restrained motion
+* services portfolio for:
+
+  * Strategic Advisory
+  * Portfolio Optimization
+  * Technology Transformation
+  * Risk & Compliance
+  * Growth Strategy
+  * M&A Advisory
+* case studies section
+* testimonial carousel or equivalent polished proof section
+* validated inquiry/contact form
+* multi-step consultation booking flow
+* three tier offer structure:
+
+  * Strategy Session
+  * Portfolio Review
+  * Advisory Retainer
+* Stripe-ready frontend checkout boundary
+* backend-ready booking and invoice endpoints if backend exists
+* graceful success / cancel / follow-up flow
+* luxury but performant mobile experience
+
+Design tone:
+quiet luxury, executive confidence, premium consulting credibility
+
+5. UNIFIED API SERVER — EXPRESS/TYPESCRIPT CONTROL PLANE
+   Purpose:
+   Shared backend powering the suite.
+
+Required outcomes:
+
+* clean route organization by domain:
+
+  * /api/auth
+  * /api/vessels
+  * /api/inca
+  * /api/booking
+  * /api/invoice
+  * /api/stripe
+  * preserve and enhance other existing namespaces in workspace
+* middleware stack for:
+
+  * request IDs / correlation IDs
+  * structured logging
+  * security headers
+  * rate limiting
+  * auth/session scaffolding
+  * sanitized error handling
+* health endpoint
+* env/config validation
+* RBAC-ready scaffolding
+* service/provider boundaries for:
+
+  * AI orchestration
+  * payments
+  * storage
+  * cache/session
+  * database access
+* Azure-ready boundaries for:
+
+  * Key Vault
+  * Blob Storage
+  * Redis
+  * PostgreSQL
+  * Application Insights
+* mock/live switching where appropriate
+* realistic seeded API responses for instant demo usability
+* static serving integration only if current workspace architecture already uses unified serving
+
+STEP 3: SHARED DESIGN SYSTEM AND COMPONENT LAYER
+Create or enhance a shared design layer across the suite:
+
+* cards
+* KPI ribbons
+* charts containers
+* table shells
+* status pills
+* alerts
+* modal/drawer patterns
+* empty states
+* loaders and skeletons
+* premium forms
+* consistent spacing, radii, typography, shadows, and motion
+
+Each brand must still feel distinct:
+
+* SZL Holdings = innovation / venture / platform authority
+* Vessels = operational maritime intelligence
+* INCA = AI research sophistication
+* Carlota Jo = luxury advisory execution
+
+STEP 4: DATA, MOCKING, AND STATE
+Create believable seed/demo data for:
+
+* vessels, fleet performance, emissions, compliance, alerts
+* research projects, experiments, models, insights
+* consultation offers, inquiries, bookings, case studies
+* product status catalog for SZL Holdings
+
+Rules:
+
+* keep mock data organized
+* separate domain data from presentation data
+* use clean typing/interfaces/schemas
+* make data believable, not random filler
+* create provider/service boundaries so mock data can be swapped later
+
+STEP 5: OBSERVABILITY, SECURITY, AND RELIABILITY
+Implement production-minded foundations without overengineering:
+
+* request correlation ID support
+* structured logging hooks
+* health endpoint
+* clean error boundaries
+* input validation on mutation endpoints
