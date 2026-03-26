@@ -986,8 +986,10 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     this.cleanupExpiredSessions();
 
     let session = this._chatSessions.get(sessionId);
-    if (session && session.ownerId && options?.ownerId && session.ownerId !== options.ownerId) {
-      throw new Error("Session access denied: owner mismatch");
+    if (session && session.ownerId) {
+      if (!options?.ownerId || session.ownerId !== options.ownerId) {
+        throw new Error("Session access denied: owner mismatch");
+      }
     }
     if (!session) {
       session = {
