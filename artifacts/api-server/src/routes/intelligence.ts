@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import express, { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
 import { services } from "@workspace/services";
@@ -572,17 +573,29 @@ router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware({ req
 
 router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
-    const { sessionId, message, messages, systemPrompt, model, maxTokens } = req.body;
+    const { sessionId, message, messages, systemPrompt, maxTokens } = req.body;
+    const ownerId = (req as any).user?.id || (req as any).userId;
+    const sid = sessionId || crypto.randomUUID();
 
     if (messages && Array.isArray(messages)) {
-      const result = await services.ai.chatCompletion(messages, { model, maxTokens });
-      sendSuccess(res, result);
+      const lastUserMsg = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user");
+      const systemMsg = messages.find((m: { role: string }) => m.role === "system");
+      if (lastUserMsg) {
+        const hfResult = await services.huggingface.chat(sid, lastUserMsg.content, {
+          systemPrompt: systemMsg?.content,
+          maxTokens,
+          ownerId,
+        });
+        sendSuccess(res, { content: hfResult.reply, model: hfResult.model, provider: "huggingface", tier: hfResult.tier, usage: { promptTokens: 0, completionTokens: 0 } });
+      } else {
+        const result = await services.ai.chatCompletion(messages, { maxTokens });
+        sendSuccess(res, result);
+      }
       return;
     }
 
     if (!message) { sendError(res, "Either 'message' (string) or 'messages' (array) is required", 400); return; }
-    const sid = sessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const result = await services.huggingface.chat(sid, message, { systemPrompt, maxTokens });
+    const result = await services.huggingface.chat(sid, message, { systemPrompt, maxTokens, ownerId });
     sendSuccess(res, result);
   } catch (err) { handleRouteError(res, err, "Failed to generate chat response"); }
 });
