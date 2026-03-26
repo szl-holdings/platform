@@ -572,11 +572,92 @@ router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware({ req
 
 router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
-    const { messages, model, maxTokens } = req.body;
-    if (!messages || !Array.isArray(messages)) { sendError(res, "Messages array is required", 400); return; }
-    const result = await services.ai.chatCompletion(messages, { model, maxTokens });
+    const { sessionId, message, messages, systemPrompt, model, maxTokens } = req.body;
+
+    if (messages && Array.isArray(messages)) {
+      const result = await services.ai.chatCompletion(messages, { model, maxTokens });
+      sendSuccess(res, result);
+      return;
+    }
+
+    if (!message) { sendError(res, "Either 'message' (string) or 'messages' (array) is required", 400); return; }
+    const sid = sessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const result = await services.huggingface.chat(sid, message, { systemPrompt, maxTokens });
     sendSuccess(res, result);
-  } catch (err) { handleRouteError(res, err, "Failed to generate chat completion"); }
+  } catch (err) { handleRouteError(res, err, "Failed to generate chat response"); }
+});
+
+router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const history = services.huggingface.getChatHistory(req.params.sessionId);
+    sendSuccess(res, { sessionId: req.params.sessionId, messages: history });
+  } catch (err) { handleRouteError(res, err, "Failed to get chat history"); }
+});
+
+router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const cleared = services.huggingface.clearChatSession(req.params.sessionId);
+    sendSuccess(res, { sessionId: req.params.sessionId, cleared });
+  } catch (err) { handleRouteError(res, err, "Failed to clear chat session"); }
+});
+
+router.post("/intelligence/ai/embed", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) { sendError(res, "Text is required", 400); return; }
+    const result = await services.huggingface.embedding(text);
+    sendSuccess(res, result);
+  } catch (err) { handleRouteError(res, err, "Failed to generate embedding"); }
+});
+
+router.post("/intelligence/ai/semantic-search", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { query, documents, topK } = req.body;
+    if (!query || !documents || !Array.isArray(documents)) {
+      sendError(res, "Query and documents array are required", 400); return;
+    }
+    const results = await services.huggingface.semanticSearch(query, documents, { topK });
+    sendSuccess(res, { query, results, totalDocuments: documents.length });
+  } catch (err) { handleRouteError(res, err, "Failed to perform semantic search"); }
+});
+
+router.post("/intelligence/ai/analyze-document", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { text, classificationLabels } = req.body;
+    if (!text) { sendError(res, "Text is required", 400); return; }
+    const result = await services.huggingface.analyzeDocument(text, { classificationLabels });
+    sendSuccess(res, result);
+  } catch (err) { handleRouteError(res, err, "Failed to analyze document"); }
+});
+
+router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  const prompt = (req.query.prompt as string) || "";
+  if (!prompt) { sendError(res, "Prompt query parameter is required", 400); return; }
+
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
+  });
+
+  try {
+    const maxTokens = parseInt(req.query.maxTokens as string) || 512;
+    for await (const token of services.huggingface.streamTextGeneration(prompt, { maxTokens })) {
+      res.write(`data: ${JSON.stringify({ token })}\n\n`);
+    }
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+  } catch (err) {
+    res.write(`data: ${JSON.stringify({ error: "Stream failed" })}\n\n`);
+  }
+  res.end();
+});
+
+router.get("/intelligence/ai/health", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const healthStatus = services.huggingface.getHealthStatus();
+    sendSuccess(res, healthStatus);
+  } catch (err) { handleRouteError(res, err, "Failed to get AI health status"); }
 });
 
 router.post("/intelligence/ai/threat-briefing", aiRateLimit, authMiddleware({ required: false }), async (_req, res) => {
@@ -732,6 +813,9 @@ router.get("/intelligence/data-flow", intelRateLimit, authMiddleware({ required:
       { source: "OFAC/UN", target: "Vessels", type: "sanctions_list", volume: 34, status: "active" },
       { source: "RSS Feeds", target: "Lyte Command", type: "news_feed", volume: 567, status: "active" },
       { source: "HuggingFace", target: "All Apps", type: "ai_inference", volume: 2341, status: "active" },
+      { source: "HuggingFace Embeddings", target: "All Apps", type: "semantic_search", volume: 456, status: "active" },
+      { source: "HuggingFace Stream", target: "All Apps", type: "sse_streaming", volume: 189, status: "active" },
+      { source: "HuggingFace Pipeline", target: "All Apps", type: "document_analysis", volume: 312, status: "active" },
       { source: "OpenAI Proxy", target: "All Apps", type: "chat_completion", volume: 891, status: "active" },
       { source: "Firestorm", target: "Admin Panel", type: "threat_aggregate", volume: 456, status: "active" },
       { source: "Vessels", target: "Admin Panel", type: "maritime_aggregate", volume: 234, status: "active" },

@@ -60,4 +60,10 @@ export {
   type HFImageResult,
   type HFSentimentResult,
   type HFQuestionAnswerResult,
+  type HFEmbeddingResult,
+  type HFDocumentAnalysis,
+  type HFChatMessage,
+  type HFChatResult,
+  type HFHealthStatus,
+  type ModelTier,
 } from "./adapters/huggingface.js";

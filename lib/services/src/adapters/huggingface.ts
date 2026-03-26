@@ -3,16 +3,22 @@ import { ServiceAdapter, type ServiceStatus } from "../base.js";
 export interface HFTextGenerationResult {
   text: string;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFSummarizationResult {
   summary: string;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFClassificationResult {
   labels: Array<{ label: string; score: number }>;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFNERResult {
@@ -24,35 +30,174 @@ export interface HFNERResult {
     end: number;
   }>;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFTranslationResult {
   translatedText: string;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFZeroShotResult {
   labels: string[];
   scores: number[];
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFImageResult {
   imageBase64: string;
   mimeType: string;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFSentimentResult {
   label: string;
   score: number;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
 }
 
 export interface HFQuestionAnswerResult {
   answer: string;
   score: number;
   model: string;
+  tier: ModelTier;
+  cached: boolean;
+}
+
+export interface HFEmbeddingResult {
+  embedding: number[];
+  dimensions: number;
+  model: string;
+  tier: ModelTier;
+  cached: boolean;
+}
+
+export interface HFDocumentAnalysis {
+  summary: HFSummarizationResult;
+  entities: HFNERResult;
+  sentiment: HFSentimentResult;
+  classification: HFZeroShotResult;
+  model: string;
+  pipelineSteps: string[];
+  processingTimeMs: number;
+}
+
+export interface HFChatMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
+
+export interface HFChatResult {
+  reply: string;
+  model: string;
+  tier: ModelTier;
+  turnCount: number;
+  sessionId: string;
+}
+
+export interface HFHealthStatus {
+  activeTier: ModelTier;
+  modelsAvailable: Record<string, string>;
+  cacheStats: { hits: number; misses: number; size: number; hitRate: string };
+  freeTierAvailable: boolean;
+  apiKeyConfigured: boolean;
+}
+
+export type ModelTier = "primary" | "secondary" | "tertiary" | "mock";
+
+interface ModelChain {
+  primary: string;
+  secondary: string;
+  tertiary: string;
+}
+
+const MODEL_REGISTRY: Record<string, ModelChain> = {
+  textGeneration: {
+    primary: "mistralai/Mistral-7B-Instruct-v0.3",
+    secondary: "microsoft/Phi-3-mini-4k-instruct",
+    tertiary: "google/flan-t5-base",
+  },
+  summarization: {
+    primary: "facebook/bart-large-cnn",
+    secondary: "sshleifer/distilbart-cnn-12-6",
+    tertiary: "google/flan-t5-base",
+  },
+  classification: {
+    primary: "distilbert-base-uncased-finetuned-sst-2-english",
+    secondary: "cardiffnlp/twitter-roberta-base-sentiment-latest",
+    tertiary: "nlptown/bert-base-multilingual-uncased-sentiment",
+  },
+  ner: {
+    primary: "dslim/bert-base-NER",
+    secondary: "Jean-Baptiste/camembert-ner-with-dates",
+    tertiary: "elastic/distilbert-base-cased-finetuned-conll03-english",
+  },
+  zeroShot: {
+    primary: "facebook/bart-large-mnli",
+    secondary: "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+    tertiary: "typeform/distilbert-base-uncased-mnli",
+  },
+  sentiment: {
+    primary: "distilbert-base-uncased-finetuned-sst-2-english",
+    secondary: "cardiffnlp/twitter-roberta-base-sentiment-latest",
+    tertiary: "nlptown/bert-base-multilingual-uncased-sentiment",
+  },
+  questionAnswering: {
+    primary: "deepset/roberta-base-squad2",
+    secondary: "distilbert-base-cased-distilled-squad",
+    tertiary: "deepset/tinyroberta-squad2",
+  },
+  imageGeneration: {
+    primary: "stabilityai/stable-diffusion-xl-base-1.0",
+    secondary: "runwayml/stable-diffusion-v1-5",
+    tertiary: "stabilityai/stable-diffusion-2-1",
+  },
+  embedding: {
+    primary: "sentence-transformers/all-MiniLM-L6-v2",
+    secondary: "sentence-transformers/paraphrase-MiniLM-L3-v2",
+    tertiary: "sentence-transformers/all-MiniLM-L12-v2",
+  },
+  translation: {
+    primary: "Helsinki-NLP/opus-mt-en-fr",
+    secondary: "Helsinki-NLP/opus-mt-en-de",
+    tertiary: "Helsinki-NLP/opus-mt-en-es",
+  },
+};
+
+const CACHE_TTL: Record<string, number> = {
+  textGeneration: 5 * 60 * 1000,
+  summarization: 10 * 60 * 1000,
+  classification: 15 * 60 * 1000,
+  ner: 15 * 60 * 1000,
+  translation: 30 * 60 * 1000,
+  zeroShot: 10 * 60 * 1000,
+  sentiment: 10 * 60 * 1000,
+  questionAnswering: 5 * 60 * 1000,
+  embedding: 60 * 60 * 1000,
+  imageGeneration: 30 * 60 * 1000,
+};
+
+const MAX_CACHE_SIZE = 500;
+
+interface CacheEntry {
+  data: unknown;
+  expiry: number;
+  accessedAt: number;
+}
+
+interface ChatSession {
+  messages: HFChatMessage[];
+  createdAt: number;
+  lastAccessedAt: number;
 }
 
 const MOCK_ENTITIES: HFNERResult["entities"] = [
@@ -67,25 +212,19 @@ const MOCK_CLASSIFICATIONS = [
   { label: "medium", score: 0.45 },
 ];
 
-const HF_MODELS = {
-  textGeneration: "google/flan-t5-small",
-  summarization: "facebook/bart-large-cnn",
-  classification: "distilbert-base-uncased-finetuned-sst-2-english",
-  ner: "dslim/bert-base-NER",
-  translation: "Helsinki-NLP/opus-mt-en-fr",
-  zeroShot: "facebook/bart-large-mnli",
-  sentiment: "distilbert-base-uncased-finetuned-sst-2-english",
-  questionAnswering: "deepset/roberta-base-squad2",
-  imageGeneration: "stabilityai/stable-diffusion-2-1",
-} as const;
-
 export class HuggingFaceAdapter extends ServiceAdapter {
   readonly name = "huggingface";
   readonly description =
-    "HuggingFace Inference API for NLP, vision, and classification tasks";
+    "HuggingFace Inference API — advanced NLP, vision, embeddings, and streaming pipelines";
   readonly requiredEnvVars: string[] = [];
 
   private _freeTierAvailable: boolean | null = null;
+  private readonly _cache = new Map<string, CacheEntry>();
+  private _cacheHits = 0;
+  private _cacheMisses = 0;
+  private readonly _chatSessions = new Map<string, ChatSession>();
+  private static readonly MAX_CHAT_TURNS = 20;
+  private static readonly CHAT_SESSION_TTL = 30 * 60 * 1000;
 
   private get apiKey(): string | undefined {
     return process.env["HUGGINGFACE_API_KEY"];
@@ -112,6 +251,24 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     return [];
   }
 
+  getHealthStatus(): HFHealthStatus {
+    const totalReqs = this._cacheHits + this._cacheMisses;
+    return {
+      activeTier: this.apiKey ? "primary" : this._freeTierAvailable ? "primary" : "mock",
+      modelsAvailable: Object.fromEntries(
+        Object.entries(MODEL_REGISTRY).map(([k, v]) => [k, v.primary])
+      ),
+      cacheStats: {
+        hits: this._cacheHits,
+        misses: this._cacheMisses,
+        size: this._cache.size,
+        hitRate: totalReqs > 0 ? `${((this._cacheHits / totalReqs) * 100).toFixed(1)}%` : "0%",
+      },
+      freeTierAvailable: this._freeTierAvailable ?? true,
+      apiKeyConfigured: !!this.apiKey,
+    };
+  }
+
   protected async performHealthCheck(): Promise<void> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
@@ -132,13 +289,55 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     }
   }
 
+  private getCacheKey(taskType: string, input: unknown): string {
+    const inputStr = typeof input === "string" ? input : JSON.stringify(input);
+    let hash = 0;
+    for (let i = 0; i < inputStr.length; i++) {
+      const chr = inputStr.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0;
+    }
+    return `${taskType}:${hash}`;
+  }
+
+  private getFromCache(key: string): unknown | null {
+    const entry = this._cache.get(key);
+    if (!entry) {
+      this._cacheMisses++;
+      return null;
+    }
+    if (entry.expiry < Date.now()) {
+      this._cache.delete(key);
+      this._cacheMisses++;
+      return null;
+    }
+    entry.accessedAt = Date.now();
+    this._cacheHits++;
+    return entry.data;
+  }
+
+  private setCache(key: string, data: unknown, ttlMs: number): void {
+    if (this._cache.size >= MAX_CACHE_SIZE) {
+      let oldestKey = "";
+      let oldestTime = Infinity;
+      for (const [k, v] of this._cache) {
+        if (v.accessedAt < oldestTime) {
+          oldestTime = v.accessedAt;
+          oldestKey = k;
+        }
+      }
+      if (oldestKey) this._cache.delete(oldestKey);
+    }
+    this._cache.set(key, { data, expiry: Date.now() + ttlMs, accessedAt: Date.now() });
+  }
+
   private async callHF(model: string, body: unknown): Promise<unknown> {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (this.apiKey) {
       headers["Authorization"] = `Bearer ${this.apiKey}`;
     }
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    const timer = setTimeout(() => controller.abort(), 20000);
     try {
       const response = await fetch(
         `https://api-inference.huggingface.co/models/${model}`,
@@ -168,10 +367,42 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     }
   }
 
+  private async callWithFallback(
+    taskType: string,
+    body: unknown | ((model: string) => unknown),
+  ): Promise<{ data: unknown; model: string; tier: ModelTier }> {
+    const chain = MODEL_REGISTRY[taskType];
+    if (!chain) throw new Error(`Unknown task type: ${taskType}`);
+
+    const tiers: Array<{ model: string; tier: ModelTier }> = [
+      { model: chain.primary, tier: "primary" },
+      { model: chain.secondary, tier: "secondary" },
+      { model: chain.tertiary, tier: "tertiary" },
+    ];
+
+    for (const { model, tier } of tiers) {
+      try {
+        const requestBody = typeof body === "function" ? body(model) : body;
+        const data = await this.callHF(model, requestBody);
+        return { data, model, tier };
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("503") || msg.includes("429") || msg.includes("504")) {
+          continue;
+        }
+        if (tier === "tertiary") throw err;
+        continue;
+      }
+    }
+    throw new Error(`All models failed for ${taskType}`);
+  }
+
   private mockTextGen(prompt: string): HFTextGenerationResult {
     return {
-      text: `[AI Generated] Analysis of "${prompt.slice(0, 50)}...": Based on current intelligence data, key indicators suggest elevated activity levels across monitored sectors. Continued monitoring recommended.`,
+      text: `[AI Generated] Analysis of "${prompt.slice(0, 50)}...": Based on current intelligence data, key indicators suggest elevated activity levels across monitored sectors. Continued monitoring recommended with emphasis on anomaly detection and cross-correlation of signals. The overall risk posture remains within acceptable parameters, though targeted review of critical infrastructure dependencies is advised.`,
       model: "mock-hf-model",
+      tier: "mock",
+      cached: false,
     };
   }
 
@@ -179,13 +410,28 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     prompt: string,
     options?: { model?: string; maxTokens?: number },
   ): Promise<HFTextGenerationResult> {
-    const model = options?.model ?? HF_MODELS.textGeneration;
+    const cacheKey = this.getCacheKey("textGeneration", { prompt, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFTextGenerationResult), cached: true };
+
     try {
-      const data = (await this.callHF(model, {
-        inputs: prompt,
-        parameters: { max_new_tokens: options?.maxTokens ?? 256 },
-      })) as Array<{ generated_text: string }>;
-      return { text: data[0]?.generated_text ?? "", model };
+      const body = { inputs: prompt, parameters: { max_new_tokens: options?.maxTokens ?? 512, temperature: 0.7 } };
+      let data: unknown, model: string, tier: ModelTier;
+      if (options?.model) {
+        data = await this.callHF(options.model, body);
+        model = options.model;
+        tier = "primary";
+      } else {
+        ({ data, model, tier } = await this.callWithFallback("textGeneration", body));
+      }
+      const result: HFTextGenerationResult = {
+        text: Array.isArray(data) ? (data[0]?.generated_text ?? "") : String(data),
+        model,
+        tier,
+        cached: false,
+      };
+      this.setCache(cacheKey, result, CACHE_TTL.textGeneration);
+      return result;
     } catch {
       return this.mockTextGen(prompt);
     }
@@ -195,20 +441,30 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     text: string,
     options?: { model?: string; maxLength?: number },
   ): Promise<HFSummarizationResult> {
-    const model = options?.model ?? HF_MODELS.summarization;
+    const cacheKey = this.getCacheKey("summarization", { text, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFSummarizationResult), cached: true };
+
     try {
-      const data = (await this.callHF(model, {
-        inputs: text,
-        parameters: {
-          max_length: options?.maxLength ?? 150,
-          min_length: 30,
-        },
-      })) as Array<{ summary_text: string }>;
-      return { summary: data[0]?.summary_text ?? "", model };
+      const { data, model, tier } = await this.callWithFallback(
+        "summarization",
+        { inputs: text, parameters: { max_length: options?.maxLength ?? 200, min_length: 30 } },
+      );
+      const arr = data as Array<{ summary_text: string }>;
+      const result: HFSummarizationResult = {
+        summary: arr[0]?.summary_text ?? "",
+        model: options?.model ?? model,
+        tier,
+        cached: false,
+      };
+      this.setCache(cacheKey, result, CACHE_TTL.summarization);
+      return result;
     } catch {
       return {
         summary: `Executive Summary: ${text.slice(0, 100)}... Key findings indicate significant developments requiring immediate attention across multiple operational domains.`,
         model: "mock-hf-model",
+        tier: "mock",
+        cached: false,
       };
     }
   }
@@ -217,14 +473,26 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     text: string,
     options?: { model?: string },
   ): Promise<HFClassificationResult> {
-    const model = options?.model ?? HF_MODELS.classification;
+    const cacheKey = this.getCacheKey("classification", { text, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFClassificationResult), cached: true };
+
     try {
-      const data = (await this.callHF(model, { inputs: text })) as Array<
-        Array<{ label: string; score: number }>
-      >;
-      return { labels: data[0] ?? [], model };
+      const { data, model, tier } = await this.callWithFallback(
+        "classification",
+        { inputs: text },
+      );
+      const arr = data as Array<Array<{ label: string; score: number }>>;
+      const result: HFClassificationResult = {
+        labels: arr[0] ?? [],
+        model: options?.model ?? model,
+        tier,
+        cached: false,
+      };
+      this.setCache(cacheKey, result, CACHE_TTL.classification);
+      return result;
     } catch {
-      return { labels: [...MOCK_CLASSIFICATIONS], model: "mock-hf-model" };
+      return { labels: [...MOCK_CLASSIFICATIONS], model: "mock-hf-model", tier: "mock", cached: false };
     }
   }
 
@@ -232,27 +500,32 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     text: string,
     options?: { model?: string },
   ): Promise<HFNERResult> {
-    const model = options?.model ?? HF_MODELS.ner;
+    const cacheKey = this.getCacheKey("ner", { text, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFNERResult), cached: true };
+
     try {
-      const data = (await this.callHF(model, { inputs: text })) as Array<{
-        entity_group: string;
-        word: string;
-        score: number;
-        start: number;
-        end: number;
-      }>;
-      return {
-        entities: (data ?? []).map((e) => ({
+      const { data, model, tier } = await this.callWithFallback(
+        "ner",
+        { inputs: text },
+      );
+      const arr = data as Array<{ entity_group: string; word: string; score: number; start: number; end: number }>;
+      const result: HFNERResult = {
+        entities: (arr ?? []).map((e) => ({
           entity: e.entity_group,
           word: e.word,
           score: e.score,
           start: e.start,
           end: e.end,
         })),
-        model,
+        model: options?.model ?? model,
+        tier,
+        cached: false,
       };
+      this.setCache(cacheKey, result, CACHE_TTL.ner);
+      return result;
     } catch {
-      return { entities: [...MOCK_ENTITIES], model: "mock-hf-model" };
+      return { entities: [...MOCK_ENTITIES], model: "mock-hf-model", tier: "mock", cached: false };
     }
   }
 
@@ -261,19 +534,56 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     options?: { model?: string; sourceLang?: string; targetLang?: string },
   ): Promise<HFTranslationResult> {
     const langPair = `${options?.sourceLang ?? "en"}-${options?.targetLang ?? "fr"}`;
-    const model =
-      options?.model ?? `Helsinki-NLP/opus-mt-${langPair}`;
-    try {
-      const data = (await this.callHF(model, { inputs: text })) as Array<{
-        translation_text: string;
-      }>;
-      return { translatedText: data[0]?.translation_text ?? "", model };
-    } catch {
-      return {
-        translatedText: `[Translated ${langPair}] ${text}`,
-        model: "mock-hf-model",
-      };
+    const cacheKey = this.getCacheKey("translation", { text, langPair });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFTranslationResult), cached: true };
+
+    if (options?.model) {
+      try {
+        const data = await this.callHF(options.model, { inputs: text });
+        const arr = data as Array<{ translation_text: string }>;
+        const result: HFTranslationResult = {
+          translatedText: arr[0]?.translation_text ?? "",
+          model: options.model,
+          tier: "primary",
+          cached: false,
+        };
+        this.setCache(cacheKey, result, CACHE_TTL.translation);
+        return result;
+      } catch {
+        // fall through to fallback chain
+      }
     }
+
+    const dynamicModels = [
+      `Helsinki-NLP/opus-mt-${langPair}`,
+      `Helsinki-NLP/opus-mt-en-${options?.targetLang ?? "fr"}`,
+      MODEL_REGISTRY.translation.tertiary,
+    ];
+
+    for (const model of dynamicModels) {
+      try {
+        const data = await this.callHF(model, { inputs: text });
+        const arr = data as Array<{ translation_text: string }>;
+        const result: HFTranslationResult = {
+          translatedText: arr[0]?.translation_text ?? "",
+          model,
+          tier: model === dynamicModels[0] ? "primary" : "secondary",
+          cached: false,
+        };
+        this.setCache(cacheKey, result, CACHE_TTL.translation);
+        return result;
+      } catch {
+        continue;
+      }
+    }
+
+    return {
+      translatedText: `[Translated ${langPair}] ${text}`,
+      model: "mock-hf-model",
+      tier: "mock",
+      cached: false,
+    };
   }
 
   async zeroShotClassification(
@@ -281,18 +591,30 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     candidateLabels: string[],
     options?: { model?: string },
   ): Promise<HFZeroShotResult> {
-    const model = options?.model ?? HF_MODELS.zeroShot;
+    const cacheKey = this.getCacheKey("zeroShot", { text, candidateLabels, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFZeroShotResult), cached: true };
+
     try {
-      const data = (await this.callHF(model, {
-        inputs: text,
-        parameters: { candidate_labels: candidateLabels },
-      })) as { labels: string[]; scores: number[] };
-      return { labels: data.labels, scores: data.scores, model };
+      const { data, model, tier } = await this.callWithFallback(
+        "zeroShot",
+        { inputs: text, parameters: { candidate_labels: candidateLabels } },
+      );
+      const res = data as { labels: string[]; scores: number[] };
+      const result: HFZeroShotResult = {
+        labels: res.labels,
+        scores: res.scores,
+        model: options?.model ?? model,
+        tier,
+        cached: false,
+      };
+      this.setCache(cacheKey, result, CACHE_TTL.zeroShot);
+      return result;
     } catch {
       const scores = candidateLabels.map(
         (_, i) => Math.max(0.1, 0.95 - i * 0.15 + (Math.random() * 0.1 - 0.05)),
       );
-      return { labels: candidateLabels, scores, model: "mock-hf-model" };
+      return { labels: candidateLabels, scores, model: "mock-hf-model", tier: "mock", cached: false };
     }
   }
 
@@ -300,23 +622,34 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     text: string,
     options?: { model?: string },
   ): Promise<HFSentimentResult> {
-    const model = options?.model ?? HF_MODELS.sentiment;
+    const cacheKey = this.getCacheKey("sentiment", { text, ...options });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFSentimentResult), cached: true };
+
     try {
-      const data = (await this.callHF(model, { inputs: text })) as Array<
-        Array<{ label: string; score: number }>
-      >;
-      const top = data[0]?.[0];
-      return {
+      const { data, model, tier } = await this.callWithFallback(
+        "sentiment",
+        { inputs: text },
+      );
+      const arr = data as Array<Array<{ label: string; score: number }>>;
+      const top = arr[0]?.[0];
+      const result: HFSentimentResult = {
         label: top?.label ?? "NEUTRAL",
         score: top?.score ?? 0,
-        model,
+        model: options?.model ?? model,
+        tier,
+        cached: false,
       };
+      this.setCache(cacheKey, result, CACHE_TTL.sentiment);
+      return result;
     } catch {
       const isNeg = /threat|attack|critical|danger|warning|breach|risk/i.test(text);
       return {
         label: isNeg ? "NEGATIVE" : "POSITIVE",
         score: isNeg ? 0.89 : 0.82,
         model: "mock-hf-model",
+        tier: "mock",
+        cached: false,
       };
     }
   }
@@ -326,17 +659,32 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     context: string,
     options?: { model?: string },
   ): Promise<HFQuestionAnswerResult> {
-    const model = options?.model ?? HF_MODELS.questionAnswering;
+    const cacheKey = this.getCacheKey("questionAnswering", { question, context });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFQuestionAnswerResult), cached: true };
+
     try {
-      const data = (await this.callHF(model, {
-        inputs: { question, context },
-      })) as { answer: string; score: number };
-      return { answer: data.answer, score: data.score, model };
+      const { data, model, tier } = await this.callWithFallback(
+        "questionAnswering",
+        { inputs: { question, context } },
+      );
+      const res = data as { answer: string; score: number };
+      const result: HFQuestionAnswerResult = {
+        answer: res.answer,
+        score: res.score,
+        model: options?.model ?? model,
+        tier,
+        cached: false,
+      };
+      this.setCache(cacheKey, result, CACHE_TTL.questionAnswering);
+      return result;
     } catch {
       return {
         answer: `Based on available intelligence, the answer to "${question.slice(0, 40)}..." relates to ongoing operational patterns detected across monitored systems.`,
         score: 0.85,
         model: "mock-hf-model",
+        tier: "mock",
+        cached: false,
       };
     }
   }
@@ -345,25 +693,340 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     prompt: string,
     options?: { model?: string },
   ): Promise<HFImageResult> {
-    const model = options?.model ?? HF_MODELS.imageGeneration;
+    const cacheKey = this.getCacheKey("imageGeneration", { prompt });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFImageResult), cached: true };
+
     try {
-      const result = (await this.callHF(model, { inputs: prompt })) as { __imageBase64: string; __mimeType: string };
-      return { imageBase64: result.__imageBase64, mimeType: result.__mimeType, model };
+      const { data, model, tier } = await this.callWithFallback(
+        "imageGeneration",
+        { inputs: prompt },
+      );
+      const res = data as { __imageBase64: string; __mimeType: string };
+      const result: HFImageResult = {
+        imageBase64: res.__imageBase64,
+        mimeType: res.__mimeType,
+        model: options?.model ?? model,
+        tier,
+        cached: false,
+      };
+      this.setCache(cacheKey, result, CACHE_TTL.imageGeneration);
+      return result;
     } catch {
       return {
         imageBase64: createPlaceholderImage(prompt),
         mimeType: "image/svg+xml",
         model: "mock-hf-model",
+        tier: "mock",
+        cached: false,
       };
+    }
+  }
+
+  async embedding(
+    text: string | string[],
+    options?: { model?: string },
+  ): Promise<HFEmbeddingResult> {
+    const inputText = Array.isArray(text) ? text.join(" ") : text;
+    const cacheKey = this.getCacheKey("embedding", { text: inputText });
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return { ...(cached as HFEmbeddingResult), cached: true };
+
+    try {
+      const { data, model, tier } = await this.callWithFallback(
+        "embedding",
+        { inputs: inputText },
+      );
+      let embeddingVector: number[];
+      if (Array.isArray(data) && Array.isArray(data[0])) {
+        embeddingVector = data[0] as number[];
+      } else if (Array.isArray(data)) {
+        embeddingVector = data as number[];
+      } else {
+        throw new Error("Unexpected embedding response format");
+      }
+
+      const result: HFEmbeddingResult = {
+        embedding: embeddingVector,
+        dimensions: embeddingVector.length,
+        model: options?.model ?? model,
+        tier,
+        cached: false,
+      };
+      this.setCache(cacheKey, result, CACHE_TTL.embedding);
+      return result;
+    } catch {
+      const mockDim = 384;
+      const mockEmb = Array.from({ length: mockDim }, () => (Math.random() - 0.5) * 2);
+      const norm = Math.sqrt(mockEmb.reduce((s, v) => s + v * v, 0));
+      const normalized = mockEmb.map(v => v / norm);
+      return {
+        embedding: normalized,
+        dimensions: mockDim,
+        model: "mock-hf-model",
+        tier: "mock",
+        cached: false,
+      };
+    }
+  }
+
+  async analyzeDocument(
+    text: string,
+    options?: { classificationLabels?: string[] },
+  ): Promise<HFDocumentAnalysis> {
+    const startTime = Date.now();
+    const labels = options?.classificationLabels ?? [
+      "security_threat", "operational_issue", "compliance_risk",
+      "performance_degradation", "strategic_opportunity", "routine_update",
+    ];
+
+    const [summary, entities, sentiment, classification] = await Promise.all([
+      this.summarization(text),
+      this.namedEntityRecognition(text),
+      this.sentimentAnalysis(text),
+      this.zeroShotClassification(text, labels),
+    ]);
+
+    return {
+      summary,
+      entities,
+      sentiment,
+      classification,
+      model: `pipeline[${summary.model},${entities.model},${sentiment.model},${classification.model}]`,
+      pipelineSteps: ["summarization", "ner", "sentiment", "zeroShot"],
+      processingTimeMs: Date.now() - startTime,
+    };
+  }
+
+  async chat(
+    sessionId: string,
+    userMessage: string,
+    options?: { systemPrompt?: string; maxTokens?: number },
+  ): Promise<HFChatResult> {
+    this.cleanupExpiredSessions();
+
+    let session = this._chatSessions.get(sessionId);
+    if (!session) {
+      session = {
+        messages: [],
+        createdAt: Date.now(),
+        lastAccessedAt: Date.now(),
+      };
+      if (options?.systemPrompt) {
+        session.messages.push({ role: "system", content: options.systemPrompt });
+      } else {
+        session.messages.push({
+          role: "system",
+          content: "You are an expert intelligence analyst for SZL Holdings, a technology consulting firm. Provide concise, data-driven analysis and actionable recommendations. Reference specific metrics when available.",
+        });
+      }
+      this._chatSessions.set(sessionId, session);
+    }
+
+    session.messages.push({ role: "user", content: userMessage });
+    session.lastAccessedAt = Date.now();
+
+    if (session.messages.length > HuggingFaceAdapter.MAX_CHAT_TURNS * 2 + 1) {
+      const systemMsg = session.messages[0];
+      session.messages = [systemMsg, ...session.messages.slice(-HuggingFaceAdapter.MAX_CHAT_TURNS * 2)];
+    }
+
+    try {
+      const conversationText = session.messages
+        .map(m => `${m.role}: ${m.content}`)
+        .join("\n");
+
+      const prompt = `${conversationText}\nassistant:`;
+
+      const result = await this.textGeneration(prompt, {
+        maxTokens: options?.maxTokens ?? 512,
+      });
+
+      let reply = result.text;
+      const assistantIdx = reply.lastIndexOf("assistant:");
+      if (assistantIdx >= 0) {
+        reply = reply.slice(assistantIdx + "assistant:".length).trim();
+      }
+
+      session.messages.push({ role: "assistant", content: reply });
+
+      return {
+        reply,
+        model: result.model,
+        tier: result.tier,
+        turnCount: Math.floor((session.messages.length - 1) / 2),
+        sessionId,
+      };
+    } catch {
+      const mockReply = this.generateMockChatReply(userMessage);
+      session.messages.push({ role: "assistant", content: mockReply });
+      return {
+        reply: mockReply,
+        model: "mock-hf-model",
+        tier: "mock",
+        turnCount: Math.floor((session.messages.length - 1) / 2),
+        sessionId,
+      };
+    }
+  }
+
+  getChatHistory(sessionId: string): HFChatMessage[] {
+    const session = this._chatSessions.get(sessionId);
+    return session ? [...session.messages] : [];
+  }
+
+  clearChatSession(sessionId: string): boolean {
+    return this._chatSessions.delete(sessionId);
+  }
+
+  async *streamTextGeneration(
+    prompt: string,
+    options?: { model?: string; maxTokens?: number },
+  ): AsyncGenerator<string, void, unknown> {
+    const chain = MODEL_REGISTRY.textGeneration;
+    const models = options?.model
+      ? [options.model, chain.secondary, chain.tertiary]
+      : [chain.primary, chain.secondary, chain.tertiary];
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+
+    for (const model of models) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 30000);
+        try {
+          const response = await fetch(
+            `https://api-inference.huggingface.co/models/${model}`,
+            {
+              method: "POST",
+              headers,
+              body: JSON.stringify({
+                inputs: prompt,
+                parameters: {
+                  max_new_tokens: options?.maxTokens ?? 512,
+                  temperature: 0.7,
+                  return_full_text: false,
+                },
+                stream: true,
+              }),
+              signal: controller.signal,
+            },
+          );
+
+          if (!response.ok) throw new Error(`HF stream error: ${response.status}`);
+
+          const reader = response.body?.getReader();
+          if (!reader) throw new Error("No response body reader");
+
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed || trimmed === "data: [DONE]") continue;
+              if (trimmed.startsWith("data: ")) {
+                try {
+                  const parsed = JSON.parse(trimmed.slice(6));
+                  const token = parsed.token?.text ?? parsed.generated_text ?? "";
+                  if (token) yield token;
+                } catch {
+                  if (trimmed.length > 6) yield trimmed.slice(6);
+                }
+              }
+            }
+          }
+          return;
+        } finally {
+          clearTimeout(timer);
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    const mockText = this.mockTextGen(prompt).text;
+    const words = mockText.split(" ");
+    for (const word of words) {
+      yield word + " ";
+      await new Promise((r) => setTimeout(r, 30 + Math.random() * 50));
+    }
+  }
+
+  cosineSimilarity(a: number[], b: number[]): number {
+    if (a.length !== b.length) return 0;
+    let dot = 0, normA = 0, normB = 0;
+    for (let i = 0; i < a.length; i++) {
+      dot += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+  }
+
+  async semanticSearch(
+    query: string,
+    documents: string[],
+    options?: { topK?: number },
+  ): Promise<Array<{ text: string; score: number; index: number }>> {
+    const [queryEmb, ...docEmbs] = await Promise.all([
+      this.embedding(query),
+      ...documents.map(d => this.embedding(d)),
+    ]);
+
+    const scored = docEmbs.map((emb, i) => ({
+      text: documents[i],
+      score: this.cosineSimilarity(queryEmb.embedding, emb.embedding),
+      index: i,
+    }));
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, options?.topK ?? 5);
+  }
+
+  private generateMockChatReply(userMessage: string): string {
+    const msg = userMessage.toLowerCase();
+    if (msg.includes("threat") || msg.includes("security")) {
+      return "Based on current threat intelligence, I've identified 3 active high-severity threats targeting your sector. The primary concern is a phishing campaign (Operation DarkHook) with a 94% confidence rating. I recommend immediate review of email security policies and employee awareness training. Shall I generate a detailed threat briefing?";
+    }
+    if (msg.includes("vessel") || msg.includes("maritime") || msg.includes("ship")) {
+      return "Current maritime intelligence shows 6 tracked vessels across 3 major shipping corridors. The Strait of Hormuz has elevated security presence with 142 vessels in queue. No sanctions violations detected in the last 24 hours. Weather advisory: South China Sea showing rough seas with tropical storm warning. Want me to pull detailed route analysis?";
+    }
+    if (msg.includes("risk") || msg.includes("compliance")) {
+      return "Risk posture analysis for Q1 2026: Cyber attack probability at 34% (trending up), supply chain disruption at 22% (increasing), regulatory compliance gap at 15% (decreasing). Overall risk score: 67/100 (Moderate). Top recommendation: Accelerate zero-trust architecture adoption to reduce attack surface by estimated 40%.";
+    }
+    return "I've analyzed the current operational data across the SZL portfolio. Key metrics show 99.97% platform uptime, 234,567 API calls processed today with 42ms average response time, and 156 active users. All critical systems are operating within normal parameters. Is there a specific domain you'd like me to dive deeper into?";
+  }
+
+  private cleanupExpiredSessions(): void {
+    const now = Date.now();
+    for (const [id, session] of this._chatSessions) {
+      if (now - session.lastAccessedAt > HuggingFaceAdapter.CHAT_SESSION_TTL) {
+        this._chatSessions.delete(id);
+      }
     }
   }
 }
 
 function createPlaceholderImage(_prompt: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-    <rect width="512" height="512" fill="#1a1a2e"/>
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0f172a"/>
+        <stop offset="100%" stop-color="#1e1b4b"/>
+      </linearGradient>
+    </defs>
+    <rect width="512" height="512" fill="url(#bg)"/>
     <text x="256" y="240" text-anchor="middle" fill="#6366f1" font-size="20" font-family="sans-serif">AI Generated Image</text>
-    <text x="256" y="280" text-anchor="middle" fill="#94a3b8" font-size="14" font-family="sans-serif">[Demo Mode]</text>
+    <text x="256" y="270" text-anchor="middle" fill="#94a3b8" font-size="14" font-family="sans-serif">[Demo Mode — SDXL-Turbo]</text>
+    <text x="256" y="300" text-anchor="middle" fill="#475569" font-size="11" font-family="sans-serif">Configure HUGGINGFACE_API_KEY for live generation</text>
   </svg>`;
   return Buffer.from(svg).toString("base64");
 }
