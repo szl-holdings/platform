@@ -9,6 +9,19 @@ import { GoogleAdapter } from "./adapters/google.js";
 import { NotionAdapter } from "./adapters/notion.js";
 import { StorageAdapter } from "./adapters/storage.js";
 import { MonitoringAdapter } from "./adapters/monitoring.js";
+import { GitHubAdapter } from "./adapters/github.js";
+import { GoogleCalendarAdapter } from "./adapters/google-calendar.js";
+import { GoogleDocsAdapter } from "./adapters/google-docs.js";
+import { GoogleDriveAdapter } from "./adapters/google-drive.js";
+import { DropboxAdapter } from "./adapters/dropbox.js";
+import { OneDriveAdapter } from "./adapters/onedrive.js";
+import { StormGlassAdapter } from "./adapters/stormglass.js";
+import { PostHogAdapter } from "./adapters/posthog.js";
+import { GmailAdapter } from "./adapters/gmail.js";
+import { ConfluenceAdapter } from "./adapters/confluence.js";
+import { HubSpotAdapter } from "./adapters/hubspot.js";
+import { ElevenLabsAdapter } from "./adapters/elevenlabs.js";
+import { FigmaAdapter } from "./adapters/figma.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -32,6 +45,19 @@ export class ServiceRegistry {
   readonly notion: NotionAdapter;
   readonly storage: StorageAdapter;
   readonly monitoring: MonitoringAdapter;
+  readonly github: GitHubAdapter;
+  readonly googleCalendar: GoogleCalendarAdapter;
+  readonly googleDocs: GoogleDocsAdapter;
+  readonly googleDrive: GoogleDriveAdapter;
+  readonly dropbox: DropboxAdapter;
+  readonly onedrive: OneDriveAdapter;
+  readonly stormglass: StormGlassAdapter;
+  readonly posthog: PostHogAdapter;
+  readonly gmail: GmailAdapter;
+  readonly confluence: ConfluenceAdapter;
+  readonly hubspot: HubSpotAdapter;
+  readonly elevenlabs: ElevenLabsAdapter;
+  readonly figma: FigmaAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -46,6 +72,19 @@ export class ServiceRegistry {
     this.notion = new NotionAdapter();
     this.storage = new StorageAdapter();
     this.monitoring = new MonitoringAdapter();
+    this.github = new GitHubAdapter();
+    this.googleCalendar = new GoogleCalendarAdapter();
+    this.googleDocs = new GoogleDocsAdapter();
+    this.googleDrive = new GoogleDriveAdapter();
+    this.dropbox = new DropboxAdapter();
+    this.onedrive = new OneDriveAdapter();
+    this.stormglass = new StormGlassAdapter();
+    this.posthog = new PostHogAdapter();
+    this.gmail = new GmailAdapter();
+    this.confluence = new ConfluenceAdapter();
+    this.hubspot = new HubSpotAdapter();
+    this.elevenlabs = new ElevenLabsAdapter();
+    this.figma = new FigmaAdapter();
 
     this.adapters = [
       this.ai,
@@ -58,6 +97,19 @@ export class ServiceRegistry {
       this.notion,
       this.storage,
       this.monitoring,
+      this.github,
+      this.googleCalendar,
+      this.googleDocs,
+      this.googleDrive,
+      this.dropbox,
+      this.onedrive,
+      this.stormglass,
+      this.posthog,
+      this.gmail,
+      this.confluence,
+      this.hubspot,
+      this.elevenlabs,
+      this.figma,
     ];
   }
 

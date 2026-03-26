@@ -158,7 +158,15 @@ Common utilities: slugify, truncate, formatCurrency, formatNumber, formatDate, g
 
 ### `lib/services` (`@workspace/services`)
 
-Shared backend service adapter library. Each adapter auto-detects environment variables and falls back to mock/demo mode.
+Shared backend service adapter library. Provides a consistent pattern for integrating with third-party services. Each adapter auto-detects environment variables and falls back to mock/demo mode when keys are missing.
+
+- `src/base.ts` — abstract `ServiceAdapter` class with status reporting (LIVE_CONFIGURED / MOCKED_DEMO_MODE / MANUAL_REQUIRED)
+- `src/adapters/` — 23 individual adapters: ai, weather, shipping, stripe, slack, twilio, google, notion, storage, monitoring, github, google-calendar, google-docs, google-drive, dropbox, onedrive, stormglass, posthog, gmail, confluence, hubspot, elevenlabs, figma
+- `src/registry.ts` — `ServiceRegistry` aggregates all adapters, exports singleton `services` instance
+- `src/index.ts` — barrel export of all adapters, types, and registry
+- API endpoint: `GET /api/services/health` returns the full integration health matrix
+- Admin API endpoints: `GET /api/admin/overview`, `GET /api/admin/connectors`, `POST /api/admin/connectors/:name/test`, `POST /api/admin/connectors/:name/sync`, `GET /api/admin/users`, `POST /api/admin/users`, `GET /api/admin/audit-log`, `GET /api/admin/feature-flags`, `PUT /api/admin/feature-flags/:key`, `GET /api/admin/billing`, `GET /api/admin/webhooks`, `GET /api/admin/files`, `GET /api/admin/environment`, `POST /api/admin/seed`, `POST /api/admin/seed/reset`
+- `.env.example` at project root documents all supported environment variables
 
 ### `lib/api-spec` (`@workspace/api-spec`)
 
@@ -175,6 +183,59 @@ Generated React Query hooks and fetch client from the OpenAPI spec.
 ### `artifacts/project-list` (`@workspace/project-list`)
 
 React + Vite single-page career portfolio for Stephen L. — Technology Consultant.
+
+**Sections:**
+- Hero: particle animation background, animated gradient text, "Available for Consulting" badge, CTA buttons, social links (LinkedIn, GitHub, Twitter, Email)
+- About: professional summary, stat cards (10+ Years, 50+ Projects, 100% Satisfaction, 24/7 Support), technologies/tools tag cloud
+- Services: 6 consulting service cards (Full-Stack Dev, Cloud/Infrastructure, Digital Products, Data Architecture, Security/Compliance, Performance Optimization)
+- Portfolio/Work: project cards fetched from API with status badges (In Progress, Delivered, Paused, Legacy)
+- Testimonials: 3 client testimonial cards with star ratings
+- Contact: LinkedIn connect button, email CTA, full social links row
+- Footer: brand, social icons, copyright
+
+**Design:**
+- Dark theme: navy background (`220 20% 4%`), primary indigo/violet (`250 90% 65%`)
+- Fonts: Plus Jakarta Sans (display), Inter (body)
+- Gradient text via `.gradient-text` class
+- Particle canvas animation with connection lines
+- Framer Motion animations: fade-ins, parallax, scroll-triggered reveals, hover effects
+- Glassmorphism sticky navbar
+- Fully responsive (mobile/tablet/desktop)
+- Reduced-motion accessibility support
+
+**SEO:**
+- Open Graph + Twitter Card meta tags
+- JSON-LD structured data (Person schema)
+- Canonical URL, meta description, keywords
+
+**Contact info:**
+- LinkedIn: https://linkedin.com/in/stephen-l-279315240
+- Email: contact@stephenl.dev
+- Website: stephenl.dev
+
+- Depends on: `@workspace/api-client-react`, `framer-motion`, `lucide-react`
+
+### `artifacts/admin-panel` (`@workspace/admin-panel`)
+
+Admin Control Plane — premium dark-mode executive dashboard for managing the SZL ecosystem.
+
+**Pages:**
+- Dashboard: System overview with real-time health indicators for database, storage, memory, and all 23 connectors
+- App Registry: Lists all SZL apps with status indicators (active/planned)
+- Connectors: View all 23 integrations with test/sync actions, search, category filtering, missing env var display
+- Users & Roles: User management CRUD with role badges (admin, developer, operator, viewer)
+- Audit Log: Filterable system activity log with search
+- Webhooks: Incoming webhook event viewer
+- Feature Flags: Toggle features with ON/OFF switches
+- Billing: Plan details, seats, invoices, included features
+- Files: File browser for uploaded assets
+- Environment: Readiness screen showing configured vs missing env vars per connector
+- Seed Data: Seed/reset demo data manager
+
+**Design:** Premium dark executive theme, navy/slate backgrounds, blue primary accent, sidebar navigation with section grouping
+
+- Route: `/admin/`
+- Depends on: `@tanstack/react-query`, `wouter`, `lucide-react`, `tailwindcss`
 
 ### `scripts` (`@workspace/scripts`)
 

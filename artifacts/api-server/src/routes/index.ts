@@ -15,6 +15,7 @@ import firestormRouter from "./firestorm";
 import lyteRouter from "./lyte";
 import dreamscapeRouter from "./dreamscape";
 import readinessRouter from "./readiness";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(firestormRouter);
 router.use(lyteRouter);
 router.use(dreamscapeRouter);
 router.use(readinessRouter);
+router.use(adminRouter);
 
 export default router;
