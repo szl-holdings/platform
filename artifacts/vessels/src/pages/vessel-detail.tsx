@@ -20,6 +20,27 @@ const statusColors: Record<string, string> = {
   delivered: "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
 
+function DetailSkeleton() {
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center gap-4">
+        <div className="skeleton h-8 w-16 rounded" />
+        <div className="flex-1 space-y-2">
+          <div className="skeleton h-6 w-48" />
+          <div className="skeleton h-3 w-64" />
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-lg" />)}
+      </div>
+      <div className="skeleton h-10 w-96 rounded" />
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => <div key={i} className="skeleton h-16 rounded-lg" />)}
+      </div>
+    </div>
+  );
+}
+
 export default function VesselDetailPage() {
   const [, params] = useRoute("/vessel/:id");
   const vesselId = Number(params?.id);
@@ -29,21 +50,30 @@ export default function VesselDetailPage() {
   const { data: cargo = [] } = useQuery({ queryKey: ["cargo", vesselId], queryFn: () => api.vessels.cargo(vesselId), enabled: !!vesselId });
   const { data: routes = [] } = useQuery({ queryKey: ["vesselRoutes", vesselId], queryFn: () => api.vessels.routes(vesselId), enabled: !!vesselId });
 
-  if (isLoading) return <div className="flex items-center justify-center h-full text-muted-foreground">Loading...</div>;
-  if (!vessel) return <div className="flex items-center justify-center h-full text-muted-foreground">Vessel not found</div>;
+  if (isLoading) return <DetailSkeleton />;
+  if (!vessel) return (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <Ship className="w-12 h-12 text-muted-foreground/20 mx-auto mb-3" />
+        <p className="text-muted-foreground font-medium">Vessel not found</p>
+      </div>
+    </div>
+  );
 
   const lastPosition = positions[0];
+  const isAtSea = vessel.status === "at_sea";
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 animate-fade-in-up">
         <Link href="/">
           <Button variant="ghost" size="sm"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <h1 className="font-display text-2xl font-bold">{vessel.name}</h1>
-            <Badge variant="outline" className={statusColors[vessel.status] || ""}>
+            <Badge variant="outline" className={`${statusColors[vessel.status] || ""} ${isAtSea ? "animate-pulse" : ""}`}>
+              {isAtSea && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse-dot" />}
               {vessel.status?.replace("_", " ")}
             </Badge>
           </div>
@@ -52,10 +82,12 @@ export default function VesselDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-1 hover:border-primary/20 transition-all duration-300 group">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Ship className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Ship className={`w-5 h-5 text-primary ${isAtSea ? "animate-wave-float" : ""}`} />
+              </div>
               <div>
                 <p className="text-xs text-muted-foreground">Type</p>
                 <p className="text-sm font-semibold capitalize">{vessel.vesselType}</p>
@@ -63,10 +95,12 @@ export default function VesselDetailPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-2 hover:border-chart-2/20 transition-all duration-300 group">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <MapPin className="w-5 h-5 text-chart-2" />
+              <div className="w-10 h-10 rounded-lg bg-chart-2/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <MapPin className="w-5 h-5 text-chart-2" />
+              </div>
               <div>
                 <p className="text-xs text-muted-foreground">Last Position</p>
                 <p className="text-sm font-semibold">{lastPosition ? `${Number(lastPosition.latitude).toFixed(4)}, ${Number(lastPosition.longitude).toFixed(4)}` : "Unknown"}</p>
@@ -74,10 +108,12 @@ export default function VesselDetailPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-chart-3/20 transition-all duration-300 group">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Navigation className="w-5 h-5 text-chart-3" />
+              <div className="w-10 h-10 rounded-lg bg-chart-3/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Navigation className="w-5 h-5 text-chart-3" />
+              </div>
               <div>
                 <p className="text-xs text-muted-foreground">Speed / Heading</p>
                 <p className="text-sm font-semibold">{lastPosition ? `${lastPosition.speed} kn / ${lastPosition.heading}°` : "N/A"}</p>
@@ -85,10 +121,12 @@ export default function VesselDetailPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-4 hover:border-chart-4/20 transition-all duration-300 group">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <Package className="w-5 h-5 text-chart-4" />
+              <div className="w-10 h-10 rounded-lg bg-chart-4/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Package className="w-5 h-5 text-chart-4" />
+              </div>
               <div>
                 <p className="text-xs text-muted-foreground">Tonnage</p>
                 <p className="text-sm font-semibold">{vessel.grossTonnage ? `${Number(vessel.grossTonnage).toLocaleString()} GT` : "N/A"}</p>
@@ -98,7 +136,7 @@ export default function VesselDetailPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="routes" className="space-y-4">
+      <Tabs defaultValue="routes" className="space-y-4 animate-fade-in-up stagger-5">
         <TabsList className="bg-muted">
           <TabsTrigger value="routes">Routes ({routes.length})</TabsTrigger>
           <TabsTrigger value="cargo">Cargo ({cargo.length})</TabsTrigger>
@@ -107,9 +145,15 @@ export default function VesselDetailPage() {
 
         <TabsContent value="routes" className="space-y-3">
           {routes.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No routes assigned</p>
-          ) : routes.map((route: any) => (
-            <Card key={route.id} className="bg-card border-border">
+            <Card className="bg-card border-border border-dashed">
+              <CardContent className="p-12 text-center">
+                <Navigation className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">No routes assigned</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Assign routes via the Route Planning page</p>
+              </CardContent>
+            </Card>
+          ) : routes.map((route: any, i: number) => (
+            <Card key={route.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -126,8 +170,8 @@ export default function VesselDetailPage() {
                 </div>
                 {route.waypoints && Array.isArray(route.waypoints) && route.waypoints.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {route.waypoints.map((wp: any, i: number) => (
-                      <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded">{wp.name || `WP ${i + 1}`}</span>
+                    {route.waypoints.map((wp: any, idx: number) => (
+                      <span key={idx} className="text-xs bg-muted px-2 py-0.5 rounded">{wp.name || `WP ${idx + 1}`}</span>
                     ))}
                   </div>
                 )}
@@ -138,9 +182,15 @@ export default function VesselDetailPage() {
 
         <TabsContent value="cargo" className="space-y-3">
           {cargo.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No cargo records</p>
-          ) : cargo.map((c: any) => (
-            <Card key={c.id} className="bg-card border-border">
+            <Card className="bg-card border-border border-dashed">
+              <CardContent className="p-12 text-center">
+                <Package className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">No cargo records</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Cargo manifests will appear here</p>
+              </CardContent>
+            </Card>
+          ) : cargo.map((c: any, i: number) => (
+            <Card key={c.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -156,9 +206,15 @@ export default function VesselDetailPage() {
 
         <TabsContent value="positions" className="space-y-3">
           {positions.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">No position data</p>
-          ) : positions.map((pos: any) => (
-            <Card key={pos.id} className="bg-card border-border">
+            <Card className="bg-card border-border border-dashed">
+              <CardContent className="p-12 text-center">
+                <MapPin className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-muted-foreground font-medium">No position data</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Position history will be recorded automatically</p>
+              </CardContent>
+            </Card>
+          ) : positions.map((pos: any, i: number) => (
+            <Card key={pos.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">

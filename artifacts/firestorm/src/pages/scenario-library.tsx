@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Target, Plus, Trash2, Shield, Zap, AlertTriangle } from "lucide-react";
+import { Target, Plus, Trash2, Shield, Zap, AlertTriangle, Globe, Server, Users, Lock, Link2, Building } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -37,6 +37,36 @@ const categoryLabels: Record<string, string> = {
   supply_chain: "Supply Chain",
 };
 
+const categoryIcons: Record<string, any> = {
+  network: Globe,
+  application: Server,
+  social_engineering: Users,
+  physical: Building,
+  insider_threat: Lock,
+  supply_chain: Link2,
+};
+
+function ScenarioSkeleton() {
+  return (
+    <Card className="bg-card border-border">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-3">
+          <div className="skeleton w-9 h-9 rounded-lg" />
+          <div className="skeleton h-4 w-32" />
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0 space-y-3">
+        <div className="skeleton h-3 w-full" />
+        <div className="skeleton h-3 w-3/4" />
+        <div className="flex gap-2">
+          <div className="skeleton h-5 w-20 rounded-full" />
+          <div className="skeleton h-5 w-16 rounded-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ScenarioLibrary() {
   const qc = useQueryClient();
   const { data: scenarios = [], isLoading } = useQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
@@ -60,7 +90,7 @@ export default function ScenarioLibrary() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Scenario Library</h1>
           <p className="text-sm text-muted-foreground mt-1">Pre-built security assessment scenarios for simulation</p>
@@ -106,57 +136,81 @@ export default function ScenarioLibrary() {
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap animate-fade-in-up stagger-1">
         <Button variant={filter === "all" ? "default" : "outline"} size="sm" onClick={() => setFilter("all")}>All ({scenarios.length})</Button>
-        {categories.map((cat: string) => (
-          <Button key={cat} variant={filter === cat ? "default" : "outline"} size="sm" onClick={() => setFilter(cat)}>
-            {categoryLabels[cat] || cat} ({scenarios.filter((s: any) => s.category === cat).length})
-          </Button>
-        ))}
+        {categories.map((cat: string) => {
+          const CatIcon = categoryIcons[cat] || Target;
+          return (
+            <Button key={cat} variant={filter === cat ? "default" : "outline"} size="sm" onClick={() => setFilter(cat)} className="gap-1.5">
+              <CatIcon className="w-3.5 h-3.5" />
+              {categoryLabels[cat] || cat} ({scenarios.filter((s: any) => s.category === cat).length})
+            </Button>
+          );
+        })}
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading scenarios...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => <ScenarioSkeleton key={i} />)}
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">No scenarios found</div>
+        <Card className="bg-card border-border border-dashed animate-fade-in-up stagger-2">
+          <CardContent className="p-16 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+              <Target className="w-8 h-8 text-muted-foreground/30" />
+            </div>
+            <p className="text-muted-foreground font-medium">No scenarios found</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">{filter !== "all" ? "Try a different filter or create a new scenario" : "Create your first scenario to get started"}</p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((scenario: any) => (
-            <Card key={scenario.id} className="bg-card border-border hover:border-primary/20 transition-colors group">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Target className="w-4.5 h-4.5 text-primary" />
+          {filtered.map((scenario: any, i: number) => {
+            const CatIcon = categoryIcons[scenario.category] || Target;
+            const isCritical = scenario.severity === "critical";
+            const catBgColor = categoryColors[scenario.category]?.split(" ")[0] || "bg-primary/10";
+            return (
+              <Card key={scenario.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 group hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 animate-fade-in-up stagger-${Math.min((i % 6) + 1, 8)} ${isCritical ? "ring-1 ring-red-500/10" : ""}`}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-lg ${catBgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <CatIcon className={`w-4.5 h-4.5 ${categoryColors[scenario.category]?.split(" ")[1] || "text-primary"}`} />
+                      </div>
+                      <CardTitle className="text-sm font-display leading-tight">{scenario.name}</CardTitle>
                     </div>
-                    <CardTitle className="text-sm font-display leading-tight">{scenario.name}</CardTitle>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteMut.mutate(scenario.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteMut.mutate(scenario.id)}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0 space-y-3">
-                <p className="text-sm text-muted-foreground line-clamp-2">{scenario.description || "No description"}</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className={categoryColors[scenario.category] || ""}>{categoryLabels[scenario.category] || scenario.category}</Badge>
-                  <Badge variant="outline" className={severityColors[scenario.severity] || ""}>{scenario.severity}</Badge>
-                </div>
-                {scenario.attackVector && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Zap className="w-3 h-3" />
-                    <span>{scenario.attackVector}</span>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-3">
+                  <p className="text-sm text-muted-foreground line-clamp-2">{scenario.description || "No description"}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className={categoryColors[scenario.category] || ""}>
+                      {categoryLabels[scenario.category] || scenario.category}
+                    </Badge>
+                    <Badge variant="outline" className={`${severityColors[scenario.severity] || ""} ${isCritical ? "animate-threat-pulse" : ""}`}>
+                      {isCritical && <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />}
+                      {scenario.severity}
+                    </Badge>
                   </div>
-                )}
-                {scenario.mitreTechnique && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Shield className="w-3 h-3" />
-                    <span>MITRE: {scenario.mitreTechnique}</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  {scenario.attackVector && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-2.5 py-1.5">
+                      <Zap className="w-3 h-3 text-primary" />
+                      <span>{scenario.attackVector}</span>
+                    </div>
+                  )}
+                  {scenario.mitreTechnique && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-2.5 py-1.5">
+                      <Shield className="w-3 h-3 text-primary" />
+                      <span>MITRE: {scenario.mitreTechnique}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

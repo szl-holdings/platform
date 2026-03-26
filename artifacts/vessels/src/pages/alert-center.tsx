@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Bell, Shield, Plus, Clock, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, Bell, Shield, Plus, Clock, Trash2, BellOff } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 const severityColors: Record<string, string> = {
@@ -25,6 +25,51 @@ const alertStatusColors: Record<string, string> = {
   resolved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   dismissed: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
 };
+
+function AnimatedCounter({ value }: { value: number }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    const start = ref.current;
+    const diff = value - start;
+    if (diff === 0) return;
+    let cancelled = false;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      if (cancelled) return;
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / 1000, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(start + diff * eased));
+      if (progress < 1) requestAnimationFrame(step);
+      else ref.current = value;
+    };
+    requestAnimationFrame(step);
+    return () => { cancelled = true; };
+  }, [value]);
+  return <>{display}</>;
+}
+
+function AlertSkeleton() {
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="skeleton w-8 h-8 rounded-lg" />
+          <div className="flex-1 space-y-1.5">
+            <div className="skeleton h-4 w-40" />
+            <div className="skeleton h-3 w-full" />
+            <div className="skeleton h-3 w-32" />
+          </div>
+          <div className="flex gap-2">
+            <div className="skeleton h-5 w-16 rounded-full" />
+            <div className="skeleton h-5 w-16 rounded-full" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AlertCenterPage() {
   const qc = useQueryClient();
@@ -49,42 +94,48 @@ export default function AlertCenterPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
+      <div className="animate-fade-in-up">
         <h1 className="font-display text-2xl font-bold">Alert Center</h1>
         <p className="text-sm text-muted-foreground mt-1">Monitor triggered alerts and manage alert rules</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-card border-border">
+        <Card className={`bg-card border-border animate-fade-in-up stagger-1 hover:border-chart-5/20 transition-all duration-300 group ${activeAlerts.length > 0 ? "ring-1 ring-chart-5/10" : ""}`}>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Active Alerts</p>
-              <p className="text-2xl font-bold font-display mt-1 text-chart-5">{activeAlerts.length}</p>
+              <p className="text-2xl font-bold font-display mt-1 text-chart-5"><AnimatedCounter value={activeAlerts.length} /></p>
             </div>
-            <AlertTriangle className="w-5 h-5 text-chart-5" />
+            <div className={`w-10 h-10 rounded-lg bg-chart-5/10 flex items-center justify-center group-hover:scale-110 transition-transform ${activeAlerts.length > 0 ? "animate-pulse" : ""}`}>
+              <AlertTriangle className="w-5 h-5 text-chart-5" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-2 hover:border-primary/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Alerts</p>
-              <p className="text-2xl font-bold font-display mt-1">{alerts.length}</p>
+              <p className="text-2xl font-bold font-display mt-1"><AnimatedCounter value={alerts.length} /></p>
             </div>
-            <Bell className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Bell className="w-5 h-5 text-primary" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-chart-2/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Alert Rules</p>
-              <p className="text-2xl font-bold font-display mt-1">{alertRules.length}</p>
+              <p className="text-2xl font-bold font-display mt-1"><AnimatedCounter value={alertRules.length} /></p>
             </div>
-            <Shield className="w-5 h-5 text-chart-2" />
+            <div className="w-10 h-10 rounded-lg bg-chart-2/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Shield className="w-5 h-5 text-chart-2" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="alerts" className="space-y-4">
+      <Tabs defaultValue="alerts" className="space-y-4 animate-fade-in-up stagger-4">
         <TabsList className="bg-muted">
           <TabsTrigger value="alerts">Triggered Alerts ({alerts.length})</TabsTrigger>
           <TabsTrigger value="rules">Alert Rules ({alertRules.length})</TabsTrigger>
@@ -92,18 +143,30 @@ export default function AlertCenterPage() {
 
         <TabsContent value="alerts" className="space-y-3">
           {loadingAlerts ? (
-            <div className="text-center py-12 text-muted-foreground">Loading alerts...</div>
+            <>
+              {[...Array(3)].map((_, i) => <AlertSkeleton key={i} />)}
+            </>
           ) : alerts.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No alerts triggered</div>
+            <Card className="bg-card border-border border-dashed">
+              <CardContent className="p-16 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+                  <BellOff className="w-8 h-8 text-muted-foreground/30" />
+                </div>
+                <p className="text-muted-foreground font-medium">No alerts triggered</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">All systems operating normally</p>
+              </CardContent>
+            </Card>
           ) : (
-            alerts.map((alert: any) => {
+            alerts.map((alert: any, i: number) => {
               const vessel = vessels.find((v: any) => v.id === alert.vesselId);
+              const isCritical = alert.severity === "critical";
+              const isActive = alert.status === "active";
               return (
-                <Card key={alert.id} className="bg-card border-border">
+                <Card key={alert.id} className={`bg-card border-border transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)} ${isCritical && isActive ? "ring-1 ring-red-500/20" : "hover:border-primary/20"}`}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${alert.severity === "critical" ? "bg-red-500/10" : alert.severity === "high" ? "bg-orange-500/10" : "bg-amber-500/10"}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${alert.severity === "critical" ? "bg-red-500/10" : alert.severity === "high" ? "bg-orange-500/10" : "bg-amber-500/10"} ${isCritical && isActive ? "animate-pulse" : ""}`}>
                           <AlertTriangle className={`w-4 h-4 ${alert.severity === "critical" ? "text-red-400" : alert.severity === "high" ? "text-orange-400" : "text-amber-400"}`} />
                         </div>
                         <div>
@@ -116,7 +179,10 @@ export default function AlertCenterPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={severityColors[alert.severity] || ""}>{alert.severity}</Badge>
+                        <Badge variant="outline" className={`${severityColors[alert.severity] || ""} ${isCritical && isActive ? "animate-pulse" : ""}`}>
+                          {isCritical && isActive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />}
+                          {alert.severity}
+                        </Badge>
                         <Badge variant="outline" className={alertStatusColors[alert.status] || ""}>{alert.status}</Badge>
                       </div>
                     </div>
@@ -174,9 +240,17 @@ export default function AlertCenterPage() {
             </Dialog>
           </div>
           {alertRules.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No alert rules configured</div>
-          ) : alertRules.map((rule: any) => (
-            <Card key={rule.id} className="bg-card border-border">
+            <Card className="bg-card border-border border-dashed">
+              <CardContent className="p-16 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-muted-foreground/30" />
+                </div>
+                <p className="text-muted-foreground font-medium">No alert rules configured</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Create rules to automatically trigger alerts</p>
+              </CardContent>
+            </Card>
+          ) : alertRules.map((rule: any, i: number) => (
+            <Card key={rule.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -185,7 +259,12 @@ export default function AlertCenterPage() {
                     <div className="flex items-center gap-2 mt-2">
                       <Badge variant="outline" className="text-xs">{rule.ruleType}</Badge>
                       <Badge variant="outline" className={severityColors[rule.severity] || ""}>{rule.severity}</Badge>
-                      {rule.isActive && <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Active</Badge>}
+                      {rule.isActive && (
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse-dot" />
+                          Active
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteRuleMut.mutate(rule.id)}>

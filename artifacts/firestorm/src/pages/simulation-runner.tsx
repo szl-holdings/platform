@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Play, Clock, CheckCircle, XCircle, Activity, Target, Shield } from "lucide-react";
-import { useState } from "react";
+import { Play, Clock, CheckCircle, XCircle, Activity, Target, Shield, Loader2, Zap } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -25,6 +25,110 @@ function getScoreColor(score: number) {
   if (score < 50) return "text-amber-400";
   if (score < 70) return "text-orange-400";
   return "text-red-400";
+}
+
+function getScoreBg(score: number) {
+  if (score < 30) return "bg-emerald-500/10";
+  if (score < 50) return "bg-amber-500/10";
+  if (score < 70) return "bg-orange-500/10";
+  return "bg-red-500/10";
+}
+
+function AnimatedCounter({ value }: { value: number }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    const start = ref.current;
+    const diff = value - start;
+    if (diff === 0) return;
+    let cancelled = false;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      if (cancelled) return;
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / 1000, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(start + diff * eased));
+      if (progress < 1) requestAnimationFrame(step);
+      else ref.current = value;
+    };
+    requestAnimationFrame(step);
+    return () => { cancelled = true; };
+  }, [value]);
+  return <>{display}</>;
+}
+
+function AnimatedProgress({ value, className }: { value: number; className?: string }) {
+  const [current, setCurrent] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setCurrent(value), 100);
+    return () => clearTimeout(timer);
+  }, [value]);
+  return <Progress value={current} className={`${className} transition-all duration-1000`} />;
+}
+
+function SimSkeleton() {
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-5">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="skeleton w-10 h-10 rounded-lg" />
+          <div className="flex-1 space-y-1.5">
+            <div className="skeleton h-4 w-40" />
+            <div className="skeleton h-3 w-56" />
+          </div>
+          <div className="skeleton h-5 w-20 rounded-full" />
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-lg" />)}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+const simPhases = ["Initializing", "Scanning targets", "Analyzing vectors", "Executing payloads", "Generating report"];
+
+function RunningSimDisplay() {
+  const [phase, setPhase] = useState(0);
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhase(p => (p + 1) % simPhases.length);
+    }, 2500);
+    const progInterval = setInterval(() => {
+      setProgress(p => Math.min(p + Math.random() * 5, 95));
+    }, 500);
+    return () => { clearInterval(interval); clearInterval(progInterval); };
+  }, []);
+  return (
+    <div className="bg-amber-500/5 rounded-lg p-4 border border-amber-500/10 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(0deg, transparent, transparent 20px, hsl(var(--primary) / 0.1) 20px, hsl(var(--primary) / 0.1) 21px)" }} />
+      </div>
+      <div className="relative">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 text-sm text-amber-400">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="font-medium">Simulation in progress</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {simPhases.map((_, idx) => (
+              <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${idx <= phase ? "bg-amber-400" : "bg-amber-400/20"}`} />
+            ))}
+          </div>
+        </div>
+        <AnimatedProgress value={progress} className="h-2" />
+        <div className="flex items-center justify-between mt-2 text-xs text-amber-400/60">
+          <span className="flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            {simPhases[phase]}...
+          </span>
+          <span>{Math.round(progress)}%</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function SimulationRunner() {
@@ -48,7 +152,7 @@ export default function SimulationRunner() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Simulation Runner</h1>
           <p className="text-sm text-muted-foreground mt-1">Execute controlled security simulations and review results</p>
@@ -87,54 +191,79 @@ export default function SimulationRunner() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-1 hover:border-primary/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Runs</p>
-              <p className="text-2xl font-bold font-display mt-1">{simulations.length}</p>
+              <p className="text-2xl font-bold font-display mt-1"><AnimatedCounter value={simulations.length} /></p>
             </div>
-            <Activity className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Activity className="w-5 h-5 text-primary" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-chart-3/20 transition-all duration-300 group ${simulations.filter((s: any) => s.status === "running").length > 0 ? "ring-1 ring-chart-3/10" : ""}`}>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Running</p>
-              <p className="text-2xl font-bold font-display mt-1 text-chart-3">{simulations.filter((s: any) => s.status === "running").length}</p>
+              <p className="text-2xl font-bold font-display mt-1 text-chart-3"><AnimatedCounter value={simulations.filter((s: any) => s.status === "running").length} /></p>
             </div>
-            <Clock className="w-5 h-5 text-chart-3" />
+            <div className={`w-10 h-10 rounded-lg bg-chart-3/10 flex items-center justify-center group-hover:scale-110 transition-transform ${simulations.filter((s: any) => s.status === "running").length > 0 ? "animate-pulse" : ""}`}>
+              <Clock className="w-5 h-5 text-chart-3" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-chart-4/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Completed</p>
-              <p className="text-2xl font-bold font-display mt-1 text-chart-4">{simulations.filter((s: any) => s.status === "completed").length}</p>
+              <p className="text-2xl font-bold font-display mt-1 text-chart-4"><AnimatedCounter value={simulations.filter((s: any) => s.status === "completed").length} /></p>
             </div>
-            <CheckCircle className="w-5 h-5 text-chart-4" />
+            <div className="w-10 h-10 rounded-lg bg-chart-4/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CheckCircle className="w-5 h-5 text-chart-4" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading simulations...</div>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => <SimSkeleton key={i} />)}
+        </div>
       ) : simulations.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">No simulation runs yet</div>
+        <Card className="bg-card border-border border-dashed animate-fade-in-up stagger-4">
+          <CardContent className="p-16 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+              <Activity className="w-8 h-8 text-muted-foreground/30" />
+            </div>
+            <p className="text-muted-foreground font-medium">No simulation runs yet</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Run your first simulation to begin security testing</p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-4">
-          {simulations.map((sim: any) => {
+          {simulations.map((sim: any, i: number) => {
             const scenario = scenarios.find((s: any) => s.id === sim.scenarioId);
             const assessment = assessments.find((a: any) => a.id === sim.assessmentId);
             const results = sim.results as any;
             const score = results?.overallScore ? Number(results.overallScore) : null;
+            const isRunning = sim.status === "running";
 
             return (
-              <Card key={sim.id} className="bg-card border-border">
+              <Card key={sim.id} className={`bg-card border-border transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)} ${isRunning ? "ring-1 ring-amber-500/20 animate-glow-border" : ""}`}>
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mt-0.5">
-                        <Activity className="w-5 h-5 text-primary" />
+                      <div className={`w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mt-0.5 ${isRunning ? "ring-1 ring-amber-500/20" : ""}`}>
+                        {isRunning ? (
+                          <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+                        ) : sim.status === "completed" ? (
+                          <CheckCircle className="w-5 h-5 text-emerald-400" />
+                        ) : sim.status === "failed" ? (
+                          <XCircle className="w-5 h-5 text-red-400" />
+                        ) : (
+                          <Activity className="w-5 h-5 text-primary" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-display font-semibold">{sim.name}</h3>
@@ -144,40 +273,36 @@ export default function SimulationRunner() {
                         </div>
                       </div>
                     </div>
-                    <Badge variant="outline" className={statusColors[sim.status] || ""}>{sim.status}</Badge>
+                    <Badge variant="outline" className={`${statusColors[sim.status] || ""} ${isRunning ? "animate-pulse" : ""}`}>
+                      {isRunning && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse-dot" />}
+                      {sim.status}
+                    </Badge>
                   </div>
 
-                  {sim.status === "running" && (
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 text-sm text-amber-400 mb-2">
-                        <Clock className="w-4 h-4 animate-pulse" /> Simulation in progress...
-                      </div>
-                      <Progress value={60} className="h-1.5" />
-                    </div>
-                  )}
+                  {isRunning && <RunningSimDisplay />}
 
                   {sim.status === "completed" && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
                       {score !== null && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className={`${getScoreBg(score)} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                           <p className="text-xs text-muted-foreground mb-1">Risk Score</p>
                           <p className={`text-xl font-bold font-display ${getScoreColor(score)}`}>{score.toFixed(1)}</p>
                         </div>
                       )}
                       {results?.vulnerabilitiesFound !== undefined && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className="bg-chart-2/10 rounded-lg p-3 text-center border border-transparent hover:border-chart-2/20 transition-colors">
                           <p className="text-xs text-muted-foreground mb-1">Vulnerabilities</p>
                           <p className="text-xl font-bold font-display text-chart-2">{results.vulnerabilitiesFound}</p>
                         </div>
                       )}
                       {results?.attackPathsIdentified !== undefined && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className="bg-primary/10 rounded-lg p-3 text-center border border-transparent hover:border-primary/20 transition-colors">
                           <p className="text-xs text-muted-foreground mb-1">Attack Paths</p>
                           <p className="text-xl font-bold font-display text-primary">{results.attackPathsIdentified}</p>
                         </div>
                       )}
                       {results?.mitigationsApplied !== undefined && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className="bg-chart-4/10 rounded-lg p-3 text-center border border-transparent hover:border-chart-4/20 transition-colors">
                           <p className="text-xs text-muted-foreground mb-1">Mitigations</p>
                           <p className="text-xl font-bold font-display text-chart-4">{results.mitigationsApplied}</p>
                         </div>
@@ -189,8 +314,8 @@ export default function SimulationRunner() {
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-xs text-muted-foreground mb-2">Recommendations</p>
                       <ul className="space-y-1">
-                        {results.recommendations.map((rec: string, i: number) => (
-                          <li key={i} className="text-xs flex items-start gap-2">
+                        {results.recommendations.map((rec: string, idx: number) => (
+                          <li key={idx} className="text-xs flex items-start gap-2">
                             <Shield className="w-3 h-3 text-primary mt-0.5 shrink-0" />
                             <span>{rec}</span>
                           </li>

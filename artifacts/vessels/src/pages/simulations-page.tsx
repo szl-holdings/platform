@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Activity, Play, Clock, AlertTriangle, CheckCircle, TrendingDown } from "lucide-react";
-import { useState } from "react";
+import { Activity, Play, Clock, AlertTriangle, CheckCircle, TrendingDown, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
@@ -31,6 +31,42 @@ function getRiskColor(score: number) {
   if (score < 50) return "text-amber-400";
   if (score < 70) return "text-orange-400";
   return "text-red-400";
+}
+
+function getRiskBg(score: number) {
+  if (score < 30) return "bg-emerald-500/10";
+  if (score < 50) return "bg-amber-500/10";
+  if (score < 70) return "bg-orange-500/10";
+  return "bg-red-500/10";
+}
+
+function AnimatedProgress({ value, className }: { value: number; className?: string }) {
+  const [current, setCurrent] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setCurrent(value), 100);
+    return () => clearTimeout(timer);
+  }, [value]);
+  return <Progress value={current} className={`${className} transition-all duration-1000`} />;
+}
+
+function SimSkeleton() {
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-5">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="skeleton w-10 h-10 rounded-lg" />
+          <div className="flex-1 space-y-1.5">
+            <div className="skeleton h-4 w-40" />
+            <div className="skeleton h-3 w-56" />
+          </div>
+          <div className="skeleton h-5 w-20 rounded-full" />
+        </div>
+        <div className="grid grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-lg" />)}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function SimulationsPage() {
@@ -64,7 +100,7 @@ export default function SimulationsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Simulations</h1>
           <p className="text-sm text-muted-foreground mt-1">Run route risk assessments and impact analyses</p>
@@ -110,24 +146,39 @@ export default function SimulationsPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading simulations...</div>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => <SimSkeleton key={i} />)}
+        </div>
       ) : simulations.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">No simulations run yet</div>
+        <Card className="bg-card border-border border-dashed animate-fade-in-up stagger-2">
+          <CardContent className="p-16 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+              <Activity className="w-8 h-8 text-muted-foreground/30" />
+            </div>
+            <p className="text-muted-foreground font-medium">No simulations run yet</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Run your first simulation to analyze route risks</p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-4">
-          {simulations.map((sim: any) => {
+          {simulations.map((sim: any, i: number) => {
             const vessel = vessels.find((v: any) => v.id === sim.vesselId);
             const route = routes.find((r: any) => r.id === sim.routeId);
             const riskScore = sim.riskScore ? Number(sim.riskScore) : null;
             const results = sim.results as any;
+            const isRunning = sim.status === "running";
 
             return (
-              <Card key={sim.id} className="bg-card border-border">
+              <Card key={sim.id} className={`bg-card border-border transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)} ${isRunning ? "ring-1 ring-amber-500/20" : ""}`}>
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mt-0.5">
-                        <Activity className="w-5 h-5 text-primary" />
+                      <div className={`w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mt-0.5 ${isRunning ? "ring-1 ring-amber-500/20" : ""}`}>
+                        {isRunning ? (
+                          <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+                        ) : (
+                          <Activity className="w-5 h-5 text-primary" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-display font-semibold">{sim.name}</h3>
@@ -138,38 +189,46 @@ export default function SimulationsPage() {
                         </p>
                       </div>
                     </div>
-                    <Badge variant="outline" className={statusColors[sim.status] || ""}>{sim.status}</Badge>
+                    <Badge variant="outline" className={`${statusColors[sim.status] || ""} ${isRunning ? "animate-pulse" : ""}`}>
+                      {isRunning && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse-dot" />}
+                      {sim.status}
+                    </Badge>
                   </div>
 
-                  {sim.status === "running" && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-2 text-sm text-amber-400 mb-2">
-                        <Clock className="w-4 h-4 animate-pulse" /> Running simulation...
+                  {isRunning && (
+                    <div className="mb-4 bg-amber-500/5 rounded-lg p-4 border border-amber-500/10">
+                      <div className="flex items-center gap-2 text-sm text-amber-400 mb-3">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="font-medium">Running simulation...</span>
                       </div>
-                      <Progress value={65} className="h-1.5" />
+                      <AnimatedProgress value={65} className="h-2" />
+                      <div className="flex items-center justify-between mt-2 text-xs text-amber-400/60">
+                        <span>Analyzing risk factors</span>
+                        <span>65%</span>
+                      </div>
                     </div>
                   )}
 
                   {sim.status === "completed" && riskScore !== null && (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
-                      <div className="bg-muted/50 rounded-lg p-3 text-center">
+                      <div className={`${getRiskBg(riskScore)} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                         <p className="text-xs text-muted-foreground mb-1">Overall Risk</p>
                         <p className={`text-xl font-bold font-display ${getRiskColor(riskScore)}`}>{riskScore.toFixed(1)}</p>
                       </div>
                       {results?.weatherRisk && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className={`${getRiskBg(Number(results.weatherRisk))} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                           <p className="text-xs text-muted-foreground mb-1">Weather Risk</p>
                           <p className={`text-xl font-bold font-display ${getRiskColor(Number(results.weatherRisk))}`}>{Number(results.weatherRisk).toFixed(1)}</p>
                         </div>
                       )}
                       {results?.routeRisk && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className={`${getRiskBg(Number(results.routeRisk))} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                           <p className="text-xs text-muted-foreground mb-1">Route Risk</p>
                           <p className={`text-xl font-bold font-display ${getRiskColor(Number(results.routeRisk))}`}>{Number(results.routeRisk).toFixed(1)}</p>
                         </div>
                       )}
                       {results?.scheduleRisk && (
-                        <div className="bg-muted/50 rounded-lg p-3 text-center">
+                        <div className={`${getRiskBg(Number(results.scheduleRisk))} rounded-lg p-3 text-center border border-transparent hover:border-primary/10 transition-colors`}>
                           <p className="text-xs text-muted-foreground mb-1">Schedule Risk</p>
                           <p className={`text-xl font-bold font-display ${getRiskColor(Number(results.scheduleRisk))}`}>{Number(results.scheduleRisk).toFixed(1)}</p>
                         </div>
@@ -181,8 +240,8 @@ export default function SimulationsPage() {
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-xs text-muted-foreground mb-2">Recommendations</p>
                       <ul className="space-y-1">
-                        {results.recommendations.map((rec: string, i: number) => (
-                          <li key={i} className="text-xs flex items-start gap-2">
+                        {results.recommendations.map((rec: string, idx: number) => (
+                          <li key={idx} className="text-xs flex items-start gap-2">
                             <TrendingDown className="w-3 h-3 text-primary mt-0.5 shrink-0" />
                             <span>{rec}</span>
                           </li>

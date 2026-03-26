@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, Plus, Shield, Bug, CheckCircle, XCircle } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, Plus, Shield, Bug, CheckCircle, XCircle, Search } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 const severityColors: Record<string, string> = {
@@ -27,6 +27,50 @@ const statusColors: Record<string, string> = {
   accepted: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   false_positive: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
 };
+
+function AnimatedCounter({ value }: { value: number }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    const start = ref.current;
+    const diff = value - start;
+    if (diff === 0) return;
+    let cancelled = false;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      if (cancelled) return;
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / 1000, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(start + diff * eased));
+      if (progress < 1) requestAnimationFrame(step);
+      else ref.current = value;
+    };
+    requestAnimationFrame(step);
+    return () => { cancelled = true; };
+  }, [value]);
+  return <>{display}</>;
+}
+
+function FindingSkeleton() {
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-2">
+            <div className="skeleton h-4 w-48" />
+            <div className="skeleton h-3 w-full" />
+            <div className="skeleton h-3 w-40" />
+          </div>
+          <div className="flex gap-2 ml-4">
+            <div className="skeleton h-5 w-16 rounded-full" />
+            <div className="skeleton h-7 w-28 rounded" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function FindingsPage() {
   const qc = useQueryClient();
@@ -54,7 +98,7 @@ export default function FindingsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Findings</h1>
           <p className="text-sm text-muted-foreground mt-1">Security findings from assessments and simulations</p>
@@ -103,33 +147,41 @@ export default function FindingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-1 hover:border-primary/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
-            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p><p className="text-2xl font-bold font-display mt-1">{findings.length}</p></div>
-            <Bug className="w-5 h-5 text-primary" />
+            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p><p className="text-2xl font-bold font-display mt-1"><AnimatedCounter value={findings.length} /></p></div>
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Bug className="w-5 h-5 text-primary" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-red-500/20 transition-all duration-300 group ${criticalCount > 0 ? "ring-1 ring-red-500/10" : ""}`}>
           <CardContent className="p-4 flex items-center justify-between">
-            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">Critical</p><p className="text-2xl font-bold font-display mt-1 text-red-400">{criticalCount}</p></div>
-            <AlertTriangle className="w-5 h-5 text-red-400" />
+            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">Critical</p><p className={`text-2xl font-bold font-display mt-1 text-red-400 ${criticalCount > 0 ? "animate-threat-pulse" : ""}`}><AnimatedCounter value={criticalCount} /></p></div>
+            <div className={`w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform ${criticalCount > 0 ? "animate-pulse" : ""}`}>
+              <AlertTriangle className="w-5 h-5 text-red-400" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-3 hover:border-orange-500/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
-            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">High</p><p className="text-2xl font-bold font-display mt-1 text-orange-400">{highCount}</p></div>
-            <Shield className="w-5 h-5 text-orange-400" />
+            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">High</p><p className="text-2xl font-bold font-display mt-1 text-orange-400"><AnimatedCounter value={highCount} /></p></div>
+            <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Shield className="w-5 h-5 text-orange-400" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border animate-fade-in-up stagger-4 hover:border-chart-3/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
-            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">Open</p><p className="text-2xl font-bold font-display mt-1 text-chart-3">{openCount}</p></div>
-            <XCircle className="w-5 h-5 text-chart-3" />
+            <div><p className="text-xs text-muted-foreground uppercase tracking-wider">Open</p><p className="text-2xl font-bold font-display mt-1 text-chart-3"><AnimatedCounter value={openCount} /></p></div>
+            <div className="w-10 h-10 rounded-lg bg-chart-3/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <XCircle className="w-5 h-5 text-chart-3" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap animate-fade-in-up stagger-5">
         {["all", "critical", "high", "medium", "low", "info"].map(sev => (
           <Button key={sev} variant={filter === sev ? "default" : "outline"} size="sm" onClick={() => setFilter(sev)}>
             {sev === "all" ? `All (${findings.length})` : `${sev.charAt(0).toUpperCase() + sev.slice(1)} (${findings.filter((f: any) => f.severity === sev).length})`}
@@ -138,15 +190,27 @@ export default function FindingsPage() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading findings...</div>
+        <div className="space-y-3">
+          {[...Array(4)].map((_, i) => <FindingSkeleton key={i} />)}
+        </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">No findings found</div>
+        <Card className="bg-card border-border border-dashed animate-fade-in-up stagger-6">
+          <CardContent className="p-16 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-muted-foreground/30" />
+            </div>
+            <p className="text-muted-foreground font-medium">No findings found</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">{filter !== "all" ? "Try a different severity filter" : "Findings will appear after assessments are run"}</p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-3">
-          {filtered.map((finding: any) => {
+          {filtered.map((finding: any, i: number) => {
             const assessment = assessments.find((a: any) => a.id === finding.assessmentId);
+            const isCritical = finding.severity === "critical";
+            const isOpen = finding.status === "open";
             return (
-              <Card key={finding.id} className="bg-card border-border hover:border-primary/20 transition-colors">
+              <Card key={finding.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min((i % 6) + 1, 8)} ${isCritical && isOpen ? "ring-1 ring-red-500/10" : ""}`}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -165,7 +229,10 @@ export default function FindingsPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-2 ml-4">
-                      <Badge variant="outline" className={severityColors[finding.severity] || ""}>{finding.severity}</Badge>
+                      <Badge variant="outline" className={`${severityColors[finding.severity] || ""} ${isCritical && isOpen ? "animate-threat-pulse" : ""}`}>
+                        {isCritical && isOpen && <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />}
+                        {finding.severity}
+                      </Badge>
                       <Select value={finding.status} onValueChange={v => updateMut.mutate({ id: finding.id, data: { status: v } })}>
                         <SelectTrigger className="w-32 h-7 text-xs">
                           <SelectValue />
