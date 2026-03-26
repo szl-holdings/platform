@@ -1057,6 +1057,39 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     }
   }
 
+  initSessionFromHistory(
+    sessionId: string,
+    priorTurns: Array<{ role: string; content: string }>,
+    options?: { systemPrompt?: string; ownerId?: string },
+  ): void {
+    const existing = this._chatSessions.get(sessionId);
+    if (existing && existing.ownerId) {
+      if (!options?.ownerId || existing.ownerId !== options.ownerId) {
+        throw new Error("Session access denied: owner mismatch");
+      }
+    }
+    const messages: HFChatMessage[] = [];
+    if (options?.systemPrompt) {
+      messages.push({ role: "system", content: options.systemPrompt });
+    } else {
+      messages.push({
+        role: "system",
+        content: "You are an expert intelligence analyst for SZL Holdings, a technology consulting firm. Provide concise, data-driven analysis and actionable recommendations. Reference specific metrics when available.",
+      });
+    }
+    for (const turn of priorTurns) {
+      if (turn.role === "user" || turn.role === "assistant") {
+        messages.push({ role: turn.role as "user" | "assistant", content: turn.content });
+      }
+    }
+    this._chatSessions.set(sessionId, {
+      messages,
+      createdAt: existing?.createdAt ?? Date.now(),
+      lastAccessedAt: Date.now(),
+      ownerId: options?.ownerId ?? existing?.ownerId,
+    });
+  }
+
   getChatHistory(sessionId: string, requesterId?: string): HFChatMessage[] {
     const session = this._chatSessions.get(sessionId);
     if (!session) return [];

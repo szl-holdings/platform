@@ -581,6 +581,13 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
       const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === "user");
       if (!lastUserMsg) { sendError(res, "No user message found in messages array", 400); return; }
       const systemMsg = messages.find((m: { role: string }) => m.role === "system");
+      const priorTurns = messages
+        .filter((m: { role: string }) => m.role !== "system")
+        .slice(0, -1) as Array<{ role: string; content: string }>;
+      services.huggingface.initSessionFromHistory(sid, priorTurns, {
+        systemPrompt: systemMsg?.content,
+        ownerId,
+      });
       const hfResult = await services.huggingface.chat(sid, lastUserMsg.content, {
         systemPrompt: systemMsg?.content,
         maxTokens,
