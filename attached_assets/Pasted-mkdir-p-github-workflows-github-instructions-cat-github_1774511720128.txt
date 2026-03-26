@@ -1,0 +1,359 @@
+mkdir -p .github/workflows .github/instructions
+
+cat > .github/workflows/ci.yml <<'EOF'
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect package manager
+        id: pm
+        shell: bash
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "name=pnpm" >> "$GITHUB_OUTPUT"
+          elif [ -f yarn.lock ]; then
+            echo "name=yarn" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=npm" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: ${{ steps.pm.outputs.name }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          case "${{ steps.pm.outputs.name }}" in
+            pnpm)
+              pnpm install --frozen-lockfile || pnpm install
+              ;;
+            yarn)
+              yarn install --immutable || yarn install
+              ;;
+            npm)
+              if [ -f package-lock.json ]; then
+                npm ci
+              else
+                npm install
+              fi
+              ;;
+          esac
+
+      - name: Lint
+        shell: bash
+        run: |
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.lint?0:1)"; then
+            case "${{ steps.pm.outputs.name }}" in
+              pnpm) pnpm lint ;;
+              yarn) yarn lint ;;
+              npm) npm run lint ;;
+            esac
+          else
+            echo "No root lint script found, skipping."
+          fi
+
+      - name: Test
+        shell: bash
+        run: |
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.test?0:1)"; then
+            case "${{ steps.pm.outputs.name }}" in
+              pnpm) pnpm test -- --runInBand || pnpm test ;;
+              yarn) yarn test --runInBand || yarn test ;;
+              npm) npm test -- --runInBand || npm test ;;
+            esac
+          else
+            echo "No root test script found, skipping."
+          fi
+
+      - name: Build
+        shell: bash
+        run: |
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.build?0:1)"; then
+            case "${{ steps.pm.outputs.name }}" in
+              pnpm) pnpm build ;;
+              yarn) yarn build ;;
+              npm) npm run build ;;
+            esac
+          else
+            echo "No root build script found, skipping."
+          fi
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect package manager
+        id: pm
+        shell: bash
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "name=pnpm" >> "$GITHUB_OUTPUT"
+          elif [ -f yarn.lock ]; then
+            echo "name=yarn" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=npm" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: ${{ steps.pm.outputs.name }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          case "${{ steps.pm.outputs.name }}" in
+            pnpm)
+              pnpm install --frozen-lockfile || pnpm install
+              ;;
+            yarn)
+              yarn install --immutable || yarn install
+              ;;
+            npm)
+              if [ -f package-lock.json ]; then
+                npm ci
+              else
+                npm install
+              fi
+              ;;
+          esac
+
+      - name: Deploy if script exists
+        shell: bash
+        env:
+          NODE_ENV: production
+        run: |
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.deploy?0:1)"; then
+            case "${{ steps.pm.outputs.name }}" in
+              pnpm) pnpm deploy ;;
+              yarn) yarn deploy ;;
+              npm) npm run deploy ;;
+            esac
+          else
+            echo "No deploy script found, skipping."
+          fi
+EOF
+
+cat > .github/workflows/codeql.yml <<'EOF'
+name: CodeQL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '21 3 * * 1'
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+EOF
+
+cat > .github/workflows/stale.yml <<'EOF'
+name: Stale Issues and PRs
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark stale issues and PRs
+        uses: actions/stale@v10
+        with:
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: pinned,security
+          exempt-pr-labels: pinned,security
+          stale-issue-message: >
+            This issue has been inactive for 30 days and is being marked stale.
+            Reply or update it to keep it open.
+          stale-pr-message: >
+            This pull request has been inactive for 30 days and is being marked stale.
+            Reply or update it to keep it open.
+          close-issue-message: >
+            Closing due to inactivity.
+          close-pr-message: >
+            Closing due to inactivity.
+EOF
+
+cat > .github/dependabot.yml <<'EOF'
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+EOF
+
+cat > .github/copilot-instructions.md <<'EOF'
+# Repository-wide GitHub Copilot instructions
+
+Follow the existing architecture, naming conventions, and folder structure.
+Prefer the smallest safe diff that solves the problem completely.
+Before adding code, inspect nearby files for patterns and reuse existing utilities.
+When changing behavior, update or add tests whenever tests already exist in the repo.
+Never hardcode secrets, tokens, passwords, connection strings, or API keys.
+Use environment variables and documented config files for runtime configuration.
+Favor explicit error handling over silent failure.
+Avoid broad try/catch blocks that swallow exceptions.
+Keep functions focused and composable.
+For TypeScript, prefer strict typing and avoid any unless there is a strong reason.
+For React, prefer accessible components and predictable state flow.
+For backend changes, validate inputs and return structured errors.
+For scripts and workflows, keep permissions minimal.
+When generating documentation, be concise and specific to this repository.
+EOF
+
+cat > .github/instructions/frontend.instructions.md <<'EOF'
+---
+applyTo: "**/*.{ts,tsx,js,jsx,css,scss,vue}"
+---
+Prefer reusable UI components over one-off markup.
+Keep styling consistent with the existing design system or utility classes already in the repo.
+Preserve accessibility: semantic HTML, keyboard support, labels, alt text, and visible focus states.
+Avoid unnecessary client-side state when derived data will do.
+Do not introduce a new state library unless the repository already uses it.
+EOF
+
+cat > .github/instructions/backend.instructions.md <<'EOF'
+---
+applyTo: "**/*.{ts,js,json,yml,yaml}"
+---
+For backend and automation changes, prioritize reliability and observability.
+Validate external inputs.
+Use structured logging where logging already exists.
+Fail fast on invalid configuration.
+Do not weaken authentication, authorization, or auditability.
+For GitHub Actions, keep permissions minimal and pin action majors intentionally.
+EOF
+
+cat > .prettierrc.cjs <<'EOF'
+module.exports = {
+  singleQuote: true,
+  semi: true,
+  trailingComma: 'all',
+  printWidth: 100,
+}
+EOF
+
+cat > eslint.config.js <<'EOF'
+const js = require('@eslint/js')
+
+module.exports = [
+  js.configs.recommended,
+  {
+    ignores: ['node_modules/**', 'dist/**', 'build/**', '.next/**', 'coverage/**'],
+  },
+  {
+    files: ['**/*.{js,cjs,mjs,ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+    rules: {
+      'no-console': 'warn',
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
+  },
+]
+EOF
+
+echo "Created GitHub automation foundation files."
