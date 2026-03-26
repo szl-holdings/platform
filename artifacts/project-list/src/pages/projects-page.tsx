@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Linkedin, Mail, ArrowRight, ExternalLink, Loader2, ChevronDown, Code2, Cloud, Smartphone, Database, Shield, Zap, Star, Quote, Github, Twitter, CreditCard, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { IntelligenceBar } from "@/components/IntelligenceBar";
 
 const statusLabels: Record<string, string> = {
   active: "In Progress",
@@ -825,6 +826,9 @@ export default function ProjectsPage() {
     <div className="min-h-screen bg-background relative">
       <Navbar />
       <HeroSection />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <IntelligenceBar />
+      </div>
       <AboutSection />
       <ServicesSection />
       <WorkSection />

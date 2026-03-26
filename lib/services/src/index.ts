@@ -24,3 +24,15 @@ export { ConfluenceAdapter, type ConfluencePage } from "./adapters/confluence.js
 export { HubSpotAdapter, type HubSpotContact, type HubSpotDeal } from "./adapters/hubspot.js";
 export { ElevenLabsAdapter, type ElevenLabsVoice, type TTSResult } from "./adapters/elevenlabs.js";
 export { FigmaAdapter, type FigmaFile, type FigmaProject } from "./adapters/figma.js";
+export {
+  HuggingFaceAdapter,
+  type HFTextGenerationResult,
+  type HFSummarizationResult,
+  type HFClassificationResult,
+  type HFNERResult,
+  type HFTranslationResult,
+  type HFZeroShotResult,
+  type HFImageResult,
+  type HFSentimentResult,
+  type HFQuestionAnswerResult,
+} from "./adapters/huggingface.js";

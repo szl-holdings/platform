@@ -22,6 +22,7 @@ import { ConfluenceAdapter } from "./adapters/confluence.js";
 import { HubSpotAdapter } from "./adapters/hubspot.js";
 import { ElevenLabsAdapter } from "./adapters/elevenlabs.js";
 import { FigmaAdapter } from "./adapters/figma.js";
+import { HuggingFaceAdapter } from "./adapters/huggingface.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -58,6 +59,7 @@ export class ServiceRegistry {
   readonly hubspot: HubSpotAdapter;
   readonly elevenlabs: ElevenLabsAdapter;
   readonly figma: FigmaAdapter;
+  readonly huggingface: HuggingFaceAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -85,6 +87,7 @@ export class ServiceRegistry {
     this.hubspot = new HubSpotAdapter();
     this.elevenlabs = new ElevenLabsAdapter();
     this.figma = new FigmaAdapter();
+    this.huggingface = new HuggingFaceAdapter();
 
     this.adapters = [
       this.ai,
@@ -110,6 +113,7 @@ export class ServiceRegistry {
       this.hubspot,
       this.elevenlabs,
       this.figma,
+      this.huggingface,
     ];
   }
 

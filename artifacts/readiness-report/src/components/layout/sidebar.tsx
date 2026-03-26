@@ -11,7 +11,8 @@ import {
   Command,
   Server,
   Wifi,
-  WifiOff
+  WifiOff,
+  Sparkles
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -58,6 +59,7 @@ const navItems = [
   { href: "/alerts", label: "Alerting Center", icon: BellRing },
   { href: "/trends", label: "Trend History", icon: TrendingUp },
   { href: "/rollup", label: "Executive Rollup", icon: FileBarChart },
+  { href: "/ai-insights", label: "AI Insights", icon: Sparkles },
 ];
 
 export function Sidebar() {

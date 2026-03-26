@@ -9,6 +9,7 @@ import { CaseStudiesSection } from "@/components/sections/CaseStudiesSection";
 import { EcosystemSection } from "@/components/sections/EcosystemSection";
 import { PremiumSection } from "@/components/sections/PremiumSection";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { IntelligenceSection } from "@/components/sections/IntelligenceSection";
 
 export function Home() {
   return (
@@ -22,6 +23,7 @@ export function Home() {
         <ServicesSection />
         <PortfolioSection />
         <CaseStudiesSection />
+        <IntelligenceSection />
         <EcosystemSection />
         <PremiumSection />
         <ContactSection />

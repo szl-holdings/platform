@@ -8,7 +8,7 @@ export interface ChatMessage {
 export interface ChatCompletionResult {
   content: string;
   model: string;
-  provider: "openai" | "anthropic" | "mock";
+  provider: "openai" | "anthropic" | "replit-proxy" | "mock";
   usage: { promptTokens: number; completionTokens: number };
 }
 
@@ -22,8 +22,16 @@ const MOCK_RESPONSES = [
 export class AIAdapter extends ServiceAdapter {
   readonly name = "ai";
   readonly description =
-    "AI chat completions via OpenAI or Anthropic with automatic fallback";
-  readonly requiredEnvVars = ["OPENAI_API_KEY or ANTHROPIC_API_KEY"];
+    "AI chat completions via Replit OpenAI proxy, OpenAI, or Anthropic with automatic fallback";
+  readonly requiredEnvVars = ["AI_INTEGRATIONS_OPENAI_API_KEY or OPENAI_API_KEY or ANTHROPIC_API_KEY"];
+
+  private get replitProxyUrl(): string | undefined {
+    return process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
+  }
+
+  private get replitProxyKey(): string | undefined {
+    return process.env["AI_INTEGRATIONS_OPENAI_API_KEY"];
+  }
 
   private get anthropicKey(): string | undefined {
     return process.env["ANTHROPIC_API_KEY"];
@@ -33,17 +41,26 @@ export class AIAdapter extends ServiceAdapter {
     return process.env["OPENAI_API_KEY"];
   }
 
+  private get hasReplitProxy(): boolean {
+    return !!(this.replitProxyKey && this.replitProxyUrl);
+  }
+
   get status(): ServiceStatus {
-    if (this.openaiKey || this.anthropicKey) return "LIVE_CONFIGURED";
+    if (this.hasReplitProxy || this.openaiKey || this.anthropicKey) return "LIVE_CONFIGURED";
     return "MOCKED_DEMO_MODE";
   }
 
   get isLive(): boolean {
-    return !!(this.openaiKey || this.anthropicKey);
+    return !!(this.hasReplitProxy || this.openaiKey || this.anthropicKey);
   }
 
   protected async performHealthCheck(): Promise<void> {
-    if (this.openaiKey) {
+    if (this.replitProxyKey && this.replitProxyUrl) {
+      const response = await fetch(`${this.replitProxyUrl}/models`, {
+        headers: { Authorization: `Bearer ${this.replitProxyKey}` },
+      });
+      if (!response.ok) throw new Error(`Replit OpenAI proxy returned ${response.status}`);
+    } else if (this.openaiKey) {
       const response = await fetch("https://api.openai.com/v1/models", {
         headers: { Authorization: `Bearer ${this.openaiKey}` },
       });
@@ -64,14 +81,16 @@ export class AIAdapter extends ServiceAdapter {
 
   get presentEnvVars(): string[] {
     const present: string[] = [];
+    if (this.replitProxyKey) present.push("AI_INTEGRATIONS_OPENAI_API_KEY");
+    if (this.replitProxyUrl) present.push("AI_INTEGRATIONS_OPENAI_BASE_URL");
     if (this.openaiKey) present.push("OPENAI_API_KEY");
     if (this.anthropicKey) present.push("ANTHROPIC_API_KEY");
     return present;
   }
 
   get missingEnvVars(): string[] {
-    if (this.openaiKey || this.anthropicKey) return [];
-    return ["OPENAI_API_KEY or ANTHROPIC_API_KEY"];
+    if (this.replitProxyKey || this.openaiKey || this.anthropicKey) return [];
+    return ["AI_INTEGRATIONS_OPENAI_API_KEY or OPENAI_API_KEY or ANTHROPIC_API_KEY"];
   }
 
   async chatCompletion(
@@ -82,15 +101,68 @@ export class AIAdapter extends ServiceAdapter {
       return this.mockChatCompletion(messages);
     }
 
+    const providers: Array<() => Promise<ChatCompletionResult>> = [];
+
+    if (this.hasReplitProxy) {
+      providers.push(() => this.replitProxyCompletion(messages, options));
+    }
     if (this.openaiKey) {
-      return this.openaiCompletion(messages, options);
+      providers.push(() => this.openaiCompletion(messages, options));
+    }
+    if (this.anthropicKey) {
+      providers.push(() => this.anthropicCompletion(messages, options));
     }
 
-    if (this.anthropicKey) {
-      return this.anthropicCompletion(messages, options);
+    for (const tryProvider of providers) {
+      try {
+        return await tryProvider();
+      } catch {
+        continue;
+      }
     }
 
     return this.mockChatCompletion(messages);
+  }
+
+  private async replitProxyCompletion(
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): Promise<ChatCompletionResult> {
+    const model = options?.model ?? "gpt-4o-mini";
+    const response = await fetch(
+      `${this.replitProxyUrl}/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.replitProxyKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          max_tokens: options?.maxTokens ?? 1024,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Replit OpenAI proxy error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as {
+      choices: Array<{ message: { content: string } }>;
+      usage: { prompt_tokens: number; completion_tokens: number };
+    };
+
+    return {
+      content: data.choices[0]?.message?.content ?? "",
+      model,
+      provider: "replit-proxy",
+      usage: {
+        promptTokens: data.usage?.prompt_tokens ?? 0,
+        completionTokens: data.usage?.completion_tokens ?? 0,
+      },
+    };
   }
 
   private async openaiCompletion(

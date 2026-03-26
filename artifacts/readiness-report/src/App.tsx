@@ -11,6 +11,7 @@ import Risks from "@/pages/risks";
 import Alerts from "@/pages/alerts";
 import Trends from "@/pages/trends";
 import Rollup from "@/pages/rollup";
+import AIInsights from "@/pages/ai-insights";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/alerts" component={Alerts} />
       <Route path="/trends" component={Trends} />
       <Route path="/rollup" component={Rollup} />
+      <Route path="/ai-insights" component={AIInsights} />
       <Route component={NotFound} />
     </Switch>
   );

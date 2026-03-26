@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff } from "lucide-react";
+import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "./ui";
 
@@ -71,6 +71,7 @@ const navItems = [
   { name: "Campaigns", href: "/campaigns", icon: Film },
   { name: "Global Assets", href: "/assets", icon: FolderOpen },
   { name: "Voices", href: "/voice", icon: Mic },
+  { name: "AI Studio", href: "/ai-studio", icon: Sparkles },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
