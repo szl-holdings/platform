@@ -578,30 +578,21 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
     const sid = sessionId || crypto.randomUUID();
 
     if (messages && Array.isArray(messages)) {
+      const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === "user");
+      if (!lastUserMsg) { sendError(res, "No user message found in messages array", 400); return; }
       const systemMsg = messages.find((m: { role: string }) => m.role === "system");
-      const conversationMsgs = messages.filter((m: { role: string }) => m.role !== "system");
-      let lastResult: any = null;
-      for (const msg of conversationMsgs) {
-        if (msg.role === "user") {
-          lastResult = await services.huggingface.chat(sid, msg.content, {
-            systemPrompt: systemMsg?.content,
-            maxTokens,
-            ownerId,
-          });
-        }
-      }
-      if (lastResult) {
-        sendSuccess(res, { content: lastResult.reply, model: lastResult.model, provider: "huggingface", tier: lastResult.tier, sessionId: sid, usage: { promptTokens: 0, completionTokens: 0 } });
-      } else {
-        const result = await services.ai.chatCompletion(messages, { maxTokens });
-        sendSuccess(res, result);
-      }
+      const hfResult = await services.huggingface.chat(sid, lastUserMsg.content, {
+        systemPrompt: systemMsg?.content,
+        maxTokens,
+        ownerId,
+      });
+      sendSuccess(res, { content: hfResult.reply, model: hfResult.model, provider: "huggingface", tier: hfResult.tier, sessionId: sid, usage: { promptTokens: 0, completionTokens: 0 } });
       return;
     }
 
     if (!message) { sendError(res, "Either 'message' (string) or 'messages' (array) is required", 400); return; }
     const result = await services.huggingface.chat(sid, message, { systemPrompt, maxTokens, ownerId });
-    sendSuccess(res, result);
+    sendSuccess(res, { content: result.reply, model: result.model, provider: "huggingface", tier: result.tier, sessionId: sid, usage: { promptTokens: 0, completionTokens: 0 } });
   } catch (err) { handleRouteError(res, err, "Failed to generate chat response"); }
 });
 
