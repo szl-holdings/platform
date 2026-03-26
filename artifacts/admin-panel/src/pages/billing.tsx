@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { CreditCard, CheckCircle, Calendar, Users, Sparkles, Shield, BarChart3, AlertTriangle } from "lucide-react";
+import { CreditCard, CheckCircle, Calendar, Users, Sparkles, Shield, BarChart3, AlertTriangle, ExternalLink, Package } from "lucide-react";
 
 function formatAmount(cents: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
@@ -48,7 +48,17 @@ export default function BillingPage() {
         <p className="text-sm text-muted-foreground mt-1">Plan details, entitlements, and usage</p>
       </div>
 
-      {settings && !settings.stripeConfigured && (
+      {data.stripeConnected ? (
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-emerald-400">Stripe Connected ({data.stripeMode} mode)</p>
+            <p className="text-xs text-muted-foreground mt-1">Live payment processing is active. All billing data is pulled from Stripe.</p>
+          </div>
+        </div>
+      ) : (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-4 h-4 text-amber-400" />
@@ -106,6 +116,39 @@ export default function BillingPage() {
         </div>
       </div>
 
+      {data.products && data.products.length > 0 && (
+        <div className="rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+              <Package className="w-4 h-4 text-indigo-400" />
+            </div>
+            <span className="text-sm font-medium">Stripe Products</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {data.products.map((product) => (
+              <div key={product.id} className="rounded-lg border border-border/50 bg-muted/20 p-4 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">{product.name}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${product.active ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
+                    {product.active ? "Active" : "Inactive"}
+                  </span>
+                </div>
+                {product.description && (
+                  <p className="text-xs text-muted-foreground mb-2">{product.description}</p>
+                )}
+                <div className="flex flex-wrap gap-1.5">
+                  {product.prices.map((price) => (
+                    <span key={price.id} className="text-xs px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 font-mono">
+                      {formatAmount(price.amount, price.currency)}{price.interval ? `/${price.interval}` : ""}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -155,7 +198,7 @@ export default function BillingPage() {
             {settings.entitlements.map((ent, i) => (
               <div key={i} className="rounded-lg border border-border/50 bg-muted/20 p-3 hover:bg-muted/30 transition-colors">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium">{ent.featureKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</span>
+                  <span className="text-sm font-medium">{ent.featureKey.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}</span>
                   <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${ent.type === "boolean" ? "bg-emerald-500/10 text-emerald-400" : "bg-blue-500/10 text-blue-400"}`}>
                     {ent.type}
                   </span>
@@ -188,7 +231,7 @@ export default function BillingPage() {
             <tbody>
               {settings.usageSummary.map((u) => (
                 <tr key={u.featureKey} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                  <td className="py-3 text-sm">{u.featureKey.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</td>
+                  <td className="py-3 text-sm">{u.featureKey.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}</td>
                   <td className="py-3 text-sm font-mono">{u.totalQuantity.toLocaleString()}</td>
                   <td className="py-3 text-sm text-muted-foreground">{u.eventCount}</td>
                 </tr>
@@ -222,7 +265,13 @@ export default function BillingPage() {
                   <td className="py-3 text-sm text-muted-foreground">{new Date(inv.date).toLocaleDateString()}</td>
                   <td className="py-3 text-sm font-medium">{formatAmount(inv.amount, data.currency)}</td>
                   <td className="py-3">
-                    <span className="text-xs px-2.5 py-1 rounded-full text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 capitalize font-medium">
+                    <span className={`text-xs px-2.5 py-1 rounded-full capitalize font-medium ${
+                      inv.status === "paid" 
+                        ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/30" 
+                        : inv.status === "open"
+                        ? "text-blue-400 bg-blue-500/10 border border-blue-500/30"
+                        : "text-amber-400 bg-amber-500/10 border border-amber-500/30"
+                    }`}>
                       {inv.status}
                     </span>
                   </td>

@@ -297,6 +297,84 @@ export interface Invoice {
   createdAt?: string;
 }
 
+export type StripeProductPricesItem = {
+  id: string;
+  amount: number;
+  currency: string;
+  interval?: string | null;
+};
+
+export interface StripeProduct {
+  id: string;
+  name: string;
+  description?: string;
+  active: boolean;
+  prices: StripeProductPricesItem[];
+}
+
+export type CheckoutRequestMode =
+  (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
+
+export const CheckoutRequestMode = {
+  subscription: "subscription",
+  payment: "payment",
+} as const;
+
+export interface CheckoutRequest {
+  priceId: string;
+  mode?: CheckoutRequestMode;
+  successUrl: string;
+  cancelUrl: string;
+  customerEmail?: string;
+}
+
+export interface CheckoutResponse {
+  sessionId: string;
+  url: string;
+}
+
+export type SubscriptionStatusResponseSubscription = {
+  id?: string;
+  customerId?: string;
+  status?: string;
+  priceId?: string;
+  currentPeriodStart?: number;
+  currentPeriodEnd?: number;
+  cancelAtPeriodEnd?: boolean;
+} | null;
+
+export type SubscriptionStatusResponseAllSubscriptionsItem = {
+  [key: string]: unknown;
+};
+
+export interface SubscriptionStatusResponse {
+  subscribed: boolean;
+  subscription?: SubscriptionStatusResponseSubscription;
+  allSubscriptions?: SubscriptionStatusResponseAllSubscriptionsItem[];
+}
+
+export interface StripeCheckoutSession {
+  id: string;
+  url?: string | null;
+  status: string;
+  customerId?: string | null;
+  subscriptionId?: string | null;
+  paymentIntentId?: string | null;
+}
+
+export interface StripeInvoice {
+  id: string;
+  customerId: string;
+  subscriptionId?: string | null;
+  amount: number;
+  currency: string;
+  status: string;
+  paidAt?: number | null;
+  created: number;
+  hostedInvoiceUrl?: string | null;
+  invoicePdf?: string | null;
+}
+
 export interface FeatureFlag {
   id: number;
   key: string;
@@ -657,6 +735,24 @@ export type GetAuthProviders200 = {
 
 export type ListNotificationsParams = {
   userId?: number;
+};
+
+export type GetSubscriptionStatusParams = {
+  email?: string;
+  customerId?: string;
+};
+
+export type CreateCustomerPortalBody = {
+  customerId: string;
+  returnUrl: string;
+};
+
+export type CreateCustomerPortal200 = {
+  url?: string;
+};
+
+export type ListStripeInvoicesParams = {
+  customerId?: string;
 };
 
 export type ListStephenContentBlocksParams = {

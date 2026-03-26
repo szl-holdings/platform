@@ -6,6 +6,7 @@ import Signals from "@/pages/signals";
 import Recommendations from "@/pages/recommendations";
 import Incidents from "@/pages/incidents";
 import Playbooks from "@/pages/playbooks";
+import Commerce from "@/pages/commerce";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/recommendations" component={Recommendations} />
       <Route path="/incidents" component={Incidents} />
       <Route path="/playbooks" component={Playbooks} />
+      <Route path="/commerce" component={Commerce} />
       <Route component={NotFound} />
     </Switch>
   );

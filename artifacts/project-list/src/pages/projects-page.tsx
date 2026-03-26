@@ -1,7 +1,7 @@
 import { useListProjects, Project } from "@workspace/api-client-react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Linkedin, Mail, ArrowRight, ExternalLink, Loader2, ChevronDown, Code2, Cloud, Smartphone, Database, Shield, Zap, Star, Quote, Github, Twitter } from "lucide-react";
+import { Linkedin, Mail, ArrowRight, ExternalLink, Loader2, ChevronDown, Code2, Cloud, Smartphone, Database, Shield, Zap, Star, Quote, Github, Twitter, CreditCard, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const statusLabels: Record<string, string> = {
@@ -594,6 +594,145 @@ function TestimonialsSection() {
   );
 }
 
+interface StripeProduct {
+  id: string;
+  name: string;
+  description: string;
+  active: boolean;
+  prices: Array<{ id: string; amount: number; currency: string; interval?: string }>;
+}
+
+function PricingSection() {
+  const [products, setProducts] = useState<StripeProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/billing/products")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setProducts(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSubscribe = async (priceId: string) => {
+    setCheckoutLoading(priceId);
+    try {
+      const baseUrl = window.location.origin;
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priceId,
+          mode: "subscription",
+          successUrl: baseUrl + "/stephen/checkout/success?session_id={CHECKOUT_SESSION_ID}",
+          cancelUrl: baseUrl + "/stephen/checkout/cancel",
+        }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  if (loading || products.length === 0) return null;
+
+  return (
+    <section id="pricing" className="relative py-24 sm:py-32 overflow-hidden">
+      <div className="absolute inset-0">
+        <div className="absolute top-1/2 left-1/4 w-[500px] h-[400px] bg-primary/5 rounded-full blur-[150px]" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.7 }} className="text-center mb-16">
+          <span className="text-primary font-semibold text-sm tracking-widest uppercase mb-4 block">Pricing</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-6">
+            Simple, transparent <span className="gradient-text">pricing</span>
+          </h2>
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+            Choose a plan that fits your needs. Get access to premium content, templates, and exclusive insights.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
+          {products.map((product, i) => {
+            const price = product.prices[0];
+            if (!price) return null;
+            const isPopular = i === 0 || products.length === 1;
+            return (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                whileHover={{ y: -6 }}
+                className={cn(
+                  "relative flex flex-col rounded-2xl border backdrop-blur-sm p-8 transition-all duration-300",
+                  isPopular
+                    ? "border-primary/50 bg-gradient-to-b from-primary/10 to-card/50 shadow-xl shadow-primary/10"
+                    : "border-border/60 bg-card/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                )}
+              >
+                {isPopular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold bg-primary text-primary-foreground shadow-lg">
+                    Most Popular
+                  </div>
+                )}
+                <div className="mb-6">
+                  <h3 className="text-xl font-display font-bold text-foreground mb-2">{product.name}</h3>
+                  {product.description && (
+                    <p className="text-muted-foreground text-sm">{product.description}</p>
+                  )}
+                </div>
+                <div className="mb-8">
+                  <span className="text-4xl font-display font-extrabold text-foreground">
+                    {new Intl.NumberFormat("en-US", { style: "currency", currency: price.currency }).format(price.amount / 100)}
+                  </span>
+                  {price.interval && (
+                    <span className="text-muted-foreground text-base">/{price.interval}</span>
+                  )}
+                </div>
+                <div className="flex-1 mb-8">
+                  <div className="space-y-3">
+                    {["Premium content access", "Exclusive templates", "Technical analyses", "Priority support"].map((feature) => (
+                      <div key={feature} className="flex items-center gap-3 text-sm">
+                        <Check className="w-4 h-4 text-primary shrink-0" />
+                        <span className="text-muted-foreground">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleSubscribe(price.id)}
+                  disabled={checkoutLoading === price.id}
+                  className={cn(
+                    "w-full py-3.5 rounded-full font-semibold text-base transition-all duration-300 flex items-center justify-center gap-2",
+                    isPopular
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/35 hover:scale-105"
+                      : "border-2 border-border hover:border-primary/50 text-foreground hover:bg-primary/5"
+                  )}
+                >
+                  {checkoutLoading === price.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4" />
+                      Subscribe
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ContactSection() {
   return (
     <section id="contact" className="relative py-24 sm:py-32">
@@ -690,6 +829,7 @@ export default function ProjectsPage() {
       <ServicesSection />
       <WorkSection />
       <TestimonialsSection />
+      <PricingSection />
       <ContactSection />
       <Footer />
     </div>

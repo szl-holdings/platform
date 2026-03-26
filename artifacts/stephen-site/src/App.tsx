@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { Home } from "@/pages/Home";
+import CheckoutSuccess from "@/pages/checkout-success";
+import CheckoutCancel from "@/pages/checkout-cancel";
 import { Server, AlertTriangle } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -57,6 +59,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/checkout/success" component={CheckoutSuccess} />
+      <Route path="/checkout/cancel" component={CheckoutCancel} />
       <Route component={NotFound} />
     </Switch>
   );

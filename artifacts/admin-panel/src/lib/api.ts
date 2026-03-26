@@ -195,6 +195,21 @@ export interface FeatureFlag {
   updatedAt: string;
 }
 
+export interface StripeProductPrice {
+  id: string;
+  amount: number;
+  currency: string;
+  interval?: string;
+}
+
+export interface StripeProduct {
+  id: string;
+  name: string;
+  description: string;
+  active: boolean;
+  prices: StripeProductPrice[];
+}
+
 export interface BillingInfo {
   plan: string;
   status: string;
@@ -205,6 +220,9 @@ export interface BillingInfo {
   seats: { used: number; total: number };
   features: string[];
   invoices: { id: string; date: string; amount: number; status: string }[];
+  stripeMode?: "live" | "test" | "mock";
+  stripeConnected?: boolean;
+  products?: StripeProduct[];
 }
 
 export interface WebhookEvent {

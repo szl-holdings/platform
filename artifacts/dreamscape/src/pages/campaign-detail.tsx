@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRoute, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, FileText, LayoutTemplate, Mic2, FolderArchive, Eye, ArrowLeft, Calendar } from "lucide-react";
+import { ChevronRight, FileText, LayoutTemplate, Mic2, FolderArchive, Eye, ArrowLeft, Calendar, CreditCard } from "lucide-react";
 import { useCampaign } from "@/hooks/use-campaigns";
 import { Badge, Button } from "@/components/ui";
 import { format } from "date-fns";
@@ -11,6 +11,7 @@ import { StoryboardBoard } from "@/components/storyboards/storyboard-board";
 import { VoiceoverManager } from "@/components/voice/voiceover-manager";
 import { AssetVault } from "@/components/vault/asset-vault";
 import { CreativePreview } from "@/components/preview/creative-preview";
+import { CampaignBilling } from "@/components/billing/campaign-billing";
 
 const statusColors: Record<string, string> = {
   concept: "bg-muted text-muted-foreground",
@@ -27,7 +28,7 @@ export function CampaignDetail() {
   const campaignId = params?.id || "";
   const { data: campaign, isLoading } = useCampaign(campaignId);
   
-  const [activeTab, setActiveTab] = React.useState<"scripts"|"storyboards"|"voice"|"vault"|"preview">("scripts");
+  const [activeTab, setActiveTab] = React.useState<"scripts"|"storyboards"|"voice"|"vault"|"preview"|"billing">("scripts");
 
   if (isLoading) {
     return (
@@ -75,6 +76,7 @@ export function CampaignDetail() {
     { id: "voice", label: "Voiceovers", icon: Mic2 },
     { id: "vault", label: "Asset Vault", icon: FolderArchive },
     { id: "preview", label: "Stakeholder Preview", icon: Eye },
+    { id: "billing", label: "Billing", icon: CreditCard },
   ] as const;
 
   return (
@@ -169,6 +171,7 @@ export function CampaignDetail() {
             {activeTab === "voice" && <VoiceoverManager campaignId={campaignId} />}
             {activeTab === "vault" && <AssetVault campaignId={campaignId} />}
             {activeTab === "preview" && <CreativePreview campaignId={campaignId} />}
+            {activeTab === "billing" && <CampaignBilling campaignId={campaignId} campaignName={campaign.name} />}
           </motion.div>
         </AnimatePresence>
       </div>

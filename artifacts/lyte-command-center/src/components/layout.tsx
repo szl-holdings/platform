@@ -11,7 +11,8 @@ import {
   Bell,
   Server,
   Wifi,
-  WifiOff
+  WifiOff,
+  CreditCard
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -85,6 +86,7 @@ const NAV_ITEMS = [
   { href: "/incidents", label: "Incidents", icon: AlertTriangle },
   { href: "/recommendations", label: "Recommendations", icon: Lightbulb },
   { href: "/playbooks", label: "Playbooks", icon: BookOpen },
+  { href: "/commerce", label: "Commerce", icon: CreditCard },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

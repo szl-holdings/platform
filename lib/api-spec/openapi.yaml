@@ -480,6 +480,125 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Invoice"
+  /billing/products:
+    get:
+      operationId: listStripeProducts
+      tags: [billing]
+      summary: List Stripe products with prices
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StripeProduct"
+  /billing/checkout:
+    post:
+      operationId: createCheckoutSession
+      tags: [billing]
+      summary: Create a Stripe Checkout Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+      responses:
+        "200":
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+  /billing/subscription-status:
+    get:
+      operationId: getSubscriptionStatus
+      tags: [billing]
+      summary: Get subscription status for a customer
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: customerId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Subscription status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionStatusResponse"
+  /billing/customer-portal:
+    post:
+      operationId: createCustomerPortal
+      tags: [billing]
+      summary: Create a Stripe Customer Portal session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                returnUrl:
+                  type: string
+              required:
+                - customerId
+                - returnUrl
+      responses:
+        "200":
+          description: Portal session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+  /billing/checkout-session/{sessionId}:
+    get:
+      operationId: getCheckoutSession
+      tags: [billing]
+      summary: Get a checkout session by ID
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Checkout session details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StripeCheckoutSession"
+  /billing/stripe-invoices:
+    get:
+      operationId: listStripeInvoices
+      tags: [billing]
+      summary: List Stripe invoices
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of Stripe invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StripeInvoice"
   /feature-flags:
     get:
       operationId: listFeatureFlags
@@ -1372,6 +1491,153 @@ components:
         - orgId
         - amount
         - status
+    StripeProduct:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        active:
+          type: boolean
+        prices:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              amount:
+                type: integer
+              currency:
+                type: string
+              interval:
+                type: string
+                nullable: true
+            required:
+              - id
+              - amount
+              - currency
+      required:
+        - id
+        - name
+        - active
+        - prices
+    CheckoutRequest:
+      type: object
+      properties:
+        priceId:
+          type: string
+        mode:
+          type: string
+          enum: [subscription, payment]
+        successUrl:
+          type: string
+        cancelUrl:
+          type: string
+        customerEmail:
+          type: string
+      required:
+        - priceId
+        - successUrl
+        - cancelUrl
+    CheckoutResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        url:
+          type: string
+      required:
+        - sessionId
+        - url
+    SubscriptionStatusResponse:
+      type: object
+      properties:
+        subscribed:
+          type: boolean
+        subscription:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+            customerId:
+              type: string
+            status:
+              type: string
+            priceId:
+              type: string
+            currentPeriodStart:
+              type: integer
+            currentPeriodEnd:
+              type: integer
+            cancelAtPeriodEnd:
+              type: boolean
+        allSubscriptions:
+          type: array
+          items:
+            type: object
+      required:
+        - subscribed
+    StripeCheckoutSession:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          nullable: true
+        status:
+          type: string
+        customerId:
+          type: string
+          nullable: true
+        subscriptionId:
+          type: string
+          nullable: true
+        paymentIntentId:
+          type: string
+          nullable: true
+      required:
+        - id
+        - status
+    StripeInvoice:
+      type: object
+      properties:
+        id:
+          type: string
+        customerId:
+          type: string
+        subscriptionId:
+          type: string
+          nullable: true
+        amount:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+        paidAt:
+          type: integer
+          nullable: true
+        created:
+          type: integer
+        hostedInvoiceUrl:
+          type: string
+          nullable: true
+        invoicePdf:
+          type: string
+          nullable: true
+      required:
+        - id
+        - customerId
+        - amount
+        - currency
+        - status
+        - created
     FeatureFlag:
       type: object
       properties:

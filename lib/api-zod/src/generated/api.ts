@@ -378,6 +378,118 @@ export const ListInvoicesResponseItem = zod.object({
 export const ListInvoicesResponse = zod.array(ListInvoicesResponseItem);
 
 /**
+ * @summary List Stripe products with prices
+ */
+export const ListStripeProductsResponseItem = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  description: zod.string().optional(),
+  active: zod.boolean(),
+  prices: zod.array(
+    zod.object({
+      id: zod.string(),
+      amount: zod.number(),
+      currency: zod.string(),
+      interval: zod.string().nullish(),
+    }),
+  ),
+});
+export const ListStripeProductsResponse = zod.array(
+  ListStripeProductsResponseItem,
+);
+
+/**
+ * @summary Create a Stripe Checkout Session
+ */
+export const CreateCheckoutSessionBody = zod.object({
+  priceId: zod.string(),
+  mode: zod.enum(["subscription", "payment"]).optional(),
+  successUrl: zod.string(),
+  cancelUrl: zod.string(),
+  customerEmail: zod.string().optional(),
+});
+
+export const CreateCheckoutSessionResponse = zod.object({
+  sessionId: zod.string(),
+  url: zod.string(),
+});
+
+/**
+ * @summary Get subscription status for a customer
+ */
+export const GetSubscriptionStatusQueryParams = zod.object({
+  email: zod.coerce.string().optional(),
+  customerId: zod.coerce.string().optional(),
+});
+
+export const GetSubscriptionStatusResponse = zod.object({
+  subscribed: zod.boolean(),
+  subscription: zod
+    .object({
+      id: zod.string().optional(),
+      customerId: zod.string().optional(),
+      status: zod.string().optional(),
+      priceId: zod.string().optional(),
+      currentPeriodStart: zod.number().optional(),
+      currentPeriodEnd: zod.number().optional(),
+      cancelAtPeriodEnd: zod.boolean().optional(),
+    })
+    .nullish(),
+  allSubscriptions: zod.array(zod.object({}).passthrough()).optional(),
+});
+
+/**
+ * @summary Create a Stripe Customer Portal session
+ */
+export const CreateCustomerPortalBody = zod.object({
+  customerId: zod.string(),
+  returnUrl: zod.string(),
+});
+
+export const CreateCustomerPortalResponse = zod.object({
+  url: zod.string().optional(),
+});
+
+/**
+ * @summary Get a checkout session by ID
+ */
+export const GetCheckoutSessionParams = zod.object({
+  sessionId: zod.coerce.string(),
+});
+
+export const GetCheckoutSessionResponse = zod.object({
+  id: zod.string(),
+  url: zod.string().nullish(),
+  status: zod.string(),
+  customerId: zod.string().nullish(),
+  subscriptionId: zod.string().nullish(),
+  paymentIntentId: zod.string().nullish(),
+});
+
+/**
+ * @summary List Stripe invoices
+ */
+export const ListStripeInvoicesQueryParams = zod.object({
+  customerId: zod.coerce.string().optional(),
+});
+
+export const ListStripeInvoicesResponseItem = zod.object({
+  id: zod.string(),
+  customerId: zod.string(),
+  subscriptionId: zod.string().nullish(),
+  amount: zod.number(),
+  currency: zod.string(),
+  status: zod.string(),
+  paidAt: zod.number().nullish(),
+  created: zod.number(),
+  hostedInvoiceUrl: zod.string().nullish(),
+  invoicePdf: zod.string().nullish(),
+});
+export const ListStripeInvoicesResponse = zod.array(
+  ListStripeInvoicesResponseItem,
+);
+
+/**
  * @summary List feature flags
  */
 export const ListFeatureFlagsResponseItem = zod.object({

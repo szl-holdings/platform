@@ -22,8 +22,12 @@ import type {
   AuditEvent,
   AuthUser,
   BillingPlan,
+  CheckoutRequest,
+  CheckoutResponse,
   Connector,
   CreateConnector,
+  CreateCustomerPortal200,
+  CreateCustomerPortalBody,
   CreateFeatureFlag,
   CreateNotification,
   CreateProject,
@@ -38,11 +42,13 @@ import type {
   FirestormCampaign,
   FirestormLead,
   GetAuthProviders200,
+  GetSubscriptionStatusParams,
   HealthStatus,
   Invoice,
   ListFirestormAnalyticsParams,
   ListNotificationsParams,
   ListStephenContentBlocksParams,
+  ListStripeInvoicesParams,
   Login201,
   LoginBody,
   LyteOrder,
@@ -60,7 +66,11 @@ import type {
   StephenPortfolioCaseStudy,
   StephenProfile,
   StephenTestimonial,
+  StripeCheckoutSession,
+  StripeInvoice,
+  StripeProduct,
   Subscription,
+  SubscriptionStatusResponse,
   UpdateConnector,
   UpdateFeatureFlag,
   UpdateProject,
@@ -2243,6 +2253,549 @@ export function useListInvoices<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getListInvoicesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List Stripe products with prices
+ */
+export const getListStripeProductsUrl = () => {
+  return `/api/billing/products`;
+};
+
+export const listStripeProducts = async (
+  options?: RequestInit,
+): Promise<StripeProduct[]> => {
+  return customFetch<StripeProduct[]>(getListStripeProductsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListStripeProductsQueryKey = () => {
+  return [`/api/billing/products`] as const;
+};
+
+export const getListStripeProductsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listStripeProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStripeProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListStripeProductsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listStripeProducts>>
+  > = ({ signal }) => listStripeProducts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listStripeProducts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListStripeProductsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listStripeProducts>>
+>;
+export type ListStripeProductsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List Stripe products with prices
+ */
+
+export function useListStripeProducts<
+  TData = Awaited<ReturnType<typeof listStripeProducts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStripeProducts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListStripeProductsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a Stripe Checkout Session
+ */
+export const getCreateCheckoutSessionUrl = () => {
+  return `/api/billing/checkout`;
+};
+
+export const createCheckoutSession = async (
+  checkoutRequest: CheckoutRequest,
+  options?: RequestInit,
+): Promise<CheckoutResponse> => {
+  return customFetch<CheckoutResponse>(getCreateCheckoutSessionUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(checkoutRequest),
+  });
+};
+
+export const getCreateCheckoutSessionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCheckoutSession>>,
+    TError,
+    { data: BodyType<CheckoutRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCheckoutSession>>,
+  TError,
+  { data: BodyType<CheckoutRequest> },
+  TContext
+> => {
+  const mutationKey = ["createCheckoutSession"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCheckoutSession>>,
+    { data: BodyType<CheckoutRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createCheckoutSession(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCheckoutSessionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCheckoutSession>>
+>;
+export type CreateCheckoutSessionMutationBody = BodyType<CheckoutRequest>;
+export type CreateCheckoutSessionMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a Stripe Checkout Session
+ */
+export const useCreateCheckoutSession = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCheckoutSession>>,
+    TError,
+    { data: BodyType<CheckoutRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createCheckoutSession>>,
+  TError,
+  { data: BodyType<CheckoutRequest> },
+  TContext
+> => {
+  return useMutation(getCreateCheckoutSessionMutationOptions(options));
+};
+
+/**
+ * @summary Get subscription status for a customer
+ */
+export const getGetSubscriptionStatusUrl = (
+  params?: GetSubscriptionStatusParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/billing/subscription-status?${stringifiedParams}`
+    : `/api/billing/subscription-status`;
+};
+
+export const getSubscriptionStatus = async (
+  params?: GetSubscriptionStatusParams,
+  options?: RequestInit,
+): Promise<SubscriptionStatusResponse> => {
+  return customFetch<SubscriptionStatusResponse>(
+    getGetSubscriptionStatusUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetSubscriptionStatusQueryKey = (
+  params?: GetSubscriptionStatusParams,
+) => {
+  return [
+    `/api/billing/subscription-status`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetSubscriptionStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSubscriptionStatus>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetSubscriptionStatusParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSubscriptionStatus>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetSubscriptionStatusQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getSubscriptionStatus>>
+  > = ({ signal }) =>
+    getSubscriptionStatus(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSubscriptionStatus>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetSubscriptionStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSubscriptionStatus>>
+>;
+export type GetSubscriptionStatusQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get subscription status for a customer
+ */
+
+export function useGetSubscriptionStatus<
+  TData = Awaited<ReturnType<typeof getSubscriptionStatus>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetSubscriptionStatusParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSubscriptionStatus>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetSubscriptionStatusQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a Stripe Customer Portal session
+ */
+export const getCreateCustomerPortalUrl = () => {
+  return `/api/billing/customer-portal`;
+};
+
+export const createCustomerPortal = async (
+  createCustomerPortalBody: CreateCustomerPortalBody,
+  options?: RequestInit,
+): Promise<CreateCustomerPortal200> => {
+  return customFetch<CreateCustomerPortal200>(getCreateCustomerPortalUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createCustomerPortalBody),
+  });
+};
+
+export const getCreateCustomerPortalMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCustomerPortal>>,
+    TError,
+    { data: BodyType<CreateCustomerPortalBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCustomerPortal>>,
+  TError,
+  { data: BodyType<CreateCustomerPortalBody> },
+  TContext
+> => {
+  const mutationKey = ["createCustomerPortal"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCustomerPortal>>,
+    { data: BodyType<CreateCustomerPortalBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createCustomerPortal(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCustomerPortalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCustomerPortal>>
+>;
+export type CreateCustomerPortalMutationBody =
+  BodyType<CreateCustomerPortalBody>;
+export type CreateCustomerPortalMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a Stripe Customer Portal session
+ */
+export const useCreateCustomerPortal = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCustomerPortal>>,
+    TError,
+    { data: BodyType<CreateCustomerPortalBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createCustomerPortal>>,
+  TError,
+  { data: BodyType<CreateCustomerPortalBody> },
+  TContext
+> => {
+  return useMutation(getCreateCustomerPortalMutationOptions(options));
+};
+
+/**
+ * @summary Get a checkout session by ID
+ */
+export const getGetCheckoutSessionUrl = (sessionId: string) => {
+  return `/api/billing/checkout-session/${sessionId}`;
+};
+
+export const getCheckoutSession = async (
+  sessionId: string,
+  options?: RequestInit,
+): Promise<StripeCheckoutSession> => {
+  return customFetch<StripeCheckoutSession>(
+    getGetCheckoutSessionUrl(sessionId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCheckoutSessionQueryKey = (sessionId: string) => {
+  return [`/api/billing/checkout-session/${sessionId}`] as const;
+};
+
+export const getGetCheckoutSessionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCheckoutSession>>,
+  TError = ErrorType<unknown>,
+>(
+  sessionId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCheckoutSession>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCheckoutSessionQueryKey(sessionId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCheckoutSession>>
+  > = ({ signal }) =>
+    getCheckoutSession(sessionId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!sessionId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCheckoutSession>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetCheckoutSessionQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCheckoutSession>>
+>;
+export type GetCheckoutSessionQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get a checkout session by ID
+ */
+
+export function useGetCheckoutSession<
+  TData = Awaited<ReturnType<typeof getCheckoutSession>>,
+  TError = ErrorType<unknown>,
+>(
+  sessionId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getCheckoutSession>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetCheckoutSessionQueryOptions(sessionId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List Stripe invoices
+ */
+export const getListStripeInvoicesUrl = (params?: ListStripeInvoicesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/billing/stripe-invoices?${stringifiedParams}`
+    : `/api/billing/stripe-invoices`;
+};
+
+export const listStripeInvoices = async (
+  params?: ListStripeInvoicesParams,
+  options?: RequestInit,
+): Promise<StripeInvoice[]> => {
+  return customFetch<StripeInvoice[]>(getListStripeInvoicesUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListStripeInvoicesQueryKey = (
+  params?: ListStripeInvoicesParams,
+) => {
+  return [`/api/billing/stripe-invoices`, ...(params ? [params] : [])] as const;
+};
+
+export const getListStripeInvoicesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listStripeInvoices>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListStripeInvoicesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listStripeInvoices>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListStripeInvoicesQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listStripeInvoices>>
+  > = ({ signal }) => listStripeInvoices(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listStripeInvoices>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListStripeInvoicesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listStripeInvoices>>
+>;
+export type ListStripeInvoicesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List Stripe invoices
+ */
+
+export function useListStripeInvoices<
+  TData = Awaited<ReturnType<typeof listStripeInvoices>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListStripeInvoicesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listStripeInvoices>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListStripeInvoicesQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

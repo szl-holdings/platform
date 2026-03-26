@@ -569,8 +569,41 @@ adminRouter.put("/admin/feature-flags/:key", (req, res) => {
   res.json({ key, ...flag });
 });
 
-adminRouter.get("/admin/billing", (_req, res) => {
-  res.json(MOCK_BILLING);
+adminRouter.get("/admin/billing", async (_req, res) => {
+  try {
+    if (services.stripe.isLive) {
+      const products = await services.stripe.listProducts();
+      const invoices = await services.stripe.listInvoices(undefined, 10);
+      const connection = await services.stripe.testConnection();
+
+      const mainProduct = products[0];
+      const mainPrice = mainProduct?.prices[0];
+
+      res.json({
+        plan: mainProduct?.name ?? "No Plan",
+        status: connection.connected ? "active" : "inactive",
+        currentPeriodStart: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+        currentPeriodEnd: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59).toISOString(),
+        monthlyAmount: mainPrice?.amount ?? 0,
+        currency: mainPrice?.currency ?? "usd",
+        seats: MOCK_BILLING.seats,
+        features: MOCK_BILLING.features,
+        invoices: invoices.map((inv) => ({
+          id: inv.id,
+          date: new Date(inv.created * 1000).toISOString().split("T")[0],
+          amount: inv.amount,
+          status: inv.status,
+        })),
+        stripeMode: connection.mode,
+        stripeConnected: connection.connected,
+        products,
+      });
+    } else {
+      res.json({ ...MOCK_BILLING, stripeMode: "mock", stripeConnected: false, products: [] });
+    }
+  } catch {
+    res.json({ ...MOCK_BILLING, stripeMode: "mock", stripeConnected: false, products: [] });
+  }
 });
 
 adminRouter.get("/admin/webhooks", (_req, res) => {
