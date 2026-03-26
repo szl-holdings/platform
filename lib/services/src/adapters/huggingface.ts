@@ -228,6 +228,7 @@ interface ChatSession {
   messages: HFChatMessage[];
   createdAt: number;
   lastAccessedAt: number;
+  ownerId?: string;
 }
 
 const MOCK_ENTITIES: HFNERResult["entities"] = [
@@ -557,7 +558,14 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     audioBuffer: Buffer,
     options?: { model?: string; language?: string },
   ): Promise<HFTranscriptionResult> {
-    const cacheKey = this.getCacheKey("transcription", { size: audioBuffer.length, ...options });
+    let contentHash = 0;
+    for (let i = 0; i < Math.min(audioBuffer.length, 4096); i++) {
+      contentHash = ((contentHash << 5) - contentHash) + audioBuffer[i]!;
+      contentHash |= 0;
+    }
+    contentHash = ((contentHash << 5) - contentHash) + audioBuffer.length;
+    contentHash |= 0;
+    const cacheKey = this.getCacheKey("transcription", { contentHash, ...options });
     const cached = this.getFromCache(cacheKey);
     if (cached) return { ...(cached as HFTranscriptionResult), cached: true };
 
@@ -973,7 +981,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
   async chat(
     sessionId: string,
     userMessage: string,
-    options?: { systemPrompt?: string; maxTokens?: number },
+    options?: { systemPrompt?: string; maxTokens?: number; ownerId?: string },
   ): Promise<HFChatResult> {
     this.cleanupExpiredSessions();
 
@@ -983,6 +991,7 @@ export class HuggingFaceAdapter extends ServiceAdapter {
         messages: [],
         createdAt: Date.now(),
         lastAccessedAt: Date.now(),
+        ownerId: options?.ownerId,
       };
       if (options?.systemPrompt) {
         session.messages.push({ role: "system", content: options.systemPrompt });
@@ -1043,13 +1052,22 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     }
   }
 
-  getChatHistory(sessionId: string): HFChatMessage[] {
+  getChatHistory(sessionId: string, requesterId?: string): HFChatMessage[] {
     const session = this._chatSessions.get(sessionId);
-    return session ? [...session.messages] : [];
+    if (!session) return [];
+    if (session.ownerId && requesterId && session.ownerId !== requesterId) return [];
+    return [...session.messages];
   }
 
-  clearChatSession(sessionId: string): boolean {
+  clearChatSession(sessionId: string, requesterId?: string): boolean {
+    const session = this._chatSessions.get(sessionId);
+    if (!session) return false;
+    if (session.ownerId && requesterId && session.ownerId !== requesterId) return false;
     return this._chatSessions.delete(sessionId);
+  }
+
+  getSessionOwnerId(sessionId: string): string | undefined {
+    return this._chatSessions.get(sessionId)?.ownerId;
   }
 
   async *streamTextGeneration(
