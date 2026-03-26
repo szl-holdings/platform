@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import express, { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
 import { services } from "@workspace/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
@@ -575,15 +575,8 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
     const { sessionId, message, messages, systemPrompt, model, maxTokens } = req.body;
 
     if (messages && Array.isArray(messages)) {
-      const lastUserMsg = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user");
-      if (lastUserMsg) {
-        const sid = sessionId || `legacy-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        const hfResult = await services.huggingface.chat(sid, lastUserMsg.content, { systemPrompt: messages.find((m: { role: string }) => m.role === "system")?.content, maxTokens });
-        sendSuccess(res, { content: hfResult.reply, model: hfResult.model, tier: hfResult.tier, sessionId: hfResult.sessionId });
-      } else {
-        const result = await services.ai.chatCompletion(messages, { model, maxTokens });
-        sendSuccess(res, result);
-      }
+      const result = await services.ai.chatCompletion(messages, { model, maxTokens });
+      sendSuccess(res, result);
       return;
     }
 
@@ -594,14 +587,14 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to generate chat response"); }
 });
 
-router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
   try {
     const history = services.huggingface.getChatHistory(req.params.sessionId);
     sendSuccess(res, { sessionId: req.params.sessionId, messages: history });
   } catch (err) { handleRouteError(res, err, "Failed to get chat history"); }
 });
 
-router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
   try {
     const cleared = services.huggingface.clearChatSession(req.params.sessionId);
     sendSuccess(res, { sessionId: req.params.sessionId, cleared });
@@ -617,10 +610,10 @@ router.post("/intelligence/ai/reason", aiRateLimit, authMiddleware({ required: f
   } catch (err) { handleRouteError(res, err, "Failed to generate reasoning response"); }
 });
 
-router.post("/intelligence/ai/transcribe", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+router.post("/intelligence/ai/transcribe", express.raw({ type: ["audio/*", "application/octet-stream"], limit: "25mb" }), aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
-    if (!req.body || !Buffer.isBuffer(req.body)) {
-      sendError(res, "Audio data is required (send raw audio buffer)", 400); return;
+    if (!req.body || !Buffer.isBuffer(req.body) || req.body.length === 0) {
+      sendError(res, "Audio data is required. Send raw audio bytes with Content-Type: audio/wav (or audio/mpeg, application/octet-stream). Max 25MB.", 400); return;
     }
     const language = (req.query as Record<string, string>).language;
     const result = await services.huggingface.transcription(req.body, { language });
@@ -680,10 +673,16 @@ router.get("/intelligence/ai/stream", aiRateLimit, authMiddleware({ required: fa
   res.end();
 });
 
-router.get("/intelligence/ai/health", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/intelligence/ai/health", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const healthStatus = services.huggingface.getHealthStatus();
-    sendSuccess(res, healthStatus);
+    const probe = (req.query as Record<string, string>).probe === "true";
+    if (probe) {
+      const probeResults = await services.huggingface.probeModelAvailability();
+      sendSuccess(res, { ...healthStatus, modelProbes: probeResults });
+    } else {
+      sendSuccess(res, healthStatus);
+    }
   } catch (err) { handleRouteError(res, err, "Failed to get AI health status"); }
 });
 

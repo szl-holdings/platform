@@ -297,6 +297,39 @@ export class HuggingFaceAdapter extends ServiceAdapter {
     return "tertiary";
   }
 
+  async probeModelAvailability(): Promise<Record<string, { available: boolean; tier: ModelTier; latencyMs: number }>> {
+    const probes: Record<string, { available: boolean; tier: ModelTier; latencyMs: number }> = {};
+    const taskTypes = ["textGeneration", "reasoning", "summarization", "embedding"];
+    for (const taskType of taskTypes) {
+      const chain = MODEL_REGISTRY[taskType];
+      if (!chain) continue;
+      const start = Date.now();
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
+        try {
+          const response = await fetch(
+            `https://api-inference.huggingface.co/models/${chain.primary}`,
+            { method: "POST", headers, body: JSON.stringify({ inputs: "test", parameters: { max_new_tokens: 1 } }), signal: controller.signal },
+          );
+          const latencyMs = Date.now() - start;
+          if (response.ok || response.status === 503) {
+            probes[taskType] = { available: true, tier: response.ok ? "primary" : "secondary", latencyMs };
+          } else {
+            probes[taskType] = { available: false, tier: "mock", latencyMs };
+          }
+        } finally {
+          clearTimeout(timer);
+        }
+      } catch {
+        probes[taskType] = { available: false, tier: "mock", latencyMs: Date.now() - start };
+      }
+    }
+    return probes;
+  }
+
   getHealthStatus(): HFHealthStatus {
     const totalReqs = this._cacheHits + this._cacheMisses;
     return {
