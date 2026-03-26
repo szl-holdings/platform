@@ -1,11 +1,11 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { Home } from "@/pages/Home";
+import { Server, AlertTriangle } from "lucide-react";
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -14,6 +14,44 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+interface AppHealthSummary {
+  services: { name: string; status: string }[];
+  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
+}
+
+function DemoModeBanner() {
+  const { data } = useQuery<AppHealthSummary>({
+    queryKey: ["app-health-stephen"],
+    queryFn: () => fetch("/api/services/health/app/stephen-site").then((r) => r.json()),
+    refetchInterval: 120000,
+  });
+
+  if (!data) return null;
+
+  const hasDemoMode = data.summary.mockedDemoMode > 0;
+  const hasUnhealthy = data.summary.manualRequired > 0;
+  if (!hasDemoMode && !hasUnhealthy) return null;
+
+  const demoNames = data.services.filter((s) => s.status === "MOCKED_DEMO_MODE").map((s) => s.name);
+
+  if (hasUnhealthy) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-50 bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center justify-center gap-2">
+        <AlertTriangle className="w-4 h-4 text-red-400" />
+        <span className="text-xs text-red-400 font-medium">{data.summary.manualRequired} integration(s) not configured</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500/10 backdrop-blur-sm border-b border-amber-500/30 px-4 py-2 flex items-center justify-center gap-2">
+      <Server className="w-4 h-4 text-amber-400" />
+      <span className="text-xs text-amber-400 font-medium">Demo Mode</span>
+      <span className="text-xs text-amber-400/60">— {demoNames.join(", ")} using simulated data</span>
+    </div>
+  );
+}
 
 function Router() {
   return (
@@ -25,7 +63,6 @@ function Router() {
 }
 
 function App() {
-  // Apply dark class to HTML to enforce the theme properly
   if (typeof document !== "undefined") {
     document.documentElement.classList.add("dark");
   }
@@ -34,6 +71,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <DemoModeBanner />
           <Router />
         </WouterRouter>
         <Toaster />

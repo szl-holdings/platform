@@ -42,6 +42,26 @@ export class AIAdapter extends ServiceAdapter {
     return !!(this.openaiKey || this.anthropicKey);
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    if (this.openaiKey) {
+      const response = await fetch("https://api.openai.com/v1/models", {
+        headers: { Authorization: `Bearer ${this.openaiKey}` },
+      });
+      if (!response.ok) throw new Error(`OpenAI API returned ${response.status}`);
+    } else if (this.anthropicKey) {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": this.anthropicKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model: "claude-3-haiku-20240307", max_tokens: 1, messages: [{ role: "user", content: "ping" }] }),
+      });
+      if (!response.ok && response.status !== 400) throw new Error(`Anthropic API returned ${response.status}`);
+    }
+  }
+
   get presentEnvVars(): string[] {
     const present: string[] = [];
     if (this.openaiKey) present.push("OPENAI_API_KEY");

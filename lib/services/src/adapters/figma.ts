@@ -56,6 +56,11 @@ export class FigmaAdapter extends ServiceAdapter {
     return response.json();
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const result = await this.testConnection();
+    if (!result.connected) throw new Error("Figma connection verification failed");
+  }
+
   async testConnection(): Promise<{ connected: boolean; email?: string }> {
     if (!this.isLive) return { connected: false };
     try {

@@ -43,6 +43,14 @@ export class WeatherAdapter extends ServiceAdapter {
   readonly description = "Weather current conditions and forecasts";
   readonly requiredEnvVars = ["WEATHER_API_KEY"];
 
+  protected async performHealthCheck(): Promise<void> {
+    const apiKey = process.env["WEATHER_API_KEY"];
+    const response = await fetch(
+      `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=London`,
+    );
+    if (!response.ok) throw new Error(`Weather API returned ${response.status}`);
+  }
+
   async getCurrentConditions(
     location: string,
   ): Promise<WeatherConditions> {

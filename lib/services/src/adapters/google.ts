@@ -36,6 +36,26 @@ export class GoogleAdapter extends ServiceAdapter {
     );
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    if (this.hasServiceAccount) {
+      const key = JSON.parse(process.env["GOOGLE_SERVICE_ACCOUNT_KEY"]!) as { client_email: string; token_uri?: string };
+      const response = await fetch(key.token_uri || "https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+          assertion: "health-check-probe",
+        }),
+      });
+      if (!response.ok && response.status !== 400) throw new Error(`Google token endpoint returned ${response.status}`);
+    } else if (this.hasOAuthCredentials) {
+      const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=health-check-probe`);
+      if (!response.ok && response.status !== 400) throw new Error(`Google OAuth returned ${response.status}`);
+    } else {
+      throw new Error("Google API not configured — missing credentials");
+    }
+  }
+
   get status(): ServiceStatus {
     if (this.hasServiceAccount || this.hasOAuthCredentials) {
       return "LIVE_CONFIGURED";

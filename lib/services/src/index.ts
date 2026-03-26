@@ -1,4 +1,4 @@
-export { ServiceAdapter, type ServiceStatus, type ServiceHealthReport } from "./base.js";
+export { ServiceAdapter, type ServiceStatus, type ServiceHealthReport, type ConnectionTestResult } from "./base.js";
 export { ServiceRegistry, type IntegrationHealthMatrix, services } from "./registry.js";
 
 export { AIAdapter, type ChatMessage, type ChatCompletionResult } from "./adapters/ai.js";

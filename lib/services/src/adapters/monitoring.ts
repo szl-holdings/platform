@@ -26,6 +26,17 @@ export class MonitoringAdapter extends ServiceAdapter {
     return process.env["SENTRY_DSN"];
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const dsn = this.sentryDsn;
+    if (!dsn) throw new Error("SENTRY_DSN not configured");
+    const parsed = new URL(dsn);
+    const host = parsed.hostname;
+    const response = await fetch(`https://${host}/api/0/`, {
+      method: "GET",
+    });
+    if (!response.ok && response.status !== 401) throw new Error(`Sentry returned ${response.status}`);
+  }
+
   async reportError(
     error: Error | string,
     context?: Record<string, unknown>,

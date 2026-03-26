@@ -79,6 +79,11 @@ export class HubSpotAdapter extends ServiceAdapter {
     return response.json();
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const result = await this.testConnection();
+    if (!result.connected) throw new Error("HubSpot connection verification failed");
+  }
+
   async testConnection(): Promise<{ connected: boolean; portalId?: string }> {
     if (!this.isLive) return { connected: false };
     try {

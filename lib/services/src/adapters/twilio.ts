@@ -28,6 +28,16 @@ export class TwilioAdapter extends ServiceAdapter {
     return process.env["TWILIO_PHONE_NUMBER"];
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${this.accountSid}.json`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Basic ${btoa(`${this.accountSid}:${this.authToken}`)}`,
+      },
+    });
+    if (!response.ok) throw new Error(`Twilio API returned ${response.status}`);
+  }
+
   async sendSMS(to: string, body: string): Promise<SMSResult> {
     if (!this.isLive) {
       return {

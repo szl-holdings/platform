@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { services } from "@workspace/services";
+import { APP_INTEGRATIONS, PLATFORM_APPS } from "@workspace/config";
 
 const adminRouter: IRouter = Router();
 
@@ -110,18 +111,45 @@ adminRouter.get("/admin/connectors", (_req, res) => {
 });
 
 adminRouter.post("/admin/connectors/:name/test", async (req, res) => {
+  const result = await services.testConnection(req.params["name"]!);
+  if (!result) {
+    res.status(404).json({ error: "Connector not found" });
+    return;
+  }
+  integrationActivityLog.unshift({
+    id: `act_${Date.now()}`,
+    type: "connection_test",
+    connector: result.name,
+    app: null,
+    status: result.success ? "success" : "error",
+    message: result.message,
+    timestamp: result.testedAt,
+    responseTimeMs: result.responseTimeMs,
+  });
+  if (integrationActivityLog.length > 200) integrationActivityLog.length = 200;
+  res.json(result);
+});
+
+adminRouter.put("/admin/connectors/:name/enable", (req, res) => {
   const adapter = services.getAdapter(req.params["name"]!);
   if (!adapter) {
     res.status(404).json({ error: "Connector not found" });
     return;
   }
-  const report = adapter.getHealthReport();
-  res.json({
-    name: report.name,
-    status: report.status,
-    testedAt: new Date().toISOString(),
-    result: report.status === "LIVE_CONFIGURED" ? "connected" : report.status === "MOCKED_DEMO_MODE" ? "demo_mode" : "not_configured",
+  const { enabled } = req.body as { enabled: boolean };
+  adapter.setEnabled(enabled);
+  integrationActivityLog.unshift({
+    id: `act_${Date.now()}`,
+    type: "connection_test",
+    connector: adapter.name,
+    app: null,
+    status: enabled ? "success" : "warning",
+    message: enabled ? "Connector enabled" : "Connector disabled by user",
+    timestamp: new Date().toISOString(),
+    responseTimeMs: null,
   });
+  if (integrationActivityLog.length > 200) integrationActivityLog.length = 200;
+  res.json({ name: adapter.name, enabled, status: adapter.getHealthReport().status });
 });
 
 adminRouter.post("/admin/connectors/:name/sync", async (req, res) => {
@@ -130,12 +158,24 @@ adminRouter.post("/admin/connectors/:name/sync", async (req, res) => {
     res.status(404).json({ error: "Connector not found" });
     return;
   }
-  res.json({
+  const syncResult = {
     name: adapter.name,
     synced: true,
     syncedAt: new Date().toISOString(),
     itemsSynced: Math.floor(Math.random() * 20) + 1,
+  };
+  integrationActivityLog.unshift({
+    id: `act_${Date.now()}`,
+    type: "sync",
+    connector: adapter.name,
+    app: null,
+    status: "success",
+    message: `Synced ${syncResult.itemsSynced} items`,
+    timestamp: syncResult.syncedAt,
+    responseTimeMs: null,
   });
+  if (integrationActivityLog.length > 200) integrationActivityLog.length = 200;
+  res.json(syncResult);
 });
 
 adminRouter.get("/admin/users", (_req, res) => {
@@ -261,6 +301,81 @@ adminRouter.post("/admin/seed/reset", (_req, res) => {
     resetAt: new Date().toISOString(),
     message: "All demo data has been reset to defaults",
   });
+});
+
+interface IntegrationActivity {
+  id: string;
+  type: "connection_test" | "sync" | "webhook" | "api_call" | "error" | "health_check";
+  connector: string;
+  app: string | null;
+  status: "success" | "error" | "warning";
+  message: string;
+  timestamp: string;
+  responseTimeMs: number | null;
+}
+
+export { integrationActivityLog, type IntegrationActivity };
+
+const integrationActivityLog: IntegrationActivity[] = [
+  { id: "act_seed_001", type: "health_check", connector: "stripe", app: "lyte", status: "success", message: "Periodic health check passed", timestamp: "2026-03-26T07:00:00Z", responseTimeMs: 45 },
+  { id: "act_seed_002", type: "api_call", connector: "ai", app: "firestorm", status: "success", message: "Chat completion request processed", timestamp: "2026-03-26T06:45:00Z", responseTimeMs: 1200 },
+  { id: "act_seed_003", type: "sync", connector: "github", app: "stephen-site", status: "success", message: "Synced 8 repositories", timestamp: "2026-03-26T06:30:00Z", responseTimeMs: 320 },
+  { id: "act_seed_004", type: "webhook", connector: "stripe", app: "lyte", status: "success", message: "invoice.paid webhook processed", timestamp: "2026-03-26T06:15:00Z", responseTimeMs: 15 },
+  { id: "act_seed_005", type: "error", connector: "slack", app: "vessels", status: "error", message: "Webhook URL not configured", timestamp: "2026-03-26T06:00:00Z", responseTimeMs: null },
+  { id: "act_seed_006", type: "connection_test", connector: "weather", app: "vessels", status: "success", message: "Running in demo mode", timestamp: "2026-03-26T05:45:00Z", responseTimeMs: 2 },
+  { id: "act_seed_007", type: "api_call", connector: "notion", app: "readiness", status: "success", message: "Fetched 12 assessment pages", timestamp: "2026-03-26T05:30:00Z", responseTimeMs: 450 },
+  { id: "act_seed_008", type: "health_check", connector: "monitoring", app: "control-plane", status: "success", message: "All monitoring endpoints healthy", timestamp: "2026-03-26T05:00:00Z", responseTimeMs: 30 },
+  { id: "act_seed_009", type: "sync", connector: "hubspot", app: "lyte", status: "success", message: "Synced 34 contacts", timestamp: "2026-03-26T04:30:00Z", responseTimeMs: 890 },
+  { id: "act_seed_010", type: "api_call", connector: "elevenlabs", app: "dreamscape", status: "success", message: "Generated audio narration", timestamp: "2026-03-26T04:00:00Z", responseTimeMs: 2100 },
+  { id: "act_seed_011", type: "webhook", connector: "github", app: "stephen-site", status: "success", message: "push event on main branch", timestamp: "2026-03-26T03:30:00Z", responseTimeMs: 12 },
+  { id: "act_seed_012", type: "error", connector: "twilio", app: "firestorm", status: "error", message: "SMS delivery failed - invalid number", timestamp: "2026-03-26T03:00:00Z", responseTimeMs: 150 },
+];
+
+adminRouter.get("/admin/integration-health", (_req, res) => {
+  const matrix = services.getHealthMatrix();
+  const appHealth: Record<string, { slug: string; name: string; connectors: string[]; health: ReturnType<typeof services.getHealthMatrix> }> = {};
+
+  for (const app of PLATFORM_APPS) {
+    const mapping = APP_INTEGRATIONS[app.slug];
+    if (mapping) {
+      appHealth[app.slug] = {
+        slug: app.slug,
+        name: app.name,
+        connectors: mapping.connectors,
+        health: services.getAppHealthMatrix(mapping.connectors),
+      };
+    }
+  }
+
+  const unhealthyConnectors = matrix.services.filter((s) => s.status === "MANUAL_REQUIRED");
+  const demoConnectors = matrix.services.filter((s) => s.status === "MOCKED_DEMO_MODE");
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    overall: matrix,
+    perApp: appHealth,
+    alerts: {
+      unhealthyCount: unhealthyConnectors.length,
+      demoCount: demoConnectors.length,
+      unhealthyConnectors: unhealthyConnectors.map((c) => c.name),
+      demoConnectors: demoConnectors.map((c) => c.name),
+    },
+  });
+});
+
+adminRouter.get("/admin/integration-activity", (req, res) => {
+  let events = [...integrationActivityLog];
+  const connector = req.query["connector"] as string | undefined;
+  const app = req.query["app"] as string | undefined;
+  const type = req.query["type"] as string | undefined;
+  const status = req.query["status"] as string | undefined;
+
+  if (connector) events = events.filter((e) => e.connector === connector);
+  if (app) events = events.filter((e) => e.app === app);
+  if (type) events = events.filter((e) => e.type === type);
+  if (status) events = events.filter((e) => e.status === status);
+
+  res.json({ events, total: events.length });
 });
 
 function getCategoryForService(name: string): string {

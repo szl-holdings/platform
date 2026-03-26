@@ -62,6 +62,11 @@ export class StripeAdapter extends ServiceAdapter {
     return response.json();
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const result = await this.testConnection();
+    if (!result.connected) throw new Error("Stripe connection verification failed");
+  }
+
   async testConnection(): Promise<StripeConnectionStatus> {
     if (!this.isLive) {
       return { connected: false, mode: "mock" };

@@ -8,10 +8,76 @@ import {
   Zap,
   Settings,
   LogOut,
-  Bell
+  Bell,
+  Server,
+  Wifi,
+  WifiOff
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+
+interface AppHealthSummary {
+  services: { name: string; status: string }[];
+  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
+}
+
+function DemoModeBanner() {
+  const { data } = useQuery<AppHealthSummary>({
+    queryKey: ["app-health-lyte"],
+    queryFn: () => fetch("/api/services/health/app/lyte").then((r) => r.json()),
+    refetchInterval: 60000,
+  });
+  if (!data) return null;
+  const hasDemoMode = data.summary.mockedDemoMode > 0;
+  const hasUnhealthy = data.summary.manualRequired > 0;
+  if (!hasDemoMode && !hasUnhealthy) return null;
+  const demoNames = data.services.filter((s) => s.status === "MOCKED_DEMO_MODE").map((s) => s.name);
+  if (hasUnhealthy) {
+    return (
+      <div className="bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center gap-2 shrink-0">
+        <WifiOff className="w-4 h-4 text-red-400" />
+        <span className="text-xs text-red-400 font-medium">{data.summary.manualRequired} integration(s) not configured</span>
+      </div>
+    );
+  }
+  return (
+    <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2 shrink-0">
+      <Server className="w-4 h-4 text-amber-400" />
+      <span className="text-xs text-amber-400 font-medium">Demo Mode</span>
+      <span className="text-xs text-amber-400/60">— {demoNames.join(", ")} using simulated data</span>
+    </div>
+  );
+}
+
+function IntegrationStatusFooter() {
+  const { data } = useQuery<AppHealthSummary>({
+    queryKey: ["app-health-lyte"],
+    queryFn: () => fetch("/api/services/health/app/lyte").then((r) => r.json()),
+    refetchInterval: 60000,
+  });
+  if (!data) return null;
+  return (
+    <div className="px-4 pb-2 space-y-2">
+      <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">Integrations</div>
+      <div className="flex flex-wrap gap-1">
+        {data.services.map((svc) => (
+          <span key={svc.name} className={cn(
+            "inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded",
+            svc.status === "LIVE_CONFIGURED" ? "bg-emerald-500/10 text-emerald-400" :
+            svc.status === "MOCKED_DEMO_MODE" ? "bg-amber-500/10 text-amber-400" :
+            "bg-red-500/10 text-red-400"
+          )}>
+            {svc.status === "LIVE_CONFIGURED" ? <Wifi className="w-2.5 h-2.5" /> :
+             svc.status === "MOCKED_DEMO_MODE" ? <Server className="w-2.5 h-2.5" /> :
+             <WifiOff className="w-2.5 h-2.5" />}
+            {svc.name}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const NAV_ITEMS = [
   { href: "/", label: "Command", icon: LayoutDashboard },
@@ -62,6 +128,7 @@ export function Layout({ children }: { children: ReactNode }) {
           })}
         </div>
 
+        <IntegrationStatusFooter />
         <div className="p-4 border-t border-white/5">
           <div className="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white transition-colors cursor-pointer rounded-xl hover:bg-white/5">
             <Settings className="w-5 h-5" />
@@ -76,6 +143,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
+        <DemoModeBanner />
         <header className="h-16 border-b border-white/5 bg-background/50 backdrop-blur-md flex items-center justify-between px-8 shrink-0 z-20">
           <h1 className="font-display font-semibold text-xl text-white/90 capitalize tracking-wide">
             {NAV_ITEMS.find(i => i.href === location)?.label || "Command Center"}

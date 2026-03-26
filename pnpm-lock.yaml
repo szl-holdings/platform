@@ -367,6 +367,9 @@ importers:
       '@workspace/auth':
         specifier: workspace:*
         version: link:../../lib/auth
+      '@workspace/config':
+        specifier: workspace:*
+        version: link:../../lib/config
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db

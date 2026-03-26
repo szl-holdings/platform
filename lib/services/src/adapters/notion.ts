@@ -46,6 +46,17 @@ export class NotionAdapter extends ServiceAdapter {
   readonly description = "Notion workspace pages and databases";
   readonly requiredEnvVars = ["NOTION_API_KEY"];
 
+  protected async performHealthCheck(): Promise<void> {
+    const apiKey = process.env["NOTION_API_KEY"];
+    const response = await fetch("https://api.notion.com/v1/users/me", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Notion-Version": "2022-06-28",
+      },
+    });
+    if (!response.ok) throw new Error(`Notion API returned ${response.status}`);
+  }
+
   private get apiKey(): string | undefined {
     return process.env["NOTION_API_KEY"];
   }

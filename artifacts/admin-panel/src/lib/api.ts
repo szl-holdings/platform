@@ -18,7 +18,7 @@ export const api = {
   getOverview: () => apiFetch<AdminOverview>("/admin/overview"),
   getApps: () => apiFetch<{ apps: AppInfo[] }>("/admin/apps"),
   getConnectors: () => apiFetch<ConnectorsResponse>("/admin/connectors"),
-  testConnector: (name: string) => apiFetch<ConnectorTestResult>(`/admin/connectors/${name}/test`, { method: "POST" }),
+  testConnector: (name: string) => apiFetch<ConnectionTestResult>(`/admin/connectors/${name}/test`, { method: "POST" }),
   syncConnector: (name: string) => apiFetch<ConnectorSyncResult>(`/admin/connectors/${name}/sync`, { method: "POST" }),
   getUsers: () => apiFetch<{ users: UserInfo[] }>("/admin/users"),
   createUser: (data: { email: string; name: string; role: string }) => apiFetch<UserInfo>("/admin/users", { method: "POST", body: JSON.stringify(data) }),
@@ -38,6 +38,20 @@ export const api = {
   seedData: () => apiFetch<SeedResult>("/admin/seed", { method: "POST" }),
   resetData: () => apiFetch<SeedResult>("/admin/seed/reset", { method: "POST" }),
   getServicesHealth: () => apiFetch<ServicesHealthMatrix>("/services/health"),
+  getIntegrationHealth: () => apiFetch<IntegrationHealthDashboard>("/admin/integration-health"),
+  getIntegrationActivity: (params?: { connector?: string; app?: string; type?: string; status?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.connector) qs.set("connector", params.connector);
+    if (params?.app) qs.set("app", params.app);
+    if (params?.type) qs.set("type", params.type);
+    if (params?.status) qs.set("status", params.status);
+    const query = qs.toString();
+    return apiFetch<IntegrationActivityResponse>(`/admin/integration-activity${query ? `?${query}` : ""}`);
+  },
+  getHealthSummary: () => apiFetch<HealthSummary>("/services/health/summary"),
+  testAppConnectors: (appSlug: string) => apiFetch<{ app: string; results: ConnectionTestResult[] }>(`/services/health/app/${appSlug}/test`, { method: "POST" }),
+  setConnectorEnabled: (name: string, enabled: boolean) => apiFetch<{ name: string; enabled: boolean; status: string }>(`/admin/connectors/${name}/enable`, { method: "PUT", body: JSON.stringify({ enabled }) }),
+  verifyAll: () => apiFetch<VerifyAllResult>("/services/health/verify-all", { method: "POST" }),
 };
 
 export interface AdminOverview {
@@ -63,6 +77,14 @@ export interface ServiceHealth {
   requiredEnvVars: string[];
   presentEnvVars: string[];
   missingEnvVars: string[];
+  lastChecked: string | null;
+  lastError: string | null;
+  errorCount: number;
+  responseTimeMs: number | null;
+  lastSuccessfulCheck: string | null;
+  consecutiveFailures: number;
+  retryState: "idle" | "retrying" | "failed";
+  enabled: boolean;
 }
 
 export interface AppInfo {
@@ -85,11 +107,14 @@ export interface ConnectorDetail extends ServiceHealth {
   webhookUrl: string;
 }
 
-export interface ConnectorTestResult {
+export interface ConnectionTestResult {
   name: string;
+  success: boolean;
   status: string;
   testedAt: string;
-  result: string;
+  responseTimeMs: number;
+  message: string;
+  error: string | null;
 }
 
 export interface ConnectorSyncResult {
@@ -97,6 +122,48 @@ export interface ConnectorSyncResult {
   synced: boolean;
   syncedAt: string;
   itemsSynced: number;
+}
+
+export interface IntegrationHealthDashboard {
+  timestamp: string;
+  overall: ServicesHealthMatrix;
+  perApp: Record<string, {
+    slug: string;
+    name: string;
+    connectors: string[];
+    health: ServicesHealthMatrix;
+  }>;
+  alerts: {
+    unhealthyCount: number;
+    demoCount: number;
+    unhealthyConnectors: string[];
+    demoConnectors: string[];
+  };
+}
+
+export interface IntegrationActivity {
+  id: string;
+  type: "connection_test" | "sync" | "webhook" | "api_call" | "error" | "health_check";
+  connector: string;
+  app: string | null;
+  status: "success" | "error" | "warning";
+  message: string;
+  timestamp: string;
+  responseTimeMs: number | null;
+}
+
+export interface IntegrationActivityResponse {
+  events: IntegrationActivity[];
+  total: number;
+}
+
+export interface HealthSummary {
+  unhealthyCount: number;
+  demoCount: number;
+  liveCount: number;
+  total: number;
+  hasDemoMode: boolean;
+  hasUnhealthy: boolean;
 }
 
 export interface UserInfo {
@@ -168,4 +235,16 @@ export interface SeedResult {
   resetAt?: string;
   message?: string;
   tables?: { name: string; rows: number }[];
+}
+
+export interface VerifyAllResult {
+  verifiedAt: string;
+  summary: { totalApps: number; healthyApps: number; totalConnectors: number; totalFallbacks: number; totalFailed: number };
+  apps: Record<string, {
+    app: string;
+    connectors: Array<{ name: string; success: boolean; status: string; fallbackMode: boolean; message: string; responseTimeMs: number }>;
+    allHealthy: boolean;
+    fallbackCount: number;
+    failedCount: number;
+  }>;
 }

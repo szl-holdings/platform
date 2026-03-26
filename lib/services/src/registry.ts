@@ -1,4 +1,4 @@
-import { type ServiceAdapter, type ServiceHealthReport } from "./base.js";
+import { type ServiceAdapter, type ServiceHealthReport, type ConnectionTestResult } from "./base.js";
 import { AIAdapter } from "./adapters/ai.js";
 import { WeatherAdapter } from "./adapters/weather.js";
 import { ShippingAdapter } from "./adapters/shipping.js";
@@ -133,6 +133,57 @@ export class ServiceRegistry {
 
   getAllAdapters(): ServiceAdapter[] {
     return [...this.adapters];
+  }
+
+  async testAllConnections(): Promise<ConnectionTestResult[]> {
+    return Promise.all(this.adapters.map((a) => a.runHealthCheck()));
+  }
+
+  async testConnection(name: string): Promise<ConnectionTestResult | null> {
+    const adapter = this.getAdapter(name);
+    if (!adapter) return null;
+    return adapter.runHealthCheck();
+  }
+
+  getAdaptersForApp(connectorNames: string[]): ServiceAdapter[] {
+    return connectorNames
+      .map((n) => this.getAdapter(n))
+      .filter((a): a is ServiceAdapter => a !== undefined);
+  }
+
+  getAppHealthMatrix(connectorNames: string[]): IntegrationHealthMatrix & { unknownConnectors: string[] } {
+    const adapters: ServiceAdapter[] = [];
+    const unknownConnectors: string[] = [];
+
+    for (const name of connectorNames) {
+      const adapter = this.getAdapter(name);
+      if (adapter) {
+        adapters.push(adapter);
+      } else {
+        unknownConnectors.push(name);
+      }
+    }
+
+    const services = adapters.map((a) => a.getHealthReport());
+    return {
+      timestamp: new Date().toISOString(),
+      services,
+      summary: {
+        total: connectorNames.length,
+        liveConfigured: services.filter((s) => s.status === "LIVE_CONFIGURED").length,
+        mockedDemoMode: services.filter((s) => s.status === "MOCKED_DEMO_MODE").length,
+        manualRequired: services.filter((s) => s.status === "MANUAL_REQUIRED").length + unknownConnectors.length,
+      },
+      unknownConnectors,
+    };
+  }
+
+  getUnhealthyCount(): number {
+    return this.adapters.filter((a) => a.status === "MANUAL_REQUIRED").length;
+  }
+
+  getDemoModeCount(): number {
+    return this.adapters.filter((a) => a.status === "MOCKED_DEMO_MODE").length;
   }
 }
 

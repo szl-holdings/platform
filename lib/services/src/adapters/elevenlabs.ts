@@ -37,6 +37,11 @@ export class ElevenLabsAdapter extends ServiceAdapter {
     return process.env["ELEVENLABS_API_KEY"];
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const result = await this.testConnection();
+    if (!result.connected) throw new Error("ElevenLabs connection verification failed");
+  }
+
   async testConnection(): Promise<{ connected: boolean; tier?: string }> {
     if (!this.isLive) return { connected: false };
     try {

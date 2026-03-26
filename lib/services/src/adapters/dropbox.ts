@@ -37,6 +37,11 @@ export class DropboxAdapter extends ServiceAdapter {
     return process.env["DROPBOX_ACCESS_TOKEN"];
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const result = await this.testConnection();
+    if (!result.connected) throw new Error("Dropbox connection verification failed");
+  }
+
   async testConnection(): Promise<{ connected: boolean; email?: string }> {
     if (!this.isLive) return { connected: false };
     try {

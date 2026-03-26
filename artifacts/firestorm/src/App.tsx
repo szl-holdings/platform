@@ -1,7 +1,7 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
-import { Flame, Shield, Target, Search, BarChart3, FileText, LayoutDashboard } from "lucide-react";
+import { Flame, Shield, Target, Search, BarChart3, FileText, LayoutDashboard, Server, AlertTriangle, Wifi, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AssessmentDashboard from "@/pages/assessment-dashboard";
 import ScenarioLibrary from "@/pages/scenario-library";
@@ -22,6 +22,78 @@ const navItems = [
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
   { path: "/reports", label: "Reports", icon: FileText },
 ];
+
+interface AppHealthSummary {
+  services: { name: string; status: string }[];
+  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
+}
+
+function IntegrationStatusFooter() {
+  const { data } = useQuery<AppHealthSummary>({
+    queryKey: ["app-health-firestorm"],
+    queryFn: () => fetch("/api/services/health/app/firestorm").then((r) => r.json()),
+    refetchInterval: 60000,
+  });
+
+  if (!data) return null;
+
+  return (
+    <div className="p-3 border-t border-border space-y-2">
+      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Integrations</div>
+      <div className="flex flex-wrap gap-1">
+        {data.services.map((svc) => (
+          <span
+            key={svc.name}
+            className={cn(
+              "inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded",
+              svc.status === "LIVE_CONFIGURED" ? "bg-emerald-500/10 text-emerald-400" :
+              svc.status === "MOCKED_DEMO_MODE" ? "bg-amber-500/10 text-amber-400" :
+              "bg-red-500/10 text-red-400"
+            )}
+          >
+            {svc.status === "LIVE_CONFIGURED" ? <Wifi className="w-2.5 h-2.5" /> :
+             svc.status === "MOCKED_DEMO_MODE" ? <Server className="w-2.5 h-2.5" /> :
+             <WifiOff className="w-2.5 h-2.5" />}
+            {svc.name}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DemoModeBanner() {
+  const { data } = useQuery<AppHealthSummary>({
+    queryKey: ["app-health-firestorm"],
+    queryFn: () => fetch("/api/services/health/app/firestorm").then((r) => r.json()),
+    refetchInterval: 60000,
+  });
+
+  if (!data) return null;
+
+  const hasDemoMode = data.summary.mockedDemoMode > 0;
+  const hasUnhealthy = data.summary.manualRequired > 0;
+  if (!hasDemoMode && !hasUnhealthy) return null;
+
+  const demoNames = data.services.filter((s) => s.status === "MOCKED_DEMO_MODE").map((s) => s.name);
+
+  if (hasUnhealthy) {
+    return (
+      <div className="bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center gap-2">
+        <AlertTriangle className="w-4 h-4 text-red-400" />
+        <span className="text-xs text-red-400 font-medium">{data.summary.manualRequired} integration(s) not configured</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2">
+      <Server className="w-4 h-4 text-amber-400" />
+      <span className="text-xs text-amber-400 font-medium">Demo Mode</span>
+      <span className="text-xs text-amber-400/60">— {demoNames.join(", ")} using simulated data</span>
+    </div>
+  );
+}
 
 function Sidebar() {
   const [location] = useLocation();
@@ -54,6 +126,7 @@ function Sidebar() {
           );
         })}
       </nav>
+      <IntegrationStatusFooter />
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Shield className="w-3 h-3" />
@@ -88,9 +161,12 @@ function App() {
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <div className="flex h-screen bg-background">
           <Sidebar />
-          <main className="flex-1 overflow-auto">
-            <AppRouter />
-          </main>
+          <div className="flex-1 flex flex-col overflow-auto">
+            <DemoModeBanner />
+            <main className="flex-1 overflow-auto">
+              <AppRouter />
+            </main>
+          </div>
         </div>
         <Toaster />
       </WouterRouter>

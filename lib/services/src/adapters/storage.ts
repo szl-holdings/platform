@@ -42,6 +42,19 @@ export class StorageAdapter extends ServiceAdapter {
     "STORAGE_BUCKET",
   ];
 
+  protected async performHealthCheck(): Promise<void> {
+    const bucket = process.env["STORAGE_BUCKET"];
+    const endpoint = process.env["STORAGE_ENDPOINT"] || "https://s3.amazonaws.com";
+    const response = await fetch(`${endpoint}/${bucket}?max-keys=1`, {
+      method: "GET",
+      headers: {
+        "x-amz-content-sha256": "UNSIGNED-PAYLOAD",
+      },
+    });
+    if (!response.ok && response.status !== 403) throw new Error(`Storage returned ${response.status}`);
+    if (response.status === 403) throw new Error("Storage authentication failed");
+  }
+
   async upload(
     key: string,
     _data: Buffer | string,

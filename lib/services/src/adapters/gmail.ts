@@ -53,6 +53,11 @@ export class GmailAdapter extends ServiceAdapter {
     return "MOCKED_DEMO_MODE";
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    const result = await this.testConnection();
+    if (!result.connected) throw new Error("Gmail connection verification failed");
+  }
+
   async testConnection(): Promise<{ connected: boolean }> {
     if (!this.isLive) return { connected: false };
     return { connected: true };

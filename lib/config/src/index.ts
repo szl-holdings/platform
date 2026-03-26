@@ -48,3 +48,34 @@ export function getRequiredEnv(key: string): string {
 export function getOptionalEnv(key: string, fallback: string = ""): string {
   return process.env[key] ?? fallback;
 }
+
+export const APP_INTEGRATIONS: Record<string, { connectors: string[]; description: string }> = {
+  "stephen-site": {
+    connectors: ["ai", "github", "google", "storage"],
+    description: "Portfolio site uses AI for content, GitHub for repos, Google auth, file storage",
+  },
+  vessels: {
+    connectors: ["weather", "stormglass", "shipping", "monitoring", "storage", "slack"],
+    description: "Maritime intelligence uses weather/ocean APIs, shipping data, monitoring, notifications",
+  },
+  firestorm: {
+    connectors: ["ai", "slack", "twilio", "monitoring", "posthog", "storage"],
+    description: "Security simulation uses AI analysis, alerting via Slack/Twilio, analytics, monitoring",
+  },
+  lyte: {
+    connectors: ["stripe", "hubspot", "gmail", "storage", "posthog", "shipping"],
+    description: "Commerce uses payments, CRM, email, storage, analytics, logistics",
+  },
+  dreamscape: {
+    connectors: ["ai", "figma", "storage", "google-drive", "dropbox", "elevenlabs"],
+    description: "Creative tools use AI generation, design tools, storage, media",
+  },
+  readiness: {
+    connectors: ["ai", "notion", "confluence", "google-docs", "slack", "monitoring"],
+    description: "Assessments use AI scoring, documentation tools, notifications, monitoring",
+  },
+  "control-plane": {
+    connectors: ["ai", "stripe", "slack", "twilio", "google", "notion", "github", "storage", "monitoring", "posthog", "gmail", "hubspot", "confluence", "figma", "elevenlabs", "weather", "stormglass", "shipping", "google-calendar", "google-docs", "google-drive", "dropbox", "onedrive"],
+    description: "Admin panel monitors all connectors across the platform",
+  },
+} as const;

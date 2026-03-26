@@ -1,10 +1,12 @@
 import { Switch, Route, Router as WouterRouter, useLocation, Link } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import DashboardPage from "@/pages/dashboard";
 import AppsPage from "@/pages/apps";
 import ConnectorsPage from "@/pages/connectors";
+import IntegrationHealthPage from "@/pages/integration-health";
+import IntegrationActivityPage from "@/pages/integration-activity";
 import UsersPage from "@/pages/users";
 import AuditLogPage from "@/pages/audit-log";
 import WebhooksPage from "@/pages/webhooks";
@@ -14,6 +16,7 @@ import FilesPage from "@/pages/files";
 import EnvironmentPage from "@/pages/environment";
 import SeedManagerPage from "@/pages/seed-manager";
 import NotFound from "@/pages/not-found";
+import { api } from "@/lib/api";
 import {
   LayoutDashboard,
   Layers,
@@ -27,6 +30,10 @@ import {
   Settings,
   Database,
   Hexagon,
+  HeartPulse,
+  Activity,
+  AlertTriangle,
+  Server,
 } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -44,12 +51,15 @@ interface NavItem {
   label: string;
   icon: React.ReactNode;
   section?: string;
+  badge?: "health";
 }
 
 const NAV_ITEMS: NavItem[] = [
   { path: "/", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" />, section: "System" },
   { path: "/apps", label: "App Registry", icon: <Layers className="w-4 h-4" /> },
   { path: "/connectors", label: "Connectors", icon: <Plug className="w-4 h-4" /> },
+  { path: "/integration-health", label: "Integration Health", icon: <HeartPulse className="w-4 h-4" />, badge: "health" },
+  { path: "/integration-activity", label: "Activity Feed", icon: <Activity className="w-4 h-4" /> },
   { path: "/users", label: "Users & Roles", icon: <Users className="w-4 h-4" />, section: "Management" },
   { path: "/audit-log", label: "Audit Log", icon: <ScrollText className="w-4 h-4" /> },
   { path: "/webhooks", label: "Webhooks", icon: <Webhook className="w-4 h-4" /> },
@@ -59,6 +69,62 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/environment", label: "Environment", icon: <Settings className="w-4 h-4" /> },
   { path: "/seed", label: "Seed Data", icon: <Database className="w-4 h-4" /> },
 ];
+
+function HealthBadge() {
+  const { data } = useQuery({
+    queryKey: ["health-summary"],
+    queryFn: api.getHealthSummary,
+    refetchInterval: 30000,
+  });
+
+  if (!data) return null;
+
+  if (data.hasUnhealthy) {
+    return (
+      <span className="ml-auto flex items-center justify-center w-5 h-5 rounded-full bg-red-500/20 text-red-400">
+        <AlertTriangle className="w-3 h-3" />
+      </span>
+    );
+  }
+
+  if (data.hasDemoMode) {
+    return (
+      <span className="ml-auto flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/20 text-amber-400">
+        <Server className="w-3 h-3" />
+      </span>
+    );
+  }
+
+  return null;
+}
+
+function DemoModeBanner() {
+  const { data } = useQuery({
+    queryKey: ["health-summary"],
+    queryFn: api.getHealthSummary,
+    refetchInterval: 60000,
+  });
+
+  if (!data || (!data.hasDemoMode && !data.hasUnhealthy)) return null;
+
+  if (data.hasUnhealthy) {
+    return (
+      <div className="bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center gap-2">
+        <AlertTriangle className="w-4 h-4 text-red-400" />
+        <span className="text-xs text-red-400 font-medium">{data.unhealthyCount} integration(s) not configured</span>
+        <span className="text-xs text-red-400/60">— Some features may be unavailable</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2">
+      <Server className="w-4 h-4 text-amber-400" />
+      <span className="text-xs text-amber-400 font-medium">Demo Mode Active</span>
+      <span className="text-xs text-amber-400/60">— {data.demoCount} of {data.total} integrations using simulated data</span>
+    </div>
+  );
+}
 
 function Sidebar() {
   const [location] = useLocation();
@@ -100,6 +166,7 @@ function Sidebar() {
               >
                 {item.icon}
                 {item.label}
+                {item.badge === "health" && <HealthBadge />}
               </Link>
             </div>
           );
@@ -123,6 +190,8 @@ function AppRouter() {
       <Route path="/" component={DashboardPage} />
       <Route path="/apps" component={AppsPage} />
       <Route path="/connectors" component={ConnectorsPage} />
+      <Route path="/integration-health" component={IntegrationHealthPage} />
+      <Route path="/integration-activity" component={IntegrationActivityPage} />
       <Route path="/users" component={UsersPage} />
       <Route path="/audit-log" component={AuditLogPage} />
       <Route path="/webhooks" component={WebhooksPage} />
@@ -143,9 +212,12 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <div className="flex min-h-screen bg-background">
             <Sidebar />
-            <main className="flex-1 p-6 overflow-auto">
-              <AppRouter />
-            </main>
+            <div className="flex-1 flex flex-col overflow-auto">
+              <DemoModeBanner />
+              <main className="flex-1 p-6">
+                <AppRouter />
+              </main>
+            </div>
           </div>
         </WouterRouter>
         <Toaster />

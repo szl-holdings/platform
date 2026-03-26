@@ -75,6 +75,14 @@ export class ShippingAdapter extends ServiceAdapter {
   readonly description = "Maritime vessel tracking and port information";
   readonly requiredEnvVars = ["MARINE_TRAFFIC_API_KEY"];
 
+  protected async performHealthCheck(): Promise<void> {
+    const apiKey = process.env["MARINE_TRAFFIC_API_KEY"];
+    const response = await fetch(
+      `https://services.marinetraffic.com/api/exportvessel/v:5/${apiKey}/protocol:json`,
+    );
+    if (!response.ok) throw new Error(`MarineTraffic API returned ${response.status}`);
+  }
+
   async trackVessel(identifier: string): Promise<VesselPosition | null> {
     if (!this.isLive) {
       const vessel = MOCK_VESSELS.find(

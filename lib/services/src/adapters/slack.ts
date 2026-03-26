@@ -41,6 +41,21 @@ export class SlackAdapter extends ServiceAdapter {
     return ["SLACK_WEBHOOK_URL or SLACK_BOT_TOKEN"];
   }
 
+  protected async performHealthCheck(): Promise<void> {
+    if (this.botToken) {
+      const response = await fetch("https://slack.com/api/auth.test", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${this.botToken}` },
+      });
+      if (!response.ok) throw new Error(`Slack API returned ${response.status}`);
+      const data = await response.json() as { ok: boolean; error?: string };
+      if (!data.ok) throw new Error(`Slack auth failed: ${data.error}`);
+    } else if (this.webhookUrl) {
+      const url = new URL(this.webhookUrl);
+      if (!url.hostname.includes("slack")) throw new Error("Invalid Slack webhook URL");
+    }
+  }
+
   async sendWebhookMessage(
     text: string,
     options?: { channel?: string; username?: string; iconEmoji?: string },
