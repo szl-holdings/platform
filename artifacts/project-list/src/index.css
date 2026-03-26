@@ -64,7 +64,7 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased font-sans selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground antialiased font-sans selection:bg-primary/20 selection:text-primary relative;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -73,6 +73,7 @@
 
   html {
     scroll-behavior: smooth;
+    position: relative;
   }
 }
 
@@ -140,11 +141,48 @@
   background-clip: text;
 }
 
+.card-3d-tilt {
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+.card-glow {
+  position: relative;
+}
+
+.card-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background: radial-gradient(
+    300px circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(139, 92, 246, 0.12),
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-glow:hover::before {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-gradient,
   .animate-float,
   .animate-pulse-glow {
     animation: none;
+  }
+
+  .card-3d-tilt {
+    transition: none;
+  }
+
+  .card-3d-tilt:hover {
+    transform: none !important;
   }
 
   html {

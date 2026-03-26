@@ -38,19 +38,18 @@ export function Navbar() {
           </span>
         </a>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
+              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
             >
               {link.name}
             </a>
           ))}
           <a href="#contact">
-            <Button className="rounded-full font-semibold shadow-lg shadow-primary/20">
+            <Button className="rounded-full font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-[0.98] transition-all duration-300">
               Request Meeting
             </Button>
           </a>
@@ -80,7 +79,7 @@ export function Navbar() {
                   key={link.name}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-lg font-medium text-foreground py-2 border-b border-white/5"
+                  className="text-lg font-medium text-foreground py-2 border-b border-white/5 hover:text-primary transition-colors duration-300"
                 >
                   {link.name}
                 </a>

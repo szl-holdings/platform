@@ -38,7 +38,8 @@ export function ServicesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group p-8 rounded-2xl glass-panel hover:bg-white/[0.02] hover:-translate-y-1 transition-all duration-300"
+                whileHover={{ y: -6, scale: 1.02 }}
+                className="group p-8 rounded-2xl glass-panel hover:bg-white/[0.02] hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
               >
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                   <Icon className="w-6 h-6 text-primary" />

@@ -12,7 +12,7 @@ import { ContactSection } from "@/components/sections/ContactSection";
 
 export function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 selection:text-primary relative">
       <Navbar />
       
       <main>

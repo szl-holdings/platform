@@ -47,10 +47,14 @@ export function AboutSection() {
             </div>
 
             <div className="flex flex-wrap gap-3 mt-8">
-              {skills.map((skill, i) => (
-                <span key={i} className="px-4 py-2 rounded-full border border-white/10 bg-secondary/50 text-sm font-medium text-foreground hover:border-primary/50 transition-colors cursor-default">
+              {skills.map((skill) => (
+                <motion.span
+                  key={skill}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  className="px-4 py-2 rounded-full border border-white/10 bg-secondary/50 text-sm font-medium text-foreground hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 cursor-default"
+                >
                   {skill}
-                </span>
+                </motion.span>
               ))}
             </div>
           </motion.div>
@@ -64,13 +68,18 @@ export function AboutSection() {
             transition={{ duration: 0.7, delay: 0.2 }}
           >
             {statsToDisplay.map((stat, i) => (
-              <div 
-                key={i} 
-                className="glass-panel p-8 rounded-2xl flex flex-col justify-center items-center text-center hover:-translate-y-1 transition-transform duration-300"
+              <motion.div 
+                key={`stat-${stat.label}`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ y: -4, scale: 1.02 }}
+                className="glass-panel p-8 rounded-2xl flex flex-col justify-center items-center text-center hover:border-primary/30 transition-all duration-300"
               >
                 <span className="text-4xl md:text-5xl font-serif font-bold text-primary mb-2">{stat.value}</span>
                 <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{stat.label}</span>
-              </div>
+              </motion.div>
             ))}
           </motion.div>
 

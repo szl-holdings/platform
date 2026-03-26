@@ -62,7 +62,8 @@ export function PortfolioSection() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.4 }}
-                className="group relative overflow-hidden rounded-2xl glass-panel aspect-[4/3] flex flex-col justify-end p-8"
+                whileHover={{ y: -6, scale: 1.01 }}
+                className="group relative overflow-hidden rounded-2xl glass-panel aspect-[4/3] flex flex-col justify-end p-8 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500"
               >
                 {/* Abstract placeholder background per project */}
                 <div className="absolute inset-0 bg-gradient-to-br from-secondary via-background to-card z-0 transition-transform duration-700 group-hover:scale-105" />

@@ -6,7 +6,6 @@ import { format } from "date-fns";
 export function EcosystemSection() {
   const { data: statusData, isLoading } = useGetStephenEcosystemStatus();
 
-  // Fallback demo data
   const ecosystem = statusData || {
     apps: [
       { name: "Vessels App", slug: "vessels", description: "Integration Core", status: "operational", lastChecked: new Date().toISOString() },
@@ -55,17 +54,17 @@ export function EcosystemSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Apps */}
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-lg font-semibold text-foreground mb-6">Core Applications</h4>
-            {ecosystem.apps.map((app, i) => (
+            {ecosystem.apps.map((app, idx) => (
               <motion.div
-                key={app.slug}
+                key={`app-${app.slug || app.name || idx}`}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-panel p-5 rounded-xl flex items-center justify-between"
+                transition={{ duration: 0.5 }}
+                whileHover={{ x: 4 }}
+                className="glass-panel p-5 rounded-xl flex items-center justify-between hover:border-primary/20 transition-all duration-300"
               >
                 <div>
                   <h5 className="font-bold text-foreground">{app.name}</h5>
@@ -84,18 +83,18 @@ export function EcosystemSection() {
             ))}
           </div>
 
-          {/* Connectors */}
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-foreground mb-6">Integrations</h4>
             <div className="glass-panel p-6 rounded-2xl grid grid-cols-1 gap-4">
-              {ecosystem.connectors.map((connector, i) => (
+              {ecosystem.connectors.map((connector, idx) => (
                 <motion.div
-                  key={connector.slug}
+                  key={`connector-${connector.slug || connector.name || idx}`}
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="flex items-center justify-between pb-4 border-b border-white/5 last:border-0 last:pb-0"
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ x: -2 }}
+                  className="flex items-center justify-between pb-4 border-b border-white/5 last:border-0 last:pb-0 transition-all duration-300"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-foreground">
@@ -103,7 +102,7 @@ export function EcosystemSection() {
                     </div>
                     <span className="font-medium text-foreground">{connector.name}</span>
                   </div>
-                  <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(connector.status).split(' ')[0].replace('text-', 'bg-')}`} 
+                  <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(connector.status).split(' ')[0].replace('text-', 'bg-')}`}
                        title={connector.status} />
                 </motion.div>
               ))}

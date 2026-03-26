@@ -16,13 +16,13 @@ export function Footer() {
               Building the future of integrated technology. Elevating brands, scaling systems, and driving innovation across the digital ecosystem.
             </p>
             <div className="flex items-center gap-4">
-              <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background transition-colors">
+              <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
                 <Linkedin size={18} />
               </a>
-              <a href="https://github.com/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background transition-colors">
+              <a href="https://github.com/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
                 <Github size={18} />
               </a>
-              <a href="mailto:stephen@szlholdings.com" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background transition-colors">
+              <a href="mailto:stephen@szlholdings.com" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
                 <Mail size={18} />
               </a>
             </div>
@@ -31,12 +31,12 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-6">Navigate</h4>
             <ul className="space-y-4">
-              <li><a href="#about" className="text-muted-foreground hover:text-primary transition-colors">About</a></li>
-              <li><a href="#timeline" className="text-muted-foreground hover:text-primary transition-colors">Achievements</a></li>
-              <li><a href="#services" className="text-muted-foreground hover:text-primary transition-colors">Services</a></li>
-              <li><a href="#portfolio" className="text-muted-foreground hover:text-primary transition-colors">Portfolio</a></li>
-              <li><a href="#ecosystem" className="text-muted-foreground hover:text-primary transition-colors">Ecosystem</a></li>
-              <li><a href="#contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+              <li><a href="#about" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">About</a></li>
+              <li><a href="#timeline" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Achievements</a></li>
+              <li><a href="#services" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Services</a></li>
+              <li><a href="#portfolio" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Portfolio</a></li>
+              <li><a href="#ecosystem" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Ecosystem</a></li>
+              <li><a href="#contact" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Contact</a></li>
             </ul>
           </div>
 
