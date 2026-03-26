@@ -20,7 +20,7 @@ const MOCK_USERS = [
   { id: "usr_001", email: "admin@szl.com", name: "SZL Admin", role: "admin", status: "active", lastLogin: "2026-03-25T08:00:00Z" },
   { id: "usr_002", email: "dev@szl.com", name: "Dev User", role: "developer", status: "active", lastLogin: "2026-03-24T16:30:00Z" },
   { id: "usr_003", email: "viewer@szl.com", name: "Read-Only User", role: "viewer", status: "active", lastLogin: "2026-03-20T10:00:00Z" },
-  { id: "usr_004", email: "ops@szl.com", name: "Ops Manager", role: "operator", status: "inactive", lastLogin: "2026-02-15T12:00:00Z" },
+  { id: "usr_004", email: "ops@szl.com", name: "Ops Manager", role: "ops", status: "inactive", lastLogin: "2026-02-15T12:00:00Z" },
 ];
 
 const MOCK_AUDIT_LOG = [

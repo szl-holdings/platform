@@ -1,18 +1,24 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { correlationMiddleware } from "./middlewares/correlation";
+import { globalLimiter } from "./middlewares/rate-limiters";
 
 const app: Express = express();
 
 const isProduction = process.env.NODE_ENV === "production";
 
+app.use(correlationMiddleware);
+
 app.use(helmet({
   contentSecurityPolicy: isProduction ? undefined : false,
   crossOriginEmbedderPolicy: false,
+  hsts: isProduction ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  frameguard: { action: "deny" },
 }));
 
 const allowedOrigins = process.env.CORS_ORIGINS
@@ -29,30 +35,24 @@ app.use(cors({
     : (allowedOrigins ?? true),
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id"],
+  exposedHeaders: ["X-Correlation-Id"],
   maxAge: 86400,
 }));
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: isProduction ? 200 : 1000,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many requests, please try again later." },
-  skip: (req) => req.path === "/api/health" || req.path === "/api/health/live" || req.path === "/api/health/ready",
-});
-
-app.use(apiLimiter);
+app.use(globalLimiter);
 
 app.use(
   pinoHttp({
     logger,
+    genReqId: (req) => (req as Request).correlationId || req.id,
     serializers: {
       req(req) {
         return {
           id: req.id,
           method: req.method,
           url: req.url?.split("?")[0],
+          correlationId: req.id,
         };
       },
       res(res) {
@@ -74,6 +74,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.get("/api/health", (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();
+  const dbUrl = process.env.DATABASE_URL;
   res.json({
     status: "healthy",
     timestamp: new Date().toISOString(),
@@ -87,6 +88,10 @@ app.get("/api/health", (_req: Request, res: Response) => {
       external: memUsage.external,
     },
     node: process.version,
+    services: {
+      database: dbUrl ? "configured" : "not_configured",
+      server: "ok",
+    },
   });
 });
 
@@ -94,12 +99,32 @@ app.get("/api/health/live", (_req: Request, res: Response) => {
   res.status(200).json({ status: "ok" });
 });
 
-app.get("/api/health/ready", (_req: Request, res: Response) => {
-  res.status(200).json({
-    status: "ready",
+app.get("/api/health/ready", async (_req: Request, res: Response) => {
+  const dbUrl = process.env.DATABASE_URL;
+  let dbStatus = "not_configured";
+
+  if (dbUrl) {
+    try {
+      const { db } = await import("@workspace/db");
+      const { sql } = await import("drizzle-orm");
+      await Promise.race([
+        db.execute(sql`SELECT 1`),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
+      ]);
+      dbStatus = "connected";
+    } catch {
+      dbStatus = "unreachable";
+    }
+  }
+
+  const allOk = dbStatus !== "unreachable";
+
+  res.status(allOk ? 200 : 503).json({
+    status: allOk ? "ready" : "degraded",
     timestamp: new Date().toISOString(),
     checks: {
       server: "ok",
+      database: dbStatus,
       uptime: process.uptime(),
     },
   });

@@ -33,7 +33,7 @@ router.get("/projects", authMiddleware({ required: false }), async (req, res) =>
   }
 });
 
-router.post("/projects", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
+router.post("/projects", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const body = insertProjectSchema.parse(req.body);
     const [project] = await db
@@ -76,7 +76,7 @@ router.get("/projects/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/projects/:id", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
+router.patch("/projects/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { name, description, status } = req.body;
@@ -115,7 +115,7 @@ router.patch("/projects/:id", authMiddleware(), requireRole("operator", "super_a
   }
 });
 
-router.delete("/projects/:id", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
+router.delete("/projects/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [project] = await db

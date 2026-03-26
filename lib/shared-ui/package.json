@@ -7,7 +7,9 @@
     ".": "./src/index.ts",
     "./tokens": "./src/tokens.ts",
     "./animations": "./src/animations.ts",
-    "./components": "./src/components.ts"
+    "./components": "./src/components.ts",
+    "./themes": "./src/themes.ts",
+    "./premium-components": "./src/premium-components.ts"
   },
   "dependencies": {
     "framer-motion": "catalog:",

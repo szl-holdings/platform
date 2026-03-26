@@ -1,5 +1,8 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { failFastOnInvalidConfig } from "./lib/startup-validation";
+
+failFastOnInvalidConfig();
 
 const rawPort = process.env["PORT"];
 

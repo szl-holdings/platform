@@ -31,7 +31,7 @@ router.get("/billing/plans/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/billing/subscriptions", authMiddleware(), requireRole("operator", "analyst"), async (_req, res) => {
+router.get("/billing/subscriptions", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
   try {
     const subs = await db.select().from(subscriptionsTable).orderBy(desc(subscriptionsTable.createdAt));
     sendSuccess(res, subs);
@@ -40,7 +40,7 @@ router.get("/billing/subscriptions", authMiddleware(), requireRole("operator", "
   }
 });
 
-router.get("/billing/invoices", authMiddleware(), requireRole("operator", "analyst"), async (_req, res) => {
+router.get("/billing/invoices", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
   try {
     const invs = await db.select().from(invoicesTable).orderBy(desc(invoicesTable.createdAt));
     sendSuccess(res, invs);

@@ -23,7 +23,7 @@ router.get("/notifications", authMiddleware(), async (req, res) => {
   }
 });
 
-router.post("/notifications", authMiddleware(), requireRole("operator"), async (req, res) => {
+router.post("/notifications", authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const { userId, type, channel, title, message, actionUrl } = req.body;
     if (!userId || typeof userId !== "number") {

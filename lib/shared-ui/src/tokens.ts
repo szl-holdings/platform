@@ -118,6 +118,22 @@ export const effects = {
   },
 } as const;
 
+export const motion = {
+  duration: {
+    instant: "0.1s",
+    fast: "0.2s",
+    normal: "0.3s",
+    slow: "0.4s",
+    slower: "0.6s",
+  },
+  easing: {
+    default: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    snappy: "cubic-bezier(0.16, 1, 0.3, 1)",
+    smooth: "cubic-bezier(0.22, 1, 0.36, 1)",
+    bounce: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+  },
+} as const;
+
 export const breakpoints = {
   sm: "640px",
   md: "768px",

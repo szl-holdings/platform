@@ -1,6 +1,31 @@
 export { ServiceAdapter, type ServiceStatus, type ServiceHealthReport, type ConnectionTestResult } from "./base.js";
 export { ServiceRegistry, type IntegrationHealthMatrix, services } from "./registry.js";
 
+export {
+  type ProviderMode,
+  type DataProvider,
+  resolveProviderMode,
+  createProvider,
+  vesselsMockProvider,
+  type VesselRecord,
+  incaMockProvider,
+  type IncaModel,
+  bookingMockProvider,
+  type BookingAppointment,
+  holdingsMockProvider,
+  type HoldingsVenture,
+} from "./providers/index.js";
+
+export {
+  azureKeyVault,
+  azureBlobStorage,
+  azureRedis,
+  azurePostgres,
+  azureAppInsights,
+  getAzureStatus,
+  type AzureServiceConfig,
+} from "./azure/index.js";
+
 export { AIAdapter, type ChatMessage, type ChatCompletionResult } from "./adapters/ai.js";
 export { WeatherAdapter, type WeatherConditions, type WeatherForecastDay } from "./adapters/weather.js";
 export { ShippingAdapter, type VesselPosition, type PortInfo } from "./adapters/shipping.js";

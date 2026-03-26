@@ -16,7 +16,7 @@ router.get("/feature-flags", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/feature-flags", authMiddleware(), requireRole("operator"), async (req, res) => {
+router.post("/feature-flags", authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const { key, name, description, isEnabled, rolloutPercentage, conditions } = req.body;
     if (!key || typeof key !== "string" || key.trim().length === 0) {
@@ -51,7 +51,7 @@ router.post("/feature-flags", authMiddleware(), requireRole("operator"), async (
   }
 });
 
-router.patch("/feature-flags/:id", authMiddleware(), requireRole("operator"), async (req, res) => {
+router.patch("/feature-flags/:id", authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { name, description, isEnabled, rolloutPercentage, conditions } = req.body;
@@ -91,7 +91,7 @@ router.patch("/feature-flags/:id", authMiddleware(), requireRole("operator"), as
   }
 });
 
-router.delete("/feature-flags/:id", authMiddleware(), requireRole("operator"), async (req, res) => {
+router.delete("/feature-flags/:id", authMiddleware(), requireRole("ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [flag] = await db.delete(featureFlagsTable).where(eq(featureFlagsTable.id, id)).returning();

@@ -6,7 +6,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/audit/activity", authMiddleware(), requireRole("operator", "analyst"), async (_req, res) => {
+router.get("/audit/activity", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
   try {
     const logs = await db.select().from(activityLogTable).orderBy(desc(activityLogTable.createdAt)).limit(100);
     sendSuccess(res, logs);
@@ -15,7 +15,7 @@ router.get("/audit/activity", authMiddleware(), requireRole("operator", "analyst
   }
 });
 
-router.get("/audit/events", authMiddleware(), requireRole("operator", "analyst"), async (_req, res) => {
+router.get("/audit/events", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
   try {
     const events = await db.select().from(auditEventsTable).orderBy(desc(auditEventsTable.createdAt)).limit(100);
     sendSuccess(res, events);

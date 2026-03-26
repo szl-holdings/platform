@@ -27,7 +27,7 @@ import { authMiddleware, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/stephen/contacts", authMiddleware(), requireRole("operator"), async (_req, res) => {
+router.get("/stephen/contacts", authMiddleware(), requireRole("ops"), async (_req, res) => {
   try {
     const contacts = await db.select().from(stephenSiteContactsTable).orderBy(desc(stephenSiteContactsTable.createdAt));
     sendSuccess(res, contacts);

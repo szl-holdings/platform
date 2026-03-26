@@ -163,7 +163,7 @@ router.delete("/auth/sessions/:id", authMiddleware(), async (req, res) => {
     }
 
     const isOwner = session.userId === req.user!.id;
-    const isPrivileged = req.user!.roles.includes("super_admin") || req.user!.roles.includes("operator");
+    const isPrivileged = req.user!.roles.includes("super_admin") || req.user!.roles.includes("ops");
     if (!isOwner && !isPrivileged) {
       sendForbidden(res);
       return;
@@ -178,7 +178,7 @@ router.delete("/auth/sessions/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/auth/roles", authMiddleware(), requireRole("operator", "analyst"), async (_req, res) => {
+router.get("/auth/roles", authMiddleware(), requireRole("ops", "analyst"), async (_req, res) => {
   try {
     const roles = await db.select().from(rolesTable).orderBy(rolesTable.name);
     sendSuccess(res, roles);
@@ -187,7 +187,7 @@ router.get("/auth/roles", authMiddleware(), requireRole("operator", "analyst"), 
   }
 });
 
-router.get("/auth/users", authMiddleware(), requireRole("operator"), async (_req, res) => {
+router.get("/auth/users", authMiddleware(), requireRole("ops"), async (_req, res) => {
   try {
     const users = await db.select({
       id: usersTable.id,

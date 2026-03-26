@@ -6,7 +6,7 @@ import { UserPlus, Shield, Eye, Code, Settings, X, Search, Users as UsersIcon } 
 const ROLE_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
   admin: { icon: <Shield className="w-3 h-3" />, color: "text-red-400 bg-red-500/10 border-red-500/30", bg: "bg-red-500" },
   developer: { icon: <Code className="w-3 h-3" />, color: "text-blue-400 bg-blue-500/10 border-blue-500/30", bg: "bg-blue-500" },
-  operator: { icon: <Settings className="w-3 h-3" />, color: "text-amber-400 bg-amber-500/10 border-amber-500/30", bg: "bg-amber-500" },
+  ops: { icon: <Settings className="w-3 h-3" />, color: "text-amber-400 bg-amber-500/10 border-amber-500/30", bg: "bg-amber-500" },
   viewer: { icon: <Eye className="w-3 h-3" />, color: "text-green-400 bg-green-500/10 border-green-500/30", bg: "bg-green-500" },
 };
 
@@ -136,7 +136,7 @@ export default function UsersPage() {
               >
                 <option value="viewer">Viewer</option>
                 <option value="developer">Developer</option>
-                <option value="operator">Operator</option>
+                <option value="ops">Ops</option>
                 <option value="admin">Admin</option>
               </select>
               <button

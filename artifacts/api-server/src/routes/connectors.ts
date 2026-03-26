@@ -19,7 +19,7 @@ router.get("/connectors", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.post("/connectors", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
+router.post("/connectors", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const { name, type, config, orgId } = req.body;
     if (!name || typeof name !== "string" || name.trim().length === 0) {
@@ -59,7 +59,7 @@ router.get("/connectors/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.patch("/connectors/:id", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
+router.patch("/connectors/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { name, status, config, isEnabled } = req.body;
@@ -94,7 +94,7 @@ router.patch("/connectors/:id", authMiddleware(), requireRole("operator", "super
   }
 });
 
-router.delete("/connectors/:id", authMiddleware(), requireRole("operator", "super_admin"), async (req, res) => {
+router.delete("/connectors/:id", authMiddleware(), requireRole("ops", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [connector] = await db.delete(connectorsTable).where(eq(connectorsTable.id, id)).returning();
@@ -110,7 +110,7 @@ router.delete("/connectors/:id", authMiddleware(), requireRole("operator", "supe
   }
 });
 
-router.get("/connectors/:id/logs", authMiddleware(), requireRole("operator", "analyst"), async (req, res) => {
+router.get("/connectors/:id/logs", authMiddleware(), requireRole("ops", "analyst"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const logs = await db.select().from(connectorLogsTable).where(eq(connectorLogsTable.connectorId, id)).orderBy(desc(connectorLogsTable.createdAt));

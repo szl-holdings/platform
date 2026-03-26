@@ -9,17 +9,21 @@ export const PLATFORM_APPS = [
   { slug: "dreamscape", name: "Dreamscape Creative", icon: "Palette", color: "#ec4899" },
   { slug: "readiness", name: "Readiness Assessments", icon: "Shield", color: "#10b981" },
   { slug: "control-plane", name: "Admin Control Plane", icon: "Settings", color: "#64748b" },
+  { slug: "szl-holdings", name: "SZL Holdings", icon: "Building2", color: "#8b5cf6" },
+  { slug: "inca", name: "INCA AI Research", icon: "Brain", color: "#14b8a6" },
+  { slug: "carlota-jo", name: "Carlota Jo Advisory", icon: "Crown", color: "#f43f5e" },
 ] as const;
 
 export type AppSlug = (typeof PLATFORM_APPS)[number]["slug"];
 
 export const ROLES = [
   { name: "super_admin", description: "Full platform access — all apps, settings, billing, users" },
-  { name: "operator", description: "Day-to-day operational access — manage data across apps" },
+  { name: "exec", description: "Executive-level oversight — portfolio metrics, strategic reports" },
+  { name: "ops", description: "Day-to-day operational access — manage data across apps" },
+  { name: "compliance", description: "Regulatory and compliance oversight — audit logs, policy enforcement" },
+  { name: "maintenance", description: "Infrastructure and system maintenance access" },
   { name: "analyst", description: "Read-only access to dashboards, reports, and analytics" },
-  { name: "seller", description: "E-commerce and marketing tools access" },
-  { name: "client_viewer", description: "External client portal — view project status and deliverables" },
-  { name: "creative_user", description: "Creative tools access — Dreamscape assets and reviews" },
+  { name: "viewer", description: "External viewer — read-only access to shared dashboards" },
 ] as const;
 
 export type RoleName = (typeof ROLES)[number]["name"];
@@ -77,5 +81,17 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
   "control-plane": {
     connectors: ["ai", "stripe", "slack", "twilio", "google", "notion", "github", "storage", "monitoring", "posthog", "gmail", "hubspot", "confluence", "figma", "elevenlabs", "weather", "stormglass", "shipping", "google-calendar", "google-docs", "google-drive", "dropbox", "onedrive"],
     description: "Admin panel monitors all connectors across the platform",
+  },
+  "szl-holdings": {
+    connectors: ["ai", "stripe", "storage", "monitoring", "posthog"],
+    description: "Holdings dashboard for portfolio management, venture tracking, and strategic metrics",
+  },
+  inca: {
+    connectors: ["ai", "huggingface", "storage", "monitoring", "posthog"],
+    description: "AI research platform for model training, evaluation, and deployment",
+  },
+  "carlota-jo": {
+    connectors: ["ai", "stripe", "google-calendar", "gmail", "hubspot", "storage"],
+    description: "Luxury advisory booking, client management, and payment processing",
   },
 } as const;

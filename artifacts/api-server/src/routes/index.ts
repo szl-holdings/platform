@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { authLimiter, readLimiter, writeLimiter } from "../middlewares/rate-limiters";
 import healthRouter from "./health";
 import projectsRouter from "./projects";
 import servicesRouter from "./services";
@@ -17,8 +18,27 @@ import dreamscapeRouter from "./dreamscape";
 import readinessRouter from "./readiness";
 import adminRouter from "./admin";
 import intelligenceRouter from "./intelligence";
+import incaRouter from "./inca";
+import bookingRouter from "./booking";
+import holdingsRouter from "./holdings";
 
 const router: IRouter = Router();
+
+router.use("/auth", authLimiter);
+
+router.use("/billing", writeLimiter);
+router.use("/connectors", writeLimiter);
+router.use("/notifications", writeLimiter);
+router.use("/feature-flags", writeLimiter);
+router.use("/projects", writeLimiter);
+router.use("/files", writeLimiter);
+
+router.use("/vessels", readLimiter);
+router.use("/intelligence", readLimiter);
+router.use("/inca", readLimiter);
+router.use("/booking", readLimiter);
+router.use("/holdings", readLimiter);
+router.use("/audit", readLimiter);
 
 router.use(healthRouter);
 router.use(projectsRouter);
@@ -38,5 +58,8 @@ router.use(dreamscapeRouter);
 router.use(readinessRouter);
 router.use(adminRouter);
 router.use(intelligenceRouter);
+router.use(incaRouter);
+router.use(bookingRouter);
+router.use(holdingsRouter);
 
 export default router;
