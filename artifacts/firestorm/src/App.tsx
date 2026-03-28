@@ -1,7 +1,7 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
-import { Flame, Shield, Target, Search, BarChart3, FileText, LayoutDashboard, Server, AlertTriangle, Wifi, WifiOff } from "lucide-react";
+import { Flame, Shield, Target, Search, BarChart3, FileText, LayoutDashboard, Server, AlertTriangle, Wifi, WifiOff, Brain, Bug } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
@@ -21,10 +21,10 @@ const queryClient = new QueryClient({
 const navItems = [
   { path: "/", label: "Assessments", icon: LayoutDashboard },
   { path: "/threat-intel", label: "Threat Intelligence", icon: AlertTriangle },
-  { path: "/ai-command", label: "AI Command Wall", icon: Shield },
+  { path: "/ai-command", label: "AI Command Wall", icon: Brain },
   { path: "/scenarios", label: "Scenario Library", icon: Target },
   { path: "/simulations", label: "Simulation Runner", icon: Search },
-  { path: "/findings", label: "Findings", icon: Shield },
+  { path: "/findings", label: "Findings", icon: Bug },
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
   { path: "/reports", label: "Reports", icon: FileText },
 ];

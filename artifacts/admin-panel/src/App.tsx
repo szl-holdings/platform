@@ -39,6 +39,8 @@ import {
   Activity,
   AlertTriangle,
   Server,
+  Brain,
+  Globe,
 } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -74,8 +76,8 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/files", label: "Files", icon: <FolderOpen className="w-4 h-4" /> },
   { path: "/environment", label: "Environment", icon: <Settings className="w-4 h-4" /> },
   { path: "/seed", label: "Seed Data", icon: <Database className="w-4 h-4" /> },
-  { path: "/intelligence", label: "Intelligence", icon: <Activity className="w-4 h-4" />, section: "Intelligence" },
-  { path: "/ai-analyzer", label: "AI Analyzer", icon: <Activity className="w-4 h-4" /> },
+  { path: "/intelligence", label: "Intelligence", icon: <Globe className="w-4 h-4" />, section: "Intelligence" },
+  { path: "/ai-analyzer", label: "AI Analyzer", icon: <Brain className="w-4 h-4" /> },
 ];
 
 function HealthBadge() {

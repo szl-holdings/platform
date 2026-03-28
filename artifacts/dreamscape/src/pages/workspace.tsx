@@ -75,18 +75,18 @@ function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[1,2,3].map(i => (
-        <Card key={i} className="overflow-hidden border-border/50 bg-card">
-          <div className="h-36 bg-muted/30 animate-pulse" />
+        <Card key={i} className="overflow-hidden border-border/50 bg-card/80">
+          <div className="h-36 bg-gradient-to-br from-primary/10 to-amber-500/10 animate-pulse" />
           <div className="p-6 space-y-3">
             <div className="flex gap-2">
-              <div className="w-20 h-5 bg-muted/30 animate-pulse rounded-full" />
-              <div className="w-16 h-5 bg-muted/30 animate-pulse rounded-full" />
+              <div className="w-20 h-5 bg-muted/40 animate-pulse rounded-full" />
+              <div className="w-16 h-5 bg-muted/40 animate-pulse rounded-full" />
             </div>
-            <div className="w-3/4 h-6 bg-muted/30 animate-pulse rounded" />
-            <div className="w-1/2 h-4 bg-muted/20 animate-pulse rounded" />
+            <div className="w-3/4 h-6 bg-muted/40 animate-pulse rounded" />
+            <div className="w-1/2 h-4 bg-muted/30 animate-pulse rounded" />
             <div className="pt-4 space-y-2">
-              <div className="w-full h-1.5 bg-muted/20 animate-pulse rounded-full" />
-              <div className="w-1/3 h-3 bg-muted/20 animate-pulse rounded" />
+              <div className="w-full h-1.5 bg-muted/30 animate-pulse rounded-full" />
+              <div className="w-1/3 h-3 bg-muted/30 animate-pulse rounded" />
             </div>
           </div>
         </Card>

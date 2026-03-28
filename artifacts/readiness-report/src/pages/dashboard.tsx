@@ -119,7 +119,8 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold text-white font-display">Dimension Performance</h3>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-primary" /> On Target</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-warning" /> Below Target</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(38, 92%, 50%)' }} /> Near Target</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-destructive" /> Below Target</span>
               </div>
             </div>
             <div className="flex-1 w-full min-h-[300px]">
@@ -147,9 +148,11 @@ export default function Dashboard() {
                     formatter={(value: number, name: string) => [value, name === 'score' ? 'Current Score' : name]}
                   />
                   <Bar dataKey="score" radius={[6, 6, 0, 0]} maxBarSize={40} animationDuration={1200} animationEasing="ease-out">
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.score >= entry.target ? 'hsl(var(--primary))' : 'hsl(var(--warning))'} />
-                    ))}
+                    {chartData.map((entry, index) => {
+                      const gap = entry.target - entry.score;
+                      const color = gap <= 0 ? 'hsl(var(--primary))' : gap <= 15 ? 'hsl(38, 92%, 50%)' : 'hsl(var(--destructive))';
+                      return <Cell key={`cell-${index}`} fill={color} />;
+                    })}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>

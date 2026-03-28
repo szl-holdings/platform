@@ -237,23 +237,23 @@ function HeroSection() {
           <a href="#work" onClick={(e) => { e.preventDefault(); document.querySelector("#work")?.scrollIntoView({ behavior: "smooth" }); }} className="group inline-flex items-center gap-2 px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold text-base sm:text-lg shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40 hover:scale-105 active:scale-[0.98] transition-all duration-300">
             View My Work <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </a>
-          <a href="#contact" onClick={(e) => { e.preventDefault(); document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); }} className="group inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-border hover:border-primary/50 text-foreground font-semibold text-base sm:text-lg hover:bg-primary/5 active:scale-[0.98] transition-all duration-300">
+          <a href="#contact" onClick={(e) => { e.preventDefault(); document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); }} className="group inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-primary/40 hover:border-primary text-foreground font-semibold text-base sm:text-lg hover:bg-primary/10 shadow-lg shadow-primary/10 hover:shadow-xl hover:shadow-primary/20 hover:scale-105 active:scale-[0.98] transition-all duration-300">
             Get in Touch
-            <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-all duration-300" />
           </a>
         </motion.div>
 
         <motion.div custom={4} initial="hidden" animate="visible" variants={heroTextReveal} className="flex items-center justify-center gap-6 mt-12">
-          <a href="https://linkedin.com/in/stephen-l-279315240" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/50 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="LinkedIn">
+          <a href="https://linkedin.com/in/stephen-l-279315240" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/70 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="LinkedIn">
             <Linkedin className="w-5 h-5" />
           </a>
-          <a href="https://github.com/stephenl" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/50 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="GitHub">
+          <a href="https://github.com/stephenl" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/70 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="GitHub">
             <Github className="w-5 h-5" />
           </a>
-          <a href="https://twitter.com/stephenl" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/50 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="Twitter">
+          <a href="https://twitter.com/stephenl" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/70 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="Twitter">
             <Twitter className="w-5 h-5" />
           </a>
-          <a href="mailto:contact@stephenl.dev" className="text-muted-foreground/50 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="Email">
+          <a href="mailto:contact@stephenl.dev" className="text-muted-foreground/70 hover:text-primary hover:scale-110 transition-all duration-300" aria-label="Email">
             <Mail className="w-5 h-5" />
           </a>
         </motion.div>

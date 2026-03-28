@@ -5,7 +5,7 @@ export function useCampaigns() {
   return useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
-      await delay(600);
+      await delay(200);
       return [...mockDb.campaigns];
     }
   });
