@@ -14,10 +14,10 @@ export default function Testimonials() {
           className="text-center mb-20"
         >
           <p className="text-xs font-medium tracking-[0.3em] uppercase text-gold-400/80 mb-4">
-            Client Perspectives
+            Clients
           </p>
           <h2 className="font-serif text-4xl md:text-5xl font-light text-cream-50">
-            What Leaders Say
+            In Their Words
           </h2>
         </motion.div>
 

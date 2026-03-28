@@ -8,8 +8,7 @@ export default function Footer() {
               Carlota Jo
             </h3>
             <p className="text-sm text-cream-300/60 leading-relaxed max-w-xs">
-              Strategic advisory for enterprises navigating complexity.
-              Rigorous thinking. Measurable outcomes. Enduring partnerships.
+              Rigorous strategy. Measurable outcomes.
             </p>
           </div>
           <div>

@@ -14,10 +14,10 @@ export default function Pricing() {
           className="text-center mb-20"
         >
           <p className="text-xs font-medium tracking-[0.3em] uppercase text-gold-400/80 mb-4">
-            Engagement Models
+            Pricing
           </p>
           <h2 className="font-serif text-4xl md:text-5xl font-light text-cream-50">
-            How We Work Together
+            Engagement Tiers
           </h2>
         </motion.div>
 

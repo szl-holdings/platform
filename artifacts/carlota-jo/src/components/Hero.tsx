@@ -22,7 +22,7 @@ export default function Hero() {
           transition={{ duration: 1, ease: "easeOut" }}
         >
           <p className="text-xs font-medium tracking-[0.3em] uppercase text-gold-400/80 mb-8">
-            Strategic Advisory &bull; Portfolio Optimization &bull; Transformation
+            Strategy &bull; Portfolio &bull; Transformation
           </p>
         </motion.div>
 
@@ -45,8 +45,7 @@ export default function Hero() {
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
           className="text-lg md:text-xl text-cream-200/50 font-light max-w-2xl mx-auto leading-relaxed mb-12"
         >
-          Carlota Jo partners with enterprise leaders to navigate strategic
-          complexity, optimize portfolios, and capture transformative growth.
+          Enterprise strategy. Measurable outcomes.
         </motion.p>
 
         <motion.div

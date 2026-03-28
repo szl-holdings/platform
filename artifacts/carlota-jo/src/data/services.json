@@ -3,48 +3,48 @@
     "id": "strategic-advisory",
     "title": "Strategic Advisory",
     "icon": "Compass",
-    "summary": "Guiding executive teams through inflection points with clarity and conviction.",
-    "description": "We partner with C-suite leaders to navigate complex strategic decisions — from market entry and competitive positioning to organizational redesign. Our approach combines rigorous analytical frameworks with deep industry expertise to deliver actionable roadmaps that drive sustainable growth.",
-    "capabilities": ["Corporate strategy development", "Market entry & expansion planning", "Competitive landscape analysis", "Board advisory & governance", "Executive coaching & alignment"]
+    "summary": "Clarity at inflection points.",
+    "description": "C-suite counsel for market entry, competitive positioning, and organizational redesign.",
+    "capabilities": ["Corporate strategy", "Market entry planning", "Competitive analysis", "Board advisory", "Executive alignment"]
   },
   {
     "id": "portfolio-optimization",
     "title": "Portfolio Optimization",
     "icon": "BarChart3",
-    "summary": "Maximizing value across your portfolio through disciplined allocation and strategic pruning.",
-    "description": "Our portfolio optimization practice helps holding companies, private equity firms, and diversified enterprises evaluate, restructure, and enhance their asset portfolios. We apply a proprietary valuation methodology that accounts for strategic synergies, market dynamics, and operational efficiency to maximize total portfolio value.",
-    "capabilities": ["Asset valuation & benchmarking", "Portfolio restructuring", "Synergy identification & capture", "Divestiture strategy", "Capital allocation frameworks"]
+    "summary": "Disciplined allocation. Maximum value.",
+    "description": "Evaluate, restructure, and enhance asset portfolios using proprietary valuation methodology.",
+    "capabilities": ["Asset valuation", "Portfolio restructuring", "Synergy capture", "Divestiture strategy", "Capital allocation"]
   },
   {
     "id": "technology-transformation",
     "title": "Technology Transformation",
     "icon": "Cpu",
-    "summary": "Architecting digital futures that deliver measurable business outcomes.",
-    "description": "We guide established enterprises through digital transformation with a pragmatic, outcomes-driven methodology. Our technology transformation engagements begin with strategic vision and cascade through architecture, implementation roadmaps, vendor selection, and change management — always anchored to quantifiable business impact.",
-    "capabilities": ["Digital strategy & roadmapping", "Enterprise architecture design", "Technology vendor evaluation", "Data & analytics strategy", "Change management & adoption"]
+    "summary": "Digital futures with measurable impact.",
+    "description": "Outcomes-driven transformation from strategic vision through architecture and implementation.",
+    "capabilities": ["Digital strategy", "Enterprise architecture", "Vendor evaluation", "Data & analytics", "Change management"]
   },
   {
     "id": "risk-compliance",
     "title": "Risk & Compliance",
     "icon": "Shield",
-    "summary": "Protecting enterprise value through proactive risk management and regulatory foresight.",
-    "description": "Our risk and compliance advisory practice helps organizations anticipate, assess, and mitigate strategic, operational, and regulatory risks. We build robust governance frameworks that protect value while enabling agile decision-making in complex regulatory environments.",
-    "capabilities": ["Enterprise risk management", "Regulatory compliance frameworks", "ESG strategy & reporting", "Crisis preparedness planning", "Internal audit optimization"]
+    "summary": "Protect value. Enable agility.",
+    "description": "Proactive risk management and governance frameworks for complex regulatory environments.",
+    "capabilities": ["Enterprise risk management", "Regulatory compliance", "ESG strategy", "Crisis preparedness", "Internal audit"]
   },
   {
     "id": "growth-strategy",
     "title": "Growth Strategy",
     "icon": "TrendingUp",
-    "summary": "Unlocking organic and inorganic growth pathways for ambitious enterprises.",
-    "description": "We help ambitious organizations identify and capture growth opportunities across markets, channels, and customer segments. Our growth strategy practice combines deep market intelligence with customer insights and financial modeling to build conviction around high-impact growth initiatives.",
-    "capabilities": ["Market sizing & opportunity assessment", "Customer segmentation & targeting", "Go-to-market strategy", "Revenue model innovation", "Partnership & alliance strategy"]
+    "summary": "Find growth. Capture it.",
+    "description": "Market intelligence and financial modeling to build conviction around high-impact growth initiatives.",
+    "capabilities": ["Market sizing", "Customer segmentation", "Go-to-market strategy", "Revenue model innovation", "Partnership strategy"]
   },
   {
     "id": "ma-advisory",
     "title": "M&A Advisory",
     "icon": "Handshake",
-    "summary": "Delivering superior transaction outcomes through rigorous diligence and strategic insight.",
-    "description": "Our M&A advisory practice supports acquirers and targets through every phase of the transaction lifecycle. From target identification and strategic rationale through due diligence, negotiation, and post-merger integration, we bring a disciplined approach that maximizes deal value and minimizes integration risk.",
-    "capabilities": ["Target identification & screening", "Strategic & commercial due diligence", "Valuation & deal structuring", "Integration planning & execution", "Carve-out advisory"]
+    "summary": "Superior transaction outcomes.",
+    "description": "End-to-end support from target identification through diligence, negotiation, and integration.",
+    "capabilities": ["Target screening", "Commercial due diligence", "Valuation & structuring", "Integration planning", "Carve-out advisory"]
   }
 ]

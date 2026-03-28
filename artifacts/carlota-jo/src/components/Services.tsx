@@ -34,10 +34,10 @@ export default function Services() {
           className="text-center mb-20"
         >
           <p className="text-xs font-medium tracking-[0.3em] uppercase text-gold-400/80 mb-4">
-            What We Do
+            Services
           </p>
           <h2 className="font-serif text-4xl md:text-5xl font-light text-cream-50">
-            Service Portfolio
+            How We Deliver
           </h2>
         </motion.div>
 

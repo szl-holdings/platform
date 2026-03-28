@@ -5,13 +5,13 @@
     "type": "One-Time",
     "price": "$4,500",
     "priceNote": "per session",
-    "description": "A focused half-day engagement designed for executives seeking expert perspective on a specific strategic question or decision.",
+    "description": "Half-day deep dive on a specific strategic question.",
     "features": [
       "4-hour executive workshop",
-      "Pre-session briefing & research",
-      "Dedicated senior partner",
+      "Pre-session research brief",
+      "Senior partner-led",
       "Strategic options analysis",
-      "Written executive summary",
+      "Executive summary deliverable",
       "30-day follow-up call"
     ],
     "highlighted": false,
@@ -23,16 +23,16 @@
     "type": "Engagement",
     "price": "$45,000",
     "priceNote": "per engagement",
-    "description": "A comprehensive 6-8 week engagement delivering deep analytical insight and actionable recommendations across your portfolio or strategic challenge.",
+    "description": "6-8 week deep analytical engagement with actionable recommendations.",
     "features": [
       "Dedicated engagement team",
-      "Comprehensive market analysis",
+      "Market & competitive analysis",
       "Proprietary valuation framework",
-      "Stakeholder interview program",
+      "Stakeholder interviews",
       "Board-ready deliverables",
       "Implementation roadmap",
       "60-day post-delivery support",
-      "Quarterly check-in for 12 months"
+      "Quarterly check-ins (12 mo.)"
     ],
     "highlighted": true,
     "cta": "Start Engagement"
@@ -43,17 +43,17 @@
     "type": "Ongoing",
     "price": "$18,000",
     "priceNote": "per month",
-    "description": "An ongoing advisory partnership providing continuous access to senior strategic counsel, ideal for organizations navigating sustained periods of transformation or growth.",
+    "description": "Continuous senior strategic counsel on retainer.",
     "features": [
-      "Named senior partner advisor",
+      "Named senior partner",
       "Monthly strategy sessions",
       "Unlimited advisory calls",
-      "Priority engagement scheduling",
+      "Priority scheduling",
       "Annual strategic review",
-      "Board meeting preparation",
-      "Executive team coaching",
-      "Industry intelligence briefings",
-      "Peer network introductions"
+      "Board prep support",
+      "Executive coaching",
+      "Industry intelligence briefs",
+      "Peer network access"
     ],
     "highlighted": false,
     "cta": "Retain Advisory"
