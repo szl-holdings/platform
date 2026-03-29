@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { Response, Request } from "express";
 import { InvalidIdError } from "../middlewares/auth";
 
 export interface ApiError {
@@ -7,8 +7,12 @@ export interface ApiError {
   details?: unknown;
 }
 
-export function sendSuccess<T>(res: Response, data: T, status = 200) {
-  res.status(status).json(data);
+export function sendSuccess<T>(res: Response, data: T, status = 200, meta?: Record<string, unknown>) {
+  if (meta) {
+    res.status(status).json({ data, meta });
+  } else {
+    res.status(status).json(data);
+  }
 }
 
 export function sendCreated<T>(res: Response, data: T) {
@@ -40,6 +44,13 @@ export function sendUnauthorized(res: Response, message = "Authentication requir
 
 export function sendForbidden(res: Response, message = "Insufficient permissions") {
   sendError(res, message, 403, "FORBIDDEN");
+}
+
+export function parsePagination(query: Record<string, unknown>) {
+  const page = Math.max(1, parseInt(String(query.page || "1"), 10) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(String(query.limit || "50"), 10) || 50));
+  const offset = (page - 1) * limit;
+  return { page, limit, offset };
 }
 
 export function handleRouteError(res: Response, err: unknown, fallbackMessage: string) {

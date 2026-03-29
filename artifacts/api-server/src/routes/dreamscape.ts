@@ -8,16 +8,18 @@ import {
   dreamscapeCampaignAssetsTable,
   dreamscapeReviewsTable,
 } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
-import { sendSuccess, sendNotFound, sendError, handleRouteError } from "../lib/api-response";
+import { eq, desc, sql } from "drizzle-orm";
+import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/dreamscape/campaigns", authMiddleware(), async (_req, res) => {
+router.get("/dreamscape/campaigns", authMiddleware(), async (req, res) => {
   try {
-    const rows = await db.select().from(dreamscapeCampaignsTable).orderBy(desc(dreamscapeCampaignsTable.createdAt));
-    sendSuccess(res, rows);
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const rows = await db.select().from(dreamscapeCampaignsTable).orderBy(desc(dreamscapeCampaignsTable.createdAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(dreamscapeCampaignsTable);
+    sendSuccess(res, rows, 200, { page, limit, total: count });
   } catch (err) {
     handleRouteError(res, err, "Failed to list campaigns");
   }
@@ -106,6 +108,17 @@ router.patch("/dreamscape/scripts/:id", authMiddleware(), async (req, res) => {
   }
 });
 
+router.delete("/dreamscape/scripts/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(dreamscapeScriptsTable).where(eq(dreamscapeScriptsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Script"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete script");
+  }
+});
+
 router.get("/dreamscape/campaigns/:id/storyboards", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
@@ -136,6 +149,17 @@ router.patch("/dreamscape/storyboards/:id", authMiddleware(), async (req, res) =
   }
 });
 
+router.delete("/dreamscape/storyboards/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(dreamscapeStoryboardsTable).where(eq(dreamscapeStoryboardsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Storyboard"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete storyboard");
+  }
+});
+
 router.get("/dreamscape/campaigns/:id/voice-assets", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
@@ -163,6 +187,17 @@ router.patch("/dreamscape/voice-assets/:id", authMiddleware(), async (req, res) 
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update voice asset");
+  }
+});
+
+router.delete("/dreamscape/voice-assets/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(dreamscapeVoiceAssetsTable).where(eq(dreamscapeVoiceAssetsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Voice asset"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete voice asset");
   }
 });
 
@@ -223,6 +258,17 @@ router.patch("/dreamscape/reviews/:id", authMiddleware(), async (req, res) => {
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update review");
+  }
+});
+
+router.delete("/dreamscape/reviews/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(dreamscapeReviewsTable).where(eq(dreamscapeReviewsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Review"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete review");
   }
 });
 

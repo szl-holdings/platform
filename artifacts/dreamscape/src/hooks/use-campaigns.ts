@@ -1,12 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { mockDb, delay, type Campaign } from "@/lib/mock-db";
+import { api } from "@/lib/api";
+
+export type Campaign = {
+  id: number;
+  name: string;
+  clientName?: string;
+  client?: string;
+  category: string;
+  status: string;
+  deadline?: string;
+  description?: string;
+  targetAudience?: string;
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export function useCampaigns() {
   return useQuery({
     queryKey: ['campaigns'],
     queryFn: async () => {
-      await delay(200);
-      return [...mockDb.campaigns] as Campaign[];
+      return await api.campaigns.list() as Campaign[];
     }
   });
 }
@@ -15,10 +29,9 @@ export function useCampaign(id: string) {
   return useQuery({
     queryKey: ['campaign', id],
     queryFn: async () => {
-      await delay(300);
-      const campaign = mockDb.campaigns.find(c => c.id === id);
-      if (!campaign) throw new Error("Campaign not found");
-      return campaign;
+      const numId = parseInt(id, 10);
+      if (isNaN(numId)) throw new Error("Invalid campaign ID");
+      return await api.campaigns.get(numId) as Campaign;
     }
   });
 }
@@ -27,22 +40,15 @@ export function useCreateCampaign() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<Campaign>) => {
-      await delay(500);
-      const newCampaign: Campaign = {
-        id: `c${Date.now()}`,
+      return await api.campaigns.create({
         name: data.name || "Untitled",
-        client: data.client || "Unknown",
+        clientName: data.client || data.clientName || "Unknown",
         category: data.category || "commercial",
         status: data.status || "concept",
-        deadline: data.deadline || new Date().toISOString(),
-        progress: 0,
-        budget: data.budget || "$0",
-        director: data.director || "Unassigned",
+        deadline: data.deadline,
         description: data.description || "",
-        kpis: data.kpis || [],
-      };
-      mockDb.campaigns.push(newCampaign);
-      return newCampaign;
+        metadata: data.metadata,
+      });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaigns'] })
   });

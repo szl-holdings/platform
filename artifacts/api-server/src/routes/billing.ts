@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, billingPlansTable, subscriptionsTable, invoicesTable } from "@workspace/db";
+import { db, billingPlansTable, subscriptionsTable, invoicesTable, organizationsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
@@ -214,9 +214,22 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
           const sub = await services.stripe.getSubscription(session.subscription as string);
           if (sub) {
             try {
+              const metadata = session.metadata as Record<string, string> | undefined;
+              let orgId = metadata?.orgId ? parseInt(metadata.orgId, 10) : undefined;
+              let planId = metadata?.planId ? parseInt(metadata.planId, 10) : undefined;
+
+              if (!orgId) {
+                const [firstOrg] = await db.select().from(organizationsTable).limit(1);
+                orgId = firstOrg?.id ?? 1;
+              }
+              if (!planId) {
+                const [firstPlan] = await db.select().from(billingPlansTable).limit(1);
+                planId = firstPlan?.id ?? 1;
+              }
+
               await db.insert(subscriptionsTable).values({
-                orgId: 1,
-                planId: 1,
+                orgId,
+                planId,
                 status: "active",
                 stripeSubscriptionId: sub.id,
                 currentPeriodStart: new Date(sub.currentPeriodStart * 1000),
@@ -278,8 +291,15 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
         logger.info({ invoiceId: invoice.id }, "Invoice paid");
 
         try {
+          const metadata = invoice.metadata as Record<string, string> | undefined;
+          let orgId = metadata?.orgId ? parseInt(metadata.orgId, 10) : undefined;
+          if (!orgId) {
+            const [firstOrg] = await db.select().from(organizationsTable).limit(1);
+            orgId = firstOrg?.id ?? 1;
+          }
+
           await db.insert(invoicesTable).values({
-            orgId: 1,
+            orgId,
             stripeInvoiceId: invoice.id as string,
             amount: ((invoice.amount_paid as number) / 100).toFixed(2),
             currency: invoice.currency as string,

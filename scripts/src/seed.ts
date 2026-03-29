@@ -53,6 +53,8 @@ import {
   lyteIncidentsTable,
   lytePlaybooksTable,
   lyteRecommendationsTable,
+  dreamscapeProjectsTable,
+  dreamscapeAssetsTable,
   dreamscapeCampaignsTable,
   dreamscapeScriptsTable,
   dreamscapeStoryboardsTable,
@@ -65,6 +67,20 @@ import {
   readinessMilestonesTable,
   readinessRisksTable,
   readinessAlertsTable,
+  incaProjectsTable,
+  incaExperimentsTable,
+  incaModelsTable,
+  incaInsightsTable,
+  incaDatasetsTable,
+  carlotaInquiriesTable,
+  carlotaReservationsTable,
+  carlotaServicesTable,
+  carlotaClientProfilesTable,
+  holdingsVenturesTable,
+  holdingsMilestonesTable,
+  holdingsMetricsTable,
+  holdingsLeadershipTable,
+  holdingsInquiriesTable,
 } from "@workspace/db";
 import { randomBytes } from "crypto";
 
@@ -446,26 +462,26 @@ async function seed() {
   console.log("  ✓ firestorm risk scores");
 
   const fsCampaigns = await db.insert(firestormCampaignsTable).values([
-    { name: "Q1 Security Awareness", description: "Quarterly security awareness and phishing simulation campaign", campaignType: "awareness", status: "active", targetAudience: "All employees", channels: ["email", "slack"], startDate: new Date("2026-01-15"), endDate: new Date("2026-03-31") },
-    { name: "Executive Threat Briefing", description: "Monthly executive threat intelligence briefing series", campaignType: "briefing", status: "active", targetAudience: "C-Suite and VPs", channels: ["email", "meeting"], startDate: new Date("2026-02-01"), endDate: new Date("2026-06-30") },
-    { name: "Vendor Risk Communication", description: "Supply chain and vendor risk notification campaign", campaignType: "notification", status: "draft", targetAudience: "Procurement team", channels: ["email"] },
+    { name: "Q1 Security Awareness", description: "Quarterly security awareness and phishing simulation campaign", type: "awareness", status: "active", targetAudience: { roles: ["All employees"] }, budget: "5000", startDate: new Date("2026-01-15"), endDate: new Date("2026-03-31") },
+    { name: "Executive Threat Briefing", description: "Monthly executive threat intelligence briefing series", type: "briefing", status: "active", targetAudience: { roles: ["C-Suite", "VPs"] }, budget: "2000", startDate: new Date("2026-02-01"), endDate: new Date("2026-06-30") },
+    { name: "Vendor Risk Communication", description: "Supply chain and vendor risk notification campaign", type: "notification", status: "draft", targetAudience: { roles: ["Procurement team"] }, budget: "1500" },
   ]).returning();
   console.log(`  ✓ ${fsCampaigns.length} firestorm campaigns`);
 
   await db.insert(firestormLeadsTable).values([
-    { campaignId: fsCampaigns[0].id, name: "IT Security Team", email: "security@szlholdings.com", company: "SZL Holdings", role: "Security Analyst", source: "internal", status: "contacted", score: 90 },
-    { campaignId: fsCampaigns[0].id, name: "HR Department", email: "hr@szlholdings.com", company: "SZL Holdings", role: "HR Manager", source: "internal", status: "engaged", score: 75 },
-    { campaignId: fsCampaigns[1].id, name: "Stephen L.", email: "stephen@szlholdings.com", company: "SZL Holdings", role: "CEO", source: "internal", status: "contacted", score: 95 },
-    { campaignId: fsCampaigns[1].id, name: "Alex Rivera", email: "alex@szlholdings.com", company: "SZL Holdings", role: "COO", source: "internal", status: "new", score: 80 },
+    { campaignId: fsCampaigns[0].id, firstName: "IT Security", lastName: "Team", email: "security@szlholdings.com", company: "SZL Holdings", title: "Security Analyst", source: "internal", status: "contacted", score: 90 },
+    { campaignId: fsCampaigns[0].id, firstName: "HR", lastName: "Department", email: "hr@szlholdings.com", company: "SZL Holdings", title: "HR Manager", source: "internal", status: "engaged", score: 75 },
+    { campaignId: fsCampaigns[1].id, firstName: "Stephen", lastName: "L.", email: "stephen@szlholdings.com", company: "SZL Holdings", title: "CEO", source: "internal", status: "contacted", score: 95 },
+    { campaignId: fsCampaigns[1].id, firstName: "Alex", lastName: "Rivera", email: "alex@szlholdings.com", company: "SZL Holdings", title: "COO", source: "internal", status: "new", score: 80 },
   ]);
   console.log("  ✓ firestorm leads");
 
   await db.insert(firestormAnalyticsTable).values([
-    { campaignId: fsCampaigns[0].id, metricName: "email_open_rate", metricValue: "72.50", dimension: "overall", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-15") },
-    { campaignId: fsCampaigns[0].id, metricName: "phishing_click_rate", metricValue: "8.30", dimension: "overall", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-15") },
-    { campaignId: fsCampaigns[0].id, metricName: "report_rate", metricValue: "45.00", dimension: "overall", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-15") },
-    { campaignId: fsCampaigns[1].id, metricName: "attendance_rate", metricValue: "88.00", dimension: "executive", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-31") },
-    { campaignId: fsCampaigns[1].id, metricName: "engagement_score", metricValue: "91.20", dimension: "executive", periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-31") },
+    { campaignId: fsCampaigns[0].id, date: new Date("2026-03-01"), impressions: 1200, clicks: 864, conversions: 540, spend: "150.00", revenue: "0" },
+    { campaignId: fsCampaigns[0].id, date: new Date("2026-03-08"), impressions: 1350, clicks: 972, conversions: 607, spend: "150.00", revenue: "0" },
+    { campaignId: fsCampaigns[0].id, date: new Date("2026-03-15"), impressions: 1100, clicks: 792, conversions: 495, spend: "150.00", revenue: "0" },
+    { campaignId: fsCampaigns[1].id, date: new Date("2026-03-01"), impressions: 50, clicks: 44, conversions: 44, spend: "100.00", revenue: "0" },
+    { campaignId: fsCampaigns[1].id, date: new Date("2026-03-15"), impressions: 50, clicks: 46, conversions: 45, spend: "100.00", revenue: "0" },
   ]);
   console.log("  ✓ firestorm analytics");
 
@@ -517,6 +533,21 @@ async function seed() {
   ]);
   console.log("  ✓ Lyte recommendations");
 
+  const dProjects = await db.insert(dreamscapeProjectsTable).values([
+    { name: "SZL Brand Story 2026", description: "Full brand narrative video series showcasing SZL Holdings evolution and vision", clientName: "SZL Holdings", type: "brand_story", status: "production", mood: "inspiring", colorPalette: { primary: "#1e40af", secondary: "#f59e0b" } },
+    { name: "Vessels Fleet Showcase", description: "Commercial video highlighting maritime fleet capabilities", clientName: "Vessels Division", type: "commercial", status: "pre_production" },
+    { name: "Firestorm Product Launch", description: "Social media campaign assets for Firestorm marketing platform launch", clientName: "Firestorm Team", type: "product_launch", status: "review" },
+    { name: "Internal Culture Documentary", description: "Documentary-style video about SZL company culture and team", clientName: "HR Department", type: "documentary", status: "concept" },
+  ]).returning();
+  console.log(`  ✓ ${dProjects.length} Dreamscape projects`);
+
+  await db.insert(dreamscapeAssetsTable).values([
+    { projectId: dProjects[0].id, name: "SZL Logo Pack", type: "image" },
+    { projectId: dProjects[0].id, name: "Drone Footage - City", type: "video", metadata: { resolution: "4K", duration: "45s" } },
+    { projectId: dProjects[2].id, name: "Firestorm UI Screenshots", type: "image" },
+  ]);
+  console.log("  ✓ Dreamscape assets");
+
   const dCampaigns = await db.insert(dreamscapeCampaignsTable).values([
     { name: "SZL Brand Story 2026", description: "Full brand narrative video series showcasing SZL Holdings evolution and vision", clientName: "SZL Holdings", status: "production", category: "brand_story", targetAudience: "Investors, Partners, Enterprise Clients", deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000) },
     { name: "Vessels Fleet Showcase", description: "Commercial video highlighting maritime fleet capabilities and tracking technology", clientName: "Vessels Division", status: "pre_production", category: "commercial", targetAudience: "Shipping companies, logistics partners" },
@@ -560,10 +591,10 @@ async function seed() {
   console.log("  ✓ Dreamscape campaign assets");
 
   await db.insert(dreamscapeReviewsTable).values([
-    { campaignId: dCampaigns[0].id, reviewerName: "Stephen L.", reviewerRole: "Executive Producer", comment: "Brand story narrative is compelling. The opening sequence sets the right tone. Approved for production.", status: "approved", section: "Script" },
-    { campaignId: dCampaigns[0].id, reviewerName: "Casey Torres", reviewerRole: "Creative Director", comment: "Storyboard flow is solid. Consider adding a customer testimonial segment between scenes 3 and 4.", status: "changes_requested", section: "Storyboard" },
-    { campaignId: dCampaigns[2].id, reviewerName: "Morgan Blake", reviewerRole: "Marketing Director", comment: "The 30s spot script is punchy and on-brand. Ready for voiceover recording.", status: "approved", section: "Script" },
-    { campaignId: dCampaigns[2].id, reviewerName: "Stephen L.", reviewerRole: "Executive Producer", comment: "Would like to see more product detail in the feature highlights scene.", status: "changes_requested", section: "Storyboard" },
+    { campaignId: dCampaigns[0].id, reviewerName: "Stephen L.", comment: "Brand story narrative is compelling. The opening sequence sets the right tone. Approved for production.", status: "approved" },
+    { campaignId: dCampaigns[0].id, reviewerName: "Casey Torres", comment: "Storyboard flow is solid. Consider adding a customer testimonial segment between scenes 3 and 4.", status: "changes_requested" },
+    { campaignId: dCampaigns[2].id, reviewerName: "Morgan Blake", comment: "The 30s spot script is punchy and on-brand. Ready for voiceover recording.", status: "approved" },
+    { campaignId: dCampaigns[2].id, reviewerName: "Stephen L.", comment: "Would like to see more product detail in the feature highlights scene.", status: "changes_requested" },
   ]);
   console.log("  ✓ Dreamscape reviews");
 
@@ -629,6 +660,127 @@ async function seed() {
     { programId: readinessProgram.id, type: "general", title: "Quarterly assessment due", message: "Q2 2026 readiness assessment cycle begins in 30 days. Prepare assessment materials.", severity: "info" },
   ]);
   console.log("  ✓ readiness alerts");
+
+  const incaProjects = await db.insert(incaProjectsTable).values([
+    { name: "NLP Pipeline v3", description: "Next-gen natural language processing pipeline for document intelligence", status: "development", domain: "NLP", accuracy: "93.40", progress: 78, metadata: { framework: "PyTorch", cluster: "gpu-pool-01", owner: "Jordan Chen" } },
+    { name: "Anomaly Detection Engine", description: "Real-time anomaly detection for financial transaction monitoring", status: "deployed", domain: "Anomaly Detection", accuracy: "91.00", progress: 100, metadata: { framework: "TensorFlow", dataset: "transactions-2025", owner: "Alex Rivera" } },
+    { name: "Recommendation System", description: "ML-powered recommendation engine for portfolio optimization", status: "deployed", domain: "RecSys", accuracy: "94.20", progress: 100, metadata: { framework: "XGBoost", owner: "Stephen L." } },
+    { name: "Computer Vision POC", description: "Proof of concept for automated document classification using vision models", status: "research", domain: "Computer Vision", progress: 15, metadata: { owner: "Jordan Chen" } },
+  ]).returning();
+  console.log(`  ✓ ${incaProjects.length} INCA projects`);
+
+  const incaExperiments = await db.insert(incaExperimentsTable).values([
+    { projectId: incaProjects[0].id, name: "BERT Fine-tune v1", hypothesis: "Fine-tuning BERT-base on domain corpus will reach >90% accuracy", status: "completed", hyperparameters: { learningRate: 2e-5, epochs: 10, batchSize: 32 }, results: "Accuracy: 91.2%, F1: 0.897, Loss: 0.234" },
+    { projectId: incaProjects[0].id, name: "BERT Fine-tune v2", hypothesis: "Augmented data will improve F1 by 2%+", status: "running", hyperparameters: { learningRate: 3e-5, epochs: 15, batchSize: 16 }, results: "Accuracy: 93.4%, F1: 0.921 (in progress)" },
+    { projectId: incaProjects[1].id, name: "Isolation Forest Baseline", hypothesis: "Isolation forests can detect >80% of anomalies", status: "completed", hyperparameters: { contamination: 0.01, nEstimators: 200 }, results: "Precision: 88%, Recall: 76%, AUC: 0.92" },
+    { projectId: incaProjects[1].id, name: "Autoencoder v1", hypothesis: "Deep autoencoder will outperform isolation forest on high-dim data", status: "completed", hyperparameters: { encoderLayers: [128, 64, 32], latentDim: 16 }, results: "Precision: 91%, Recall: 84%, AUC: 0.95" },
+    { projectId: incaProjects[2].id, name: "XGBoost Portfolio Model", hypothesis: "Gradient boosting can predict allocation with <5% RMSE", status: "completed", hyperparameters: { maxDepth: 8, nEstimators: 500, learningRate: 0.1 }, results: "RMSE: 3.2%, R²: 0.94" },
+  ]).returning();
+  console.log(`  ✓ ${incaExperiments.length} INCA experiments`);
+
+  await db.insert(incaModelsTable).values([
+    { projectId: incaProjects[0].id, name: "nlp-pipeline-bert-v2", architecture: "BERT-base (fine-tuned)", version: "2.1.0", status: "production", accuracy: "93.40", speed: 45, parameters: "110M", metadata: { gpuRequired: true, servingEndpoint: "/api/inca/predict/nlp" } },
+    { projectId: incaProjects[1].id, name: "anomaly-autoencoder-v1", architecture: "Deep Autoencoder", version: "1.0.0", status: "production", accuracy: "91.00", speed: 12, parameters: "2.4M", metadata: { servingEndpoint: "/api/inca/predict/anomaly" } },
+    { projectId: incaProjects[2].id, name: "portfolio-xgb-v1", architecture: "XGBoost", version: "1.2.0", status: "retired", accuracy: "94.20", speed: 8, parameters: "500 estimators" },
+    { projectId: incaProjects[0].id, name: "nlp-pipeline-bert-v1", architecture: "BERT-base (fine-tuned)", version: "1.0.0", status: "retired", accuracy: "91.20", speed: 52, parameters: "110M" },
+  ]);
+  console.log("  ✓ INCA models");
+
+  await db.insert(incaInsightsTable).values([
+    { category: "discovery", title: "Training data augmentation improves F1 by 2.4%", description: "Adding synthetic paraphrase data to training set improved F1 score from 0.897 to 0.921. Recommend augmenting all future training runs.", impact: "high", confidence: 92, sourceExperiment: "BERT Fine-tune v2" },
+    { category: "success", title: "Autoencoder outperforms Isolation Forest on high-dimensional data", description: "Deep autoencoder shows 8% improvement in recall over isolation forest baseline when feature dimensionality exceeds 50.", impact: "high", confidence: 88, sourceExperiment: "Autoencoder v1" },
+    { category: "warning", title: "False positive rate needs attention", description: "Current model generates ~200 false positives per day. Recommend threshold tuning and adding business rule filters.", impact: "medium", confidence: 95 },
+    { category: "warning", title: "Model drift detected in Q4 data", description: "Portfolio recommendation model shows performance degradation on Q4 2025 data. Retraining recommended.", impact: "high", confidence: 85, sourceExperiment: "XGBoost Portfolio Model" },
+  ]);
+  console.log("  ✓ INCA insights");
+
+  await db.insert(incaDatasetsTable).values([
+    { projectId: incaProjects[0].id, name: "Legal Documents Corpus", description: "10k annotated legal documents for NLP training", source: "internal", format: "jsonl", size: "450 MB", recordCount: 10000, status: "validated", metadata: { fields: ["text", "labels", "metadata"] } },
+    { projectId: incaProjects[1].id, name: "Transaction History 2025", description: "Full year of financial transaction records for anomaly detection", source: "database", format: "parquet", size: "2.1 GB", recordCount: 5400000, status: "validated", metadata: { fields: ["timestamp", "amount", "category", "merchant", "is_anomaly"] } },
+    { projectId: incaProjects[2].id, name: "Portfolio Performance Data", description: "Historical portfolio performance metrics", source: "api", format: "csv", size: "85 MB", recordCount: 120000, status: "archived" },
+  ]);
+  console.log("  ✓ INCA datasets");
+
+  await db.insert(carlotaServicesTable).values([
+    { name: "Strategic Advisory", slug: "strategic-advisory", description: "C-suite strategic counsel for complex business transformations and market positioning", category: "advisory", isActive: "true", sortOrder: 1, metadata: { icon: "Compass", duration: "3-6 months" } },
+    { name: "Portfolio Optimization", slug: "portfolio-optimization", description: "Data-driven portfolio analysis and rebalancing strategies for maximum returns", category: "advisory", isActive: "true", sortOrder: 2, metadata: { icon: "TrendingUp", duration: "2-4 months" } },
+    { name: "Technology Transformation", slug: "technology-transformation", description: "End-to-end technology modernization from architecture to implementation", category: "consulting", isActive: "true", sortOrder: 3, metadata: { icon: "Cpu", duration: "6-12 months" } },
+    { name: "Risk & Compliance", slug: "risk-compliance", description: "Comprehensive risk assessment and regulatory compliance frameworks", category: "consulting", isActive: "true", sortOrder: 4, metadata: { icon: "Shield", duration: "2-3 months" } },
+    { name: "Growth Strategy", slug: "growth-strategy", description: "Market expansion and revenue growth playbooks for scaling organizations", category: "advisory", isActive: "true", sortOrder: 5, metadata: { icon: "Rocket", duration: "3-6 months" } },
+    { name: "M&A Advisory", slug: "ma-advisory", description: "Merger and acquisition due diligence, valuation, and integration support", category: "advisory", isActive: "true", sortOrder: 6, metadata: { icon: "Handshake", duration: "1-3 months" } },
+  ]);
+  console.log("  ✓ Carlota Jo services");
+
+  await db.insert(carlotaInquiriesTable).values([
+    { name: "Sarah Chen", email: "s.chen@techventures.com", company: "TechVentures Inc.", phone: "+1-555-0101", service: "strategic-advisory", message: "Looking for strategic advisory services to navigate a Series C fundraise and international expansion.", status: "in_progress" },
+    { name: "Marcus Williams", email: "m.williams@novacore.io", company: "NovaCore", phone: "+1-555-0202", service: "technology-transformation", message: "We need help modernizing our legacy infrastructure. Currently running on-premise and want to move to cloud-native architecture.", status: "new" },
+    { name: "Elena Rodriguez", email: "e.rodriguez@globalfund.com", company: "Global Fund Partners", service: "portfolio-optimization", message: "Interested in portfolio optimization services for our $2B AUM fund.", status: "contacted" },
+  ]);
+  console.log("  ✓ Carlota Jo inquiries");
+
+  await db.insert(carlotaReservationsTable).values([
+    { name: "Sarah Chen", email: "s.chen@techventures.com", company: "TechVentures Inc.", phone: "+1-555-0101", service: "strategic-advisory", tier: "executive", date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], time: "10:00 AM", notes: "Series C fundraise discussion. Please prepare market analysis.", status: "confirmed", confirmationId: "CJ-A1B2C3" },
+    { name: "David Park", email: "d.park@novabright.co", company: "NovaBright", service: "growth-strategy", tier: "strategy-session", date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], time: "2:00 PM", status: "pending", confirmationId: "CJ-D4E5F6" },
+  ]);
+  console.log("  ✓ Carlota Jo reservations");
+
+  await db.insert(carlotaClientProfilesTable).values([
+    { name: "Sarah Chen", email: "s.chen@techventures.com", company: "TechVentures Inc.", phone: "+1-555-0101", notes: "Series C client. High priority.", metadata: { industry: "Technology", aum: "$150M", firstContact: "2025-11" } },
+    { name: "David Park", email: "d.park@novabright.co", company: "NovaBright", notes: "Growth-stage SaaS. Referred by Marcus Williams.", metadata: { industry: "SaaS", employees: 85 } },
+    { name: "Elena Rodriguez", email: "e.rodriguez@globalfund.com", company: "Global Fund Partners", phone: "+1-555-0303", metadata: { industry: "Finance", aum: "$2B" } },
+  ]);
+  console.log("  ✓ Carlota Jo client profiles");
+
+  const ventures = await db.insert(holdingsVenturesTable).values([
+    { slug: "vessels", name: "Vessels", description: "Maritime intelligence and fleet tracking platform", sector: "Maritime Tech", status: "active", stage: "growth", color: "#06b6d4", website: "/vessels", metrics: { arr: "$1.2M", users: "4,200", growth: "+28%" }, metadata: { icon: "Ship", tagline: "Maritime Intelligence", marketContext: "Global shipping market valued at $14.1T with increasing demand for digital fleet management solutions." } },
+    { slug: "firestorm", name: "Firestorm", description: "AI-powered security simulation and red team platform", sector: "Cybersecurity", status: "active", stage: "growth", color: "#f97316", website: "/firestorm", metrics: { arr: "$890K", users: "1,800", growth: "+45%" }, metadata: { icon: "Shield", tagline: "Security Intelligence", marketContext: "Cybersecurity market expected to reach $538B by 2030." } },
+    { slug: "dreamscape", name: "Dreamscape", description: "Creative campaign engine for storytelling and media production", sector: "Creative Tech", status: "active", stage: "early", color: "#f59e0b", website: "/dreamscape", metrics: { campaigns: "47", assets: "2,400", growth: "+62%" }, metadata: { icon: "Palette", tagline: "Creative Engine" } },
+    { slug: "lyte", name: "Lyte", description: "Business observability command center for operational decisions", sector: "DevOps", status: "active", stage: "growth", color: "#0ea5e9", website: "/lyte-command-center", metrics: { signals: "24K/day", incidents: "156", growth: "+33%" }, metadata: { icon: "Zap", tagline: "Operational Intelligence" } },
+    { slug: "inca", name: "INCA", description: "AI research command center for ML experiments and model lifecycle", sector: "AI/ML", status: "active", stage: "early", color: "#8b5cf6", website: "/inca", metrics: { models: "12", experiments: "89", growth: "+55%" }, metadata: { icon: "Sparkles", tagline: "AI Research Platform" } },
+    { slug: "nexus-analytics", name: "Nexus Analytics", description: "Enterprise data analytics and business intelligence platform", sector: "Analytics", status: "stealth", stage: "concept", color: "#10b981", metrics: { beta_users: "120" }, metadata: { icon: "BarChart3", tagline: "Data Intelligence", marketContext: "Business intelligence market growing at 13.2% CAGR." } },
+  ]).returning();
+  console.log(`  ✓ ${ventures.length} Holdings ventures`);
+
+  await db.insert(holdingsMilestonesTable).values([
+    { ventureId: ventures[0].id, title: "Vessels v2.0 Launch", description: "Major platform update with real-time AIS integration", date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], category: "product_launch" },
+    { ventureId: ventures[0].id, title: "Series A Close", description: "Closed $8M Series A led by Maritime Capital Partners", date: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], category: "funding" },
+    { ventureId: ventures[1].id, title: "SOC 2 Certification", description: "Achieved SOC 2 Type II compliance certification", date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], category: "milestone" },
+    { ventureId: ventures[1].id, title: "1000th Customer", description: "Reached 1,000 active enterprise customers", date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], category: "milestone" },
+    { ventureId: ventures[2].id, title: "Dreamscape Beta Launch", description: "Public beta launch of creative campaign engine", date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], category: "product_launch" },
+    { ventureId: ventures[3].id, title: "Lyte v1.0 GA", description: "General availability release of Lyte Command Center", date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], category: "product_launch" },
+    { ventureId: ventures[4].id, title: "INCA Research Lab Founded", description: "Established dedicated AI/ML research lab", date: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], category: "milestone" },
+  ]);
+  console.log("  ✓ Holdings milestones");
+
+  await db.insert(holdingsMetricsTable).values([
+    { ventureId: ventures[0].id, label: "ARR", value: "$1.2M", category: "revenue", period: "2026-Q1" },
+    { ventureId: ventures[0].id, label: "Active Users", value: "4,200", category: "users", period: "2026-Q1" },
+    { ventureId: ventures[0].id, label: "Fleet Coverage", value: "12,000+ vessels", category: "product", period: "2026-Q1" },
+    { ventureId: ventures[1].id, label: "ARR", value: "$890K", category: "revenue", period: "2026-Q1" },
+    { ventureId: ventures[1].id, label: "Simulations Run", value: "8,400", category: "product", period: "2026-Q1" },
+    { ventureId: ventures[2].id, label: "Campaigns Created", value: "47", category: "product", period: "2026-Q1" },
+    { ventureId: ventures[2].id, label: "Assets Generated", value: "2,400", category: "product", period: "2026-Q1" },
+    { ventureId: ventures[3].id, label: "Signals Processed", value: "24K/day", category: "product", period: "2026-Q1" },
+    { ventureId: ventures[3].id, label: "MTTR", value: "23 min", category: "ops", period: "2026-Q1" },
+    { ventureId: ventures[4].id, label: "Models in Production", value: "12", category: "product", period: "2026-Q1" },
+    { ventureId: ventures[4].id, label: "Experiments", value: "89", category: "product", period: "2026-Q1" },
+  ]);
+  console.log("  ✓ Holdings metrics");
+
+  await db.insert(holdingsLeadershipTable).values([
+    { name: "Stephen Lutar", title: "Founder & CEO", bio: "Technologist and entrepreneur building the next generation of enterprise software.", linkedIn: "https://linkedin.com/in/stephenlutar", sortOrder: 1 },
+    { name: "Alex Rivera", title: "COO", bio: "Operations leader with 15+ years scaling technology companies from startup to enterprise.", sortOrder: 2 },
+    { name: "Jordan Chen", title: "Chief Data Officer", bio: "Data science expert specializing in AI/ML systems and enterprise analytics.", sortOrder: 3 },
+    { name: "Morgan Blake", title: "VP of Marketing", bio: "Marketing strategist with deep expertise in B2B SaaS growth and brand building.", sortOrder: 4 },
+    { name: "Casey Torres", title: "Creative Director", bio: "Award-winning creative director with experience across media, film, and digital storytelling.", sortOrder: 5 },
+  ]);
+  console.log("  ✓ Holdings leadership");
+
+  await db.insert(holdingsInquiriesTable).values([
+    { name: "Rachel Kim", email: "rachel@venturecap.com", company: "Venture Capital Partners", subject: "Investment Inquiry", message: "Interested in learning more about SZL Holdings portfolio for potential Series B co-investment.", status: "new" },
+    { name: "Thomas Wright", email: "t.wright@enterprisecorp.com", company: "EnterpriseCorp", subject: "Partnership Proposal", message: "We'd like to explore a strategic partnership around your Vessels and Firestorm platforms.", status: "replied" },
+  ]);
+  console.log("  ✓ Holdings inquiries");
 
   console.log("\n✅ Seed complete!");
 }

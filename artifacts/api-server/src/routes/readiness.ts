@@ -8,16 +8,18 @@ import {
   readinessRisksTable,
   readinessAlertsTable,
 } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
-import { sendSuccess, sendNotFound, sendError, handleRouteError } from "../lib/api-response";
+import { eq, desc, sql } from "drizzle-orm";
+import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/readiness/programs", authMiddleware(), async (_req, res) => {
+router.get("/readiness/programs", authMiddleware(), async (req, res) => {
   try {
-    const rows = await db.select().from(readinessProgramsTable).orderBy(desc(readinessProgramsTable.createdAt));
-    sendSuccess(res, rows);
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const rows = await db.select().from(readinessProgramsTable).orderBy(desc(readinessProgramsTable.createdAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(readinessProgramsTable);
+    sendSuccess(res, rows, 200, { page, limit, total: count });
   } catch (err) {
     handleRouteError(res, err, "Failed to list programs");
   }
@@ -54,6 +56,17 @@ router.patch("/readiness/programs/:id", authMiddleware(), async (req, res) => {
   }
 });
 
+router.delete("/readiness/programs/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(readinessProgramsTable).where(eq(readinessProgramsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Program"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete program");
+  }
+});
+
 router.get("/readiness/programs/:id/dimensions", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
@@ -81,6 +94,17 @@ router.patch("/readiness/dimensions/:id", authMiddleware(), async (req, res) => 
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update dimension");
+  }
+});
+
+router.delete("/readiness/dimensions/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(readinessDimensionsTable).where(eq(readinessDimensionsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Dimension"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete dimension");
   }
 });
 
@@ -133,6 +157,17 @@ router.patch("/readiness/milestones/:id", authMiddleware(), async (req, res) => 
   }
 });
 
+router.delete("/readiness/milestones/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(readinessMilestonesTable).where(eq(readinessMilestonesTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Milestone"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete milestone");
+  }
+});
+
 router.get("/readiness/programs/:id/risks", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
@@ -163,6 +198,17 @@ router.patch("/readiness/risks/:id", authMiddleware(), async (req, res) => {
   }
 });
 
+router.delete("/readiness/risks/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(readinessRisksTable).where(eq(readinessRisksTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Risk"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete risk");
+  }
+});
+
 router.get("/readiness/programs/:id/alerts", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
@@ -190,6 +236,17 @@ router.patch("/readiness/alerts/:id", authMiddleware(), async (req, res) => {
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update alert");
+  }
+});
+
+router.delete("/readiness/alerts/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(readinessAlertsTable).where(eq(readinessAlertsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Alert"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete alert");
   }
 });
 

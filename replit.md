@@ -16,7 +16,7 @@ Do not make changes to the file `Y`.
 - **Monorepo:** pnpm workspaces, Node.js 24, TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (60+ tables across 20 schema files).
+- **Database:** PostgreSQL with Drizzle ORM (90+ tables).
 - **Authentication:** Session-based with Replit Auth fallback, 7-role RBAC.
 - **API Codegen:** Orval from OpenAPI specification.
 - **Bundling:** esbuild (CJS) and Vite.
@@ -24,39 +24,45 @@ Do not make changes to the file `Y`.
 ### UI/UX Design System
 Premium dark-mode-forward design via `@workspace/shared-ui`. Navy background (220 20% 4%), primary indigo/violet (250 90% 65%), Plus Jakarta Sans display font, Inter body font. Glassmorphism effects, gradients, shadows, and Framer Motion animations. Military/NASA command center aesthetic on operational apps (Vessels, Firestorm, Lyte, INCA, Readiness). Components include KPI ribbon, chart container, data table shell, AgentCopilot, and advanced form elements.
 
-### Applications (14 total)
+### Applications & Technical Implementation
 
-#### Portfolio & Brand
+#### Platform Overview
+DreamStack is a pnpm monorepo containing 14 interconnected applications built with TypeScript, sharing a common PostgreSQL database, authentication system, and design system. All apps use real PostgreSQL via Drizzle ORM (90+ tables) — no mock data.
+
+#### Core Infrastructure & Features
+- **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Seven roles (`super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`) control access.
+- **API Server:** Modular routes in `artifacts/api-server`, utilizing Zod for validation and Drizzle for persistence. Includes `helmet`, `express-rate-limit`, CORS, and structured error handling.
+- **Service Adapters:** `lib/services` provides a consistent pattern for integrating 24 third-party services with auto environment variable detection and mock fallback.
+- **Stripe Billing Integration:** Full checkout/subscription/webhook pipeline for managing billing flows.
+- **Intelligence Layer:** 25+ REST endpoints for cross-platform intelligence (threats, geopolitical events, maritime data) and AI-powered endpoints (chat, summarize, sentiment).
+- **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all applications, offering SSE streaming, markdown rendering, and suggested questions.
+- **Observability:** Structured logging via pino and system health monitoring (DB, storage, auth, connectors).
+- **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
+- **Admin Panel (`admin-panel`, route: `/admin/`):** System administration — health monitoring, app registry, connectors, user roles, audit logs, webhooks, feature flags, billing, and environment readiness.
+
+#### Application Portfolio
 - **Project List (`project-list`, route: `/`):** Main portfolio with hero section, project showcase, and social links.
-- **Stephen Site (`stephen-site`, route: `/stephen/`):** Founder/CEO personal brand — "Builder. Architect. Operator." positioning with case studies ($12M fuel savings, 52% faster incident response), ecosystem health monitoring, and strategic advisory rates ($25K-$150K).
-- **SZL Holdings (`szl-holdings`, route: `/szl-holdings/`):** Holding company corporate portal — "The Future Is Engineered" cinematic hero, animated portfolio with 4-metric company cards, 11-milestone funding timeline (seed $2.4M → Series B $45M), constellation ecosystem visualization with particle system.
-
-#### Operational Platforms
-- **Vessels (`vessels`, route: `/vessels/`):** Maritime intelligence command center — 18 realistic vessels (Panamax, VLCC, Valemax, Arc7 LNG), CII emissions per IMO MEPC.352(78), Bosporus/Turkish Straits chokepoint intelligence, OFAC/EU sanctions monitoring. Military UI: "CLASSIFICATION: UNCLASSIFIED".
-- **Firestorm (`firestorm`, route: `/firestorm/`):** SOC Operations Center — incidents (Kanban), MITRE ATT&CK mapping, compliance frameworks (NIST CSF, FedRAMP, FISMA), real-time alerts with NVD CVE proxy, SOC dashboard with MTTD/MTTR metrics. DB-backed incidents, compliance controls, and alerts.
-- **Lyte Command Center (`lyte-command-center`, route: `/lyte-command-center/`):** Operations command — real-time infrastructure telemetry (4 regions, 47 services, 12 K8s clusters), 99.97% uptime, 24 realistic signals (CloudWatch, PagerDuty, Datadog, Sentry), 12 production incidents, cost optimization recommendations ($197k-$628k savings), SOC 2/GDPR/ISO 27001 compliance references.
-- **INCA (`inca`, route: `/inca/`):** AI Research Command Center — 10 programs (TITAN LLM 70B, AEGIS Nav, HELIX Drug Discovery), 25 experiments with realistic ML hyperparameters, real benchmarks (MMLU, nuScenes, CASP15), compute utilization (A100/H100/TPU v4), government AI program references (NAIRR, EU AI Act).
-- **Readiness Report (`readiness-report`, route: `/readiness-report/`):** Organizational readiness — NIST CSF/ISO 27001/CMMC frameworks, Zero-Trust Architecture Migration program, 3-tier color system (green/amber/red), 8 compliance dimensions, EO 14028 SBOM references.
-- **Terra (`terra`, route: `/terra/`):** Real estate intelligence — portfolio dashboard with 8 properties, market intelligence (8 regions), deal pipeline (5-stage Kanban), revenue/occupancy analytics, risk/alert center.
-
-#### Creative & Advisory
-- **Dreamscape (`dreamscape`, route: `/dreamscape/`):** Creative production platform — 6 campaigns ($340K-$2.4M budgets), AI tools (Stable Diffusion XL, RunwayML Gen-3 Alpha, ElevenLabs V2), industry-standard storyboards with shot types, department-based approval workflows (Creative/Client/Legal/Production/Media). "CREATIVE ENGINE" branding.
-- **Carlota Jo (`carlota-jo`, route: `/carlota-jo/`):** Strategic advisory — "Counsel for Consequential Decisions" for Fortune 500/sovereign wealth/PE. Porter's Five Forces, BCG matrix, COSO ERM frameworks. Executive Strategy Sessions to Senior Advisory Retainers. Confidential inquiry with NDA.
-
-#### Infrastructure
-- **Admin Panel (`admin-panel`, route: `/admin/`):** System administration — health monitoring, app registry, connectors, user roles, audit logs, webhooks, feature flags, billing, environment readiness.
-- **API Server (`api-server`):** Express 5 backend with 60+ REST endpoints, structured logging, rate limiting, CORS, Zod validation, Drizzle ORM.
+- **Stephen Site (`stephen-site`, route: `/stephen/`):** Founder/CEO personal brand with case studies ($12M fuel savings, 52% faster incident response) and strategic advisory rates.
+- **SZL Holdings (`szl-holdings`, route: `/szl-holdings/`):** Holding company corporate portal with animated hero, interactive portfolio visualization, and 11-milestone funding timeline.
+- **Vessels (`vessels`, route: `/vessels/`):** Maritime intelligence command center — 18 realistic vessels, CII emissions (IMO MEPC.352(78)), chokepoint intelligence, and sanctions monitoring.
+- **Firestorm (`firestorm`, route: `/firestorm/`):** SOC Operations Center — incidents (Kanban), MITRE ATT&CK mapping, compliance frameworks (NIST CSF, FedRAMP), and real-time NVD CVE proxy.
+- **Lyte Command Center (`lyte-command-center`, route: `/lyte-command-center/`):** Operations command — real-time infrastructure telemetry (4 regions, 12 K8s clusters), 24 realistic signals, and cost optimization.
+- **INCA (`inca`, route: `/inca/`):** AI Research Command Center — 10 programs (TITAN LLM, AEGIS Nav), 25 experiments with ML hyperparameters, and compute utilization (A100/H100).
+- **Readiness Report (`readiness-report`, route: `/readiness-report/`):** Organizational readiness — NIST CSF/ISO 27001/CMMC frameworks and Zero-Trust Architecture Migration programs.
+- **Terra (`terra`, route: `/terra/`):** Real estate intelligence — portfolio dashboard (8 properties), market intelligence, deal pipeline, and revenue/occupancy analytics.
+- **Dreamscape (`dreamscape`, route: `/dreamscape/`):** Creative production platform — 6 campaigns, AI tools (SDXL, RunwayML), and department-based approval workflows.
+- **Carlota Jo (`carlota-jo`, route: `/carlota-jo/`):** Strategic advisory — "Counsel for Consequential Decisions" for Fortune 500/sovereign wealth. Porter's Five Forces, BCG matrix, and COSO ERM frameworks.
 
 ### Database Schema
-60+ tables across 20 schema files in `lib/db/src/schema/`:
+90+ tables across 20+ schema files in `lib/db/src/schema/`:
 - **Auth:** users, sessions, roles, user_roles, organizations, org_members
 - **Billing:** billing_plans, subscriptions, invoices, entitlements, usage_events
-- **Vessels:** vessels, vessels_fleets, vessels_positions, vessels_routes, vessels_alerts, vessels_cargo, vessels_simulations, vessels_weather_snapshots, vessels_alert_rules
-- **Firestorm:** firestorm_scenarios, firestorm_assessments, firestorm_simulation_runs, firestorm_findings, firestorm_risk_scores, firestorm_incidents, firestorm_compliance_controls, firestorm_alerts, firestorm_campaigns, firestorm_leads, firestorm_analytics
-- **Lyte:** lyte_workspaces, lyte_signals, lyte_command_cards, lyte_incidents, lyte_playbooks, lyte_recommendations
-- **Dreamscape:** dreamscape_campaigns, dreamscape_scripts, dreamscape_storyboards, dreamscape_voice_assets, dreamscape_campaign_assets, dreamscape_reviews
-- **Readiness:** readiness_programs, readiness_dimensions, readiness_score_history, readiness_milestones, readiness_risks, readiness_alerts
-- **Stephen:** stephen_content_blocks, stephen_case_studies, stephen_booking_requests, stephen_site_contacts, stephen_site_case_studies, stephen_site_testimonials
+- **Vessels:** vessels, fleets, positions, routes, alerts, cargo, simulations, weather, alert_rules
+- **Firestorm:** scenarios, assessments, simulation_runs, findings, risk_scores, incidents, compliance_controls, alerts, campaigns, leads, analytics
+- **Lyte:** workspaces, signals, command_cards, incidents, playbooks, recommendations
+- **Dreamscape:** campaigns, scripts, storyboards, voice_assets, campaign_assets, reviews
+- **Readiness:** programs, dimensions, score_history, milestones, risks, alerts
+- **Stephen/Holdings:** content_blocks, case studies, booking_requests, site_contacts, testimonials, portfolio_items
 
 ### Shared Libraries
 - `lib/shared-ui`: Design system, AgentCopilot, copilot configs, AI components, premium components

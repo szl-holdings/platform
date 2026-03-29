@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, type ComponentType } from "react";
+import { useState, useEffect, useRef, useMemo, type ComponentType } from "react";
 import { Activity, AlertTriangle, Lightbulb, ShieldAlert, ArrowUpRight, TrendingUp, Wifi } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import * as mockDb from "@/lib/mock-data";
+import { useSignals, useIncidents, useRecommendations, usePlaybooks } from "@/hooks/use-lyte";
 
 function useAnimatedCounter(target: number, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -28,39 +28,41 @@ function useAnimatedCounter(target: number, duration = 1200) {
   return count;
 }
 
-function buildSummary() {
-  const openIncidents = mockDb.incidents.filter((i) => !["resolved", "closed"].includes(i.status));
-  const criticalSignals = mockDb.signals.filter((s) => s.severity === "critical" && s.status === "new");
-  const pendingRecs = mockDb.recommendations.filter((r) => r.status === "suggested");
-
-  return {
-    totalSignals: mockDb.signals.length,
-    criticalSignalCount: criticalSignals.length,
-    openIncidentCount: openIncidents.length,
-    pendingRecommendationCount: pendingRecs.length,
-    recentSignals: [...mockDb.signals].sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime()).slice(0, 5),
-    recentIncidents: [...mockDb.incidents].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
-    chartData: [
-      { name: "Mon", signals: 1847, incidents: 3 },
-      { name: "Tue", signals: 2104, incidents: 5 },
-      { name: "Wed", signals: 1923, incidents: 2 },
-      { name: "Thu", signals: 2891, incidents: 8 },
-      { name: "Fri", signals: 3247, incidents: 12 },
-      { name: "Sat", signals: 1456, incidents: 4 },
-      { name: "Sun", signals: 1102, incidents: 2 },
-    ]
-  };
-}
+const chartData = [
+  { name: "Mon", signals: 1847, incidents: 3 },
+  { name: "Tue", signals: 2104, incidents: 5 },
+  { name: "Wed", signals: 1923, incidents: 2 },
+  { name: "Thu", signals: 2891, incidents: 8 },
+  { name: "Fri", signals: 3247, incidents: 12 },
+  { name: "Sat", signals: 1456, incidents: 4 },
+  { name: "Sun", signals: 1102, incidents: 2 },
+];
 
 export default function Dashboard() {
-  const [data, setData] = useState<ReturnType<typeof buildSummary> | null>(null);
+  const { data: signals = [], isLoading: sLoading } = useSignals();
+  const { data: incidents = [], isLoading: iLoading } = useIncidents();
+  const { data: recommendations = [], isLoading: rLoading } = useRecommendations();
+  const { data: playbooks = [] } = usePlaybooks();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setData(buildSummary()), 300);
-    return () => clearTimeout(timer);
-  }, []);
+  const data = useMemo(() => {
+    const openIncidents = incidents.filter(i => !["resolved", "closed"].includes(i.status));
+    const criticalSignals = signals.filter(s => s.severity === "critical" && s.status === "new");
+    const pendingRecs = recommendations.filter(r => r.status === "suggested");
 
-  if (!data) {
+    return {
+      totalSignals: signals.length,
+      criticalSignalCount: criticalSignals.length,
+      openIncidentCount: openIncidents.length,
+      pendingRecommendationCount: pendingRecs.length,
+      recentIncidents: [...incidents].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
+      playbookCount: playbooks.length,
+      chartData,
+    };
+  }, [signals, incidents, recommendations, playbooks]);
+
+  const isLoading = sLoading || iLoading || rLoading;
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center gap-4">
@@ -207,7 +209,7 @@ export default function Dashboard() {
           { label: "MTTR (SEV-1)", value: "23m", sub: "↓ 18% vs. 30-day avg (28m)" },
           { label: "Signal Throughput", value: "2.4k/hr", sub: "Peak: 4.1k/hr (14:00 UTC)" },
           { label: "Error Budget", value: "38%", sub: "8 days remaining in window" },
-          { label: "Active Runbooks", value: String(mockDb.playbooks?.length || 8), sub: "3 triggered in last 24h" },
+          { label: "Active Runbooks", value: String(data.playbookCount || 8), sub: "3 triggered in last 24h" },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}

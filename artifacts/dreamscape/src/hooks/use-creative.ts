@@ -1,13 +1,71 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { mockDb, delay, type Script, type StoryboardScene, type Voiceover, type Asset, type Review } from "@/lib/mock-db";
+import { api } from "@/lib/api";
 
-// -- SCRIPTS --
+export type Script = {
+  id: number;
+  campaignId: number;
+  title: string;
+  content: string;
+  version: number;
+  status: "draft" | "review" | "approved" | "final";
+  updatedAt?: string;
+  notes?: string;
+};
+
+export type StoryboardScene = {
+  id: number;
+  campaignId: number;
+  sceneNumber: number;
+  title?: string;
+  visualDescription?: string;
+  visual?: string;
+  dialogue?: string;
+  duration?: string;
+  thumbnailUrl?: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type Voiceover = {
+  id: number;
+  campaignId: number;
+  name: string;
+  provider: string;
+  text?: string;
+  status: string;
+  audioUrl?: string;
+  duration?: string;
+};
+
+export type Asset = {
+  id: number;
+  campaignId: number;
+  name: string;
+  type: string;
+  fileUrl?: string;
+  thumbnailUrl?: string;
+  fileSize?: number;
+  mimeType?: string;
+  tags?: string[];
+};
+
+export type Review = {
+  id: number;
+  campaignId: number;
+  reviewerName: string;
+  reviewerRole?: string;
+  comment: string;
+  status: "pending" | "approved" | "changes_requested" | "rejected";
+  section?: string;
+  createdAt?: string;
+};
+
 export function useScripts(campaignId: string) {
   return useQuery({
     queryKey: ['scripts', campaignId],
     queryFn: async () => {
-      await delay(400);
-      return mockDb.scripts.filter(s => s.campaignId === campaignId);
+      const numId = parseInt(campaignId, 10);
+      if (isNaN(numId)) return [];
+      return await api.scripts.listForCampaign(numId) as Script[];
     }
   });
 }
@@ -15,25 +73,21 @@ export function useScripts(campaignId: string) {
 export function useUpdateScript() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Partial<Script> & { id: string }) => {
-      await delay();
-      const idx = mockDb.scripts.findIndex(s => s.id === data.id);
-      if (idx !== -1) {
-        mockDb.scripts[idx] = { ...mockDb.scripts[idx], ...data, updatedAt: new Date().toISOString() };
-      }
-      return mockDb.scripts[idx];
+    mutationFn: async (data: Partial<Script> & { id: number; campaignId?: number | string }) => {
+      const { id, ...rest } = data;
+      return await api.scripts.update(id, rest);
     },
-    onSuccess: (_, variables) => queryClient.invalidateQueries({ queryKey: ['scripts', variables.campaignId] })
+    onSuccess: (_, variables) => queryClient.invalidateQueries({ queryKey: ['scripts', String(variables.campaignId)] })
   });
 }
 
-// -- STORYBOARDS --
 export function useStoryboards(campaignId: string) {
   return useQuery({
     queryKey: ['storyboards', campaignId],
     queryFn: async () => {
-      await delay(400);
-      return mockDb.storyboards.filter(s => s.campaignId === campaignId).sort((a, b) => a.sceneNumber - b.sceneNumber);
+      const numId = parseInt(campaignId, 10);
+      if (isNaN(numId)) return [];
+      return await api.storyboards.listForCampaign(numId) as StoryboardScene[];
     }
   });
 }
@@ -42,34 +96,27 @@ export function useCreateStoryboard() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<StoryboardScene>) => {
-      await delay();
-      const newScene: StoryboardScene = {
-        id: `sb${Date.now()}`,
-        campaignId: data.campaignId!,
+      return await api.storyboards.create({
+        campaignId: data.campaignId,
+        title: data.title || `Scene ${data.sceneNumber || 1}`,
         sceneNumber: data.sceneNumber || 1,
-        shotType: data.shotType || "MS — Medium Shot",
-        cameraMovement: data.cameraMovement || "Static",
-        visual: data.visual || "",
+        visualDescription: data.visualDescription || data.visual || "",
         dialogue: data.dialogue || "",
         duration: data.duration || "0s",
         thumbnailUrl: data.thumbnailUrl || "",
-        talentNotes: data.talentNotes || "",
-        lighting: data.lighting || "",
-      };
-      mockDb.storyboards.push(newScene);
-      return newScene;
+      });
     },
-    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ['storyboards', v.campaignId] })
+    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ['storyboards', String(v.campaignId)] })
   });
 }
 
-// -- VOICEOVERS --
 export function useVoiceovers(campaignId: string) {
   return useQuery({
     queryKey: ['voiceovers', campaignId],
     queryFn: async () => {
-      await delay(300);
-      return mockDb.voiceovers.filter(v => v.campaignId === campaignId);
+      const numId = parseInt(campaignId, 10);
+      if (isNaN(numId)) return [];
+      return await api.voiceAssets.listForCampaign(numId) as Voiceover[];
     }
   });
 }
@@ -78,29 +125,25 @@ export function useCreateVoiceover() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<Voiceover>) => {
-      await delay();
-      const newVo: Voiceover = {
-        id: `v${Date.now()}`,
-        campaignId: data.campaignId!,
+      return await api.voiceAssets.create({
+        campaignId: data.campaignId,
         name: data.name || "New Voiceover",
         provider: data.provider || "placeholder",
         text: data.text || "",
         status: data.provider === "elevenlabs" ? "generating" : "pending",
-      };
-      mockDb.voiceovers.push(newVo);
-      return newVo;
+      });
     },
-    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ['voiceovers', v.campaignId] })
+    onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ['voiceovers', String(v.campaignId)] })
   });
 }
 
-// -- ASSETS --
 export function useAssets(campaignId: string) {
   return useQuery({
     queryKey: ['assets', campaignId],
     queryFn: async () => {
-      await delay(500);
-      return mockDb.assets.filter(a => a.campaignId === campaignId);
+      const numId = parseInt(campaignId, 10);
+      if (isNaN(numId)) return [];
+      return await api.campaignAssets.listForCampaign(numId) as Asset[];
     }
   });
 }
@@ -108,22 +151,20 @@ export function useAssets(campaignId: string) {
 export function useDeleteAsset() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, campaignId }: { id: string, campaignId: string }) => {
-      await delay();
-      const idx = mockDb.assets.findIndex(a => a.id === id);
-      if (idx !== -1) mockDb.assets.splice(idx, 1);
+    mutationFn: async ({ id, campaignId }: { id: number; campaignId: string }) => {
+      return await api.campaignAssets.delete(id);
     },
     onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ['assets', v.campaignId] })
   });
 }
 
-// -- REVIEWS --
 export function useReviews(campaignId: string) {
   return useQuery({
     queryKey: ['reviews', campaignId],
     queryFn: async () => {
-      await delay(300);
-      return mockDb.reviews.filter(r => r.campaignId === campaignId);
+      const numId = parseInt(campaignId, 10);
+      if (isNaN(numId)) return [];
+      return await api.reviews.listForCampaign(numId) as Review[];
     }
   });
 }
@@ -131,10 +172,8 @@ export function useReviews(campaignId: string) {
 export function useUpdateReview() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: Review["status"]; campaignId: string }) => {
-      await delay();
-      const idx = mockDb.reviews.findIndex(r => r.id === id);
-      if (idx !== -1) mockDb.reviews[idx].status = status;
+    mutationFn: async ({ id, status, campaignId }: { id: number; status: Review["status"]; campaignId: string }) => {
+      return await api.reviews.update(id, { status });
     },
     onSuccess: (_, v) => queryClient.invalidateQueries({ queryKey: ['reviews', v.campaignId] })
   });

@@ -2,6 +2,32 @@ import { pgTable, text, serial, timestamp, integer, boolean, jsonb } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+export const dreamscapeProjectsTable = pgTable("dreamscape_projects", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  clientName: text("client_name"),
+  type: text("type").notNull(),
+  status: text("status", { enum: ["concept", "pre_production", "production", "post_production", "review", "published", "archived"] }).notNull().default("concept"),
+  mood: text("mood"),
+  colorPalette: jsonb("color_palette"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const dreamscapeAssetsTable = pgTable("dreamscape_assets", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => dreamscapeProjectsTable.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  fileUrl: text("file_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  width: integer("width"),
+  height: integer("height"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const dreamscapeCampaignsTable = pgTable("dreamscape_campaigns", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -74,12 +100,12 @@ export const dreamscapeCampaignAssetsTable = pgTable("dreamscape_campaign_assets
 
 export const dreamscapeReviewsTable = pgTable("dreamscape_reviews", {
   id: serial("id").primaryKey(),
-  campaignId: integer("campaign_id").notNull().references(() => dreamscapeCampaignsTable.id, { onDelete: "cascade" }),
+  projectId: integer("project_id").references(() => dreamscapeProjectsTable.id, { onDelete: "cascade" }),
+  campaignId: integer("campaign_id").references(() => dreamscapeCampaignsTable.id, { onDelete: "cascade" }),
+  assetId: integer("asset_id").references(() => dreamscapeAssetsTable.id, { onDelete: "set null" }),
   reviewerName: text("reviewer_name").notNull(),
-  reviewerRole: text("reviewer_role"),
   comment: text("comment").notNull(),
   status: text("status", { enum: ["pending", "approved", "changes_requested", "rejected"] }).notNull().default("pending"),
-  section: text("section"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

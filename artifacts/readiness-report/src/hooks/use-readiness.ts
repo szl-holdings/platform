@@ -1,106 +1,150 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  mockPrograms, 
-  mockDimensions, 
-  mockMilestones, 
-  mockRisks, 
-  mockAlerts, 
-  mockScoreHistory,
-  type Program,
-  type Dimension,
-  type Milestone,
-  type Risk,
-  type Alert,
-  type ScoreHistory
-} from "@/lib/mock-data";
+import { api } from "@/lib/api";
 
-// Simulate network delay
-const delay = (ms = 400) => new Promise(resolve => setTimeout(resolve, ms));
+export type Program = {
+  id: number;
+  name: string;
+  description: string;
+  overallScore: number | string;
+  targetScore: number | string;
+  status: 'active' | 'paused' | 'completed' | 'archived';
+  owner: string;
+  createdAt: string;
+};
 
-const ACTIVE_PROGRAM_ID = "p_1";
+export type Dimension = {
+  id: number;
+  programId: number;
+  name: string;
+  category: string;
+  currentScore: number | string;
+  targetScore: number | string;
+  maxScore: number | string;
+  assessorName: string;
+  lastAssessedAt: string;
+};
+
+export type Milestone = {
+  id: number;
+  programId: number;
+  title: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'overdue' | 'canceled';
+  dueDate: string;
+  owner: string;
+};
+
+export type Risk = {
+  id: number;
+  programId: number;
+  dimensionId?: number;
+  title: string;
+  description: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  likelihood: 'very_likely' | 'likely' | 'possible' | 'unlikely';
+  status: 'open' | 'mitigating' | 'resolved' | 'accepted';
+  mitigation: string;
+  owner: string;
+  createdAt: string;
+};
+
+export type Alert = {
+  id: number;
+  programId: number;
+  type: string;
+  title: string;
+  message: string;
+  severity: 'critical' | 'warning' | 'info';
+  isRead: boolean;
+  createdAt: string;
+};
+
+export type ScoreHistory = {
+  id: number;
+  dimensionId: number;
+  programId: number;
+  score: number | string;
+  notes: string;
+  recordedAt: string;
+};
+
+const ACTIVE_PROGRAM_ID = 1;
 
 export function usePrograms() {
   return useQuery({
     queryKey: ['programs'],
     queryFn: async () => {
-      await delay();
-      return mockPrograms;
+      const result = await api.programs.list();
+      return (result.data || result) as Program[];
     }
   });
 }
 
-export function useProgram(id: string) {
+export function useProgram(id: number) {
   return useQuery({
     queryKey: ['programs', id],
     queryFn: async () => {
-      await delay();
-      return mockPrograms.find(p => p.id === id);
+      return await api.programs.get(id) as Program;
     }
   });
 }
 
-export function useDimensions(programId: string = ACTIVE_PROGRAM_ID) {
+export function useDimensions(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['dimensions', programId],
     queryFn: async () => {
-      await delay();
-      return mockDimensions.filter(d => d.programId === programId);
+      return await api.dimensions.listForProgram(programId) as Dimension[];
     }
   });
 }
 
-export function useMilestones(programId: string = ACTIVE_PROGRAM_ID) {
+export function useMilestones(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['milestones', programId],
     queryFn: async () => {
-      await delay();
-      return mockMilestones.filter(m => m.programId === programId).sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+      return await api.milestones.listForProgram(programId) as Milestone[];
     }
   });
 }
 
-export function useRisks(programId: string = ACTIVE_PROGRAM_ID) {
+export function useRisks(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['risks', programId],
     queryFn: async () => {
-      await delay();
-      return mockRisks.filter(r => r.programId === programId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return await api.risks.listForProgram(programId) as Risk[];
     }
   });
 }
 
-export function useAlerts(programId: string = ACTIVE_PROGRAM_ID) {
+export function useAlerts(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['alerts', programId],
     queryFn: async () => {
-      await delay();
-      return mockAlerts.filter(a => a.programId === programId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return await api.alerts.listForProgram(programId) as Alert[];
     }
   });
 }
 
-export function useScoreHistory(programId: string = ACTIVE_PROGRAM_ID) {
+export function useScoreHistory(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['scoreHistory', programId],
     queryFn: async () => {
-      await delay();
-      // Aggregate dimensions for this program
-      const dims = mockDimensions.filter(d => d.programId === programId);
-      const dimIds = dims.map(d => d.id);
-      return mockScoreHistory.filter(sh => dimIds.includes(sh.dimensionId));
+      const dims = await api.dimensions.listForProgram(programId) as Dimension[];
+      const allScores: ScoreHistory[] = [];
+      for (const dim of dims) {
+        const scores = await api.dimensions.scores(dim.id) as ScoreHistory[];
+        allScores.push(...scores);
+      }
+      return allScores;
     }
   });
 }
 
-// --- Mutations ---
 export function useUpdateMilestoneStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: Milestone['status'] }) => {
-      await delay();
-      const idx = mockMilestones.findIndex(m => m.id === id);
-      if (idx !== -1) mockMilestones[idx].status = status;
-      return mockMilestones[idx];
+    mutationFn: async ({ id, status }: { id: number, status: Milestone['status'] }) => {
+      return await api.milestones.update(id, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['milestones'] });
@@ -111,11 +155,8 @@ export function useUpdateMilestoneStatus() {
 export function useUpdateRiskStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: Risk['status'] }) => {
-      await delay();
-      const idx = mockRisks.findIndex(r => r.id === id);
-      if (idx !== -1) mockRisks[idx].status = status;
-      return mockRisks[idx];
+    mutationFn: async ({ id, status }: { id: number, status: Risk['status'] }) => {
+      return await api.risks.update(id, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['risks'] });
@@ -126,11 +167,8 @@ export function useUpdateRiskStatus() {
 export function useMarkAlertRead() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      await delay();
-      const idx = mockAlerts.findIndex(a => a.id === id);
-      if (idx !== -1) mockAlerts[idx].isRead = true;
-      return mockAlerts[idx];
+    mutationFn: async (id: number) => {
+      return await api.alerts.update(id, { isRead: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
