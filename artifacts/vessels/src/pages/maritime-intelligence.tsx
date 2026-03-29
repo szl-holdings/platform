@@ -128,14 +128,17 @@ export default function MaritimeIntelligence() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
-          <h1 className="font-display text-2xl font-bold flex items-center gap-2">
-            <Globe className="w-6 h-6 text-primary" /> Maritime Intelligence
+          <h1 className="font-display text-2xl font-bold flex items-center gap-2 tracking-tight uppercase">
+            <Globe className="w-6 h-6 text-primary" /> Maritime Intelligence Center
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Live vessel tracking, chokepoint monitoring, and maritime threat assessment</p>
+          <p className="text-xs text-muted-foreground mt-1 tracking-wider font-mono">AIS VESSEL TRACKING // CHOKEPOINT MONITORING // THREAT ASSESSMENT // SANCTIONS COMPLIANCE</p>
         </div>
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse">
-          <Radio className="w-3 h-3 mr-1" /> AIS Live
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse font-mono text-[10px]">
+            <Radio className="w-3 h-3 mr-1" /> AIS FEED ACTIVE
+          </Badge>
+          <span className="text-[10px] text-muted-foreground font-mono hidden md:block">UTC {new Date().toISOString().slice(11, 19)}</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">
@@ -215,9 +218,9 @@ export default function MaritimeIntelligence() {
                     </Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                    <div><span className="block text-muted-foreground/60">Vessels</span><span className="font-semibold text-foreground">{cp.vesselCount}</span></div>
-                    <div><span className="block text-muted-foreground/60">Daily Transits</span><span className="font-semibold text-foreground">{cp.dailyTransits}</span></div>
-                    <div><span className="block text-muted-foreground/60">Oil Flow</span><span className="font-semibold text-foreground">{cp.oilFlowMbpd} Mb/d</span></div>
+                    <div><span className="block text-muted-foreground/60 font-mono text-[9px]">VESSELS</span><span className="font-semibold text-foreground">{cp.vesselCount}</span></div>
+                    <div><span className="block text-muted-foreground/60 font-mono text-[9px]">DAILY TRANSITS</span><span className="font-semibold text-foreground">{cp.dailyTransits}</span></div>
+                    <div><span className="block text-muted-foreground/60 font-mono text-[9px]">OIL FLOW</span><span className="font-semibold text-foreground">{cp.oilFlowMbpd} Mb/d</span></div>
                   </div>
                   <p className="text-xs text-muted-foreground/60 mt-2">{cp.status}</p>
                 </div>

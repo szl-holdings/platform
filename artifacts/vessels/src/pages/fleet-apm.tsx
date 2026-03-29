@@ -16,7 +16,7 @@ export default function FleetAPMPage() {
   const bottomPerformers = [...vessels].filter(v => v.tce > 0).sort((a, b) => a.tce - b.tce).slice(0, 5);
 
   const utilizationData = vessels.filter(v => v.utilization > 0).map(v => ({
-    name: v.name.replace("MV ", ""),
+    name: v.name,
     utilization: v.utilization,
     target: 90,
   }));
@@ -44,10 +44,10 @@ export default function FleetAPMPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="animate-fade-in-up">
-        <h1 className="font-display text-2xl font-bold flex items-center gap-2">
-          <BarChart3 className="w-6 h-6 text-primary" /> Fleet APM
+        <h1 className="font-display text-2xl font-bold flex items-center gap-2 tracking-tight uppercase">
+          <BarChart3 className="w-6 h-6 text-primary" /> Fleet Performance Monitor
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Asset Performance Management — TCE, utilization, and market analytics</p>
+        <p className="text-xs text-muted-foreground mt-1 tracking-wider font-mono">TCE ANALYTICS // UTILIZATION TRACKING // MARKET BENCHMARKS // VOYAGE P&L</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">

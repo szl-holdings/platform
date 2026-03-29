@@ -269,9 +269,15 @@ export default function FleetDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="animate-fade-in-up">
-        <h1 className="font-display text-2xl font-bold">Command Center</h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time fleet intelligence and operational overview</p>
+      <div className="animate-fade-in-up flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight uppercase">Fleet Command Center</h1>
+          <p className="text-xs text-muted-foreground mt-1 tracking-wider font-mono">MARITIME INTELLIGENCE & OPERATIONAL CONTROL // CLASSIFICATION: UNCLASSIFIED</p>
+        </div>
+        <div className="hidden md:flex items-center gap-4 text-[10px] text-muted-foreground font-mono">
+          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />SYSTEMS NOMINAL</span>
+          <span>UTC {new Date().toISOString().slice(11, 19)}</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 animate-fade-in-up stagger-1">
@@ -510,23 +516,29 @@ export default function FleetDashboard() {
                         </div>
                         <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200" />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Type</span>
-                          <span>{typeIcons[vessel.vesselType] || vessel.vesselType}</span>
+                          <span className="text-muted-foreground font-mono text-[10px]">CLASS</span>
+                          <span className="font-medium">{vessel.shipClass || typeIcons[vessel.vesselType] || vessel.vesselType}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Flag</span>
+                          <span className="text-muted-foreground font-mono text-[10px]">FLAG</span>
                           <span>{vessel.flag}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Fleet</span>
-                          <span>{fleet?.name || "Unassigned"}</span>
+                          <span className="text-muted-foreground font-mono text-[10px]">DWT</span>
+                          <span>{vessel.deadweight ? `${Number(vessel.deadweight).toLocaleString()} t` : "N/A"}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">Tonnage</span>
-                          <span>{vessel.grossTonnage ? `${Number(vessel.grossTonnage).toLocaleString()} GT` : "N/A"}</span>
+                          <span className="text-muted-foreground font-mono text-[10px]">ROUTE</span>
+                          <span className="text-[10px] truncate max-w-[140px]">{vessel.tradeLane || fleet?.name || "Unassigned"}</span>
                         </div>
+                        {vessel.nextPort && (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground font-mono text-[10px]">NEXT</span>
+                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3 text-primary/60" />{vessel.nextPort}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                         <Badge variant="outline" className={`${statusColors[vessel.status] || ""} ${isAtSea ? "animate-pulse" : ""}`}>

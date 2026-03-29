@@ -108,12 +108,14 @@ async function fetchRssNews(): Promise<typeof DEMO_NEWS> {
 
 async function fetchOpenMeteoMarineWeather(): Promise<typeof DEMO_MARINE_WEATHER> {
   const regions = [
+    { region: "Western Black Sea (Constanta)", lat: 43.8, lon: 28.6 },
     { region: "North Atlantic", lat: 45.0, lon: -30.0 },
-    { region: "Strait of Malacca", lat: 2.5, lon: 101.0 },
-    { region: "Mediterranean", lat: 35.0, lon: 18.0 },
+    { region: "Bosporus & Sea of Marmara", lat: 41.0, lon: 29.0 },
+    { region: "Eastern Mediterranean", lat: 35.0, lon: 28.0 },
     { region: "South China Sea", lat: 12.0, lon: 115.0 },
-    { region: "Persian Gulf", lat: 26.0, lon: 52.0 },
-    { region: "Indian Ocean", lat: -5.0, lon: 72.0 },
+    { region: "Strait of Hormuz / AG", lat: 26.0, lon: 56.0 },
+    { region: "Indian Ocean (Monsoon)", lat: -5.0, lon: 72.0 },
+    { region: "Barents Sea (NSR)", lat: 69.0, lon: 33.0 },
   ];
   try {
     const results = await Promise.all(
@@ -290,28 +292,34 @@ const DEMO_MARITIME_VESSELS = [
 ];
 
 const DEMO_CHOKEPOINTS = [
-  { name: "Strait of Hormuz", lat: 26.57, lon: 56.25, vesselCount: 142, avgWait: "2.4h", riskLevel: "elevated", dailyTransits: 67, oilFlowMbpd: 21.0, status: "Elevated security presence" },
-  { name: "Strait of Malacca", lat: 1.43, lon: 103.5, vesselCount: 218, avgWait: "1.8h", riskLevel: "normal", dailyTransits: 94, oilFlowMbpd: 16.0, status: "Normal operations" },
-  { name: "Suez Canal", lat: 30.46, lon: 32.34, vesselCount: 76, avgWait: "8.2h", riskLevel: "elevated", dailyTransits: 52, oilFlowMbpd: 5.5, status: "Convoy delays reported" },
-  { name: "Panama Canal", lat: 9.08, lon: -79.68, vesselCount: 38, avgWait: "14.6h", riskLevel: "warning", dailyTransits: 36, oilFlowMbpd: 0.9, status: "Water level restrictions active" },
-  { name: "Bab el-Mandeb", lat: 12.58, lon: 43.33, vesselCount: 54, avgWait: "1.2h", riskLevel: "critical", dailyTransits: 28, oilFlowMbpd: 6.2, status: "Security threat — rerouting advised" },
-  { name: "Danish Straits", lat: 55.7, lon: 12.6, vesselCount: 89, avgWait: "0.5h", riskLevel: "normal", dailyTransits: 118, oilFlowMbpd: 3.2, status: "Clear passage" },
+  { name: "Strait of Hormuz", lat: 26.57, lon: 56.25, vesselCount: 142, avgWait: "2.4h", riskLevel: "elevated", dailyTransits: 67, oilFlowMbpd: 21.0, status: "IRGCN fast boat activity reported — UKMTO advisory in effect. Tanker War Insurance premium elevated." },
+  { name: "Strait of Malacca", lat: 1.43, lon: 103.5, vesselCount: 218, avgWait: "1.8h", riskLevel: "normal", dailyTransits: 94, oilFlowMbpd: 16.0, status: "Normal VTIS operations. Singapore VTS reporting standard traffic density. No piracy alerts (ReCAAP ISC)." },
+  { name: "Suez Canal", lat: 30.46, lon: 32.34, vesselCount: 76, avgWait: "8.2h", riskLevel: "elevated", dailyTransits: 52, oilFlowMbpd: 5.5, status: "SCA convoy delays — southbound backup at Great Bitter Lake. New Suez Canal channel partially restricted for maintenance." },
+  { name: "Bosporus / Turkish Straits", lat: 41.12, lon: 29.05, vesselCount: 48, avgWait: "18.5h", riskLevel: "warning", dailyTransits: 42, oilFlowMbpd: 3.4, status: "Northbound queue 23 vessels. Kıyı Emniyeti reporting strong southerly current 4-6 kn. Hazardous cargo transit restricted 2200-0600." },
+  { name: "Panama Canal", lat: 9.08, lon: -79.68, vesselCount: 38, avgWait: "14.6h", riskLevel: "warning", dailyTransits: 36, oilFlowMbpd: 0.9, status: "Gatun Lake water level restrictions — max draft 44 ft TFW. Neo-Panamax slots reduced to 8/day. Auction premiums $2.4M+." },
+  { name: "Bab el-Mandeb", lat: 12.58, lon: 43.33, vesselCount: 54, avgWait: "1.2h", riskLevel: "critical", dailyTransits: 28, oilFlowMbpd: 6.2, status: "Houthi anti-ship missile threat — EUNAVFOR ASPIDES active. Multiple carriers rerouting via Cape of Good Hope (+10 days)." },
+  { name: "Danish Straits (Øresund)", lat: 55.7, lon: 12.6, vesselCount: 89, avgWait: "0.5h", riskLevel: "normal", dailyTransits: 118, oilFlowMbpd: 3.2, status: "Clear passage. HELCOM reporting normal Baltic Sea entry conditions. DMA VTS operational." },
+  { name: "Cape of Good Hope", lat: -34.35, lon: 18.47, vesselCount: 65, avgWait: "0h", riskLevel: "elevated", dailyTransits: 38, oilFlowMbpd: 2.8, status: "Increased traffic from Red Sea diversions. SAMSA weather advisory: Agulhas Current 3-4 kn opposing seas. SW swell 4-5m forecast." },
 ];
 
 const DEMO_MARINE_WEATHER = [
+  { region: "Western Black Sea (Constanta)", lat: 43.8, lon: 28.6, windSpeed: 22, windDirection: "NE", waveHeight: 2.1, seaTemp: 9.8, visibility: "Moderate", condition: "Moderate seas", warning: "Northeasterly gale warning — Beaufort 7-8 forecast" },
   { region: "North Atlantic", lat: 45.0, lon: -30.0, windSpeed: 28, windDirection: "NW", waveHeight: 3.2, seaTemp: 14.5, visibility: "Good", condition: "Moderate seas", warning: null },
-  { region: "Strait of Malacca", lat: 2.5, lon: 101.0, windSpeed: 12, windDirection: "SW", waveHeight: 0.8, seaTemp: 29.2, visibility: "Moderate", condition: "Calm", warning: "Thunderstorm advisory" },
-  { region: "Mediterranean", lat: 35.0, lon: 18.0, windSpeed: 18, windDirection: "NE", waveHeight: 1.5, seaTemp: 18.8, visibility: "Good", condition: "Slight seas", warning: null },
-  { region: "South China Sea", lat: 12.0, lon: 115.0, windSpeed: 35, windDirection: "E", waveHeight: 4.1, seaTemp: 27.6, visibility: "Poor", condition: "Rough seas", warning: "Tropical storm warning" },
-  { region: "Persian Gulf", lat: 26.0, lon: 52.0, windSpeed: 22, windDirection: "NW", waveHeight: 1.8, seaTemp: 24.1, visibility: "Good", condition: "Moderate", warning: null },
-  { region: "Indian Ocean", lat: -5.0, lon: 72.0, windSpeed: 15, windDirection: "W", waveHeight: 2.0, seaTemp: 28.3, visibility: "Good", condition: "Moderate seas", warning: null },
+  { region: "Bosporus & Sea of Marmara", lat: 41.0, lon: 29.0, windSpeed: 18, windDirection: "S", waveHeight: 0.8, seaTemp: 11.2, visibility: "Good", condition: "Slight seas", warning: "Strong southerly current 4-6 kn in strait" },
+  { region: "Eastern Mediterranean", lat: 35.0, lon: 28.0, windSpeed: 15, windDirection: "NW", waveHeight: 1.2, seaTemp: 18.8, visibility: "Good", condition: "Slight seas", warning: null },
+  { region: "South China Sea", lat: 12.0, lon: 115.0, windSpeed: 35, windDirection: "E", waveHeight: 4.1, seaTemp: 27.6, visibility: "Poor", condition: "Rough seas", warning: "Tropical storm warning — PAGASA Signal #2" },
+  { region: "Strait of Hormuz / AG", lat: 26.0, lon: 56.0, windSpeed: 25, windDirection: "NW", waveHeight: 1.8, seaTemp: 24.1, visibility: "Good", condition: "Moderate", warning: "Shamal wind advisory 25-35 kn" },
+  { region: "Indian Ocean (Monsoon)", lat: -5.0, lon: 72.0, windSpeed: 15, windDirection: "W", waveHeight: 2.0, seaTemp: 28.3, visibility: "Good", condition: "Moderate seas", warning: null },
+  { region: "Barents Sea (NSR)", lat: 69.0, lon: 33.0, windSpeed: 32, windDirection: "W", waveHeight: 3.8, seaTemp: 2.1, visibility: "Poor", condition: "Rough seas", warning: "Ice warning — pack ice edge 71°N. Visibility <1nm in snow" },
 ];
 
 const DEMO_SANCTIONS_VESSELS = [
-  { name: "DARK HORIZON", imo: "9876543", flag: "Unknown", status: "OFAC Listed", reason: "Sanctions evasion — Iranian oil transport", listedDate: "2025-11-15", source: "OFAC SDN" },
-  { name: "SHADOW CARRIER", imo: "9654321", flag: "Cameroon", status: "UN Sanctioned", reason: "DPRK coal shipment violations", listedDate: "2025-09-20", source: "UN Panel of Experts" },
-  { name: "GHOST TANKER IV", imo: "9512345", flag: "Togolese", status: "OFAC Listed", reason: "Venezuelan oil sanctions circumvention", listedDate: "2026-01-08", source: "OFAC SDN" },
-  { name: "MIDNIGHT SUN", imo: "9345678", flag: "Palau", status: "EU Sanctioned", reason: "Russian oil price cap violations", listedDate: "2026-02-14", source: "EU Council" },
+  { name: "SHUI SPIRIT", imo: "9180281", flag: "Cameroon", status: "OFAC SDN Listed", reason: "OFAC SDN listed (06/2025) — Identified as part of PRC-linked fleet conducting STS transfers of Iranian crude oil in Gulf of Oman. Previously named SUEZ RAJAN. Designated under E.O. 13846.", listedDate: "2025-06-15", source: "OFAC SDN" },
+  { name: "BILLION STAR 7", imo: "9126592", flag: "Palau", status: "UN Sanctioned", reason: "UN Panel of Experts Report S/2026/115 — DPRK-flagged vessel engaged in coal exports violating UNSCR 2397 (2017). AIS dark periods >72 hours detected in East China Sea.", listedDate: "2025-09-20", source: "UN Panel of Experts" },
+  { name: "ELENA", imo: "9187637", flag: "Gabon", status: "EU Sanctioned", reason: "EU Regulation 2022/879 — Russian oil price cap violation. Transporting Urals crude above $60/bbl ceiling. Previously registered as ASTRA under Marshall Islands flag. STS operations in Laconian Gulf.", listedDate: "2026-02-14", source: "EU Council Regulation 833/2014" },
+  { name: "COMET", imo: "9215378", flag: "Tanzania", status: "OFAC Listed", reason: "OFAC identified — Venezuelan PDVSA crude transport circumventing Executive Order 13884. Repeated flag changes: Liberia → Comoros → Tanzania since 2024.", listedDate: "2026-01-08", source: "OFAC SDN" },
+  { name: "LINDA I", imo: "9196454", flag: "Unknown", status: "OFAC SDN Listed", reason: "Part of Syrian Arab Republic sanctions network. Identified delivering refined products to Baniyas Terminal. AIS spoofing detected. Designated under Syria-related E.O. 13582.", listedDate: "2025-11-15", source: "OFAC SDN" },
+  { name: "SAOWALAK", imo: "9134146", flag: "Comoros", status: "OFAC Listed", reason: "Dark fleet tanker involved in Russian crude oil transport circumventing G7 price cap. Repeated STS operations off Ceuta and Kalamata. P&I insurance lapsed.", listedDate: "2026-03-10", source: "OFAC / EU Council" },
 ];
 
 const DEMO_NEWS = [

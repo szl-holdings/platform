@@ -50,7 +50,7 @@ export default function CO2EmissionsPage() {
   const ciiPieData = Object.entries(ciiDistribution).map(([rating, count]) => ({ name: rating, value: count }));
 
   const vesselEmissions = vessels.map(v => ({
-    name: v.name.replace("MV ", ""),
+    name: v.name,
     co2Daily: v.co2EmissionsDaily,
     ciiRating: v.ciiRating,
     eexi: v.eexi,
@@ -70,10 +70,10 @@ export default function CO2EmissionsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
-          <h1 className="font-display text-2xl font-bold flex items-center gap-2">
-            <Leaf className="w-6 h-6 text-emerald-400" /> CO2 & Emissions
+          <h1 className="font-display text-2xl font-bold flex items-center gap-2 tracking-tight uppercase">
+            <Leaf className="w-6 h-6 text-emerald-400" /> Emissions & CII Monitoring
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Fuel consumption, emissions tracking, CII ratings, and compliance pathways</p>
+          <p className="text-xs text-muted-foreground mt-1 tracking-wider font-mono">MARPOL ANNEX VI REG. 28 // IMO DCS // EU MRV 2015/757 // EU ETS MARITIME</p>
         </div>
         <select
           className="bg-card border border-border rounded-lg px-3 py-1.5 text-sm text-foreground"

@@ -29,10 +29,10 @@ export default function SyntheticsCompliancePage() {
   return (
     <div className="p-6 space-y-6">
       <div className="animate-fade-in-up">
-        <h1 className="font-display text-2xl font-bold flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-primary" /> Synthetics & Compliance
+        <h1 className="font-display text-2xl font-bold flex items-center gap-2 tracking-tight uppercase">
+          <ShieldCheck className="w-6 h-6 text-primary" /> Regulatory Compliance
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Certificate tracking, port state control, compliance alerts, and sanctions monitoring</p>
+        <p className="text-xs text-muted-foreground mt-1 tracking-wider font-mono">ISM / ISPS // SOLAS // MARPOL // MLC 2006 // BWM CONVENTION // EU ETS // PSC INSPECTION</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">
@@ -100,7 +100,7 @@ export default function SyntheticsCompliancePage() {
                       {cert.status}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">{cert.vesselName} · {cert.issuer}</p>
+                  <p className="text-xs text-muted-foreground">{cert.vesselName} · {cert.issuer}{cert.regulation ? ` · ${cert.regulation}` : ""}</p>
                   <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
                     <span>Expires: {new Date(cert.expiryDate).toLocaleDateString()}</span>
                     <span className={`font-semibold ${cert.daysUntilExpiry <= 0 ? "text-red-400" : cert.daysUntilExpiry <= 30 ? "text-amber-400" : "text-emerald-400"}`}>
@@ -128,7 +128,7 @@ export default function SyntheticsCompliancePage() {
                       <p className="text-sm font-semibold">{def.description}</p>
                       <Badge variant="outline" className={`text-xs ${defSeverityColors[def.severity]}`}>{def.severity}</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">{def.vesselName} · {def.port} · Code: {def.deficiencyCode}</p>
+                    <p className="text-xs text-muted-foreground">{def.vesselName} · {def.port} · Code: {def.deficiencyCode}{def.mouRegime ? ` · ${def.mouRegime}` : ""}</p>
                     <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
                       <span>Inspected: {new Date(def.inspectionDate).toLocaleDateString()}</span>
                       <Badge variant="outline" className={`text-[10px] ${def.status === "Open" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>{def.status}</Badge>
