@@ -155,7 +155,7 @@ export default function SimulationRunner() {
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Simulation Runner</h1>
-          <p className="text-sm text-muted-foreground mt-1">Execute controlled security simulations and review results</p>
+          <p className="text-sm text-muted-foreground mt-1">Execute controlled security assessments and review results</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

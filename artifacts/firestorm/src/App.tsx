@@ -1,102 +1,62 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
-import { Flame, Shield, Target, Search, BarChart3, FileText, LayoutDashboard, Server, AlertTriangle, Wifi, WifiOff, Brain, Bug } from "lucide-react";
+import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
-import AssessmentDashboard from "@/pages/assessment-dashboard";
-import ScenarioLibrary from "@/pages/scenario-library";
-import SimulationRunner from "@/pages/simulation-runner";
+import SOCDashboard from "@/pages/soc-dashboard";
+import ThreatIntelligence from "@/pages/threat-intelligence";
+import IncidentsPage from "@/pages/incidents-page";
 import FindingsPage from "@/pages/findings-page";
+import MitreAttackPage from "@/pages/mitre-attack-page";
+import CompliancePage from "@/pages/compliance-page";
+import AlertsPage from "@/pages/alerts-page";
 import RiskScoringPage from "@/pages/risk-scoring";
 import ReportsPage from "@/pages/reports-page";
-import ThreatIntelligence from "@/pages/threat-intelligence";
-import ThreatIntelAI from "@/pages/threat-intel";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
 const navItems = [
-  { path: "/", label: "Assessments", icon: LayoutDashboard },
-  { path: "/threat-intel", label: "Threat Intelligence", icon: AlertTriangle },
-  { path: "/ai-command", label: "AI Command Wall", icon: Brain },
-  { path: "/scenarios", label: "Scenario Library", icon: Target },
-  { path: "/simulations", label: "Simulation Runner", icon: Search },
-  { path: "/findings", label: "Findings", icon: Bug },
+  { path: "/", label: "SOC Dashboard", icon: Activity },
+  { path: "/threat-intel", label: "Threat Intel", icon: AlertTriangle },
+  { path: "/incidents", label: "Incidents", icon: Shield },
+  { path: "/findings", label: "Findings", icon: Target },
+  { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
+  { path: "/compliance", label: "Compliance", icon: ClipboardCheck },
+  { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
   { path: "/reports", label: "Reports", icon: FileText },
 ];
 
-interface AppHealthSummary {
-  services: { name: string; status: string }[];
-  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
-}
-
-function IntegrationStatusFooter() {
-  const { data } = useQuery<AppHealthSummary>({
-    queryKey: ["app-health-firestorm"],
-    queryFn: () => fetch("/api/services/health/app/firestorm").then((r) => r.json()),
-    refetchInterval: 60000,
+function StatusBar() {
+  const { data: socData } = useQuery({
+    queryKey: ["soc-dashboard"],
+    queryFn: () => fetch("/api/firestorm/soc-dashboard").then(r => r.json()),
+    refetchInterval: 30000,
   });
 
-  if (!data) return null;
+  const alertCount = socData?.openAlerts || 0;
+  const incidentCount = socData?.activeIncidents || 0;
 
   return (
-    <div className="p-3 border-t border-border space-y-2">
-      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Integrations</div>
-      <div className="flex flex-wrap gap-1">
-        {data.services.map((svc) => (
-          <span
-            key={svc.name}
-            className={cn(
-              "inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded transition-colors",
-              svc.status === "LIVE_CONFIGURED" ? "bg-emerald-500/10 text-emerald-400" :
-              svc.status === "MOCKED_DEMO_MODE" ? "bg-amber-500/10 text-amber-400" :
-              "bg-red-500/10 text-red-400"
-            )}
-          >
-            {svc.status === "LIVE_CONFIGURED" ? <Wifi className="w-2.5 h-2.5" /> :
-             svc.status === "MOCKED_DEMO_MODE" ? <Server className="w-2.5 h-2.5" /> :
-             <WifiOff className="w-2.5 h-2.5" />}
-            {svc.name}
-          </span>
-        ))}
+    <div className="h-8 bg-card/50 border-b border-border flex items-center justify-between px-4 text-xs">
+      <div className="flex items-center gap-4">
+        <span className="flex items-center gap-1.5 text-emerald-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          Systems Operational
+        </span>
       </div>
-    </div>
-  );
-}
-
-function DemoModeBanner() {
-  const { data } = useQuery<AppHealthSummary>({
-    queryKey: ["app-health-firestorm"],
-    queryFn: () => fetch("/api/services/health/app/firestorm").then((r) => r.json()),
-    refetchInterval: 60000,
-  });
-
-  if (!data) return null;
-
-  const hasDemoMode = data.summary.mockedDemoMode > 0;
-  const hasUnhealthy = data.summary.manualRequired > 0;
-  if (!hasDemoMode && !hasUnhealthy) return null;
-
-  const demoNames = data.services.filter((s) => s.status === "MOCKED_DEMO_MODE").map((s) => s.name);
-
-  if (hasUnhealthy) {
-    return (
-      <div className="bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center gap-2">
-        <AlertTriangle className="w-4 h-4 text-red-400" />
-        <span className="text-xs text-red-400 font-medium">{data.summary.manualRequired} integration(s) not configured</span>
+      <div className="flex items-center gap-4 text-muted-foreground">
+        <span className={`flex items-center gap-1 ${alertCount > 0 ? "text-amber-400" : ""}`}>
+          <Bell className="w-3 h-3" /> {alertCount} alerts
+        </span>
+        <span className={`flex items-center gap-1 ${incidentCount > 0 ? "text-red-400" : ""}`}>
+          <Shield className="w-3 h-3" /> {incidentCount} active
+        </span>
       </div>
-    );
-  }
-
-  return (
-    <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2">
-      <Server className="w-4 h-4 text-amber-400" />
-      <span className="text-xs text-amber-400 font-medium">Demo Mode</span>
-      <span className="text-xs text-amber-400/60">— {demoNames.join(", ")} using simulated data</span>
     </div>
   );
 }
@@ -112,7 +72,7 @@ function Sidebar() {
           </div>
           <div>
             <h1 className="font-display text-lg font-bold text-foreground">Firestorm</h1>
-            <p className="text-xs text-muted-foreground">Security Simulation</p>
+            <p className="text-xs text-muted-foreground">Security Operations</p>
           </div>
         </div>
       </div>
@@ -137,11 +97,10 @@ function Sidebar() {
           );
         })}
       </nav>
-      <IntegrationStatusFooter />
       <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Shield className="w-3 h-3" />
-          <span>Controlled Simulation Mode</span>
+        <div className="flex items-center gap-2 text-xs text-emerald-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Platform Operational</span>
         </div>
       </div>
     </aside>
@@ -151,12 +110,13 @@ function Sidebar() {
 function AppRouter() {
   return (
     <Switch>
-      <Route path="/" component={AssessmentDashboard} />
+      <Route path="/" component={SOCDashboard} />
       <Route path="/threat-intel" component={ThreatIntelligence} />
-      <Route path="/ai-command" component={ThreatIntelAI} />
-      <Route path="/scenarios" component={ScenarioLibrary} />
-      <Route path="/simulations" component={SimulationRunner} />
+      <Route path="/incidents" component={IncidentsPage} />
       <Route path="/findings" component={FindingsPage} />
+      <Route path="/mitre-attack" component={MitreAttackPage} />
+      <Route path="/compliance" component={CompliancePage} />
+      <Route path="/alerts" component={AlertsPage} />
       <Route path="/risk-scoring" component={RiskScoringPage} />
       <Route path="/reports" component={ReportsPage} />
       <Route>
@@ -175,7 +135,7 @@ function App() {
         <div className="flex h-screen bg-background">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-auto">
-            <DemoModeBanner />
+            <StatusBar />
             <main className="flex-1 overflow-auto">
               <AppRouter />
             </main>

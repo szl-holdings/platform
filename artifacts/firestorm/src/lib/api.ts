@@ -50,4 +50,28 @@ export const api = {
   reports: {
     get: (assessmentId: number) => apiFetch<any>(`/firestorm/reports/${assessmentId}`),
   },
+  incidents: {
+    list: () => apiFetch<any[]>("/firestorm/incidents"),
+    get: (id: number) => apiFetch<any>(`/firestorm/incidents/${id}`),
+    create: (data: any) => apiFetch<any>("/firestorm/incidents", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/incidents/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    delete: (id: number) => apiFetch<void>(`/firestorm/incidents/${id}`, { method: "DELETE" }),
+  },
+  compliance: {
+    list: (framework?: string) => apiFetch<any[]>(`/firestorm/compliance${framework ? `?framework=${framework}` : ""}`),
+    create: (data: any) => apiFetch<any>("/firestorm/compliance", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/compliance/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    seed: () => apiFetch<any>("/firestorm/compliance/seed", { method: "POST" }),
+  },
+  alerts: {
+    list: (status?: string) => apiFetch<any[]>(`/firestorm/alerts${status ? `?status=${status}` : ""}`),
+    create: (data: any) => apiFetch<any>("/firestorm/alerts", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/alerts/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  },
+  socDashboard: {
+    get: () => apiFetch<any>("/firestorm/soc-dashboard"),
+  },
+  cves: {
+    list: (keyword?: string) => apiFetch<any[]>(`/firestorm/cves${keyword ? `?keyword=${encodeURIComponent(keyword)}` : ""}`),
+  },
 };

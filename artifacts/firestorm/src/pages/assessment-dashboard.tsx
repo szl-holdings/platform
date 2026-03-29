@@ -115,7 +115,7 @@ export default function AssessmentDashboard() {
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Assessment Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">Security assessments and simulation overview</p>
+          <p className="text-sm text-muted-foreground mt-1">Security assessments and operational overview</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

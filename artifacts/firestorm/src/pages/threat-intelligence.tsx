@@ -118,7 +118,7 @@ function AnimatedCounter({ value }: { value: number }) {
 
 export default function ThreatIntelligence() {
   const { data: threats = [] } = useQuery({ queryKey: ["intel-threats"], queryFn: () => apiFetch<any[]>("/intelligence/threats"), refetchInterval: 30000 });
-  const { data: cves = [] } = useQuery({ queryKey: ["intel-cves"], queryFn: () => apiFetch<any[]>("/intelligence/cves"), refetchInterval: 60000 });
+  const { data: cves = [] } = useQuery({ queryKey: ["intel-cves"], queryFn: () => apiFetch<any[]>("/firestorm/cves"), refetchInterval: 60000 });
   const { data: geoEvents = [] } = useQuery({ queryKey: ["intel-geo"], queryFn: () => apiFetch<any[]>("/intelligence/geopolitical"), refetchInterval: 60000 });
   const { data: briefing } = useQuery({ queryKey: ["intel-briefing"], queryFn: () => apiFetch<any>("/intelligence/ai/threat-briefing", { method: "POST", body: JSON.stringify({}) }), refetchInterval: 300000, retry: 1 });
 
@@ -140,7 +140,7 @@ export default function ThreatIntelligence() {
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
             <Globe className="w-6 h-6 text-primary" /> Threat Intelligence Center
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time global cyber threat monitoring and AI-powered analysis</p>
+          <p className="text-sm text-muted-foreground mt-1">Real-time global cyber threat monitoring and intelligence analysis</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse">
