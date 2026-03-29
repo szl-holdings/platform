@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Calendar, User, CreditCard } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Calendar, User, CreditCard, Shield } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import servicesData from "@/data/services.json";
@@ -9,11 +9,11 @@ import tiersData from "@/data/tiers.json";
 type Step = "service" | "tier" | "schedule" | "details" | "confirmation";
 
 const steps: { id: Step; label: string; icon: React.ElementType }[] = [
-  { id: "service", label: "Service", icon: Check },
-  { id: "tier", label: "Tier", icon: CreditCard },
+  { id: "service", label: "Practice Area", icon: Check },
+  { id: "tier", label: "Engagement", icon: CreditCard },
   { id: "schedule", label: "Schedule", icon: Calendar },
   { id: "details", label: "Details", icon: User },
-  { id: "confirmation", label: "Confirm", icon: Check },
+  { id: "confirmation", label: "Review", icon: Check },
 ];
 
 interface BookingData {
@@ -192,7 +192,7 @@ export default function BookingFlow() {
   };
 
   const inputClass =
-    "w-full bg-navy-900/40 border border-gold-500/10 px-4 py-3 text-sm text-cream-100 placeholder:text-cream-300/30 focus:outline-none focus:border-gold-500/30 transition-colors";
+    "w-full bg-navy-900/30 border border-gold-500/8 px-5 py-3.5 text-sm text-cream-100 placeholder:text-cream-300/25 focus:outline-none focus:border-gold-500/25 transition-colors font-light";
 
   if (bookingConfirmed) {
     return (
@@ -205,58 +205,67 @@ export default function BookingFlow() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-20 h-20 mx-auto mb-8 border border-gold-500/30 flex items-center justify-center">
-                <Check size={32} className="text-gold-400" strokeWidth={1.5} />
+              <div className="w-20 h-20 mx-auto mb-8 border border-gold-500/20 flex items-center justify-center">
+                <Check size={32} className="text-gold-400" strokeWidth={1.2} />
               </div>
-              <h2 className="font-serif text-3xl text-cream-50 mb-4">
-                Consultation Confirmed
+              <h2 className="font-serif text-3xl text-cream-50 mb-3">
+                Consultation Reserved
               </h2>
-              <p className="text-sm text-cream-300/50 mb-6">
-                Your booking reference is{" "}
-                <span className="text-gold-400 font-medium">{confirmationId}</span>
+              <p className="text-sm text-cream-300/40 mb-2 font-light">
+                Your advisory session has been secured.
               </p>
-              <div className="border border-gold-500/10 bg-navy-900/30 p-6 text-left space-y-3 mb-8">
+              <p className="text-sm text-cream-300/40 mb-8 font-light">
+                Reference: <span className="text-gold-400 font-medium">{confirmationId}</span>
+              </p>
+              <div className="border border-gold-500/8 bg-navy-900/20 p-8 text-left space-y-4 mb-8">
                 <div className="flex justify-between text-sm">
-                  <span className="text-cream-300/50">Service</span>
+                  <span className="text-cream-300/40 font-light">Practice Area</span>
                   <span className="text-cream-100">{selectedService?.title}</span>
                 </div>
+                <div className="w-full h-px bg-gold-500/5" />
                 <div className="flex justify-between text-sm">
-                  <span className="text-cream-300/50">Tier</span>
+                  <span className="text-cream-300/40 font-light">Engagement</span>
                   <span className="text-cream-100">{selectedTier?.name}</span>
                 </div>
+                <div className="w-full h-px bg-gold-500/5" />
                 <div className="flex justify-between text-sm">
-                  <span className="text-cream-300/50">Date</span>
+                  <span className="text-cream-300/40 font-light">Date</span>
                   <span className="text-cream-100">{formatDate(booking.date)}</span>
                 </div>
+                <div className="w-full h-px bg-gold-500/5" />
                 <div className="flex justify-between text-sm">
-                  <span className="text-cream-300/50">Time</span>
+                  <span className="text-cream-300/40 font-light">Time</span>
                   <span className="text-cream-100">{booking.time} ET</span>
                 </div>
               </div>
 
+              <p className="text-xs text-cream-300/30 mb-6 font-light leading-relaxed">
+                A senior partner will reach out within 24 hours with a pre-session briefing document and any preparatory materials for your consultation.
+              </p>
+
               <button
                 onClick={handlePayment}
-                className="w-full py-3.5 bg-gold-500/90 text-navy-950 text-sm font-medium tracking-widest uppercase hover:bg-gold-400 transition-all duration-300 mb-3"
+                className="w-full py-4 bg-gold-500/90 text-navy-950 text-xs font-medium tracking-[0.2em] uppercase hover:bg-gold-400 transition-all duration-300 mb-3"
               >
                 Proceed to Payment
               </button>
 
               {stripeError && (
-                <p className="text-xs text-gold-400/70 mt-2 mb-4">{stripeError}</p>
+                <p className="text-xs text-gold-400/70 mt-2 mb-4 font-light">{stripeError}</p>
               )}
 
-              <div className="flex items-center justify-center gap-6 mt-4">
+              <div className="flex items-center justify-center gap-6 mt-6">
                 <a
                   href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/booking/follow-up`}
-                  className="text-xs text-gold-400/70 hover:text-gold-400 transition-colors"
+                  className="text-[11px] text-gold-400/60 hover:text-gold-400 transition-colors tracking-wider uppercase"
                 >
-                  What Happens Next?
+                  What Happens Next
                 </a>
                 <a
                   href={import.meta.env.BASE_URL}
-                  className="text-xs text-cream-300/40 hover:text-gold-400 transition-colors"
+                  className="text-[11px] text-cream-300/30 hover:text-gold-400 transition-colors tracking-wider uppercase"
                 >
-                  Return to Home
+                  Return Home
                 </a>
               </div>
             </motion.div>
@@ -272,33 +281,43 @@ export default function BookingFlow() {
       <Header />
       <main className="flex-1 pt-28 pb-16">
         <div className="max-w-3xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-12">
+          <div className="text-center mb-4">
+            <p className="text-[11px] font-medium tracking-[0.4em] uppercase text-gold-400/60 mb-3">
+              Private Advisory
+            </p>
             <h1 className="font-serif text-3xl md:text-4xl font-light text-cream-50 mb-3">
-              Book a Consultation
+              Request a Consultation
             </h1>
-            <p className="text-sm text-cream-300/50">
-              Select your service, choose your engagement tier, and schedule your session.
+            <p className="text-sm text-cream-300/35 font-light max-w-md mx-auto">
+              Configure your engagement below. All consultations begin with a confidential scoping conversation with a senior partner.
             </p>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mb-12">
+          <div className="flex items-center justify-center gap-1.5 mb-14 mt-10">
             {steps.map((step, i) => (
-              <div key={step.id} className="flex items-center gap-2">
-                <div
-                  className={`w-8 h-8 flex items-center justify-center text-xs font-medium transition-all ${
-                    i < stepIndex
-                      ? "bg-gold-500/20 text-gold-400 border border-gold-500/30"
-                      : i === stepIndex
-                      ? "bg-gold-500/90 text-navy-950 border border-gold-500"
-                      : "border border-gold-500/10 text-cream-300/30"
-                  }`}
-                >
-                  {i < stepIndex ? <Check size={14} /> : i + 1}
+              <div key={step.id} className="flex items-center gap-1.5">
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className={`w-9 h-9 flex items-center justify-center text-xs font-medium transition-all ${
+                      i < stepIndex
+                        ? "bg-gold-500/15 text-gold-400 border border-gold-500/25"
+                        : i === stepIndex
+                        ? "bg-gold-500/90 text-navy-950 border border-gold-500"
+                        : "border border-gold-500/8 text-cream-300/25"
+                    }`}
+                  >
+                    {i < stepIndex ? <Check size={14} /> : i + 1}
+                  </div>
+                  <span className={`text-[10px] tracking-wider uppercase hidden sm:block ${
+                    i <= stepIndex ? "text-gold-400/60" : "text-cream-300/20"
+                  }`}>
+                    {step.label}
+                  </span>
                 </div>
                 {i < steps.length - 1 && (
                   <div
-                    className={`w-8 h-px ${
-                      i < stepIndex ? "bg-gold-500/30" : "bg-gold-500/10"
+                    className={`w-10 h-px mb-5 sm:mb-0 ${
+                      i < stepIndex ? "bg-gold-500/25" : "bg-gold-500/8"
                     }`}
                   />
                 )}
@@ -316,26 +335,29 @@ export default function BookingFlow() {
             >
               {currentStep === "service" && (
                 <div className="space-y-4">
-                  <h3 className="font-serif text-xl text-cream-50 mb-6">
-                    Select a Service Area
+                  <h3 className="font-serif text-xl text-cream-50 mb-2">
+                    Select a Practice Area
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <p className="text-xs text-cream-300/30 font-light mb-6">
+                    Choose the capability most aligned with your strategic needs. Your assigned partner will refine the scope during the initial consultation.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {servicesData.map((service) => (
                       <button
                         key={service.id}
                         onClick={() =>
                           setBooking({ ...booking, service: service.id })
                         }
-                        className={`text-left border p-5 transition-all duration-300 ${
+                        className={`text-left border p-6 transition-all duration-300 ${
                           booking.service === service.id
-                            ? "border-gold-500/40 bg-gold-500/5"
-                            : "border-gold-500/10 bg-navy-900/20 hover:border-gold-500/20"
+                            ? "border-gold-500/35 bg-gold-500/5"
+                            : "border-gold-500/8 bg-navy-900/15 hover:border-gold-500/15"
                         }`}
                       >
-                        <h4 className="text-sm font-medium text-cream-100 mb-1">
+                        <h4 className="text-sm font-medium text-cream-100 mb-1.5">
                           {service.title}
                         </h4>
-                        <p className="text-xs text-cream-300/40 leading-relaxed">
+                        <p className="text-xs text-cream-300/35 leading-relaxed font-light italic">
                           {service.summary}
                         </p>
                       </button>
@@ -346,20 +368,23 @@ export default function BookingFlow() {
 
               {currentStep === "tier" && (
                 <div className="space-y-4">
-                  <h3 className="font-serif text-xl text-cream-50 mb-6">
-                    Choose Your Engagement Tier
+                  <h3 className="font-serif text-xl text-cream-50 mb-2">
+                    Choose Your Engagement Model
                   </h3>
-                  <div className="grid grid-cols-1 gap-4">
+                  <p className="text-xs text-cream-300/30 font-light mb-6">
+                    Select the engagement structure that best fits your timeline and scope requirements.
+                  </p>
+                  <div className="grid grid-cols-1 gap-3">
                     {tiersData.map((tier) => (
                       <button
                         key={tier.id}
                         onClick={() =>
                           setBooking({ ...booking, tier: tier.id })
                         }
-                        className={`text-left border p-6 transition-all duration-300 ${
+                        className={`text-left border p-7 transition-all duration-300 ${
                           booking.tier === tier.id
-                            ? "border-gold-500/40 bg-gold-500/5"
-                            : "border-gold-500/10 bg-navy-900/20 hover:border-gold-500/20"
+                            ? "border-gold-500/35 bg-gold-500/5"
+                            : "border-gold-500/8 bg-navy-900/15 hover:border-gold-500/15"
                         }`}
                       >
                         <div className="flex items-baseline justify-between mb-2">
@@ -370,8 +395,11 @@ export default function BookingFlow() {
                             {tier.price}
                           </span>
                         </div>
-                        <p className="text-xs text-cream-300/40">
+                        <p className="text-xs text-cream-300/35 font-light">
                           {tier.type} &middot; {tier.priceNote}
+                        </p>
+                        <p className="text-xs text-cream-300/25 font-light mt-2 leading-relaxed">
+                          {tier.description}
                         </p>
                       </button>
                     ))}
@@ -381,11 +409,14 @@ export default function BookingFlow() {
 
               {currentStep === "schedule" && (
                 <div className="space-y-6">
-                  <h3 className="font-serif text-xl text-cream-50 mb-6">
-                    Select a Date & Time
+                  <h3 className="font-serif text-xl text-cream-50 mb-2">
+                    Select a Preferred Date & Time
                   </h3>
+                  <p className="text-xs text-cream-300/30 font-light mb-6">
+                    All times are Eastern. Your partner's office will confirm availability within 24 hours.
+                  </p>
                   <div>
-                    <label className="text-xs font-medium tracking-widest uppercase text-cream-200/60 mb-3 block">
+                    <label className="text-[11px] font-medium tracking-[0.15em] uppercase text-cream-200/40 mb-3 block">
                       Available Dates
                     </label>
                     <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-2">
@@ -393,10 +424,10 @@ export default function BookingFlow() {
                         <button
                           key={d}
                           onClick={() => setBooking({ ...booking, date: d })}
-                          className={`py-2.5 px-2 text-xs text-center border transition-all ${
+                          className={`py-3 px-2 text-xs text-center border transition-all ${
                             booking.date === d
-                              ? "border-gold-500/40 bg-gold-500/10 text-gold-400"
-                              : "border-gold-500/10 text-cream-300/50 hover:border-gold-500/20"
+                              ? "border-gold-500/35 bg-gold-500/8 text-gold-400"
+                              : "border-gold-500/8 text-cream-300/40 hover:border-gold-500/15"
                           }`}
                         >
                           {formatDate(d)}
@@ -405,7 +436,7 @@ export default function BookingFlow() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium tracking-widest uppercase text-cream-200/60 mb-3 block">
+                    <label className="text-[11px] font-medium tracking-[0.15em] uppercase text-cream-200/40 mb-3 block">
                       Preferred Time (ET)
                     </label>
                     <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -413,10 +444,10 @@ export default function BookingFlow() {
                         <button
                           key={t}
                           onClick={() => setBooking({ ...booking, time: t })}
-                          className={`py-2.5 px-2 text-xs border transition-all ${
+                          className={`py-3 px-2 text-xs border transition-all ${
                             booking.time === t
-                              ? "border-gold-500/40 bg-gold-500/10 text-gold-400"
-                              : "border-gold-500/10 text-cream-300/50 hover:border-gold-500/20"
+                              ? "border-gold-500/35 bg-gold-500/8 text-gold-400"
+                              : "border-gold-500/8 text-cream-300/40 hover:border-gold-500/15"
                           }`}
                         >
                           {t}
@@ -429,97 +460,129 @@ export default function BookingFlow() {
 
               {currentStep === "details" && (
                 <div className="space-y-6">
-                  <h3 className="font-serif text-xl text-cream-50 mb-6">
-                    Your Contact Information
+                  <h3 className="font-serif text-xl text-cream-50 mb-2">
+                    Your Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Full Name *"
-                      value={booking.name}
+                  <p className="text-xs text-cream-300/30 font-light mb-6">
+                    This information is used solely for partner assignment and pre-session preparation.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="text-[11px] tracking-[0.15em] uppercase text-cream-300/35 mb-2 block font-medium">Full Name *</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Sarah Chen"
+                        value={booking.name}
+                        onChange={(e) =>
+                          setBooking({ ...booking, name: e.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] tracking-[0.15em] uppercase text-cream-300/35 mb-2 block font-medium">Email Address *</label>
+                      <input
+                        type="email"
+                        placeholder="e.g. s.chen@company.com"
+                        value={booking.email}
+                        onChange={(e) =>
+                          setBooking({ ...booking, email: e.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="text-[11px] tracking-[0.15em] uppercase text-cream-300/35 mb-2 block font-medium">Organization</label>
+                      <input
+                        type="text"
+                        placeholder="Company or fund name"
+                        value={booking.company}
+                        onChange={(e) =>
+                          setBooking({ ...booking, company: e.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] tracking-[0.15em] uppercase text-cream-300/35 mb-2 block font-medium">Phone</label>
+                      <input
+                        type="tel"
+                        placeholder="Direct line preferred"
+                        value={booking.phone}
+                        onChange={(e) =>
+                          setBooking({ ...booking, phone: e.target.value })
+                        }
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[11px] tracking-[0.15em] uppercase text-cream-300/35 mb-2 block font-medium">Pre-Session Context</label>
+                    <textarea
+                      placeholder="Briefly describe the strategic challenge or decision you'd like to discuss. This helps your assigned partner prepare a more productive session."
+                      rows={4}
+                      value={booking.notes}
                       onChange={(e) =>
-                        setBooking({ ...booking, name: e.target.value })
+                        setBooking({ ...booking, notes: e.target.value })
                       }
-                      className={inputClass}
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email Address *"
-                      value={booking.email}
-                      onChange={(e) =>
-                        setBooking({ ...booking, email: e.target.value })
-                      }
-                      className={inputClass}
+                      className={`${inputClass} resize-none`}
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Company"
-                      value={booking.company}
-                      onChange={(e) =>
-                        setBooking({ ...booking, company: e.target.value })
-                      }
-                      className={inputClass}
-                    />
-                    <input
-                      type="tel"
-                      placeholder="Phone"
-                      value={booking.phone}
-                      onChange={(e) =>
-                        setBooking({ ...booking, phone: e.target.value })
-                      }
-                      className={inputClass}
-                    />
-                  </div>
-                  <textarea
-                    placeholder="Any additional notes or context for your consultation"
-                    rows={4}
-                    value={booking.notes}
-                    onChange={(e) =>
-                      setBooking({ ...booking, notes: e.target.value })
-                    }
-                    className={`${inputClass} resize-none`}
-                  />
                 </div>
               )}
 
               {currentStep === "confirmation" && (
                 <div className="space-y-6">
-                  <h3 className="font-serif text-xl text-cream-50 mb-6">
-                    Review Your Booking
+                  <h3 className="font-serif text-xl text-cream-50 mb-2">
+                    Review Your Consultation Request
                   </h3>
-                  <div className="border border-gold-500/10 bg-navy-900/30 p-8 space-y-4">
-                    <div className="flex justify-between text-sm border-b border-gold-500/5 pb-3">
-                      <span className="text-cream-300/50">Service</span>
+                  <p className="text-xs text-cream-300/30 font-light mb-6">
+                    Please confirm the details below. You will receive a confirmation email with pre-session materials within 24 hours.
+                  </p>
+                  <div className="border border-gold-500/8 bg-navy-900/20 p-8 lg:p-10 space-y-5">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cream-300/40 font-light">Practice Area</span>
                       <span className="text-cream-100">{selectedService?.title}</span>
                     </div>
-                    <div className="flex justify-between text-sm border-b border-gold-500/5 pb-3">
-                      <span className="text-cream-300/50">Engagement Tier</span>
+                    <div className="w-full h-px bg-gold-500/5" />
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cream-300/40 font-light">Engagement Model</span>
                       <span className="text-cream-100">
-                        {selectedTier?.name} — {selectedTier?.price}
+                        {selectedTier?.name} &mdash; {selectedTier?.price}
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm border-b border-gold-500/5 pb-3">
-                      <span className="text-cream-300/50">Date & Time</span>
+                    <div className="w-full h-px bg-gold-500/5" />
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cream-300/40 font-light">Preferred Date & Time</span>
                       <span className="text-cream-100">
                         {formatDate(booking.date)} at {booking.time} ET
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm border-b border-gold-500/5 pb-3">
-                      <span className="text-cream-300/50">Name</span>
+                    <div className="w-full h-px bg-gold-500/5" />
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cream-300/40 font-light">Name</span>
                       <span className="text-cream-100">{booking.name}</span>
                     </div>
-                    <div className="flex justify-between text-sm border-b border-gold-500/5 pb-3">
-                      <span className="text-cream-300/50">Email</span>
+                    <div className="w-full h-px bg-gold-500/5" />
+                    <div className="flex justify-between text-sm">
+                      <span className="text-cream-300/40 font-light">Email</span>
                       <span className="text-cream-100">{booking.email}</span>
                     </div>
                     {booking.company && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-cream-300/50">Company</span>
-                        <span className="text-cream-100">{booking.company}</span>
-                      </div>
+                      <>
+                        <div className="w-full h-px bg-gold-500/5" />
+                        <div className="flex justify-between text-sm">
+                          <span className="text-cream-300/40 font-light">Organization</span>
+                          <span className="text-cream-100">{booking.company}</span>
+                        </div>
+                      </>
                     )}
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-cream-300/25 tracking-wide">
+                    <Shield size={12} />
+                    All engagement details are held in strict confidence.
                   </div>
                 </div>
               )}
@@ -532,13 +595,13 @@ export default function BookingFlow() {
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-10">
+          <div className="flex items-center justify-between mt-12">
             <button
               onClick={goBack}
               disabled={stepIndex === 0}
-              className="flex items-center gap-2 text-sm text-cream-300/50 hover:text-gold-400 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 text-[11px] tracking-wider uppercase text-cream-300/40 hover:text-gold-400 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={14} />
               Back
             </button>
 
@@ -546,18 +609,18 @@ export default function BookingFlow() {
               <button
                 onClick={handleConfirm}
                 disabled={submitting}
-                className="px-8 py-3 bg-gold-500/90 text-navy-950 text-sm font-medium tracking-widest uppercase hover:bg-gold-400 transition-all duration-300 disabled:opacity-50"
+                className="px-10 py-3.5 bg-gold-500/90 text-navy-950 text-xs font-medium tracking-[0.2em] uppercase hover:bg-gold-400 transition-all duration-300 disabled:opacity-50"
               >
-                {submitting ? "Confirming..." : "Confirm Booking"}
+                {submitting ? "Confirming..." : "Confirm & Reserve"}
               </button>
             ) : (
               <button
                 onClick={goNext}
                 disabled={!canProceed()}
-                className="flex items-center gap-2 px-8 py-3 bg-gold-500/90 text-navy-950 text-sm font-medium tracking-widest uppercase hover:bg-gold-400 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-10 py-3.5 bg-gold-500/90 text-navy-950 text-xs font-medium tracking-[0.2em] uppercase hover:bg-gold-400 transition-all duration-300 disabled:opacity-20 disabled:cursor-not-allowed"
               >
-                Next
-                <ArrowRight size={16} />
+                Continue
+                <ArrowRight size={14} />
               </button>
             )}
           </div>

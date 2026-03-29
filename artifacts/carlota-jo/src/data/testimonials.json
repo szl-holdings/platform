@@ -1,37 +1,42 @@
 [
   {
     "id": 1,
-    "quote": "They challenged our assumptions and transformed our trajectory. Strategic rigor like nothing we'd seen before.",
+    "quote": "They challenged our assumptions with the kind of intellectual rigor we'd only seen from top-tier firms. The strategic options analysis fundamentally changed our trajectory and positioned us two years ahead of our competitive set.",
     "name": "Marcus Haverford",
     "title": "Chief Executive Officer",
-    "company": "Meridian Capital Partners"
+    "company": "Meridian Capital Partners",
+    "context": "Private Equity, $6.2B AUM"
   },
   {
     "id": 2,
-    "quote": "Boardroom thinking with operational grit. The portfolio restructuring generated extraordinary shareholder value.",
+    "quote": "Boardroom-caliber thinking with genuine operational depth. The portfolio restructuring work generated extraordinary shareholder value and gave our board the conviction to execute a transformative divestiture program.",
     "name": "Elena Vasquez-Chen",
-    "title": "Managing Director",
-    "company": "Northwell Industries"
+    "title": "Managing Director & Group CFO",
+    "company": "Northwell Industrial Holdings",
+    "context": "Diversified Industrials, FTSE 250"
   },
   {
     "id": 3,
-    "quote": "Their customer segmentation work alone was worth the entire engagement. It changed how we see our market.",
+    "quote": "Their customer segmentation methodology was unlike anything we'd seen from prior engagements. The jobs-to-be-done framework alone was worth the entire engagement fee — it fundamentally reframed how we see our addressable market.",
     "name": "James Thornton",
-    "title": "President & COO",
-    "company": "Aether Technologies"
+    "title": "President & Chief Operating Officer",
+    "company": "Aether Technologies",
+    "context": "Enterprise SaaS, Series D"
   },
   {
     "id": 4,
-    "quote": "Thorough diligence, sharp negotiation support, exceptional terms. Would engage again without hesitation.",
+    "quote": "Thorough commercial diligence, incisive negotiation support, and exceptional terms on a complex cross-border transaction. We secured exclusivity against two larger bidders. Would engage again without hesitation.",
     "name": "Dr. Priya Nair",
     "title": "Chief Strategy Officer",
-    "company": "Luminos Pharmaceuticals"
+    "company": "Luminos Pharmaceuticals",
+    "context": "Specialty Pharma, NYSE-listed"
   },
   {
     "id": 5,
-    "quote": "Genuine technical depth with business acumen — remarkably rare. They delivered measurable outcomes, not just decks.",
+    "quote": "Rare combination of genuine technical depth and commercial acumen. They delivered a transformation roadmap with measurable ROI milestones — not the 200-page strategy deck we feared. Fourteen months in, we're ahead of every benchmark they set.",
     "name": "Richard Belmont",
     "title": "Chairman of the Board",
-    "company": "Continental Financial Group"
+    "company": "Continental Financial Group",
+    "context": "Financial Services, $28B Assets"
   }
 ]

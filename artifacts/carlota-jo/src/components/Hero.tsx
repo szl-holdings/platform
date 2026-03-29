@@ -21,8 +21,8 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
         >
-          <p className="text-xs font-medium tracking-[0.3em] uppercase text-gold-400/80 mb-8">
-            Strategy &bull; Portfolio &bull; Transformation
+          <p className="text-[11px] font-medium tracking-[0.4em] uppercase text-gold-400/70 mb-10">
+            Strategic Advisory &bull; Portfolio Optimization &bull; Enterprise Transformation
           </p>
         </motion.div>
 
@@ -30,7 +30,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-          className="font-serif text-5xl md:text-7xl lg:text-8xl font-light text-cream-50 leading-[1.1] mb-8"
+          className="font-serif text-5xl md:text-7xl lg:text-[5.5rem] font-light text-cream-50 leading-[1.08] mb-8"
         >
           Counsel for
           <br />
@@ -43,30 +43,40 @@ export default function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="text-lg md:text-xl text-cream-200/50 font-light max-w-2xl mx-auto leading-relaxed mb-12"
+          className="text-base md:text-lg text-cream-200/45 font-light max-w-2xl mx-auto leading-relaxed mb-6"
         >
-          Enterprise strategy. Measurable outcomes.
+          Trusted by boards and leadership teams at Fortune 500 companies,
+          sovereign wealth funds, and private equity portfolios.
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+          className="text-sm text-cream-300/30 font-light max-w-xl mx-auto leading-relaxed mb-14"
+        >
+          Rigorous strategy. Proprietary frameworks. Measurable outcomes.
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-5"
         >
           <a
             href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/book`}
-            className="px-8 py-3.5 bg-gold-500/90 text-navy-950 text-sm font-medium tracking-widest uppercase hover:bg-gold-400 transition-all duration-300"
+            className="px-10 py-4 bg-gold-500/90 text-navy-950 text-xs font-medium tracking-[0.2em] uppercase hover:bg-gold-400 transition-all duration-300"
           >
-            Schedule Consultation
+            Request a Consultation
           </a>
           <button
             onClick={() =>
               document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })
             }
-            className="px-8 py-3.5 border border-cream-200/20 text-cream-200/70 text-sm font-medium tracking-widest uppercase hover:border-gold-500/40 hover:text-gold-400 transition-all duration-300"
+            className="px-10 py-4 border border-cream-200/15 text-cream-200/60 text-xs font-medium tracking-[0.2em] uppercase hover:border-gold-500/40 hover:text-gold-400 transition-all duration-300"
           >
-            Our Services
+            Explore Capabilities
           </button>
         </motion.div>
       </div>
