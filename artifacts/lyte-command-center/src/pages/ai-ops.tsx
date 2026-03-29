@@ -34,10 +34,10 @@ export default function AIOps() {
   };
 
   const forecastData = [
-    { label: "P1 Incidents (7d)", value: 2, trend: "stable", confidence: 87 },
-    { label: "P2 Incidents (7d)", value: 5, trend: "increasing", confidence: 72 },
-    { label: "System Alerts (7d)", value: 18, trend: "decreasing", confidence: 81 },
-    { label: "SLA Breach Risk", value: 12, trend: "stable", confidence: 90 },
+    { label: "SEV-1 Incidents (7d)", value: 3, trend: "increasing", confidence: 91, detail: "Based on replication lag pattern + payment pipeline stress" },
+    { label: "SEV-2 Incidents (7d)", value: 8, trend: "increasing", confidence: 78, detail: "EKS capacity pressure + Redis eviction rate trending up" },
+    { label: "Infrastructure Alerts (7d)", value: 47, trend: "increasing", confidence: 84, detail: "NAT Gateway costs + node group scaling events accelerating" },
+    { label: "SLA Breach Probability", value: 23, trend: "increasing", confidence: 93, detail: "99.95% target at risk — error budget 62% consumed with 8 days remaining" },
   ];
 
   return (
@@ -47,7 +47,7 @@ export default function AIOps() {
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <Brain className="w-7 h-7 text-cyan-400" /> AI Operations Center
           </h2>
-          <p className="text-sm text-slate-400 mt-1">Streaming situation reports, anomaly detection, and predictive incident forecasting</p>
+          <p className="text-sm text-slate-400 mt-1">ML-driven anomaly detection, predictive incident forecasting, and automated SRE intelligence</p>
         </div>
         <span className="inline-flex items-center gap-2 text-xs text-cyan-400 bg-cyan-400/10 px-3 py-1.5 rounded-full border border-cyan-400/20">
           <Radio className="w-3 h-3 animate-pulse" /> Ops Active
@@ -101,9 +101,10 @@ export default function AIOps() {
                   }`}>{f.trend}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-white">{f.value}</span>
+                  <span className="text-2xl font-bold text-white">{f.value}{f.label.includes("Probability") ? "%" : ""}</span>
                   <span className="text-xs text-slate-500">{f.confidence}% confidence</span>
                 </div>
+                {(f as any).detail && <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">{(f as any).detail}</p>}
               </div>
             ))}
           </div>
@@ -141,10 +142,10 @@ export default function AIOps() {
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "System Load", value: 67, color: "cyan" as const },
-            { label: "Error Rate", value: 3, color: "emerald" as const },
-            { label: "API Latency", value: 42, color: "blue" as const },
-            { label: "Queue Depth", value: 28, color: "violet" as const },
+            { label: "EKS Cluster Load", value: 87, color: "cyan" as const },
+            { label: "Error Budget Burn", value: 62, color: "emerald" as const },
+            { label: "API p99 (norm)", value: 74, color: "blue" as const },
+            { label: "Kafka Consumer Lag", value: 41, color: "violet" as const },
           ].map((g) => (
             <div key={g.label} className="bg-glass rounded-xl p-4 flex flex-col items-center">
               <AnimatedGauge value={g.value} label={g.label} color={g.color} size={90} />

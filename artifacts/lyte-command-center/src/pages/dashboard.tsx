@@ -40,11 +40,15 @@ function buildSummary() {
     pendingRecommendationCount: pendingRecs.length,
     recentSignals: [...mockDb.signals].sort((a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime()).slice(0, 5),
     recentIncidents: [...mockDb.incidents].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
-    chartData: Array.from({ length: 7 }).map((_, i) => ({
-      name: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'short' }),
-      signals: Math.floor(Math.random() * 50) + 10,
-      incidents: Math.floor(Math.random() * 5)
-    }))
+    chartData: [
+      { name: "Mon", signals: 1847, incidents: 3 },
+      { name: "Tue", signals: 2104, incidents: 5 },
+      { name: "Wed", signals: 1923, incidents: 2 },
+      { name: "Thu", signals: 2891, incidents: 8 },
+      { name: "Fri", signals: 3247, incidents: 12 },
+      { name: "Sat", signals: 1456, incidents: 4 },
+      { name: "Sun", signals: 1102, incidents: 2 },
+    ]
   };
 }
 
@@ -74,8 +78,8 @@ export default function Dashboard() {
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex justify-between items-end mb-8">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h2 className="text-3xl font-display font-bold text-white mb-2">Executive Overview</h2>
-          <p className="text-slate-400 text-lg">System operations and health telemetry across the SZL portfolio.</p>
+          <h2 className="text-3xl font-display font-bold text-white mb-2">Operations Command</h2>
+          <p className="text-slate-400 text-lg">Real-time infrastructure telemetry across 4 regions, 47 services, 12 Kubernetes clusters.</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -95,10 +99,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard title="Total Signals (24h)" value={data.totalSignals} icon={Activity} trend="+12%" color="cyan" delay={0} />
-        <MetricCard title="Critical Signals" value={data.criticalSignalCount} icon={ShieldAlert} trend="+2" color="red" delay={0.1} pulse />
-        <MetricCard title="Open Incidents" value={data.openIncidentCount} icon={AlertTriangle} trend="-1" color="orange" delay={0.2} />
-        <MetricCard title="Pending Actions" value={data.pendingRecommendationCount} icon={Lightbulb} trend="0" color="blue" delay={0.3} />
+        <MetricCard title="Active Signal Sources" value={data.totalSignals} icon={Activity} trend="+18%" color="cyan" delay={0} />
+        <MetricCard title="Critical Alerts" value={data.criticalSignalCount} icon={ShieldAlert} trend="+3" color="red" delay={0.1} pulse />
+        <MetricCard title="Active Incidents" value={data.openIncidentCount} icon={AlertTriangle} trend="+4" color="orange" delay={0.2} />
+        <MetricCard title="Open Recommendations" value={data.pendingRecommendationCount} icon={Lightbulb} trend="+2" color="blue" delay={0.3} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -113,7 +117,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-6 relative z-10">
             <div>
               <h3 className="text-xl font-display font-semibold text-white">Signal Volume</h3>
-              <p className="text-sm text-slate-400">Aggregated events over the last 7 days</p>
+              <p className="text-sm text-slate-400">Aggregated signal volume and incident count over the last 7 days</p>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <span className="w-3 h-0.5 bg-cyan-500 rounded-full" />
@@ -200,10 +204,10 @@ export default function Dashboard() {
         className="grid grid-cols-2 lg:grid-cols-4 gap-4"
       >
         {[
-          { label: "Mean Response", value: "4.2m", sub: "↓ 12% from last week" },
-          { label: "Signal Throughput", value: "847/hr", sub: "Peak: 1.2k/hr" },
-          { label: "SLA Compliance", value: "98.4%", sub: "Target: 99%" },
-          { label: "Active Playbooks", value: String(mockDb.playbooks?.length || 6), sub: "2 triggered today" },
+          { label: "MTTR (SEV-1)", value: "23m", sub: "↓ 18% vs. 30-day avg (28m)" },
+          { label: "Signal Throughput", value: "2.4k/hr", sub: "Peak: 4.1k/hr (14:00 UTC)" },
+          { label: "Error Budget", value: "38%", sub: "8 days remaining in window" },
+          { label: "Active Runbooks", value: String(mockDb.playbooks?.length || 8), sub: "3 triggered in last 24h" },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}

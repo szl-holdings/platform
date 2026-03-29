@@ -55,7 +55,7 @@ export default function Recommendations() {
       <div className="mb-10 flex items-end justify-between">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h2 className="text-3xl font-display font-bold text-white mb-2">AI Engine Recommendations</h2>
-          <p className="text-slate-400">Actionable insights synthesized from across the SZL workspace.</p>
+          <p className="text-slate-400">Cost optimization, compliance, and reliability insights based on infrastructure telemetry analysis.</p>
         </motion.div>
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3">
           {highImpact > 0 && (
@@ -109,6 +109,20 @@ export default function Recommendations() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3 leading-tight group-hover:text-cyan-50 transition-colors">{rec.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed mb-4">{rec.description}</p>
+
+                {(rec as any).savings && (
+                  <div className="flex items-center gap-2 mb-3 text-xs text-emerald-400 bg-emerald-400/5 px-3 py-1.5 rounded-lg border border-emerald-400/10">
+                    <DollarSign className="w-3 h-3" />
+                    <span className="font-semibold">{(rec as any).savings}</span>
+                    <span className="text-slate-500">estimated savings</span>
+                  </div>
+                )}
+                {(rec as any).compliance && (
+                  <div className="flex items-center gap-2 mb-3 text-xs text-violet-400 bg-violet-400/5 px-3 py-1.5 rounded-lg border border-violet-400/10">
+                    <Shield className="w-3 h-3" />
+                    <span className="font-medium">{(rec as any).compliance}</span>
+                  </div>
+                )}
 
                 <div className="mb-2">
                   <div className="flex items-center justify-between text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">
