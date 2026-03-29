@@ -39,8 +39,8 @@ export default function Milestones() {
     <Shell>
       <div className="p-8 pb-20 space-y-8">
         <header>
-          <h1 className="text-4xl font-display font-bold text-white tracking-tight">Milestone Tracker</h1>
-          <p className="text-muted-foreground mt-2 text-lg">Project delivery timeline and critical path items.</p>
+          <h1 className="text-4xl font-display font-bold text-white tracking-tight">Program Milestones</h1>
+          <p className="text-muted-foreground mt-2 text-lg">Transformation program delivery timeline aligned with NIST CSF implementation tiers.</p>
         </header>
 
         <div className="glass-panel rounded-3xl p-2 md:p-6 overflow-hidden relative">

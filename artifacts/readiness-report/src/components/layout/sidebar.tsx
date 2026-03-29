@@ -55,9 +55,9 @@ const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/scorecards", label: "Scorecards", icon: Target },
   { href: "/milestones", label: "Milestones", icon: GitCommit },
-  { href: "/risks", label: "Risks & Blockers", icon: ShieldAlert },
-  { href: "/alerts", label: "Alerting Center", icon: BellRing },
-  { href: "/trends", label: "Trend History", icon: TrendingUp },
+  { href: "/risks", label: "Risk Register", icon: ShieldAlert },
+  { href: "/alerts", label: "Compliance Alerts", icon: BellRing },
+  { href: "/trends", label: "Maturity Trajectory", icon: TrendingUp },
   { href: "/rollup", label: "Executive Rollup", icon: FileBarChart },
   { href: "/ai-insights", label: "AI Insights", icon: Sparkles },
 ];
@@ -73,7 +73,7 @@ export function Sidebar() {
         </div>
         <div>
           <h1 className="font-display font-bold text-lg leading-tight text-white tracking-wide">SZL Readiness</h1>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Portfolio View</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Command Center</p>
         </div>
       </div>
       
@@ -116,12 +116,12 @@ export function Sidebar() {
       <div className="p-4 border-t border-white/5">
         <div className="bg-card rounded-xl p-4 border border-white/5 shadow-inner">
           <div className="text-xs font-medium text-muted-foreground mb-1">Active Program</div>
-          <div className="font-semibold text-white text-sm truncate">Project Apollo</div>
+          <div className="font-semibold text-white text-sm truncate">Zero-Trust Architecture Migration</div>
           <div className="flex items-center gap-2 mt-2">
             <div className="h-1.5 flex-1 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-primary rounded-full w-[82.5%]" />
+              <div className="h-full bg-primary rounded-full w-[74.3%]" />
             </div>
-            <span className="text-xs font-bold text-primary">82.5</span>
+            <span className="text-xs font-bold text-primary">74.3</span>
           </div>
         </div>
       </div>

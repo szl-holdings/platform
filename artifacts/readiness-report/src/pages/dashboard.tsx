@@ -67,11 +67,11 @@ export default function Dashboard() {
       <div className="p-8 pb-20 space-y-8">
         <header className="flex items-end justify-between">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Portfolio Readiness</h1>
-            <p className="text-muted-foreground mt-2 text-lg">Executive overview of active transformation programs.</p>
+            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Readiness Posture</h1>
+            <p className="text-muted-foreground mt-2 text-lg">Organizational readiness across NIST CSF, ISO 27001, and CMMC frameworks.</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="text-right">
-            <div className="text-sm font-medium text-muted-foreground mb-1">Active Context</div>
+            <div className="text-sm font-medium text-muted-foreground mb-1">Active Program</div>
             <div className="bg-card border border-white/10 px-4 py-2 rounded-xl text-white font-medium shadow-lg flex items-center gap-2">
               <Activity className="w-4 h-4 text-primary" />
               {activeProgram?.name}
@@ -118,9 +118,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-white font-display">Dimension Performance</h3>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-primary" /> On Target</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-primary" /> Meets Tier Target</span>
                 <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(38, 92%, 50%)' }} /> Near Target</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-destructive" /> Below Target</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-destructive" /> Below Tier Target</span>
               </div>
             </div>
             <div className="flex-1 w-full min-h-[300px]">

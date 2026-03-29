@@ -37,7 +37,7 @@ export default function Scorecards() {
         <header className="flex items-end justify-between">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
             <h1 className="text-4xl font-display font-bold text-white tracking-tight">Domain Scorecards</h1>
-            <p className="text-muted-foreground mt-2 text-lg">Detailed breakdown across all maturity dimensions.</p>
+            <p className="text-muted-foreground mt-2 text-lg">Maturity assessment across NIST CSF, ISO 27001, and CMMC control domains.</p>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3">
             <div className="text-right">
@@ -60,7 +60,7 @@ export default function Scorecards() {
             className="xl:col-span-1 glass-panel rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-            <h3 className="text-lg font-semibold text-white mb-6 font-display w-full text-left relative z-10">Portfolio Radar</h3>
+            <h3 className="text-lg font-semibold text-white mb-6 font-display w-full text-left relative z-10">Framework Coverage Radar</h3>
             <div className="w-full h-[350px] relative z-10">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>

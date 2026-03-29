@@ -38,8 +38,8 @@ export default function Risks() {
       <div className="p-8 pb-20 space-y-8">
         <header className="flex justify-between items-end">
           <div>
-            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Risks & Blockers</h1>
-            <p className="text-muted-foreground mt-2 text-lg">Active threats to readiness and their mitigation plans.</p>
+            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Risk Register</h1>
+            <p className="text-muted-foreground mt-2 text-lg">Active threats to organizational readiness with enterprise risk management mitigation strategies.</p>
           </div>
           <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl font-semibold transition-colors shadow-lg shadow-primary/20 flex items-center gap-2">
             <ShieldAlert className="w-4 h-4" /> Log Risk

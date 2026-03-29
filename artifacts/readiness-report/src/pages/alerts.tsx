@@ -33,8 +33,8 @@ export default function Alerts() {
       <div className="p-8 pb-20 space-y-8 max-w-4xl mx-auto">
         <header className="flex justify-between items-end border-b border-white/10 pb-6">
           <div>
-            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Alerting Center</h1>
-            <p className="text-muted-foreground mt-2">Notifications regarding readiness degradation and events.</p>
+            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Compliance & Readiness Alerts</h1>
+            <p className="text-muted-foreground mt-2">Framework compliance notifications, threshold breaches, and readiness degradation events.</p>
           </div>
           <div className="bg-card px-4 py-2 rounded-lg border border-white/5 text-sm font-medium">
             <span className="text-primary font-bold mr-2">{alerts?.filter(a => !a.isRead).length}</span> 

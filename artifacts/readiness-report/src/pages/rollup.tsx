@@ -120,8 +120,8 @@ export default function Rollup() {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-primary/20 to-transparent" />
             <h3 className="text-2xl font-display font-bold text-white mb-6">Strategic Assessment</h3>
             <div className="space-y-4">
-              <p className="text-muted-foreground leading-relaxed">The overall portfolio is currently tracking at an acceptable readiness level, though significant variance exists between dimensions. Security and Compliance remain strong pillars with scores above 90.</p>
-              <p className="text-muted-foreground leading-relaxed">However, <strong className="text-white">Team Competency</strong> and <strong className="text-white">Operational Readiness</strong> require immediate leadership attention. Key staff attrition has introduced a critical risk that endangers upcoming Phase 2 milestones if not mitigated swiftly.</p>
+              <p className="text-muted-foreground leading-relaxed">The Zero-Trust Architecture Migration is tracking at NIST CSF Tier 2 (Risk Informed) with a composite readiness index of 74.3 against a Tier 3 (Repeatable) target of 90. Governance & Policy (ISO 27001 A.5) and Data Protection (ISO 27001 A.8) are performing above threshold, indicating strong ISMS foundation.</p>
+              <p className="text-muted-foreground leading-relaxed">However, <strong className="text-white">Workforce Cyber Readiness</strong> (58, below CMMC Level 3 minimum) and <strong className="text-white">Supply Chain Risk</strong> (64, NIST CSF ID.SC) require immediate executive intervention. Critical cybersecurity talent attrition and unresolved SBOM compliance gaps per EO 14028 threaten the Phase 2 deployment timeline and FedRAMP ATO submission schedule.</p>
             </div>
           </motion.div>
 
@@ -138,9 +138,10 @@ export default function Rollup() {
             </h3>
             <ul className="space-y-5">
               {[
-                "Approve emergency budget for external contractors to backfill departing cloud architects (Risk: R_1).",
-                "Escalate vendor SLA dispute regarding the monitoring tool deployment delay to VP level.",
-                "Reschedule overdue User Training Seminars to unblock final system handover.",
+                "Authorize Booz Allen Hamilton interim engagement for Zero Trust architecture consulting. Activate SANS workforce pipeline to backfill two departing CISSP-certified architects (Risk R-1, CMMC Impact: HIGH).",
+                "Direct legal counsel to complete updated DPIA under GDPR/Schrems II for AWS GovCloud migration. Implement CloudHSM key sovereignty controls before EU data transfer deadline (Risk R-3, Regulatory Impact: SEVERE).",
+                "Mandate 100% completion of NICE-aligned security awareness training within 14 days. Current 62% completion rate blocks NIST SP 800-50 compliance and FedRAMP ATO package submission.",
+                "Commission SBOM audit per EO 14028 for all Tier 1 vendor dependencies. 41% of deployed applications lack validated SBOMs, creating SolarWinds/Log4j-class supply chain exposure (Risk R-5).",
               ].map((text, i) => (
                 <motion.li
                   key={i}

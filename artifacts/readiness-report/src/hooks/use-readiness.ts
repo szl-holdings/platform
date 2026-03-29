@@ -17,7 +17,6 @@ import {
 // Simulate network delay
 const delay = (ms = 400) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Helper to filter by active program (default to first one for demo)
 const ACTIVE_PROGRAM_ID = "p_1";
 
 export function usePrograms() {

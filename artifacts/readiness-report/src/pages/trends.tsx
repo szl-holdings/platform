@@ -49,8 +49,8 @@ export default function Trends() {
       <div className="p-8 pb-20 space-y-8">
         <header className="flex items-end justify-between">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Trend History</h1>
-            <p className="text-muted-foreground mt-2 text-lg">Readiness score progression over time.</p>
+            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Maturity Trajectory</h1>
+            <p className="text-muted-foreground mt-2 text-lg">NIST CSF tier progression and control maturity trends over assessment cycles.</p>
           </motion.div>
         </header>
 
