@@ -13,7 +13,7 @@ export function Footer() {
               <span className="font-serif font-semibold text-2xl">SZL Holdings</span>
             </div>
             <p className="text-muted-foreground max-w-sm mb-8 leading-relaxed">
-              Building the future of integrated technology. Elevating brands, scaling systems, and driving innovation across the digital ecosystem.
+              A vertically integrated technology company building enterprise-grade platforms across maritime intelligence, cybersecurity, commerce, and creative production.
             </p>
             <div className="flex items-center gap-4">
               <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">

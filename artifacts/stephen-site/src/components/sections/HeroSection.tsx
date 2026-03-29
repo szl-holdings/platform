@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetStephenProfile } from "@workspace/api-client-react";
 import { useRef, useEffect } from "react";
@@ -32,8 +32,8 @@ function GeometricMesh() {
       nodes.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
         radius: Math.random() * 2 + 1,
       });
     }
@@ -59,7 +59,7 @@ function GeometricMesh() {
           const dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist) {
-            const opacity = 0.12 * (1 - dist / connectionDist);
+            const opacity = 0.08 * (1 - dist / connectionDist);
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
@@ -71,7 +71,7 @@ function GeometricMesh() {
       });
 
       nodes.forEach((node) => {
-        const pulse = 0.4 + Math.sin(time * 2 + node.x * 0.01) * 0.3;
+        const pulse = 0.3 + Math.sin(time * 2 + node.x * 0.01) * 0.2;
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${goldColor.r}, ${goldColor.g}, ${goldColor.b}, ${pulse})`;
@@ -98,7 +98,7 @@ const textReveal = {
     y: 0,
     filter: "blur(0px)",
     transition: {
-      duration: 0.8,
+      duration: 0.9,
       delay: 0.3 + i * 0.15,
       ease: [0.25, 0.4, 0.25, 1],
     },
@@ -115,7 +115,7 @@ export function HeroSection() {
   const fallback = {
     name: "Stephen Lutar",
     title: "Founder & CEO, SZL Holdings",
-    tagline: "Building the future of integrated technology",
+    tagline: "I build the systems that power enterprises. From fintech platforms processing millions in transactions to maritime intelligence tracking global fleets — I architect, ship, and scale technology that moves industries forward.",
   };
 
   const name = profile?.name || fallback.name;
@@ -127,22 +127,22 @@ export function HeroSection() {
       <GeometricMesh />
 
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary/15 rounded-full blur-[150px] animate-hero-glow" />
-        <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] bg-yellow-600/10 rounded-full blur-[130px] animate-hero-glow-delayed" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[180px] animate-hero-float" />
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary/12 rounded-full blur-[150px] animate-hero-glow" />
+        <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] bg-yellow-600/8 rounded-full blur-[130px] animate-hero-glow-delayed" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-[180px] animate-hero-float" />
       </div>
 
       <motion.div style={{ y, opacity }} className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <div className="max-w-4xl">
+        <div className="max-w-5xl">
           <motion.div
             custom={0}
             initial="hidden"
             animate="visible"
             variants={textReveal}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8 border-primary/30 group cursor-default">
-              <Sparkles className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium text-primary">Available for Consulting</span>
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass-panel mb-10 border-primary/20">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-sm font-medium text-foreground/70 tracking-wide">Founder & CEO at SZL Holdings</span>
             </div>
           </motion.div>
 
@@ -151,7 +151,7 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
             variants={textReveal}
-            className="text-5xl sm:text-7xl md:text-8xl font-serif font-bold text-foreground leading-[1.1] mb-6"
+            className="text-5xl sm:text-7xl md:text-[5.5rem] font-serif font-bold text-foreground leading-[1.05] mb-4 tracking-tight"
           >
             <span className={isLoading ? "blur-sm" : "transition-all duration-500"}>{name}</span>
           </motion.h1>
@@ -161,9 +161,11 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
             variants={textReveal}
-            className="text-2xl sm:text-3xl md:text-4xl text-muted-foreground font-light mb-8"
+            className="text-xl sm:text-2xl md:text-3xl text-primary font-medium mb-8 tracking-wide"
           >
-            <span className={isLoading ? "blur-sm" : "transition-all duration-500"}>{title}</span>
+            <span className={isLoading ? "blur-sm" : "transition-all duration-500"}>
+              Builder. Architect. Operator.
+            </span>
           </motion.h2>
 
           <motion.p
@@ -171,7 +173,7 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
             variants={textReveal}
-            className="text-lg sm:text-xl text-foreground/80 max-w-2xl mb-12 leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-foreground/60 max-w-3xl mb-14 leading-relaxed font-light"
           >
             <span className={isLoading ? "blur-sm" : "transition-all duration-500"}>{tagline}</span>
           </motion.p>
@@ -184,15 +186,38 @@ export function HeroSection() {
             className="flex flex-wrap items-center gap-6"
           >
             <a href="#portfolio">
-              <Button size="lg" className="rounded-full px-8 py-6 text-base shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group">
-                View Portfolio
+              <Button size="lg" className="rounded-full px-10 py-7 text-base shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group font-semibold">
+                Explore My Work
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </a>
-            <a href="#contact" className="text-foreground hover:text-primary font-medium transition-all duration-300 flex items-center gap-2 group">
-              Request a Meeting
+            <a href="#contact" className="text-foreground/70 hover:text-primary font-medium transition-all duration-300 flex items-center gap-2 group border border-white/10 rounded-full px-8 py-4 hover:border-primary/30">
+              Request a Briefing
               <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
             </a>
+          </motion.div>
+
+          <motion.div
+            custom={5}
+            initial="hidden"
+            animate="visible"
+            variants={textReveal}
+            className="flex items-center gap-8 mt-16 pt-8 border-t border-white/5"
+          >
+            <div className="flex flex-col">
+              <span className="text-3xl font-serif font-bold text-primary">15+</span>
+              <span className="text-xs text-foreground/40 uppercase tracking-widest mt-1">Years in Enterprise Tech</span>
+            </div>
+            <div className="w-px h-12 bg-white/10" />
+            <div className="flex flex-col">
+              <span className="text-3xl font-serif font-bold text-primary">$2B+</span>
+              <span className="text-xs text-foreground/40 uppercase tracking-widest mt-1">Systems Architected</span>
+            </div>
+            <div className="w-px h-12 bg-white/10" />
+            <div className="flex flex-col">
+              <span className="text-3xl font-serif font-bold text-primary">6</span>
+              <span className="text-xs text-foreground/40 uppercase tracking-widest mt-1">Live Products</span>
+            </div>
           </motion.div>
         </div>
       </motion.div>
@@ -201,10 +226,10 @@ export function HeroSection() {
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.8 }}
+        transition={{ delay: 1.8, duration: 0.8 }}
       >
-        <span className="text-xs uppercase tracking-widest text-muted-foreground font-medium">Scroll</span>
-        <div className="w-[1px] h-12 bg-gradient-to-b from-primary to-transparent animate-pulse" />
+        <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/30 font-medium">Discover</span>
+        <ChevronDown className="w-4 h-4 text-primary/50 animate-bounce" />
       </motion.div>
     </section>
   );

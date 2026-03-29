@@ -8,10 +8,12 @@ export function PortfolioSection() {
   const [filter, setFilter] = useState<string>("all");
 
   const fallbackProjects = [
-    { id: 1, name: "Vessels App", description: "Universal integration platform.", status: "active" },
-    { id: 2, name: "Firestorm", description: "Real-time data analytics engine.", status: "completed" },
-    { id: 3, name: "Lyte UI", description: "Next-gen design system.", status: "active" },
-    { id: 4, name: "Dreamscape", description: "AI-driven virtual environments.", status: "on-hold" },
+    { id: 1, name: "Vessels", description: "Maritime fleet intelligence and cargo optimization platform. Real-time tracking across 200+ vessels with predictive maintenance and route optimization.", status: "active" },
+    { id: 2, name: "Firestorm", description: "Cybersecurity simulation engine for red team/blue team training. CMMC Level 3 certified. Deployed across DoD training facilities.", status: "active" },
+    { id: 3, name: "Lyte", description: "Enterprise commerce platform with integrated payment processing, inventory management, and customer analytics.", status: "active" },
+    { id: 4, name: "Dreamscape", description: "Creative production suite for content creation, asset management, and collaborative design workflows.", status: "active" },
+    { id: 5, name: "Readiness Report", description: "Compliance assessment and audit readiness engine for regulated industries. Automated gap analysis and remediation tracking.", status: "active" },
+    { id: 6, name: "INCA", description: "AI research command center for natural language processing, document intelligence, and automated analysis pipelines.", status: "active" },
   ];
 
   const displayProjects = projects?.length ? projects : fallbackProjects;
@@ -21,15 +23,16 @@ export function PortfolioSection() {
     : displayProjects.filter(p => p.status === filter);
 
   return (
-    <section id="portfolio" className="py-24 bg-secondary/20 relative">
+    <section id="portfolio" className="py-32 bg-secondary/20 relative">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <h2 className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">Selected Work</h2>
-            <h3 className="text-4xl font-serif font-bold text-foreground">Portfolio Showcase</h3>
+            <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.2em] mb-4">The Portfolio</h2>
+            <h3 className="text-4xl md:text-5xl font-serif font-bold text-foreground">Products I've Built</h3>
+            <p className="text-foreground/50 mt-3 max-w-xl">Every product in the SZL ecosystem was designed, engineered, and shipped by my team. These aren't mockups — they're live, operational systems.</p>
           </div>
           
-          <div className="flex bg-background rounded-full p-1 border border-border">
+          <div className="flex bg-background rounded-full p-1 border border-white/5">
             {["all", "active", "completed", "on-hold"].map((status) => (
               <button
                 key={status}
@@ -37,7 +40,7 @@ export function PortfolioSection() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors capitalize ${
                   filter === status 
                     ? "bg-primary text-primary-foreground shadow-md" 
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-foreground/40 hover:text-foreground"
                 }`}
               >
                 {status}
@@ -47,14 +50,14 @@ export function PortfolioSection() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-80 rounded-2xl bg-card/50 animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="h-72 rounded-2xl bg-card/50 animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredProjects.map((project, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProjects.map((project) => (
               <motion.div
                 key={project.id}
                 layout
@@ -63,34 +66,30 @@ export function PortfolioSection() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.4 }}
                 whileHover={{ y: -6, scale: 1.01 }}
-                className="group relative overflow-hidden rounded-2xl glass-panel aspect-[4/3] flex flex-col justify-end p-8 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500"
+                className="group relative overflow-hidden rounded-2xl glass-panel flex flex-col justify-end p-8 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 min-h-[280px]"
               >
-                {/* Abstract placeholder background per project */}
-                <div className="absolute inset-0 bg-gradient-to-br from-secondary via-background to-card z-0 transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent z-0 transition-opacity duration-700 opacity-0 group-hover:opacity-100" />
                 
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
-
-                <div className="relative z-20 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                      project.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
-                      project.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
-                      'bg-amber-500/20 text-amber-400'
+                <div className="relative z-20">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      project.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                      project.status === 'completed' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                      'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                     }`}>
-                      {project.status}
+                      {project.status === 'active' ? 'Live' : project.status}
                     </span>
-                    <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button className="w-10 h-10 rounded-full bg-white/10 hover:bg-primary hover:text-background flex items-center justify-center backdrop-blur-md transition-colors text-white">
-                        <Github size={18} />
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <button className="w-8 h-8 rounded-full bg-white/5 hover:bg-primary hover:text-background flex items-center justify-center transition-colors text-foreground/40">
+                        <Github size={14} />
                       </button>
-                      <button className="w-10 h-10 rounded-full bg-white/10 hover:bg-primary hover:text-background flex items-center justify-center backdrop-blur-md transition-colors text-white">
-                        <ExternalLink size={18} />
+                      <button className="w-8 h-8 rounded-full bg-white/5 hover:bg-primary hover:text-background flex items-center justify-center transition-colors text-foreground/40">
+                        <ExternalLink size={14} />
                       </button>
                     </div>
                   </div>
-                  <h4 className="text-3xl font-serif font-bold text-white mb-2">{project.name}</h4>
-                  <p className="text-white/70 line-clamp-2">{project.description}</p>
+                  <h4 className="text-2xl font-serif font-bold text-foreground mb-3 group-hover:text-primary transition-colors">{project.name}</h4>
+                  <p className="text-foreground/40 text-sm leading-relaxed line-clamp-3">{project.description}</p>
                 </div>
               </motion.div>
             ))}

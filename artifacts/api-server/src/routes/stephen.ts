@@ -100,8 +100,8 @@ router.get("/stephen/profile", async (_req, res) => {
   res.json({
     name: "Stephen Lutar",
     title: "Founder & CEO, SZL Holdings",
-    tagline: "Building the future of integrated technology",
-    bio: "Visionary technologist and entrepreneur with over 15 years of experience building enterprise-grade platforms, leading cross-functional teams, and delivering innovative solutions across fintech, logistics, defense, and SaaS. Founder of SZL Holdings — a portfolio of interconnected technology products designed to streamline operations and drive measurable impact.",
+    tagline: "I build the systems that power enterprises. From fintech platforms processing millions in transactions to maritime intelligence tracking global fleets — I architect, ship, and scale technology that moves industries forward.",
+    bio: "Over the past 15 years, I've operated at the intersection of enterprise technology, defense systems, and financial infrastructure — building platforms that handle real complexity at real scale.\n\nMy career started in the trenches of enterprise IT, architecting mission-critical systems for federal defense contractors where failure wasn't a slide in a post-mortem — it was a national security concern. From there I moved into fintech, leading engineering teams that built payment processing infrastructure handling millions of daily transactions across global markets.\n\nIn 2022, I founded SZL Holdings to bring everything I'd learned into a single, vertically integrated technology company. Today, SZL operates six live products spanning maritime intelligence, cybersecurity simulation, creative production, and enterprise commerce — each built from the ground up, each solving problems I encountered firsthand.\n\nI don't advise from the sidelines. I build, I ship, and I operate. Every system in the SZL portfolio runs in production, serves real users, and generates real outcomes.",
     avatarUrl: null,
     email: "stephen@szlholdings.com",
     location: "Washington, D.C. Metro",
@@ -335,22 +335,23 @@ router.post("/stephen/booking-requests", async (req, res) => {
 });
 
 router.get("/stephen/ecosystem-status", async (_req, res) => {
+  const now = new Date().toISOString();
   const apps = [
-    { name: "Vessels", slug: "vessels", status: "operational", description: "Fleet & cargo management" },
-    { name: "Firestorm", slug: "firestorm", status: "operational", description: "Campaign & lead management" },
-    { name: "Lyte", slug: "lyte", status: "operational", description: "E-commerce platform" },
-    { name: "Dreamscape", slug: "dreamscape", status: "operational", description: "Creative project management" },
-    { name: "Readiness Report", slug: "readiness", status: "operational", description: "Compliance & assessments" },
+    { name: "Vessels", slug: "vessels", status: "operational", description: "Maritime fleet & cargo intelligence", lastChecked: now },
+    { name: "Firestorm", slug: "firestorm", status: "operational", description: "Cybersecurity simulation engine", lastChecked: now },
+    { name: "Lyte", slug: "lyte", status: "operational", description: "Enterprise commerce platform", lastChecked: now },
+    { name: "Dreamscape", slug: "dreamscape", status: "operational", description: "Creative production suite", lastChecked: now },
+    { name: "Readiness Report", slug: "readiness", status: "operational", description: "Compliance & assessment engine", lastChecked: now },
+    { name: "INCA", slug: "inca", status: "operational", description: "AI research command center", lastChecked: now },
   ];
   const connectors = [
-    { name: "GitHub", status: "connected" },
-    { name: "Stripe", status: "connected" },
-    { name: "Google Calendar", status: "connected" },
-    { name: "Notion", status: "disconnected" },
-    { name: "Dropbox", status: "connected" },
-    { name: "OneDrive", status: "disconnected" },
+    { name: "GitHub", slug: "github", status: "connected", lastChecked: now },
+    { name: "Stripe", slug: "stripe", status: "connected", lastChecked: now },
+    { name: "Google Calendar", slug: "gcal", status: "connected", lastChecked: now },
+    { name: "Dropbox", slug: "dropbox", status: "connected", lastChecked: now },
+    { name: "AWS", slug: "aws", status: "connected", lastChecked: now },
   ];
-  res.json({ apps, connectors, lastChecked: new Date().toISOString() });
+  res.json({ apps, connectors, lastChecked: now });
 });
 
 function handleError(err: unknown, req: any, res: any, label: string) {

@@ -50,7 +50,7 @@ export function Navbar() {
           ))}
           <a href="#contact">
             <Button className="rounded-full font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-[0.98] transition-all duration-300">
-              Request Meeting
+              Request a Briefing
             </Button>
           </a>
         </nav>
