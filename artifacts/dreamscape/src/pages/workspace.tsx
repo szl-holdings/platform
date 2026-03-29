@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { Plus, MoreHorizontal, LayoutGrid, Clock, Target, Sparkles, Film, Palette, Megaphone, Layers } from "lucide-react";
+import { Plus, MoreHorizontal, LayoutGrid, Clock, Target, Sparkles, Film, Palette, Megaphone, Layers, TrendingUp, DollarSign, Users } from "lucide-react";
 import { useCampaigns, useCreateCampaign } from "@/hooks/use-campaigns";
 import { Button, Card, Badge, Input } from "@/components/ui";
 
@@ -30,6 +30,16 @@ const categoryGradients: Record<string, string> = {
   default: "linear-gradient(135deg, rgba(217,119,6,0.3), rgba(217,119,6,0.15), rgba(245,158,11,0.25))",
 };
 
+const categoryLabels: Record<string, string> = {
+  brand_campaign: "Brand Film",
+  brand_story: "Brand Story",
+  product_launch: "Product Launch",
+  social_media: "Social Campaign",
+  commercial: "Performance Ads",
+  video_production: "Documentary",
+  event_marketing: "Experiential",
+};
+
 const categoryIcons: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   brand_campaign: Megaphone,
   brand_story: Megaphone,
@@ -46,7 +56,7 @@ function CampaignThumbnail({ category, name }: { category: string; name: string 
 
   return (
     <div
-      className="w-full h-36 rounded-t-xl flex items-center justify-center relative overflow-hidden"
+      className="w-full h-40 rounded-t-xl flex items-center justify-center relative overflow-hidden"
       style={{ background: gradient }}
     >
       <div
@@ -57,15 +67,15 @@ function CampaignThumbnail({ category, name }: { category: string; name: string 
         className="absolute inset-0"
         style={{ background: "radial-gradient(circle at 80% 80%, rgba(0,0,0,0.2), transparent 50%)" }}
       />
-      <div className="absolute top-3 left-3 flex gap-1">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.3)" }} />
-        ))}
+      <div className="absolute top-3 left-3">
+        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-black/30 backdrop-blur-sm text-white/80">
+          {categoryLabels[category] || category.replace('_', ' ')}
+        </span>
       </div>
-      <Icon className="w-10 h-10" style={{ color: "rgba(255,255,255,0.6)" }} />
+      <Icon className="w-10 h-10" style={{ color: "rgba(255,255,255,0.5)" }} />
       <div
-        className="absolute bottom-0 left-0 right-0 h-12"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.3), transparent)" }}
+        className="absolute bottom-0 left-0 right-0 h-16"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,0.4), transparent)" }}
       />
     </div>
   );
@@ -76,7 +86,7 @@ function LoadingSkeleton() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[1,2,3].map(i => (
         <Card key={i} className="overflow-hidden border-border/50 bg-card/80">
-          <div className="h-36 bg-gradient-to-br from-primary/10 to-amber-500/10 animate-pulse" />
+          <div className="h-40 bg-gradient-to-br from-primary/10 to-amber-500/10 animate-pulse" />
           <div className="p-6 space-y-3">
             <div className="flex gap-2">
               <div className="w-20 h-5 bg-muted/40 animate-pulse rounded-full" />
@@ -116,7 +126,7 @@ export function Workspace() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h1 className="text-3xl font-display font-bold text-foreground">Campaign Workspace</h1>
-          <p className="text-muted-foreground mt-1">Manage active creative projects and timelines.</p>
+          <p className="text-muted-foreground mt-1">Active productions and creative projects across all clients.</p>
         </motion.div>
         
         {isCreating ? (
@@ -162,33 +172,58 @@ export function Workspace() {
                       </button>
                     </div>
                     
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="bg-background/50 text-xs">{campaign.category.replace('_', ' ')}</Badge>
+                    <div className="flex items-center gap-2 mb-2">
                       <Badge 
                         variant="outline"
-                        className={`text-xs ${campaign.status === "review" ? "border-amber-500/50 text-amber-400" : campaign.status === "published" ? "border-emerald-500/50 text-emerald-400" : ""}`}
+                        className={`text-xs capitalize ${campaign.status === "review" ? "border-amber-500/50 text-amber-400" : campaign.status === "published" ? "border-emerald-500/50 text-emerald-400" : campaign.status === "post_production" ? "border-violet-500/50 text-violet-400" : ""}`}
                       >
-                        {campaign.status.replace('_', ' ')}
+                        {campaign.status.replace(/_/g, ' ')}
                       </Badge>
+                      {campaign.budget && (
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                          <DollarSign className="w-3 h-3 mr-0.5" />{campaign.budget.replace('$', '')}
+                        </Badge>
+                      )}
                     </div>
                     
-                    <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors leading-tight">{campaign.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-5 flex items-center gap-1.5">
-                      <Target className="w-3.5 h-3.5" /> Client: {campaign.client}
+                    <h3 className="text-base font-bold text-foreground mb-1 group-hover:text-primary transition-colors leading-tight line-clamp-1">{campaign.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
+                      <Target className="w-3.5 h-3.5 shrink-0" /> {campaign.client}
                     </p>
+                    {campaign.director && (
+                      <p className="text-xs text-muted-foreground/70 mb-3 flex items-center gap-1.5">
+                        <Users className="w-3 h-3 shrink-0" /> Dir: {campaign.director}
+                      </p>
+                    )}
                     
+                    {campaign.kpis && campaign.kpis.length > 0 && (
+                      <div className="grid grid-cols-2 gap-1.5 mb-3">
+                        {campaign.kpis.slice(0, 2).map((kpi, i) => (
+                          <div key={i} className="bg-muted/30 rounded-lg px-2 py-1.5 border border-border/30">
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{kpi.label}</div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-sm font-bold text-foreground">{kpi.value}</span>
+                              <span className="text-[10px] text-emerald-400 flex items-center">
+                                <TrendingUp className="w-2.5 h-2.5" /> {kpi.trend}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between text-xs mb-1.5">
                           <span className="text-muted-foreground">Progress</span>
                           <span className="font-semibold text-foreground">{campaign.progress}%</span>
                         </div>
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${campaign.progress}%` }}
                             transition={{ delay: 0.3, duration: 1, ease: "easeOut" }}
-                            className={`h-full rounded-full ${campaign.progress >= 80 ? 'bg-success' : campaign.progress >= 50 ? 'bg-primary' : 'bg-warning'}`}
+                            className={`h-full rounded-full ${campaign.progress >= 80 ? 'bg-emerald-500' : campaign.progress >= 50 ? 'bg-primary' : campaign.progress >= 25 ? 'bg-amber-500' : 'bg-blue-500'}`}
                           />
                         </div>
                       </div>

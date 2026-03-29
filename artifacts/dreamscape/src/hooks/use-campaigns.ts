@@ -36,6 +36,10 @@ export function useCreateCampaign() {
         status: data.status || "concept",
         deadline: data.deadline || new Date().toISOString(),
         progress: 0,
+        budget: data.budget || "$0",
+        director: data.director || "Unassigned",
+        description: data.description || "",
+        kpis: data.kpis || [],
       };
       mockDb.campaigns.push(newCampaign);
       return newCampaign;

@@ -47,10 +47,14 @@ export function useCreateStoryboard() {
         id: `sb${Date.now()}`,
         campaignId: data.campaignId!,
         sceneNumber: data.sceneNumber || 1,
+        shotType: data.shotType || "MS — Medium Shot",
+        cameraMovement: data.cameraMovement || "Static",
         visual: data.visual || "",
         dialogue: data.dialogue || "",
         duration: data.duration || "0s",
-        thumbnailUrl: data.thumbnailUrl || ""
+        thumbnailUrl: data.thumbnailUrl || "",
+        talentNotes: data.talentNotes || "",
+        lighting: data.lighting || "",
       };
       mockDb.storyboards.push(newScene);
       return newScene;
@@ -127,7 +131,7 @@ export function useReviews(campaignId: string) {
 export function useUpdateReview() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: Review["status"], campaignId: string }) => {
+    mutationFn: async ({ id, status }: { id: string; status: Review["status"]; campaignId: string }) => {
       await delay();
       const idx = mockDb.reviews.findIndex(r => r.id === id);
       if (idx !== -1) mockDb.reviews[idx].status = status;

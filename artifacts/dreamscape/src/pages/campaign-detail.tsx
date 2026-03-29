@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useRoute, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, FileText, LayoutTemplate, Mic2, FolderArchive, Eye, ArrowLeft, Calendar, CreditCard } from "lucide-react";
+import { ChevronRight, FileText, LayoutTemplate, Mic2, FolderArchive, Eye, ArrowLeft, Calendar, CreditCard, TrendingUp, DollarSign, Users } from "lucide-react";
 import { useCampaign } from "@/hooks/use-campaigns";
 import { Badge, Button } from "@/components/ui";
 import { format } from "date-fns";
@@ -75,7 +75,7 @@ export function CampaignDetail() {
     { id: "storyboards", label: "Storyboards", icon: LayoutTemplate },
     { id: "voice", label: "Voiceovers", icon: Mic2 },
     { id: "vault", label: "Asset Vault", icon: FolderArchive },
-    { id: "preview", label: "Stakeholder Preview", icon: Eye },
+    { id: "preview", label: "Review & Approval", icon: Eye },
     { id: "billing", label: "Billing", icon: CreditCard },
   ] as const;
 
@@ -95,13 +95,23 @@ export function CampaignDetail() {
         </div>
         
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-display font-bold text-foreground">{campaign.name}</h1>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               <Badge variant="outline">{campaign.client}</Badge>
               <Badge variant="default" className={`capitalize ${statusColors[campaign.status] || ''}`}>
-                {campaign.status.replace('_', ' ')}
+                {campaign.status.replace(/_/g, ' ')}
               </Badge>
+              {campaign.budget && (
+                <Badge variant="outline" className="text-xs">
+                  <DollarSign className="w-3 h-3 mr-0.5" />{campaign.budget.replace('$', '')}
+                </Badge>
+              )}
+              {campaign.director && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Users className="w-3 h-3" /> Dir: {campaign.director}
+                </span>
+              )}
               {campaign.deadline && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
@@ -109,19 +119,37 @@ export function CampaignDetail() {
                 </span>
               )}
             </div>
-            {campaign.progress !== undefined && (
-              <div className="mt-3 flex items-center gap-3 max-w-sm">
-                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${campaign.progress}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="h-full bg-primary rounded-full"
-                  />
-                </div>
-                <span className="text-xs font-semibold text-muted-foreground">{campaign.progress}%</span>
-              </div>
+            {campaign.description && (
+              <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">{campaign.description}</p>
             )}
+            <div className="flex items-center gap-4 mt-3">
+              {campaign.progress !== undefined && (
+                <div className="flex items-center gap-3 max-w-xs flex-1">
+                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${campaign.progress}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className="h-full bg-primary rounded-full"
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">{campaign.progress}%</span>
+                </div>
+              )}
+              {campaign.kpis && campaign.kpis.length > 0 && (
+                <div className="hidden lg:flex items-center gap-3">
+                  {campaign.kpis.slice(0, 3).map((kpi, i) => (
+                    <div key={i} className="flex items-center gap-1.5 text-xs">
+                      <span className="text-muted-foreground">{kpi.label}:</span>
+                      <span className="font-bold text-foreground">{kpi.value}</span>
+                      <span className="text-emerald-400 flex items-center text-[10px]">
+                        <TrendingUp className="w-2.5 h-2.5" />{kpi.trend}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <Button variant="outline" onClick={() => setActiveTab("preview")}>
             <Eye className="w-4 h-4 mr-2" /> Share Preview

@@ -84,10 +84,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div>
           <div className="h-16 flex items-center px-6 border-b border-border/50">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-amber-300 flex items-center justify-center shadow-lg shadow-primary/20">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary via-amber-400 to-amber-300 flex items-center justify-center shadow-lg shadow-primary/30 cinematic-glow">
                 <Video className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-lg tracking-wide text-foreground">DREAMSCAPE</span>
+              <div className="flex flex-col">
+                <span className="font-display font-bold text-base tracking-[0.2em] text-foreground leading-none">DREAMSCAPE</span>
+                <span className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground/60 leading-none mt-0.5">Creative Engine</span>
+              </div>
             </div>
           </div>
           
