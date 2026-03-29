@@ -45,6 +45,7 @@ A premium dark-mode-forward design system is implemented via `@workspace/shared-
     - **Lyte Command Center:** Incident and signal command center.
     - **INCA:** AI Research Command Center for managing AI/ML research projects and experiments.
     - **Carlota Jo (`carlota-jo`):** Luxury advisory consulting site with service portfolio, case studies, and booking/checkout flow.
+    - **Terra (`terra`):** Real estate business observability platform with portfolio dashboard, market intelligence, deal pipeline, property detail pages, occupancy/revenue analytics, and risk/alert feed. Uses Recharts for data visualization and premium dark-mode design consistent with SZL Holdings aesthetic.
 
 ### Shared Libraries
 - `lib/config`: Maps applications to connector dependencies.

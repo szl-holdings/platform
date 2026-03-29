@@ -14,6 +14,7 @@ const SZL_APPS = [
   { id: "firestorm", name: "Firestorm Security", description: "Security simulation platform", status: "active", url: "/firestorm/" },
   { id: "stephen-site", name: "Stephen Lutar", description: "Personal portfolio site", status: "active", url: "/stephen/" },
   { id: "mockup-sandbox", name: "Component Preview", description: "Design system preview", status: "active", url: "/__mockup/" },
+  { id: "terra", name: "Terra Real Estate Intelligence", description: "Real estate portfolio observability platform", status: "active", url: "/terra/" },
 ];
 
 const MOCK_USERS = [
