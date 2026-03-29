@@ -6,7 +6,7 @@ export function useCampaigns() {
     queryKey: ['campaigns'],
     queryFn: async () => {
       await delay(200);
-      return [...mockDb.campaigns];
+      return [...mockDb.campaigns] as Campaign[];
     }
   });
 }

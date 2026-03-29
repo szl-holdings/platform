@@ -1,11 +1,11 @@
 {
   "company": {
     "name": "SZL Holdings",
-    "tagline": "Strategic Innovation. Unified Technology.",
-    "description": "A premier technology holding company building the future through AI-powered platforms across maritime intelligence, cybersecurity, creative technology, and strategic consulting.",
+    "tagline": "Architecting the Intelligent Enterprise",
+    "description": "A vertically-integrated technology holding company engineering the convergence of AI, cybersecurity, and maritime intelligence to define the next era of global infrastructure.",
     "founded": "2021",
-    "headquarters": "Global Operations",
-    "email": "info@szlholdings.com"
+    "headquarters": "Washington, D.C. · London · Singapore",
+    "email": "inquiries@szlholdings.com"
   },
   "nav": {
     "links": [
@@ -16,74 +16,80 @@
       { "label": "Leadership", "href": "#leadership" },
       { "label": "Contact", "href": "#contact" }
     ],
-    "ctaLabel": "Get in Touch"
+    "ctaLabel": "Investor Relations"
   },
   "hero": {
-    "headline": "Building Tomorrow's",
-    "headlineAccent": "Technology Ecosystem",
-    "subheadline": "SZL Holdings unites a portfolio of innovative technology companies driving transformation across maritime intelligence, cybersecurity, creative production, and AI-powered consulting.",
-    "cta": "Explore Our Ecosystem",
-    "ctaSecondary": "Contact Us",
-    "badge": "Est. 2021 \u00b7 Global Operations"
+    "headline": "The Future",
+    "headlineAccent": "Is Engineered",
+    "subheadline": "SZL Holdings deploys capital and talent across six frontier technology platforms — from maritime intelligence and cybersecurity simulation to AI-native creative production — engineering compound returns at the intersection of deep tech and critical infrastructure.",
+    "cta": "Explore the Ecosystem",
+    "ctaSecondary": "Investor Relations",
+    "badge": "Est. 2021 · $180M+ Deployed Capital",
+    "stats": [
+      { "value": "$2.4B+", "label": "Addressable Market" },
+      { "value": "6", "label": "Portfolio Companies" },
+      { "value": "142%", "label": "YoY Revenue Growth" },
+      { "value": "3", "label": "Continents" }
+    ]
   },
   "ecosystem": {
-    "title": "The SZL Ecosystem",
-    "subtitle": "An interconnected network of technology platforms, each amplifying the capabilities of the others.",
+    "title": "Ecosystem Architecture",
+    "subtitle": "A unified intelligence fabric connecting six operating companies. Shared data infrastructure. Compounding network effects. One orchestration layer.",
     "legendLabels": {
-      "live": "Live",
+      "live": "Operational",
       "beta": "Beta",
       "inDevelopment": "In Development"
     },
     "canvasAriaLabel": "Interactive ecosystem visualization showing SZL Holdings connected to portfolio companies"
   },
   "portfolio": {
-    "title": "Portfolio Companies",
-    "subtitle": "Each platform is purpose-built for its domain while sharing infrastructure and intelligence across the ecosystem.",
+    "title": "Operating Companies",
+    "subtitle": "Each platform commands its vertical while sharing intelligence, infrastructure, and security fabric across the ecosystem.",
     "filterAllLabel": "All",
-    "visitLabel": "Visit",
+    "visitLabel": "Enter",
     "comingSoonLabel": "Coming Soon"
   },
   "timeline": {
-    "title": "Our Journey",
-    "subtitle": "From founding vision to global technology ecosystem — key milestones in the SZL Holdings story."
+    "title": "Company Timeline",
+    "subtitle": "From seed-stage thesis to multi-vertical technology platform — the milestones defining SZL Holdings."
   },
   "pillars": {
-    "title": "Innovation Pillars",
-    "subtitle": "Five strategic domains where SZL Holdings drives measurable impact through technology and expertise."
+    "title": "Innovation Verticals",
+    "subtitle": "Five strategic domains where SZL Holdings captures outsized value through proprietary technology and deep sector expertise."
   },
   "leadership": {
-    "title": "Vision & Leadership",
-    "quote": "We believe the most impactful technology companies are built at the intersection of deep domain expertise and cutting-edge innovation. SZL Holdings exists to find those intersections and build category-defining platforms.",
-    "attribution": "SZL Holdings Executive Team",
-    "vision": "Our vision is to create an interconnected ecosystem where each portfolio company amplifies the capabilities of the others — sharing data, infrastructure, and intelligence to deliver solutions greater than the sum of their parts.",
+    "title": "Vision & Thesis",
+    "quote": "The next trillion-dollar companies won't be built on a single product — they'll emerge from intelligently orchestrated ecosystems where data flows between verticals, AI compounds across domains, and every platform makes the others exponentially more valuable. That's not a vision. It's an engineering problem. And we're solving it.",
+    "attribution": "SZL Holdings Founding Team",
+    "vision": "We operate at the convergence of the $1.8 trillion AI market, the $266 billion cybersecurity sector, and the $15.4 billion maritime analytics opportunity. Our thesis is simple: vertical integration of AI across critical infrastructure creates defensible, compounding value that horizontal platforms cannot replicate.",
     "values": [
-      { "title": "Innovation First", "description": "We invest in technologies that don't just improve processes — they redefine what's possible." },
-      { "title": "Domain Mastery", "description": "Every portfolio company is built by teams with deep expertise in their respective industries." },
-      { "title": "Ecosystem Thinking", "description": "Our platforms are designed to interoperate, creating compounding value across the entire portfolio." },
-      { "title": "Measured Impact", "description": "We track outcomes relentlessly, ensuring every initiative delivers measurable results for our stakeholders." }
+      { "title": "Vertical Integration", "description": "We don't build tools — we build operating systems for entire industries. Full-stack ownership from data ingestion to decision output." },
+      { "title": "Compounding Intelligence", "description": "Every model trained, every dataset enriched, every prediction validated makes every platform in the ecosystem smarter." },
+      { "title": "Infrastructure-Grade", "description": "Our platforms are built for the organizations that can't afford downtime — shipping operators, defense contractors, enterprise security teams." },
+      { "title": "Capital Efficiency", "description": "Shared infrastructure across six verticals means 40% lower cloud spend, unified security, and engineering leverage that standalone companies can't match." }
     ]
   },
   "contact": {
     "title": "Get in Touch",
-    "subtitle": "Whether you're an investor, potential partner, or exploring collaboration opportunities, we'd love to hear from you.",
+    "subtitle": "Investor relations, strategic partnerships, and portfolio company inquiries.",
     "fields": ["name", "email", "company", "subject", "message"],
     "labels": {
       "name": "Name *",
       "email": "Email *",
-      "company": "Company",
+      "company": "Organization",
       "subject": "Subject *",
       "message": "Message *"
     },
     "placeholders": {
       "name": "Your full name",
       "email": "your@email.com",
-      "company": "Your company (optional)",
+      "company": "Your organization (optional)",
       "subject": "Inquiry subject",
       "message": "Tell us how we can help..."
     },
     "submitLabel": "Send Inquiry",
     "submittingLabel": "Sending...",
-    "successMessage": "Thank you! Your inquiry has been submitted. We'll be in touch soon.",
+    "successMessage": "Thank you. Our team will respond within 24 hours.",
     "errorMessage": "Something went wrong. Please try again or email us directly."
   },
   "footer": {

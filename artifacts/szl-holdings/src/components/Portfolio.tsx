@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Ship, Sparkles, Shield, Zap, BarChart3, Palette,
-  ExternalLink, ArrowRight,
+  ExternalLink, ArrowRight, TrendingUp,
 } from "lucide-react";
 import portfolioData from "@/data/portfolio.json";
 import siteData from "@/data/site.json";
@@ -43,7 +43,7 @@ export function Portfolio() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text mb-4">
+          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
             {portfolio.title}
           </h2>
           <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
@@ -56,9 +56,9 @@ export function Portfolio() {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                 filter === cat
-                  ? "bg-szl-primary text-white"
+                  ? "bg-szl-primary text-white shadow-[0_0_20px_rgba(99,102,241,0.3)]"
                   : "border border-szl-border text-szl-text-secondary hover:text-szl-text hover:border-szl-border-hover"
               }`}
             >
@@ -81,41 +81,58 @@ export function Portfolio() {
                   transition={{ duration: 0.3 }}
                   className="group relative rounded-xl border border-szl-border bg-szl-surface hover:border-szl-border-hover hover:bg-szl-surface-hover transition-all duration-300"
                 >
-                  <div className="p-6">
+                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `radial-gradient(ellipse at 50% 0%, ${company.color}0a 0%, transparent 70%)`,
+                    }}
+                  />
+                  <div className="relative p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${company.color}20` }}
+                        className="w-11 h-11 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: `${company.color}18` }}
                       >
-                        <Icon size={20} style={{ color: company.color }} />
+                        <Icon size={22} style={{ color: company.color }} />
                       </div>
                       <StatusBadge status={company.status} />
                     </div>
 
-                    <h3 className="font-[var(--font-display)] text-lg font-bold text-szl-text mb-1">
+                    <h3 className="font-[var(--font-display)] text-xl font-bold text-szl-text mb-1">
                       {company.name}
                     </h3>
-                    <p className="text-szl-text-muted text-xs font-medium uppercase tracking-wider mb-3">
+                    <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-3">
                       {company.tagline}
                     </p>
-                    <p className="text-szl-text-secondary text-sm leading-relaxed mb-4">
+                    <p className="text-szl-text-secondary text-sm leading-relaxed mb-5">
                       {company.description}
                     </p>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-szl-border">
-                      <div>
-                        <p className="text-szl-text-muted text-xs">{company.metrics.label}</p>
-                        <p className="text-szl-text font-semibold text-sm">{company.metrics.value}</p>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {company.metrics.slice(0, 4).map((metric: { label: string; value: string }) => (
+                        <div key={metric.label} className="rounded-lg bg-szl-bg/60 px-3 py-2">
+                          <p className="text-szl-text font-bold text-sm">{metric.value}</p>
+                          <p className="text-szl-text-muted text-[10px] font-medium uppercase tracking-wider">{metric.label}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {company.marketContext && (
+                      <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-szl-primary/5 border border-szl-primary/10 mb-4">
+                        <TrendingUp size={12} className="text-szl-primary-light mt-0.5 shrink-0" />
+                        <p className="text-szl-text-muted text-[10px] leading-tight">{company.marketContext}</p>
                       </div>
+                    )}
+
+                    <div className="flex items-center justify-end pt-3 border-t border-szl-border">
                       {company.link !== "#" ? (
                         <a
                           href={company.link}
-                          className="flex items-center gap-1 text-szl-primary-light text-sm font-medium hover:text-szl-primary transition-colors"
+                          className="flex items-center gap-1.5 text-szl-primary-light text-sm font-semibold hover:text-szl-primary transition-colors group/link"
                         >
-                          {portfolio.visitLabel} <ExternalLink size={14} />
+                          {portfolio.visitLabel} <ExternalLink size={14} className="group-hover/link:translate-x-0.5 transition-transform" />
                         </a>
                       ) : (
-                        <span className="flex items-center gap-1 text-szl-text-muted text-sm">
+                        <span className="flex items-center gap-1.5 text-szl-text-muted text-sm font-medium">
                           {portfolio.comingSoonLabel} <ArrowRight size={14} />
                         </span>
                       )}

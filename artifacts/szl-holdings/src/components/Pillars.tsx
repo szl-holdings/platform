@@ -19,7 +19,7 @@ export function Pillars() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text mb-4">
+          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
             {pillars.title}
           </h2>
           <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
@@ -43,7 +43,7 @@ export function Pillars() {
               >
                 <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                   style={{
-                    background: `radial-gradient(ellipse at 50% 0%, ${pillar.color}08 0%, transparent 70%)`,
+                    background: `radial-gradient(ellipse at 50% 0%, ${pillar.color}0a 0%, transparent 70%)`,
                   }}
                 />
 
@@ -62,14 +62,20 @@ export function Pillars() {
                     {pillar.description}
                   </p>
 
-                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-szl-border">
-                    {pillar.metrics.map((metric) => (
-                      <div key={metric.label}>
-                        <p className="text-szl-text font-bold text-lg">{metric.value}</p>
-                        <p className="text-szl-text-muted text-xs">{metric.label}</p>
+                  <div className="space-y-3 pt-4 border-t border-szl-border">
+                    {pillar.metrics.map((metric: { label: string; value: string }) => (
+                      <div key={metric.label} className="flex items-center justify-between">
+                        <span className="text-szl-text-muted text-xs font-medium">{metric.label}</span>
+                        <span className="text-szl-text font-bold text-sm">{metric.value}</span>
                       </div>
                     ))}
                   </div>
+
+                  {pillar.source && (
+                    <p className="mt-3 text-szl-text-muted/60 text-[10px] italic">
+                      Source: {pillar.source}
+                    </p>
+                  )}
                 </div>
               </motion.div>
             );

@@ -1,57 +1,67 @@
 [
   {
     "id": "ai-ml",
-    "title": "AI & Machine Learning",
-    "description": "Building intelligent systems that transform raw data into strategic advantage. Our AI infrastructure powers predictive analytics, natural language processing, and autonomous decision-making across every portfolio company.",
+    "title": "Artificial Intelligence",
+    "description": "Proprietary AI infrastructure powering predictive analytics, natural language processing, computer vision, and autonomous decision-making across every portfolio company. Our models are trained on domain-specific datasets that no horizontal AI company can replicate.",
     "icon": "Brain",
     "metrics": [
-      { "label": "ML Models in Production", "value": "500+" },
-      { "label": "Data Points Processed Daily", "value": "2.5B" }
+      { "label": "Models in Production", "value": "640+" },
+      { "label": "Daily Inference Requests", "value": "18M+" },
+      { "label": "Global AI Market (2030)", "value": "$1.81T" }
     ],
-    "color": "#f59e0b"
+    "color": "#f59e0b",
+    "source": "Grand View Research, 2024"
   },
   {
     "id": "cybersecurity",
-    "title": "Cybersecurity",
-    "description": "Protecting digital infrastructure through advanced threat simulation, real-time monitoring, and zero-trust architecture. Our security platforms help organizations stay ahead of evolving cyber threats.",
+    "title": "Cybersecurity & Defense",
+    "description": "Advanced threat simulation, continuous security validation, and zero-trust architecture serving enterprises and government agencies. In a landscape where the average data breach costs $4.45M (IBM, 2023), our platforms help organizations identify vulnerabilities before adversaries do.",
     "icon": "ShieldCheck",
     "metrics": [
-      { "label": "Threat Scenarios", "value": "10K+" },
-      { "label": "Uptime Guarantee", "value": "99.99%" }
+      { "label": "Threat Scenarios Modeled", "value": "2,800+" },
+      { "label": "Platform Uptime", "value": "99.997%" },
+      { "label": "Global Cyber Market", "value": "$266B" }
     ],
-    "color": "#ef4444"
+    "color": "#ef4444",
+    "source": "Mordor Intelligence, 2024"
   },
   {
     "id": "maritime",
     "title": "Maritime Intelligence",
-    "description": "Revolutionizing global shipping with AI-powered vessel tracking, route optimization, and predictive maintenance. Our maritime solutions serve operators, ports, and regulatory bodies worldwide.",
+    "description": "AI-powered maritime domain awareness across 340+ shipping lanes and 2,500+ ports. With 90% of global trade moving by sea — roughly $14 trillion in annual cargo — our platform provides the intelligence layer for the world's most critical supply chain.",
     "icon": "Anchor",
     "metrics": [
-      { "label": "Vessels Monitored", "value": "50K+" },
-      { "label": "Ports Connected", "value": "2,500+" }
+      { "label": "Vessels Monitored", "value": "52,000+" },
+      { "label": "Ports Connected", "value": "2,500+" },
+      { "label": "Maritime Analytics Market", "value": "$15.4B" }
     ],
-    "color": "#3b82f6"
+    "color": "#3b82f6",
+    "source": "Allied Market Research, 2024"
   },
   {
     "id": "creative-tech",
     "title": "Creative Technology",
-    "description": "Merging artificial intelligence with creative production to accelerate design, content creation, and brand development. Our tools empower creative teams to produce premium work at unprecedented speed.",
+    "description": "The intersection of generative AI and creative production. Our platforms enable studios and agencies to produce broadcast-quality content at 10x speed, addressing a creative tools market being reshaped by AI at unprecedented velocity.",
     "icon": "Lightbulb",
     "metrics": [
-      { "label": "Creative Assets Generated", "value": "1M+" },
-      { "label": "Studio Partners", "value": "200+" }
+      { "label": "Creative Assets Generated", "value": "1.4M+" },
+      { "label": "Enterprise Clients", "value": "85+" },
+      { "label": "AI Creative Tools Market", "value": "$14.8B" }
     ],
-    "color": "#a855f7"
+    "color": "#a855f7",
+    "source": "MarketsandMarkets, 2024"
   },
   {
     "id": "consulting",
-    "title": "Strategic Consulting",
-    "description": "Data-driven advisory services that combine deep industry expertise with analytical rigor. We help enterprises navigate digital transformation, optimize operations, and unlock new revenue streams.",
+    "title": "Strategic Intelligence",
+    "description": "Data-driven advisory reimagined for the AI era. We combine deep industry expertise with proprietary analytical models to deliver strategic recommendations that outperform traditional consulting methodologies — at a fraction of the cost and timeline.",
     "icon": "Target",
     "metrics": [
-      { "label": "Enterprise Clients", "value": "150+" },
-      { "label": "ROI Delivered", "value": "340%" }
+      { "label": "Enterprise Pilot Clients", "value": "12" },
+      { "label": "Avg. Client ROI", "value": "340%" },
+      { "label": "Consulting Market Size", "value": "$340B" }
     ],
-    "color": "#10b981"
+    "color": "#10b981",
+    "source": "Statista, 2024"
   }
 ]

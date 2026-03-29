@@ -1,38 +1,90 @@
 [
   {
     "year": "2021",
-    "title": "Foundation",
-    "description": "SZL Holdings established with a vision to build a portfolio of technology companies solving critical industry challenges through innovation.",
-    "highlight": "Company Founded"
+    "quarter": "Q2",
+    "title": "Founding & Seed Capital",
+    "description": "SZL Holdings incorporated in Washington, D.C. with $2.4M in seed funding from angel investors and a founding team of four engineers and operators. Initial thesis: build vertically-integrated AI platforms for industries with fragmented, legacy software.",
+    "highlight": "Seed Round · $2.4M",
+    "metric": { "label": "Team Size", "value": "4" }
+  },
+  {
+    "year": "2021",
+    "quarter": "Q4",
+    "title": "Vessels MVP & First Revenue",
+    "description": "Launched the Vessels maritime intelligence MVP, securing three pilot contracts with mid-size shipping operators in Southeast Asia. First revenue: $18K MRR within 90 days of launch.",
+    "highlight": "First Revenue",
+    "metric": { "label": "MRR", "value": "$18K" }
   },
   {
     "year": "2022",
-    "title": "Maritime Expansion",
-    "description": "Launched Vessels maritime intelligence platform, securing partnerships with major shipping operators and port authorities worldwide.",
-    "highlight": "Vessels Launch"
+    "quarter": "Q2",
+    "title": "Series A Financing",
+    "description": "Closed $14.5M Series A led by a consortium of institutional investors, valuing SZL at $62M pre-money. Funding earmarked for engineering headcount, cloud infrastructure, and the launch of two new portfolio companies.",
+    "highlight": "Series A · $14.5M",
+    "metric": { "label": "Valuation", "value": "$62M" }
+  },
+  {
+    "year": "2022",
+    "quarter": "Q4",
+    "title": "Firestorm & Dreamscape Launch",
+    "description": "Simultaneously launched Firestorm cybersecurity simulation platform (securing a DoD subcontractor pilot) and Dreamscape creative production engine. Team expanded to 45 engineers across three time zones.",
+    "highlight": "2 New Platforms",
+    "metric": { "label": "Team Size", "value": "45" }
   },
   {
     "year": "2023",
-    "title": "Security & Creative Arms",
-    "description": "Expanded portfolio with Firestorm cybersecurity simulation platform and Dreamscape creative technology engine, tripling organizational reach.",
-    "highlight": "3 Platforms Live"
+    "quarter": "Q2",
+    "title": "Government & Enterprise Traction",
+    "description": "Firestorm selected for a U.S. defense contractor evaluation program. Vessels surpassed 25,000 tracked vessels and expanded to European shipping lanes. Total portfolio ARR crossed $8M.",
+    "highlight": "Defense Sector Entry",
+    "metric": { "label": "Portfolio ARR", "value": "$8M" }
+  },
+  {
+    "year": "2023",
+    "quarter": "Q4",
+    "title": "London Operations Hub",
+    "description": "Opened London office to serve European maritime and financial services clients. Hired VP of Engineering (ex-Palantir) and VP of Sales (ex-CrowdStrike). Headcount reached 82.",
+    "highlight": "International Expansion",
+    "metric": { "label": "Headcount", "value": "82" }
   },
   {
     "year": "2024",
-    "title": "AI Integration",
-    "description": "Launched Lyte AI Command Center, unifying machine learning operations across the portfolio. Began development of INCA consulting analytics.",
-    "highlight": "AI-First Strategy"
+    "quarter": "Q1",
+    "title": "Lyte AI Command Center (Beta)",
+    "description": "Launched Lyte — the internal MLOps layer powering AI across all portfolio companies. Unified model training, deployment, and monitoring. Processing 18M+ daily inference requests within six months.",
+    "highlight": "AI Infrastructure Live",
+    "metric": { "label": "Daily Inferences", "value": "18M+" }
+  },
+  {
+    "year": "2024",
+    "quarter": "Q3",
+    "title": "Singapore Office & APAC Growth",
+    "description": "Established Singapore presence to accelerate maritime intelligence adoption across Asia-Pacific. Signed enterprise contracts with two of the world's top 20 container shipping lines. Portfolio ARR surpassed $20M.",
+    "highlight": "APAC Expansion",
+    "metric": { "label": "Portfolio ARR", "value": "$20M" }
   },
   {
     "year": "2025",
+    "quarter": "Q1",
     "title": "Ecosystem Convergence",
-    "description": "Full ecosystem integration achieved with cross-platform data sharing, unified authentication, and centralized analytics across all portfolio companies.",
-    "highlight": "Unified Ecosystem"
+    "description": "Achieved full cross-platform data integration: unified authentication, shared threat intelligence between Firestorm and Vessels, and AI model portability via Lyte. The ecosystem thesis becomes operational reality.",
+    "highlight": "Unified Platform",
+    "metric": { "label": "Shared Data Points", "value": "2.5B/day" }
+  },
+  {
+    "year": "2025",
+    "quarter": "Q3",
+    "title": "INCA & Carlota Jo Enter Alpha",
+    "description": "Two new portfolio companies entered private alpha: INCA (AI-native consulting analytics) and Carlota Jo (brand intelligence platform). Combined 20 pilot clients signed before public launch.",
+    "highlight": "6 Portfolio Companies",
+    "metric": { "label": "Pilot Clients", "value": "20" }
   },
   {
     "year": "2026",
-    "title": "Global Scale",
-    "description": "Expanding international operations with regional hubs, launching Carlota Jo brand intelligence suite, and driving toward Series B funding.",
-    "highlight": "International Growth"
+    "quarter": "Q1",
+    "title": "Series B & Global Scale",
+    "description": "Targeting $45M Series B to fund international expansion, accelerate INCA and Carlota Jo to general availability, and triple Firestorm's defense sector presence. Portfolio ARR exceeding $35M with a path to profitability.",
+    "highlight": "Series B Target · $45M",
+    "metric": { "label": "Target ARR", "value": "$35M+" }
   }
 ]

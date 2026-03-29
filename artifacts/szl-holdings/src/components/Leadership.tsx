@@ -14,7 +14,7 @@ export function Leadership() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text mb-4">
+          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
             {leadership.title}
           </h2>
         </motion.div>
@@ -23,29 +23,32 @@ export function Leadership() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative rounded-2xl border border-szl-border bg-szl-surface p-8 sm:p-12 mb-12"
+          className="relative rounded-2xl border border-szl-border bg-szl-surface p-8 sm:p-12 mb-12 overflow-hidden"
         >
-          <Quote size={40} className="text-szl-primary/20 mb-4" />
-          <blockquote className="font-[var(--font-display)] text-xl sm:text-2xl text-szl-text leading-relaxed mb-6">
-            {leadership.quote}
-          </blockquote>
-          <p className="text-szl-text-secondary text-sm font-medium">
-            — {leadership.attribution}
-          </p>
-
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(99,102,241,0.06)_0%,transparent_60%)]" />
+          <div className="relative">
+            <Quote size={48} className="text-szl-primary/15 mb-6" />
+            <blockquote className="font-[var(--font-display)] text-xl sm:text-2xl lg:text-[1.75rem] text-szl-text leading-relaxed mb-8">
+              {leadership.quote}
+            </blockquote>
+            <p className="text-szl-text-secondary text-sm font-semibold tracking-wide uppercase">
+              — {leadership.attribution}
+            </p>
+          </div>
           <div className="absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-primary/40 to-transparent" />
+          <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-accent/20 to-transparent" />
         </motion.div>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-szl-text-secondary text-lg text-center max-w-3xl mx-auto mb-12 leading-relaxed"
+          className="text-szl-text-secondary text-lg text-center max-w-4xl mx-auto mb-14 leading-relaxed"
         >
           {leadership.vision}
         </motion.p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {leadership.values.map((value, index) => (
             <motion.div
               key={value.title}
@@ -53,10 +56,10 @@ export function Leadership() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="rounded-xl border border-szl-border bg-szl-surface p-5 hover:border-szl-border-hover transition-all"
+              className="group rounded-xl border border-szl-border bg-szl-surface p-5 hover:border-szl-border-hover hover:bg-szl-surface-hover transition-all duration-300"
             >
-              <div className="w-8 h-8 rounded-lg bg-szl-primary/10 flex items-center justify-center mb-3">
-                <span className="text-szl-primary-light font-bold text-sm">{String(index + 1).padStart(2, "0")}</span>
+              <div className="w-9 h-9 rounded-lg bg-szl-primary/10 flex items-center justify-center mb-4 group-hover:bg-szl-primary/15 transition-colors">
+                <span className="text-szl-primary-light font-bold text-sm font-[var(--font-display)]">{String(index + 1).padStart(2, "0")}</span>
               </div>
               <h3 className="font-[var(--font-display)] text-base font-bold text-szl-text mb-2">
                 {value.title}
