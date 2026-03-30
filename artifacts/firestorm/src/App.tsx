@@ -1,8 +1,8 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users } from "lucide-react";
+import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
@@ -30,25 +30,28 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
-const navItems = [
-  { path: "/", label: "SOC Dashboard", icon: Activity },
-  { path: "/threat-intel", label: "Threat Intel", icon: AlertTriangle },
-  { path: "/threat-feed", label: "Threat Feed", icon: Rss },
+const primaryNavItems = [
+  { path: "/", label: "SOC Overview", icon: Activity },
   { path: "/incidents", label: "Incidents", icon: Shield },
-  { path: "/findings", label: "Findings", icon: Target },
+  { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
+  { path: "/threat-intel", label: "Threat Intel", icon: AlertTriangle },
+  { path: "/findings", label: "Findings", icon: Target },
+];
+
+const secondaryNavItems = [
   { path: "/xdr-console", label: "XDR Console", icon: Layers },
   { path: "/threat-hunting", label: "Threat Hunting", icon: Search },
   { path: "/identity-threat", label: "Identity Threats", icon: Users },
+  { path: "/forensics", label: "Forensics", icon: Flame },
   { path: "/executive-risk", label: "Executive Risk", icon: BarChart3 },
   { path: "/compliance", label: "Compliance", icon: ClipboardCheck },
-  { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
+  { path: "/threat-feed", label: "Threat Feed", icon: Rss },
   { path: "/reports", label: "Reports", icon: FileText },
-  { path: "/observability", label: "Observability", icon: Search },
   { path: "/sentinel", label: "Sentinel Watch", icon: Search },
   { path: "/watchlists", label: "Watchlists", icon: Target },
-  { path: "/forensics", label: "Forensics", icon: Flame },
+  { path: "/observability", label: "Observability", icon: Search },
 ];
 
 function PageLoader() {
@@ -59,74 +62,111 @@ function PageLoader() {
   );
 }
 
-function StatusBar() {
-  const { data: socData } = useQuery({
-    queryKey: ["soc-dashboard"],
-    queryFn: () => fetch("/api/firestorm/soc-dashboard").then(r => r.json()),
-    refetchInterval: 30000,
+interface AppHealthSummary {
+  services: { name: string; status: string }[];
+  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
+}
+
+function DemoModeBanner() {
+  const { data } = useQuery<AppHealthSummary>({
+    queryKey: ["app-health-firestorm"],
+    queryFn: () => fetch("/api/services/health/app/firestorm").then((r) => r.json()),
+    refetchInterval: 60000,
   });
 
-  const alertCount = socData?.openAlerts || 0;
-  const incidentCount = socData?.activeIncidents || 0;
+  if (!data) return null;
+  const hasDemoMode = data.summary.mockedDemoMode > 0;
+  const hasUnhealthy = data.summary.manualRequired > 0;
+  if (!hasDemoMode && !hasUnhealthy) return null;
+
+  if (hasUnhealthy) {
+    return (
+      <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center gap-2 shrink-0">
+        <span className="text-[11px] text-red-400">{data.summary.manualRequired} integration(s) not configured</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-8 bg-card/50 border-b border-border flex items-center justify-between px-4 text-xs">
-      <div className="flex items-center gap-4">
-        <span className="flex items-center gap-1.5 text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          Systems Operational
-        </span>
-      </div>
-      <div className="flex items-center gap-4 text-muted-foreground">
-        <span className={`flex items-center gap-1 ${alertCount > 0 ? "text-amber-400" : ""}`}>
-          <Bell className="w-3 h-3" /> {alertCount} alerts
-        </span>
-        <span className={`flex items-center gap-1 ${incidentCount > 0 ? "text-red-400" : ""}`}>
-          <Shield className="w-3 h-3" /> {incidentCount} active
-        </span>
-      </div>
+    <div className="border-b border-orange-500/10 px-4 py-1 flex items-center gap-2 shrink-0">
+      <span className="text-[10px] font-mono text-orange-400/50 px-2 py-0.5 rounded-full border border-orange-500/20 bg-orange-500/5">DEMO</span>
+      <span className="text-[10px] text-orange-400/40">Simulated data</span>
     </div>
   );
 }
 
 function Sidebar() {
   const [location] = useLocation();
+  const [moreExpanded, setMoreExpanded] = useState(false);
+
   return (
-    <aside className="w-64 bg-card border-r border-border flex flex-col h-screen sticky top-0">
-      <div className="p-5 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Flame className="w-5 h-5 text-primary animate-pulse" />
+    <aside className="w-56 bg-[#09080f]/95 border-r border-orange-500/10 flex flex-col h-screen sticky top-0">
+      <div className="px-4 py-4 border-b border-orange-500/10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
+            <Flame className="w-4 h-4 text-orange-400" />
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold text-foreground">Firestorm</h1>
-            <p className="text-xs text-muted-foreground">Security Operations</p>
+            <h1 className="font-display text-sm font-bold text-orange-50">Firestorm</h1>
+            <p className="text-[10px] text-orange-400/50">Security Operations</p>
           </div>
         </div>
       </div>
-      <nav className="flex-1 p-3 space-y-1">
-        {navItems.map(({ path, label, icon: Icon }) => {
+
+      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+        {primaryNavItems.map(({ path, label, icon: Icon }) => {
           const isActive = path === "/" ? location === "/" : location.startsWith(path);
           return (
             <Link key={path} href={path}>
               <div className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
+                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
                 isActive
-                  ? "bg-primary/10 text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted hover:translate-x-0.5"
+                  ? "bg-orange-500/10 text-orange-300"
+                  : "text-orange-400/50 hover:text-orange-200 hover:bg-orange-500/5"
               )}>
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-orange-400 rounded-r-full" />
                 )}
-                <Icon className={cn("w-4 h-4 transition-transform duration-200", isActive && "scale-110")} />
+                <Icon className="w-3.5 h-3.5 shrink-0" />
                 {label}
               </div>
             </Link>
           );
         })}
+
+        <div className="pt-2">
+          <button
+            onClick={() => setMoreExpanded(!moreExpanded)}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-orange-400/40 hover:text-orange-300 hover:bg-orange-500/5 transition-all w-full"
+          >
+            <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
+            More pages
+          </button>
+          {moreExpanded && (
+            <div className="mt-0.5 space-y-0.5">
+              {secondaryNavItems.map(({ path, label, icon: Icon }) => {
+                const isActive = path === "/" ? location === "/" : location.startsWith(path);
+                return (
+                  <Link key={path} href={path}>
+                    <div className={cn(
+                      "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
+                      isActive
+                        ? "bg-orange-500/10 text-orange-300"
+                        : "text-orange-400/40 hover:text-orange-200 hover:bg-orange-500/5"
+                    )}>
+                      <Icon className="w-3 h-3 shrink-0" />
+                      {label}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </nav>
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+
+      <div className="px-4 py-3 border-t border-orange-500/10">
+        <div className="flex items-center gap-2 text-[10px] text-orange-400/30">
           <Flame className="w-3 h-3" />
           <span>SZL Holdings Platform</span>
         </div>
@@ -174,7 +214,7 @@ function App() {
         <div className="flex h-screen bg-background">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-auto">
-            <StatusBar />
+            <DemoModeBanner />
             <main className="flex-1 overflow-auto">
               <AppRouter />
             </main>

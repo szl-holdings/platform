@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown, EyeOff, ShieldAlert, Shield } from "lucide-react";
+import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown, EyeOff, ShieldAlert, Shield, ChevronRight } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
@@ -36,69 +36,29 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
-interface NavSection {
-  title: string;
-  items: { path: string; label: string; icon: typeof LayoutDashboard; roles?: UserRole[] }[];
-}
+const primaryNavItems = [
+  { path: "/", label: "Fleet Command", icon: LayoutDashboard },
+  { path: "/intelligence", label: "Maritime Intel", icon: Globe },
+  { path: "/alerts", label: "Alerts", icon: AlertTriangle },
+  { path: "/routes", label: "Route Planning", icon: Navigation },
+  { path: "/fleet-apm", label: "Fleet APM", icon: BarChart3 },
+  { path: "/weather", label: "Weather", icon: CloudRain },
+];
 
-const navSections: NavSection[] = [
-  {
-    title: "Overview",
-    items: [
-      { path: "/", label: "Command Center", icon: LayoutDashboard },
-      { path: "/intelligence", label: "Maritime Intel", icon: Globe },
-      { path: "/fleet-apm", label: "Fleet APM", icon: BarChart3 },
-    ],
-  },
-  {
-    title: "Operations",
-    items: [
-      { path: "/infrastructure", label: "Infrastructure", icon: Cog, roles: ["ops", "maintenance", "exec"] },
-      { path: "/routes", label: "Route Planning", icon: Navigation, roles: ["ops", "exec"] },
-      { path: "/weather", label: "Weather Impact", icon: CloudRain, roles: ["ops", "exec"] },
-      { path: "/simulations", label: "Simulations", icon: Activity, roles: ["ops", "exec"] },
-    ],
-  },
-  {
-    title: "Monitoring",
-    items: [
-      { path: "/logs", label: "Logs Explorer", icon: ScrollText },
-      { path: "/alerts", label: "Alert Center", icon: AlertTriangle },
-      { path: "/digital-experience", label: "Digital Experience", icon: Package, roles: ["ops", "exec"] },
-    ],
-  },
-  {
-    title: "Compliance & Environment",
-    items: [
-      { path: "/synthetics", label: "Synthetics/Compliance", icon: ShieldCheck, roles: ["compliance", "exec"] },
-      { path: "/co2-emissions", label: "CO2 & Emissions", icon: Leaf, roles: ["compliance", "exec", "ops"] },
-    ],
-  },
-  {
-    title: "Risk & Compliance",
-    items: [
-      { path: "/dark-vessel-detection", label: "Dark Vessel Detection", icon: EyeOff, roles: ["ops", "compliance", "exec"] },
-      { path: "/sanctions-screening", label: "Sanctions Screening", icon: ShieldAlert, roles: ["compliance", "exec"] },
-      { path: "/risk-scoring", label: "Risk Scoring Engine", icon: Shield, roles: ["ops", "compliance", "exec"] },
-      { path: "/commodities-tracking", label: "Commodities Tracking", icon: Package, roles: ["ops", "exec"] },
-    ],
-  },
-  {
-    title: "Threat Intelligence",
-    items: [
-      { path: "/cyber-threats", label: "Cyber Threat Panel", icon: Shield, roles: ["ops", "exec"] },
-      { path: "/incidents", label: "Incident Reporting", icon: AlertTriangle },
-    ],
-  },
-  {
-    title: "Intelligence",
-    items: [
-      { path: "/applied-intelligence", label: "Applied Intelligence", icon: Brain },
-      { path: "/ai-intel", label: "AI Intelligence", icon: Brain },
-      { path: "/observability", label: "Observability", icon: Activity },
-      { path: "/port-analytics", label: "Port Analytics", icon: Anchor },
-    ],
-  },
+const secondaryNavItems = [
+  { path: "/risk-scoring", label: "Risk Scoring", icon: Shield },
+  { path: "/dark-vessel-detection", label: "Dark Vessels", icon: EyeOff },
+  { path: "/sanctions-screening", label: "Sanctions", icon: ShieldAlert },
+  { path: "/co2-emissions", label: "CO2 & Emissions", icon: Leaf },
+  { path: "/cyber-threats", label: "Cyber Threats", icon: ShieldCheck },
+  { path: "/incidents", label: "Incidents", icon: AlertTriangle },
+  { path: "/port-analytics", label: "Port Analytics", icon: Anchor },
+  { path: "/observability", label: "Observability", icon: Activity },
+  { path: "/logs", label: "Logs", icon: ScrollText },
+  { path: "/simulations", label: "Simulations", icon: Activity },
+  { path: "/applied-intelligence", label: "Applied AI", icon: Brain },
+  { path: "/commodities-tracking", label: "Commodities", icon: Package },
+  { path: "/infrastructure", label: "Infrastructure", icon: Cog },
 ];
 
 function PageLoader() {
@@ -114,46 +74,6 @@ interface AppHealthSummary {
   summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
 }
 
-function IntegrationStatusFooter() {
-  const { data } = useQuery<AppHealthSummary>({
-    queryKey: ["app-health-vessels"],
-    queryFn: () => fetch("/api/services/health/app/vessels").then((r) => r.json()),
-    refetchInterval: 60000,
-  });
-
-  if (!data) return null;
-
-  const { summary } = data;
-  const hasUnhealthy = summary.manualRequired > 0;
-
-  return (
-    <div className="p-3 border-t border-border space-y-2">
-      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Integrations</div>
-      <div className="flex flex-wrap gap-1">
-        {data.services.map((svc) => (
-          <span
-            key={svc.name}
-            className={cn(
-              "inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded transition-colors",
-              svc.status === "LIVE_CONFIGURED" ? "bg-emerald-500/10 text-emerald-400" :
-              svc.status === "MOCKED_DEMO_MODE" ? "bg-amber-500/10 text-amber-400" :
-              "bg-red-500/10 text-red-400"
-            )}
-          >
-            {svc.status === "LIVE_CONFIGURED" ? <Wifi className="w-2.5 h-2.5" /> :
-             svc.status === "MOCKED_DEMO_MODE" ? <Server className="w-2.5 h-2.5" /> :
-             <WifiOff className="w-2.5 h-2.5" />}
-            {svc.name}
-          </span>
-        ))}
-      </div>
-      {hasUnhealthy && (
-        <div className="text-xs text-red-400">{summary.manualRequired} not configured</div>
-      )}
-    </div>
-  );
-}
-
 function DemoModeBanner() {
   const { data } = useQuery<AppHealthSummary>({
     queryKey: ["app-health-vessels"],
@@ -167,27 +87,24 @@ function DemoModeBanner() {
   const hasUnhealthy = data.summary.manualRequired > 0;
   if (!hasDemoMode && !hasUnhealthy) return null;
 
-  const demoNames = data.services.filter((s) => s.status === "MOCKED_DEMO_MODE").map((s) => s.name);
-
   if (hasUnhealthy) {
     return (
-      <div className="bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center gap-2 shrink-0">
-        <WifiOff className="w-4 h-4 text-red-400" />
-        <span className="text-xs text-red-400 font-medium">{data.summary.manualRequired} integration(s) not configured</span>
+      <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center gap-2 shrink-0">
+        <WifiOff className="w-3 h-3 text-red-400" />
+        <span className="text-[11px] text-red-400">{data.summary.manualRequired} integration(s) not configured</span>
       </div>
     );
   }
 
   return (
-    <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2 shrink-0">
-      <Server className="w-4 h-4 text-amber-400" />
-      <span className="text-xs text-amber-400 font-medium">Demo Mode</span>
-      <span className="text-xs text-amber-400/60">— {demoNames.join(", ")} using simulated data</span>
+    <div className="border-b border-sky-500/10 px-4 py-1 flex items-center gap-2 shrink-0">
+      <span className="text-[10px] font-mono text-sky-400/50 px-2 py-0.5 rounded-full border border-sky-500/20 bg-sky-500/5">DEMO</span>
+      <span className="text-[10px] text-sky-400/40">Simulated data</span>
     </div>
   );
 }
 
-function RoleSelector() {
+function RoleSelector({ expanded }: { expanded: boolean }) {
   const { user, setRole } = useAuth();
   const [open, setOpen] = useState(false);
   const roles: UserRole[] = ["exec", "ops", "compliance", "maintenance"];
@@ -196,21 +113,26 @@ function RoleSelector() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 w-full p-2.5 rounded-lg hover:bg-muted transition-colors text-left"
+        className="flex items-center gap-2 w-full px-2 py-2 rounded-lg hover:bg-sky-500/5 transition-colors text-left"
+        aria-label={`Current role: ${roleLabels[user.role]}`}
       >
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-          <User className="w-4 h-4 text-primary" />
+        <div className="w-7 h-7 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
+          <User className="w-3.5 h-3.5 text-sky-400" />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold truncate">{user.name}</p>
-          <p className="text-[10px] text-muted-foreground">{roleLabels[user.role]}</p>
-        </div>
-        <ChevronDown className={cn("w-3 h-3 text-muted-foreground transition-transform", open && "rotate-180")} />
+        {expanded && (
+          <>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-sky-100 truncate">{user.name}</p>
+              <p className="text-[10px] text-sky-400/50">{roleLabels[user.role]}</p>
+            </div>
+            <ChevronDown className={cn("w-3 h-3 text-sky-400/40 transition-transform shrink-0", open && "rotate-180")} />
+          </>
+        )}
       </button>
       {open && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 bg-card border border-border rounded-lg shadow-lg z-50 overflow-hidden">
-          <div className="p-2 border-b border-border">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider px-2">Switch Role</p>
+        <div className="absolute bottom-full left-0 right-0 mb-1 bg-[#0a1628] border border-sky-500/20 rounded-lg shadow-xl z-50 overflow-hidden" style={{ minWidth: 160 }}>
+          <div className="p-2 border-b border-sky-500/10">
+            <p className="text-[10px] text-sky-400/50 uppercase tracking-wider px-2">Switch Role</p>
           </div>
           {roles.map(r => (
             <button
@@ -218,7 +140,7 @@ function RoleSelector() {
               onClick={() => { setRole(r); setOpen(false); }}
               className={cn(
                 "w-full text-left px-3 py-2 text-xs transition-colors",
-                user.role === r ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                user.role === r ? "bg-sky-500/10 text-sky-400" : "text-sky-300/50 hover:text-sky-100 hover:bg-sky-500/5"
               )}
             >
               {roleLabels[r]}
@@ -233,61 +155,94 @@ function RoleSelector() {
 function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
+  const [hovered, setHovered] = useState(false);
+  const [moreExpanded, setMoreExpanded] = useState(false);
+  const expanded = hovered;
 
   return (
-    <aside className="w-64 bg-card border-r border-border flex flex-col h-screen sticky top-0">
-      <div className="p-5 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Ship className="w-5 h-5 text-primary animate-wave-float" />
-          </div>
-          <div>
-            <h1 className="font-display text-lg font-bold text-foreground">Vessels</h1>
-            <p className="text-xs text-muted-foreground">Maritime Intelligence</p>
-          </div>
+    <aside
+      className={cn(
+        "bg-[#060e1a]/95 border-r border-sky-500/10 flex flex-col h-screen sticky top-0 transition-all duration-200 ease-out z-30",
+        expanded ? "w-52" : "w-14"
+      )}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setMoreExpanded(false); }}
+    >
+      {/* Logo */}
+      <div className="px-3 py-4 border-b border-sky-500/10 flex items-center gap-2.5 overflow-hidden">
+        <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
+          <Ship className="w-4 h-4 text-sky-400 animate-wave-float" />
         </div>
+        {expanded && (
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <h1 className="font-display text-sm font-bold text-sky-50 truncate">Vessels</h1>
+            <p className="text-[10px] text-sky-400/50 truncate">Maritime Intelligence</p>
+          </div>
+        )}
       </div>
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
-        {navSections.map((section) => {
-          const visibleItems = section.items.filter(item => !item.roles || item.roles.includes(user.role));
-          if (visibleItems.length === 0) return null;
+
+      {/* Nav */}
+      <nav className="flex-1 px-1.5 py-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
+        {primaryNavItems.map(({ path, label, icon: Icon }) => {
+          const isActive = path === "/" ? location === "/" : location.startsWith(path);
           return (
-            <div key={section.title}>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider px-3 mb-1.5 font-medium">{section.title}</p>
-              <div className="space-y-0.5">
-                {visibleItems.map(({ path, label, icon: Icon }) => {
+            <Link key={path} href={path}>
+              <div
+                className={cn(
+                  "flex items-center rounded-lg transition-all duration-150 cursor-pointer relative",
+                  expanded ? "gap-2.5 px-3 py-2" : "justify-center px-0 py-2.5",
+                  isActive
+                    ? "bg-sky-500/10 text-sky-300"
+                    : "text-sky-400/50 hover:text-sky-200 hover:bg-sky-500/5"
+                )}
+                title={!expanded ? label : undefined}
+              >
+                {isActive && expanded && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-sky-400 rounded-r-full" />
+                )}
+                <Icon className={cn("shrink-0", expanded ? "w-3.5 h-3.5" : "w-5 h-5")} />
+                {expanded && <span className="text-xs font-medium truncate">{label}</span>}
+              </div>
+            </Link>
+          );
+        })}
+
+        {expanded && (
+          <div className="pt-2">
+            <button
+              onClick={() => setMoreExpanded(!moreExpanded)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-sky-400/40 hover:text-sky-300 hover:bg-sky-500/5 transition-all w-full"
+            >
+              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
+              More pages
+            </button>
+            {moreExpanded && (
+              <div className="mt-0.5 space-y-0.5">
+                {secondaryNavItems.map(({ path, label, icon: Icon }) => {
                   const isActive = path === "/" ? location === "/" : location.startsWith(path);
                   return (
                     <Link key={path} href={path}>
                       <div className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
+                        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
                         isActive
-                          ? "bg-primary/10 text-primary shadow-sm"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted hover:translate-x-0.5"
+                          ? "bg-sky-500/10 text-sky-300"
+                          : "text-sky-400/40 hover:text-sky-200 hover:bg-sky-500/5"
                       )}>
-                        {isActive && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
-                        )}
-                        <Icon className={cn("w-4 h-4 transition-transform duration-200", isActive && "scale-110")} />
+                        <Icon className="w-3 h-3 shrink-0" />
                         {label}
                       </div>
                     </Link>
                   );
                 })}
               </div>
-            </div>
-          );
-        })}
+            )}
+          </div>
+        )}
       </nav>
-      <IntegrationStatusFooter />
-      <div className="border-t border-border">
-        <RoleSelector />
-      </div>
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Anchor className="w-3 h-3" />
-          <span>SZL Holdings Platform</span>
-        </div>
+
+      {/* Footer */}
+      <div className="px-1.5 py-3 border-t border-sky-500/10">
+        <RoleSelector expanded={expanded} />
       </div>
     </aside>
   );
@@ -335,9 +290,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex h-screen bg-background">
+          <div className="flex h-screen bg-[#060e1a]">
             <Sidebar />
-            <div className="flex-1 flex flex-col overflow-auto">
+            <div className="flex-1 flex flex-col overflow-auto min-w-0">
               <DemoModeBanner />
               <main className="flex-1 overflow-auto">
                 <AppRouter />

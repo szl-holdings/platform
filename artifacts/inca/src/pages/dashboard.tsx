@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers } from "lucide-react";
+import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
 import { cn } from "@/lib/utils";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 function LiveClock() {
   const [time, setTime] = useState(new Date());
@@ -12,77 +12,35 @@ function LiveClock() {
     return () => clearInterval(interval);
   }, []);
   return (
-    <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
+    <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
       <div className="flex items-center gap-1.5">
         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
         <span className="uppercase tracking-wider text-emerald-400 text-[10px] font-semibold">Systems Nominal</span>
       </div>
-      <span className="text-border">|</span>
+      <span className="text-border">·</span>
       <span>{time.toLocaleTimeString("en-US", { hour12: false })}</span>
     </div>
   );
 }
 
-function HealthGauge({ score }: { score: number }) {
-  const circumference = 2 * Math.PI * 45;
-  const strokeDashoffset = circumference - (score / 100) * circumference;
-  const color = score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-red-400";
+function HealthBar({ score }: { score: number }) {
+  const color = score >= 80 ? "bg-emerald-400" : score >= 60 ? "bg-amber-400" : "bg-red-400";
+  const textColor = score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-red-400";
+  const label = score >= 80 ? "Healthy" : score >= 60 ? "Degraded" : "Critical";
   return (
-    <div className="flex flex-col items-center justify-center">
-      <div className="relative w-28 h-28">
-        <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="5" className="text-border" />
-          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="5"
-            className={color} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease-in-out" }} />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-display font-bold text-foreground">{score}</span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-wider">Health</span>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Research Health</span>
+        <span className={`text-xs font-mono font-bold ${textColor}`}>{label}</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-2 bg-border rounded-full overflow-hidden">
+          <div className={`h-full rounded-full transition-all duration-1000 ${color}`} style={{ width: `${score}%` }} />
         </div>
+        <span className={`text-2xl font-display font-bold ${textColor} tabular-nums`}>{score}</span>
       </div>
-      <p className="text-xs font-medium text-foreground mt-2">Research Health</p>
-    </div>
-  );
-}
-
-function PipelineVisualization() {
-  const stages = [
-    { label: "Research", count: projects.filter(p => p.status === "research").length, color: "bg-violet-500", textColor: "text-violet-400" },
-    { label: "Development", count: projects.filter(p => p.status === "development").length, color: "bg-blue-500", textColor: "text-blue-400" },
-    { label: "Testing", count: projects.filter(p => p.status === "testing").length, color: "bg-amber-500", textColor: "text-amber-400" },
-    { label: "Deployed", count: projects.filter(p => p.status === "deployed").length, color: "bg-emerald-500", textColor: "text-emerald-400" },
-  ];
-  const total = projects.length;
-
-  return (
-    <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-          <GitBranch className="w-3.5 h-3.5 text-emerald-400" />
-          Pipeline Stages
-        </h3>
-        <Link href="/projects">
-          <span className="text-xs text-primary hover:text-primary/80 cursor-pointer flex items-center gap-1">View All <ArrowRight className="w-3 h-3" /></span>
-        </Link>
-      </div>
-      <div className="flex gap-2 mb-4">
-        {stages.map((s, i) => (
-          <div key={s.label} className="flex-1 flex flex-col items-center relative">
-            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white", s.color)}>
-              {s.count}
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-1.5 uppercase tracking-wider text-center">{s.label}</p>
-            {i < stages.length - 1 && (
-              <div className="absolute top-5 left-[60%] w-[80%] h-px bg-border" />
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-0.5 h-2 rounded-full overflow-hidden">
-        {stages.map(s => (
-          <div key={s.label} className={cn(s.color, "transition-all duration-500")} style={{ width: `${(s.count / total) * 100}%` }} />
-        ))}
+      <div className="flex gap-2 text-[10px] text-muted-foreground/50 font-mono">
+        <span>0</span><span className="flex-1 text-center">50</span><span>100</span>
       </div>
     </div>
   );
@@ -113,32 +71,34 @@ function ExperimentComparisonTable() {
   }, [sortKey, sortDir]);
 
   const SortIcon = ({ col }: { col: SortKey }) => {
-    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 text-muted-foreground/40" />;
-    return sortDir === "asc" ? <ChevronUp className="w-3 h-3 text-emerald-400" /> : <ChevronDown className="w-3 h-3 text-emerald-400" />;
+    if (sortKey !== col) return <ArrowUpDown className="w-2.5 h-2.5 text-muted-foreground/30" />;
+    return sortDir === "asc" ? <ChevronUp className="w-2.5 h-2.5 text-emerald-400" /> : <ChevronDown className="w-2.5 h-2.5 text-emerald-400" />;
   };
 
-  const statusColor: Record<string, string> = {
-    research: "text-violet-400 bg-violet-400/10",
-    development: "text-blue-400 bg-blue-400/10",
-    testing: "text-amber-400 bg-amber-400/10",
-    deployed: "text-emerald-400 bg-emerald-400/10",
+  const statusConfig: Record<string, { text: string; dot: string; label: string }> = {
+    research: { text: "text-violet-400", dot: "bg-violet-400", label: "bg-violet-400/10 text-violet-400" },
+    development: { text: "text-blue-400", dot: "bg-blue-400", label: "bg-blue-400/10 text-blue-400" },
+    testing: { text: "text-amber-400", dot: "bg-amber-400", label: "bg-amber-400/10 text-amber-400" },
+    deployed: { text: "text-emerald-400", dot: "bg-emerald-400", label: "bg-emerald-400/10 text-emerald-400" },
   };
 
   return (
     <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl overflow-hidden">
       <div className="px-5 py-3 border-b border-border flex items-center justify-between">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-emerald-400" />
-          Experiment Runs — Comparison Table
+          <Layers className="w-3.5 h-3.5 text-primary" />
+          Experiments — Comparison Table
         </h3>
         <Link href="/experiments">
-          <span className="text-xs text-primary hover:text-primary/80 cursor-pointer flex items-center gap-1">All Experiments <ArrowRight className="w-3 h-3" /></span>
+          <span className="text-xs text-primary hover:text-primary/80 cursor-pointer flex items-center gap-1">
+            All Experiments <ArrowRight className="w-3 h-3" />
+          </span>
         </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-border bg-muted/20">
+            <tr className="border-b border-border bg-muted/10">
               {[
                 { key: "name" as SortKey, label: "Project" },
                 { key: "domain" as SortKey, label: "Domain" },
@@ -146,39 +106,47 @@ function ExperimentComparisonTable() {
                 { key: "loss" as SortKey, label: "Loss" },
                 { key: "status" as SortKey, label: "Status" },
               ].map(col => (
-                <th key={col.key} className="text-left px-4 py-2.5 font-mono text-[10px] text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors select-none" onClick={() => handleSort(col.key)}>
-                  <span className="flex items-center gap-1">{col.label} <SortIcon col={col.key} /></span>
+                <th key={col.key} className="text-left px-4 py-3 font-mono text-[10px] text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors select-none" onClick={() => handleSort(col.key)}>
+                  <span className="flex items-center gap-1.5">{col.label} <SortIcon col={col.key} /></span>
                 </th>
               ))}
-              <th className="text-left px-4 py-2.5 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Experiments</th>
-              <th className="text-left px-4 py-2.5 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Inference</th>
+              <th className="text-left px-4 py-3 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Runs</th>
+              <th className="text-left px-4 py-3 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">Inference</th>
             </tr>
           </thead>
           <tbody>
-            {sortedProjects.map((p, i) => {
+            {sortedProjects.map((p) => {
               const projExps = experiments.filter(e => e.projectId === p.id);
               const running = projExps.filter(e => e.status === "running").length;
               const completed = projExps.filter(e => e.status === "completed").length;
+              const s = statusConfig[p.status] || statusConfig.research;
               return (
-                <tr key={p.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                  <td className="px-4 py-2.5 font-medium text-foreground whitespace-nowrap">{p.name}</td>
-                  <td className="px-4 py-2.5 text-muted-foreground font-mono text-[10px]">{p.domain}</td>
-                  <td className="px-4 py-2.5">
-                    <span className={cn("font-mono font-bold", p.accuracy >= 90 ? "text-emerald-400" : p.accuracy >= 70 ? "text-amber-400" : "text-red-400")}>
-                      {p.accuracy.toFixed(1)}%
-                    </span>
+                <tr key={p.id} className="border-b border-border/40 hover:bg-muted/15 transition-colors">
+                  <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{p.name}</td>
+                  <td className="px-4 py-3">
+                    <span className="text-[10px] font-mono text-muted-foreground bg-muted/30 px-2 py-0.5 rounded">{p.domain}</span>
                   </td>
-                  <td className="px-4 py-2.5 font-mono text-muted-foreground">{p.loss.toFixed(4)}</td>
-                  <td className="px-4 py-2.5">
-                    <span className={cn("text-[10px] font-mono uppercase px-2 py-0.5 rounded-full", statusColor[p.status])}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className={cn("font-mono font-bold text-sm", p.accuracy >= 90 ? "text-emerald-400" : p.accuracy >= 70 ? "text-amber-400" : "text-red-400")}>
+                        {p.accuracy.toFixed(1)}%
+                      </span>
+                      <div className="w-12 h-1 bg-border rounded-full overflow-hidden">
+                        <div className={cn("h-full rounded-full", p.accuracy >= 90 ? "bg-emerald-400" : p.accuracy >= 70 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${p.accuracy}%` }} />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-muted-foreground text-[11px]">{p.loss.toFixed(4)}</td>
+                  <td className="px-4 py-3">
+                    <span className={cn("text-[10px] font-mono uppercase px-2 py-1 rounded-full flex items-center gap-1 w-fit", s.label)}>
+                      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", s.dot, p.status === "testing" && "animate-pulse")} />
                       {p.status}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-muted-foreground">
-                    <span className="font-mono">{completed}</span>
-                    {running > 0 && <span className="text-amber-400 ml-1 font-mono">+{running} running</span>}
+                  <td className="px-4 py-3 text-muted-foreground font-mono text-[11px]">
+                    {completed}{running > 0 && <span className="text-amber-400 ml-1">+{running} ▶</span>}
                   </td>
-                  <td className="px-4 py-2.5 font-mono text-muted-foreground">{p.inferenceTime}ms</td>
+                  <td className="px-4 py-3 font-mono text-muted-foreground text-[11px]">{p.inferenceTime}ms</td>
                 </tr>
               );
             })}
@@ -196,7 +164,7 @@ function ModelPerformanceCharts() {
     <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-          <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
+          <BarChart3 className="w-3.5 h-3.5 text-primary" />
           Model Performance Trends
         </h3>
         <Link href="/models">
@@ -208,20 +176,22 @@ function ModelPerformanceCharts() {
           const chartData = (model.performanceHistory || []).map(h => ({
             date: new Date(h.date).toLocaleDateString("en", { month: "short", day: "numeric" }),
             accuracy: h.accuracy,
-            latency: h.latency,
           }));
           return (
-            <div key={model.id} className="bg-muted/10 rounded-lg border border-border/50 p-3">
-              <div className="flex items-center justify-between mb-2">
+            <div key={model.id} className="bg-muted/10 rounded-lg border border-border/50 p-4">
+              <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-xs font-medium text-foreground">{model.name}</p>
-                  <p className="text-[10px] text-muted-foreground font-mono">{model.architecture} — v{model.version}</p>
+                  <p className="text-xs font-semibold text-foreground">{model.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-mono">{model.architecture} v{model.version}</p>
                 </div>
-                <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full",
-                  model.status === "production" ? "text-emerald-400 bg-emerald-400/10" : "text-amber-400 bg-amber-400/10"
-                )}>{model.status}</span>
+                <div className="text-right">
+                  <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full",
+                    model.status === "production" ? "text-emerald-400 bg-emerald-400/10" : "text-amber-400 bg-amber-400/10"
+                  )}>{model.status}</span>
+                  <p className={cn("text-xl font-display font-bold mt-0.5", model.accuracy >= 90 ? "text-emerald-400" : "text-amber-400")}>{model.accuracy.toFixed(1)}%</p>
+                </div>
               </div>
-              <div className="h-28">
+              <div className="h-20">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <XAxis dataKey="date" stroke="#64748b" fontSize={8} tickLine={false} axisLine={false} />
@@ -231,71 +201,13 @@ function ModelPerformanceCharts() {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex items-center gap-4 mt-2 text-[10px]">
-                <span className="text-muted-foreground">Acc: <span className="text-emerald-400 font-mono font-bold">{model.accuracy.toFixed(1)}%</span></span>
-                <span className="text-muted-foreground">Params: <span className="text-foreground font-mono">{model.parameters}</span></span>
-                <span className="text-muted-foreground">Speed: <span className="text-foreground font-mono">{model.speed}ms</span></span>
+              <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground font-mono">
+                <span>Params: <span className="text-foreground">{model.parameters}</span></span>
+                <span>Speed: <span className="text-foreground">{model.speed}ms</span></span>
               </div>
             </div>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-function ComputeAndBenchmarks() {
-  const gpuMetrics = [
-    { name: "A100 80GB Cluster", used: 94 },
-    { name: "H100 SXM Pod", used: 78 },
-    { name: "TPU v4 Pod", used: 62 },
-  ];
-
-  const benchmarks = [
-    { name: "MMLU", project: "TITAN LLM", value: 91.8, target: 90, met: true },
-    { name: "nuScenes mAP", project: "AEGIS Nav", value: 69.4, target: 68, met: true },
-    { name: "CASP15 TM", project: "HELIX Drug", value: 0.83, target: 0.85, met: false },
-    { name: "Threat Recall", project: "SENTINEL", value: 97.2, target: 95, met: true },
-    { name: "T850 RMSE", project: "GAIA Climate", value: 3.45, target: 3.2, met: false },
-    { name: "MMMU", project: "NEXUS VLM", value: 74.3, target: 72, met: true },
-  ];
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
-        <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Cpu className="w-3.5 h-3.5 text-emerald-400" />Compute Utilization
-        </h3>
-        <div className="space-y-3">
-          {gpuMetrics.map(g => (
-            <div key={g.name}>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">{g.name}</span>
-                <span className={cn("font-mono font-bold", g.used > 90 ? "text-red-400" : g.used > 75 ? "text-amber-400" : "text-emerald-400")}>{g.used}%</span>
-              </div>
-              <div className="h-2 bg-border rounded-full overflow-hidden">
-                <div className={cn("h-full rounded-full transition-all duration-700", g.used > 90 ? "bg-red-400/70" : g.used > 75 ? "bg-amber-400/70" : "bg-emerald-400/70")} style={{ width: `${g.used}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
-        <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Shield className="w-3.5 h-3.5 text-emerald-400" />Benchmark Targets
-        </h3>
-        <div className="space-y-2">
-          {benchmarks.map(b => (
-            <div key={b.name} className="flex items-center gap-3">
-              <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", b.met ? "bg-emerald-400" : "bg-amber-400")} />
-              <span className="text-[10px] font-mono text-muted-foreground w-20 shrink-0">{b.name}</span>
-              <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-                <div className={cn("h-full rounded-full", b.met ? "bg-emerald-400/60" : "bg-amber-400/60")} style={{ width: `${Math.min((b.value / b.target) * 100, 100)}%` }} />
-              </div>
-              <span className="text-[10px] font-mono text-foreground w-12 text-right">{b.value}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -306,105 +218,141 @@ export default function Dashboard() {
   const activeProjects = projects.length;
   const runningExperiments = experiments.filter(e => e.status === "running").length;
   const deployedModels = models.filter(m => m.status === "production").length;
-  const totalInsights = insights.length;
-  const highImpact = insights.filter(i => i.impact === "high").length;
+  const highImpactInsights = insights.filter(i => i.impact === "high").length;
   const meanAcc = (projects.reduce((s, p) => s + p.accuracy, 0) / projects.length).toFixed(1);
 
   const recentExperiments = experiments
     .filter(e => e.status === "running" || e.status === "completed")
     .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-    .slice(0, 5);
+    .slice(0, 6);
 
   const topInsights = insights.filter(i => i.impact === "high").slice(0, 4);
+  
   const categoryColors: Record<string, string> = {
-    success: "text-emerald-400 bg-emerald-400/10",
-    warning: "text-amber-400 bg-amber-400/10",
-    trend: "text-blue-400 bg-blue-400/10",
-    discovery: "text-violet-400 bg-violet-400/10",
+    success: "text-emerald-400",
+    warning: "text-amber-400",
+    trend: "text-blue-400",
+    discovery: "text-violet-400",
   };
+
+  const pipelineStages = [
+    { label: "Research", count: projects.filter(p => p.status === "research").length, color: "bg-violet-500", textColor: "text-violet-400" },
+    { label: "Dev", count: projects.filter(p => p.status === "development").length, color: "bg-blue-500", textColor: "text-blue-400" },
+    { label: "Testing", count: projects.filter(p => p.status === "testing").length, color: "bg-amber-500", textColor: "text-amber-400" },
+    { label: "Deployed", count: projects.filter(p => p.status === "deployed").length, color: "bg-emerald-500", textColor: "text-emerald-400" },
+  ];
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1600px]">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">Research Command Center</h1>
-          <p className="text-sm text-muted-foreground mt-1">INCA AI Research Operations — Unified Telemetry</p>
+          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Research Command Center</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">INCA AI Research Operations — Unified Telemetry</p>
         </div>
         <LiveClock />
       </div>
 
+      {/* Top metrics row — clean 6-across grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Programs", value: activeProjects, icon: Brain, color: "bg-emerald-400/15 text-emerald-400", trend: "+2 Q1" },
-          { label: "Running", value: runningExperiments, icon: FlaskConical, color: "bg-amber-400/15 text-amber-400", trend: "+3" },
-          { label: "Deployed", value: deployedModels, icon: Cpu, color: "bg-emerald-400/15 text-emerald-400", trend: "+1" },
-          { label: "Insights", value: totalInsights, icon: Lightbulb, color: "bg-violet-400/15 text-violet-400", trend: `${highImpact} high` },
-          { label: "Accuracy", value: `${meanAcc}%`, icon: Activity, color: "bg-cyan-400/15 text-cyan-400", trend: "+2.1%" },
-          { label: "Health", value: healthScore, icon: Shield, color: healthScore >= 80 ? "bg-emerald-400/15 text-emerald-400" : "bg-amber-400/15 text-amber-400", isGauge: true },
+          { label: "Programs", value: activeProjects, icon: Brain, color: "text-emerald-400", bg: "bg-emerald-400/10", trend: "+2 Q1" },
+          { label: "Running", value: runningExperiments, icon: FlaskConical, color: "text-amber-400", bg: "bg-amber-400/10", trend: "active now" },
+          { label: "Deployed", value: deployedModels, icon: Cpu, color: "text-emerald-400", bg: "bg-emerald-400/10", trend: "+1 this month" },
+          { label: "High-Impact", value: highImpactInsights, icon: Lightbulb, color: "text-violet-400", bg: "bg-violet-400/10", trend: "insights" },
+          { label: "Avg Accuracy", value: `${meanAcc}%`, icon: Activity, color: "text-cyan-400", bg: "bg-cyan-400/10", trend: "+2.1% vs Q4" },
+          { label: "Health", value: healthScore, icon: Shield, color: healthScore >= 80 ? "text-emerald-400" : "text-amber-400", bg: healthScore >= 80 ? "bg-emerald-400/10" : "bg-amber-400/10", trend: "score" },
         ].map((stat) => (
-          <div key={stat.label} className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-4 hover:border-primary/20 transition-all group">
-            {stat.isGauge ? (
-              <HealthGauge score={stat.value as number} />
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-3">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", stat.color)}>
-                    <stat.icon className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded font-mono flex items-center gap-0.5">
-                    <TrendingUp className="w-2.5 h-2.5" />{stat.trend}
-                  </span>
-                </div>
-                <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider">{stat.label}</p>
-              </>
-            )}
+          <div key={stat.label} className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-4 hover:border-primary/20 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", stat.bg)}>
+                <stat.icon className={cn("w-3.5 h-3.5", stat.color)} />
+              </div>
+            </div>
+            <p className={cn("text-2xl font-display font-bold", stat.color)}>{stat.value}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{stat.label}</p>
+            <p className="text-[9px] text-muted-foreground/50 mt-0.5 font-mono">{stat.trend}</p>
           </div>
         ))}
+      </div>
+
+      {/* Research health bar — more modern than donut */}
+      <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl px-5 py-4">
+        <HealthBar score={healthScore} />
       </div>
 
       <ExperimentComparisonTable />
       <ModelPerformanceCharts />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <PipelineVisualization />
+        {/* Pipeline */}
+        <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
+              <GitBranch className="w-3.5 h-3.5 text-primary" />
+              Pipeline
+            </h3>
+            <Link href="/projects">
+              <span className="text-xs text-primary cursor-pointer flex items-center gap-1">View All <ArrowRight className="w-3 h-3" /></span>
+            </Link>
+          </div>
+          <div className="space-y-2.5">
+            {pipelineStages.map(s => (
+              <div key={s.label} className="flex items-center gap-3">
+                <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0", s.color)}>{s.count}</div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-muted-foreground">{s.label}</span>
+                    <span className={cn("text-[10px] font-mono", s.textColor)}>{Math.round((s.count / projects.length) * 100)}%</span>
+                  </div>
+                  <div className="h-1 bg-border rounded-full overflow-hidden">
+                    <div className={cn(s.color, "h-full rounded-full")} style={{ width: `${(s.count / projects.length) * 100}%` }} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
+        {/* Live Experiment Feed */}
         <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
           <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 text-emerald-400" />Live Experiment Feed
+            <Radio className="w-3.5 h-3.5 text-primary" />Live Feed
           </h3>
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {recentExperiments.map(exp => {
               const project = projects.find(p => p.id === exp.projectId);
               return (
-                <div key={exp.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors">
-                  <div className={cn("w-2 h-2 rounded-full shrink-0", exp.status === "running" ? "bg-amber-400 animate-pulse" : "bg-emerald-400")} />
+                <div key={exp.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/20 transition-colors border border-transparent hover:border-border/50">
+                  <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", exp.status === "running" ? "bg-amber-400 animate-pulse" : "bg-emerald-400")} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-foreground truncate">{exp.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{project?.name}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono">{project?.name}</p>
                   </div>
-                  <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full shrink-0", exp.status === "running" ? "text-amber-400 bg-amber-400/10" : "text-emerald-400 bg-emerald-400/10")}>{exp.status}</span>
+                  <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0", exp.status === "running" ? "text-amber-400 bg-amber-400/10" : "text-emerald-400 bg-emerald-400/10")}>{exp.status}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
+        {/* Priority Insights */}
         <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
-              <Lightbulb className="w-3.5 h-3.5 text-emerald-400" />Priority Insights
+              <Lightbulb className="w-3.5 h-3.5 text-primary" />Priority Insights
             </h3>
             <Link href="/insights">
-              <span className="text-xs text-primary hover:text-primary/80 cursor-pointer flex items-center gap-1">View All <ArrowRight className="w-3 h-3" /></span>
+              <span className="text-xs text-primary cursor-pointer flex items-center gap-1">View All <ArrowRight className="w-3 h-3" /></span>
             </Link>
           </div>
           <div className="space-y-2.5">
             {topInsights.map(insight => (
-              <div key={insight.id} className="p-2.5 rounded-lg bg-muted/20 border border-border/50 hover:border-primary/20 transition-colors">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={cn("text-[10px] font-mono uppercase px-2 py-0.5 rounded-full", categoryColors[insight.category])}>{insight.category}</span>
-                  <span className="text-[10px] text-muted-foreground font-mono">{insight.confidence}%</span>
+              <div key={insight.id} className="p-3 rounded-lg border border-border/50 hover:border-primary/20 transition-colors">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className={cn("text-[10px] font-mono uppercase", categoryColors[insight.category])}>
+                    {insight.category}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-mono ml-auto">{insight.confidence}%</span>
                 </div>
                 <p className="text-xs text-foreground leading-snug">{insight.title}</p>
               </div>
@@ -413,7 +361,56 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <ComputeAndBenchmarks />
+      {/* Compute Utilization */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
+          <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Cpu className="w-3.5 h-3.5 text-primary" />Compute Utilization
+          </h3>
+          <div className="space-y-4">
+            {[
+              { name: "A100 80GB Cluster", used: 94 },
+              { name: "H100 SXM Pod", used: 78 },
+              { name: "TPU v4 Pod", used: 62 },
+            ].map(g => (
+              <div key={g.name}>
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="text-muted-foreground font-mono text-[11px]">{g.name}</span>
+                  <span className={cn("font-mono font-bold", g.used > 90 ? "text-red-400" : g.used > 75 ? "text-amber-400" : "text-emerald-400")}>{g.used}%</span>
+                </div>
+                <div className="h-2 bg-border rounded-full overflow-hidden">
+                  <div className={cn("h-full rounded-full transition-all duration-700", g.used > 90 ? "bg-red-400/80" : g.used > 75 ? "bg-amber-400/80" : "bg-emerald-400/80")} style={{ width: `${g.used}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
+          <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Shield className="w-3.5 h-3.5 text-primary" />Benchmark Targets
+          </h3>
+          <div className="space-y-2.5">
+            {[
+              { name: "MMLU", project: "TITAN LLM", value: 91.8, target: 90, met: true },
+              { name: "nuScenes mAP", project: "AEGIS Nav", value: 69.4, target: 68, met: true },
+              { name: "CASP15 TM", project: "HELIX Drug", value: 0.83, target: 0.85, met: false },
+              { name: "Threat Recall", project: "SENTINEL", value: 97.2, target: 95, met: true },
+              { name: "T850 RMSE", project: "GAIA Climate", value: 3.45, target: 3.2, met: false },
+              { name: "MMMU", project: "NEXUS VLM", value: 74.3, target: 72, met: true },
+            ].map(b => (
+              <div key={b.name} className="flex items-center gap-3">
+                {b.met ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                <span className="text-[10px] font-mono text-muted-foreground w-24 shrink-0">{b.name}</span>
+                <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+                  <div className={cn("h-full rounded-full", b.met ? "bg-emerald-400/70" : "bg-amber-400/70")} style={{ width: `${Math.min((b.value / b.target) * 100, 100)}%` }} />
+                </div>
+                <span className="text-[10px] font-mono text-foreground w-10 text-right">{b.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
