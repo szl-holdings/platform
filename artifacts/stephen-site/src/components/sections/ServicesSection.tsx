@@ -1,111 +1,94 @@
 import { motion } from "framer-motion";
-import { Server, Layout, ShieldCheck, Zap, Database, Search, TrendingUp, Code2 } from "lucide-react";
-import { useListStephenContentBlocks } from "@workspace/api-client-react";
+import { ArrowRight } from "lucide-react";
 
-const fallbackServices = [
-  { 
-    id: 1, 
-    title: "Enterprise Architecture", 
-    content: "End-to-end platform design for organizations scaling past their first architecture — monolith to microservices, built for 10x growth.", 
-    icon: "Server" 
+const capabilities = [
+  {
+    id: "systems-design",
+    tag: "Technical architecture",
+    title: "Systems design & architecture",
+    text: "Full-stack architecture for scale: database design, API contracts, event-driven pipelines, caching strategy, and observability. From greenfield to legacy modernisation.",
   },
-  { 
-    id: 2, 
-    title: "Technical Due Diligence", 
-    content: "Deep technical assessment for PE and VC acquirers — code quality, infrastructure risk, and scalability scoring.", 
-    icon: "Search" 
+  {
+    id: "ai-infra",
+    tag: "AI / ML",
+    title: "AI and ML infrastructure",
+    text: "End-to-end ML systems: feature stores, training pipelines, model registries, inference serving, and monitoring for drift and performance degradation in production.",
   },
-  { 
-    id: 3, 
-    title: "Cybersecurity Architecture", 
-    content: "Zero-trust network design and NIST/CMMC compliance for defense, fintech, and regulated industries.", 
-    icon: "ShieldCheck" 
+  {
+    id: "team-building",
+    tag: "Org design",
+    title: "Engineering team building",
+    text: "Hiring, structuring, and developing high-velocity engineering teams. I've built teams from 0 to 40+ across multiple time zones and technical disciplines.",
   },
-  { 
-    id: 4, 
-    title: "Fractional CTO", 
-    content: "Senior engineering leadership for Series A–C companies — team structure, tech stack, delivery process.", 
-    icon: "Code2" 
-  },
-  { 
-    id: 5, 
-    title: "Data & Intelligence Systems", 
-    content: "Real-time data pipelines and ML-ops infrastructure built for throughput and reliability at scale.", 
-    icon: "Database" 
-  },
-  { 
-    id: 6, 
-    title: "Product Strategy", 
-    content: "Translating technical capability into market positioning — PMF analysis, competitive benchmarking, go-to-market.", 
-    icon: "TrendingUp" 
+  {
+    id: "cto-advisory",
+    tag: "Advisory",
+    title: "Fractional CTO advisory",
+    text: "Embedded technical leadership for early-stage companies that need senior judgment without a full-time commitment. Architecture decisions, hiring, vendor selection, and board communication.",
   },
 ];
 
-const iconMap: Record<string, React.ElementType> = {
-  Server, Layout, ShieldCheck, Zap, Database, Search, TrendingUp, Code2
-};
-
 export function ServicesSection() {
-  const { data: services } = useListStephenContentBlocks({ type: "service" });
-  
-  const displayServices = services?.length ? services : fallbackServices;
-
   return (
-    <section id="services" className="py-32 bg-background relative border-t border-white/5">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="max-w-3xl mb-20">
-          <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.2em] mb-4">Engagement Models</h2>
-          <h3 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-6">Strategic Advisory & Technical Leadership</h3>
-          <p className="text-foreground/50 text-lg leading-relaxed">
-            I partner with a select number of organizations each quarter. Engagements are scoped for impact, 
-            priced at parity with top-tier strategy firms, and delivered with the hands-on depth that only a 
-            builder-operator can provide.
-          </p>
+    <section id="capabilities" className="py-24 lg:py-32 bg-[#0a0e14] border-t border-white/5">
+      <div className="max-w-6xl mx-auto px-6 lg:px-12">
+        <div className="grid lg:grid-cols-12 gap-12 mb-14">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-6"
+          >
+            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-[#7ba3d4]/60 mb-4">
+              Capabilities
+            </p>
+            <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight">
+              What I do
+            </h2>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.65, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-6 flex items-end"
+          >
+            <p className="text-white/45 text-base font-light leading-relaxed">
+              Available for select fractional engagements alongside full-time focus on SZL portfolio companies.
+            </p>
+          </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayServices.map((service, index) => {
-            const Icon = service.icon && iconMap[service.icon] ? iconMap[service.icon] : Zap;
-            
-            return (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
-                whileHover={{ y: -6, scale: 1.01 }}
-                className="group p-8 rounded-2xl glass-panel hover:bg-white/[0.02] hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 flex flex-col"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <h4 className="text-lg font-bold text-foreground mb-3 leading-snug">{service.title}</h4>
-                <p className="text-foreground/50 leading-relaxed text-sm flex-1">
-                  {service.content}
-                </p>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-12 flex items-center justify-between border-t border-white/5 pt-10"
-        >
-          <p className="text-foreground/40 text-sm">Accepting 2–3 engagements per quarter.</p>
-          <a href="#contact">
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/35 transition-all duration-300"
+        <div className="grid md:grid-cols-2 gap-px bg-white/5">
+          {capabilities.map((cap, i) => (
+            <motion.div
+              key={cap.id}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              className="group bg-[#0a0e14] hover:bg-[#0e1520] transition-colors duration-300 p-8 lg:p-10"
             >
-              Request a Briefing
-            </motion.button>
-          </a>
-        </motion.div>
+              <p className="text-[10px] font-medium tracking-[0.25em] uppercase text-[#7ba3d4]/45 mb-4">
+                {cap.tag}
+              </p>
+              <h3 className="text-xl font-semibold text-white mb-3 tracking-tight">
+                {cap.title}
+              </h3>
+              <p className="text-white/40 text-[14px] font-light leading-relaxed mb-5">
+                {cap.text}
+              </p>
+              <button
+                onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}
+                className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.12em] uppercase text-[#7ba3d4]/40 hover:text-[#7ba3d4] transition-colors duration-300 group"
+              >
+                Discuss an engagement
+                <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+              </button>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

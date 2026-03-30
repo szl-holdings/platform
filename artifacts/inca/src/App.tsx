@@ -10,6 +10,7 @@ import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/k
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
+const IncaHome = lazy(() => import("@/pages/inca-home"));
 const QuipuCommand = lazy(() => import("@/pages/quipu-command"));
 const AgentSpawner = lazy(() => import("@/pages/agent-spawner"));
 const ChasquiRelay = lazy(() => import("@/pages/chasqui-relay"));
@@ -266,47 +267,64 @@ const incaShortcuts: KeyboardShortcut[] = [
   { key: "G", description: "Go to GPU Monitor", category: "Navigation" },
 ];
 
+function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const [location] = useLocation();
+  const isPublicHome = location === "/home";
+
+  if (isPublicHome) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <IncaHome />
+      </Suspense>
+    );
+  }
+
+  return (
+    <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#f59e0b">
+      <div className="flex flex-col h-screen bg-background">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
+          Skip to main content
+        </a>
+        <EcosystemNav currentAppId="inca" currentAppName="INCA — Agentic Intelligence Cortex" accentColor="#f59e0b" />
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
+          <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+            <AppRouter />
+          </main>
+        </div>
+      </div>
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        commands={incaCommands}
+        appName="INCA"
+        accentColor="#f59e0b"
+      />
+      <WelcomeOverlay
+        appId="inca"
+        appName="INCA"
+        subtitle="AI Research Command Center"
+        description="Track experiments, manage model versions, and optimize GPU costs across your entire ML research pipeline — from hypothesis to production deployment."
+        accentColor="#8b5cf6"
+        icon={Brain}
+        features={[
+          { icon: FlaskConical, title: "Experiments", description: "Parallel experiment tracking with hyperparameter importance analysis" },
+          { icon: Cpu, title: "Model Registry", description: "Version control and lineage graph for every production model" },
+          { icon: TrendingUp, title: "Predictions", description: "Live inference monitoring with drift and anomaly detection" },
+          { icon: Layers, title: "Ensemble Studio", description: "Combine models and build multi-model voting pipelines" },
+        ]}
+      />
+    </PowerUserProvider>
+  );
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(incaCommands);
 
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#f59e0b">
-          <div className="flex flex-col h-screen bg-background">
-            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
-              Skip to main content
-            </a>
-            <EcosystemNav currentAppId="inca" currentAppName="INCA — Agentic Intelligence Cortex" accentColor="#f59e0b" />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-                <AppRouter />
-              </main>
-            </div>
-          </div>
-          <CommandPalette
-            open={cmdOpen}
-            onClose={() => setCmdOpen(false)}
-            commands={incaCommands}
-            appName="INCA"
-            accentColor="#f59e0b"
-          />
-          <WelcomeOverlay
-            appId="inca"
-            appName="INCA"
-            subtitle="AI Research Command Center"
-            description="Track experiments, manage model versions, and optimize GPU costs across your entire ML research pipeline — from hypothesis to production deployment."
-            accentColor="#8b5cf6"
-            icon={Brain}
-            features={[
-              { icon: FlaskConical, title: "Experiments", description: "Parallel experiment tracking with hyperparameter importance analysis" },
-              { icon: Cpu, title: "Model Registry", description: "Version control and lineage graph for every production model" },
-              { icon: TrendingUp, title: "Predictions", description: "Live inference monitoring with drift and anomaly detection" },
-              { icon: Layers, title: "Ensemble Studio", description: "Combine models and build multi-model voting pipelines" },
-            ]}
-          />
-        </PowerUserProvider>
+        <IncaAppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </WouterRouter>
     </QueryClientProvider>
   );

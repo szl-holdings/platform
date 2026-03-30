@@ -1,63 +1,81 @@
-import { Github, Linkedin, Mail, ArrowUpRight } from "lucide-react";
-
 export function Footer() {
   return (
-    <footer className="bg-background border-t border-border pt-20 pb-10">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <span className="font-serif font-bold text-background text-lg">SL</span>
-              </div>
-              <span className="font-serif font-semibold text-2xl">Stephen Lutar</span>
-            </div>
-            <p className="text-muted-foreground max-w-sm mb-8 leading-relaxed">
-              Builder, architect, and operator. Building enterprise-grade platforms across maritime intelligence, cybersecurity, commerce, and creative production.
+    <footer className="bg-[#080c11] border-t border-white/5 py-12 lg:py-14">
+      <div className="max-w-6xl mx-auto px-6 lg:px-12">
+        <div className="grid md:grid-cols-12 gap-10">
+          <div className="md:col-span-4">
+            <h3 className="text-[17px] font-semibold text-white tracking-tight mb-1">
+              Stephen Lutar
+            </h3>
+            <p className="text-[9px] tracking-[0.28em] uppercase text-[#7ba3d4]/40 font-medium mb-5">
+              Founder & CEO, SZL Holdings
             </p>
-            <div className="flex items-center gap-4">
-              <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
-                <Linkedin size={18} />
-              </a>
-              <a href="https://github.com/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
-                <Github size={18} />
-              </a>
-              <a href="mailto:stephen@szlholdings.com" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
-                <Mail size={18} />
-              </a>
-            </div>
+            <p className="text-[13px] text-white/25 font-light leading-relaxed max-w-xs">
+              Builder of enterprise infrastructure, AI platforms, and founder-led teams.
+              London, UK.
+            </p>
           </div>
-          
-          <div>
-            <h4 className="font-semibold text-foreground mb-6">Navigate</h4>
-            <ul className="space-y-4">
-              <li><a href="#about" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">About</a></li>
-              <li><a href="#services" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Services</a></li>
-              <li><a href="#case-studies" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Case Studies</a></li>
-              <li><a href="#insights" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Insights</a></li>
-              <li><a href="#testimonials" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Testimonials</a></li>
-              <li><a href="#contact" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Contact</a></li>
+
+          <div className="md:col-span-3">
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">
+              Portfolio
+            </h4>
+            <ul className="space-y-2.5">
+              {[
+                { label: "SZL Holdings", href: "/szl-holdings/" },
+                { label: "Vessels", href: "/vessels/" },
+                { label: "INCA", href: "/inca/" },
+                { label: "Carlota Jo", href: "/carlota-jo/" },
+                { label: "Dreamscape", href: "/dreamscape/" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-semibold text-foreground mb-6">Ecosystem</h4>
-            <ul className="space-y-4">
-              <li><a href="/vessels/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Vessels <ArrowUpRight size={14} /></a></li>
-              <li><a href="/firestorm/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Firestorm <ArrowUpRight size={14} /></a></li>
-              <li><a href="/lyte-command-center/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Lyte <ArrowUpRight size={14} /></a></li>
-              <li><a href="/dreamscape/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Dreamscape <ArrowUpRight size={14} /></a></li>
-              <li><a href="/readiness-report/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Readiness Report <ArrowUpRight size={14} /></a></li>
+          <div className="md:col-span-2">
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">
+              Navigation
+            </h4>
+            <ul className="space-y-2.5">
+              {[
+                { label: "Work", href: "#work" },
+                { label: "About", href: "#about" },
+                { label: "Capabilities", href: "#capabilities" },
+                { label: "Thinking", href: "#thinking" },
+                { label: "Contact", href: "#contact" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light">
+                    {item.label}
+                  </a>
+                </li>
+              ))}
             </ul>
+          </div>
+
+          <div className="md:col-span-3">
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">
+              Contact
+            </h4>
+            <p className="text-[13px] text-white/22 font-light mb-2">hello@stephenlutar.com</p>
+            <p className="text-[13px] text-white/22 font-light">London, UK</p>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-10 pt-7 border-t border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p className="text-[11px] text-white/15 tracking-wider">
             &copy; {new Date().getFullYear()} Stephen Lutar. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
-            Washington, D.C. Metro &middot; Global Availability
+          <p className="text-[11px] text-white/12 tracking-wider">
+            Part of SZL Holdings
           </p>
         </div>
       </div>

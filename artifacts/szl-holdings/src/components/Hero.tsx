@@ -1,111 +1,101 @@
 import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-const ventures = [
-  { name: "Vessels", domain: "Maritime Intelligence" },
-  { name: "Firestorm", domain: "Adversarial Security" },
-  { name: "Dreamscape", domain: "AI Creative Production" },
-  { name: "INCA", domain: "Research Intelligence" },
-  { name: "Terra", domain: "Real Estate Analytics" },
-  { name: "Alloy", domain: "Unified AI Platform" },
+const ecosystem = [
+  { name: "Vessels", category: "Maritime Intelligence", status: "live" },
+  { name: "INCA", category: "Intelligence Platform", status: "live" },
+  { name: "Carlota Jo", category: "Strategic Advisory", status: "live" },
+  { name: "Firestorm", category: "Security Simulation", status: "live" },
+  { name: "Dreamscape", category: "Creative Engine", status: "beta" },
+  { name: "Terra", category: "Real Estate Intelligence", status: "beta" },
 ];
+
+const statusColors: Record<string, string> = {
+  live: "bg-emerald-500",
+  beta: "bg-amber-400",
+  dev: "bg-neutral-300",
+};
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-szl-bg pt-16">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
-          style={{ background: "radial-gradient(ellipse at center, rgba(201,169,110,0.04) 0%, transparent 65%)" }}
-        />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px]"
-          style={{ background: "radial-gradient(ellipse at bottom right, rgba(201,169,110,0.03) 0%, transparent 60%)" }}
-        />
-        <div className="absolute inset-0"
-          style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.015) 1px, transparent 1px)", backgroundSize: "48px 48px" }}
-        />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-[60px] bg-white">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-neutral-200 to-transparent" />
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(40,80,160,0.03)_0%,transparent_65%)]" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 w-full">
-        <div className="max-w-4xl mx-auto text-center mb-20">
-          <m.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-10"
-          >
-            <span className="inline-flex items-center gap-2.5 px-4 py-1.5 border border-szl-border text-szl-text-muted text-[10px] font-medium tracking-[0.25em] uppercase">
-              <span className="w-1 h-1 rounded-full bg-szl-accent inline-block" />
-              Est. 2021 · Washington, D.C. · London · Singapore
-            </span>
-          </m.div>
-
-          <m.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl sm:text-6xl lg:text-[4.5rem] xl:text-[5.25rem] leading-[1.0] font-[var(--font-display)] mb-8 tracking-tight text-szl-text"
-          >
-            A portfolio built for modern
-            <br />
-            <span style={{ color: "var(--color-szl-accent)" }}>
-              systems, operations,
-            </span>
-            <br />
-            and premium execution
-          </m.h1>
-
-          <m.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.38 }}
-            className="text-szl-text-secondary text-base sm:text-lg max-w-xl mx-auto mb-12 leading-relaxed font-light"
-          >
-            SZL Holdings deploys capital and operational infrastructure across six frontier technology ventures — each commanding a distinct vertical within a unified intelligence ecosystem.
-          </m.p>
-
-          <m.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <a
-              href="#portfolio"
-              className="group px-8 py-3.5 bg-szl-accent text-szl-bg font-semibold text-sm hover:bg-szl-accent-light transition-colors duration-200 flex items-center gap-2.5"
-            >
-              Explore the portfolio
-              <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
-            </a>
-            <a
-              href="#leadership"
-              className="group px-8 py-3.5 border border-szl-border text-szl-text-secondary font-medium text-sm hover:text-szl-text hover:border-szl-border-hover transition-all duration-200 flex items-center gap-2.5"
-            >
-              View the ventures
-              <ArrowRight size={15} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-            </a>
-          </m.div>
-        </div>
-
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-20 text-center">
         <m.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-7"
+        >
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-neutral-200 bg-neutral-50 text-neutral-500 text-[11px] font-medium tracking-[0.08em] uppercase">
+            Strategic Technology Portfolio
+          </span>
+        </m.div>
+
+        <m.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          className="border-t border-szl-border pt-12"
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] font-bold leading-[1.06] tracking-[-0.025em] text-neutral-900 mb-6"
         >
-          <p className="text-szl-text-muted text-[10px] font-medium tracking-[0.25em] uppercase text-center mb-8">
-            Active ventures
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-szl-border">
-            {ventures.map((v) => (
-              <div
-                key={v.name}
-                className="bg-szl-bg px-5 py-6 text-center hover:bg-szl-bg-secondary transition-colors duration-200"
-              >
-                <p className="text-szl-text font-[var(--font-display)] text-base mb-1">{v.name}</p>
-                <p className="text-szl-text-muted text-[10px] tracking-wide leading-tight">{v.domain}</p>
+          One holding company.
+          <br />
+          <span className="text-[hsl(215,45%,36%)]">Six frontier platforms.</span>
+        </m.h1>
+
+        <m.p
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="text-neutral-500 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed"
+        >
+          SZL Holdings builds and scales technology companies at the intersection
+          of maritime intelligence, AI, and enterprise operations.
+        </m.p>
+
+        <m.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.48 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16"
+        >
+          <a
+            href="#portfolio"
+            className="group flex items-center gap-2 px-6 py-3 rounded text-[13.5px] font-semibold text-white bg-[hsl(215,45%,32%)] hover:bg-[hsl(215,45%,38%)] transition-colors duration-200 shadow-sm"
+          >
+            Explore the portfolio
+            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform duration-200" />
+          </a>
+          <a
+            href="#contact"
+            className="flex items-center gap-2 px-6 py-3 rounded text-[13.5px] font-semibold text-neutral-600 border border-neutral-200 hover:border-neutral-300 hover:text-neutral-900 transition-all duration-200"
+          >
+            Start a strategic conversation
+          </a>
+        </m.div>
+
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.6 }}
+          className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-w-2xl mx-auto"
+        >
+          {ecosystem.map((venture) => (
+            <div
+              key={venture.name}
+              className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-neutral-100 bg-neutral-50/70 text-left group"
+            >
+              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusColors[venture.status]}`} />
+              <div>
+                <p className="text-neutral-800 text-[12px] font-semibold leading-tight">{venture.name}</p>
+                <p className="text-neutral-400 text-[10px] leading-tight mt-0.5">{venture.category}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </m.div>
       </div>
     </section>

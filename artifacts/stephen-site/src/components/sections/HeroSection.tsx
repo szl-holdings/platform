@@ -1,103 +1,112 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { useRef } from "react";
+
+const stats = [
+  { value: "15+", label: "Years building enterprise systems" },
+  { value: "£2B+", label: "Infrastructure value designed" },
+  { value: "5", label: "Live ventures in production" },
+];
 
 export function HeroSection() {
-  const ref = useRef<HTMLDivElement>(null);
-
   return (
-    <section id="hero" ref={ref} className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[160px]" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[120px]" />
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-          }}
-        />
+    <section id="hero" className="relative min-h-screen flex items-end pb-24 lg:pb-32 overflow-hidden bg-[#0a0e14]">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-[20%] w-[600px] h-[500px] bg-[#4a6fa5]/4 rounded-full blur-[160px]" />
       </div>
 
-      <div className="container mx-auto px-6 lg:px-8 max-w-6xl relative z-10">
-        <div className="max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex items-center gap-2.5 mb-10"
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span className="text-[11px] font-medium text-foreground/50 tracking-[0.2em] uppercase">
-              Founder & CEO — SZL Holdings
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-6xl sm:text-7xl lg:text-[5.5rem] font-serif font-normal text-foreground leading-[1.0] mb-6 tracking-tight"
-          >
-            Stephen Lutar
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.35 }}
-            className="text-lg sm:text-xl text-foreground/55 max-w-2xl mb-4 leading-relaxed font-light"
-          >
-            Systems operator. I build the infrastructure that powers enterprises — from defense platforms and fintech architectures to a six-company technology holding company.
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.42 }}
-            className="text-base text-foreground/35 max-w-xl mb-12 leading-relaxed font-light"
-          >
-            15 years. $2B+ in systems architected. Six live products in production.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.52 }}
-            className="flex flex-wrap items-center gap-5"
-          >
-            <a
-              href="#case-studies"
-              className="group inline-flex items-center gap-2.5 px-8 py-3.5 bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors duration-200"
+      <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-12 w-full">
+        <div className="grid lg:grid-cols-12 gap-12 items-end">
+          <div className="lg:col-span-8">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7 }}
+              className="flex items-center gap-3 mb-10"
             >
-              View selected work
-              <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
-            </a>
-            <a
-              href="#about"
-              className="group inline-flex items-center gap-2 text-sm font-medium text-foreground/50 hover:text-primary transition-colors duration-200"
+              <div className="w-1.5 h-1.5 bg-emerald-400/70 rounded-full" />
+              <span className="text-[11px] font-medium tracking-[0.28em] uppercase text-white/35">
+                Founder & CEO — SZL Holdings
+              </span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl md:text-6xl lg:text-[4.75rem] font-semibold text-white leading-[1.06] tracking-tight mb-7"
             >
-              Read the thesis
-              <ArrowRight size={13} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-            </a>
-          </motion.div>
+              Stephen Lutar
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="text-base md:text-[1.1rem] text-white/55 font-light max-w-lg leading-relaxed mb-10"
+            >
+              I build enterprise-grade systems and founding teams — from maritime intelligence
+              platforms tracking global fleets to fintech infrastructure processing millions in
+              daily transactions.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, delay: 0.38, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-col sm:flex-row items-start gap-4"
+            >
+              <a
+                href="#work"
+                className="group flex items-center gap-2.5 px-7 py-3.5 text-[13px] font-medium tracking-[0.07em] text-white bg-[#4a6fa5] hover:bg-[#5a80b8] transition-colors duration-300"
+              >
+                Selected work
+                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+              </a>
+              <a
+                href="#contact"
+                className="px-7 py-3.5 text-[13px] font-medium tracking-[0.07em] text-white/50 border border-white/12 hover:border-white/25 hover:text-white/75 transition-all duration-300"
+              >
+                Request a briefing
+              </a>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.75, duration: 0.8 }}
+              className="mt-16 pt-8 border-t border-white/6 flex flex-wrap gap-x-10 gap-y-5"
+            >
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <p className="text-2xl font-semibold text-[#7ba3d4] mb-1">{stat.value}</p>
+                  <p className="text-[11px] tracking-widest uppercase text-white/28 font-light">{stat.label}</p>
+                </div>
+              ))}
+            </motion.div>
+          </div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.85 }}
-            className="flex items-center gap-10 mt-16 pt-10 border-t border-white/6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, delay: 0.45 }}
+            className="lg:col-span-4 hidden lg:block"
           >
-            {[
-              { value: "15+", label: "Years in enterprise tech" },
-              { value: "$2B+", label: "Systems architected" },
-              { value: "6", label: "Live products" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex flex-col">
-                <span className="text-3xl font-serif text-primary">{stat.value}</span>
-                <span className="text-[10px] text-foreground/30 uppercase tracking-[0.2em] mt-1">{stat.label}</span>
+            <div className="border border-white/8 p-6 hover:border-white/14 transition-colors duration-400">
+              <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-[#7ba3d4]/60 mb-3">
+                Current focus
+              </p>
+              <p className="text-white/60 text-sm font-light leading-relaxed mb-5">
+                Scaling Vessels Maritime Intelligence and INCA AI Research across enterprise clients in Europe and North America.
+              </p>
+              <div className="space-y-2">
+                {["Vessels — Maritime AI", "INCA — Research Cortex", "Carlota Jo — Advisory"].map((v) => (
+                  <div key={v} className="flex items-center gap-2.5">
+                    <div className="w-1 h-1 bg-[#7ba3d4]/50 rounded-full shrink-0" />
+                    <span className="text-[12px] text-white/35 font-light">{v}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </motion.div>
         </div>
       </div>

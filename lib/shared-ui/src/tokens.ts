@@ -1,84 +1,143 @@
 export const colors = {
   background: {
-    primary: "hsl(216 14% 5%)",
-    secondary: "hsl(216 12% 8%)",
-    tertiary: "hsl(216 10% 11%)",
-    elevated: "hsl(216 10% 14%)",
-    overlay: "hsla(216 14% 3% / 0.85)",
+    primary: "hsl(220 20% 4%)",
+    secondary: "hsl(220 18% 7%)",
+    tertiary: "hsl(220 16% 10%)",
+    elevated: "hsl(220 14% 14%)",
+    overlay: "hsla(220 20% 4% / 0.85)",
   },
   surface: {
-    base: "hsl(216 10% 9%)",
-    raised: "hsl(216 10% 12%)",
-    overlay: "hsl(216 10% 15%)",
-    hover: "hsl(216 10% 17%)",
-    active: "hsl(216 10% 19%)",
+    base: "hsla(220 15% 12% / 0.6)",
+    baseHover: "hsla(220 15% 14% / 0.7)",
     border: "hsla(0 0% 100% / 0.07)",
+    borderHover: "hsla(0 0% 100% / 0.12)",
+    glass: "hsla(220 20% 20% / 0.08)",
+    glassHover: "hsla(220 20% 20% / 0.12)",
+    glassBorder: "hsla(220 20% 40% / 0.12)",
+    card: "hsla(220 18% 10% / 0.55)",
+    cardHover: "hsla(220 18% 12% / 0.65)",
+    // Legacy aliases kept for compatibility
+    raised: "hsla(220 15% 14% / 0.7)",
+    overlay: "hsla(220 20% 4% / 0.85)",
+    hover: "hsla(220 15% 14% / 0.7)",
+    active: "hsla(220 15% 16% / 0.75)",
     borderRaised: "hsla(0 0% 100% / 0.10)",
-    card: "hsl(216 10% 9%)",
-    cardHover: "hsl(216 10% 12%)",
   },
-  _legacyGlass: {
-    glass: "hsla(220 20% 20% / 0.1)",
-    glassHover: "hsla(220 20% 20% / 0.15)",
-    glassBorder: "hsla(220 20% 40% / 0.15)",
+
+  neutral: {
+    graphite: "hsl(220 8% 18%)",
+    charcoal: "hsl(220 10% 12%)",
+    ink: "hsl(220 15% 6%)",
+    softBlack: "hsl(220 18% 4%)",
+    warmOffWhite: "hsl(40 15% 96%)",
+    stone: "hsl(35 8% 72%)",
+    mistGray: "hsl(220 8% 60%)",
+    mutedSilver: "hsl(220 6% 48%)",
   },
-  primary: {
-    DEFAULT: "hsl(220 90% 62%)",
-    light: "hsl(220 90% 72%)",
-    dark: "hsl(220 90% 52%)",
-    muted: "hsla(220 90% 62% / 0.12)",
-    subtle: "hsla(220 90% 62% / 0.06)",
-  },
+
   text: {
-    primary: "hsl(210 20% 97%)",
-    secondary: "hsl(210 10% 65%)",
-    tertiary: "hsl(210 8% 45%)",
-    muted: "hsl(210 6% 36%)",
-    placeholder: "hsl(210 6% 32%)",
-    inverse: "hsl(216 14% 5%)",
+    primary: "hsl(0 0% 96%)",
+    secondary: "hsl(220 8% 65%)",
+    muted: "hsl(220 8% 42%)",
+    subtle: "hsl(220 8% 32%)",
+    inverse: "hsl(220 20% 4%)",
+    warmWhite: "hsl(40 15% 96%)",
+    // Legacy aliases
+    tertiary: "hsl(220 8% 42%)",
+    placeholder: "hsl(220 8% 32%)",
     link: "hsl(220 90% 68%)",
   },
-  status: {
-    success: "hsl(152 60% 48%)",
-    successMuted: "hsla(152 60% 48% / 0.12)",
-    warning: "hsl(38 90% 54%)",
-    warningMuted: "hsla(38 90% 54% / 0.12)",
-    error: "hsl(4 72% 56%)",
-    errorMuted: "hsla(4 72% 56% / 0.12)",
-    info: "hsl(210 80% 56%)",
-    infoMuted: "hsla(210 80% 56% / 0.12)",
+
+  semantic: {
+    success: "hsl(152 55% 42%)",
+    successLight: "hsl(152 55% 55%)",
+    warning: "hsl(38 85% 52%)",
+    warningLight: "hsl(38 85% 65%)",
+    critical: "hsl(4 72% 50%)",
+    criticalLight: "hsl(4 72% 62%)",
+    info: "hsl(210 70% 52%)",
+    infoLight: "hsl(210 70% 65%)",
+    neutral: "hsl(220 8% 52%)",
+    // Legacy aliases
+    error: "hsl(4 72% 50%)",
+    errorMuted: "hsla(4 72% 50% / 0.12)",
+    successMuted: "hsla(152 55% 42% / 0.12)",
+    warningMuted: "hsla(38 85% 52% / 0.12)",
+    infoMuted: "hsla(210 70% 52% / 0.12)",
   },
-  border: {
-    DEFAULT: "hsla(0 0% 100% / 0.08)",
-    subtle: "hsla(0 0% 100% / 0.05)",
-    strong: "hsla(0 0% 100% / 0.14)",
-    focus: "hsl(220 90% 62%)",
-  },
-  laneAccents: {
+
+  // Brand Bible lane accent colors
+  lane: {
     szl: {
-      primary: "hsl(220 16% 62%)",
-      secondary: "hsl(220 12% 48%)",
-      muted: "hsla(220 16% 62% / 0.10)",
+      primary: "hsl(215 45% 40%)",
+      primaryLight: "hsl(215 45% 52%)",
+      primaryDark: "hsl(215 45% 30%)",
+      accent: "hsl(215 30% 58%)",
+      muted: "hsla(215 45% 40% / 0.12)",
+      surface: "hsla(215 30% 12% / 0.55)",
     },
     vessels: {
-      primary: "hsl(208 72% 44%)",
-      secondary: "hsl(196 60% 52%)",
-      muted: "hsla(208 72% 44% / 0.10)",
+      primary: "hsl(205 70% 38%)",
+      primaryLight: "hsl(205 70% 52%)",
+      primaryDark: "hsl(205 70% 28%)",
+      accent: "hsl(188 55% 45%)",
+      muted: "hsla(205 70% 38% / 0.12)",
+      surface: "hsla(210 40% 10% / 0.55)",
     },
     inca: {
-      primary: "hsl(172 56% 42%)",
-      secondary: "hsl(186 64% 48%)",
-      muted: "hsla(172 56% 42% / 0.10)",
+      primary: "hsl(245 50% 45%)",
+      primaryLight: "hsl(245 50% 58%)",
+      primaryDark: "hsl(245 50% 34%)",
+      accent: "hsl(260 35% 55%)",
+      muted: "hsla(245 50% 45% / 0.12)",
+      surface: "hsla(245 30% 10% / 0.55)",
     },
     carlotaJo: {
-      primary: "hsl(24 54% 52%)",
-      secondary: "hsl(10 48% 48%)",
-      muted: "hsla(24 54% 52% / 0.10)",
+      primary: "hsl(32 40% 48%)",
+      primaryLight: "hsl(32 40% 62%)",
+      primaryDark: "hsl(32 40% 36%)",
+      accent: "hsl(35 28% 55%)",
+      cream: "hsl(40 28% 88%)",
+      taupe: "hsl(30 15% 65%)",
+      muted: "hsla(32 40% 48% / 0.12)",
+      surface: "hsla(30 15% 8% / 0.6)",
     },
     stephen: {
-      primary: "hsl(264 56% 60%)",
-      secondary: "hsl(280 44% 56%)",
-      muted: "hsla(264 56% 60% / 0.10)",
+      primary: "hsl(220 35% 50%)",
+      primaryLight: "hsl(220 35% 64%)",
+      primaryDark: "hsl(220 35% 38%)",
+      accent: "hsl(38 55% 52%)",
+      muted: "hsla(220 35% 50% / 0.12)",
+      surface: "hsla(220 20% 10% / 0.55)",
+    },
+  },
+
+  // Legacy laneAccents kept for backward compatibility with existing components
+  laneAccents: {
+    szl: {
+      primary: "hsl(215 45% 40%)",
+      secondary: "hsl(215 30% 58%)",
+      muted: "hsla(215 45% 40% / 0.10)",
+    },
+    vessels: {
+      primary: "hsl(205 70% 38%)",
+      secondary: "hsl(188 55% 45%)",
+      muted: "hsla(205 70% 38% / 0.10)",
+    },
+    inca: {
+      primary: "hsl(245 50% 45%)",
+      secondary: "hsl(260 35% 55%)",
+      muted: "hsla(245 50% 45% / 0.10)",
+    },
+    carlotaJo: {
+      primary: "hsl(32 40% 48%)",
+      secondary: "hsl(35 28% 55%)",
+      muted: "hsla(32 40% 48% / 0.10)",
+    },
+    stephen: {
+      primary: "hsl(220 35% 50%)",
+      secondary: "hsl(38 55% 52%)",
+      muted: "hsla(220 35% 50% / 0.10)",
     },
     firestorm: {
       primary: "hsl(36 84% 52%)",
@@ -111,14 +170,59 @@ export const colors = {
       muted: "hsla(232 64% 58% / 0.10)",
     },
   },
+
+  border: {
+    DEFAULT: "hsla(0 0% 100% / 0.07)",
+    subtle: "hsla(0 0% 100% / 0.04)",
+    strong: "hsla(0 0% 100% / 0.14)",
+    warm: "hsla(40 20% 80% / 0.10)",
+    focus: "hsl(220 90% 62%)",
+  },
+
+  // Legacy primary kept for backward compatibility
+  primary: {
+    DEFAULT: "hsl(220 90% 62%)",
+    light: "hsl(220 90% 72%)",
+    dark: "hsl(220 90% 52%)",
+    muted: "hsla(220 90% 62% / 0.12)",
+    subtle: "hsla(220 90% 62% / 0.06)",
+  },
 } as const;
 
 export const typography = {
   fontFamily: {
-    display: "'Geist', 'Inter', system-ui, -apple-system, sans-serif",
+    display: "'Inter', system-ui, -apple-system, sans-serif",
     body: "'Inter', system-ui, -apple-system, sans-serif",
-    mono: "'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace",
+    serif: "'Georgia', 'Palatino Linotype', serif",
+    mono: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
   },
+
+  scale: {
+    display: {
+      "2xl": { size: "clamp(3rem, 6vw, 4.5rem)", weight: "700", tracking: "-0.025em", leading: "1.05" },
+      xl: { size: "clamp(2.5rem, 5vw, 3.75rem)", weight: "700", tracking: "-0.02em", leading: "1.08" },
+      lg: { size: "clamp(2rem, 4vw, 3rem)", weight: "600", tracking: "-0.015em", leading: "1.1" },
+      md: { size: "clamp(1.75rem, 3vw, 2.25rem)", weight: "600", tracking: "-0.01em", leading: "1.15" },
+      sm: { size: "clamp(1.5rem, 2.5vw, 1.875rem)", weight: "600", tracking: "-0.005em", leading: "1.2" },
+    },
+    heading: {
+      lg: { size: "1.5rem", weight: "600", tracking: "-0.005em", leading: "1.3" },
+      md: { size: "1.25rem", weight: "600", tracking: "0", leading: "1.4" },
+      sm: { size: "1.125rem", weight: "600", tracking: "0", leading: "1.4" },
+    },
+    eyebrow: { size: "0.6875rem", weight: "500", tracking: "0.12em" },
+    subheading: { size: "1rem", weight: "400", tracking: "0", leading: "1.6" },
+    body: {
+      lg: { size: "1.125rem", weight: "400", leading: "1.65" },
+      md: { size: "1rem", weight: "400", leading: "1.6" },
+      sm: { size: "0.875rem", weight: "400", leading: "1.55" },
+    },
+    caption: { size: "0.75rem", weight: "400", tracking: "0.01em", leading: "1.5" },
+    label: { size: "0.75rem", weight: "500", tracking: "0.04em" },
+    mono: { size: "0.8125rem", weight: "400", leading: "1.5" },
+  },
+
+  // Legacy fontSize kept for any Tailwind config that references it
   fontSize: {
     "display-2xl": ["4.5rem", { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "700" }],
     "display-xl": ["3.75rem", { lineHeight: "1.06", letterSpacing: "-0.03em", fontWeight: "700" }],
@@ -142,17 +246,22 @@ export const typography = {
 
 export const spacing = {
   page: {
-    x: "clamp(1.25rem, 4vw, 5rem)",
-    y: "clamp(2rem, 5vh, 5rem)",
+    x: "clamp(1.25rem, 5vw, 5rem)",
+    y: "clamp(3.5rem, 8vh, 7rem)",
+    xMd: "clamp(1.5rem, 6vw, 6rem)",
   },
   section: {
+    sm: "clamp(3rem, 6vw, 5rem)",
+    md: "clamp(4rem, 8vw, 7rem)",
+    lg: "clamp(5rem, 10vw, 9rem)",
+    // Legacy alias
     gap: "clamp(1.5rem, 3vw, 3rem)",
   },
   card: {
-    padding: "clamp(1.25rem, 2vw, 1.75rem)",
+    padding: "clamp(1.25rem, 2.5vw, 2rem)",
     paddingCompact: "1rem",
     paddingRelaxed: "2rem",
-    gap: "1rem",
+    gap: "1.25rem",
   },
   layout: {
     sidebarWidth: "256px",
@@ -170,87 +279,94 @@ export const spacing = {
 
 export const effects = {
   surface: {
+    card: {
+      background: "hsla(220 15% 12% / 0.5)",
+      border: "1px solid hsla(0 0% 100% / 0.07)",
+      borderRadius: "0.75rem",
+    },
+    cardHover: {
+      background: "hsla(220 15% 14% / 0.65)",
+      border: "1px solid hsla(0 0% 100% / 0.11)",
+    },
+    glass: {
+      background: "hsla(220 15% 18% / 0.06)",
+      backdropFilter: "blur(16px)",
+      border: "1px solid hsla(0 0% 100% / 0.07)",
+    },
+    // Legacy named surfaces kept for backward compat
     base: {
-      background: "hsl(216 10% 9%)",
+      background: "hsla(220 15% 12% / 0.5)",
       border: "1px solid hsla(0 0% 100% / 0.07)",
     },
     raised: {
-      background: "hsl(216 10% 12%)",
+      background: "hsla(220 15% 14% / 0.7)",
       border: "1px solid hsla(0 0% 100% / 0.09)",
       boxShadow: "0 1px 3px hsla(0 0% 0% / 0.24), 0 1px 2px hsla(0 0% 0% / 0.16)",
     },
     overlay: {
-      background: "hsl(216 10% 15%)",
+      background: "hsla(220 14% 15% / 0.8)",
       border: "1px solid hsla(0 0% 100% / 0.11)",
       boxShadow: "0 4px 12px hsla(0 0% 0% / 0.30), 0 2px 4px hsla(0 0% 0% / 0.20)",
     },
     interactive: {
-      background: "hsl(216 10% 9%)",
+      background: "hsla(220 15% 12% / 0.5)",
       border: "1px solid hsla(0 0% 100% / 0.07)",
-      transition: "background 0.15s ease, border-color 0.15s ease",
+      transition: "background 0.18s ease, border-color 0.18s ease",
     },
     interactiveHover: {
-      background: "hsl(216 10% 12%)",
+      background: "hsla(220 15% 14% / 0.65)",
       border: "1px solid hsla(0 0% 100% / 0.11)",
     },
   },
-  _legacy: {
-    glassmorphism: {
-      background: "hsla(220 20% 20% / 0.1)",
-      backdropFilter: "blur(20px) saturate(1.5)",
-      border: "1px solid hsla(220 20% 40% / 0.15)",
-    },
-    glassmorphismStrong: {
-      background: "hsla(220 20% 15% / 0.3)",
-      backdropFilter: "blur(40px) saturate(1.8)",
-      border: "1px solid hsla(220 20% 40% / 0.25)",
-    },
-  },
   shadow: {
-    xs: "0 1px 2px hsla(0 0% 0% / 0.20)",
-    sm: "0 1px 3px hsla(0 0% 0% / 0.28), 0 1px 2px hsla(0 0% 0% / 0.18)",
-    md: "0 4px 8px hsla(0 0% 0% / 0.28), 0 2px 4px hsla(0 0% 0% / 0.18)",
-    lg: "0 8px 24px hsla(0 0% 0% / 0.32), 0 4px 8px hsla(0 0% 0% / 0.20)",
-    xl: "0 16px 48px hsla(0 0% 0% / 0.36), 0 8px 16px hsla(0 0% 0% / 0.22)",
+    xs: "0 1px 3px hsla(0 0% 0% / 0.2)",
+    sm: "0 2px 6px hsla(0 0% 0% / 0.28)",
+    md: "0 4px 16px hsla(0 0% 0% / 0.35)",
+    lg: "0 8px 32px hsla(0 0% 0% / 0.42)",
+    xl: "0 16px 56px hsla(0 0% 0% / 0.5)",
     "2xl": "0 24px 64px hsla(0 0% 0% / 0.40), 0 12px 24px hsla(0 0% 0% / 0.24)",
     inset: "inset 0 1px 0 hsla(0 0% 100% / 0.05)",
-  },
-  gradient: {
-    primary: "linear-gradient(135deg, hsl(220 90% 62%), hsl(248 72% 64%))",
-    subtle: "linear-gradient(135deg, hsla(220 90% 62% / 0.08), hsla(248 72% 64% / 0.08))",
-    text: "linear-gradient(135deg, hsl(220 90% 72%), hsl(248 72% 74%))",
-    surface: "linear-gradient(180deg, hsla(0 0% 100% / 0.03) 0%, hsla(0 0% 100% / 0.00) 100%)",
-    meshDark: "radial-gradient(ellipse at 25% 40%, hsla(220 90% 62% / 0.05) 0%, transparent 55%), radial-gradient(ellipse at 75% 20%, hsla(248 72% 64% / 0.04) 0%, transparent 55%), radial-gradient(ellipse at 50% 85%, hsla(192 80% 46% / 0.03) 0%, transparent 55%)",
-    topHighlight: "linear-gradient(180deg, hsla(0 0% 100% / 0.06) 0%, transparent 1px)",
   },
   borderRadius: {
     xs: "0.25rem",
     sm: "0.375rem",
-    md: "0.5rem",
-    lg: "0.75rem",
-    xl: "1rem",
+    md: "0.625rem",
+    lg: "0.875rem",
+    xl: "1.25rem",
     "2xl": "1.5rem",
     full: "9999px",
+  },
+  gradient: {
+    meshDark: "radial-gradient(ellipse at 25% 35%, hsla(215 45% 40% / 0.05) 0%, transparent 55%), radial-gradient(ellipse at 75% 65%, hsla(220 20% 10% / 0.06) 0%, transparent 55%)",
+    primary: "linear-gradient(135deg, hsl(220 90% 62%), hsl(248 72% 64%))",
+    subtle: "linear-gradient(135deg, hsla(220 90% 62% / 0.08), hsla(248 72% 64% / 0.08))",
+    text: "linear-gradient(135deg, hsl(220 90% 72%), hsl(248 72% 74%))",
+    surface: "linear-gradient(180deg, hsla(0 0% 100% / 0.03) 0%, hsla(0 0% 100% / 0.00) 100%)",
+    topHighlight: "linear-gradient(180deg, hsla(0 0% 100% / 0.06) 0%, transparent 1px)",
   },
 } as const;
 
 export const motion = {
   duration: {
-    instant: "80ms",
-    fast: "150ms",
-    normal: "220ms",
-    slow: "320ms",
-    slower: "480ms",
-    enter: "250ms",
+    instant: "100ms",
+    fast: "180ms",
+    normal: "280ms",
+    slow: "420ms",
+    slower: "650ms",
+    reveal: "800ms",
+    // Legacy aliases
+    enter: "280ms",
     exit: "180ms",
   },
   easing: {
-    default: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+    default: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    smooth: "cubic-bezier(0.22, 1, 0.36, 1)",
+    sharp: "cubic-bezier(0.16, 1, 0.3, 1)",
+    standard: "cubic-bezier(0.4, 0, 0.2, 1)",
+    // Legacy aliases
+    snappy: "cubic-bezier(0.16, 1, 0.3, 1)",
     enter: "cubic-bezier(0.0, 0.0, 0.2, 1)",
     exit: "cubic-bezier(0.4, 0.0, 1, 1)",
-    snappy: "cubic-bezier(0.16, 1, 0.3, 1)",
-    smooth: "cubic-bezier(0.22, 1, 0.36, 1)",
-    spring: "cubic-bezier(0.34, 1.20, 0.64, 1)",
   },
   reduced: {
     duration: "0ms",

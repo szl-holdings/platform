@@ -1,11 +1,20 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { analytics } from "@/lib/analytics";
+import { Navbar } from "@/components/Navbar";
+import { Hero } from "@/components/Hero";
+import { PortfolioStrip } from "@/components/PortfolioStrip";
+import { StrategicThesis } from "@/components/StrategicThesis";
+import { Milestones } from "@/components/Milestones";
+import { FeaturedVentures } from "@/components/FeaturedVentures";
+import { LatestDevelopments } from "@/components/LatestDevelopments";
+import { TrustSection } from "@/components/TrustSection";
+import { ContactCTA } from "@/components/ContactCTA";
+import { Footer } from "@/components/Footer";
 
-const HomePage = lazy(() => import("@/pages/home"));
 const PortfolioPage = lazy(() => import("@/pages/portfolio"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const VentureDetailPage = lazy(() => import("@/pages/venture-detail"));
@@ -28,6 +37,26 @@ function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-6 h-6 border-2 border-szl-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
+function HomePage() {
+  useEffect(() => {
+    document.title = "SZL Holdings — Strategic Technology Portfolio";
+  }, []);
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <Hero />
+      <PortfolioStrip />
+      <StrategicThesis />
+      <Milestones />
+      <FeaturedVentures />
+      <LatestDevelopments />
+      <TrustSection />
+      <ContactCTA />
+      <Footer />
     </div>
   );
 }
@@ -73,8 +102,8 @@ function App() {
             </Route>
           </Switch>
         </WouterRouter>
-        <IncaAgentIndicator agentName="Portfolio Analyst" systemType="mama-quilla" currentTask="Cross-correlating portfolio performance against macro indicators" confidence={0.90} />
       </LazyMotion>
+      <IncaAgentIndicator agentName="Portfolio Analyst" systemType="inti" currentTask="Monitoring portfolio performance metrics" confidence={0.88} />
     </QueryClientProvider>
   );
 }

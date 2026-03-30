@@ -31,6 +31,8 @@ const VesselsListPage = lazy(() => import("@/pages/vessels-list"));
 const CorridorRoutesPage = lazy(() => import("@/pages/corridor-routes"));
 
 const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));
+const VesselsHome = lazy(() => import("@/pages/vessels-home"));
+const VesselDetailPage = lazy(() => import("@/pages/vessel-detail"));
 const RoutePlanningPage = lazy(() => import("@/pages/route-planning"));
 const AlertCenterPage = lazy(() => import("@/pages/alert-center"));
 const WeatherPage = lazy(() => import("@/pages/weather-page"));
@@ -346,6 +348,48 @@ const vesselsShortcuts: KeyboardShortcut[] = [
   { key: "C", description: "Go to Command Mode", category: "Navigation" },
 ];
 
+function AppShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const [location] = useLocation();
+  const isPublicHome = location === "/home";
+
+  if (isPublicHome) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <VesselsHome />
+      </Suspense>
+    );
+  }
+
+  return (
+    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#3b82f6">
+      <div className="flex flex-col h-screen bg-[#060e1a]">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-sky-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+          Skip to main content
+        </a>
+        <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#3b82f6" />
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
+          <div className="flex-1 flex flex-col overflow-auto min-w-0">
+            <DemoModeBanner />
+            <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+              <AppRouter />
+            </main>
+          </div>
+        </div>
+      </div>
+      <Toaster />
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        commands={vesselsCommands}
+        appName="Vessels"
+        accentColor="#3b82f6"
+      />
+      <IncaAgentIndicator agentName="Maritime Analyst" systemType="inti" currentTask="Scanning AIS transponder anomalies across fleet" confidence={0.91} />
+    </PowerUserProvider>
+  );
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
@@ -353,32 +397,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#3b82f6">
-            <div className="flex flex-col h-screen bg-[#060e1a]">
-              <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-sky-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
-                Skip to main content
-              </a>
-              <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#3b82f6" />
-              <div className="flex flex-1 overflow-hidden">
-                <Sidebar />
-                <div className="flex-1 flex flex-col overflow-auto min-w-0">
-                  <DemoModeBanner />
-                  <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-                    <AppRouter />
-                  </main>
-                </div>
-              </div>
-            </div>
-            <Toaster />
-            <CommandPalette
-              open={cmdOpen}
-              onClose={() => setCmdOpen(false)}
-              commands={vesselsCommands}
-              appName="Vessels"
-              accentColor="#3b82f6"
-            />
-            <IncaAgentIndicator agentName="Maritime Analyst" systemType="inti" currentTask="Scanning AIS transponder anomalies across fleet" confidence={0.91} />
-          </PowerUserProvider>
+          <AppShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           <WelcomeOverlay
             appId="vessels"
             appName="Vessels"

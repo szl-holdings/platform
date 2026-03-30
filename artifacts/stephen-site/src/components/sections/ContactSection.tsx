@@ -1,274 +1,125 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Mail, MapPin, Shield, Clock } from "lucide-react";
-
-import { useCreateStephenBookingRequest } from "@workspace/api-client-react";
-import { Button } from "@workspace/shared-ui/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@workspace/shared-ui/ui/form";
-import { Input } from "@workspace/shared-ui/ui/input";
-import { Textarea } from "@workspace/shared-ui/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
-import { useToast } from "@workspace/shared-ui/hooks/use-toast";
-
-const formSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  company: z.string().optional(),
-  role: z.string().optional(),
-  type: z.enum(["consultation", "project", "recruitment", "partnership", "other"]),
-  message: z.string().min(10, "Please provide more details"),
-  preferredDate: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { ArrowRight } from "lucide-react";
 
 export function ContactSection() {
-  const { toast } = useToast();
-  const mutation = useCreateStephenBookingRequest();
-  
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      company: "",
-      role: "",
-      type: "consultation",
-      message: "",
-      preferredDate: "",
-    },
-  });
+  const [form, setForm] = useState({ name: "", email: "", context: "" });
+  const [submitted, setSubmitted] = useState(false);
 
-  const onSubmit = async (data: FormValues) => {
-    try {
-      await mutation.mutateAsync({ data });
-      toast({
-        title: "Request Received",
-        description: "Thank you. I'll personally review your inquiry and respond within 24 hours.",
-      });
-      form.reset();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Submission Failed",
-        description: "There was an error sending your request. Please try again.",
-      });
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
   };
 
   return (
-    <section id="contact" className="py-32 bg-secondary/20 relative border-t border-white/5">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          
+    <section id="contact" className="py-24 lg:py-32 bg-[#0a0e14] border-t border-white/5">
+      <div className="max-w-6xl mx-auto px-6 lg:px-12">
+        <div className="grid lg:grid-cols-12 gap-16 lg:gap-20">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-5"
           >
-            <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.2em] mb-4">Engage</h2>
-            <h3 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-6">Request a Strategic Briefing</h3>
-            <p className="text-foreground/50 text-lg mb-12 max-w-md leading-relaxed">
-              I work with a limited number of clients each quarter to ensure deep, meaningful engagement. 
-              If you're facing a complex technical challenge or strategic decision, let's talk.
+            <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-[#7ba3d4]/60 mb-6">
+              Contact
             </p>
-
-            <div className="space-y-8 mb-12">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-background border border-white/5 flex items-center justify-center shrink-0 text-primary">
-                  <Mail size={20} />
+            <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight mb-8">
+              Request
+              <br />
+              <span className="text-white/40 font-normal">a briefing</span>
+            </h2>
+            <p className="text-white/50 text-base font-light leading-relaxed mb-10">
+              If you're building something at scale, facing a technical decision with
+              long-term consequences, or looking for a fractional technical partner
+              — let's talk.
+            </p>
+            <div className="space-y-4">
+              {[
+                ["Response time", "Within 48 hours on all enquiries."],
+                ["Engagements", "Select fractional work only — limited slots."],
+                ["Format", "Introductory call, then we go from there."],
+              ].map(([label, text]) => (
+                <div key={label} className="flex gap-4">
+                  <div className="w-4 h-[1px] bg-[#7ba3d4]/30 shrink-0 mt-[0.65rem]" />
+                  <div>
+                    <p className="text-[12px] font-medium text-[#7ba3d4]/60 mb-0.5">{label}</p>
+                    <p className="text-[13px] text-white/35 font-light">{text}</p>
+                  </div>
                 </div>
-                <div>
-                  <h5 className="font-medium text-foreground mb-1">Direct Line</h5>
-                  <p className="text-foreground/50">stephen@szlholdings.com</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-background border border-white/5 flex items-center justify-center shrink-0 text-primary">
-                  <MapPin size={20} />
-                </div>
-                <div>
-                  <h5 className="font-medium text-foreground mb-1">Base of Operations</h5>
-                  <p className="text-foreground/50">Washington, D.C. Metro</p>
-                  <p className="text-foreground/30 text-sm">Available globally for remote and on-site engagements</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-background border border-white/5 flex items-center justify-center shrink-0 text-primary">
-                  <Clock size={20} />
-                </div>
-                <div>
-                  <h5 className="font-medium text-foreground mb-1">Response Time</h5>
-                  <p className="text-foreground/50">All inquiries reviewed within 24 hours</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-panel rounded-xl p-5 border-primary/10 flex items-start gap-3">
-              <Shield size={18} className="text-primary mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm text-foreground/50">
-                  All communications are treated as confidential. NDA available upon request for sensitive discussions.
-                </p>
-              </div>
+              ))}
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="glass-panel p-8 sm:p-10 rounded-3xl"
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-7"
           >
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Jane Smith" className="bg-background border-border" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input placeholder="jane@company.com" className="bg-background border-border" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Organization</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Company or fund name" className="bg-background border-border" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Your Role</FormLabel>
-                        <FormControl>
-                          <Input placeholder="CEO, CTO, Partner..." className="bg-background border-border" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Engagement Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-background border-border">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="consultation">Strategic Advisory</SelectItem>
-                          <SelectItem value="project">Technical Engagement</SelectItem>
-                          <SelectItem value="partnership">Investment / Partnership</SelectItem>
-                          <SelectItem value="recruitment">Speaking / Advisory Board</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="preferredDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Preferred Timeline</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input type="date" className="bg-background border-border pl-10" {...field} />
-                          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Brief on Your Challenge</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Describe the technical challenge, strategic question, or opportunity you'd like to discuss..." 
-                          className="bg-background border-border min-h-[120px] resize-none" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="w-full py-6 text-base rounded-xl font-bold shadow-lg shadow-primary/20"
-                  disabled={mutation.isPending}
-                >
-                  {mutation.isPending ? "Submitting..." : "Submit Briefing Request"}
-                </Button>
-
-                <p className="text-center text-xs text-foreground/30">
-                  Typically responds within 24 hours. Currently accepting Q2 2026 engagements.
+            {submitted ? (
+              <div className="py-12">
+                <div className="w-8 h-[1px] bg-[#7ba3d4] mb-7" />
+                <h3 className="text-2xl font-semibold text-white mb-3 tracking-tight">Request received</h3>
+                <p className="text-white/45 text-base font-light leading-relaxed max-w-sm">
+                  I'll be in touch within 48 hours.
                 </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-[11px] tracking-[0.2em] uppercase text-white/28 font-medium mb-2">
+                      Your name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className="w-full bg-transparent border border-white/10 text-white/80 text-[14px] font-light px-4 py-3 placeholder-white/18 focus:outline-none focus:border-[#7ba3d4]/40 transition-colors duration-200"
+                      placeholder="Full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] tracking-[0.2em] uppercase text-white/28 font-medium mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      className="w-full bg-transparent border border-white/10 text-white/80 text-[14px] font-light px-4 py-3 placeholder-white/18 focus:outline-none focus:border-[#7ba3d4]/40 transition-colors duration-200"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] tracking-[0.2em] uppercase text-white/28 font-medium mb-2">
+                    What you're working on
+                  </label>
+                  <textarea
+                    required
+                    rows={5}
+                    value={form.context}
+                    onChange={(e) => setForm({ ...form, context: e.target.value })}
+                    className="w-full bg-transparent border border-white/10 text-white/80 text-[14px] font-light px-4 py-3 placeholder-white/18 focus:outline-none focus:border-[#7ba3d4]/40 transition-colors duration-200 resize-none"
+                    placeholder="Brief context on the challenge or opportunity..."
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="group inline-flex items-center gap-2.5 px-8 py-3.5 text-[13px] font-medium tracking-[0.07em] text-white bg-[#4a6fa5] hover:bg-[#5a80b8] transition-colors duration-300"
+                >
+                  Send request
+                  <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                </button>
               </form>
-            </Form>
+            )}
           </motion.div>
-
         </div>
       </div>
     </section>

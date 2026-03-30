@@ -1,167 +1,117 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { TrendingUp, BarChart3, Globe, Activity, Zap, Shield } from "lucide-react";
-
-const sectors = [
-  { name: "Defense Tech", signal: "Bullish", confidence: 91, drivers: ["NDAA 2026 spending", "Ukraine rebuild contracts", "AI integration mandates"], risk: "Low", ytd: "+38%", color: "#3b82f6" },
-  { name: "Maritime / Shipping", signal: "Neutral", confidence: 72, drivers: ["Red Sea rerouting normalizing", "Port automation wave"], risk: "Medium", ytd: "+12%", color: "#06b6d4" },
-  { name: "AIOps / Observability", signal: "Bullish", confidence: 88, drivers: ["Enterprise AI ops adoption", "Datadog / New Relic M&A wave"], risk: "Low", ytd: "+54%", color: "#f59e0b" },
-  { name: "PropTech", signal: "Cautious", confidence: 61, drivers: ["Rate cut cycle emerging", "Distressed office market opportunities"], risk: "Medium", ytd: "+7%", color: "#10b981" },
-  { name: "Cybersecurity", signal: "Bullish", confidence: 94, drivers: ["CMMC mandates", "Critical infra regulation"], risk: "Low", ytd: "+47%", color: "#ef4444" },
-];
-
-const signals: Record<string, string> = {
-  Bullish: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  Neutral: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  Cautious: "text-orange-400 bg-orange-500/10 border-orange-500/20",
-};
 
 const theses = [
   {
-    title: "Vertical AI > Horizontal AI",
-    thesis: "Sector-specific AI platforms with deep domain data moats outperform general-purpose tools by 3–5x on NRR in defense and maritime verticals.",
-    conviction: 9.2,
-    timeframe: "18–36 months",
+    id: "maritime",
+    area: "Maritime & Logistics",
+    thesis: "Port congestion, fleet inefficiency, and opaque supply chains cost the global economy $250B+ annually. Real-time AI can capture a meaningful slice of that value.",
+    position: "Building — Vessels is live in enterprise trials.",
   },
   {
-    title: "Government as First Customer",
-    thesis: "Defense and federal contract wins function as revenue predictability anchors — enabling faster Series A raises and de-risking go-to-market for B2B expansion.",
-    conviction: 8.7,
-    timeframe: "12–24 months",
+    id: "ai-research",
+    area: "AI Research Infrastructure",
+    thesis: "Every company doing serious ML work has the same pain: fragmented experiment tracking, no model lineage, and no coherent way to monitor production drift. This is table stakes infrastructure that doesn't exist as a clean product.",
+    position: "Building — INCA is live.",
   },
   {
-    title: "Intelligence Compounding Effect",
-    thesis: "Shared data infrastructure across portfolio companies creates cross-vertical ML feedback loops that are effectively impossible for single-product competitors to replicate.",
-    conviction: 9.5,
-    timeframe: "24–48 months",
+    id: "fintech-infra",
+    area: "Financial Infrastructure",
+    thesis: "Mid-market fintechs are under-served. Stripe solves payments. Plaid solves data. Nobody has solved the operational core: ledger, reconciliation, reporting, and compliance in one coherent layer.",
+    position: "Monitoring. May build.",
+  },
+  {
+    id: "org-intelligence",
+    area: "Organisational Intelligence",
+    thesis: "Decision quality degrades with org size. The tools most companies use — decks, spreadsheets, emails — are structurally unable to carry the information needed for good decisions. There's a category to be built here.",
+    position: "Active research.",
   },
 ];
 
-export function MarketIntelligenceSection() {
-  const [selectedSector, setSelectedSector] = useState(sectors[0]);
+const writing = [
+  { title: "On building systems that outlast their builders", area: "Engineering" },
+  { title: "Why most ML projects fail before the first model is trained", area: "AI / ML" },
+  { title: "The hidden cost of premature abstraction", area: "Engineering" },
+  { title: "What maritime taught me about real-time systems", area: "Infrastructure" },
+];
 
+export function MarketIntelligenceSection() {
   return (
-    <section className="py-32 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/10 to-background pointer-events-none" />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
+    <section id="thinking" className="py-24 lg:py-32 bg-[#080c11] border-t border-white/5">
+      <div className="max-w-6xl mx-auto px-6 lg:px-12">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-14"
         >
-          <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.2em] mb-4">Market Intelligence</h2>
-          <div className="flex items-end justify-between gap-6">
-            <h3 className="text-4xl md:text-5xl font-serif font-bold text-foreground">
-              Sector Signals &<br /> Investment Theses
-            </h3>
-            <p className="hidden md:block text-muted-foreground max-w-sm text-sm leading-relaxed">
-              Real-time sector conviction signals and proprietary investment theses built from pattern recognition across the SZL portfolio.
-            </p>
-          </div>
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-[#7ba3d4]/60 mb-4">
+            Market theses
+          </p>
+          <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight">
+            Where I see
+            <br />
+            <span className="text-white/40 font-normal">the next decade.</span>
+          </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Sector Navigator */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-4 space-y-3"
-          >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Globe className="w-3.5 h-3.5" /> Sector Coverage
-            </p>
-            {sectors.map(s => (
-              <button
-                key={s.name}
-                onClick={() => setSelectedSector(s)}
-                className={`w-full text-left p-4 rounded-xl border transition-all ${selectedSector.name === s.name ? "border-primary/40 bg-primary/5" : "border-border/50 bg-card/50 hover:border-border"}`}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-semibold text-foreground">{s.name}</span>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${signals[s.signal]}`}>{s.signal}</span>
+        <div className="space-y-px bg-white/5 mb-20">
+          {theses.map((t, i) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-[#080c11] hover:bg-[#0d1219] transition-colors duration-300 p-7 lg:p-9"
+            >
+              <div className="grid lg:grid-cols-12 gap-5 lg:gap-8">
+                <div className="lg:col-span-3">
+                  <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#7ba3d4]/55">{t.area}</p>
                 </div>
-                <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-                  <span>Confidence: <span className="text-foreground font-medium">{s.confidence}%</span></span>
-                  <span>YTD: <span className={`font-medium ${s.ytd.startsWith("+") ? "text-emerald-400" : "text-red-400"}`}>{s.ytd}</span></span>
+                <div className="lg:col-span-6">
+                  <p className="text-[14px] text-white/50 font-light leading-relaxed">{t.thesis}</p>
                 </div>
-                <div className="mt-2 h-1 bg-border/30 rounded-full">
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${s.confidence}%`, backgroundColor: s.color }} />
+                <div className="lg:col-span-3">
+                  <p className="text-[12px] text-[#a0c0e8]/60 font-light">{t.position}</p>
                 </div>
-              </button>
-            ))}
-          </motion.div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-          {/* Sector Detail */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:col-span-8 space-y-6"
-          >
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-xl font-serif font-bold text-foreground">{selectedSector.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">Risk Profile: <span className={selectedSector.risk === "Low" ? "text-emerald-400" : "text-amber-400"}>{selectedSector.risk}</span></p>
-                </div>
-                <div className="text-right">
-                  <p className="text-3xl font-bold font-mono" style={{ color: selectedSector.color }}>{selectedSector.ytd}</p>
-                  <p className="text-[10px] text-muted-foreground">YTD Return</p>
-                </div>
-              </div>
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Zap className="w-3 h-3" /> Key Drivers
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedSector.drivers.map(d => (
-                    <span key={d} className="text-xs px-3 py-1 rounded-full border border-border bg-muted/20 text-muted-foreground">{d}</span>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground">Conviction Score</span>
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${selectedSector.confidence}%`, backgroundColor: selectedSector.color }} />
-                </div>
-                <span className="text-sm font-bold font-mono" style={{ color: selectedSector.color }}>{selectedSector.confidence}%</span>
-              </div>
-            </div>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-8"
+        >
+          <p className="text-[11px] font-medium tracking-[0.3em] uppercase text-[#7ba3d4]/60 mb-5">
+            Writing
+          </p>
+          <h3 className="text-2xl font-semibold text-white tracking-tight">
+            Thinking in public
+          </h3>
+        </motion.div>
 
-            {/* Investment Theses */}
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5" /> Active Investment Theses
-              </p>
-              <div className="space-y-3">
-                {theses.map((t, i) => (
-                  <motion.div
-                    key={t.title}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="rounded-xl border border-border bg-card/50 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <h5 className="text-sm font-semibold text-foreground">{t.title}</h5>
-                      <div className="text-right shrink-0">
-                        <p className="text-lg font-bold text-primary font-mono">{t.conviction}/10</p>
-                        <p className="text-[9px] text-muted-foreground">{t.timeframe}</p>
-                      </div>
-                    </div>
-                    <p className="text-[12px] text-muted-foreground leading-relaxed">{t.thesis}</p>
-                  </motion.div>
-                ))}
+        <div className="space-y-px bg-white/5">
+          {writing.map((w, i) => (
+            <motion.div
+              key={w.title}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: i * 0.06 }}
+              className="bg-[#080c11] hover:bg-[#0d1219] transition-colors duration-300 px-7 py-5 flex items-center justify-between gap-4 group cursor-pointer"
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-[#7ba3d4]/40 shrink-0">{w.area}</span>
+                <span className="text-[14px] text-white/55 font-light group-hover:text-white/75 transition-colors duration-200 truncate">{w.title}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground/40 text-center mt-4 font-mono">Mock Data · For illustrative purposes only</p>
-            </div>
-          </motion.div>
+              <span className="text-[11px] text-[#7ba3d4]/30 group-hover:text-[#7ba3d4]/60 transition-colors duration-200 shrink-0">Coming soon</span>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

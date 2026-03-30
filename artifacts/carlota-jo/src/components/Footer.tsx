@@ -1,35 +1,40 @@
 export default function Footer() {
   return (
-    <footer className="bg-stone-50 border-t border-stone-200 py-16 lg:py-20">
-      <div className="max-w-7xl mx-auto px-6 lg:px-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+    <footer className="bg-[#06080c] border-t border-[#f5f0e8]/5 py-14 lg:py-16">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
-            <h3 className="font-serif text-2xl font-light text-ink-900 mb-1.5">
-              Carlota Jo
-            </h3>
-            <p className="text-[10px] tracking-[0.3em] uppercase text-warm-gold font-medium mb-5">
-              Strategic Advisory
-            </p>
-            <p className="text-sm text-ink-500 leading-relaxed max-w-xs font-light">
-              Rigorous strategy. Proprietary frameworks. Measurable outcomes for the world's most consequential organizations.
+            <div className="mb-5">
+              <h3
+                className="text-[18px] font-light text-[#f5f0e8] leading-none"
+                style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
+              >
+                Carlota Jo
+              </h3>
+              <p className="text-[9px] tracking-[0.3em] uppercase text-[#c8a96a]/45 font-medium mt-1">
+                Consulting
+              </p>
+            </div>
+            <p className="text-[13px] text-[#f5f0e8]/28 leading-relaxed max-w-xs font-light">
+              Principal advisory for boards, leadership teams, and investors navigating consequential decisions.
             </p>
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-[10px] font-medium tracking-[0.2em] uppercase text-stone-400 mb-5">
-              Practice Areas
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#f5f0e8]/28 mb-4">
+              Practice
             </h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {[
-                "Strategic Advisory",
-                "Portfolio Optimization",
-                "Technology Transformation",
-                "Risk & Compliance",
-                "Growth Strategy",
+                "Board & Governance",
+                "Capital Strategy",
+                "Transformation",
                 "M&A Advisory",
+                "Stakeholder Engagement",
+                "Growth Strategy",
               ].map((s) => (
                 <li key={s}>
-                  <span className="text-sm text-ink-500 hover:text-ink-900 transition-colors cursor-default font-light">
+                  <span className="text-[13px] text-[#f5f0e8]/22 hover:text-[#f5f0e8]/55 transition-colors cursor-default font-light">
                     {s}
                   </span>
                 </li>
@@ -38,40 +43,39 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-[10px] font-medium tracking-[0.2em] uppercase text-stone-400 mb-5">
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#f5f0e8]/28 mb-4">
               Firm
             </h4>
-            <ul className="space-y-3 text-sm text-ink-500 font-light">
-              <li className="hover:text-ink-900 transition-colors cursor-default">About</li>
-              <li className="hover:text-ink-900 transition-colors cursor-default">Perspectives</li>
-              <li className="hover:text-ink-900 transition-colors cursor-default">Careers</li>
-              <li className="hover:text-ink-900 transition-colors cursor-default">Press</li>
+            <ul className="space-y-2.5 text-[13px] text-[#f5f0e8]/22 font-light">
+              {["About", "Approach", "Enquiries", "Confidentiality"].map((item) => (
+                <li key={item}>
+                  <span className="hover:text-[#f5f0e8]/55 transition-colors cursor-default">{item}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className="md:col-span-4">
-            <h4 className="text-[10px] font-medium tracking-[0.2em] uppercase text-stone-400 mb-5">
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#f5f0e8]/28 mb-4">
               Contact
             </h4>
-            <ul className="space-y-3 text-sm text-ink-500 font-light">
-              <li className="hover:text-ink-900 transition-colors">inquiries@carlotajo.com</li>
-              <li>+1 (212) 555-0184</li>
-              <li className="leading-relaxed text-stone-400">
-                280 Park Avenue, 38th Floor<br />
-                New York, NY 10017
+            <ul className="space-y-2.5 text-[13px] text-[#f5f0e8]/22 font-light">
+              <li>inquiries@carlotajo.com</li>
+              <li className="leading-relaxed">
+                London &nbsp;·&nbsp; New York
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[11px] text-stone-400 tracking-wider font-light">
+        <div className="mt-12 pt-7 border-t border-[#f5f0e8]/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p className="text-[11px] text-[#f5f0e8]/15 tracking-wider">
             &copy; {new Date().getFullYear()} Carlota Jo Consulting. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            {["Privacy Policy", "Terms of Engagement", "NDA Request"].map((link) => (
-              <span key={link} className="text-[11px] text-stone-400 tracking-wider hover:text-ink-500 transition-colors cursor-pointer font-light">
-                {link}
+            {["Privacy Policy", "Terms of Engagement", "NDA Request"].map((item) => (
+              <span key={item} className="text-[11px] text-[#f5f0e8]/15 tracking-wider hover:text-[#f5f0e8]/32 transition-colors cursor-pointer">
+                {item}
               </span>
             ))}
           </div>
