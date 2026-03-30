@@ -13,6 +13,7 @@ import {
   Laptop, Grid, List, ArrowUpRight, GitBranch, Map,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const EcosystemViz = lazy(() => import("@/pages/ecosystem-viz"));
@@ -388,6 +389,7 @@ function App() {
             <Route component={AppDirectory} />
           </Switch>
         </WouterRouter>
+      <IncaAgentIndicator agentName="Portfolio Analyst" systemType="mama-quilla" currentTask="Cross-correlating portfolio performance against macro indicators" confidence={0.90} />
       </LazyMotion>
     </QueryClientProvider>
   );

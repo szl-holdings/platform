@@ -11,6 +11,7 @@ import { cn } from "@workspace/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 
 const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));
 const VesselDetailPage = lazy(() => import("@/pages/vessel-detail"));
@@ -344,6 +345,7 @@ function App() {
               appName="Vessels"
               accentColor="#3b82f6"
             />
+            <IncaAgentIndicator agentName="Maritime Analyst" systemType="inti" currentTask="Scanning AIS transponder anomalies across fleet" confidence={0.91} />
           </PowerUserProvider>
         </WouterRouter>
       </AuthProvider>

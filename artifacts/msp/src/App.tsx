@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import {
   LayoutDashboard,
   Building2,
@@ -249,6 +250,7 @@ function App() {
             accentColor="#06b6d4"
           />
         </PowerUserProvider>
+        <IncaAgentIndicator agentName="IT Sentinel" systemType="mama-quilla" currentTask="Monitoring endpoint health across managed clients" confidence={0.88} />
       </WouterRouter>
       <Toaster position="bottom-right" richColors />
     </QueryClientProvider>

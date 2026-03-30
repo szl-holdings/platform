@@ -7,6 +7,7 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { museConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 
 const Workspace = lazy(() => import("@/pages/workspace").then(m => ({ default: m.Workspace })));
 const CampaignDetail = lazy(() => import("@/pages/campaign-detail").then(m => ({ default: m.CampaignDetail })));
@@ -101,6 +102,12 @@ function App() {
             commands={dreamscapeCommands}
             appName="Dreamscape"
             accentColor="#ec4899"
+          />
+          <IncaAgentIndicator 
+            agentName="Creative Director" 
+            systemType="inti" 
+            currentTask="Generating brand-aligned visual concepts for active campaigns" 
+            confidence={0.93} 
           />
         </PowerUserProvider>
       </WouterRouter>

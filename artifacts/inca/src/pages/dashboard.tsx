@@ -368,11 +368,44 @@ export default function Dashboard() {
     <div className="p-6 lg:p-8 space-y-6 max-w-[1600px]">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Research Command Center</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">INCA AI Research Operations — Unified Telemetry</p>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-xl font-display font-bold text-foreground tracking-tight">Agentic Intelligence Cortex</h1>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-400/10 text-amber-400/80 border border-amber-400/15">
+              Quipu Engine v2.1
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            The nervous system of the SZL ecosystem — 9 domain agents active, 6 Lenses as sensory perception, Qhapaq Ñan intelligence mesh online.
+          </p>
         </div>
         <LiveClock />
       </div>
+
+      {/* Inca Mythology Cortex Banner */}
+      <div className="relative bg-gradient-to-r from-amber-500/8 via-yellow-500/5 to-emerald-500/5 border border-amber-400/15 rounded-xl p-5 overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: "repeating-linear-gradient(60deg, #f59e0b 0px, #f59e0b 1px, transparent 1px, transparent 20px), repeating-linear-gradient(-60deg, #f59e0b 0px, #f59e0b 1px, transparent 1px, transparent 20px)" }} />
+        <div className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {[
+            { name: "Quipu Engine", role: "Agentic Core", desc: "9 knots active", icon: "⌇", color: "text-amber-400" },
+            { name: "Sacsayhuamán", role: "Immune System", desc: "Shield: nominal", icon: "◈", color: "text-orange-400" },
+            { name: "Qhapaq Ñan", role: "Intelligence Mesh", desc: "12 nodes online", icon: "⬡", color: "text-cyan-400" },
+            { name: "Willaq Umu", role: "Model Oracle", desc: "6 oracles online", icon: "◎", color: "text-violet-400" },
+            { name: "Chasqui Relay", role: "Privacy Router", desc: "1.2K req/min", icon: "▶", color: "text-emerald-400" },
+            { name: "Inti & Mama Q", role: "Dual-Mind", desc: "6 reflex · 3 deep", icon: "☀◑", color: "text-yellow-400" },
+          ].map(layer => (
+            <div key={layer.name} className="text-center">
+              <div className="text-2xl mb-1" style={{ color: layer.color.replace("text-", "").includes("-") ? undefined : undefined }}>
+                <span className={layer.color}>{layer.icon}</span>
+              </div>
+              <p className={`text-[11px] font-bold font-mono ${layer.color}`}>{layer.name}</p>
+              <p className="text-[9px] text-muted-foreground/50">{layer.role}</p>
+              <p className="text-[10px] text-foreground/70 font-mono mt-0.5">{layer.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[

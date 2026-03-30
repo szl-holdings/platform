@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { terraConfig } from "@workspace/shared-ui/copilot-configs";
+import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { Sidebar } from "@/components/sidebar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
@@ -106,6 +107,12 @@ function App() {
             commands={terraCommands}
             appName="Terra"
             accentColor="#10b981"
+          />
+          <IncaAgentIndicator 
+            agentName="Deal Scout" 
+            systemType="mama-quilla" 
+            currentTask="Analysing off-market opportunity signals in target zip codes" 
+            confidence={0.84} 
           />
         </PowerUserProvider>
       </WouterRouter>

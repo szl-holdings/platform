@@ -22,6 +22,7 @@
     "./command-palette": "./src/command-palette.tsx",
     "./data-export": "./src/data-export.tsx",
     "./keyboard-shortcuts": "./src/keyboard-shortcuts.tsx",
+    "./inca-agent-indicator": "./src/inca-agent-indicator.tsx",
     "./UserButton": "./src/UserButton.tsx",
     "./utils": "./src/utils.ts",
     "./hooks/use-mobile": "./src/hooks/use-mobile.tsx",

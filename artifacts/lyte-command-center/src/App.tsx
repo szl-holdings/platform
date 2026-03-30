@@ -21,6 +21,7 @@ const MeridianAnalytics = lazy(() => import("@/pages/meridian-analytics"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const PortfolioObservability = lazy(() => import("@/pages/portfolio-observability"));
+const QhapaqNan = lazy(() => import("@/pages/qhapaq-nan"));
 const AnomalyDetection = lazy(() => import("@/pages/anomaly-detection"));
 const SLOTracking = lazy(() => import("@/pages/slo-tracking"));
 const CloudCost = lazy(() => import("@/pages/cloud-cost"));
@@ -75,6 +76,7 @@ function Router() {
         <Route path="/observability" component={ObservabilityPage} />
         <Route path="/portfolio-observability" component={PortfolioObservability} />
         <Route path="/topology" component={Topology} />
+        <Route path="/qhapaq-nan" component={QhapaqNan} />
         <Route path="/meridian-analytics" component={MeridianAnalytics} />
         <Route path="/anomaly-detection" component={AnomalyDetection} />
         <Route path="/slo-tracking" component={SLOTracking} />

@@ -29,6 +29,7 @@ const XDRConsole = lazy(() => import("@/pages/xdr-console"));
 const ThreatHunting = lazy(() => import("@/pages/threat-hunting"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
+const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
 
 const ReadinessDashboard = lazy(() => import("@/pages/compliance/readiness-dashboard"));
 const FrameworkScorecards = lazy(() => import("@/pages/compliance/framework-scorecards"));
@@ -43,6 +44,7 @@ const queryClient = new QueryClient({
 
 const primaryNavItems = [
   { path: "/", label: "SOC Overview", icon: Activity },
+  { path: "/sacsayhuaman-shield", label: "Sacsayhuamán Shield", icon: ShieldCheck },
   { path: "/incidents", label: "Incidents", icon: Shield },
   { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
@@ -256,6 +258,7 @@ function AppRouter() {
         <Route path="/cr/vendor-risk" component={VendorRisk} />
         <Route path="/cr/milestones" component={MilestonesTrends} />
         <Route path="/cr/ai-insights" component={ReadinessAIInsights} />
+        <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>

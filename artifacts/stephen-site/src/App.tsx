@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
@@ -91,6 +92,7 @@ function App() {
               </Suspense>
             </div>
           </div>
+        <IncaAgentIndicator agentName="Brand Monitor" systemType="inti" currentTask="Tracking thought leadership signal amplification across networks" confidence={0.79} />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
