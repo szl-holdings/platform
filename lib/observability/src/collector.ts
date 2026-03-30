@@ -44,9 +44,9 @@ export class MetricCollector {
   }
 
   private generateInitialEvents(now: number): ObservabilityEvent[] {
-    const pillars: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic"];
+    const pillars: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
     const events: ObservabilityEvent[] = [];
-    const eventTypes: ObservabilityEvent["type"][] = ["metric_threshold", "anomaly", "status_change", "deployment"];
+    const eventTypes: ObservabilityEvent["type"][] = ["metric_threshold", "anomaly", "status_change", "deployment", "security", "compliance"];
 
     for (let i = 0; i < 8; i++) {
       const pillar = pillars[Math.floor(Math.random() * pillars.length)];
@@ -70,6 +70,8 @@ export class MetricCollector {
       anomaly: ["Unusual pattern detected", "Trend deviation identified", "Predictive model flagged potential issue"],
       status_change: ["Status improved to healthy", "Component recovered", "Dependency check passed"],
       deployment: ["Configuration updated", "New baseline established", "Calibration complete"],
+      security: ["Security posture verified", "Compliance check passed", "Threat surface scan complete"],
+      compliance: ["Framework alignment validated", "Zero-trust boundary verified", "Audit trail checkpoint"],
     };
     const pool = messages[type] || messages.status_change;
     return pool[Math.floor(Math.random() * pool.length)];
@@ -152,7 +154,7 @@ export class MetricCollector {
   }
 
   private computePillarScores(snapshots: MetricSnapshot[]): PillarScore[] {
-    const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic"];
+    const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
     const now = Date.now();
 
     return pillarIds.map((pillarId) => {

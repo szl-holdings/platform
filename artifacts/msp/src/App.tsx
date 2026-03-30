@@ -29,6 +29,7 @@ import NOCPage from "@/pages/noc";
 import RevenuePage from "@/pages/revenue";
 import TechniciansPage from "@/pages/technicians";
 import DispatchPage from "@/pages/dispatch";
+import ObservabilityPage from "@/pages/observability";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -62,6 +63,12 @@ const navSections: NavSection[] = [
     items: [
       { path: "/revenue", label: "Revenue & Billing", icon: DollarSign },
       { path: "/technicians", label: "Technicians", icon: Users },
+    ],
+  },
+  {
+    title: "Intelligence",
+    items: [
+      { path: "/observability", label: "Observability", icon: Activity },
     ],
   },
 ];
@@ -153,6 +160,7 @@ function AppRouter() {
       <Route path="/revenue" component={RevenuePage} />
       <Route path="/technicians" component={TechniciansPage} />
       <Route path="/dispatch" component={DispatchPage} />
+      <Route path="/observability" component={ObservabilityPage} />
       <Route component={NotFound} />
     </Switch>
   );

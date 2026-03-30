@@ -22,14 +22,27 @@ export const szlHoldingsConfig: DomainConfig = {
     { id: "compliance_system_health", name: "Compliance System Health", description: "Regulatory compliance system availability", unit: "score", pillar: "operational", type: "gauge" },
     { id: "shareholder_value", name: "Shareholder Value Index", description: "Composite shareholder value metric", unit: "score", pillar: "strategic", type: "gauge" },
     { id: "strategic_alignment", name: "Strategic Alignment Score", description: "Portfolio-strategy alignment measure", unit: "score", pillar: "strategic", type: "gauge" },
+      { id: "threat_surface_score", name: "Threat Surface Score", description: "Composite attack surface exposure rating", unit: "score", pillar: "securityPosture", type: "gauge", thresholds: { warning: 60, critical: 40, direction: "below" } },
+      { id: "compliance_drift", name: "Compliance Drift Index", description: "Deviation from baseline compliance posture", unit: "%", pillar: "securityPosture", type: "gauge", thresholds: { warning: 10, critical: 25, direction: "above" } },
+      { id: "vulnerability_mttr", name: "Vulnerability MTTR", description: "Mean time to remediate discovered vulnerabilities", unit: "seconds", pillar: "securityPosture", type: "gauge" },
+      { id: "deploy_frequency", name: "Deployment Frequency", description: "Deployments per day", unit: "count", pillar: "innovationVelocity", type: "counter" },
+      { id: "change_failure_rate", name: "Change Failure Rate", description: "Percentage of deployments causing incidents", unit: "%", pillar: "innovationVelocity", type: "gauge", thresholds: { warning: 15, critical: 30, direction: "above" } },
+      { id: "lead_time_changes", name: "Lead Time for Changes", description: "Time from commit to production", unit: "seconds", pillar: "innovationVelocity", type: "gauge" },
+      { id: "mttr", name: "Mean Time to Recovery", description: "Average time to restore service after incident", unit: "seconds", pillar: "innovationVelocity", type: "gauge", thresholds: { warning: 3600, critical: 14400, direction: "above" } },
   ],
   kpis: [
     { id: "growth", name: "Portfolio Growth", pillar: "business", format: "percent", target: 12 },
     { id: "subsidiary_health", name: "Subsidiary Health", pillar: "business", format: "score", target: 80 },
     { id: "yield", name: "Investment Yield", pillar: "business", format: "percent", target: 8 },
+  
+      { id: "security_score", name: "Security Posture Score", pillar: "securityPosture", format: "score", target: 85 },
+      { id: "deploy_freq", name: "Deploy Frequency", pillar: "innovationVelocity", format: "number", target: 5 },
   ],
   healthSignals: [
     { id: "data_stale", name: "Stale Portfolio Data", pillar: "operational", severity: "warning", condition: "Portfolio data not refreshed in > 1hr" },
     { id: "compliance_gap", name: "Compliance Gap Detected", pillar: "operational", severity: "critical", condition: "Regulatory filing deadline approaching" },
+  
+      { id: "compliance_drift", name: "Compliance Drift Detected", pillar: "securityPosture", severity: "warning", condition: "Compliance deviation > 10%" },
+      { id: "high_failure_rate", name: "High Change Failure Rate", pillar: "innovationVelocity", severity: "critical", condition: "Change failure rate > 30%" },
   ],
 };

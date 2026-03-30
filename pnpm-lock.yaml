@@ -1385,6 +1385,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -2096,6 +2099,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
       '@workspace/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui

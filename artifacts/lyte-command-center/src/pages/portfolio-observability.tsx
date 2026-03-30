@@ -153,7 +153,7 @@ export default function PortfolioObservability() {
       .slice(0, 15);
   }, [appStates]);
 
-  const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic"];
+  const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
 
   if (appStates.length === 0) {
     return (

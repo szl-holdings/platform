@@ -2,6 +2,28 @@ import { useState, useMemo } from "react";
 import { useObservability } from "./provider.js";
 import { PILLARS, type PillarId, type PillarScore, type MetricSnapshot, type ObservabilityEvent } from "../types.js";
 
+const PILLAR_ACCENTS: Record<string, string> = {
+  performance: "#3b82f6",
+  business: "#10b981",
+  userExperience: "#8b5cf6",
+  predictiveHealth: "#f59e0b",
+  operational: "#94a3b8",
+  strategic: "#f43f5e",
+  securityPosture: "#ef4444",
+  innovationVelocity: "#6366f1",
+};
+
+const PILLAR_ICONS: Record<string, string> = {
+  performance: "⚡",
+  business: "📈",
+  userExperience: "👥",
+  predictiveHealth: "🧠",
+  operational: "🖥️",
+  strategic: "🎯",
+  securityPosture: "🛡️",
+  innovationVelocity: "🚀",
+};
+
 function formatValue(value: number, unit: string): string {
   if (unit === "percent" || unit === "%") return `${value.toFixed(1)}%`;
   if (unit === "ms") return `${value.toFixed(0)}ms`;
@@ -91,17 +113,22 @@ function SparkLine({ data, color = "#10b981" }: { data: number[]; color?: string
 function PillarCard({ pillar, score }: { pillar: typeof PILLARS[0]; score: PillarScore }) {
   const circumference = 2 * Math.PI * 18;
   const offset = circumference - (score.score / 100) * circumference;
+  const accent = PILLAR_ACCENTS[pillar.id] || "#94a3b8";
+  const icon = PILLAR_ICONS[pillar.id] || "●";
 
   return (
     <div className={`rounded-xl border p-4 ${statusBg(score.status)} transition-all hover:scale-[1.02]`}>
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-white/90 truncate pr-2">{pillar.name}</h4>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-base flex-shrink-0">{icon}</span>
+          <h4 className="text-sm font-medium text-white/90 truncate">{pillar.name}</h4>
+        </div>
         <div className="relative w-10 h-10 flex-shrink-0">
           <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
             <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" strokeWidth="3" className="text-white/5" />
             <circle
               cx="20" cy="20" r="18" fill="none"
-              stroke={score.status === "healthy" ? "#10b981" : score.status === "degraded" ? "#f59e0b" : "#ef4444"}
+              stroke={score.status === "healthy" ? accent : score.status === "degraded" ? "#f59e0b" : "#ef4444"}
               strokeWidth="3" strokeLinecap="round"
               strokeDasharray={circumference} strokeDashoffset={offset}
               style={{ transition: "stroke-dashoffset 0.5s ease" }}
@@ -119,6 +146,9 @@ function PillarCard({ pillar, score }: { pillar: typeof PILLARS[0]; score: Pilla
           <span className="text-red-400">{score.anomalyCount} anomal{score.anomalyCount === 1 ? "y" : "ies"}</span>
         )}
       </div>
+      <div className="mt-2 pt-2 border-t border-white/5">
+        <span className="text-[10px] text-white/20 uppercase tracking-wider">{pillar.inspiredBy}</span>
+      </div>
     </div>
   );
 }
@@ -133,7 +163,10 @@ function MetricRow({ snapshot, config }: { snapshot: MetricSnapshot; config: { m
     <div className="flex items-center gap-4 py-2 px-3 rounded-lg hover:bg-white/5 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="text-sm text-white/90 truncate">{def.name}</div>
-        <div className="text-xs text-slate-500 capitalize">{def.pillar.replace(/([A-Z])/g, " $1").trim()}</div>
+        <div className="text-xs text-slate-500 flex items-center gap-1.5">
+          <span>{PILLAR_ICONS[def.pillar] || "●"}</span>
+          <span className="capitalize">{def.pillar.replace(/([A-Z])/g, " $1").trim()}</span>
+        </div>
       </div>
       <SparkLine data={snapshot.trend} color={sparkColor} />
       <div className="text-right min-w-[60px]">
@@ -157,7 +190,10 @@ function EventRow({ event }: { event: ObservabilityEvent }) {
       <div className="flex-1 min-w-0">
         <div className="text-sm text-white/80 truncate">{event.message}</div>
         <div className="text-xs text-slate-500 flex gap-2 mt-0.5">
+          <span>{PILLAR_ICONS[event.pillar] || "●"}</span>
           <span className="capitalize">{event.pillar.replace(/([A-Z])/g, " $1").trim()}</span>
+          <span>·</span>
+          <span>{event.type.replace(/_/g, " ")}</span>
           <span>·</span>
           <span>{timeAgo(event.timestamp)}</span>
         </div>
@@ -187,19 +223,33 @@ export function ObservabilityPanel() {
   }, [state.events, pillarFilter]);
 
   const tabs: { id: TabId; label: string }[] = [
-    { id: "pillars", label: "6 Pillars" },
+    { id: "pillars", label: "8 Pillars" },
     { id: "metrics", label: "Metrics" },
     { id: "events", label: "Events" },
   ];
+
+  const maturityLevel = config.maturityLevel || 3;
+  const maturityNames = ["", "Reactive", "Proactive", "Predictive", "Intelligent", "Autonomous"];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">{config.appName} Observability</h2>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+              <span className="text-sm font-bold text-white">◆</span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">{config.appName}</h2>
+              <p className="text-xs text-indigo-400/70 font-medium">DreamStack Intelligence</p>
+            </div>
+          </div>
           <p className="text-sm text-slate-400 mt-1">{config.description}</p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-400">
+            L{maturityLevel} {maturityNames[maturityLevel]}
+          </div>
           <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium ${statusBg(state.overallStatus)} ${statusColor(state.overallStatus)}`}>
             <span className={`w-2 h-2 rounded-full ${state.overallStatus === "healthy" ? "bg-emerald-400" : state.overallStatus === "degraded" ? "bg-amber-400" : "bg-red-400"}`} />
             Score: {state.overallScore}
@@ -214,7 +264,7 @@ export function ObservabilityPanel() {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
               activeTab === tab.id
-                ? "text-white bg-white/10 border-b-2 border-cyan-400"
+                ? "text-white bg-white/10 border-b-2 border-indigo-400"
                 : "text-slate-400 hover:text-white"
             }`}
           >
@@ -225,18 +275,18 @@ export function ObservabilityPanel() {
           <select
             value={pillarFilter}
             onChange={(e) => setPillarFilter(e.target.value as PillarId | "all")}
-            className="bg-white/5 border border-white/10 text-sm text-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-cyan-400"
+            className="bg-white/5 border border-white/10 text-sm text-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-400"
           >
             <option value="all">All Pillars</option>
             {PILLARS.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
+              <option key={p.id} value={p.id}>{PILLAR_ICONS[p.id]} {p.name}</option>
             ))}
           </select>
         </div>
       </div>
 
       {activeTab === "pillars" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {PILLARS.map((pillar) => {
             const score = state.pillars.find((p) => p.pillarId === pillar.id);
             if (!score) return null;

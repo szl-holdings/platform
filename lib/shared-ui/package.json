@@ -12,7 +12,8 @@
     "./premium-components": "./src/premium-components.ts",
     "./copilot": "./src/copilot.tsx",
     "./copilot-configs": "./src/copilot-configs.ts",
-    "./ai-components": "./src/ai-components.tsx"
+    "./ai-components": "./src/ai-components.tsx",
+    "./intelligence-philosophy": "./src/intelligence-philosophy.tsx"
   },
   "dependencies": {
     "framer-motion": "catalog:",

@@ -119,7 +119,7 @@ export default function SystemObservability() {
   }, [appStates]);
 
   const pillarAverages = useMemo(() => {
-    const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic"];
+    const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
     return pillarIds.map((id) => {
       const scores = appStates.map((a) => a.pillars.find((p) => p.pillarId === id)?.score ?? 0);
       const avg = scores.length > 0 ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : 0;

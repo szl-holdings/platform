@@ -71,11 +71,11 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **Stripe Billing Integration:** Full checkout/subscription/webhook pipeline with API routes for managing billing flows and webhook verification.
 - **Intelligence Layer:** Provides 25+ REST endpoints for cross-platform intelligence (threats, geopolitical events, maritime data, news, tech trends) and AI-powered endpoints (chat, summarize, sentiment, image-gen, threat-briefing). Features in-memory caching and demo data fallback.
 - **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all 8 applications, offering a floating button, slide-out chat panel with SSE streaming, markdown rendering, and suggested questions. Supports Replit proxy, OpenAI, and Anthropic providers.
-- **Observability:** Structured logging via pino and a system health endpoint monitoring DB, storage, auth, connectors, and app routes. An Intelligent Observability framework (`@workspace/observability`) provides 6-pillar domain-native observability (Performance Intelligence, Business Observability, User Experience Intelligence, Predictive Health, Operational Awareness, Strategic Insight) across all 9 apps. Each app has domain-specific metrics, KPIs, and health signals with an `/observability` page. Lyte Command Center aggregates cross-portfolio health. Admin Panel provides system-wide observability. API endpoints at `/api/observability/:appSlug`.
+- **Observability (DreamStack Intelligence):** Structured logging via pino and a system health endpoint monitoring DB, storage, auth, connectors, and app routes. The DreamStack Intelligence framework (`@workspace/observability`) provides **8-pillar** domain-native observability (Performance Intelligence, Business Observability, User Experience Intelligence, Predictive Health, Operational Awareness, Strategic Insight, **Security Posture**, **Innovation Velocity**) across all 11 apps. Inspired by New Relic Business Observability, Dynatrace Davis AI/Smartscape, Datadog Watchdog/APM, and DORA metrics. Each app has domain-specific metrics, KPIs, and health signals with an `/observability` page. Lyte Command Center aggregates cross-portfolio health. Admin Panel provides system-wide observability. API endpoints at `/api/observability/:appSlug`. Philosophy component at `@workspace/shared-ui/intelligence-philosophy`. 5-level maturity model (Reactive → Proactive → Predictive → Intelligent → Autonomous).
 - **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
 
 ### Shared Libraries
-- `lib/shared-ui`: Design system, AgentCopilot, copilot configs, AI components, premium components
+- `lib/shared-ui`: Design system, AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy component
 - `lib/db`: Drizzle ORM schemas and database connection
 - `lib/config`: Application-to-connector dependency mapping
 - `lib/services`: 24 service adapters with health checks and mock fallback
@@ -86,7 +86,7 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 ### Post-Merge Script
 `scripts/post-merge.sh` runs `pnpm install --frozen-lockfile` then `yes '' | pnpm --filter db push || true` to handle interactive drizzle-kit prompts automatically.
 
-- `lib/observability`: Intelligent Observability framework with metric collectors, 6-pillar interfaces, domain configs for all 9 apps, React provider/hooks, and ObservabilityPanel component.
+- `lib/observability`: DreamStack Intelligence framework with metric collectors, 8-pillar interfaces (incl. Security Posture + Innovation Velocity), domain configs for all 11 apps (vessels, firestorm, inca, dreamscape, carlota-jo, szl-holdings, readiness-report, stephen-site, lyte-command-center, msp, terra), React provider/hooks, and ObservabilityPanel component.
 
 ### Consolidated Content (from GitHub repos)
 - **`social-content/`**: 24 banners (LinkedIn/X/Instagram/YouTube + 8-week campaign), 16 hero screenshots, 7 PDF guides (marketing playbook, carousels, profile kit), content calendar, hackajob profile, Lyte logos
