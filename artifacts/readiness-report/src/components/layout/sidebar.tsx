@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { 
   LayoutDashboard, 
   Target, 
@@ -99,7 +100,8 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t border-white/5 space-y-2">
+        <UserButton showName className="w-full" />
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Command className="w-3 h-3" />
           <span>SZL Holdings Platform</span>

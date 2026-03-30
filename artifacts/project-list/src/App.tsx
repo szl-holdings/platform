@@ -6,6 +6,7 @@ import {
   Search, ExternalLink, Shield, Brain, Zap, Ship, Building, Palette, Activity,
   Globe, BarChart3, Laptop, Grid, List, ArrowUpRight,
 } from "lucide-react";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { cn } from "@workspace/shared-ui/utils";
 
 const SpectrumAnalytics = lazy(() => import("@/pages/spectrum-analytics"));
@@ -223,6 +224,7 @@ function AppDirectory() {
           </div>
 
           <div className="flex items-center gap-3">
+            <UserButton className="mr-1" />
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input

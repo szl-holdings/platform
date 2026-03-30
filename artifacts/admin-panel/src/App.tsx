@@ -6,6 +6,7 @@ import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { nexusConfig } from "@workspace/shared-ui/copilot-configs";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { api } from "@/lib/api";
 import {
   LayoutDashboard,
@@ -270,7 +271,8 @@ function Sidebar() {
           <NavSection key={section.title} section={section} />
         ))}
       </nav>
-      <div className="px-4 py-3 border-t border-border">
+      <div className="px-4 py-3 border-t border-border space-y-2">
+        <UserButton showName className="w-full justify-between" />
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-xs text-muted-foreground">System Online</span>

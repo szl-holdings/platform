@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { LayoutDashboard, Film, Video, Search, Bell, Settings, Sparkles, Calendar, Image, BookOpen, Wand2, Palette, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "./ui";
 import { useState } from "react";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 
 const navItems = [
   { name: "Workspace", href: "/", icon: LayoutDashboard },
@@ -68,23 +69,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="p-3 border-t border-border/50">
-            {!collapsed ? (
-              <div className="flex items-center gap-3 px-3 py-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-white">SJ</span>
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-medium leading-none truncate">Sarah Jenkins</span>
-                  <span className="text-xs text-muted-foreground mt-0.5">Creative Director</span>
-                </div>
-              </div>
-            ) : (
-              <div className="flex justify-center">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">SJ</span>
-                </div>
-              </div>
-            )}
+            <UserButton showName={!collapsed} className="w-full" />
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}

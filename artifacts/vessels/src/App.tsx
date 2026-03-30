@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown, EyeOff, ShieldAlert, Shield, ChevronRight } from "lucide-react";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
@@ -242,7 +243,8 @@ function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-1.5 py-3 border-t border-sky-500/10">
+      <div className="px-1.5 py-3 border-t border-sky-500/10 space-y-2">
+        <UserButton showName={expanded} className="w-full" />
         <RoleSelector expanded={expanded} />
       </div>
     </aside>

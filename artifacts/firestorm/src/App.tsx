@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
@@ -166,7 +167,8 @@ function Sidebar() {
         </div>
       </nav>
 
-      <div className="px-4 py-3 border-t border-orange-500/10">
+      <div className="px-4 py-3 border-t border-orange-500/10 space-y-2">
+        <UserButton showName className="w-full" />
         <div className="flex items-center gap-2 text-[10px] text-orange-400/30">
           <Flame className="w-3 h-3" />
           <span>SZL Holdings Platform</span>

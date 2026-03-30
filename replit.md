@@ -17,7 +17,7 @@ The platform is built as a pnpm monorepo using Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
 - **Database:** PostgreSQL with Drizzle ORM (90+ tables).
-- **Authentication:** Session-based with Replit Auth fallback, featuring a 7-role RBAC system.
+- **Authentication:** Real Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC. Fallback to DevAuthProvider in local dev (when REPL_ID is absent).
 - **API Codegen:** Orval from OpenAPI specification.
 - **Bundling:** esbuild (CJS) and Vite.
 
@@ -61,6 +61,7 @@ The platform includes 15 applications:
 AI-powered domain agents are implemented for each application, with specialized system prompts, tool definitions, and connections to existing API routes for data retrieval.
 
 ### Shared Libraries
+<<<<<<< HEAD
 Key shared libraries (`lib/`) provide:
 - `shared-ui`: Design system, `AgentCopilot`, AI components, hooks, `ErrorBoundary`.
 - `db`: Drizzle ORM schemas, connection pool.
@@ -69,6 +70,20 @@ Key shared libraries (`lib/`) provide:
 - `api-spec`, `api-zod`, `api-client-react`: OpenAPI specification, Zod schemas, React Query hooks.
 - `integrations-openai-ai-server`, `integrations-openai-ai-react`, `integrations-anthropic-ai`, `integrations-gemini-ai`: AI integration packages.
 - `observability`: DreamStack Intelligence framework.
+=======
+- `lib/shared-ui`: Design system (56 UI components), AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy, `ErrorBoundary`, `useRealtimeChannel`, `useFeatureFlag` hooks, `UserButton` (real auth sign-in/out), `AuthGate`
+- `lib/replit-auth-web`: `useAuth()` React hook — fetches `/api/auth/user`, triggers login/logout via server-side OIDC redirects. Used by `UserButton` and `AuthGate`.
+- `lib/db`: Drizzle ORM schemas, connection pool (min/max/idle timeout/statement timeout), slow-query logging in dev (includes `conversations` + `messages` tables for AlloyChat, and `agent_training_pairs`, `agent_behavior_prefs`, `agent_feedback`, `advisory_audit` for Agent Training Studio)
+- `lib/config`: Application-to-connector dependency mapping
+- `lib/services`: 24 service adapters with health checks and mock fallback
+- `lib/api-spec`: OpenAPI 3.1 specification
+- `lib/api-zod`: Generated Zod schemas
+- `lib/api-client-react`: Generated React Query hooks
+- `lib/integrations-openai-ai-server`: OpenAI server-side integration via Replit AI Integrations (exports `toFile` from openai)
+- `lib/integrations-openai-ai-react`: OpenAI React client hooks
+- `lib/integrations-anthropic-ai`: Anthropic server-side integration via Replit AI Integrations
+- `lib/integrations-gemini-ai`: Gemini AI server-side integration via Replit AI Integrations
+>>>>>>> 1c7865d (feat: replace DevAuthProvider with real Replit Auth (OIDC/PKCE))
 
 ### Infrastructure Hardening
 Includes graceful shutdown, response compression, WebSocket layer, API documentation (Swagger UI), structured error codes (`lib/error-codes.ts`), CI/CD pipelines for typecheck, lint, build, security audit, and migration checks, `ErrorBoundary` for all React apps, runtime feature flags, and an in-process background job queue.

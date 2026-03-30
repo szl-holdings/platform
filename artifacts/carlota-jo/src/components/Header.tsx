@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 
 const navLinks = [
   { label: "Capabilities", href: "#services" },
@@ -70,6 +71,7 @@ export default function Header() {
             >
               Start a Conversation
             </button>
+            <UserButton />
           </nav>
 
           <button

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@workspace/shared-ui/ui/button";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Link } from "wouter";
 
 const navLinks = [
@@ -52,6 +53,7 @@ export function Navbar() {
               Let's Connect <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </a>
+          <UserButton />
         </nav>
 
         <button

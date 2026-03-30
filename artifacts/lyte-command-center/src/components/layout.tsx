@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { 
   Activity, 
   AlertTriangle, 
@@ -155,7 +156,8 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <div className="p-3 border-t border-white/5">
+        <div className="p-3 border-t border-white/5 space-y-2">
+          <UserButton showName className="w-full" />
           <div className="flex items-center gap-2 text-[10px] text-slate-500">
             <Zap className="w-3 h-3" />
             <span>SZL Holdings</span>

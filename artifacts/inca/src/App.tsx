@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 
@@ -135,7 +136,8 @@ function Sidebar() {
         </div>
       </nav>
 
-      <div className="px-4 py-3 border-t border-border">
+      <div className="px-4 py-3 border-t border-border space-y-2">
+        <UserButton showName className="w-full" />
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground/40">
           <Beaker className="w-3 h-3" />
           <span className="font-mono">SZL Holdings</span>

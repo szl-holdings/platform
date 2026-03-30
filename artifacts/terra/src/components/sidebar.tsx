@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Building2, LayoutDashboard, TrendingUp, Handshake, BarChart3, AlertTriangle, Home, ChevronLeft, ChevronRight, DollarSign, Activity, Percent, Users, Thermometer } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 
 interface NavItem {
   path: string;
@@ -107,7 +108,8 @@ export function Sidebar() {
         </button>
       </div>
 
-      <div className="p-3 border-t border-terra-border">
+      <div className="p-3 border-t border-terra-border space-y-2">
+        <UserButton showName={!collapsed} className="w-full" />
         <div className="flex items-center gap-2 text-[10px] text-terra-text-muted">
           <Building2 className="w-3 h-3" />
           {!collapsed && <span>SZL Holdings Platform</span>}

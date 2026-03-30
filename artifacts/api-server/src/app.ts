@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import compression from "compression";
 import swaggerUi from "swagger-ui-express";
@@ -13,6 +14,7 @@ import { logger } from "./lib/logger";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
+import { authMiddleware } from "./middlewares/authMiddleware";
 
 const app: Express = express();
 
@@ -91,8 +93,10 @@ app.use(
   }),
 );
 
+app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(authMiddleware);
 
 app.get("/api/health", (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();

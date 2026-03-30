@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import siteData from "@/data/site.json";
+import { UserButton } from "@workspace/shared-ui/UserButton";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -50,6 +51,7 @@ export function Navbar() {
           >
             {siteData.nav.ctaLabel}
           </a>
+          <UserButton />
         </div>
 
         <button
