@@ -38,6 +38,7 @@ import vesselsLiveRouter from "./vessels-live";
 import lyteLiveRouter from "./lyte-live";
 import dreamscapeLiveRouter from "./dreamscape-live";
 import carlotaLiveRouter from "./carlota-live";
+import agentTrainingRouter from "./agent-training";
 
 const router: IRouter = Router();
 
@@ -111,5 +112,6 @@ router.use("/dreamscape", readLimiter);
 router.use(dreamscapeLiveRouter);
 router.use("/carlota", readLimiter);
 router.use(carlotaLiveRouter);
+router.use(agentTrainingRouter);
 
 export default router;

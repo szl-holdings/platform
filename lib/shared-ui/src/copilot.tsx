@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { colors, effects, typography } from "./tokens";
 
+export interface VoiceProfile {
+  voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
+  label: string;
+}
+
 export interface CopilotConfig {
   name: string;
   icon: string;
@@ -9,11 +14,17 @@ export interface CopilotConfig {
   welcomeMessage: string;
   placeholderText?: string;
   suggestedQuestions?: string[];
+  voiceProfile?: VoiceProfile;
+  agentId?: string;
+  isAdvisoryAgent?: boolean;
 }
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  isVoice?: boolean;
+  rating?: number;
+  id?: string;
 }
 
 function SimpleMarkdown({ content }: { content: string }) {
@@ -139,15 +150,148 @@ function TypingIndicator({ accentColor }: { accentColor: string }) {
   );
 }
 
+function AdvisoryBadge({ type }: { type: "informational" | "advisory" | "action-required" }) {
+  const styles: Record<typeof type, { bg: string; color: string; label: string; icon: string }> = {
+    informational: { bg: "hsla(210, 80%, 50%, 0.15)", color: "hsl(210, 80%, 70%)", label: "Informational", icon: "ℹ️" },
+    advisory: { bg: "hsla(40, 90%, 50%, 0.15)", color: "hsl(40, 90%, 65%)", label: "Advisory Only", icon: "⚠️" },
+    "action-required": { bg: "hsla(0, 80%, 50%, 0.15)", color: "hsl(0, 80%, 70%)", label: "Human Approval Required", icon: "🛑" },
+  };
+  const s = styles[type];
+  return (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "0.3rem",
+      fontSize: "0.65rem",
+      fontWeight: 600,
+      padding: "0.2rem 0.5rem",
+      borderRadius: "0.375rem",
+      background: s.bg,
+      color: s.color,
+      border: `1px solid ${s.color}40`,
+      letterSpacing: "0.03em",
+      textTransform: "uppercase",
+    }}>
+      {s.icon} {s.label}
+    </span>
+  );
+}
+
+function detectAdvisoryType(content: string): "informational" | "advisory" | "action-required" | null {
+  const lower = content.toLowerCase();
+  const actionKeywords = ["restart service", "delete", "drop table", "scale down", "terminate", "remove", "disable", "shutdown", "wipe", "reset", "rollback", "force"];
+  const advisoryKeywords = ["recommend", "suggest", "consider", "you should", "i would", "you could", "configure", "update", "upgrade", "modify", "change", "adjust"];
+  if (actionKeywords.some(k => lower.includes(k))) return "action-required";
+  if (advisoryKeywords.some(k => lower.includes(k))) return "advisory";
+  return null;
+}
+
+function WaveformVisualizer({ isActive, color }: { isActive: boolean; color: string }) {
+  if (!isActive) return null;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "2px", height: "20px" }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          style={{
+            width: "3px",
+            background: color,
+            borderRadius: "2px",
+            animation: `copilotWave 0.8s ease-in-out ${i * 0.1}s infinite alternate`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function RecordingIndicator({ isRecording, accentColor }: { isRecording: boolean; accentColor: string }) {
+  if (!isRecording) return null;
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "0.5rem",
+      padding: "0.5rem 0.75rem",
+      background: "hsla(0, 80%, 40%, 0.2)",
+      border: "1px solid hsla(0, 80%, 50%, 0.3)",
+      borderRadius: "0.5rem",
+      fontSize: "0.75rem",
+      color: "hsl(0, 80%, 70%)",
+    }}>
+      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "hsl(0, 80%, 60%)", animation: "copilotPulse 1s ease-in-out infinite" }} />
+      Recording...
+      <WaveformVisualizer isActive={true} color={accentColor} />
+    </div>
+  );
+}
+
+function FeedbackButtons({ onFeedback, accentColor }: { onFeedback: (rating: number) => void; accentColor: string }) {
+  const [given, setGiven] = useState<number | null>(null);
+  return (
+    <div style={{ display: "flex", gap: "0.25rem", marginTop: "0.5rem" }}>
+      {[1, -1].map((r) => (
+        <button
+          key={r}
+          onClick={() => { if (!given) { setGiven(r); onFeedback(r); } }}
+          title={r === 1 ? "Helpful" : "Not helpful"}
+          style={{
+            background: given === r ? (r === 1 ? "hsla(140, 60%, 40%, 0.3)" : "hsla(0, 60%, 40%, 0.3)") : "transparent",
+            border: `1px solid ${given === r ? (r === 1 ? "hsla(140, 60%, 60%, 0.5)" : "hsla(0, 60%, 60%, 0.5)") : "transparent"}`,
+            borderRadius: "0.375rem",
+            padding: "0.2rem 0.4rem",
+            cursor: given ? "default" : "pointer",
+            fontSize: "0.875rem",
+            opacity: given && given !== r ? 0.4 : 1,
+            transition: "all 0.2s",
+          }}
+        >
+          {r === 1 ? "👍" : "👎"}
+        </button>
+      ))}
+      {given && (
+        <span style={{ fontSize: "0.7rem", color: colors.text.muted, alignSelf: "center" }}>
+          {given === 1 ? "Thanks!" : "We'll improve"}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function isMobileDevice(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+}
+
 export function AgentCopilot({ config }: { config: CopilotConfig }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [voiceOutputEnabled, setVoiceOutputEnabled] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const touchStartXRef = useRef<number>(0);
+
+  useEffect(() => {
+    const check = () => setIsMobile(isMobileDevice());
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -158,16 +302,59 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
   }, [messages, streamingContent, scrollToBottom]);
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (isOpen && !voiceMode && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isOpen]);
+  }, [isOpen, voiceMode]);
+
+  const submitFeedback = useCallback(async (rating: number, msg: ChatMessage) => {
+    if (!config.agentId) return;
+    try {
+      await fetch("/api/agent-training/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: config.agentId,
+          rating: rating > 0 ? 5 : 1,
+          responseContent: msg.content,
+        }),
+      });
+    } catch {
+    }
+  }, [config.agentId]);
+
+  const speakText = useCallback(async (text: string) => {
+    if (!voiceOutputEnabled || !config.voiceProfile) return;
+    try {
+      setIsSpeaking(true);
+      const res = await fetch("/api/agent-training/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.slice(0, 800), voice: config.voiceProfile.voice }),
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setIsSpeaking(false); };
+      await audio.play();
+    } catch {
+      setIsSpeaking(false);
+    }
+  }, [voiceOutputEnabled, config.voiceProfile]);
 
   const executeChat = useCallback(async (userContent: string, currentMessages: ChatMessage[]) => {
-    const userMsg: ChatMessage = { role: "user", content: userContent };
+    const userMsg: ChatMessage = { role: "user", content: userContent, isVoice: isRecording, id: `u-${Date.now()}` };
     const newMessages = [...currentMessages, userMsg];
     setMessages(newMessages);
     setInput("");
+    setVoiceTranscript("");
     setIsStreaming(true);
     setStreamingContent("");
 
@@ -227,10 +414,16 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
         throw new Error("Server reported stream error");
       }
 
-      setMessages([...newMessages, { role: "assistant", content: accumulated || "I'm here to help! Could you rephrase that?" }]);
+      const finalContent = accumulated || "I'm here to help! Could you rephrase that?";
+      const assistantMsg: ChatMessage = { role: "assistant", content: finalContent, id: `a-${Date.now()}` };
+      setMessages([...newMessages, assistantMsg]);
+
+      if (voiceOutputEnabled && voiceMode && finalContent) {
+        await speakText(finalContent);
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") {
-        setMessages([...newMessages, { role: "assistant", content: streamingContent || "Response cancelled." }]);
+        setMessages([...newMessages, { role: "assistant", content: streamingContent || "Response cancelled.", id: `a-${Date.now()}` }]);
       } else {
         try {
           const fallbackRes = await fetch("/api/intelligence/ai/chat", {
@@ -240,12 +433,14 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           });
           if (fallbackRes.ok) {
             const result = await fallbackRes.json() as { content: string };
-            setMessages([...newMessages, { role: "assistant", content: result.content }]);
+            const assistantMsg: ChatMessage = { role: "assistant", content: result.content, id: `a-${Date.now()}` };
+            setMessages([...newMessages, assistantMsg]);
+            if (voiceOutputEnabled && voiceMode) await speakText(result.content);
           } else {
             throw new Error("Fallback failed");
           }
         } catch {
-          setMessages([...newMessages, { role: "assistant", content: config.welcomeMessage }]);
+          setMessages([...newMessages, { role: "assistant", content: config.welcomeMessage, id: `a-${Date.now()}` }]);
         }
       }
     } finally {
@@ -253,7 +448,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
       setStreamingContent("");
       abortRef.current = null;
     }
-  }, [config.systemPrompt, config.welcomeMessage, streamingContent]);
+  }, [config.systemPrompt, config.welcomeMessage, streamingContent, voiceMode, voiceOutputEnabled, speakText, isRecording]);
 
   const sendMessage = async () => {
     const trimmed = input.trim();
@@ -266,12 +461,96 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
     executeChat(q, messages);
   };
 
+  const startVoiceRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeTypes = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/aac"];
+      const mimeType = mimeTypes.find(m => MediaRecorder.isTypeSupported(m));
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      recorder.start(100);
+      setIsRecording(true);
+
+      if ("vibrate" in navigator) navigator.vibrate(50);
+    } catch {
+      setIsRecording(false);
+    }
+  }, []);
+
+  const stopVoiceRecording = useCallback(async () => {
+    return new Promise<Blob>((resolve) => {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder || recorder.state !== "recording") { resolve(new Blob()); return; }
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        recorder.stream.getTracks().forEach(t => t.stop());
+        resolve(blob);
+      };
+      recorder.stop();
+      setIsRecording(false);
+    });
+  }, []);
+
+  const handleVoicePress = useCallback(async () => {
+    if (isRecording) {
+      if ("vibrate" in navigator) navigator.vibrate([50, 30, 50]);
+      const blob = await stopVoiceRecording();
+      if (!blob || blob.size < 1000) return;
+
+      setIsTranscribing(true);
+      try {
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const result = reader.result as string;
+            resolve(result);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+
+        const res = await fetch("/api/agent-training/transcribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ audio: base64, mimeType: blob.type }),
+        });
+
+        if (res.ok) {
+          const data = await res.json() as { transcript: string };
+          if (data.transcript?.trim()) {
+            setVoiceTranscript(data.transcript);
+            setInput(data.transcript);
+            await executeChat(data.transcript, messages);
+          }
+        }
+      } catch {
+      } finally {
+        setIsTranscribing(false);
+      }
+    } else {
+      await startVoiceRecording();
+    }
+  }, [isRecording, messages, startVoiceRecording, stopVoiceRecording, executeChat]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0]?.clientX ?? 0;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = (e.changedTouches[0]?.clientX ?? 0) - touchStartXRef.current;
+    if (diff > 80) setIsOpen(false);
+  };
+
+  const panelWidth = isMobile ? "100vw" : "min(420px, 100vw)";
+
   const fabStyle: React.CSSProperties = {
     position: "fixed",
-    bottom: "1.5rem",
-    right: "1.5rem",
-    width: "56px",
-    height: "56px",
+    bottom: isMobile ? "1rem" : "1.5rem",
+    right: isMobile ? "1rem" : "1.5rem",
+    width: isMobile ? "52px" : "56px",
+    height: isMobile ? "52px" : "56px",
     borderRadius: "50%",
     background: `linear-gradient(135deg, ${config.accentColor}, ${config.accentColor}dd)`,
     border: "none",
@@ -279,22 +558,23 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "1.5rem",
+    fontSize: isMobile ? "1.375rem" : "1.5rem",
     boxShadow: `0 4px 20px ${config.accentColor}40, ${effects.shadow.lg}`,
     transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
     zIndex: 9998,
     color: "#fff",
+    WebkitTapHighlightColor: "transparent",
   };
 
   const panelStyle: React.CSSProperties = {
     position: "fixed",
     top: 0,
     right: 0,
-    width: "min(420px, 100vw)",
-    height: "100vh",
-    background: "hsla(220, 20%, 6%, 0.95)",
+    width: panelWidth,
+    height: "100dvh",
+    background: "hsla(220, 20%, 6%, 0.98)",
     backdropFilter: "blur(40px) saturate(1.8)",
-    borderLeft: `1px solid hsla(220, 20%, 40%, 0.2)`,
+    borderLeft: isMobile ? "none" : `1px solid hsla(220, 20%, 40%, 0.2)`,
     zIndex: 9999,
     display: "flex",
     flexDirection: "column",
@@ -321,10 +601,20 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
           40% { transform: scale(1); opacity: 1; }
         }
+        @keyframes copilotWave {
+          from { height: 4px; }
+          to { height: 16px; }
+        }
+        @keyframes copilotPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.8); }
+        }
         @keyframes copilotFabPulse {
           0%, 100% { box-shadow: 0 4px 20px ${config.accentColor}40; }
           50% { box-shadow: 0 4px 30px ${config.accentColor}60; }
         }
+        .copilot-msg-feedback { opacity: 0; transition: opacity 0.2s; }
+        .copilot-msg:hover .copilot-msg-feedback { opacity: 1; }
       `}</style>
 
       {!isOpen && (
@@ -332,12 +622,16 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           onClick={() => setIsOpen(true)}
           style={fabStyle}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.1)";
-            e.currentTarget.style.boxShadow = `0 6px 30px ${config.accentColor}60, ${effects.shadow.xl}`;
+            if (!isMobile) {
+              e.currentTarget.style.transform = "scale(1.1)";
+              e.currentTarget.style.boxShadow = `0 6px 30px ${config.accentColor}60, ${effects.shadow.xl}`;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow = `0 4px 20px ${config.accentColor}40, ${effects.shadow.lg}`;
+            if (!isMobile) {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = `0 4px 20px ${config.accentColor}40, ${effects.shadow.lg}`;
+            }
           }}
           aria-label={`Open ${config.name} AI Copilot`}
         >
@@ -347,14 +641,23 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
 
       <div style={overlayStyle} onClick={() => setIsOpen(false)} data-testid="copilot-overlay" />
 
-      <div style={panelStyle} data-testid="copilot-panel" onClick={(e) => e.stopPropagation()}>
+      <div
+        style={panelStyle}
+        data-testid="copilot-panel"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={isMobile ? handleTouchStart : undefined}
+        onTouchEnd={isMobile ? handleTouchEnd : undefined}
+      >
         <div style={{
-          padding: "1.25rem 1.5rem",
+          padding: "1rem 1.25rem",
+          paddingTop: isMobile ? "max(1rem, env(safe-area-inset-top, 1rem))" : "1.25rem",
           borderBottom: `1px solid ${colors.border.DEFAULT}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           background: `linear-gradient(180deg, hsla(220, 20%, 10%, 0.8) 0%, transparent 100%)`,
+          gap: "0.5rem",
+          flexShrink: 0,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div style={{
@@ -366,41 +669,107 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
               alignItems: "center",
               justifyContent: "center",
               fontSize: "1.125rem",
+              flexShrink: 0,
             }}>
               {config.icon}
             </div>
             <div>
               <div style={{ fontWeight: 600, fontSize: "0.9375rem", color: colors.text.primary }}>{config.name}</div>
-              <div style={{ fontSize: "0.75rem", color: colors.text.muted }}>AI Copilot</div>
+              <div style={{ fontSize: "0.75rem", color: colors.text.muted }}>
+                {config.isAdvisoryAgent ? "Advisory AI" : "AI Copilot"}
+                {voiceMode && <span style={{ marginLeft: "0.4rem", color: config.accentColor }}>· Voice</span>}
+              </div>
             </div>
           </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            data-testid="copilot-close"
-            aria-label="Close copilot"
-            style={{
-              background: "transparent",
-              border: "none",
-              color: colors.text.muted,
-              cursor: "pointer",
-              padding: "0.5rem",
-              borderRadius: "0.375rem",
-              fontSize: "1.25rem",
-              lineHeight: 1,
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = colors.surface.glass;
-              e.currentTarget.style.color = colors.text.primary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = colors.text.muted;
-            }}
-          >
-            ✕
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+            {config.voiceProfile && (
+              <>
+                <button
+                  onClick={() => { setVoiceMode(v => !v); if (!voiceMode && isMobile) setVoiceOutputEnabled(true); }}
+                  title={voiceMode ? "Switch to text" : "Switch to voice mode"}
+                  style={{
+                    background: voiceMode ? `${config.accentColor}25` : "transparent",
+                    border: `1px solid ${voiceMode ? config.accentColor : "transparent"}`,
+                    borderRadius: "0.5rem",
+                    padding: "0.375rem",
+                    color: voiceMode ? config.accentColor : colors.text.muted,
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                    transition: "all 0.2s",
+                    minWidth: "32px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  aria-label="Toggle voice mode"
+                >
+                  🎙️
+                </button>
+                {voiceMode && (
+                  <button
+                    onClick={() => setVoiceOutputEnabled(v => !v)}
+                    title={voiceOutputEnabled ? "Disable voice responses" : "Enable voice responses"}
+                    style={{
+                      background: voiceOutputEnabled ? `${config.accentColor}25` : "transparent",
+                      border: `1px solid ${voiceOutputEnabled ? config.accentColor : "transparent"}`,
+                      borderRadius: "0.5rem",
+                      padding: "0.375rem",
+                      color: voiceOutputEnabled ? config.accentColor : colors.text.muted,
+                      cursor: "pointer",
+                      fontSize: "0.875rem",
+                      transition: "all 0.2s",
+                      minWidth: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    aria-label="Toggle voice output"
+                  >
+                    🔊
+                  </button>
+                )}
+              </>
+            )}
+            <button
+              onClick={() => setIsOpen(false)}
+              data-testid="copilot-close"
+              aria-label="Close copilot"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: colors.text.muted,
+                cursor: "pointer",
+                padding: "0.375rem",
+                borderRadius: "0.375rem",
+                fontSize: "1.25rem",
+                lineHeight: 1,
+                transition: "all 0.2s",
+                minWidth: "32px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
+
+        {config.isAdvisoryAgent && (
+          <div style={{
+            padding: "0.625rem 1.25rem",
+            background: "hsla(40, 90%, 50%, 0.1)",
+            borderBottom: `1px solid hsla(40, 90%, 50%, 0.2)`,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            fontSize: "0.7rem",
+            color: "hsl(40, 90%, 65%)",
+            flexShrink: 0,
+          }}>
+            ⚠️ <strong>Advisory Mode</strong> — This agent provides recommendations only. Destructive operations require explicit human approval.
+          </div>
+        )}
 
         <div style={{
           flex: 1,
@@ -409,6 +778,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
+          WebkitOverflowScrolling: "touch",
         }}>
           {messages.length === 0 && !isStreaming && (
             <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
@@ -436,6 +806,16 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
               }}>
                 {config.welcomeMessage}
               </div>
+              {voiceMode && config.voiceProfile && (
+                <div style={{
+                  fontSize: "0.75rem",
+                  color: config.accentColor,
+                  marginBottom: "1rem",
+                  opacity: 0.8,
+                }}>
+                  Voice mode active — press and hold the mic to speak
+                </div>
+              )}
               {config.suggestedQuestions && config.suggestedQuestions.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   {config.suggestedQuestions.map((q, i) => (
@@ -447,23 +827,14 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
                         background: colors.surface.glass,
                         border: `1px solid ${colors.border.DEFAULT}`,
                         borderRadius: "0.625rem",
-                        padding: "0.625rem 1rem",
+                        padding: isMobile ? "0.75rem 1rem" : "0.625rem 1rem",
                         color: colors.text.secondary,
                         fontSize: "0.8125rem",
                         cursor: "pointer",
                         textAlign: "left",
                         transition: "all 0.2s",
                         fontFamily: "inherit",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = colors.surface.glassHover;
-                        e.currentTarget.style.borderColor = `${config.accentColor}40`;
-                        e.currentTarget.style.color = colors.text.primary;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = colors.surface.glass;
-                        e.currentTarget.style.borderColor = colors.border.DEFAULT;
-                        e.currentTarget.style.color = colors.text.secondary;
+                        WebkitTapHighlightColor: "transparent",
                       }}
                     >
                       {q}
@@ -474,36 +845,62 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
             </div>
           )}
 
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              style={{
-                alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                maxWidth: "85%",
-                padding: "0.75rem 1rem",
-                borderRadius: msg.role === "user" ? "1rem 1rem 0.25rem 1rem" : "1rem 1rem 1rem 0.25rem",
-                background: msg.role === "user"
-                  ? `${config.accentColor}20`
-                  : colors.surface.glass,
-                border: `1px solid ${msg.role === "user" ? `${config.accentColor}30` : colors.border.DEFAULT}`,
-                fontSize: "0.8125rem",
-                color: colors.text.primary,
-                lineHeight: 1.5,
-              }}
-            >
-              {msg.role === "assistant" ? <SimpleMarkdown content={msg.content} /> : msg.content}
-            </div>
-          ))}
+          {messages.map((msg, i) => {
+            const isAssistant = msg.role === "assistant";
+            const advisoryType = isAssistant && config.isAdvisoryAgent ? detectAdvisoryType(msg.content) : null;
+            return (
+              <div
+                key={i}
+                className="copilot-msg"
+                style={{
+                  alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+                  maxWidth: "88%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: msg.role === "user" ? "1rem 1rem 0.25rem 1rem" : "1rem 1rem 1rem 0.25rem",
+                  background: msg.role === "user"
+                    ? `${config.accentColor}20`
+                    : colors.surface.glass,
+                  border: `1px solid ${msg.role === "user" ? `${config.accentColor}30` : colors.border.DEFAULT}`,
+                  fontSize: isMobile ? "0.875rem" : "0.8125rem",
+                  color: colors.text.primary,
+                  lineHeight: 1.5,
+                }}
+              >
+                {msg.isVoice && msg.role === "user" && (
+                  <div style={{ fontSize: "0.7rem", color: colors.text.muted, marginBottom: "0.25rem" }}>🎙️ Voice input</div>
+                )}
+                {advisoryType && (
+                  <div style={{ marginBottom: "0.5rem" }}>
+                    <AdvisoryBadge type={advisoryType} />
+                  </div>
+                )}
+                {isAssistant ? <SimpleMarkdown content={msg.content} /> : msg.content}
+                {isAssistant && config.agentId && (
+                  <div className="copilot-msg-feedback">
+                    <FeedbackButtons
+                      onFeedback={(rating) => submitFeedback(rating, msg)}
+                      accentColor={config.accentColor}
+                    />
+                  </div>
+                )}
+                {isAssistant && isSpeaking && i === messages.length - 1 && (
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <WaveformVisualizer isActive={true} color={config.accentColor} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {isStreaming && (
             <div style={{
               alignSelf: "flex-start",
-              maxWidth: "85%",
+              maxWidth: "88%",
               padding: "0.75rem 1rem",
               borderRadius: "1rem 1rem 1rem 0.25rem",
               background: colors.surface.glass,
               border: `1px solid ${colors.border.DEFAULT}`,
-              fontSize: "0.8125rem",
+              fontSize: isMobile ? "0.875rem" : "0.8125rem",
               color: colors.text.primary,
               lineHeight: 1.5,
             }}>
@@ -519,55 +916,159 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
         </div>
 
         <div style={{
-          padding: "1rem 1.25rem",
+          padding: "0.75rem 1.25rem",
+          paddingBottom: isMobile ? "max(0.75rem, env(safe-area-inset-bottom, 0.75rem))" : "1rem",
           borderTop: `1px solid ${colors.border.DEFAULT}`,
           background: "hsla(220, 20%, 8%, 0.6)",
+          flexShrink: 0,
         }}>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder={config.placeholderText ?? `Ask ${config.name}...`}
-              disabled={isStreaming}
-              style={{
-                flex: 1,
-                background: colors.surface.glass,
-                border: `1px solid ${colors.border.DEFAULT}`,
-                borderRadius: "0.75rem",
-                padding: "0.75rem 1rem",
-                color: colors.text.primary,
-                fontSize: "0.8125rem",
-                outline: "none",
-                transition: "border-color 0.2s",
-                fontFamily: "inherit",
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = `${config.accentColor}50`; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = colors.border.DEFAULT; }}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={isStreaming || !input.trim()}
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "0.75rem",
-                background: input.trim() && !isStreaming ? config.accentColor : colors.surface.glass,
-                border: "none",
-                color: input.trim() && !isStreaming ? "#fff" : colors.text.muted,
-                cursor: input.trim() && !isStreaming ? "pointer" : "default",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1rem",
-                transition: "all 0.2s",
-                flexShrink: 0,
-              }}
-              aria-label="Send message"
-            >
-              ↑
-            </button>
+          {isRecording && (
+            <div style={{ marginBottom: "0.5rem" }}>
+              <RecordingIndicator isRecording={isRecording} accentColor={config.accentColor} />
+            </div>
+          )}
+          {isTranscribing && (
+            <div style={{ marginBottom: "0.5rem", fontSize: "0.75rem", color: colors.text.muted }}>
+              <TypingIndicator accentColor={config.accentColor} />
+              Transcribing...
+            </div>
+          )}
+          {voiceTranscript && !isTranscribing && !isStreaming && (
+            <div style={{ marginBottom: "0.5rem", fontSize: "0.75rem", color: colors.text.muted, fontStyle: "italic" }}>
+              "{voiceTranscript}"
+            </div>
+          )}
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            {voiceMode && config.voiceProfile ? (
+              <>
+                <button
+                  onPointerDown={handleVoicePress}
+                  disabled={isStreaming || isTranscribing}
+                  style={{
+                    flex: 1,
+                    height: isMobile ? "52px" : "44px",
+                    borderRadius: "0.75rem",
+                    background: isRecording ? "hsla(0, 80%, 50%, 0.25)" : `${config.accentColor}20`,
+                    border: `2px solid ${isRecording ? "hsl(0, 80%, 50%)" : config.accentColor}`,
+                    color: isRecording ? "hsl(0, 80%, 60%)" : config.accentColor,
+                    cursor: isStreaming || isTranscribing ? "default" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    transition: "all 0.2s",
+                    fontFamily: "inherit",
+                    WebkitTapHighlightColor: "transparent",
+                    opacity: isStreaming || isTranscribing ? 0.5 : 1,
+                  }}
+                  aria-label={isRecording ? "Stop recording" : "Start recording"}
+                >
+                  {isRecording ? (
+                    <><span style={{ width: "10px", height: "10px", borderRadius: "2px", background: "hsl(0, 80%, 60%)" }} /> Stop</>
+                  ) : (
+                    <>🎙️ {isMobile ? "Tap to speak" : "Push to talk"}</>
+                  )}
+                </button>
+                <button
+                  onClick={() => setVoiceMode(false)}
+                  disabled={isStreaming}
+                  style={{
+                    width: "44px",
+                    height: isMobile ? "52px" : "44px",
+                    borderRadius: "0.75rem",
+                    background: colors.surface.glass,
+                    border: `1px solid ${colors.border.DEFAULT}`,
+                    color: colors.text.muted,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "1rem",
+                    transition: "all 0.2s",
+                    flexShrink: 0,
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                  title="Switch to text input"
+                >
+                  ⌨️
+                </button>
+              </>
+            ) : (
+              <>
+                <input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                  placeholder={config.placeholderText ?? `Ask ${config.name}...`}
+                  disabled={isStreaming}
+                  style={{
+                    flex: 1,
+                    background: colors.surface.glass,
+                    border: `1px solid ${colors.border.DEFAULT}`,
+                    borderRadius: "0.75rem",
+                    padding: isMobile ? "0.875rem 1rem" : "0.75rem 1rem",
+                    color: colors.text.primary,
+                    fontSize: isMobile ? "0.9375rem" : "0.8125rem",
+                    outline: "none",
+                    transition: "border-color 0.2s",
+                    fontFamily: "inherit",
+                    WebkitAppearance: "none",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = `${config.accentColor}50`; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = colors.border.DEFAULT; }}
+                />
+                {config.voiceProfile && (
+                  <button
+                    onClick={() => setVoiceMode(true)}
+                    disabled={isStreaming}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "0.75rem",
+                      background: colors.surface.glass,
+                      border: `1px solid ${colors.border.DEFAULT}`,
+                      color: colors.text.muted,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "1rem",
+                      transition: "all 0.2s",
+                      flexShrink: 0,
+                    }}
+                    title="Switch to voice input"
+                  >
+                    🎙️
+                  </button>
+                )}
+                <button
+                  onClick={sendMessage}
+                  disabled={isStreaming || !input.trim()}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "0.75rem",
+                    background: input.trim() && !isStreaming ? config.accentColor : colors.surface.glass,
+                    border: "none",
+                    color: input.trim() && !isStreaming ? "#fff" : colors.text.muted,
+                    cursor: input.trim() && !isStreaming ? "pointer" : "default",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "1rem",
+                    transition: "all 0.2s",
+                    flexShrink: 0,
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                  aria-label="Send message"
+                >
+                  ↑
+                </button>
+              </>
+            )}
           </div>
           <div style={{
             textAlign: "center",
@@ -576,7 +1077,7 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
             marginTop: "0.5rem",
             opacity: 0.6,
           }}>
-            Powered by SZL Intelligence
+            {config.isAdvisoryAgent ? "Advisory mode — no destructive actions" : "Powered by SZL Intelligence"}
           </div>
         </div>
       </div>

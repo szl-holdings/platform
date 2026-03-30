@@ -30,6 +30,7 @@ import {
   FileText,
   Gauge,
   Network,
+  GraduationCap,
 } from "lucide-react";
 
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
@@ -56,6 +57,7 @@ const LoadTestDashboardPage = lazy(() => import("@/pages/load-test-dashboard"));
 const WorkflowAutomation = lazy(() => import("@/pages/workflow-automation"));
 const DeveloperPortal = lazy(() => import("@/pages/developer-portal"));
 const NuroMesh = lazy(() => import("@/pages/nuro-mesh"));
+const AgentTrainingPage = lazy(() => import("@/pages/agent-training"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ConnectorHealth = lazy(() => import("@/pages/connector-health"));
 
@@ -103,6 +105,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/load-tests", label: "Load Tests", icon: <Gauge className="w-4 h-4" /> },
   { path: "/workflows", label: "Workflows", icon: <Activity className="w-4 h-4" />, section: "Automation" },
   { path: "/developer", label: "Developer Portal", icon: <Globe className="w-4 h-4" />, section: "Developer" },
+  { path: "/agent-training", label: "Training Studio", icon: <GraduationCap className="w-4 h-4" />, section: "AI Agents" },
 ];
 
 function PageLoader() {
@@ -256,6 +259,7 @@ function AppRouter() {
         <Route path="/load-tests" component={LoadTestDashboardPage} />
         <Route path="/workflows" component={WorkflowAutomation} />
         <Route path="/developer" component={DeveloperPortal} />
+        <Route path="/agent-training" component={AgentTrainingPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

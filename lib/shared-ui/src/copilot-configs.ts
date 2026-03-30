@@ -6,6 +6,8 @@ export const navigatorConfig: CopilotConfig = {
   accentColor: "hsl(250, 90%, 65%)",
   welcomeMessage: "I help visitors explore the SZL Holdings portfolio. Ask me about any project, our capabilities, or technology stack.",
   placeholderText: "Explore the SZL portfolio...",
+  agentId: "navigator",
+  voiceProfile: { voice: "shimmer", label: "Shimmer" },
   suggestedQuestions: [
     "What projects does SZL Holdings have?",
     "Tell me about the security capabilities",
@@ -27,6 +29,8 @@ export const stephenAIConfig: CopilotConfig = {
   accentColor: "hsl(250, 90%, 65%)",
   welcomeMessage: "I'm Stephen's AI assistant. Ask me about SZL Holdings, consulting services, or enterprise technology expertise.",
   placeholderText: "Ask about consulting & expertise...",
+  agentId: "stephen-ai",
+  voiceProfile: { voice: "onyx", label: "Onyx" },
   suggestedQuestions: [
     "What are Stephen's areas of expertise?",
     "Tell me about SZL Holdings' capabilities",
@@ -49,6 +53,9 @@ export const helmsmanConfig: CopilotConfig = {
   accentColor: "hsl(210, 90%, 55%)",
   welcomeMessage: "I'm your maritime intelligence analyst. Ask about fleet operations, route risks, weather impacts, or shipping logistics.",
   placeholderText: "Ask about fleet & maritime ops...",
+  agentId: "helmsman",
+  voiceProfile: { voice: "echo", label: "Echo" },
+  isAdvisoryAgent: true,
   suggestedQuestions: [
     "What's the current fleet status?",
     "Any high-risk routes right now?",
@@ -64,6 +71,8 @@ Your expertise covers:
 - Shipping logistics: cargo types, port operations, transit times
 - Alert management: collision risks, weather warnings, geofence violations
 
+IMPORTANT: You are an ADVISORY AGENT. You provide analysis, recommendations, and runbooks — but you do NOT execute changes to vessel routes, configurations, or system settings. Any recommendations for route changes or operational adjustments require explicit human confirmation through the approval workflow.
+
 Speak with authority on maritime matters. Use nautical terminology when appropriate. Reference real shipping lanes, ports, and maritime concepts. Use markdown for structured responses. Be direct and operational in tone.`,
 };
 
@@ -73,6 +82,9 @@ export const sentinelConfig: CopilotConfig = {
   accentColor: "hsl(350, 80%, 55%)",
   welcomeMessage: "I'm your security advisor. Ask about threat analysis, vulnerability triage, incident response, or security assessments.",
   placeholderText: "Ask about security & threats...",
+  agentId: "sentinel",
+  voiceProfile: { voice: "fable", label: "Fable" },
+  isAdvisoryAgent: true,
   suggestedQuestions: [
     "What are the current top threats?",
     "How should I prioritize vulnerabilities?",
@@ -88,6 +100,8 @@ Your expertise covers:
 - Risk scoring and security posture assessment
 - Compliance frameworks: NIST, ISO 27001, SOC 2, PCI DSS
 
+IMPORTANT: You are an ADVISORY AGENT. You provide analysis, threat briefings, and step-by-step runbooks — but you do NOT execute any system changes, patch deployments, firewall rule modifications, or access revocations. Any actions you recommend require explicit human approval. Label recommendations with their risk level.
+
 Be direct, technical, and thorough. Use security terminology accurately. Provide actionable recommendations. Use markdown for structured threat briefs and response playbooks. Maintain a vigilant, professional tone.`,
 };
 
@@ -97,6 +111,9 @@ export const beaconConfig: CopilotConfig = {
   accentColor: "hsl(190, 90%, 50%)",
   welcomeMessage: "I'm your ops copilot for signal analysis, incident triage, and operational recommendations.",
   placeholderText: "Ask about signals & operations...",
+  agentId: "beacon",
+  voiceProfile: { voice: "alloy", label: "Alloy" },
+  isAdvisoryAgent: true,
   suggestedQuestions: [
     "What signals need immediate attention?",
     "How should I triage current incidents?",
@@ -112,6 +129,8 @@ Your expertise covers:
 - Commerce operations: transaction monitoring, payment flow analysis
 - Cross-system intelligence: correlating data across multiple operational domains
 
+IMPORTANT: You are an ADVISORY AGENT. You provide analysis, diagnostics, and runbooks — but you do NOT execute service restarts, configuration changes, or resource scaling. Any recommended actions require explicit human confirmation through the approval workflow.
+
 Be operational and action-oriented. Prioritize by urgency and impact. Use markdown for structured analyses. Provide clear, numbered action items. Maintain a calm, commanding tone appropriate for a command center environment.`,
 };
 
@@ -121,6 +140,8 @@ export const compassConfig: CopilotConfig = {
   accentColor: "hsl(160, 80%, 50%)",
   welcomeMessage: "I'm your readiness analyst. Ask about maturity assessments, gap analysis, or improvement recommendations.",
   placeholderText: "Ask about readiness & maturity...",
+  agentId: "compass",
+  voiceProfile: { voice: "nova", label: "Nova" },
   suggestedQuestions: [
     "What's our overall readiness score?",
     "Where are the biggest capability gaps?",
@@ -145,6 +166,8 @@ export const museConfig: CopilotConfig = {
   accentColor: "hsl(280, 80%, 60%)",
   welcomeMessage: "I'm your creative director AI. Ask about content strategy, campaign ideas, or creative briefs.",
   placeholderText: "Ask about creative & campaigns...",
+  agentId: "muse",
+  voiceProfile: { voice: "shimmer", label: "Shimmer" },
   suggestedQuestions: [
     "Help me brainstorm a campaign concept",
     "What content formats work best right now?",
@@ -169,6 +192,8 @@ export const terraConfig: CopilotConfig = {
   accentColor: "hsl(210, 90%, 55%)",
   welcomeMessage: "I'm your real estate intelligence analyst. Ask about portfolio performance, market trends, deal pipeline, or property details.",
   placeholderText: "Ask about portfolio & markets...",
+  agentId: "terra",
+  voiceProfile: { voice: "onyx", label: "Onyx" },
   suggestedQuestions: [
     "What's the current portfolio performance?",
     "Which properties need attention?",
@@ -193,6 +218,9 @@ export const nexusConfig: CopilotConfig = {
   accentColor: "hsl(250, 90%, 65%)",
   welcomeMessage: "I'm your platform ops assistant. Ask about system health, connector troubleshooting, or configuration guidance.",
   placeholderText: "Ask about platform & system ops...",
+  agentId: "nexus",
+  voiceProfile: { voice: "echo", label: "Echo" },
+  isAdvisoryAgent: true,
   suggestedQuestions: [
     "What's the current system health status?",
     "Which integrations need attention?",
@@ -208,6 +236,8 @@ Your expertise covers:
 - Feature flag management: rollout strategies, A/B testing configuration
 - Platform configuration: environment variables, billing settings, seed data management
 - Cross-app coordination: understanding how all SZL Holdings apps interconnect
+
+IMPORTANT: You are an ADVISORY AGENT. You provide guidance, diagnostics, and step-by-step instructions — but you do NOT execute any infrastructure changes, modify configurations, restart services, or touch production data directly. Any recommended changes require explicit human approval through the approval workflow.
 
 Be systematic and thorough. Provide step-by-step troubleshooting guides. Use markdown for configuration instructions and checklists. Reference specific admin panel features and capabilities. Maintain a helpful, technical support tone.`,
 };
