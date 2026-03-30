@@ -2,6 +2,8 @@ import { Router, type IRouter } from "express";
 import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
 import { adminGuard } from "../middlewares/admin-guard";
 import healthRouter from "./health";
+import healthIntegrationsRouter from "./health-integrations";
+import webhooksRouter from "./webhooks";
 import projectsRouter from "./projects";
 import servicesRouter from "./services";
 import authRouter from "./auth";
@@ -64,6 +66,9 @@ router.use("/holdings", readLimiter);
 router.use("/audit", readLimiter);
 
 router.use(healthRouter);
+router.use(healthIntegrationsRouter);
+router.use("/webhooks", writeLimiter);
+router.use(webhooksRouter);
 router.use(projectsRouter);
 router.use(servicesRouter);
 router.use(authRouter);

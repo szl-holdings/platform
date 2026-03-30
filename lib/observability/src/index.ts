@@ -4,3 +4,5 @@ export { ServerTelemetryCollector, ClientTelemetryCollector, serverTelemetry, cl
 export type { TelemetryEvent, RequestTelemetry, WebVitalsReport, BusinessEvent, AlertRecord } from "./telemetry.js";
 export { doctrineEventBus, seedDoctrineEvents } from "./event-bus.js";
 export type { CorrelatedEventGroup } from "./event-bus.js";
+export { initializeOpenTelemetry, getTracer, getOtelConfig, isOtelInitialized } from "./otel.js";
+export type { OtelConfig, Span } from "./otel.js";

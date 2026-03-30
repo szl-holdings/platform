@@ -9,6 +9,7 @@ export * from "./route-line";
 export * from "./vessel-map";
 export * from "./vessel-detail-drawer";
 export * from "./vessel-filters";
+export * from "./geocoding";
 
 export { VesselDetailDrawer as DetailDrawer } from "./vessel-detail-drawer";
 export { VesselFilters as FleetFilters } from "./vessel-filters";

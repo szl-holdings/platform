@@ -388,4 +388,181 @@ router.post("/stripe/checkout", async (req: Request, res: Response) => {
   }
 });
 
+const TERRA_PLANS = {
+  "terra-starter-monthly":   { priceEnv: "STRIPE_PRICE_TERRA_STARTER_MONTHLY",  name: "Terra Starter (Monthly)",  interval: "month" },
+  "terra-starter-annual":    { priceEnv: "STRIPE_PRICE_TERRA_STARTER_ANNUAL",   name: "Terra Starter (Annual)",   interval: "year"  },
+  "terra-pro-monthly":       { priceEnv: "STRIPE_PRICE_TERRA_PRO_MONTHLY",      name: "Terra Pro (Monthly)",      interval: "month" },
+  "terra-pro-annual":        { priceEnv: "STRIPE_PRICE_TERRA_PRO_ANNUAL",       name: "Terra Pro (Annual)",       interval: "year"  },
+  "terra-enterprise-monthly":{ priceEnv: "STRIPE_PRICE_TERRA_ENTERPRISE_MONTHLY",name: "Terra Enterprise (Monthly)",interval: "month"},
+  "terra-enterprise-annual": { priceEnv: "STRIPE_PRICE_TERRA_ENTERPRISE_ANNUAL",name: "Terra Enterprise (Annual)",interval: "year"  },
+} as const;
+
+router.get("/billing/terra/plans", (_req, res) => {
+  const plans = Object.entries(TERRA_PLANS).map(([planId, plan]) => ({
+    planId,
+    name: plan.name,
+    interval: plan.interval,
+    configured: !!process.env[plan.priceEnv],
+    stripePriceEnv: plan.priceEnv,
+  }));
+  sendSuccess(res, plans);
+});
+
+router.post("/billing/terra/subscribe", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { planId, email, successUrl, cancelUrl } = req.body as {
+      planId?: string; email?: string; successUrl?: string; cancelUrl?: string;
+    };
+
+    if (!planId || !successUrl || !cancelUrl) {
+      sendBadRequest(res, "planId, successUrl, and cancelUrl are required");
+      return;
+    }
+
+    const plan = TERRA_PLANS[planId as keyof typeof TERRA_PLANS];
+    if (!plan) {
+      sendBadRequest(res, `Unknown Terra plan "${planId}". Valid plans: ${Object.keys(TERRA_PLANS).join(", ")}`);
+      return;
+    }
+
+    const priceId = process.env[plan.priceEnv];
+    if (!priceId) {
+      sendError(res, `Stripe price not configured for plan "${planId}". Set ${plan.priceEnv}.`, 503);
+      return;
+    }
+
+    const session = await services.stripe.createCheckoutSession({
+      priceId,
+      mode: "subscription",
+      successUrl,
+      cancelUrl,
+      customerEmail: email,
+      metadata: { planId, planName: plan.name, product: "terra" },
+    });
+
+    sendSuccess(res, { sessionId: session.id, url: session.url });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create Terra subscription checkout");
+  }
+});
+
+router.post("/billing/terra/metered-usage", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { subscriptionItemId, quantity, action, timestamp } = req.body as {
+      subscriptionItemId?: string;
+      quantity?: number;
+      action?: "increment" | "set";
+      timestamp?: number;
+    };
+
+    if (!subscriptionItemId || quantity == null) {
+      sendBadRequest(res, "subscriptionItemId and quantity are required");
+      return;
+    }
+
+    const record = await services.stripe.createMeteredUsageRecord(
+      subscriptionItemId,
+      quantity,
+      action ?? "increment",
+      timestamp,
+    );
+
+    sendSuccess(res, { usageRecordId: record.id, quantity: record.quantity });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to report metered usage");
+  }
+});
+
+router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const { companyName, email, contactName, seats, addOns, notes, successUrl, cancelUrl } = req.body as {
+      companyName?: string;
+      email?: string;
+      contactName?: string;
+      seats?: number;
+      addOns?: string[];
+      notes?: string;
+      successUrl?: string;
+      cancelUrl?: string;
+    };
+
+    if (!email || !companyName) {
+      sendBadRequest(res, "email and companyName are required");
+      return;
+    }
+
+    const customer = await services.stripe.createCustomer(
+      email,
+      contactName ?? companyName,
+      {
+        company: companyName,
+        product: "firestorm",
+        requestType: "enterprise-quote",
+        seats: String(seats ?? 0),
+        addOns: (addOns ?? []).join(", "),
+      },
+    );
+
+    if (successUrl && cancelUrl) {
+      const enterprisePriceId = process.env.STRIPE_PRICE_FIRESTORM_ENTERPRISE;
+      if (enterprisePriceId) {
+        const session = await services.stripe.createCheckoutSession({
+          priceId: enterprisePriceId,
+          mode: "subscription",
+          customerId: customer.id,
+          successUrl,
+          cancelUrl,
+          metadata: { product: "firestorm", companyName, notes: notes ?? "" },
+        });
+        sendSuccess(res, {
+          status: "checkout",
+          customerId: customer.id,
+          sessionId: session.id,
+          url: session.url,
+        });
+        return;
+      }
+    }
+
+    sendSuccess(res, {
+      status: "pending",
+      customerId: customer.id,
+      message: "Enterprise quote request received. A team member will contact you within 1 business day.",
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create enterprise quote");
+  }
+});
+
+router.post("/billing/firestorm/invoice", authMiddleware(), requireRole("admin", "superadmin"), async (req: Request, res: Response) => {
+  try {
+    const { customerId, lineItems, dueDate, notes } = req.body as {
+      customerId?: string;
+      lineItems?: Array<{ description: string; amount: number; currency?: string }>;
+      dueDate?: number;
+      notes?: string;
+    };
+
+    if (!customerId || !lineItems?.length) {
+      sendBadRequest(res, "customerId and lineItems are required");
+      return;
+    }
+
+    const invoice = await services.stripe.createInvoice(customerId, lineItems, {
+      dueDate,
+      notes,
+      metadata: { product: "firestorm" },
+    });
+
+    sendSuccess(res, {
+      invoiceId: invoice.id,
+      status: invoice.status,
+      hostedUrl: invoice.hostedInvoiceUrl,
+      pdfUrl: invoice.invoicePdf,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create and send invoice");
+  }
+});
+
 export default router;

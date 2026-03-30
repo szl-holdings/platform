@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
   getOidcConfig,
+  getAzureAdConfig,
   getSessionToken,
   setSessionCookie,
   clearSessionCookie,
@@ -10,10 +11,12 @@ import {
   getSafeReturnTo,
   getOrigin,
   upsertUserFromOidc,
+  upsertUserFromAzureAd,
   createOidcSession,
   deleteOidcSession,
   ISSUER_URL,
   isOidcConfigured,
+  isAzureAdConfigured,
 } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -228,6 +231,114 @@ router.post("/mobile-auth/logout", async (req: Request, res: Response) => {
     await deleteOidcSession(token);
   }
   res.json({ success: true });
+});
+
+router.get("/auth/providers", (_req: Request, res: Response) => {
+  const providers = [
+    ...(isOidcConfigured() ? [{ id: "replit", name: "Replit", loginUrl: "/api/login" }] : []),
+    ...(isAzureAdConfigured() ? [{ id: "azure_ad", name: "Microsoft Azure AD", loginUrl: "/api/azure-ad/login" }] : []),
+  ];
+  res.json({ providers });
+});
+
+router.get("/azure-ad/login", async (req: Request, res: Response) => {
+  if (!isAzureAdConfigured()) {
+    res.status(503).json({ error: "Azure AD SSO not configured" });
+    return;
+  }
+
+  try {
+    const config = await getAzureAdConfig();
+    const callbackUrl = `${getOrigin(req)}/api/azure-ad/callback`;
+    const returnTo = getSafeReturnTo(req.query.returnTo);
+
+    const state = oidc.randomState();
+    const nonce = oidc.randomNonce();
+    const codeVerifier = oidc.randomPKCECodeVerifier();
+    const codeChallenge = await oidc.calculatePKCECodeChallenge(codeVerifier);
+
+    const redirectTo = oidc.buildAuthorizationUrl(config, {
+      redirect_uri: callbackUrl,
+      scope: "openid email profile offline_access User.Read",
+      code_challenge: codeChallenge,
+      code_challenge_method: "S256",
+      state,
+      nonce,
+    });
+
+    setOidcCookie(res, "aad_code_verifier", codeVerifier);
+    setOidcCookie(res, "aad_nonce", nonce);
+    setOidcCookie(res, "aad_state", state);
+    setOidcCookie(res, "aad_return_to", returnTo);
+
+    res.redirect(redirectTo.href);
+  } catch (err) {
+    req.log?.error({ err }, "Azure AD login initiation failed");
+    res.status(500).json({ error: "Azure AD login initiation failed" });
+  }
+});
+
+router.get("/azure-ad/callback", async (req: Request, res: Response) => {
+  if (!isAzureAdConfigured()) {
+    res.redirect("/");
+    return;
+  }
+
+  try {
+    const config = await getAzureAdConfig();
+    const callbackUrl = `${getOrigin(req)}/api/azure-ad/callback`;
+
+    const codeVerifier = req.cookies?.aad_code_verifier;
+    const nonce = req.cookies?.aad_nonce;
+    const expectedState = req.cookies?.aad_state;
+    const returnTo = getSafeReturnTo(req.cookies?.aad_return_to);
+
+    if (!codeVerifier || !expectedState) {
+      res.redirect("/api/azure-ad/login");
+      return;
+    }
+
+    const currentUrl = new URL(
+      `${callbackUrl}?${new URL(req.url, `http://${req.headers.host}`).searchParams}`,
+    );
+
+    let tokens: oidc.TokenEndpointResponse & oidc.TokenEndpointResponseHelpers;
+    try {
+      tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
+        pkceCodeVerifier: codeVerifier,
+        expectedNonce: nonce,
+        expectedState,
+        idTokenExpected: true,
+      });
+    } catch {
+      res.redirect("/api/azure-ad/login");
+      return;
+    }
+
+    res.clearCookie("aad_code_verifier", { path: "/" });
+    res.clearCookie("aad_nonce", { path: "/" });
+    res.clearCookie("aad_state", { path: "/" });
+    res.clearCookie("aad_return_to", { path: "/" });
+
+    const claims = tokens.claims();
+    if (!claims) {
+      res.redirect("/api/azure-ad/login");
+      return;
+    }
+
+    const user = await upsertUserFromAzureAd(claims as unknown as Record<string, unknown>);
+    const token = await createOidcSession(
+      user.id,
+      req.ip ?? null,
+      req.headers["user-agent"] ?? null,
+    );
+
+    setSessionCookie(res, token);
+    res.redirect(returnTo);
+  } catch (err) {
+    req.log?.error({ err }, "Azure AD callback failed");
+    res.redirect("/api/azure-ad/login");
+  }
 });
 
 export default router;

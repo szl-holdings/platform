@@ -432,6 +432,107 @@ export class StripeAdapter extends ServiceAdapter {
     }
   }
 
+  async createMeteredUsageRecord(
+    subscriptionItemId: string,
+    quantity: number,
+    action: "increment" | "set" = "increment",
+    timestamp?: number,
+  ): Promise<{ id: string; quantity: number }> {
+    if (!this.isLive) {
+      return { id: "usage_mock_" + Date.now(), quantity };
+    }
+
+    const params = new URLSearchParams();
+    params.set("quantity", String(Math.max(0, Math.floor(quantity))));
+    params.set("action", action);
+    params.set("timestamp", String(timestamp ?? Math.floor(Date.now() / 1000)));
+
+    const data = (await this.stripeRequest(
+      `/subscription_items/${subscriptionItemId}/usage_records`,
+      { method: "POST", body: params.toString() },
+    )) as { id: string; quantity: number };
+
+    return { id: data.id, quantity: data.quantity };
+  }
+
+  async createInvoice(
+    customerId: string,
+    lineItems: Array<{ description: string; amount: number; currency?: string }>,
+    options?: { dueDate?: number; notes?: string; metadata?: Record<string, string> },
+  ): Promise<StripeInvoice> {
+    if (!this.isLive) {
+      return {
+        id: "inv_mock_" + Date.now(),
+        customerId,
+        amount: lineItems.reduce((s, i) => s + i.amount, 0),
+        currency: lineItems[0]?.currency ?? "usd",
+        status: "draft",
+        created: Date.now(),
+      };
+    }
+
+    const invoiceParams = new URLSearchParams();
+    invoiceParams.set("customer", customerId);
+    invoiceParams.set("collection_method", "send_invoice");
+    invoiceParams.set(
+      "due_date",
+      String(options?.dueDate ?? Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60),
+    );
+    if (options?.notes) invoiceParams.set("description", options.notes);
+    if (options?.metadata) {
+      for (const [k, v] of Object.entries(options.metadata)) {
+        invoiceParams.set(`metadata[${k}]`, v);
+      }
+    }
+
+    const inv = (await this.stripeRequest("/invoices", {
+      method: "POST",
+      body: invoiceParams.toString(),
+    })) as { id: string };
+
+    for (const item of lineItems) {
+      const itemParams = new URLSearchParams();
+      itemParams.set("customer", customerId);
+      itemParams.set("invoice", inv.id);
+      itemParams.set("description", item.description);
+      itemParams.set("amount", String(item.amount));
+      itemParams.set("currency", item.currency ?? "usd");
+      await this.stripeRequest("/invoiceitems", { method: "POST", body: itemParams.toString() });
+    }
+
+    const finalized = (await this.stripeRequest(`/invoices/${inv.id}/finalize`, {
+      method: "POST",
+    })) as { id: string };
+
+    const sent = (await this.stripeRequest(`/invoices/${finalized.id}/send`, {
+      method: "POST",
+    })) as {
+      id: string;
+      customer: string;
+      subscription: string | null;
+      amount_paid: number;
+      currency: string;
+      status: string;
+      status_transitions: { paid_at: number | null };
+      created: number;
+      hosted_invoice_url: string | null;
+      invoice_pdf: string | null;
+    };
+
+    return {
+      id: sent.id,
+      customerId: sent.customer,
+      subscriptionId: sent.subscription ?? undefined,
+      amount: sent.amount_paid,
+      currency: sent.currency,
+      status: sent.status,
+      paidAt: sent.status_transitions.paid_at ?? undefined,
+      created: sent.created,
+      hostedInvoiceUrl: sent.hosted_invoice_url ?? undefined,
+      invoicePdf: sent.invoice_pdf ?? undefined,
+    };
+  }
+
   async verifyWebhookPayload(
     payload: string | Buffer,
     signature: string | undefined,

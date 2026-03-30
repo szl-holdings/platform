@@ -11,8 +11,20 @@ import { ensureAlloyTables } from "./lib/alloy-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
+import { initializeOpenTelemetry } from "@workspace/observability";
 
 failFastOnInvalidConfig();
+
+initializeOpenTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api",
+  serviceVersion: process.env.npm_package_version ?? "1.0.0",
+  otlpEndpoint: process.env.OTLP_ENDPOINT ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  exportToAzureMonitor: !!process.env.AZURE_APP_INSIGHTS_CONNECTION_STRING,
+  exportToNewRelic: !!process.env.NEW_RELIC_LICENSE_KEY,
+  exportToConsole: process.env.OTEL_CONSOLE_EXPORT === "true",
+}).catch(err => {
+  logger.warn({ err }, "OpenTelemetry initialization failed — continuing without OTel");
+});
 
 const rawPort = process.env["PORT"];
 

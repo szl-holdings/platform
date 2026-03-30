@@ -10,6 +10,7 @@ export const SESSION_COOKIE = "sid";
 export const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 
 let oidcConfig: client.Configuration | null = null;
+let azureAdConfig: client.Configuration | null = null;
 
 export async function getOidcConfig(): Promise<client.Configuration> {
   if (!oidcConfig) {
@@ -23,6 +24,49 @@ export async function getOidcConfig(): Promise<client.Configuration> {
 
 export function isOidcConfigured(): boolean {
   return !!process.env.REPL_ID;
+}
+
+export function isAzureAdConfigured(): boolean {
+  return !!(
+    process.env.AZURE_AD_TENANT_ID &&
+    process.env.AZURE_AD_CLIENT_ID &&
+    process.env.AZURE_AD_CLIENT_SECRET
+  );
+}
+
+export function getAzureAdIssuerUrl(): string {
+  const tenantId = process.env.AZURE_AD_TENANT_ID!;
+  return `https://login.microsoftonline.com/${tenantId}/v2.0`;
+}
+
+export async function getAzureAdConfig(): Promise<client.Configuration> {
+  if (!azureAdConfig) {
+    azureAdConfig = await client.discovery(
+      new URL(getAzureAdIssuerUrl()),
+      process.env.AZURE_AD_CLIENT_ID!,
+      { client_secret: process.env.AZURE_AD_CLIENT_SECRET },
+    );
+  }
+  return azureAdConfig;
+}
+
+const AZURE_AD_ROLE_MAP: Record<string, RoleName> = {
+  "SZL.Admin": "admin",
+  "SZL.SuperAdmin": "super_admin",
+  "SZL.Operator": "ops",
+  "SZL.Analyst": "analyst",
+  "SZL.Viewer": "viewer",
+};
+
+export function mapAzureAdRoles(groups: string[] | undefined, appRoles: string[] | undefined): RoleName[] {
+  const roles: Set<RoleName> = new Set();
+  const sources = [...(groups ?? []), ...(appRoles ?? [])];
+  for (const r of sources) {
+    const mapped = AZURE_AD_ROLE_MAP[r];
+    if (mapped) roles.add(mapped);
+  }
+  if (roles.size === 0) roles.add("viewer" as RoleName);
+  return Array.from(roles);
 }
 
 export interface OidcUserData {
@@ -67,6 +111,65 @@ export async function upsertUserFromOidc(claims: Record<string, unknown>): Promi
     email: user.email,
     avatarUrl: user.avatarUrl,
     roles: userRoles.map((r) => r.roleName) as RoleName[],
+  };
+}
+
+export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Promise<{
+  id: number;
+  displayName: string;
+  email: string | null;
+  avatarUrl: string | null;
+  roles: RoleName[];
+}> {
+  const azureOid = claims.oid as string;
+  const sub = claims.sub as string;
+  const externalId = `aad:${azureOid ?? sub}`;
+  const email = (claims.email as string) || (claims.preferred_username as string) || null;
+  const givenName = (claims.given_name as string) || null;
+  const familyName = (claims.family_name as string) || null;
+  const displayName = [givenName, familyName].filter(Boolean).join(" ") || (claims.name as string) || externalId;
+  const avatarUrl = null;
+
+  const [user] = await db
+    .insert(usersTable)
+    .values({ replitId: externalId, email, displayName, avatarUrl })
+    .onConflictDoUpdate({
+      target: usersTable.replitId,
+      set: { email, displayName, updatedAt: new Date() },
+    })
+    .returning();
+
+  const groups = (claims.groups as string[]) ?? [];
+  const appRoles = (claims.roles as string[]) ?? [];
+  const mappedRoles = mapAzureAdRoles(groups, appRoles);
+
+  const existingRoles = await db
+    .select({ roleName: rolesTable.name })
+    .from(userRolesTable)
+    .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
+    .where(eq(userRolesTable.userId, user.id));
+
+  if (existingRoles.length === 0 && mappedRoles.length > 0) {
+    for (const roleName of mappedRoles) {
+      const [role] = await db.select().from(rolesTable).where(eq(rolesTable.name, roleName)).limit(1);
+      if (role) {
+        await db.insert(userRolesTable).values({ userId: user.id, roleId: role.id }).onConflictDoNothing();
+      }
+    }
+  }
+
+  const finalRoles = await db
+    .select({ roleName: rolesTable.name })
+    .from(userRolesTable)
+    .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
+    .where(eq(userRolesTable.userId, user.id));
+
+  return {
+    id: user.id,
+    displayName: user.displayName,
+    email: user.email,
+    avatarUrl: user.avatarUrl,
+    roles: (finalRoles.length > 0 ? finalRoles.map((r) => r.roleName) : mappedRoles) as RoleName[],
   };
 }
 

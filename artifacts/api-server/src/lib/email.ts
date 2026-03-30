@@ -16,7 +16,40 @@ interface SendResult {
 }
 
 const FROM_ADDRESS = "SZL Holdings <inquiries@szlholdings.com>";
+const FROM_NAME = "SZL Holdings";
+const FROM_EMAIL = "inquiries@szlholdings.com";
 const INTERNAL_EMAIL = process.env.SZL_INTERNAL_EMAIL || "team@szlholdings.com";
+
+async function sendViaSendGrid(options: EmailOptions): Promise<SendResult> {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey) throw new Error("SENDGRID_API_KEY not configured");
+
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: options.to }] }],
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      reply_to: options.replyTo ? { email: options.replyTo } : undefined,
+      subject: options.subject,
+      content: [
+        { type: "text/html", value: options.html },
+        ...(options.text ? [{ type: "text/plain", value: options.text }] : []),
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`SendGrid error: ${res.status} ${err}`);
+  }
+
+  const messageId = res.headers.get("x-message-id") ?? `sg-${Date.now()}`;
+  return { success: true, messageId, provider: "sendgrid" };
+}
 
 async function sendViaResend(options: EmailOptions): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -76,18 +109,49 @@ async function sendViaSMTP(options: EmailOptions): Promise<SendResult> {
   return { success: true, messageId: info.messageId, provider: "smtp" };
 }
 
+function getPrimaryProvider(): "sendgrid" | "resend" {
+  const configured = process.env.EMAIL_PROVIDER?.toLowerCase();
+  if (configured === "sendgrid" && process.env.SENDGRID_API_KEY) return "sendgrid";
+  if (configured === "resend" && process.env.RESEND_API_KEY) return "resend";
+  if (process.env.SENDGRID_API_KEY) return "sendgrid";
+  return "resend";
+}
+
 export async function sendEmail(options: EmailOptions): Promise<SendResult> {
-  try {
-    return await sendViaResend(options);
-  } catch (resendErr) {
-    console.warn("[email] Resend failed, trying SMTP fallback:", (resendErr as Error).message);
+  const primary = getPrimaryProvider();
+
+  const providers: Array<() => Promise<SendResult>> = primary === "sendgrid"
+    ? [
+        () => sendViaSendGrid(options),
+        () => sendViaResend(options),
+        () => sendViaSMTP(options),
+      ]
+    : [
+        () => sendViaResend(options),
+        () => sendViaSendGrid(options),
+        () => sendViaSMTP(options),
+      ];
+
+  let lastError: Error | undefined;
+  for (const send of providers) {
     try {
-      return await sendViaSMTP(options);
-    } catch (smtpErr) {
-      console.error("[email] SMTP fallback also failed:", (smtpErr as Error).message);
-      return { success: false, error: `All providers failed. Resend: ${(resendErr as Error).message}` };
+      return await send();
+    } catch (err) {
+      lastError = err as Error;
+      console.warn(`[email] Provider failed (${lastError.message}), trying next...`);
     }
   }
+
+  console.error("[email] All email providers failed");
+  return { success: false, error: `All providers failed. Last error: ${lastError?.message}` };
+}
+
+export function getEmailProviderStatus(): { primary: string; available: string[] } {
+  const available: string[] = [];
+  if (process.env.SENDGRID_API_KEY) available.push("sendgrid");
+  if (process.env.RESEND_API_KEY) available.push("resend");
+  if (process.env.SMTP_HOST && process.env.SMTP_USER) available.push("smtp");
+  return { primary: getPrimaryProvider(), available };
 }
 
 function szlBrand(content: string): string {

@@ -1,7 +1,8 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
-import { sendSuccess, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { geocodeAddress, reverseGeocode, getGeocodingProviderStatus } from "../lib/geocoding";
 
 const router: IRouter = Router();
 
@@ -186,6 +187,42 @@ router.get("/terra/sector-performance", terraRateLimit, authMiddleware({ require
       generatedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch sector performance"); }
+});
+
+router.get("/terra/geocode", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const address = req.query.address as string | undefined;
+    if (!address) {
+      sendBadRequest(res, "address query parameter is required");
+      return;
+    }
+
+    const result = await geocodeAddress(address);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Geocoding failed");
+  }
+});
+
+router.get("/terra/reverse-geocode", authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const lat = parseFloat(req.query.lat as string);
+    const lng = parseFloat(req.query.lng as string);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      sendBadRequest(res, "lat and lng query parameters are required");
+      return;
+    }
+
+    const result = await reverseGeocode(lat, lng);
+    sendSuccess(res, result);
+  } catch (err) {
+    handleRouteError(res, err, "Reverse geocoding failed");
+  }
+});
+
+router.get("/terra/geocoding-status", async (_req: Request, res: Response) => {
+  sendSuccess(res, getGeocodingProviderStatus());
 });
 
 export default router;
