@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Shield, AlertTriangle, Activity, Clock, Crosshair, Flame, Target, TrendingUp, TrendingDown, Zap } from "lucide-react";
+import { Shield, AlertTriangle, Activity, Clock, Crosshair, Flame, Target, TrendingUp, TrendingDown, Zap, Terminal, Search, BookOpen, Network, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -75,6 +75,231 @@ function AnimatedCounter({ value, duration = 1200, decimals = 0 }: { value: numb
     return () => { cancelled = true; };
   }, [value, duration]);
   return <>{decimals > 0 ? display.toFixed(decimals) : Math.round(display)}</>;
+}
+
+function ResponseTimer() {
+  const [elapsed, setElapsed] = useState({ detect: 0, investigate: 0, contain: 0 });
+  const startRef = useRef(Date.now() - 142000);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const ms = Date.now() - startRef.current;
+      const seconds = Math.floor(ms / 1000);
+      setElapsed({
+        detect: Math.min(seconds, 60),
+        investigate: Math.max(0, Math.min(seconds - 60, 600)),
+        contain: Math.max(0, Math.min(seconds - 660, 3600)),
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const total = Math.floor((Date.now() - startRef.current) / 1000);
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+
+  const phases = [
+    { label: "Detect", target: "1 min", current: elapsed.detect, max: 60, met: elapsed.detect <= 60, color: "emerald" },
+    { label: "Investigate", target: "10 min", current: elapsed.investigate, max: 600, met: elapsed.investigate <= 600, color: "amber" },
+    { label: "Contain", target: "60 min", current: elapsed.contain, max: 3600, met: elapsed.contain <= 3600, color: "blue" },
+  ];
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <Clock className="w-4 h-4 text-red-400" />
+          <span className="font-display font-semibold text-sm text-foreground">1-10-60 Response Timer</span>
+          <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20 ml-1">Active Incident</Badge>
+        </div>
+        <div className="font-mono text-2xl font-bold text-red-400">{String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}</div>
+      </div>
+      <div className="p-4 grid grid-cols-3 gap-4">
+        {phases.map((p) => {
+          const pct = Math.min((p.current / p.max) * 100, 100);
+          const colorMap: Record<string, { bar: string; text: string; bg: string }> = {
+            emerald: { bar: "bg-emerald-400", text: "text-emerald-400", bg: "bg-emerald-400/10" },
+            amber: { bar: "bg-amber-400", text: "text-amber-400", bg: "bg-amber-400/10" },
+            blue: { bar: "bg-blue-400", text: "text-blue-400", bg: "bg-blue-400/10" },
+          };
+          const c = colorMap[p.color];
+          return (
+            <div key={p.label} className={`rounded-lg p-3 border border-border/50 ${p.met ? "" : "border-red-500/20"}`}>
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-xs font-mono font-bold ${c.text}`}>{p.label}</span>
+                <span className="text-[10px] text-muted-foreground">Target: {p.target}</span>
+              </div>
+              <div className="h-2 bg-border rounded-full overflow-hidden mb-2">
+                <div className={`h-full rounded-full transition-all ${p.met ? c.bar : "bg-red-400"}`} style={{ width: `${pct}%` }} />
+              </div>
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="text-muted-foreground font-mono">{Math.floor(p.current / 60)}m {p.current % 60}s</span>
+                <span className={p.met ? "text-emerald-400" : "text-red-400"}>{p.met ? "✓ On Track" : "⚠ Delayed"}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const triageQueue = [
+  { id: "INC-2847", title: "Lateral movement — DC-PROD-03", technique: "T1021.002", score: 96, priority: "P1", playbook: "Lateral Movement Response", status: "Assigned" },
+  { id: "INC-2846", title: "C2 beacon to APT29 infra", technique: "T1071.001", score: 91, priority: "P1", playbook: "C2 Containment", status: "In Progress" },
+  { id: "ALT-5821", title: "Data exfil pattern — S3", technique: "T1567.002", score: 84, priority: "P2", playbook: "Data Exfiltration", status: "Queued" },
+  { id: "ALT-5820", title: "Brute force — admin portal", technique: "T1110.001", score: 71, priority: "P2", playbook: "Credential Attack", status: "Queued" },
+];
+
+function AIThreatTriage() {
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+        <Crosshair className="w-4 h-4 text-primary animate-pulse" />
+        <span className="font-display font-semibold text-sm text-foreground">AI Threat Triage</span>
+        <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20 ml-1">Auto-classified</Badge>
+      </div>
+      <div className="divide-y divide-border/50">
+        {triageQueue.map((item) => (
+          <div key={item.id} className="px-5 py-3 hover:bg-muted/10 transition-colors">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono text-muted-foreground">{item.id}</span>
+                  <Badge variant="outline" className={`text-[9px] ${item.priority === "P1" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-orange-500/10 text-orange-400 border-orange-500/20"}`}>{item.priority}</Badge>
+                  <Badge variant="outline" className="text-[9px] bg-muted/50 text-muted-foreground">{item.technique}</Badge>
+                </div>
+                <p className="text-xs text-foreground font-medium truncate">{item.title}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-lg font-bold font-mono text-red-400">{item.score}</div>
+                <div className="text-[9px] text-muted-foreground">AI Score</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <BookOpen className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">{item.playbook}</span>
+              <span className={`text-[10px] font-mono ml-auto ${item.status === "In Progress" ? "text-amber-400" : item.status === "Assigned" ? "text-blue-400" : "text-muted-foreground"}`}>{item.status}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const nlQueries = [
+  "Show me all PowerShell executions from non-admin accounts in the last 24 hours",
+  "Find lateral movement attempts targeting domain controllers",
+  "List all connections to known C2 IPs from internal hosts",
+];
+
+function NLThreatHunting() {
+  const [query, setQuery] = useState("");
+  const [result, setResult] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const runQuery = async (q: string) => {
+    setQuery(q);
+    setLoading(true);
+    setResult(null);
+    await new Promise(r => setTimeout(r, 900));
+    setLoading(false);
+    setResult(`Found 14 matching events across 6 hosts.\n\nTop matches:\n• WORKSTATION-142: powershell.exe -enc JABj... (14:23 UTC)\n• SERVER-PROD-07: powershell.exe -ExecutionPolicy Bypass... (13:47 UTC)\n• DC-PROD-03: powershell.exe -WindowStyle Hidden... (12:31 UTC)\n\nRisk: HIGH — 3 events match known T1059.001 pattern`);
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+        <Search className="w-4 h-4 text-purple-400" />
+        <span className="font-display font-semibold text-sm text-foreground">Natural Language Threat Hunt</span>
+        <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-400 border-purple-500/20 ml-1">Purple AI</Badge>
+      </div>
+      <div className="p-4 space-y-3">
+        <div className="flex gap-2">
+          <input
+            className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+            placeholder="Describe what you're hunting for..."
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && query && runQuery(query)}
+          />
+          <button onClick={() => query && runQuery(query)} className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
+            Hunt
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {nlQueries.map(q => (
+            <button key={q} onClick={() => runQuery(q)} className="text-[10px] px-2 py-1 rounded border border-border/50 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-colors bg-muted/20 truncate max-w-[200px]">
+              {q.slice(0, 35)}...
+            </button>
+          ))}
+        </div>
+        {loading && <div className="flex items-center gap-2 text-xs text-muted-foreground"><span className="w-3 h-3 border border-primary/50 border-t-primary rounded-full animate-spin" />Hunting across 847K events...</div>}
+        {result && !loading && (
+          <div className="bg-background rounded-lg border border-border p-3">
+            <pre className="text-[10px] text-foreground whitespace-pre-wrap font-mono leading-relaxed">{result}</pre>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const blastRadiusNodes = [
+  { id: "DC-PROD-03", type: "compromised", x: 50, y: 50, risk: 96 },
+  { id: "FILE-SERVER-01", type: "at-risk", x: 20, y: 25, risk: 78 },
+  { id: "DB-PROD-02", type: "at-risk", x: 80, y: 25, risk: 82 },
+  { id: "WEB-APP-01", type: "at-risk", x: 15, y: 65, risk: 61 },
+  { id: "BACKUP-SRV", type: "at-risk", x: 85, y: 65, risk: 54 },
+  { id: "WORKSTATION-142", type: "origin", x: 50, y: 85, risk: 100 },
+];
+
+function BlastRadiusViz() {
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+        <Network className="w-4 h-4 text-red-400" />
+        <span className="font-display font-semibold text-sm text-foreground">Blast Radius — Lateral Movement Paths</span>
+        <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20 ml-1">INC-2847</Badge>
+      </div>
+      <div className="p-4">
+        <div className="relative h-52 bg-background rounded-lg border border-border/50 overflow-hidden">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {/* Edges */}
+            {[
+              [50, 50, 20, 25], [50, 50, 80, 25], [50, 50, 15, 65],
+              [50, 50, 85, 65], [50, 85, 50, 50],
+            ].map(([x1, y1, x2, y2], i) => (
+              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(239,68,68,0.3)" strokeWidth="0.8" strokeDasharray="2 2">
+                <animate attributeName="stroke-opacity" from="0.1" to="0.6" dur={`${1.5 + i * 0.3}s`} repeatCount="indefinite" direction="alternate" />
+              </line>
+            ))}
+            {/* Nodes */}
+            {blastRadiusNodes.map((node) => {
+              const color = node.type === "origin" ? "#f59e0b" : node.type === "compromised" ? "#ef4444" : "#f97316";
+              return (
+                <g key={node.id}>
+                  <circle cx={node.x} cy={node.y} r="4" fill={color} opacity="0.2">
+                    {node.type !== "origin" && <animate attributeName="r" from="4" to="8" dur="2s" repeatCount="indefinite" />}
+                    {node.type !== "origin" && <animate attributeName="opacity" from="0.2" to="0" dur="2s" repeatCount="indefinite" />}
+                  </circle>
+                  <circle cx={node.x} cy={node.y} r="3" fill={color} opacity="0.9" />
+                  <text x={node.x} y={node.y - 5} textAnchor="middle" fontSize="3" fill="rgba(255,255,255,0.7)" fontFamily="monospace">{node.id.split("-")[0]}</text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />Origin</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />Compromised</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />At Risk</span>
+          <span className="ml-auto font-mono">5 hosts at risk · Mock Data</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function MitreHeatMap() {
@@ -177,7 +402,10 @@ export default function SOCDashboard() {
         </div>
       </div>
 
-      {/* Threat Posture Banner — replaces 4 stat cards */}
+      {/* 1-10-60 Timer */}
+      <ResponseTimer />
+
+      {/* Threat Posture Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className={`bg-card border rounded-xl p-5 flex items-center gap-4 ${data.activeIncidents > 0 ? "border-red-500/30 ring-1 ring-red-500/10" : "border-border"}`}>
           <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0 animate-pulse">
@@ -201,7 +429,6 @@ export default function SOCDashboard() {
           </div>
         </div>
 
-        {/* Threat Posture Score — replaces MTTD / MTTR cards */}
         <div className="col-span-1 bg-card border border-border rounded-xl p-5">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono mb-3">Threat Posture</p>
           <div className="flex items-end gap-3 mb-3">
@@ -229,37 +456,17 @@ export default function SOCDashboard() {
         </div>
       </div>
 
-      {/* Detection Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: "MTTD", value: data.mttd, unit: "min", color: "text-primary", icon: Crosshair, trend: "12% faster", positive: true },
-          { label: "MTTR", value: data.mttr, unit: "min", color: "text-emerald-400", icon: Zap, trend: "8% faster", positive: true },
-          { label: "Open Findings", value: data.openFindings, unit: "", color: "text-blue-400", icon: Target, trend: `${data.criticalFindings} critical`, positive: false },
-          { label: "Alerts Processed", value: data.totalAlerts, unit: "", color: "text-muted-foreground", icon: Activity, trend: "this month", positive: true },
-        ].map(item => (
-          <Card key={item.label} className="bg-card border-border">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">{item.label}</p>
-                <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
-              </div>
-              <p className={`text-2xl font-bold font-display ${item.color}`}>
-                <AnimatedCounter value={item.value} decimals={item.label === "MTTD" ? 1 : 0} />
-                {item.unit && <span className="text-xs text-muted-foreground ml-1">{item.unit}</span>}
-              </p>
-              <p className={`text-[10px] mt-1 flex items-center gap-1 ${item.positive ? "text-emerald-400/60" : "text-red-400/60"}`}>
-                {item.positive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-                {item.trend}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+      {/* AI Triage + NL Hunting */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <AIThreatTriage />
+        <NLThreatHunting />
       </div>
 
-      {/* MITRE Heatmap — the visual showpiece */}
+      {/* Blast Radius + MITRE */}
+      <BlastRadiusViz />
       <MitreHeatMap />
 
-      {/* Threat Timeline + MTTD Chart */}
+      {/* Threat Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="bg-card border-border lg:col-span-2">
           <CardHeader className="pb-2">

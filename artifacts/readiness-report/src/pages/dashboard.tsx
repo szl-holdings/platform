@@ -1,9 +1,137 @@
 import { Shell } from "@/components/layout/shell";
 import { usePrograms, useDimensions, useAlerts, useRisks } from "@/hooks/use-readiness";
-import { ArrowUpRight, Activity, ShieldAlert, Target, BellRing, CheckCircle2, TrendingUp } from "lucide-react";
+import { ArrowUpRight, Activity, ShieldAlert, Target, BellRing, CheckCircle2, TrendingUp, RefreshCw, Shield, FileCheck, Clock, AlertCircle, CheckCircle, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { type ComponentType, useState, useEffect, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
+// ─── Continuous Compliance Controls (Vanta/Drata-style) ──────────────────────
+const controlMonitors = [
+  { control: "MFA Enforcement", framework: "SOC 2 CC6.1", status: "passing", lastChecked: "2m ago", automationCoverage: 100 },
+  { control: "Encryption at Rest", framework: "ISO 27001 A.10.1", status: "passing", lastChecked: "5m ago", automationCoverage: 100 },
+  { control: "Privileged Access Review", framework: "CMMC AC.2.006", status: "failing", lastChecked: "1h ago", automationCoverage: 75 },
+  { control: "Audit Log Retention", framework: "SOC 2 CC7.2", status: "passing", lastChecked: "8m ago", automationCoverage: 100 },
+  { control: "Vulnerability Scan Cadence", framework: "NIST CSF DE.CM-8", status: "warning", lastChecked: "3h ago", automationCoverage: 88 },
+  { control: "Data Classification Tags", framework: "ISO 27001 A.8.2", status: "passing", lastChecked: "12m ago", automationCoverage: 92 },
+];
+
+const evidenceRequests = [
+  { id: "EVD-241", control: "Pen Test Report", assignee: "Security Team", due: "Mar 31", status: "in-progress", priority: "high" },
+  { id: "EVD-240", control: "Vendor Risk Assessment", assignee: "Procurement", due: "Apr 5", status: "not-started", priority: "medium" },
+  { id: "EVD-239", control: "Employee Training Certs", assignee: "HR", due: "Apr 12", status: "in-progress", priority: "medium" },
+];
+
+const auditReadinessItems = [
+  { framework: "SOC 2 Type II", progress: 84, target: "May 2026", status: "On Track" },
+  { framework: "ISO 27001", progress: 71, target: "Jul 2026", status: "On Track" },
+  { framework: "CMMC Level 2", progress: 58, target: "Sep 2026", status: "At Risk" },
+];
+
+function ContinuousCompliancePanel() {
+  const passing = controlMonitors.filter(c => c.status === "passing").length;
+  const failing = controlMonitors.filter(c => c.status === "failing").length;
+  const warning = controlMonitors.filter(c => c.status === "warning").length;
+  const total = controlMonitors.length;
+  const pct = Math.round((passing / total) * 100);
+
+  return (
+    <div className="glass-panel rounded-2xl p-6 space-y-5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-display font-semibold text-white flex items-center gap-2">
+          <RefreshCw className="w-4 h-4 text-primary animate-spin [animation-duration:3s]" />
+          Continuous Compliance Monitoring
+        </h3>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="text-emerald-400 font-mono">{passing} passing</span>
+          <span className="text-amber-400 font-mono">{warning} warning</span>
+          <span className="text-red-400 font-mono">{failing} failing</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="relative w-16 h-16 shrink-0">
+          <svg viewBox="0 0 36 36" className="w-16 h-16 -rotate-90">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3" />
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#22c55e" strokeWidth="3" strokeDasharray={`${pct} ${100 - pct}`} strokeLinecap="round" />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-sm font-bold text-white">{pct}%</span>
+          </div>
+        </div>
+        <div className="flex-1 grid grid-cols-2 gap-x-8 gap-y-1">
+          {controlMonitors.map(c => (
+            <div key={c.control} className="flex items-center gap-2 py-1">
+              {c.status === "passing" ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> :
+               c.status === "failing" ? <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 animate-pulse" /> :
+               <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+              <div className="min-w-0">
+                <p className="text-[11px] text-white/80 truncate">{c.control}</p>
+                <p className="text-[9px] text-white/30 font-mono">{c.framework} · {c.lastChecked}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EvidenceCollectionPanel() {
+  return (
+    <div className="glass-panel rounded-2xl p-6 space-y-4">
+      <h3 className="text-lg font-display font-semibold text-white flex items-center gap-2">
+        <FileCheck className="w-4 h-4 text-blue-400" />
+        Evidence Collection Tracker
+      </h3>
+      <div className="space-y-3">
+        {evidenceRequests.map(e => (
+          <div key={e.id} className={`p-3 rounded-xl border ${e.priority === "high" ? "border-red-500/20 bg-red-500/5" : "border-white/5 bg-white/[0.02]"}`}>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-white/30">{e.id}</span>
+                <span className="text-xs font-semibold text-white">{e.control}</span>
+              </div>
+              <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${e.status === "in-progress" ? "text-blue-400 bg-blue-400/10" : "text-white/30 bg-white/5"}`}>{e.status}</span>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-white/40">
+              <span>{e.assignee}</span>
+              <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Due {e.due}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AuditReadinessPanel() {
+  return (
+    <div className="glass-panel rounded-2xl p-6 space-y-4">
+      <h3 className="text-lg font-display font-semibold text-white flex items-center gap-2">
+        <Shield className="w-4 h-4 text-primary" />
+        Audit Readiness by Framework
+      </h3>
+      <div className="space-y-4">
+        {auditReadinessItems.map(a => (
+          <div key={a.framework}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-sm font-semibold text-white">{a.framework}</span>
+              <div className="flex items-center gap-3 text-xs">
+                <span className="text-white/40">Target: {a.target}</span>
+                <span className={a.status === "On Track" ? "text-emerald-400" : "text-amber-400"}>{a.status}</span>
+                <span className="font-bold text-white">{a.progress}%</span>
+              </div>
+            </div>
+            <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${a.status === "On Track" ? "bg-gradient-to-r from-primary to-emerald-400" : "bg-gradient-to-r from-amber-500 to-yellow-400"}`} style={{ width: `${a.progress}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-[10px] text-white/20 font-mono text-center">Mock Data · Auto-synced from control tests</p>
+    </div>
+  );
+}
 
 function useAnimatedCounter(target: number, duration = 1200, decimals = 0) {
   const [count, setCount] = useState(0);
@@ -253,6 +381,17 @@ export default function Dashboard() {
           <StatCard delay={0.35} value={criticalRisks.length} label="Critical Open Risks" icon={ShieldAlert} accentColor="text-destructive" bg="bg-destructive/10" highlight />
           <StatCard delay={0.45} value={unreadAlerts.length} label="Unread Alerts" icon={BellRing} accentColor="text-amber-400" bg="bg-amber-500/10" />
         </div>
+
+        {/* Continuous Compliance Monitoring */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <ContinuousCompliancePanel />
+        </motion.div>
+
+        {/* Evidence + Audit Readiness */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <EvidenceCollectionPanel />
+          <AuditReadinessPanel />
+        </motion.div>
       </div>
     </Shell>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers, CheckCircle, AlertCircle, Clock, DollarSign, GitMerge, Users } from "lucide-react";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
 import { cn } from "@workspace/shared-ui/utils";
@@ -87,7 +87,7 @@ function ExperimentComparisonTable() {
       <div className="px-5 py-3 border-b border-border flex items-center justify-between">
         <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
           <Layers className="w-3.5 h-3.5 text-primary" />
-          Experiments — Comparison Table
+          Experiments — Parallel Comparison
         </h3>
         <Link href="/experiments">
           <span className="text-xs text-primary hover:text-primary/80 cursor-pointer flex items-center gap-1">
@@ -157,6 +157,134 @@ function ExperimentComparisonTable() {
   );
 }
 
+const hyperparamImportance = [
+  { param: "learning_rate", importance: 0.42, range: "1e-5 to 1e-3" },
+  { param: "batch_size", importance: 0.28, range: "16 to 512" },
+  { param: "dropout", importance: 0.15, range: "0.1 to 0.5" },
+  { param: "warmup_steps", importance: 0.09, range: "100 to 5000" },
+  { param: "weight_decay", importance: 0.06, range: "0.01 to 0.1" },
+];
+
+function HyperparamImportance() {
+  return (
+    <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
+      <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
+        <BarChart3 className="w-3.5 h-3.5 text-primary" />
+        Hyperparameter Importance
+      </h3>
+      <div className="space-y-3">
+        {hyperparamImportance.map((h) => (
+          <div key={h.param}>
+            <div className="flex items-center justify-between mb-1 text-[11px]">
+              <span className="font-mono text-foreground">{h.param}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground">{h.range}</span>
+                <span className="font-bold text-primary">{(h.importance * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+            <div className="h-2 bg-border rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary" style={{ width: `${h.importance * 100}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground/50 mt-3 font-mono">Shapley values across 847 completed runs · Mock Data</p>
+    </div>
+  );
+}
+
+const modelLineageNodes = [
+  { id: "titan-v1", label: "TITAN v1", type: "model", status: "archived", x: 15, y: 20 },
+  { id: "exp-224", label: "EXP-224", type: "experiment", status: "completed", x: 45, y: 10 },
+  { id: "exp-231", label: "EXP-231", type: "experiment", status: "completed", x: 45, y: 35 },
+  { id: "titan-v2", label: "TITAN v2", type: "model", status: "production", x: 75, y: 22 },
+  { id: "deploy-prod", label: "PROD Deploy", type: "deploy", status: "live", x: 90, y: 22 },
+];
+
+function ModelLineage() {
+  const colorMap: Record<string, string> = {
+    model: "#6366f1", experiment: "#f59e0b", deploy: "#22c55e", archived: "#64748b"
+  };
+  return (
+    <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
+      <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
+        <GitMerge className="w-3.5 h-3.5 text-primary" />
+        Model Lineage Graph
+      </h3>
+      <div className="relative h-32 bg-muted/10 rounded-lg border border-border/50 overflow-hidden">
+        <svg className="w-full h-full" viewBox="0 0 100 50" preserveAspectRatio="none">
+          {[
+            [15, 20, 45, 10], [15, 20, 45, 35],
+            [45, 10, 75, 22], [45, 35, 75, 22],
+            [75, 22, 90, 22],
+          ].map(([x1, y1, x2, y2], i) => (
+            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(99,102,241,0.3)" strokeWidth="0.8" markerEnd="url(#arrow)" />
+          ))}
+          {modelLineageNodes.map((node) => {
+            const color = node.status === "archived" ? "#64748b" : colorMap[node.type] || "#6366f1";
+            return (
+              <g key={node.id}>
+                <circle cx={node.x} cy={node.y} r="4" fill={color} opacity="0.2" />
+                <circle cx={node.x} cy={node.y} r="3" fill={color} opacity="0.9" />
+                <text x={node.x} y={node.y + 8} textAnchor="middle" fontSize="3.5" fill="rgba(255,255,255,0.6)" fontFamily="monospace">{node.label}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-400 inline-block" />Model</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />Experiment</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />Deploy</span>
+      </div>
+    </div>
+  );
+}
+
+const gpuOptRecs = [
+  { cluster: "A100 80GB", usage: 94, costPerFlop: "$0.0042", recommendation: "Scale down during off-peak (02:00–06:00 UTC)", savings: "$1,840/mo" },
+  { cluster: "H100 SXM", usage: 78, costPerFlop: "$0.0061", recommendation: "Migrate batch jobs to A100 cluster", savings: "$3,200/mo" },
+  { cluster: "TPU v4 Pod", usage: 62, costPerFlop: "$0.0038", recommendation: "Consolidate 3 small experiments", savings: "$890/mo" },
+];
+
+function GPUOptimization() {
+  return (
+    <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
+      <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
+        <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+        GPU Cost-Per-FLOP Optimization
+      </h3>
+      <div className="space-y-3">
+        {gpuOptRecs.map((g) => (
+          <div key={g.cluster} className="p-3 rounded-lg border border-border/50 bg-muted/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-foreground">{g.cluster}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-mono text-muted-foreground">{g.costPerFlop}/FLOP</span>
+                <span className="text-[10px] font-bold text-emerald-400">Save {g.savings}</span>
+              </div>
+            </div>
+            <div className="h-1.5 bg-border rounded-full overflow-hidden mb-2">
+              <div className={cn("h-full rounded-full", g.usage > 90 ? "bg-red-400" : g.usage > 75 ? "bg-amber-400" : "bg-emerald-400")} style={{ width: `${g.usage}%` }} />
+            </div>
+            <p className="text-[10px] text-muted-foreground">{g.recommendation}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const collaborativeReport = {
+  title: "Q1 2026 Research Report",
+  authors: ["Dr. Chen", "M. Rodriguez", "S. Park"],
+  highlights: [
+    "TITAN v2 achieves 91.8 MMLU — 3.2pts above baseline",
+    "AEGIS lateral collision avoidance: 69.4 nuScenes mAP",
+    "GPU cost reduced 18% via workload consolidation",
+  ],
+};
+
 function ModelPerformanceCharts() {
   const prodModels = models.filter(m => m.status === "production" || m.status === "staging").slice(0, 4);
 
@@ -185,9 +313,7 @@ function ModelPerformanceCharts() {
                   <p className="text-[10px] text-muted-foreground font-mono">{model.architecture} v{model.version}</p>
                 </div>
                 <div className="text-right">
-                  <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full",
-                    model.status === "production" ? "text-emerald-400 bg-emerald-400/10" : "text-amber-400 bg-amber-400/10"
-                  )}>{model.status}</span>
+                  <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded-full", model.status === "production" ? "text-emerald-400 bg-emerald-400/10" : "text-amber-400 bg-amber-400/10")}>{model.status}</span>
                   <p className={cn("text-xl font-display font-bold mt-0.5", model.accuracy >= 90 ? "text-emerald-400" : "text-amber-400")}>{model.accuracy.toFixed(1)}%</p>
                 </div>
               </div>
@@ -200,10 +326,6 @@ function ModelPerformanceCharts() {
                     <Line type="monotone" dataKey="accuracy" stroke="#22c55e" strokeWidth={2} dot={false} name="Accuracy %" />
                   </LineChart>
                 </ResponsiveContainer>
-              </div>
-              <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground font-mono">
-                <span>Params: <span className="text-foreground">{model.parameters}</span></span>
-                <span>Speed: <span className="text-foreground">{model.speed}ms</span></span>
               </div>
             </div>
           );
@@ -252,7 +374,6 @@ export default function Dashboard() {
         <LiveClock />
       </div>
 
-      {/* Top metrics row — clean 6-across grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
           { label: "Programs", value: activeProjects, icon: Brain, color: "text-emerald-400", bg: "bg-emerald-400/10", trend: "+2 Q1" },
@@ -275,16 +396,65 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Research health bar — more modern than donut */}
       <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl px-5 py-4">
         <HealthBar score={healthScore} />
       </div>
 
       <ExperimentComparisonTable />
+
+      {/* New W&B-style features */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <HyperparamImportance />
+        <ModelLineage />
+      </div>
+
+      <GPUOptimization />
+
+      {/* Collaborative Report Builder */}
+      <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
+            <Users className="w-3.5 h-3.5 text-primary" />
+            Collaborative Report Builder
+          </h3>
+          <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live · 3 contributors
+          </span>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 bg-muted/10 rounded-lg border border-border/50 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-bold text-foreground">{collaborativeReport.title}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400 font-mono">Draft</span>
+            </div>
+            <div className="space-y-2">
+              {collaborativeReport.highlights.map((h, i) => (
+                <div key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{h}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">Contributors</p>
+            {collaborativeReport.authors.map(a => (
+              <div key={a} className="flex items-center gap-2 p-2 rounded-lg bg-muted/10 border border-border/50">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+                  {a.split(" ").pop()![0]}
+                </div>
+                <span className="text-xs text-foreground">{a}</span>
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <ModelPerformanceCharts />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Pipeline */}
         <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
@@ -313,7 +483,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Live Experiment Feed */}
         <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
           <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
             <Radio className="w-3.5 h-3.5 text-primary" />Live Feed
@@ -335,7 +504,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Priority Insights */}
         <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-display font-semibold text-foreground flex items-center gap-2">
@@ -355,57 +523,6 @@ export default function Dashboard() {
                   <span className="text-[10px] text-muted-foreground font-mono ml-auto">{insight.confidence}%</span>
                 </div>
                 <p className="text-xs text-foreground leading-snug">{insight.title}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Compute Utilization */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
-          <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Cpu className="w-3.5 h-3.5 text-primary" />Compute Utilization
-          </h3>
-          <div className="space-y-4">
-            {[
-              { name: "A100 80GB Cluster", used: 94 },
-              { name: "H100 SXM Pod", used: 78 },
-              { name: "TPU v4 Pod", used: 62 },
-            ].map(g => (
-              <div key={g.name}>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-muted-foreground font-mono text-[11px]">{g.name}</span>
-                  <span className={cn("font-mono font-bold", g.used > 90 ? "text-red-400" : g.used > 75 ? "text-amber-400" : "text-emerald-400")}>{g.used}%</span>
-                </div>
-                <div className="h-2 bg-border rounded-full overflow-hidden">
-                  <div className={cn("h-full rounded-full transition-all duration-700", g.used > 90 ? "bg-red-400/80" : g.used > 75 ? "bg-amber-400/80" : "bg-emerald-400/80")} style={{ width: `${g.used}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-card/60 backdrop-blur-sm border border-border rounded-xl p-5">
-          <h3 className="text-sm font-display font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Shield className="w-3.5 h-3.5 text-primary" />Benchmark Targets
-          </h3>
-          <div className="space-y-2.5">
-            {[
-              { name: "MMLU", project: "TITAN LLM", value: 91.8, target: 90, met: true },
-              { name: "nuScenes mAP", project: "AEGIS Nav", value: 69.4, target: 68, met: true },
-              { name: "CASP15 TM", project: "HELIX Drug", value: 0.83, target: 0.85, met: false },
-              { name: "Threat Recall", project: "SENTINEL", value: 97.2, target: 95, met: true },
-              { name: "T850 RMSE", project: "GAIA Climate", value: 3.45, target: 3.2, met: false },
-              { name: "MMMU", project: "NEXUS VLM", value: 74.3, target: 72, met: true },
-            ].map(b => (
-              <div key={b.name} className="flex items-center gap-3">
-                {b.met ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                <span className="text-[10px] font-mono text-muted-foreground w-24 shrink-0">{b.name}</span>
-                <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-                  <div className={cn("h-full rounded-full", b.met ? "bg-emerald-400/70" : "bg-amber-400/70")} style={{ width: `${Math.min((b.value / b.target) * 100, 100)}%` }} />
-                </div>
-                <span className="text-[10px] font-mono text-foreground w-10 text-right">{b.value}</span>
               </div>
             ))}
           </div>

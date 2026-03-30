@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Activity, AlertTriangle, Lightbulb, ShieldAlert, ArrowUpRight, TrendingUp, Wifi, Server, Cpu, HardDrive, Network, Clock, Zap, BarChart3 } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Activity, AlertTriangle, Lightbulb, ShieldAlert, ArrowUpRight, TrendingUp, Wifi, Server, Cpu, HardDrive, Network, Clock, Zap, BarChart3, GitCommit, Link as LinkIcon, Map, BookOpen, Target } from "lucide-react";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, RadarChart, Radar, PolarGrid, PolarAngleAxis } from "recharts";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -45,27 +45,180 @@ const infraMetrics = [
 ];
 
 const severityConfig: Record<string, { dot: string; border: string; bg: string }> = {
-  critical: {
-    dot: "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse",
-    border: "border-red-500/20",
-    bg: "bg-red-500/5",
-  },
-  high: {
-    dot: "bg-orange-500",
-    border: "border-orange-500/10",
-    bg: "",
-  },
-  medium: {
-    dot: "bg-amber-500",
-    border: "border-amber-500/10",
-    bg: "",
-  },
-  low: {
-    dot: "bg-blue-500",
-    border: "border-blue-500/10",
-    bg: "",
-  },
+  critical: { dot: "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse", border: "border-red-500/20", bg: "bg-red-500/5" },
+  high: { dot: "bg-orange-500", border: "border-orange-500/10", bg: "" },
+  medium: { dot: "bg-amber-500", border: "border-amber-500/10", bg: "" },
+  low: { dot: "bg-blue-500", border: "border-blue-500/10", bg: "" },
 };
+
+const serviceMapNodes = [
+  { id: "api-gateway", label: "API Gateway", health: "healthy", x: 50, y: 10, deps: ["auth-svc", "order-svc"] },
+  { id: "auth-svc", label: "Auth Service", health: "healthy", x: 20, y: 40, deps: ["user-db"] },
+  { id: "order-svc", label: "Order Service", health: "degraded", x: 80, y: 40, deps: ["payment-svc", "inventory-db"] },
+  { id: "payment-svc", label: "Payment Service", health: "healthy", x: 65, y: 70, deps: [] },
+  { id: "user-db", label: "User DB", health: "healthy", x: 10, y: 70, deps: [] },
+  { id: "inventory-db", label: "Inventory DB", health: "critical", x: 90, y: 70, deps: [] },
+];
+
+const sloData = [
+  { name: "API Availability", current: 99.94, target: 99.9, budget: 38, budgetUsed: 62 },
+  { name: "Latency P99", current: 98.7, target: 99.5, budget: 18, budgetUsed: 82 },
+  { name: "Error Rate", current: 99.98, target: 99.95, budget: 71, budgetUsed: 29 },
+  { name: "Throughput SLO", current: 99.2, target: 99.0, budget: 85, budgetUsed: 15 },
+];
+
+const recentChanges = [
+  { id: "DEP-4821", type: "deploy", service: "order-svc", desc: "v2.14.0 — fee calculation update", time: "14m ago", correlated: true },
+  { id: "CFG-2201", type: "config", service: "api-gateway", desc: "Rate limit threshold changed 1k→2k rps", time: "1h ago", correlated: false },
+  { id: "DEP-4820", type: "deploy", service: "payment-svc", desc: "v3.2.1 — Stripe API migration", time: "3h ago", correlated: false },
+];
+
+const correlatedIncidentId = "INC-8847";
+
+function ServiceMap() {
+  const healthColor = (h: string) => h === "healthy" ? "#22c55e" : h === "degraded" ? "#f59e0b" : "#ef4444";
+  return (
+    <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-display font-semibold text-white flex items-center gap-2">
+          <Map className="w-4 h-4 text-cyan-400" />
+          Unified Service Map
+        </h3>
+        <div className="flex items-center gap-3 text-[10px] text-slate-500">
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />Healthy</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />Degraded</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block" />Critical</span>
+        </div>
+      </div>
+      <div className="relative h-52 bg-white/[0.02] rounded-lg border border-white/5 overflow-hidden">
+        <svg className="w-full h-full" viewBox="0 0 100 90" preserveAspectRatio="none">
+          {serviceMapNodes.flatMap(node =>
+            node.deps.map(dep => {
+              const target = serviceMapNodes.find(n => n.id === dep);
+              if (!target) return null;
+              return (
+                <line key={`${node.id}-${dep}`}
+                  x1={node.x} y1={node.y + 3} x2={target.x} y2={target.y + 3}
+                  stroke="rgba(6,182,212,0.2)" strokeWidth="0.5" />
+              );
+            })
+          )}
+          {serviceMapNodes.map(node => {
+            const color = healthColor(node.health);
+            return (
+              <g key={node.id}>
+                <circle cx={node.x} cy={node.y + 3} r={node.health === "critical" ? "5" : "4"} fill={color} opacity="0.2">
+                  {node.health === "critical" && <animate attributeName="r" from="4" to="8" dur="1.5s" repeatCount="indefinite" />}
+                  {node.health === "critical" && <animate attributeName="opacity" from="0.2" to="0" dur="1.5s" repeatCount="indefinite" />}
+                </circle>
+                <circle cx={node.x} cy={node.y + 3} r="3" fill={color} opacity="0.9" />
+                <text x={node.x} y={node.y - 2} textAnchor="middle" fontSize="3.5" fill="rgba(255,255,255,0.6)" fontFamily="monospace">{node.label}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      <p className="text-[10px] text-slate-500 mt-2">Live health propagation across 47 services · Mock Data</p>
+    </div>
+  );
+}
+
+function SLOBurnRate() {
+  return (
+    <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-display font-semibold text-white flex items-center gap-2">
+          <Target className="w-4 h-4 text-amber-400" />
+          SLO Error Budget Tracking
+        </h3>
+        <span className="text-[10px] text-slate-500">30-day window</span>
+      </div>
+      <div className="space-y-3">
+        {sloData.map((slo) => (
+          <div key={slo.name}>
+            <div className="flex items-center justify-between mb-1 text-[11px]">
+              <span className="text-slate-300 font-medium">{slo.name}</span>
+              <div className="flex items-center gap-3">
+                <span className={cn("font-mono font-bold", slo.current >= slo.target ? "text-emerald-400" : "text-red-400")}>{slo.current.toFixed(2)}%</span>
+                <span className="text-slate-500">target {slo.target}%</span>
+              </div>
+            </div>
+            <div className="relative h-2 bg-white/5 rounded-full overflow-hidden">
+              <div className={cn("absolute inset-y-0 left-0 rounded-full transition-all", slo.budgetUsed > 80 ? "bg-red-400" : slo.budgetUsed > 60 ? "bg-amber-400" : "bg-emerald-400")} style={{ width: `${slo.budgetUsed}%` }} />
+            </div>
+            <div className="flex items-center justify-between mt-0.5 text-[10px] text-slate-600">
+              <span>Budget used: {slo.budgetUsed}%</span>
+              <span className={slo.budget < 30 ? "text-red-400" : "text-slate-500"}>{slo.budget}% remaining</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChangeIntelligence() {
+  return (
+    <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-display font-semibold text-white flex items-center gap-2">
+          <GitCommit className="w-4 h-4 text-violet-400" />
+          Change Intelligence
+        </h3>
+        <span className="text-[10px] text-red-400 font-mono">1 correlated incident</span>
+      </div>
+      <div className="space-y-2">
+        {recentChanges.map(c => (
+          <div key={c.id} className={cn("p-3 rounded-lg border", c.correlated ? "border-orange-500/30 bg-orange-500/5" : "border-white/5 bg-white/[0.02]")}>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className={cn("text-[9px] font-mono px-1.5 py-0.5 rounded border", c.type === "deploy" ? "text-blue-400 bg-blue-400/10 border-blue-400/20" : "text-violet-400 bg-violet-400/10 border-violet-400/20")}>{c.type}</span>
+                <span className="text-[10px] font-mono text-cyan-400">{c.service}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {c.correlated && <span className="text-[9px] text-orange-400 font-mono">→ {correlatedIncidentId}</span>}
+                <span className="text-[10px] text-slate-500">{c.time}</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-300">{c.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RunbookAutomation() {
+  const runbooks = [
+    { name: "High Memory Alert", trigger: "Memory > 85%", lastRun: "12m ago", status: "auto-resolved", runs: 14 },
+    { name: "Pod Restart Loop", trigger: "Restart > 3x/5min", lastRun: "1h ago", status: "escalated", runs: 3 },
+    { name: "DB Connection Pool", trigger: "Conn pool > 90%", lastRun: "3h ago", status: "auto-resolved", runs: 7 },
+  ];
+  return (
+    <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5">
+      <h3 className="text-sm font-display font-semibold text-white flex items-center gap-2 mb-3">
+        <BookOpen className="w-4 h-4 text-emerald-400" />
+        Runbook Automation
+      </h3>
+      <div className="space-y-2">
+        {runbooks.map(r => (
+          <div key={r.name} className="p-3 rounded-lg bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-[11px] font-semibold text-white">{r.name}</p>
+              <span className={cn("text-[9px] px-1.5 py-0.5 rounded font-mono", r.status === "auto-resolved" ? "text-emerald-400 bg-emerald-400/10" : "text-orange-400 bg-orange-400/10")}>
+                {r.status}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-500">
+              <span>Trigger: {r.trigger}</span>
+              <span>{r.runs} runs · last {r.lastRun}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { data: signals = [] } = useSignals();
@@ -102,7 +255,6 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-5">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-xl font-display font-bold text-white">Operations Command</h2>
@@ -118,7 +270,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Critical KPI row — 3 most important metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { title: "Critical Alerts", value: critCount, icon: ShieldAlert, color: "red", pulse: true, sub: `${data.openIncidentCount} open incidents` },
@@ -150,9 +301,20 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Hero section: Incident Timeline (right, larger) + Signal Volume (left) */}
+      {/* Service Map */}
+      <ServiceMap />
+
+      {/* SLO Burn Rate + Change Intelligence */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SLOBurnRate />
+        <ChangeIntelligence />
+      </div>
+
+      {/* Runbook Automation */}
+      <RunbookAutomation />
+
+      {/* Signal Volume + Incident Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Signal Volume Chart — 2/5 */}
         <div className="lg:col-span-2 bg-white/[0.03] rounded-xl p-4 border border-white/5">
           <div className="flex justify-between items-center mb-3">
             <div>
@@ -183,7 +345,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Incident Timeline Hero — 3/5 */}
         <div className="lg:col-span-3 bg-white/[0.03] rounded-xl p-4 border border-white/5">
           <div className="flex justify-between items-center mb-4">
             <div>
@@ -191,7 +352,7 @@ export default function Dashboard() {
                 <Activity className="w-4 h-4 text-red-400 animate-pulse" />
                 Incident Timeline
               </h3>
-              <p className="text-[10px] text-slate-500 mt-0.5">Active & recent incidents requiring attention</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Active & recent incidents</p>
             </div>
             <Link href="/incidents" className="text-[10px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
               View All <ArrowUpRight className="w-3 h-3" />
@@ -202,10 +363,7 @@ export default function Dashboard() {
             {data.recentIncidents.length > 0 ? data.recentIncidents.map((incident) => {
               const sev = severityConfig[incident.severity] || severityConfig.medium;
               return (
-                <div key={incident.id} className={cn(
-                  "p-3 rounded-lg border flex items-start gap-3 hover:bg-white/[0.04] transition-all relative overflow-hidden",
-                  sev.border, sev.bg
-                )}>
+                <div key={incident.id} className={cn("p-3 rounded-lg border flex items-start gap-3 hover:bg-white/[0.04] transition-all relative overflow-hidden", sev.border, sev.bg)}>
                   <span className={cn("w-2 h-2 rounded-full mt-1 shrink-0", sev.dot)} />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-white leading-tight truncate">{incident.title}</p>
@@ -271,7 +429,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Bottom metrics row — 3 key stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: "MTTR (SEV-1)", value: "23m", sub: "18% faster vs 30-day avg", color: "text-emerald-400", icon: Zap },

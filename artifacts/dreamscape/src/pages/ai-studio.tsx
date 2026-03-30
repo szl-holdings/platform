@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, TrendingUp, ImageIcon, FileText, Calendar, Loader2, Lightbulb, Palette, Globe, Zap, Sliders, Video, Music, Type, Wand2, Camera, Layers, MonitorPlay } from "lucide-react";
+import { Sparkles, TrendingUp, ImageIcon, FileText, Calendar, Loader2, Lightbulb, Palette, Globe, Zap, Sliders, Video, Music, Type, Wand2, Camera, Layers, MonitorPlay, Mic, RefreshCw, Check, Copy, MessageSquare, BarChart3 } from "lucide-react";
 import { Button, Card, Badge, Input } from "@/components/ui";
 import { ShimmerReveal, TypewriterText } from "@workspace/shared-ui/ai-components";
 
@@ -332,6 +332,10 @@ export function AIStudio() {
         </motion.div>
       </div>
 
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+        <BrandVoiceSection />
+      </motion.div>
+
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <Card className="p-6 border-border/50">
           <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
@@ -356,6 +360,152 @@ export function AIStudio() {
           </div>
         </Card>
       </motion.div>
+    </div>
+  );
+}
+
+// ─── Brand Voice Engine ────────────────────────────────────────────────────
+const brandVoiceProfiles = [
+  { name: "Bold & Direct", tone: "Assertive", formality: 3, personality: ["Bold", "Direct", "Energetic"], color: "from-orange-500 to-red-500" },
+  { name: "Warm & Friendly", tone: "Conversational", formality: 2, personality: ["Friendly", "Approachable"], color: "from-amber-400 to-yellow-500" },
+  { name: "Expert Authority", tone: "Authoritative", formality: 4, personality: ["Expert", "Precise"], color: "from-blue-500 to-indigo-500" },
+  { name: "Creative & Playful", tone: "Playful", formality: 1, personality: ["Fun", "Unexpected"], color: "from-violet-500 to-pink-500" },
+];
+
+const channelPreviews: Record<string, { icon: string; caption: string; maxChars: number }> = {
+  "Instagram": { icon: "📸", caption: "The future of storytelling is here 🎬 We're rewriting what's possible when ambitious creative teams meet cutting-edge AI. Ready to level up?\n\n#Creative #AI #Innovation", maxChars: 150 },
+  "LinkedIn": { icon: "💼", caption: "We've spent 18 months rethinking how high-performance creative teams collaborate. Today, we're sharing what we learned — and why the biggest gains came from the smallest process changes.", maxChars: 300 },
+  "Email": { icon: "📧", caption: "Subject: The creative tool your team didn't know they needed\n\nHi {first_name},\n\nThe biggest bottleneck in creative teams isn't talent — it's tooling. That's why we built Dreamscape.\n\nI'd love 15 minutes to walk you through it personally.", maxChars: 500 },
+  "Twitter/X": { icon: "𝕏", caption: "The creative teams crushing it in 2026 have one thing in common: they stopped waiting for the \"right tools.\"\n\nHere's what they're using instead 🧵", maxChars: 280 },
+};
+
+const performanceInsights = [
+  { asset: "Q1 Product Launch Video", views: 284000, ctr: 8.4, conversion: 3.2, topChannel: "LinkedIn", trend: "+42%" },
+  { asset: "Brand Story Carousel", views: 127000, ctr: 12.1, conversion: 4.8, topChannel: "Instagram", trend: "+28%" },
+  { asset: "Thought Leadership Series", views: 89000, ctr: 6.7, conversion: 2.1, topChannel: "LinkedIn", trend: "+15%" },
+];
+
+const abTests = [
+  { name: "Holiday Campaign CTA", variantA: '"Shop Now" → 2.4% CTR', variantB: '"Claim Your Offer" → 3.8% CTR', winner: "B", confidence: 97 },
+  { name: "Email Subject Line", variantA: '"Big news..." → 24% open rate', variantB: '"We\'ve been building..." → 31% open', winner: "B", confidence: 94 },
+];
+
+function BrandVoiceSection() {
+  const [selected, setSelected] = React.useState(0);
+  const [prompt, setPrompt] = React.useState("Write a campaign launch post");
+  const [generated, setGenerated] = React.useState(false);
+  const [generating, setGenerating] = React.useState(false);
+  const [channel, setChannel] = React.useState("LinkedIn");
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    setGenerated(false);
+    await new Promise(r => setTimeout(r, 1100));
+    setGenerating(false);
+    setGenerated(true);
+  };
+
+  const voice = brandVoiceProfiles[selected];
+  const preview = channelPreviews[channel];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="p-6 border-border/50">
+        <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
+          <Mic className="w-5 h-5 text-violet-400" /> Brand Voice Engine
+          <Badge variant="outline" className="ml-auto text-[10px] bg-violet-500/10 text-violet-400 border-violet-500/20">Jasper-style</Badge>
+        </h3>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {brandVoiceProfiles.map((v, i) => (
+            <button key={v.name} onClick={() => setSelected(i)} className={`relative p-3 rounded-xl border text-left transition-all ${selected === i ? "border-primary/50 bg-primary/5" : "border-border/50 hover:border-border"}`}>
+              <div className={`w-4 h-1.5 rounded-full bg-gradient-to-r ${v.color} mb-1.5`} />
+              <p className="text-xs font-semibold text-foreground">{v.name}</p>
+              <p className="text-[10px] text-muted-foreground">{v.tone} · Formality {v.formality}/5</p>
+              {selected === i && <Check className="w-3 h-3 text-primary absolute top-2.5 right-2.5" />}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1.5 mb-4 flex-wrap">
+          {voice.personality.map(p => <Badge key={p} variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20">{p}</Badge>)}
+        </div>
+        <div className="flex gap-2 mb-3">
+          <input className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary" placeholder="Campaign brief..." value={prompt} onChange={e => setPrompt(e.target.value)} onKeyDown={e => e.key === "Enter" && handleGenerate()} />
+          <Button onClick={handleGenerate} disabled={generating} size="sm">
+            {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+          </Button>
+        </div>
+        {generated && (
+          <div className="bg-muted/20 border border-border/50 rounded-xl p-4">
+            <p className="text-[11px] font-bold text-primary mb-2">{voice.name} voice applied:</p>
+            <p className="text-xs text-foreground leading-relaxed">Your {prompt} — reimagined with {voice.personality.join(" & ")} energy. The kind of content that makes people stop scrolling and take action. Because bold ideas deserve bold execution.</p>
+            <div className="flex items-center justify-end mt-2">
+              <button className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground"><Copy className="w-3 h-3" /></button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <Card className="p-6 border-border/50">
+        <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
+          <Globe className="w-5 h-5 text-cyan-400" /> Multi-Channel Preview
+        </h3>
+        <div className="flex gap-2 flex-wrap mb-4">
+          {Object.entries(channelPreviews).map(([ch, { icon }]) => (
+            <button key={ch} onClick={() => setChannel(ch)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${channel === ch ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" : "border-border/50 text-muted-foreground hover:text-foreground"}`}>
+              <span>{icon}</span>{ch}
+            </button>
+          ))}
+        </div>
+        <div className="bg-muted/20 border border-border/50 rounded-xl p-4">
+          <p className="text-xs text-foreground whitespace-pre-line leading-relaxed">{preview.caption}</p>
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/30 text-[10px] text-muted-foreground">
+            <span>{preview.caption.length}/{preview.maxChars} chars</span>
+            <span className={preview.caption.length > preview.maxChars ? "text-red-400" : "text-emerald-400"}>{preview.caption.length <= preview.maxChars ? "✓ Within limit" : "⚠ Over limit"}</span>
+          </div>
+        </div>
+        <p className="text-[10px] text-muted-foreground/50 mt-2 font-mono text-center">Mock Data · Format-adaptive preview</p>
+      </Card>
+
+      <Card className="p-6 border-border/50">
+        <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-emerald-400" /> Content Performance Analytics
+        </h3>
+        <div className="space-y-3">
+          {performanceInsights.map(p => (
+            <div key={p.asset} className="p-3 rounded-lg border border-border/50 hover:border-border transition-colors">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs font-semibold text-foreground">{p.asset}</p>
+                <span className="text-[10px] font-bold text-emerald-400">{p.trend}</span>
+              </div>
+              <div className="flex gap-4 text-[11px]">
+                <span className="text-muted-foreground">Views: <span className="text-foreground">{p.views.toLocaleString()}</span></span>
+                <span className="text-muted-foreground">CTR: <span className="text-cyan-400 font-bold">{p.ctr}%</span></span>
+                <span className="text-muted-foreground">Conv: <span className="text-violet-400 font-bold">{p.conversion}%</span></span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="p-6 border-border/50">
+        <h3 className="text-lg font-display font-bold text-foreground mb-4 flex items-center gap-2">
+          <Sliders className="w-5 h-5 text-amber-400" /> A/B Content Testing
+        </h3>
+        <div className="space-y-3">
+          {abTests.map(t => (
+            <div key={t.name} className="p-3 rounded-lg border border-border/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold">{t.name}</p>
+                <span className="text-[10px] text-emerald-400 font-mono">Variant {t.winner} won · {t.confidence}% conf.</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className={`p-2 rounded-lg border text-[10px] ${t.winner === "A" ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/30"}`}><span className="text-muted-foreground block mb-0.5">A</span>{t.variantA}</div>
+                <div className={`p-2 rounded-lg border text-[10px] ${t.winner === "B" ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/30"}`}><span className="text-muted-foreground block mb-0.5">B</span>{t.variantB}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }

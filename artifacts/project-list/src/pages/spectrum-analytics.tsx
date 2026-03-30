@@ -1,6 +1,6 @@
 import { useListProjects, Project } from "@workspace/api-client-react";
 import { useState } from "react";
-import { BarChart3, Filter, Grid3X3, TrendingUp, Eye, ArrowUp, ArrowDown, Search, Layers } from "lucide-react";
+import { BarChart3, Filter, Grid3X3, TrendingUp, Eye, ArrowUp, ArrowDown, Search, Layers, Zap, RefreshCw, AlertCircle, Clock } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 
 const healthDimensions = ["Performance", "Security", "Reliability", "Scalability", "Maintainability"];
@@ -152,6 +152,91 @@ export default function SpectrumAnalytics() {
             No projects match your filters
           </div>
         )}
+
+        <DORAMetricsSection />
+        <VelocityBurndownSection projects={projects} />
+      </div>
+    </div>
+  );
+}
+
+// ─── DORA Metrics (Vercel/GitHub-style) ───────────────────────────────────────
+const doraMetrics = [
+  { label: "Deployment Frequency", value: "4.2/day", rating: "Elite", icon: Zap, color: "text-emerald-400", detail: "Multiple deploys per day across active projects" },
+  { label: "Lead Time for Changes", value: "1.4 hrs", rating: "Elite", icon: Clock, color: "text-emerald-400", detail: "Commit to production in under 2 hours" },
+  { label: "Change Failure Rate", value: "3.8%", rating: "High", icon: AlertCircle, color: "text-amber-400", detail: "Target <5% for elite performers" },
+  { label: "Mean Time to Restore", value: "22 min", rating: "Elite", icon: RefreshCw, color: "text-emerald-400", detail: "Restoration when incidents occur" },
+];
+
+const ratingColors: Record<string, string> = {
+  Elite: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  High: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+  Medium: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+  Low: "text-red-400 bg-red-500/10 border-red-500/20",
+};
+
+function DORAMetricsSection() {
+  return (
+    <div className="rounded-xl border border-border bg-card p-6 mt-8">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-display font-bold flex items-center gap-2">
+          <Zap className="w-5 h-5 text-primary" /> DORA Metrics
+        </h2>
+        <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">Mock Data</span>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {doraMetrics.map(m => {
+          const Icon = m.icon;
+          return (
+            <div key={m.label} className="rounded-xl border border-border bg-muted/20 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <Icon className={`w-4 h-4 ${m.color}`} />
+                <span className={`text-[10px] px-1.5 py-0.5 rounded border font-medium ${ratingColors[m.rating]}`}>{m.rating}</span>
+              </div>
+              <p className="text-xl font-bold font-display mb-0.5">{m.value}</p>
+              <p className="text-xs font-medium text-foreground mb-1">{m.label}</p>
+              <p className="text-[10px] text-muted-foreground">{m.detail}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function VelocityBurndownSection({ projects }: { projects: Project[] }) {
+  const active = projects.filter(p => p.status === "active");
+  return (
+    <div className="rounded-xl border border-border bg-card p-6 mt-4">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-display font-bold flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-primary" /> Velocity & Sprint Burndown
+        </h2>
+        <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">Mock Data</span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {active.slice(0, 6).map((p, i) => {
+          const seed = (p.id || i + 1) * 17;
+          const velocity = 24 + (seed % 28);
+          const completed = 55 + (seed % 38);
+          const total = 80 + (seed % 40);
+          const pct = Math.round((completed / total) * 100);
+          return (
+            <div key={p.id || i} className="rounded-xl border border-border bg-muted/20 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold truncate">{p.name}</p>
+                <span className="text-[10px] font-mono text-emerald-400">{velocity} pts/sprint</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden mb-1.5">
+                <div className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full" style={{ width: `${pct}%` }} />
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                <span>{completed}/{total} story pts</span>
+                <span className={pct >= 70 ? "text-emerald-400" : "text-amber-400"}>{pct}% complete</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

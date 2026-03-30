@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Activity, Database, HardDrive, Cpu, Wifi, WifiOff, AlertTriangle, Server, Layers, Users, Zap, Clock, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Activity, Database, HardDrive, Cpu, Wifi, WifiOff, AlertTriangle, Server, Layers, Users, Zap, Clock, TrendingUp, ArrowUpRight, ArrowDownRight, DollarSign, GitBranch, Globe, Shield, BarChart3, Gauge } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 function AnimatedStatusDot({ status }: { status: string }) {
@@ -292,6 +292,107 @@ export default function DashboardPage() {
       </div>
 
       <IntegrationHealthSection connectors={data.connectors} />
+
+      <CostAnalyticsSection />
+      <DeploymentPerformanceSection />
+    </div>
+  );
+}
+
+// ─── Cost Analytics (Vercel/Datadog-style) ────────────────────────────────────
+const costBreakdown = [
+  { service: "API Server", cost: 142, prev: 178, change: -20, unit: "/mo" },
+  { service: "Database (PostgreSQL)", cost: 89, prev: 89, change: 0, unit: "/mo" },
+  { service: "Object Storage", cost: 24, prev: 19, change: +26, unit: "/mo" },
+  { service: "CDN / Edge", cost: 31, prev: 27, change: +15, unit: "/mo" },
+];
+
+const anomalyAlerts = [
+  { message: "Storage cost spike +26% vs last month", severity: "warning" },
+  { message: "API response p99 exceeded 800ms (3 occurrences today)", severity: "warning" },
+];
+
+const p50 = 48, p95 = 186, p99 = 412;
+
+function CostAnalyticsSection() {
+  const total = costBreakdown.reduce((s, c) => s + c.cost, 0);
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+          <DollarSign className="w-4 h-4 text-emerald-400" />
+        </div>
+        <span className="text-sm font-medium">Cost Analytics</span>
+        <span className="ml-auto text-xs text-muted-foreground font-mono">${total}/mo total</span>
+        <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono">Mock Data</span>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {costBreakdown.map(c => (
+          <div key={c.service} className="rounded-lg border border-border bg-muted/20 p-3">
+            <p className="text-[10px] text-muted-foreground mb-1 truncate">{c.service}</p>
+            <p className="text-lg font-bold">${c.cost}<span className="text-[10px] text-muted-foreground">{c.unit}</span></p>
+            <span className={`text-[10px] font-medium ${c.change < 0 ? "text-emerald-400" : c.change > 0 ? "text-amber-400" : "text-muted-foreground"}`}>
+              {c.change > 0 ? "+" : ""}{c.change}% vs last mo
+            </span>
+          </div>
+        ))}
+      </div>
+      {anomalyAlerts.map((a, i) => (
+        <div key={i} className="flex items-center gap-2 text-xs text-amber-400 bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
+          <Shield className="w-3.5 h-3.5 shrink-0" />
+          {a.message}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DeploymentPerformanceSection() {
+  const deployments = [
+    { env: "Production", deploys: 47, successRate: 97.9, avgBuildTime: "2m 14s", lastDeploy: "2h ago", p50, p95, p99 },
+    { env: "Staging", deploys: 128, successRate: 92.1, avgBuildTime: "1m 58s", lastDeploy: "35m ago", p50: 41, p95: 149, p99: 318 },
+  ];
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+          <GitBranch className="w-4 h-4 text-blue-400" />
+        </div>
+        <span className="text-sm font-medium">Deployment & Performance Benchmarks</span>
+        <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-mono ml-auto">Mock Data</span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {deployments.map(d => (
+          <div key={d.env} className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold">{d.env}</span>
+              <span className="text-[10px] text-muted-foreground">{d.deploys} deploys this month</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-background/50 rounded p-2">
+                <p className="text-[9px] text-muted-foreground">Success</p>
+                <p className="text-sm font-bold text-emerald-400">{d.successRate}%</p>
+              </div>
+              <div className="bg-background/50 rounded p-2">
+                <p className="text-[9px] text-muted-foreground">Avg Build</p>
+                <p className="text-sm font-bold">{d.avgBuildTime}</p>
+              </div>
+              <div className="bg-background/50 rounded p-2">
+                <p className="text-[9px] text-muted-foreground">Last Deploy</p>
+                <p className="text-sm font-bold">{d.lastDeploy}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground mb-1.5">API Latency Percentiles</p>
+              <div className="flex gap-3 text-xs font-mono">
+                <span className="text-emerald-400">p50: {d.p50}ms</span>
+                <span className="text-amber-400">p95: {d.p95}ms</span>
+                <span className="text-red-400">p99: {d.p99}ms</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

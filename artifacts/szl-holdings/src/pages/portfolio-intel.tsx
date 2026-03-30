@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Building2, TrendingUp, DollarSign, BarChart3, Globe, Shield, Zap, Brain } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Building2, TrendingUp, DollarSign, BarChart3, Globe, Shield, Zap, Brain, Target, Flame, GitMerge, Activity } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis } from "recharts";
+import { useState } from "react";
 
 const companies = [
   { name: "Firestorm", vertical: "Cybersecurity", stage: "Growth", arr: "$2.4M", growth: "+84%", employees: 28, valuation: "$18M", status: "Performing", icon: Shield, color: "#ef4444" },
@@ -150,7 +151,124 @@ export default function PortfolioIntel() {
             );
           })}
         </div>
+
+        <MASignalsPanel />
+        <IRRModelPanel />
       </div>
     </div>
+  );
+}
+
+// ─── M&A Signals ──────────────────────────────────────────────────────────────
+const maSignals = [
+  { company: "Lyte", signal: "Inbound Interest", description: "3 strategic acquirers in discussion; indicative offers $55–70M range", priority: "high", date: "Mar 2026" },
+  { company: "Terra", signal: "Strategic Merger", description: "Early conversations with PropTech consolidator; exploring $50M+ deal", priority: "medium", date: "Feb 2026" },
+  { company: "Firestorm", signal: "PE Buyout Interest", description: "CrowdStrike partner fund conducting preliminary due diligence", priority: "medium", date: "Mar 2026" },
+  { company: "INCA", signal: "Secondary Sale", description: "Early investor seeking liquidity; secondary at $18M pre-money implied", priority: "low", date: "Jan 2026" },
+];
+
+const priorityStyle: Record<string, string> = {
+  high: "text-red-400 bg-red-500/10 border-red-500/20",
+  medium: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+  low: "text-sky-400 bg-sky-500/10 border-sky-500/20",
+};
+
+function MASignalsPanel() {
+  return (
+    <Card className="bg-szl-surface border-szl-border">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm text-szl-text flex items-center gap-2">
+            <GitMerge className="w-4 h-4 text-szl-accent" /> M&A Pipeline Intelligence
+          </CardTitle>
+          <Badge variant="outline" className="text-[10px] bg-szl-accent/10 text-szl-accent border-szl-accent/20">Mock Data</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {maSignals.map(s => (
+            <div key={s.company} className="p-3 rounded-xl border border-szl-border bg-black/20 flex items-start gap-3">
+              <Badge variant="outline" className={`text-[9px] shrink-0 mt-0.5 ${priorityStyle[s.priority]}`}>{s.priority}</Badge>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-xs font-bold text-szl-text">{s.company}</span>
+                  <span className="text-[10px] text-szl-accent">{s.signal}</span>
+                  <span className="text-[10px] text-szl-text-secondary ml-auto shrink-0">{s.date}</span>
+                </div>
+                <p className="text-[11px] text-szl-text-secondary">{s.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── IRR Model ────────────────────────────────────────────────────────────────
+const irrData = [
+  { company: "Lyte", invested: 4.2, currentVal: 35, moic: 8.3, irr: 94, stage: "Growth" },
+  { company: "INCA", invested: 2.1, currentVal: 22, moic: 10.5, irr: 112, stage: "Series A" },
+  { company: "Terra", invested: 3.8, currentVal: 28, moic: 7.4, irr: 78, stage: "Growth" },
+  { company: "Firestorm", invested: 2.5, currentVal: 18, moic: 7.2, irr: 84, stage: "Growth" },
+  { company: "Vessels", invested: 1.8, currentVal: 14, moic: 7.8, irr: 61, stage: "Series A" },
+  { company: "Dreamscape", invested: 0.4, currentVal: 8, moic: 20.0, irr: 220, stage: "Seed+" },
+];
+
+function IRRModelPanel() {
+  const [scenario, setScenario] = useState<"base" | "bear" | "bull">("base");
+  const multipliers = { base: 1, bear: 0.65, bull: 1.45 };
+  const mult = multipliers[scenario];
+  const totalInvested = irrData.reduce((s, c) => s + c.invested, 0);
+  const totalValue = irrData.reduce((s, c) => s + c.currentVal * mult, 0);
+  const portfolioMOIC = (totalValue / totalInvested).toFixed(2);
+
+  return (
+    <Card className="bg-szl-surface border-szl-border">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm text-szl-text flex items-center gap-2">
+            <Activity className="w-4 h-4 text-szl-accent" /> IRR / MOIC Model
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            {(["bear", "base", "bull"] as const).map(s => (
+              <button key={s} onClick={() => setScenario(s)} className={`text-[10px] px-2 py-1 rounded-lg transition-colors capitalize ${scenario === s ? "bg-szl-accent text-white" : "bg-black/20 text-szl-text-secondary hover:text-szl-text"}`}>{s}</button>
+            ))}
+            <Badge variant="outline" className="text-[10px] bg-muted/20 text-szl-text-secondary border-szl-border ml-2">Mock Data</Badge>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-3 flex items-center gap-6 text-xs">
+          <span className="text-szl-text-secondary">Total Invested: <span className="text-szl-text font-bold">${totalInvested.toFixed(1)}M</span></span>
+          <span className="text-szl-text-secondary">Portfolio Value: <span className="text-emerald-400 font-bold">${totalValue.toFixed(1)}M</span></span>
+          <span className="text-szl-text-secondary">Portfolio MOIC: <span className="text-szl-accent font-bold">{portfolioMOIC}x</span></span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-szl-text-secondary border-b border-szl-border">
+                <th className="text-left py-2 pr-4">Company</th>
+                <th className="text-right py-2 pr-4">Invested</th>
+                <th className="text-right py-2 pr-4">Value ({scenario})</th>
+                <th className="text-right py-2 pr-4">MOIC</th>
+                <th className="text-right py-2">IRR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {irrData.map(c => (
+                <tr key={c.company} className="border-b border-szl-border/50 hover:bg-black/20 transition-colors">
+                  <td className="py-2 pr-4 font-medium text-szl-text">{c.company}</td>
+                  <td className="py-2 pr-4 text-right text-szl-text-secondary">${c.invested}M</td>
+                  <td className="py-2 pr-4 text-right font-bold text-emerald-400">${(c.currentVal * mult).toFixed(1)}M</td>
+                  <td className="py-2 pr-4 text-right text-szl-accent font-bold">{(c.moic * mult).toFixed(1)}x</td>
+                  <td className="py-2 text-right font-bold" style={{ color: c.irr > 100 ? "#10b981" : c.irr > 70 ? "#6c63ff" : "#f59e0b" }}>{Math.round(c.irr * mult)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

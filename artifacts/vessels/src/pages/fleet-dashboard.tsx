@@ -4,7 +4,7 @@ import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Link } from "wouter";
-import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle } from "lucide-react";
+import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 const statusColors: Record<string, string> = {
@@ -197,6 +197,183 @@ function seededValue(id: number, offset: number, range: number) {
   return (hash / 1000) * range;
 }
 
+const darkVesselEvents = [
+  { vessel: "ATLAS PIONEER", gap: "18h 42m", lastSeen: "Strait of Hormuz", confidence: 94, flagState: "Panama", risk: "critical" },
+  { vessel: "SILVER HORIZON", gap: "9h 15m", lastSeen: "Gulf of Oman", confidence: 78, flagState: "Marshall Is.", risk: "high" },
+  { vessel: "NORDIC STAR", gap: "6h 03m", lastSeen: "Red Sea", confidence: 62, flagState: "Liberia", risk: "medium" },
+];
+
+const sanctionsQueue = [
+  { vessel: "OCEAN FORTUNE", flag: "Iran", confidence: 97, status: "OFAC Match", matched: ["SDN List", "EU Sanctions"], risk: "critical" },
+  { vessel: "PACIFIC EAGLE", flag: "Russia", confidence: 84, status: "Partial Match", matched: ["EU Sanctions"], risk: "high" },
+  { vessel: "GOLD PIONEER", flag: "DPRK", confidence: 91, status: "OFAC Match", matched: ["SDN List", "OFAC DPRK"], risk: "critical" },
+];
+
+const cargoFlowRoutes = [
+  { route: "Persian Gulf → EU", commodity: "Crude Oil", volume: "4.2M bbl/day", trend: "+8%", color: "text-amber-400" },
+  { route: "US Gulf → Asia", commodity: "LNG", volume: "1.8M tons", trend: "+12%", color: "text-sky-400" },
+  { route: "Brazil → China", commodity: "Iron Ore", volume: "2.1M tons", trend: "-3%", color: "text-emerald-400" },
+  { route: "Black Sea → Med", commodity: "Grain", volume: "890K tons", trend: "+5%", color: "text-violet-400" },
+];
+
+const portCongestion = [
+  { port: "Singapore", waitTime: "2.4 days", vessels: 47, trend: "↑ Worsening", color: "text-red-400" },
+  { port: "Rotterdam", waitTime: "1.1 days", vessels: 23, trend: "→ Stable", color: "text-amber-400" },
+  { port: "Shanghai", waitTime: "3.8 days", vessels: 91, trend: "↑ Worsening", color: "text-red-400" },
+  { port: "Houston", waitTime: "0.8 days", vessels: 18, trend: "↓ Improving", color: "text-emerald-400" },
+];
+
+const behavioralRiskVessels = [
+  { name: "TITAN VOYAGER", score: 87, reasons: ["AIS manipulation", "Speed anomaly", "Sanctioned zone transit"], trend: "+14 pts" },
+  { name: "SEA MERCURY", score: 72, reasons: ["Identity switch", "Unusual anchoring pattern"], trend: "+8 pts" },
+  { name: "BLUE ODYSSEY", score: 58, reasons: ["STS transfer proximity", "Flag state change"], trend: "+22 pts" },
+];
+
+function BehavioralRiskPanel() {
+  return (
+    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+        <Shield className="w-3.5 h-3.5 text-red-400" />
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Behavioral AI Risk Scoring</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">Windward Model</Badge>
+      </div>
+      <div className="divide-y divide-sky-500/5">
+        {behavioralRiskVessels.map((v) => {
+          const risk = getRiskBadge(v.score);
+          return (
+            <div key={v.name} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-sky-100">{v.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-red-400">{v.trend}</span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full border text-[10px] ${risk.color}`}>{v.score}</span>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {v.reasons.map(r => (
+                  <span key={r} className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400/70 border border-sky-500/10">{r}</span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DarkVesselPanel() {
+  return (
+    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+        <EyeOff className="w-3.5 h-3.5 text-amber-400" />
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Dark Vessel Detection</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-amber-500/10 text-amber-400 border-amber-500/20">Satellite Gaps</Badge>
+      </div>
+      <div className="divide-y divide-sky-500/5">
+        {darkVesselEvents.map((v) => (
+          <div key={v.vessel} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-sky-100">{v.vessel}</span>
+              <Badge variant="outline" className={`text-[9px] ${v.risk === "critical" ? "bg-red-500/10 text-red-400 border-red-500/20" : v.risk === "high" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
+                {v.risk}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-4 text-[10px] text-sky-400/60">
+              <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Gap: <span className="text-amber-400 font-mono">{v.gap}</span></span>
+              <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{v.lastSeen}</span>
+              <span className="ml-auto font-mono text-sky-400/40">{v.flagState} · {v.confidence}% conf.</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SanctionsPanel() {
+  return (
+    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+        <AlertTriangle className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Sanctions Screening</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">5 AIS Sources</Badge>
+      </div>
+      <div className="divide-y divide-sky-500/5">
+        {sanctionsQueue.map((v) => (
+          <div key={v.vessel} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-sky-100">{v.vessel}</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${v.risk === "critical" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-orange-500/10 text-orange-400 border-orange-500/20"}`}>{v.status}</span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] text-sky-400/50 font-mono">Flag: {v.flag}</span>
+              <span className="text-[10px] font-mono text-sky-400/40">Conf: {v.confidence}%</span>
+              <div className="flex gap-1 ml-auto">
+                {v.matched.map(m => (
+                  <span key={m} className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">{m}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CargoFlowPanel() {
+  return (
+    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+        <Package className="w-3.5 h-3.5 text-sky-400" />
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Cargo Flow Intelligence</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20">Kpler Analytics</Badge>
+      </div>
+      <div className="p-3 grid grid-cols-2 gap-2">
+        {cargoFlowRoutes.map((r) => (
+          <div key={r.route} className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] font-mono text-sky-400/50 uppercase">{r.commodity}</span>
+              <span className={`text-[10px] font-bold ${r.trend.startsWith("+") ? "text-emerald-400" : "text-red-400"}`}>{r.trend}</span>
+            </div>
+            <p className="text-[11px] text-sky-200 font-medium mb-1">{r.route}</p>
+            <p className={`text-xs font-bold font-mono ${r.color}`}>{r.volume}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PortCongestionPanel() {
+  return (
+    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+        <Anchor className="w-3.5 h-3.5 text-sky-400" />
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Port Congestion Forecast</span>
+      </div>
+      <div className="divide-y divide-sky-500/5">
+        {portCongestion.map((p) => (
+          <div key={p.port} className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors">
+            <div className="w-6 h-6 rounded bg-sky-500/10 flex items-center justify-center shrink-0">
+              <Anchor className="w-3 h-3 text-sky-400/60" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-sky-100">{p.port}</p>
+              <p className="text-[10px] text-sky-400/50">{p.vessels} vessels waiting</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs font-bold font-mono text-sky-100">{p.waitTime}</p>
+              <p className={`text-[10px] font-mono ${p.color}`}>{p.trend}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void }) {
   const vid = vessel.id || 1;
   const riskScore = Math.floor(seededValue(vid, 0, 40) + (vessel.status === "maintenance" ? 50 : vessel.status === "anchored" ? 25 : 10));
@@ -246,6 +423,17 @@ function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void })
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
+          <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">Behavioral AI Score</h4>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-2 bg-sky-500/10 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-red-400" style={{ width: `${riskScore}%` }} />
+            </div>
+            <span className={`text-sm font-bold font-mono ${risk.color.split(" ")[0]}`}>{riskScore}/100</span>
+          </div>
+          <p className="text-[10px] text-sky-400/40">Pattern analysis from 90-day AIS history</p>
         </div>
 
         <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
@@ -301,106 +489,143 @@ function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void })
   );
 }
 
+type IntelTab = "behavioral" | "dark" | "sanctions" | "cargo" | "congestion";
+
 export default function FleetDashboard() {
   const { data: kpis } = useQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
   const { data: mockVessels = [] } = useQuery({ queryKey: ["mock-vessels"], queryFn: () => dataProvider.getVessels() });
   const { data: eventLogs = [] } = useQuery({ queryKey: ["dashboard-logs"], queryFn: () => dataProvider.getEventLogs() });
 
   const [selectedVessel, setSelectedVessel] = useState<any | null>(null);
+  const [intelTab, setIntelTab] = useState<IntelTab>("behavioral");
 
   const recentAlerts = eventLogs.filter((l: any) => l.severity === "Critical" || l.severity === "Warning").slice(0, 5);
 
-  return (
-    <div className="flex h-[calc(100vh-0px)] overflow-hidden">
-      <div className="flex-1 flex flex-col min-w-0">
-        {kpis && (
-          <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-sky-500/10 bg-[#0a1628]/80 backdrop-blur shrink-0 overflow-x-auto">
-            <div className="flex items-center gap-2 mr-3 shrink-0">
-              <Globe className="w-3.5 h-3.5 text-sky-400" />
-              <span className="font-display text-xs font-bold text-sky-50 uppercase tracking-wider">Fleet Command</span>
-              <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 ml-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE</span>
-            </div>
-            <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
-            {[
-              { label: "FLEET", value: kpis.totalVessels, color: "text-sky-200" },
-              { label: "SEA", value: kpis.atSea, color: "text-emerald-400" },
-              { label: "PORT", value: kpis.inPort, color: "text-sky-400" },
-              { label: "ANCHOR", value: kpis.anchored, color: "text-amber-400" },
-              { label: "TCE", value: `$${(kpis.averageTCE / 1000).toFixed(0)}k`, color: "text-emerald-400" },
-              { label: "UTIL", value: `${kpis.averageUtilization}%`, color: "text-sky-200" },
-              { label: "CO2", value: `${(kpis.totalCO2Today / 1000).toFixed(1)}k`, color: "text-amber-400" },
-              { label: "HEALTH", value: kpis.fleetHealthScore, color: kpis.fleetHealthScore >= 80 ? "text-emerald-400" : "text-amber-400" },
-            ].map((kpi, i) => (
-              <div key={kpi.label} className="flex items-center gap-1.5 px-2 py-0.5 shrink-0">
-                <span className="text-[9px] font-mono text-sky-500/50 uppercase">{kpi.label}</span>
-                <span className={`text-sm font-bold font-display ${kpi.color}`}>
-                  {typeof kpi.value === "number" ? <AnimatedCounter value={kpi.value} /> : kpi.value}
-                </span>
-                {i < 7 && <div className="h-3 w-px bg-sky-500/10 ml-1" />}
-              </div>
-            ))}
-            {kpis.criticalAlerts > 0 && (
-              <>
-                <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
-                <div className="flex items-center gap-1 px-2 py-0.5 shrink-0">
-                  <AlertTriangle className="w-3 h-3 text-red-400 animate-pulse" />
-                  <span className="text-[9px] font-mono text-red-400/80 uppercase">ALERTS</span>
-                  <span className="text-sm font-bold text-red-400"><AnimatedCounter value={kpis.criticalAlerts} /></span>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+  const intelTabs: { id: IntelTab; label: string; icon: any }[] = [
+    { id: "behavioral", label: "Behavioral Risk", icon: Shield },
+    { id: "dark", label: "Dark Vessels", icon: EyeOff },
+    { id: "sanctions", label: "Sanctions", icon: AlertTriangle },
+    { id: "cargo", label: "Cargo Flow", icon: Package },
+    { id: "congestion", label: "Port Congestion", icon: Anchor },
+  ];
 
-        <div className="flex-1 relative">
-          {mockVessels.length > 0 ? (
-            <FleetMap mockVessels={mockVessels} onVesselClick={setSelectedVessel} selectedVesselId={selectedVessel?.id} />
-          ) : (
-            <div className="flex items-center justify-center h-full bg-[#060e1a]">
-              <div className="text-center">
-                <Ship className="w-12 h-12 text-sky-500/20 mx-auto mb-3" />
-                <p className="text-sm text-sky-400/40">Loading fleet data...</p>
+  return (
+    <div className="flex flex-col h-[calc(100vh-0px)] overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0">
+          {kpis && (
+            <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-sky-500/10 bg-[#0a1628]/80 backdrop-blur shrink-0 overflow-x-auto">
+              <div className="flex items-center gap-2 mr-3 shrink-0">
+                <Globe className="w-3.5 h-3.5 text-sky-400" />
+                <span className="font-display text-xs font-bold text-sky-50 uppercase tracking-wider">Fleet Command</span>
+                <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 ml-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE</span>
               </div>
+              <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
+              {[
+                { label: "FLEET", value: kpis.totalVessels, color: "text-sky-200" },
+                { label: "SEA", value: kpis.atSea, color: "text-emerald-400" },
+                { label: "PORT", value: kpis.inPort, color: "text-sky-400" },
+                { label: "ANCHOR", value: kpis.anchored, color: "text-amber-400" },
+                { label: "TCE", value: `$${(kpis.averageTCE / 1000).toFixed(0)}k`, color: "text-emerald-400" },
+                { label: "UTIL", value: `${kpis.averageUtilization}%`, color: "text-sky-200" },
+                { label: "CO2", value: `${(kpis.totalCO2Today / 1000).toFixed(1)}k`, color: "text-amber-400" },
+                { label: "HEALTH", value: kpis.fleetHealthScore, color: kpis.fleetHealthScore >= 80 ? "text-emerald-400" : "text-amber-400" },
+              ].map((kpi, i) => (
+                <div key={kpi.label} className="flex items-center gap-1.5 px-2 py-0.5 shrink-0">
+                  <span className="text-[9px] font-mono text-sky-500/50 uppercase">{kpi.label}</span>
+                  <span className={`text-sm font-bold font-display ${kpi.color}`}>
+                    {typeof kpi.value === "number" ? <AnimatedCounter value={kpi.value} /> : kpi.value}
+                  </span>
+                  {i < 7 && <div className="h-3 w-px bg-sky-500/10 ml-1" />}
+                </div>
+              ))}
+              {kpis.criticalAlerts > 0 && (
+                <>
+                  <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
+                  <div className="flex items-center gap-1 px-2 py-0.5 shrink-0">
+                    <AlertTriangle className="w-3 h-3 text-red-400 animate-pulse" />
+                    <span className="text-[9px] font-mono text-red-400/80 uppercase">ALERTS</span>
+                    <span className="text-sm font-bold text-red-400"><AnimatedCounter value={kpis.criticalAlerts} /></span>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
-          {recentAlerts.length > 0 && (
-            <div className="absolute top-3 left-3 w-72 bg-[#0a1628]/90 backdrop-blur-xl rounded-lg border border-sky-500/10 overflow-hidden">
-              <div className="px-3 py-2 border-b border-sky-500/10 flex items-center justify-between">
-                <span className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider flex items-center gap-1.5">
-                  <AlertTriangle className="w-3 h-3 text-amber-400" />Live Alerts
-                </span>
-                <Link href="/alerts">
-                  <span className="text-[10px] text-sky-400 hover:text-sky-300 cursor-pointer">View all</span>
-                </Link>
+          <div className="flex-1 relative overflow-hidden">
+            {mockVessels.length > 0 ? (
+              <FleetMap mockVessels={mockVessels} onVesselClick={setSelectedVessel} selectedVesselId={selectedVessel?.id} />
+            ) : (
+              <div className="flex items-center justify-center h-full bg-[#060e1a]">
+                <div className="text-center">
+                  <Ship className="w-12 h-12 text-sky-500/20 mx-auto mb-3" />
+                  <p className="text-sm text-sky-400/40">Loading fleet data...</p>
+                </div>
               </div>
-              <div className="max-h-48 overflow-y-auto">
-                {recentAlerts.map((alert: any) => (
-                  <div key={alert.id} className="px-3 py-2 border-b border-sky-500/5 last:border-0 hover:bg-sky-500/5 transition-colors">
-                    <div className="flex items-start gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${alert.severity === "Critical" ? "bg-red-400 animate-pulse" : "bg-amber-400"}`} />
-                      <div className="min-w-0">
-                        <p className="text-[11px] text-sky-100 leading-tight truncate">{alert.message}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[9px] text-sky-400/40">{alert.vesselName}</span>
-                          <span className="text-[9px] text-sky-400/30 flex items-center gap-0.5">
-                            <Clock className="w-2 h-2" />
-                            {new Date(alert.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </span>
+            )}
+
+            {recentAlerts.length > 0 && (
+              <div className="absolute top-3 left-3 w-72 bg-[#0a1628]/90 backdrop-blur-xl rounded-lg border border-sky-500/10 overflow-hidden">
+                <div className="px-3 py-2 border-b border-sky-500/10 flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider flex items-center gap-1.5">
+                    <AlertTriangle className="w-3 h-3 text-amber-400" />Live Alerts
+                  </span>
+                  <Link href="/alerts">
+                    <span className="text-[10px] text-sky-400 hover:text-sky-300 cursor-pointer">View all</span>
+                  </Link>
+                </div>
+                <div className="max-h-48 overflow-y-auto">
+                  {recentAlerts.map((alert: any) => (
+                    <div key={alert.id} className="px-3 py-2 border-b border-sky-500/5 last:border-0 hover:bg-sky-500/5 transition-colors">
+                      <div className="flex items-start gap-2">
+                        <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${alert.severity === "Critical" ? "bg-red-400 animate-pulse" : "bg-amber-400"}`} />
+                        <div className="min-w-0">
+                          <p className="text-[11px] text-sky-100 leading-tight truncate">{alert.message}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[9px] text-sky-400/40">{alert.vesselName}</span>
+                            <span className="text-[9px] text-sky-400/30 flex items-center gap-0.5">
+                              <Clock className="w-2 h-2" />
+                              {new Date(alert.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+
+        {selectedVessel && (
+          <VesselDrawer vessel={selectedVessel} onClose={() => setSelectedVessel(null)} />
+        )}
       </div>
 
-      {selectedVessel && (
-        <VesselDrawer vessel={selectedVessel} onClose={() => setSelectedVessel(null)} />
-      )}
+      {/* Intelligence Panel — full width bottom strip */}
+      <div className="shrink-0 bg-[#060e1a] border-t border-sky-500/10" style={{ height: 260 }}>
+        <div className="flex items-center gap-1 px-4 pt-2 pb-0 border-b border-sky-500/10">
+          {intelTabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setIntelTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono rounded-t transition-colors ${intelTab === tab.id ? "bg-sky-500/10 text-sky-300 border-b-2 border-sky-400" : "text-sky-400/50 hover:text-sky-400/80"}`}
+            >
+              <tab.icon className="w-3 h-3" />
+              {tab.label}
+            </button>
+          ))}
+          <span className="ml-auto text-[9px] font-mono text-sky-400/30 pr-2">Maritime Intelligence · Mock Data</span>
+        </div>
+        <div className="p-3 overflow-auto h-[210px]">
+          {intelTab === "behavioral" && <BehavioralRiskPanel />}
+          {intelTab === "dark" && <DarkVesselPanel />}
+          {intelTab === "sanctions" && <SanctionsPanel />}
+          {intelTab === "cargo" && <CargoFlowPanel />}
+          {intelTab === "congestion" && <PortCongestionPanel />}
+        </div>
+      </div>
     </div>
   );
 }

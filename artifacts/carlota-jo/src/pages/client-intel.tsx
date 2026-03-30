@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Users, TrendingUp, AlertCircle, CheckCircle, Star, MessageSquare, BarChart3 } from "lucide-react";
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
+import { Users, TrendingUp, AlertCircle, CheckCircle, Star, MessageSquare, BarChart3, Search, Globe, Flame, Target, Award } from "lucide-react";
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar } from "recharts";
 
 const clients = [
   {
@@ -174,7 +174,136 @@ export default function ClientIntel() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        <SocialListeningPanel />
+        <CompetitiveBenchmarkPanel />
+        <CampaignROIPanel />
       </div>
     </div>
+  );
+}
+
+// ─── Social Listening (Brandwatch-style) ──────────────────────────────────────
+const mentions = [
+  { brand: "Luminary Cosmetics", platform: "Instagram", sentiment: "positive", volume: 2847, change: "+18%", topTopic: "Summer Campaign", timestamp: "Live" },
+  { brand: "Oasis Wellness", platform: "Twitter/X", sentiment: "positive", volume: 1204, change: "+31%", topTopic: "Mindfulness Series", timestamp: "Live" },
+  { brand: "Kova Spirits", platform: "Reddit", sentiment: "negative", volume: 389, change: "-8%", topTopic: "Packaging Complaints", timestamp: "Live" },
+  { brand: "Velas Agency", platform: "LinkedIn", sentiment: "neutral", volume: 612, change: "+4%", topTopic: "Team Highlights", timestamp: "Live" },
+];
+
+const sentimentColor: Record<string, string> = {
+  positive: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  neutral: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+  negative: "text-red-400 bg-red-500/10 border-red-500/20",
+};
+
+function SocialListeningPanel() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2"><Globe className="w-4 h-4 text-primary" /> Social Listening Dashboard</CardTitle>
+          <Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20">Brandwatch-style · Mock Data</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-3">
+          {mentions.map(m => (
+            <div key={m.brand} className="p-3 rounded-xl border border-border bg-muted/20">
+              <div className="flex items-center justify-between mb-1.5">
+                <div>
+                  <p className="text-xs font-semibold text-foreground">{m.brand}</p>
+                  <p className="text-[10px] text-muted-foreground">{m.platform} · {m.timestamp}</p>
+                </div>
+                <Badge variant="outline" className={`text-[9px] ${sentimentColor[m.sentiment]}`}>{m.sentiment}</Badge>
+              </div>
+              <div className="flex items-center gap-3 text-[11px]">
+                <span className="text-muted-foreground">Mentions: <span className="text-foreground font-bold">{m.volume.toLocaleString()}</span></span>
+                <span className={m.change.startsWith("+") ? "text-emerald-400" : "text-red-400"}>{m.change}</span>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">Top topic: <span className="text-foreground">{m.topTopic}</span></p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Competitive Benchmarking ─────────────────────────────────────────────────
+const benchmarkData = [
+  { metric: "Avg NPS", carlotaJo: 85, industry: 61, topQuartile: 80 },
+  { metric: "Engagement Rate", carlotaJo: 76, industry: 52, topQuartile: 70 },
+  { metric: "Churn Rate", carlotaJo: 12, industry: 28, topQuartile: 15 },
+  { metric: "Campaign ROI", carlotaJo: 340, industry: 180, topQuartile: 260 },
+];
+
+function CompetitiveBenchmarkPanel() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2"><Target className="w-4 h-4 text-primary" /> Competitive Benchmarking</CardTitle>
+          <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Mock Industry Data</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {benchmarkData.map(b => (
+            <div key={b.metric}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-medium text-foreground">{b.metric}</span>
+                <div className="flex items-center gap-3 text-[10px]">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary inline-block" />Carlota Jo: <strong className="text-primary">{b.carlotaJo}</strong></span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-muted-foreground inline-block" />Industry: {b.industry}</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />Top 25%: {b.topQuartile}</span>
+                </div>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden relative">
+                <div className="h-full rounded-full bg-muted-foreground/30" style={{ width: `${Math.min(b.industry / (b.carlotaJo > b.industry ? b.carlotaJo * 1.2 : b.industry * 1.2) * 100, 100)}%` }} />
+                <div className="absolute top-0 h-full rounded-full bg-amber-400/50" style={{ width: `${Math.min(b.topQuartile / (b.carlotaJo > b.topQuartile ? b.carlotaJo * 1.2 : b.topQuartile * 1.2) * 100, 100)}%` }} />
+                <div className="absolute top-0 h-full rounded-full bg-primary" style={{ width: `${Math.min(100, 83)}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Campaign ROI Attribution ─────────────────────────────────────────────────
+const roiData = [
+  { channel: "Paid Social", spend: 12000, revenue: 51600, roi: 330 },
+  { channel: "Email", spend: 3400, revenue: 21420, roi: 530 },
+  { channel: "Influencer", spend: 8000, revenue: 28800, roi: 260 },
+  { channel: "Organic Search", spend: 2200, revenue: 13200, roi: 500 },
+];
+
+function CampaignROIPanel() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2"><Award className="w-4 h-4 text-primary" /> Campaign ROI Attribution</CardTitle>
+          <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Mock Data</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {roiData.map(r => (
+            <div key={r.channel} className="p-3 rounded-xl border border-border bg-muted/20 text-center">
+              <p className="text-[10px] text-muted-foreground mb-1">{r.channel}</p>
+              <p className="text-lg font-bold text-emerald-400">{r.roi}%</p>
+              <p className="text-[10px] text-muted-foreground">ROI</p>
+              <div className="mt-2 pt-2 border-t border-border/50 flex justify-between text-[9px] text-muted-foreground">
+                <span>Spend ${(r.spend / 1000).toFixed(1)}K</span>
+                <span>Rev ${(r.revenue / 1000).toFixed(1)}K</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
