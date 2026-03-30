@@ -1,12 +1,14 @@
 const ecosystemNodes = [
-  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "firestorm", "inca", "lyte", "dreamscape", "terra", "msp"] },
-  { id: "vessels", name: "Vessels Maritime", type: "subsidiary", x: 20, y: 25, connections: ["szl", "lyte"] },
-  { id: "firestorm", name: "Firestorm Security", type: "subsidiary", x: 80, y: 20, connections: ["szl", "lyte"] },
-  { id: "inca", name: "INCA AI Research", type: "subsidiary", x: 15, y: 70, connections: ["szl", "dreamscape"] },
-  { id: "lyte", name: "Lyte Command", type: "subsidiary", x: 85, y: 65, connections: ["szl", "firestorm", "vessels"] },
-  { id: "dreamscape", name: "Dreamscape Creative", type: "subsidiary", x: 35, y: 85, connections: ["szl", "inca"] },
-  { id: "terra", name: "Terra Real Estate", type: "subsidiary", x: 65, y: 85, connections: ["szl"] },
-  { id: "msp", name: "Evolve MSP", type: "subsidiary", x: 50, y: 15, connections: ["szl", "lyte", "firestorm"] },
+  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "firestorm", "inca", "lyte", "nimbus", "beacon", "rosie", "aegis", "alloyscpe"] },
+  { id: "vessels", name: "Vessels · OBSERVE", type: "subsidiary", x: 20, y: 20, connections: ["szl", "lyte", "rosie"] },
+  { id: "rosie", name: "Rosie · OBSERVE", type: "subsidiary", x: 80, y: 15, connections: ["szl", "lyte", "firestorm"] },
+  { id: "beacon", name: "Beacon · OBSERVE", type: "subsidiary", x: 15, y: 55, connections: ["szl", "aegis"] },
+  { id: "inca", name: "INCA · UNDERSTAND", type: "subsidiary", x: 15, y: 80, connections: ["szl", "nimbus"] },
+  { id: "nimbus", name: "Nimbus · UNDERSTAND", type: "subsidiary", x: 50, y: 88, connections: ["szl", "inca", "aegis"] },
+  { id: "aegis", name: "Aegis · DECIDE", type: "subsidiary", x: 82, y: 55, connections: ["szl", "alloyscpe", "nimbus"] },
+  { id: "lyte", name: "Lyte · EXECUTE", type: "subsidiary", x: 85, y: 78, connections: ["szl", "firestorm", "vessels"] },
+  { id: "firestorm", name: "Firestorm · EXECUTE", type: "subsidiary", x: 65, y: 18, connections: ["szl", "lyte"] },
+  { id: "alloyscpe", name: "AlloyScape · EXECUTE", type: "subsidiary", x: 48, y: 20, connections: ["szl", "aegis"] },
 ];
 
 export function NexusMap() {

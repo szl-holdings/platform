@@ -1,0 +1,32 @@
+kind = "web"
+  previewPath = "/aegis/"
+  title = "Aegis — Control Plane & Risk Register"
+  version = "1.0.0"
+  id = "artifacts/readiness-report"
+  router = "path"
+
+  [[integratedSkills]]
+  name = "react-vite"
+  version = "1.0.0"
+
+  [[services]]
+  name = "web"
+  paths = [ "/aegis/" ]
+  localPort = 24800
+
+  [services.development]
+  run = "pnpm --filter @workspace/readiness-report run dev"
+
+  [services.production]
+  build = [ "pnpm", "--filter", "@workspace/readiness-report", "run", "build" ]
+  publicDir = "artifacts/readiness-report/dist/public"
+  serve = "static"
+
+  [[services.production.rewrites]]
+  from = "/*"
+  to = "/index.html"
+
+  [services.env]
+  PORT = "24800"
+  BASE_PATH = "/aegis/"
+  

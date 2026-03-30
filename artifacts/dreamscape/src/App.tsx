@@ -91,9 +91,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={dreamscapeShortcuts} appName="Dreamscape" accentColor="#7c3aed">
+        <PowerUserProvider shortcuts={dreamscapeShortcuts} appName="Nimbus" accentColor="#ec4899">
           <div className="flex flex-col h-screen">
-            <EcosystemNav currentAppId="dreamscape" currentAppName="Dreamscape Creative Engine" accentColor="#7c3aed" />
+            <EcosystemNav currentAppId="nimbus" currentAppName="Nimbus — Predictive Intelligence" accentColor="#ec4899" />
             <div className="flex-1 overflow-hidden">
               <Layout>
                 <Router />
@@ -104,22 +104,22 @@ function App() {
             open={cmdOpen}
             onClose={() => setCmdOpen(false)}
             commands={dreamscapeCommands}
-            appName="Dreamscape"
-            accentColor="#7c3aed"
+            appName="Nimbus"
+            accentColor="#ec4899"
           />
           <IncaAgentIndicator 
-            agentName="Creative Director" 
+            agentName="Prediction Engine" 
             systemType="inti" 
-            currentTask="Generating brand-aligned visual concepts for active campaigns" 
+            currentTask="Modeling scenario confidence scores and forecasting decision outcomes" 
             confidence={0.93} 
           />
         </PowerUserProvider>
         <WelcomeOverlay
-          appId="dreamscape"
-          appName="Dreamscape"
-          subtitle="Creative Engine"
-          description="Studio-grade content operations — campaign workspace, asset management, content calendar, and AI creative tools built for serious creative teams."
-          accentColor="#7c3aed"
+          appId="nimbus"
+          appName="Nimbus"
+          subtitle="Predictive Intelligence — UNDERSTAND Layer"
+          description="Prediction, scenario modeling, and confidence scoring platform — powering the SZL UNDERSTAND layer with probabilistic outputs, assumption tracking, and model-backed decision intelligence."
+          accentColor="#ec4899"
           icon={Palette}
           features={[
             { icon: Sparkles, title: "AI Studio", description: "Generate copy, visuals, and scripts with AI assistance" },

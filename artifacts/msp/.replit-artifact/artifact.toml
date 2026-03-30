@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/msp/"
-title = "MSP Command Center"
+title = "Rosie — Threat & Incident Command"
 version = "1.0.0"
 id = "artifacts/msp"
 router = "path"

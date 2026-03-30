@@ -373,8 +373,8 @@ router.get("/stephen/ecosystem-status", async (_req, res) => {
     { name: "Vessels", slug: "vessels", status: "operational", description: "Maritime fleet & cargo intelligence", lastChecked: now },
     { name: "Firestorm", slug: "firestorm", status: "operational", description: "Cybersecurity simulation engine", lastChecked: now },
     { name: "Lyte", slug: "lyte", status: "operational", description: "Enterprise commerce platform", lastChecked: now },
-    { name: "Dreamscape", slug: "dreamscape", status: "operational", description: "Creative production suite", lastChecked: now },
-    { name: "Readiness Report", slug: "readiness", status: "operational", description: "Compliance & assessment engine", lastChecked: now },
+    { name: "Nimbus", slug: "dreamscape", status: "operational", description: "Predictive intelligence · UNDERSTAND", lastChecked: now },
+    { name: "Aegis", slug: "aegis", status: "operational", description: "Control plane & risk register · DECIDE", lastChecked: now },
     { name: "INCA", slug: "inca", status: "operational", description: "AI research command center", lastChecked: now },
   ];
   const connectors = [

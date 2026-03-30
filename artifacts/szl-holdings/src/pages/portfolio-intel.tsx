@@ -8,10 +8,10 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const companies = [
   { name: "Firestorm", vertical: "Cybersecurity", stage: "Growth", arr: "$2.4M", growth: "+84%", employees: 28, valuation: "$18M", status: "Performing", icon: Shield, color: "#ef4444" },
   { name: "INCA", vertical: "AI / ML Research", stage: "Series A", arr: "$1.8M", growth: "+112%", employees: 19, valuation: "$22M", status: "Outperforming", icon: Brain, color: "#8b5cf6" },
-  { name: "Terra", vertical: "PropTech", stage: "Growth", arr: "$3.1M", growth: "+61%", employees: 34, valuation: "$28M", status: "Performing", icon: Building2, color: "#10b981" },
+  { name: "Beacon", vertical: "Business Telemetry · OBSERVE", stage: "Growth", arr: "$3.1M", growth: "+61%", employees: 34, valuation: "$28M", status: "Performing", icon: Building2, color: "#0ea5e9" },
   { name: "Vessels", vertical: "Maritime Tech", stage: "Series A", arr: "$1.2M", growth: "+48%", employees: 22, valuation: "$14M", status: "Performing", icon: Globe, color: "#3b82f6" },
   { name: "Lyte", vertical: "AIOps", stage: "Growth", arr: "$4.2M", growth: "+93%", employees: 41, valuation: "$35M", status: "Outperforming", icon: Zap, color: "#f59e0b" },
-  { name: "Dreamscape", vertical: "Creative AI", stage: "Seed+", arr: "$680K", growth: "+220%", employees: 11, valuation: "$8M", status: "Scaling", icon: Brain, color: "#ec4899" },
+  { name: "Nimbus", vertical: "Predictive Intel · UNDERSTAND", stage: "Seed+", arr: "$680K", growth: "+220%", employees: 11, valuation: "$8M", status: "Scaling", icon: Brain, color: "#ec4899" },
 ];
 
 const portfolioValue = [
@@ -20,12 +20,12 @@ const portfolioValue = [
 ];
 
 const sectorAllocation = [
-  { name: "AIOps", value: 28, color: "#f59e0b" },
-  { name: "PropTech", value: 22, color: "#10b981" },
+  { name: "AIOps", value: 25, color: "#f59e0b" },
+  { name: "Business Intel", value: 20, color: "#0ea5e9" },
   { name: "Cybersecurity", value: 18, color: "#ef4444" },
   { name: "AI Research", value: 17, color: "#8b5cf6" },
   { name: "Maritime", value: 10, color: "#3b82f6" },
-  { name: "Creative AI", value: 5, color: "#ec4899" },
+  { name: "Prediction", value: 10, color: "#ec4899" },
 ];
 
 const statusStyle: Record<string, string> = {
@@ -168,7 +168,7 @@ export default function PortfolioIntel() {
 // ─── M&A Signals ──────────────────────────────────────────────────────────────
 const maSignals = [
   { company: "Lyte", signal: "Inbound Interest", description: "3 strategic acquirers in discussion; indicative offers $55–70M range", priority: "high", date: "Mar 2026" },
-  { company: "Terra", signal: "Strategic Merger", description: "Early conversations with PropTech consolidator; exploring $50M+ deal", priority: "medium", date: "Feb 2026" },
+  { company: "Beacon", signal: "Strategic Merger", description: "Early conversations with enterprise analytics consolidator; exploring $50M+ deal", priority: "medium", date: "Feb 2026" },
   { company: "Firestorm", signal: "PE Buyout Interest", description: "CrowdStrike partner fund conducting preliminary due diligence", priority: "medium", date: "Mar 2026" },
   { company: "INCA", signal: "Secondary Sale", description: "Early investor seeking liquidity; secondary at $18M pre-money implied", priority: "low", date: "Jan 2026" },
 ];
@@ -215,10 +215,10 @@ function MASignalsPanel() {
 const irrData = [
   { company: "Lyte", invested: 4.2, currentVal: 35, moic: 8.3, irr: 94, stage: "Growth" },
   { company: "INCA", invested: 2.1, currentVal: 22, moic: 10.5, irr: 112, stage: "Series A" },
-  { company: "Terra", invested: 3.8, currentVal: 28, moic: 7.4, irr: 78, stage: "Growth" },
+  { company: "Beacon", invested: 3.8, currentVal: 28, moic: 7.4, irr: 78, stage: "Growth" },
   { company: "Firestorm", invested: 2.5, currentVal: 18, moic: 7.2, irr: 84, stage: "Growth" },
   { company: "Vessels", invested: 1.8, currentVal: 14, moic: 7.8, irr: 61, stage: "Series A" },
-  { company: "Dreamscape", invested: 0.4, currentVal: 8, moic: 20.0, irr: 220, stage: "Seed+" },
+  { company: "Nimbus", invested: 0.4, currentVal: 8, moic: 20.0, irr: 220, stage: "Seed+" },
 ];
 
 function IRRModelPanel() {

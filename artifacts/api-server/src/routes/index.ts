@@ -68,6 +68,7 @@ router.use(auditRouter);
 router.use(billingRouter);
 router.use(featureFlagsRouter);
 router.use(filesRouter);
+
 router.use(stephenRouter);
 router.use(vesselsRouter);
 router.use(firestormRouter);
@@ -93,12 +94,32 @@ router.use("/domain-agents", readLimiter);
 router.use(domainAgentsRouter);
 router.use("/gov", readLimiter);
 router.use(govDataRouter);
+
 router.use("/terra", readLimiter);
 router.use(terraRouter);
+router.use("/beacon", readLimiter);
+router.use(terraRouter);
+
 router.use("/msp", readLimiter);
 router.use(mspLiveRouter);
+router.use("/rosie", readLimiter);
+router.use(mspLiveRouter);
+
 router.use("/terra", readLimiter);
 router.use(terraLiveRouter);
+router.use("/beacon", readLimiter);
+router.use(terraLiveRouter);
+
+router.use("/readiness", readLimiter);
+router.use(readinessRouter);
+router.use("/aegis", readLimiter);
+router.use(readinessRouter);
+
+router.use("/dreamscape", readLimiter);
+router.use(dreamscapeRouter);
+router.use("/nimbus", readLimiter);
+router.use(dreamscapeRouter);
+
 router.use(agentTrainingRouter);
 router.use("/comments", writeLimiter);
 router.use(commentsRouter);

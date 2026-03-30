@@ -6,16 +6,16 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 const demos = [
   { id: "firestorm", name: "Firestorm", subtitle: "Security Operations", icon: Shield, color: "from-red-500/20 to-orange-500/20", borderColor: "border-red-500/20", path: "/firestorm/", highlights: ["Live threat map with animated indicators", "SOC dashboard with real-time metrics", "MITRE ATT&CK framework matrix", "Incident timeline and response tracking"] },
   { id: "inca", name: "INCA", subtitle: "AI Research Command", icon: Brain, color: "from-violet-500/20 to-purple-500/20", borderColor: "border-violet-500/20", path: "/inca/", highlights: ["Predictions dashboard with confidence tracking", "Model registry with versioning", "Ensemble studio for model combinations", "Anomaly timeline visualization"] },
-  { id: "terra", name: "Terra", subtitle: "Real Estate Intelligence", icon: Building, color: "from-emerald-500/20 to-green-500/20", borderColor: "border-emerald-500/20", path: "/terra/", highlights: ["Property intelligence with AI valuations", "Interactive market trend analysis", "Portfolio management dashboard", "Neighborhood scoring and analytics"] },
+  { id: "terra", name: "Beacon", subtitle: "Business Telemetry · OBSERVE", icon: Building, color: "from-sky-500/20 to-blue-500/20", borderColor: "border-sky-500/20", path: "/terra/", highlights: ["KPI drift detection and telemetry", "Market anomaly signals", "Portfolio observability dashboard", "Business health scoring and analytics"] },
   { id: "vessels", name: "Vessels", subtitle: "Maritime Intelligence", icon: Ship, color: "from-cyan-500/20 to-blue-500/20", borderColor: "border-cyan-500/20", path: "/vessels/", highlights: ["Real-time vessel tracking", "Port performance analytics", "Route optimization engine", "Maritime risk assessment"] },
   { id: "lyte", name: "Lyte", subtitle: "Command Center", icon: Zap, color: "from-blue-500/20 to-indigo-500/20", borderColor: "border-blue-500/20", path: "/lyte-command-center/", highlights: ["Signal feed with pattern detection", "Incident management workflow", "Operational playbooks library", "AI-powered operations center"] },
-  { id: "dreamscape", name: "Dreamscape", subtitle: "Creative Engine", icon: Palette, color: "from-pink-500/20 to-rose-500/20", borderColor: "border-pink-500/20", path: "/dreamscape/", highlights: ["Campaign workspace with drag-and-drop", "AI content generation studio", "Social media content calendar", "Asset management library"] },
+  { id: "dreamscape", name: "Nimbus", subtitle: "Predictive Intelligence · UNDERSTAND", icon: Palette, color: "from-pink-500/20 to-rose-500/20", borderColor: "border-pink-500/20", path: "/dreamscape/", highlights: ["Scenario modeling and what-if analysis", "Confidence scoring and uncertainty tracking", "Prediction studio with assumption management", "Cross-ecosystem signal synthesis"] },
 ];
 
 export function LiveDemos() {
   usePageMeta({
     title: "SZL Holdings | Live Application Demos",
-    description: "Try live demos of SZL Holdings enterprise applications: Firestorm security simulation, INCA AI research, Terra real estate intelligence, and more.",
+    description: "Try live demos of SZL Holdings enterprise applications: Firestorm security simulation, INCA AI research, Beacon business telemetry, Nimbus prediction intelligence, and more.",
     canonical: "https://szlholdings.com/demos",
   });
   const [hoveredDemo, setHoveredDemo] = useState<string | null>(null);

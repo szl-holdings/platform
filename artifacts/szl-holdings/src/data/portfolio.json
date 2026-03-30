@@ -2,8 +2,9 @@
   {
     "id": "vessels",
     "name": "Vessels",
-    "tagline": "Maritime Command Platform",
-    "description": "A maritime command platform designed to bring visibility, coordination, and operational intelligence to fleet and voyage workflows.",
+    "doctrineRole": "OBSERVE",
+    "tagline": "Maritime Intelligence Platform",
+    "description": "Full-spectrum maritime domain awareness integrating AIS data, satellite imagery, and multi-source sensor fusion to deliver real-time vessel tracking, route optimization, dark vessel detection, and predictive risk analytics across global shipping lanes. The only platform that identifies sanctions evasion events an average of 34 days before formal designations.",
     "status": "Live",
     "category": "Maritime",
     "link": "/vessels/",
@@ -76,27 +77,31 @@
     "marketContext": "Personal authority platform for modern operational clarity and execution leadership"
   },
   {
-    "id": "dreamscape",
-    "name": "Dreamscape",
-    "tagline": "Creative Production Engine",
-    "description": "Enterprise creative production platform combining generative AI, real-time collaboration, and automated asset pipelines.",
+    "id": "nimbus",
+    "name": "Nimbus",
+    "doctrineRole": "UNDERSTAND",
+    "tagline": "Predictive Intelligence Engine",
+    "description": "Prediction, scenario modeling, and confidence scoring platform — transforming the SZL creative and analytics surface into a predictive intelligence layer. Nimbus powers scenario planning with probabilistic outputs, assumption tracking, and model-backed confidence scores for high-stakes decisions.",
     "status": "Live",
-    "category": "Creative Tech",
+    "category": "Predictive Intelligence",
     "link": "/dreamscape/",
     "icon": "Sparkles",
     "color": "#a855f7",
     "cta": "View Dreamscape",
     "metrics": [
-      { "label": "Projects Delivered", "value": "12,400+" },
-      { "label": "Enterprise Clients", "value": "85+" }
+      { "label": "Scenarios Modeled", "value": "12,400+" },
+      { "label": "Est. Annual Revenue", "value": "$5.1M ARR" },
+      { "label": "Enterprise Clients", "value": "85+" },
+      { "label": "Addressable Market", "value": "$14.8B" }
     ],
-    "marketContext": "AI-powered creative tools for modern production workflows"
+    "marketContext": "AI-powered predictive analytics market expected to reach $14.8B by 2028 (MarketsandMarkets)"
   },
   {
     "id": "firestorm",
     "name": "Firestorm",
-    "tagline": "Security Simulation Platform",
-    "description": "Cybersecurity simulation platform delivering continuous adversarial testing and real-time remediation verification.",
+    "doctrineRole": "EXECUTE",
+    "tagline": "Cyber Range & Threat Simulation",
+    "description": "Military-grade cybersecurity simulation platform delivering continuous adversarial testing, automated MITRE ATT&CK coverage, and real-time remediation verification for enterprises, defense contractors, and government agencies. The platform that makes annual penetration testing obsolete.",
     "status": "Live",
     "category": "Cybersecurity",
     "link": "/firestorm/",
@@ -107,6 +112,139 @@
       { "label": "Simulations Executed", "value": "31,200+" },
       { "label": "Threat Scenarios", "value": "2,800+" }
     ],
-    "marketContext": "Cybersecurity simulation for modern threat environments"
+    "marketContext": "Global cybersecurity market size projected at $266B in 2027 (Mordor Intelligence)"
+  },
+  {
+    "id": "lyte",
+    "name": "Lyte",
+    "doctrineRole": "EXECUTE",
+    "tagline": "AIOps Command Center",
+    "description": "Centralized AIOps and MLOps platform orchestrating model training, deployment, monitoring, and autonomous remediation at scale — the operating system for enterprise AI infrastructure. Powers 18M+ daily inference requests across the SZL ecosystem and external enterprise clients.",
+    "status": "Beta",
+    "category": "AI/ML",
+    "link": "/lyte-command-center/",
+    "icon": "Zap",
+    "color": "#f59e0b",
+    "metrics": [
+      { "label": "Models in Production", "value": "640+" },
+      { "label": "Inference Requests/Day", "value": "18M+" },
+      { "label": "GPU Hours Orchestrated", "value": "1.2M+" },
+      { "label": "Addressable Market", "value": "$1.8T" }
+    ],
+    "marketContext": "Global AI market projected to reach $1.81T by 2030 (Grand View Research)"
+  },
+  {
+    "id": "rosie",
+    "name": "Rosie",
+    "doctrineRole": "OBSERVE",
+    "tagline": "Threat & Anomaly Visibility — Incident Command",
+    "description": "Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Rosie integrates government contract intelligence, FedRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.",
+    "status": "Live",
+    "category": "Security",
+    "link": "/msp/",
+    "icon": "AlertTriangle",
+    "color": "#ef4444",
+    "metrics": [
+      { "label": "Active Clients", "value": "47" },
+      { "label": "SLA Compliance", "value": "99.2%" },
+      { "label": "Incidents Resolved/Mo", "value": "1,200+" },
+      { "label": "Addressable Market", "value": "$23B" }
+    ],
+    "marketContext": "Managed security services market projected at $23B by 2027 (MarketsandMarkets)"
+  },
+  {
+    "id": "aegis",
+    "name": "Aegis",
+    "doctrineRole": "DECIDE",
+    "tagline": "Control Plane, Risk Register & Governance",
+    "description": "Enterprise control plane for risk register management, compliance scoring, remediation tracking, and governance automation. Aegis enforces NIST CSF 2.0, FedRAMP, and CMMC frameworks across the SZL ecosystem — transforming compliance from a cost center into a strategic advantage.",
+    "status": "Live",
+    "category": "Governance & Risk",
+    "link": "/aegis/",
+    "icon": "Shield",
+    "color": "#10b981",
+    "metrics": [
+      { "label": "Controls Tracked", "value": "840+" },
+      { "label": "Risk Items Resolved", "value": "2,100+" },
+      { "label": "Compliance Score Avg", "value": "91%" },
+      { "label": "Addressable Market", "value": "$54B" }
+    ],
+    "marketContext": "GRC market projected at $54B by 2027 (Grand View Research)"
+  },
+  {
+    "id": "beacon",
+    "name": "Beacon",
+    "doctrineRole": "OBSERVE",
+    "tagline": "Business Telemetry & KPI Intelligence",
+    "description": "Business observability platform detecting KPI movement, value leakage, and market anomalies across real estate, employment, and commercial data feeds. Beacon turns Census Bureau, BLS, FEMA, and SEC EDGAR data into continuous business telemetry.",
+    "status": "Live",
+    "category": "Business Intelligence",
+    "link": "/terra/",
+    "icon": "BarChart3",
+    "color": "#0ea5e9",
+    "metrics": [
+      { "label": "Markets Monitored", "value": "340+" },
+      { "label": "KPI Signals/Day", "value": "12,000+" },
+      { "label": "Data Sources Integrated", "value": "8" },
+      { "label": "Addressable Market", "value": "$29B" }
+    ],
+    "marketContext": "Business intelligence and analytics market projected at $29B by 2027 (Mordor Intelligence)"
+  },
+  {
+    "id": "alloyscape",
+    "name": "AlloyScape",
+    "doctrineRole": "EXECUTE",
+    "tagline": "Execution Fabric — Connectors, Automations & DAGs",
+    "description": "AlloyScape is the unified execution layer across the SZL ecosystem — managing connector orchestration, workflow automation, and directed acyclic graph (DAG) execution. Every AI recommendation from Aegis or Nimbus is executed through AlloyScape.",
+    "status": "Live",
+    "category": "Automation",
+    "link": "/alloy/",
+    "icon": "Workflow",
+    "color": "#8b5cf6",
+    "metrics": [
+      { "label": "Connectors Active", "value": "35+" },
+      { "label": "Workflows Executed/Day", "value": "4,800+" },
+      { "label": "Automation Success Rate", "value": "99.7%" },
+      { "label": "Addressable Market", "value": "$8.6B" }
+    ],
+    "marketContext": "Workflow automation market projected at $8.6B by 2027 (MarketsandMarkets)"
+  },
+  {
+    "id": "inca",
+    "name": "INCA",
+    "doctrineRole": "UNDERSTAND",
+    "tagline": "AI Research Command Center",
+    "description": "AI-native research platform transforming unstructured enterprise data into strategic intelligence — combining experiment tracking, model registry, LLM evaluation, and automated reporting for high-stakes decision environments. $14M Series A closed February 2026.",
+    "status": "In Development",
+    "category": "AI/ML",
+    "link": "#",
+    "icon": "BarChart3",
+    "color": "#10b981",
+    "metrics": [
+      { "label": "Status", "value": "Private Alpha" },
+      { "label": "Series A", "value": "$14M · Feb 2026" },
+      { "label": "Pilot Clients", "value": "12" },
+      { "label": "Addressable Market", "value": "$340B" }
+    ],
+    "marketContext": "Management consulting and AI evaluation market combined exceeds $340B globally (Statista, 2024)"
+  },
+  {
+    "id": "carlota-jo",
+    "name": "Carlota Jo",
+    "doctrineRole": "DECIDE",
+    "tagline": "Brand Intelligence Platform",
+    "description": "AI-enhanced brand strategy engine synthesizing consumer sentiment, competitive landscape analysis, and cultural trend intelligence into actionable brand positioning — the system that makes guesswork in brand strategy structurally impossible for agencies, DTC brands, and Fortune 500 marketing teams.",
+    "status": "In Development",
+    "category": "Creative Tech",
+    "link": "#",
+    "icon": "Palette",
+    "color": "#ec4899",
+    "metrics": [
+      { "label": "Status", "value": "Private Alpha" },
+      { "label": "Brands in Pilot", "value": "8" },
+      { "label": "Sentiment Data Points", "value": "2.1B+" },
+      { "label": "Addressable Market", "value": "$8.4B" }
+    ],
+    "marketContext": "Brand analytics and intelligence market projected at $8.4B by 2027 (Research and Markets)"
   }
 ]

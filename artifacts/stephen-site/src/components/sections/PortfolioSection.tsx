@@ -11,8 +11,8 @@ export function PortfolioSection() {
     { id: 1, name: "Vessels", description: "Maritime fleet intelligence and cargo optimization platform. Real-time tracking across 200+ vessels with predictive maintenance and route optimization.", status: "active" },
     { id: 2, name: "Firestorm", description: "Cybersecurity simulation engine for red team/blue team training. CMMC Level 3 certified. Deployed across DoD training facilities.", status: "active" },
     { id: 3, name: "Lyte", description: "Enterprise commerce platform with integrated payment processing, inventory management, and customer analytics.", status: "active" },
-    { id: 4, name: "Dreamscape", description: "Creative production suite for content creation, asset management, and collaborative design workflows.", status: "active" },
-    { id: 5, name: "Readiness Report", description: "Compliance assessment and audit readiness engine for regulated industries. Automated gap analysis and remediation tracking.", status: "active" },
+    { id: 4, name: "Nimbus", description: "Predictive intelligence platform for scenario modeling, confidence scoring, and enterprise decision support — UNDERSTAND layer.", status: "active" },
+    { id: 5, name: "Aegis", description: "Enterprise control plane for risk register management, compliance scoring, and governance automation across NIST CSF, FedRAMP, and CMMC.", status: "active" },
     { id: 6, name: "INCA", description: "AI research command center for natural language processing, document intelligence, and automated analysis pipelines.", status: "active" },
   ];
 

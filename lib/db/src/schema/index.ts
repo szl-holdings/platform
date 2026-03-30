@@ -33,3 +33,5 @@ export * from "./vessels_product";
 export * from "./inca_product";
 export * from "./carlota_client";
 export * from "./audit_logs";
+export * from "./entities";
+export * from "./platform_events";

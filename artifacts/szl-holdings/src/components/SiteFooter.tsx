@@ -1,9 +1,15 @@
 import { Link } from "wouter";
 
 const PLATFORMS_LINKS = [
-  { label: "Alloy", href: "/alloy/" },
+  { label: "AlloyScape", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
+  { label: "Rosie", href: "/msp/" },
+  { label: "Beacon", href: "/terra/" },
+  { label: "INCA", href: "/inca/" },
+  { label: "Nimbus", href: "/dreamscape/" },
+  { label: "Aegis", href: "/readiness-report/" },
+  { label: "Firestorm", href: "/firestorm/" },
 ];
 
 const SERVICES_LINKS = [

@@ -62,7 +62,7 @@ These numbers are real. They are also, frankly, the least interesting part of th
 
 **Domain specificity is a durable moat against foundational model commoditization.** The last 18 months produced the loudest chorus yet: "foundation models will commoditize everything." And yet Vessels Maritime Intelligence closed its largest enterprise contract in February — specifically because its AIS anomaly detection understands *why* a vessel deviates from its route, not just that it did. INCA's model evaluation platform expanded its enterprise footprint by 340% because it can assess model behavior on proprietary, domain-specific data distributions that general benchmarks cannot touch. The world has access to GPT-4 and Claude. It does not have access to five years of maritime routing signals, cybersecurity red team playbooks, and CRE portfolio analytics — all interconnected. That is the moat.
 
-**The holding company structure gives portfolio companies access to credibility and distribution they cannot buy.** When Firestorm Security closed its third Fortune 500 client, the conversation began not with a product demo but with a briefing on SZL's broader thesis for enterprise security architecture. When Terra Real Estate Intelligence was shortlisted for a $50M AUM advisory mandate, the due diligence team asked to meet the holding company first. The platform brand is an accelerant.
+**The holding company structure gives portfolio companies access to credibility and distribution they cannot buy.** When Firestorm Security closed its third Fortune 500 client, the conversation began not with a product demo but with a briefing on SZL's broader thesis for enterprise security architecture. When Beacon was shortlisted for a $50M AUM advisory mandate, the due diligence team asked to meet the holding company first. The platform brand is an accelerant.
 
 ## Where The Work Remains Harder
 
@@ -86,11 +86,11 @@ $14M Series A closed February 2026. The LLM evaluation market is nascent and wil
 ### Vessels Maritime Intelligence — Maritime
 Vessels has the most patient capital profile in our portfolio and the largest long-term opportunity. AIS anomaly detection, dark vessel tracking, sanctions compliance, and climate routing overlays are each significant markets. Combined, with the geopolitical volatility of 2024–2026 driving maritime intelligence demand, we see Vessels as the eventual flagship platform of the ecosystem.
 
-### Terra Real Estate Intelligence — Real Estate
-$3.1M ARR. 34 enterprise CRE clients. The commercial real estate intelligence market is undergoing its most significant technology adoption cycle since ARGUS. Terra's climate risk overlay and AI-powered portfolio performance suite are genuinely differentiated. The pipeline for 2026 includes two potential platform license deals with institutional fund managers.
+### Beacon — Business Telemetry · OBSERVE
+$3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. Beacon's continuous telemetry and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
 
-### Dreamscape Creative Engine — Creative Tech
-The youngest platform in the portfolio, Dreamscape is attacking the creative production market — the last major enterprise vertical to resist systematic intelligence. AI-native creative workflows, brand intelligence, and production analytics are the core thesis. Early signals from media and entertainment clients are strong.
+### Nimbus — Predictive Intelligence · UNDERSTAND
+Nimbus is attacking the decision intelligence market — the enterprise vertical that still relies on manual scenario analysis and disconnected forecasting tools. AI-native scenario modeling, confidence scoring, and assumption tracking are the core thesis. Early signals from strategic planning and operations teams are strong.
 
 ## The Forward Thesis
 
@@ -329,7 +329,7 @@ The commercial real estate market is not ignoring climate risk. Every major CRE 
 
 ## What AI-Native Intelligence Changes
 
-Terra Real Estate Intelligence integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that CRE fund managers actually use to make decisions.
+Beacon integrates physical climate risk data — flood maps, sea level projections, wildfire risk modeling, heat stress analysis, storm surge scenarios — with the operational and financial data that fund managers actually use to make decisions.
 
 This is not climate reporting bolted onto a separate data source. It is a unified intelligence layer where every financial metric has a climate-adjusted variant: climate-adjusted NOI, climate-adjusted cap rate, climate-adjusted LTV, insurance-adjusted free cash flow. When a portfolio manager is reviewing an acquisition model, the climate risk variables are embedded in the same interface, the same workflow, the same financial model — not in a separate PDF report from a third-party consultant.
 
@@ -378,9 +378,9 @@ What those platforms did not anticipate was the degree to which creative product
 
 ## The AI-Native Creative Architecture
 
-The Dreamscape Creative Engine is built for the production environment that actually exists in 2026, not the one that creative SaaS was designed for in 2015.
+Nimbus is built for the decision-making environment that actually exists in 2026, not the one that enterprise analytics was designed for in 2015.
 
-**Intelligence is embedded in the workflow, not adjacent to it.** Rather than exporting performance data from one system, analyzing it in another, and manually applying insights back into a third system, Dreamscape maintains a connected intelligence layer across the full production lifecycle. The brief that goes into the system is informed by performance data from similar past briefs. The creative directions generated are ranked by predicted performance against the target audience and channel mix. The review and approval workflow surfaces brand compliance issues before the reviewer sees the asset, not after.
+**Intelligence is embedded in the workflow, not adjacent to it.** Rather than exporting performance data from one system, analyzing it in another, and manually applying insights back into a third system, Nimbus maintains a connected intelligence layer across the full decision lifecycle. The scenario that goes into the system is informed by confidence scores from similar past scenarios. The predictions generated are ranked by modeled confidence and assumption sensitivity against the target outcome. The review and approval workflow surfaces model drift and assumption risk before the decision-maker sees the final recommendation, not after.
 
 **Brand governance is a continuous function, not a gate.** Large brands produce creative content across hundreds of campaigns, dozens of agencies and internal teams, multiple geographies and languages, simultaneously. Maintaining brand consistency across that distributed production environment is an enormous operational challenge that most organizations solve with guidelines documents and manual review — neither of which scale. AI-native brand intelligence can monitor every asset in production against brand standards continuously, flagging deviations before they reach approval rather than after they reach distribution.
 

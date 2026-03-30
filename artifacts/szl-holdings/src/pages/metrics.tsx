@@ -16,10 +16,10 @@ const appUsage = [
   { name: "Firestorm", sessions: 1840, avgDuration: "8m 42s", bounce: "18%" },
   { name: "Lyte", sessions: 2120, avgDuration: "11m 15s", bounce: "12%" },
   { name: "INCA", sessions: 980, avgDuration: "14m 33s", bounce: "9%" },
-  { name: "Terra", sessions: 1340, avgDuration: "7m 22s", bounce: "22%" },
+  { name: "Beacon", sessions: 1340, avgDuration: "7m 22s", bounce: "22%" },
   { name: "Vessels", sessions: 760, avgDuration: "9m 18s", bounce: "16%" },
-  { name: "Dreamscape", sessions: 1100, avgDuration: "6m 44s", bounce: "28%" },
-  { name: "MSP", sessions: 890, avgDuration: "12m 07s", bounce: "11%" },
+  { name: "Nimbus", sessions: 1100, avgDuration: "6m 44s", bounce: "28%" },
+  { name: "Rosie", sessions: 890, avgDuration: "12m 07s", bounce: "11%" },
 ];
 
 const usageChart = appUsage.map(a => ({ name: a.name, sessions: a.sessions }));

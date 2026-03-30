@@ -10,3 +10,4 @@ export { default as AppObservabilityPage } from "./AppObservabilityPage";
 export { apiFetch, type PaginationMeta, type PaginatedResponse } from "./api-fetch";
 export { useNotificationCenter, type LiveNotification, type ApiNotification, type NotificationCenterState } from "./notification-center";
 export { AgentInsightsWidget, type KnowledgeEntry as AgentKnowledgeEntry, type AgentRun } from "./agent-insights-widget";
+export { ExplainabilityDrawer, useExplainability, ExplainButton, type ExplainabilityMetadata, type ExplainabilityDrawerProps } from "./explainability";

@@ -117,11 +117,11 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: "msp",
-    appName: "Evolve MSP",
+    appName: "Rosie",
     generators: [
       () => ({
         appId: "msp",
-        appName: "Evolve MSP",
+        appName: "Rosie",
         title: "SLA Breach Imminent",
         message: `Client ${["Apex Industries", "TechCorp", "Nova Systems", "Pinnacle LLC"][Math.floor(Math.random() * 4)]} — P1 ticket ${Math.floor(Math.random() * 60)}min from SLA breach`,
         severity: "critical" as NotifSeverity,
@@ -129,7 +129,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "msp",
-        appName: "Evolve MSP",
+        appName: "Rosie",
         title: "Device Offline Alert",
         message: `${2 + Math.floor(Math.random() * 8)} devices offline across client network — monitoring triggered`,
         severity: "warning" as NotifSeverity,
@@ -137,7 +137,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "msp",
-        appName: "Evolve MSP",
+        appName: "Rosie",
         title: "Contract Renewal Due",
         message: `${["Meridian Corp", "Atlas Partners", "Zenith Tech"][Math.floor(Math.random() * 3)]} contract expires in 14 days — renewal required`,
         severity: "info" as NotifSeverity,
@@ -145,7 +145,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "msp",
-        appName: "Evolve MSP",
+        appName: "Rosie",
         title: "NOC Alert Escalation",
         message: "Network anomaly detected — auto-escalated to L2 support team",
         severity: "warning" as NotifSeverity,
@@ -193,11 +193,11 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: "terra",
-    appName: "Terra",
+    appName: "Beacon",
     generators: [
       () => ({
         appId: "terra",
-        appName: "Terra",
+        appName: "Beacon",
         title: "Lease Expiry Alert",
         message: `${2 + Math.floor(Math.random() * 5)} properties have leases expiring within 30 days — renewal outreach needed`,
         severity: "warning" as NotifSeverity,
@@ -205,7 +205,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "terra",
-        appName: "Terra",
+        appName: "Beacon",
         title: "Vacancy Rate Spike",
         message: `Portfolio vacancy rate increased to ${8 + Math.floor(Math.random() * 7)}% — above 10% threshold approaching`,
         severity: "warning" as NotifSeverity,
@@ -213,7 +213,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "terra",
-        appName: "Terra",
+        appName: "Beacon",
         title: "Market Valuation Update",
         message: "Q1 2026 valuations complete — 3 properties show 12%+ appreciation",
         severity: "info" as NotifSeverity,
@@ -221,7 +221,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "terra",
-        appName: "Terra",
+        appName: "Beacon",
         title: "Investment Alert",
         message: "High-yield acquisition opportunity flagged — cap rate 7.8% in target market",
         severity: "info" as NotifSeverity,
@@ -269,11 +269,11 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: "dreamscape",
-    appName: "Dreamscape",
+    appName: "Nimbus",
     generators: [
       () => ({
         appId: "dreamscape",
-        appName: "Dreamscape",
+        appName: "Nimbus",
         title: "Campaign Milestone Reached",
         message: `${["Q2 Brand Launch", "Summer Campaign", "Product Drop"][Math.floor(Math.random() * 3)]} reached ${50 + Math.floor(Math.random() * 45)}% of engagement target`,
         severity: "info" as NotifSeverity,
@@ -281,7 +281,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "dreamscape",
-        appName: "Dreamscape",
+        appName: "Nimbus",
         title: "Content Approval Needed",
         message: `${3 + Math.floor(Math.random() * 5)} AI-generated assets pending review before scheduled publication`,
         severity: "warning" as NotifSeverity,
@@ -289,7 +289,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "dreamscape",
-        appName: "Dreamscape",
+        appName: "Nimbus",
         title: "Brand Voice Deviation",
         message: "AI Studio generated content flagged — tone inconsistency with brand guidelines detected",
         severity: "warning" as NotifSeverity,
@@ -297,7 +297,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "dreamscape",
-        appName: "Dreamscape",
+        appName: "Nimbus",
         title: "Social Post Published",
         message: "Scheduled batch of 8 posts published across LinkedIn, X, and Instagram",
         severity: "info" as NotifSeverity,

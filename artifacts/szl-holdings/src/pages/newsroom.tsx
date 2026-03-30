@@ -41,9 +41,9 @@ const pressItems = [
   },
   {
     type: "Media Coverage", date: "January 15, 2026",
-    headline: "Terra Real Estate Intelligence: The PropTech Platform Changing How CRE Firms Make Decisions",
-    summary: "Commercial Observer profiles Terra's growth to $3.1M ARR with 34 enterprise CRE firms, noting its climate risk overlay and AI-powered portfolio performance features as key differentiators.",
-    tags: ["Portfolio", "Terra", "PropTech"],
+    headline: "Beacon Business Telemetry: The Intelligence Platform Changing How Enterprise Teams Make Decisions",
+    summary: "Commercial Observer profiles Beacon's growth to $3.1M ARR with 34 enterprise clients, noting its continuous KPI telemetry and anomaly detection as key differentiators.",
+    tags: ["Portfolio", "Beacon", "Business Telemetry"],
     source: "Commercial Observer",
   },
 ];

@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/dreamscape/"
-title = "Dreamscape Creative Engine"
+title = "Nimbus — Predictive Intelligence"
 version = "1.0.0"
 id = "artifacts/dreamscape"
 router = "path"

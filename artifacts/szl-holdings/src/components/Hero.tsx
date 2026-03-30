@@ -2,12 +2,12 @@ import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 const platforms = [
-  { name: "Lyte", category: "Business Observability", status: "live", color: "hsl(192,70%,46%)" },
-  { name: "Vessels", category: "Maritime Intelligence", status: "live", color: "hsl(208,65%,48%)" },
-  { name: "INCA", category: "AI Research Platform", status: "live", color: "hsl(246,45%,60%)" },
-  { name: "Alloy", category: "AI Command Center", status: "live", color: "hsl(218,50%,62%)" },
-  { name: "Carlota Jo", category: "Strategic Advisory", status: "live", color: "hsl(32,38%,58%)" },
-  { name: "Firestorm", category: "Security Simulation", status: "live", color: "hsl(28,78%,56%)" },
+  { name: "Vessels", category: "OBSERVE · Maritime", status: "live", color: "hsl(208,65%,48%)" },
+  { name: "Rosie", category: "OBSERVE · Incident Command", status: "live", color: "hsl(0,70%,55%)" },
+  { name: "Beacon", category: "OBSERVE · Business Telemetry", status: "live", color: "hsl(200,70%,45%)" },
+  { name: "INCA", category: "UNDERSTAND · AI Research", status: "live", color: "hsl(246,45%,60%)" },
+  { name: "Nimbus", category: "UNDERSTAND · Prediction", status: "live", color: "hsl(280,55%,55%)" },
+  { name: "AlloyScape", category: "EXECUTE · Automations", status: "live", color: "hsl(218,50%,62%)" },
 ];
 
 const nodePositions = [
@@ -20,7 +20,7 @@ const connections = [
 ];
 
 function EcosystemMap() {
-  const colors = ["hsl(192,70%,46%)", "hsl(208,65%,48%)", "hsl(246,45%,60%)", "hsl(218,50%,62%)", "hsl(32,38%,58%)", "hsl(28,78%,56%)"];
+  const colors = ["hsl(208,65%,48%)", "hsl(0,70%,55%)", "hsl(200,70%,45%)", "hsl(246,45%,60%)", "hsl(280,55%,55%)", "hsl(218,50%,62%)"];
 
   return (
     <div className="relative w-full" style={{ aspectRatio: "16/7", maxWidth: "480px" }}>
@@ -120,7 +120,7 @@ export function Hero() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}>
-                Six frontier platforms.
+                Eight frontier platforms.
               </span>
             </m.h1>
 
@@ -222,7 +222,7 @@ export function Hero() {
             }}>
               <div className="flex items-center justify-between mb-5">
                 <span style={{ fontSize: "11px", fontWeight: "500", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,46%)" }}>Ecosystem Map</span>
-                <span style={{ fontSize: "11px", color: "hsl(152,50%,42%)", fontWeight: "500", letterSpacing: "0.04em" }}>6 platforms live</span>
+                <span style={{ fontSize: "11px", color: "hsl(152,50%,42%)", fontWeight: "500", letterSpacing: "0.04em" }}>8 platforms live</span>
               </div>
               <EcosystemMap />
               <div style={{ height: "1px", background: "hsla(0,0%,100%,0.05)", margin: "1.25rem 0" }} />

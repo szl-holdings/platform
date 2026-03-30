@@ -79,7 +79,7 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-            <EcosystemNav currentAppId="stephen-site" currentAppName="Stephen Lutar" accentColor="#64748b" />
+            <EcosystemNav currentAppId="career" currentAppName="Career — Founder Identity" accentColor="#6366f1" />
             <div style={{ flex: 1 }}>
               <Suspense fallback={
                 <div className="min-h-screen bg-background flex items-center justify-center">

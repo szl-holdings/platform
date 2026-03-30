@@ -24,8 +24,8 @@ export function EcosystemSection() {
       { name: "Vessels", slug: "vessels", description: "Maritime fleet & cargo intelligence", status: "operational", lastChecked: new Date().toISOString() },
       { name: "Firestorm", slug: "firestorm", description: "Cybersecurity simulation engine", status: "operational", lastChecked: new Date().toISOString() },
       { name: "Lyte", slug: "lyte", description: "Enterprise commerce platform", status: "operational", lastChecked: new Date().toISOString() },
-      { name: "Dreamscape", slug: "dreamscape", description: "Creative production suite", status: "operational", lastChecked: new Date().toISOString() },
-      { name: "Readiness Report", slug: "readiness", description: "Compliance & assessment engine", status: "operational", lastChecked: new Date().toISOString() },
+      { name: "Nimbus", slug: "dreamscape", description: "Predictive intelligence · UNDERSTAND", status: "operational", lastChecked: new Date().toISOString() },
+      { name: "Aegis", slug: "aegis", description: "Control plane & risk register · DECIDE", status: "operational", lastChecked: new Date().toISOString() },
       { name: "INCA", slug: "inca", description: "AI research command center", status: "operational", lastChecked: new Date().toISOString() },
     ],
     connectors: [

@@ -109,8 +109,8 @@ function Sidebar() {
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <h1 className="font-display text-sm font-semibold text-foreground truncate tracking-tight">Evolve MSP</h1>
-            <p className="text-[10px] text-primary/35 font-mono uppercase tracking-wider">Managed Services</p>
+            <h1 className="font-display text-base font-bold text-foreground truncate">Rosie</h1>
+            <p className="text-[10px] text-muted-foreground">Incident Command</p>
           </div>
         )}
       </div>
@@ -240,9 +240,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={basePath}>
-        <PowerUserProvider shortcuts={mspShortcuts} appName="Evolve MSP" accentColor="#3b82f6">
+        <PowerUserProvider shortcuts={mspShortcuts} appName="Rosie" accentColor="#ef4444">
           <div className="flex flex-col h-screen">
-            <EcosystemNav currentAppId="msp" currentAppName="Evolve MSP Command Center" accentColor="#3b82f6" />
+            <EcosystemNav currentAppId="rosie" currentAppName="Rosie — Threat & Incident Command" accentColor="#ef4444" />
             <div className="flex-1 overflow-hidden">
               <DashboardLayout />
             </div>
@@ -251,17 +251,17 @@ function App() {
             open={cmdOpen}
             onClose={() => setCmdOpen(false)}
             commands={mspCommands}
-            appName="Evolve MSP"
-            accentColor="#3b82f6"
+            appName="Rosie"
+            accentColor="#ef4444"
           />
-          <IncaAgentIndicator agentName="IT Sentinel" systemType="mama-quilla" currentTask="Monitoring endpoint health across managed clients" confidence={0.88} />
+          <IncaAgentIndicator agentName="IT Sentinel" systemType="mama-quilla" currentTask="Monitoring endpoint health and anomaly signals across managed clients" confidence={0.88} />
         </PowerUserProvider>
         <WelcomeOverlay
-          appId="msp"
-          appName="Evolve MSP"
-          subtitle="Enterprise MSP Command Center"
-          description="Unified managed services operations — client health, NOC monitoring, service desk, device inventory, and revenue analytics in one enterprise-grade platform."
-          accentColor="#3b82f6"
+          appId="rosie"
+          appName="Rosie"
+          subtitle="Threat & Anomaly Visibility — OBSERVE Layer"
+          description="Evidence-backed incident command delivering threat detection, anomaly visibility, and MSP-grade operational intelligence — with AI-powered ticket routing and churn risk prediction."
+          accentColor="#ef4444"
           icon={Monitor}
           features={[
             { icon: Building2, title: "Client Management", description: "Health scoring and churn risk for every account" },

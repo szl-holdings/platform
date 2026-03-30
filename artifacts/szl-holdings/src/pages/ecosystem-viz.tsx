@@ -5,13 +5,13 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const portfolio = [
-  { name: "Terra", sector: "PropTech", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+34%", headcount: 18, color: "#22c55e", status: "Scaling" },
+  { name: "Beacon", sector: "Business Telemetry · OBSERVE", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+34%", headcount: 18, color: "#0ea5e9", status: "Scaling" },
   { name: "Vessels", sector: "Maritime AI", stage: "Growth", ownership: 100, arr: "$1.8M", growth: "+51%", headcount: 12, color: "#06b6d4", status: "Scaling" },
   { name: "Firestorm", sector: "Cybersecurity", stage: "Early", ownership: 100, arr: "$0.9M", growth: "+82%", headcount: 9, color: "#ef4444", status: "Hypergrowth" },
   { name: "Lyte AIOps", sector: "DevOps", stage: "Growth", ownership: 100, arr: "$3.1M", growth: "+28%", headcount: 21, color: "#8b5cf6", status: "Scaling" },
-  { name: "Dreamscape", sector: "Creative AI", stage: "Early", ownership: 100, arr: "$0.6M", growth: "+114%", headcount: 7, color: "#f97316", status: "Hypergrowth" },
+  { name: "Nimbus", sector: "Predictive Intel · UNDERSTAND", stage: "Early", ownership: 100, arr: "$0.6M", growth: "+114%", headcount: 7, color: "#ec4899", status: "Hypergrowth" },
   { name: "INCA", sector: "MLOps", stage: "Early", ownership: 100, arr: "$0.4M", growth: "+93%", headcount: 6, color: "#ec4899", status: "Hypergrowth" },
-  { name: "MSP Command", sector: "IT Services", stage: "Mature", ownership: 100, arr: "$8.2M", growth: "+12%", headcount: 47, color: "#eab308", status: "Profitable" },
+  { name: "Rosie", sector: "Incident Command · OBSERVE", stage: "Mature", ownership: 100, arr: "$8.2M", growth: "+12%", headcount: 47, color: "#ef4444", status: "Profitable" },
   { name: "Carlota Jo", sector: "Consulting", stage: "Mature", ownership: 100, arr: "$4.4M", growth: "+18%", headcount: 14, color: "#64748b", status: "Profitable" },
 ];
 
@@ -54,7 +54,7 @@ export default function EcosystemViz() {
           { label: "Combined ARR", value: `$${totalARR.toFixed(1)}M`, color: "text-emerald-400" },
           { label: "Portfolio Companies", value: portfolio.length, color: "text-sky-400" },
           { label: "Total Headcount", value: totalHeadcount, color: "text-primary" },
-          { label: "Fastest Growth", value: "Dreamscape +114%", color: "text-orange-400" },
+          { label: "Fastest Growth", value: "Nimbus +114%", color: "text-pink-400" },
         ].map(({ label, value, color }) => (
           <Card key={label}><CardContent className="p-4"><p className="text-xs text-muted-foreground">{label}</p><p className={`text-xl font-bold ${color}`}>{value}</p></CardContent></Card>
         ))}

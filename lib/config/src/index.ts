@@ -2,16 +2,19 @@ export const APP_NAME = "SZL Holdings DreamStack";
 export const APP_VERSION = "0.1.0";
 
 export const PLATFORM_APPS = [
-  { slug: "stephen-site", name: "Stephen L. Portfolio", icon: "Globe", color: "#6366f1" },
+  { slug: "career", name: "Career — Founder Identity", icon: "Globe", color: "#6366f1" },
   { slug: "vessels", name: "Vessels Tracker", icon: "Ship", color: "#06b6d4" },
-  { slug: "firestorm", name: "Firestorm Marketing", icon: "Flame", color: "#f97316" },
-  { slug: "lyte", name: "Lyte Commerce", icon: "ShoppingBag", color: "#a855f7" },
-  { slug: "dreamscape", name: "Dreamscape Creative", icon: "Palette", color: "#ec4899" },
-  { slug: "readiness", name: "Readiness Assessments", icon: "Shield", color: "#10b981" },
+  { slug: "firestorm", name: "Firestorm Security Simulation", icon: "Flame", color: "#f97316" },
+  { slug: "lyte", name: "Lyte Command Center", icon: "ShoppingBag", color: "#a855f7" },
+  { slug: "nimbus", name: "Nimbus Predictive Intelligence", icon: "Palette", color: "#ec4899" },
+  { slug: "aegis", name: "Aegis Control Plane", icon: "Shield", color: "#10b981" },
   { slug: "control-plane", name: "Admin Control Plane", icon: "Settings", color: "#64748b" },
   { slug: "szl-holdings", name: "SZL Holdings", icon: "Building2", color: "#8b5cf6" },
   { slug: "inca", name: "INCA AI Research", icon: "Brain", color: "#14b8a6" },
   { slug: "carlota-jo", name: "Carlota Jo Advisory", icon: "Crown", color: "#f43f5e" },
+  { slug: "rosie", name: "Rosie Incident Command", icon: "AlertTriangle", color: "#ef4444" },
+  { slug: "beacon", name: "Beacon Business Telemetry", icon: "BarChart3", color: "#0ea5e9" },
+  { slug: "alloyscpe", name: "AlloyScape Execution Fabric", icon: "Workflow", color: "#8b5cf6" },
 ] as const;
 
 export type AppSlug = (typeof PLATFORM_APPS)[number]["slug"];
@@ -53,63 +56,105 @@ export function getOptionalEnv(key: string, fallback: string = ""): string {
   return process.env[key] ?? fallback;
 }
 
-export const APP_INTEGRATIONS: Record<string, { connectors: string[]; description: string; liveFeeds?: string[] }> = {
-  "stephen-site": {
+export const APP_INTEGRATIONS: Record<string, { connectors: string[]; description: string; liveFeeds?: string[]; doctrineRole?: string }> = {
+  "career": {
     connectors: ["ai", "github", "google", "storage"],
-    description: "Portfolio site uses AI for content, GitHub for repos, Google auth, file storage",
+    description: "Career site (formerly Stephen Site) uses AI for content, GitHub for repos, Google auth, file storage",
+    doctrineRole: "EXECUTE",
   },
   vessels: {
     connectors: ["weather", "stormglass", "shipping", "monitoring", "storage", "slack", "noaa", "openmeteo", "gdelt"],
     description: "Maritime intelligence uses live NOAA CO-OPS stations, Open-Meteo marine conditions, GDELT geopolitical signals, AIS ship tracking, and port congestion analytics.",
     liveFeeds: ["NOAA CO-OPS Station API (live air temp/wind)", "Open-Meteo Marine Forecast API", "GDELT Geopolitical Event Monitor", "AIS Network (AISHub, MarineTraffic)", "OFAC Sanctions List"],
+    doctrineRole: "OBSERVE",
   },
   firestorm: {
     connectors: ["ai", "slack", "twilio", "monitoring", "posthog", "storage", "cisa", "abuseipdb", "nvd", "mitre"],
     description: "Security simulation uses AI analysis, CISA KEV mandatory patches, NVD CVE database, MITRE ATT&CK enterprise techniques, AbuseIPDB IP reputation, and live threat news feeds.",
     liveFeeds: ["CISA KEV Catalog (1,554+ entries, live)", "NVD National Vulnerability Database (live CVE search)", "MITRE ATT&CK Enterprise Matrix v14 (live GitHub)", "AbuseIPDB IP Reputation", "The Hacker News Live RSS"],
+    doctrineRole: "EXECUTE",
   },
   lyte: {
     connectors: ["stripe", "hubspot", "gmail", "storage", "posthog", "shipping", "bls"],
     description: "Commerce command center uses BLS live unemployment rate, GitHub trending repositories, and live tech news from TechCrunch + The Verge RSS feeds.",
     liveFeeds: ["BLS Unemployment Rate API (live, LNS14000000)", "GitHub Public API — Trending Repositories", "TechCrunch Live RSS", "The Verge Live RSS"],
+    doctrineRole: "EXECUTE",
   },
-  dreamscape: {
+  nimbus: {
     connectors: ["ai", "figma", "storage", "google-drive", "dropbox", "elevenlabs"],
-    description: "Creative intelligence uses HuggingFace Hub video/image generation model discovery, marketing RSS feeds, and media analytics benchmarks.",
+    description: "Nimbus (formerly Dreamscape) predictive intelligence layer — scenario modeling, confidence scoring, and prediction surfaces using HuggingFace Hub model discovery and media analytics benchmarks.",
     liveFeeds: ["HuggingFace Hub — AI Creative Tools (live API)", "Content Marketing RSS Intelligence", "Cross-Platform Media Analytics Benchmarks"],
+    doctrineRole: "UNDERSTAND",
   },
-  readiness: {
+  aegis: {
     connectors: ["ai", "notion", "confluence", "google-docs", "slack", "monitoring"],
-    description: "Assessments use AI scoring, NIST CSF 2.0 controls, FedRAMP authorized products, CMMC framework",
+    description: "Aegis (formerly Readiness) control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, FedRAMP, and CMMC frameworks.",
     liveFeeds: ["NIST CSF 2.0 Framework", "FedRAMP Marketplace", "CMMC Maturity Model", "CISA KEV (Patch Compliance)"],
+    doctrineRole: "DECIDE",
   },
-  msp: {
+  rosie: {
     connectors: ["ai", "monitoring", "posthog", "slack", "gmail"],
-    description: "MSP command center uses government contract intelligence, FedRAMP products, CMMC compliance tracking",
+    description: "Rosie (formerly MSP) — threat and anomaly visibility, evidence-backed incident command, government contract intelligence, FedRAMP products, CMMC compliance tracking.",
     liveFeeds: ["USAspending.gov Federal Contracts", "FedRAMP Authorized Products", "SAM.gov Contract Pipeline"],
+    doctrineRole: "OBSERVE",
   },
-  terra: {
+  beacon: {
     connectors: ["ai", "monitoring", "storage"],
-    description: "Real estate intelligence uses Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings",
+    description: "Beacon (formerly Terra) — business telemetry, KPI movement, value leakage detection, Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings.",
     liveFeeds: ["Census Bureau ACS Demographics", "BLS Employment Data", "FEMA National Risk Index", "SEC EDGAR REIT Filings", "Open-Meteo Climate Projections"],
+    doctrineRole: "OBSERVE",
+  },
+  alloyscpe: {
+    connectors: ["ai", "storage", "monitoring"],
+    description: "AlloyScape (formerly Alloy) — execution fabric, connectors, automations, and DAGs across the SZL platform.",
+    doctrineRole: "EXECUTE",
   },
   inca: {
     connectors: ["ai", "huggingface", "storage", "monitoring", "posthog", "arxiv"],
     description: "AI research platform with live arXiv multi-category papers, Semantic Scholar citation graph, PapersWithCode ML benchmarks, HuggingFace Hub model discovery, and research trend monitoring across cs.CL, cs.CR, cs.CV.",
     liveFeeds: ["arXiv Open Access Papers (live XML API, cs.CL/cs.CR/cs.CV)", "Semantic Scholar Research Graph API", "PapersWithCode SOTA Leaderboards", "HuggingFace Hub Model Discovery API"],
+    doctrineRole: "UNDERSTAND",
   },
   "control-plane": {
     connectors: ["ai", "stripe", "slack", "twilio", "google", "notion", "github", "storage", "monitoring", "posthog", "gmail", "hubspot", "confluence", "figma", "elevenlabs", "weather", "stormglass", "shipping", "google-calendar", "google-docs", "google-drive", "dropbox", "onedrive", "cisa", "arxiv", "abuseipdb", "noaa", "nvd", "bls", "worldbank", "openmeteo", "mitre", "gdelt"],
     description: "Admin panel monitors all connectors and live feeds across the platform including 10 new government and OSINT data adapters.",
     liveFeeds: ["All Platform Feeds Aggregated — 35 Connectors"],
+    doctrineRole: "DECIDE",
   },
   "szl-holdings": {
     connectors: ["ai", "stripe", "storage", "monitoring", "posthog"],
     description: "Holdings dashboard for portfolio management, venture tracking, and strategic metrics",
+    doctrineRole: "DECIDE",
   },
   "carlota-jo": {
     connectors: ["ai", "stripe", "google-calendar", "gmail", "hubspot", "storage", "worldbank", "bls"],
     description: "Luxury advisory booking uses World Bank live GDP indicators, BLS employment data, Harvard Business Review strategic news RSS, and consulting industry trend intelligence.",
     liveFeeds: ["World Bank Open Data API (live GDP/inflation indicators)", "BLS Employment Statistics", "Harvard Business Review Live RSS", "Consulting Industry Trend Intelligence"],
+    doctrineRole: "DECIDE",
+  },
+  "stephen-site": {
+    connectors: ["ai", "github", "google", "storage"],
+    description: "Legacy slug for Career — Founder Identity site",
+    doctrineRole: "EXECUTE",
+  },
+  dreamscape: {
+    connectors: ["ai", "figma", "storage", "google-drive", "dropbox", "elevenlabs"],
+    description: "Legacy slug for Nimbus — Predictive Intelligence",
+    doctrineRole: "UNDERSTAND",
+  },
+  terra: {
+    connectors: ["ai", "monitoring", "storage"],
+    description: "Legacy slug for Beacon — Business Telemetry",
+    doctrineRole: "OBSERVE",
+  },
+  readiness: {
+    connectors: ["ai", "notion", "confluence", "google-docs", "slack", "monitoring"],
+    description: "Legacy slug for Aegis — Control Plane",
+    doctrineRole: "DECIDE",
+  },
+  msp: {
+    connectors: ["ai", "monitoring", "posthog", "slack", "gmail"],
+    description: "Legacy slug for Rosie — Incident Command",
+    doctrineRole: "OBSERVE",
   },
 } as const;

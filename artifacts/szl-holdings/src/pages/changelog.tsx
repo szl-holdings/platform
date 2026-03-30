@@ -22,13 +22,13 @@ const entries = [
     version: "v3.7.0",
     date: "March 12, 2026",
     type: "minor",
-    highlight: "Terra Portfolio Performance + MSP RMM Console launch",
+    highlight: "Beacon Portfolio Performance + Rosie RMM Console launch",
     changes: [
-      { type: "feature", text: "Terra: Portfolio Performance module with IRR, cash-on-cash, and equity multiple tracking" },
-      { type: "feature", text: "Terra: Climate Risk Overlay with flood, wildfire, and sea level exposure scoring" },
-      { type: "feature", text: "Terra: Investor Relations module with LP portal and performance reporting" },
-      { type: "feature", text: "MSP: RMM Console with endpoint monitoring, patch management, and threat status" },
-      { type: "feature", text: "MSP: MRR Dashboard with cohort analysis and churn waterfall visualization" },
+      { type: "feature", text: "Beacon: Portfolio Performance module with IRR, cash-on-cash, and equity multiple tracking" },
+      { type: "feature", text: "Beacon: Climate Risk Overlay with flood, wildfire, and sea level exposure scoring" },
+      { type: "feature", text: "Beacon: Investor Relations module with LP portal and performance reporting" },
+      { type: "feature", text: "Rosie: RMM Console with endpoint monitoring, patch management, and threat status" },
+      { type: "feature", text: "Rosie: MRR Dashboard with cohort analysis and churn waterfall visualization" },
       { type: "improvement", text: "Vessels: Fleet map rendering performance improved 40% on large datasets" },
     ],
   },
@@ -40,9 +40,9 @@ const entries = [
     changes: [
       { type: "feature", text: "INCA: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
       { type: "feature", text: "INCA: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
-      { type: "feature", text: "Dreamscape: Brand Voice Engine with multi-channel tone calibration" },
-      { type: "feature", text: "Dreamscape: Voice Studio with podcast production and waveform editing" },
-      { type: "improvement", text: "Readiness Report: Risk Register redesign with dynamic filtering and bulk status updates" },
+      { type: "feature", text: "Nimbus: Prediction Studio with multi-channel scenario modeling" },
+      { type: "feature", text: "Nimbus: Confidence Scoring with probabilistic output and assumption tracking" },
+      { type: "improvement", text: "Aegis: Risk Register redesign with dynamic filtering and bulk status updates" },
     ],
   },
   {
@@ -52,7 +52,7 @@ const entries = [
     highlight: "Performance fixes and accessibility improvements",
     changes: [
       { type: "fix", text: "Lyte: Command Center dashboard infinite scroll on Firefox fixed" },
-      { type: "fix", text: "Terra: Property detail map failing to load on slow connections" },
+      { type: "fix", text: "Beacon: Property detail map failing to load on slow connections" },
       { type: "fix", text: "Vessels: Port analytics chart tooltip overlap on dense datasets" },
       { type: "improvement", text: "All apps: ARIA labels and keyboard navigation improvements across navigation" },
       { type: "improvement", text: "All apps: Dark mode contrast ratio improved to meet WCAG AA standards" },
@@ -62,10 +62,10 @@ const entries = [
     version: "v3.5.0",
     date: "January 28, 2026",
     type: "minor",
-    highlight: "Readiness Report multi-framework support + Carlota Jo AI Advisory",
+    highlight: "Aegis multi-framework support + Carlota Jo AI Advisory",
     changes: [
-      { type: "feature", text: "Readiness Report: Vendor Risk Assessment with 8 risk dimensions and auto-scoring" },
-      { type: "feature", text: "Readiness Report: Risk Register with owner assignment and remediation tracking" },
+      { type: "feature", text: "Aegis: Vendor Risk Assessment with 8 risk dimensions and auto-scoring" },
+      { type: "feature", text: "Aegis: Risk Register with owner assignment and remediation tracking" },
       { type: "feature", text: "Carlota Jo: AI Brand Advisory with real-time competitive positioning analysis" },
       { type: "feature", text: "Carlota Jo: Engagement Workflow tracker with milestone management" },
       { type: "security", text: "Auth token refresh logic hardened against replay attacks" },
@@ -101,7 +101,7 @@ const versionBadge: Record<string, string> = {
 export default function Changelog() {
   usePageMeta({
     title: "Changelog | SZL Holdings – Platform Release Notes",
-    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, INCA, Terra, Vessels, Lyte, and more.",
+    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, INCA, Beacon, Vessels, Lyte, Nimbus, Rosie, and Aegis.",
     canonical: "https://szlholdings.com/changelog",
   });
   return (

@@ -16,7 +16,7 @@ const AGENTS = [
   { id: "beacon", name: "Beacon", icon: "📡", color: "hsl(190, 90%, 50%)", isAdvisory: true },
   { id: "muse", name: "Muse", icon: "✨", color: "hsl(280, 80%, 60%)", isAdvisory: false },
   { id: "compass", name: "Compass", icon: "🎯", color: "hsl(160, 80%, 50%)", isAdvisory: false },
-  { id: "terra", name: "Terra", icon: "🏢", color: "hsl(210, 90%, 55%)", isAdvisory: false },
+  { id: "terra", name: "Beacon", icon: "📡", color: "hsl(200, 90%, 55%)", isAdvisory: false },
   { id: "navigator", name: "Navigator", icon: "🧭", color: "hsl(250, 90%, 65%)", isAdvisory: false },
   { id: "stephen-ai", name: "Stephen AI", icon: "💼", color: "hsl(250, 90%, 65%)", isAdvisory: false },
 ];
