@@ -26,7 +26,7 @@ SZL Holdings (szlholdings.com)
 │   ├── Action routing & output generation
 │   └── Human approval gates & governance
 │
-├── Lyte — Business Observability [$340K/quarter revenue recovery]
+├── Lyte — Business Observability [approval latency detection]
 │   ├── Command Inbox (prioritized signals)
 │   ├── Approvals Center (aging impact estimates)
 │   ├── Ownership Map (handoff visibility)
@@ -34,7 +34,7 @@ SZL Holdings (szlholdings.com)
 │   ├── Readiness Module (launch gates & blockers)
 │   └── Action Queue (role-aware, SLA-tracked)
 │
-├── Vessels — Maritime Command [34-day dark vessel pre-detection]
+├── Vessels — Maritime Command [dark vessel anomaly detection]
 │   ├── Fleet Map (AIS + anomaly detection)
 │   ├── Voyage Economics (revenue/cost/margin modeling)
 │   ├── Exception Center (consequence modeling)
@@ -157,24 +157,25 @@ SZL Holdings (szlholdings.com)
 6. **Stephen Site** (/stephen/) — Founder narrative, case studies
 
 ### Key talking points:
-- "$340K/quarter revenue recovery" (Lyte approval latency detection)
-- "34-day dark vessel pre-detection" (Vessels AIS anomaly)
-- "40% lower infrastructure overhead" (shared ecosystem architecture)
-- "11 platform roles with org-scoped access" (enterprise-grade auth)
-- "198 database tables across 5 product domains" (real schema, not a mockup)
-- "5 NYC open data sources ingested automatically" (Terra real data pipeline)
+- Approval latency detection surfaces bottlenecks before they impact revenue (Lyte)
+- AIS anomaly detection flags dark vessel behavior for early intervention (Vessels)
+- Shared monorepo architecture reduces infrastructure overhead vs separate deployments
+- 11 platform roles with org-scoped access (enterprise-grade auth)
+- 198 database tables across 5 product domains (real schema, not a mockup)
+- 5 NYC open data sources ingested automatically (Terra real data pipeline)
 
 ## 9. Core KPI Definitions
 
-| KPI | Definition | Current Value |
-|-----|-----------|---------------|
-| Revenue Recovered / Quarter | Value of stalled approvals detected by Lyte before manual review | $340K |
-| Dark Vessel Pre-Detection Lead | Days before formal sanctions designation that Vessels flags anomalous behavior | 34 days |
-| Decision Velocity | Multiplier of decision throughput via Alloy workflow orchestration vs manual | 3.4x |
-| Infrastructure Overhead Reduction | Cost savings from shared ecosystem vs standalone deployments | 40% |
-| Signal Detection Time | Time from event occurrence to Lyte surfacing the signal | < 4 min |
-| Client Retention (Carlota Jo) | Pilot client retention rate | 100% |
-| Platforms Live | Number of operational platform surfaces | 4 (public) |
+| KPI | Definition | Status |
+|-----|-----------|--------|
+| Revenue at Risk / Quarter | Value of stalled approvals detected by Lyte before manual review | Measurable — requires production data |
+| Dark Vessel Detection Lead | Days before formal designation that Vessels flags anomalous behavior | Measurable — requires AIS feed |
+| Decision Velocity | Throughput via Alloy workflow orchestration vs manual | Measurable — requires production data |
+| Infrastructure Overhead | Cost delta of shared ecosystem vs standalone deployments | Estimable — architecture comparison |
+| Signal Detection Time | Time from event occurrence to Lyte surfacing the signal | Measurable — instrumented in Alloy |
+| Platforms Live | Number of operational platform surfaces | 4 (public), 8+ (internal/demo) |
+
+_Note: Quantitative KPI targets should be established once production workloads generate baseline data._
 
 ## 10. Data Room Folder Recommendations
 

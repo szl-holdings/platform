@@ -48,3 +48,6 @@ Thumbs.db
 .cache/
 .local/
 
+# Attached assets (user-pasted payload dumps)
+attached_assets/
+
