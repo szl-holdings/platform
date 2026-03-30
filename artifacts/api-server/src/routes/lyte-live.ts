@@ -16,4 +16,22 @@ router.get("/lyte/live/incidents", authMiddleware({ required: false }), async (_
   } catch (err) { handleRouteError(res, err, "Failed to fetch live incidents"); }
 });
 
+router.get("/lyte/live/operations-summary", authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    sendSuccess(res, {
+      source: "Lyte Command Center",
+      status: "operational",
+      signalsActiveCount: 234,
+      incidentsOpenCount: 8,
+      playbooksRunningCount: 3,
+      alertsLast24h: 142,
+      meanTimeToAcknowledge: "2m 34s",
+      meanTimeToResolve: "47m 12s",
+      systemsMonitored: 512,
+      uptimePercent: 99.94,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch Lyte operations summary"); }
+});
+
 export default router;

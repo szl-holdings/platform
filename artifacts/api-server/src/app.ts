@@ -35,18 +35,38 @@ app.use(helmet({
   frameguard: { action: "deny" },
 }));
 
-const allowedOrigins = process.env.CORS_ORIGINS
+const rawCorsOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(",").map(o => o.trim())
   : undefined;
 
-if (isProduction && !allowedOrigins) {
+if (isProduction && !rawCorsOrigins) {
   logger.warn("CORS_ORIGINS not set in production — CORS will reject cross-origin requests with credentials");
 }
 
+function originToPattern(origin: string): RegExp | string {
+  if (origin.includes("*")) {
+    const escaped = origin.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\\\*/g, ".*");
+    return new RegExp(`^${escaped}$`);
+  }
+  return origin;
+}
+
+const corsOriginList = rawCorsOrigins?.map(originToPattern);
+
+function corsOriginFn(
+  requestOrigin: string | undefined,
+  callback: (err: Error | null, allow?: boolean) => void,
+) {
+  if (!requestOrigin) return callback(null, true);
+  if (!corsOriginList) return callback(null, !isProduction);
+  const allowed = corsOriginList.some(pattern =>
+    pattern instanceof RegExp ? pattern.test(requestOrigin) : pattern === requestOrigin
+  );
+  callback(null, allowed);
+}
+
 app.use(cors({
-  origin: isProduction
-    ? (allowedOrigins ?? false)
-    : (allowedOrigins ?? true),
+  origin: corsOriginFn,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id"],

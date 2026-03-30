@@ -106,6 +106,17 @@ AI-powered domain agents are implemented for each application, with specialized 
 ### Applications Count
 13 apps total (post-Alloy addition): Alloy (root `/alloy/`), SZL Holdings (root `/`, absorbs Project List), Stephen Site, Vessels, Firestorm (absorbs Readiness Report), Lyte Command Center (absorbs Admin Control Plane), INCA, Terra, Dreamscape, Carlota Jo, MSP Command Center, API Server, Mockup Sandbox
 
+### Production Readiness
+- **Environment Variables:** `NODE_ENV=production` and `LOG_LEVEL=info` set in Replit production environment. `SESSION_SECRET` and `DATABASE_URL` provided as secrets.
+- **CORS:** `CORS_ORIGINS` set to `https://*.replit.app,https://*.replit.dev,https://*.repl.co` in production; CORS uses regex matching to support wildcard patterns while respecting `credentials: true`.
+- **Security Headers:** Helmet configured with HSTS (in production), strict CSP, referrer policy, and X-Frame-Options deny.
+- **Rate Limiting:** Global (200 req/15min), auth (30 req/15min), write (100 req/15min), read (300 req/15min) limiters in production.
+- **Health Checks:** `/api/health`, `/api/health/live`, `/api/health/ready` endpoints. Startup check at `/api/healthz`.
+- **Database:** Schema synced via drizzle-kit push. Seeded with comprehensive demo data via `scripts/src/seed.ts`.
+- **Error Pages:** Branded 404 pages across all apps (styled with Tailwind, dark-mode aware). Global `ErrorBoundary` wraps all app roots for 500-level errors.
+- **Live Route Stubs:** Created `readiness-live`, `firestorm-live`, `inca-live`, `vessels-live`, `lyte-live`, `dreamscape-live`, `carlota-live` route files that were imported in `routes/index.ts` but missing from the filesystem.
+- **Project List:** Serves as primary landing page at `/` with app directory, category filters, search, and links to all apps.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

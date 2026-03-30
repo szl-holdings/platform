@@ -27,3 +27,10 @@ timeoutMs = 120000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.production]
+NODE_ENV = "production"
+LOG_LEVEL = "info"
+CORS_ORIGINS = "https://*.replit.app,https://*.replit.dev,https://*.repl.co"
