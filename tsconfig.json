@@ -32,6 +32,15 @@
     },
     {
       "path": "./lib/auth"
+    },
+    {
+      "path": "./lib/integrations-openai-ai-server"
+    },
+    {
+      "path": "./lib/integrations-openai-ai-react"
+    },
+    {
+      "path": "./lib/integrations-anthropic-ai"
     }
   ]
 }

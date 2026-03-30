@@ -14,6 +14,8 @@
     "@workspace/auth": "workspace:*",
     "@workspace/config": "workspace:*",
     "@workspace/db": "workspace:*",
+    "@workspace/integrations-openai-ai-server": "workspace:*",
+    "@workspace/integrations-anthropic-ai": "workspace:*",
     "@workspace/observability": "workspace:*",
     "@workspace/services": "workspace:*",
     "cookie-parser": "^1.4.7",

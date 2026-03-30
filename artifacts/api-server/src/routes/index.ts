@@ -23,6 +23,7 @@ import bookingRouter from "./booking";
 import holdingsRouter from "./holdings";
 import carlotaJoRouter from "./carlota-jo";
 import observabilityRouter from "./observability";
+import alloyChatRouter from "./alloy-chat";
 
 const router: IRouter = Router();
 
@@ -67,5 +68,6 @@ router.use(holdingsRouter);
 router.use(carlotaJoRouter);
 router.use("/observability", readLimiter);
 router.use(observabilityRouter);
+router.use(alloyChatRouter);
 
 export default router;

@@ -71,17 +71,21 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **Stripe Billing Integration:** Full checkout/subscription/webhook pipeline with API routes for managing billing flows and webhook verification.
 - **Intelligence Layer:** Provides 25+ REST endpoints for cross-platform intelligence (threats, geopolitical events, maritime data, news, tech trends) and AI-powered endpoints (chat, summarize, sentiment, image-gen, threat-briefing). Features in-memory caching and demo data fallback.
 - **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all 8 applications, offering a floating button, slide-out chat panel with SSE streaming, markdown rendering, and suggested questions. Supports Replit proxy, OpenAI, and Anthropic providers.
+- **AlloyChat (Admin Panel `/alloy-chat`):** Production multi-model AI operations assistant. Routes to Claude (claude-sonnet-4-6) for analysis/reasoning/code tasks and GPT-5.2 for general ops queries. SSE streaming with real-time typing effect. Conversation history persisted in PostgreSQL `conversations`+`messages` tables. Dynamic system prompt assembler pulls live state from admin API endpoints (overview, system-health, connectors, feature-flags) before every call. Contextual suggested prompts based on current health alerts. In-page markdown renderer with code blocks, tables, copy buttons. Model selector (Auto/Claude/GPT-5.2) with per-message model badge. Backend at `artifacts/api-server/src/routes/alloy-chat.ts`, frontend at `artifacts/admin-panel/src/pages/alloy-chat.tsx`.
 - **Observability (DreamStack Intelligence):** Structured logging via pino and a system health endpoint monitoring DB, storage, auth, connectors, and app routes. The DreamStack Intelligence framework (`@workspace/observability`) provides **8-pillar** domain-native observability (Performance Intelligence, Business Observability, User Experience Intelligence, Predictive Health, Operational Awareness, Strategic Insight, **Security Posture**, **Innovation Velocity**) across all 11 apps. Inspired by New Relic Business Observability, Dynatrace Davis AI/Smartscape, Datadog Watchdog/APM, and DORA metrics. Each app has domain-specific metrics, KPIs, and health signals with an `/observability` page. Lyte Command Center aggregates cross-portfolio health. Admin Panel provides system-wide observability. API endpoints at `/api/observability/:appSlug`. Philosophy component at `@workspace/shared-ui/intelligence-philosophy`. 5-level maturity model (Reactive → Proactive → Predictive → Intelligent → Autonomous).
 - **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
 
 ### Shared Libraries
 - `lib/shared-ui`: Design system, AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy component
-- `lib/db`: Drizzle ORM schemas and database connection
+- `lib/db`: Drizzle ORM schemas and database connection (includes `conversations` + `messages` tables for AlloyChat)
 - `lib/config`: Application-to-connector dependency mapping
 - `lib/services`: 24 service adapters with health checks and mock fallback
 - `lib/api-spec`: OpenAPI 3.1 specification
 - `lib/api-zod`: Generated Zod schemas
 - `lib/api-client-react`: Generated React Query hooks
+- `lib/integrations-openai-ai-server`: OpenAI server-side integration via Replit AI Integrations
+- `lib/integrations-openai-ai-react`: OpenAI React client hooks
+- `lib/integrations-anthropic-ai`: Anthropic server-side integration via Replit AI Integrations
 
 ### Post-Merge Script
 `scripts/post-merge.sh` runs `pnpm install --frozen-lockfile` then `yes '' | pnpm --filter db push || true` to handle interactive drizzle-kit prompts automatically.
