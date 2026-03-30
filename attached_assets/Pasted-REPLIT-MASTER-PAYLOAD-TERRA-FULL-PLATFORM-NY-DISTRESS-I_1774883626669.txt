@@ -1,0 +1,378 @@
+REPLIT MASTER PAYLOAD — TERRA FULL PLATFORM + NY DISTRESS INTELLIGENCE ENGINE
+
+MISSION
+Build Terra as:
+1. A world-class brokerage operating system
+2. A NYC / NY State real estate intelligence engine
+3. A deal discovery platform for brokers, agents, and investors
+
+Terra must:
+- manage deals
+- control execution
+- surface risk
+- predict outcomes
+- discover new opportunities (foreclosures, defaults, distress)
+
+THIS IS NOT JUST SOFTWARE
+THIS IS A DEAL ENGINE
+
+==================================================
+SECTION 1 — CORE DOCTRINE
+==================================================
+
+CLARITY → CONTROL → EXECUTION → OPPORTUNITY
+
+ADD NEW PRINCIPLE:
+DISCOVERY
+
+SYSTEM MUST:
+- show what is happening
+- show what is breaking
+- show what is next
+- show what can be captured (opportunities)
+
+==================================================
+SECTION 2 — SZL COMMAND LOOP
+==================================================
+
+DETECT → INTERPRET → DECIDE → EXECUTE → VERIFY → DISCOVER
+
+DISCOVER = new deals, distressed assets, opportunities
+
+==================================================
+SECTION 3 — NEW CORE FEATURE: DISTRESS INTELLIGENCE ENGINE
+==================================================
+
+CREATE MODULE:
+/apps/terra/distress-engine
+
+PURPOSE:
+Find real estate opportunities in NYC and NY State:
+- foreclosures
+- pre-foreclosures
+- defaults
+- liens
+- distressed sales
+- tax issues
+- auctions
+- bank-owned properties (REO)
+
+==================================================
+SECTION 4 — DATA SOURCES (ABSTRACTION LAYER)
+==================================================
+
+BUILD DATA INGESTION LAYER:
+
+CREATE:
+/packages/data-connectors
+
+CONNECTORS (ABSTRACTED — DO NOT HARD-CODE KEYS):
+
+- public foreclosure filings
+- county records (NY counties)
+- NYC ACRIS (property records)
+- tax lien records
+- court filings
+- auction notices
+- MLS delta signals (price drops, expired listings)
+- manual CSV upload support
+
+DATA TYPES:
+- property address
+- owner
+- filing type
+- filing date
+- debt amount (if available)
+- lien type
+- auction date
+- status
+- borough / county
+
+==================================================
+SECTION 5 — DISTRESS ENGINE FEATURES
+==================================================
+
+BUILD:
+
+1. DISTRESS SEARCH ENGINE
+
+SEARCH BY:
+- borough (NYC)
+- county (NY State)
+- zip code
+- property type
+- price range
+- distress type
+- date range
+
+FILTER:
+- pre-foreclosure
+- foreclosure
+- auction
+- REO
+- tax lien
+- expired listing
+
+SORT:
+- newest
+- highest value
+- highest risk
+- closest to auction
+
+--------------------------------------------------
+
+2. DISTRESS MAP VIEW
+
+- NYC map
+- pin markers
+- clustering
+- color-coded by distress type
+
+--------------------------------------------------
+
+3. DISTRESS LIST VIEW
+
+FOR EACH PROPERTY:
+- address
+- borough
+- type of distress
+- stage
+- estimated value (if available)
+- risk/opportunity score
+- date filed
+- action button
+
+--------------------------------------------------
+
+4. PROPERTY DETAIL (INTEL VIEW)
+
+SHOW:
+- property data
+- distress history
+- timeline
+- ownership
+- linked deals (if any)
+- notes
+- AI insight:
+  - likelihood of sale
+  - investor opportunity score
+  - suggested outreach
+
+--------------------------------------------------
+
+5. ALERT SYSTEM (CRITICAL)
+
+CREATE ALERTS:
+
+- new foreclosure in zip
+- new lien filed
+- auction approaching
+- price drop signals
+- distressed listing added
+
+DELIVERY:
+- in-app alerts
+- notification panel
+- future: email hooks
+
+==================================================
+SECTION 6 — OPPORTUNITY SCORING (NIMBUS EXTENSION)
+==================================================
+
+FOR EACH PROPERTY:
+
+GENERATE:
+- opportunity score (0–100)
+- confidence
+- rationale
+
+FACTORS:
+- distress type
+- time in distress
+- property value vs debt (if known)
+- location demand
+- listing history
+- price changes
+
+OUTPUT:
+
+“High opportunity: Pre-foreclosure, 45 days old, high-demand area, no recent activity”
+
+==================================================
+SECTION 7 — INTEGRATION INTO MAIN PRODUCT
+==================================================
+
+CONNECT DISTRESS ENGINE TO:
+
+CRM
+→ convert property → lead
+
+DEALS
+→ convert → active deal
+
+LYTE
+→ assign agent / investor
+
+NIMBUS
+→ predict close likelihood
+
+ALLOYSCAPE
+→ trigger outreach workflows
+
+==================================================
+SECTION 8 — NEW NAVIGATION ITEM
+==================================================
+
+ADD TO SIDEBAR:
+
+- Distress Engine 🔥
+
+POSITION:
+Between Listings and Deals
+
+==================================================
+SECTION 9 — INVESTOR MODE
+==================================================
+
+ADD ROLE:
+Investor
+
+INVESTOR VIEW:
+- distress feed
+- opportunity scoring
+- saved properties
+- outreach tracking
+- deal pipeline
+
+==================================================
+SECTION 10 — WORKFLOWS (NEW)
+==================================================
+
+AUTOMATIONS:
+
+1. New distress → assign agent/investor
+2. High opportunity → alert immediately
+3. Auction < 7 days → escalate
+4. No contact made → follow-up
+5. Converted to deal → create pipeline entry
+
+==================================================
+SECTION 11 — UI ADDITIONS
+==================================================
+
+DISTRESS SCREEN LAYOUT:
+
+TOP:
+filters + search bar
+
+LEFT:
+list of properties
+
+CENTER:
+map
+
+RIGHT:
+detail panel
+
+PROPERTY CARD:
+- address
+- distress type
+- score
+- action button
+
+==================================================
+SECTION 12 — WEBSITE EVOLUTION
+==================================================
+
+UPDATE LANDING PAGE:
+
+NEW SECTION:
+
+“Find Deals Before the Market Does”
+
+CONTENT:
+- NYC foreclosure tracking
+- real-time distress alerts
+- investor opportunity scoring
+
+CTA:
+Explore Opportunities
+
+==================================================
+SECTION 13 — BUSINESS MODEL (CRITICAL)
+==================================================
+
+ADD TIERS:
+
+FREE
+- basic CRM
+- limited listings
+
+PRO (Agents)
+- pipeline
+- transactions
+- automation
+
+BROKER
+- team analytics
+- routing
+- oversight
+
+INVESTOR / ELITE
+- distress engine
+- opportunity alerts
+- advanced analytics
+- early signals
+
+==================================================
+SECTION 14 — API ADDITIONS
+==================================================
+
+CREATE:
+
+/api/terra/distress/search
+/api/terra/distress/property/:id
+/api/terra/distress/alerts
+/api/terra/distress/score
+
+==================================================
+SECTION 15 — DEMO DATA (UPGRADE)
+==================================================
+
+ADD:
+
+- 50 NYC distressed properties
+- mixed boroughs
+- foreclosure timelines
+- auctions
+- lien scenarios
+
+==================================================
+SECTION 16 — SUCCESS METRICS (UPDATED)
+==================================================
+
+TRACK:
+
+- deals sourced from distress engine
+- investor conversions
+- alert engagement
+- opportunity score accuracy
+- pipeline growth from discovery
+
+==================================================
+SECTION 17 — FINAL INTENT
+==================================================
+
+Terra is now:
+
+1. Brokerage OS
+2. Deal execution system
+3. Intelligence engine
+4. Opportunity discovery platform
+
+NOT:
+just a CRM
+just a proptech tool
+
+TARGET REACTION:
+“This finds deals, runs deals, and closes deals.”
