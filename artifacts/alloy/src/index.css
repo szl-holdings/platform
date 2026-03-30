@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+
+  --font-sans: var(--app-font-sans);
+  --font-mono: var(--app-font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 224 25% 4%;
+  --foreground: 210 20% 92%;
+  --border: 220 15% 12%;
+  --input: 220 15% 12%;
+  --ring: 195 100% 50%;
+
+  --card: 224 22% 6%;
+  --card-foreground: 210 20% 92%;
+
+  --popover: 224 20% 8%;
+  --popover-foreground: 210 20% 92%;
+
+  /* Alloy cyan/teal accent — distinct from admin panel's blue */
+  --primary: 195 100% 50%;
+  --primary-foreground: 224 25% 4%;
+
+  --secondary: 220 15% 12%;
+  --secondary-foreground: 210 15% 80%;
+
+  --muted: 220 15% 10%;
+  --muted-foreground: 215 12% 52%;
+
+  --accent: 220 15% 12%;
+  --accent-foreground: 210 20% 92%;
+
+  --destructive: 0 80% 55%;
+  --destructive-foreground: 0 0% 100%;
+
+  --sidebar: 224 28% 3%;
+  --sidebar-foreground: 210 15% 70%;
+
+  --radius: 0.5rem;
+
+  --app-font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --app-font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--app-font-sans);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(220 15% 20%);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(220 15% 28%);
+}
+
+/* Alloy glow effect for primary elements */
+.alloy-glow {
+  box-shadow: 0 0 20px hsla(195, 100%, 50%, 0.15), 0 0 40px hsla(195, 100%, 50%, 0.05);
+}
+
+/* Scan line effect for terminal feel */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Streaming cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming-cursor::after {
+  content: "▋";
+  animation: blink 1s step-start infinite;
+  color: hsl(var(--primary));
+  margin-left: 1px;
+}
+
+/* Agent color themes */
+.agent-helmsman { --agent-color: hsl(210, 90%, 55%); }
+.agent-sentinel { --agent-color: hsl(350, 80%, 55%); }
+.agent-beacon { --agent-color: hsl(190, 90%, 50%); }
+.agent-muse { --agent-color: hsl(280, 80%, 60%); }
+.agent-compass { --agent-color: hsl(160, 80%, 50%); }
+.agent-terra { --agent-color: hsl(148, 70%, 47%); }
+.agent-nexus { --agent-color: hsl(250, 90%, 65%); }
+.agent-navigator { --agent-color: hsl(195, 100%, 50%); }
+.agent-stephen { --agent-color: hsl(250, 70%, 65%); }
+.agent-auto { --agent-color: hsl(195, 100%, 50%); }

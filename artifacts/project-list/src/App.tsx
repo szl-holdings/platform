@@ -4,7 +4,7 @@ import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Search, ExternalLink, Shield, Brain, Zap, Ship, Building, Palette, Activity,
-  Globe, BarChart3, Laptop, Grid, List, ArrowUpRight,
+  Globe, BarChart3, Laptop, Grid, List, ArrowUpRight, Layers,
 } from "lucide-react";
 import { UserButton } from "@workspace/shared-ui/UserButton";
 import { cn } from "@workspace/shared-ui/utils";
@@ -148,6 +148,18 @@ const apps = [
     path: "/readiness-report/",
     description: "Compliance assessment and audit readiness engine for regulated industries.",
     features: ["Gap Analysis", "Remediation", "Audit Trail", "Reports"],
+  },
+  {
+    id: "alloy",
+    name: "Alloy",
+    subtitle: "Unified AI Command",
+    category: "ai",
+    status: "live",
+    icon: Layers,
+    accent: "#00d4ff",
+    path: "/alloy/",
+    description: "Unified AI command center spanning all SZL domains. Agent switcher, streaming chat, knowledge base, real-time feeds, voice, and Model Arena.",
+    features: ["10 Domain Agents", "Streaming Chat", "Knowledge Base", "Model Arena"],
   },
 ];
 

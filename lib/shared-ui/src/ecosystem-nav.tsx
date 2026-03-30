@@ -130,6 +130,14 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     accent: "#f97316",
     icon: "⚙️",
   },
+  {
+    id: "alloy",
+    name: "Alloy",
+    subtitle: "Unified AI Command",
+    path: "/alloy/",
+    accent: "#00d4ff",
+    icon: "⚡",
+  },
 ];
 
 const LEVEL_COLORS: Record<EcosystemNotification["level"], string> = {

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/alloy/"
+title = "Alloy — Unified AI Command Center"
+version = "1.0.0"
+id = "artifacts/alloy"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/alloy/" ]
+localPort = 25500
+
+[services.development]
+run = "pnpm --filter @workspace/alloy run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/alloy", "run", "build" ]
+publicDir = "artifacts/alloy/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25500"
+BASE_PATH = "/alloy/"

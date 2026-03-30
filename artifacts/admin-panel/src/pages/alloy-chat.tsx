@@ -3,9 +3,31 @@ import {
   MessageSquare, Send, Bot, User, Sparkles, Terminal, Image, BookOpen,
   Bell, GitCompare, Download, Copy, Check, Trash2, Plus, Search, RefreshCw,
   ChevronDown, ThumbsUp, ThumbsDown, Link, CheckCircle,
-  Settings, X, Zap, Clock, Database, FileText, Brain, Cpu,
+  Settings, X, Zap, Clock, Database, FileText, Brain, Cpu, Layers, ExternalLink,
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+
+function AlloyUpgradeBanner() {
+  return (
+    <div className="mx-4 mt-3 mb-1 px-4 py-3 rounded-lg border border-cyan-500/30 bg-cyan-500/5 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2.5">
+        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
+          <Layers className="w-3.5 h-3.5 text-white" />
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-cyan-300">Alloy — the full unified AI command center — is now live!</p>
+          <p className="text-[11px] text-muted-foreground">10 domain agents, real-time feeds, knowledge base, voice, Model Arena &amp; more.</p>
+        </div>
+      </div>
+      <a
+        href="/alloy/"
+        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 text-xs font-medium hover:bg-cyan-500/25 transition-colors"
+      >
+        Open Alloy <ExternalLink className="w-3 h-3" />
+      </a>
+    </div>
+  );
+}
 
 const API_BASE = "/api";
 
@@ -777,8 +799,9 @@ export default function AlloyChat() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)]">
+      <AlloyUpgradeBanner />
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-4 mt-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-cyan-500 flex items-center justify-center">
           <Bot className="w-5 h-5 text-white" />
         </div>
