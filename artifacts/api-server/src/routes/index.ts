@@ -22,6 +22,7 @@ import incaRouter from "./inca";
 import bookingRouter from "./booking";
 import holdingsRouter from "./holdings";
 import carlotaJoRouter from "./carlota-jo";
+import observabilityRouter from "./observability";
 
 const router: IRouter = Router();
 
@@ -64,5 +65,7 @@ router.use(incaRouter);
 router.use(bookingRouter);
 router.use(holdingsRouter);
 router.use(carlotaJoRouter);
+router.use("/observability", readLimiter);
+router.use(observabilityRouter);
 
 export default router;

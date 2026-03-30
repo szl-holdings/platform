@@ -14,6 +14,7 @@ import CompliancePage from "@/pages/compliance-page";
 import AlertsPage from "@/pages/alerts-page";
 import RiskScoringPage from "@/pages/risk-scoring";
 import ReportsPage from "@/pages/reports-page";
+import ObservabilityPage from "@/pages/observability";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -29,6 +30,7 @@ const navItems = [
   { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
   { path: "/reports", label: "Reports", icon: FileText },
+  { path: "/observability", label: "Observability", icon: Search },
 ];
 
 function StatusBar() {
@@ -119,6 +121,7 @@ function AppRouter() {
       <Route path="/alerts" component={AlertsPage} />
       <Route path="/risk-scoring" component={RiskScoringPage} />
       <Route path="/reports" component={ReportsPage} />
+      <Route path="/observability" component={ObservabilityPage} />
       <Route>
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Page not found</p>

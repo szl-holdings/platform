@@ -21,6 +21,7 @@ import DigitalExperiencePage from "@/pages/digital-experience";
 import SyntheticsCompliancePage from "@/pages/synthetics-compliance";
 import CO2EmissionsPage from "@/pages/co2-emissions";
 import AppliedIntelligencePage from "@/pages/applied-intelligence";
+import ObservabilityPage from "@/pages/observability";
 import { useState } from "react";
 
 const queryClient = new QueryClient({
@@ -70,6 +71,7 @@ const navSections: NavSection[] = [
     items: [
       { path: "/applied-intelligence", label: "Applied Intelligence", icon: Brain },
       { path: "/ai-intel", label: "AI Intelligence", icon: Brain },
+      { path: "/observability", label: "Observability", icon: Activity },
     ],
   },
 ];
@@ -276,6 +278,7 @@ function AppRouter() {
       <Route path="/weather" component={WeatherPage} />
       <Route path="/simulations" component={SimulationsPage} />
       <Route path="/alerts" component={AlertCenterPage} />
+      <Route path="/observability" component={ObservabilityPage} />
       <Route>
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Page not found</p>

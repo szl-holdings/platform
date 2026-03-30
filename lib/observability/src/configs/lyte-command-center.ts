@@ -1,0 +1,35 @@
+import type { DomainConfig } from "../types.js";
+
+export const lyteCommandCenterConfig: DomainConfig = {
+  appSlug: "lyte-command-center",
+  appName: "Lyte Command Center",
+  domain: "operations-command",
+  description: "Cross-portfolio operations, signal aggregation, and incident management observability",
+  connectors: ["slack", "ai", "posthog"],
+  metrics: [
+    { id: "signal_ingestion_rate", name: "Signal Ingestion Rate", description: "Signals processed per second", unit: "/hr", pillar: "performance", type: "counter" },
+    { id: "correlation_engine_latency", name: "Correlation Engine Latency", description: "Time to correlate cross-app signals", unit: "ms", pillar: "performance", type: "histogram", thresholds: { warning: 200, critical: 1000, direction: "above" } },
+    { id: "dashboard_render_time", name: "Dashboard Render Time", description: "Command center dashboard load time", unit: "ms", pillar: "performance", type: "histogram" },
+    { id: "mttr", name: "Mean Time to Resolution", description: "Average incident resolution time", unit: "seconds", pillar: "business", type: "gauge" },
+    { id: "incident_cost_savings", name: "Incident Cost Savings", description: "Estimated cost savings from fast resolution", unit: "score", pillar: "business", type: "gauge" },
+    { id: "sla_compliance", name: "SLA Compliance Rate", description: "Percentage of incidents resolved within SLA", unit: "%", pillar: "business", type: "gauge", thresholds: { warning: 90, critical: 80, direction: "below" } },
+    { id: "operator_efficiency", name: "Operator Efficiency", description: "Actions per incident for operations team", unit: "count", pillar: "userExperience", type: "gauge" },
+    { id: "alert_fatigue_index", name: "Alert Fatigue Index", description: "Alert noise vs actionable ratio", unit: "%", pillar: "userExperience", type: "gauge", thresholds: { warning: 30, critical: 50, direction: "above" } },
+    { id: "playbook_adoption", name: "Playbook Adoption Rate", description: "Rate of automated runbook usage", unit: "%", pillar: "userExperience", type: "gauge" },
+    { id: "incident_prediction", name: "Incident Prediction Accuracy", description: "Accuracy of predictive incident detection", unit: "%", pillar: "predictiveHealth", type: "gauge" },
+    { id: "capacity_forecast", name: "Capacity Forecast Accuracy", description: "Infrastructure capacity prediction accuracy", unit: "%", pillar: "predictiveHealth", type: "gauge" },
+    { id: "upstream_health", name: "Upstream Service Health", description: "Health of all monitored upstream services", unit: "score", pillar: "operational", type: "gauge" },
+    { id: "integration_sync", name: "Integration Sync Status", description: "Cross-service integration synchronization", unit: "score", pillar: "operational", type: "gauge" },
+    { id: "operational_excellence", name: "Operational Excellence Score", description: "Composite operations quality metric", unit: "score", pillar: "strategic", type: "gauge" },
+    { id: "reliability_budget", name: "Reliability Budget Remaining", description: "Error budget consumption status", unit: "%", pillar: "strategic", type: "gauge" },
+  ],
+  kpis: [
+    { id: "mttr_kpi", name: "MTTR", pillar: "business", format: "duration", target: 1800 },
+    { id: "sla", name: "SLA Compliance", pillar: "business", format: "percent", target: 95 },
+    { id: "signal_rate", name: "Signal Throughput", pillar: "performance", format: "number", target: 5000 },
+  ],
+  healthSignals: [
+    { id: "cascade_failure", name: "Cascade Failure Risk", pillar: "operational", severity: "critical", condition: "Multiple correlated failures detected" },
+    { id: "budget_burn", name: "Error Budget Burn Rate", pillar: "strategic", severity: "warning", condition: "Error budget consumption > 80%" },
+  ],
+};

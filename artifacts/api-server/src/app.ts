@@ -6,6 +6,7 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
+import { telemetryMiddleware } from "./middlewares/telemetry";
 
 const app: Express = express();
 
@@ -41,6 +42,8 @@ app.use(cors({
 }));
 
 app.use(globalLimiter);
+
+app.use(telemetryMiddleware);
 
 app.use(
   pinoHttp({

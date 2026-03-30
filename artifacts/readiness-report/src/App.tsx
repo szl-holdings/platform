@@ -15,6 +15,7 @@ import Trends from "@/pages/trends";
 import Rollup from "@/pages/rollup";
 import AIInsights from "@/pages/ai-insights";
 import NotFound from "@/pages/not-found";
+import ObservabilityPage from "@/pages/observability";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/trends" component={Trends} />
       <Route path="/rollup" component={Rollup} />
       <Route path="/ai-insights" component={AIInsights} />
+      <Route path="/observability" component={ObservabilityPage} />
       <Route component={NotFound} />
     </Switch>
   );

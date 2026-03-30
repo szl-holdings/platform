@@ -1,6 +1,6 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker } from "lucide-react";
+import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
@@ -8,6 +8,7 @@ import ProjectDetail from "@/pages/project-detail";
 import Experiments from "@/pages/experiments";
 import Models from "@/pages/models";
 import Insights from "@/pages/insights";
+import ObservabilityPage from "@/pages/observability";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -19,6 +20,7 @@ const navItems = [
   { path: "/experiments", label: "Experiments", icon: FlaskConical },
   { path: "/models", label: "Models", icon: Cpu },
   { path: "/insights", label: "Insights", icon: Lightbulb },
+  { path: "/observability", label: "Observability", icon: Activity },
 ];
 
 function Sidebar() {
@@ -76,6 +78,7 @@ function AppRouter() {
       <Route path="/experiments" component={Experiments} />
       <Route path="/models" component={Models} />
       <Route path="/insights" component={Insights} />
+      <Route path="/observability" component={ObservabilityPage} />
       <Route>
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground font-mono">404 — Page not found</p>

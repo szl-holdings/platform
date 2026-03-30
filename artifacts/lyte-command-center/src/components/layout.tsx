@@ -90,6 +90,8 @@ const NAV_ITEMS = [
   { href: "/commerce", label: "Commerce", icon: CreditCard },
   { href: "/intelligence", label: "Intelligence", icon: Brain },
   { href: "/ai-ops", label: "AI Ops Center", icon: Activity },
+  { href: "/observability", label: "Observability", icon: Zap },
+  { href: "/portfolio-observability", label: "Portfolio Health", icon: Activity },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

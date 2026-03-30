@@ -168,6 +168,10 @@ importers:
         version: 5.9.3
 
   artifacts/admin-panel:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -376,6 +380,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
       '@workspace/services':
         specifier: workspace:*
         version: link:../../lib/services
@@ -430,6 +437,10 @@ importers:
         version: 3.1.0
 
   artifacts/carlota-jo:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
@@ -484,6 +495,10 @@ importers:
         version: 3.9.0(react@19.1.0)
 
   artifacts/dreamscape:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -679,6 +694,10 @@ importers:
         version: 3.25.76
 
   artifacts/firestorm:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -874,6 +893,10 @@ importers:
         version: 3.25.76
 
   artifacts/inca:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
@@ -934,6 +957,10 @@ importers:
         version: 3.9.0(react@19.1.0)
 
   artifacts/lyte-command-center:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -1507,6 +1534,10 @@ importers:
         version: 3.25.76
 
   artifacts/readiness-report:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -1702,6 +1733,10 @@ importers:
         version: 3.25.76
 
   artifacts/stephen-site:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -1897,6 +1932,10 @@ importers:
         version: 3.25.76
 
   artifacts/szl-holdings:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'
@@ -1943,6 +1982,9 @@ importers:
       vite:
         specifier: 'catalog:'
         version: 7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2)
+      wouter:
+        specifier: ^3.3.5
+        version: 3.9.0(react@19.1.0)
 
   artifacts/terra:
     devDependencies:
@@ -2005,6 +2047,10 @@ importers:
         version: 3.9.0(react@19.1.0)
 
   artifacts/vessels:
+    dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../../lib/observability
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -2259,6 +2305,15 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  lib/observability:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
 
   lib/services:
     devDependencies:

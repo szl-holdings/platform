@@ -5,6 +5,7 @@ import BookingSuccess from "@/pages/BookingSuccess";
 import BookingCancel from "@/pages/BookingCancel";
 import BookingFollowUp from "@/pages/BookingFollowUp";
 import NotFound from "@/pages/NotFound";
+import ObservabilityPage from "@/pages/observability";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/booking/success" component={BookingSuccess} />
       <Route path="/booking/cancel" component={BookingCancel} />
       <Route path="/booking/follow-up" component={BookingFollowUp} />
+      <Route path="/observability" component={ObservabilityPage} />
       <Route component={NotFound} />
     </Switch>
   );

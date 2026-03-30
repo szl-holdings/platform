@@ -14,6 +14,7 @@
     "@workspace/auth": "workspace:*",
     "@workspace/config": "workspace:*",
     "@workspace/db": "workspace:*",
+    "@workspace/observability": "workspace:*",
     "@workspace/services": "workspace:*",
     "cookie-parser": "^1.4.7",
     "cors": "^2",

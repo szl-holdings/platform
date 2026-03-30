@@ -8,6 +8,7 @@ import { stephenAIConfig } from "@workspace/shared-ui/copilot-configs";
 import { Home } from "@/pages/Home";
 import CheckoutSuccess from "@/pages/checkout-success";
 import CheckoutCancel from "@/pages/checkout-cancel";
+import ObservabilityPage from "@/pages/observability";
 import { Server, AlertTriangle } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/checkout/success" component={CheckoutSuccess} />
       <Route path="/checkout/cancel" component={CheckoutCancel} />
+      <Route path="/observability" component={ObservabilityPage} />
       <Route component={NotFound} />
     </Switch>
   );

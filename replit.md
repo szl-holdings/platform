@@ -64,6 +64,15 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **Readiness:** programs, dimensions, score_history, milestones, risks, alerts
 - **Stephen/Holdings:** content_blocks, case studies, booking_requests, site_contacts, testimonials, portfolio_items
 
+### Technical Implementations & Feature Specifications
+- **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Seven roles (`super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`) control access.
+- **Service Adapters:** `lib/services` provides a consistent pattern for integrating 24 third-party services with auto environment variable detection and mock fallback, including health check mechanisms.
+- **Stripe Billing Integration:** Full checkout/subscription/webhook pipeline with API routes for managing billing flows and webhook verification.
+- **Intelligence Layer:** Provides 25+ REST endpoints for cross-platform intelligence (threats, geopolitical events, maritime data, news, tech trends) and AI-powered endpoints (chat, summarize, sentiment, image-gen, threat-briefing). Features in-memory caching and demo data fallback.
+- **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all 8 applications, offering a floating button, slide-out chat panel with SSE streaming, markdown rendering, and suggested questions. Supports Replit proxy, OpenAI, and Anthropic providers.
+- **Observability:** Structured logging via pino and a system health endpoint monitoring DB, storage, auth, connectors, and app routes. An Intelligent Observability framework (`@workspace/observability`) provides 6-pillar domain-native observability (Performance Intelligence, Business Observability, User Experience Intelligence, Predictive Health, Operational Awareness, Strategic Insight) across all 9 apps. Each app has domain-specific metrics, KPIs, and health signals with an `/observability` page. Lyte Command Center aggregates cross-portfolio health. Admin Panel provides system-wide observability. API endpoints at `/api/observability/:appSlug`.
+- **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
+
 ### Shared Libraries
 - `lib/shared-ui`: Design system, AgentCopilot, copilot configs, AI components, premium components
 - `lib/db`: Drizzle ORM schemas and database connection
@@ -75,6 +84,8 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 
 ### Post-Merge Script
 `scripts/post-merge.sh` runs `pnpm install --frozen-lockfile` then `yes '' | pnpm --filter db push || true` to handle interactive drizzle-kit prompts automatically.
+
+- `lib/observability`: Intelligent Observability framework with metric collectors, 6-pillar interfaces, domain configs for all 9 apps, React provider/hooks, and ObservabilityPanel component.
 
 ## External Dependencies
 - **Database:** PostgreSQL

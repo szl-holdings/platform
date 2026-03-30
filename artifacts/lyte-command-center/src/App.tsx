@@ -12,6 +12,8 @@ import Commerce from "@/pages/commerce";
 import IntelligencePage from "@/pages/intelligence";
 import AIOps from "@/pages/ai-ops";
 import NotFound from "@/pages/not-found";
+import ObservabilityPage from "@/pages/observability";
+import PortfolioObservability from "@/pages/portfolio-observability";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +36,8 @@ function Router() {
       <Route path="/commerce" component={Commerce} />
       <Route path="/intelligence" component={IntelligencePage} />
       <Route path="/ai-ops" component={AIOps} />
+      <Route path="/observability" component={ObservabilityPage} />
+      <Route path="/portfolio-observability" component={PortfolioObservability} />
       <Route component={NotFound} />
     </Switch>
   );

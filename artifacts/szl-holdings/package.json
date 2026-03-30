@@ -24,6 +24,10 @@
     "react-dom": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "wouter": "^3.3.5"
+  },
+  "dependencies": {
+    "@workspace/observability": "workspace:*"
   }
 }
