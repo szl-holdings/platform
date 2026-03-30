@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff, Sparkles, Activity } from "lucide-react";
+import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff, Sparkles, Activity, Calendar, Image, BookOpen, Wand2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "./ui";
 
@@ -73,6 +73,10 @@ const navItems = [
   { name: "Voices", href: "/voice", icon: Mic },
   { name: "AI Studio", href: "/ai-studio", icon: Sparkles },
   { name: "Observability", href: "/observability", icon: Activity },
+  { name: "Content Calendar", href: "/content-calendar", icon: Calendar },
+  { name: "Social Assets", href: "/social-assets", icon: Image },
+  { name: "Content Library", href: "/content-guides", icon: BookOpen },
+  { name: "Generator Tools", href: "/generators", icon: Wand2 },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

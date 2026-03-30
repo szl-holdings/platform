@@ -6,6 +6,10 @@ import { museConfig } from "@workspace/shared-ui/copilot-configs";
 import { Workspace } from "@/pages/workspace";
 import { CampaignDetail } from "@/pages/campaign-detail";
 import { AIStudio } from "@/pages/ai-studio";
+import { ContentCalendar } from "@/pages/content-calendar";
+import { SocialAssets } from "@/pages/social-assets";
+import { ContentGuides } from "@/pages/content-guides";
+import { GeneratorTools } from "@/pages/generator-tools";
 import NotFound from "@/pages/not-found";
 import ObservabilityPage from "@/pages/observability";
 
@@ -19,6 +23,10 @@ function Router() {
       <Route path="/campaigns/:id" component={CampaignDetail} />
       <Route path="/ai-studio" component={AIStudio} />
       <Route path="/observability" component={ObservabilityPage} />
+      <Route path="/content-calendar" component={ContentCalendar} />
+      <Route path="/social-assets" component={SocialAssets} />
+      <Route path="/content-guides" component={ContentGuides} />
+      <Route path="/generators" component={GeneratorTools} />
       <Route component={NotFound} />
     </Switch>
   );

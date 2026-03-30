@@ -1,12 +1,13 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
-import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search } from "lucide-react";
+import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
 import SOCDashboard from "@/pages/soc-dashboard";
 import ThreatIntelligence from "@/pages/threat-intelligence";
+import ThreatIntelFeed from "@/pages/threat-intel-feed";
 import IncidentsPage from "@/pages/incidents-page";
 import FindingsPage from "@/pages/findings-page";
 import MitreAttackPage from "@/pages/mitre-attack-page";
@@ -23,6 +24,7 @@ const queryClient = new QueryClient({
 const navItems = [
   { path: "/", label: "SOC Dashboard", icon: Activity },
   { path: "/threat-intel", label: "Threat Intel", icon: AlertTriangle },
+  { path: "/threat-feed", label: "Threat Feed", icon: Rss },
   { path: "/incidents", label: "Incidents", icon: Shield },
   { path: "/findings", label: "Findings", icon: Target },
   { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
@@ -114,6 +116,7 @@ function AppRouter() {
     <Switch>
       <Route path="/" component={SOCDashboard} />
       <Route path="/threat-intel" component={ThreatIntelligence} />
+      <Route path="/threat-feed" component={ThreatIntelFeed} />
       <Route path="/incidents" component={IncidentsPage} />
       <Route path="/findings" component={FindingsPage} />
       <Route path="/mitre-attack" component={MitreAttackPage} />

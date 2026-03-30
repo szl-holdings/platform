@@ -21,6 +21,10 @@ import SystemHealthPage from "@/pages/system-health";
 import IntelligenceOverview from "@/pages/intelligence-overview";
 import AIIntelligence from "@/pages/ai-intelligence";
 import SystemObservability from "@/pages/observability";
+import AlloyChatPage from "@/pages/alloy-chat";
+import InfrastructurePage from "@/pages/infrastructure";
+import PlatformHealthPage from "@/pages/platform-health";
+import LoadTestDashboardPage from "@/pages/load-test-dashboard";
 import NotFound from "@/pages/not-found";
 import { api } from "@/lib/api";
 import {
@@ -42,6 +46,10 @@ import {
   Server,
   Brain,
   Globe,
+  MessageSquare,
+  Cloud,
+  FileText,
+  Gauge,
 } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -80,6 +88,10 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/intelligence", label: "Intelligence", icon: <Globe className="w-4 h-4" />, section: "Intelligence" },
   { path: "/ai-analyzer", label: "AI Analyzer", icon: <Brain className="w-4 h-4" /> },
   { path: "/observability", label: "Observability", icon: <Activity className="w-4 h-4" />, section: "Observability" },
+  { path: "/alloy-chat", label: "AlloyChat", icon: <MessageSquare className="w-4 h-4" />, section: "Operations" },
+  { path: "/infrastructure", label: "Infrastructure", icon: <Cloud className="w-4 h-4" /> },
+  { path: "/platform-health", label: "Health Reports", icon: <FileText className="w-4 h-4" /> },
+  { path: "/load-tests", label: "Load Tests", icon: <Gauge className="w-4 h-4" /> },
 ];
 
 function HealthBadge() {
@@ -216,6 +228,10 @@ function AppRouter() {
       <Route path="/intelligence" component={IntelligenceOverview} />
       <Route path="/ai-analyzer" component={AIIntelligence} />
       <Route path="/observability" component={SystemObservability} />
+      <Route path="/alloy-chat" component={AlloyChatPage} />
+      <Route path="/infrastructure" component={InfrastructurePage} />
+      <Route path="/platform-health" component={PlatformHealthPage} />
+      <Route path="/load-tests" component={LoadTestDashboardPage} />
       <Route component={NotFound} />
     </Switch>
   );

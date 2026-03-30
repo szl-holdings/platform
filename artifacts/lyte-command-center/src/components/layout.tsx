@@ -18,6 +18,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+import { LyteLogo } from "./LyteLogo";
 
 interface AppHealthSummary {
   services: { name: string; status: string }[];
@@ -102,11 +103,15 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="w-64 border-r border-white/5 bg-card/40 backdrop-blur-xl flex flex-col shrink-0 relative z-20">
         <div className="h-16 flex items-center px-6 border-b border-white/5">
-          <div className="flex items-center gap-2">
-            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-1.5 rounded-lg shadow-lg shadow-cyan-500/20">
-              <Zap className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/30 relative">
+              <LyteLogo className="w-5 h-5 text-white" />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-cyan-400/20 to-blue-600/20 animate-pulse" />
             </div>
-            <span className="font-display font-bold text-lg tracking-wide text-white">LYTE</span>
+            <div className="flex flex-col">
+              <span className="font-display font-bold text-lg tracking-[0.15em] text-white leading-none">LYTE</span>
+              <span className="text-[9px] uppercase tracking-[0.2em] text-cyan-400/60 leading-none mt-0.5">Command Center</span>
+            </div>
           </div>
         </div>
 

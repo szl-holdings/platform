@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 const navLinks = [
   { name: "About", href: "#about" },
-  { name: "Achievements", href: "#timeline" },
   { name: "Services", href: "#services" },
-  { name: "Portfolio", href: "#portfolio" },
-  { name: "Ecosystem", href: "#ecosystem" },
-  { name: "Premium", href: "#premium" },
+  { name: "Work", href: "#portfolio" },
+  { name: "Testimonials", href: "#ecosystem" },
+  { name: "Contact", href: "#contact" },
 ];
 
 export function Navbar() {
@@ -50,7 +50,7 @@ export function Navbar() {
           ))}
           <a href="#contact">
             <Button className="rounded-full font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-105 active:scale-[0.98] transition-all duration-300">
-              Request a Briefing
+              Let's Connect <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </a>
         </nav>
