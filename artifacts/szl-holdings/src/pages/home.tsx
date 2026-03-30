@@ -38,20 +38,6 @@ const FEATURED_PLATFORMS = [
     metricLabel: "Pre-designation lead time",
   },
   {
-    id: "terra",
-    name: "Terra",
-    category: "Real Estate Broker Platform",
-    status: "In Build",
-    tagline: "Turn listings, broker workflow, and market visibility into command.",
-    audience: "Brokers, agents, and operators managing active pipelines, listings, and deal flow.",
-    href: "/terra/",
-    accent: "#a07848",
-    accentRgb: "160, 120, 72",
-    tier: 2,
-    metric: "50+",
-    metricLabel: "Distress properties tracked",
-  },
-  {
     id: "carlota-jo",
     name: "Carlota Jo",
     category: "Premium Services",
@@ -295,7 +281,6 @@ function HeroSection() {
           {[
             { label: "Lyte", href: "/lyte-command-center/" },
             { label: "Vessels", href: "/vessels/" },
-            { label: "Terra", href: "/terra/" },
             { label: "Carlota Jo", href: "/carlota-jo/" },
             { label: "Alloy", href: "/alloy/" },
           ].map((link, i) => (
@@ -466,7 +451,6 @@ function EcosystemLogicSection() {
     { level: "Intelligence Backbone", name: "Alloy", desc: "Core systems and orchestration engine. Powers signal ingestion, workflow orchestration, action routing, output generation, and human approval gates across all platforms.", accent: "#6e9ef5", accentRgb: "110, 158, 245", tier: 1, href: "/alloy/" },
     { level: "Platform — Observability", name: "Lyte", desc: "Business observability. Surfaces risk, latency, ownership gaps, and workflow friction — before they hit execution.", accent: "#06b6d4", accentRgb: "6, 182, 212", tier: 2, href: "/lyte-command-center/", status: "Live" },
     { level: "Platform — Maritime", name: "Vessels", desc: "Maritime command. Turns fleet visibility, voyage performance, and operational exceptions into decisive action.", accent: "#3b82f6", accentRgb: "59, 130, 246", tier: 2, href: "/vessels/", status: "Live" },
-    { level: "Platform — Real Estate", name: "Terra", desc: "Real estate broker platform. Turns listings, broker workflow, and market visibility into command — with distress engine, deal pipeline, and lead routing built in.", accent: "#a07848", accentRgb: "160, 120, 72", tier: 2, href: "/terra/", status: "In Build" },
     { level: "Service Brand", name: "Carlota Jo", desc: "Premium service brand. Discreet, high-trust operational and residence support for demanding environments.", accent: "#d97706", accentRgb: "217, 119, 6", tier: 2, href: "/carlota-jo/", status: "Pilot Ready" },
   ];
 

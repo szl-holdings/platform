@@ -6,11 +6,11 @@ import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { label: "Ventures", href: "/ventures" },
-  { label: "Alloy", href: "/ventures/alloy", external: "/alloy/" },
-  { label: "Lyte", href: "/ventures/lyte", external: "/lyte-command-center/" },
-  { label: "Vessels", href: "/ventures/vessels", external: "/vessels/" },
-  { label: "Carlota Jo", href: "/ventures/carlota-jo", external: "/carlota-jo/" },
+  { label: "Ecosystem", href: "/ecosystem" },
+  { label: "Alloy", href: "/alloy", external: "/alloy/" },
+  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
+  { label: "Vessels", href: "/vessels", external: "/vessels/" },
+  { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/" },
   { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];
@@ -84,19 +84,36 @@ export function SiteNav() {
         <div className="hidden lg:flex items-center gap-6">
           {NAV_LINKS.map((link) => {
             const isActive = location === link.href;
+            const isExternal = !!link.external;
+            const commonStyle = {
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              fontFamily: "var(--font-body)",
+              transition: "color 0.2s ease",
+              color: isActive ? "var(--color-szl-text)" : "var(--color-szl-text-secondary)",
+              position: "relative" as const,
+              textDecoration: "none",
+            };
+            if (isExternal) {
+              return (
+                <a
+                  key={link.href}
+                  href={link.external}
+                  onClick={() => handleNavClick(link.label, link.href)}
+                  style={commonStyle}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                >
+                  {link.label}
+                </a>
+              );
+            }
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => handleNavClick(link.label, link.href)}
-                style={{
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  fontFamily: "var(--font-body)",
-                  transition: "color 0.2s ease",
-                  color: isActive ? "var(--color-szl-text)" : "var(--color-szl-text-secondary)",
-                  position: "relative",
-                }}
+                style={commonStyle}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
                 onMouseLeave={(e) => {
                   if (!isActive) (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)";
@@ -148,23 +165,41 @@ export function SiteNav() {
             }}
           >
             <div className="px-6 py-6 flex flex-col gap-4">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => handleNavClick(link.label, link.href)}
-                  style={{
-                    fontSize: "0.9375rem",
-                    fontWeight: 500,
-                    color: "var(--color-szl-text-secondary)",
-                    transition: "color 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const mobileStyle = {
+                  fontSize: "0.9375rem",
+                  fontWeight: 500,
+                  color: "var(--color-szl-text-secondary)",
+                  transition: "color 0.2s ease",
+                  textDecoration: "none",
+                };
+                if (link.external) {
+                  return (
+                    <a
+                      key={link.href}
+                      href={link.external}
+                      onClick={() => handleNavClick(link.label, link.href)}
+                      style={mobileStyle}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                    >
+                      {link.label}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => handleNavClick(link.label, link.href)}
+                    style={mobileStyle}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
             </div>
           </m.div>
         )}

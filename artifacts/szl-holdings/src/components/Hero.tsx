@@ -258,7 +258,7 @@ export function Hero() {
                 marginBottom: "2.5rem",
               }}
             >
-              One holding structure. One operating philosophy. Six distinct brands.
+              One holding structure. One operating philosophy. Four distinct brands.
             </m.p>
 
             <m.div
