@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { CloudRain, Wind, Eye, Thermometer, Waves, AlertTriangle, Cloud, Sun, Snowflake, CloudLightning } from "lucide-react";
+import { CloudRain, Wind, Eye, Thermometer, Waves, AlertTriangle, Cloud, Sun, Snowflake, CloudLightning, MapPin } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import { LiveDataBadge } from "@/lib/live-badge";
 
 const riskColors: Record<string, string> = {
   low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -101,13 +102,24 @@ export default function WeatherPage() {
   const { data: snapshots = [], isLoading } = useQuery({ queryKey: ["weather"], queryFn: () => api.weather.snapshots() });
   const { data: routes = [] } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
 
+  const { data: marineWeather, isLoading: marineLoading } = useQuery({
+    queryKey: ["marine-weather-hormuz"],
+    queryFn: () => api.live.marineWeather(26.58, 56.26),
+    staleTime: 3600000,
+    refetchInterval: 3600000,
+  });
+
   const severeCount = snapshots.filter((s: any) => s.riskLevel === "severe" || s.riskLevel === "high").length;
+  const marineIsLive = marineWeather?.source === "live";
 
   return (
     <div className="p-6 space-y-6">
-      <div className="animate-fade-in-up">
-        <h1 className="font-display text-2xl font-bold">Weather Impact</h1>
-        <p className="text-sm text-muted-foreground mt-1">Weather conditions and risk analysis along active routes</p>
+      <div className="animate-fade-in-up flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Weather Impact</h1>
+          <p className="text-sm text-muted-foreground mt-1">Weather conditions and risk analysis along active routes</p>
+        </div>
+        <LiveDataBadge isLive={marineIsLive} isLoading={marineLoading} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -151,6 +163,67 @@ export default function WeatherPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Live Marine Weather Panel — Open-Meteo */}
+      <Card className="bg-card border-border animate-fade-in-up stagger-2">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="font-display flex items-center gap-2 text-base">
+              <Waves className="w-5 h-5 text-blue-400" /> Live Marine Conditions — Open-Meteo
+            </CardTitle>
+            <LiveDataBadge isLive={marineIsLive} isLoading={marineLoading} />
+          </div>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <MapPin className="w-3 h-3" /> Strait of Hormuz (26.58°N, 56.26°E)
+          </p>
+        </CardHeader>
+        <CardContent>
+          {marineLoading ? (
+            <div className="grid grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => <div key={i} className="skeleton h-12 rounded-lg" />)}
+            </div>
+          ) : marineWeather?.current ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10">
+                  <p className="text-xs text-muted-foreground/60 font-mono uppercase">Wave Height</p>
+                  <p className="text-2xl font-bold text-blue-400">
+                    {marineWeather.current.waveHeight != null ? `${marineWeather.current.waveHeight.toFixed(1)}m` : "—"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/10">
+                  <p className="text-xs text-muted-foreground/60 font-mono uppercase">Swell Height</p>
+                  <p className="text-2xl font-bold text-cyan-400">
+                    {marineWeather.current.swellWaveHeight != null ? `${marineWeather.current.swellWaveHeight.toFixed(1)}m` : "—"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                  <p className="text-xs text-muted-foreground/60 font-mono uppercase">Wind Waves</p>
+                  <p className="text-2xl font-bold text-emerald-400">
+                    {marineWeather.current.windWaveHeight != null ? `${marineWeather.current.windWaveHeight.toFixed(1)}m` : "—"}
+                  </p>
+                </div>
+              </div>
+              {marineWeather.forecastHours?.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">24-Hour Forecast</p>
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {marineWeather.forecastHours.slice(0, 12).map((h: any, i: number) => (
+                      <div key={i} className="shrink-0 text-center p-2 rounded bg-muted/30 min-w-[50px]">
+                        <p className="text-[9px] text-muted-foreground">{h.time?.slice(11, 16) ?? ""}</p>
+                        <p className="text-xs font-medium text-blue-400">{h.waveHeight != null ? `${h.waveHeight.toFixed(1)}m` : "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <p className="text-[10px] text-muted-foreground">Source: Open-Meteo Marine API · Updates hourly</p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Marine weather data unavailable</p>
+          )}
+        </CardContent>
+      </Card>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

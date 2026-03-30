@@ -1,9 +1,14 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { terraConfig } from "@workspace/shared-ui/copilot-configs";
 import { Sidebar } from "@/components/sidebar";
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
+});
 
 const HomePage = lazy(() => import("@/pages/home"));
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
@@ -54,7 +59,7 @@ function AppRouter() {
 
 function App() {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <div className="flex flex-col h-screen bg-terra-bg">
           <EcosystemNav currentAppId="terra" currentAppName="Terra Real Estate Intelligence" accentColor="#10b981" />
@@ -67,7 +72,7 @@ function App() {
         </div>
       </WouterRouter>
       <AgentCopilot config={terraConfig} />
-    </>
+    </QueryClientProvider>
   );
 }
 

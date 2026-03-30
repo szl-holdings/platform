@@ -28,6 +28,7 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
+    "@tanstack/react-query": "catalog:",
     "wouter": "^3.3.5",
     "@workspace/observability": "workspace:*"
   }

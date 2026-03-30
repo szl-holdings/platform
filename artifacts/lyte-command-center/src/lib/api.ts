@@ -117,4 +117,10 @@ export const api = {
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/command-cards/${id}`, { method: "DELETE" }),
   },
   executiveSummary: () => apiFetch<Record<string, unknown>>("/lyte/executive-summary"),
+  live: {
+    techNews: () => apiFetch<any>("/lyte/live/tech-news"),
+    blsEmployment: () => apiFetch<any>("/lyte/live/bls-employment"),
+    githubTrending: (language?: string) =>
+      apiFetch<any>(`/lyte/live/github-trending${language ? `?language=${encodeURIComponent(language)}` : ""}`),
+  },
 };

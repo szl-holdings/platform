@@ -54,4 +54,24 @@ export const api = {
   cves: {
     list: (keyword?: string) => apiFetch<any[]>(`/firestorm/cves${keyword ? `?keyword=${encodeURIComponent(keyword)}` : ""}`),
   },
+  live: {
+    nvdCves: (severity?: string, keyword?: string, limit?: number) => {
+      const params = new URLSearchParams();
+      if (severity) params.set("severity", severity);
+      if (keyword) params.set("keyword", keyword);
+      if (limit) params.set("limit", String(limit));
+      return apiFetch<any>(`/firestorm/live/nvd-cves${params.toString() ? `?${params}` : ""}`);
+    },
+    cisaKev: (ransomwareOnly?: boolean, limit?: number) => {
+      const params = new URLSearchParams();
+      if (ransomwareOnly) params.set("ransomware", "true");
+      if (limit) params.set("limit", String(limit));
+      return apiFetch<any>(`/firestorm/live/cisa-kev${params.toString() ? `?${params}` : ""}`);
+    },
+    mitreAttack: (tactic?: string) =>
+      apiFetch<any>(`/firestorm/live/mitre-attack${tactic ? `?tactic=${encodeURIComponent(tactic)}` : ""}`),
+    threatNews: () => apiFetch<any>("/firestorm/live/threat-news"),
+    threatIndicators: (type?: string) =>
+      apiFetch<any>(`/firestorm/live/threat-indicators${type ? `?type=${type}` : ""}`),
+  },
 };

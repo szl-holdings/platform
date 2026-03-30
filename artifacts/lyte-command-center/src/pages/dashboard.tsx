@@ -2,9 +2,12 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Activity, AlertTriangle, Lightbulb, ShieldAlert, ArrowUpRight, TrendingUp, Wifi, Server, Cpu, HardDrive, Network, Clock, Zap, BarChart3 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Link } from "wouter";
-import { cn } from "@workspace/shared-ui/utils";
+import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 import { useSignals, useIncidents, useRecommendations, usePlaybooks } from "@/hooks/use-lyte";
 import { incidents as fallbackIncidents } from "@/lib/mock-data";
+import { LiveDataBadge } from "@/lib/live-badge";
+import { api } from "@/lib/api";
 
 function useAnimatedCounter(target: number, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -69,6 +72,12 @@ export default function Dashboard() {
   const { data: incidents = [] } = useIncidents();
   const { data: recommendations = [] } = useRecommendations();
   const { data: playbooks = [] } = usePlaybooks();
+  const { data: blsData, isLoading: blsLoading } = useQuery({
+    queryKey: ["lyte-bls-employment"],
+    queryFn: () => api.live.blsEmployment(),
+    staleTime: 86400000,
+    refetchInterval: 86400000,
+  });
 
   const data = useMemo(() => {
     const effectiveIncidents = incidents.length > 0 ? incidents : fallbackIncidents;
@@ -105,13 +114,7 @@ export default function Dashboard() {
             <span className="text-slate-400 text-[11px]">Uptime</span>
             <span className="font-mono font-bold">99.97%</span>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-cyan-400 bg-cyan-400/10 px-2.5 py-1.5 rounded-full border border-cyan-400/20">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500" />
-            </span>
-            Live
-          </div>
+          <LiveDataBadge isLive={blsData?.liveData} isLoading={blsLoading} />
         </div>
       </div>
 
@@ -273,7 +276,15 @@ export default function Dashboard() {
         {[
           { label: "MTTR (SEV-1)", value: "23m", sub: "18% faster vs 30-day avg", color: "text-emerald-400", icon: Zap },
           { label: "Error Budget", value: "38%", sub: "8 days remaining in window", color: "text-amber-400", icon: BarChart3 },
-          { label: "Active Runbooks", value: String(data.playbookCount || 8), sub: "3 triggered in last 24h", color: "text-cyan-400", icon: Network },
+          {
+            label: blsData?.liveData ? `Unemployment Rate (${blsData?.data?.period ?? "BLS"})` : "Active Runbooks",
+            value: blsData?.liveData ? `${blsData.data?.data?.unemploymentRate ?? "—"}%` : String(data.playbookCount || 8),
+            sub: blsData?.liveData
+              ? `${blsData.data?.data?.trend === "improving" ? "▼ improving" : "▲ worsening"} vs prior period · BLS Live`
+              : "3 triggered in last 24h",
+            color: "text-cyan-400",
+            icon: Network,
+          },
         ].map(stat => (
           <div key={stat.label} className="bg-white/[0.03] rounded-xl p-4 border border-white/5 hover:border-white/10 transition-all flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">

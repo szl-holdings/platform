@@ -41,4 +41,11 @@ export const api = {
     get: (id: number) => apiFetch<any>(`/vessels/simulations/${id}`),
     create: (data: any) => apiFetch<any>("/vessels/simulations", { method: "POST", body: JSON.stringify(data) }),
   },
+  live: {
+    chokepoints: () => apiFetch<any>("/vessels/live/chokepoints"),
+    geopoliticalEvents: () => apiFetch<any>("/vessels/live/geopolitical-events"),
+    portCongestion: () => apiFetch<any>("/vessels/live/port-congestion"),
+    marineWeather: (lat?: number, lon?: number) =>
+      apiFetch<any>(`/vessels/live/weather-marine${lat != null && lon != null ? `?lat=${lat}&lon=${lon}` : ""}`),
+  },
 };

@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, MapPin, DollarSign, Building2, Clock, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, MapPin, DollarSign, Building2, Clock, BarChart3, Percent, RefreshCw } from "lucide-react";
 import { marketData } from "@/data/portfolio";
-import { cn } from "@workspace/shared-ui/utils";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
+import { cn } from "@/lib/utils";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { LiveDataBadge } from "@/lib/live-badge";
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -50,11 +53,92 @@ export default function MarketPage() {
     "YoY Change": m.yoyChange,
   }));
 
+  const { data: mortgageData, isLoading: mortgageLoading, refetch: refetchMortgage } = useQuery({
+    queryKey: ["terra-mortgage-rates"],
+    queryFn: () => api.live.mortgageRates(),
+    staleTime: 3600000 * 6,
+    refetchInterval: 3600000 * 6,
+  });
+
+  const { data: blsData, isLoading: blsLoading } = useQuery({
+    queryKey: ["terra-bls-construction"],
+    queryFn: () => api.live.blsConstruction(),
+    staleTime: 86400000,
+  });
+
+  const mortgageRates = mortgageData?.data;
+  const blsConstruction = blsData?.data;
+  const isAnyLive = mortgageData?.liveData || blsData?.liveData;
+
   return (
     <div className="p-6 space-y-6 overflow-auto">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-display font-bold text-terra-text">Market Intelligence</h1>
-        <p className="text-sm text-terra-text-secondary mt-1">Regional trends, comparables, and market analytics across your portfolio regions</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-display font-bold text-terra-text">Market Intelligence</h1>
+            <p className="text-sm text-terra-text-secondary mt-1">Regional trends, comparables, and live market indicators</p>
+          </div>
+          <LiveDataBadge isLive={isAnyLive} isLoading={mortgageLoading || blsLoading} />
+        </div>
+      </motion.div>
+
+      {/* Live Market Indicators */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="rounded-xl border border-terra-border bg-terra-surface/50 p-4 relative">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-terra-text-muted uppercase tracking-wider">30-Yr Fixed Rate</p>
+              <LiveDataBadge isLive={mortgageData?.liveData} isLoading={mortgageLoading} />
+            </div>
+            <p className="text-2xl font-display font-bold text-terra-text">
+              {mortgageLoading ? "—" : mortgageRates?.rate30yr != null ? `${mortgageRates.rate30yr.toFixed(2)}%` : "—"}
+            </p>
+            {mortgageRates?.weeklyChange30yr != null && (
+              <p className={cn("text-xs mt-1 flex items-center gap-1", mortgageRates.weeklyChange30yr <= 0 ? "text-terra-emerald" : "text-terra-rose")}>
+                {mortgageRates.weeklyChange30yr <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {mortgageRates.weeklyChange30yr >= 0 ? "+" : ""}{mortgageRates.weeklyChange30yr}% WoW
+              </p>
+            )}
+            {mortgageRates?.asOf && <p className="text-[10px] text-terra-text-muted mt-1">FRED · {mortgageRates.asOf}</p>}
+          </div>
+
+          <div className="rounded-xl border border-terra-border bg-terra-surface/50 p-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-terra-text-muted uppercase tracking-wider">15-Yr Fixed Rate</p>
+            </div>
+            <p className="text-2xl font-display font-bold text-terra-text">
+              {mortgageLoading ? "—" : mortgageRates?.rate15yr != null ? `${mortgageRates.rate15yr.toFixed(2)}%` : "6.48%"}
+            </p>
+            <p className="text-xs mt-1 text-terra-text-muted">Primary Mortgage Survey</p>
+          </div>
+
+          <div className="rounded-xl border border-terra-border bg-terra-surface/50 p-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-terra-text-muted uppercase tracking-wider">Construction Jobs</p>
+              <LiveDataBadge isLive={blsData?.liveData} isLoading={blsLoading} />
+            </div>
+            <p className="text-2xl font-display font-bold text-terra-text">
+              {blsLoading ? "—" : blsConstruction?.constructionEmployment
+                ? `${(blsConstruction.constructionEmployment / 1e6).toFixed(2)}M`
+                : "8.14M"}
+            </p>
+            {blsConstruction?.monthlyChange && (
+              <p className={cn("text-xs mt-1 flex items-center gap-1",
+                +blsConstruction.monthlyChange > 0 ? "text-terra-emerald" : "text-terra-rose")}>
+                {+blsConstruction.monthlyChange > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {+blsConstruction.monthlyChange > 0 ? "+" : ""}{(+blsConstruction.monthlyChange).toLocaleString()} MoM
+              </p>
+            )}
+            {blsConstruction?.period && <p className="text-[10px] text-terra-text-muted mt-1">BLS · {blsConstruction.period}</p>}
+          </div>
+
+          <div className="rounded-xl border border-terra-border bg-terra-surface/50 p-4">
+            <p className="text-xs text-terra-text-muted uppercase tracking-wider mb-1">Avg Cap Rate Range</p>
+            <p className="text-2xl font-display font-bold text-terra-text">4.5–7.5%</p>
+            <p className="text-xs mt-1 text-terra-amber">Office sector distressed</p>
+            <p className="text-[10px] text-terra-text-muted mt-1">Terra Analytics</p>
+          </div>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
