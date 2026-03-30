@@ -115,6 +115,7 @@ class InProcessJobQueue {
           this.processNext();
         }, delay);
         this.running.delete(job.id);
+        serverTelemetry.recordRetry();
         serverTelemetry.recordBusinessEvent({
           type: "job_retry",
           domain: job.type,

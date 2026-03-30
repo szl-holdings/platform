@@ -5,6 +5,7 @@ import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError 
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@workspace/services";
 import { logger } from "../lib/logger";
+import { isFlagEnabled } from "../lib/platform-flags";
 
 const router: IRouter = Router();
 
@@ -132,6 +133,11 @@ router.get("/billing/subscription-status", async (req: Request, res: Response) =
 });
 
 router.post("/billing/customer-portal", async (req: Request, res: Response) => {
+  const portalEnabled = await isFlagEnabled("pilot_customer_portal_enabled");
+  if (!portalEnabled) {
+    res.status(403).json({ error: "Feature not available", feature: "pilot_customer_portal_enabled", fallback: { url: null } });
+    return;
+  }
   try {
     const { customerId, returnUrl } = req.body as {
       customerId: string;

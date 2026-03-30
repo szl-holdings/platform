@@ -3,6 +3,7 @@ import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTa
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@workspace/db";
 import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@workspace/db";
+import { serverTelemetry } from "@workspace/observability";
 
 export interface OrgMembership {
   orgId: number;
@@ -115,6 +116,7 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       }
 
       if (!user && required) {
+        serverTelemetry.recordAuthFailure();
         res.status(401).json({ error: "Authentication required" });
         return;
       }

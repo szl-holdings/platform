@@ -5,10 +5,14 @@ import { failFastOnInvalidConfig } from "./lib/startup-validation";
 import { initWebSocket } from "./lib/websocket";
 import { jobQueue, startScheduledJobs } from "./lib/job-queue";
 import { startNamedScheduledJobs } from "./lib/scheduled-jobs";
+import "./lib/platform-jobs";
+import { startPlatformScheduledJobs } from "./lib/platform-jobs";
+import { ensurePlatformFlags } from "./lib/platform-flags";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
 import { agentScheduler } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
+import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
@@ -50,16 +54,21 @@ startDomainNotificationGenerators();
 import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
 ensureAlloyTables()
+  .then(() => ensurePlatformOpsTables())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {
     agentScheduler.start();
   })
   .catch(err => {
-    logger.fatal({ err }, "Alloy schema bootstrap failed — cannot guarantee data integrity, shutting down");
+    logger.fatal({ err }, "Schema bootstrap failed — cannot guarantee data integrity, shutting down");
     process.exit(1);
   });
 startScheduledJobs();
 startNamedScheduledJobs();
+startPlatformScheduledJobs();
+ensurePlatformFlags().catch((err) => {
+  logger.warn({ err }, "Failed to ensure platform feature flags on startup");
+});
 
 seedPlatformData().catch(err => {
   logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");

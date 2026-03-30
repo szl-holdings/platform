@@ -5,9 +5,14 @@ import {
   db, pool,
   billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable,
   usersTable, rolesTable, userRolesTable, auditEventsTable, featureFlagsTable, webhookEventsTable,
+  platformJobRunsTable, artifactApprovalsTable,
 } from "@workspace/db";
-import { desc, sql, ilike, or, eq } from "drizzle-orm";
+import { desc, sql, ilike, or, eq, and, inArray } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { serverTelemetry } from "@workspace/observability";
+import { jobQueue } from "../lib/job-queue";
+import { logActivity } from "../lib/activity-logger";
+import { isFlagEnabled } from "../lib/platform-flags";
 
 const adminRouter: IRouter = Router();
 
@@ -558,6 +563,11 @@ adminRouter.post("/admin/users", (req, res) => {
 });
 
 adminRouter.get("/admin/audit-log", async (req, res) => {
+  const enabled = await isFlagEnabled("internal_audit_console_enabled");
+  if (!enabled) {
+    res.status(403).json({ error: "Feature not available", feature: "internal_audit_console_enabled", fallback: { entries: [], total: 0 } });
+    return;
+  }
   try {
     const action = req.query["action"] as string | undefined;
     const search = req.query["search"] as string | undefined;
@@ -886,5 +896,319 @@ function getCategoryForService(name: string): string {
   };
   return categories[name] ?? "Other";
 }
+
+adminRouter.get("/admin/workflow-runs", async (req, res) => {
+  const domain = req.query["domain"] as string | undefined;
+  const status = req.query["status"] as string | undefined;
+  const workflowType = req.query["workflowType"] as string | undefined;
+  const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
+  const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
+
+  try {
+    const conditions = [];
+    if (domain) conditions.push(eq(platformJobRunsTable.domain, domain));
+    if (status) conditions.push(eq(platformJobRunsTable.status, status as "pending" | "running" | "completed" | "failed"));
+    if (workflowType) conditions.push(eq(platformJobRunsTable.workflowType, workflowType));
+
+    const dbRuns = await db
+      .select()
+      .from(platformJobRunsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(platformJobRunsTable.createdAt))
+      .limit(limit);
+
+    const jobRuns = jobQueue.getRecentJobs(50).map((j) => ({
+      id: j.id,
+      runId: j.id,
+      workflowType: j.type,
+      status: j.status as "running" | "completed" | "failed" | "pending",
+      domain: j.type.split("_")[0] ?? "platform",
+      startedAt: j.startedAt ? new Date(j.startedAt) : null,
+      completedAt: j.completedAt ? new Date(j.completedAt) : null,
+      durationMs: j.startedAt && j.completedAt ? j.completedAt - j.startedAt : null,
+      triggeredBy: "scheduler",
+      triggeredByUserId: null,
+      retries: j.retries,
+      error: j.error ?? null,
+      payload: null,
+      result: null,
+      correlationId: null,
+      workflowRunId: j.id,
+      signalId: null,
+      artifactId: null,
+      createdAt: new Date(j.createdAt),
+    }));
+
+    const filteredJobRuns = jobRuns.filter((j) => {
+      if (domain && j.domain !== domain) return false;
+      if (status && j.status !== status) return false;
+      if (workflowType && j.workflowType !== workflowType) return false;
+      return true;
+    });
+
+    const runs = [...filteredJobRuns, ...dbRuns].slice(0, limit);
+
+    const summary = {
+      total: runs.length,
+      completed: runs.filter((r) => r.status === "completed").length,
+      completedWithWarnings: runs.filter((r) => r.status === "completed_with_warnings").length,
+      failed: runs.filter((r) => r.status === "failed").length,
+      running: runs.filter((r) => r.status === "running").length,
+      pending: runs.filter((r) => r.status === "pending").length,
+    };
+
+    res.json({ timestamp: new Date().toISOString(), runs, summary });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch workflow runs" });
+  }
+});
+
+adminRouter.get("/admin/workflow-runs/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const dbRun = await db
+      .select()
+      .from(platformJobRunsTable)
+      .where(eq(platformJobRunsTable.runId, id!))
+      .limit(1);
+
+    if (dbRun.length > 0) {
+      res.json(dbRun[0]);
+      return;
+    }
+
+    const jobRun = jobQueue.getRecentJobs(200).find((j) => j.id === id);
+    if (jobRun) {
+      res.json(jobRun);
+      return;
+    }
+
+    res.status(404).json({ error: "Workflow run not found" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch workflow run" });
+  }
+});
+
+adminRouter.get("/admin/artifact-approvals", async (req, res) => {
+  const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
+  if (!approvalsEnabled) {
+    res.status(403).json({ error: "Feature not available", feature: "alloy_artifact_approvals_enabled", fallback: { approvals: [], total: 0, pendingCount: 0 } });
+    return;
+  }
+  const status = req.query["status"] as string | undefined;
+  const domain = req.query["domain"] as string | undefined;
+
+  try {
+    const conditions = [];
+    if (status) conditions.push(eq(artifactApprovalsTable.status, status as "pending" | "approved" | "rejected" | "expired"));
+    if (domain) conditions.push(eq(artifactApprovalsTable.domain, domain));
+
+    const approvals = await db
+      .select()
+      .from(artifactApprovalsTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(artifactApprovalsTable.requestedAt))
+      .limit(100);
+
+    const pendingCount = await db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(artifactApprovalsTable)
+      .where(eq(artifactApprovalsTable.status, "pending"))
+      .then((rows) => rows[0]?.count ?? 0);
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      approvals,
+      total: approvals.length,
+      pendingCount,
+      summary: {
+        pending: approvals.filter((a) => a.status === "pending").length,
+        approved: approvals.filter((a) => a.status === "approved").length,
+        rejected: approvals.filter((a) => a.status === "rejected").length,
+        expired: approvals.filter((a) => a.status === "expired").length,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch artifact approvals" });
+  }
+});
+
+adminRouter.post("/admin/artifact-approvals/:id/approve", async (req, res) => {
+  const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
+  if (!approvalsEnabled) {
+    res.status(403).json({ error: "Feature not available", feature: "alloy_artifact_approvals_enabled" });
+    return;
+  }
+  const { id } = req.params;
+  try {
+    const approval = await db
+      .select()
+      .from(artifactApprovalsTable)
+      .where(eq(artifactApprovalsTable.approvalId, id!))
+      .limit(1)
+      .then((rows) => rows[0]);
+
+    if (!approval) {
+      res.status(404).json({ error: "Artifact approval not found" });
+      return;
+    }
+    if (approval.status !== "pending") {
+      res.status(400).json({ error: `Approval is already ${approval.status}` });
+      return;
+    }
+
+    const reviewerLabel = req.user?.email ?? req.user?.displayName ?? "admin";
+    const updated = await db
+      .update(artifactApprovalsTable)
+      .set({
+        status: "approved",
+        reviewedByUserId: req.user?.id ?? null,
+        reviewedByLabel: reviewerLabel,
+        reviewedAt: new Date(),
+      })
+      .where(eq(artifactApprovalsTable.approvalId, id!))
+      .returning()
+      .then((rows) => rows[0]);
+
+    await logActivity(req, "approve_artifact", "artifact_approval", id!, `Approved artifact: ${approval.artifactId}`);
+    res.json({ success: true, approval: updated });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to approve artifact" });
+  }
+});
+
+adminRouter.post("/admin/artifact-approvals/:id/reject", async (req, res) => {
+  const approvalsEnabled = await isFlagEnabled("alloy_artifact_approvals_enabled");
+  if (!approvalsEnabled) {
+    res.status(403).json({ error: "Feature not available", feature: "alloy_artifact_approvals_enabled" });
+    return;
+  }
+  const { id } = req.params;
+  const { reason } = req.body as { reason?: string };
+
+  try {
+    const approval = await db
+      .select()
+      .from(artifactApprovalsTable)
+      .where(eq(artifactApprovalsTable.approvalId, id!))
+      .limit(1)
+      .then((rows) => rows[0]);
+
+    if (!approval) {
+      res.status(404).json({ error: "Artifact approval not found" });
+      return;
+    }
+    if (approval.status !== "pending") {
+      res.status(400).json({ error: `Approval is already ${approval.status}` });
+      return;
+    }
+
+    const reviewerLabel = req.user?.email ?? req.user?.displayName ?? "admin";
+    const updated = await db
+      .update(artifactApprovalsTable)
+      .set({
+        status: "rejected",
+        reviewedByUserId: req.user?.id ?? null,
+        reviewedByLabel: reviewerLabel,
+        reviewNote: reason ?? null,
+        reviewedAt: new Date(),
+      })
+      .where(eq(artifactApprovalsTable.approvalId, id!))
+      .returning()
+      .then((rows) => rows[0]);
+
+    await logActivity(req, "reject_artifact", "artifact_approval", id!, `Rejected artifact: ${approval.artifactId}${reason ? ` (${reason})` : ""}`);
+    res.json({ success: true, approval: updated });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to reject artifact" });
+  }
+});
+
+adminRouter.get("/admin/health-dashboard", async (_req, res) => {
+  const snapshot = serverTelemetry.getSnapshot();
+  const jobStats = jobQueue.getStats();
+  const recentJobs = jobQueue.getRecentJobs(20);
+  const activeAlerts = serverTelemetry.getActiveAlerts();
+
+  let dbLatencyMs = 0;
+  let dbStatus = "unknown";
+  try {
+    const start = Date.now();
+    await pool.query("SELECT 1");
+    dbLatencyMs = Date.now() - start;
+    dbStatus = "healthy";
+  } catch {
+    dbStatus = "degraded";
+  }
+
+  const technicalMetrics = {
+    requestCount: snapshot.requestCount,
+    errorRate: snapshot.errorRate,
+    p50Latency: snapshot.p50Latency,
+    p95Latency: snapshot.p95Latency,
+    p99Latency: snapshot.p99Latency,
+    throughputPerHour: snapshot.throughputPerHour,
+    authFailures: snapshot.authFailures ?? 0,
+    retryCount: recentJobs.reduce((sum, j) => sum + j.retries, 0),
+    workflowFailureRate: jobStats.failed > 0
+      ? Math.round((jobStats.failed / Math.max(jobStats.failed + jobStats.completed, 1)) * 100)
+      : 0,
+    dbLatencyMs,
+    dbStatus,
+  };
+
+  const productMetrics = {
+    signalCountBySeverity: (snapshot.businessEvents as Record<string, number>) ?? {},
+    unresolvedActionCount: 0,
+    jobFailures: snapshot.jobFailures,
+    workflowCompletions: snapshot.workflowCompletions,
+    artifactGenerationSuccess: 0,
+    artifactGenerationFailed: 0,
+    pendingApprovals: await db.select({ count: sql<number>`COUNT(*)::int` }).from(artifactApprovalsTable).where(eq(artifactApprovalsTable.status, "pending")).then((rows) => rows[0]?.count ?? 0),
+  };
+
+  const eventsByType = snapshot.businessEvents as Record<string, number>;
+  if (eventsByType) {
+    productMetrics.artifactGenerationSuccess = eventsByType["artifact_generation_completed"] ?? 0;
+    productMetrics.artifactGenerationFailed = snapshot.jobFailures ?? 0;
+  }
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    technical: technicalMetrics,
+    product: productMetrics,
+    jobs: {
+      ...jobStats,
+      recentFailures: recentJobs.filter((j) => j.status === "failed").map((j) => ({
+        id: j.id,
+        type: j.type,
+        error: j.error,
+        retries: j.retries,
+        completedAt: j.completedAt ? new Date(j.completedAt).toISOString() : null,
+      })),
+    },
+    alerts: {
+      active: activeAlerts.length,
+      items: activeAlerts.slice(0, 10),
+    },
+    uptime: process.uptime(),
+  });
+});
+
+adminRouter.get("/admin/environment/full", (_req, res) => {
+  const { validateStartupConfig } = require("../lib/startup-validation");
+  const result = validateStartupConfig();
+  res.json({
+    timestamp: new Date().toISOString(),
+    environment: process.env["NODE_ENV"] ?? "development",
+    appEnv: process.env["APP_ENV"] ?? "development",
+    demoMode: process.env["DEMO_MODE"] === "true",
+    valid: result.valid,
+    errors: result.errors,
+    warnings: result.warnings,
+    envSummary: result.envSummary,
+  });
+});
 
 export default adminRouter;

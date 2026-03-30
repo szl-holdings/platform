@@ -16,6 +16,7 @@ import {
 import { eq, and, desc, sql, or, gte, lte } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
+import { isFlagEnabled } from "../lib/platform-flags";
 
 const router: IRouter = Router();
 
@@ -662,7 +663,18 @@ router.post("/lyte/platform/actions/:id/update-status", authMiddleware(), update
 
 router.get("/lyte/platform/readiness", authMiddleware({ required: false }), async (req, res) => {
   try {
+    const enabled = await isFlagEnabled("lyte_readiness_enabled");
+    if (!enabled) {
+      res.status(403).json({ error: "Feature not available", feature: "lyte_readiness_enabled", fallback: { items: [], byCategory: {}, overallScore: 0 } });
+      return;
+    }
+
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    if (req.user && !canAccessOrgRecord(req.user, orgId)) {
+      sendBadRequest(res, "Unauthorized access to org record");
+      return;
+    }
+
     const category = req.query.category as string | undefined;
 
     const items = await db.select().from(readinessItemsTable).where(
@@ -770,6 +782,11 @@ router.delete("/lyte/platform/readiness/:id", authMiddleware(), async (req, res)
 
 router.get("/lyte/platform/views", authMiddleware({ required: false }), async (req, res) => {
   try {
+    const roleViewsEnabled = await isFlagEnabled("lyte_role_views_enabled");
+    if (!roleViewsEnabled) {
+      res.status(403).json({ error: "Feature not available", feature: "lyte_role_views_enabled", fallback: { views: [] } });
+      return;
+    }
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const userId = req.user?.id;
 
@@ -792,6 +809,11 @@ router.get("/lyte/platform/views", authMiddleware({ required: false }), async (r
 
 router.post("/lyte/platform/views", authMiddleware(), async (req, res) => {
   try {
+    const roleViewsEnabled = await isFlagEnabled("lyte_role_views_enabled");
+    if (!roleViewsEnabled) {
+      res.status(403).json({ error: "Feature not available", feature: "lyte_role_views_enabled" });
+      return;
+    }
     const body = req.body as Record<string, unknown>;
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }

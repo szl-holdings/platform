@@ -49,6 +49,9 @@ export class ServerTelemetryCollector {
   private startTime = Date.now();
   private businessEvents: BusinessEvent[] = [];
   private activeAlerts: AlertRecord[] = [];
+  private authFailureCount = 0;
+  private retryCount = 0;
+  private dbQueryLatencies: Array<{ durationMs: number; timestamp: number; query?: string }> = [];
 
   recordRequest(data: RequestTelemetry) {
     this.requests.push(data);
@@ -116,6 +119,38 @@ export class ServerTelemetryCollector {
 
   getUptimeSeconds(): number {
     return (Date.now() - this.startTime) / 1000;
+  }
+
+  recordAuthFailure() {
+    this.authFailureCount++;
+  }
+
+  recordRetry() {
+    this.retryCount++;
+  }
+
+  recordDbQueryLatency(durationMs: number, query?: string) {
+    this.dbQueryLatencies.push({ durationMs, timestamp: Date.now(), query: query?.slice(0, 120) });
+    const MAX_DB_SAMPLES = 500;
+    if (this.dbQueryLatencies.length > MAX_DB_SAMPLES) {
+      this.dbQueryLatencies.splice(0, this.dbQueryLatencies.length - MAX_DB_SAMPLES);
+    }
+  }
+
+  getDbLatencyP50(): number {
+    if (this.dbQueryLatencies.length === 0) return 0;
+    const sorted = [...this.dbQueryLatencies].map(r => r.durationMs).sort((a, b) => a - b);
+    return sorted[Math.floor(sorted.length * 0.5)] ?? 0;
+  }
+
+  getDbLatencyP95(): number {
+    if (this.dbQueryLatencies.length === 0) return 0;
+    const sorted = [...this.dbQueryLatencies].map(r => r.durationMs).sort((a, b) => a - b);
+    return sorted[Math.floor(sorted.length * 0.95)] ?? 0;
+  }
+
+  getDbSlowQueryCount(thresholdMs = 500): number {
+    return this.dbQueryLatencies.filter(r => r.durationMs >= thresholdMs).length;
   }
 
   recordBusinessEvent(event: Omit<BusinessEvent, "timestamp">) {
@@ -204,6 +239,14 @@ export class ServerTelemetryCollector {
       jobFailures: this.getJobFailureCount(),
       workflowCompletions: this.getWorkflowCompletionCount(),
       activeAlerts: this.getActiveAlerts().length,
+      authFailures: this.authFailureCount,
+      retryCount: this.retryCount,
+      dbLatency: {
+        p50: this.getDbLatencyP50(),
+        p95: this.getDbLatencyP95(),
+        slowQueryCount: this.getDbSlowQueryCount(),
+        sampleCount: this.dbQueryLatencies.length,
+      },
     };
   }
 }

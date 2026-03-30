@@ -22,32 +22,55 @@ export const pool = new Pool({
   statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT_MS ?? "30000", 10),
 });
 
-if (isDev) {
-  pool.on("connect", () => {
-    if (process.env.LOG_LEVEL === "debug") {
-      console.log("[db] New connection established");
+const _originalPoolQuery = pool.query.bind(pool);
+// @ts-expect-error — overriding overloaded pool.query to intercept all queries for latency instrumentation
+pool.query = async function instrumentedQuery(...args: unknown[]) {
+  const start = Date.now();
+  try {
+    // @ts-expect-error — forwarding all overload variants
+    const result = await _originalPoolQuery(...args);
+    const durationMs = Date.now() - start;
+    try {
+      const { serverTelemetry } = await import("@workspace/observability");
+      const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
+      serverTelemetry.recordDbQueryLatency(durationMs, queryText);
+    } catch {
+      // observability not available — not fatal
     }
-  });
+    return result;
+  } catch (err) {
+    const durationMs = Date.now() - start;
+    try {
+      const { serverTelemetry } = await import("@workspace/observability");
+      const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
+      serverTelemetry.recordDbQueryLatency(durationMs, queryText);
+    } catch {
+      // observability not available — not fatal
+    }
+    throw err;
+  }
+};
 
-  pool.on("error", (err) => {
+pool.on("connect", () => {
+  if (isDev && process.env.LOG_LEVEL === "debug") {
+    console.log("[db] New connection established");
+  }
+});
+
+pool.on("error", (err) => {
+  if (isDev) {
     console.error("[db] Pool error:", err.message);
-  });
-}
+  }
+});
 
 export const db = drizzle(pool, {
   schema,
   logger: isDev
     ? {
-        logQuery(query: string, params: unknown[]) {
-          const start = Date.now();
-          setImmediate(() => {
-            const elapsed = Date.now() - start;
-            if (elapsed >= SLOW_QUERY_THRESHOLD_MS) {
-              console.warn(`[db] SLOW QUERY (${elapsed}ms):`, query.slice(0, 200));
-            } else if (process.env.LOG_LEVEL === "debug") {
-              console.log(`[db] Query (${elapsed}ms):`, query.slice(0, 200));
-            }
-          });
+        logQuery(query: string, _params: unknown[]) {
+          if (process.env.LOG_LEVEL === "debug") {
+            console.log(`[db] Query:`, query.slice(0, 200));
+          }
         },
       }
     : false,

@@ -4,6 +4,8 @@ import { MetricCollector, serverTelemetry, clientTelemetry } from "@workspace/ob
 import type { WebVitalsReport } from "@workspace/observability";
 import { ALL_CONFIGS, getConfigBySlug } from "@workspace/observability/configs";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { db, platformJobRunsTable, artifactApprovalsTable } from "@workspace/db";
+import { sql, eq, and, gt } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -196,7 +198,7 @@ router.post("/observability/vitals", (req, res) => {
   res.status(204).end();
 });
 
-router.get("/observability/alerts", authMiddleware({ required: false }), (req, res) => {
+router.get("/observability/alerts", authMiddleware(), requireRole("ops", "admin"), (req, res) => {
   const includeResolved = req.query["includeResolved"] === "true";
   const alerts = includeResolved
     ? serverTelemetry.getAllAlerts()
@@ -211,11 +213,15 @@ router.get("/observability/alerts", authMiddleware({ required: false }), (req, r
 
 router.post("/observability/alerts/:id/resolve", authMiddleware(), requireRole("ops"), (req, res) => {
   const { id } = req.params;
+  if (!id || typeof id !== "string") {
+    res.status(400).json({ error: "Alert ID is required" });
+    return;
+  }
   serverTelemetry.resolveAlert(id);
   res.json({ success: true, id });
 });
 
-router.get("/observability/business-events", authMiddleware({ required: false }), (req, res) => {
+router.get("/observability/business-events", authMiddleware(), requireRole("ops", "admin"), (req, res) => {
   const snapshot = serverTelemetry.getSnapshot();
   res.setHeader("Cache-Control", "no-store");
   res.json({
@@ -225,7 +231,147 @@ router.get("/observability/business-events", authMiddleware({ required: false })
     eventsByDomain: snapshot.eventsByDomain,
     jobFailures: snapshot.jobFailures,
     workflowCompletions: snapshot.workflowCompletions,
+    authFailures: snapshot.authFailures,
+    retryCount: snapshot.retryCount,
   });
+});
+
+router.get("/observability/telemetry/technical", authMiddleware(), requireRole("ops", "admin"), (_req, res) => {
+  const snapshot = serverTelemetry.getSnapshot();
+  res.setHeader("Cache-Control", "no-store");
+  res.json({
+    timestamp: new Date().toISOString(),
+    requestLatency: {
+      p50: snapshot.p50Latency,
+      p95: snapshot.p95Latency,
+      p99: snapshot.p99Latency,
+      avg: snapshot.avgResponseTime,
+    },
+    endpointErrorRate: snapshot.errorRate,
+    clientErrorRate: snapshot.clientErrorRate,
+    requestCount: snapshot.requestCount,
+    throughputPerHour: snapshot.throughputPerHour,
+    jobDuration: {
+      failures: snapshot.jobFailures,
+      completions: snapshot.workflowCompletions,
+    },
+    workflowFailureRate: snapshot.workflowCompletions > 0
+      ? snapshot.jobFailures / (snapshot.jobFailures + snapshot.workflowCompletions)
+      : 0,
+    retryCount: snapshot.retryCount,
+    authFailures: snapshot.authFailures,
+    uptimeSeconds: snapshot.uptimeSeconds,
+    activeAlerts: snapshot.activeAlerts,
+  });
+});
+
+router.get("/observability/telemetry/product", authMiddleware(), requireRole("ops", "admin"), async (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  try {
+    const windowStart = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const [jobStats, approvalStats, recentJobs] = await Promise.all([
+      db.select({
+        workflowType: platformJobRunsTable.workflowType,
+        status: platformJobRunsTable.status,
+        count: sql<number>`COUNT(*)::int`,
+        avgDurationMs: sql<number>`AVG(EXTRACT(EPOCH FROM (completed_at - started_at)) * 1000)::int`,
+      })
+        .from(platformJobRunsTable)
+        .where(gt(platformJobRunsTable.createdAt, windowStart))
+        .groupBy(platformJobRunsTable.workflowType, platformJobRunsTable.status),
+
+      db.select({
+        status: artifactApprovalsTable.status,
+        count: sql<number>`COUNT(*)::int`,
+        avgWaitMs: sql<number>`AVG(EXTRACT(EPOCH FROM (COALESCE(reviewed_at, NOW()) - requested_at)) * 1000)::int`,
+      })
+        .from(artifactApprovalsTable)
+        .where(gt(artifactApprovalsTable.requestedAt, windowStart))
+        .groupBy(artifactApprovalsTable.status),
+
+      db.select({
+        workflowType: platformJobRunsTable.workflowType,
+        status: platformJobRunsTable.status,
+        result: platformJobRunsTable.result,
+        durationMs: sql<number>`EXTRACT(EPOCH FROM (completed_at - started_at)) * 1000`,
+      })
+        .from(platformJobRunsTable)
+        .where(and(
+          gt(platformJobRunsTable.createdAt, windowStart),
+          eq(platformJobRunsTable.status, "completed"),
+        ))
+        .orderBy(sql`created_at DESC`)
+        .limit(100),
+    ]);
+
+    const byType = (type: string) => jobStats.filter(r => r.workflowType === type);
+    const countForType = (type: string, status?: string) => {
+      const rows = status ? byType(type).filter(r => r.status === status) : byType(type);
+      return rows.reduce((s, r) => s + (r.count ?? 0), 0);
+    };
+    const avgDurationForType = (type: string) => {
+      const rows = byType(type).filter(r => r.avgDurationMs != null);
+      if (rows.length === 0) return null;
+      return Math.round(rows.reduce((s, r) => s + (r.avgDurationMs ?? 0), 0) / rows.length);
+    };
+
+    const latestJobResult = (type: string) => {
+      const match = recentJobs.find(r => r.workflowType === type);
+      return (match?.result as Record<string, unknown>) ?? null;
+    };
+
+    const lyteResult = latestJobResult("lyte_digest");
+    const readinessResult = latestJobResult("readiness_digest");
+
+    const pendingApprovals = approvalStats.find(r => r.status === "pending")?.count ?? 0;
+    const approvedApprovals = approvalStats.find(r => r.status === "approved")?.count ?? 0;
+    const avgApprovalWaitMs = approvalStats.find(r => r.status === "approved")?.avgWaitMs ?? null;
+
+    const jobRunCounts = {
+      lyteDigest: { runs: countForType("lyte_digest"), avgDurationMs: avgDurationForType("lyte_digest") },
+      readinessDigest: { runs: countForType("readiness_digest"), avgDurationMs: avgDurationForType("readiness_digest") },
+      vesselEtaRefresh: { runs: countForType("vessel_eta_refresh"), avgDurationMs: avgDurationForType("vessel_eta_refresh") },
+      routePressureScan: { runs: countForType("route_pressure_scan"), avgDurationMs: avgDurationForType("route_pressure_scan") },
+      staleActionScan: { runs: countForType("stale_action_scan"), avgDurationMs: avgDurationForType("stale_action_scan") },
+      artifactGeneration: { runs: countForType("artifact_generation"), avgDurationMs: avgDurationForType("artifact_generation") },
+      featureFlagSync: { runs: countForType("feature_flag_sync"), avgDurationMs: avgDurationForType("feature_flag_sync") },
+    };
+
+    const totalFailed = jobStats.filter(r => r.status === "failed").reduce((s, r) => s + r.count, 0);
+    const totalWarnings = jobStats.filter(r => r.status === "completed_with_warnings").reduce((s, r) => s + r.count, 0);
+    const totalCompleted = jobStats.filter(r => r.status === "completed").reduce((s, r) => s + r.count, 0);
+
+    res.json({
+      timestamp: new Date().toISOString(),
+      windowHours: 24,
+      lyte: {
+        unresolvedActionCount: typeof lyteResult?.["unresolvedActionCount"] === "number" ? lyteResult["unresolvedActionCount"] : null,
+        criticalSignalCount: typeof lyteResult?.["criticalCount"] === "number" ? lyteResult["criticalCount"] : null,
+        totalSignalCount: typeof lyteResult?.["signalCount"] === "number" ? lyteResult["signalCount"] : null,
+      },
+      readiness: {
+        blockerCount: typeof readinessResult?.["blockerCount"] === "number" ? readinessResult["blockerCount"] : null,
+        avgScore: typeof readinessResult?.["avgScore"] === "number" ? readinessResult["avgScore"] : null,
+      },
+      approvals: {
+        pending: pendingApprovals,
+        approved: approvedApprovals,
+        avgApprovalWaitMs,
+      },
+      jobRuns: jobRunCounts,
+      jobHealth: {
+        totalFailed,
+        totalWithWarnings: totalWarnings,
+        totalCompleted,
+        failureRate: (totalFailed + totalCompleted + totalWarnings) > 0
+          ? totalFailed / (totalFailed + totalCompleted + totalWarnings)
+          : 0,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to generate product telemetry", details: String(err) });
+  }
 });
 
 export default router;

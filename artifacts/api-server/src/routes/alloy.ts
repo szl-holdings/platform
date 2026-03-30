@@ -12,6 +12,9 @@ import {
   insertAlloySignalSchema,
 } from "@workspace/db";
 import { eq, desc, and, sql, inArray, gte, lte } from "drizzle-orm";
+import { authMiddleware, requireRole } from "../middlewares/auth";
+import { isFlagEnabled } from "../lib/platform-flags";
+import { platformAuth, logPlatformEvent } from "../middlewares/platform-auth";
 import {
   sendSuccess,
   sendCreated,

@@ -15,6 +15,7 @@ import {
 import { eq, and, desc, sql, or } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
+import { isFlagEnabled } from "../lib/platform-flags";
 
 const router: IRouter = Router();
 const VESSELS_PRODUCT = "vessels";
@@ -375,6 +376,11 @@ router.get("/vessels/platform/vessels/:id", authMiddleware({ required: false }),
 
 router.post("/vessels/platform/vessels", authMiddleware(), async (req, res) => {
   try {
+    const commandEnabled = await isFlagEnabled("vessels_command_mode_enabled");
+    if (!commandEnabled) {
+      res.status(403).json({ error: "Feature not available", feature: "vessels_command_mode_enabled", message: "Vessel command mode is not enabled" });
+      return;
+    }
     const body = req.body as Record<string, unknown>;
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
@@ -773,6 +779,11 @@ router.get("/vessels/platform/ports", authMiddleware({ required: false }), async
 
 router.get("/vessels/platform/corridors", authMiddleware({ required: false }), async (req, res) => {
   try {
+    const corridorEnabled = await isFlagEnabled("vessels_corridor_intelligence_enabled");
+    if (!corridorEnabled) {
+      res.status(403).json({ error: "Feature not available", feature: "vessels_corridor_intelligence_enabled", fallback: { corridors: [], intelligence: { totalCorridors: 0, highRiskCount: 0, activeConflictCount: 0 } } });
+      return;
+    }
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
 
     const corridors = await db.select().from(corridorsTable).where(

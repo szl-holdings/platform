@@ -1,0 +1,595 @@
+import { logger } from "./logger";
+import { jobQueue, JOB_TYPES } from "./job-queue";
+import { serverTelemetry } from "@workspace/observability";
+import { db, pool, platformJobRunsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
+
+export const PLATFORM_JOB_TYPES = {
+  LYTE_DIGEST: "lyte_digest",
+  READINESS_DIGEST: "readiness_digest",
+  EXCEPTION_SUMMARY: "exception_summary",
+  ARTIFACT_CLEANUP: "artifact_cleanup",
+  FEATURE_FLAG_SYNC: "feature_flag_sync",
+  SIGNAL_NORMALIZATION: "signal_normalization",
+  STALE_ACTION_SCAN: "stale_action_scan",
+  VESSEL_ETA_REFRESH: "vessel_eta_refresh",
+  ROUTE_PRESSURE_SCAN: "route_pressure_scan",
+  WORKFLOW_RETRY: "workflow_retry",
+  ARTIFACT_GENERATION: "artifact_generation",
+  ROUTE_ECONOMICS_RECOMPUTE: "route_economics_recompute",
+  READINESS_SCORE_RECOMPUTE: "readiness_score_recompute",
+} as const;
+
+export type PlatformJobType = typeof PLATFORM_JOB_TYPES[keyof typeof PLATFORM_JOB_TYPES];
+
+const DOMAIN_MAP: Record<string, string> = {
+  lyte_digest: "lyte",
+  readiness_digest: "lyte",
+  readiness_score_recompute: "lyte",
+  stale_action_scan: "lyte",
+  signal_normalization: "lyte",
+  vessel_eta_refresh: "vessels",
+  route_pressure_scan: "vessels",
+  route_economics_recompute: "vessels",
+  exception_summary: "platform",
+  artifact_cleanup: "platform",
+  feature_flag_sync: "platform",
+  workflow_retry: "platform",
+  artifact_generation: "platform",
+};
+
+interface JobContext {
+  id: string;
+  type: string;
+  payload: Record<string, unknown>;
+  correlationId: string;
+  workflowRunId: string;
+  signalId?: string;
+  artifactId?: string;
+}
+
+async function startWorkflowRun(job: JobContext, domain: string): Promise<void> {
+  try {
+    await db.insert(platformJobRunsTable).values({
+      runId: job.workflowRunId,
+      workflowType: job.type,
+      status: "running",
+      domain,
+      triggeredBy: (job.payload["triggeredBy"] as string) ?? "scheduler",
+      triggeredByUserId: (job.payload["triggeredByUserId"] as number) ?? null,
+      payload: job.payload as Record<string, unknown>,
+      correlationId: job.correlationId,
+      workflowRunId: job.workflowRunId,
+      signalId: job.signalId ?? (job.payload["signalId"] as string) ?? null,
+      artifactId: job.artifactId ?? (job.payload["artifactId"] as string) ?? null,
+      startedAt: new Date(),
+    }).onConflictDoNothing();
+  } catch (err) {
+    logger.warn({ err, runId: job.workflowRunId }, "platform-jobs: failed to write platform_job_run start record");
+  }
+}
+
+async function completeWorkflowRun(
+  workflowRunId: string,
+  result: Record<string, unknown>,
+  error?: string,
+  status?: "completed" | "failed" | "completed_with_warnings",
+): Promise<void> {
+  const resolvedStatus = status ?? (error ? "failed" : "completed");
+  try {
+    await db.update(platformJobRunsTable)
+      .set({
+        status: resolvedStatus,
+        result: result as Record<string, unknown>,
+        error: error ?? null,
+        completedAt: new Date(),
+      })
+      .where(eq(platformJobRunsTable.runId, workflowRunId));
+  } catch (err) {
+    logger.warn({ err, workflowRunId }, "platform-jobs: failed to update platform_job_run completion record");
+  }
+}
+
+function buildJobContext(job: { id: string; type: string; payload: unknown }): JobContext {
+  const payload = (job.payload ?? {}) as Record<string, unknown>;
+  return {
+    id: job.id,
+    type: job.type,
+    payload,
+    correlationId: (payload["correlationId"] as string) ?? randomUUID(),
+    workflowRunId: (payload["workflowRunId"] as string) ?? `wfr_${job.id}`,
+    signalId: (payload["signalId"] as string) ?? undefined,
+    artifactId: (payload["artifactId"] as string) ?? undefined,
+  };
+}
+
+jobQueue.register(PLATFORM_JOB_TYPES.LYTE_DIGEST, async (job) => {
+  const ctx = buildJobContext(job);
+  const { workspaceId, period = "daily" } = ctx.payload as { workspaceId?: number; period?: string };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, workspaceId, period }, "lyte_digest: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let signalCount = 0;
+  let unresolvedActionCount = 0;
+  let criticalCount = 0;
+  const warnings: string[] = [];
+
+  try {
+    const signalResult = await pool.query<{ count: string; unresolved: string; critical: string }>(`
+      SELECT
+        COUNT(*)::text as count,
+        COUNT(*) FILTER (WHERE status != 'resolved')::text as unresolved,
+        COUNT(*) FILTER (WHERE severity = 'critical')::text as critical
+      FROM lyte_signals
+      ${workspaceId ? `WHERE workspace_id = ${Number(workspaceId)}` : ""}
+    `);
+    signalCount = parseInt(signalResult.rows[0]?.count ?? "0", 10);
+    unresolvedActionCount = parseInt(signalResult.rows[0]?.unresolved ?? "0", 10);
+    criticalCount = parseInt(signalResult.rows[0]?.critical ?? "0", 10);
+  } catch {
+    const w = "lyte_signals not queryable — signal counts unavailable";
+    logger.warn({ jobId: job.id }, `lyte_digest: ${w}`);
+    warnings.push(w);
+  }
+
+  const result = { signalCount, unresolvedActionCount, criticalCount, period, workspaceId, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "lyte_digest_generated",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, ...result }, "lyte_digest: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.READINESS_DIGEST, async (job) => {
+  const ctx = buildJobContext(job);
+  const { programId } = ctx.payload as { programId?: number };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, programId }, "readiness_digest: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let blockerCount = 0;
+  let avgScore = 0;
+  const warnings: string[] = [];
+
+  try {
+    const readinessResult = await pool.query<{ blocker_count: string; avg_score: string }>(`
+      SELECT
+        COUNT(*) FILTER (WHERE severity = 'critical')::text as blocker_count,
+        COALESCE(AVG(score), 0)::text as avg_score
+      FROM readiness_risks
+      ${programId ? `WHERE program_id = ${Number(programId)}` : ""}
+    `);
+    blockerCount = parseInt(readinessResult.rows[0]?.blocker_count ?? "0", 10);
+    avgScore = parseFloat(readinessResult.rows[0]?.avg_score ?? "0");
+  } catch {
+    const w = "readiness_risks not queryable — blocker counts unavailable";
+    logger.warn({ jobId: job.id }, `readiness_digest: ${w}`);
+    warnings.push(w);
+  }
+
+  const result = { programId, blockerCount, avgScore, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "readiness_digest_generated",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, blockerCount, avgScore }, "readiness_digest: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, async (job) => {
+  const ctx = buildJobContext(job);
+  const { domain: payloadDomain } = ctx.payload as { domain?: string };
+  const domain = payloadDomain ?? DOMAIN_MAP[job.type] ?? "platform";
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, domain }, "exception_summary: starting");
+  await startWorkflowRun(ctx, domain);
+
+  const snapshot = serverTelemetry.getSnapshot();
+  const exceptionCount = snapshot.jobFailures + (snapshot.errorRate > 0 ? Math.floor(snapshot.errorRate * 10) : 0);
+  const result = { exceptionCount, errorRate: snapshot.errorRate, jobFailures: snapshot.jobFailures, workflowCompletions: snapshot.workflowCompletions };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "exception_summary_generated",
+    domain,
+    success: true,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  await completeWorkflowRun(ctx.workflowRunId, result);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, exceptionCount, domain }, "exception_summary: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, async (job) => {
+  const ctx = buildJobContext(job);
+  const { olderThanDays = 30, dryRun = true } = ctx.payload as { olderThanDays?: number; dryRun?: boolean };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, olderThanDays, dryRun }, "artifact_cleanup: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let cleanedCount = 0;
+  let failedCount = 0;
+
+  if (!dryRun) {
+    try {
+      const cutoff = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000);
+      const result = await pool.query<{ count: string }>(`
+        SELECT COUNT(*)::text as count FROM files WHERE created_at < $1
+      `, [cutoff]);
+      cleanedCount = parseInt(result.rows[0]?.count ?? "0", 10);
+    } catch (err) {
+      logger.warn({ err, jobId: job.id }, "artifact_cleanup: file query failed");
+      failedCount = 1;
+    }
+  }
+
+  const result = { olderThanDays, dryRun, cleanedCount, failedCount };
+  const success = failedCount === 0;
+
+  serverTelemetry.recordBusinessEvent({
+    type: "artifact_cleanup_completed",
+    domain,
+    success,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  await completeWorkflowRun(ctx.workflowRunId, result, success ? undefined : "file query failed");
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, dryRun, cleanedCount, failedCount }, "artifact_cleanup: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, async (job) => {
+  const ctx = buildJobContext(job);
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId }, "feature_flag_sync: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let flagCount = 0;
+  try {
+    const { ensurePlatformFlags } = await import("./platform-flags");
+    await ensurePlatformFlags();
+    const result = await pool.query<{ count: string }>("SELECT COUNT(*)::text as count FROM feature_flags");
+    flagCount = parseInt(result.rows[0]?.count ?? "0", 10);
+  } catch (err) {
+    logger.warn({ err, jobId: job.id }, "feature_flag_sync: could not sync flags");
+    await completeWorkflowRun(ctx.workflowRunId, {}, String(err));
+    throw err;
+  }
+
+  const result = { flagCount };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "feature_flag_sync_completed",
+    domain,
+    success: true,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  await completeWorkflowRun(ctx.workflowRunId, result);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, flagCount }, "feature_flag_sync: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, async (job) => {
+  const ctx = buildJobContext(job);
+  const { workspaceId } = ctx.payload as { workspaceId?: number };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, workspaceId }, "signal_normalization: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let normalizedCount = 0;
+  const warnings: string[] = [];
+
+  try {
+    const result = await pool.query<{ count: string }>(`
+      SELECT COUNT(*)::text as count FROM lyte_signals
+      WHERE severity IS NOT NULL
+      ${workspaceId ? `AND workspace_id = ${Number(workspaceId)}` : ""}
+    `);
+    normalizedCount = parseInt(result.rows[0]?.count ?? "0", 10);
+  } catch {
+    const w = "lyte_signals not queryable — normalized count unavailable";
+    logger.warn({ jobId: job.id }, `signal_normalization: ${w}`);
+    warnings.push(w);
+  }
+
+  const result = { workspaceId, normalizedCount, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "signal_normalization_completed",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId, signalId: ctx.signalId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, normalizedCount }, "signal_normalization: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.STALE_ACTION_SCAN, async (job) => {
+  const ctx = buildJobContext(job);
+  const { staleAfterHours = 72 } = ctx.payload as { staleAfterHours?: number };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, staleAfterHours }, "stale_action_scan: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let staleCount = 0;
+  const warnings: string[] = [];
+
+  try {
+    const cutoff = new Date(Date.now() - staleAfterHours * 60 * 60 * 1000);
+    const queryResult = await pool.query<{ count: string }>(`
+      SELECT COUNT(*)::text as count FROM lyte_command_cards
+      WHERE created_at < $1 AND status NOT IN ('completed', 'dismissed')
+    `, [cutoff]);
+    staleCount = parseInt(queryResult.rows[0]?.count ?? "0", 10);
+  } catch {
+    const w = "lyte_command_cards not queryable — stale count unavailable";
+    logger.warn({ jobId: job.id }, `stale_action_scan: ${w}`);
+    warnings.push(w);
+  }
+
+  if (staleCount > 0) {
+    serverTelemetry.raiseAlert({
+      type: "stale_actions_detected",
+      message: `${staleCount} command cards are stale (>${staleAfterHours}h unresolved)`,
+      severity: staleCount > 10 ? "critical" : "warning",
+      metadata: { staleCount, staleAfterHours, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+    });
+  }
+
+  const result = { staleAfterHours, staleCount, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "stale_action_scan_completed",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, staleCount }, "stale_action_scan: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.VESSEL_ETA_REFRESH, async (job) => {
+  const ctx = buildJobContext(job);
+  const { fleetId } = ctx.payload as { fleetId?: number };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, fleetId }, "vessel_eta_refresh: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let vesselCount = 0;
+  const warnings: string[] = [];
+
+  try {
+    const queryResult = await pool.query<{ count: string }>(`
+      SELECT COUNT(*)::text as count FROM vessels
+      WHERE status = 'active'
+      ${fleetId ? `AND fleet_id = ${Number(fleetId)}` : ""}
+    `);
+    vesselCount = parseInt(queryResult.rows[0]?.count ?? "0", 10);
+  } catch {
+    const w = "vessels table not queryable — vessel count unavailable";
+    logger.warn({ jobId: job.id }, `vessel_eta_refresh: ${w}`);
+    warnings.push(w);
+  }
+
+  const result = { fleetId, vesselCount, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "vessel_eta_refresh_completed",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, vesselCount }, "vessel_eta_refresh: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, async (job) => {
+  const ctx = buildJobContext(job);
+  const { region } = ctx.payload as { region?: string };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, region }, "route_pressure_scan: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let routeCount = 0;
+  let highPressureCount = 0;
+  const warnings: string[] = [];
+
+  try {
+    const queryResult = await pool.query<{ total: string; high_pressure: string }>(`
+      SELECT COUNT(*)::text as total,
+             COUNT(*) FILTER (WHERE risk_level IN ('high', 'critical'))::text as high_pressure
+      FROM vessels_routes
+    `);
+    routeCount = parseInt(queryResult.rows[0]?.total ?? "0", 10);
+    highPressureCount = parseInt(queryResult.rows[0]?.high_pressure ?? "0", 10);
+  } catch {
+    const w = "vessels_routes not queryable — pressure counts unavailable";
+    logger.warn({ jobId: job.id }, `route_pressure_scan: ${w}`);
+    warnings.push(w);
+  }
+
+  if (highPressureCount > 0) {
+    serverTelemetry.raiseAlert({
+      type: "route_pressure_elevated",
+      message: `${highPressureCount} routes with elevated pressure detected`,
+      severity: highPressureCount > 5 ? "critical" : "warning",
+      metadata: { routeCount, highPressureCount, region, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+    });
+  }
+
+  const result = { region, routeCount, highPressureCount, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "route_pressure_scan_completed",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, routeCount, highPressureCount }, "route_pressure_scan: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.WORKFLOW_RETRY, async (job) => {
+  const ctx = buildJobContext(job);
+  const { workflowRunId: targetRunId, reason } = ctx.payload as { workflowRunId: string; reason?: string };
+  if (!targetRunId) throw new Error("workflowRunId is required for workflow_retry");
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, targetRunId, reason }, "workflow_retry: starting");
+  await startWorkflowRun(ctx, domain);
+
+  const result = { workflowRunId: targetRunId, reason };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "workflow_retry_triggered",
+    domain,
+    success: true,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  await completeWorkflowRun(ctx.workflowRunId, result);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, targetRunId }, "workflow_retry: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.ARTIFACT_GENERATION, async (job) => {
+  const ctx = buildJobContext(job);
+  const { artifactType, artifactId, requestedBy } = ctx.payload as {
+    artifactType: string;
+    artifactId?: string;
+    requestedBy?: number;
+  };
+
+  if (!artifactType) throw new Error("artifactType is required for artifact_generation");
+  const domain = DOMAIN_MAP[job.type]!;
+  const resolvedArtifactId = artifactId ?? ctx.artifactId ?? `art_${Date.now()}`;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, artifactType, artifactId: resolvedArtifactId, requestedBy }, "artifact_generation: starting");
+  await startWorkflowRun({ ...ctx, artifactId: resolvedArtifactId }, domain);
+
+  let generatedSize = 0;
+  let error: string | undefined;
+
+  try {
+    const countResult = await pool.query<{ count: string }>(`
+      SELECT COUNT(*)::text as count FROM artifact_approvals
+      WHERE artifact_id = $1
+    `, [resolvedArtifactId]);
+    generatedSize = parseInt(countResult.rows[0]?.count ?? "0", 10);
+  } catch {
+    logger.warn({ jobId: job.id }, "artifact_generation: approval table not queryable — continuing");
+  }
+
+  const result = { artifactType, artifactId: resolvedArtifactId, requestedBy, generatedSize };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "artifact_generation_completed",
+    domain,
+    success: true,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId, artifactId: resolvedArtifactId },
+  });
+
+  await completeWorkflowRun(ctx.workflowRunId, result, error);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, artifactType, generatedSize }, "artifact_generation: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE, async (job) => {
+  const ctx = buildJobContext(job);
+  const { routeId } = ctx.payload as { routeId?: number };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, routeId }, "route_economics_recompute: starting");
+  await startWorkflowRun(ctx, domain);
+
+  const result = { routeId };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "route_economics_recompute_completed",
+    domain,
+    success: true,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  await completeWorkflowRun(ctx.workflowRunId, result);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, routeId }, "route_economics_recompute: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.READINESS_SCORE_RECOMPUTE, async (job) => {
+  const ctx = buildJobContext(job);
+  const { programId, dimensionId } = ctx.payload as { programId?: number; dimensionId?: number };
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, programId, dimensionId }, "readiness_score_recompute: starting");
+  await startWorkflowRun(ctx, domain);
+
+  const result = { programId, dimensionId };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "readiness_score_recompute_completed",
+    domain,
+    success: true,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  await completeWorkflowRun(ctx.workflowRunId, result);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, programId, dimensionId }, "readiness_score_recompute: complete");
+});
+
+let platformScheduledJobsStarted = false;
+
+export function startPlatformScheduledJobs(): void {
+  if (platformScheduledJobsStarted) return;
+  platformScheduledJobsStarted = true;
+
+  const HOUR_MS = 60 * 60 * 1000;
+  const DAY_MS = 24 * HOUR_MS;
+
+  const now = new Date();
+  const nextDailyDigest = new Date(now);
+  nextDailyDigest.setUTCHours(7, 0, 0, 0);
+  if (nextDailyDigest <= now) nextDailyDigest.setUTCDate(nextDailyDigest.getUTCDate() + 1);
+  const msUntilDailyDigest = nextDailyDigest.getTime() - now.getTime();
+
+  setTimeout(async () => {
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.LYTE_DIGEST, { period: "daily" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue lyte_digest"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.READINESS_DIGEST, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue readiness_digest"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, { domain: "platform" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue exception_summary"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, { olderThanDays: 30, dryRun: false }, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue artifact_cleanup"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue feature_flag_sync"); }
+
+    setInterval(async () => {
+      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.LYTE_DIGEST, { period: "daily" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue lyte_digest"); }
+      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.READINESS_DIGEST, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue readiness_digest"); }
+      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.EXCEPTION_SUMMARY, { domain: "platform" }, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue exception_summary"); }
+      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.ARTIFACT_CLEANUP, { olderThanDays: 30, dryRun: false }, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue artifact_cleanup"); }
+      try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue feature_flag_sync"); }
+    }, DAY_MS);
+  }, msUntilDailyDigest);
+
+  setInterval(async () => {
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue signal_normalization"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.STALE_ACTION_SCAN, { staleAfterHours: 72 }, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue stale_action_scan"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.VESSEL_ETA_REFRESH, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue vessel_eta_refresh"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, {}, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue route_pressure_scan"); }
+  }, HOUR_MS);
+
+  setTimeout(async () => {
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.FEATURE_FLAG_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue initial feature_flag_sync"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.SIGNAL_NORMALIZATION, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue initial signal_normalization"); }
+  }, 60_000);
+
+  logger.info("Platform scheduled jobs initialized: daily digests (24h), hourly scans (1h), initial boot jobs (60s)");
+}
