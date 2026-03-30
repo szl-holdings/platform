@@ -48,7 +48,6 @@ import lytePlatformRouter from "./lyte-platform";
 import vesselsPlatformRouter from "./vessels-platform";
 import capitalReadinessRouter from "./capital-readiness";
 import certificationReadinessRouter from "./certification-readiness";
-import nimbusRouter from "./nimbus";
 import ownershipControlRouter from "./ownership-control";
 import lyteExtendedRouter from "./lyte-extended";
 import vesselsExtendedRouter from "./vessels-extended";
@@ -175,9 +174,6 @@ router.use(certificationReadinessRouter);
 
 router.use("/ownership", writeLimiter);
 router.use(ownershipControlRouter);
-
-router.use("/nimbus", readLimiter);
-router.use(nimbusRouter);
 
 router.use("/terra", writeLimiter);
 router.use(terraCrmRouter);

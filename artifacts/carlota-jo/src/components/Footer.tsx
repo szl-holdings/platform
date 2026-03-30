@@ -11,7 +11,7 @@ const serviceLinks = [
 
 const aboutLinks = [
   { label: "Who We Serve", href: "/who-we-serve" },
-  { label: "About Rosa", href: "/founder" },
+  { label: "About Carlota Jo", href: "/founder" },
   { label: "Request Consultation", href: "/contact" },
   { label: "Client Portal", href: "/client-portal" },
 ];

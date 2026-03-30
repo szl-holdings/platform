@@ -6,7 +6,7 @@ import { Link, useLocation } from "wouter";
 const navLinks = [
   { label: "Services", href: "/services" },
   { label: "Who We Serve", href: "/who-we-serve" },
-  { label: "About Rosa", href: "/founder" },
+  { label: "About Carlota Jo", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];
 

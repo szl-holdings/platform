@@ -89,7 +89,7 @@ const carlotaCommands: CommandItem[] = [
   { id: "nav-home", label: "Home", icon: "✨", group: "Navigation", keywords: ["overview", "main"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
   { id: "nav-services", label: "Services", icon: "📋", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/services"); } },
   { id: "nav-who-we-serve", label: "Who We Serve", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/who-we-serve"); } },
-  { id: "nav-founder", label: "About Rosa", icon: "👤", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/founder"); } },
+  { id: "nav-founder", label: "About Carlota Jo", icon: "👤", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/founder"); } },
   { id: "nav-contact", label: "Request Consultation", icon: "📬", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/contact"); } },
   { id: "nav-portal", label: "Client Portal", icon: "🔐", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-portal"); } },
   { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/"; } },

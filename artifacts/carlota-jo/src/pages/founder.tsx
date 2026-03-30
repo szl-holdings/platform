@@ -34,7 +34,7 @@ export default function FounderPage() {
             >
               <div className="lg:col-span-7">
                 <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-6" style={{ color: "var(--color-gold)" }}>
-                  Rosa Lutar
+                  Carlota Jo
                 </p>
                 <h1 className="font-serif font-light leading-[1.1] mb-6" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--color-ink-900)" }}>
                   Fractional Director of Properties

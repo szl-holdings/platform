@@ -21,7 +21,7 @@ function RosaBlock() {
               The Founder
             </p>
             <h2 className="font-serif text-3xl font-light mb-4" style={{ color: "var(--color-ink-900)" }}>
-              Rosa Lutar
+              Carlota Jo
             </h2>
             <p className="text-sm font-light leading-relaxed mb-1" style={{ color: "var(--color-ink-600)" }}>
               Fractional Director of Properties & Residence
@@ -43,7 +43,7 @@ function RosaBlock() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
             >
-              About Rosa
+              About Carlota Jo
             </Link>
             <Link
               href="/contact"

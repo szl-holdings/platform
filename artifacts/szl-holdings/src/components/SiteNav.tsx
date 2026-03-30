@@ -10,8 +10,7 @@ const NAV_LINKS = [
   { label: "Alloy", href: "/alloy", external: "/alloy/" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
-  { label: "Firestorm", href: "/firestorm", external: "/firestorm/" },
-  { label: "INCA", href: "/inca", external: "/inca/" },
+  { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/" },
   { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];

@@ -51,10 +51,10 @@ const platforms = [
     status: "Live",
   },
   {
-    name: "Nimbus",
+    name: "Dreamscape",
     label: "Predictive Intelligence Platform",
     copy: "ML-driven forecasting, scenario planning, and decision intelligence for leadership teams.",
-    cta: "Explore Nimbus",
+    cta: "Explore Dreamscape",
     href: "/dreamscape/",
     accent: "hsl(270,70%,55%)",
     accentRgb: "155,100,230",

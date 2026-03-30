@@ -10,7 +10,7 @@ const platforms = [
   { name: "Vessels", role: "Maritime Command", color: "hsl(205,85%,55%)" },
   { name: "Firestorm", role: "Cyber Defense", color: "hsl(0,80%,55%)" },
   { name: "INCA", role: "AI Research Cortex", color: "hsl(265,80%,60%)" },
-  { name: "Nimbus", role: "Predictive Intelligence", color: "hsl(270,70%,55%)" },
+  { name: "Dreamscape", role: "Predictive Intelligence", color: "hsl(270,70%,55%)" },
   { name: "Terra", role: "Business Telemetry", color: "hsl(160,70%,45%)" },
   { name: "Rosie", role: "Threat & Incident Ops", color: "hsl(215,80%,55%)" },
   { name: "Carlota Jo", role: "High-Trust Advisory", color: "hsl(38,55%,58%)" },
@@ -209,7 +209,7 @@ export function Hero() {
                 <span style={{
                   fontSize: "10px", color: "hsl(210,5%,36%)", fontWeight: "500",
                   letterSpacing: "0.04em", fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
-                }}>10 operating brands</span>
+                }}>6 operating brands</span>
               </div>
               <div style={{ height: "1px", background: "hsla(0,0%,100%,0.05)", marginBottom: "0.75rem" }} />
               <div className="space-y-1.5">

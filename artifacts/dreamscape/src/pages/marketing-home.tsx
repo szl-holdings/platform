@@ -97,7 +97,7 @@ export default function DreamscapeMarketingHome() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
               <Brain className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-[15px] tracking-tight">Nimbus</span>
+            <span className="font-bold text-[15px] tracking-tight">Dreamscape</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
             {["Platform", "Capabilities", "Intelligence", "Security"].map(item => (
@@ -167,7 +167,7 @@ export default function DreamscapeMarketingHome() {
           <div className="text-center mb-8">
             <p className="text-[11px] font-semibold text-purple-400/60 tracking-[0.15em] uppercase mb-3">Live Predictions</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Foresight in real time</h2>
-            <p className="text-gray-500 text-[14px] max-w-xl mx-auto">Continuous predictions, opportunities, and risk signals across your data.</p>
+            <p className="text-gray-500 text-[14px] max-w-xl mx-auto">Dreamscape continuously generates predictions, surfaces opportunities, and flags risks across your business data.</p>
           </div>
           <div className="space-y-3">
             {predictions.map((p, i) => (
@@ -216,7 +216,7 @@ export default function DreamscapeMarketingHome() {
               <span className="bg-gradient-to-r from-purple-300 to-indigo-400 bg-clip-text text-transparent">Start predicting.</span>
             </h2>
             <p className="text-gray-500 text-[15px] mb-10 max-w-xl mx-auto leading-relaxed">
-              Nimbus is available to qualified teams. Schedule a walkthrough to see how predictive intelligence changes the way you lead.
+              Dreamscape is available to qualified teams. Schedule a walkthrough to see how predictive intelligence changes the way you lead.
             </p>
             <Link href="/demo">
               <button className="px-10 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all text-[15px] shadow-lg shadow-purple-500/20">
@@ -234,7 +234,7 @@ export default function DreamscapeMarketingHome() {
               <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
                 <Brain className="w-3 h-3 text-white" />
               </div>
-              <span className="font-bold text-[13px]">Nimbus</span>
+              <span className="font-bold text-[13px]">Dreamscape</span>
               <span className="text-[11px] text-gray-600 ml-2">by SZL Holdings</span>
             </div>
             <p className="text-[11px] text-gray-600">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>

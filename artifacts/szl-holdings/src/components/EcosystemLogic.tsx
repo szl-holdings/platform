@@ -232,7 +232,7 @@ export function EcosystemLogic() {
                 { entity: "Vessels", role: "Maritime command. Fleet intelligence in one layer.", accent: "hsl(205,85%,55%)", accentRgb: "38,164,218" },
                 { entity: "Firestorm", role: "Cyber defense. XDR, threat detection, SOC automation.", accent: "hsl(0,80%,55%)", accentRgb: "220,60,60" },
                 { entity: "INCA", role: "AI research. Structured intelligence and decision workflows.", accent: "hsl(265,80%,60%)", accentRgb: "139,92,246" },
-                { entity: "Nimbus", role: "Predictive intelligence. ML forecasting and scenario planning.", accent: "hsl(270,70%,55%)", accentRgb: "155,100,230" },
+                { entity: "Dreamscape", role: "Predictive intelligence. ML forecasting and scenario planning.", accent: "hsl(270,70%,55%)", accentRgb: "155,100,230" },
                 { entity: "Terra", role: "Business telemetry. Real-time KPI and health monitoring.", accent: "hsl(160,70%,45%)", accentRgb: "34,168,120" },
                 { entity: "Rosie", role: "Incident command. MSP operations and SLA management.", accent: "hsl(215,80%,55%)", accentRgb: "55,120,210" },
                 { entity: "Carlota Jo", role: "Premium service. High-trust execution support.", accent: "hsl(38,55%,58%)", accentRgb: "191,152,82" },
