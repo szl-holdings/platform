@@ -42,7 +42,7 @@ SZL Holdings (szlholdings.com)
 │   ├── Dark Vessel Detection & Sanctions Screening
 │   └── Command Workflows (intervention triggers)
 │
-├── Carlota Jo — Premium Services [100% pilot client retention]
+├── Carlota Jo — Premium Services [client portal & inquiry management]
 │   ├── Service catalog & booking
 │   ├── Discreet inquiry workflow
 │   └── Client relationship management
