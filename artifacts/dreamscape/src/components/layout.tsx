@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Wifi, Sparkles, Activity, Calendar, Image, BookOpen, Wand2, Palette, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Film, Video, Search, Bell, Settings, Sparkles, Calendar, Image, BookOpen, Wand2, Palette, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "./ui";
 import { useState } from "react";
 
