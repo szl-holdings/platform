@@ -25,7 +25,7 @@ function CommandLoopPanel({ activePhase }: { activePhase: string }) {
   const phases = [
     { phase: "DETECT", color: "#0ea5e9", current: activePhase === "DETECT" },
     { phase: "INTERPRET", color: "#f59e0b", current: false, link: "/lyte-command-center/" },
-    { phase: "DECIDE", color: "#8b5cf6", current: false, link: "/dreamscape/" },
+    { phase: "DECIDE", color: "#8b5cf6", current: false, link: "/alloy/" },
     { phase: "EXECUTE", color: "#00d4ff", current: false, link: "/alloy/" },
     { phase: "VERIFY", color: "#10b981", current: activePhase === "VERIFY" },
   ];

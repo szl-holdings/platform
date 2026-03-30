@@ -18,7 +18,7 @@ const NAV = [
   { href: "/ownership", label: "Ownership Map", icon: Users },
   { href: "/escalation", label: "Escalation Center", icon: AlertOctagon },
   { href: "/intervention", label: "Intervention Workspace", icon: Wrench },
-  { href: "/readiness", label: "Readiness", icon: Package },
+  { href: "/readiness", label: "Lyte Readiness", icon: Package },
   { href: "/admin/jobs", label: "Job Status", icon: Activity },
 ];
 

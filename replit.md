@@ -1,7 +1,26 @@
 # DreamStack Platform
 
 ## Overview
-DreamStack is a pnpm monorepo containing a suite of 12 interconnected applications built with TypeScript, sharing a common PostgreSQL database, authentication system, and design system. Built for "Stephen L" — technology consultant and founder of SZL Holdings. The platform provides an integrated ecosystem for maritime intelligence, cybersecurity operations, AI research, creative production, organizational readiness, operations command, real estate intelligence, strategic advisory, and corporate/personal portfolios.
+SZL Command Systems — a pnpm monorepo containing a suite of 13 interconnected applications built with TypeScript, sharing a common PostgreSQL database, authentication system, and design system. Built for Stephen Lutar — founder of SZL Holdings. Organised as a strict brand hierarchy: **SZL Holdings** (parent) → **Alloy** (shared intelligence engine) → **Lyte / Vessels / Terra** (command platforms) → **Carlota Jo** (premium service) → **Stephen Lutar** (founder identity). Non-core apps (Nimbus/Dreamscape, INCA, Firestorm, MSP/Rosie) remain internally operational but are hidden from all public-facing surfaces and app switchers.
+
+### Brand Hierarchy (Task #147 — enforced)
+- **SZL Holdings** — dark-first, platinum/silver/graphite, Space Grotesk display
+- **Alloy** — cool steel / signal blue (hsl 210 80% 50%), positioned as infrastructure engine, not a competing product
+- **Lyte** — signal cyan (hsl 192 84% 46%), business observability / risk detection
+- **Vessels** — deep ocean blue (hsl 205 72% 38%), maritime command intelligence
+- **Terra** — stone/slate (hsl 26 40% 42%), elite real estate broker platform
+- **Carlota Jo** — warm ivory/brushed gold (hsl 32 40% 48%), discreet premium services
+- **Stephen Lutar** — near-monochrome (hsl 220 10% 55%), founder identity
+
+### Public Surfaces (approved)
+- Ecosystem Nav app switcher shows only: SZL Holdings, Alloy, Lyte, Vessels, Terra, Carlota Jo, Stephen Lutar
+- Non-core apps removed from ECOSYSTEM_APPS in `lib/shared-ui/src/ecosystem-nav.tsx`
+- DOCTRINE_APP_MAP updated in `lib/shared-ui/src/doctrine-layer.ts`
+
+### Shared Components (Task #147)
+- `lib/shared-ui/src/command-mode.tsx` — Command Mode surface: `CommandModeSurface`, `CommandModeSignalCard`, `StatusBadge`, APPROVED_CTAS, APPROVED_STATUSES
+- Status labels: Live, Pilot Ready, In Build, Strategic, Internal, Private Demo
+- Approved CTAs defined in `APPROVED_CTAS` export
 
 ## User Preferences
 I prefer detailed explanations.

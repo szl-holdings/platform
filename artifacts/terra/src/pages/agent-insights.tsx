@@ -62,7 +62,7 @@ export default function AgentInsightsPage() {
       />
 
       <AgentInsightsWidget
-        domain="firestorm"
+        domain="terra"
         apiBase="/api"
         accentColor="#ef4444"
         compact={false}

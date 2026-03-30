@@ -3,26 +3,26 @@ import type { BrandTokens, BrandSlug } from "./tokens";
 const szlHoldings: BrandTokens = {
   slug: "szl-holdings",
   name: "SZL Holdings",
-  tagline: "One holding company. Six frontier platforms.",
+  tagline: "Premium command systems across observability, operations, and specialized platforms.",
   description:
-    "A venture and operating ecosystem building premium command systems, observability products, and high-trust service brands.",
+    "The holding company behind Alloy, Lyte, Vessels, Terra, Carlota Jo, and the founder. One operating philosophy. One standard of execution.",
   colors: {
-    primary: "hsl(215 45% 32%)",
-    primaryLight: "hsl(215 45% 42%)",
-    primaryDark: "hsl(215 45% 24%)",
-    accent: "hsl(215 45% 52%)",
-    surface: "hsl(215 30% 97%)",
-    surfaceHover: "hsl(215 30% 94%)",
-    border: "hsl(215 20% 90%)",
+    primary: "hsl(220 15% 55%)",
+    primaryLight: "hsl(220 15% 68%)",
+    primaryDark: "hsl(220 15% 40%)",
+    accent: "hsl(38 30% 62%)",
+    surface: "hsl(210 12% 5%)",
+    surfaceHover: "hsl(210 12% 8%)",
+    border: "hsla(0 0% 100% / 0.07)",
     text: {
-      primary: "hsl(215 20% 12%)",
-      secondary: "hsl(215 10% 40%)",
-      muted: "hsl(215 8% 60%)",
+      primary: "hsl(38 12% 94%)",
+      secondary: "hsl(210 5% 58%)",
+      muted: "hsl(210 5% 40%)",
     },
     gradient: {
-      primary: "linear-gradient(135deg, hsl(215 45% 40%), hsl(215 30% 52%))",
-      subtle: "linear-gradient(135deg, hsla(215 45% 40% / 0.08), hsla(215 30% 52% / 0.06))",
-      text: "linear-gradient(135deg, hsl(215 45% 62%), hsl(215 30% 72%))",
+      primary: "linear-gradient(135deg, hsl(220 15% 55%), hsl(220 10% 38%))",
+      subtle: "linear-gradient(135deg, hsla(220 15% 55% / 0.08), hsla(220 10% 38% / 0.06))",
+      text: "linear-gradient(135deg, hsl(220 15% 72%), hsl(38 30% 72%))",
     },
     semantic: {
       success: "hsl(152 55% 42%)",
@@ -32,7 +32,7 @@ const szlHoldings: BrandTokens = {
     },
   },
   typography: {
-    displayFont: "'Instrument Serif', Georgia, serif",
+    displayFont: "'Space Grotesk', 'Inter', system-ui, sans-serif",
     bodyFont: "'Inter', system-ui, -apple-system, sans-serif",
     monoFont: "'JetBrains Mono', 'Fira Code', monospace",
     displayWeight: "700",
@@ -50,40 +50,40 @@ const szlHoldings: BrandTokens = {
     stagger: 0.08,
   },
   ui: {
-    borderRadius: "0.75rem",
-    mode: "light",
+    borderRadius: "0.5rem",
+    mode: "dark",
   },
 };
 
 const vessels: BrandTokens = {
   slug: "vessels",
-  name: "Vessels Maritime Intelligence",
-  tagline: "Total maritime intelligence. Zero blind spots.",
+  name: "Vessels",
+  tagline: "Total fleet visibility. Zero blind spots.",
   description:
-    "Command-grade maritime intelligence platform for fleet operators, shipping companies, and financial institutions tracking vessel risk and performance.",
+    "Maritime command intelligence platform for fleet operators, shipping companies, and principals requiring real-time vessel intelligence and operational command.",
   colors: {
-    primary: "hsl(205 70% 38%)",
-    primaryLight: "hsl(205 70% 50%)",
-    primaryDark: "hsl(205 70% 28%)",
-    accent: "hsl(188 55% 45%)",
-    surface: "hsl(210 40% 6%)",
-    surfaceHover: "hsl(210 40% 9%)",
-    border: "hsla(210 60% 60% / 0.08)",
+    primary: "hsl(205 72% 38%)",
+    primaryLight: "hsl(205 72% 52%)",
+    primaryDark: "hsl(205 72% 28%)",
+    accent: "hsl(186 58% 44%)",
+    surface: "hsl(210 40% 5%)",
+    surfaceHover: "hsl(210 40% 8%)",
+    border: "hsla(205 60% 60% / 0.08)",
     text: {
-      primary: "hsl(205 30% 92%)",
-      secondary: "hsl(205 20% 60%)",
-      muted: "hsl(205 15% 40%)",
+      primary: "hsl(205 25% 92%)",
+      secondary: "hsl(205 15% 60%)",
+      muted: "hsl(205 12% 40%)",
     },
     gradient: {
-      primary: "linear-gradient(135deg, hsl(205 70% 38%), hsl(188 55% 45%))",
-      subtle: "linear-gradient(135deg, hsla(205 70% 38% / 0.08), hsla(188 55% 45% / 0.06))",
-      text: "linear-gradient(135deg, hsl(205 70% 60%), hsl(188 55% 62%))",
+      primary: "linear-gradient(135deg, hsl(205 72% 38%), hsl(186 58% 44%))",
+      subtle: "linear-gradient(135deg, hsla(205 72% 38% / 0.08), hsla(186 58% 44% / 0.06))",
+      text: "linear-gradient(135deg, hsl(205 72% 60%), hsl(186 58% 62%))",
     },
     semantic: {
       success: "hsl(152 55% 45%)",
       warning: "hsl(38 85% 52%)",
       error: "hsl(4 72% 50%)",
-      info: "hsl(205 70% 52%)",
+      info: "hsl(205 72% 52%)",
     },
   },
   typography: {
@@ -167,10 +167,10 @@ const inca: BrandTokens = {
 
 const carlotaJo: BrandTokens = {
   slug: "carlota-jo",
-  name: "Carlota Jo Consulting",
-  tagline: "Strategic excellence. Curated for the rare few.",
+  name: "Carlota Jo",
+  tagline: "Operational excellence, without the visibility.",
   description:
-    "Ultra-premium strategic advisory practice serving founders, executives, and family offices with world-class business transformation expertise.",
+    "Discreet operational and residence support for demanding environments. Not a software product. A service for principals who require white-glove execution.",
   colors: {
     primary: "hsl(32 40% 48%)",
     primaryLight: "hsl(32 40% 60%)",
@@ -223,14 +223,14 @@ const carlotaJo: BrandTokens = {
 const stephen: BrandTokens = {
   slug: "stephen",
   name: "Stephen Lutar",
-  tagline: "Engineering clarity in a noisy world.",
+  tagline: "Systems. Visibility. Execution.",
   description:
-    "Fractional CTO and senior engineering advisor specializing in systems architecture, AI infrastructure, and high-performance engineering teams.",
+    "Founder of SZL Holdings. Operator. Systems builder. The person behind Alloy, Lyte, Vessels, Terra, and Carlota Jo — and the operating philosophy that binds them.",
   colors: {
-    primary: "hsl(220 35% 50%)",
-    primaryLight: "hsl(220 35% 64%)",
-    primaryDark: "hsl(220 35% 38%)",
-    accent: "hsl(38 55% 52%)",
+    primary: "hsl(220 10% 55%)",
+    primaryLight: "hsl(220 10% 68%)",
+    primaryDark: "hsl(220 10% 40%)",
+    accent: "hsl(220 8% 72%)",
     surface: "hsl(220 15% 8%)",
     surfaceHover: "hsl(220 15% 11%)",
     border: "hsla(220 30% 60% / 0.08)",
@@ -387,15 +387,15 @@ const dreamscape: BrandTokens = {
 
 const terra: BrandTokens = {
   slug: "terra",
-  name: "Terra Real Estate Intelligence",
-  tagline: "Data-driven real estate decisions at institutional scale.",
+  name: "Terra",
+  tagline: "The broker platform built for serious operators.",
   description:
-    "Real estate intelligence platform combining live market data, demographic analytics, and institutional-grade risk scoring for property investors.",
+    "Elite real estate broker platform. Turns listings, broker workflow, and market visibility into command — distress engine, deal pipeline, and lead routing built in.",
   colors: {
-    primary: "hsl(26 48% 44%)",
-    primaryLight: "hsl(26 48% 56%)",
-    primaryDark: "hsl(26 48% 34%)",
-    accent: "hsl(14 40% 40%)",
+    primary: "hsl(26 40% 42%)",
+    primaryLight: "hsl(26 40% 56%)",
+    primaryDark: "hsl(26 40% 32%)",
+    accent: "hsl(214 50% 48%)",
     surface: "hsl(20 7% 8%)",
     surfaceHover: "hsl(20 7% 11%)",
     border: "hsla(26 48% 44% / 0.12)",
@@ -442,15 +442,15 @@ const terra: BrandTokens = {
 
 const lyte: BrandTokens = {
   slug: "lyte",
-  name: "Lyte Command Center",
-  tagline: "Operations intelligence at the speed of business.",
+  name: "Lyte",
+  tagline: "See risk before it hits execution.",
   description:
-    "Modern operations command center for MSPs and service businesses managing clients, tasks, billing, and performance in a unified dashboard.",
+    "Business observability command platform. Surfaces risk, latency, ownership gaps, and workflow friction before they hit execution — at every level of the organisation.",
   colors: {
-    primary: "hsl(192 80% 46%)",
-    primaryLight: "hsl(192 80% 58%)",
-    primaryDark: "hsl(192 80% 36%)",
-    accent: "hsl(180 60% 44%)",
+    primary: "hsl(192 84% 46%)",
+    primaryLight: "hsl(192 84% 58%)",
+    primaryDark: "hsl(192 84% 34%)",
+    accent: "hsl(210 72% 52%)",
     surface: "hsl(186 8% 8%)",
     surfaceHover: "hsl(186 8% 11%)",
     border: "hsla(192 80% 46% / 0.12)",
@@ -552,15 +552,15 @@ const msp: BrandTokens = {
 
 const alloy: BrandTokens = {
   slug: "alloy",
-  name: "Alloy Command",
-  tagline: "Unified AI command for your entire operation.",
+  name: "Alloy",
+  tagline: "The intelligence backbone behind every platform.",
   description:
-    "Enterprise AI command center unifying agents, data pipelines, and operational intelligence across every business function.",
+    "Alloy is not a product you buy. It is the operating infrastructure that makes every SZL platform credible — shared signal ingestion, workflow orchestration, action routing, output generation, and human approval gates.",
   colors: {
-    primary: "hsl(232 64% 58%)",
-    primaryLight: "hsl(232 64% 70%)",
-    primaryDark: "hsl(232 64% 46%)",
-    accent: "hsl(248 52% 62%)",
+    primary: "hsl(210 80% 50%)",
+    primaryLight: "hsl(210 80% 62%)",
+    primaryDark: "hsl(210 80% 38%)",
+    accent: "hsl(195 90% 46%)",
     surface: "hsl(228 8% 9%)",
     surfaceHover: "hsl(228 8% 12%)",
     border: "hsla(232 64% 58% / 0.12)",

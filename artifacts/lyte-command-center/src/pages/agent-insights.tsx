@@ -62,9 +62,9 @@ export default function AgentInsightsPage() {
       />
 
       <AgentInsightsWidget
-        domain="firestorm"
+        domain="lyte"
         apiBase="/api"
-        accentColor="#ef4444"
+        accentColor="#06b6d4"
         compact={false}
       />
 

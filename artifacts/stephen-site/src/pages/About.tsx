@@ -18,7 +18,7 @@ export function About() {
             I build enterprise infrastructure, AI platforms, and domain-specific intelligence tools. My focus is on the category of software where the problem is genuinely hard — where domain depth, auditability, and decision-support quality matter more than feature count.
           </p>
           <p>
-            I founded SZL Holdings in 2023 as a strategic holding structure for a portfolio of domain-specific platforms. The portfolio currently spans maritime intelligence (Vessels), AI research infrastructure (INCA), strategic advisory technology (Carlota Jo), and AI operations (Lyte Command Center).
+            I founded SZL Holdings in 2023 as a strategic holding structure for a portfolio of domain-specific platforms. The portfolio currently spans maritime intelligence (Vessels), business telemetry (Beacon), strategic advisory (Carlota Jo), and orchestration (Lyte Command Center), powered by the Alloy execution fabric.
           </p>
           <p>
             My background is in enterprise software architecture, product design, and the infrastructure layer that sits between raw data and operational decisions. I'm particularly focused on the intersection of AI and accountability — building platforms where intelligence outputs are explainable, traceable, and defensible.
@@ -33,7 +33,7 @@ export function About() {
           <div className="grid sm:grid-cols-2 gap-5">
             {[
               { title: "Vessels Maritime", body: "Building the maritime intelligence layer for fleet operators — from AIS tracking to voyage economics to sanctions compliance." },
-              { title: "INCA Platform", body: "Developing explainable AI infrastructure for enterprise intelligence and research operations." },
+              { title: "Alloy Engine", body: "Building the execution fabric and predictive intelligence layer powering decision-making across the ecosystem." },
               { title: "SZL Portfolio", body: "Scaling the portfolio company model across complementary enterprise software domains." },
               { title: "Enterprise AI", body: "Writing and advising on the accountability and explainability requirements for AI in regulated operations." },
             ].map((item) => (

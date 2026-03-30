@@ -1,6 +1,7 @@
 import { APPROVALS, WORKFLOWS, EVENTS, formatCurrency, getSeverityColor, getStateColor, type Severity } from "@workspace/shared-ui/core-observability-data";
 import { cn } from "@workspace/shared-ui/utils";
 import { Inbox, AlertTriangle, Clock, User, ArrowRight, Zap, ExternalLink } from "lucide-react";
+import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
 
 type ActionPriority = "urgent" | "high" | "medium";
 
@@ -193,6 +194,54 @@ export default function CommandInbox() {
           </div>
         </div>
       ))}
+
+      <CommandModeSurface
+        title="Command Mode — Active Signals"
+        accentColor="#f59e0b"
+        signals={COMMAND_SIGNALS}
+      />
     </div>
   );
 }
+
+const COMMAND_SIGNALS: CommandModeSignal[] = [
+  {
+    id: "cs-001",
+    level: "critical",
+    what: "Northgate contract approval stalled — 48h past SLA",
+    why: "Legal review has no assigned owner. $840K ARR at risk if contract lapses without renewal signature by Friday.",
+    owner: "Jordan Alvarez",
+    next: "Escalate to VP Legal with 24h deadline",
+    valueAtRisk: "$840K",
+    category: "Approval",
+  },
+  {
+    id: "cs-002",
+    level: "high",
+    what: "TechCorp churn probability at 88% — no executive outreach in 14 days",
+    why: "Alloy model predicts churn based on declining usage, 3 unresolved support tickets, and zero executive contact since renewal discussion.",
+    owner: "Marcus Webb",
+    next: "Schedule executive call within 24h",
+    valueAtRisk: "$480K",
+    category: "Retention",
+  },
+  {
+    id: "cs-003",
+    level: "high",
+    what: "Apex Logistics onboarding compliance step has no owner",
+    why: "6 vendor onboardings blocked downstream. Compliance review step was created without owner assignment — likely a workflow configuration gap.",
+    next: "Assign compliance owner and unblock pipeline",
+    valueAtRisk: "$320K",
+    category: "Ownership",
+  },
+  {
+    id: "cs-004",
+    level: "medium",
+    what: "Q1 CapEx budget authorization aging at 72h",
+    why: "Infrastructure upgrade requires cross-department sign-off. Two of four approvers have not responded.",
+    owner: "Priya Mehta",
+    next: "Send reminder with 48h escalation trigger",
+    valueAtRisk: "$450K",
+    category: "Approval",
+  },
+];

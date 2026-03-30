@@ -4,6 +4,7 @@ import { brokerageSummary, brokerageDeals, riskSignals, agents, automationRuns }
 import { RiskBadge, StageBadge, DealHealthCard, formatCurrency, AgentAvatar, StatusIndicator } from "@/components/brokerage-ui";
 import { cn } from "@workspace/shared-ui/utils";
 import { Link } from "wouter";
+import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
 
 const commandLoopItems = [
   { label: "DETECT", desc: "Pipeline & listing health", icon: Activity, color: "text-blue-400" },
@@ -282,6 +283,55 @@ export default function DashboardPage() {
           </div>
         </div>
       </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="col-span-full">
+        <CommandModeSurface
+          title="Command Mode — Deal Signals"
+          accentColor="#a07848"
+          signals={DEAL_SIGNALS}
+        />
+      </motion.div>
     </div>
   );
 }
+
+const DEAL_SIGNALS: CommandModeSignal[] = [
+  {
+    id: "ts-001",
+    level: "critical",
+    what: "112 Riverside Dr — buyer financing fell through 48h before closing",
+    why: "Lender withdrew pre-approval due to appraisal gap of $85K. Seller has backup offer expiring in 72h. Commission of $42K at risk if deal collapses.",
+    owner: "Sarah Chen",
+    next: "Contact buyer's agent to negotiate price adjustment or bridge financing",
+    valueAtRisk: "$42K commission",
+    category: "Deal Risk",
+  },
+  {
+    id: "ts-002",
+    level: "high",
+    what: "Distress property cluster detected — 4 new pre-foreclosures in Westside corridor",
+    why: "County recorder filings show 4 lis pendens within 0.3mi radius. Area median price down 8% QoQ. Potential acquisition opportunity before auction.",
+    owner: "Marcus Webb",
+    next: "Run Alloy distress valuation model. Contact owners within 48h.",
+    valueAtRisk: "$280K potential",
+    category: "Distress Engine",
+  },
+  {
+    id: "ts-003",
+    level: "high",
+    what: "3 leads uncontacted for 72h+ — auto-routing to backup agent",
+    why: "Agent Jake Morrison has not responded to 3 inbound leads from Zillow syndication. SLA breach triggers automatic reassignment in 24h.",
+    owner: "Jake Morrison",
+    next: "Contact agent. If unresponsive, reassign leads to Sarah Chen.",
+    category: "Lead Routing",
+  },
+  {
+    id: "ts-004",
+    level: "medium",
+    what: "MLS listing 2024-8847 — price reduction recommended based on days on market",
+    why: "Property at 45 DOM vs 28 DOM area median. Alloy pricing model suggests 3-5% reduction would align with comparable sold properties.",
+    owner: "Lisa Park",
+    next: "Present pricing analysis to seller at scheduled review meeting",
+    category: "Pricing",
+  },
+];

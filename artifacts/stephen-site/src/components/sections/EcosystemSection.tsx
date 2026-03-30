@@ -9,12 +9,10 @@ type EcoStatus = { apps: EcoApp[]; connectors: EcoConnector[] };
 
 const appIcons: Record<string, React.ElementType> = {
   vessels: Globe,
-  firestorm: Activity,
   lyte: Server,
   alloy: Cpu,
-  dreamscape: Cpu,
-  readiness: CheckCircle2,
-  inca: Cpu,
+  beacon: Activity,
+  carlota: Globe,
 };
 
 export function EcosystemSection() {
@@ -22,12 +20,11 @@ export function EcosystemSection() {
 
   const ecosystem: EcoStatus = (statusData as unknown as EcoStatus) || {
     apps: [
-      { name: "Vessels", slug: "vessels", description: "Maritime fleet & cargo intelligence", status: "operational", lastChecked: new Date().toISOString() },
-      { name: "Firestorm", slug: "firestorm", description: "Cybersecurity simulation engine", status: "operational", lastChecked: new Date().toISOString() },
-      { name: "Lyte", slug: "lyte", description: "Enterprise commerce platform", status: "operational", lastChecked: new Date().toISOString() },
       { name: "Alloy", slug: "alloy", description: "Execution fabric & predictive intelligence · ENGINE", status: "operational", lastChecked: new Date().toISOString() },
-      { name: "Aegis", slug: "aegis", description: "Control plane & risk register · DECIDE", status: "operational", lastChecked: new Date().toISOString() },
-      { name: "INCA", slug: "inca", description: "AI research command center", status: "operational", lastChecked: new Date().toISOString() },
+      { name: "Lyte", slug: "lyte", description: "Business observability & orchestration", status: "operational", lastChecked: new Date().toISOString() },
+      { name: "Vessels", slug: "vessels", description: "Maritime fleet & cargo intelligence", status: "operational", lastChecked: new Date().toISOString() },
+      { name: "Beacon", slug: "beacon", description: "Business telemetry & KPI observability", status: "operational", lastChecked: new Date().toISOString() },
+      { name: "Carlota Jo", slug: "carlota", description: "Strategic advisory platform", status: "operational", lastChecked: new Date().toISOString() },
     ],
     connectors: [
       { name: "GitHub", slug: "github", status: "connected", lastChecked: new Date().toISOString() },

@@ -3,7 +3,6 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 
 const Home = lazy(() => import("@/pages/Home"));
 const ServicesPage = lazy(() => import("@/pages/Services"));
@@ -114,12 +113,6 @@ function App() {
           commands={carlotaCommands}
           appName="Carlota Jo"
           accentColor="#c8a96a"
-        />
-        <IncaAgentIndicator
-          agentName="Advisory Agent"
-          systemType="mama-quilla"
-          currentTask="Synthesising client readiness signals for next session"
-          confidence={0.87}
         />
       </PowerUserProvider>
     </WouterRouter>

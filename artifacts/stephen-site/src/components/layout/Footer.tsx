@@ -11,8 +11,8 @@ const navLinks = [
 
 const ecosystemLinks = [
   { label: "SZL Holdings", href: "/szl-holdings/" },
+  { label: "Alloy", href: "/alloy/" },
   { label: "Vessels", href: "/vessels/" },
-  { label: "INCA", href: "/inca/" },
   { label: "Carlota Jo", href: "/carlota-jo/" },
 ];
 

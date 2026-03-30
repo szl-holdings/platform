@@ -3,16 +3,15 @@ import { apiFetch } from "@workspace/shared-ui";
 import { cn } from "@workspace/shared-ui/utils";
 import {
   Shield, Ship, Zap, TrendingDown, AlertTriangle, CheckCircle, Clock,
-  ArrowRight, ExternalLink, Activity, BarChart3, Flame, Eye, User,
+  ArrowRight, ExternalLink, Activity, BarChart3, Eye, User,
   GitBranch, Package, Navigation
 } from "lucide-react";
 
 const DOMAIN_LINKS = [
-  { id: "lyte", label: "Lyte", description: "Business Command", color: "#f59e0b", href: "/lyte-command-center/", icon: Zap },
-  { id: "vessels", label: "Vessels", description: "Maritime Intel", color: "#0ea5e9", href: "/vessels/", icon: Ship },
-  { id: "firestorm", label: "Firestorm", description: "Security SOC", color: "#f97316", href: "/firestorm/", icon: Flame },
-  { id: "alloy", label: "Alloy", description: "Workflow Engine", color: "#00d4ff", href: "/alloy/", icon: GitBranch },
-  { id: "nimbus", label: "Nimbus", description: "Predictive AI", color: "#8b5cf6", href: "/dreamscape/", icon: TrendingDown },
+  { id: "lyte", label: "Lyte", description: "Business Observability", color: "#06b6d4", href: "/lyte-command-center/", icon: Zap },
+  { id: "vessels", label: "Vessels", description: "Maritime Command", color: "#3b82f6", href: "/vessels/", icon: Ship },
+  { id: "terra", label: "Terra", description: "Broker Platform", color: "#a07848", href: "/terra/", icon: Navigation },
+  { id: "alloy", label: "Alloy", description: "Intelligence Engine", color: "#60a5fa", href: "/alloy/", icon: GitBranch },
 ];
 
 const DEMO_UNIFIED = {
@@ -36,26 +35,26 @@ const DEMO_UNIFIED = {
       { title: "Route Deviation — Pacific Guardian off optimal lane", severity: "warning", type: "route_deviation", impact: 24000 },
     ],
   },
-  firestorm: {
-    openVulns: 12,
-    criticalAssets: 5,
-    openIncidents: 3,
-    topFindings: [
-      { title: "Payment API v3 — Auth Bypass Vulnerability", severity: "critical", asset: "payment-api-v3", cvss: 9.5 },
-      { title: "Auth Service — Session Fixation Risk", severity: "critical", asset: "auth-service-cluster", cvss: 8.7 },
-      { title: "VPN Gateway — Unpatched CVE-2024-3891", severity: "high", asset: "corporate-vpn-gateway", cvss: 8.1 },
+  terra: {
+    activeListings: 34,
+    stalledDeals: 5,
+    pipelineValue: 12800000,
+    topSignals: [
+      { title: "3 leads uncontacted for 72h+ — SLA breach imminent", severity: "critical", type: "lead_routing", impact: 180000 },
+      { title: "Distress cluster detected — 4 pre-foreclosures in Westside", severity: "high", type: "distress_engine", impact: 280000 },
+      { title: "MLS listing 2024-8847 — price reduction recommended", severity: "warning", type: "pricing", impact: 42000 },
     ],
   },
   workflows: {
     recentRuns: [
       { id: "wf-001", name: "Northgate Contract Escalation", status: "completed", domain: "lyte", completedAt: new Date(Date.now() - 30 * 60000).toISOString() },
       { id: "wf-002", name: "Atlantic Pioneer ETA Alert", status: "in_progress", domain: "vessels", completedAt: null },
-      { id: "wf-003", name: "Payment API Vuln Assignment", status: "completed", domain: "firestorm", completedAt: new Date(Date.now() - 2 * 3600000).toISOString() },
+      { id: "wf-003", name: "Distress Property Valuation", status: "completed", domain: "terra", completedAt: new Date(Date.now() - 2 * 3600000).toISOString() },
       { id: "wf-004", name: "Q2 Forecast Drift Analysis", status: "completed", domain: "lyte", completedAt: new Date(Date.now() - 4 * 3600000).toISOString() },
     ],
   },
   recommendations: [
-    { id: "rec-001", domain: "firestorm", priority: "critical", text: "Patch payment-api-v3 auth bypass — CVSS 9.5. Service window: 2h. Risk: $2.8M exposure." },
+    { id: "rec-001", domain: "terra", priority: "critical", text: "Contact 3 unresponsive leads before auto-reassignment. $180K pipeline value at risk." },
     { id: "rec-002", domain: "lyte", priority: "urgent", text: "Escalate Northgate contract to VP Legal. SLA 48h past breach. $840K ARR at risk." },
     { id: "rec-003", domain: "vessels", priority: "high", text: "Reroute Atlantic Pioneer — weather system will cause 34h delay. Alloy route intervention recommended." },
     { id: "rec-004", domain: "lyte", priority: "high", text: "Close 47 stale pipeline opportunities. Forecast distortion is masking $890K in dead weight." },
@@ -65,7 +64,7 @@ const DEMO_UNIFIED = {
 const DOMAIN_COLORS: Record<string, string> = {
   lyte: "text-amber-400",
   vessels: "text-sky-400",
-  firestorm: "text-orange-400",
+  terra: "text-orange-400",
   alloy: "text-cyan-400",
 };
 
@@ -105,9 +104,9 @@ export default function UnifiedCommandDashboard() {
     placeholderData: [],
   });
 
-  const { data: rawFirestormFindings } = useQuery({
-    queryKey: ["unified-firestorm-findings"],
-    queryFn: () => apiFetch<any[]>("/firestorm/findings"),
+  const { data: rawTerraSignals } = useQuery({
+    queryKey: ["unified-terra-signals"],
+    queryFn: () => apiFetch<any[]>("/terra/signals"),
     placeholderData: [],
   });
 
@@ -121,7 +120,7 @@ export default function UnifiedCommandDashboard() {
             <Eye className="w-6 h-6 text-sky-400" />
             Unified Command
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Cross-domain intelligence — highest priority items across Lyte, Vessels, and Firestorm</p>
+          <p className="text-sm text-slate-400 mt-1">Cross-domain intelligence — highest priority items across Lyte, Vessels, and Terra</p>
         </div>
         <div className="flex items-center gap-1 text-[10px] text-slate-500">
           <Activity className="w-3 h-3 text-emerald-400" />
@@ -210,33 +209,33 @@ export default function UnifiedCommandDashboard() {
 
         <div
           className="rounded-xl border p-4 cursor-pointer hover:opacity-90 transition-all"
-          style={{ borderColor: "#f9731640", background: "#f9731608" }}
-          onClick={() => window.location.href = "/firestorm/"}
+          style={{ borderColor: "#a0784840", background: "#a0784808" }}
+          onClick={() => window.location.href = "/terra/"}
         >
           <div className="flex items-center gap-2 mb-3">
-            <Flame className="w-4 h-4 text-orange-400" />
-            <span className="text-sm font-semibold text-orange-400">Firestorm — Security SOC</span>
+            <Navigation className="w-4 h-4 text-orange-400" />
+            <span className="text-sm font-semibold text-orange-400">Terra — Broker Platform</span>
           </div>
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div>
-              <div className="text-2xl font-bold text-red-400">{data.firestorm.openIncidents}</div>
-              <div className="text-[10px] text-slate-500">Incidents</div>
+              <div className="text-2xl font-bold text-orange-400">{data.terra.activeListings}</div>
+              <div className="text-[10px] text-slate-500">Active Listings</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-400">{data.firestorm.openVulns}</div>
-              <div className="text-[10px] text-slate-500">Open Vulns</div>
+              <div className="text-2xl font-bold text-amber-400">{data.terra.stalledDeals}</div>
+              <div className="text-[10px] text-slate-500">Stalled Deals</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-rose-400">{data.firestorm.criticalAssets}</div>
-              <div className="text-[10px] text-slate-500">Critical Assets</div>
+              <div className="text-2xl font-bold text-emerald-400">{formatCurrency(data.terra.pipelineValue)}</div>
+              <div className="text-[10px] text-slate-500">Pipeline</div>
             </div>
           </div>
           <div className="mt-3 space-y-1.5">
-            {data.firestorm.topFindings.map((f, i) => (
+            {data.terra.topSignals.map((s, i) => (
               <div key={i} className="text-[10px] flex items-center gap-1.5 text-slate-400">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${f.severity === "critical" ? "bg-red-400" : "bg-orange-400"}`} />
-                <span className="truncate">{f.title}</span>
-                <span className="ml-auto text-orange-400/80 flex-shrink-0">CVSS {f.cvss}</span>
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.severity === "critical" ? "bg-red-400" : "bg-orange-400"}`} />
+                <span className="truncate">{s.title}</span>
+                {s.impact > 0 && <span className="ml-auto text-orange-400/80 flex-shrink-0">{formatCurrency(s.impact)}</span>}
               </div>
             ))}
           </div>
@@ -255,7 +254,7 @@ export default function UnifiedCommandDashboard() {
                 <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 mt-0.5 ${DOMAIN_COLORS[rec.domain] ? `bg-${rec.domain === "lyte" ? "amber" : rec.domain === "vessels" ? "sky" : "orange"}-500/10` : ""}`}>
                   {rec.domain === "lyte" ? <Zap className="w-3 h-3 text-amber-400" /> :
                    rec.domain === "vessels" ? <Ship className="w-3 h-3 text-sky-400" /> :
-                   <Flame className="w-3 h-3 text-orange-400" />}
+                   <Navigation className="w-3 h-3 text-orange-400" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
@@ -306,7 +305,7 @@ export default function UnifiedCommandDashboard() {
               {[
                 { label: "View Lyte Action Queue", href: "/lyte-command-center/action-queue" },
                 { label: "Vessels Exceptions", href: "/vessels/exceptions" },
-                { label: "Firestorm Assets", href: "/firestorm/asset-inventory" },
+                { label: "Terra Listings", href: "/terra/listings" },
                 { label: "Alloy Workflows", href: "/alloy/" },
               ].map(({ label, href }) => (
                 <a key={href} href={href}

@@ -38,24 +38,6 @@ const ventures = [
     accent: "hsl(32,38%,58%)",
     accentMuted: "hsla(32,38%,58%,0.10)",
   },
-  {
-    name: "INCA",
-    tagline: "Enterprise AI research and intelligence operations.",
-    category: "Intelligence Platform",
-    status: "Live",
-    href: "/inca/",
-    accent: "hsl(246,45%,60%)",
-    accentMuted: "hsla(246,45%,60%,0.10)",
-  },
-  {
-    name: "Firestorm",
-    tagline: "Adversarial simulation and red-team cyber operations.",
-    category: "Cyber Security",
-    status: "Live",
-    href: "/firestorm/",
-    accent: "hsl(28,78%,56%)",
-    accentMuted: "hsla(28,78%,56%,0.10)",
-  },
 ];
 
 const statusStyle: Record<string, { color: string; bg: string; border: string }> = {

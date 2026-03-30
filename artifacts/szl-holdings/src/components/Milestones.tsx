@@ -13,8 +13,8 @@ const milestones = [
   },
   {
     date: "Q1 2023",
-    title: "INCA platform operational",
-    description: "INCA Intelligence Platform reaches operational status with enterprise AI research capabilities.",
+    title: "Alloy engine operational",
+    description: "Alloy execution fabric reaches operational status powering predictive intelligence across the ecosystem.",
   },
   {
     date: "Q2 2023",
@@ -23,8 +23,8 @@ const milestones = [
   },
   {
     date: "Q4 2023",
-    title: "Firestorm in production",
-    description: "Adversarial security simulation platform operational across regulated industry clients.",
+    title: "Beacon enters production",
+    description: "Business telemetry platform operational, delivering continuous KPI observability for enterprise clients.",
   },
   {
     date: "2024–2025",

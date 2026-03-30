@@ -9,6 +9,7 @@ import {
   CheckCircle2, XCircle, Minus
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
 
 const { vessels, fleetExceptions, maintenanceItems, voyageEconomics, performanceMetrics } = vesselsDomainMockData;
 
@@ -321,6 +322,55 @@ export default function CommandOverviewPage() {
       {activeTab === "exec" && <ExecutiveView />}
       {activeTab === "ops" && <OperationsView />}
       {activeTab === "commercial" && <CommercialView />}
+
+      <div className="mt-6">
+        <CommandModeSurface
+          title="Command Mode — Fleet Signals"
+          accentColor="#3b82f6"
+          signals={FLEET_SIGNALS}
+        />
+      </div>
     </div>
   );
 }
+
+const FLEET_SIGNALS: CommandModeSignal[] = [
+  {
+    id: "vs-001",
+    level: "critical",
+    what: "Atlantic Pioneer — AIS transponder silent for 6h in high-risk corridor",
+    why: "Vessel last reported position in Gulf of Guinea. No signal for 6 hours exceeds 4h threshold. Pattern consistent with dark vessel behaviour or equipment failure.",
+    owner: "Operations Desk",
+    next: "Initiate contact via satellite phone. Alert flag state if no response within 2h.",
+    valueAtRisk: "$2.1M cargo",
+    category: "Dark Vessel",
+  },
+  {
+    id: "vs-002",
+    level: "high",
+    what: "MV Northern Star — ETA deviation of 34h on Hamburg–Singapore route",
+    why: "Weather system in Indian Ocean forcing reroute. Fuel burn increase of ~18%. Charter party deadline at risk — demurrage clause activates after 48h delay.",
+    owner: "Captain Rodrigues",
+    next: "Reroute via Alloy weather model. Notify charterer of revised ETA.",
+    valueAtRisk: "$180K demurrage",
+    category: "Voyage",
+  },
+  {
+    id: "vs-003",
+    level: "high",
+    what: "Pacific Meridian — main engine overdue for 500h inspection by 120h",
+    why: "Class society inspection window expired. Continued operation risks insurance coverage lapse and port state detention at next call.",
+    owner: "Fleet Technical",
+    next: "Schedule emergency dry dock at next port of call (Singapore ETA 3 days)",
+    category: "Maintenance",
+  },
+  {
+    id: "vs-004",
+    level: "medium",
+    what: "Caspian Venture — bunker fuel quality below ISO 8217 threshold",
+    why: "Lab results from Rotterdam bunkering show sulphur content at 0.52% vs 0.50% MARPOL limit. Non-compliance risk at next ECA transit.",
+    owner: "Bunker Desk",
+    next: "Switch to compliant tank before Dover Strait ECA entry",
+    category: "Compliance",
+  },
+];

@@ -10,6 +10,7 @@ export * from "./doctrine-layer";
 export * from "./doctrine-layer-badge";
 export * from "./explainability-panel";
 export * from "./design-system";
+export * from "./command-mode";
 export { default as AppObservabilityPage } from "./AppObservabilityPage";
 export { apiFetch, type PaginationMeta, type PaginatedResponse } from "./api-fetch";
 export { useNotificationCenter, type LiveNotification, type ApiNotification, type NotificationCenterState } from "./notification-center";

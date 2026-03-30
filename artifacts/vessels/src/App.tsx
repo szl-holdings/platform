@@ -16,7 +16,6 @@ import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/aut
 import { PrivateAppGuard } from "@workspace/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import { DemoModeProvider } from "@workspace/shared-ui";
 
@@ -431,7 +430,6 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         appName="Vessels"
         accentColor="#0ea5e9"
       />
-      <IncaAgentIndicator agentName="Maritime Analyst" systemType="inti" currentTask="Scanning AIS transponder anomalies across fleet" confidence={0.91} />
     </PowerUserProvider>
   );
 }

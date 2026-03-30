@@ -1,13 +1,10 @@
 const ecosystemNodes = [
-  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "firestorm", "inca", "lyte", "alloy", "beacon", "rosie", "aegis"] },
-  { id: "alloy", name: "Alloy · ENGINE", type: "engine", x: 48, y: 20, connections: ["szl", "lyte", "vessels", "aegis"] },
-  { id: "vessels", name: "Vessels · OBSERVE", type: "subsidiary", x: 20, y: 20, connections: ["szl", "lyte", "rosie"] },
-  { id: "rosie", name: "Rosie · OBSERVE", type: "subsidiary", x: 80, y: 15, connections: ["szl", "lyte", "firestorm"] },
-  { id: "beacon", name: "Beacon · OBSERVE", type: "subsidiary", x: 15, y: 55, connections: ["szl", "aegis"] },
-  { id: "inca", name: "INCA · UNDERSTAND", type: "subsidiary", x: 15, y: 80, connections: ["szl", "alloy"] },
-  { id: "aegis", name: "Aegis · DECIDE", type: "subsidiary", x: 82, y: 55, connections: ["szl", "alloy"] },
-  { id: "lyte", name: "Lyte · EXECUTE", type: "subsidiary", x: 85, y: 78, connections: ["szl", "firestorm", "vessels"] },
-  { id: "firestorm", name: "Firestorm · EXECUTE", type: "subsidiary", x: 65, y: 18, connections: ["szl", "lyte"] },
+  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "lyte", "alloy", "beacon", "carlota"] },
+  { id: "alloy", name: "Alloy · ENGINE", type: "engine", x: 50, y: 15, connections: ["szl", "lyte", "vessels", "beacon"] },
+  { id: "lyte", name: "Lyte · EXECUTE", type: "subsidiary", x: 82, y: 30, connections: ["szl", "alloy", "vessels"] },
+  { id: "vessels", name: "Vessels · OBSERVE", type: "subsidiary", x: 18, y: 30, connections: ["szl", "alloy", "lyte"] },
+  { id: "beacon", name: "Beacon · OBSERVE", type: "subsidiary", x: 25, y: 75, connections: ["szl", "alloy"] },
+  { id: "carlota", name: "Carlota Jo · ADVISORY", type: "subsidiary", x: 75, y: 75, connections: ["szl"] },
 ];
 
 export function NexusMap() {
@@ -72,8 +69,8 @@ export function NexusMap() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
           {[
-            { label: "Subsidiaries", value: "7", detail: "Active companies" },
-            { label: "Synergies", value: "12", detail: "Cross-company integrations" },
+            { label: "Platforms", value: "5", detail: "Active companies" },
+            { label: "Synergies", value: "8", detail: "Cross-company integrations" },
             { label: "Combined Revenue", value: "$24M+", detail: "Annual run rate" },
             { label: "Employees", value: "180+", detail: "Across all entities" },
           ].map((stat) => (

@@ -12,7 +12,6 @@ const ecosystemLinks = [
   { label: "Alloy", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
-  { label: "INCA", href: "/inca/" },
   { label: "Stephen Site", href: "/stephen/" },
 ];
 
