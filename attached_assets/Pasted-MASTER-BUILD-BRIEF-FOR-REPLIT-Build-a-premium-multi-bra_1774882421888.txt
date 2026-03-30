@@ -1,0 +1,433 @@
+MASTER BUILD BRIEF FOR REPLIT
+
+Build a premium multi-brand ecosystem for:
+1. SZL Holdings
+2. Vessels
+3. INCA
+4. Carlota Jo Consulting
+5. Stephen Site
+6. Admin
+
+CORE RULES
+- Premium, modern, restrained, high-trust design
+- One shared design system across all brands
+- One shared admin/CMS layer
+- One secure Supabase data spine
+- No generic startup template
+- No placeholder text
+- No dead routes or fake widgets
+- No public exposure of protected data
+- Carlota Jo must be publicly branded as “Carlota Jo,” not Rosa Lutar
+
+STACK
+- Next.js
+- TypeScript
+- Tailwind
+- shadcn/ui
+- Framer Motion
+- Supabase
+- Stripe
+- Plausible
+- Resend
+- Mapbox for Vessels
+
+APPS
+- /apps/szl-holdings
+- /apps/vessels
+- /apps/inca
+- /apps/carlota-jo
+- /apps/stephen-site
+- /apps/admin
+
+SHARED PACKAGES
+- /packages/ui
+- /packages/lib
+- /packages/types
+- /packages/analytics
+- /packages/email
+- /packages/maps
+- /packages/config
+- /packages/brand
+
+BRAND DIRECTION
+
+SZL Holdings:
+- portfolio headquarters
+- strategic, premium, investor-grade
+- hero should present the ecosystem and roadmap
+
+Vessels:
+- flagship maritime command platform
+- map-first, operational, technical, premium
+- feels like a real command center
+
+INCA:
+- secure intelligence / cyber / AI platform
+- dark, sharp, serious, signal-driven
+- feels trusted and enterprise-ready
+
+Carlota Jo:
+- luxury advisory brand
+- discreet, editorial, elegant, bespoke
+- public identity is Carlota Jo, not Rosa
+
+Stephen Site:
+- personal authority platform
+- business observability, AI, cyber, systems, execution
+- sharp, credible, high-agency
+
+PUBLIC SITE PAGES
+
+SZL Holdings:
+- /
+- /ventures
+- /roadmap
+- /about
+- /updates
+- /contact
+
+Vessels:
+- /
+- /platform
+- /capabilities
+- /use-cases
+- /security
+- /pricing
+- /demo
+- /sign-in
+- /dashboard/*
+  
+INCA:
+- /
+- /platform
+- /capabilities
+- /security
+- /insights
+- /request-access
+- /sign-in
+- /dashboard/*
+
+Carlota Jo:
+- /
+- /services
+- /approach
+- /about
+- /inquiries
+- /client-portal/*
+
+Stephen Site:
+- /
+- /work
+- /thesis
+- /writing
+- /about
+- /contact
+- /downloads
+
+Admin:
+- /admin
+- content CRUD
+- media
+- site settings
+- analytics
+- audit log
+
+CMS TABLES
+Create content tables for:
+- sites
+- pages
+- sections
+- ventures
+- services
+- features
+- use_cases
+- roadmap_items
+- updates
+- testimonials
+- faqs
+- ctas
+- articles
+- case_studies
+- downloads
+- navigation_items
+- media_assets
+- forms
+- site_settings
+
+PRODUCT TABLES
+Create protected tables for:
+- organizations
+- profiles
+- organization_memberships
+- audit_logs
+- subscriptions
+
+Vessels:
+- fleets
+- vessels_assets
+- journeys
+- vessel_events
+- vessel_alerts
+- vessel_reports
+
+INCA:
+- signals
+- findings
+- investigations
+- investigation_items
+- inca_alerts
+- reports
+
+Carlota client portal:
+- client_accounts
+- client_documents
+- client_updates
+- client_messages
+
+Forms:
+- contact_submissions
+- lead_status
+
+AUTH + SECURITY
+- Use Supabase auth
+- Roles: public, authenticated, member, client, editor, admin, super_admin
+- Enable RLS on all protected tables
+- Default deny
+- Public reads only for published public content
+- Org-scoped data must check memberships
+- Client portal must only show that client’s records
+- Keep secrets server-side only
+
+DESIGN SYSTEM
+Build reusable components:
+- SiteHeader
+- SiteFooter
+- HeroBlock
+- CTAGroup
+- FeatureGrid
+- VentureCard
+- ServiceCard
+- ArticleCard
+- CaseStudyCard
+- KPI strip
+- Timeline
+- InquiryForm
+- DashboardShell
+- SidebarNav
+- DataTable
+- AlertCard
+- LoadingSkeleton
+- EmptyState
+- ErrorState
+- AccessDenied
+
+HOMEPAGE REQUIREMENTS
+
+SZL:
+- ecosystem hero
+- venture strip
+- roadmap snapshot
+- updates
+- CTA
+
+Vessels:
+- command-center hero
+- product visual
+- capabilities
+- use cases
+- trust/security
+- demo CTA
+
+INCA:
+- secure intelligence hero
+- capabilities
+- signal/finding preview
+- trust/security
+- access CTA
+
+Carlota Jo:
+- elegant hero
+- services
+- approach
+- trust
+- discreet inquiry flow
+
+Stephen Site:
+- authority hero
+- selected work
+- themes/frameworks
+- writing
+- contact CTA
+
+CONTENT STARTERS
+
+SZL headline:
+“Structured ventures for modern systems, services, and execution.”
+
+Vessels headline:
+“Maritime visibility, built for command.”
+
+INCA headline:
+“Intelligence with structure.”
+
+Carlota Jo headline:
+“Bespoke advisory for clients who value discretion and precision.”
+
+Stephen headline:
+“Systems, visibility, and execution for modern operations.”
+
+CTAS
+SZL:
+- Explore the portfolio
+- View the roadmap
+
+Vessels:
+- Request a private demo
+- View platform capabilities
+
+INCA:
+- Schedule a private walkthrough
+- Request access
+
+Carlota Jo:
+- Inquire privately
+- Review services
+
+Stephen:
+- View selected work
+- Start a conversation
+
+ANALYTICS
+Track:
+- page_view
+- cta_click
+- form_submit
+- demo_request
+- access_request
+- private_inquiry_submit
+- sign_in
+- sign_up
+- dashboard_view
+- article_view
+- checkout_started
+- checkout_completed
+
+EMAIL
+Set up Resend templates for:
+- welcome
+- verify email
+- password reset
+- inquiry received
+- internal lead notification
+- demo request confirmation
+- access request confirmation
+- private inquiry confirmation
+- client portal invite
+- billing notifications
+
+STRIPE
+Where relevant, support:
+- pricing page
+- checkout
+- billing portal
+- subscription sync
+- webhook handling
+
+Map Stripe webhooks:
+- checkout.session.completed
+- customer.subscription.created
+- customer.subscription.updated
+- customer.subscription.deleted
+- invoice.payment_succeeded
+- invoice.payment_failed
+
+MAPBOX
+For Vessels, implement:
+- live map
+- vessel markers
+- route lines
+- detail drawer
+- filters
+- playback-ready structure
+
+ENV VARS
+Create .env.example with:
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- STRIPE_SECRET_KEY
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+- STRIPE_WEBHOOK_SECRET
+- RESEND_API_KEY
+- NEXT_PUBLIC_PLAUSIBLE_DOMAIN
+- NEXT_PUBLIC_PLAUSIBLE_API_HOST
+- NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+- app URLs for each lane
+- internal notify emails
+- feature flags
+
+DEPLOYMENT RULES
+- Production secrets must be set in Replit Deployments
+- Verify build/start commands
+- Verify auth redirects
+- Verify webhook endpoints
+- Provide README and deployment checklist
+
+BUILD ORDER
+
+Sprint 0
+- repo structure
+- shared packages
+- auth setup
+- route skeletons
+
+Sprint 1
+- design system
+
+Sprint 2
+- CMS tables + admin CRUD
+
+Sprint 3
+- all public pages
+
+Sprint 4
+- Vessels dashboard
+- INCA dashboard
+- Carlota client portal
+
+Sprint 5
+- protected product data + RLS
+
+Sprint 6
+- forms + email + analytics
+
+Sprint 7
+- billing + access control
+
+Sprint 8
+- Vessels map UX
+
+Sprint 9
+- writing, downloads, insights
+
+Sprint 10
+- QA, polish, deployment readiness
+
+DEFINITION OF DONE
+A feature is only done when:
+- UI is polished
+- mobile works
+- data model exists
+- permissions are enforced
+- loading/empty/error/success states exist
+- analytics are wired where relevant
+- copy is premium
+- SEO is set
+- admin editability exists where needed
+
+FINAL INSTRUCTION TO REPLIT
+Use this as the governing spec.
+First audit the current codebase against this brief.
+Then identify gaps.
+Then implement in the sprint order above.
+Prefer restrained, premium, maintainable choices over flashy or generic ones.
