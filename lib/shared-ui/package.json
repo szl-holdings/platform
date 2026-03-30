@@ -86,7 +86,8 @@
     "./ui/tooltip": "./src/ui/tooltip.tsx",
     "./WelcomeOverlay": "./src/WelcomeOverlay.tsx",
     "./EmptyState": "./src/EmptyState.tsx",
-    "./EcosystemTour": "./src/EcosystemTour.tsx"
+    "./EcosystemTour": "./src/EcosystemTour.tsx",
+    "./agent-insights-widget": "./src/agent-insights-widget.tsx"
   },
   "dependencies": {
     "@workspace/replit-auth-web": "workspace:*",

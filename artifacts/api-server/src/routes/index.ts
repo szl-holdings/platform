@@ -35,6 +35,7 @@ import mspLiveRouter from "./msp-live";
 import terraLiveRouter from "./terra-live";
 import agentTrainingRouter from "./agent-training";
 import commentsRouter from "./comments";
+import agentOsRouter from "./agent-os";
 
 const router: IRouter = Router();
 
@@ -100,5 +101,7 @@ router.use(terraLiveRouter);
 router.use(agentTrainingRouter);
 router.use("/comments", writeLimiter);
 router.use(commentsRouter);
+router.use("/agent-os", readLimiter);
+router.use(agentOsRouter);
 
 export default router;

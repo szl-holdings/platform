@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Building2, LayoutDashboard, TrendingUp, Handshake, BarChart3, AlertTriangle, Home, ChevronLeft, ChevronRight, DollarSign, Activity, Percent, Users, Thermometer } from "lucide-react";
+import { Building2, LayoutDashboard, TrendingUp, Handshake, BarChart3, AlertTriangle, Home, ChevronLeft, ChevronRight, DollarSign, Activity, Percent, Users, Thermometer, Brain } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -39,6 +39,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: "Platform",
     items: [
+      { path: "/agent-insights", label: "Agent Insights", icon: Brain },
       { path: "/observability", label: "Observability", icon: Activity },
     ],
   },

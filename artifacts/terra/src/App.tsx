@@ -28,6 +28,7 @@ const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const PortfolioPerformance = lazy(() => import("@/pages/portfolio-performance"));
 const ClimateRisk = lazy(() => import("@/pages/climate-risk"));
 const IRModule = lazy(() => import("@/pages/ir-module"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 function PageLoader() {
   return (
@@ -53,6 +54,7 @@ function AppRouter() {
         <Route path="/portfolio-performance" component={PortfolioPerformance} />
         <Route path="/climate-risk" component={ClimateRisk} />
         <Route path="/ir-module" component={IRModule} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-terra-text-secondary">Page not found</p>

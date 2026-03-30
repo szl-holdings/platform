@@ -4,7 +4,7 @@ import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight, ShieldCheck, Building2, TrendingUp } from "lucide-react";
+import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight, ShieldCheck, Building2, TrendingUp, Brain as BrainIcon } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
@@ -32,6 +32,7 @@ const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
 const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 const ReadinessDashboard = lazy(() => import("@/pages/compliance/readiness-dashboard"));
 const FrameworkScorecards = lazy(() => import("@/pages/compliance/framework-scorecards"));
@@ -47,6 +48,7 @@ const queryClient = new QueryClient({
 const primaryNavItems = [
   { path: "/", label: "SOC Overview", icon: Activity },
   { path: "/sacsayhuaman-shield", label: "Sacsayhuamán Shield", icon: ShieldCheck },
+  { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
   { path: "/incidents", label: "Incidents", icon: Shield },
   { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
@@ -231,6 +233,7 @@ function AppRouter() {
         <Route path="/cr/ai-insights" component={ReadinessAIInsights} />
         <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
         <Route path="/adversary-emulation" component={AdversaryEmulation} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>

@@ -25,6 +25,7 @@ import {
   Sparkles,
   Server,
   Wrench,
+  Brain,
 } from "lucide-react";
 
 const LandingPage = lazy(() => import("@/pages/landing"));
@@ -42,6 +43,7 @@ const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const RMMConsole = lazy(() => import("@/pages/rmm-console"));
 const MRRDashboard = lazy(() => import("@/pages/mrr-dashboard"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -81,6 +83,7 @@ const navSections: NavSection[] = [
     items: [
       { path: "/rmm", label: "RMM Console", icon: Monitor },
       { path: "/mrr", label: "MRR Dashboard", icon: DollarSign },
+      { path: "/agent-insights", label: "Agent Insights", icon: Brain },
       { path: "/observability", label: "Observability", icon: Activity },
     ],
   },
@@ -187,6 +190,7 @@ function AppRouter() {
         <Route path="/rmm" component={RMMConsole} />
         <Route path="/mrr" component={MRRDashboard} />
         <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

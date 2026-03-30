@@ -64,6 +64,7 @@ const NuroMesh = lazy(() => import("@/pages/nuro-mesh"));
 const AgentTrainingPage = lazy(() => import("@/pages/agent-training"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ConnectorHealth = lazy(() => import("@/pages/connector-health"));
+const AgentOSPage = lazy(() => import("@/pages/agent-os"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,6 +123,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: "Intelligence",
     collapsible: true,
     items: [
+      { path: "/agent-os", label: "Agent OS", icon: <Brain className="w-4 h-4" /> },
       { path: "/intelligence", label: "Overview", icon: <Globe className="w-4 h-4" /> },
       { path: "/ai-analyzer", label: "AI Observability", icon: <Brain className="w-4 h-4" /> },
       { path: "/nuro-mesh", label: "Nuro Mesh", icon: <Activity className="w-4 h-4" /> },
@@ -314,6 +316,7 @@ function AppRouter() {
         <Route path="/workflows" component={WorkflowAutomation} />
         <Route path="/developer" component={DeveloperPortal} />
         <Route path="/agent-training" component={AgentTrainingPage} />
+        <Route path="/agent-os" component={AgentOSPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

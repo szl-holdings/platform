@@ -36,6 +36,7 @@ const NeuralExplorer = lazy(() => import("@/pages/neural-explorer"));
 const Benchmarking = lazy(() => import("@/pages/benchmarking"));
 const GPUMonitoring = lazy(() => import("@/pages/gpu-monitoring"));
 const LLMEvaluation = lazy(() => import("@/pages/llm-evaluation"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -48,6 +49,7 @@ const cortexNavItems = [
   { path: "/chasqui-relay", label: "Chasqui Relay", icon: Radio },
   { path: "/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
+  { path: "/agent-insights", label: "Agent Insights", icon: Brain },
 ];
 
 const researchNavItems = [
@@ -233,6 +235,7 @@ function AppRouter() {
         <Route path="/benchmarking" component={Benchmarking} />
         <Route path="/gpu-monitoring" component={GPUMonitoring} />
         <Route path="/llm-eval" component={LLMEvaluation} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground font-mono">404 — Page not found</p>

@@ -5,6 +5,8 @@ import { failFastOnInvalidConfig } from "./lib/startup-validation";
 import { initWebSocket } from "./lib/websocket";
 import { jobQueue } from "./lib/job-queue";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
+import { agentScheduler } from "./lib/agent-scheduler";
+import { knowledgeStore } from "./lib/knowledge-store";
 
 failFastOnInvalidConfig();
 
@@ -26,6 +28,12 @@ const server = http.createServer(app);
 
 initWebSocket(server);
 startDomainNotificationGenerators();
+knowledgeStore.loadFromDb().then(() => {
+  agentScheduler.start();
+}).catch(err => {
+  logger.error({ err }, "Failed to initialize knowledge store from DB, starting scheduler anyway");
+  agentScheduler.start();
+});
 
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
@@ -55,6 +63,7 @@ async function shutdown(signal: string) {
   }
 
   stopDomainNotificationGenerators();
+  agentScheduler.stop();
 
   try {
     await jobQueue.shutdown();

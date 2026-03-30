@@ -25,6 +25,7 @@ const BrandVoiceEngine = lazy(() => import("@/pages/brand-voice-engine"));
 const VoiceStudio = lazy(() => import("@/pages/voice-studio"));
 const MotionGraphics = lazy(() => import("@/pages/motion-graphics"));
 const CollaborativeWorkspace = lazy(() => import("@/pages/collaborative-workspace"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ function Router() {
         <Route path="/voice-studio" component={VoiceStudio} />
         <Route path="/motion-graphics" component={MotionGraphics} />
         <Route path="/collab" component={CollaborativeWorkspace} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

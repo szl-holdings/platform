@@ -6,7 +6,7 @@ import { UserButton } from "@workspace/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
-  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor
+  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor, Brain
 } from "lucide-react";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
@@ -46,6 +46,7 @@ const DarkVesselDetection = lazy(() => import("@/pages/dark-vessel-detection"));
 const SanctionsScreening = lazy(() => import("@/pages/sanctions-screening"));
 const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
 const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -61,6 +62,7 @@ const primaryNavItems = [
   { path: "/corridors", label: "Corridors", icon: Navigation },
   { path: "/command", label: "Command Mode", icon: Activity },
   { path: "/analytics", label: "Analytics", icon: BarChart3 },
+  { path: "/agent-insights", label: "Agent Insights", icon: Brain },
 ];
 
 const legacyNavItems = [
@@ -289,6 +291,7 @@ function AppRouter() {
         <Route path="/sanctions-screening" component={SanctionsScreening} />
         <Route path="/cyber-threats" component={CyberThreatPanel} />
         <Route path="/incidents" component={IncidentReporting} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route path="/use-cases">
           <div className="p-6 max-w-2xl mx-auto space-y-6">
             <h1 className="font-display text-2xl font-bold text-sky-50">Use Cases</h1>

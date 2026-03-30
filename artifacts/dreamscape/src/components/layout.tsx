@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Film, Video, Search, Bell, Settings, Sparkles, Calendar, Image, BookOpen, Wand2, Palette, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Film, Video, Search, Bell, Settings, Sparkles, Calendar, Image, BookOpen, Wand2, Palette, ChevronLeft, ChevronRight, Brain } from "lucide-react";
 import { cn } from "./ui";
 import { useState } from "react";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -14,6 +14,7 @@ const navItems = [
   { name: "Aurora Gallery", href: "/aurora", icon: Palette },
   { name: "Generator Tools", href: "/generators", icon: Wand2 },
   { name: "Content Library", href: "/content-guides", icon: BookOpen },
+  { name: "Agent Insights", href: "/agent-insights", icon: Brain },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

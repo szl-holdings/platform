@@ -20,6 +20,7 @@ const ValueAtRisk = lazy(() => import("@/pages/value-at-risk"));
 const UseCases = lazy(() => import("@/pages/use-cases"));
 const Landing = lazy(() => import("@/pages/landing"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +53,7 @@ function Router() {
         <Route path="/value-at-risk" component={ValueAtRisk} />
         <Route path="/use-cases" component={UseCases} />
         <Route path="/platform" component={Landing} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

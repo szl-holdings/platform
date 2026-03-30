@@ -27,3 +27,4 @@ export * from "./nuro_mesh";
 export * from "./alloy_chat";
 export * from "./agent_training";
 export * from "./comments";
+export * from "./agent_os";
