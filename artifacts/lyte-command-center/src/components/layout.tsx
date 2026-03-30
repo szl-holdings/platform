@@ -155,6 +155,12 @@ export function Layout({ children }: { children: ReactNode }) {
             <span className="font-medium">Sign Out</span>
           </div>
         </div>
+        <div className="p-4 border-t border-white/5">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <Zap className="w-3 h-3" />
+            <span>SZL Holdings Platform</span>
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}

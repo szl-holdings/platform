@@ -64,13 +64,32 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
-            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-b-blue-500/50 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+      <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+        <div className="flex justify-between items-end mb-8">
+          <div>
+            <div className="h-8 w-64 bg-white/5 rounded-lg mb-2" />
+            <div className="h-5 w-96 bg-white/5 rounded-lg" />
           </div>
-          <span className="text-sm text-slate-500 animate-pulse">Initializing telemetry...</span>
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-28 bg-white/5 rounded-full" />
+            <div className="h-9 w-36 bg-white/5 rounded-full" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white/[0.03] rounded-2xl p-6 border border-white/5">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 rounded-xl bg-white/5" />
+                <div className="w-14 h-6 bg-white/5 rounded-md" />
+              </div>
+              <div className="h-4 w-32 bg-white/5 rounded mb-2" />
+              <div className="h-8 w-16 bg-white/5 rounded" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 bg-white/[0.03] rounded-2xl p-6 border border-white/5 h-96" />
+          <div className="bg-white/[0.03] rounded-2xl p-6 border border-white/5 h-96" />
         </div>
       </div>
     );

@@ -22,7 +22,7 @@ Do not make changes to the file `Y`.
 - **Bundling:** esbuild (CJS) and Vite.
 
 ### UI/UX Design System
-Premium dark-mode-forward design via `@workspace/shared-ui`. Navy background (220 20% 4%), primary indigo/violet (250 90% 65%), Plus Jakarta Sans display font, Inter body font. Glassmorphism effects, gradients, shadows, and Framer Motion animations. Military/NASA command center aesthetic on operational apps (Vessels, Firestorm, Lyte, INCA, Readiness). Components include KPI ribbon, chart container, data table shell, AgentCopilot, and advanced form elements.
+Premium dark-mode-forward design via `@workspace/shared-ui`. Unified dark background `222 20% 5%` across all dashboard apps (card: `222 18% 8%`, border: `220 15% 14%`, sidebar: `222 20% 4%`). Each app keeps its own primary/accent color. Plus Jakarta Sans display font, Inter body font. Glassmorphism effects, gradients, shadows, and Framer Motion animations. Military/NASA command center aesthetic on operational apps (Vessels, Firestorm, Lyte, INCA, Readiness). Components include KPI ribbon, chart container, data table shell, AgentCopilot, and advanced form elements. All dashboard sidebars show "SZL Holdings Platform" footer. Demo Mode banners use Server icon (amber) for demo mode and WifiOff icon (red) for unconfigured integrations. Loading states use skeleton placeholders (not spinners). API hooks catch 401 errors and return mock/fallback data to prevent infinite loading.
 
 ### Applications & Technical Implementation
 

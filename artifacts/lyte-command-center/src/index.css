@@ -34,27 +34,26 @@
 }
 
 :root {
-  /* Enforce Dark Theme Globally for Executive Feel */
-  --background: 224 35% 6%;
-  --foreground: 210 40% 98%;
+  --background: 222 20% 5%;
+  --foreground: 210 20% 96%;
 
-  --card: 224 35% 8%;
-  --card-foreground: 210 40% 98%;
+  --card: 222 18% 8%;
+  --card-foreground: 210 20% 96%;
 
-  --popover: 224 35% 8%;
-  --popover-foreground: 210 40% 98%;
+  --popover: 222 18% 10%;
+  --popover-foreground: 210 20% 96%;
 
   --primary: 191 97% 47%;
-  --primary-foreground: 222 47% 11%;
+  --primary-foreground: 222 20% 5%;
 
-  --secondary: 220 25% 15%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 220 15% 14%;
+  --secondary-foreground: 210 15% 80%;
 
-  --muted: 220 25% 15%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --muted: 220 15% 12%;
+  --muted-foreground: 215 12% 55%;
 
   --accent: 191 97% 47%;
-  --accent-foreground: 210 40% 98%;
+  --accent-foreground: 210 20% 96%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
@@ -65,8 +64,8 @@
   --success: 142 71% 45%;
   --success-foreground: 144 80% 10%;
 
-  --border: 220 25% 18%;
-  --input: 220 25% 18%;
+  --border: 220 15% 14%;
+  --input: 220 15% 16%;
   --ring: 191 97% 47%;
 
   --radius: 0.75rem;

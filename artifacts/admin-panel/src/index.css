@@ -73,13 +73,13 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 220 20% 6%;
+  --background: 222 20% 5%;
   --foreground: 210 20% 92%;
-  --border: 220 15% 16%;
-  --card: 220 18% 9%;
+  --border: 220 15% 14%;
+  --card: 222 18% 8%;
   --card-foreground: 210 20% 92%;
   --card-border: 220 15% 14%;
-  --sidebar: 220 20% 7%;
+  --sidebar: 222 20% 4%;
   --sidebar-foreground: 210 15% 75%;
   --sidebar-border: 220 15% 14%;
   --sidebar-primary: 210 100% 55%;

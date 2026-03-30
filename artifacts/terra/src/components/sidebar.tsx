@@ -43,7 +43,7 @@ export function Sidebar() {
       "bg-terra-bg-secondary border-r border-terra-border flex flex-col h-screen sticky top-0 transition-all duration-300",
       collapsed ? "w-16" : "w-60"
     )}>
-      <div className="p-4 border-b border-terra-border">
+      <div className="p-5 border-b border-terra-border">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-terra-primary to-terra-accent flex items-center justify-center flex-shrink-0">
             <Building2 className="w-5 h-5 text-white" />
@@ -57,7 +57,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 p-2 space-y-4 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
         {navSections.map((section) => (
           <div key={section.title}>
             {!collapsed && (
@@ -69,7 +69,7 @@ export function Sidebar() {
                 return (
                   <Link key={path} href={path}>
                     <div className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
                       collapsed && "justify-center px-2",
                       isActive
                         ? "bg-terra-primary/10 text-terra-primary"
@@ -79,7 +79,7 @@ export function Sidebar() {
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-terra-primary rounded-r-full" />
                       )}
                       <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && "scale-110")} />
-                      {!collapsed && label}
+                      {!collapsed && <span className="ml-0.5">{label}</span>}
                     </div>
                   </Link>
                 );

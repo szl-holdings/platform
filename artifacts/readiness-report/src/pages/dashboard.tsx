@@ -1,7 +1,7 @@
 import { Shell } from "@/components/layout/shell";
 import { Gauge } from "@/components/ui/gauge";
 import { usePrograms, useDimensions, useAlerts, useRisks } from "@/hooks/use-readiness";
-import { Loader2, ArrowUpRight, ArrowDownRight, Activity, ShieldAlert, Target, BellRing } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Activity, ShieldAlert, Target, BellRing } from "lucide-react";
 import { motion } from "framer-motion";
 import { type ComponentType } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -41,10 +41,22 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <Shell>
-        <div className="h-full flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-            <span className="text-sm text-muted-foreground animate-pulse">Loading readiness data...</span>
+        <div className="p-8 pb-20 space-y-8 animate-pulse">
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="h-10 w-72 bg-white/5 rounded-lg mb-2" />
+              <div className="h-5 w-[28rem] bg-white/5 rounded-lg" />
+            </div>
+            <div className="h-10 w-48 bg-white/5 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-4 bg-white/[0.03] rounded-3xl border border-white/5 h-96" />
+            <div className="lg:col-span-8 bg-white/[0.03] rounded-3xl border border-white/5 h-96" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white/[0.03] rounded-2xl p-6 border border-white/5 h-36" />
+            ))}
           </div>
         </div>
       </Shell>

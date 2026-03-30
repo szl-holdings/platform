@@ -129,6 +129,12 @@ export function Sidebar() {
           </div>
         </div>
       </div>
+      <div className="p-4 border-t border-white/5">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Command className="w-3 h-3" />
+          <span>SZL Holdings Platform</span>
+        </div>
+      </div>
     </div>
   );
 }

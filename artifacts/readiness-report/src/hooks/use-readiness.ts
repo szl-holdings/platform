@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { mockPrograms, mockDimensions, mockRisks, mockAlerts, mockMilestones, mockScoreHistory } from "@/lib/mock-data";
+
+function isAuthError(e: unknown): boolean {
+  return e instanceof Error && (e.message.includes("HTTP 401") || e.message.includes("HTTP 403"));
+}
 
 export type Program = {
   id: number;
@@ -74,8 +79,13 @@ export function usePrograms() {
   return useQuery({
     queryKey: ['programs'],
     queryFn: async () => {
-      const result = await api.programs.list();
-      return (result.data || result) as Program[];
+      try {
+        const result = await api.programs.list();
+        return (result.data || result) as Program[];
+      } catch (e) {
+        if (isAuthError(e)) return mockPrograms as unknown as Program[];
+        throw e;
+      }
     }
   });
 }
@@ -84,7 +94,12 @@ export function useProgram(id: number) {
   return useQuery({
     queryKey: ['programs', id],
     queryFn: async () => {
-      return await api.programs.get(id) as Program;
+      try {
+        return await api.programs.get(id) as Program;
+      } catch (e) {
+        if (isAuthError(e)) return (mockPrograms.find(p => String(p.id) === String(id)) || mockPrograms[0]) as unknown as Program;
+        throw e;
+      }
     }
   });
 }
@@ -93,7 +108,12 @@ export function useDimensions(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['dimensions', programId],
     queryFn: async () => {
-      return await api.dimensions.listForProgram(programId) as Dimension[];
+      try {
+        return await api.dimensions.listForProgram(programId) as Dimension[];
+      } catch (e) {
+        if (isAuthError(e)) return mockDimensions as unknown as Dimension[];
+        throw e;
+      }
     }
   });
 }
@@ -102,7 +122,12 @@ export function useMilestones(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['milestones', programId],
     queryFn: async () => {
-      return await api.milestones.listForProgram(programId) as Milestone[];
+      try {
+        return await api.milestones.listForProgram(programId) as Milestone[];
+      } catch (e) {
+        if (isAuthError(e)) return mockMilestones as unknown as Milestone[];
+        throw e;
+      }
     }
   });
 }
@@ -111,7 +136,12 @@ export function useRisks(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['risks', programId],
     queryFn: async () => {
-      return await api.risks.listForProgram(programId) as Risk[];
+      try {
+        return await api.risks.listForProgram(programId) as Risk[];
+      } catch (e) {
+        if (isAuthError(e)) return mockRisks as unknown as Risk[];
+        throw e;
+      }
     }
   });
 }
@@ -120,7 +150,12 @@ export function useAlerts(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['alerts', programId],
     queryFn: async () => {
-      return await api.alerts.listForProgram(programId) as Alert[];
+      try {
+        return await api.alerts.listForProgram(programId) as Alert[];
+      } catch (e) {
+        if (isAuthError(e)) return mockAlerts as unknown as Alert[];
+        throw e;
+      }
     }
   });
 }
@@ -129,13 +164,18 @@ export function useScoreHistory(programId: number = ACTIVE_PROGRAM_ID) {
   return useQuery({
     queryKey: ['scoreHistory', programId],
     queryFn: async () => {
-      const dims = await api.dimensions.listForProgram(programId) as Dimension[];
-      const allScores: ScoreHistory[] = [];
-      for (const dim of dims) {
-        const scores = await api.dimensions.scores(dim.id) as ScoreHistory[];
-        allScores.push(...scores);
+      try {
+        const dims = await api.dimensions.listForProgram(programId) as Dimension[];
+        const allScores: ScoreHistory[] = [];
+        for (const dim of dims) {
+          const scores = await api.dimensions.scores(dim.id) as ScoreHistory[];
+          allScores.push(...scores);
+        }
+        return allScores;
+      } catch (e) {
+        if (isAuthError(e)) return mockScoreHistory as unknown as ScoreHistory[];
+        throw e;
       }
-      return allScores;
     }
   });
 }

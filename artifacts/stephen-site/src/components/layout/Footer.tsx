@@ -10,10 +10,10 @@ export function Footer() {
               <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                 <span className="font-serif font-bold text-background text-lg">SL</span>
               </div>
-              <span className="font-serif font-semibold text-2xl">SZL Holdings</span>
+              <span className="font-serif font-semibold text-2xl">Stephen Lutar</span>
             </div>
             <p className="text-muted-foreground max-w-sm mb-8 leading-relaxed">
-              A vertically integrated technology company building enterprise-grade platforms across maritime intelligence, cybersecurity, commerce, and creative production.
+              Builder, architect, and operator. Building enterprise-grade platforms across maritime intelligence, cybersecurity, commerce, and creative production.
             </p>
             <div className="flex items-center gap-4">
               <a href="https://linkedin.com/in/stephenlutar" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground hover:bg-primary hover:text-background hover:scale-110 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300">
@@ -54,7 +54,7 @@ export function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
+            &copy; {new Date().getFullYear()} Stephen Lutar. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground flex items-center gap-2">
             Washington, D.C. Metro &middot; Global Availability

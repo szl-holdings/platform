@@ -140,15 +140,15 @@ function DemoModeBanner() {
 
   if (hasUnhealthy) {
     return (
-      <div className="bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center gap-2">
-        <AlertTriangle className="w-4 h-4 text-red-400" />
+      <div className="bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center gap-2 shrink-0">
+        <WifiOff className="w-4 h-4 text-red-400" />
         <span className="text-xs text-red-400 font-medium">{data.summary.manualRequired} integration(s) not configured</span>
       </div>
     );
   }
 
   return (
-    <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2">
+    <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2 shrink-0">
       <Server className="w-4 h-4 text-amber-400" />
       <span className="text-xs text-amber-400 font-medium">Demo Mode</span>
       <span className="text-xs text-amber-400/60">— {demoNames.join(", ")} using simulated data</span>

@@ -106,7 +106,7 @@ const textReveal = {
 };
 
 export function HeroSection() {
-  const { data: profile, isLoading } = useGetStephenProfile();
+  const { data: profile } = useGetStephenProfile();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
@@ -153,7 +153,7 @@ export function HeroSection() {
             variants={textReveal}
             className="text-5xl sm:text-7xl md:text-[5.5rem] font-serif font-bold text-foreground leading-[1.05] mb-4 tracking-tight"
           >
-            <span className={isLoading ? "blur-sm" : "transition-all duration-500"}>{name}</span>
+            {name}
           </motion.h1>
 
           <motion.h2
@@ -163,9 +163,7 @@ export function HeroSection() {
             variants={textReveal}
             className="text-xl sm:text-2xl md:text-3xl text-primary font-medium mb-8 tracking-wide"
           >
-            <span className={isLoading ? "blur-sm" : "transition-all duration-500"}>
-              Builder. Architect. Operator.
-            </span>
+            Builder. Architect. Operator.
           </motion.h2>
 
           <motion.p
@@ -175,7 +173,7 @@ export function HeroSection() {
             variants={textReveal}
             className="text-base sm:text-lg md:text-xl text-foreground/60 max-w-3xl mb-14 leading-relaxed font-light"
           >
-            <span className={isLoading ? "blur-sm" : "transition-all duration-500"}>{tagline}</span>
+            {tagline}
           </motion.p>
 
           <motion.div

@@ -96,7 +96,7 @@ function Sidebar() {
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Beaker className="w-3 h-3" />
-          <span className="font-mono text-[10px]">SZL Holdings · Research Division</span>
+          <span className="font-mono text-[10px]">SZL Holdings Platform</span>
         </div>
       </div>
     </aside>

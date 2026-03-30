@@ -35,7 +35,7 @@ export function Navbar() {
             <span className="font-serif font-bold text-background text-lg">SL</span>
           </div>
           <span className="font-serif font-semibold text-lg tracking-wide hidden sm:block">
-            SZL Holdings
+            Stephen Lutar
           </span>
         </a>
 

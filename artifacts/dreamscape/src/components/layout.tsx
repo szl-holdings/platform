@@ -130,6 +130,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+        <div className="p-4 border-t border-border/50">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Video className="w-3 h-3" />
+            <span>SZL Holdings Platform</span>
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}

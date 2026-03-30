@@ -108,9 +108,9 @@ function Sidebar() {
         })}
       </nav>
       <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 text-xs text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Platform Operational</span>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Flame className="w-3 h-3" />
+          <span>SZL Holdings Platform</span>
         </div>
       </div>
     </aside>
