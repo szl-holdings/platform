@@ -4,7 +4,7 @@ import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight } from "lucide-react";
+import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight, ShieldCheck, Building2, TrendingUp } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
@@ -27,6 +27,13 @@ const XDRConsole = lazy(() => import("@/pages/xdr-console"));
 const ThreatHunting = lazy(() => import("@/pages/threat-hunting"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
+
+const ReadinessDashboard = lazy(() => import("@/pages/compliance/readiness-dashboard"));
+const FrameworkScorecards = lazy(() => import("@/pages/compliance/framework-scorecards"));
+const ComplianceRisks = lazy(() => import("@/pages/compliance/compliance-risks"));
+const VendorRisk = lazy(() => import("@/pages/compliance/vendor-risk"));
+const MilestonesTrends = lazy(() => import("@/pages/compliance/milestones-trends"));
+const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-insights"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -54,6 +61,15 @@ const secondaryNavItems = [
   { path: "/sentinel", label: "Sentinel Watch", icon: Search },
   { path: "/watchlists", label: "Watchlists", icon: Target },
   { path: "/observability", label: "Observability", icon: Search },
+];
+
+const complianceNavItems = [
+  { path: "/cr/dashboard", label: "Readiness Index", icon: ShieldCheck },
+  { path: "/cr/scorecards", label: "Framework Scorecards", icon: ClipboardCheck },
+  { path: "/cr/risks", label: "Risk Register", icon: AlertTriangle },
+  { path: "/cr/vendor-risk", label: "Vendor Risk", icon: Building2 },
+  { path: "/cr/milestones", label: "Milestones & Trends", icon: TrendingUp },
+  { path: "/cr/ai-insights", label: "AI Insights", icon: Target },
 ];
 
 function PageLoader() {
@@ -100,6 +116,7 @@ function DemoModeBanner() {
 function Sidebar() {
   const [location] = useLocation();
   const [moreExpanded, setMoreExpanded] = useState(false);
+  const [complianceExpanded, setComplianceExpanded] = useState(location.startsWith("/cr"));
 
   return (
     <aside className="w-56 bg-[#09080f]/95 border-r border-orange-500/10 flex flex-col h-screen sticky top-0">
@@ -142,12 +159,43 @@ function Sidebar() {
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-orange-400/40 hover:text-orange-300 hover:bg-orange-500/5 transition-all w-full"
           >
             <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
-            More pages
+            SOC Tools
           </button>
           {moreExpanded && (
             <div className="mt-0.5 space-y-0.5">
               {secondaryNavItems.map(({ path, label, icon: Icon }) => {
                 const isActive = path === "/" ? location === "/" : location.startsWith(path);
+                return (
+                  <Link key={path} href={path}>
+                    <div className={cn(
+                      "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
+                      isActive
+                        ? "bg-orange-500/10 text-orange-300"
+                        : "text-orange-400/40 hover:text-orange-200 hover:bg-orange-500/5"
+                    )}>
+                      <Icon className="w-3 h-3 shrink-0" />
+                      {label}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="pt-2">
+          <button
+            onClick={() => setComplianceExpanded(!complianceExpanded)}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-orange-400/40 hover:text-orange-300 hover:bg-orange-500/5 transition-all w-full"
+          >
+            <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", complianceExpanded && "rotate-90")} />
+            <span className="flex-1 text-left">Compliance & Readiness</span>
+            {location.startsWith("/cr") && <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />}
+          </button>
+          {complianceExpanded && (
+            <div className="mt-0.5 space-y-0.5">
+              {complianceNavItems.map(({ path, label, icon: Icon }) => {
+                const isActive = location.startsWith(path);
                 return (
                   <Link key={path} href={path}>
                     <div className={cn(
@@ -200,6 +248,12 @@ function AppRouter() {
         <Route path="/threat-hunting" component={ThreatHunting} />
         <Route path="/identity-threat" component={IdentityThreat} />
         <Route path="/executive-risk" component={ExecutiveRisk} />
+        <Route path="/cr/dashboard" component={ReadinessDashboard} />
+        <Route path="/cr/scorecards" component={FrameworkScorecards} />
+        <Route path="/cr/risks" component={ComplianceRisks} />
+        <Route path="/cr/vendor-risk" component={VendorRisk} />
+        <Route path="/cr/milestones" component={MilestonesTrends} />
+        <Route path="/cr/ai-insights" component={ReadinessAIInsights} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>

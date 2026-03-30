@@ -1,5 +1,5 @@
 kind = "web"
-previewPath = "/szl-holdings/"
+previewPath = "/"
 title = "SZL Holdings"
 version = "1.0.0"
 id = "artifacts/szl-holdings"
@@ -11,7 +11,7 @@ version = "1.0.0"
 
 [[services]]
 name = "web"
-paths = [ "/szl-holdings/" ]
+paths = [ "/" ]
 localPort = 18490
 
 [services.development]
@@ -28,4 +28,4 @@ to = "/index.html"
 
 [services.env]
 PORT = "18490"
-BASE_PATH = "/szl-holdings/"
+BASE_PATH = "/"

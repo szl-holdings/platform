@@ -19,7 +19,18 @@ import {
   DollarSign,
   Phone,
   Target,
-  ChevronRight
+  ChevronRight,
+  Users,
+  FileText,
+  Flag,
+  Workflow,
+  Code2,
+  Key,
+  Webhook,
+  BookMarked,
+  Package,
+  Puzzle,
+  ShieldCheck
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@workspace/shared-ui/utils";
@@ -81,9 +92,33 @@ const SECONDARY_NAV = [
   { href: "/oncall", label: "On-Call", icon: Phone },
 ];
 
+const ADMIN_NAV = [
+  { href: "/admin/overview", label: "Overview", icon: Server },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/audit-log", label: "Audit Log", icon: FileText },
+  { href: "/admin/feature-flags", label: "Feature Flags", icon: Flag },
+  { href: "/admin/connectors", label: "Connectors", icon: Wifi },
+  { href: "/admin/workflows", label: "Workflows", icon: Workflow },
+  { href: "/admin/platform-health", label: "Platform Health", icon: ShieldCheck },
+];
+
+const DEVELOPER_NAV = [
+  { href: "/developer/getting-started", label: "Getting Started", icon: BookMarked },
+  { href: "/developer/api-explorer", label: "API Explorer", icon: Code2 },
+  { href: "/developer/api-keys", label: "API Keys", icon: Key },
+  { href: "/developer/webhooks", label: "Webhooks", icon: Webhook },
+  { href: "/developer/rate-limits", label: "Rate Limits", icon: BarChart3 },
+  { href: "/developer/sdk-guide", label: "SDK Guide", icon: Package },
+  { href: "/developer/plugins", label: "Plugin Docs", icon: Puzzle },
+];
+
+const ALL_NAV = [...PRIMARY_NAV, ...SECONDARY_NAV, ...ADMIN_NAV, ...DEVELOPER_NAV];
+
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [moreExpanded, setMoreExpanded] = useState(false);
+  const [adminExpanded, setAdminExpanded] = useState(location.startsWith("/admin"));
+  const [devExpanded, setDevExpanded] = useState(location.startsWith("/developer"));
 
   return (
     <div className="flex h-screen bg-background overflow-hidden selection:bg-primary/30">
@@ -154,6 +189,72 @@ export function Layout({ children }: { children: ReactNode }) {
               </div>
             )}
           </div>
+
+          <div className="pt-2">
+            <button
+              onClick={() => setAdminExpanded(!adminExpanded)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all w-full"
+            >
+              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", adminExpanded && "rotate-90")} />
+              <span className="flex-1 text-left">Administration</span>
+              {location.startsWith("/admin") && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
+            </button>
+            {adminExpanded && (
+              <div className="mt-0.5 space-y-0.5">
+                {ADMIN_NAV.map((item) => {
+                  const isActive = location.startsWith(item.href);
+                  return (
+                    <Link 
+                      key={item.href} 
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 group relative ml-2",
+                        isActive 
+                          ? "bg-cyan-500/10 text-cyan-400" 
+                          : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
+                      )}
+                    >
+                      <item.icon className="w-3 h-3 shrink-0" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="pt-2">
+            <button
+              onClick={() => setDevExpanded(!devExpanded)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all w-full"
+            >
+              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", devExpanded && "rotate-90")} />
+              <span className="flex-1 text-left">Developer</span>
+              {location.startsWith("/developer") && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
+            </button>
+            {devExpanded && (
+              <div className="mt-0.5 space-y-0.5">
+                {DEVELOPER_NAV.map((item) => {
+                  const isActive = location.startsWith(item.href);
+                  return (
+                    <Link 
+                      key={item.href} 
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 group relative ml-2",
+                        isActive 
+                          ? "bg-cyan-500/10 text-cyan-400" 
+                          : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
+                      )}
+                    >
+                      <item.icon className="w-3 h-3 shrink-0" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="p-3 border-t border-white/5 space-y-2">
@@ -169,7 +270,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <DemoModeBanner />
         <header className="h-12 border-b border-white/5 bg-background/50 backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-20">
           <h1 className="font-display font-semibold text-base text-white/90 capitalize tracking-wide">
-            {[...PRIMARY_NAV, ...SECONDARY_NAV].find(i => i.href === location)?.label || "Command Center"}
+            {ALL_NAV.find(i => i.href === location || (i.href !== "/" && location.startsWith(i.href)))?.label || "Command Center"}
           </h1>
           
           <div className="flex items-center gap-3">

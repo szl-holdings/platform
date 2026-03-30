@@ -53,8 +53,8 @@ export function Contact() {
 
     setStatus("submitting");
     try {
-      const basePath = import.meta.env.BASE_URL || "/szl-holdings/";
-      const apiBase = basePath.replace(/\/szl-holdings\/?$/, "/api");
+      const basePath = import.meta.env.BASE_URL || "/";
+      const apiBase = basePath.replace(/\/$/, "") + "/api";
       const res = await fetch(`${apiBase}/holdings/inquiries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

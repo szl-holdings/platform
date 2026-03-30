@@ -24,6 +24,22 @@ const SLOTracking = lazy(() => import("@/pages/slo-tracking"));
 const CloudCost = lazy(() => import("@/pages/cloud-cost"));
 const OnCallManagement = lazy(() => import("@/pages/oncall-management"));
 
+const AdminOverview = lazy(() => import("@/pages/admin/overview"));
+const AdminUsers = lazy(() => import("@/pages/admin/users"));
+const AuditLog = lazy(() => import("@/pages/admin/audit-log"));
+const FeatureFlags = lazy(() => import("@/pages/admin/feature-flags"));
+const Connectors = lazy(() => import("@/pages/admin/connectors"));
+const WorkflowAutomation = lazy(() => import("@/pages/admin/workflows"));
+const PlatformHealth = lazy(() => import("@/pages/admin/platform-health"));
+
+const GettingStarted = lazy(() => import("@/pages/developer/GettingStarted"));
+const ApiExplorer = lazy(() => import("@/pages/developer/ApiExplorer"));
+const ApiKeys = lazy(() => import("@/pages/developer/ApiKeys"));
+const Webhooks = lazy(() => import("@/pages/developer/Webhooks"));
+const RateLimits = lazy(() => import("@/pages/developer/RateLimits"));
+const SdkGuide = lazy(() => import("@/pages/developer/SdkGuide"));
+const PluginDocs = lazy(() => import("@/pages/developer/PluginDocs"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -62,6 +78,20 @@ function Router() {
         <Route path="/slo-tracking" component={SLOTracking} />
         <Route path="/cloud-cost" component={CloudCost} />
         <Route path="/oncall" component={OnCallManagement} />
+        <Route path="/admin/overview" component={AdminOverview} />
+        <Route path="/admin/users" component={AdminUsers} />
+        <Route path="/admin/audit-log" component={AuditLog} />
+        <Route path="/admin/feature-flags" component={FeatureFlags} />
+        <Route path="/admin/connectors" component={Connectors} />
+        <Route path="/admin/workflows" component={WorkflowAutomation} />
+        <Route path="/admin/platform-health" component={PlatformHealth} />
+        <Route path="/developer/getting-started" component={GettingStarted} />
+        <Route path="/developer/api-explorer" component={ApiExplorer} />
+        <Route path="/developer/api-keys" component={ApiKeys} />
+        <Route path="/developer/webhooks" component={Webhooks} />
+        <Route path="/developer/rate-limits" component={RateLimits} />
+        <Route path="/developer/sdk-guide" component={SdkGuide} />
+        <Route path="/developer/plugins" component={PluginDocs} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
