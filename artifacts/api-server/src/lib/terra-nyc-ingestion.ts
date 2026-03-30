@@ -67,6 +67,28 @@ async function sodaFetch(url: string): Promise<unknown[]> {
   }
 }
 
+const LEGALS_BATCH_SIZE = 20;
+
+async function fetchLegalsByDocIds(docIds: string[]): Promise<Record<string, Record<string, string>>> {
+  const result: Record<string, Record<string, string>> = {};
+  for (let i = 0; i < docIds.length; i += LEGALS_BATCH_SIZE) {
+    const batch = docIds.slice(i, i + LEGALS_BATCH_SIZE);
+    const idList = batch.map(id => `'${id}'`).join(",");
+    const legalsUrl = buildSodaUrl("8h5j-fqxa", {
+      $limit: LEGALS_BATCH_SIZE * 2,
+      $where: `document_id IN (${idList})`,
+    });
+    const legalsRecords = await sodaFetch(legalsUrl);
+    for (const lr of legalsRecords) {
+      const leg = lr as Record<string, string>;
+      if (leg.document_id && !result[leg.document_id]) {
+        result[leg.document_id] = leg;
+      }
+    }
+  }
+  return result;
+}
+
 function calcOpportunityScore(data: {
   distressType: string;
   daysInDistress: number;
@@ -120,12 +142,13 @@ function calcOpportunityScore(data: {
 }
 
 async function ingestAcrisForeclosures(runId: number): Promise<{ inserted: number; skipped: number; alerts: number }> {
-  logger.info({ runId }, "Ingesting ACRIS foreclosure data");
+  logger.info({ runId }, "Ingesting ACRIS foreclosure data (JUDG + TLS judgments via ACRIS Master + Legals)");
 
-  const url = buildSodaUrl("erm2-nwe9", {
+  const cutoffDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]!;
+  const url = buildSodaUrl("bnx9-e6tj", {
     $limit: DEFAULT_LIMIT,
-    $where: `doc_type='LIS PENDENS' AND recorded_datetime >= '${new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()}'`,
-    $order: "recorded_datetime DESC",
+    $where: `doc_type IN ('JUDG','TLS','DEED, TS') AND document_date >= '${cutoffDate}'`,
+    $order: "document_date DESC",
   });
 
   const records = await sodaFetch(url);
@@ -133,36 +156,47 @@ async function ingestAcrisForeclosures(runId: number): Promise<{ inserted: numbe
   let skipped = 0;
   let alerts = 0;
 
+  if (records.length === 0) {
+    logger.info({ runId }, "ACRIS foreclosure: no records returned (API may be unavailable)");
+    return { inserted, skipped, alerts };
+  }
+
+  const allDocIds = records.map((r: unknown) => (r as Record<string, string>).document_id).filter(Boolean) as string[];
+  const legalsByDocId = await fetchLegalsByDocIds(allDocIds);
+  logger.info({ runId, masterCount: records.length, legalsResolved: Object.keys(legalsByDocId).length }, "ACRIS foreclosure: legals resolved");
+
   for (const raw of records) {
     const rec = raw as Record<string, string>;
-    if (!rec.full_address && !rec.street_number) { skipped++; continue; }
+    const docId = rec.document_id;
+    if (!docId) { skipped++; continue; }
 
-    const address = await normalizeAddress(
-      rec.full_address ?? `${rec.street_number ?? ""} ${rec.street_name ?? ""}`.trim()
-    );
+    const legal = legalsByDocId[docId];
+    const streetNum = legal?.street_number ?? "";
+    const streetName = legal?.street_name ?? "";
+    if (!streetNum && !streetName) { skipped++; continue; }
+
+    const address = await normalizeAddress(`${streetNum} ${streetName}`.trim());
     if (!address || address.length < 5) { skipped++; continue; }
 
-    const county = rec.upper_county_name ?? "";
-    const borough = mapBoroughFromCounty(county);
-    if (!borough) { skipped++; logger.debug({ county, address }, "ACRIS foreclosure: unresolvable borough, skipping"); continue; }
-    const externalId = `acris-${rec.document_id ?? `${address}-${rec.recorded_datetime}`}`;
+    const boroughCode = legal?.borough ?? rec.recorded_borough ?? "";
+    const boroughCodeMap: Record<string, "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island"> = {
+      "1": "Manhattan", "2": "Bronx", "3": "Brooklyn", "4": "Queens", "5": "Staten Island",
+      "manhattan": "Manhattan", "bronx": "Bronx", "brooklyn": "Brooklyn", "queens": "Queens", "staten island": "Staten Island",
+    };
+    const borough = boroughCodeMap[boroughCode.toLowerCase()] ?? mapBoroughFromCounty(boroughCode);
+    if (!borough) { skipped++; logger.debug({ boroughCode, address }, "ACRIS foreclosure: unresolvable borough, skipping"); continue; }
 
-    const filingDate = rec.recorded_datetime
-      ? new Date(rec.recorded_datetime).toISOString().split("T")[0]!
+    const externalId = `acris-lispendens-${docId}`;
+    const filingDate = rec.document_date
+      ? new Date(rec.document_date).toISOString().split("T")[0]!
       : new Date().toISOString().split("T")[0]!;
-
     const daysInDistress = Math.ceil((Date.now() - new Date(filingDate).getTime()) / 86400000);
-
-    const estimatedValue = rec.assessed_value
-      ? parseFloat(rec.assessed_value)
-      : rec.sale_price
-      ? parseFloat(rec.sale_price)
-      : null;
+    const docAmount = rec.document_amt ? parseFloat(rec.document_amt) : null;
 
     const scoring = calcOpportunityScore({
       distressType: "pre-foreclosure",
       daysInDistress,
-      estimatedValue: estimatedValue ?? 0,
+      estimatedValue: docAmount ?? 0,
       borough,
     });
 
@@ -170,23 +204,23 @@ async function ingestAcrisForeclosures(runId: number): Promise<{ inserted: numbe
       externalId,
       address,
       borough,
-      county: county || mapCountyFromBorough(borough),
-      zipCode: rec.zip ?? rec.postal_code ?? null,
-      propertyType: rec.doc_type ? "multifamily" : "unknown",
+      county: mapCountyFromBorough(borough),
+      zipCode: null,
+      propertyType: "unknown",
       distressType: "pre-foreclosure",
       stage: "lis-pendens",
-      estimatedValue: estimatedValue !== null ? String(estimatedValue) : "0",
+      estimatedValue: docAmount !== null ? String(docAmount) : "0",
       filingDate,
       lastActivityDate: filingDate,
-      ownerName: rec.grantor ?? rec.party1_name ?? "Unknown Owner",
+      ownerName: "Unknown Owner",
       ownerType: "llc",
       opportunityScore: scoring.score,
-      confidenceLevel: estimatedValue ? scoring.confidence : "low",
-      scoreRationale: estimatedValue ? scoring.rationale : `${scoring.rationale} — no assessed value available`,
+      confidenceLevel: docAmount ? scoring.confidence : "low",
+      scoreRationale: `${scoring.rationale} — ACRIS Lis Pendens filing`,
       daysInDistress,
       tags: ["acris", "lis-pendens", borough.toLowerCase()],
       timeline: [{ date: filingDate, type: "Lis Pendens Filed", description: "Foreclosure proceeding filed in ACRIS" }],
-      connectorSource: "NYC ACRIS Open Data (SODA)",
+      connectorSource: "NYC ACRIS Master (bnx9-e6tj) + Legals (8h5j-fqxa)",
       ingestSource: "nyc_open_data",
       ingestRunId: runId,
       rawData: rec as unknown as Record<string, unknown>,
@@ -202,7 +236,7 @@ async function ingestAcrisForeclosures(runId: number): Promise<{ inserted: numbe
         skipped++;
       }
     } catch (err) {
-      logger.warn({ err, externalId }, "Failed to upsert ACRIS property");
+      logger.warn({ err, externalId }, "Failed to upsert ACRIS Lis Pendens property");
       skipped++;
     }
   }
@@ -211,11 +245,13 @@ async function ingestAcrisForeclosures(runId: number): Promise<{ inserted: numbe
 }
 
 async function ingestDofTaxLiens(runId: number): Promise<{ inserted: number; skipped: number; alerts: number }> {
-  logger.info({ runId }, "Ingesting DOF Tax Lien data");
+  logger.info({ runId }, "Ingesting DOF Tax Lien data (via ACRIS Master — DTL/TL&R coded doc_types)");
 
-  const url = buildSodaUrl("9rrd-yyvv", {
+  const cutoffDate = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]!;
+  const url = buildSodaUrl("bnx9-e6tj", {
     $limit: DEFAULT_LIMIT,
-    $order: "tax_year DESC",
+    $where: `doc_type IN ('DTL','TL&R','RTXL') AND document_date >= '${cutoffDate}'`,
+    $order: "document_date DESC",
   });
 
   const records = await sodaFetch(url);
@@ -223,35 +259,48 @@ async function ingestDofTaxLiens(runId: number): Promise<{ inserted: number; ski
   let skipped = 0;
   let alerts = 0;
 
+  if (records.length === 0) {
+    logger.info({ runId }, "DOF tax lien: no records returned (API may be unavailable or no matching doc types)");
+    return { inserted, skipped, alerts };
+  }
+
+  const allDocIdsDof = records.map((r: unknown) => (r as Record<string, string>).document_id).filter(Boolean) as string[];
+  const legalsByDocId = await fetchLegalsByDocIds(allDocIdsDof);
+  logger.info({ runId, masterCount: records.length, legalsResolved: Object.keys(legalsByDocId).length }, "DOF lien: legals resolved");
+
   for (const raw of records) {
     const rec = raw as Record<string, string>;
-    if (!rec.address) { skipped++; continue; }
+    const docId = rec.document_id;
+    if (!docId) { skipped++; continue; }
 
-    const address = await normalizeAddress(rec.address);
+    const legal = legalsByDocId[docId];
+    const streetNum = legal?.street_number ?? "";
+    const streetName = legal?.street_name ?? "";
+    if (!streetNum && !streetName) { skipped++; continue; }
+
+    const address = await normalizeAddress(`${streetNum} ${streetName}`.trim());
     if (!address || address.length < 5) { skipped++; continue; }
 
-    const boroughRaw = rec.borough ?? "";
-    const boroughMap: Record<string, "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island"> = {
-      manhattan: "Manhattan", brooklyn: "Brooklyn", queens: "Queens",
-      bronx: "Bronx", "staten island": "Staten Island",
-      mn: "Manhattan", bk: "Brooklyn", qn: "Queens", bx: "Bronx", si: "Staten Island",
+    const boroughCode = legal?.borough ?? rec.recorded_borough ?? "";
+    const boroughCodeMap: Record<string, "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island"> = {
+      "1": "Manhattan", "2": "Bronx", "3": "Brooklyn", "4": "Queens", "5": "Staten Island",
+      "manhattan": "Manhattan", "bronx": "Bronx", "brooklyn": "Brooklyn", "queens": "Queens", "staten island": "Staten Island",
     };
-    const resolvedBorough = boroughMap[boroughRaw.toLowerCase()] ?? mapBoroughFromCounty(boroughRaw);
-    if (!resolvedBorough) { skipped++; logger.debug({ boroughRaw, address }, "DOF lien: unresolvable borough, skipping"); continue; }
-    const borough = resolvedBorough;
-    const externalId = `dof-lien-${rec.bbl ?? address.replace(/\s+/g, "-").toLowerCase()}`;
-    const lienSaleDate = rec.lien_sale_date ?? rec.tax_year ?? null;
-    const filingDate = lienSaleDate
-      ? new Date(lienSaleDate).toISOString().split("T")[0]!
+    const borough = boroughCodeMap[boroughCode.toLowerCase()] ?? mapBoroughFromCounty(boroughCode);
+    if (!borough) { skipped++; logger.debug({ boroughCode, address }, "DOF lien: unresolvable borough, skipping"); continue; }
+
+    const externalId = `dof-lien-${docId}`;
+    const filingDate = rec.document_date
+      ? new Date(rec.document_date).toISOString().split("T")[0]!
       : new Date().toISOString().split("T")[0]!;
     const daysInDistress = Math.ceil((Date.now() - new Date(filingDate).getTime()) / 86400000);
-    const lienAmount = rec.total_lien_amount ? parseFloat(rec.total_lien_amount) : null;
-    const assessedValue = rec.assessed_value ? parseFloat(rec.assessed_value) : null;
+    const docAmount = rec.document_amt ? parseFloat(rec.document_amt) : null;
+    const distressType = (rec.doc_type ?? "").toLowerCase().includes("deed in lieu") ? "foreclosure" : "tax-lien";
 
     const scoring = calcOpportunityScore({
-      distressType: "tax-lien",
+      distressType,
       daysInDistress,
-      estimatedValue: assessedValue ?? 0,
+      estimatedValue: docAmount ?? 0,
       borough,
     });
 
@@ -260,25 +309,23 @@ async function ingestDofTaxLiens(runId: number): Promise<{ inserted: number; ski
       address,
       borough,
       county: mapCountyFromBorough(borough),
-      zipCode: rec.zip ?? rec.zipcode ?? null,
+      zipCode: null,
       propertyType: "unknown",
-      distressType: "tax-lien",
+      distressType,
       stage: "lien-filed",
-      estimatedValue: assessedValue !== null ? String(assessedValue) : "0",
-      lienAmount: lienAmount !== null ? String(lienAmount) : null,
+      estimatedValue: docAmount !== null ? String(docAmount) : "0",
+      lienAmount: docAmount !== null ? String(docAmount) : null,
       filingDate,
       lastActivityDate: filingDate,
-      ownerName: rec.owner_name ?? rec.taxpayer_name ?? "Unknown Owner",
+      ownerName: "Unknown Owner",
       ownerType: "individual",
       opportunityScore: scoring.score,
-      confidenceLevel: lienAmount !== null ? scoring.confidence : "low",
-      scoreRationale: lienAmount !== null
-        ? scoring.rationale
-        : `${scoring.rationale} — lien amount not available from source`,
+      confidenceLevel: docAmount !== null ? scoring.confidence : "low",
+      scoreRationale: `${scoring.rationale} — ACRIS ${rec.doc_type ?? "tax lien"} filing`,
       daysInDistress,
-      tags: ["tax-lien", "dof", borough.toLowerCase()],
-      timeline: [{ date: filingDate, type: "Tax Lien Filed", description: lienAmount !== null ? `NYC Finance tax lien: $${lienAmount.toLocaleString()}` : "NYC Finance tax lien recorded" }],
-      connectorSource: "NYC Dept of Finance — Tax Lien Sales (Open Data)",
+      tags: [distressType, "dof", borough.toLowerCase()],
+      timeline: [{ date: filingDate, type: distressType === "tax-lien" ? "Tax Lien Filed" : "Deed In Lieu", description: `ACRIS ${rec.doc_type ?? "distress"} document recorded` }],
+      connectorSource: "NYC ACRIS Master (bnx9-e6tj) — Tax Lien / Deed in Lieu",
       ingestSource: "nyc_open_data",
       ingestRunId: runId,
       rawData: rec as unknown as Record<string, unknown>,
@@ -307,8 +354,8 @@ async function ingestHpdViolations(runId: number): Promise<{ inserted: number; s
 
   const url = buildSodaUrl("wvxf-dwi5", {
     $limit: DEFAULT_LIMIT,
-    $where: `class = 'C' AND novissuedate >= '${new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}'`,
-    $order: "novissuedate DESC",
+    $where: `class = 'C' AND novissueddate >= '${new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}'`,
+    $order: "novissueddate DESC",
   });
 
   const records = await sodaFetch(url);
@@ -340,8 +387,8 @@ async function ingestHpdViolations(runId: number): Promise<{ inserted: number; s
     const borough = boroughMap[boroughRaw];
     if (!borough) { skipped++; logger.debug({ boroughRaw, address }, "HPD violation: unresolvable borough, skipping"); continue; }
     const externalId = `hpd-${rec.buildingid ?? address.replace(/\s+/g, "-").toLowerCase()}`;
-    const filingDate = rec.novissuedate
-      ? new Date(rec.novissuedate).toISOString().split("T")[0]!
+    const filingDate = rec.novissueddate
+      ? new Date(rec.novissueddate).toISOString().split("T")[0]!
       : new Date().toISOString().split("T")[0]!;
     const daysInDistress = Math.ceil((Date.now() - new Date(filingDate).getTime()) / 86400000);
 
@@ -396,43 +443,58 @@ async function ingestHpdViolations(runId: number): Promise<{ inserted: number; s
 }
 
 async function ingestAcrisRealPropertyMaster(runId: number): Promise<{ inserted: number; skipped: number; alerts: number }> {
-  logger.info({ runId }, "Ingesting ACRIS Real Property Master (recent sales)");
+  logger.info({ runId }, "Ingesting ACRIS Real Property Master (recent deed transfers)");
 
   const cutoffDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]!;
-  const url = buildSodaUrl("8h5j-fqxa", {
+  const masterUrl = buildSodaUrl("bnx9-e6tj", {
     $limit: DEFAULT_LIMIT,
-    $where: `document_date >= '${cutoffDate}' AND doc_type IN ('DEED', 'DEED, BARGAIN AND SALE', 'DEED IN LIEU')`,
+    $where: `doc_type IN ('DEED', 'DEED, BARGAIN AND SALE', 'DEED IN LIEU OF FORECLOSURE') AND document_date >= '${cutoffDate}'`,
     $order: "document_date DESC",
   });
 
-  const records = await sodaFetch(url);
+  const masterRecords = await sodaFetch(masterUrl);
   let inserted = 0;
   let skipped = 0;
   let alerts = 0;
 
-  for (const raw of records) {
-    const rec = raw as Record<string, string>;
-    if (!rec.street_number && !rec.street_name) { skipped++; continue; }
+  if (masterRecords.length === 0) {
+    logger.info({ runId }, "ACRIS master: no records returned (API may be unavailable)");
+    return { inserted, skipped, alerts };
+  }
 
-    const address = await normalizeAddress(`${rec.street_number ?? ""} ${rec.street_name ?? ""}`.trim());
+  const allDocIdsMaster = masterRecords.map((r: unknown) => (r as Record<string, string>).document_id).filter(Boolean) as string[];
+  const legalsByDocId = await fetchLegalsByDocIds(allDocIdsMaster);
+  logger.info({ runId, masterCount: masterRecords.length, legalsResolved: Object.keys(legalsByDocId).length }, "ACRIS master: legals resolved");
+
+  for (const rawMaster of masterRecords) {
+    const rec = rawMaster as Record<string, string>;
+    const docId = rec.document_id;
+    if (!docId) { skipped++; continue; }
+
+    const legal = legalsByDocId[docId];
+    const streetNum = legal?.street_number ?? "";
+    const streetName = legal?.street_name ?? "";
+    if (!streetNum && !streetName) { skipped++; continue; }
+
+    const address = await normalizeAddress(`${streetNum} ${streetName}`.trim());
     if (!address || address.length < 5) { skipped++; continue; }
 
-    const county = rec.borough ?? "";
+    const boroughCode = legal?.borough ?? rec.recorded_borough ?? "";
     const boroughMap: Record<string, "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island"> = {
       "1": "Manhattan", "2": "Bronx", "3": "Brooklyn", "4": "Queens", "5": "Staten Island",
       manhattan: "Manhattan", brooklyn: "Brooklyn", queens: "Queens", bronx: "Bronx", "staten island": "Staten Island",
     };
-    const resolvedBoroughMaster = boroughMap[county.toLowerCase()] ?? mapBoroughFromCounty(county);
-    if (!resolvedBoroughMaster) { skipped++; logger.debug({ county, address }, "ACRIS master: unresolvable borough, skipping"); continue; }
+    const resolvedBoroughMaster = boroughMap[boroughCode.toLowerCase()] ?? mapBoroughFromCounty(boroughCode);
+    if (!resolvedBoroughMaster) { skipped++; logger.debug({ boroughCode, address }, "ACRIS master: unresolvable borough, skipping"); continue; }
     const borough = resolvedBoroughMaster;
-    const externalId = `acris-master-${rec.document_id ?? `${address}-${rec.document_date}`}`;
+    const externalId = `acris-master-${docId}`;
 
     const filingDate = rec.document_date
       ? new Date(rec.document_date).toISOString().split("T")[0]!
       : new Date().toISOString().split("T")[0]!;
 
     const daysInDistress = Math.ceil((Date.now() - new Date(filingDate).getTime()) / 86400000);
-    const salePrice = rec.doc_amount ? parseFloat(rec.doc_amount) : null;
+    const salePrice = rec.document_amt ? parseFloat(rec.document_amt) : null;
 
     const scoring = calcOpportunityScore({
       distressType: "reo",
@@ -486,12 +548,13 @@ async function ingestAcrisRealPropertyMaster(runId: number): Promise<{ inserted:
 }
 
 async function ingestForeclosureFilings(runId: number): Promise<{ inserted: number; skipped: number; alerts: number }> {
-  logger.info({ runId }, "Ingesting ACRIS Foreclosure Filings (judgments + active proceedings)");
+  logger.info({ runId }, "Ingesting ACRIS Foreclosure Filings (JUDG coded doc_type via Master dataset)");
 
-  const url = buildSodaUrl("erm2-nwe9", {
+  const cutoffDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]!;
+  const url = buildSodaUrl("bnx9-e6tj", {
     $limit: DEFAULT_LIMIT,
-    $where: `doc_type IN ('FORECLOSURE', 'JUDGEMENT OF FORECLOSURE', 'JUDGMENT OF FORECLOSURE AND SALE') AND recorded_datetime >= '${new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()}'`,
-    $order: "recorded_datetime DESC",
+    $where: `doc_type IN ('JUDG','DEED, TS','DEED, RC') AND document_date >= '${cutoffDate}'`,
+    $order: "document_date DESC",
   });
 
   const records = await sodaFetch(url);
@@ -499,26 +562,44 @@ async function ingestForeclosureFilings(runId: number): Promise<{ inserted: numb
   let skipped = 0;
   let alerts = 0;
 
+  if (records.length === 0) {
+    logger.info({ runId }, "ACRIS foreclosure filings: no records returned (API may be unavailable)");
+    return { inserted, skipped, alerts };
+  }
+
+  const allDocIdsForeclosure = records.map((r: unknown) => (r as Record<string, string>).document_id).filter(Boolean) as string[];
+  const legalsByDocId = await fetchLegalsByDocIds(allDocIdsForeclosure);
+  logger.info({ runId, masterCount: records.length, legalsResolved: Object.keys(legalsByDocId).length }, "ACRIS foreclosure filings: legals resolved");
+
   for (const raw of records) {
     const rec = raw as Record<string, string>;
-    if (!rec.full_address && !rec.street_number) { skipped++; continue; }
+    const docId = rec.document_id;
+    if (!docId) { skipped++; continue; }
 
-    const address = await normalizeAddress(
-      rec.full_address ?? `${rec.street_number ?? ""} ${rec.street_name ?? ""}`.trim()
-    );
+    const legal = legalsByDocId[docId];
+    const streetNum = legal?.street_number ?? "";
+    const streetName = legal?.street_name ?? "";
+    if (!streetNum && !streetName) { skipped++; continue; }
+
+    const address = await normalizeAddress(`${streetNum} ${streetName}`.trim());
     if (!address || address.length < 5) { skipped++; continue; }
 
-    const county = rec.upper_county_name ?? "";
-    const borough = mapBoroughFromCounty(county);
-    if (!borough) { skipped++; logger.debug({ county, address }, "ACRIS foreclosure filing: unresolvable borough, skipping"); continue; }
-    const externalId = `acris-foreclosure-${rec.document_id ?? `${address}-${rec.recorded_datetime}`}`;
+    const boroughCode = legal?.borough ?? rec.recorded_borough ?? "";
+    const boroughCodeMap: Record<string, "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island"> = {
+      "1": "Manhattan", "2": "Bronx", "3": "Brooklyn", "4": "Queens", "5": "Staten Island",
+      "manhattan": "Manhattan", "bronx": "Bronx", "brooklyn": "Brooklyn", "queens": "Queens", "staten island": "Staten Island",
+    };
+    const borough = boroughCodeMap[boroughCode.toLowerCase()] ?? mapBoroughFromCounty(boroughCode);
+    if (!borough) { skipped++; logger.debug({ boroughCode, address }, "ACRIS foreclosure filing: unresolvable borough, skipping"); continue; }
 
-    const filingDate = rec.recorded_datetime
-      ? new Date(rec.recorded_datetime).toISOString().split("T")[0]!
+    const externalId = `acris-foreclosure-${docId}`;
+    const filingDate = rec.document_date
+      ? new Date(rec.document_date).toISOString().split("T")[0]!
       : new Date().toISOString().split("T")[0]!;
 
     const daysInDistress = Math.ceil((Date.now() - new Date(filingDate).getTime()) / 86400000);
-    const isJudgment = (rec.doc_type ?? "").toLowerCase().includes("judgment");
+    const docType = (rec.doc_type ?? "").trim().toUpperCase();
+    const isJudgment = docType === "JUDG";
     const distressType = isJudgment ? "foreclosure" : "pre-foreclosure";
     const stage = isJudgment ? "judgment" : "filing";
 
@@ -533,23 +614,23 @@ async function ingestForeclosureFilings(runId: number): Promise<{ inserted: numb
       externalId,
       address,
       borough,
-      county: county || mapCountyFromBorough(borough),
-      zipCode: rec.zip ?? null,
+      county: mapCountyFromBorough(borough),
+      zipCode: null,
       propertyType: "unknown",
       distressType,
       stage,
       estimatedValue: "0",
       filingDate,
       lastActivityDate: filingDate,
-      ownerName: rec.party2_name ?? rec.grantor ?? "Unknown",
+      ownerName: "Unknown",
       ownerType: "individual",
       opportunityScore: scoring.score,
       confidenceLevel: "low",
-      scoreRationale: `${scoring.rationale} — no assessed value available from ACRIS filing records`,
+      scoreRationale: `${scoring.rationale} — ACRIS foreclosure filing, no assessed value available`,
       daysInDistress,
       tags: ["acris-foreclosure", distressType, borough.toLowerCase()],
       timeline: [{ date: filingDate, type: isJudgment ? "Foreclosure Judgment" : "Foreclosure Filing", description: `ACRIS ${rec.doc_type ?? "foreclosure"} recorded` }],
-      connectorSource: "NYC ACRIS Foreclosure Filings (Open Data)",
+      connectorSource: "NYC ACRIS Master (bnx9-e6tj) — Foreclosure Filings",
       ingestSource: "nyc_open_data",
       ingestRunId: runId,
       rawData: rec as unknown as Record<string, unknown>,

@@ -34,15 +34,25 @@ export interface AgentRunRecord {
 
 const BASE_URL = `http://localhost:${process.env["PORT"] || 3000}`;
 
+function getInternalHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = process.env["ALLOY_INTERNAL_TOKEN"];
+  if (token) headers["x-internal-token"] = token;
+  return headers;
+}
+
 async function fetchData(path: string): Promise<unknown> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+  const timer = setTimeout(() => controller.abort(), 12000);
   try {
     const resp = await fetch(`${BASE_URL}${path}`, {
       signal: controller.signal,
-      headers: { Accept: "application/json" },
+      headers: getInternalHeaders(),
     });
-    if (!resp.ok) return null;
+    if (!resp.ok) {
+      logger.warn({ status: resp.status, path }, "Agent fetchData non-OK response");
+      return null;
+    }
     return resp.json();
   } catch {
     return null;

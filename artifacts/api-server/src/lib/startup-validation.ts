@@ -59,7 +59,11 @@ export function validateStartupConfig(): ValidationResult {
   }
 
   if (!process.env.ALLOY_INTERNAL_TOKEN) {
-    warnings.push("ALLOY_INTERNAL_TOKEN not set — AlloyChat admin context will be degraded (401 on internal admin fetches)");
+    if (isProduction) {
+      errors.push("ALLOY_INTERNAL_TOKEN is required in production — autonomous agents will get 401s on all internal API calls");
+    } else {
+      warnings.push("ALLOY_INTERNAL_TOKEN not set — autonomous agents will receive 401s on internal API calls");
+    }
   }
 
   const valid = errors.length === 0;

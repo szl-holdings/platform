@@ -23,8 +23,23 @@ declare global {
   namespace Express {
     interface Request {
       user?: AuthenticatedUser;
+      isInternalAgent?: boolean;
     }
   }
+}
+
+const INTERNAL_AGENT_USER: AuthenticatedUser = {
+  id: 0,
+  displayName: "Internal Agent",
+  email: null,
+  roles: ["super_admin"],
+};
+
+function checkInternalToken(req: Request): boolean {
+  const internalToken = process.env["ALLOY_INTERNAL_TOKEN"];
+  if (!internalToken) return false;
+  const header = req.headers["x-internal-token"] as string | undefined;
+  return header === internalToken;
 }
 
 async function resolveUserFromToken(token: string): Promise<AuthenticatedUser | null> {
@@ -84,6 +99,13 @@ export function authMiddleware(options: { required?: boolean } = {}) {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (checkInternalToken(req)) {
+        req.user = INTERNAL_AGENT_USER;
+        req.isInternalAgent = true;
+        next();
+        return;
+      }
+
       let user: AuthenticatedUser | null = null;
 
       const authHeader = req.headers.authorization;

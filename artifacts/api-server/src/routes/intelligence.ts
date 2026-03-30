@@ -25,6 +25,12 @@ function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Pr
   });
 }
 
+function preseedCache<T>(key: string, data: T, ttlMs: number): void {
+  if (!cache.has(key)) {
+    cache.set(key, { data, expiry: Date.now() + ttlMs });
+  }
+}
+
 const intelRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
@@ -160,7 +166,7 @@ async function fetchGdeltGeopolitical(): Promise<typeof DEMO_GEO_EVENTS> {
   try {
     const data = await fetchJson(
       "https://api.gdeltproject.org/api/v2/doc/doc?query=cybersecurity%20OR%20maritime%20OR%20sanctions&mode=ArtList&maxrecords=6&format=json&timespan=24h",
-      8000,
+      5000,
     ) as any;
     const articles = data?.articles;
     if (!Array.isArray(articles) || articles.length === 0) throw new Error("No GDELT data");
@@ -285,6 +291,8 @@ const DEMO_GEO_EVENTS = [
   { id: "GEO-005", title: "International sanctions update targeting state-sponsored cyber groups", region: "Global", severity: "high", category: "sanctions", timestamp: "2026-03-24T18:00:00Z", source: "US Treasury", impact: "New OFAC designations affecting technology exports" },
   { id: "GEO-006", title: "Submarine cable disruption reported in Red Sea corridor", region: "Middle East", severity: "high", category: "infrastructure", timestamp: "2026-03-24T08:45:00Z", source: "TeleGeography", impact: "Internet traffic rerouting affecting 15% of Asia-Europe bandwidth" },
 ];
+
+setImmediate(() => preseedCache("geopolitical", DEMO_GEO_EVENTS, 60000));
 
 const DEMO_MARITIME_VESSELS = [
   { mmsi: "211234567", name: "ATLANTIC VOYAGER", type: "Cargo", lat: 51.52, lon: 1.35, speed: 12.4, course: 225, heading: 223, destination: "Rotterdam", status: "Under way using engine", flag: "DE", length: 225, timestamp: "2026-03-26T09:00:00Z" },
