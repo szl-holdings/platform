@@ -1,14 +1,22 @@
 import type { Request, Response, NextFunction } from "express";
-import { db, usersTable, sessionsTable, userRolesTable, rolesTable } from "@workspace/db";
+import { db, usersTable, sessionsTable, userRolesTable, rolesTable, orgMembersTable, organizationsTable } from "@workspace/db";
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@workspace/db";
 import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@workspace/db";
+
+export interface OrgMembership {
+  orgId: number;
+  orgSlug: string;
+  orgName: string;
+  role: "owner" | "admin" | "member" | "viewer";
+}
 
 export interface AuthenticatedUser {
   id: number;
   displayName: string;
   email: string | null;
   roles: RoleName[];
+  orgs: OrgMembership[];
 }
 
 declare global {
@@ -39,17 +47,35 @@ async function resolveUserFromToken(token: string): Promise<AuthenticatedUser | 
 
   if (!user || !user.isActive) return null;
 
-  const userRoles = await db
-    .select({ roleName: rolesTable.name })
-    .from(userRolesTable)
-    .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
-    .where(eq(userRolesTable.userId, user.id));
+  const [userRoles, orgMemberships] = await Promise.all([
+    db
+      .select({ roleName: rolesTable.name })
+      .from(userRolesTable)
+      .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
+      .where(eq(userRolesTable.userId, user.id)),
+    db
+      .select({
+        orgId: orgMembersTable.orgId,
+        orgSlug: organizationsTable.slug,
+        orgName: organizationsTable.name,
+        role: orgMembersTable.role,
+      })
+      .from(orgMembersTable)
+      .innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id))
+      .where(eq(orgMembersTable.userId, user.id)),
+  ]);
 
   return {
     id: user.id,
     displayName: user.displayName,
     email: user.email,
     roles: userRoles.map((r) => r.roleName) as RoleName[],
+    orgs: orgMemberships.map((m) => ({
+      orgId: m.orgId,
+      orgSlug: m.orgSlug,
+      orgName: m.orgName,
+      role: m.role,
+    })),
   };
 }
 
@@ -154,4 +180,46 @@ export function parseIdParam(raw: string | string[]): number {
   const id = parseInt(str, 10);
   if (isNaN(id) || id < 1) throw new InvalidIdError();
   return id;
+}
+
+export function requireOrgMembership(orgSlug: string, minRole: "owner" | "admin" | "member" | "viewer" = "viewer") {
+  const roleHierarchy: Record<string, number> = { owner: 4, admin: 3, member: 2, viewer: 1 };
+
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
+    if (req.user.roles.includes("super_admin") || req.user.roles.includes("admin")) {
+      next();
+      return;
+    }
+
+    const membership = req.user.orgs.find((o) => o.orgSlug === orgSlug);
+    if (!membership) {
+      res.status(403).json({ error: "Not a member of this organization" });
+      return;
+    }
+
+    if ((roleHierarchy[membership.role] ?? 0) < (roleHierarchy[minRole] ?? 0)) {
+      res.status(403).json({ error: "Insufficient organization role" });
+      return;
+    }
+
+    next();
+  };
+}
+
+export function canAccessOrgRecord(user: AuthenticatedUser, recordOrgId: number | null | undefined): boolean {
+  if (user.roles.includes("super_admin") || user.roles.includes("admin") || user.roles.includes("exec") || user.roles.includes("ops")) {
+    return true;
+  }
+  if (recordOrgId == null) return false;
+  return user.orgs.some((o) => o.orgId === recordOrgId);
+}
+
+export function isElevatedUser(user: AuthenticatedUser): boolean {
+  const elevated = new Set(["super_admin", "admin", "exec", "ops", "compliance"]);
+  return user.roles.some((r) => elevated.has(r));
 }
