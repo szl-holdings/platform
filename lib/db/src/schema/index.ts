@@ -24,3 +24,4 @@ export * from "./holdings";
 export * from "./conversations";
 export * from "./messages";
 export * from "./nuro_mesh";
+export * from "./alloy_chat";

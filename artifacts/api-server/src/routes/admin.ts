@@ -91,6 +91,7 @@ const VALID_TABLE_NAMES = new Set([
   "dreamscape_voice_assets", "dreamscape_campaign_assets", "dreamscape_reviews",
   "readiness_programs", "readiness_dimensions", "readiness_score_history",
   "readiness_milestones", "readiness_risks", "readiness_alerts",
+  "alloy_chat_kb_documents", "alloy_chat_advisories", "alloy_chat_comparisons",
 ]);
 
 const SEED_TABLE_EXPECTATIONS = [
