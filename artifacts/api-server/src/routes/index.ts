@@ -25,6 +25,8 @@ import carlotaJoRouter from "./carlota-jo";
 import observabilityRouter from "./observability";
 import alloyChatRouter from "./alloy-chat";
 import jobsRouter from "./jobs";
+import nueroMeshRouter from "./nuro-mesh";
+import aiSafetyRouter from "./ai-safety";
 
 const router: IRouter = Router();
 
@@ -72,5 +74,9 @@ router.use(observabilityRouter);
 router.use(alloyChatRouter);
 router.use("/jobs", readLimiter);
 router.use(jobsRouter);
+router.use("/nuro-mesh", readLimiter);
+router.use(nueroMeshRouter);
+router.use("/ai-safety", readLimiter);
+router.use(aiSafetyRouter);
 
 export default router;

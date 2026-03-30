@@ -29,6 +29,7 @@ import {
   Cloud,
   FileText,
   Gauge,
+  Network,
 } from "lucide-react";
 
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
@@ -54,6 +55,7 @@ const PlatformHealthPage = lazy(() => import("@/pages/platform-health"));
 const LoadTestDashboardPage = lazy(() => import("@/pages/load-test-dashboard"));
 const WorkflowAutomation = lazy(() => import("@/pages/workflow-automation"));
 const DeveloperPortal = lazy(() => import("@/pages/developer-portal"));
+const NuroMesh = lazy(() => import("@/pages/nuro-mesh"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 const queryClient = new QueryClient({
@@ -89,8 +91,9 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/files", label: "Files", icon: <FolderOpen className="w-4 h-4" /> },
   { path: "/environment", label: "Environment", icon: <Settings className="w-4 h-4" /> },
   { path: "/seed", label: "Seed Data", icon: <Database className="w-4 h-4" /> },
-  { path: "/intelligence", label: "Intelligence", icon: <Globe className="w-4 h-4" />, section: "Intelligence" },
-  { path: "/ai-analyzer", label: "AI Analyzer", icon: <Brain className="w-4 h-4" /> },
+  { path: "/nuro-mesh", label: "Nuro Mesh", icon: <Network className="w-4 h-4" />, section: "Intelligence" },
+  { path: "/intelligence", label: "Intelligence Overview", icon: <Globe className="w-4 h-4" /> },
+  { path: "/ai-analyzer", label: "AI Observability", icon: <Brain className="w-4 h-4" /> },
   { path: "/observability", label: "Observability", icon: <Activity className="w-4 h-4" />, section: "Observability" },
   { path: "/alloy-chat", label: "AlloyChat", icon: <MessageSquare className="w-4 h-4" />, section: "Operations" },
   { path: "/infrastructure", label: "Infrastructure", icon: <Cloud className="w-4 h-4" /> },
@@ -240,6 +243,7 @@ function AppRouter() {
         <Route path="/files" component={FilesPage} />
         <Route path="/environment" component={EnvironmentPage} />
         <Route path="/seed" component={SeedManagerPage} />
+        <Route path="/nuro-mesh" component={NuroMesh} />
         <Route path="/intelligence" component={IntelligenceOverview} />
         <Route path="/ai-analyzer" component={AIIntelligence} />
         <Route path="/observability" component={SystemObservability} />

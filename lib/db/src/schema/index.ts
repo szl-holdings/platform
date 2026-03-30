@@ -23,3 +23,4 @@ export * from "./carlota_jo";
 export * from "./holdings";
 export * from "./conversations";
 export * from "./messages";
+export * from "./nuro_mesh";
