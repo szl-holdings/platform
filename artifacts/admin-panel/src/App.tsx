@@ -27,11 +27,11 @@ import {
   Globe,
   MessageSquare,
   Cloud,
-  FileText,
-  Gauge,
-  Network,
   GraduationCap,
+  ChevronDown,
+  ChevronRight as ChevronRightIcon,
 } from "lucide-react";
+import { useState } from "react";
 
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
 const AppsPage = lazy(() => import("@/pages/apps"));
@@ -75,37 +75,66 @@ interface NavItem {
   path: string;
   label: string;
   icon: React.ReactNode;
-  section?: string;
   badge?: "health";
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { path: "/", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" />, section: "System" },
-  { path: "/health", label: "System Health", icon: <HeartPulse className="w-4 h-4" /> },
-  { path: "/apps", label: "App Registry", icon: <Layers className="w-4 h-4" /> },
-  { path: "/connectors", label: "Connectors", icon: <Plug className="w-4 h-4" /> },
-  { path: "/connector-health", label: "Connector Health", icon: <Activity className="w-4 h-4" /> },
-  { path: "/integration-health", label: "Integration Health", icon: <HeartPulse className="w-4 h-4" />, badge: "health" },
-  { path: "/integration-activity", label: "Activity Feed", icon: <Activity className="w-4 h-4" /> },
-  { path: "/users", label: "Users & Roles", icon: <Users className="w-4 h-4" />, section: "Management" },
-  { path: "/audit-log", label: "Audit Log", icon: <ScrollText className="w-4 h-4" /> },
-  { path: "/webhooks", label: "Webhooks", icon: <Webhook className="w-4 h-4" /> },
-  { path: "/feature-flags", label: "Feature Flags", icon: <Flag className="w-4 h-4" />, section: "Configuration" },
-  { path: "/billing", label: "Billing", icon: <CreditCard className="w-4 h-4" /> },
-  { path: "/files", label: "Files", icon: <FolderOpen className="w-4 h-4" /> },
-  { path: "/environment", label: "Environment", icon: <Settings className="w-4 h-4" /> },
-  { path: "/seed", label: "Seed Data", icon: <Database className="w-4 h-4" /> },
-  { path: "/nuro-mesh", label: "Nuro Mesh", icon: <Network className="w-4 h-4" />, section: "Intelligence" },
-  { path: "/intelligence", label: "Intelligence Overview", icon: <Globe className="w-4 h-4" /> },
-  { path: "/ai-analyzer", label: "AI Observability", icon: <Brain className="w-4 h-4" /> },
-  { path: "/observability", label: "Observability", icon: <Activity className="w-4 h-4" />, section: "Observability" },
-  { path: "/alloy-chat", label: "AlloyChat", icon: <MessageSquare className="w-4 h-4" />, section: "Operations" },
-  { path: "/infrastructure", label: "Infrastructure", icon: <Cloud className="w-4 h-4" /> },
-  { path: "/platform-health", label: "Health Reports", icon: <FileText className="w-4 h-4" /> },
-  { path: "/load-tests", label: "Load Tests", icon: <Gauge className="w-4 h-4" /> },
-  { path: "/workflows", label: "Workflows", icon: <Activity className="w-4 h-4" />, section: "Automation" },
-  { path: "/developer", label: "Developer Portal", icon: <Globe className="w-4 h-4" />, section: "Developer" },
-  { path: "/agent-training", label: "Training Studio", icon: <GraduationCap className="w-4 h-4" />, section: "AI Agents" },
+interface NavSection {
+  title: string;
+  items: NavItem[];
+  collapsible?: boolean;
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    title: "System",
+    items: [
+      { path: "/", label: "Dashboard", icon: <LayoutDashboard className="w-4 h-4" /> },
+      { path: "/health", label: "System Health", icon: <HeartPulse className="w-4 h-4" /> },
+      { path: "/integration-health", label: "Integration Health", icon: <Activity className="w-4 h-4" />, badge: "health" },
+      { path: "/apps", label: "App Registry", icon: <Layers className="w-4 h-4" /> },
+      { path: "/connectors", label: "Connectors", icon: <Plug className="w-4 h-4" /> },
+    ],
+  },
+  {
+    title: "Management",
+    items: [
+      { path: "/users", label: "Users & Roles", icon: <Users className="w-4 h-4" /> },
+      { path: "/audit-log", label: "Audit Log", icon: <ScrollText className="w-4 h-4" /> },
+      { path: "/billing", label: "Billing", icon: <CreditCard className="w-4 h-4" /> },
+    ],
+  },
+  {
+    title: "Configuration",
+    collapsible: true,
+    items: [
+      { path: "/feature-flags", label: "Feature Flags", icon: <Flag className="w-4 h-4" /> },
+      { path: "/webhooks", label: "Webhooks", icon: <Webhook className="w-4 h-4" /> },
+      { path: "/environment", label: "Environment", icon: <Settings className="w-4 h-4" /> },
+      { path: "/files", label: "Files", icon: <FolderOpen className="w-4 h-4" /> },
+      { path: "/seed", label: "Seed Data", icon: <Database className="w-4 h-4" /> },
+    ],
+  },
+  {
+    title: "Intelligence",
+    collapsible: true,
+    items: [
+      { path: "/intelligence", label: "Overview", icon: <Globe className="w-4 h-4" /> },
+      { path: "/ai-analyzer", label: "AI Observability", icon: <Brain className="w-4 h-4" /> },
+      { path: "/nuro-mesh", label: "Nuro Mesh", icon: <Activity className="w-4 h-4" /> },
+      { path: "/agent-training", label: "Training Studio", icon: <GraduationCap className="w-4 h-4" /> },
+    ],
+  },
+  {
+    title: "Operations",
+    collapsible: true,
+    items: [
+      { path: "/alloy-chat", label: "AlloyChat", icon: <MessageSquare className="w-4 h-4" /> },
+      { path: "/infrastructure", label: "Infrastructure", icon: <Cloud className="w-4 h-4" /> },
+      { path: "/observability", label: "Observability", icon: <Activity className="w-4 h-4" /> },
+      { path: "/workflows", label: "Workflows", icon: <Activity className="w-4 h-4" /> },
+      { path: "/developer", label: "Developer Portal", icon: <Globe className="w-4 h-4" /> },
+    ],
+  },
 ];
 
 function PageLoader() {
@@ -172,37 +201,36 @@ function DemoModeBanner() {
   );
 }
 
-function Sidebar() {
+function NavSection({ section }: { section: NavSection }) {
   const [location] = useLocation();
-  let currentSection = "";
+  const [collapsed, setCollapsed] = useState(section.collapsible ?? false);
+
+  const isAnyActive = section.items.some(item =>
+    location === item.path || (item.path !== "/" && location.startsWith(item.path))
+  );
+
+  const showExpanded = !collapsed || isAnyActive;
 
   return (
-    <aside className="w-60 shrink-0 border-r border-border bg-sidebar flex flex-col h-screen sticky top-0">
-      <div className="px-5 py-5 border-b border-border">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-            <Hexagon className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold tracking-tight">SZL Admin</div>
-            <div className="text-xs text-muted-foreground">Control Plane</div>
-          </div>
-        </div>
-      </div>
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
-        {NAV_ITEMS.map((item) => {
-          const showSection = item.section && item.section !== currentSection;
-          if (item.section) currentSection = item.section;
-          const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
-
-          return (
-            <div key={item.path}>
-              {showSection && (
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 pt-4 pb-2">
-                  {item.section}
-                </div>
-              )}
+    <div>
+      <button
+        onClick={() => section.collapsible && setCollapsed(!collapsed)}
+        className={`w-full flex items-center justify-between text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 pt-5 pb-1.5 ${section.collapsible ? "hover:text-foreground cursor-pointer transition-colors" : "cursor-default"}`}
+      >
+        {section.title}
+        {section.collapsible && (
+          <span className="opacity-40">
+            {showExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRightIcon className="w-3 h-3" />}
+          </span>
+        )}
+      </button>
+      {showExpanded && (
+        <div className="space-y-0.5">
+          {section.items.map((item) => {
+            const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+            return (
               <Link
+                key={item.path}
                 href={item.path}
                 className={`flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-colors ${
                   isActive
@@ -214,15 +242,36 @@ function Sidebar() {
                 {item.label}
                 {item.badge === "health" && <HealthBadge />}
               </Link>
-            </div>
-          );
-        })}
-      </nav>
-      <div className="px-5 py-4 border-t border-border">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Sidebar() {
+  return (
+    <aside className="w-56 shrink-0 border-r border-border bg-sidebar flex flex-col h-screen sticky top-0">
+      <div className="px-4 py-4 border-b border-border">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <Hexagon className="w-4 h-4 text-primary" />
           </div>
+          <div>
+            <div className="text-sm font-semibold tracking-tight">SZL Admin</div>
+            <div className="text-xs text-muted-foreground">Control Plane</div>
+          </div>
+        </div>
+      </div>
+      <nav className="flex-1 overflow-y-auto px-2 py-2">
+        {NAV_SECTIONS.map((section) => (
+          <NavSection key={section.title} section={section} />
+        ))}
+      </nav>
+      <div className="px-4 py-3 border-t border-border">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-xs text-muted-foreground">System Online</span>
         </div>
       </div>

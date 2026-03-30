@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme inline {
@@ -24,37 +24,38 @@
 }
 
 :root {
-  --background: 222 20% 5%;
-  --foreground: 210 20% 96%;
-  
-  --primary: 43 90% 55%;
-  --primary-foreground: 222 20% 5%;
-  
-  --secondary: 220 15% 14%;
-  --secondary-foreground: 210 15% 80%;
-  
-  --muted: 220 15% 12%;
-  --muted-foreground: 215 12% 55%;
-  
-  --accent: 43 90% 55%;
-  --accent-foreground: 222 20% 5%;
-  
+  /* Light-leaning creative studio palette */
+  --background: 250 30% 98%;
+  --foreground: 250 20% 12%;
+
+  --primary: 262 83% 58%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 250 15% 94%;
+  --secondary-foreground: 250 15% 30%;
+
+  --muted: 250 15% 94%;
+  --muted-foreground: 250 10% 50%;
+
+  --accent: 262 83% 58%;
+  --accent-foreground: 0 0% 100%;
+
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  
-  --border: 220 15% 14%;
-  --ring: 43 90% 55%;
-  
-  --card: 222 18% 8%;
-  --card-foreground: 210 20% 96%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 250 15% 88%;
+  --ring: 262 83% 58%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 250 20% 12%;
 }
 
 @layer base {
   body {
     @apply bg-background text-foreground antialiased font-sans;
-    background-image: 
-      radial-gradient(ellipse at 0% 0%, hsla(43, 90%, 55%, 0.03) 0%, transparent 50%),
-      radial-gradient(ellipse at 100% 100%, hsla(225, 50%, 30%, 0.05) 0%, transparent 50%);
+    background-image:
+      radial-gradient(ellipse at 0% 0%, hsla(262, 83%, 58%, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 100%, hsla(330, 80%, 65%, 0.04) 0%, transparent 50%);
     background-attachment: fixed;
   }
 
@@ -64,8 +65,8 @@
   }
 
   ::selection {
-    background: hsla(43, 90%, 55%, 0.3);
-    color: hsl(210, 40%, 98%);
+    background: hsla(262, 83%, 58%, 0.2);
+    color: hsl(250, 20%, 12%);
   }
 }
 
@@ -78,24 +79,21 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsla(220, 10%, 30%, 0.5);
+    background: hsla(250, 15%, 70%, 0.5);
     border-radius: 100px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsla(220, 10%, 45%, 0.6);
+    background: hsla(250, 15%, 55%, 0.6);
   }
 
   .glass-panel {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-2xl;
-    box-shadow: 
-      0 0 0 1px hsla(220, 10%, 20%, 0.3),
-      0 8px 32px hsla(0, 0%, 0%, 0.3),
-      inset 0 1px 0 hsla(210, 40%, 98%, 0.03);
+    @apply bg-white/70 backdrop-blur-xl border border-white/80 shadow-lg;
+    box-shadow:
+      0 0 0 1px hsla(250, 15%, 88%, 0.8),
+      0 4px 24px hsla(250, 20%, 12%, 0.06);
   }
 
-  .cinematic-glow {
-    box-shadow: 
-      0 0 20px hsla(43, 90%, 55%, 0.1),
-      0 0 60px hsla(43, 90%, 55%, 0.05);
+  .creative-card {
+    @apply bg-white border border-border/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow;
   }
 }

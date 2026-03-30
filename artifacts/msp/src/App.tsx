@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 const LandingPage = lazy(() => import("@/pages/landing"));
+const DashboardPage = lazy(() => import("@/pages/dashboard"));
 const ClientsPage = lazy(() => import("@/pages/clients"));
 const ServiceDeskPage = lazy(() => import("@/pages/service-desk"));
 const TicketsPage = lazy(() => import("@/pages/tickets"));
@@ -163,8 +164,8 @@ function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={ClientsPage} />
-        <Route path="/dashboard" component={ClientsPage} />
+        <Route path="/" component={DashboardPage} />
+        <Route path="/dashboard" component={DashboardPage} />
         <Route path="/clients" component={ClientsPage} />
         <Route path="/tickets" component={TicketsPage} />
         <Route path="/service-desk" component={ServiceDeskPage} />

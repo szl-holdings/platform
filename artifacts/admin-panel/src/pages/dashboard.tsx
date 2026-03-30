@@ -291,22 +291,52 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-            <Activity className="w-4 h-4 text-blue-400" />
-          </div>
-          <span className="text-sm font-medium">Integration Health</span>
-          <span className="text-xs text-muted-foreground ml-auto bg-muted px-2 py-0.5 rounded-full">
-            {data.connectors.summary.total} connectors
-          </span>
+      <IntegrationHealthSection connectors={data.connectors} />
+    </div>
+  );
+}
+
+function IntegrationHealthSection({ connectors }: { connectors: { summary: { total: number }; services: { name: string; status: string }[] } }) {
+  const [showAll, setShowAll] = useState(false);
+
+  const unhealthy = connectors.services.filter(s => s.status !== "LIVE_CONFIGURED");
+  const healthy = connectors.services.filter(s => s.status === "LIVE_CONFIGURED");
+  const displayedServices = showAll ? connectors.services : unhealthy;
+  const hasUnhealthy = unhealthy.length > 0;
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+          <Activity className="w-4 h-4 text-blue-400" />
         </div>
+        <span className="text-sm font-medium">Integration Health</span>
+        <div className="ml-auto flex items-center gap-2">
+          {hasUnhealthy && !showAll && (
+            <span className="text-xs font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+              {unhealthy.length} need attention
+            </span>
+          )}
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors bg-muted px-2 py-0.5 rounded-full"
+          >
+            {showAll ? `Show issues only (${unhealthy.length})` : `Show all (${connectors.summary.total})`}
+          </button>
+        </div>
+      </div>
+      {displayedServices.length === 0 ? (
+        <div className="flex items-center gap-2 text-sm text-emerald-400 py-3">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          All {healthy.length} integrations are live and configured
+        </div>
+      ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {data.connectors.services.map((svc) => (
+          {displayedServices.map((svc) => (
             <ConnectorStatusCard key={svc.name} name={svc.name} status={svc.status} />
           ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }

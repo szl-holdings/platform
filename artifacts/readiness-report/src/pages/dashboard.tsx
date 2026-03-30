@@ -1,11 +1,9 @@
 import { Shell } from "@/components/layout/shell";
-import { Gauge } from "@workspace/shared-ui/ui/gauge";
 import { usePrograms, useDimensions, useAlerts, useRisks } from "@/hooks/use-readiness";
-import { ArrowUpRight, ArrowDownRight, Activity, ShieldAlert, Target, BellRing } from "lucide-react";
+import { ArrowUpRight, Activity, ShieldAlert, Target, BellRing, CheckCircle2, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import { type ComponentType } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { useState, useEffect, useRef } from "react";
+import { type ComponentType, useState, useEffect, useRef } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 function useAnimatedCounter(target: number, duration = 1200, decimals = 0) {
   const [count, setCount] = useState(0);
@@ -30,6 +28,120 @@ function useAnimatedCounter(target: number, duration = 1200, decimals = 0) {
   return count;
 }
 
+function ModernGauge({ value, max = 100, label }: { value: number; max?: number; label: string }) {
+  const animatedValue = useAnimatedCounter(value, 1400, 1);
+  const pct = value / max;
+  
+  const size = 240;
+  const stroke = 18;
+  const r = (size - stroke) / 2;
+  const cx = size / 2;
+  const cy = size / 2 + 20;
+  const startAngle = -220;
+  const endAngle = 40;
+  const totalAngle = endAngle - startAngle;
+  
+  function polarToCart(angle: number, radius: number) {
+    const rad = (angle * Math.PI) / 180;
+    return {
+      x: cx + radius * Math.cos(rad),
+      y: cy + radius * Math.sin(rad),
+    };
+  }
+  
+  function arcPath(start: number, end: number, radius: number) {
+    const s = polarToCart(start, radius);
+    const e = polarToCart(end, radius);
+    const large = end - start > 180 ? 1 : 0;
+    return `M ${s.x} ${s.y} A ${radius} ${radius} 0 ${large} 1 ${e.x} ${e.y}`;
+  }
+  
+  const fillAngle = startAngle + totalAngle * pct;
+  const scoreColor = pct >= 0.8 ? "#22c55e" : pct >= 0.6 ? "#3b82f6" : pct >= 0.4 ? "#f59e0b" : "#ef4444";
+  
+  return (
+    <div className="flex flex-col items-center">
+      <svg width={size} height={size * 0.75} viewBox={`0 0 ${size} ${size * 0.75}`} className="overflow-visible">
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={scoreColor} stopOpacity="0.4" />
+            <stop offset="100%" stopColor={scoreColor} stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        {/* Background track */}
+        <path d={arcPath(startAngle, endAngle, r)} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} strokeLinecap="round" />
+        {/* Filled arc */}
+        <path d={arcPath(startAngle, fillAngle, r)} fill="none" stroke="url(#gaugeGrad)" strokeWidth={stroke} strokeLinecap="round" />
+        {/* Center value */}
+        <text x={cx} y={cy - 10} textAnchor="middle" fontSize="42" fontWeight="700" fill="white" fontFamily="Outfit, sans-serif">
+          {animatedValue}
+        </text>
+        <text x={cx} y={cy + 14} textAnchor="middle" fontSize="12" fill="rgba(255,255,255,0.5)" fontFamily="Plus Jakarta Sans, sans-serif">
+          {label}
+        </text>
+        {/* Scale ticks */}
+        {[0, 25, 50, 75, 100].map((tick) => {
+          const angle = startAngle + (totalAngle * tick) / 100;
+          const inner = polarToCart(angle, r - stroke / 2 - 8);
+          const outer = polarToCart(angle, r - stroke / 2 - 2);
+          return (
+            <line key={tick} x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y} stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+          );
+        })}
+      </svg>
+      <div className="flex items-center gap-3 -mt-2">
+        <span className="text-xs text-muted-foreground">0</span>
+        <div className="h-px flex-1 bg-white/5 w-20" />
+        <span className="text-xs font-semibold" style={{ color: scoreColor }}>{value.toFixed(1)} / {max}</span>
+        <div className="h-px flex-1 bg-white/5 w-20" />
+        <span className="text-xs text-muted-foreground">{max}</span>
+      </div>
+    </div>
+  );
+}
+
+const cohesivePalette = ["#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff"];
+
+function DimensionBar({ name, score, target, index }: { name: string; score: number; target: number; index: number }) {
+  const animatedScore = useAnimatedCounter(score, 1000 + index * 100);
+  const gap = target - score;
+  const pct = (score / 100) * 100;
+  const color = cohesivePalette[Math.min(index, cohesivePalette.length - 1)];
+  const statusText = gap <= 0 ? "On Target" : gap <= 15 ? "Near Target" : "Below Target";
+  const statusColor = gap <= 0 ? "text-emerald-400" : gap <= 15 ? "text-blue-400" : "text-muted-foreground";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.06 }}
+      className="space-y-1.5"
+    >
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-white font-medium">{name}</span>
+        <div className="flex items-center gap-3">
+          <span className={`text-xs ${statusColor}`}>{statusText}</span>
+          <span className="font-bold text-white w-8 text-right">{animatedScore}</span>
+        </div>
+      </div>
+      <div className="relative h-2 bg-white/5 rounded-full overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.8, delay: index * 0.06, ease: "easeOut" }}
+          className="absolute inset-y-0 left-0 rounded-full"
+          style={{ backgroundColor: color }}
+        />
+        {/* Target marker */}
+        <div
+          className="absolute inset-y-0 w-0.5 bg-white/30"
+          style={{ left: `${target}%` }}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Dashboard() {
   const { data: programs, isLoading: pLoading } = usePrograms();
   const { data: dimensions, isLoading: dLoading } = useDimensions();
@@ -41,22 +153,11 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <Shell>
-        <div className="p-8 pb-20 space-y-8 animate-pulse">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="h-10 w-72 bg-white/5 rounded-lg mb-2" />
-              <div className="h-5 w-[28rem] bg-white/5 rounded-lg" />
-            </div>
-            <div className="h-10 w-48 bg-white/5 rounded-xl" />
-          </div>
+        <div className="p-8 space-y-8 animate-pulse">
+          <div className="h-10 w-72 bg-white/5 rounded-lg" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-4 bg-white/[0.03] rounded-3xl border border-white/5 h-96" />
             <div className="lg:col-span-8 bg-white/[0.03] rounded-3xl border border-white/5 h-96" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white/[0.03] rounded-2xl p-6 border border-white/5 h-36" />
-            ))}
           </div>
         </div>
       </Shell>
@@ -66,170 +167,128 @@ export default function Dashboard() {
   const activeProgram = programs?.[0];
   const criticalRisks = risks?.filter(r => r.severity === 'critical' && r.status !== 'resolved') || [];
   const unreadAlerts = alerts?.filter(a => !a.isRead) || [];
-  
-  const chartData = dimensions?.map(d => ({
-    name: d.name,
-    score: d.currentScore,
-    target: d.targetScore,
-    shortName: d.category.charAt(0).toUpperCase() + d.category.slice(1)
-  })).sort((a, b) => b.score - a.score) || [];
+  const sortedDimensions = [...(dimensions || [])].sort((a, b) => b.currentScore - a.currentScore);
 
   return (
     <Shell>
-      <div className="p-8 pb-20 space-y-8">
-        <header className="flex items-end justify-between">
+      <div className="p-6 lg:p-8 pb-20 space-y-8">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-4xl font-display font-bold text-white tracking-tight">Readiness Posture</h1>
-            <p className="text-muted-foreground mt-2 text-lg">Organizational readiness across NIST CSF, ISO 27001, and CMMC frameworks.</p>
+            <h1 className="text-3xl font-display font-bold text-white tracking-tight">Readiness Posture</h1>
+            <p className="text-muted-foreground mt-1">NIST CSF · ISO 27001 · CMMC frameworks</p>
           </motion.div>
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="text-right">
-            <div className="text-sm font-medium text-muted-foreground mb-1">Active Program</div>
-            <div className="bg-card border border-white/10 px-4 py-2 rounded-xl text-white font-medium shadow-lg flex items-center gap-2">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+            <div className="bg-card border border-white/10 px-4 py-2.5 rounded-xl text-white font-medium shadow-lg flex items-center gap-2">
               <Activity className="w-4 h-4 text-primary" />
-              {activeProgram?.name}
+              <span className="text-sm">{activeProgram?.name}</span>
             </div>
           </motion.div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
+        {/* Hero Section: Gauge + Dimensions */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Modern Gauge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="lg:col-span-4 glass-panel rounded-3xl p-8 flex flex-col items-center justify-center glow-effect relative overflow-hidden"
+            className="lg:col-span-4 glass-panel rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-            <div className="absolute top-4 left-4 text-sm font-medium text-muted-foreground flex items-center gap-2 z-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none rounded-2xl" />
+            <div className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-4 self-start">
               <Target className="w-4 h-4" /> Overall Score
             </div>
-            
-            <div className="mt-8 mb-4 relative z-10">
-              <Gauge value={activeProgram?.overallScore || 0} size={280} label="Readiness Index" strokeWidth={24} />
-            </div>
 
-            <div className="w-full grid grid-cols-2 gap-4 mt-4 pt-6 border-t border-white/5 relative z-10">
+            <ModernGauge value={activeProgram?.overallScore || 0} label="Readiness Index" />
+
+            <div className="w-full grid grid-cols-2 gap-4 mt-6 pt-5 border-t border-white/5">
               <div>
                 <div className="text-xs text-muted-foreground mb-1">Target</div>
                 <div className="text-xl font-bold text-white">{activeProgram?.targetScore}</div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground mb-1">Status</div>
-                <div className="text-sm font-bold text-success flex items-center gap-1 bg-success/10 w-max px-2 py-1 rounded-md">
+                <div className="text-sm font-bold flex items-center gap-1 bg-emerald-500/10 text-emerald-400 w-max px-2.5 py-1 rounded-lg">
                   <ArrowUpRight className="w-4 h-4" /> On Track
                 </div>
               </div>
             </div>
           </motion.div>
 
-          <motion.div 
+          {/* Dimension Performance Bars */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="lg:col-span-8 glass-panel rounded-3xl p-6 flex flex-col"
+            className="lg:col-span-8 glass-panel rounded-2xl p-6"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-white font-display">Dimension Performance</h3>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-primary" /> Meets Tier Target</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full" style={{ backgroundColor: 'hsl(38, 92%, 50%)' }} /> Near Target</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-destructive" /> Below Tier Target</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-1.5 rounded-full bg-indigo-400 inline-block" /> Score
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-0.5 h-3 bg-white/30 inline-block" /> Target
+                </span>
               </div>
             </div>
-            <div className="flex-1 w-full min-h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis 
-                    dataKey="shortName" 
-                    stroke="rgba(255,255,255,0.3)" 
-                    tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }} 
-                    tickLine={false}
-                    axisLine={false}
-                    dy={10}
-                  />
-                  <YAxis 
-                    stroke="rgba(255,255,255,0.3)" 
-                    tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                    domain={[0, 100]}
-                  />
-                  <Tooltip 
-                    cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                    contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }}
-                    formatter={(value: number, name: string) => [value, name === 'score' ? 'Current Score' : name]}
-                  />
-                  <Bar dataKey="score" radius={[6, 6, 0, 0]} maxBarSize={40} animationDuration={1200} animationEasing="ease-out">
-                    {chartData.map((entry, index) => {
-                      const gap = entry.target - entry.score;
-                      const color = gap <= 0 ? 'hsl(var(--primary))' : gap <= 15 ? 'hsl(38, 92%, 50%)' : 'hsl(var(--destructive))';
-                      return <Cell key={`cell-${index}`} fill={color} />;
-                    })}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="space-y-4">
+              {sortedDimensions.map((d, i) => (
+                <DimensionBar
+                  key={d.id}
+                  name={d.name}
+                  score={d.currentScore}
+                  target={d.targetScore}
+                  index={i}
+                />
+              ))}
             </div>
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <AnimatedStatCard 
-            delay={0.25} 
-            value={dimensions?.length || 0} 
-            label="Assessed Dimensions" 
-            icon={Target} 
-            trend="+2.4" 
-            trendColor="text-success"
-            glowColor="bg-primary/10"
-          />
-          <AnimatedStatCard 
-            delay={0.35} 
-            value={criticalRisks.length} 
-            label="Critical Open Risks" 
-            icon={ShieldAlert} 
-            accentBorder="border-l-2 border-l-destructive"
-            glowColor="bg-destructive/10"
-            iconColor="text-destructive"
-          />
-          <AnimatedStatCard 
-            delay={0.45} 
-            value={unreadAlerts.length} 
-            label="Unread Alerts" 
-            icon={BellRing}
-            glowColor="bg-warning/10"
-            iconColor="text-warning"
-          />
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <StatCard delay={0.25} value={dimensions?.length || 0} label="Assessed Dimensions" icon={Target} accentColor="text-primary" bg="bg-primary/10" trend="+2 this cycle" />
+          <StatCard delay={0.35} value={criticalRisks.length} label="Critical Open Risks" icon={ShieldAlert} accentColor="text-destructive" bg="bg-destructive/10" highlight />
+          <StatCard delay={0.45} value={unreadAlerts.length} label="Unread Alerts" icon={BellRing} accentColor="text-amber-400" bg="bg-amber-500/10" />
         </div>
       </div>
     </Shell>
   );
 }
 
-function AnimatedStatCard({ delay, value, label, icon: Icon, trend, trendColor, accentBorder, glowColor, iconColor = "text-primary" }: {
-  delay: number; value: number; label: string; icon: ComponentType<{ className?: string }>; trend?: string; trendColor?: string; accentBorder?: string; glowColor: string; iconColor?: string;
+function StatCard({ delay, value, label, icon: Icon, accentColor, bg, trend, highlight }: {
+  delay: number;
+  value: number;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  accentColor: string;
+  bg: string;
+  trend?: string;
+  highlight?: boolean;
 }) {
   const animatedValue = useAnimatedCounter(value);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }} 
-      animate={{ opacity: 1, y: 0 }} 
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className={`glass-panel rounded-2xl p-6 relative overflow-hidden ${accentBorder || ''}`}
+      className={`glass-panel rounded-2xl p-5 ${highlight ? "border-destructive/20" : ""}`}
     >
-      <div className={`absolute right-0 top-0 w-24 h-24 ${glowColor} rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2`} />
-      <div className="flex justify-between items-start mb-4">
-        <div className="w-12 h-12 rounded-xl bg-card border border-white/10 flex items-center justify-center">
-          <Icon className={`w-6 h-6 ${iconColor}`} />
+      <div className="flex items-center justify-between mb-4">
+        <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center`}>
+          <Icon className={`w-5 h-5 ${accentColor}`} />
         </div>
         {trend && (
-          <span className={`text-xs font-bold ${trendColor} flex items-center gap-1 bg-success/10 px-2 py-1 rounded-md`}>
-            <ArrowUpRight className="w-3 h-3"/> {trend}
+          <span className="text-xs font-medium text-emerald-400 flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded-lg">
+            <TrendingUp className="w-3 h-3" /> {trend}
           </span>
         )}
       </div>
-      <h4 className="text-3xl font-display font-bold text-white">{animatedValue}</h4>
-      <p className="text-sm text-muted-foreground mt-1 font-medium">{label}</p>
+      <div className="text-3xl font-display font-bold text-white">{animatedValue}</div>
+      <p className="text-sm text-muted-foreground mt-1">{label}</p>
     </motion.div>
   );
 }
