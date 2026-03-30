@@ -1,0 +1,782 @@
+INVESTOR + PRODUCTION READINESS PAYLOAD — SZL ECOSYSTEM
+
+MISSION
+Take the current SZL ecosystem and turn it into an investor-ready, production-ready command systems company.
+
+Do not treat this as a loose collection of apps.
+Treat it as one coherent company with one doctrine, one operating model, and multiple product faces.
+
+COMPANY DOCTRINE
+SZL builds command systems.
+
+Use this hierarchy everywhere:
+- SZL Holdings = parent ecosystem and authority layer
+- Alloy = engine, orchestration, workflow, and output layer
+- Lyte = business command / business observability platform
+- Vessels = maritime command platform
+- Terra = real estate broker command platform
+- Carlota Jo Consulting = premium human execution / high-trust service layer
+- Stephen Lutar = founder / operator identity
+- Admin / Internal = governance, flags, audit, jobs, approvals
+
+CORE RULE
+Every product must map to the same logic:
+signals -> visibility -> ownership -> action -> accountability -> execution advantage
+
+That is the company.
+That is the moat.
+That is the story for investors, operators, and customers.
+
+PRIMARY OBJECTIVE
+Create two clearly separated layers:
+
+1. PUBLIC CREDIBILITY LAYER
+- premium
+- clear
+- crawlable
+- proof-driven
+- fast
+- investor-facing
+- customer-facing
+
+2. PRIVATE OPERATIONS LAYER
+- authenticated
+- org-scoped
+- governed
+- stateful
+- auditable
+- operationally real
+
+Do not blur them together.
+
+MANDATORY FIRST STEP — INVESTOR/PRODUCTION AUDIT
+Before building anything else, audit the current project and return only:
+
+1. Current app and artifact inventory
+2. Current public routes
+3. Current private routes
+4. Current schema / migration state
+5. Current auth / access model
+6. Current org scoping or lack of org scoping
+7. Current design system quality
+8. Current brand duplication / hierarchy conflicts
+9. What is real vs mocked
+10. What is broken
+11. What is production-risky
+12. What is investor-confusing
+13. What is out of scope and should be hidden or archived
+14. Best 90-day execution sequence
+
+Do not start random implementation before this audit is complete.
+
+INVESTOR READINESS GOAL
+When someone sees the ecosystem, they should immediately understand:
+- what the company is
+- what the engine is
+- what each product does
+- what is real
+- what market each product serves
+- why the architecture is disciplined
+- why the company can execute
+
+PRODUCTION READINESS GOAL
+The system must be able to support:
+- authenticated product usage
+- organization-based access
+- reliable workflows
+- auditable actions
+- deployment discipline
+- environment separation
+- secure operations
+- believable product demos
+- internal governance
+
+PUBLIC STORY
+Enforce this exact market story:
+
+SZL Holdings builds premium command systems.
+Alloy is the engine.
+Lyte is the business command product.
+Vessels is the maritime command product.
+Terra is the real estate broker command product.
+Carlota Jo Consulting is the premium service layer.
+Stephen Lutar is the founder/operator behind the system.
+
+Do not present all products as equal disconnected brands.
+Do not let Alloy compete with the products.
+Do not let internal tools become public brands.
+
+PUBLIC NAV
+Use this public nav:
+- Ecosystem
+- Alloy
+- Lyte
+- Vessels
+- Terra
+- Carlota Jo
+- Founder
+- Contact
+
+Optional:
+- Case Studies
+- Insights
+
+Remove from public nav:
+- Nimbus
+- duplicate About pages
+- duplicate founder pages
+- standalone Project Readiness naming
+- archived apps
+- random project links
+- extra AI pages without a clear role
+
+PUBLIC ROUTES
+/
+ /ecosystem
+ /ventures
+ /alloy
+ /alloy/architecture
+ /alloy/workflows
+ /lyte
+ /lyte/use-cases
+ /lyte/demo
+ /vessels
+ /vessels/platform
+ /terra
+ /terra/platform
+ /terra/listings
+ /carlota-jo
+ /carlota-jo/services
+ /founder
+ /contact
+ /case-studies
+ /insights
+
+PRIVATE ROUTES
+/app/lyte
+/app/lyte/signals
+/app/lyte/actions
+/app/lyte/readiness
+/app/vessels
+/app/vessels/fleet
+/app/vessels/exceptions
+/app/vessels/routes
+/app/alloy
+/app/alloy/workflows
+/app/alloy/runs
+/app/alloy/artifacts
+/app/alloy/admin
+/app/terra
+/app/terra/listings
+/app/terra/inquiries
+/app/terra/agents
+/app/internal
+/app/internal/users
+/app/internal/flags
+/app/internal/audit
+/app/internal/jobs
+
+BRAND CLEANUP RULES
+- Remove public Nimbus references
+- Rename Project Readiness to Lyte Readiness
+- Remove duplicate founder narratives
+- Remove duplicate about pages
+- Remove duplicate AI pages
+- Archive or hide non-core surfaces that do not support the main hierarchy
+- Preserve code until audit confirms safe removal
+
+PUBLIC PAGE STANDARD
+Every major public page must include:
+1. one sharp claim
+2. one supporting visual
+3. one proof surface
+4. one clear CTA
+
+Do not build empty marketing shells.
+Do not fill pages with generic startup copy.
+
+SZL PAGE
+Purpose:
+Parent ecosystem, authority, and logic layer
+
+Must communicate:
+- what the company is
+- how the ecosystem works
+- how Alloy powers everything
+- where each product fits
+- why this is one coherent system
+
+Required sections:
+1. Hero
+2. Featured Platforms
+3. How the Ecosystem Works
+4. Powered by Alloy
+5. Built by an Operator
+6. Proof of Execution
+7. What the System Solves
+8. Start the Right Conversation
+9. Footer
+
+Core message:
+SZL Holdings is the parent ecosystem behind Alloy, Lyte, Vessels, Terra, and high-trust operating brands designed to turn visibility into action and execution into advantage.
+
+ALLOY PAGE
+Purpose:
+Engine page, not chatbot page
+
+Must communicate:
+- Alloy is the orchestration/workflow/output layer
+- Alloy powers Lyte, Vessels, and Terra
+- Alloy ingests signals, routes actions, generates outputs, and supports governed execution
+
+Required sections:
+1. What Alloy Is
+2. What Alloy Powers
+3. How Alloy Works
+4. Workflow Engine
+5. Agent Roles
+6. Outputs
+7. Governance
+
+LYTE PAGE
+Purpose:
+First category-defining proof point
+
+Must communicate:
+- business observability
+- ownership clarity
+- workflow latency
+- explainable action
+- value at risk
+
+Required modules:
+- Command Overview
+- Signals Feed
+- Narrative Insight Rail
+- Action Center
+- Role-Based Dashboards
+- Workflow Latency View
+- Ownership Map
+- Value-at-Risk Panel
+- Drill-down Detail Drawer
+- Demo Mode
+- Lyte Readiness
+
+Mandatory Lyte UX rule:
+Every signal must answer:
+- what happened
+- why it matters
+- who owns it
+- what action comes next
+- what value is at risk
+
+VESSELS PAGE
+Purpose:
+Prestige product / maritime command proof
+
+Must communicate:
+- fleet visibility
+- voyage awareness
+- operational exceptions
+- readiness
+- economics
+
+Required modules:
+- Command Overview
+- Live Fleet Map
+- Vessel Detail Experience
+- Voyage Economics
+- Exceptions Center
+- Maintenance Readiness
+- Command Mode
+- Performance Analytics
+- Route / Corridor View
+- Demo Data Mode
+
+TERRA PAGE
+Purpose:
+Commercial wedge / real estate broker command proof
+
+Must communicate:
+- listing intelligence
+- broker workflow
+- inquiry routing
+- agent coordination
+- map/search visibility
+
+Required modules:
+- Listings Command View
+- Listing Detail Experience
+- Inquiry Routing
+- Agent / Brokerage View
+- Market Activity Layer
+- Property Map
+- Filters and Search
+- Demo Data Mode
+
+Critical Terra rule:
+Terra must feel like premium broker technology, not a consumer real estate clone.
+
+CARLOTA JO PAGE
+Purpose:
+Premium services layer
+
+Must communicate:
+- discretion
+- white-glove execution
+- responsiveness
+- structure
+- professionalism
+
+Critical rule:
+Carlota Jo must feel like quiet luxury, not software.
+
+FOUNDER PAGE
+Purpose:
+Single canonical operator narrative
+
+Must communicate:
+- builder
+- operator
+- systems thinker
+- business observability
+- workflow discipline
+- command systems
+
+Critical rule:
+Use one founder story only.
+
+DESIGN SYSTEM DIRECTION
+Build one premium design system across the ecosystem.
+
+Visual goals:
+- dark-first premium UI
+- excellent light mode
+- deep charcoal / graphite base
+- restrained accent logic by lane
+- strong editorial typography
+- layered panels
+- subtle motion only
+- luxury operating company meets enterprise command software
+
+Lane accents:
+- SZL = platinum / silver / graphite
+- Alloy = cool steel / restrained signal blue
+- Lyte = signal cyan / intelligent blue
+- Vessels = deep ocean / storm-teal / marine steel
+- Terra = stone / slate / refined urban blue
+- Carlota Jo = warm ivory / taupe / brushed gold restraint
+- Founder = monochrome with subtle alloy tie-in
+
+Create tokens/components for:
+- colors
+- spacing
+- typography
+- borders
+- elevation
+- nav
+- buttons
+- cards
+- badges
+- KPI tiles
+- tabs
+- tables
+- drawers
+- forms
+- charts
+- proof frames
+- screenshot frames
+- diagram blocks
+- contact cards
+
+MOTION RULE
+Use only:
+- fade
+- slight lift
+- panel reveal
+- section reveal
+- ambient diagram motion
+
+No gimmicky motion.
+
+PRIVATE OPERATIONS STANDARD
+Private areas must be:
+- authenticated
+- organization-scoped
+- permission-checked
+- auditable
+- role-aware
+- stateful
+- operationally useful
+
+ROLE MODEL
+- anonymous_visitor
+- founder_admin
+- platform_admin
+- operator
+- analyst
+- executive_viewer
+- ops_manager
+- sales_delivery_user
+- maritime_ops_user
+- real_estate_ops_user
+- service_coordinator
+- pilot_customer_user
+
+AUTH / ACCESS / GOVERNANCE
+Tasks:
+1. implement auth for all private routes
+2. implement organization membership model
+3. implement org-scoped access controls
+4. ensure every record fetch by id is permission-checked
+5. ensure private routes cannot load data without valid org scope
+6. implement read-only executive scopes
+7. scope pilot_customer_user to only their organization
+8. protect artifact access by org + role + approval state
+
+Rules:
+- public routes do not require auth
+- private routes require auth
+- data access must be org-scoped
+- never trust client-side filtering as access control
+
+DATABASE / SCHEMA DISCIPLINE
+Create or verify canonical tables:
+- USERS
+- ORGANIZATIONS
+- MEMBERSHIPS
+- PRODUCTS
+- SIGNALS
+- ACTIONS
+- WORKFLOWS
+- WORKFLOW_RUNS
+- APPROVALS
+- ARTIFACTS
+- COMMENTS
+- EVENT_LOG
+- FEATURE_FLAGS
+- VESSELS
+- PORTS
+- ROUTES
+- VOYAGES
+- EXCEPTIONS
+- READINESS_ITEMS
+- PROPERTIES
+- LISTINGS
+- AGENTS
+- BROKERAGES
+- TRANSACTIONS
+- INQUIRIES
+
+Rules:
+- use explicit migrations
+- create demo and seed data
+- add indexes for org, owner, status, created_at, detected_at
+- keep canonical fields queryable
+- use json only when needed
+- no schema drift outside migration flow
+
+ALLOY SERVICES
+Build or verify real services for:
+- signal normalization
+- severity assignment
+- owner resolution
+- workflow planning
+- artifact generation
+- approval routing
+- run logging
+- retry handling
+
+LYTE SERVICES
+Build or verify:
+- dashboard builders
+- signal queries
+- action queue
+- readiness scoring
+- insight narrative generation
+
+VESSELS SERVICES
+Build or verify:
+- fleet summary
+- map payload
+- ETA drift
+- route deviation
+- voyage economics
+- exception queue
+- maintenance watch
+
+TERRA SERVICES
+Build or verify:
+- listings query layer
+- inquiry routing
+- agent workload view
+- brokerage visibility layer
+- map payload
+- filter/search services
+
+FEATURE FLAGS
+Create flags for:
+- lyte_readiness_enabled
+- lyte_value_at_risk_enabled
+- lyte_role_views_enabled
+- vessels_command_mode_enabled
+- vessels_corridor_intelligence_enabled
+- alloy_admin_enabled
+- alloy_artifact_approvals_enabled
+- internal_audit_console_enabled
+- pilot_customer_portal_enabled
+- advanced_export_enabled
+- terra_map_mode_enabled
+- terra_broker_view_enabled
+
+Tasks:
+- create flag schema and service
+- create internal flag console
+- gate unstable modules
+- allow role/org targeting
+- provide graceful fallbacks
+
+OBSERVABILITY + ANALYTICS
+Instrument:
+
+Technical:
+- request latency
+- endpoint error rate
+- DB query latency
+- job duration
+- workflow failure rate
+- retry count
+- auth failures
+- map render failures
+- deployment health
+
+Product/business:
+- signal count by severity
+- unresolved action count
+- action resolution time
+- approval wait time
+- readiness blocker count
+- exception count by vessel/route
+- artifact generation success/failure
+- dashboard engagement by role
+- filter/save-view usage
+- listing views
+- inquiry conversion
+
+INTERNAL TOOLS
+Build minimal internal tools:
+- internal user list
+- internal feature flag console
+- internal workflow run viewer
+- internal artifact approval queue
+- internal audit viewer
+- internal demo data seeder
+- internal job status page
+
+JOBS
+Create structured jobs for:
+Daily:
+- daily_lyte_digest
+- daily_readiness_digest
+- daily_exception_summary
+- daily_artifact_cleanup
+- daily_feature_flag_sync
+
+Hourly:
+- hourly_signal_normalization
+- hourly_stale_action_scan
+- hourly_vessel_eta_refresh
+- hourly_route_pressure_scan
+- hourly_terra_inquiry_digest
+
+On demand:
+- workflow_retry_job
+- artifact_generation_job
+- route_economics_recompute_job
+- readiness_score_recompute_job
+
+PROOF LAYER
+Every major page must include:
+1. strategic copy
+2. supporting visual
+3. proof / use-case reinforcement
+
+DEMO DATA
+Seed coherent demo data for:
+- Lyte
+- Vessels
+- Terra
+
+CASE STUDIES
+Create reusable case study modules:
+- Problem
+- Context
+- Constraints
+- System Built
+- How It Worked
+- Outcome
+- Visual Proof
+- Why It Matters
+
+Create shells for:
+1. Lyte observability case
+2. Vessels exception/route case
+3. Alloy workflow/output case
+4. Terra listing/inquiry case
+
+INVESTOR READINESS PACKAGE
+Create or prepare these internal materials:
+- ecosystem architecture overview
+- product hierarchy map
+- public vs private boundary map
+- current stack and migration discipline summary
+- auth / access model summary
+- what is real vs mocked summary
+- roadmap by phase
+- top risks and mitigation notes
+- product demo guide
+- core KPI definitions
+- case study shells
+- founder narrative
+- deployment/environment structure
+- data room folder recommendations
+
+PRODUCTION READINESS PACKAGE
+Create or verify:
+- environment separation
+- secret management
+- deployment checklist
+- rollback notes
+- seed/demo mode separation
+- logging strategy
+- error handling strategy
+- route protection review
+- mobile pass
+- performance pass
+- cleanup pass
+
+ENVIRONMENT VARIABLES
+Create or verify:
+- PUBLIC_APP_URL
+- PUBLIC_ANALYTICS_KEY
+- PUBLIC_MAPBOX_TOKEN
+- DATABASE_URL
+- DATABASE_URL_STAGING
+- AUTH_PROVIDER_URL
+- AUTH_PROVIDER_KEY
+- SERVICE_ROLE_KEY
+- TELEMETRY_EXPORT_ENDPOINT
+- CONTACT_ENDPOINT
+- CRM_ENDPOINT
+- WEATHER_API_KEY
+- FEATURE_FLAG_BACKEND_KEY
+- DEMO_MODE
+- APP_ENV
+- LOG_LEVEL
+
+Rules:
+- never hardcode secrets
+- keep staging and production separate
+- keep demo mode explicit
+
+DEPLOYMENT MODEL
+Public/static or pre-rendered:
+- SZL public ecosystem
+- Carlota Jo public site
+- Founder pages
+- Case Studies / Insights
+- public Alloy / Lyte / Vessels / Terra marketing pages
+
+Autoscale/app tier:
+- authenticated Lyte app
+- authenticated Vessels app
+- authenticated Terra app
+- Alloy backend/API
+
+90-DAY EXECUTION ORDER
+PHASE 0
+- inventory and cleanup
+- remove Nimbus publicly
+- relabel Lyte Readiness
+- remove duplicate founder copy
+- classify every artifact as core, internal, archived, or removable
+
+PHASE 1
+- create structure
+- create schemas
+- create migrations
+- create seed/demo data
+- create env/config base
+
+PHASE 2
+- implement auth
+- implement memberships
+- implement org scoping and access enforcement
+- protect private routes
+
+PHASE 3
+- build Alloy ingestion/workflow/artifact/approval core
+- build run history and audit logging
+
+PHASE 4
+- build Lyte APIs and stateful flows
+
+PHASE 5
+- build Terra APIs and stateful flows
+
+PHASE 6
+- build Vessels APIs and stateful flows
+
+PHASE 7
+- build feature flag system
+- build internal admin tools
+- build scheduled jobs
+
+PHASE 8
+- instrument telemetry and analytics
+- add proof layers
+- finalize public/private boundaries
+- prepare investor-facing credibility surfaces
+
+PHASE 9
+- performance pass
+- mobile pass
+- security pass
+- deployment-readiness pass
+- documentation pass
+- final cleanup pass
+
+REPORTING FORMAT
+After each phase, return:
+- files created
+- files modified
+- tables created
+- APIs created
+- services created
+- routes created
+- roles/policies added
+- flags added
+- jobs added
+- deployment updates
+- blockers
+- next highest-leverage tasks
+
+FINAL REPORT MUST INCLUDE
+- where Nimbus was removed
+- where Project Readiness became Lyte Readiness
+- public vs private boundary map
+- auth/access enforcement status
+- what is real vs mocked
+- what remains conceptual
+- top production risks
+- top investor risks
+- next 10 highest-leverage improvements
+
+FINAL INSTRUCTION
+Do not stop at polished demos.
+Build the governed software layer.
+Build the credibility layer.
+Build the investor-readiness layer.
+Use the existing repo as the execution base.
+Return real file changes, not just ideas.
+```
