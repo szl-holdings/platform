@@ -49,6 +49,7 @@ import vesselsPlatformRouter from "./vessels-platform";
 import capitalReadinessRouter from "./capital-readiness";
 import certificationReadinessRouter from "./certification-readiness";
 import nimbusRouter from "./nimbus";
+import ownershipControlRouter from "./ownership-control";
 
 const router: IRouter = Router();
 
@@ -164,6 +165,9 @@ router.use(capitalReadinessRouter);
 
 router.use("/certification", writeLimiter);
 router.use(certificationReadinessRouter);
+
+router.use("/ownership", writeLimiter);
+router.use(ownershipControlRouter);
 
 router.use("/nimbus", readLimiter);
 router.use(nimbusRouter);

@@ -42,3 +42,4 @@ export * from "./canonical";
 export * from "./maritime";
 export * from "./capital_readiness";
 export * from "./certification_readiness";
+export * from "./ownership_control";

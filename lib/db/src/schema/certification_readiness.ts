@@ -102,24 +102,6 @@ export const certificationTasksTable = pgTable("certification_tasks", {
   index("cert_tasks_status_idx").on(t.status),
 ]);
 
-// ─── OWNERSHIP SCENARIOS ──────────────────────────────────────────────────────
-
-export const ownershipScenariosTable = pgTable("ownership_scenarios", {
-  id: serial("id").primaryKey(),
-  scenarioName: text("scenario_name").notNull(),
-  description: text("description"),
-  ownershipStructureJson: jsonb("ownership_structure_json"),
-  programEligibilityJson: jsonb("program_eligibility_json"),
-  flaggedIssues: jsonb("flagged_issues"),
-  requiresAttorneyReview: boolean("requires_attorney_review").notNull().default(false),
-  requiresCpaReview: boolean("requires_cpa_review").notNull().default(false),
-  legalDisclaimerAcknowledged: boolean("legal_disclaimer_acknowledged").notNull().default(false),
-  status: text("status", { enum: ["draft", "active", "archived"] }).notNull().default("draft"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
 // ─── APPLICATION ARTIFACTS ────────────────────────────────────────────────────
 
 export const applicationArtifactsTable = pgTable("application_artifacts", {
@@ -222,10 +204,6 @@ export type CertificationStatus = typeof certificationStatusTable.$inferSelect;
 export const insertCertificationTaskSchema = createInsertSchema(certificationTasksTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertCertificationTask = z.infer<typeof insertCertificationTaskSchema>;
 export type CertificationTask = typeof certificationTasksTable.$inferSelect;
-
-export const insertOwnershipScenarioSchema = createInsertSchema(ownershipScenariosTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertOwnershipScenario = z.infer<typeof insertOwnershipScenarioSchema>;
-export type OwnershipScenario = typeof ownershipScenariosTable.$inferSelect;
 
 export const insertApplicationArtifactSchema = createInsertSchema(applicationArtifactsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertApplicationArtifact = z.infer<typeof insertApplicationArtifactSchema>;
