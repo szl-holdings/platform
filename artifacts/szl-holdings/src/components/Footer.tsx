@@ -1,17 +1,26 @@
-const portfolioLinks = [
+import { Link } from "wouter";
+
+const ecosystemLinks = [
+  { label: "SZL Holdings", href: "/" },
   { label: "Alloy", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
   { label: "Carlota Jo", href: "/carlota-jo/" },
   { label: "INCA", href: "/inca/" },
   { label: "Firestorm", href: "/firestorm/" },
+  { label: "Stephen Site", href: "/stephen/" },
 ];
 
 const companyLinks = [
-  { label: "Ecosystem", href: "#portfolio" },
-  { label: "Our Thesis", href: "#thesis" },
-  { label: "Timeline", href: "#milestones" },
-  { label: "Contact", href: "#contact" },
+  { label: "Portfolio", href: "/ventures" },
+  { label: "Strategic thesis", href: "/#thesis" },
+  { label: "Latest developments", href: "/updates" },
+  { label: "Contact", href: "/contact" },
+];
+
+const legalLinks = [
+  { label: "Privacy", href: "/legal/privacy" },
+  { label: "Terms", href: "/legal/terms" },
 ];
 
 const founderLinks = [
@@ -65,9 +74,9 @@ export function Footer() {
               textTransform: "uppercase",
               color: "hsl(210,5%,36%)",
               marginBottom: "1.125rem",
-            }}>Portfolio</h4>
+            }}>Ecosystem</h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-              {portfolioLinks.map((l) => (
+              {ecosystemLinks.map((l) => (
                 <li key={l.label}>
                   <a
                     href={l.href}
@@ -147,7 +156,13 @@ export function Footer() {
           <p style={{ fontSize: "12px", color: "hsl(210,5%,34%)" }}>
             &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
           </p>
-          <p style={{ fontSize: "12px", color: "hsl(210,5%,34%)" }}>inquiries@szlholdings.com</p>
+          <div className="flex items-center gap-4">
+            {legalLinks.map((l) => (
+              <Link key={l.label} href={l.href} className="text-neutral-400 text-[12px] hover:text-neutral-600 transition-colors">
+                {l.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

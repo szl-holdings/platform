@@ -17,6 +17,7 @@ import { Footer } from "@/components/Footer";
 
 const PortfolioPage = lazy(() => import("@/pages/portfolio"));
 const FounderPage = lazy(() => import("@/pages/founder"));
+const VenturesPage = lazy(() => import("@/pages/ventures"));
 const VentureDetailPage = lazy(() => import("@/pages/venture-detail"));
 const ContactPage = lazy(() => import("@/pages/contact"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
@@ -24,6 +25,10 @@ const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 const Changelog = lazy(() => import("@/pages/changelog"));
 const Roadmap = lazy(() => import("@/pages/roadmap"));
 const PortfolioIntel = lazy(() => import("@/pages/portfolio-intel"));
+const AboutPage = lazy(() => import("@/pages/about"));
+const UpdatesPage = lazy(() => import("@/pages/updates"));
+const LegalPrivacy = lazy(() => import("@/pages/legal-privacy"));
+const LegalTerms = lazy(() => import("@/pages/legal-terms"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,14 +89,23 @@ function App() {
             <Route path="/">
               <Suspense fallback={<PageLoader />}><HomePage /></Suspense>
             </Route>
+            <Route path="/ventures">
+              <Suspense fallback={<PageLoader />}><VenturesPage /></Suspense>
+            </Route>
+            <Route path="/ventures/:id">
+              <Suspense fallback={<PageLoader />}><VentureDetailPage /></Suspense>
+            </Route>
+            <Route path="/about">
+              <Suspense fallback={<PageLoader />}><AboutPage /></Suspense>
+            </Route>
+            <Route path="/updates">
+              <Suspense fallback={<PageLoader />}><UpdatesPage /></Suspense>
+            </Route>
             <Route path="/portfolio">
               <Suspense fallback={<PageLoader />}><PortfolioPage /></Suspense>
             </Route>
             <Route path="/founder">
               <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>
-            </Route>
-            <Route path="/ventures/:id">
-              <Suspense fallback={<PageLoader />}><VentureDetailPage /></Suspense>
             </Route>
             <Route path="/contact">
               <Suspense fallback={<PageLoader />}><ContactPage /></Suspense>
@@ -110,6 +124,12 @@ function App() {
             </Route>
             <Route path="/portfolio-intel">
               <Suspense fallback={<PageLoader />}><PortfolioIntel /></Suspense>
+            </Route>
+            <Route path="/legal/privacy">
+              <Suspense fallback={<PageLoader />}><LegalPrivacy /></Suspense>
+            </Route>
+            <Route path="/legal/terms">
+              <Suspense fallback={<PageLoader />}><LegalTerms /></Suspense>
             </Route>
             <Route>
               <Suspense fallback={<PageLoader />}><HomePage /></Suspense>

@@ -18,7 +18,19 @@ import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/k
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
-const VesselsLandingPage = lazy(() => import("@/pages/vessels-landing"));
+// Marketing pages
+const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
+const MarketingPlatformPage = lazy(() => import("@/pages/marketing-platform"));
+const MarketingCapabilitiesPage = lazy(() => import("@/pages/marketing-capabilities"));
+const MarketingUseCasesPage = lazy(() => import("@/pages/marketing-use-cases"));
+const MarketingSecurityPage = lazy(() => import("@/pages/marketing-security"));
+const MarketingPricingPage = lazy(() => import("@/pages/marketing-pricing"));
+const MarketingDemoPage = lazy(() => import("@/pages/marketing-demo"));
+const SignInPage = lazy(() => import("@/pages/marketing-sign-in"));
+const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
+const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
+
+// Dashboard / product pages
 const CommandOverviewPage = lazy(() => import("@/pages/command-overview"));
 const FleetMapPage = lazy(() => import("@/pages/fleet-map"));
 const VesselDetailEnhancedPage = lazy(() => import("@/pages/vessel-detail-enhanced"));
@@ -29,16 +41,10 @@ const CommandModePage = lazy(() => import("@/pages/command-mode"));
 const PerformanceAnalyticsPage = lazy(() => import("@/pages/performance-analytics"));
 const VesselsListPage = lazy(() => import("@/pages/vessels-list"));
 const CorridorRoutesPage = lazy(() => import("@/pages/corridor-routes"));
-
-const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));
-const VesselsHome = lazy(() => import("@/pages/vessels-home"));
-const VesselDetailPage = lazy(() => import("@/pages/vessel-detail"));
-const RoutePlanningPage = lazy(() => import("@/pages/route-planning"));
 const AlertCenterPage = lazy(() => import("@/pages/alert-center"));
-const WeatherPage = lazy(() => import("@/pages/weather-page"));
-const SimulationsPage = lazy(() => import("@/pages/simulations-page"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 const MaritimeIntelligence = lazy(() => import("@/pages/maritime-intelligence"));
-const FleetAPMPage = lazy(() => import("@/pages/fleet-apm"));
+const WeatherPage = lazy(() => import("@/pages/weather-page"));
 const PortAnalyticsPage = lazy(() => import("@/pages/port-analytics"));
 const CO2EmissionsPage = lazy(() => import("@/pages/co2-emissions"));
 const RiskScoringPage = lazy(() => import("@/pages/risk-scoring"));
@@ -46,35 +52,37 @@ const DarkVesselDetection = lazy(() => import("@/pages/dark-vessel-detection"));
 const SanctionsScreening = lazy(() => import("@/pages/sanctions-screening"));
 const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
 const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
-const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
 const primaryNavItems = [
-  { path: "/platform", label: "Command Overview", icon: LayoutDashboard },
-  { path: "/fleet", label: "Fleet Map", icon: MapPin },
-  { path: "/vessels-list", label: "Vessel Roster", icon: List },
-  { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
-  { path: "/economics", label: "Voyage Economics", icon: DollarSign },
-  { path: "/maintenance", label: "Maintenance", icon: Wrench },
-  { path: "/corridors", label: "Corridors", icon: Navigation },
-  { path: "/command", label: "Command Mode", icon: Activity },
-  { path: "/analytics", label: "Analytics", icon: BarChart3 },
-  { path: "/agent-insights", label: "Agent Insights", icon: Brain },
+  { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { path: "/dashboard/fleet", label: "Fleet", icon: MapPin },
+  { path: "/dashboard/vessels", label: "Vessels", icon: List },
+  { path: "/dashboard/routes", label: "Routes", icon: Navigation },
+  { path: "/dashboard/alerts", label: "Alerts", icon: AlertTriangle },
+  { path: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+  { path: "/dashboard/billing", label: "Billing", icon: DollarSign },
+  { path: "/dashboard/settings", label: "Settings", icon: Wrench },
+];
+
+const adminNavItems = [
+  { path: "/dashboard/team", label: "Team", icon: Radio },
+  { path: "/dashboard/audit-log", label: "Audit Log", icon: Activity },
 ];
 
 const legacyNavItems = [
+  { path: "/fleet", label: "Fleet Map", icon: Globe },
+  { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
+  { path: "/economics", label: "Voyage Economics", icon: DollarSign },
+  { path: "/maintenance", label: "Maintenance", icon: Wrench },
+  { path: "/command", label: "Command Mode", icon: Activity },
+  { path: "/analytics", label: "Analytics", icon: BarChart3 },
   { path: "/intelligence", label: "Maritime Intel", icon: Globe },
-  { path: "/routes", label: "Route Planning", icon: Navigation },
-  { path: "/alerts", label: "Alerts", icon: AlertTriangle },
-  { path: "/weather", label: "Weather", icon: Activity },
-  { path: "/port-analytics", label: "Port Analytics", icon: Ship },
-  { path: "/co2-emissions", label: "CO2 & Emissions", icon: Activity },
-  { path: "/risk-scoring", label: "Risk Scoring", icon: Activity },
-  { path: "/dark-vessel-detection", label: "Dark Vessels", icon: Activity },
-  { path: "/sanctions-screening", label: "Sanctions", icon: Activity },
+  { path: "/corridors", label: "Corridors", icon: Navigation },
+  { path: "/agent-insights", label: "Agent Insights", icon: Brain },
 ];
 
 function PageLoader() {
@@ -198,7 +206,7 @@ function Sidebar() {
 
       <nav className="flex-1 px-1.5 py-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
         {primaryNavItems.map(({ path, label, icon: Icon }) => {
-          const isActive = location.startsWith(path);
+          const isActive = location === path || location.startsWith(path + "/");
           return (
             <Link key={path} href={path}>
               <div
@@ -220,6 +228,26 @@ function Sidebar() {
             </Link>
           );
         })}
+
+        {expanded && (
+          <div className="pt-3">
+            <p className="text-[9px] font-mono text-sky-400/30 uppercase tracking-[0.12em] px-3 mb-1.5">Admin</p>
+            {adminNavItems.map(({ path, label, icon: Icon }) => {
+              const isActive = location === path;
+              return (
+                <Link key={path} href={path}>
+                  <div className={cn(
+                    "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
+                    isActive ? "bg-sky-500/10 text-sky-300" : "text-sky-400/30 hover:text-sky-200 hover:bg-sky-500/5"
+                  )}>
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    {label}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         {expanded && (
           <div className="pt-2">
@@ -274,12 +302,54 @@ function Sidebar() {
   );
 }
 
-function AppRouter() {
+function DashboardRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={VesselsLandingPage} />
-        <Route path="/platform" component={CommandOverviewPage} />
+        <Route path="/dashboard" component={CommandOverviewPage} />
+        <Route path="/dashboard/fleet" component={FleetMapPage} />
+        <Route path="/dashboard/vessels/:id" component={VesselDetailEnhancedPage} />
+        <Route path="/dashboard/vessels" component={VesselsListPage} />
+        <Route path="/dashboard/routes" component={CorridorRoutesPage} />
+        <Route path="/dashboard/alerts" component={AlertCenterPage} />
+        <Route path="/dashboard/reports" component={PerformanceAnalyticsPage} />
+        <Route path="/dashboard/billing">
+          <div className="p-6 max-w-xl mx-auto space-y-4">
+            <h1 className="font-display text-xl font-bold text-sky-50">Billing</h1>
+            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
+              <p className="text-sm font-medium text-sky-100 mb-1">Active subscription</p>
+              <p className="text-xs text-sky-400/40">Fleet Command Plan · 10 vessels · Billed annually</p>
+            </div>
+          </div>
+        </Route>
+        <Route path="/dashboard/settings">
+          <div className="p-6 max-w-xl mx-auto space-y-4">
+            <h1 className="font-display text-xl font-bold text-sky-50">Settings</h1>
+            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
+              <p className="text-sm font-medium text-sky-100 mb-1">Organisation settings</p>
+              <p className="text-xs text-sky-400/40">Configure fleet parameters, API integrations, and user preferences.</p>
+            </div>
+          </div>
+        </Route>
+        <Route path="/dashboard/team">
+          <div className="p-6 max-w-xl mx-auto space-y-4">
+            <h1 className="font-display text-xl font-bold text-sky-50">Team</h1>
+            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
+              <p className="text-sm font-medium text-sky-100 mb-1">Team management</p>
+              <p className="text-xs text-sky-400/40">Invite members, assign roles, and manage fleet access permissions.</p>
+            </div>
+          </div>
+        </Route>
+        <Route path="/dashboard/audit-log">
+          <div className="p-6 max-w-xl mx-auto space-y-4">
+            <h1 className="font-display text-xl font-bold text-sky-50">Audit Log</h1>
+            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-5">
+              <p className="text-sm font-medium text-sky-100 mb-1">Activity history</p>
+              <p className="text-xs text-sky-400/40">Full audit trail of user actions, data access, and configuration changes.</p>
+            </div>
+          </div>
+        </Route>
+        {/* Legacy routes preserved */}
         <Route path="/fleet" component={FleetMapPage} />
         <Route path="/vessel/:id" component={VesselDetailEnhancedPage} />
         <Route path="/vessels/:id" component={VesselDetailEnhancedPage} />
@@ -294,8 +364,6 @@ function AppRouter() {
         <Route path="/routes" component={CorridorRoutesPage} />
         <Route path="/alerts" component={AlertCenterPage} />
         <Route path="/weather" component={WeatherPage} />
-        <Route path="/simulations" component={SimulationsPage} />
-        <Route path="/fleet-apm" component={FleetAPMPage} />
         <Route path="/port-analytics" component={PortAnalyticsPage} />
         <Route path="/co2-emissions" component={CO2EmissionsPage} />
         <Route path="/risk-scoring" component={RiskScoringPage} />
@@ -304,34 +372,6 @@ function AppRouter() {
         <Route path="/cyber-threats" component={CyberThreatPanel} />
         <Route path="/incidents" component={IncidentReporting} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
-        <Route path="/use-cases">
-          <div className="p-6 max-w-2xl mx-auto space-y-6">
-            <h1 className="font-display text-2xl font-bold text-sky-50">Use Cases</h1>
-            <p className="text-sky-400/50 text-sm">Vessels is designed for three core operational personas: fleet executives who need portfolio-level margin visibility, operations teams who manage exceptions and ETA deviations in real time, and commercial teams tracking charter performance and voyage P&L.</p>
-            <div className="grid gap-4">
-              {[{ title: "Fleet Executive", desc: "Strategic fleet position — utilization, TCE, margin, and exception exposure at a glance." }, { title: "Fleet Operations", desc: "Real-time exception triage, vessel status, ETA monitoring, and maintenance readiness." }, { title: "Commercial", desc: "Voyage charter performance, route profitability, and delay cost impact per voyage." }].map(u => (
-                <div key={u.title} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
-                  <p className="text-sm font-semibold text-sky-100">{u.title}</p>
-                  <p className="text-xs text-sky-400/50 mt-1">{u.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Route>
-        <Route path="/contact">
-          <div className="p-6 max-w-xl mx-auto space-y-4">
-            <h1 className="font-display text-2xl font-bold text-sky-50">Contact</h1>
-            <p className="text-sky-400/50 text-sm">For fleet demo requests, commercial inquiries, and integration questions:</p>
-            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 space-y-2">
-              {[{ label: "Maritime Operations", value: "maritime@vessels.io" }, { label: "Commercial Enquiries", value: "commercial@vessels.io" }, { label: "Demo Request", value: "demo@vessels.io" }].map(c => (
-                <div key={c.label} className="flex items-center gap-3">
-                  <span className="text-[10px] text-sky-400/40 w-32 shrink-0">{c.label}</span>
-                  <span className="text-xs font-mono text-sky-300">{c.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Route>
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -343,38 +383,24 @@ function AppRouter() {
 }
 
 const vesselsCommands: CommandItem[] = [
-  { id: "nav-landing", label: "Vessels Home", icon: "🚢", group: "Navigation", keywords: ["landing", "home", "start"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
-  { id: "nav-platform", label: "Command Overview", icon: "📊", group: "Navigation", keywords: ["dashboard", "overview", "kpi"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/platform"); } },
-  { id: "nav-fleet", label: "Fleet Map", icon: "🗺️", group: "Navigation", keywords: ["map", "fleet", "positions"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/fleet"); } },
-  { id: "nav-vessels-list", label: "Vessel Roster", icon: "📋", group: "Navigation", keywords: ["list", "roster", "vessels"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/vessels-list"); } },
-  { id: "nav-exceptions", label: "Exceptions Center", icon: "⚠️", group: "Navigation", keywords: ["exceptions", "alerts", "issues"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/exceptions"); } },
+  { id: "nav-dashboard", label: "Dashboard Overview", icon: "📊", group: "Navigation", keywords: ["dashboard", "overview", "kpi"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard"); } },
+  { id: "nav-fleet", label: "Fleet Map", icon: "🗺️", group: "Navigation", keywords: ["map", "fleet", "positions"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard/fleet"); } },
+  { id: "nav-vessels", label: "Vessel Roster", icon: "📋", group: "Navigation", keywords: ["list", "roster", "vessels"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard/vessels"); } },
+  { id: "nav-alerts", label: "Alerts", icon: "⚠️", group: "Navigation", keywords: ["alerts", "exceptions", "issues"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard/alerts"); } },
   { id: "nav-economics", label: "Voyage Economics", icon: "💰", group: "Navigation", keywords: ["economics", "revenue", "margin"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/economics"); } },
-  { id: "nav-maintenance", label: "Maintenance Readiness", icon: "🔧", group: "Navigation", keywords: ["maintenance", "readiness", "health"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/maintenance"); } },
   { id: "nav-command", label: "Command Mode", icon: "🎯", group: "Navigation", keywords: ["command", "operational", "focused"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/command"); } },
-  { id: "nav-analytics", label: "Performance Analytics", icon: "📈", group: "Navigation", keywords: ["analytics", "performance", "trends"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/analytics"); } },
   { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
   { id: "app-inca", label: "Switch to INCA", icon: "🧠", group: "Switch App", description: "AI Research", action: () => { window.location.href = "/inca/"; } },
 ];
 
 const vesselsShortcuts: KeyboardShortcut[] = [
-  { key: "P", description: "Go to Command Overview", category: "Navigation" },
+  { key: "D", description: "Go to Dashboard", category: "Navigation" },
   { key: "F", description: "Go to Fleet Map", category: "Navigation" },
-  { key: "E", description: "Go to Exceptions Center", category: "Navigation" },
+  { key: "A", description: "Go to Alerts", category: "Navigation" },
   { key: "C", description: "Go to Command Mode", category: "Navigation" },
 ];
 
-function AppShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
-  const [location] = useLocation();
-  const isPublicHome = location === "/home";
-
-  if (isPublicHome) {
-    return (
-      <Suspense fallback={<PageLoader />}>
-        <VesselsHome />
-      </Suspense>
-    );
-  }
-
+function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   return (
     <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#0ea5e9">
       <div className="flex flex-col h-screen bg-[#060e1a]">
@@ -387,7 +413,7 @@ function AppShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: b
           <div className="flex-1 flex flex-col overflow-auto min-w-0">
             <DemoModeBanner />
             <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-              <AppRouter />
+              <DashboardRouter />
             </main>
           </div>
         </div>
@@ -405,6 +431,44 @@ function AppShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: b
   );
 }
 
+function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const [location] = useLocation();
+  const isDashboard = location.startsWith("/dashboard") ||
+    location.startsWith("/fleet") || location.startsWith("/vessel") ||
+    location.startsWith("/exceptions") || location.startsWith("/economics") ||
+    location.startsWith("/maintenance") || location.startsWith("/command") ||
+    location.startsWith("/analytics") || location.startsWith("/intelligence") ||
+    location.startsWith("/corridors") || location.startsWith("/alerts") ||
+    location.startsWith("/weather") || location.startsWith("/port-analytics") ||
+    location.startsWith("/co2-emissions") || location.startsWith("/risk-scoring") ||
+    location.startsWith("/dark-vessel-detection") || location.startsWith("/sanctions-screening") ||
+    location.startsWith("/cyber-threats") || location.startsWith("/incidents") ||
+    location.startsWith("/agent-insights") || location.startsWith("/vessels-list") ||
+    location.startsWith("/routes");
+
+  if (isDashboard) {
+    return <DashboardShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+  }
+
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#060e1a]"><div className="w-6 h-6 border-2 border-sky-500/40 border-t-sky-400 rounded-full animate-spin" /></div>}>
+      <Switch>
+        <Route path="/" component={MarketingHomePage} />
+        <Route path="/platform" component={MarketingPlatformPage} />
+        <Route path="/capabilities" component={MarketingCapabilitiesPage} />
+        <Route path="/use-cases" component={MarketingUseCasesPage} />
+        <Route path="/security" component={MarketingSecurityPage} />
+        <Route path="/pricing" component={MarketingPricingPage} />
+        <Route path="/demo" component={MarketingDemoPage} />
+        <Route path="/sign-in" component={SignInPage} />
+        <Route path="/legal/privacy" component={LegalPrivacyPage} />
+        <Route path="/legal/terms" component={LegalTermsPage} />
+        <Route component={MarketingHomePage} />
+      </Switch>
+    </Suspense>
+  );
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
@@ -412,7 +476,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AppShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+          <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           <WelcomeOverlay
             appId="vessels"
             appName="Vessels"

@@ -6,6 +6,19 @@ import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/k
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 
 const Home = lazy(() => import("@/pages/Home"));
+const ServicesPage = lazy(() => import("@/pages/Services"));
+const ApproachPage = lazy(() => import("@/pages/Approach"));
+const AboutPage = lazy(() => import("@/pages/About"));
+const InquiriesPage = lazy(() => import("@/pages/Inquiries"));
+const { ClientPortalOverview, ClientPortalDocuments, ClientPortalUpdates, ClientPortalMessages, ClientPortalSettings } = {
+  ClientPortalOverview: lazy(() => import("@/pages/ClientPortal").then(m => ({ default: m.ClientPortalOverview }))),
+  ClientPortalDocuments: lazy(() => import("@/pages/ClientPortal").then(m => ({ default: m.ClientPortalDocuments }))),
+  ClientPortalUpdates: lazy(() => import("@/pages/ClientPortal").then(m => ({ default: m.ClientPortalUpdates }))),
+  ClientPortalMessages: lazy(() => import("@/pages/ClientPortal").then(m => ({ default: m.ClientPortalMessages }))),
+  ClientPortalSettings: lazy(() => import("@/pages/ClientPortal").then(m => ({ default: m.ClientPortalSettings }))),
+};
+const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
+const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const BookingFlow = lazy(() => import("@/pages/BookingFlow"));
 const BookingSuccess = lazy(() => import("@/pages/BookingSuccess"));
 const BookingCancel = lazy(() => import("@/pages/BookingCancel"));
@@ -32,7 +45,23 @@ function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
+        {/* Marketing / public pages */}
         <Route path="/" component={Home} />
+        <Route path="/services" component={ServicesPage} />
+        <Route path="/approach" component={ApproachPage} />
+        <Route path="/about" component={AboutPage} />
+        <Route path="/inquiries" component={InquiriesPage} />
+        <Route path="/legal/privacy" component={LegalPrivacyPage} />
+        <Route path="/legal/terms" component={LegalTermsPage} />
+
+        {/* Client Portal */}
+        <Route path="/client-portal" component={ClientPortalOverview} />
+        <Route path="/client-portal/documents" component={ClientPortalDocuments} />
+        <Route path="/client-portal/updates" component={ClientPortalUpdates} />
+        <Route path="/client-portal/messages" component={ClientPortalMessages} />
+        <Route path="/client-portal/settings" component={ClientPortalSettings} />
+
+        {/* Legacy routes */}
         <Route path="/book" component={BookingFlow} />
         <Route path="/booking/success" component={BookingSuccess} />
         <Route path="/booking/cancel" component={BookingCancel} />
@@ -53,20 +82,18 @@ function Router() {
 
 const carlotaCommands: CommandItem[] = [
   { id: "nav-home", label: "Home", icon: "✨", group: "Navigation", keywords: ["overview", "main"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-services", label: "Services", icon: "📋", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/services"); } },
+  { id: "nav-approach", label: "Approach", icon: "🧭", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/approach"); } },
+  { id: "nav-about", label: "About", icon: "ℹ️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/about"); } },
+  { id: "nav-inquiries", label: "Private Inquiry", icon: "📬", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/inquiries"); } },
+  { id: "nav-portal", label: "Client Portal", icon: "🔐", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-portal"); } },
   { id: "nav-advisory", label: "Advisory Intel", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/advisory"); } },
-  { id: "nav-ai-advisory", label: "AI Advisory", icon: "🤖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-advisory"); } },
-  { id: "nav-engagements", label: "Engagements", icon: "🤝", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/engagements"); } },
-  { id: "nav-client-intel", label: "Client Intel", icon: "📊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-intel"); } },
-  { id: "nav-roi", label: "ROI Calculator", icon: "💰", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/roi-calculator"); } },
-  { id: "nav-brand-audit", label: "Brand Audit", icon: "🔍", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/brand-audit"); } },
-  { id: "nav-content", label: "Content Strategy", icon: "📝", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/content-strategy"); } },
-  { id: "nav-book", label: "Book Consultation", icon: "📅", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/book"); } },
-  { id: "app-dreamscape", label: "Switch to Dreamscape", icon: "🎨", group: "Switch App", description: "Creative Engine", action: () => { window.location.href = "/dreamscape/"; } },
+  { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/szl-holdings/"; } },
 ];
 
 const carlotaShortcuts: KeyboardShortcut[] = [
-  { key: "B", description: "Book consultation", category: "Actions" },
-  { key: "A", description: "Go to Advisory Intel", category: "Navigation" },
+  { key: "I", description: "Open private inquiry", category: "Actions" },
+  { key: "S", description: "Go to Services", category: "Navigation" },
 ];
 
 function App() {
@@ -74,9 +101,9 @@ function App() {
 
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#f472b6">
+      <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#c8a96a">
         <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo Consulting" accentColor="#f472b6" />
+          <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo Consulting" accentColor="#c8a96a" />
           <div style={{ flex: 1 }}>
             <Router />
           </div>
@@ -86,13 +113,13 @@ function App() {
           onClose={() => setCmdOpen(false)}
           commands={carlotaCommands}
           appName="Carlota Jo"
-          accentColor="#f472b6"
+          accentColor="#c8a96a"
         />
-        <IncaAgentIndicator 
-          agentName="Advisory Agent" 
-          systemType="mama-quilla" 
-          currentTask="Synthesising client readiness signals for next session" 
-          confidence={0.87} 
+        <IncaAgentIndicator
+          agentName="Advisory Agent"
+          systemType="mama-quilla"
+          currentTask="Synthesising client readiness signals for next session"
+          confidence={0.87}
         />
       </PowerUserProvider>
     </WouterRouter>

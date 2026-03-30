@@ -7,6 +7,18 @@ import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
 
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
+const Work = lazy(() => import("@/pages/Work").then(m => ({ default: m.Work })));
+const WorkDetail = lazy(() => import("@/pages/WorkDetail").then(m => ({ default: m.WorkDetail })));
+const Thesis = lazy(() => import("@/pages/Thesis").then(m => ({ default: m.Thesis })));
+const Writing = lazy(() => import("@/pages/Writing").then(m => ({ default: m.Writing })));
+const WritingDetail = lazy(() => import("@/pages/WritingDetail").then(m => ({ default: m.WritingDetail })));
+const About = lazy(() => import("@/pages/About").then(m => ({ default: m.About })));
+const Contact = lazy(() => import("@/pages/Contact").then(m => ({ default: m.Contact })));
+const Downloads = lazy(() => import("@/pages/Downloads").then(m => ({ default: m.Downloads })));
+const LegalPrivacy = lazy(() => import("@/pages/legal-privacy").then(m => ({ default: m.LegalPrivacy })));
+const LegalTerms = lazy(() => import("@/pages/legal-terms").then(m => ({ default: m.LegalTerms })));
+
+// Legacy pages
 const NotFound = lazy(() => import("@/pages/not-found"));
 const CheckoutSuccess = lazy(() => import("@/pages/checkout-success"));
 const CheckoutCancel = lazy(() => import("@/pages/checkout-cancel"));
@@ -36,13 +48,9 @@ function PageLoader() {
         <div className="relative w-16 h-16">
           <div className="absolute inset-0 border-2 border-primary/20 rounded-full" />
           <div className="absolute inset-0 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center font-bold text-primary tracking-tighter text-xl">
-            SL
-          </div>
+          <div className="absolute inset-0 flex items-center justify-center font-bold text-primary tracking-tighter text-xl">SL</div>
         </div>
-        <div className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase animate-pulse">
-          Loading Experience
-        </div>
+        <div className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase animate-pulse">Loading</div>
       </div>
     </div>
   );
@@ -52,7 +60,20 @@ function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
+        {/* Primary nav routes */}
         <Route path="/" component={Home} />
+        <Route path="/work/:slug" component={WorkDetail} />
+        <Route path="/work" component={Work} />
+        <Route path="/thesis" component={Thesis} />
+        <Route path="/writing/:slug" component={WritingDetail} />
+        <Route path="/writing" component={Writing} />
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/downloads" component={Downloads} />
+        <Route path="/legal/privacy" component={LegalPrivacy} />
+        <Route path="/legal/terms" component={LegalTerms} />
+
+        {/* Legacy routes preserved */}
         <Route path="/career" component={CareerCommand} />
         <Route path="/financial-research" component={FinancialResearch} />
         <Route path="/hackajob" component={HackajobProfile} />
@@ -81,18 +102,10 @@ function App() {
           <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
             <EcosystemNav currentAppId="career" currentAppName="Career — Founder Identity" accentColor="#6366f1" />
             <div style={{ flex: 1 }}>
-              <Suspense fallback={
-                <div className="min-h-screen bg-background flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center animate-pulse">
-                    <span className="font-serif font-bold text-primary text-lg">SL</span>
-                  </div>
-                </div>
-              }>
-                <Router />
-              </Suspense>
+              <Router />
             </div>
           </div>
-        <IncaAgentIndicator agentName="Brand Monitor" systemType="inti" currentTask="Tracking thought leadership signal amplification across networks" confidence={0.79} />
+          <IncaAgentIndicator agentName="Brand Monitor" systemType="inti" currentTask="Tracking thought leadership signal amplification across networks" confidence={0.79} />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

@@ -1,3 +1,26 @@
+import { Link } from "wouter";
+
+const navLinks = [
+  { label: "Work", href: "/work" },
+  { label: "Thesis", href: "/thesis" },
+  { label: "Writing", href: "/writing" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Downloads", href: "/downloads" },
+];
+
+const ecosystemLinks = [
+  { label: "SZL Holdings", href: "/szl-holdings/" },
+  { label: "Vessels", href: "/vessels/" },
+  { label: "INCA", href: "/inca/" },
+  { label: "Carlota Jo", href: "/carlota-jo/" },
+];
+
+const legalLinks = [
+  { label: "Privacy", href: "/legal/privacy" },
+  { label: "Terms", href: "/legal/terms" },
+];
+
 export function Footer() {
   return (
     <footer className="bg-[#080c11] border-t border-white/5 pt-20 pb-10">
@@ -13,47 +36,28 @@ export function Footer() {
             <p className="text-[9px] tracking-[0.28em] uppercase text-[#7ba3d4]/40 font-medium mb-5">
               Founder & CEO, SZL Holdings
             </p>
-            <p className="text-white/40 max-w-sm mb-8 leading-relaxed font-light text-[13px]">
-              Clarity for modern execution. Builder of enterprise infrastructure, AI platforms, and founder-led teams.
+            <p className="text-[13px] text-white/25 font-light leading-relaxed max-w-xs">
+              Builder of enterprise infrastructure, AI platforms, and founder-led teams. London, UK.
             </p>
           </div>
 
-          <div className="md:col-span-3">
-            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">
-              Portfolio
-            </h4>
+          <div className="md:col-span-2">
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">Navigation</h4>
             <ul className="space-y-2.5">
-              {[
-                { label: "SZL Holdings", href: "/szl-holdings/" },
-                { label: "Vessels", href: "/vessels/" },
-                { label: "INCA", href: "/inca/" },
-                { label: "Carlota Jo", href: "/carlota-jo/" },
-                { label: "Dreamscape", href: "/dreamscape/" },
-              ].map((item) => (
+              {navLinks.map((item) => (
                 <li key={item.label}>
-                  <a
-                    href={item.href}
-                    className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light"
-                  >
+                  <Link href={item.href} className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light">
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="md:col-span-2">
-            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">
-              Navigation
-            </h4>
+          <div className="md:col-span-3">
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">Portfolio</h4>
             <ul className="space-y-2.5">
-              {[
-                { label: "Work", href: "#work" },
-                { label: "About", href: "#about" },
-                { label: "Capabilities", href: "#capabilities" },
-                { label: "Thinking", href: "#thinking" },
-                { label: "Contact", href: "#contact" },
-              ].map((item) => (
+              {ecosystemLinks.map((item) => (
                 <li key={item.label}>
                   <a href={item.href} className="text-[13px] text-white/22 hover:text-white/55 transition-colors font-light">
                     {item.label}
@@ -64,9 +68,7 @@ export function Footer() {
           </div>
 
           <div className="md:col-span-3">
-            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">
-              Contact
-            </h4>
+            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-white/25 mb-4">Contact</h4>
             <p className="text-[13px] text-white/22 font-light mb-2">hello@stephenlutar.com</p>
             <p className="text-[13px] text-white/22 font-light">London, UK</p>
           </div>
@@ -76,9 +78,14 @@ export function Footer() {
           <p className="text-[11px] text-white/15 tracking-wider">
             &copy; {new Date().getFullYear()} Stephen Lutar. All rights reserved.
           </p>
-          <p className="text-[11px] text-white/12 tracking-wider">
-            Part of SZL Holdings
-          </p>
+          <div className="flex items-center gap-5">
+            {legalLinks.map((link) => (
+              <Link key={link.label} href={link.href} className="text-[11px] text-white/15 tracking-wider hover:text-white/35 transition-colors">
+                {link.label}
+              </Link>
+            ))}
+            <span className="text-[11px] text-white/12 tracking-wider">Part of SZL Holdings</span>
+          </div>
         </div>
       </div>
     </footer>

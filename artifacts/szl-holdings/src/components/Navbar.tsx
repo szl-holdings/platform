@@ -1,25 +1,30 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronRight } from "lucide-react";
+import { Link, useLocation } from "wouter";
 
 const navLinks = [
-  { label: "Ecosystem", href: "#portfolio" },
-  { label: "Lyte", href: "/lyte-command-center/" },
-  { label: "Vessels", href: "/vessels/" },
-  { label: "Carlota Jo", href: "/carlota-jo/" },
-  { label: "Founder", href: "/stephen/" },
-  { label: "Contact", href: "#contact" },
+  { label: "Ventures", href: "/ventures" },
+  { label: "Roadmap", href: "/roadmap" },
+  { label: "About", href: "/about" },
+  { label: "Updates", href: "/updates" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [location] = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
 
   return (
     <m.nav
@@ -34,7 +39,7 @@ export function Navbar() {
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <div className="max-w-[1280px] mx-auto px-6 lg:px-10 h-[60px] flex items-center justify-between">
-        <a href="/" className="flex items-center gap-3 group" aria-label="SZL Holdings">
+        <Link href="/" className="flex items-center gap-3 group" aria-label="SZL Holdings">
           <div className="w-7 h-7 rounded-[6px] flex items-center justify-center relative overflow-hidden"
             style={{
               background: "linear-gradient(135deg, hsl(210, 12%, 24%), hsl(210, 10%, 18%))",
@@ -57,15 +62,15 @@ export function Navbar() {
           }}>
             SZL Holdings
           </span>
-        </a>
+        </Link>
 
         <div className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
-            <a
-              key={link.href + link.label}
+            <Link
+              key={link.href}
               href={link.href}
               style={{
-                color: "hsl(210,5%,58%)",
+                color: location === link.href ? "hsl(38,12%,94%)" : "hsl(210,5%,58%)",
                 fontSize: "13px",
                 fontWeight: "500",
                 padding: "0.375rem 0.875rem",
@@ -79,15 +84,15 @@ export function Navbar() {
                 (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,58%)";
+                (e.currentTarget as HTMLElement).style.color = location === link.href ? "hsl(38,12%,94%)" : "hsl(210,5%,58%)";
                 (e.currentTarget as HTMLElement).style.background = "transparent";
               }}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
-          <a
-            href="#contact"
+          <Link
+            href="/ventures"
             style={{
               display: "flex",
               alignItems: "center",
@@ -113,8 +118,9 @@ export function Navbar() {
               (e.currentTarget as HTMLElement).style.boxShadow = "none";
             }}
           >
-            Get in touch
-          </a>
+            Explore the portfolio
+            <ChevronRight size={13} />
+          </Link>
         </div>
 
         <button
@@ -145,8 +151,8 @@ export function Navbar() {
           >
             <div className="px-6 py-6 flex flex-col gap-1">
               {navLinks.map((link) => (
-                <a
-                  key={link.href + link.label}
+                <Link
+                  key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
                   style={{
@@ -168,10 +174,10 @@ export function Navbar() {
                   }}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
-              <a
-                href="#contact"
+              <Link
+                href="/ventures"
                 onClick={() => setMobileOpen(false)}
                 style={{
                   display: "flex",
@@ -188,8 +194,8 @@ export function Navbar() {
                   transition: "all 0.18s ease",
                 }}
               >
-                Get in touch
-              </a>
+                Explore the portfolio
+              </Link>
             </div>
           </m.div>
         )}

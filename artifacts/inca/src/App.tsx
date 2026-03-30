@@ -3,15 +3,25 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight, Plus, Radio, Sun, Moon, Zap, Network } from "lucide-react";
+import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight, Plus, Radio, Sun, Network, Settings, Users, FileText, Shield } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
+// Marketing pages
+const IncaMarketingHome = lazy(() => import("@/pages/marketing-home"));
+const IncaPlatformPage = lazy(() => import("@/pages/marketing-platform"));
+const IncaCapabilitiesPage = lazy(() => import("@/pages/marketing-capabilities"));
+const IncaSecurityPage = lazy(() => import("@/pages/marketing-security"));
+const IncaInsightsPage = lazy(() => import("@/pages/marketing-insights"));
+const RequestAccessPage = lazy(() => import("@/pages/marketing-request-access"));
+const SignInPage = lazy(() => import("@/pages/marketing-sign-in"));
+const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
+const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
+
+// Dashboard / product pages
 const Dashboard = lazy(() => import("@/pages/dashboard"));
-const IncaHome = lazy(() => import("@/pages/inca-home"));
-const PlatformPage = lazy(() => import("@/pages/platform"));
 const QuipuCommand = lazy(() => import("@/pages/quipu-command"));
 const AgentSpawner = lazy(() => import("@/pages/agent-spawner"));
 const ChasquiRelay = lazy(() => import("@/pages/chasqui-relay"));
@@ -43,8 +53,22 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
 });
 
+const primaryDashboardNav = [
+  { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { path: "/dashboard/signals", label: "Signals", icon: Radio },
+  { path: "/dashboard/findings", label: "Findings", icon: Eye },
+  { path: "/dashboard/investigations", label: "Investigations", icon: FolderKanban },
+  { path: "/dashboard/alerts", label: "Alerts", icon: BellRing },
+  { path: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+  { path: "/dashboard/settings", label: "Settings", icon: Settings },
+];
+
+const adminDashboardNav = [
+  { path: "/dashboard/team", label: "Team", icon: Users },
+  { path: "/dashboard/audit-log", label: "Audit Log", icon: FileText },
+];
+
 const cortexNavItems = [
-  { path: "/", label: "Cortex Overview", icon: LayoutDashboard },
   { path: "/quipu-command", label: "Quipu Command", icon: Network },
   { path: "/agent-spawner", label: "Agent Spawner", icon: Plus },
   { path: "/chasqui-relay", label: "Chasqui Relay", icon: Radio },
@@ -73,11 +97,9 @@ const secondaryNavItems = [
   { path: "/confidence", label: "Confidence", icon: BarChart3 },
   { path: "/scenarios", label: "Scenario Builder", icon: Boxes },
   { path: "/correlations", label: "Correlations", icon: GitBranch },
-  { path: "/neural-explorer", label: "Neural Explorer", icon: Brain },
   { path: "/registry", label: "Model Registry", icon: Database },
   { path: "/benchmarking", label: "Benchmarking", icon: Trophy },
   { path: "/llm-eval", label: "LLM Evaluation", icon: FlaskConical },
-  { path: "/observability", label: "Observability", icon: Activity },
 ];
 
 function PageLoader() {
@@ -88,43 +110,39 @@ function PageLoader() {
   );
 }
 
-function Sidebar() {
+function DashboardSidebar() {
   const [location] = useLocation();
   const [researchExpanded, setResearchExpanded] = useState(false);
   const [moreExpanded, setMoreExpanded] = useState(false);
 
   return (
-    <aside className="w-56 bg-[#080c14]/95 border-r border-white/6 flex flex-col h-screen sticky top-0">
-      <div className="px-4 py-4 border-b border-white/6">
+    <aside className="w-56 bg-[#0d0a1a]/80 border-r border-violet-500/10 flex flex-col h-screen sticky top-0 backdrop-blur-sm">
+      <div className="px-4 py-4 border-b border-violet-500/10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-md bg-primary/8 border border-primary/14 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-amber-400/12 flex items-center justify-center shrink-0"
+            style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.15), rgba(16,185,129,0.1))" }}>
             <Brain className="w-4 h-4 text-primary animate-neural-pulse" />
           </div>
           <div>
-            <h1 className="font-display text-sm font-semibold text-foreground tracking-tight">INCA</h1>
-            <p className="text-[10px] text-primary/40 font-mono uppercase tracking-wider">Intelligence Platform</p>
+            <h1 className="font-display text-sm font-bold text-foreground tracking-tight">INCA</h1>
+            <p className="text-[10px] text-amber-400/70 font-mono uppercase tracking-[0.1em]">Agentic Cortex</p>
           </div>
         </div>
       </div>
 
-      {/* Cortex section */}
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         <div className="px-3 py-1 mb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-primary/40">Command</span>
+          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/50">Intelligence</span>
         </div>
-        {cortexNavItems.map(({ path, label, icon: Icon }) => {
-          const isActive = path === "/" ? location === "/" : location.startsWith(path);
+        {primaryDashboardNav.map(({ path, label, icon: Icon }) => {
+          const isActive = path === "/dashboard" ? location === "/dashboard" : location.startsWith(path);
           return (
             <Link key={path} href={path}>
               <div className={cn(
                 "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
-                isActive
-                  ? "bg-amber-400/10 text-amber-400"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                isActive ? "bg-amber-400/10 text-amber-400" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               )}>
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-amber-400 rounded-r-full" />
-                )}
+                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-amber-400 rounded-r-full" />}
                 <Icon className="w-3.5 h-3.5 shrink-0" />
                 {label}
               </div>
@@ -133,7 +151,44 @@ function Sidebar() {
         })}
 
         <div className="px-3 pt-3 pb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/40">Analysis</span>
+          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/40">Admin</span>
+        </div>
+        {adminDashboardNav.map(({ path, label, icon: Icon }) => {
+          const isActive = location === path;
+          return (
+            <Link key={path} href={path}>
+              <div className={cn(
+                "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
+                isActive ? "bg-amber-400/10 text-amber-400" : "text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30"
+              )}>
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                {label}
+              </div>
+            </Link>
+          );
+        })}
+
+        <div className="px-3 pt-3 pb-1">
+          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/50">Intelligence Cortex</span>
+        </div>
+        {cortexNavItems.map(({ path, label, icon: Icon }) => {
+          const isActive = location.startsWith(path);
+          return (
+            <Link key={path} href={path}>
+              <div className={cn(
+                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
+                isActive ? "bg-amber-400/10 text-amber-400" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}>
+                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-amber-400 rounded-r-full" />}
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                {label}
+              </div>
+            </Link>
+          );
+        })}
+
+        <div className="px-3 pt-3 pb-1">
+          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/40">Research Lab</span>
         </div>
         <button
           onClick={() => setResearchExpanded(!researchExpanded)}
@@ -145,14 +200,12 @@ function Sidebar() {
         {researchExpanded && (
           <div className="mt-0.5 space-y-0.5">
             {researchNavItems.map(({ path, label, icon: Icon }) => {
-              const isActive = path === "/" ? location === "/" : location.startsWith(path);
+              const isActive = location.startsWith(path);
               return (
                 <Link key={path} href={path}>
                   <div className={cn(
-                    "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                    isActive
-                      ? "bg-primary/12 text-primary"
-                      : "text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30"
+                    "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ml-2",
+                    isActive ? "bg-primary/12 text-primary" : "text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30"
                   )}>
                     <Icon className="w-3 h-3 shrink-0" />
                     {label}
@@ -174,14 +227,12 @@ function Sidebar() {
           {moreExpanded && (
             <div className="mt-0.5 space-y-0.5">
               {secondaryNavItems.map(({ path, label, icon: Icon }) => {
-                const isActive = path === "/" ? location === "/" : location.startsWith(path);
+                const isActive = location.startsWith(path);
                 return (
                   <Link key={path} href={path}>
                     <div className={cn(
-                      "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                      isActive
-                        ? "bg-violet-500/12 text-violet-300"
-                        : "text-violet-400/30 hover:text-violet-200 hover:bg-violet-500/5"
+                      "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ml-2",
+                      isActive ? "bg-violet-500/12 text-violet-300" : "text-violet-400/30 hover:text-violet-200 hover:bg-violet-500/5"
                     )}>
                       <Icon className="w-3 h-3 shrink-0" />
                       {label}
@@ -195,29 +246,53 @@ function Sidebar() {
       </nav>
 
       <div className="px-4 py-3 border-t border-violet-500/10 space-y-2">
-        <Link href="/platform">
-          <div className="w-full text-xs font-medium bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 hover:text-violet-300 rounded-lg px-3 py-2 transition-colors text-center cursor-pointer">
-            Request access
-          </div>
-        </Link>
         <UserButton showName className="w-full" />
-        <div className="flex items-center gap-2 text-[10px] text-primary/25">
+        <div className="flex items-center gap-2 text-[10px] text-amber-400/30">
           <Brain className="w-3 h-3" />
-          <span className="font-mono">SZL Holdings · INCA</span>
+          <span className="font-mono">SZL Holdings · Quipu Engine</span>
         </div>
       </div>
     </aside>
   );
 }
 
-function AppRouter() {
+function DashboardRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/">
-          <Suspense fallback={<PageLoader />}><PlatformPage /></Suspense>
-        </Route>
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard/signals/:id">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Signal Detail</h1><p className="text-muted-foreground text-sm">Signal detail view — full investigation context and evidence chain.</p></div>
+        </Route>
+        <Route path="/dashboard/signals">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Signals</h1><p className="text-muted-foreground text-sm">Active intelligence signals — prioritised and enriched for analyst review.</p></div>
+        </Route>
+        <Route path="/dashboard/findings/:id">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Finding Detail</h1><p className="text-muted-foreground text-sm">Structured finding with evidence chain and explainability output.</p></div>
+        </Route>
+        <Route path="/dashboard/findings">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Findings</h1><p className="text-muted-foreground text-sm">Intelligence findings awaiting review, in progress, or resolved.</p></div>
+        </Route>
+        <Route path="/dashboard/investigations/:id">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Investigation Detail</h1><p className="text-muted-foreground text-sm">Multi-stage investigation with linked signals, findings, and decision log.</p></div>
+        </Route>
+        <Route path="/dashboard/investigations">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Investigations</h1><p className="text-muted-foreground text-sm">Open and closed investigations with full audit trail.</p></div>
+        </Route>
+        <Route path="/dashboard/alerts" component={AlertsManagement} />
+        <Route path="/dashboard/reports">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Reports</h1><p className="text-muted-foreground text-sm">Intelligence reporting, trend analysis, and executive briefing exports.</p></div>
+        </Route>
+        <Route path="/dashboard/settings">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Settings</h1><p className="text-muted-foreground text-sm">Organisation settings, API configuration, and integration management.</p></div>
+        </Route>
+        <Route path="/dashboard/team">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Team</h1><p className="text-muted-foreground text-sm">Manage team members, roles, and access permissions.</p></div>
+        </Route>
+        <Route path="/dashboard/audit-log">
+          <div className="p-6 max-w-xl mx-auto"><h1 className="text-xl font-bold text-foreground mb-2">Audit Log</h1><p className="text-muted-foreground text-sm">Immutable audit trail of all platform actions, data access, and configuration changes.</p></div>
+        </Route>
+        {/* Legacy routes */}
         <Route path="/quipu-command" component={QuipuCommand} />
         <Route path="/agent-spawner" component={AgentSpawner} />
         <Route path="/chasqui-relay" component={ChasquiRelay} />
@@ -244,9 +319,6 @@ function AppRouter() {
         <Route path="/gpu-monitoring" component={GPUMonitoring} />
         <Route path="/llm-eval" component={LLMEvaluation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
-        <Route path="/platform">
-          <Suspense fallback={<PageLoader />}><PlatformPage /></Suspense>
-        </Route>
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground font-mono">404 — Page not found</p>
@@ -258,18 +330,12 @@ function AppRouter() {
 }
 
 const incaCommands: CommandItem[] = [
-  { id: "nav-dashboard", label: "Dashboard", icon: "🧠", group: "Navigation", keywords: ["home", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
-  { id: "nav-projects", label: "Projects", icon: "📁", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/projects"); } },
+  { id: "nav-dashboard", label: "Dashboard", icon: "🧠", group: "Navigation", keywords: ["home", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard"); } },
+  { id: "nav-signals", label: "Signals", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard/signals"); } },
+  { id: "nav-findings", label: "Findings", icon: "🔍", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard/findings"); } },
   { id: "nav-experiments", label: "Experiments", icon: "🧪", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/experiments"); } },
   { id: "nav-models", label: "Models", icon: "⚙️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/models"); } },
-  { id: "nav-insights", label: "Insights", icon: "💡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/insights"); } },
   { id: "nav-gpu", label: "GPU Monitor", icon: "🖥️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/gpu-monitoring"); } },
-  { id: "nav-registry", label: "Model Registry", icon: "📦", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/registry"); } },
-  { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/predictions"); } },
-  { id: "nav-ensemble", label: "Ensemble Studio", icon: "🎛️", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ensemble"); } },
-  { id: "nav-neural", label: "Neural Explorer", icon: "🔬", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/neural-explorer"); } },
-  { id: "nav-llm", label: "LLM Evaluation", icon: "🤖", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/llm-eval"); } },
-  { id: "nav-benchmarking", label: "Benchmarking", icon: "🏆", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/benchmarking"); } },
   { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
 ];
@@ -281,18 +347,7 @@ const incaShortcuts: KeyboardShortcut[] = [
   { key: "G", description: "Go to GPU Monitor", category: "Navigation" },
 ];
 
-function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
-  const [location] = useLocation();
-  const isPublicHome = location === "/home";
-
-  if (isPublicHome) {
-    return (
-      <Suspense fallback={<PageLoader />}>
-        <IncaHome />
-      </Suspense>
-    );
-  }
-
+function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   return (
     <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#f59e0b">
       <div className="flex flex-col h-screen bg-background">
@@ -301,9 +356,9 @@ function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         </a>
         <EcosystemNav currentAppId="inca" currentAppName="INCA — Agentic Intelligence Cortex" accentColor="#f59e0b" />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
+          <DashboardSidebar />
           <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-            <AppRouter />
+            <DashboardRouter />
           </main>
         </div>
       </div>
@@ -317,18 +372,57 @@ function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
       <WelcomeOverlay
         appId="inca"
         appName="INCA"
-        subtitle="Intelligence With Structure"
-        description="INCA is built to turn signals, findings, and operational noise into clearer visibility, more structured triage, and more informed action."
-        accentColor="#f59e0b"
+        subtitle="AI Research Command Center"
+        description="Track experiments, manage model versions, and optimize GPU costs across your entire ML research pipeline — from hypothesis to production deployment."
+        accentColor="#8b5cf6"
         icon={Brain}
         features={[
-          { icon: FlaskConical, title: "Signal visibility", description: "Bring fragmented indicators into a cleaner, more structured interface designed to support review and prioritization." },
-          { icon: Cpu, title: "Triage workflows", description: "Move from raw inputs to more organized action paths with workflows that support clarity, ownership, and follow-through." },
-          { icon: TrendingUp, title: "Explainable outputs", description: "Support better decisions with outputs that are easier to understand, validate, and communicate." },
-          { icon: Layers, title: "Traceable operations", description: "Build trust through audit-friendly workflows, historical views, and stronger visibility into what happened and why." },
+          { icon: FlaskConical, title: "Experiments", description: "Parallel experiment tracking with hyperparameter importance analysis" },
+          { icon: Cpu, title: "Model Registry", description: "Version control and lineage graph for every production model" },
+          { icon: TrendingUp, title: "Predictions", description: "Live inference monitoring with drift and anomaly detection" },
+          { icon: Layers, title: "Ensemble Studio", description: "Combine models and build multi-model voting pipelines" },
         ]}
       />
     </PowerUserProvider>
+  );
+}
+
+function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const [location] = useLocation();
+  const isDashboard = location.startsWith("/dashboard") ||
+    location.startsWith("/quipu") || location.startsWith("/agent-spawner") ||
+    location.startsWith("/chasqui") || location.startsWith("/dual-mind") ||
+    location.startsWith("/willaq-umu") || location.startsWith("/projects") ||
+    location.startsWith("/experiments") || location.startsWith("/models") ||
+    location.startsWith("/insights") || location.startsWith("/observability") ||
+    location.startsWith("/predictions") || location.startsWith("/alerts") ||
+    location.startsWith("/ensemble") || location.startsWith("/drift") ||
+    location.startsWith("/anomalies") || location.startsWith("/correlation-alerts") ||
+    location.startsWith("/confidence") || location.startsWith("/scenarios") ||
+    location.startsWith("/correlations") || location.startsWith("/registry") ||
+    location.startsWith("/neural-explorer") || location.startsWith("/benchmarking") ||
+    location.startsWith("/gpu-monitoring") || location.startsWith("/llm-eval") ||
+    location.startsWith("/agent-insights");
+
+  if (isDashboard) {
+    return <DashboardShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+  }
+
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#060410]"><div className="w-6 h-6 border-2 border-violet-500/40 border-t-violet-400 rounded-full animate-spin" /></div>}>
+      <Switch>
+        <Route path="/" component={IncaMarketingHome} />
+        <Route path="/platform" component={IncaPlatformPage} />
+        <Route path="/capabilities" component={IncaCapabilitiesPage} />
+        <Route path="/security" component={IncaSecurityPage} />
+        <Route path="/insights-hub" component={IncaInsightsPage} />
+        <Route path="/request-access" component={RequestAccessPage} />
+        <Route path="/sign-in" component={SignInPage} />
+        <Route path="/legal/privacy" component={LegalPrivacyPage} />
+        <Route path="/legal/terms" component={LegalTermsPage} />
+        <Route component={IncaMarketingHome} />
+      </Switch>
+    </Suspense>
   );
 }
 
@@ -338,7 +432,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <IncaAppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+        <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </WouterRouter>
     </QueryClientProvider>
   );
