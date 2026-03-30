@@ -19,7 +19,7 @@
   "hero": {
     "headline": "The Future",
     "headlineAccent": "Is Engineered",
-    "subheadline": "SZL Holdings deploys capital and talent across six frontier technology platforms — from maritime intelligence and cybersecurity simulation to AI-native creative production — engineering compound returns at the intersection of deep tech and critical infrastructure.",
+    "subheadline": "SZL Holdings deploys capital and elite talent across six frontier technology platforms — from maritime intelligence and adversarial security simulation to AI-native creative production. We engineer compound returns at the intersection of deep technology and critical global infrastructure.",
     "cta": "Explore the Ecosystem",
     "ctaSecondary": "Investor Relations",
     "badge": "Est. 2021 · $180M+ Deployed Capital",
@@ -69,7 +69,7 @@
   },
   "contact": {
     "title": "Get in Touch",
-    "subtitle": "Investor relations, strategic partnerships, and portfolio company inquiries.",
+    "subtitle": "Investor relations, strategic partnerships, and portfolio company inquiries. We respond within 24 hours.",
     "fields": ["name", "email", "company", "subject", "message"],
     "labels": {
       "name": "Name *",
@@ -82,13 +82,13 @@
       "name": "Your full name",
       "email": "your@email.com",
       "company": "Your organization (optional)",
-      "subject": "Inquiry subject",
-      "message": "Tell us how we can help..."
+      "subject": "Investor inquiry, partnership, or portfolio",
+      "message": "Tell us how we can partner..."
     },
     "submitLabel": "Send Inquiry",
     "submittingLabel": "Sending...",
-    "successMessage": "Thank you. Our team will respond within 24 hours.",
-    "errorMessage": "Something went wrong. Please try again or email us directly."
+    "successMessage": "Thank you. Our team will respond within 24 business hours.",
+    "errorMessage": "Something went wrong. Please try again or email us directly at inquiries@szlholdings.com."
   },
   "footer": {
     "sections": {

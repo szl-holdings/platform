@@ -10,6 +10,7 @@ import {
 import { eq, desc, ilike, or, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -200,6 +201,27 @@ router.post("/holdings/inquiries", (req, res) => {
     subject: subject.trim(), message: message.trim(),
   }).returning().then(([row]) => {
     res.status(201).json({ success: true, data: row });
+    setImmediate(async () => {
+      try {
+        await sendEmail({
+          to: email.trim(),
+          subject: "We received your inquiry — SZL Holdings",
+          html: buildInquiryAckEmail(name.trim(), subject.trim()),
+        });
+        await sendEmail({
+          to: INTERNAL_EMAIL,
+          subject: `New Inquiry: ${subject.trim()} — from ${name.trim()}`,
+          html: buildLeadNotificationEmail({
+            name: name.trim(), email: email.trim(),
+            company: typeof company === "string" ? company.trim() : undefined,
+            subject: subject.trim(), message: message.trim(),
+          }),
+          replyTo: email.trim(),
+        });
+      } catch (emailErr) {
+        console.warn("[holdings] Email send failed (non-blocking):", emailErr);
+      }
+    });
   }).catch(err => {
     handleRouteError(res, err, "Failed to create inquiry");
   });
