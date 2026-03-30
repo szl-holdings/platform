@@ -1,4 +1,21 @@
 type EventName =
+  | "page_view"
+  | "cta_click"
+  | "form_submit"
+  | "demo_request"
+  | "access_request"
+  | "private_inquiry_submit"
+  | "download_asset"
+  | "sign_in"
+  | "sign_up"
+  | "dashboard_view"
+  | "alert_view"
+  | "report_view"
+  | "billing_portal_open"
+  | "checkout_started"
+  | "checkout_completed"
+  | "article_view"
+  | "case_study_view"
   | "hero_cta_click"
   | "venture_card_click"
   | "founder_page_view"
@@ -13,6 +30,15 @@ type EventName =
   | "nav_link_click";
 
 interface EventProperties {
+  site?: string;
+  page?: string;
+  section?: string;
+  cta_label?: string;
+  form_key?: string;
+  product_key?: string;
+  organization_id?: string;
+  plan_key?: string;
+  content_slug?: string;
   [key: string]: string | number | boolean | undefined;
 }
 
@@ -50,23 +76,75 @@ export function initScrollDepthTracking(pageSlug: string): () => void {
 }
 
 export const analytics = {
-  heroCTAClick: (ctaLabel: string) => track("hero_cta_click", { cta_label: ctaLabel }),
+  pageView: (page: string, site = "szl-holdings") =>
+    track("page_view", { site, page }),
+
+  ctaClick: (label: string, page: string, section?: string, site = "szl-holdings") =>
+    track("cta_click", { cta_label: label, page, section, site }),
+
+  formSubmit: (formKey: string, page: string, site = "szl-holdings") =>
+    track("form_submit", { form_key: formKey, page, site }),
+
+  demoRequest: (site = "vessels") =>
+    track("demo_request", { site }),
+
+  accessRequest: (site = "inca") =>
+    track("access_request", { site }),
+
+  privateInquirySubmit: (site = "carlota-jo") =>
+    track("private_inquiry_submit", { site }),
+
+  downloadAsset: (contentSlug: string, site = "szl-holdings") =>
+    track("download_asset", { content_slug: contentSlug, site }),
+
+  signIn: (site = "szl-holdings") =>
+    track("sign_in", { site }),
+
+  dashboardView: (page: string, site = "szl-holdings") =>
+    track("dashboard_view", { page, site }),
+
+  alertView: (contentSlug: string, site = "szl-holdings") =>
+    track("alert_view", { content_slug: contentSlug, site }),
+
+  reportView: (contentSlug: string, site = "szl-holdings") =>
+    track("report_view", { content_slug: contentSlug, site }),
+
+  articleView: (contentSlug: string, site = "szl-holdings") =>
+    track("article_view", { content_slug: contentSlug, site }),
+
+  caseStudyView: (contentSlug: string, site = "szl-holdings") =>
+    track("case_study_view", { content_slug: contentSlug, site }),
+
+  heroCTAClick: (ctaLabel: string) =>
+    track("hero_cta_click", { cta_label: ctaLabel, site: "szl-holdings" }),
+
   ventureCardClick: (ventureId: string, ventureName: string) =>
     track("venture_card_click", { venture_id: ventureId, venture_name: ventureName }),
-  founderPageView: () => track("founder_page_view"),
+
+  founderPageView: () =>
+    track("founder_page_view", { site: "szl-holdings" }),
+
   contactFunnelStart: (inquiryType: string) =>
     track("contact_funnel_start", { inquiry_type: inquiryType }),
+
   contactFormSubmit: (inquiryType: string) =>
-    track("contact_form_submit", { inquiry_type: inquiryType }),
-  resumeDownloadClick: () => track("resume_download_click"),
+    track("contact_form_submit", { form_key: inquiryType, site: "szl-holdings" }),
+
+  resumeDownloadClick: () =>
+    track("download_asset", { content_slug: "resume", site: "stephen-site" }),
+
   ventureDetailView: (ventureId: string) =>
     track("venture_detail_view", { venture_id: ventureId }),
+
   ecosystemNodeClick: (nodeId: string) =>
     track("ecosystem_node_click", { node_id: nodeId }),
+
   portfolioFilter: (filterType: string, filterValue: string) =>
     track("portfolio_filter", { filter_type: filterType, filter_value: filterValue }),
+
   insightsArticleClick: (slug: string, title: string) =>
-    track("insights_article_click", { slug, title }),
+    track("article_view", { content_slug: slug, title }),
+
   navLinkClick: (label: string, href: string) =>
     track("nav_link_click", { label, href }),
 };

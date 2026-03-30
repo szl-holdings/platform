@@ -40,10 +40,20 @@ export default function ContactForm() {
     if (!validate()) return;
     setStatus("submitting");
     try {
-      const res = await fetch("/api/booking/inquiries", {
+      const basePath = import.meta.env.BASE_URL || "/";
+      const apiBase = basePath.replace(/\/$/, "") + "/api";
+      const res = await fetch(`${apiBase}/cms/contact-submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          siteId: 4,
+          formKey: "carlota_private_inquiry",
+          fullName: form.name,
+          email: form.email,
+          company: form.company || "",
+          message: form.message,
+          metadataJson: { phone: form.phone, service: form.service },
+        }),
       });
       if (res.ok) {
         setStatus("success");

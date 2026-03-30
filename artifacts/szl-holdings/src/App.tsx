@@ -23,6 +23,12 @@ const LegalTerms = lazy(() => import("@/pages/legal-terms"));
 const TrustCenter = lazy(() => import("@/pages/trust-center"));
 const InvestorStory = lazy(() => import("@/pages/investor-story"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
+const InsightsPage = lazy(() => import("@/pages/insights"));
+const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
+const Changelog = lazy(() => import("@/pages/changelog"));
+const Roadmap = lazy(() => import("@/pages/roadmap"));
+const PortfolioIntel = lazy(() => import("@/pages/portfolio-intel"));
+const AdminPage = lazy(() => import("@/pages/admin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,6 +122,12 @@ function App() {
             </Route>
             <Route path="/kpis">
               <Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense>
+            </Route>
+            <Route path="/admin">
+              <Suspense fallback={<PageLoader />}><AdminPage /></Suspense>
+            </Route>
+            <Route path="/admin/:section">
+              <Suspense fallback={<PageLoader />}><AdminPage /></Suspense>
             </Route>
             <Route>
               <HomePage />

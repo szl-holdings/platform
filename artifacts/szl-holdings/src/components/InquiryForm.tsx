@@ -128,13 +128,22 @@ export function InquiryForm({ defaultType = "general", showTypeSelector = true, 
     try {
       const basePath = import.meta.env.BASE_URL || "/";
       const apiBase = basePath.replace(/\/$/, "") + "/api";
-      const res = await fetch(`${apiBase}/holdings/inquiries`, {
+      const res = await fetch(`${apiBase}/cms/contact-submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, inquiryType }),
+        body: JSON.stringify({
+          siteId: 1,
+          formKey: "szl_contact",
+          fullName: form.name,
+          email: form.email,
+          company: form.firmName || form.organization || form.firm || "",
+          message: `[${inquiryType}] ${form.subject}\n\n${form.message}`,
+          metadataJson: { inquiryType, ...form },
+        }),
       });
       if (!res.ok) throw new Error("Failed");
       analytics.contactFormSubmit(inquiryType);
+      analytics.formSubmit("szl_contact", "/contact");
       setStatus("success");
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {

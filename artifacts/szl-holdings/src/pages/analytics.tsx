@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell,
+  PieChart, Pie, Cell, BarChart, Bar,
 } from "recharts";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";

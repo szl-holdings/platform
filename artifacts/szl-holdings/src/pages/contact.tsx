@@ -3,6 +3,7 @@ import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { initScrollDepthTracking } from "@/lib/analytics";
 
 const CONTACT_PATHS = [
   {
@@ -44,11 +45,13 @@ const CONTACT_PATHS = [
 
 export default function ContactPage() {
   useEffect(() => {
-    document.title = "Contact | SZL Holdings";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute("content", "Contact SZL Holdings for ecosystem discussions, product inquiries, strategic conversations, partnerships, and founder-related opportunities.");
-    }
+    document.title = "Contact — SZL Holdings";
+    const metaDesc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (metaDesc) metaDesc.content = "Strategic inquiries, partnership discussions, media and press, and general correspondence with SZL Holdings.";
+    const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+    if (ogTitle) ogTitle.content = "Contact — SZL Holdings";
+    const cleanup = initScrollDepthTracking("contact");
+    return cleanup;
   }, []);
 
   return (

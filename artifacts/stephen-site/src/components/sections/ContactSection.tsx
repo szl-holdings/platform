@@ -6,8 +6,24 @@ export function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", context: "" });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      const basePath = import.meta.env.BASE_URL || "/";
+      const apiBase = basePath.replace(/\/$/, "") + "/api";
+      await fetch(`${apiBase}/cms/contact-submissions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          siteId: 5,
+          formKey: "stephen_contact",
+          fullName: form.name,
+          email: form.email,
+          message: form.context,
+        }),
+      });
+    } catch {
+    }
     setSubmitted(true);
   };
 
