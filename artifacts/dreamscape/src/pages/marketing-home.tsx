@@ -113,7 +113,7 @@ export default function DreamscapeMarketingHome() {
         </div>
       </nav>
 
-      <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+      <section className="relative flex items-center justify-center pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-28 lg:pb-20 overflow-hidden" style={{ minHeight: "min(85vh, 760px)" }}>
         <PredictionMesh />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[radial-gradient(ellipse,rgba(139,92,246,0.06)_0%,transparent_70%)]" />

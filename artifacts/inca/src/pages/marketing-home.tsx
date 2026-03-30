@@ -161,12 +161,12 @@ export default function IncaMarketingHome() {
     <div className="min-h-screen bg-[#060410] text-violet-50 overflow-x-hidden">
       <MarketingNav />
 
-      <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+      <section className="relative flex items-center justify-center pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-28 lg:pb-20 overflow-hidden" style={{ minHeight: "min(85vh, 760px)" }}>
         <NeuralNetwork />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[radial-gradient(ellipse,rgba(124,58,237,0.06)_0%,transparent_70%)]" />
         </div>
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-24 text-center">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 text-center">
           <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-violet-500/20 bg-violet-500/6 text-violet-400/80 text-[11px] font-medium tracking-[0.08em] uppercase mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
