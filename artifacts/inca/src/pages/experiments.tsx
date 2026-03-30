@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { experiments, projects, type Experiment } from "@/data/seed-data";
 import { cn } from "@workspace/shared-ui/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { ExportButton } from "@workspace/shared-ui/data-export";
 
 const statusColors: Record<string, string> = {
   running: "text-amber-400 bg-amber-400/10",
@@ -163,9 +164,30 @@ export default function Experiments() {
 
   return (
     <div className="p-6 lg:p-8 space-y-5 max-w-[1200px]">
-      <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Experiments</h1>
-        <p className="text-sm text-muted-foreground mt-1">Compare training runs, validate hypotheses, and surface the experiments that advance model performance</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Experiments</h1>
+          <p className="text-sm text-muted-foreground mt-1">Compare training runs, validate hypotheses, and surface the experiments that advance model performance</p>
+        </div>
+        <ExportButton
+          filename="experiments"
+          csvData={experiments.map(e => {
+            const last = e.metrics[e.metrics.length - 1];
+            const proj = projects.find(p => p.id === e.projectId);
+            return {
+              Name: e.name,
+              Project: proj?.name || "",
+              Status: e.status,
+              Accuracy: last ? `${last.accuracy.toFixed(1)}%` : "",
+              "Val Accuracy": last ? `${last.valAccuracy.toFixed(1)}%` : "",
+              Loss: last ? last.loss.toFixed(3) : "",
+              Epochs: e.metrics.length,
+              Duration: e.duration || "",
+            };
+          })}
+          pdfTitle="ML Experiments"
+          accentColor="#8b5cf6"
+        />
       </div>
 
       <div className="flex flex-wrap gap-2">

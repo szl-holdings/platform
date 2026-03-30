@@ -4,6 +4,7 @@ import { Plus, Search, AlertTriangle, ShieldCheck, ChevronRight, Clock, User } f
 import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ExportButton } from "@workspace/shared-ui/data-export";
 
 const severityColors = {
   critical: "bg-red-500/20 text-red-400 border-red-500/30",
@@ -125,6 +126,19 @@ export default function Incidents() {
               className="w-full bg-card/50 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
             />
           </div>
+          <ExportButton
+            filename="incidents"
+            csvData={(filtered || []).map((i: any) => ({
+              ID: i.id,
+              Title: i.title,
+              Severity: i.severity,
+              Status: i.status,
+              "Assigned To": i.assignedTo || "",
+              "Created At": i.createdAt || "",
+            }))}
+            pdfTitle="Incident Tracker"
+            accentColor="#06b6d4"
+          />
           <button 
             onClick={handleCreate}
             disabled={createMutation.isPending}

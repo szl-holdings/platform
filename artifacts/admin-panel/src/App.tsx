@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation, Link } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
@@ -318,26 +320,61 @@ function AppRouter() {
   );
 }
 
+const adminCommands: CommandItem[] = [
+  { id: "nav-dashboard", label: "Dashboard", icon: "⚙️", group: "Navigation", keywords: ["home", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-apps", label: "Apps", icon: "📱", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/apps"); } },
+  { id: "nav-connectors", label: "Connectors", icon: "🔌", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/connectors"); } },
+  { id: "nav-users", label: "Users", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/users"); } },
+  { id: "nav-audit-log", label: "Audit Log", icon: "📋", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/audit-log"); } },
+  { id: "nav-feature-flags", label: "Feature Flags", icon: "🚩", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/feature-flags"); } },
+  { id: "nav-system-health", label: "System Health", icon: "❤️", group: "Monitoring", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/system-health"); } },
+  { id: "nav-platform-health", label: "Platform Health", icon: "🏥", group: "Monitoring", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/platform-health"); } },
+  { id: "nav-observability", label: "Observability", icon: "📊", group: "Monitoring", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/observability"); } },
+  { id: "nav-infrastructure", label: "Infrastructure", icon: "🏗️", group: "Monitoring", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/infrastructure"); } },
+  { id: "nav-workflows", label: "Workflow Automation", icon: "🔄", group: "Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/workflows"); } },
+  { id: "nav-developer", label: "Developer Portal", icon: "👨‍💻", group: "Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/developer"); } },
+  { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
+  { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
+];
+
+const adminShortcuts: KeyboardShortcut[] = [
+  { key: "C", description: "Go to Connectors", category: "Navigation" },
+  { key: "U", description: "Go to Users", category: "Navigation" },
+  { key: "H", description: "Go to System Health", category: "Navigation" },
+  { key: "F", description: "Go to Feature Flags", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(adminCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex flex-col min-h-screen bg-background">
-            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
-              Skip to main content
-            </a>
-            <EcosystemNav currentAppId="admin" currentAppName="Admin Control Plane" accentColor="#f97316" />
-            <div className="flex flex-1 overflow-auto">
-              <Sidebar />
-              <div className="flex-1 flex flex-col overflow-auto">
-                <DemoModeBanner />
-                <main id="main-content" className="flex-1 p-6" tabIndex={-1}>
-                  <AppRouter />
-                </main>
+          <PowerUserProvider shortcuts={adminShortcuts} appName="Admin Panel" accentColor="#f97316">
+            <div className="flex flex-col min-h-screen bg-background">
+              <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
+                Skip to main content
+              </a>
+              <EcosystemNav currentAppId="admin" currentAppName="Admin Control Plane" accentColor="#f97316" />
+              <div className="flex flex-1 overflow-auto">
+                <Sidebar />
+                <div className="flex-1 flex flex-col overflow-auto">
+                  <DemoModeBanner />
+                  <main id="main-content" className="flex-1 p-6" tabIndex={-1}>
+                    <AppRouter />
+                  </main>
+                </div>
               </div>
             </div>
-          </div>
+            <CommandPalette
+              open={cmdOpen}
+              onClose={() => setCmdOpen(false)}
+              commands={adminCommands}
+              appName="Admin Panel"
+              accentColor="#f97316"
+            />
+          </PowerUserProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

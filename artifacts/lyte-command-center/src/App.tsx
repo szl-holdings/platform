@@ -5,6 +5,8 @@ import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { Layout } from "@/components/layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Signals = lazy(() => import("@/pages/signals"));
@@ -98,18 +100,53 @@ function Router() {
   );
 }
 
+const lyteCommands: CommandItem[] = [
+  { id: "nav-dashboard", label: "Dashboard", icon: "⚡", group: "Navigation", keywords: ["home", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-signals", label: "Signals", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
+  { id: "nav-incidents", label: "Incidents", icon: "🚨", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/incidents"); } },
+  { id: "nav-playbooks", label: "Playbooks", icon: "📚", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/playbooks"); } },
+  { id: "nav-intelligence", label: "Intelligence", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/intelligence"); } },
+  { id: "nav-ai-ops", label: "AI Ops", icon: "🤖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-ops"); } },
+  { id: "nav-topology", label: "Topology", icon: "🗺️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/topology"); } },
+  { id: "nav-anomaly", label: "Anomaly Detection", icon: "⚠️", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/anomaly-detection"); } },
+  { id: "nav-slo", label: "SLO Tracking", icon: "📊", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/slo-tracking"); } },
+  { id: "nav-cloud-cost", label: "Cloud Cost", icon: "💰", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/cloud-cost"); } },
+  { id: "nav-oncall", label: "On-Call Management", icon: "📞", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/oncall"); } },
+  { id: "nav-admin", label: "Admin Overview", icon: "⚙️", group: "Admin", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/admin/overview"); } },
+  { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
+  { id: "app-vessels", label: "Switch to Vessels", icon: "🚢", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
+];
+
+const lyteShortcuts: KeyboardShortcut[] = [
+  { key: "S", description: "Go to Signals", category: "Navigation" },
+  { key: "I", description: "Go to Incidents", category: "Navigation" },
+  { key: "P", description: "Go to Playbooks", category: "Navigation" },
+  { key: "A", description: "Go to AI Ops", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(lyteCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex flex-col h-screen">
-          <EcosystemNav currentAppId="lyte" currentAppName="Lyte Command Center" accentColor="#f59e0b" />
-          <div className="flex-1 overflow-hidden">
-            <Layout>
-              <Router />
-            </Layout>
+        <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte Command Center" accentColor="#f59e0b">
+          <div className="flex flex-col h-screen">
+            <EcosystemNav currentAppId="lyte" currentAppName="Lyte Command Center" accentColor="#f59e0b" />
+            <div className="flex-1 overflow-hidden">
+              <Layout>
+                <Router />
+              </Layout>
+            </div>
           </div>
-        </div>
+          <CommandPalette
+            open={cmdOpen}
+            onClose={() => setCmdOpen(false)}
+            commands={lyteCommands}
+            appName="Lyte"
+            accentColor="#f59e0b"
+          />
+        </PowerUserProvider>
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>

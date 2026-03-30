@@ -9,6 +9,8 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
 const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));
 const VesselDetailPage = lazy(() => import("@/pages/vessel-detail"));
@@ -288,27 +290,61 @@ function AppRouter() {
   );
 }
 
+const vesselsCommands: CommandItem[] = [
+  { id: "nav-fleet", label: "Fleet Command", icon: "🚢", group: "Navigation", keywords: ["dashboard", "home", "fleet"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-intel", label: "Maritime Intelligence", icon: "🌊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/intelligence"); } },
+  { id: "nav-alerts", label: "Alerts", icon: "⚠️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alerts"); } },
+  { id: "nav-routes", label: "Route Planning", icon: "🗺️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/routes"); } },
+  { id: "nav-fleet-apm", label: "Fleet APM", icon: "📊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/fleet-apm"); } },
+  { id: "nav-weather", label: "Weather", icon: "🌦️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/weather"); } },
+  { id: "nav-risk", label: "Risk Scoring", icon: "🛡️", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/risk-scoring"); } },
+  { id: "nav-dark-vessel", label: "Dark Vessel Detection", icon: "🔦", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dark-vessel-detection"); } },
+  { id: "nav-port", label: "Port Analytics", icon: "⚓", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/port-analytics"); } },
+  { id: "nav-co2", label: "CO2 & Emissions", icon: "🌿", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/co2-emissions"); } },
+  { id: "nav-sanctions", label: "Sanctions Screening", icon: "🚫", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/sanctions-screening"); } },
+  { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
+  { id: "app-inca", label: "Switch to INCA", icon: "🧠", group: "Switch App", description: "AI Research", action: () => { window.location.href = "/inca/"; } },
+];
+
+const vesselsShortcuts: KeyboardShortcut[] = [
+  { key: "F", description: "Go to Fleet Command", category: "Navigation" },
+  { key: "A", description: "Go to Alerts", category: "Navigation" },
+  { key: "R", description: "Go to Route Planning", category: "Navigation" },
+  { key: "W", description: "Go to Weather", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex flex-col h-screen bg-[#060e1a]">
-            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-sky-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
-              Skip to main content
-            </a>
-            <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#3b82f6" />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <div className="flex-1 flex flex-col overflow-auto min-w-0">
-                <DemoModeBanner />
-                <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-                  <AppRouter />
-                </main>
+          <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#3b82f6">
+            <div className="flex flex-col h-screen bg-[#060e1a]">
+              <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-sky-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+                Skip to main content
+              </a>
+              <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#3b82f6" />
+              <div className="flex flex-1 overflow-hidden">
+                <Sidebar />
+                <div className="flex-1 flex flex-col overflow-auto min-w-0">
+                  <DemoModeBanner />
+                  <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+                    <AppRouter />
+                  </main>
+                </div>
               </div>
             </div>
-          </div>
-          <Toaster />
+            <Toaster />
+            <CommandPalette
+              open={cmdOpen}
+              onClose={() => setCmdOpen(false)}
+              commands={vesselsCommands}
+              appName="Vessels"
+              accentColor="#3b82f6"
+            />
+          </PowerUserProvider>
         </WouterRouter>
       </AuthProvider>
       <AgentCopilot config={helmsmanConfig} />

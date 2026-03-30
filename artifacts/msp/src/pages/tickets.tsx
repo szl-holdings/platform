@@ -1,5 +1,6 @@
 import { Ticket, Clock, AlertTriangle, CheckCircle, User, ArrowUp, Filter, Plus } from "lucide-react";
 import { useState } from "react";
+import { ExportButton } from "@workspace/shared-ui/data-export";
 
 interface TicketItem {
   id: string;
@@ -60,9 +61,28 @@ export default function Tickets() {
           <h1 className="text-2xl font-display font-bold">Service Desk</h1>
           <p className="text-sm text-muted-foreground mt-1">Open tickets, SLA countdown timers, and escalation status across all client accounts</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-          <Plus className="w-4 h-4" /> New Ticket
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            filename="service-desk-tickets"
+            csvData={tickets.map(t => ({
+              ID: t.id,
+              Subject: t.subject,
+              Client: t.client,
+              Priority: t.priority,
+              Status: t.status,
+              Assignee: t.assignee,
+              Created: t.created,
+              "SLA Deadline": t.slaDeadline,
+              "SLA Status": t.slaStatus,
+              Category: t.category,
+            }))}
+            pdfTitle="Service Desk Tickets"
+            accentColor="#3b82f6"
+          />
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+            <Plus className="w-4 h-4" /> New Ticket
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">

@@ -6,6 +6,7 @@ import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Link } from "wouter";
 import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { ExportButton } from "@workspace/shared-ui/data-export";
 
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -519,6 +520,20 @@ export default function FleetDashboard() {
                 <Globe className="w-3.5 h-3.5 text-sky-400" />
                 <span className="font-display text-xs font-bold text-sky-50 uppercase tracking-wider">Fleet Command</span>
                 <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 ml-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE</span>
+                <ExportButton
+                  filename="fleet-manifest"
+                  csvData={mockVessels.map((v: any) => ({
+                    Name: v.name,
+                    IMO: v.imoNumber || v.imo || "",
+                    Flag: v.flag || "",
+                    Type: v.vesselType || v.type || "",
+                    Status: v.status || "",
+                    "Current Port": v.currentPort || "",
+                    Destination: v.destination || "",
+                  }))}
+                  pdfTitle="Fleet Manifest"
+                  accentColor="#0ea5e9"
+                />
               </div>
               <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
               {[

@@ -4,7 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Toaster } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import {
   LayoutDashboard,
   Building2,
@@ -203,17 +205,50 @@ function DashboardLayout() {
   );
 }
 
+const mspCommands: CommandItem[] = [
+  { id: "nav-dashboard", label: "Client Dashboard", icon: "🏢", group: "Navigation", keywords: ["home", "overview", "clients"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard"); } },
+  { id: "nav-noc", label: "NOC Operations", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/noc"); } },
+  { id: "nav-tickets", label: "Service Desk", icon: "🎫", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/tickets"); } },
+  { id: "nav-devices", label: "Device Inventory", icon: "🖥️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/devices"); } },
+  { id: "nav-contracts", label: "Contracts & SLAs", icon: "📄", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/contracts"); } },
+  { id: "nav-dispatch", label: "Technician Dispatch", icon: "🔧", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dispatch"); } },
+  { id: "nav-revenue", label: "Revenue & Billing", icon: "💰", group: "Business", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/revenue"); } },
+  { id: "nav-technicians", label: "Technicians", icon: "👥", group: "Business", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/technicians"); } },
+  { id: "nav-rmm", label: "RMM Console", icon: "🖥️", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/rmm"); } },
+  { id: "nav-mrr", label: "MRR Dashboard", icon: "📈", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/mrr"); } },
+  { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
+  { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
+];
+
+const mspShortcuts: KeyboardShortcut[] = [
+  { key: "T", description: "Go to Service Desk", category: "Navigation" },
+  { key: "D", description: "Go to Device Inventory", category: "Navigation" },
+  { key: "N", description: "Go to NOC Operations", category: "Navigation" },
+  { key: "R", description: "Go to Revenue & Billing", category: "Navigation" },
+];
+
 function App() {
   const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(mspCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={basePath}>
-        <div className="flex flex-col h-screen">
-          <EcosystemNav currentAppId="msp" currentAppName="Evolve MSP Command Center" accentColor="#06b6d4" />
-          <div className="flex-1 overflow-hidden">
-            <DashboardLayout />
+        <PowerUserProvider shortcuts={mspShortcuts} appName="Evolve MSP" accentColor="#06b6d4">
+          <div className="flex flex-col h-screen">
+            <EcosystemNav currentAppId="msp" currentAppName="Evolve MSP Command Center" accentColor="#06b6d4" />
+            <div className="flex-1 overflow-hidden">
+              <DashboardLayout />
+            </div>
           </div>
-        </div>
+          <CommandPalette
+            open={cmdOpen}
+            onClose={() => setCmdOpen(false)}
+            commands={mspCommands}
+            appName="Evolve MSP"
+            accentColor="#06b6d4"
+          />
+        </PowerUserProvider>
       </WouterRouter>
       <Toaster position="bottom-right" richColors />
     </QueryClientProvider>

@@ -6,6 +6,8 @@ import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { compassConfig } from "@workspace/shared-ui/copilot-configs";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Scorecards = lazy(() => import("@/pages/scorecards"));
@@ -60,17 +62,47 @@ function Router() {
   );
 }
 
+const readinessCommands: CommandItem[] = [
+  { id: "nav-dashboard", label: "Readiness Dashboard", icon: "📊", group: "Navigation", keywords: ["home", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-scorecards", label: "Framework Scorecards", icon: "✅", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/scorecards"); } },
+  { id: "nav-milestones", label: "Milestones", icon: "🏁", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/milestones"); } },
+  { id: "nav-risks", label: "Risk Register", icon: "⚠️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/risks"); } },
+  { id: "nav-alerts", label: "Alerts", icon: "🔔", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alerts"); } },
+  { id: "nav-trends", label: "Trends", icon: "📈", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/trends"); } },
+  { id: "nav-ai-insights", label: "AI Insights", icon: "🤖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-insights"); } },
+  { id: "nav-vendor-risk", label: "Vendor Risk", icon: "🏢", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/vendor-risk"); } },
+  { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
+  { id: "app-admin", label: "Switch to Admin Panel", icon: "⚙️", group: "Switch App", description: "Control Plane", action: () => { window.location.href = "/admin/"; } },
+];
+
+const readinessShortcuts: KeyboardShortcut[] = [
+  { key: "S", description: "Go to Scorecards", category: "Navigation" },
+  { key: "R", description: "Go to Risk Register", category: "Navigation" },
+  { key: "T", description: "Go to Trends", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(readinessCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-            <EcosystemNav currentAppId="readiness-report" currentAppName="Readiness Report" accentColor="#84cc16" />
-            <div style={{ flex: 1 }}>
-              <Router />
+          <PowerUserProvider shortcuts={readinessShortcuts} appName="Readiness Report" accentColor="#84cc16">
+            <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+              <EcosystemNav currentAppId="readiness-report" currentAppName="Readiness Report" accentColor="#84cc16" />
+              <div style={{ flex: 1 }}>
+                <Router />
+              </div>
             </div>
-          </div>
+            <CommandPalette
+              open={cmdOpen}
+              onClose={() => setCmdOpen(false)}
+              commands={readinessCommands}
+              appName="Readiness Report"
+              accentColor="#84cc16"
+            />
+          </PowerUserProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

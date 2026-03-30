@@ -8,6 +8,8 @@ import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Be
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
@@ -264,26 +266,62 @@ function AppRouter() {
   );
 }
 
+const firestormCommands: CommandItem[] = [
+  { id: "nav-soc", label: "SOC Overview", icon: "🔴", group: "Navigation", keywords: ["dashboard", "home"], action: () => { window.location.hash = ""; window.location.pathname = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-incidents", label: "Incidents", icon: "🛡️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/incidents"); } },
+  { id: "nav-alerts", label: "Alerts", icon: "🔔", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alerts"); } },
+  { id: "nav-mitre", label: "MITRE ATT&CK", icon: "🎯", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/mitre-attack"); } },
+  { id: "nav-threat-intel", label: "Threat Intelligence", icon: "⚠️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/threat-intel"); } },
+  { id: "nav-findings", label: "Findings", icon: "🎯", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/findings"); } },
+  { id: "nav-xdr", label: "XDR Console", icon: "🖥️", group: "SOC Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/xdr-console"); } },
+  { id: "nav-hunting", label: "Threat Hunting", icon: "🔍", group: "SOC Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/threat-hunting"); } },
+  { id: "nav-forensics", label: "Forensics Timeline", icon: "🔥", group: "SOC Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/forensics"); } },
+  { id: "nav-risk", label: "Risk Scoring", icon: "📊", group: "SOC Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/risk-scoring"); } },
+  { id: "nav-reports", label: "Reports", icon: "📄", group: "SOC Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/reports"); } },
+  { id: "nav-compliance", label: "Compliance Readiness", icon: "✅", group: "Compliance", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/cr/dashboard"); } },
+  { id: "app-vessels", label: "Switch to Vessels", icon: "🚢", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
+  { id: "app-inca", label: "Switch to INCA", icon: "🧠", group: "Switch App", description: "AI Research", action: () => { window.location.href = "/inca/"; } },
+  { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
+];
+
+const firestormShortcuts: KeyboardShortcut[] = [
+  { key: "I", description: "Go to Incidents", category: "Navigation" },
+  { key: "A", description: "Go to Alerts", category: "Navigation" },
+  { key: "T", description: "Go to Threat Intel", category: "Navigation" },
+  { key: "R", description: "Go to Reports", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(firestormCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex flex-col h-screen bg-background">
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
-            Skip to main content
-          </a>
-          <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Security Simulation" accentColor="#ef4444" />
-          <div className="flex flex-1 overflow-hidden">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-auto">
-              <DemoModeBanner />
-              <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-                <AppRouter />
-              </main>
+        <PowerUserProvider shortcuts={firestormShortcuts} appName="Firestorm" accentColor="#ef4444">
+          <div className="flex flex-col h-screen bg-background">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+              Skip to main content
+            </a>
+            <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Security Simulation" accentColor="#ef4444" />
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar />
+              <div className="flex-1 flex flex-col overflow-auto">
+                <DemoModeBanner />
+                <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+                  <AppRouter />
+                </main>
+              </div>
             </div>
+            <Toaster />
+            <CommandPalette
+              open={cmdOpen}
+              onClose={() => setCmdOpen(false)}
+              commands={firestormCommands}
+              appName="Firestorm"
+              accentColor="#ef4444"
+            />
           </div>
-        </div>
-        <Toaster />
+        </PowerUserProvider>
       </WouterRouter>
       <AgentCopilot config={sentinelConfig} />
     </QueryClientProvider>

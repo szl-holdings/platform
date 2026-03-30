@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus, CheckCircle, Activity } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { clients as mockClients, type Client } from "@/data/mock-data";
+import { ExportButton } from "@workspace/shared-ui/data-export";
 
 function HealthBadge({ score }: { score: number }) {
   const color = score >= 90 ? "text-emerald-400 bg-emerald-500/10" : score >= 75 ? "text-amber-400 bg-amber-500/10" : "text-red-400 bg-red-500/10";
@@ -105,9 +106,25 @@ export default function ClientsPage() {
           <h1 className="text-2xl font-display font-bold text-foreground">Client Management</h1>
           <p className="text-sm text-muted-foreground mt-1">Client health, contract status, and endpoint coverage across all managed accounts</p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
-          <Plus className="w-4 h-4" /> Add Client
-        </button>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            filename="msp-clients"
+            csvData={mockClients.map(c => ({
+              Name: c.name,
+              Industry: c.industry,
+              "Contract Status": c.contractStatus,
+              "Health Score": c.healthScore,
+              Devices: c.deviceCount,
+              "Open Tickets": c.openTickets,
+              "MRR ($)": c.mrr,
+            }))}
+            pdfTitle="Client Management Report"
+            accentColor="#3b82f6"
+          />
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
+            <Plus className="w-4 h-4" /> Add Client
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

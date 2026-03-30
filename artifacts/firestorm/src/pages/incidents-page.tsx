@@ -11,6 +11,7 @@ import { Textarea } from "@workspace/shared-ui/ui/textarea";
 import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ExportButton } from "@workspace/shared-ui/data-export";
 
 const statusOrder = ["detection", "triage", "investigation", "containment", "remediation", "closed"];
 const statusColors: Record<string, string> = {
@@ -76,6 +77,20 @@ export default function IncidentsPage() {
             <Button variant={view === "list" ? "default" : "ghost"} size="sm" onClick={() => setView("list")}>List</Button>
             <Button variant={view === "kanban" ? "default" : "ghost"} size="sm" onClick={() => setView("kanban")}>Kanban</Button>
           </div>
+          <ExportButton
+            filename="incidents"
+            csvData={incidents.map((i: any) => ({
+              ID: i.id,
+              Title: i.title,
+              Severity: i.severity,
+              Status: i.status,
+              "Assigned Analyst": i.assignedAnalyst || "",
+              "ATT&CK Technique": i.attackTechnique || "",
+              "Created At": i.createdAt ? new Date(i.createdAt).toLocaleString() : "",
+            }))}
+            pdfTitle="Incident Response Log"
+            accentColor="#ef4444"
+          />
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="w-4 h-4 mr-2" /> New Incident</Button>

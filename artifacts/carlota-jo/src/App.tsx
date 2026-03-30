@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
 const Home = lazy(() => import("@/pages/Home"));
 const BookingFlow = lazy(() => import("@/pages/BookingFlow"));
@@ -48,15 +50,44 @@ function Router() {
   );
 }
 
+const carlotaCommands: CommandItem[] = [
+  { id: "nav-home", label: "Home", icon: "✨", group: "Navigation", keywords: ["overview", "main"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-advisory", label: "Advisory Intel", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/advisory"); } },
+  { id: "nav-ai-advisory", label: "AI Advisory", icon: "🤖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-advisory"); } },
+  { id: "nav-engagements", label: "Engagements", icon: "🤝", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/engagements"); } },
+  { id: "nav-client-intel", label: "Client Intel", icon: "📊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-intel"); } },
+  { id: "nav-roi", label: "ROI Calculator", icon: "💰", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/roi-calculator"); } },
+  { id: "nav-brand-audit", label: "Brand Audit", icon: "🔍", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/brand-audit"); } },
+  { id: "nav-content", label: "Content Strategy", icon: "📝", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/content-strategy"); } },
+  { id: "nav-book", label: "Book Consultation", icon: "📅", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/book"); } },
+  { id: "app-dreamscape", label: "Switch to Dreamscape", icon: "🎨", group: "Switch App", description: "Creative Engine", action: () => { window.location.href = "/dreamscape/"; } },
+];
+
+const carlotaShortcuts: KeyboardShortcut[] = [
+  { key: "B", description: "Book consultation", category: "Actions" },
+  { key: "A", description: "Go to Advisory Intel", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(carlotaCommands);
+
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo Consulting" accentColor="#f472b6" />
-        <div style={{ flex: 1 }}>
-          <Router />
+      <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#f472b6">
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+          <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo Consulting" accentColor="#f472b6" />
+          <div style={{ flex: 1 }}>
+            <Router />
+          </div>
         </div>
-      </div>
+        <CommandPalette
+          open={cmdOpen}
+          onClose={() => setCmdOpen(false)}
+          commands={carlotaCommands}
+          appName="Carlota Jo"
+          accentColor="#f472b6"
+        />
+      </PowerUserProvider>
     </WouterRouter>
   );
 }

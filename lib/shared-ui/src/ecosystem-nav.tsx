@@ -878,6 +878,8 @@ export function EcosystemNav({
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        // Defer to app-level command palette if registered
+        if ((window as any).__hasCommandPalette) return;
         e.preventDefault();
         setShowSearch(true);
       }

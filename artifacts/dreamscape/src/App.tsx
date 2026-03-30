@@ -5,6 +5,8 @@ import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { Layout } from "@/components/layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { museConfig } from "@workspace/shared-ui/copilot-configs";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
 const Workspace = lazy(() => import("@/pages/workspace").then(m => ({ default: m.Workspace })));
 const CampaignDetail = lazy(() => import("@/pages/campaign-detail").then(m => ({ default: m.CampaignDetail })));
@@ -55,18 +57,52 @@ function Router() {
   );
 }
 
+const dreamscapeCommands: CommandItem[] = [
+  { id: "nav-workspace", label: "Workspace", icon: "🎨", group: "Navigation", keywords: ["home", "campaigns", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-ai-studio", label: "AI Studio", icon: "🤖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-studio"); } },
+  { id: "nav-calendar", label: "Content Calendar", icon: "📅", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/content-calendar"); } },
+  { id: "nav-social", label: "Social Assets", icon: "📱", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/social-assets"); } },
+  { id: "nav-guides", label: "Content Guides", icon: "📖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/content-guides"); } },
+  { id: "nav-generators", label: "Generator Tools", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/generators"); } },
+  { id: "nav-aurora", label: "Aurora Gallery", icon: "🌅", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/aurora"); } },
+  { id: "nav-brand-voice", label: "Brand Voice Engine", icon: "🎙️", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/brand-voice"); } },
+  { id: "nav-voice-studio", label: "Voice Studio", icon: "🎤", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/voice-studio"); } },
+  { id: "nav-motion", label: "Motion Graphics", icon: "🎬", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/motion-graphics"); } },
+  { id: "nav-collab", label: "Collaborative Workspace", icon: "👥", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/collab"); } },
+  { id: "app-carlota-jo", label: "Switch to Carlota Jo", icon: "✨", group: "Switch App", description: "Brand Consulting", action: () => { window.location.href = "/carlota-jo/"; } },
+  { id: "app-inca", label: "Switch to INCA", icon: "🧠", group: "Switch App", description: "AI Research", action: () => { window.location.href = "/inca/"; } },
+];
+
+const dreamscapeShortcuts: KeyboardShortcut[] = [
+  { key: "C", description: "Go to Content Calendar", category: "Navigation" },
+  { key: "S", description: "Go to AI Studio", category: "Navigation" },
+  { key: "G", description: "Go to Generator Tools", category: "Navigation" },
+  { key: "B", description: "Go to Brand Voice Engine", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(dreamscapeCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex flex-col h-screen">
-          <EcosystemNav currentAppId="dreamscape" currentAppName="Dreamscape Creative Engine" accentColor="#ec4899" />
-          <div className="flex-1 overflow-hidden">
-            <Layout>
-              <Router />
-            </Layout>
+        <PowerUserProvider shortcuts={dreamscapeShortcuts} appName="Dreamscape" accentColor="#ec4899">
+          <div className="flex flex-col h-screen">
+            <EcosystemNav currentAppId="dreamscape" currentAppName="Dreamscape Creative Engine" accentColor="#ec4899" />
+            <div className="flex-1 overflow-hidden">
+              <Layout>
+                <Router />
+              </Layout>
+            </div>
           </div>
-        </div>
+          <CommandPalette
+            open={cmdOpen}
+            onClose={() => setCmdOpen(false)}
+            commands={dreamscapeCommands}
+            appName="Dreamscape"
+            accentColor="#ec4899"
+          />
+        </PowerUserProvider>
       </WouterRouter>
       <AgentCopilot config={museConfig} />
     </QueryClientProvider>

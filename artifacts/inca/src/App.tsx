@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Projects = lazy(() => import("@/pages/projects"));
@@ -182,22 +184,57 @@ function AppRouter() {
   );
 }
 
+const incaCommands: CommandItem[] = [
+  { id: "nav-dashboard", label: "Dashboard", icon: "🧠", group: "Navigation", keywords: ["home", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-projects", label: "Projects", icon: "📁", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/projects"); } },
+  { id: "nav-experiments", label: "Experiments", icon: "🧪", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/experiments"); } },
+  { id: "nav-models", label: "Models", icon: "⚙️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/models"); } },
+  { id: "nav-insights", label: "Insights", icon: "💡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/insights"); } },
+  { id: "nav-gpu", label: "GPU Monitor", icon: "🖥️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/gpu-monitoring"); } },
+  { id: "nav-registry", label: "Model Registry", icon: "📦", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/registry"); } },
+  { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/predictions"); } },
+  { id: "nav-ensemble", label: "Ensemble Studio", icon: "🎛️", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ensemble"); } },
+  { id: "nav-neural", label: "Neural Explorer", icon: "🔬", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/neural-explorer"); } },
+  { id: "nav-llm", label: "LLM Evaluation", icon: "🤖", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/llm-eval"); } },
+  { id: "nav-benchmarking", label: "Benchmarking", icon: "🏆", group: "Research Tools", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/benchmarking"); } },
+  { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
+  { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
+];
+
+const incaShortcuts: KeyboardShortcut[] = [
+  { key: "E", description: "Go to Experiments", category: "Navigation" },
+  { key: "M", description: "Go to Models", category: "Navigation" },
+  { key: "P", description: "Go to Predictions", category: "Navigation" },
+  { key: "G", description: "Go to GPU Monitor", category: "Navigation" },
+];
+
 function App() {
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(incaCommands);
+
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex flex-col h-screen bg-background">
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
-            Skip to main content
-          </a>
-          <EcosystemNav currentAppId="inca" currentAppName="INCA AI Research Command Center" accentColor="#8b5cf6" />
-          <div className="flex flex-1 overflow-hidden">
-            <Sidebar />
-            <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-              <AppRouter />
-            </main>
+        <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#8b5cf6">
+          <div className="flex flex-col h-screen bg-background">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
+              Skip to main content
+            </a>
+            <EcosystemNav currentAppId="inca" currentAppName="INCA AI Research Command Center" accentColor="#8b5cf6" />
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar />
+              <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+                <AppRouter />
+              </main>
+            </div>
           </div>
-        </div>
+          <CommandPalette
+            open={cmdOpen}
+            onClose={() => setCmdOpen(false)}
+            commands={incaCommands}
+            appName="INCA"
+            accentColor="#8b5cf6"
+          />
+        </PowerUserProvider>
       </WouterRouter>
     </QueryClientProvider>
   );
