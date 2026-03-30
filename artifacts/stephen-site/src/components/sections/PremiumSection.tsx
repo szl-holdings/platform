@@ -152,7 +152,7 @@ export function PremiumSection() {
               )}
             </Button>
             <p className="mt-6 text-sm text-muted-foreground">
-              Already a member? <a href="#" className="text-primary hover:underline">Log in</a>
+              Already a member? <a href="/checkout/success" className="text-primary hover:underline">Check your access</a>
             </p>
           </div>
 

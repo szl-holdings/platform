@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = `${BASE}/api`;
 
-const DEFAULT_PIN = "szl2026";
+const DEFAULT_PIN = import.meta.env.VITE_ADMIN_PIN || "szl2026";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -97,7 +97,7 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
             Unlock Admin
           </button>
         </form>
-        <p className="text-center text-xs text-muted-foreground mt-6">Default PIN: szl2026</p>
+        <p className="text-center text-xs text-muted-foreground mt-6">Contact the site administrator for access.</p>
       </m.div>
     </div>
   );

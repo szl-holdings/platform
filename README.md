@@ -116,7 +116,11 @@ Not a portfolio site. A platform architect's narrative: the thesis, the tech, th
 │   ├── vessels/             # Vessels Maritime Intelligence
 │   └── api-server/          # Centralised API and integration layer
 ├── lib/
-│   └── shared-ui/           # Shared design system and components
+│   ├── shared-ui/           # Shared design system and components
+│   ├── db/                  # Drizzle ORM schema and database client
+│   ├── services/            # Stripe, email, and third-party adapters
+│   ├── auth/                # Authentication service (Replit OIDC)
+│   └── analytics/           # Telemetry and event tracking
 ├── docs/
 │   ├── architecture.md      # Four-layer model, entity graph, agent network
 │   ├── trust-center.md      # Platform trust, security, AI governance
@@ -134,21 +138,175 @@ Not a portfolio site. A platform architect's narrative: the thesis, the tech, th
 
 ---
 
-## Quick Start
+## Local Setup
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm 9+
+- PostgreSQL (provided by Replit managed database)
+
+### Installation
 
 ```bash
-# Install dependencies
+# Install all workspace dependencies
 pnpm install
 
-# Push database schema (development)
+# Push database schema to development database
 pnpm --filter @workspace/db run push
 
-# Seed demo data
+# Seed demo data (optional)
 pnpm --filter @workspace/scripts run seed
-
-# Start all services (handled by Replit workflows)
-# Each artifact reads PORT from environment
 ```
+
+### Starting Services
+
+Each artifact runs as a separate Vite dev server and reads `PORT` from the environment. In Replit, workflows manage this automatically. To start individually:
+
+```bash
+# Start the API server
+pnpm --filter @workspace/api-server run dev
+
+# Start a specific frontend artifact (e.g. SZL Holdings)
+pnpm --filter szl-holdings run dev
+
+# Start all services simultaneously (via Replit workflow manager)
+# Each artifact is registered as a separate workflow
+```
+
+### Build
+
+```bash
+# Build a specific artifact
+pnpm --filter szl-holdings run build
+
+# Build all artifacts
+pnpm -r run build
+```
+
+---
+
+## Environment Variables
+
+All environment variables are managed through Replit Secrets. Do **not** commit secrets to version control.
+
+### Required (Production)
+
+| Variable | Description | Example |
+|---|---|---|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/db` |
+| `SESSION_SECRET` | Random secret for session signing (min 32 chars) | `openssl rand -hex 32` |
+| `STRIPE_SECRET_KEY` | Stripe secret key for payments | `sk_live_...` |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret for event verification | `whsec_...` |
+| `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key (via Replit AI Integration proxy) | Set via Replit Integrations |
+| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Anthropic API key (via Replit AI Integration proxy) | Set via Replit Integrations |
+
+### Optional
+
+| Variable | Description | Default |
+|---|---|---|
+| `PORT` | Port for each service to bind on | Assigned by Replit per artifact |
+| `NODE_ENV` | Environment mode | `development` |
+| `CORS_ORIGINS` | Comma-separated allowed CORS origins | Open in development |
+| `LOG_LEVEL` | Pino log level (`trace`, `debug`, `info`, `warn`, `error`) | `info` |
+| `RESEND_API_KEY` | Resend API key for transactional email | Required for contact forms |
+| `SMTP_HOST` | SMTP host for email delivery (alternative to Resend) | — |
+| `SMTP_PORT` | SMTP port | `587` |
+| `SMTP_USER` | SMTP username | — |
+| `SMTP_PASS` | SMTP password | — |
+| `SZL_INTERNAL_EMAIL` | Internal routing address for contact form submissions | — |
+| `ISSUER_URL` | OIDC issuer URL for Replit Auth | Auto-detected on Replit |
+| `VITE_APP_URL` | Base URL for frontend apps (used in email links) | — |
+| `VITE_ADMIN_PIN` | PIN for the SZL Holdings admin panel UI gate (client-side only — not a substitute for server-side auth) | Defaults to `szl2026` — **must be changed in production** |
+
+### Stripe Pricing (Carlota Jo Checkout)
+
+| Variable | Description |
+|---|---|
+| `STRIPE_PRICE_STRATEGY_SESSION` | Stripe Price ID for Strategy Session tier |
+| `STRIPE_PRICE_PORTFOLIO_REVIEW` | Stripe Price ID for Portfolio Review tier |
+| `STRIPE_PRICE_ADVISORY_RETAINER` | Stripe Price ID for Advisory Retainer tier |
+
+---
+
+## Stripe Webhooks
+
+The API server handles the following Stripe webhook events at `POST /api/billing/webhooks`:
+
+| Event | Description | Handler action |
+|---|---|---|
+| `checkout.session.completed` | Payment or subscription checkout completed | Creates or links subscription record, logs payment confirmation |
+| `customer.subscription.created` | New subscription activated | Inserts subscription into DB with active status |
+| `customer.subscription.updated` | Subscription modified (plan change, renewal) | Updates status, `current_period_start`, and `current_period_end` |
+| `customer.subscription.deleted` | Subscription cancelled | Sets subscription status to `canceled` |
+| `invoice.paid` | Invoice payment succeeded (Stripe's event name for successful invoice payment, also called `invoice.payment_succeeded` in older docs) | Inserts invoice record with `paid` status and amount |
+| `invoice.payment_failed` | Payment attempt failed | Marks linked subscription as `past_due` |
+| `payment_intent.succeeded` | One-time payment completed | Logged to audit trail; no DB write required |
+
+**Webhook configuration:**
+1. In the Stripe Dashboard, create a webhook endpoint pointing to `https://your-domain.com/api/billing/webhooks`
+2. Select all seven events listed above
+3. Copy the signing secret and set `STRIPE_WEBHOOK_SECRET` in Replit Secrets
+4. The endpoint validates every event signature before processing — unsigned events are rejected with 400
+
+---
+
+## Deployment Checklist
+
+Run through this checklist before promoting any release to production.
+
+### Secrets & Configuration
+
+- [ ] `DATABASE_URL` is set to the production database connection string
+- [ ] `SESSION_SECRET` is a cryptographically random value (minimum 32 characters)
+- [ ] `STRIPE_SECRET_KEY` is the live key (`sk_live_...`), not test key
+- [ ] `STRIPE_WEBHOOK_SECRET` is copied from the production Stripe webhook endpoint
+- [ ] All `STRIPE_PRICE_*` variables are set to live Stripe Price IDs
+- [ ] `AI_INTEGRATIONS_OPENAI_API_KEY` is set (via Replit AI Integrations)
+- [ ] `AI_INTEGRATIONS_ANTHROPIC_API_KEY` is set (via Replit AI Integrations)
+- [ ] `CORS_ORIGINS` is set to the production domain(s) — do not leave open
+- [ ] `RESEND_API_KEY` or SMTP credentials are configured for transactional email
+- [ ] `SZL_INTERNAL_EMAIL` is set to the correct internal routing address
+- [ ] `NODE_ENV=production` is set
+
+### Auth & Access
+
+- [ ] Replit Auth redirect URIs include the production domain
+- [ ] `VITE_ADMIN_PIN` is set to a strong value (not the default `szl2026`)
+- [ ] All protected API endpoints return 401 without a valid session token
+- [ ] Org-scoped endpoints deny requests from mismatched org IDs
+- [ ] Client portal endpoints deny access from non-matching clients
+
+### Build & Start Commands
+
+- [ ] All artifacts build without TypeScript errors: `pnpm -r run build`
+- [ ] API server builds successfully: `pnpm --filter @workspace/api-server run build`
+- [ ] Database schema is up to date: `pnpm --filter @workspace/db run push`
+- [ ] All workflows are registered and start correctly in the Replit workflow manager
+
+### Stripe Webhooks
+
+- [ ] Webhook endpoint is registered in the Stripe Dashboard for production
+- [ ] Webhook signing secret matches `STRIPE_WEBHOOK_SECRET`
+- [ ] All seven event types from the Stripe Webhooks section are selected in the Stripe Dashboard
+- [ ] Test a webhook delivery from the Stripe Dashboard and confirm 200 response
+
+### Frontend
+
+- [ ] All public pages load without console errors at production URL
+- [ ] SEO meta tags (title, description, OG) are present on all public pages
+- [ ] No placeholder text, "Lorem ipsum", or "Coming soon" labels visible to users
+- [ ] All forms validate inline and show loading states on submit
+- [ ] Mobile layout verified at 375px, 768px, and 1024px breakpoints
+- [ ] All navigation links resolve to real pages (no 404s)
+
+### Security
+
+- [ ] No API keys or secrets are present in frontend JavaScript bundles
+- [ ] HTTPS is enforced on the production domain
+- [ ] Content-Security-Policy headers are active (enabled by Helmet in production)
+- [ ] HSTS headers are set (`max-age=31536000; includeSubDomains; preload`)
+- [ ] Rate limiting is active on all API endpoints
 
 ---
 

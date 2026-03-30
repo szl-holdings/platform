@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 
 const theses = [
   {
@@ -28,10 +29,10 @@ const theses = [
 ];
 
 const writing = [
-  { title: "On building systems that outlast their builders", area: "Engineering" },
-  { title: "Why most ML projects fail before the first model is trained", area: "AI / ML" },
-  { title: "The hidden cost of premature abstraction", area: "Engineering" },
-  { title: "What maritime taught me about real-time systems", area: "Infrastructure" },
+  { title: "The accountability gap in enterprise AI", area: "AI & Enterprise", slug: "accountability-gap-enterprise-ai" },
+  { title: "The command interface is underbuilt", area: "Product", slug: "command-interface-underbuilt" },
+  { title: "Vertical intelligence beats horizontal tooling", area: "Strategy", slug: "vertical-intelligence-vs-horizontal-tooling" },
+  { title: "Multi-tenant isolation as a building material", area: "Engineering", slug: "multi-tenant-isolation" },
 ];
 
 export function MarketIntelligenceSection() {
@@ -97,20 +98,21 @@ export function MarketIntelligenceSection() {
 
         <div className="space-y-px bg-white/5">
           {writing.map((w, i) => (
-            <motion.div
-              key={w.title}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.5, delay: i * 0.06 }}
-              className="bg-[#080c11] hover:bg-[#0d1219] transition-colors duration-300 px-7 py-5 flex items-center justify-between gap-4 group cursor-pointer"
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-[#7ba3d4]/40 shrink-0">{w.area}</span>
-                <span className="text-[14px] text-white/55 font-light group-hover:text-white/75 transition-colors duration-200 truncate">{w.title}</span>
-              </div>
-              <span className="text-[11px] text-[#7ba3d4]/30 group-hover:text-[#7ba3d4]/60 transition-colors duration-200 shrink-0">Coming soon</span>
-            </motion.div>
+            <Link key={w.title} href={`/writing/${w.slug}`}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: i * 0.06 }}
+                className="bg-[#080c11] hover:bg-[#0d1219] transition-colors duration-300 px-7 py-5 flex items-center justify-between gap-4 group cursor-pointer"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-[#7ba3d4]/40 shrink-0">{w.area}</span>
+                  <span className="text-[14px] text-white/55 font-light group-hover:text-white/75 transition-colors duration-200 truncate">{w.title}</span>
+                </div>
+                <span className="text-[11px] text-[#7ba3d4]/50 group-hover:text-[#7ba3d4]/80 transition-colors duration-200 shrink-0">Read →</span>
+              </motion.div>
+            </Link>
           ))}
         </div>
       </div>

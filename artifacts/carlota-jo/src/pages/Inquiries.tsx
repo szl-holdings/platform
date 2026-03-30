@@ -2,13 +2,44 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API = `${BASE}/api`;
+
 export default function InquiriesPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", company: "", email: "", type: "", message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch(`${API}/booking/inquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          company: form.company || undefined,
+          service: form.type || undefined,
+          message: form.message,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || `Submission failed (${res.status})`);
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again or email us directly.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -107,11 +138,24 @@ export default function InquiriesPage() {
                     className="w-full bg-[#0c0e14] border border-[#f5f0e8]/8 px-4 py-3 text-[13px] text-[#f5f0e8] placeholder-[#f5f0e8]/18 font-light focus:outline-none focus:border-[#c8a96a]/30 transition-colors resize-none"
                   />
                 </div>
+                {submitError && (
+                  <p className="text-[12px] text-red-400/80 font-light border border-red-500/20 bg-red-500/5 px-4 py-3">
+                    {submitError}
+                  </p>
+                )}
                 <button
                   type="submit"
-                  className="w-full py-3.5 text-[13px] font-medium tracking-[0.1em] text-[#07090d] bg-[#c8a96a] hover:bg-[#d4b87a] transition-colors"
+                  disabled={submitting}
+                  className="w-full py-3.5 text-[13px] font-medium tracking-[0.1em] text-[#07090d] bg-[#c8a96a] hover:bg-[#d4b87a] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
-                  Submit private inquiry
+                  {submitting ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-[#07090d]/40 border-t-[#07090d] rounded-full animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit private inquiry"
+                  )}
                 </button>
                 <p className="text-center text-[11px] text-[#f5f0e8]/18 font-light">
                   All submissions are strictly confidential
