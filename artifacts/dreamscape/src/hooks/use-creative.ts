@@ -23,6 +23,10 @@ export type StoryboardScene = {
   duration?: string;
   thumbnailUrl?: string;
   metadata?: Record<string, unknown>;
+  shotType?: string;
+  cameraMovement?: string;
+  lighting?: string;
+  talentNotes?: string;
 };
 
 export type Voiceover = {
@@ -46,6 +50,11 @@ export type Asset = {
   fileSize?: number;
   mimeType?: string;
   tags?: string[];
+  category?: string;
+  size?: string;
+  url?: string;
+  codec?: string;
+  resolution?: string;
 };
 
 export type Review = {
@@ -57,6 +66,11 @@ export type Review = {
   status: "pending" | "approved" | "changes_requested" | "rejected";
   section?: string;
   createdAt?: string;
+  round?: number;
+  department?: string;
+  reviewer?: string;
+  role?: string;
+  date?: string;
 };
 
 export function useScripts(campaignId: string) {

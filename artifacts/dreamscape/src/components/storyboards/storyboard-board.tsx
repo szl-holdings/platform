@@ -10,7 +10,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
 
   const handleAddScene = () => {
     const nextNum = (scenes?.length || 0) + 1;
-    createScene.mutate({ campaignId, sceneNumber: nextNum, visual: "New scene description...", duration: "3s" });
+    createScene.mutate({ campaignId: parseInt(campaignId, 10), sceneNumber: nextNum, visual: "New scene description...", duration: "3s" });
   };
 
   if (isLoading) return <div className="animate-pulse flex gap-6 overflow-hidden">
@@ -24,7 +24,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
           <h2 className="font-semibold text-lg flex items-center gap-2">
             <Clapperboard className="w-5 h-5 text-primary" /> Scene Layout
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">{scenes?.length || 0} scenes &middot; {scenes?.reduce((acc, s) => acc + parseInt(s.duration), 0) || 0}s total runtime</p>
+          <p className="text-xs text-muted-foreground mt-1">{scenes?.length || 0} scenes &middot; {scenes?.reduce((acc, s) => acc + parseInt(s.duration || "0"), 0) || 0}s total runtime</p>
         </div>
         <Button onClick={handleAddScene} disabled={createScene.isPending}>
           <Plus className="w-4 h-4 mr-2" /> Add Scene
@@ -35,7 +35,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
         {scenes?.map((scene) => (
           <motion.div 
             key={scene.id} 
-            layoutId={scene.id}
+            layoutId={String(scene.id)}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="w-[340px] shrink-0 h-full max-h-[700px] flex flex-col group cursor-grab active:cursor-grabbing"

@@ -10,8 +10,8 @@ export type UpdateConnectorStatus =
   (typeof UpdateConnectorStatus)[keyof typeof UpdateConnectorStatus];
 
 export const UpdateConnectorStatus = {
-  active: "active",
-  inactive: "inactive",
-  error: "error",
-  pending: "pending",
+  active: 'active',
+  inactive: 'inactive',
+  error: 'error',
+  pending: 'pending',
 } as const;

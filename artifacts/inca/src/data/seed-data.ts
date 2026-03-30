@@ -40,7 +40,7 @@ export interface Experiment {
   results: string;
   status: "running" | "completed" | "failed" | "queued";
   metrics: ExperimentMetric[];
-  hyperparameters: Record<string, string | number>;
+  hyperparameters: Record<string, string | number | boolean>;
   startDate: string;
   endDate: string | null;
   duration: string;

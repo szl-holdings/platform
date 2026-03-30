@@ -10,9 +10,9 @@ export type CreateNotificationType =
   (typeof CreateNotificationType)[keyof typeof CreateNotificationType];
 
 export const CreateNotificationType = {
-  info: "info",
-  success: "success",
-  warning: "warning",
-  error: "error",
-  action_required: "action_required",
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  error: 'error',
+  action_required: 'action_required',
 } as const;

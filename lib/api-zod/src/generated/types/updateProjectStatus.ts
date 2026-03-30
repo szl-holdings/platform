@@ -6,12 +6,11 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type UpdateProjectStatus =
-  (typeof UpdateProjectStatus)[keyof typeof UpdateProjectStatus];
+export type UpdateProjectStatus = (typeof UpdateProjectStatus)[keyof typeof UpdateProjectStatus];
 
 export const UpdateProjectStatus = {
-  active: "active",
-  completed: "completed",
-  "on-hold": "on-hold",
-  archived: "archived",
+  active: 'active',
+  completed: 'completed',
+  'on-hold': 'on-hold',
+  archived: 'archived',
 } as const;

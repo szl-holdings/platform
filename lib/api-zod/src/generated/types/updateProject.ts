@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { UpdateProjectStatus } from "./updateProjectStatus";
+import type { UpdateProjectStatus } from './updateProjectStatus';
 
 export interface UpdateProject {
   name?: string;

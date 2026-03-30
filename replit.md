@@ -30,7 +30,7 @@ Premium dark-mode-forward design via `@workspace/shared-ui`. Unified dark backgr
 DreamStack is a pnpm monorepo containing 14 interconnected applications built with TypeScript, sharing a common PostgreSQL database, authentication system, and design system. All apps use real PostgreSQL via Drizzle ORM (90+ tables) — no mock data.
 
 #### Core Infrastructure & Features
-- **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Seven roles (`super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`) control access.
+- **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Eleven roles (`super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`, `operator`, `seller`, `client_viewer`, `creative_user`) control access.
 - **API Server:** Modular routes in `artifacts/api-server`, utilizing Zod for validation and Drizzle for persistence. Includes `helmet`, `express-rate-limit`, CORS, and structured error handling.
 - **Service Adapters:** `lib/services` provides a consistent pattern for integrating 24 third-party services with auto environment variable detection and mock fallback.
 - **Stripe Billing Integration:** Full checkout/subscription/webhook pipeline for managing billing flows.

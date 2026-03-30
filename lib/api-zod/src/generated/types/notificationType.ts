@@ -6,13 +6,12 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type NotificationType =
-  (typeof NotificationType)[keyof typeof NotificationType];
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
 
 export const NotificationType = {
-  info: "info",
-  success: "success",
-  warning: "warning",
-  error: "error",
-  action_required: "action_required",
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  error: 'error',
+  action_required: 'action_required',
 } as const;

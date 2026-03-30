@@ -10,9 +10,11 @@ export type CreateStephenBookingRequestType =
   (typeof CreateStephenBookingRequestType)[keyof typeof CreateStephenBookingRequestType];
 
 export const CreateStephenBookingRequestType = {
-  consultation: "consultation",
-  partnership: "partnership",
-  investment: "investment",
-  speaking: "speaking",
-  other: "other",
+  consultation: 'consultation',
+  project: 'project',
+  recruitment: 'recruitment',
+  partnership: 'partnership',
+  investment: 'investment',
+  speaking: 'speaking',
+  other: 'other',
 } as const;

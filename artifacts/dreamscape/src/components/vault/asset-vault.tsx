@@ -37,7 +37,7 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
   const categories = [...new Set(assets?.map(a => a.category) || [])];
   const filteredAssets = activeCategory ? assets?.filter(a => a.category === activeCategory) : assets;
   const totalSizeMB = assets?.reduce((acc, a) => {
-    const match = a.size.match(/([\d.]+)\s*(TB|GB|MB|KB)/i);
+    const match = (a.size || "").match(/([\d.]+)\s*(TB|GB|MB|KB)/i);
     if (!match) return acc;
     const val = parseFloat(match[1]);
     if (match[2] === 'TB') return acc + val * 1024 * 1024;
@@ -78,7 +78,7 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+              onClick={() => setActiveCategory(activeCategory === cat ? null : (cat || null))}
               className={`text-xs px-3 py-1.5 rounded-full border transition-all whitespace-nowrap ${activeCategory === cat ? 'bg-primary/10 border-primary/30 text-primary' : 'border-border/50 text-muted-foreground hover:text-foreground hover:border-border'}`}
             >
               {cat} ({assets?.filter(a => a.category === cat).length})
@@ -90,7 +90,7 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filteredAssets?.map(asset => {
           const Icon = TYPE_ICONS[asset.type] || FileText;
-          const borderColor = CATEGORY_COLORS[asset.category] || "";
+          const borderColor = CATEGORY_COLORS[asset.category as keyof typeof CATEGORY_COLORS] || "";
           return (
             <Card key={asset.id} className={`group overflow-hidden flex flex-col relative border-border/60 hover:border-primary/50 transition-all hover:shadow-xl hover:-translate-y-1 border-l-2 ${borderColor}`}>
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -148,13 +148,13 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
                 </div>
                 
                 <div className="mt-auto flex flex-wrap gap-1">
-                  {asset.tags.slice(0, 3).map(tag => (
+                  {(asset.tags || []).slice(0, 3).map(tag => (
                     <Badge key={tag} variant="outline" className="text-[9px] py-0 h-4 bg-muted/50">
                       {tag}
                     </Badge>
                   ))}
-                  {asset.tags.length > 3 && (
-                    <Badge variant="outline" className="text-[9px] py-0 h-4 bg-muted/50">+{asset.tags.length - 3}</Badge>
+                  {(asset.tags || []).length > 3 && (
+                    <Badge variant="outline" className="text-[9px] py-0 h-4 bg-muted/50">+{(asset.tags || []).length - 3}</Badge>
                   )}
                 </div>
               </div>

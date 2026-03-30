@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { CheckoutRequestMode } from "./checkoutRequestMode";
+import type { CheckoutRequestMode } from './checkoutRequestMode';
 
 export interface CheckoutRequest {
   priceId: string;

@@ -6,16 +6,15 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type CreateConnectorType =
-  (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
+export type CreateConnectorType = (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
 
 export const CreateConnectorType = {
-  stripe: "stripe",
-  slack: "slack",
-  twilio: "twilio",
-  google: "google",
-  notion: "notion",
-  github: "github",
-  shopify: "shopify",
-  custom: "custom",
+  stripe: 'stripe',
+  slack: 'slack',
+  twilio: 'twilio',
+  google: 'google',
+  notion: 'notion',
+  github: 'github',
+  shopify: 'shopify',
+  custom: 'custom',
 } as const;

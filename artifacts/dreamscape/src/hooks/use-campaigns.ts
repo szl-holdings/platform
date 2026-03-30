@@ -17,7 +17,7 @@ export type Campaign = {
   progress?: number;
   budget?: string;
   director?: string;
-  kpis?: { label: string; value: string; trend: string }[];
+  kpis?: { label: string; value: string; trend?: string }[];
 };
 
 function isAuthError(e: unknown): boolean {

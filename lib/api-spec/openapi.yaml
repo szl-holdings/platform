@@ -1154,6 +1154,9 @@ components:
         description:
           type: string
           nullable: true
+        category:
+          type: string
+          nullable: true
         status:
           type: string
           enum: [active, completed, on-hold, archived]
@@ -2048,7 +2051,7 @@ components:
           nullable: true
         type:
           type: string
-          enum: [consultation, partnership, investment, speaking, other]
+          enum: [consultation, project, recruitment, partnership, investment, speaking, other]
         message:
           type: string
         preferredDate:
@@ -2081,7 +2084,7 @@ components:
           type: string
         type:
           type: string
-          enum: [consultation, partnership, investment, speaking, other]
+          enum: [consultation, project, recruitment, partnership, investment, speaking, other]
         message:
           type: string
         preferredDate:

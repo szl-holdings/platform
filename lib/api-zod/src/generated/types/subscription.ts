@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { SubscriptionStatus } from "./subscriptionStatus";
+import type { SubscriptionStatus } from './subscriptionStatus';
 
 export interface Subscription {
   id: number;

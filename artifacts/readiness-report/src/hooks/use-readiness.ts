@@ -10,8 +10,8 @@ export type Program = {
   id: number;
   name: string;
   description: string;
-  overallScore: number | string;
-  targetScore: number | string;
+  overallScore: number;
+  targetScore: number;
   status: 'active' | 'paused' | 'completed' | 'archived';
   owner: string;
   createdAt: string;
@@ -22,9 +22,9 @@ export type Dimension = {
   programId: number;
   name: string;
   category: string;
-  currentScore: number | string;
-  targetScore: number | string;
-  maxScore: number | string;
+  currentScore: number;
+  targetScore: number;
+  maxScore: number;
   assessorName: string;
   lastAssessedAt: string;
 };
@@ -68,7 +68,7 @@ export type ScoreHistory = {
   id: number;
   dimensionId: number;
   programId: number;
-  score: number | string;
+  score: number;
   notes: string;
   recordedAt: string;
 };
@@ -81,7 +81,7 @@ export function usePrograms() {
     queryFn: async () => {
       try {
         const result = await api.programs.list();
-        return (result.data || result) as Program[];
+        return ((result.data || result) as unknown) as Program[];
       } catch (e) {
         if (isAuthError(e)) return mockPrograms as unknown as Program[];
         throw e;
@@ -95,7 +95,7 @@ export function useProgram(id: number) {
     queryKey: ['programs', id],
     queryFn: async () => {
       try {
-        return await api.programs.get(id) as Program;
+        return (await api.programs.get(id) as unknown) as Program;
       } catch (e) {
         if (isAuthError(e)) return (mockPrograms.find(p => String(p.id) === String(id)) || mockPrograms[0]) as unknown as Program;
         throw e;
@@ -109,7 +109,7 @@ export function useDimensions(programId: number = ACTIVE_PROGRAM_ID) {
     queryKey: ['dimensions', programId],
     queryFn: async () => {
       try {
-        return await api.dimensions.listForProgram(programId) as Dimension[];
+        return (await api.dimensions.listForProgram(programId) as unknown) as Dimension[];
       } catch (e) {
         if (isAuthError(e)) return mockDimensions as unknown as Dimension[];
         throw e;
@@ -123,7 +123,7 @@ export function useMilestones(programId: number = ACTIVE_PROGRAM_ID) {
     queryKey: ['milestones', programId],
     queryFn: async () => {
       try {
-        return await api.milestones.listForProgram(programId) as Milestone[];
+        return (await api.milestones.listForProgram(programId) as unknown) as Milestone[];
       } catch (e) {
         if (isAuthError(e)) return mockMilestones as unknown as Milestone[];
         throw e;
@@ -137,7 +137,7 @@ export function useRisks(programId: number = ACTIVE_PROGRAM_ID) {
     queryKey: ['risks', programId],
     queryFn: async () => {
       try {
-        return await api.risks.listForProgram(programId) as Risk[];
+        return (await api.risks.listForProgram(programId) as unknown) as Risk[];
       } catch (e) {
         if (isAuthError(e)) return mockRisks as unknown as Risk[];
         throw e;
@@ -151,7 +151,7 @@ export function useAlerts(programId: number = ACTIVE_PROGRAM_ID) {
     queryKey: ['alerts', programId],
     queryFn: async () => {
       try {
-        return await api.alerts.listForProgram(programId) as Alert[];
+        return (await api.alerts.listForProgram(programId) as unknown) as Alert[];
       } catch (e) {
         if (isAuthError(e)) return mockAlerts as unknown as Alert[];
         throw e;
@@ -165,10 +165,10 @@ export function useScoreHistory(programId: number = ACTIVE_PROGRAM_ID) {
     queryKey: ['scoreHistory', programId],
     queryFn: async () => {
       try {
-        const dims = await api.dimensions.listForProgram(programId) as Dimension[];
+        const dims = (await api.dimensions.listForProgram(programId) as unknown) as Dimension[];
         const allScores: ScoreHistory[] = [];
         for (const dim of dims) {
-          const scores = await api.dimensions.scores(dim.id) as ScoreHistory[];
+          const scores = (await api.dimensions.scores(dim.id) as unknown) as ScoreHistory[];
           allScores.push(...scores);
         }
         return allScores;

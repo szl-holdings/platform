@@ -100,7 +100,7 @@ const textReveal = {
     transition: {
       duration: 0.9,
       delay: 0.3 + i * 0.15,
-      ease: [0.25, 0.4, 0.25, 1],
+      ease: [0.25, 0.4, 0.25, 1] as const,
     },
   }),
 };

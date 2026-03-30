@@ -44,7 +44,7 @@ export default function Alerts() {
 
         <div className="space-y-3">
           {alerts?.map((alert, i) => {
-            const Icon = TypeIcon[alert.type] || BellRing;
+            const Icon = TypeIcon[alert.type as keyof typeof TypeIcon] || BellRing;
             
             return (
               <motion.div 

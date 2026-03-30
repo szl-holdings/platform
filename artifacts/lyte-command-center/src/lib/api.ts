@@ -46,6 +46,7 @@ export interface LyteSignal {
   body?: string;
   status: string;
   metadata?: Record<string, unknown>;
+  receivedAt: string;
   createdAt: string;
 }
 
@@ -84,6 +85,8 @@ export interface LytePlaybook {
   workspaceId: number;
   title: string;
   description?: string;
+  category?: string;
+  content?: string;
   triggerConditions?: Record<string, unknown>;
   steps?: unknown[];
   isActive: boolean;

@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { StripeProductPricesItem } from "./stripeProductPricesItem";
+import type { StripeProductPricesItem } from './stripeProductPricesItem';
 
 export interface StripeProduct {
   id: string;

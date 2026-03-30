@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { InvoiceStatus } from "./invoiceStatus";
+import type { InvoiceStatus } from './invoiceStatus';
 
 export interface Invoice {
   id: number;

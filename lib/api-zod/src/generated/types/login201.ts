@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { AuthUser } from "./authUser";
+import type { AuthUser } from './authUser';
 
 export type Login201 = {
   token?: string;

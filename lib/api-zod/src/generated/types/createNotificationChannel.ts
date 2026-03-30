@@ -10,8 +10,8 @@ export type CreateNotificationChannel =
   (typeof CreateNotificationChannel)[keyof typeof CreateNotificationChannel];
 
 export const CreateNotificationChannel = {
-  in_app: "in_app",
-  email: "email",
-  sms: "sms",
-  slack: "slack",
+  in_app: 'in_app',
+  email: 'email',
+  sms: 'sms',
+  slack: 'slack',
 } as const;

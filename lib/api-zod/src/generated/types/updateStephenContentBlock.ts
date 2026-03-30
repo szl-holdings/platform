@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { UpdateStephenContentBlockMetadata } from "./updateStephenContentBlockMetadata";
+import type { UpdateStephenContentBlockMetadata } from './updateStephenContentBlockMetadata';
 
 export interface UpdateStephenContentBlock {
   title?: string;

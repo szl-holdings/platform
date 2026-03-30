@@ -3,6 +3,10 @@ import { Activity, CheckCircle2, AlertTriangle, XCircle, Globe, Server, Cpu, Clo
 import { useGetStephenEcosystemStatus } from "@workspace/api-client-react";
 import { format } from "date-fns";
 
+type EcoApp = { name: string; slug: string; description: string; status: string; lastChecked?: string };
+type EcoConnector = { name: string; slug: string; status: string; lastChecked?: string };
+type EcoStatus = { apps: EcoApp[]; connectors: EcoConnector[] };
+
 const appIcons: Record<string, React.ElementType> = {
   vessels: Globe,
   firestorm: Activity,
@@ -15,7 +19,7 @@ const appIcons: Record<string, React.ElementType> = {
 export function EcosystemSection() {
   const { data: statusData, isLoading } = useGetStephenEcosystemStatus();
 
-  const ecosystem = statusData || {
+  const ecosystem: EcoStatus = (statusData as unknown as EcoStatus) || {
     apps: [
       { name: "Vessels", slug: "vessels", description: "Maritime fleet & cargo intelligence", status: "operational", lastChecked: new Date().toISOString() },
       { name: "Firestorm", slug: "firestorm", description: "Cybersecurity simulation engine", status: "operational", lastChecked: new Date().toISOString() },

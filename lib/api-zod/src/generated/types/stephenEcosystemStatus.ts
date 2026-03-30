@@ -5,8 +5,8 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { StephenEcosystemStatusAppsItem } from "./stephenEcosystemStatusAppsItem";
-import type { StephenEcosystemStatusConnectorsItem } from "./stephenEcosystemStatusConnectorsItem";
+import type { StephenEcosystemStatusAppsItem } from './stephenEcosystemStatusAppsItem';
+import type { StephenEcosystemStatusConnectorsItem } from './stephenEcosystemStatusConnectorsItem';
 
 export interface StephenEcosystemStatus {
   apps?: StephenEcosystemStatusAppsItem[];

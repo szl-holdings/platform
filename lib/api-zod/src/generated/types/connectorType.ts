@@ -9,12 +9,12 @@
 export type ConnectorType = (typeof ConnectorType)[keyof typeof ConnectorType];
 
 export const ConnectorType = {
-  stripe: "stripe",
-  slack: "slack",
-  twilio: "twilio",
-  google: "google",
-  notion: "notion",
-  github: "github",
-  shopify: "shopify",
-  custom: "custom",
+  stripe: 'stripe',
+  slack: 'slack',
+  twilio: 'twilio',
+  google: 'google',
+  notion: 'notion',
+  github: 'github',
+  shopify: 'shopify',
+  custom: 'custom',
 } as const;

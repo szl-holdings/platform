@@ -90,10 +90,12 @@ export interface ReadinessAlert {
   id: number;
   programId: number;
   dimensionId?: number;
+  type: string;
   title: string;
   message?: string;
   severity: string;
   status: string;
+  isRead?: boolean;
   metadata?: Record<string, unknown>;
   createdAt: string;
 }

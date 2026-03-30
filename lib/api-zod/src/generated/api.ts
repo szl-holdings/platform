@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import * as zod from "zod";
+import * as zod from 'zod';
 
 /**
  * Returns server health status
@@ -23,7 +23,8 @@ export const ListProjectsResponseItem = zod.object({
   id: zod.number(),
   name: zod.string(),
   description: zod.string().nullish(),
-  status: zod.enum(["active", "completed", "on-hold", "archived"]),
+  category: zod.string().nullish(),
+  status: zod.enum(['active', 'completed', 'on-hold', 'archived']),
   createdAt: zod.date(),
   updatedAt: zod.date(),
 });
@@ -39,7 +40,7 @@ export const CreateProjectBody = zod.object({
   name: zod.string(),
   description: zod.string().nullish(),
   status: zod
-    .enum(["active", "completed", "on-hold", "archived"])
+    .enum(['active', 'completed', 'on-hold', 'archived'])
     .default(createProjectBodyStatusDefault),
 });
 
@@ -54,7 +55,8 @@ export const GetProjectResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
   description: zod.string().nullish(),
-  status: zod.enum(["active", "completed", "on-hold", "archived"]),
+  category: zod.string().nullish(),
+  status: zod.enum(['active', 'completed', 'on-hold', 'archived']),
   createdAt: zod.date(),
   updatedAt: zod.date(),
 });
@@ -69,14 +71,15 @@ export const UpdateProjectParams = zod.object({
 export const UpdateProjectBody = zod.object({
   name: zod.string().optional(),
   description: zod.string().nullish(),
-  status: zod.enum(["active", "completed", "on-hold", "archived"]).optional(),
+  status: zod.enum(['active', 'completed', 'on-hold', 'archived']).optional(),
 });
 
 export const UpdateProjectResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
   description: zod.string().nullish(),
-  status: zod.enum(["active", "completed", "on-hold", "archived"]),
+  category: zod.string().nullish(),
+  status: zod.enum(['active', 'completed', 'on-hold', 'archived']),
   createdAt: zod.date(),
   updatedAt: zod.date(),
 });
@@ -151,17 +154,8 @@ export const ListConnectorsResponseItem = zod.object({
   id: zod.number(),
   orgId: zod.number().nullish(),
   name: zod.string(),
-  type: zod.enum([
-    "stripe",
-    "slack",
-    "twilio",
-    "google",
-    "notion",
-    "github",
-    "shopify",
-    "custom",
-  ]),
-  status: zod.enum(["active", "inactive", "error", "pending"]),
+  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
+  status: zod.enum(['active', 'inactive', 'error', 'pending']),
   isEnabled: zod.boolean().optional(),
   createdAt: zod.date().optional(),
   updatedAt: zod.date().optional(),
@@ -173,16 +167,7 @@ export const ListConnectorsResponse = zod.array(ListConnectorsResponseItem);
  */
 export const CreateConnectorBody = zod.object({
   name: zod.string(),
-  type: zod.enum([
-    "stripe",
-    "slack",
-    "twilio",
-    "google",
-    "notion",
-    "github",
-    "shopify",
-    "custom",
-  ]),
+  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
   orgId: zod.number().optional(),
   config: zod.object({}).passthrough().optional(),
 });
@@ -198,17 +183,8 @@ export const GetConnectorResponse = zod.object({
   id: zod.number(),
   orgId: zod.number().nullish(),
   name: zod.string(),
-  type: zod.enum([
-    "stripe",
-    "slack",
-    "twilio",
-    "google",
-    "notion",
-    "github",
-    "shopify",
-    "custom",
-  ]),
-  status: zod.enum(["active", "inactive", "error", "pending"]),
+  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
+  status: zod.enum(['active', 'inactive', 'error', 'pending']),
   isEnabled: zod.boolean().optional(),
   createdAt: zod.date().optional(),
   updatedAt: zod.date().optional(),
@@ -223,7 +199,7 @@ export const UpdateConnectorParams = zod.object({
 
 export const UpdateConnectorBody = zod.object({
   name: zod.string().optional(),
-  status: zod.enum(["active", "inactive", "error", "pending"]).optional(),
+  status: zod.enum(['active', 'inactive', 'error', 'pending']).optional(),
   config: zod.object({}).passthrough().optional(),
   isEnabled: zod.boolean().optional(),
 });
@@ -232,17 +208,8 @@ export const UpdateConnectorResponse = zod.object({
   id: zod.number(),
   orgId: zod.number().nullish(),
   name: zod.string(),
-  type: zod.enum([
-    "stripe",
-    "slack",
-    "twilio",
-    "google",
-    "notion",
-    "github",
-    "shopify",
-    "custom",
-  ]),
-  status: zod.enum(["active", "inactive", "error", "pending"]),
+  type: zod.enum(['stripe', 'slack', 'twilio', 'google', 'notion', 'github', 'shopify', 'custom']),
+  status: zod.enum(['active', 'inactive', 'error', 'pending']),
   isEnabled: zod.boolean().optional(),
   createdAt: zod.date().optional(),
   updatedAt: zod.date().optional(),
@@ -265,25 +232,23 @@ export const ListNotificationsQueryParams = zod.object({
 export const ListNotificationsResponseItem = zod.object({
   id: zod.number(),
   userId: zod.number(),
-  type: zod.enum(["info", "success", "warning", "error", "action_required"]),
-  channel: zod.enum(["in_app", "email", "sms", "slack"]),
+  type: zod.enum(['info', 'success', 'warning', 'error', 'action_required']),
+  channel: zod.enum(['in_app', 'email', 'sms', 'slack']),
   title: zod.string(),
   message: zod.string(),
   actionUrl: zod.string().nullish(),
   isRead: zod.boolean(),
   createdAt: zod.date().optional(),
 });
-export const ListNotificationsResponse = zod.array(
-  ListNotificationsResponseItem,
-);
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem);
 
 /**
  * @summary Create a notification
  */
 export const CreateNotificationBody = zod.object({
   userId: zod.number(),
-  type: zod.enum(["info", "success", "warning", "error", "action_required"]),
-  channel: zod.enum(["in_app", "email", "sms", "slack"]).optional(),
+  type: zod.enum(['info', 'success', 'warning', 'error', 'action_required']),
+  channel: zod.enum(['in_app', 'email', 'sms', 'slack']).optional(),
   title: zod.string(),
   message: zod.string(),
   actionUrl: zod.string().optional(),
@@ -299,8 +264,8 @@ export const MarkNotificationReadParams = zod.object({
 export const MarkNotificationReadResponse = zod.object({
   id: zod.number(),
   userId: zod.number(),
-  type: zod.enum(["info", "success", "warning", "error", "action_required"]),
-  channel: zod.enum(["in_app", "email", "sms", "slack"]),
+  type: zod.enum(['info', 'success', 'warning', 'error', 'action_required']),
+  channel: zod.enum(['in_app', 'email', 'sms', 'slack']),
   title: zod.string(),
   message: zod.string(),
   actionUrl: zod.string().nullish(),
@@ -357,12 +322,10 @@ export const ListSubscriptionsResponseItem = zod.object({
   id: zod.number(),
   orgId: zod.number(),
   planId: zod.number(),
-  status: zod.enum(["active", "trialing", "past_due", "canceled", "paused"]),
+  status: zod.enum(['active', 'trialing', 'past_due', 'canceled', 'paused']),
   createdAt: zod.date().optional(),
 });
-export const ListSubscriptionsResponse = zod.array(
-  ListSubscriptionsResponseItem,
-);
+export const ListSubscriptionsResponse = zod.array(ListSubscriptionsResponseItem);
 
 /**
  * @summary List invoices
@@ -372,7 +335,7 @@ export const ListInvoicesResponseItem = zod.object({
   orgId: zod.number(),
   amount: zod.string(),
   currency: zod.string().optional(),
-  status: zod.enum(["draft", "open", "paid", "void", "uncollectible"]),
+  status: zod.enum(['draft', 'open', 'paid', 'void', 'uncollectible']),
   createdAt: zod.date().optional(),
 });
 export const ListInvoicesResponse = zod.array(ListInvoicesResponseItem);
@@ -394,16 +357,14 @@ export const ListStripeProductsResponseItem = zod.object({
     }),
   ),
 });
-export const ListStripeProductsResponse = zod.array(
-  ListStripeProductsResponseItem,
-);
+export const ListStripeProductsResponse = zod.array(ListStripeProductsResponseItem);
 
 /**
  * @summary Create a Stripe Checkout Session
  */
 export const CreateCheckoutSessionBody = zod.object({
   priceId: zod.string(),
-  mode: zod.enum(["subscription", "payment"]).optional(),
+  mode: zod.enum(['subscription', 'payment']).optional(),
   successUrl: zod.string(),
   cancelUrl: zod.string(),
   customerEmail: zod.string().optional(),
@@ -485,9 +446,7 @@ export const ListStripeInvoicesResponseItem = zod.object({
   hostedInvoiceUrl: zod.string().nullish(),
   invoicePdf: zod.string().nullish(),
 });
-export const ListStripeInvoicesResponse = zod.array(
-  ListStripeInvoicesResponseItem,
-);
+export const ListStripeInvoicesResponse = zod.array(ListStripeInvoicesResponseItem);
 
 /**
  * @summary List feature flags
@@ -514,9 +473,7 @@ export const CreateFeatureFlagBody = zod.object({
   name: zod.string(),
   description: zod.string().optional(),
   isEnabled: zod.boolean().default(createFeatureFlagBodyIsEnabledDefault),
-  rolloutPercentage: zod
-    .number()
-    .default(createFeatureFlagBodyRolloutPercentageDefault),
+  rolloutPercentage: zod.number().default(createFeatureFlagBodyRolloutPercentageDefault),
 });
 
 /**
@@ -606,9 +563,7 @@ export const ListStephenContactsResponseItem = zod.object({
   status: zod.string().optional(),
   createdAt: zod.date().optional(),
 });
-export const ListStephenContactsResponse = zod.array(
-  ListStephenContactsResponseItem,
-);
+export const ListStephenContactsResponse = zod.array(ListStephenContactsResponseItem);
 
 /**
  * @summary Submit a contact form
@@ -632,9 +587,7 @@ export const ListStephenTestimonialsResponseItem = zod.object({
   rating: zod.number(),
   isPublished: zod.boolean().optional(),
 });
-export const ListStephenTestimonialsResponse = zod.array(
-  ListStephenTestimonialsResponseItem,
-);
+export const ListStephenTestimonialsResponse = zod.array(ListStephenTestimonialsResponseItem);
 
 /**
  * @summary List case studies
@@ -649,9 +602,7 @@ export const ListStephenCaseStudiesResponseItem = zod.object({
   technologies: zod.array(zod.string()).optional(),
   isPublished: zod.boolean().optional(),
 });
-export const ListStephenCaseStudiesResponse = zod.array(
-  ListStephenCaseStudiesResponseItem,
-);
+export const ListStephenCaseStudiesResponse = zod.array(ListStephenCaseStudiesResponseItem);
 
 /**
  * @summary Get Stephen's profile data
@@ -673,14 +624,12 @@ export const GetStephenProfileResponse = zod.object({
  * @summary List all content blocks
  */
 export const ListStephenContentBlocksQueryParams = zod.object({
-  type: zod
-    .enum(["achievement", "about", "service", "stat", "skill"])
-    .optional(),
+  type: zod.enum(['achievement', 'about', 'service', 'stat', 'skill']).optional(),
 });
 
 export const ListStephenContentBlocksResponseItem = zod.object({
   id: zod.number(),
-  type: zod.enum(["achievement", "about", "service", "stat", "skill"]),
+  type: zod.enum(['achievement', 'about', 'service', 'stat', 'skill']),
   title: zod.string(),
   content: zod.string(),
   icon: zod.string().nullish(),
@@ -690,15 +639,13 @@ export const ListStephenContentBlocksResponseItem = zod.object({
   metadata: zod.object({}).passthrough().nullish(),
   createdAt: zod.date(),
 });
-export const ListStephenContentBlocksResponse = zod.array(
-  ListStephenContentBlocksResponseItem,
-);
+export const ListStephenContentBlocksResponse = zod.array(ListStephenContentBlocksResponseItem);
 
 /**
  * @summary Create a content block
  */
 export const CreateStephenContentBlockBody = zod.object({
-  type: zod.enum(["achievement", "about", "service", "stat", "skill"]),
+  type: zod.enum(['achievement', 'about', 'service', 'stat', 'skill']),
   title: zod.string(),
   content: zod.string(),
   icon: zod.string().optional(),
@@ -727,7 +674,7 @@ export const UpdateStephenContentBlockBody = zod.object({
 
 export const UpdateStephenContentBlockResponse = zod.object({
   id: zod.number(),
-  type: zod.enum(["achievement", "about", "service", "stat", "skill"]),
+  type: zod.enum(['achievement', 'about', 'service', 'stat', 'skill']),
   title: zod.string(),
   content: zod.string(),
   icon: zod.string().nullish(),
@@ -855,20 +802,20 @@ export const ListStephenBookingRequestsResponseItem = zod.object({
   company: zod.string().nullish(),
   role: zod.string().nullish(),
   type: zod.enum([
-    "consultation",
-    "partnership",
-    "investment",
-    "speaking",
-    "other",
+    'consultation',
+    'project',
+    'recruitment',
+    'partnership',
+    'investment',
+    'speaking',
+    'other',
   ]),
   message: zod.string(),
   preferredDate: zod.string().nullish(),
-  status: zod.enum(["pending", "confirmed", "declined", "completed"]),
+  status: zod.enum(['pending', 'confirmed', 'declined', 'completed']),
   createdAt: zod.date(),
 });
-export const ListStephenBookingRequestsResponse = zod.array(
-  ListStephenBookingRequestsResponseItem,
-);
+export const ListStephenBookingRequestsResponse = zod.array(ListStephenBookingRequestsResponseItem);
 
 /**
  * @summary Submit a booking request
@@ -879,11 +826,13 @@ export const CreateStephenBookingRequestBody = zod.object({
   company: zod.string().optional(),
   role: zod.string().optional(),
   type: zod.enum([
-    "consultation",
-    "partnership",
-    "investment",
-    "speaking",
-    "other",
+    'consultation',
+    'project',
+    'recruitment',
+    'partnership',
+    'investment',
+    'speaking',
+    'other',
   ]),
   message: zod.string(),
   preferredDate: zod.string().optional(),
@@ -954,9 +903,7 @@ export const ListFirestormCampaignsResponseItem = zod.object({
   budget: zod.string().nullish(),
   spent: zod.string().nullish(),
 });
-export const ListFirestormCampaignsResponse = zod.array(
-  ListFirestormCampaignsResponseItem,
-);
+export const ListFirestormCampaignsResponse = zod.array(ListFirestormCampaignsResponseItem);
 
 /**
  * @summary List leads
@@ -970,9 +917,7 @@ export const ListFirestormLeadsResponseItem = zod.object({
   score: zod.number().optional(),
   status: zod.string(),
 });
-export const ListFirestormLeadsResponse = zod.array(
-  ListFirestormLeadsResponseItem,
-);
+export const ListFirestormLeadsResponse = zod.array(ListFirestormLeadsResponseItem);
 
 /**
  * @summary List campaign analytics
@@ -989,9 +934,7 @@ export const ListFirestormAnalyticsResponseItem = zod.object({
   clicks: zod.number().optional(),
   conversions: zod.number().optional(),
 });
-export const ListFirestormAnalyticsResponse = zod.array(
-  ListFirestormAnalyticsResponseItem,
-);
+export const ListFirestormAnalyticsResponse = zod.array(ListFirestormAnalyticsResponseItem);
 
 /**
  * @summary List products
@@ -1031,9 +974,7 @@ export const ListDreamscapeProjectsResponseItem = zod.object({
   status: zod.string(),
   mood: zod.string().nullish(),
 });
-export const ListDreamscapeProjectsResponse = zod.array(
-  ListDreamscapeProjectsResponseItem,
-);
+export const ListDreamscapeProjectsResponse = zod.array(ListDreamscapeProjectsResponseItem);
 
 /**
  * @summary List readiness assessments
@@ -1046,6 +987,4 @@ export const ListReadinessAssessmentsResponseItem = zod.object({
   overallScore: zod.string().nullish(),
   assessorName: zod.string().nullish(),
 });
-export const ListReadinessAssessmentsResponse = zod.array(
-  ListReadinessAssessmentsResponseItem,
-);
+export const ListReadinessAssessmentsResponse = zod.array(ListReadinessAssessmentsResponseItem);

@@ -52,7 +52,7 @@ function buildDataSources(isAuthenticated: boolean) {
 }
 
 router.get("/observability/:appSlug", authMiddleware({ required: false }), (req, res) => {
-  const { appSlug } = req.params;
+  const appSlug = String(req.params.appSlug);
   const config = getConfigBySlug(appSlug);
   const collector = collectors.get(appSlug);
 

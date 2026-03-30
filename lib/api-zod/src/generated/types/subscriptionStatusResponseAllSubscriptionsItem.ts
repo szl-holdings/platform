@@ -6,6 +6,4 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type SubscriptionStatusResponseAllSubscriptionsItem = {
-  [key: string]: unknown;
-};
+export type SubscriptionStatusResponseAllSubscriptionsItem = { [key: string]: unknown };

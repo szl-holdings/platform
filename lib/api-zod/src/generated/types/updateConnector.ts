@@ -5,8 +5,8 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { UpdateConnectorConfig } from "./updateConnectorConfig";
-import type { UpdateConnectorStatus } from "./updateConnectorStatus";
+import type { UpdateConnectorConfig } from './updateConnectorConfig';
+import type { UpdateConnectorStatus } from './updateConnectorStatus';
 
 export interface UpdateConnector {
   name?: string;

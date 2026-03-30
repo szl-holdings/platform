@@ -5,8 +5,8 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { CreateStephenContentBlockMetadata } from "./createStephenContentBlockMetadata";
-import type { CreateStephenContentBlockType } from "./createStephenContentBlockType";
+import type { CreateStephenContentBlockMetadata } from './createStephenContentBlockMetadata';
+import type { CreateStephenContentBlockType } from './createStephenContentBlockType';
 
 export interface CreateStephenContentBlock {
   type: CreateStephenContentBlockType;

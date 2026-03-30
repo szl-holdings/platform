@@ -5,8 +5,8 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { ConnectorStatus } from "./connectorStatus";
-import type { ConnectorType } from "./connectorType";
+import type { ConnectorStatus } from './connectorStatus';
+import type { ConnectorType } from './connectorType';
 
 export interface Connector {
   id: number;

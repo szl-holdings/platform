@@ -22,7 +22,7 @@ export default function Playbooks() {
 
   const filtered = playbooks?.filter(p => 
     p.title.toLowerCase().includes(search.toLowerCase()) ||
-    p.category.toLowerCase().includes(search.toLowerCase())
+    (p.category || "").toLowerCase().includes(search.toLowerCase())
   ) || [];
 
   const selected = playbooks?.find(p => p.id === selectedId) || filtered[0];
@@ -53,7 +53,7 @@ export default function Playbooks() {
           {categories.map(cat => (
             <div key={cat}>
               <div className="px-3 py-1 text-[10px] uppercase tracking-widest text-slate-500 font-bold">
-                {cat.replace('_', ' ')}
+                {(cat || "").replace('_', ' ')}
               </div>
               <div className="space-y-1">
                 {filtered.filter(p => p.category === cat).map((pb, i) => (
@@ -103,7 +103,7 @@ export default function Playbooks() {
               <div className="px-8 py-6 border-b border-white/5 bg-white/[0.01]">
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                    {selected.category.replace('_', ' ')}
+                    {(selected.category || "").replace('_', ' ')}
                   </span>
                   <span className="text-xs text-slate-500 flex items-center gap-1">
                     <Lock className="w-3 h-3" /> Internal Use Only
@@ -115,7 +115,7 @@ export default function Playbooks() {
               
               <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="prose prose-invert prose-cyan max-w-none">
-                  {selected.content.split('\n\n').map((block, i) => {
+                  {(selected.content || "").split('\n\n').map((block: string, i: number) => {
                     if (block.startsWith('# ')) {
                       return (
                         <motion.h1
@@ -146,7 +146,7 @@ export default function Playbooks() {
                       const items = block.split('\n');
                       return (
                         <div key={i} className="space-y-2 my-4">
-                          {items.map((item, j) => {
+                          {items.map((item: string, j: number) => {
                             const isNumbered = /^\d+\.\s/.test(item);
                             return (
                               <motion.div

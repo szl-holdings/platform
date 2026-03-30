@@ -11,7 +11,7 @@ export function VoiceoverManager({ campaignId }: { campaignId: string }) {
   const [newText, setNewText] = React.useState("");
 
   const handleCreate = () => {
-    createVoice.mutate({ campaignId, text: newText, provider: "elevenlabs", name: "AI Generate - " + new Date().toLocaleTimeString() }, {
+    createVoice.mutate({ campaignId: parseInt(campaignId, 10), text: newText, provider: "elevenlabs", name: "AI Generate - " + new Date().toLocaleTimeString() }, {
       onSuccess: () => {
         setIsCreating(false);
         setNewText("");

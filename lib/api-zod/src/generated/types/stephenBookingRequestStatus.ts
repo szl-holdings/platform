@@ -10,8 +10,8 @@ export type StephenBookingRequestStatus =
   (typeof StephenBookingRequestStatus)[keyof typeof StephenBookingRequestStatus];
 
 export const StephenBookingRequestStatus = {
-  pending: "pending",
-  confirmed: "confirmed",
-  declined: "declined",
-  completed: "completed",
+  pending: 'pending',
+  confirmed: 'confirmed',
+  declined: 'declined',
+  completed: 'completed',
 } as const;

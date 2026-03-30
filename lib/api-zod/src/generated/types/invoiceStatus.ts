@@ -9,9 +9,9 @@
 export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus];
 
 export const InvoiceStatus = {
-  draft: "draft",
-  open: "open",
-  paid: "paid",
-  void: "void",
-  uncollectible: "uncollectible",
+  draft: 'draft',
+  open: 'open',
+  paid: 'paid',
+  void: 'void',
+  uncollectible: 'uncollectible',
 } as const;

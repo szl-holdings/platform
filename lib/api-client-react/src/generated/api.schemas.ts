@@ -12,29 +12,29 @@ export interface HealthStatus {
 export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus];
 
 export const ProjectStatus = {
-  active: "active",
-  completed: "completed",
-  "on-hold": "on-hold",
-  archived: "archived",
+  active: 'active',
+  completed: 'completed',
+  'on-hold': 'on-hold',
+  archived: 'archived',
 } as const;
 
 export interface Project {
   id: number;
   name: string;
   description?: string | null;
+  category?: string | null;
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
 }
 
-export type CreateProjectStatus =
-  (typeof CreateProjectStatus)[keyof typeof CreateProjectStatus];
+export type CreateProjectStatus = (typeof CreateProjectStatus)[keyof typeof CreateProjectStatus];
 
 export const CreateProjectStatus = {
-  active: "active",
-  completed: "completed",
-  "on-hold": "on-hold",
-  archived: "archived",
+  active: 'active',
+  completed: 'completed',
+  'on-hold': 'on-hold',
+  archived: 'archived',
 } as const;
 
 export interface CreateProject {
@@ -43,14 +43,13 @@ export interface CreateProject {
   status?: CreateProjectStatus;
 }
 
-export type UpdateProjectStatus =
-  (typeof UpdateProjectStatus)[keyof typeof UpdateProjectStatus];
+export type UpdateProjectStatus = (typeof UpdateProjectStatus)[keyof typeof UpdateProjectStatus];
 
 export const UpdateProjectStatus = {
-  active: "active",
-  completed: "completed",
-  "on-hold": "on-hold",
-  archived: "archived",
+  active: 'active',
+  completed: 'completed',
+  'on-hold': 'on-hold',
+  archived: 'archived',
 } as const;
 
 export interface UpdateProject {
@@ -91,24 +90,23 @@ export interface UserSummary {
 export type ConnectorType = (typeof ConnectorType)[keyof typeof ConnectorType];
 
 export const ConnectorType = {
-  stripe: "stripe",
-  slack: "slack",
-  twilio: "twilio",
-  google: "google",
-  notion: "notion",
-  github: "github",
-  shopify: "shopify",
-  custom: "custom",
+  stripe: 'stripe',
+  slack: 'slack',
+  twilio: 'twilio',
+  google: 'google',
+  notion: 'notion',
+  github: 'github',
+  shopify: 'shopify',
+  custom: 'custom',
 } as const;
 
-export type ConnectorStatus =
-  (typeof ConnectorStatus)[keyof typeof ConnectorStatus];
+export type ConnectorStatus = (typeof ConnectorStatus)[keyof typeof ConnectorStatus];
 
 export const ConnectorStatus = {
-  active: "active",
-  inactive: "inactive",
-  error: "error",
-  pending: "pending",
+  active: 'active',
+  inactive: 'inactive',
+  error: 'error',
+  pending: 'pending',
 } as const;
 
 export interface Connector {
@@ -122,18 +120,17 @@ export interface Connector {
   updatedAt?: string;
 }
 
-export type CreateConnectorType =
-  (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
+export type CreateConnectorType = (typeof CreateConnectorType)[keyof typeof CreateConnectorType];
 
 export const CreateConnectorType = {
-  stripe: "stripe",
-  slack: "slack",
-  twilio: "twilio",
-  google: "google",
-  notion: "notion",
-  github: "github",
-  shopify: "shopify",
-  custom: "custom",
+  stripe: 'stripe',
+  slack: 'slack',
+  twilio: 'twilio',
+  google: 'google',
+  notion: 'notion',
+  github: 'github',
+  shopify: 'shopify',
+  custom: 'custom',
 } as const;
 
 export type CreateConnectorConfig = { [key: string]: unknown };
@@ -149,10 +146,10 @@ export type UpdateConnectorStatus =
   (typeof UpdateConnectorStatus)[keyof typeof UpdateConnectorStatus];
 
 export const UpdateConnectorStatus = {
-  active: "active",
-  inactive: "inactive",
-  error: "error",
-  pending: "pending",
+  active: 'active',
+  inactive: 'inactive',
+  error: 'error',
+  pending: 'pending',
 } as const;
 
 export type UpdateConnectorConfig = { [key: string]: unknown };
@@ -164,25 +161,23 @@ export interface UpdateConnector {
   isEnabled?: boolean;
 }
 
-export type NotificationType =
-  (typeof NotificationType)[keyof typeof NotificationType];
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
 
 export const NotificationType = {
-  info: "info",
-  success: "success",
-  warning: "warning",
-  error: "error",
-  action_required: "action_required",
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  error: 'error',
+  action_required: 'action_required',
 } as const;
 
-export type NotificationChannel =
-  (typeof NotificationChannel)[keyof typeof NotificationChannel];
+export type NotificationChannel = (typeof NotificationChannel)[keyof typeof NotificationChannel];
 
 export const NotificationChannel = {
-  in_app: "in_app",
-  email: "email",
-  sms: "sms",
-  slack: "slack",
+  in_app: 'in_app',
+  email: 'email',
+  sms: 'sms',
+  slack: 'slack',
 } as const;
 
 export interface Notification {
@@ -201,21 +196,21 @@ export type CreateNotificationType =
   (typeof CreateNotificationType)[keyof typeof CreateNotificationType];
 
 export const CreateNotificationType = {
-  info: "info",
-  success: "success",
-  warning: "warning",
-  error: "error",
-  action_required: "action_required",
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  error: 'error',
+  action_required: 'action_required',
 } as const;
 
 export type CreateNotificationChannel =
   (typeof CreateNotificationChannel)[keyof typeof CreateNotificationChannel];
 
 export const CreateNotificationChannel = {
-  in_app: "in_app",
-  email: "email",
-  sms: "sms",
-  slack: "slack",
+  in_app: 'in_app',
+  email: 'email',
+  sms: 'sms',
+  slack: 'slack',
 } as const;
 
 export interface CreateNotification {
@@ -259,15 +254,14 @@ export interface BillingPlan {
   createdAt?: string;
 }
 
-export type SubscriptionStatus =
-  (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
 
 export const SubscriptionStatus = {
-  active: "active",
-  trialing: "trialing",
-  past_due: "past_due",
-  canceled: "canceled",
-  paused: "paused",
+  active: 'active',
+  trialing: 'trialing',
+  past_due: 'past_due',
+  canceled: 'canceled',
+  paused: 'paused',
 } as const;
 
 export interface Subscription {
@@ -281,11 +275,11 @@ export interface Subscription {
 export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus];
 
 export const InvoiceStatus = {
-  draft: "draft",
-  open: "open",
-  paid: "paid",
-  void: "void",
-  uncollectible: "uncollectible",
+  draft: 'draft',
+  open: 'open',
+  paid: 'paid',
+  void: 'void',
+  uncollectible: 'uncollectible',
 } as const;
 
 export interface Invoice {
@@ -312,12 +306,11 @@ export interface StripeProduct {
   prices: StripeProductPricesItem[];
 }
 
-export type CheckoutRequestMode =
-  (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
+export type CheckoutRequestMode = (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
 
 export const CheckoutRequestMode = {
-  subscription: "subscription",
-  payment: "payment",
+  subscription: 'subscription',
+  payment: 'payment',
 } as const;
 
 export interface CheckoutRequest {
@@ -343,9 +336,7 @@ export type SubscriptionStatusResponseSubscription = {
   cancelAtPeriodEnd?: boolean;
 } | null;
 
-export type SubscriptionStatusResponseAllSubscriptionsItem = {
-  [key: string]: unknown;
-};
+export type SubscriptionStatusResponseAllSubscriptionsItem = { [key: string]: unknown };
 
 export interface SubscriptionStatusResponse {
   subscribed: boolean;
@@ -474,11 +465,11 @@ export type StephenContentBlockType =
   (typeof StephenContentBlockType)[keyof typeof StephenContentBlockType];
 
 export const StephenContentBlockType = {
-  achievement: "achievement",
-  about: "about",
-  service: "service",
-  stat: "stat",
-  skill: "skill",
+  achievement: 'achievement',
+  about: 'about',
+  service: 'service',
+  stat: 'stat',
+  skill: 'skill',
 } as const;
 
 export type StephenContentBlockMetadata = { [key: string]: unknown } | null;
@@ -500,11 +491,11 @@ export type CreateStephenContentBlockType =
   (typeof CreateStephenContentBlockType)[keyof typeof CreateStephenContentBlockType];
 
 export const CreateStephenContentBlockType = {
-  achievement: "achievement",
-  about: "about",
-  service: "service",
-  stat: "stat",
-  skill: "skill",
+  achievement: 'achievement',
+  about: 'about',
+  service: 'service',
+  stat: 'stat',
+  skill: 'skill',
 } as const;
 
 export type CreateStephenContentBlockMetadata = { [key: string]: unknown };
@@ -576,21 +567,23 @@ export type StephenBookingRequestType =
   (typeof StephenBookingRequestType)[keyof typeof StephenBookingRequestType];
 
 export const StephenBookingRequestType = {
-  consultation: "consultation",
-  partnership: "partnership",
-  investment: "investment",
-  speaking: "speaking",
-  other: "other",
+  consultation: 'consultation',
+  project: 'project',
+  recruitment: 'recruitment',
+  partnership: 'partnership',
+  investment: 'investment',
+  speaking: 'speaking',
+  other: 'other',
 } as const;
 
 export type StephenBookingRequestStatus =
   (typeof StephenBookingRequestStatus)[keyof typeof StephenBookingRequestStatus];
 
 export const StephenBookingRequestStatus = {
-  pending: "pending",
-  confirmed: "confirmed",
-  declined: "declined",
-  completed: "completed",
+  pending: 'pending',
+  confirmed: 'confirmed',
+  declined: 'declined',
+  completed: 'completed',
 } as const;
 
 export interface StephenBookingRequest {
@@ -610,11 +603,13 @@ export type CreateStephenBookingRequestType =
   (typeof CreateStephenBookingRequestType)[keyof typeof CreateStephenBookingRequestType];
 
 export const CreateStephenBookingRequestType = {
-  consultation: "consultation",
-  partnership: "partnership",
-  investment: "investment",
-  speaking: "speaking",
-  other: "other",
+  consultation: 'consultation',
+  project: 'project',
+  recruitment: 'recruitment',
+  partnership: 'partnership',
+  investment: 'investment',
+  speaking: 'speaking',
+  other: 'other',
 } as const;
 
 export interface CreateStephenBookingRequest {
@@ -763,11 +758,11 @@ export type ListStephenContentBlocksType =
   (typeof ListStephenContentBlocksType)[keyof typeof ListStephenContentBlocksType];
 
 export const ListStephenContentBlocksType = {
-  achievement: "achievement",
-  about: "about",
-  service: "service",
-  stat: "stat",
-  skill: "skill",
+  achievement: 'achievement',
+  about: 'about',
+  service: 'service',
+  stat: 'stat',
+  skill: 'skill',
 } as const;
 
 export type ListFirestormAnalyticsParams = {

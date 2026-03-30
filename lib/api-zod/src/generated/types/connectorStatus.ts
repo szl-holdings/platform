@@ -6,12 +6,11 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type ConnectorStatus =
-  (typeof ConnectorStatus)[keyof typeof ConnectorStatus];
+export type ConnectorStatus = (typeof ConnectorStatus)[keyof typeof ConnectorStatus];
 
 export const ConnectorStatus = {
-  active: "active",
-  inactive: "inactive",
-  error: "error",
-  pending: "pending",
+  active: 'active',
+  inactive: 'inactive',
+  error: 'error',
+  pending: 'pending',
 } as const;

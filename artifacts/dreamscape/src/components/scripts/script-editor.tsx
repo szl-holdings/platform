@@ -18,7 +18,7 @@ export function ScriptEditor({ campaignId }: { campaignId: string }) {
   if (!activeScript) return <div className="p-8 text-center text-muted-foreground border border-dashed border-border rounded-xl">No scripts found. Create one to begin.</div>;
 
   const handleSave = () => {
-    updateScript.mutate({ id: activeScript.id, campaignId, content });
+    updateScript.mutate({ id: activeScript.id, campaignId: parseInt(campaignId, 10), content });
   };
 
   return (
@@ -59,7 +59,7 @@ export function ScriptEditor({ campaignId }: { campaignId: string }) {
           </div>
           
           {activeScript.status !== "approved" && (
-            <Button className="w-full mt-4" variant="outline" onClick={() => updateScript.mutate({ id: activeScript.id, campaignId, status: "approved" })}>
+            <Button className="w-full mt-4" variant="outline" onClick={() => updateScript.mutate({ id: activeScript.id, campaignId: parseInt(campaignId, 10), status: "approved" })}>
               <CheckCircle className="w-4 h-4 mr-2" /> Mark as Approved
             </Button>
           )}
@@ -76,7 +76,7 @@ export function ScriptEditor({ campaignId }: { campaignId: string }) {
                 <div className="ml-6 flex-1 text-sm">
                   <p className="font-medium text-foreground">Version {v}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {i === 0 ? "Current Draft" : format(new Date(activeScript.updatedAt), "MMM d, h:mm a")}
+                    {i === 0 ? "Current Draft" : format(new Date(activeScript.updatedAt || new Date()), "MMM d, h:mm a")}
                   </p>
                 </div>
               </div>

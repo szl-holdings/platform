@@ -5,7 +5,7 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { CreateStephenBookingRequestType } from "./createStephenBookingRequestType";
+import type { CreateStephenBookingRequestType } from './createStephenBookingRequestType';
 
 export interface CreateStephenBookingRequest {
   name: string;

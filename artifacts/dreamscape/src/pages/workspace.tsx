@@ -221,16 +221,16 @@ export function Workspace() {
                         <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${campaign.progress}%` }}
+                            animate={{ width: `${campaign.progress ?? 0}%` }}
                             transition={{ delay: 0.3, duration: 1, ease: "easeOut" }}
-                            className={`h-full rounded-full ${campaign.progress >= 80 ? 'bg-emerald-500' : campaign.progress >= 50 ? 'bg-primary' : campaign.progress >= 25 ? 'bg-amber-500' : 'bg-blue-500'}`}
+                            className={`h-full rounded-full ${(campaign.progress ?? 0) >= 80 ? 'bg-emerald-500' : (campaign.progress ?? 0) >= 50 ? 'bg-primary' : (campaign.progress ?? 0) >= 25 ? 'bg-amber-500' : 'bg-blue-500'}`}
                           />
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Clock className="w-3.5 h-3.5" />
-                        <span>Due {format(new Date(campaign.deadline), "MMM d, yyyy")}</span>
+                        <span>Due {format(new Date(campaign.deadline || new Date()), "MMM d, yyyy")}</span>
                       </div>
                     </div>
                   </div>

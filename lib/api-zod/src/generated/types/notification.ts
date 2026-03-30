@@ -5,8 +5,8 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { NotificationChannel } from "./notificationChannel";
-import type { NotificationType } from "./notificationType";
+import type { NotificationChannel } from './notificationChannel';
+import type { NotificationType } from './notificationType';
 
 export interface Notification {
   id: number;

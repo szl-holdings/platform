@@ -10,9 +10,9 @@ export type StephenContentBlockType =
   (typeof StephenContentBlockType)[keyof typeof StephenContentBlockType];
 
 export const StephenContentBlockType = {
-  achievement: "achievement",
-  about: "about",
-  service: "service",
-  stat: "stat",
-  skill: "skill",
+  achievement: 'achievement',
+  about: 'about',
+  service: 'service',
+  stat: 'stat',
+  skill: 'skill',
 } as const;

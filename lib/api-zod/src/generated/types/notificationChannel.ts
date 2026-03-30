@@ -6,12 +6,11 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type NotificationChannel =
-  (typeof NotificationChannel)[keyof typeof NotificationChannel];
+export type NotificationChannel = (typeof NotificationChannel)[keyof typeof NotificationChannel];
 
 export const NotificationChannel = {
-  in_app: "in_app",
-  email: "email",
-  sms: "sms",
-  slack: "slack",
+  in_app: 'in_app',
+  email: 'email',
+  sms: 'sms',
+  slack: 'slack',
 } as const;

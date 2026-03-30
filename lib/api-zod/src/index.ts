@@ -1,5 +1,5 @@
-export * from "./generated/api";
-export { type LoginBody as LoginBodyType } from "./generated/types/loginBody";
+export * from './generated/api';
+export { type LoginBody as LoginBodyType } from './generated/types/loginBody';
 export type {
   AuthUser,
   Connector,
@@ -56,4 +56,4 @@ export type {
   BillingPlan,
   BillingPlanFeatures,
   GetAuthProviders200,
-} from "./generated/types";
+} from './generated/types';

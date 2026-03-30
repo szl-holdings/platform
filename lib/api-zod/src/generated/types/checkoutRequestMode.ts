@@ -6,10 +6,9 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type CheckoutRequestMode =
-  (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
+export type CheckoutRequestMode = (typeof CheckoutRequestMode)[keyof typeof CheckoutRequestMode];
 
 export const CheckoutRequestMode = {
-  subscription: "subscription",
-  payment: "payment",
+  subscription: 'subscription',
+  payment: 'payment',
 } as const;

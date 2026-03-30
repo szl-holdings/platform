@@ -5,8 +5,8 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
-import type { SubscriptionStatusResponseAllSubscriptionsItem } from "./subscriptionStatusResponseAllSubscriptionsItem";
-import type { SubscriptionStatusResponseSubscription } from "./subscriptionStatusResponseSubscription";
+import type { SubscriptionStatusResponseAllSubscriptionsItem } from './subscriptionStatusResponseAllSubscriptionsItem';
+import type { SubscriptionStatusResponseSubscription } from './subscriptionStatusResponseSubscription';
 
 export interface SubscriptionStatusResponse {
   subscribed: boolean;

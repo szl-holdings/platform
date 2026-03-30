@@ -17,7 +17,7 @@ export const usersTable = pgTable("users", {
 
 export const rolesTable = pgTable("roles", {
   id: serial("id").primaryKey(),
-  name: text("name", { enum: ["super_admin", "exec", "ops", "compliance", "maintenance", "analyst", "viewer"] }).notNull().unique(),
+  name: text("name", { enum: ["super_admin", "exec", "ops", "compliance", "maintenance", "analyst", "viewer", "operator", "seller", "client_viewer", "creative_user"] }).notNull().unique(),
   description: text("description"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -53,4 +53,4 @@ export const insertSessionSchema = createInsertSchema(sessionsTable).omit({ id: 
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type Session = typeof sessionsTable.$inferSelect;
 
-export type RoleName = "super_admin" | "exec" | "ops" | "compliance" | "maintenance" | "analyst" | "viewer";
+export type RoleName = "super_admin" | "exec" | "ops" | "compliance" | "maintenance" | "analyst" | "viewer" | "operator" | "seller" | "client_viewer" | "creative_user";

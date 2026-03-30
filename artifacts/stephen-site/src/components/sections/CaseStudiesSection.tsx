@@ -71,7 +71,7 @@ export function CaseStudiesSection() {
             >
               <div className="p-8 flex-1 flex flex-col">
                 <div className="flex flex-wrap gap-2 mb-5">
-                  {study.tags.map(tag => (
+                  {(study.tags || []).map(tag => (
                     <span key={tag} className="text-[10px] font-bold uppercase tracking-wider text-primary/80 bg-primary/8 px-2.5 py-1 rounded-full">
                       {tag}
                     </span>

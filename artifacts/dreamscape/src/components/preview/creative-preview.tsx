@@ -123,9 +123,9 @@ export function CreativePreview({ campaignId }: { campaignId: string }) {
           
           <div className="space-y-3">
             {reviews?.map(review => {
-              const DeptIcon = DEPARTMENT_ICONS[review.department] || Users;
+              const DeptIcon = DEPARTMENT_ICONS[review.department as keyof typeof DEPARTMENT_ICONS] || Users;
               return (
-                <div key={review.id} className={`bg-background rounded-xl p-4 border border-border border-l-2 ${DEPARTMENT_COLORS[review.department] || ''}`}>
+                <div key={review.id} className={`bg-background rounded-xl p-4 border border-border border-l-2 ${DEPARTMENT_COLORS[review.department as keyof typeof DEPARTMENT_COLORS] || ''}`}>
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <div className="font-medium text-sm">{review.reviewer}</div>
@@ -148,7 +148,7 @@ export function CreativePreview({ campaignId }: { campaignId: string }) {
                   <p className="text-sm text-foreground/90 mt-2 leading-relaxed">"{review.comment}"</p>
                   <div className="flex items-center justify-between mt-3">
                     <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {format(new Date(review.date), "MMM d, h:mm a")}
+                      <Clock className="w-3 h-3" /> {format(new Date(review.date || review.createdAt || new Date()), "MMM d, h:mm a")}
                     </div>
                     <Badge variant="outline" className="text-[9px] h-4">{review.department}</Badge>
                   </div>
