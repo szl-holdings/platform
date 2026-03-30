@@ -131,7 +131,14 @@ function CountUpNumber({ value, suffix = "" }: { value: number; suffix?: string 
 
 export default function HomePage() {
   useEffect(() => {
-    document.title = "SZL Holdings — Premium Command Systems";
+    document.title = "SZL Holdings | Premium Command Systems";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute(
+        "content",
+        "SZL Holdings builds premium command systems across observability, operations, and specialized platforms — powered by Alloy, deployed through Lyte, Vessels, and Carlota Jo."
+      );
+    }
     const cleanup = initScrollDepthTracking("home");
     return cleanup;
   }, []);
@@ -141,13 +148,12 @@ export default function HomePage() {
       <SiteNav />
       <main>
         <HeroSection />
-        <LiveMetricsStrip />
         <FeaturedPlatformsSection />
         <EcosystemLogicSection />
         <AlloyBackboneSection />
-        <ProofMetricsSection />
-        <ProofSection />
         <FounderSection />
+        <ProofSection />
+        <WhatTheSystemSolvesSection />
         <CapitalAndCredibilitySection />
         <ContactByAudienceSection />
       </main>
@@ -211,7 +217,7 @@ function HeroSection() {
           style={{ color: "var(--color-szl-text-secondary)", fontSize: "1.0625rem", maxWidth: "36rem", margin: "0 auto 0.75rem", lineHeight: 1.7 }}
         >
           One parent company. One intelligence backbone. Purpose-built platforms across
-          business observability, maritime command, real estate operations, and high-trust services —
+          execution infrastructure, maritime command, business observability, and high-trust services —
           all powered by Alloy.
         </m.p>
 
@@ -231,7 +237,7 @@ function HeroSection() {
           className="flex flex-col items-center gap-3 mb-10"
         >
           <Link
-            href="/portfolio"
+            href="/ecosystem"
             onClick={() => analytics.heroCTAClick("Explore the Ecosystem")}
             className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-sm text-sm font-semibold transition-all duration-200"
             style={{
@@ -298,53 +304,6 @@ function HeroSection() {
             </a>
           ))}
         </m.div>
-      </div>
-    </section>
-  );
-}
-
-function LiveMetricsStrip() {
-  const STRIP_METRICS = [
-    { label: "PLATFORMS LIVE", value: "4", mono: true },
-    { label: "SIGNAL DETECTION", value: "< 4 MIN", mono: true },
-    { label: "VESSELS TRACKED", value: "10+", mono: true },
-    { label: "DARK VESSEL LEAD", value: "34 DAYS", mono: true },
-    { label: "RECOVERY / QTR", value: "$340K", mono: true },
-    { label: "CLIENT RETENTION", value: "100%", mono: true },
-  ];
-
-  return (
-    <section
-      style={{
-        borderTop: "1px solid var(--color-szl-border)",
-        borderBottom: "1px solid var(--color-szl-border)",
-        background: "var(--color-szl-bg-secondary)",
-        padding: "0.875rem 0",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-0 divide-x" style={{ borderColor: "var(--color-szl-border)" }}>
-          {STRIP_METRICS.map((m, i) => (
-            <div key={m.label} className="px-4 py-2 text-center first:pl-0 last:pr-0">
-              <p
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "1.0625rem",
-                  fontWeight: 500,
-                  color: "var(--color-szl-text)",
-                  letterSpacing: "-0.01em",
-                  lineHeight: 1,
-                  marginBottom: "0.25rem",
-                }}
-              >
-                {m.value}
-              </p>
-              <p style={{ fontSize: "0.625rem", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-szl-text-faint)", textTransform: "uppercase" }}>
-                {m.label}
-              </p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -459,7 +418,7 @@ function EcosystemLogicSection() {
     <section style={{ padding: "5rem 0 5.5rem", borderBottom: "1px solid var(--color-szl-border)", background: "var(--color-szl-bg-secondary)" }}>
       <div className="max-w-6xl mx-auto px-6">
         <SectionHeader
-          eyebrow="Ecosystem Logic"
+          eyebrow="How the Ecosystem Works"
           title="The hierarchy is intentional."
           subtitle="SZL Holdings is the parent entity. Alloy is the intelligence backbone shared across every platform. Lyte, Vessels, and Carlota Jo are purpose-built command surfaces — each solving a specific domain problem, all running on the same operating fabric."
         />
@@ -561,7 +520,7 @@ function AlloyBackboneSection() {
           className="text-center mb-14"
         >
           <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-alloy)", marginBottom: "0.75rem", fontFamily: "var(--font-mono)" }}>
-            Alloy Backbone
+            Powered by Alloy
           </p>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, color: "var(--color-szl-text)", marginBottom: "1rem", letterSpacing: "-0.025em" }}>
             The intelligence layer behind every platform.
@@ -621,25 +580,17 @@ function AlloyBackboneSection() {
   );
 }
 
-function ProofMetricsSection() {
+function ProofSection() {
   return (
-    <section style={{ padding: "5rem 0 5.5rem", borderBottom: "1px solid var(--color-szl-border)", background: "var(--color-szl-bg-tertiary)" }}>
+    <section style={{ padding: "5rem 0 5.5rem", borderBottom: "1px solid var(--color-szl-border)" }}>
       <div className="max-w-6xl mx-auto px-6">
-        <m.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-12"
-        >
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.75rem" }}>
-            Operational Proof
-          </p>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, color: "var(--color-szl-text)", letterSpacing: "-0.025em", lineHeight: 1.1 }}>
-            Real outcomes. Active deployment.
-          </h2>
-        </m.div>
+        <SectionHeader
+          eyebrow="Proof of Execution"
+          title="Real outcomes. Active deployment."
+          subtitle="Not projections. Not hypotheticals. Specific operational outcomes from platforms operating in the field."
+        />
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
           {PROOF_METRICS.map((metric, i) => (
             <m.div
               key={metric.label}
@@ -673,22 +624,8 @@ function ProofMetricsSection() {
             </m.div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
 
-function ProofSection() {
-  return (
-    <section style={{ padding: "5rem 0 5.5rem", borderBottom: "1px solid var(--color-szl-border)" }}>
-      <div className="max-w-6xl mx-auto px-6">
-        <SectionHeader
-          eyebrow="Case Studies"
-          title="Documented results from production."
-          subtitle="Not projections. Not hypotheticals. Specific operational outcomes from platforms operating in the field."
-        />
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           {PROOF_CARDS.map((item, i) => (
             <m.div
               key={item.title}
@@ -759,7 +696,7 @@ function FounderSection() {
             transition={{ duration: 0.6 }}
           >
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-              Founder & Operator
+              Built by an Operator
             </p>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, color: "var(--color-szl-text)", lineHeight: 1.08, marginBottom: "1.25rem", letterSpacing: "-0.025em" }}>
               Stephen Lutar.<br />
@@ -848,6 +785,80 @@ function FounderSection() {
   );
 }
 
+function WhatTheSystemSolvesSection() {
+  const PROBLEMS = [
+    { label: "Approval Latency", desc: "Workflows stalling for days with no visibility into who is blocking or why — or what it's costing.", accent: "var(--color-szl-lyte)", accentRgb: "6, 182, 212" },
+    { label: "Ownership Gaps", desc: "Critical processes with no clear owner — decisions delayed, accountability diffused, value at risk.", accent: "var(--color-szl-lyte)", accentRgb: "6, 182, 212" },
+    { label: "Forecast Drift", desc: "Pipeline numbers shifting without explanation, too late to course correct before it hits the quarter.", accent: "var(--color-szl-lyte)", accentRgb: "6, 182, 212" },
+    { label: "Lyte Readiness", desc: "No structured view of execution readiness before milestones hit — only discovered when it's too late.", accent: "var(--color-szl-lyte)", accentRgb: "6, 182, 212" },
+    { label: "Voyage Profitability", desc: "Fleet economics invisible until the voyage is complete and the damage is already done.", accent: "var(--color-szl-vessels)", accentRgb: "59, 130, 246" },
+    { label: "Operational Exceptions", desc: "Alerts without context, incidents without ownership, noise with no resolution path.", accent: "var(--color-szl-vessels)", accentRgb: "59, 130, 246" },
+    { label: "Workflow Routing", desc: "Actions falling through cracks because routing is manual, inconsistent, or entirely absent.", accent: "var(--color-szl-alloy)", accentRgb: "110, 158, 245" },
+    { label: "White-Glove Execution", desc: "High-trust environments requiring structured support that matches their actual complexity and discretion requirements.", accent: "var(--color-szl-carlota)", accentRgb: "217, 119, 6" },
+  ];
+
+  return (
+    <section
+      style={{
+        padding: "5rem 0 5.5rem",
+        borderBottom: "1px solid var(--color-szl-border)",
+        background: "var(--color-szl-bg-tertiary)",
+      }}
+    >
+      <div className="max-w-6xl mx-auto px-6">
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-12"
+        >
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.75rem" }}>
+            What the System Solves
+          </p>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, color: "var(--color-szl-text)", letterSpacing: "-0.025em", lineHeight: 1.1, marginBottom: "1rem" }}>
+            Eight problems. One ecosystem.
+          </h2>
+          <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "1rem", maxWidth: "38rem", lineHeight: 1.7 }}>
+            Every platform in the SZL ecosystem was built around operational problems encountered directly — not feature requests, not market research. Specific problems, solved with purpose-built systems.
+          </p>
+        </m.div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {PROBLEMS.map((p, i) => (
+            <m.div
+              key={p.label}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.05 }}
+              className="rounded-sm p-5 transition-all duration-200"
+              style={{ background: "var(--color-szl-surface)", border: "1px solid var(--color-szl-border)" }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = `rgba(${p.accentRgb}, 0.24)`;
+                el.style.background = "var(--color-szl-elevated)";
+                el.style.boxShadow = `0 0 14px rgba(${p.accentRgb}, 0.08)`;
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = "var(--color-szl-border)";
+                el.style.background = "var(--color-szl-surface)";
+                el.style.boxShadow = "none";
+              }}
+            >
+              <div className="w-1 h-3 rounded-full mb-4" style={{ background: p.accent }} />
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: "0.875rem", fontWeight: 700, color: "var(--color-szl-text)", marginBottom: "0.5rem", letterSpacing: "-0.01em" }}>
+                {p.label}
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.65 }}>{p.desc}</p>
+            </m.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CapitalAndCredibilitySection() {
   const PILLARS = [
     {
@@ -912,7 +923,7 @@ function CapitalAndCredibilitySection() {
               marginBottom: "0.75rem",
             }}
           >
-            Capital and Credibility
+            Governance + Readiness Layer
           </p>
           <h2
             style={{
@@ -1058,7 +1069,7 @@ function ContactByAudienceSection() {
           className="text-center mb-14"
         >
           <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.75rem" }}>
-            Contact by Audience
+            Start the Right Conversation
           </p>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 700, color: "var(--color-szl-text)", marginBottom: "1rem", letterSpacing: "-0.025em" }}>
             Start the right conversation.

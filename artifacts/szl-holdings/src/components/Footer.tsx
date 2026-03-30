@@ -11,8 +11,8 @@ const nav = [
 ];
 
 const legal = [
-  { label: "Privacy", href: "/legal/privacy" },
-  { label: "Terms", href: "/legal/terms" },
+  { label: "Privacy", href: "/contact" },
+  { label: "Terms", href: "/contact" },
 ];
 
 export function Footer() {

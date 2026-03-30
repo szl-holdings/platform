@@ -1,34 +1,17 @@
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
-import { Navbar } from "@/components/Navbar";
-import { Hero } from "@/components/Hero";
-import { FeaturedPlatforms } from "@/components/FeaturedPlatforms";
-import { EcosystemLogic } from "@/components/EcosystemLogic";
-import { AlloyBackbone } from "@/components/AlloyBackbone";
-import { FounderBlock } from "@/components/FounderBlock";
-import { ProofGrid } from "@/components/ProofGrid";
-import { WhatItSolves } from "@/components/WhatItSolves";
-import { ContactSegments } from "@/components/ContactSegments";
-import { Footer } from "@/components/Footer";
 
+const HomePage = lazy(() => import("@/pages/home"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
 const VenturesPage = lazy(() => import("@/pages/ventures"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const ContactPage = lazy(() => import("@/pages/contact"));
-const LegalPrivacy = lazy(() => import("@/pages/legal-privacy"));
-const LegalTerms = lazy(() => import("@/pages/legal-terms"));
-const TrustCenter = lazy(() => import("@/pages/trust-center"));
-const InvestorStory = lazy(() => import("@/pages/investor-story"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
-const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
-const Changelog = lazy(() => import("@/pages/changelog"));
-const Roadmap = lazy(() => import("@/pages/roadmap"));
-const PortfolioIntel = lazy(() => import("@/pages/portfolio-intel"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 
@@ -68,6 +51,13 @@ function RequireAuth({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function ExternalRedirect({ to }: { to: string }) {
+  if (typeof window !== "undefined") {
+    window.location.href = to;
+  }
+  return <PageLoader />;
+}
+
 function PageLoader() {
   return (
     <div
@@ -91,30 +81,6 @@ function PageLoader() {
   );
 }
 
-function HomePage() {
-  useEffect(() => {
-    document.title = "SZL Holdings | Premium Command Systems";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute("content", "SZL Holdings is the parent ecosystem behind Alloy, Lyte, Vessels, and high-trust operating brands built for observability, command, and modern execution.");
-    }
-  }, []);
-  return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <Navbar />
-      <Hero />
-      <FeaturedPlatforms />
-      <EcosystemLogic />
-      <AlloyBackbone />
-      <FounderBlock />
-      <ProofGrid />
-      <WhatItSolves />
-      <ContactSegments />
-      <Footer />
-    </div>
-  );
-}
-
 function App() {
   return (
     <DemoModeProvider>
@@ -123,7 +89,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Switch>
             <Route path="/">
-              <HomePage />
+              <Suspense fallback={<PageLoader />}><HomePage /></Suspense>
             </Route>
             <Route path="/ecosystem">
               <Suspense fallback={<PageLoader />}><EcosystemPage /></Suspense>
@@ -131,8 +97,35 @@ function App() {
             <Route path="/ventures">
               <Suspense fallback={<PageLoader />}><VenturesPage /></Suspense>
             </Route>
-            <Route path="/portfolio">
-              <Redirect to="/ventures" />
+            <Route path="/alloy">
+              <ExternalRedirect to="/alloy/" />
+            </Route>
+            <Route path="/alloy/architecture">
+              <ExternalRedirect to="/alloy/architecture" />
+            </Route>
+            <Route path="/alloy/workflows">
+              <ExternalRedirect to="/alloy/workflows" />
+            </Route>
+            <Route path="/lyte">
+              <ExternalRedirect to="/lyte-command-center/" />
+            </Route>
+            <Route path="/lyte/use-cases">
+              <ExternalRedirect to="/lyte-command-center/use-cases" />
+            </Route>
+            <Route path="/lyte/demo">
+              <ExternalRedirect to="/lyte-command-center/demo" />
+            </Route>
+            <Route path="/vessels">
+              <ExternalRedirect to="/vessels/" />
+            </Route>
+            <Route path="/vessels/platform">
+              <ExternalRedirect to="/vessels/platform" />
+            </Route>
+            <Route path="/carlota-jo">
+              <ExternalRedirect to="/carlota-jo/" />
+            </Route>
+            <Route path="/carlota-jo/services">
+              <ExternalRedirect to="/carlota-jo/services" />
             </Route>
             <Route path="/founder">
               <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>
@@ -140,23 +133,11 @@ function App() {
             <Route path="/contact">
               <Suspense fallback={<PageLoader />}><ContactPage /></Suspense>
             </Route>
-            <Route path="/legal/privacy">
-              <Suspense fallback={<PageLoader />}><LegalPrivacy /></Suspense>
-            </Route>
-            <Route path="/legal/terms">
-              <Suspense fallback={<PageLoader />}><LegalTerms /></Suspense>
-            </Route>
-            <Route path="/trust">
-              <Suspense fallback={<PageLoader />}><TrustCenter /></Suspense>
-            </Route>
-            <Route path="/investor">
-              <Suspense fallback={<PageLoader />}><InvestorStory /></Suspense>
+            <Route path="/case-studies">
+              <Suspense fallback={<PageLoader />}><CaseStudiesPage /></Suspense>
             </Route>
             <Route path="/insights">
               <Suspense fallback={<PageLoader />}><InsightsPage /></Suspense>
-            </Route>
-            <Route path="/insights/:slug">
-              <Suspense fallback={<PageLoader />}><InsightsArticlePage /></Suspense>
             </Route>
             <Route path="/kpis">
               <RequireAuth><Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense></RequireAuth>
@@ -167,11 +148,11 @@ function App() {
             <Route path="/admin/:section">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
             </Route>
-            <Route path="/case-studies">
-              <Suspense fallback={<PageLoader />}><CaseStudiesPage /></Suspense>
+            <Route path="/portfolio">
+              <Redirect to="/ventures" />
             </Route>
             <Route>
-              <HomePage />
+              <Redirect to="/" />
             </Route>
           </Switch>
         </WouterRouter>

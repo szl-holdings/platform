@@ -87,7 +87,7 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
   },
   dreamscape: {
     connectors: ["ai", "figma", "storage", "google-drive", "dropbox", "elevenlabs"],
-    description: "Alloy predictive intelligence layer — scenario modeling, confidence scoring, and prediction surfaces using HuggingFace Hub model discovery and media analytics benchmarks. Absorbed into Alloy (formerly Nimbus).",
+    description: "Alloy predictive intelligence layer — scenario modeling, confidence scoring, and prediction surfaces using HuggingFace Hub model discovery and media analytics benchmarks. Absorbed into Alloy.",
     liveFeeds: ["HuggingFace Hub — AI Creative Tools (live API)", "Content Marketing RSS Intelligence", "Cross-Platform Media Analytics Benchmarks"],
     doctrineRole: "EXECUTE",
   },

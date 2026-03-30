@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { AlloyIntelligenceLayout } from "@/components/nimbus-layout";
+import { AlloyIntelligenceLayout } from "@/components/alloy-intelligence-layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { alloyPredictiveConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";

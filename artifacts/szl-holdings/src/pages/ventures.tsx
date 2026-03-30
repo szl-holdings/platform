@@ -42,7 +42,7 @@ const VENTURES = [
 export default function VenturesPage() {
   usePageMeta({
     title: "Ventures — SZL Holdings",
-    description: "SZL Holdings portfolio: sovereign platforms built for operational complexity — Alloy, Lyte, Vessels, Firestorm, INCA, Rosie, Dreamscape, and Carlota Jo.",
+    description: "SZL Holdings portfolio: Alloy, Lyte, Vessels, and Carlota Jo — purpose-built platforms across observability, maritime command, and premium services.",
     canonical: "https://szlholdings.com/ventures",
   });
 

@@ -10,7 +10,7 @@ const projectAppUrls: Record<string, string> = {
   "Firestorm Security Operations": "/firestorm/",
   "Lyte Command Center": "/lyte-command-center/",
   "Dreamscape Creative Engine": "/alloy/",
-  "Nimbus": "/alloy/",
+  "Alloy Predictive Intelligence": "/alloy/",
   "Alloy": "/alloy/",
   "AlloyScape": "/alloy/",
   "Readiness Report": "/readiness-report/",
@@ -86,6 +86,23 @@ const statusDots: Record<string, string> = {
   "on-hold": "bg-amber-400",
   archived: "bg-zinc-500",
 };
+
+const HIDDEN_FROM_PUBLIC = new Set([
+  "Firestorm Security Operations",
+  "INCA AI Research Command Center",
+  "INCA AI Research",
+  "INCA",
+  "MSP Command Center",
+  "Rosie",
+  "Evolve MSP Command Center",
+  "Dreamscape Creative Engine",
+  "Terra Real Estate Intelligence",
+  "Beacon",
+  "Readiness Report",
+  "Aegis",
+  "Admin Control Plane",
+  "Service Integration Layer",
+]);
 
 const ALL_CATEGORIES = "All";
 
@@ -227,12 +244,13 @@ export default function ProjectsPage() {
     : [ALL_CATEGORIES];
 
   const filtered = projects?.filter(p => {
+    if (HIDDEN_FROM_PUBLIC.has(p.name)) return false;
     const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = activeCategory === ALL_CATEGORIES || (projectCategories[p.name] || "App") === activeCategory;
     return matchesSearch && matchesCategory;
   }) ?? [];
 
-  const activeCount = projects?.filter(p => p.status === "active").length ?? 0;
+  const activeCount = projects?.filter(p => p.status === "active" && !HIDDEN_FROM_PUBLIC.has(p.name)).length ?? 0;
 
   return (
     <div className="min-h-screen bg-background">

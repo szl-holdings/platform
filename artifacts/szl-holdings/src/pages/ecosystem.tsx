@@ -10,7 +10,7 @@ const brands = [
     role: "Parent Brand / Ecosystem Authority",
     description: "The masterbrand and operating philosophy behind every entity in the ecosystem. Sets standards, defines the system, and holds the structure together.",
     accent: "hsl(210,10%,60%)",
-    status: "Active",
+    status: "Live",
     href: "/",
   },
   {
@@ -50,8 +50,8 @@ const brands = [
     role: "Founder / Operator",
     description: "Builder, operator, and systems thinker. The founder who built the ecosystem, designed the platforms, and operates the system.",
     accent: "hsl(210,8%,56%)",
-    status: "Active",
-    href: "/stephen/",
+    status: "Live",
+    href: "/founder",
   },
 ];
 
@@ -73,7 +73,7 @@ const internal = [
 export default function EcosystemPage() {
   usePageMeta({
     title: "Ecosystem — SZL Holdings",
-    description: "The full SZL Holdings ecosystem: Alloy, Beacon, Lyte, Vessels, Firestorm, INCA, Rosie, Carlota Jo, and Dreamscape. One operating philosophy. Multiple sovereign platforms.",
+    description: "The SZL Holdings ecosystem: one parent company, one intelligence backbone, and purpose-built platforms across observability, maritime command, and premium services.",
     canonical: "https://szlholdings.com/ecosystem",
   });
 
