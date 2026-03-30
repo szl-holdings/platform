@@ -8,7 +8,7 @@ interface EnvVarSpec {
 }
 
 const ENV_SPECS: EnvVarSpec[] = [
-  { key: "PORT", required: true, description: "Server listen port" },
+  { key: "PORT", required: false, description: "Server listen port", defaultValue: "3000" },
   { key: "NODE_ENV", required: false, description: "Runtime environment", defaultValue: "development" },
   { key: "DATABASE_URL", required: false, description: "PostgreSQL connection string" },
   { key: "SESSION_SECRET", required: false, description: "Session encryption secret" },

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, TrendingUp, ImageIcon, FileText, Calendar, Loader2, Lightbulb, Palette, Globe, Zap, Sliders, Video, Music, Type, Wand2, Camera, Layers, MonitorPlay, Mic, RefreshCw, Check, Copy, MessageSquare, BarChart3 } from "lucide-react";
+import { Sparkles, TrendingUp, ImageIcon, FileText, Calendar, Loader2, Lightbulb, Palette, Globe, Zap, Sliders, Video, Music, Type, Wand2, Camera, Layers, MonitorPlay, Mic, RefreshCw, Check, Copy, MessageSquare, BarChart3, Radio } from "lucide-react";
 import { Button, Card, Badge, Input } from "@/components/ui";
 import { ShimmerReveal, TypewriterText } from "@workspace/shared-ui/ai-components";
 
@@ -107,11 +107,30 @@ export function AIStudio() {
   const [selectedTool, setSelectedTool] = React.useState<string | null>(null);
 
   const imageMutation = useMutation({
-    mutationFn: async (_prompt: string) => ({ imageBase64: "", mimeType: "image/png", model: "SDXL", tier: "premium" }),
+    mutationFn: async (prompt: string) => {
+      const res = await fetch("/api/alloy-chat/image-generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ prompt, provider: "openai", size: "1024x1024" }),
+      });
+      if (!res.ok) throw new Error("Image generation failed");
+      return res.json();
+    },
   });
 
   const briefMutation = useMutation({
-    mutationFn: async (_topic: string) => ({ content: "Brief generated." }),
+    mutationFn: async (topic: string) => {
+      const toneStr = tone < 25 ? "corporate" : tone < 50 ? "professional" : tone < 75 ? "conversational" : "bold";
+      const res = await fetch("/api/intelligence/ai/campaign-copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ topic, tone: toneStr, format: "creative-brief" }),
+      });
+      if (!res.ok) throw new Error("Brief generation failed");
+      return res.json();
+    },
   });
 
   const toneLabel = tone < 25 ? "Corporate" : tone < 50 ? "Professional" : tone < 75 ? "Conversational" : "Bold & Provocative";
@@ -120,9 +139,39 @@ export function AIStudio() {
     if (!briefTopic.trim()) return;
     setCopyResult("");
     setCopyDone(false);
-    await new Promise(r => setTimeout(r, 800));
-    setCopyResult(`Campaign: ${briefTopic}\n\nHeadline: Beyond What You Know\nSubheadline: Where vision meets velocity\nBody: Every breakthrough starts with a single question — what if? We build the answers that move industries forward, one bold idea at a time.\nCTA: See What's Next \u2192`);
-    setCopyDone(true);
+    const toneStr = tone < 25 ? "corporate" : tone < 50 ? "professional" : tone < 75 ? "conversational" : "bold";
+    try {
+      const res = await fetch("/api/intelligence/ai/campaign-copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ topic: briefTopic.trim(), tone: toneStr, format: "full-campaign" }),
+      });
+      if (!res.ok || !res.body) throw new Error("Stream failed");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const json = JSON.parse(line.slice(6));
+            if (json.done) { setCopyDone(true); break; }
+            if (json.error) throw new Error(json.error);
+            if (json.content) setCopyResult(prev => prev + json.content);
+          } catch {}
+        }
+      }
+      setCopyDone(true);
+    } catch (err) {
+      setCopyResult(`Error: ${err instanceof Error ? err.message : "Generation failed"}`);
+      setCopyDone(true);
+    }
   };
 
   return (

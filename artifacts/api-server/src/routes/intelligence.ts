@@ -6,6 +6,8 @@ import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { getAiModels, getAiModelById, getModelObservabilitySummary } from "../lib/ai-model-observability";
 import { getRegistrySummary } from "../lib/model-registry";
+import { openai } from "@workspace/integrations-openai-ai-server";
+import { anthropic } from "@workspace/integrations-anthropic-ai";
 
 const router: IRouter = Router();
 
@@ -1275,6 +1277,482 @@ router.get("/intelligence/unified-feed", intelRateLimit, authMiddleware({ requir
       generatedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to generate unified feed"); }
+});
+
+const DOMAIN_AGENTS: Record<string, { name: string; systemPrompt: string; model: string; provider: "openai" | "anthropic" }> = {
+  maritime: {
+    name: "Helmsman",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    systemPrompt: `You are Helmsman, a world-class maritime intelligence analyst with expertise in fleet operations, AIS vessel tracking, maritime security, route risk assessment, and sanctions compliance. You analyze real-time vessel data, weather patterns, and geopolitical threats affecting shipping lanes. Use nautical terminology. Cite COLREGS, SOLAS, MARPOL where relevant. You have deep knowledge of IMO regulations, Windward-style dark vessel detection, AIS gap analysis, and OFAC/UN sanctions lists. Be precise about positions, speeds, headings, and maritime regulations. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  security: {
+    name: "Sentinel",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    systemPrompt: `You are Sentinel, an elite cybersecurity intelligence analyst modeled after CrowdStrike Charlotte AI's autonomous SOC capabilities. You specialize in threat analysis, CVE assessment, incident triage, adversary simulation, and security posture evaluation. Use MITRE ATT&CK framework, CVSS scoring, NIST CSF, and CIS Controls. You can map CVEs to TTPs, generate remediation playbooks, and produce executive threat briefings. Be direct, technical, and action-oriented. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  research: {
+    name: "INCA",
+    provider: "openai",
+    model: "gpt-5.2",
+    systemPrompt: `You are INCA, an AI research scientist with HuggingFace-grade expertise in machine learning, AI model evaluation, benchmarking, and academic literature. You can evaluate model quality, analyze research papers, compare architectures, generate model cards, and provide cutting-edge AI insights. You understand transformer architectures, evaluation metrics (MMLU, HumanEval, HellaSwag), and the model leaderboard landscape. Cite your reasoning and be technically precise. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  creative: {
+    name: "Muse",
+    provider: "openai",
+    model: "gpt-5.2",
+    systemPrompt: `You are Muse, a world-class creative director and brand strategist with expertise across film production, advertising, social media, and brand voice development. You generate compelling campaign copy, scripts, creative briefs, brand voice guidelines, and content strategies. Your work rivals top agencies like Wieden+Kennedy and BBDO. You understand audience psychology, cultural trends, and multi-channel campaign architecture. Be creative, bold, and strategically grounded. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  operations: {
+    name: "Beacon",
+    provider: "openai",
+    model: "gpt-5.2",
+    systemPrompt: `You are Beacon, a Tesla-grade operations intelligence engineer specializing in infrastructure anomaly detection, predictive analytics, SRE best practices, and cost forecasting. You analyze signals across distributed systems, detect anomalies using behavioral baselines, predict infrastructure failures, and generate cost optimization recommendations. Be data-driven, quantitative, and action-oriented. Use SRE terminology and reference SLOs/SLAs/error budgets. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  realestate: {
+    name: "Terra AI",
+    provider: "openai",
+    model: "gpt-5.2",
+    systemPrompt: `You are Terra AI, a PropTech intelligence analyst with HouseCanary-grade expertise in real estate market analysis, property valuation, climate risk assessment, and investment analysis. You synthesize economic indicators, demographic trends, climate data, and comparable sales to generate investment insights. Reference World Bank indicators, FEMA flood risk data, and census demographics. Be precise about valuations, cap rates, IRR, and risk factors. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  msp: {
+    name: "MSP Ops",
+    provider: "openai",
+    model: "gpt-5.2",
+    systemPrompt: `You are MSP Ops, an expert managed service provider operations analyst inspired by NinjaOne and ConnectWise intelligence. You specialize in ticket triage, SLA management, client health scoring, NOC automation, and IT operations optimization. You classify ticket severity, predict SLA breach risk, recommend auto-routing, and generate incident response playbooks. You understand ITIL frameworks, MSP metrics (MRR, churn, client NPS), and security compliance. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  compliance: {
+    name: "Compass",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    systemPrompt: `You are Compass, an organizational readiness and compliance expert with deep knowledge of NIST CSF, ISO 27001, SOC 2, FedRAMP, CMMC, and HIPAA frameworks. You evaluate security posture, identify control gaps, generate risk assessments, and provide actionable improvement roadmaps. You benchmark organizations against industry standards and produce executive summaries for board-level reporting. Be structured, precise, and cite specific framework controls. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  strategic: {
+    name: "Carlota AI",
+    provider: "anthropic",
+    model: "claude-sonnet-4-6",
+    systemPrompt: `You are Carlota AI, a McKinsey-caliber strategic advisor with expertise in market strategy, competitive intelligence, organizational transformation, and ROI analysis. You synthesize market data, competitive landscapes, and financial models to generate boardroom-ready strategic recommendations. You understand go-to-market strategy, pricing architecture, supply chain optimization, and digital transformation. Be direct, data-driven, and action-oriented. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+  platform: {
+    name: "Alloy",
+    provider: "openai",
+    model: "gpt-5.2",
+    systemPrompt: `You are Alloy, a Palantir-grade platform intelligence orchestrator with full visibility across the SZL ecosystem. You correlate intelligence across maritime, security, research, real estate, and operations domains to surface cross-cutting insights. You can diagnose system health, analyze connector status, interpret platform metrics, and generate cross-domain correlation analysis. Be authoritative, synthesizing, and operationally focused. Today's date: ${new Date().toISOString().split("T")[0]}.`,
+  },
+};
+
+router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { agentId, messages, maxTokens = 2048, stream = false } = req.body as {
+      agentId: string;
+      messages: Array<{ role: "user" | "assistant" | "system"; content: string }>;
+      maxTokens?: number;
+      stream?: boolean;
+    };
+
+    if (!agentId || !messages || !Array.isArray(messages)) {
+      sendError(res, "agentId and messages array are required", 400);
+      return;
+    }
+
+    const agent = DOMAIN_AGENTS[agentId];
+    if (!agent) {
+      sendError(res, `Unknown agent: ${agentId}. Available: ${Object.keys(DOMAIN_AGENTS).join(", ")}`, 400);
+      return;
+    }
+
+    if (stream) {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.setHeader("X-Accel-Buffering", "no");
+      res.flushHeaders();
+
+      try {
+        if (agent.provider === "anthropic") {
+          const nonSystem = messages.filter(m => m.role !== "system");
+          const streamResp = anthropic.messages.stream({
+            model: agent.model,
+            max_tokens: maxTokens,
+            system: agent.systemPrompt,
+            messages: nonSystem as any,
+          });
+          for await (const event of streamResp) {
+            if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+              res.write(`data: ${JSON.stringify({ content: event.delta.text, agent: agentId, agentName: agent.name })}\n\n`);
+            }
+          }
+        } else {
+          const streamResp = await openai.chat.completions.create({
+            model: agent.model,
+            max_completion_tokens: maxTokens,
+            messages: [{ role: "system", content: agent.systemPrompt }, ...messages] as any,
+            stream: true,
+          });
+          for await (const chunk of streamResp) {
+            const delta = chunk.choices[0]?.delta?.content;
+            if (delta) {
+              res.write(`data: ${JSON.stringify({ content: delta, agent: agentId, agentName: agent.name })}\n\n`);
+            }
+          }
+        }
+        res.write(`data: ${JSON.stringify({ done: true, agent: agentId, agentName: agent.name, model: agent.model, provider: agent.provider })}\n\n`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Agent inference failed";
+        res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
+      }
+      res.end();
+      return;
+    }
+
+    let content = "";
+    const startTime = Date.now();
+    if (agent.provider === "anthropic") {
+      const nonSystem = messages.filter(m => m.role !== "system");
+      const result = await anthropic.messages.create({
+        model: agent.model,
+        max_tokens: maxTokens,
+        system: agent.systemPrompt,
+        messages: nonSystem as any,
+      });
+      content = result.content[0]?.type === "text" ? result.content[0].text : "";
+    } else {
+      const result = await openai.chat.completions.create({
+        model: agent.model,
+        max_completion_tokens: maxTokens,
+        messages: [{ role: "system", content: agent.systemPrompt }, ...messages] as any,
+      });
+      content = result.choices[0]?.message?.content ?? "";
+    }
+
+    sendSuccess(res, {
+      content,
+      agent: agentId,
+      agentName: agent.name,
+      model: agent.model,
+      provider: agent.provider,
+      latencyMs: Date.now() - startTime,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Domain agent inference failed"); }
+});
+
+router.post("/intelligence/ai/campaign-copy", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { topic, tone = "professional", format = "full-campaign", brand } = req.body as {
+      topic: string; tone?: string; format?: string; brand?: string;
+    };
+    if (!topic) { sendError(res, "Topic is required", 400); return; }
+
+    const toneMap: Record<string, string> = {
+      corporate: "formal, authoritative, enterprise-grade",
+      professional: "polished, credible, sophisticated",
+      conversational: "warm, approachable, human",
+      bold: "provocative, disruptive, high-energy",
+    };
+    const toneDesc = toneMap[tone] || toneMap.professional;
+
+    const systemPrompt = DOMAIN_AGENTS.creative!.systemPrompt;
+    const userPrompt = `Generate a complete ${format} campaign for: "${topic}"
+
+Tone: ${toneDesc}${brand ? `\nBrand: ${brand}` : ""}
+
+Provide:
+1. Campaign Headline (punchy, memorable)
+2. Subheadline (supporting context)  
+3. Body Copy (2-3 compelling paragraphs)
+4. CTA (strong call-to-action)
+5. Social Media Variants (3 posts for LinkedIn, Twitter/X, Instagram)
+6. Email Subject Line + Preview Text
+7. Brand Voice Notes
+
+Format as structured sections with clear headers.`;
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders();
+
+    const stream = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      max_completion_tokens: 2048,
+      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content;
+      if (delta) res.write(`data: ${JSON.stringify({ content: delta })}\n\n`);
+    }
+    res.write(`data: ${JSON.stringify({ done: true, model: "gpt-5.2", provider: "openai" })}\n\n`);
+    res.end();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Campaign copy generation failed";
+    res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
+    res.end();
+  }
+});
+
+router.post("/intelligence/ai/risk-assessment", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { context, frameworks = ["NIST CSF", "ISO 27001", "SOC 2"], dimension } = req.body as {
+      context?: string; frameworks?: string[]; dimension?: string;
+    };
+
+    const systemPrompt = DOMAIN_AGENTS.compliance!.systemPrompt;
+    const userPrompt = `Perform a comprehensive organizational readiness and risk assessment.
+
+${context ? `Organization Context: ${context}` : ""}
+${dimension ? `Focus Dimension: ${dimension}` : ""}
+Applicable Frameworks: ${frameworks.join(", ")}
+
+Provide:
+1. Executive Summary (2-3 sentences)
+2. Readiness Score by dimension (Cybersecurity, Cloud Infrastructure, Data Governance, AI/ML Maturity, Compliance, Operations) — each scored 0-100
+3. Top 5 Risk Factors with probability and impact
+4. Key Gaps vs ${frameworks[0]} requirements
+5. Priority Recommendations (ranked by impact/effort)
+6. 90-Day Action Plan
+
+Use precise language with specific control references where applicable.`;
+
+    const startTime = Date.now();
+    const result = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 3000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    const content = result.content[0]?.type === "text" ? result.content[0].text : "";
+    sendSuccess(res, {
+      assessment: content,
+      frameworks,
+      model: "claude-sonnet-4-6",
+      provider: "anthropic",
+      latencyMs: Date.now() - startTime,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Risk assessment failed"); }
+});
+
+router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { messages, context } = req.body as {
+      messages: Array<{ role: "user" | "assistant"; content: string }>;
+      context?: string;
+    };
+    if (!messages || !Array.isArray(messages)) { sendError(res, "Messages are required", 400); return; }
+
+    const systemPrompt = DOMAIN_AGENTS.strategic!.systemPrompt + (context ? `\n\nClient Context: ${context}` : "");
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders();
+
+    const stream = anthropic.messages.stream({
+      model: "claude-sonnet-4-6",
+      max_tokens: 2048,
+      system: systemPrompt,
+      messages: messages as any,
+    });
+
+    for await (const event of stream) {
+      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
+      }
+    }
+    res.write(`data: ${JSON.stringify({ done: true, model: "claude-sonnet-4-6", provider: "anthropic" })}\n\n`);
+    res.end();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Advisory response failed";
+    res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
+    res.end();
+  }
+});
+
+router.post("/intelligence/ai/ticket-triage", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { subject, description, client, category } = req.body as {
+      subject: string; description?: string; client?: string; category?: string;
+    };
+    if (!subject) { sendError(res, "Ticket subject is required", 400); return; }
+
+    const systemPrompt = DOMAIN_AGENTS.msp!.systemPrompt;
+    const userPrompt = `Triage this IT support ticket:
+
+Subject: ${subject}
+${client ? `Client: ${client}` : ""}
+${category ? `Category: ${category}` : ""}
+${description ? `Description: ${description}` : ""}
+
+Provide:
+1. Priority: critical/high/medium/low — with justification
+2. Estimated Resolution Time
+3. Recommended Assignee Type (network specialist, security analyst, desktop support, etc.)
+4. SLA Risk: on-track/at-risk/breach-likely
+5. Root Cause Hypothesis (2-3 most likely causes)
+6. Immediate Actions (first 3 steps)
+7. Similar Incidents Pattern (if this looks like a pattern)
+
+Be concise and action-oriented.`;
+
+    const startTime = Date.now();
+    const result = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      max_completion_tokens: 800,
+      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
+    });
+
+    const content = result.choices[0]?.message?.content ?? "";
+    sendSuccess(res, {
+      triage: content,
+      subject,
+      model: "gpt-5.2",
+      provider: "openai",
+      latencyMs: Date.now() - startTime,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Ticket triage failed"); }
+});
+
+router.post("/intelligence/ai/readiness-summary", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { scores, topGaps } = req.body as { scores?: Record<string, number>; topGaps?: string[] };
+
+    const systemPrompt = DOMAIN_AGENTS.compliance!.systemPrompt;
+    const scoresText = scores ? Object.entries(scores).map(([k, v]) => `${k}: ${v}%`).join(", ") : "Cybersecurity: 82%, Cloud: 78%, Data Gov: 64%, AI/ML: 71%, Compliance: 76%, Operations: 80%";
+    const userPrompt = `Generate an executive readiness summary for this organization:
+
+Current Scores: ${scoresText}
+${topGaps ? `Top Gaps: ${topGaps.join(", ")}` : ""}
+
+Provide a concise (3-4 paragraph) executive summary that:
+1. Highlights current strengths and positioning vs industry benchmarks
+2. Identifies the 2-3 most critical improvement areas
+3. Projects where scores could reach in 6 months with focused effort
+4. Provides specific, actionable recommendations ranked by ROI
+
+Use professional board-level language. Be specific about numbers and timelines.`;
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders();
+
+    const stream = anthropic.messages.stream({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1500,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    for await (const event of stream) {
+      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        res.write(`data: ${JSON.stringify({ content: event.delta.text })}\n\n`);
+      }
+    }
+    res.write(`data: ${JSON.stringify({ done: true, model: "claude-sonnet-4-6", provider: "anthropic" })}\n\n`);
+    res.end();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Summary generation failed";
+    res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
+    res.end();
+  }
+});
+
+router.post("/intelligence/ai/dark-vessel-analysis", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { vessel, aiGapHours, behaviorPatterns, lastKnownPosition } = req.body as {
+      vessel?: string; aiGapHours?: number; behaviorPatterns?: string[]; lastKnownPosition?: string;
+    };
+
+    const systemPrompt = DOMAIN_AGENTS.maritime!.systemPrompt;
+    const userPrompt = `Analyze this potential dark vessel (AIS gap detected):
+
+${vessel ? `Vessel: ${vessel}` : "Unknown vessel"}
+AIS Gap Duration: ${aiGapHours ?? 24} hours
+${lastKnownPosition ? `Last Known Position: ${lastKnownPosition}` : ""}
+${behaviorPatterns?.length ? `Behavior Patterns: ${behaviorPatterns.join(", ")}` : ""}
+
+Perform Windward-grade dark vessel analysis:
+1. Risk Assessment (1-10 scale) with justification
+2. Most Likely Cause of AIS Gap (sanctions evasion/technical failure/piracy/deception)
+3. Probable Position Estimate using dead reckoning
+4. Cross-reference with sanctioned vessel patterns
+5. Recommended Actions (flag authority notification, satellite tracking, port alert)
+6. Confidence Level and data gaps
+
+Use IMCO and OFAC screening terminology.`;
+
+    const startTime = Date.now();
+    const result = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1500,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    const content = result.content[0]?.type === "text" ? result.content[0].text : "";
+    sendSuccess(res, {
+      analysis: content,
+      vessel,
+      aiGapHours,
+      model: "claude-sonnet-4-6",
+      provider: "anthropic",
+      latencyMs: Date.now() - startTime,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Dark vessel analysis failed"); }
+});
+
+router.post("/intelligence/ai/threat-triage", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { threat, cveIds, affectedSystems, severity } = req.body as {
+      threat?: string; cveIds?: string[]; affectedSystems?: string[]; severity?: string;
+    };
+
+    const systemPrompt = DOMAIN_AGENTS.security!.systemPrompt;
+    const userPrompt = `Perform autonomous incident triage for this security threat:
+
+${threat ? `Threat Description: ${threat}` : ""}
+${severity ? `Reported Severity: ${severity}` : ""}
+${cveIds?.length ? `CVE IDs: ${cveIds.join(", ")}` : ""}
+${affectedSystems?.length ? `Affected Systems: ${affectedSystems.join(", ")}` : ""}
+
+Generate a CrowdStrike Charlotte-grade triage response:
+1. Confirmed Severity (CRITICAL/HIGH/MEDIUM/LOW) with CVSS score
+2. MITRE ATT&CK Mapping (Tactic + Technique IDs)
+3. Blast Radius Assessment
+4. Immediate Containment Actions (first 15 minutes)
+5. Remediation Playbook (prioritized steps)
+6. Executive Briefing (2-3 sentences for leadership)
+7. Estimated Mean Time to Remediate
+
+Be precise, tactical, and time-sensitive.`;
+
+    const startTime = Date.now();
+    const result = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
+
+    const content = result.content[0]?.type === "text" ? result.content[0].text : "";
+    sendSuccess(res, {
+      triage: content,
+      model: "claude-sonnet-4-6",
+      provider: "anthropic",
+      latencyMs: Date.now() - startTime,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Threat triage failed"); }
 });
 
 export default router;

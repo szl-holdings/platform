@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Eye, EyeOff, AlertTriangle, Shield, Radio, Ship, MapPin, Clock, Zap, Filter, Search, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, AlertTriangle, Shield, Radio, Ship, MapPin, Clock, Filter, Search, RefreshCw, Sparkles, Loader2 } from "lucide-react";
 
 const darkVessels = [
   { id: "DV-001", name: "GHOST MERIDIAN", imo: "9821045", flag: "Unknown", lat: 25.4, lon: 56.2, lastAIS: "14h ago", gapDuration: "14h 22m", suspicionScore: 94, reason: "AIS disabled near Iran — sanctions zone transit", priorCalls: ["Bandar Abbas", "Jebel Ali"], ownerChain: "Obscured via 3 shell co.", status: "Critical" },
@@ -42,9 +42,38 @@ function ScoreBar({ score }: { score: number }) {
   );
 }
 
+interface VesselAnalysis {
+  loading: boolean;
+  content: string;
+  error?: string;
+}
+
 export default function DarkVesselDetection() {
   const [activeTab, setActiveTab] = useState<"dark" | "sts" | "iuu">("dark");
   const [search, setSearch] = useState("");
+  const [vesselAnalyses, setVesselAnalyses] = useState<Record<string, VesselAnalysis>>({});
+
+  const analyzeVessel = async (vessel: typeof darkVessels[0]) => {
+    setVesselAnalyses(prev => ({ ...prev, [vessel.id]: { loading: true, content: "" } }));
+    try {
+      const res = await fetch("/api/intelligence/ai/dark-vessel-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          vessel: `${vessel.name} (IMO: ${vessel.imo}, Flag: ${vessel.flag})`,
+          aiGapHours: parseFloat(vessel.gapDuration),
+          lastKnownPosition: `${vessel.lat.toFixed(1)}°N ${vessel.lon.toFixed(1)}°E`,
+          behaviorPatterns: [vessel.reason, `Prior port calls: ${vessel.priorCalls.join(", ")}`, `Owner: ${vessel.ownerChain}`],
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setVesselAnalyses(prev => ({ ...prev, [vessel.id]: { loading: false, content: data.data?.analysis ?? data.analysis ?? "No analysis returned" } }));
+    } catch (err) {
+      setVesselAnalyses(prev => ({ ...prev, [vessel.id]: { loading: false, content: "", error: err instanceof Error ? err.message : "Analysis failed" } }));
+    }
+  };
 
   const filtered = darkVessels.filter(v =>
     v.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -152,11 +181,36 @@ export default function DarkVesselDetection() {
                           ))}
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1.5">Owner chain: {vessel.ownerChain}</p>
+                        {vesselAnalyses[vessel.id] && !vesselAnalyses[vessel.id].loading && (
+                          <div className="mt-3 bg-muted/30 rounded-lg p-3">
+                            <div className="flex items-center gap-1 mb-1.5 text-[10px] text-muted-foreground">
+                              <Sparkles className="w-3 h-3 text-primary" /> Helmsman AI · claude-sonnet-4-6
+                            </div>
+                            {vesselAnalyses[vessel.id].error ? (
+                              <p className="text-xs text-red-400">{vesselAnalyses[vessel.id].error}</p>
+                            ) : (
+                              <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">{vesselAnalyses[vessel.id].content}</p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="w-28 shrink-0">
-                      <p className="text-[10px] text-muted-foreground mb-1">Suspicion Score</p>
-                      <ScoreBar score={vessel.suspicionScore} />
+                    <div className="flex flex-col items-end gap-3 shrink-0">
+                      <div className="w-28">
+                        <p className="text-[10px] text-muted-foreground mb-1">Suspicion Score</p>
+                        <ScoreBar score={vessel.suspicionScore} />
+                      </div>
+                      <button
+                        onClick={() => analyzeVessel(vessel)}
+                        disabled={vesselAnalyses[vessel.id]?.loading}
+                        className="text-[10px] px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors flex items-center gap-1 disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {vesselAnalyses[vessel.id]?.loading ? (
+                          <><Loader2 className="w-3 h-3 animate-spin" /> Analyzing...</>
+                        ) : (
+                          <><Sparkles className="w-3 h-3" /> AI Analysis</>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </CardContent>

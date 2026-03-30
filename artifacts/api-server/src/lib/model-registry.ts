@@ -23,19 +23,19 @@ interface RegistryDefaults {
 
 const CATEGORY_DEFAULTS: Record<AgentCategory, RegistryDefaults> = {
   domain: {
-    model: "gpt-4o-mini",
+    model: "gpt-5.2",
     temperature: 0.7,
     maxCompletionTokens: 4096,
     topP: 1,
   },
   general: {
-    model: "gpt-4o-mini",
+    model: "gpt-5.2",
     temperature: 0.7,
     maxCompletionTokens: 1024,
     topP: 1,
   },
   "lyte-ai": {
-    model: "gpt-4o-mini",
+    model: "gpt-5.2",
     temperature: 0.4,
     maxCompletionTokens: 500,
     topP: 1,

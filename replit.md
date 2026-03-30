@@ -25,12 +25,15 @@ The platform is built as a pnpm monorepo using Node.js 24 and TypeScript 5.9.
 A premium design system via `@workspace/shared-ui` ensures consistent aesthetics. Each app has a **unique visual identity** matching its market lane. Common components include KPI ribbons, chart containers, data table shells, `AgentCopilot`, and advanced form elements. Demo Mode banners and loading states with skeleton placeholders are integrated. Typography: Plus Jakarta Sans (display), Inter (body), Source Serif 4 (luxury/editorial apps).
 
 ### Platform Architecture & Features
-DreamStack comprises 12 applications sharing a PostgreSQL database, authentication, and design system.
+DreamStack comprises 13 applications sharing a PostgreSQL database, authentication, and design system.
 - **Authentication & RBAC:** Middleware manages Bearer token sessions and Replit Auth, with an 11-role RBAC system.
 - **API Server:** Modular routes in `artifacts/api-server` use Zod for validation and Drizzle for persistence, including security features like `helmet`, `express-rate-limit`, CORS, and structured error handling.
 - **Service Adapters:** `lib/services` provides a pattern for integrating 27 third-party services with environment variable detection and mock fallbacks, including health checks.
 - **Stripe Billing:** Full integration for checkout, subscriptions, and webhooks.
 - **Intelligence Layer:** Over 40 REST endpoints provide cross-platform intelligence, including government data feeds (CISA KEV, NVD CVE, MITRE ATT&CK, FedRAMP, Census Bureau, BLS, FEMA, USAspending.gov, NOAA, arXiv, Semantic Scholar, PapersWithCode, HuggingFace Hub, SEC EDGAR) with TTL caching and AI-powered endpoints (chat, summarize, sentiment, image-gen, threat-briefing).
+- **Live AI Models:** All AI inference uses GPT-5.2 (primary, OpenAI via Replit proxy) and Claude Sonnet 4.6 (Anthropic via Replit proxy). Configured in `artifacts/api-server/src/lib/model-registry.ts` and `lib/services/src/adapters/ai.ts`. Zero mock/setTimeout fakes.
+- **Domain AI Agents:** 10 specialized agents in `intelligence.ts`: Helmsman (maritime), Sentinel (security), INCA (research), Muse (creative), Beacon (ops), Terra AI (real estate), MSP Ops (ticketing), Compass (compliance), Carlota AI (strategy), Alloy (platform). All accessible via POST `/api/intelligence/ai/domain-agent` with `agentId` parameter, supports SSE streaming.
+- **AI Feature Routes:** `/api/intelligence/ai/campaign-copy` (SSE), `/api/intelligence/ai/advisory` (SSE), `/api/intelligence/ai/readiness-summary` (SSE), `/api/intelligence/ai/ticket-triage`, `/api/intelligence/ai/dark-vessel-analysis`, `/api/intelligence/ai/threat-triage`, `/api/intelligence/ai/risk-assessment`.
 - **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) are present in all applications, offering SSE streaming, markdown rendering, suggested questions, voice input/output, and mobile optimization.
 - **Advisory-Only Architecture:** Infrastructure agents are designed as advisory-only, preventing direct execution of changes and logging recommendations for human approval.
 - **Agent Training Studio (Admin Panel):** A dedicated studio allows per-agent training with Q&A pairs, behavioral customization, and performance monitoring.
@@ -52,40 +55,7 @@ DreamStack comprises 12 applications sharing a PostgreSQL database, authenticati
 - **Carlota Jo (`carlota-jo`, route: `/carlota-jo/`):** Luxury strategy consulting — deep navy (#0a0e1a) with cream/gold typography, Cormorant Garamond serif (McKinsey-style). Advisory intel, engagements, ROI calculator.
 - **MSP Command Center (`msp`, route: `/msp/`):** Managed IT services — dark with cyan accents (NinjaOne-style). MRR as hero stat ($184,200), client health table, NOC alerts, service desk, device inventory, contract/SLA tracking.
 - **API Server (`api-server`):** Shared backend for all apps.
-- **Component Preview Server (`mockup-sandbox`):** Design sandbox for UI component prototyping.
-
-### Database Schema
-90+ tables across 20+ schema files in `lib/db/src/schema/`:
-- **Auth:** users, sessions, roles, user_roles, organizations, org_members
-- **Billing:** billing_plans, subscriptions, invoices, entitlements, usage_events
-- **Vessels:** vessels, fleets, positions, routes, alerts, cargo, simulations, weather, alert_rules
-- **Firestorm:** scenarios, assessments, simulation_runs, findings, risk_scores, incidents, compliance_controls, alerts, campaigns, leads, analytics
-- **Lyte:** workspaces, signals, command_cards, incidents, playbooks, recommendations
-- **Dreamscape:** campaigns, scripts, storyboards, voice_assets, campaign_assets, reviews
-- **Readiness:** programs, dimensions, score_history, milestones, risks, alerts
-- **Stephen/Holdings:** content_blocks, case studies, booking_requests, site_contacts, testimonials, portfolio_items
-- **Alloy:** conversations, messages (added for Alloy flagship)
-
-### Technical Implementations & Feature Specifications
-- **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Seven roles (`super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`) control access.
-- **Service Adapters:** `lib/services` provides a consistent pattern for integrating 27 third-party services with auto environment variable detection and mock fallback, including health check mechanisms.
-- **Stripe Billing Integration:** Full checkout/subscription/webhook pipeline with API routes for managing billing flows and webhook verification.
-- **Intelligence Layer (Live Government Data Hub):** Provides 40+ REST endpoints for cross-platform intelligence. Live government feeds include: CISA KEV (1,554 mandatory patch entries), NVD CVE database, MITRE ATT&CK techniques, FedRAMP Marketplace, Census Bureau ACS, BLS employment, FEMA National Risk Index, USAspending.gov federal contracts, NOAA marine buoys, arXiv research papers, Semantic Scholar citations, PapersWithCode benchmarks, HuggingFace Hub models, and SEC EDGAR REIT filings. All with TTL caching and enriched demo fallback.
-- **Cross-App Intelligence Mesh:** `/api/intelligence/cross-app-correlation`, `/api/intelligence/unified-feed`, `/api/intelligence/data-flow`.
-- **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all applications, offering floating button, slide-out chat panel with SSE streaming, markdown rendering, suggested questions. Supports voice input (Whisper STT), voice output (OpenAI TTS), push-to-talk, mobile optimization, swipe-to-close, feedback, and advisory-mode safety layer.
-- **Agent Training Studio (Admin Panel `/agent-training`):** Per-agent training studio with curated Q&A pairs, behavioral preference customization, performance dashboard with ratings, and Advisory Audit Trail.
-- **Advisory-Only Architecture:** Infrastructure agents (Helmsman, Sentinel, Beacon, Nexus) are marked `isAdvisoryAgent: true`. Prevents agents from executing changes.
-- **AlloyChat (Admin Panel `/alloy-chat`):** Production multi-model AI operations assistant. Routes to Claude (claude-sonnet-4-6) for analysis/reasoning/code and GPT-5.2 for general ops. SSE streaming, conversation history in PostgreSQL.
-- **Observability (DreamStack Intelligence):** Structured logging via pino. The DreamStack Intelligence framework (`@workspace/observability`) provides **8-pillar** domain-native observability across all apps. 5-level maturity model (Reactive → Proactive → Predictive → Intelligent → Autonomous).
-- **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
-
-### Performance Optimizations
-- **Shared UI:** 56 shadcn/ui components consolidated in `@workspace/shared-ui` (no local `src/components/ui/` in apps)
-- **Code Splitting:** All 13 routed apps use `React.lazy()` + `Suspense` for route-level code splitting
-- **Framer Motion:** szl-holdings uses `LazyMotion` + `m` components (lighter than `motion`); all apps split framer-motion into `vendor-motion` chunk
-- **Recharts:** Lazy-loaded via route-level code splitting + isolated in `vendor-charts` chunk
-- **Dependency Catalog:** recharts, react-hook-form, framer-motion, lucide-react normalized via pnpm catalog
-- **Vite Build:** `manualChunks` splits vendor code into recharts/d3, framer-motion, radix-ui, tanstack, lucide-react, and react chunks; `cssCodeSplit` enabled
+- **Mockup Sandbox (`mockup-sandbox`):** Design sandbox for UI component prototyping.
 
 ### Domain Agent System
 AI-powered domain agents are implemented for each application, with specialized system prompts, tool definitions, and connections to existing API routes for data retrieval.
@@ -152,6 +122,40 @@ AI-powered domain agents are implemented for each application, with specialized 
 - **Error Pages:** Branded 404 pages across all apps (styled with Tailwind, dark-mode aware). Global `ErrorBoundary` wraps all app roots for 500-level errors.
 - **Live Route Stubs:** Created `readiness-live`, `firestorm-live`, `inca-live`, `vessels-live`, `lyte-live`, `dreamscape-live`, `carlota-live` route files that were imported in `routes/index.ts` but missing from the filesystem.
 - **Project List:** Serves as primary landing page at `/` with app directory, category filters, search, and links to all apps.
+
+### Database Schema
+90+ tables across 20+ schema files in `lib/db/src/schema/`:
+- **Auth:** users, sessions, roles, user_roles, organizations, org_members
+- **Billing:** billing_plans, subscriptions, invoices, entitlements, usage_events
+- **Vessels:** vessels, fleets, positions, routes, alerts, cargo, simulations, weather, alert_rules
+- **Firestorm:** scenarios, assessments, simulation_runs, findings, risk_scores, incidents, compliance_controls, alerts, campaigns, leads, analytics
+- **Lyte:** workspaces, signals, command_cards, incidents, playbooks, recommendations
+- **Dreamscape:** campaigns, scripts, storyboards, voice_assets, campaign_assets, reviews
+- **Readiness:** programs, dimensions, score_history, milestones, risks, alerts
+- **Stephen/Holdings:** content_blocks, case studies, booking_requests, site_contacts, testimonials, portfolio_items
+
+### Technical Implementations & Feature Specifications
+- **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Seven roles (`super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`) control access.
+- **Service Adapters:** `lib/services` provides a consistent pattern for integrating 27 third-party services with auto environment variable detection and mock fallback, including health check mechanisms. New adapters: `CisaAdapter` (CISA KEV — free, no key), `ArxivAdapter` (arXiv XML API — free, no key), `AbuseIPDBAdapter` (IP reputation — free tier, optional key `ABUSEIPDB_API_KEY`).
+- **Stripe Billing Integration:** Full checkout/subscription/webhook pipeline with API routes for managing billing flows and webhook verification.
+- **Intelligence Layer (Live Government Data Hub):** Provides 40+ REST endpoints for cross-platform intelligence. Live government feeds include: CISA KEV (1,554 mandatory patch entries), NVD CVE database, MITRE ATT&CK techniques, FedRAMP Marketplace, Census Bureau ACS, BLS employment, FEMA National Risk Index, USAspending.gov federal contracts, NOAA marine buoys, arXiv research papers (XML API), Semantic Scholar citations, PapersWithCode benchmarks, HuggingFace Hub models, and SEC EDGAR REIT filings. All with TTL caching and enriched demo fallback. New route files: `gov-data.ts` (hub), `terra.ts` (real estate), `msp-live.ts` (MSP contracts), `readiness-live.ts` (NIST compliance). Includes AI-powered endpoints (chat, summarize, sentiment, image-gen, threat-briefing).
+- **Cross-App Intelligence Mesh:** `/api/intelligence/cross-app-correlation` correlates data across all app lanes (maritime×security, research×security, real estate×risk, government×cyber). `/api/intelligence/unified-feed` aggregates 14 signals from 5 source types. `/api/intelligence/data-flow` maps 28 live data connections.
+- **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all 9 applications, offering a floating button, slide-out chat panel with SSE streaming, markdown rendering, and suggested questions. Supports Replit proxy, OpenAI, and Anthropic providers. Extended with voice input (Whisper STT), voice output (OpenAI TTS), push-to-talk recording, mobile optimization with safe-area/touch support, swipe-to-close gesture, thumbs up/down feedback, and advisory-mode safety layer with visual badges and runbook generation.
+- **Agent Training Studio (Admin Panel `/agent-training`):** Per-agent training studio with curated Q&A pairs, behavioral preference customization (tone, detail level, jargon, response length, custom instructions), performance dashboard with ratings, and Advisory Audit Trail. Injected into agent system prompts at inference time. Backend at `artifacts/api-server/src/routes/agent-training.ts`. DB tables: `agent_training_pairs`, `agent_behavior_prefs`, `agent_feedback`, `advisory_audit`.
+- **Advisory-Only Architecture:** Infrastructure agents (Helmsman, Sentinel, Beacon, Nexus) are marked `isAdvisoryAgent: true`. Copilot detects destructive/advisory keywords and shows colored badges (informational/advisory/action-required) on responses. Advisory Audit Trail logs all recommendations with risk level, runbook, and human approval status. Architecturally prevents agents from executing changes.
+- **Voice API Endpoints:** `POST /api/agent-training/transcribe` — Whisper STT for copilot voice input. `POST /api/agent-training/tts` — OpenAI TTS for copilot voice responses. Each agent has a unique voice profile (alloy/echo/fable/onyx/nova/shimmer).
+- **Per-agent Feedback:** Every assistant message in all copilots shows thumbs up/down buttons (visible on hover). Ratings POST to `/api/agent-training/feedback` and are tracked in `agent_feedback` table by `agentId`.
+- **AlloyChat (Admin Panel `/alloy-chat`):** Production multi-model AI operations assistant. Routes to Claude (claude-sonnet-4-6) for analysis/reasoning/code tasks and GPT-5.2 for general ops queries. SSE streaming with real-time typing effect. Conversation history persisted in PostgreSQL `conversations`+`messages` tables. Dynamic system prompt assembler pulls live state from admin API endpoints (overview, system-health, connectors, feature-flags) before every call. Contextual suggested prompts based on current health alerts. In-page markdown renderer with code blocks, tables, copy buttons. Model selector (Auto/Claude/GPT-5.2) with per-message model badge. Backend at `artifacts/api-server/src/routes/alloy-chat.ts`, frontend at `artifacts/admin-panel/src/pages/alloy-chat.tsx`.
+- **Observability (DreamStack Intelligence):** Structured logging via pino and a system health endpoint monitoring DB, storage, auth, connectors, and app routes. The DreamStack Intelligence framework (`@workspace/observability`) provides **8-pillar** domain-native observability (Performance Intelligence, Business Observability, User Experience Intelligence, Predictive Health, Operational Awareness, Strategic Insight, **Security Posture**, **Innovation Velocity**) across all 11 apps. Inspired by New Relic Business Observability, Dynatrace Davis AI/Smartscape, Datadog Watchdog/APM, and DORA metrics. Each app has domain-specific metrics, KPIs, and health signals with an `/observability` page. Lyte Command Center aggregates cross-portfolio health. Admin Panel provides system-wide observability. API endpoints at `/api/observability/:appSlug`. Philosophy component at `@workspace/shared-ui/intelligence-philosophy`. 5-level maturity model (Reactive → Proactive → Predictive → Intelligent → Autonomous).
+- **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
+
+### Performance Optimizations
+- **Shared UI:** 56 shadcn/ui components consolidated in `@workspace/shared-ui` (no local `src/components/ui/` in apps)
+- **Code Splitting:** All 13 routed apps use `React.lazy()` + `Suspense` for route-level code splitting
+- **Framer Motion:** szl-holdings uses `LazyMotion` + `m` components (lighter than `motion`); all apps split framer-motion into `vendor-motion` chunk
+- **Recharts:** Lazy-loaded via route-level code splitting + isolated in `vendor-charts` chunk
+- **Dependency Catalog:** recharts, react-hook-form, framer-motion, lucide-react normalized via pnpm catalog
+- **Vite Build:** `manualChunks` splits vendor code into recharts/d3, framer-motion, radix-ui, tanstack, lucide-react, and react chunks; `cssCodeSplit` enabled
 
 ## External Dependencies
 - **Database:** PostgreSQL

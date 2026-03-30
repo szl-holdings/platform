@@ -1,4 +1,4 @@
-import { Ticket, Clock, AlertTriangle, CheckCircle, User, ArrowUp, Filter, Plus } from "lucide-react";
+import { Ticket, Clock, AlertTriangle, CheckCircle, User, Filter, Plus, Sparkles, Loader2, X, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { ExportButton } from "@workspace/shared-ui/data-export";
 
@@ -46,20 +46,62 @@ const slaColors: Record<string, string> = {
   breached: "text-red-400",
 };
 
+interface TriageResult {
+  ticketId: string;
+  triage: string;
+  loading: boolean;
+  error?: string;
+}
+
 export default function Tickets() {
   const [filter, setFilter] = useState("all");
+  const [selectedTicket, setSelectedTicket] = useState<TicketItem | null>(null);
+  const [triageResults, setTriageResults] = useState<Record<string, TriageResult>>({});
 
   const filtered = filter === "all" ? tickets : tickets.filter((t) => t.status === filter);
   const openCount = tickets.filter(t => t.status === "open").length;
   const inProgressCount = tickets.filter(t => t.status === "in-progress").length;
   const breachedCount = tickets.filter(t => t.slaStatus === "breached").length;
 
+  const triageTicket = async (ticket: TicketItem) => {
+    setTriageResults(prev => ({
+      ...prev,
+      [ticket.id]: { ticketId: ticket.id, triage: "", loading: true },
+    }));
+
+    try {
+      const res = await fetch("/api/intelligence/ai/ticket-triage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          subject: ticket.subject,
+          client: ticket.client,
+          category: ticket.category,
+          description: `Status: ${ticket.status}, Priority: ${ticket.priority}, SLA: ${ticket.slaDeadline} (${ticket.slaStatus}), Assignee: ${ticket.assignee}, Created: ${ticket.created}`,
+        }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setTriageResults(prev => ({
+        ...prev,
+        [ticket.id]: { ticketId: ticket.id, triage: data.data?.triage ?? data.triage ?? "No triage returned", loading: false },
+      }));
+    } catch (err) {
+      setTriageResults(prev => ({
+        ...prev,
+        [ticket.id]: { ticketId: ticket.id, triage: "", loading: false, error: err instanceof Error ? err.message : "Triage failed" },
+      }));
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold">Service Desk</h1>
-          <p className="text-sm text-muted-foreground mt-1">Open tickets, SLA countdown timers, and escalation status across all client accounts</p>
+          <p className="text-sm text-muted-foreground mt-1">Ticket management with SLA tracking and AI triage</p>
         </div>
         <div className="flex items-center gap-2">
           <ExportButton
@@ -108,34 +150,104 @@ export default function Tickets() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="divide-y divide-border">
-          {filtered.map((ticket) => (
-            <div key={ticket.id} className="p-4 hover:bg-muted/30 transition-colors cursor-pointer">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-muted-foreground">{ticket.id}</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${prioColors[ticket.priority]}`}>
-                    {ticket.priority}
-                  </span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${statusColors[ticket.status]}`}>
-                    {ticket.status.replace("-", " ")}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className={`rounded-xl border border-border bg-card overflow-hidden ${selectedTicket ? "lg:col-span-3" : "lg:col-span-5"}`}>
+          <div className="divide-y divide-border">
+            {filtered.map((ticket) => (
+              <div
+                key={ticket.id}
+                className={`p-4 transition-colors cursor-pointer ${selectedTicket?.id === ticket.id ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted/30"}`}
+                onClick={() => setSelectedTicket(selectedTicket?.id === ticket.id ? null : ticket)}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-muted-foreground">{ticket.id}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${prioColors[ticket.priority]}`}>
+                      {ticket.priority}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${statusColors[ticket.status]}`}>
+                      {ticket.status.replace("-", " ")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-medium flex items-center gap-1 ${slaColors[ticket.slaStatus]}`}>
+                      <Clock className="w-3 h-3" /> {ticket.slaDeadline}
+                    </span>
+                    <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${selectedTicket?.id === ticket.id ? "rotate-90" : ""}`} />
+                  </div>
+                </div>
+                <p className="text-sm font-medium">{ticket.subject}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-muted-foreground">{ticket.client} · {ticket.category}</span>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <User className="w-3 h-3" /> {ticket.assignee}
                   </span>
                 </div>
-                <span className={`text-xs font-medium flex items-center gap-1 ${slaColors[ticket.slaStatus]}`}>
-                  <Clock className="w-3 h-3" /> {ticket.slaDeadline}
-                </span>
               </div>
-              <p className="text-sm font-medium">{ticket.subject}</p>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-xs text-muted-foreground">{ticket.client} · {ticket.category}</span>
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <User className="w-3 h-3" /> {ticket.assignee}
-                </span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+
+        {selectedTicket && (
+          <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5 space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-mono text-xs text-muted-foreground">{selectedTicket.id}</p>
+                <p className="font-semibold text-sm mt-1">{selectedTicket.subject}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{selectedTicket.client} · {selectedTicket.category}</p>
+              </div>
+              <button onClick={() => setSelectedTicket(null)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${prioColors[selectedTicket.priority]}`}>{selectedTicket.priority}</span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${statusColors[selectedTicket.status]}`}>{selectedTicket.status.replace("-", " ")}</span>
+              <span className={`text-xs font-medium flex items-center gap-1 ${slaColors[selectedTicket.slaStatus]}`}><Clock className="w-3 h-3" />{selectedTicket.slaDeadline}</span>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-primary" /> AI Triage
+                </h3>
+                <button
+                  onClick={() => triageTicket(selectedTicket)}
+                  disabled={triageResults[selectedTicket.id]?.loading}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {triageResults[selectedTicket.id]?.loading ? (
+                    <><Loader2 className="w-3 h-3 animate-spin" /> Analyzing...</>
+                  ) : (
+                    <><Sparkles className="w-3 h-3" /> {triageResults[selectedTicket.id] ? "Re-triage" : "Run AI Triage"}</>
+                  )}
+                </button>
+              </div>
+
+              {!triageResults[selectedTicket.id] && (
+                <p className="text-xs text-muted-foreground text-center py-6 bg-muted/30 rounded-lg">
+                  Click "Run AI Triage" to get priority analysis, root cause hypotheses, and recommended actions from MSP Ops AI.
+                </p>
+              )}
+
+              {triageResults[selectedTicket.id]?.error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-xs text-red-400">{triageResults[selectedTicket.id].error}</p>
+                </div>
+              )}
+
+              {triageResults[selectedTicket.id]?.triage && (
+                <div className="p-3 rounded-lg bg-muted/30 border border-border text-xs text-foreground leading-relaxed whitespace-pre-wrap max-h-72 overflow-y-auto">
+                  <div className="flex items-center gap-1 mb-2 text-[10px] text-muted-foreground">
+                    <Sparkles className="w-3 h-3 text-primary" /> MSP Ops AI · gpt-5.2
+                  </div>
+                  {triageResults[selectedTicket.id].triage}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

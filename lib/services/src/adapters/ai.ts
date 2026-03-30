@@ -128,7 +128,7 @@ export class AIAdapter extends ServiceAdapter {
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
   ): Promise<ChatCompletionResult> {
-    const model = options?.model ?? "gpt-4o-mini";
+    const model = options?.model ?? "gpt-5.2";
     const response = await fetch(
       `${this.replitProxyUrl}/chat/completions`,
       {
@@ -169,7 +169,7 @@ export class AIAdapter extends ServiceAdapter {
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
   ): Promise<ChatCompletionResult> {
-    const model = options?.model ?? "gpt-4o-mini";
+    const model = options?.model ?? "gpt-5.2";
     const response = await fetch(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -383,7 +383,7 @@ export class AIAdapter extends ServiceAdapter {
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
   ): AsyncGenerator<string, void, unknown> {
-    const model = options?.model ?? "gpt-4o-mini";
+    const model = options?.model ?? "gpt-5.2";
     const response = await fetch(url, {
       method: "POST",
       headers: {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Rss, Globe, Shield, AlertTriangle, Clock, Radio, Eye, ExternalLink, RefreshCw } from "lucide-react";
+import { Rss, Globe, Shield, AlertTriangle, Clock, Radio, Eye, ExternalLink, RefreshCw, Sparkles, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "@/lib/api";
@@ -41,8 +41,37 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(diffHrs / 24)}d ago`;
 }
 
+interface ThreatAnalysis {
+  loading: boolean;
+  content: string;
+  error?: string;
+  expanded: boolean;
+}
+
 export default function ThreatIntelFeed() {
   const [activeTab, setActiveTab] = useState<"cves" | "kev" | "news" | "certs">("cves");
+  const [analyses, setAnalyses] = useState<Record<string, ThreatAnalysis>>({});
+
+  const analyzeThread = async (id: string, title: string, description: string, severity: string, tags?: string[]) => {
+    setAnalyses(prev => ({ ...prev, [id]: { loading: true, content: "", expanded: true } }));
+    try {
+      const res = await fetch("/api/intelligence/ai/threat-triage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          threat: `${title}: ${description}`,
+          severity,
+          affectedSystems: tags ?? [],
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setAnalyses(prev => ({ ...prev, [id]: { loading: false, content: data.data?.triage ?? data.triage ?? "No analysis returned", expanded: true } }));
+    } catch (err) {
+      setAnalyses(prev => ({ ...prev, [id]: { loading: false, content: "", error: err instanceof Error ? err.message : "Analysis failed", expanded: true } }));
+    }
+  };
 
   const { data: cveData, isLoading: cveLoading, refetch: refetchCves } = useQuery({
     queryKey: ["live-nvd-cves"],
@@ -91,6 +120,33 @@ export default function ThreatIntelFeed() {
   };
 
   const isLoading = activeTab === "cves" ? cveLoading : activeTab === "kev" ? kevLoading : activeTab === "certs" ? certLoading : newsLoading;
+
+  const AiTriagePanel = ({ id }: { id: string }) => {
+    const a = analyses[id];
+    if (!a || a.loading) return null;
+    return (
+      <div className="mt-3 pt-3 border-t border-border">
+        {a.error ? (
+          <p className="text-xs text-red-400">{a.error}</p>
+        ) : (
+          <div className="bg-muted/30 rounded-lg p-3">
+            <div className="flex items-center gap-1 mb-2 text-[10px] text-muted-foreground">
+              <Sparkles className="w-3 h-3 text-primary" /> Sentinel AI · claude-sonnet-4-6
+              <button
+                onClick={() => setAnalyses(prev => ({ ...prev, [id]: { ...prev[id], expanded: !prev[id].expanded } }))}
+                className="ml-auto"
+              >
+                {a.expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </button>
+            </div>
+            {a.expanded && (
+              <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">{a.content}</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -183,6 +239,17 @@ export default function ThreatIntelFeed() {
                     {cve.attackVector && <span>Attack: {cve.attackVector}</span>}
                     {cve.cwe && <span>{cve.cwe}</span>}
                   </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => analyzeThread(cve.id, cve.id, cve.description ?? "", cve.severity, [cve.cwe, cve.attackVector, cve.vendor].filter(Boolean))}
+                      disabled={analyses[cve.id]?.loading}
+                      className="text-[10px] px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors flex items-center gap-1 disabled:opacity-50"
+                    >
+                      {analyses[cve.id]?.loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                      {analyses[cve.id]?.loading ? "Analyzing..." : "AI Triage"}
+                    </button>
+                  </div>
+                  <AiTriagePanel id={cve.id} />
                 </div>
                 <a
                   href={`https://nvd.nist.gov/vuln/detail/${cve.id}`}
@@ -237,6 +304,17 @@ export default function ThreatIntelFeed() {
                     <span><Shield className="w-3 h-3 inline mr-1" />{v.vendorProject}</span>
                     <span>{v.product}</span>
                   </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      onClick={() => analyzeThread(v.cveID, v.vulnerabilityName ?? v.cveID, v.shortDescription ?? v.requiredAction ?? "", v.knownRansomwareCampaignUse === "Known" ? "critical" : "high", [v.vendorProject, v.product].filter(Boolean))}
+                      disabled={analyses[v.cveID]?.loading}
+                      className="text-[10px] px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors flex items-center gap-1 disabled:opacity-50"
+                    >
+                      {analyses[v.cveID]?.loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                      {analyses[v.cveID]?.loading ? "Analyzing..." : "AI Triage"}
+                    </button>
+                  </div>
+                  <AiTriagePanel id={v.cveID} />
                 </div>
                 <a
                   href={`https://nvd.nist.gov/vuln/detail/${v.cveID}`}
@@ -287,7 +365,16 @@ export default function ThreatIntelFeed() {
                   {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground capitalize">{item.category}</span>
+                    <button
+                      onClick={() => analyzeThread(item.id, item.title, item.description ?? "", item.severity, [item.category])}
+                      disabled={analyses[item.id]?.loading}
+                      className="text-[10px] px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors flex items-center gap-1 disabled:opacity-50"
+                    >
+                      {analyses[item.id]?.loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                      {analyses[item.id]?.loading ? "Analyzing..." : "AI Triage"}
+                    </button>
                   </div>
+                  <AiTriagePanel id={item.id} />
                 </div>
                 {item.url && item.url !== "#" && (
                   <a
