@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Building2, LayoutDashboard, TrendingUp, Handshake, BarChart3, AlertTriangle, Home, ChevronLeft, ChevronRight, DollarSign, Activity, Percent, Users, Thermometer, Brain } from "lucide-react";
+import { Building2, LayoutDashboard, AlertTriangle, Home, ChevronLeft, ChevronRight, Users, Brain, Zap, FileText, ClipboardList, DollarSign, Activity, List, UserCheck, ArrowLeftRight } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -8,39 +8,43 @@ interface NavItem {
   path: string;
   label: string;
   icon: typeof LayoutDashboard;
+  badge?: string;
 }
 
 const navSections: { title: string; items: NavItem[] }[] = [
   {
-    title: "Overview",
+    title: "Command",
     items: [
-      { path: "/", label: "Home", icon: Home },
-      { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { path: "/alerts", label: "Risk & Alerts", icon: AlertTriangle },
+      { path: "/", label: "Command Center", icon: LayoutDashboard },
     ],
   },
   {
-    title: "Intelligence",
+    title: "Pipeline",
     items: [
-      { path: "/market", label: "Market Intel", icon: TrendingUp },
-      { path: "/analytics", label: "Analytics", icon: BarChart3 },
-      { path: "/investment-analysis", label: "Investment Analysis", icon: DollarSign },
+      { path: "/listings", label: "Listings", icon: Home },
+      { path: "/leads", label: "Leads + CRM", icon: UserCheck },
+      { path: "/deals", label: "Deal Pipeline", icon: Activity },
+      { path: "/offers", label: "Offers + Negotiation", icon: ArrowLeftRight },
     ],
   },
   {
     title: "Operations",
     items: [
-      { path: "/pipeline", label: "Deal Pipeline", icon: Handshake },
-      { path: "/portfolio-performance", label: "Portfolio Performance", icon: Percent },
-      { path: "/climate-risk", label: "Climate Risk Overlay", icon: Thermometer },
-      { path: "/ir-module", label: "Investor Relations", icon: Users },
+      { path: "/transactions", label: "Transactions", icon: ClipboardList },
+      { path: "/documents", label: "Docs + Compliance", icon: FileText },
+    ],
+  },
+  {
+    title: "Intelligence",
+    items: [
+      { path: "/team", label: "Team Performance", icon: Users },
+      { path: "/predictions", label: "Nimbus Intelligence", icon: Brain },
     ],
   },
   {
     title: "Platform",
     items: [
-      { path: "/agent-insights", label: "Agent Insights", icon: Brain },
-      { path: "/observability", label: "Observability", icon: Activity },
+      { path: "/automations", label: "AlloyScape", icon: Zap },
     ],
   },
 ];
@@ -62,7 +66,7 @@ export function Sidebar() {
           {!collapsed && (
             <div>
               <h1 className="font-display text-lg font-bold text-terra-text">Terra</h1>
-              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">Real Estate Intelligence</p>
+              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">Brokerage OS</p>
             </div>
           )}
         </div>
@@ -75,7 +79,7 @@ export function Sidebar() {
               <p className="text-[10px] text-terra-text-muted uppercase tracking-wider px-3 mb-1.5 font-medium">{section.title}</p>
             )}
             <div className="space-y-0.5">
-              {section.items.map(({ path, label, icon: Icon }) => {
+              {section.items.map(({ path, label, icon: Icon, badge }) => {
                 const isActive = path === "/" ? location === "/" : location.startsWith(path);
                 return (
                   <Link key={path} href={path}>
@@ -90,7 +94,12 @@ export function Sidebar() {
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-terra-primary rounded-r-full" />
                       )}
                       <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && "scale-110")} />
-                      {!collapsed && <span className="ml-0.5">{label}</span>}
+                      {!collapsed && (
+                        <span className="ml-0.5 flex-1">{label}</span>
+                      )}
+                      {!collapsed && badge && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 flex-shrink-0">{badge}</span>
+                      )}
                     </div>
                   </Link>
                 );

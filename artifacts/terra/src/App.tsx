@@ -10,30 +10,27 @@ import { Sidebar } from "@/components/sidebar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
-import { Building2, TrendingUp, BarChart3, DollarSign } from "lucide-react";
+import { Building2, Activity, Users, Brain, Zap, FileText, ClipboardList, Home, UserCheck, ArrowLeftRight } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 2 } },
 });
 
-const HomePage = lazy(() => import("@/pages/home"));
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
-const MarketPage = lazy(() => import("@/pages/market"));
-const PipelinePage = lazy(() => import("@/pages/pipeline"));
-const PropertyDetailPage = lazy(() => import("@/pages/property-detail"));
-const AnalyticsPage = lazy(() => import("@/pages/analytics"));
-const AlertsPage = lazy(() => import("@/pages/alerts-page"));
-const InvestmentAnalysis = lazy(() => import("@/pages/investment-analysis"));
-const ObservabilityPage = lazy(() => import("@/pages/observability"));
-const PortfolioPerformance = lazy(() => import("@/pages/portfolio-performance"));
-const ClimateRisk = lazy(() => import("@/pages/climate-risk"));
-const IRModule = lazy(() => import("@/pages/ir-module"));
-const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
+const ListingsPage = lazy(() => import("@/pages/listings"));
+const LeadsPage = lazy(() => import("@/pages/leads"));
+const DealsPage = lazy(() => import("@/pages/deals"));
+const OffersPage = lazy(() => import("@/pages/offers"));
+const TransactionsPage = lazy(() => import("@/pages/transactions"));
+const DocumentsPage = lazy(() => import("@/pages/documents"));
+const TeamPage = lazy(() => import("@/pages/team"));
+const PredictionsPage = lazy(() => import("@/pages/predictions"));
+const AutomationsPage = lazy(() => import("@/pages/automations"));
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-terra-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }
@@ -43,18 +40,15 @@ function AppRouter() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={DashboardPage} />
-        <Route path="/dashboard" component={DashboardPage} />
-        <Route path="/market" component={MarketPage} />
-        <Route path="/pipeline" component={PipelinePage} />
-        <Route path="/property/:id" component={PropertyDetailPage} />
-        <Route path="/analytics" component={AnalyticsPage} />
-        <Route path="/alerts" component={AlertsPage} />
-        <Route path="/investment-analysis" component={InvestmentAnalysis} />
-        <Route path="/observability" component={ObservabilityPage} />
-        <Route path="/portfolio-performance" component={PortfolioPerformance} />
-        <Route path="/climate-risk" component={ClimateRisk} />
-        <Route path="/ir-module" component={IRModule} />
-        <Route path="/agent-insights" component={AgentInsightsPage} />
+        <Route path="/listings" component={ListingsPage} />
+        <Route path="/leads" component={LeadsPage} />
+        <Route path="/deals" component={DealsPage} />
+        <Route path="/offers" component={OffersPage} />
+        <Route path="/transactions" component={TransactionsPage} />
+        <Route path="/documents" component={DocumentsPage} />
+        <Route path="/team" component={TeamPage} />
+        <Route path="/predictions" component={PredictionsPage} />
+        <Route path="/automations" component={AutomationsPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-terra-text-secondary">Page not found</p>
@@ -65,25 +59,30 @@ function AppRouter() {
   );
 }
 
+function navigate(path: string) {
+  window.location.href = window.location.pathname.replace(/\/[^/]*$/, path);
+}
+
 const terraCommands: CommandItem[] = [
-  { id: "nav-dashboard", label: "Dashboard", icon: "🏢", group: "Navigation", keywords: ["home", "overview", "properties"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dashboard"); } },
-  { id: "nav-market", label: "Market Trends", icon: "📈", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/market"); } },
-  { id: "nav-pipeline", label: "Deal Pipeline", icon: "🔄", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/pipeline"); } },
-  { id: "nav-analytics", label: "Analytics", icon: "📊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/analytics"); } },
-  { id: "nav-alerts", label: "Alerts", icon: "🔔", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alerts"); } },
-  { id: "nav-investment", label: "Investment Analysis", icon: "💰", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/investment-analysis"); } },
-  { id: "nav-portfolio", label: "Portfolio Performance", icon: "📁", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/portfolio-performance"); } },
-  { id: "nav-climate", label: "Climate Risk", icon: "🌡️", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/climate-risk"); } },
-  { id: "nav-ir", label: "Investor Relations", icon: "🤝", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ir-module"); } },
+  { id: "nav-dashboard", label: "Command Center", icon: "🏢", group: "Navigation", keywords: ["home", "overview", "dashboard"], action: () => navigate("/") },
+  { id: "nav-listings", label: "Listings + Inventory", icon: "🏠", group: "Navigation", action: () => navigate("/listings") },
+  { id: "nav-leads", label: "Leads + CRM", icon: "👤", group: "Navigation", action: () => navigate("/leads") },
+  { id: "nav-deals", label: "Deal Pipeline", icon: "🔄", group: "Navigation", action: () => navigate("/deals") },
+  { id: "nav-offers", label: "Offers + Negotiation", icon: "🤝", group: "Navigation", action: () => navigate("/offers") },
+  { id: "nav-transactions", label: "Transactions", icon: "📋", group: "Navigation", action: () => navigate("/transactions") },
+  { id: "nav-documents", label: "Documents + Compliance", icon: "📄", group: "Navigation", action: () => navigate("/documents") },
+  { id: "nav-team", label: "Team Performance", icon: "👥", group: "Intelligence", action: () => navigate("/team") },
+  { id: "nav-predictions", label: "Nimbus Intelligence", icon: "🧠", group: "Intelligence", action: () => navigate("/predictions") },
+  { id: "nav-automations", label: "AlloyScape Automations", icon: "⚡", group: "Platform", action: () => navigate("/automations") },
   { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
   { id: "app-msp", label: "Switch to Evolve MSP", icon: "💻", group: "Switch App", description: "Managed Services", action: () => { window.location.href = "/msp/"; } },
 ];
 
 const terraShortcuts: KeyboardShortcut[] = [
-  { key: "M", description: "Go to Market Trends", category: "Navigation" },
-  { key: "P", description: "Go to Deal Pipeline", category: "Navigation" },
-  { key: "A", description: "Go to Analytics", category: "Navigation" },
-  { key: "I", description: "Go to Investment Analysis", category: "Navigation" },
+  { key: "L", description: "Go to Listings", category: "Navigation" },
+  { key: "D", description: "Go to Deal Pipeline", category: "Navigation" },
+  { key: "T", description: "Go to Team Performance", category: "Navigation" },
+  { key: "N", description: "Go to Nimbus Intelligence", category: "Navigation" },
 ];
 
 function App() {
@@ -92,12 +91,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={terraShortcuts} appName="Beacon" accentColor="#0ea5e9">
+        <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#5e9a32">
           <div className="flex flex-col h-screen bg-terra-bg">
             <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:text-sm focus:font-medium">
               Skip to main content
             </a>
-            <EcosystemNav currentAppId="beacon" currentAppName="Beacon — Business Telemetry" accentColor="#0ea5e9" />
+            <EcosystemNav currentAppId="terra" currentAppName="Terra Brokerage OS" accentColor="#5e9a32" />
             <div className="flex flex-1 overflow-hidden">
               <Sidebar />
               <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
@@ -109,28 +108,28 @@ function App() {
             open={cmdOpen}
             onClose={() => setCmdOpen(false)}
             commands={terraCommands}
-            appName="Beacon"
-            accentColor="#0ea5e9"
+            appName="Terra"
+            accentColor="#5e9a32"
           />
-          <IncaAgentIndicator 
-            agentName="Telemetry Scout" 
-            systemType="mama-quilla" 
-            currentTask="Detecting KPI movement and value leakage signals across monitored markets" 
-            confidence={0.84} 
+          <IncaAgentIndicator
+            agentName="Nimbus"
+            systemType="mama-quilla"
+            currentTask="Analyzing deal health signals and stall risk across active pipeline"
+            confidence={0.89}
           />
         </PowerUserProvider>
         <WelcomeOverlay
-          appId="beacon"
-          appName="Beacon"
-          subtitle="Business Telemetry — OBSERVE Layer"
-          description="Business observability platform detecting KPI movement, value leakage, and market anomalies. Turns Census Bureau, BLS, FEMA, and SEC EDGAR data into continuous business telemetry."
-          accentColor="#0ea5e9"
+          appId="terra"
+          appName="Terra"
+          subtitle="Brokerage Command Platform"
+          description="A full brokerage operating system — listings, leads, 15-stage deal pipeline, offers, transactions, documents, team performance, Nimbus AI intelligence, and AlloyScape automation."
+          accentColor="#5e9a32"
           icon={Building2}
           features={[
-            { icon: Building2, title: "Portfolio Dashboard", description: "Consolidated view of value, occupancy, and cap rates" },
-            { icon: TrendingUp, title: "Market Trends", description: "12-month revenue and NOI trend analysis" },
-            { icon: BarChart3, title: "Property Intel", description: "Per-property performance signals and alerts" },
-            { icon: DollarSign, title: "Valuations", description: "AI-driven cap rate and valuation estimates" },
+            { icon: Activity, title: "Deal Pipeline", description: "15-stage kanban with close probability and stall risk" },
+            { icon: UserCheck, title: "Leads + CRM", description: "Conversion scoring, engagement tracking, and follow-up management" },
+            { icon: Brain, title: "Nimbus Intelligence", description: "AI predictions with confidence, rationale, and next actions" },
+            { icon: Zap, title: "AlloyScape", description: "Workflow automation with audit trail and retry queue" },
           ]}
         />
       </WouterRouter>

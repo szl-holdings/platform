@@ -1,191 +1,287 @@
 import { motion } from "framer-motion";
-import { Building2, DollarSign, TrendingUp, Users, Percent, AlertTriangle, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
-import { ActivityFeed } from "@workspace/shared-ui/collaboration";
-import { AlertFeed } from "@/components/alert-feed";
-import { properties, portfolioSummary, revenueHistory } from "@/data/portfolio";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AlertTriangle, TrendingUp, Clock, DollarSign, Home, Users, CheckCircle, Zap, Shield, Activity } from "lucide-react";
+import { brokerageSummary, brokerageDeals, riskSignals, agents, automationRuns } from "@/data/brokerage";
+import { RiskBadge, StageBadge, DealHealthCard, formatCurrency, AgentAvatar, StatusIndicator } from "@/components/brokerage-ui";
+import { cn } from "@workspace/shared-ui/utils";
 import { Link } from "wouter";
 
-function formatCurrency(n: number) {
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
-  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
-  return `$${n.toFixed(0)}`;
-}
-
-function CustomTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-terra-bg-tertiary border border-terra-border rounded-xl p-3 shadow-xl">
-      <p className="text-xs font-semibold text-terra-text mb-2">{label}</p>
-      {payload.map((item: any) => (
-        <div key={item.name} className="flex items-center gap-2 text-xs">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-          <span className="text-terra-text-secondary">{item.name}:</span>
-          <span className="text-terra-text font-semibold">{formatCurrency(item.value)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const statusConfig: Record<string, { label: string; dot: string; text: string }> = {
-  performing: { label: "Performing", dot: "bg-terra-emerald", text: "text-terra-emerald" },
-  watch: { label: "Watch", dot: "bg-terra-amber", text: "text-terra-amber" },
-  critical: { label: "Critical", dot: "bg-terra-rose", text: "text-terra-rose" },
-};
+const commandLoopItems = [
+  { label: "DETECT", desc: "Pipeline & listing health", icon: Activity, color: "text-blue-400" },
+  { label: "INTERPRET", desc: "Risk signals & Nimbus intel", icon: Shield, color: "text-violet-400" },
+  { label: "DECIDE", desc: "Owner actions & approvals", icon: Users, color: "text-amber-400" },
+  { label: "EXECUTE", desc: "AlloyScape automations", icon: Zap, color: "text-emerald-400" },
+  { label: "VERIFY", desc: "Compliance & audit trail", icon: CheckCircle, color: "text-terra-primary" },
+];
 
 export default function DashboardPage() {
-  const performingCount = properties.filter(p => p.status === "performing").length;
-
-  const summaryStats = [
-    { label: "Portfolio Value", value: formatCurrency(portfolioSummary.totalValue), change: "+12.4%", up: true, sub: `${portfolioSummary.totalProperties} properties`, icon: Building2 },
-    { label: "Avg Occupancy", value: `${portfolioSummary.avgOccupancy.toFixed(1)}%`, change: "-0.3%", up: false, sub: "Portfolio avg", icon: Users },
-    { label: "Avg Cap Rate", value: `${portfolioSummary.avgCapRate.toFixed(1)}%`, change: "+0.1%", up: true, sub: "Weighted avg", icon: Percent },
-    { label: "Performing", value: `${performingCount}/${portfolioSummary.totalProperties}`, change: `${properties.filter(p => p.status !== "performing").length} need attention`, up: true, sub: "Assets", icon: TrendingUp },
-  ];
+  const activeSignals = riskSignals.filter(s => !s.acknowledged);
+  const criticalSignals = activeSignals.filter(s => s.severity === "critical");
+  const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 6);
+  const recentRuns = automationRuns.slice(0, 4);
 
   return (
-    <div className="p-6 space-y-6 overflow-auto max-w-7xl">
+    <div className="p-6 space-y-6 overflow-auto">
+      {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-display font-bold text-terra-text">Portfolio Dashboard</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Unified view of portfolio value, occupancy, cap rates, and asset-level performance signals</p>
+            <h1 className="text-2xl font-display font-bold text-terra-text">Brokerage Command Center</h1>
+            <p className="text-sm text-terra-text-secondary mt-1">Real-time visibility across listings, deals, leads, and pipeline — March 30, 2026</p>
           </div>
-          <div className="text-right">
-            <p className="text-xs text-terra-text-muted uppercase tracking-wider mb-1">Monthly Revenue</p>
-            <p className="text-3xl font-display font-bold text-terra-text">{formatCurrency(portfolioSummary.totalMonthlyRevenue)}</p>
-            <div className="flex items-center justify-end gap-1 mt-0.5">
-              <ArrowUp className="w-3 h-3 text-terra-emerald" />
-              <span className="text-sm font-semibold text-terra-emerald">+5.2%</span>
-              <span className="text-xs text-terra-text-muted">vs last month</span>
+          <div className="flex items-center gap-2">
+            {criticalSignals.length > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600/10 border border-red-500/20 text-xs text-red-400 font-semibold animate-pulse">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                {criticalSignals.length} Critical
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
+              <Clock className="w-3.5 h-3.5" />
+              {activeSignals.length} Active Signals
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Summary Stat Pills */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {summaryStats.map((s, i) => (
-          <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-            className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm p-4">
-            <div className="flex items-center justify-between mb-2">
-              <s.icon className="w-4 h-4 text-terra-text-muted" />
-              <span className={`text-xs font-semibold flex items-center gap-0.5 ${s.up ? "text-terra-emerald" : "text-terra-rose"}`}>
-                {s.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                {s.change}
-              </span>
+      {/* Command Loop */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }}
+        className="flex gap-2 overflow-x-auto pb-1">
+        {commandLoopItems.map((item, i) => (
+          <div key={item.label} className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-terra-surface border border-terra-border">
+              <item.icon className={cn("w-3.5 h-3.5", item.color)} />
+              <div>
+                <p className={cn("text-[10px] font-bold uppercase tracking-wider", item.color)}>{item.label}</p>
+                <p className="text-[10px] text-terra-text-muted hidden sm:block">{item.desc}</p>
+              </div>
             </div>
-            <div className="text-2xl font-display font-bold text-terra-text">{s.value}</div>
-            <div className="text-xs text-terra-text-muted mt-0.5">{s.sub}</div>
-          </motion.div>
+            {i < commandLoopItems.length - 1 && <div className="text-terra-text-muted text-xs flex-shrink-0">→</div>}
+          </div>
         ))}
+      </motion.div>
+
+      {/* KPI Strip */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { label: "Active Listings", value: brokerageSummary.activeListings, icon: Home, color: "from-blue-500 to-cyan-400" },
+            { label: "Active Buyers", value: brokerageSummary.activeBuyers, icon: Users, color: "from-violet-500 to-purple-400" },
+            { label: "Active Deals", value: brokerageSummary.activeDeals, icon: Activity, color: "from-emerald-500 to-green-400" },
+            { label: "Pending Offers", value: brokerageSummary.pendingOffers, icon: DollarSign, color: "from-amber-500 to-yellow-400" },
+            { label: "Under Contract", value: brokerageSummary.underContract, icon: CheckCircle, color: "from-terra-primary to-terra-accent" },
+            { label: "Closings MTD", value: brokerageSummary.closingsThisMonth, icon: TrendingUp, color: "from-emerald-500 to-teal-400" },
+          ].map((m) => (
+            <motion.div key={m.label} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl border border-terra-border p-4 bg-terra-surface/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 opacity-5">
+                <div className={cn("w-full h-full rounded-bl-full bg-gradient-to-br", m.color)} />
+              </div>
+              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br mb-2", m.color)}>
+                <m.icon className="w-4 h-4 text-white" />
+              </div>
+              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
+              <p className="text-2xl font-display font-bold text-terra-text">{m.value}</p>
+            </motion.div>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {[
+            { label: "Pipeline Value", value: formatCurrency(brokerageSummary.pipelineValue), sub: "Active deals", alert: false },
+            { label: "Commission MTD", value: formatCurrency(brokerageSummary.totalCommissionMTD), sub: "All agents", alert: false },
+            { label: "Commission at Risk", value: formatCurrency(brokerageSummary.commissionAtRisk), sub: "High/critical deals", alert: true },
+            { label: "Avg Days to Close", value: `${brokerageSummary.avgDaysToClose}d`, sub: "Team average", alert: false },
+            { label: "Stalled Deals", value: brokerageSummary.stalledDeals, sub: "Need intervention", alert: brokerageSummary.stalledDeals > 0 },
+          ].map((m) => (
+            <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className={cn("rounded-xl border p-4 bg-terra-surface/50", m.alert ? "border-rose-500/30 bg-rose-500/5" : "border-terra-border")}>
+              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
+              <p className={cn("text-xl font-display font-bold mt-1", m.alert ? "text-rose-400" : "text-terra-text")}>{m.value}</p>
+              {m.sub && <p className="text-[10px] text-terra-text-muted mt-0.5">{m.sub}</p>}
+            </motion.div>
+          ))}
+        </div>
       </div>
 
-      {/* HERO: Revenue Chart */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="font-display font-bold text-terra-text text-lg">Revenue & NOI Trend</h3>
-            <p className="text-sm text-terra-text-muted mt-0.5">12-month portfolio performance</p>
-          </div>
-          <div className="flex items-center gap-5 text-xs text-terra-text-muted">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-terra-primary inline-block" /> Revenue</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-terra-emerald inline-block" /> NOI</span>
-          </div>
-        </div>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueHistory} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-              <defs>
-                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="noiGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(60,100,160,0.06)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: "#4e5d80", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "#4e5d80", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(1)}M`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#3b82f6" fill="url(#revenueGradient)" strokeWidth={2.5} dot={false} />
-              <Area type="monotone" dataKey="noi" name="NOI" stroke="#10b981" fill="url(#noiGradient)" strokeWidth={2.5} dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
-
-      {/* Properties + Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Alert Feed */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm p-5 max-h-[500px] overflow-y-auto">
-          <AlertFeed limit={5} />
-        </motion.div>
-
-        {/* Property Summary Table */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-          className="lg:col-span-2 rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm">
-          <div className="p-4 border-b border-terra-border flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-terra-primary" />
-              <h3 className="font-display font-bold text-terra-text">Properties</h3>
-              <span className="text-xs text-terra-text-muted">({properties.length} total)</span>
+        {/* Risk Signal Panel */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="lg:col-span-2">
+          <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <h3 className="font-display font-bold text-terra-text">Risk Signals — Beacon</h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400">{activeSignals.length} active</span>
+              </div>
+              <Link href="/deals">
+                <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer transition-colors">View All →</span>
+              </Link>
             </div>
-            <Link href="/property">
-              <span className="text-xs text-terra-primary hover:underline cursor-pointer flex items-center gap-1">
-                View All <ChevronRight className="w-3 h-3" />
-              </span>
-            </Link>
-          </div>
-          <div className="divide-y divide-terra-border">
-            {properties.slice(0, 8).map((property) => {
-              const status = statusConfig[property.status];
-              return (
-                <Link key={property.id} href={`/property/${property.id}`}>
-                  <div className="px-4 py-3 flex items-center gap-4 hover:bg-terra-surface-hover transition-colors cursor-pointer">
+            <div className="divide-y divide-terra-border">
+              {activeSignals.slice(0, 5).map((signal) => (
+                <div key={signal.id} className={cn("px-5 py-4 hover:bg-terra-surface-hover transition-colors", signal.severity === "critical" && "bg-red-600/5")}>
+                  <div className="flex items-start gap-3">
+                    <RiskBadge level={signal.severity} />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-terra-text truncate">{property.name}</p>
-                        <span className={`flex items-center gap-1 text-[10px] font-semibold ${status.text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-                          {status.label}
-                        </span>
+                      <p className="text-sm font-semibold text-terra-text">{signal.title}</p>
+                      <p className="text-xs text-terra-text-secondary mt-0.5 line-clamp-1">{signal.description}</p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded truncate">→ {signal.actionRequired}</span>
                       </div>
-                      <p className="text-xs text-terra-text-muted">{property.city}, {property.state} · {property.type}</p>
                     </div>
-                    <div className="flex items-center gap-6 shrink-0 text-right">
-                      <div>
-                        <p className="text-[10px] text-terra-text-muted">Occupancy</p>
-                        <p className={`text-sm font-semibold ${property.occupancy >= 90 ? "text-terra-emerald" : property.occupancy >= 80 ? "text-terra-amber" : "text-terra-rose"}`}>
-                          {property.occupancy}%
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-terra-text-muted">Rev/mo</p>
-                        <p className="text-sm font-semibold text-terra-text">{formatCurrency(property.monthlyRevenue)}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-terra-text-muted">Cap Rate</p>
-                        <p className="text-sm font-semibold text-terra-text">{property.capRate}%</p>
-                      </div>
+                    <div className="text-right flex-shrink-0">
+                      <span className="text-[10px] text-terra-text-muted">{signal.daysOpen === 0 ? "Today" : `${signal.daysOpen}d`}</span>
+                      <p className="text-[10px] text-terra-text-muted mt-0.5">{signal.assignedTo}</p>
                     </div>
                   </div>
-                </Link>
-              );
-            })}
+                </div>
+              ))}
+            </div>
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <ActivityFeed entityType="property" title="Portfolio Team Activity" limit={8} compact />
+        {/* Urgent Items */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-amber-500/20 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-400" />
+              <h3 className="font-display font-bold text-terra-text">Action Needed</h3>
+            </div>
+            <div className="p-4 space-y-3">
+              {brokerageDeals.filter(d => d.hasUrgentIssue && !["closed","lost-stalled"].includes(d.stage)).slice(0,4).map(deal => (
+                <div key={deal.id} className="rounded-lg border border-amber-500/20 bg-terra-surface p-3">
+                  <p className="text-xs font-semibold text-terra-text">{deal.address.split(",")[0]}</p>
+                  <p className="text-[10px] text-amber-400 mt-0.5">{deal.urgentIssue}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <StageBadge stage={deal.stage} />
+                    <span className="text-[10px] text-terra-text-muted">{deal.nextActionOwner}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </motion.div>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Stalled Deals */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-rose-400" />
+                <h3 className="font-display font-bold text-terra-text">Stalled Deals</h3>
+              </div>
+              <Link href="/deals">
+                <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer">View Pipeline →</span>
+              </Link>
+            </div>
+            <div className="divide-y divide-terra-border">
+              {brokerageDeals.filter(d => d.isStalled).map(deal => (
+                <div key={deal.id} className="px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <DealHealthCard score={deal.dealHealthScore} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-terra-text">{deal.address.split(",")[0]}</p>
+                      <p className="text-xs text-terra-text-secondary mt-0.5">{deal.stalledReason}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <StageBadge stage={deal.stage} />
+                        <span className="text-[10px] text-terra-text-muted">{deal.daysInStage}d in stage</span>
+                      </div>
+                    </div>
+                    <RiskBadge level={deal.riskLevel} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Automation Runs */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
+          <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-terra-primary" />
+                <h3 className="font-display font-bold text-terra-text">AlloyScape — Recent Runs</h3>
+              </div>
+              <Link href="/automations">
+                <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer">View All →</span>
+              </Link>
+            </div>
+            <div className="divide-y divide-terra-border">
+              {recentRuns.map(run => (
+                <div key={run.id} className="px-5 py-3.5 flex items-start gap-3">
+                  <StatusIndicator status={run.status === "success" ? "success" : run.status === "failed" ? "error" : "warning"} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-terra-text">{run.automationName}</p>
+                    <p className="text-[10px] text-terra-text-muted">{run.affectedEntity}</p>
+                    {run.errorMessage && <p className="text-[10px] text-rose-400 mt-0.5">{run.errorMessage}</p>}
+                  </div>
+                  <span className="text-[10px] text-terra-text-muted flex-shrink-0">{new Date(run.startedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Agent Leaderboard */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+        <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-terra-primary" />
+              <h3 className="font-display font-bold text-terra-text">Agent Leaderboard — MTD</h3>
+            </div>
+            <Link href="/team">
+              <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer">Full Report →</span>
+            </Link>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-terra-border">
+                  {["Agent", "Team", "Listings", "Deals", "Commission MTD", "Conv. Rate", "Avg DTC", "Stalled"].map(h => (
+                    <th key={h} className="text-left py-3 px-4 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {topAgents.map((agent) => (
+                  <tr key={agent.id} className="border-b border-terra-border/50 hover:bg-terra-surface-hover transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <AgentAvatar name={agent.name} avatar={agent.avatar} className="w-7 h-7 text-[10px]" />
+                        <div>
+                          <p className="text-xs font-semibold text-terra-text">{agent.name}</p>
+                          <p className="text-[10px] text-terra-text-muted capitalize">{agent.role}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-xs text-terra-text-secondary">{agent.team}</td>
+                    <td className="py-3 px-4 text-xs text-terra-text">{agent.activeListings}</td>
+                    <td className="py-3 px-4 text-xs text-terra-text">{agent.activeDeals}</td>
+                    <td className="py-3 px-4 text-xs font-semibold text-terra-primary">{formatCurrency(agent.commissionMTD)}</td>
+                    <td className="py-3 px-4 text-xs">
+                      <span className={cn(agent.conversionRate >= 0.40 ? "text-emerald-400" : agent.conversionRate >= 0.30 ? "text-amber-400" : "text-rose-400")}>
+                        {Math.round(agent.conversionRate * 100)}%
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-xs text-terra-text">{agent.avgDaysToClose}d</td>
+                    <td className="py-3 px-4">
+                      {agent.stalledDeals > 0 ? (
+                        <span className="text-xs font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">{agent.stalledDeals}</span>
+                      ) : (
+                        <span className="text-xs text-emerald-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
