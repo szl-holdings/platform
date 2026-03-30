@@ -1,27 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme inline {
   --font-serif: 'Cormorant Garamond', 'Georgia', serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 
-  --color-navy-950: #0a0c14;
-  --color-navy-900: #0f1320;
-  --color-navy-800: #161c30;
-  --color-navy-700: #1e2740;
-  --color-navy-600: #2a3555;
-  --color-navy-500: #3d4a6a;
+  --color-navy-950: #0a0e1a;
+  --color-navy-900: #0d1220;
+  --color-navy-800: #141c32;
+  --color-navy-700: #1d2741;
+  --color-navy-600: #283553;
+  --color-navy-500: #3d4f72;
 
-  --color-gold-400: #c9a54e;
+  --color-gold-400: #c8a85a;
   --color-gold-500: #b8943f;
   --color-gold-600: #a68334;
   --color-gold-300: #d9ba6e;
   --color-gold-200: #e5cf96;
 
   --color-cream-50: #faf8f4;
-  --color-cream-100: #f3efe6;
-  --color-cream-200: #e5dfd2;
+  --color-cream-100: #f4f0e8;
+  --color-cream-200: #e8e2d4;
   --color-cream-300: #d4ccbb;
+  --color-cream-400: #b8b09e;
 }
 
 * {
@@ -44,8 +45,8 @@ body {
 }
 
 ::selection {
-  background-color: var(--color-gold-500);
-  color: var(--color-navy-950);
+  background-color: rgba(200, 168, 90, 0.25);
+  color: var(--color-cream-50);
 }
 
 ::-webkit-scrollbar {

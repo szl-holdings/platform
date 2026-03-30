@@ -6,9 +6,8 @@ import { Link } from "wouter";
 
 const navLinks = [
   { name: "About", href: "#about" },
+  { name: "Work", href: "#case-studies" },
   { name: "Services", href: "#services" },
-  { name: "Case Studies", href: "#case-studies" },
-  { name: "Insights", href: "#insights" },
   { name: "Contact", href: "#contact" },
 ];
 

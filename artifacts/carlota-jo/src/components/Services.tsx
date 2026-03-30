@@ -48,7 +48,7 @@ export default function Services() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="lg:col-span-7 flex items-end"
           >
-            <p className="text-sm text-cream-200/40 font-light leading-relaxed max-w-xl">
+            <p className="text-sm text-cream-200/70 font-light leading-relaxed max-w-xl">
               Each practice draws on proven strategic frameworks, proprietary
               methodologies, and decades of senior advisory experience. We work
               across industries and geographies, bringing cross-sector insight
@@ -77,7 +77,7 @@ export default function Services() {
                 <h3 className="font-serif text-xl font-medium text-cream-50 mb-3">
                   {service.title}
                 </h3>
-                <p className="text-[13px] text-cream-200/35 leading-relaxed mb-5 font-light">
+                <p className="text-[13px] text-cream-200/65 leading-relaxed mb-5 font-light">
                   {service.summary}
                 </p>
 
@@ -85,9 +85,9 @@ export default function Services() {
                   {service.capabilities.slice(0, 3).map((cap) => (
                     <li
                       key={cap}
-                      className="text-xs text-cream-300/30 flex items-start gap-2 font-light"
+                      className="text-xs text-cream-300/55 flex items-start gap-2 font-light"
                     >
-                      <span className="text-gold-500/40 mt-0.5">—</span>
+                      <span className="text-gold-500/60 mt-0.5">—</span>
                       {cap}
                     </li>
                   ))}

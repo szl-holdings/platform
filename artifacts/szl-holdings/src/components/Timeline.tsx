@@ -6,71 +6,57 @@ export function Timeline() {
   const { timeline } = siteData;
 
   return (
-    <section id="timeline" className="py-20 lg:py-28">
-      <div className="max-w-5xl mx-auto px-6">
+    <section id="timeline" className="py-24 lg:py-32 bg-white border-t border-szl-border">
+      <div className="max-w-6xl mx-auto px-6">
         <m.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="mb-16"
         >
-          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
+          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">History</p>
+          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight">
             {timeline.title}
           </h2>
-          <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
-            {timeline.subtitle}
-          </p>
         </m.div>
 
-        <div className="relative">
-          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-szl-primary/50 via-szl-accent/30 to-szl-border" />
-
-          {milestonesData.map((milestone, index) => {
-            const isLeft = index % 2 === 0;
-            return (
-              <m.div
-                key={`${milestone.year}-${milestone.quarter}`}
-                initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
-                className={`relative flex items-start mb-8 last:mb-0 ${
-                  isLeft ? "md:flex-row" : "md:flex-row-reverse"
-                } flex-row`}
-              >
-                <div className="hidden md:block md:w-1/2" />
-
-                <div className="absolute left-4 md:left-1/2 -translate-x-1/2 z-10 mt-6">
-                  <div className="w-3 h-3 rounded-full bg-szl-primary border-2 border-szl-bg shadow-[0_0_10px_rgba(99,102,241,0.4)]" />
+        <div className="space-y-0 divide-y divide-szl-border">
+          {milestonesData.map((milestone, index) => (
+            <m.div
+              key={`${milestone.year}-${milestone.quarter}`}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.4, delay: index * 0.06 }}
+              className="group py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-8 hover:bg-szl-bg-secondary/50 px-2 -mx-2 rounded-lg transition-colors duration-200"
+            >
+              <div className="shrink-0 sm:w-32">
+                <span className="text-szl-accent font-[var(--font-display)] font-bold text-sm">
+                  {milestone.year}
+                </span>
+                <span className="text-szl-text-muted text-xs ml-1.5">{milestone.quarter}</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <h3 className="font-[var(--font-display)] text-base font-bold text-szl-text">
+                    {milestone.title}
+                  </h3>
+                  <span className="hidden sm:inline px-2 py-0.5 rounded-full bg-szl-bg-tertiary text-szl-text-muted text-[11px] font-medium">
+                    {milestone.highlight}
+                  </span>
                 </div>
-
-                <div className={`ml-10 md:ml-0 md:w-1/2 ${isLeft ? "md:pr-12" : "md:pl-12"}`}>
-                  <div className="group rounded-xl border border-szl-border bg-szl-surface p-6 hover:border-szl-border-hover hover:bg-szl-surface-hover transition-all duration-300">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-szl-primary font-[var(--font-display)] font-bold text-xl">
-                        {milestone.year} {milestone.quarter}
-                      </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-szl-primary/10 text-szl-primary-light text-xs font-semibold">
-                        {milestone.highlight}
-                      </span>
-                    </div>
-                    <h3 className="font-[var(--font-display)] text-lg font-bold text-szl-text mb-2">
-                      {milestone.title}
-                    </h3>
-                    <p className="text-szl-text-secondary text-sm leading-relaxed mb-3">
-                      {milestone.description}
-                    </p>
-                    {milestone.metric && (
-                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-szl-bg/60 border border-szl-border/50">
-                        <span className="text-szl-text-muted text-xs font-medium">{milestone.metric.label}</span>
-                        <span className="text-szl-text font-bold text-sm">{milestone.metric.value}</span>
-                      </div>
-                    )}
+                <p className="text-szl-text-secondary text-sm leading-relaxed">
+                  {milestone.description}
+                </p>
+                {milestone.metric && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-szl-bg-secondary border border-szl-border mt-3">
+                    <span className="text-szl-text-muted text-xs">{milestone.metric.label}:</span>
+                    <span className="text-szl-text font-semibold text-sm">{milestone.metric.value}</span>
                   </div>
-                </div>
-              </m.div>
-            );
-          })}
+                )}
+              </div>
+            </m.div>
+          ))}
         </div>
       </div>
     </section>

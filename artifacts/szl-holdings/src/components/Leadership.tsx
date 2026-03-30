@@ -1,75 +1,92 @@
 import { m } from "framer-motion";
-import { Quote } from "lucide-react";
 import siteData from "@/data/site.json";
+
+const teamMembers = [
+  {
+    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80&auto=format&fit=crop",
+    name: "Stephen Lutar", role: "Founder & CEO", focus: "Enterprise Architecture",
+  },
+  {
+    photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&q=80&auto=format&fit=crop",
+    name: "Thomas Franklin", role: "Chief Technology Officer", focus: "AI & Infrastructure",
+  },
+  {
+    photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80&auto=format&fit=crop",
+    name: "Maria Reyes", role: "Chief Investment Officer", focus: "Capital Deployment",
+  },
+  {
+    photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80&auto=format&fit=crop",
+    name: "James Chen", role: "VP Operations", focus: "Platform Delivery",
+  },
+];
 
 export function Leadership() {
   const { leadership } = siteData;
 
   return (
-    <section id="leadership" className="py-20 lg:py-28">
+    <section id="leadership" className="py-24 lg:py-32 bg-szl-bg-secondary border-t border-szl-border">
       <div className="max-w-6xl mx-auto px-6">
         <m.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14"
+          className="mb-16"
         >
-          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
-            {leadership.title}
-          </h2>
-        </m.div>
-
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative rounded-2xl border border-szl-border bg-szl-surface p-8 sm:p-12 mb-12 overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(99,102,241,0.06)_0%,transparent_60%)]" />
-          <div className="relative">
-            <Quote size={48} className="text-szl-primary/15 mb-6" />
-            <blockquote className="font-[var(--font-display)] text-xl sm:text-2xl lg:text-[1.75rem] text-szl-text leading-relaxed mb-8">
-              {leadership.quote}
-            </blockquote>
-            <p className="text-szl-text-secondary text-sm font-semibold tracking-wide uppercase">
-              — {leadership.attribution}
+          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">Leadership</p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight">
+              Built by operators.
+            </h2>
+            <p className="text-szl-text-secondary text-sm max-w-sm leading-relaxed">
+              Founders and executives who have shipped production systems at scale.
             </p>
           </div>
-          <div className="absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-primary/40 to-transparent" />
-          <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-accent/20 to-transparent" />
         </m.div>
 
-        <m.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-szl-text-secondary text-lg text-center max-w-4xl mx-auto mb-14 leading-relaxed"
-        >
-          {leadership.vision}
-        </m.p>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {leadership.values.map((value, index) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+          {teamMembers.map((member, index) => (
             <m.div
-              key={value.title}
-              initial={{ opacity: 0, y: 20 }}
+              key={member.name}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="group rounded-xl border border-szl-border bg-szl-surface p-5 hover:border-szl-border-hover hover:bg-szl-surface-hover transition-all duration-300"
+              transition={{ delay: index * 0.08 }}
+              className="rounded-xl border border-szl-border bg-white p-5 hover:border-szl-border-hover hover:shadow-sm transition-all duration-200"
             >
-              <div className="w-9 h-9 rounded-lg bg-szl-primary/10 flex items-center justify-center mb-4 group-hover:bg-szl-primary/15 transition-colors">
-                <span className="text-szl-primary-light font-bold text-sm font-[var(--font-display)]">{String(index + 1).padStart(2, "0")}</span>
+              <div className="w-14 h-14 rounded-xl overflow-hidden mb-4">
+                <img
+                  src={member.photo}
+                  alt={member.name}
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
-              <h3 className="font-[var(--font-display)] text-base font-bold text-szl-text mb-2">
-                {value.title}
+              <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-0.5">
+                {member.name}
               </h3>
-              <p className="text-szl-text-secondary text-sm leading-relaxed">
-                {value.description}
+              <p className="text-szl-text-muted text-[11px] font-medium uppercase tracking-wider mb-1">
+                {member.role}
+              </p>
+              <p className="text-szl-text-secondary text-xs">
+                {member.focus}
               </p>
             </m.div>
           ))}
         </div>
+
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-2xl border border-szl-border bg-white p-8 sm:p-10"
+        >
+          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-6">Founding Thesis</p>
+          <blockquote className="font-[var(--font-display)] text-lg sm:text-xl text-szl-text leading-relaxed mb-6 max-w-4xl">
+            "{leadership.quote}"
+          </blockquote>
+          <p className="text-szl-text-secondary text-sm font-semibold">
+            — {leadership.attribution}
+          </p>
+        </m.div>
       </div>
     </section>
   );

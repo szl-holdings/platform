@@ -1,209 +1,124 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/shared-ui/ui/button";
-import { useGetStephenProfile } from "@workspace/api-client-react";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 
-function GeometricMesh() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationId: number;
-    const nodes: { x: number; y: number; vx: number; vy: number; radius: number; }[] = [];
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const isMobile = window.innerWidth < 768;
-    const nodeCount = isMobile ? 30 : 60;
-    for (let i = 0; i < nodeCount; i++) {
-      nodes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * 2 + 1,
-      });
-    }
-
-    let time = 0;
-    const goldColor = { r: 196, g: 155, b: 45 };
-
-    const animate = () => {
-      time += 0.005;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      nodes.forEach((node) => {
-        node.x += node.vx;
-        node.y += node.vy;
-        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
-        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
-      });
-
-      const connectionDist = isMobile ? 100 : 150;
-      nodes.forEach((a, i) => {
-        nodes.slice(i + 1).forEach((b) => {
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < connectionDist) {
-            const opacity = 0.08 * (1 - dist / connectionDist);
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(${goldColor.r}, ${goldColor.g}, ${goldColor.b}, ${opacity})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        });
-      });
-
-      nodes.forEach((node) => {
-        const pulse = 0.3 + Math.sin(time * 2 + node.x * 0.01) * 0.2;
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${goldColor.r}, ${goldColor.g}, ${goldColor.b}, ${pulse})`;
-        ctx.fill();
-      });
-
-      animationId = requestAnimationFrame(animate);
-    };
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />;
-}
-
-const textReveal = {
-  hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.9,
-      delay: 0.3 + i * 0.15,
-      ease: [0.25, 0.4, 0.25, 1] as const,
-    },
-  }),
-};
+const stats = [
+  { value: "15+", label: "Years in Enterprise Tech" },
+  { value: "$2B+", label: "Systems Architected" },
+  { value: "6", label: "Live Products" },
+];
 
 export function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   return (
     <section id="hero" ref={ref} className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary/12 rounded-full blur-[150px] animate-hero-glow" />
-        <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] bg-yellow-600/8 rounded-full blur-[130px] animate-hero-glow-delayed" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-[180px] animate-hero-float" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/6 rounded-full blur-[180px]" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-yellow-600/5 rounded-full blur-[150px]" />
       </div>
 
-      <motion.div style={{ y, opacity }} className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <div className="max-w-5xl">
-          <motion.div custom={0} initial="hidden" animate="visible" variants={textReveal}>
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass-panel mb-10 border-primary/20">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-sm font-medium text-foreground/70 tracking-wide">Founder & CEO at SZL Holdings</span>
-            </div>
-          </motion.div>
+      <motion.div style={{ y, opacity }} className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <div className="lg:col-span-7">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-panel border-primary/20 mb-10">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-xs font-medium text-foreground/60 tracking-wide">Founder & CEO — SZL Holdings</span>
+              </div>
+            </motion.div>
 
-          <motion.h1
-            custom={1}
-            initial="hidden"
-            animate="visible"
-            variants={textReveal}
-            className="text-5xl sm:text-7xl md:text-[5.5rem] font-serif font-bold text-foreground leading-[1.05] mb-4 tracking-tight"
-          >
-            Stephen Lutar
-          </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="text-5xl sm:text-7xl md:text-[5rem] font-serif font-bold text-foreground leading-[1.05] mb-5 tracking-tight"
+            >
+              Stephen Lutar
+            </motion.h1>
 
-          <motion.h2
-            custom={2}
-            initial="hidden"
-            animate="visible"
-            variants={textReveal}
-            className="text-xl sm:text-2xl md:text-3xl text-primary font-medium mb-8 tracking-wide"
-          >
-            Builder. Architect. Operator.
-          </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.35 }}
+              className="text-base sm:text-lg text-foreground/55 max-w-xl mb-10 leading-relaxed font-light"
+            >
+              I build the systems that power enterprises — from fintech platforms processing millions in transactions to maritime intelligence tracking global fleets.
+            </motion.p>
 
-          <motion.p
-            custom={3}
-            initial="hidden"
-            animate="visible"
-            variants={textReveal}
-            className="text-base sm:text-lg md:text-xl text-foreground/60 max-w-3xl mb-14 leading-relaxed font-light"
-          >
-            I build the systems that power enterprises. From fintech platforms processing millions in transactions to maritime intelligence tracking global fleets — I architect, ship, and scale technology that moves industries forward.
-          </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex flex-wrap items-center gap-4"
+            >
+              <a href="#case-studies">
+                <Button size="lg" className="rounded-full px-8 py-6 text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/35 hover:scale-105 transition-all duration-300 group">
+                  Explore My Work
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </a>
+              <a
+                href="#contact"
+                className="text-sm font-medium text-foreground/60 hover:text-primary transition-colors duration-300 flex items-center gap-2 group"
+              >
+                Request a Briefing
+                <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+              </a>
+            </motion.div>
 
-          <motion.div custom={4} initial="hidden" animate="visible" variants={textReveal} className="flex flex-wrap items-center gap-6">
-            <a href="#case-studies">
-              <Button size="lg" className="rounded-full px-10 py-7 text-base shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group font-semibold">
-                Explore My Work
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </a>
-            <a href="#contact" className="text-foreground/70 hover:text-primary font-medium transition-all duration-300 flex items-center gap-2 group border border-white/10 rounded-full px-8 py-4 hover:border-primary/30">
-              Request a Briefing
-              <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-            </a>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="flex items-center gap-8 mt-14 pt-8 border-t border-white/5"
+            >
+              {stats.map((stat, i) => (
+                <div key={i} className="flex flex-col">
+                  <span className="text-2xl sm:text-3xl font-serif font-bold text-primary">{stat.value}</span>
+                  <span className="text-[10px] text-foreground/35 uppercase tracking-widest mt-1">{stat.label}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
 
           <motion.div
-            custom={5}
-            initial="hidden"
-            animate="visible"
-            variants={textReveal}
-            className="flex items-center gap-8 mt-16 pt-8 border-t border-white/5"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="lg:col-span-5 hidden lg:flex justify-center"
           >
-            <div className="flex flex-col">
-              <span className="text-3xl font-serif font-bold text-primary">15+</span>
-              <span className="text-xs text-foreground/40 uppercase tracking-widest mt-1">Years in Enterprise Tech</span>
-            </div>
-            <div className="w-px h-12 bg-white/10" />
-            <div className="flex flex-col">
-              <span className="text-3xl font-serif font-bold text-primary">$2B+</span>
-              <span className="text-xs text-foreground/40 uppercase tracking-widest mt-1">Systems Architected</span>
-            </div>
-            <div className="w-px h-12 bg-white/10" />
-            <div className="flex flex-col">
-              <span className="text-3xl font-serif font-bold text-primary">6</span>
-              <span className="text-xs text-foreground/40 uppercase tracking-widest mt-1">Live Products</span>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-yellow-600/10 rounded-2xl blur-2xl scale-95" />
+              <div className="relative w-80 h-96 rounded-2xl overflow-hidden border border-white/10">
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=640&q=80&auto=format&fit=crop"
+                  alt="Stephen Lutar"
+                  className="w-full h-full object-cover object-center"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+              </div>
             </div>
           </motion.div>
         </div>
       </motion.div>
 
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.8, duration: 0.8 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 0.8 }}
       >
-        <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/30 font-medium">Discover</span>
-        <ChevronDown className="w-4 h-4 text-primary/50 animate-bounce" />
+        <span className="text-[9px] uppercase tracking-[0.2em] text-foreground/25 font-medium">Scroll</span>
+        <ChevronDown className="w-3.5 h-3.5 text-primary/40 animate-bounce" />
       </motion.div>
     </section>
   );

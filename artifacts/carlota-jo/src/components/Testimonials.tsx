@@ -31,7 +31,7 @@ export default function Testimonials() {
               className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 py-10 border-b border-cream-200/5 last:border-b-0"
             >
               <div className="lg:col-span-8">
-                <p className="font-serif text-xl lg:text-2xl font-light text-cream-100/70 leading-relaxed italic">
+                <p className="font-serif text-xl lg:text-2xl font-light text-cream-100 leading-relaxed italic">
                   "{t.quote}"
                 </p>
               </div>

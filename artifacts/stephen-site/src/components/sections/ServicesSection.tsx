@@ -5,39 +5,39 @@ import { useListStephenContentBlocks } from "@workspace/api-client-react";
 const fallbackServices = [
   { 
     id: 1, 
-    title: "Enterprise Architecture & Platform Design", 
-    content: "End-to-end system design for organizations scaling past their first architecture. From monolith decomposition to event-driven microservices, I design platforms built to handle 10x growth without 10x cost. Typical engagement: $45K - $120K.", 
+    title: "Enterprise Architecture", 
+    content: "End-to-end platform design for organizations scaling past their first architecture — monolith to microservices, built for 10x growth.", 
     icon: "Server" 
   },
   { 
     id: 2, 
-    title: "Technical Due Diligence & M&A Advisory", 
-    content: "Deep technical assessment for PE firms, VCs, and corporate acquirers evaluating technology assets. Code quality audits, infrastructure risk analysis, and scalability scoring. Comparable to McKinsey Digital or Bain tech assessments. Typical engagement: $35K - $85K.", 
+    title: "Technical Due Diligence", 
+    content: "Deep technical assessment for PE and VC acquirers — code quality, infrastructure risk, and scalability scoring.", 
     icon: "Search" 
   },
   { 
     id: 3, 
-    title: "Cybersecurity & Threat Architecture", 
-    content: "Security-first infrastructure design for defense, fintech, and regulated industries. NIST/CMMC compliance frameworks, zero-trust network architecture, and red team simulation design. Typical engagement: $50K - $150K.", 
+    title: "Cybersecurity Architecture", 
+    content: "Zero-trust network design and NIST/CMMC compliance for defense, fintech, and regulated industries.", 
     icon: "ShieldCheck" 
   },
   { 
     id: 4, 
-    title: "Product & Growth Strategy", 
-    content: "Translating technical capability into market positioning. Product-market fit analysis, competitive technical benchmarking, and go-to-market engineering. Informed by building six products across four verticals. Typical engagement: $25K - $60K.", 
-    icon: "TrendingUp" 
-  },
-  { 
-    id: 5, 
-    title: "Full-Stack Engineering Leadership", 
-    content: "Fractional CTO and engineering leadership for Series A-C companies needing senior technical direction without a full-time hire. Team structuring, tech stack evaluation, and delivery process optimization. Retainer: $15K - $30K/month.", 
+    title: "Fractional CTO", 
+    content: "Senior engineering leadership for Series A–C companies — team structure, tech stack, delivery process.", 
     icon: "Code2" 
   },
   { 
-    id: 6, 
-    title: "Data Infrastructure & Intelligence Systems", 
-    content: "Real-time data pipeline architecture, analytics platform design, and ML-ops infrastructure. From maritime vessel tracking to financial transaction monitoring — built for throughput and reliability. Typical engagement: $40K - $100K.", 
+    id: 5, 
+    title: "Data & Intelligence Systems", 
+    content: "Real-time data pipelines and ML-ops infrastructure built for throughput and reliability at scale.", 
     icon: "Database" 
+  },
+  { 
+    id: 6, 
+    title: "Product Strategy", 
+    content: "Translating technical capability into market positioning — PMF analysis, competitive benchmarking, go-to-market.", 
+    icon: "TrendingUp" 
   },
 ];
 
@@ -93,21 +93,14 @@ export function ServicesSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 glass-panel rounded-2xl p-8 md:p-12 border-primary/10 text-center"
+          className="mt-12 flex items-center justify-between border-t border-white/5 pt-10"
         >
-          <p className="text-foreground/40 text-sm uppercase tracking-[0.15em] mb-3">Engagement starts with a conversation</p>
-          <h4 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-4">
-            Initial consultations are complimentary and confidential.
-          </h4>
-          <p className="text-foreground/50 max-w-2xl mx-auto mb-8">
-            All engagements begin with a 30-minute strategic briefing to assess fit and scope. 
-            NDA available upon request. Limited availability — currently accepting 2-3 new engagements per quarter.
-          </p>
+          <p className="text-foreground/40 text-sm">Accepting 2–3 engagements per quarter.</p>
           <a href="#contact">
             <motion.button
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className="px-10 py-4 rounded-full bg-primary text-primary-foreground font-semibold shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
+              className="px-8 py-3.5 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/35 transition-all duration-300"
             >
               Request a Briefing
             </motion.button>

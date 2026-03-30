@@ -10,8 +10,6 @@
   "nav": {
     "links": [
       { "label": "Portfolio", "href": "#portfolio" },
-      { "label": "Innovation", "href": "#pillars" },
-      { "label": "Timeline", "href": "#timeline" },
       { "label": "Leadership", "href": "#leadership" },
       { "label": "Contact", "href": "#contact" }
     ],

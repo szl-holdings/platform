@@ -4,8 +4,6 @@ import { LazyMotion, domMax } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Portfolio } from "@/components/Portfolio";
-import { Timeline } from "@/components/Timeline";
-import { Pillars } from "@/components/Pillars";
 import { Leadership } from "@/components/Leadership";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
@@ -32,8 +30,6 @@ function HomePage() {
       <Navbar />
       <Hero />
       <Portfolio />
-      <Pillars />
-      <Timeline />
       <Leadership />
       <Contact />
       <Footer />

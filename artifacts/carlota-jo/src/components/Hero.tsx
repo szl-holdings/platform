@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-const featuredInsight = {
-  label: "Latest Perspective",
-  title: "Why 73% of Digital Transformations Fail — and What the Other 27% Do Differently",
-  category: "Technology & Operations",
+const featuredEngagement = {
+  label: "Featured Engagement",
+  title: "Portfolio Transformation for a Global Industrial Group — $1.4B repositioning across six operating companies.",
+  category: "Enterprise Strategy",
 };
 
 export default function Hero() {
@@ -41,7 +41,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-base md:text-lg text-cream-200/50 font-light max-w-lg leading-relaxed mb-10"
+              className="text-base md:text-lg text-cream-200 font-light max-w-lg leading-relaxed mb-10"
             >
               We advise boards, leadership teams, and investors on their most
               critical strategic challenges — from portfolio transformation to
@@ -64,11 +64,11 @@ export default function Hero() {
               </button>
               <button
                 onClick={() =>
-                  document.querySelector("#perspectives")?.scrollIntoView({ behavior: "smooth" })
+                  document.querySelector("#case-studies")?.scrollIntoView({ behavior: "smooth" })
                 }
                 className="px-8 py-3.5 text-xs font-medium tracking-[0.15em] uppercase text-cream-200/60 border border-cream-200/12 hover:border-cream-200/25 hover:text-cream-50 transition-all duration-300"
               >
-                Explore Our Thinking
+                Explore Our Work
               </button>
             </motion.div>
           </div>
@@ -81,20 +81,20 @@ export default function Hero() {
           >
             <div className="border border-cream-200/8 p-8 lg:p-10 hover:border-cream-200/15 transition-colors duration-500 group cursor-pointer"
               onClick={() =>
-                document.querySelector("#perspectives")?.scrollIntoView({ behavior: "smooth" })
+                document.querySelector("#case-studies")?.scrollIntoView({ behavior: "smooth" })
               }
             >
               <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-gold-400/70 mb-5">
-                {featuredInsight.label}
+                {featuredEngagement.label}
               </p>
               <p className="text-[11px] tracking-wider uppercase text-cream-300/40 mb-3">
-                {featuredInsight.category}
+                {featuredEngagement.category}
               </p>
               <h3 className="font-serif text-xl md:text-2xl font-light text-cream-50 leading-snug mb-6 group-hover:text-gold-300 transition-colors duration-300">
-                {featuredInsight.title}
+                {featuredEngagement.title}
               </h3>
               <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.15em] uppercase text-gold-400/60 group-hover:text-gold-400 transition-colors">
-                Read the perspective
+                View engagement
                 <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-300" />
               </span>
             </div>

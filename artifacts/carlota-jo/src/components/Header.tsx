@@ -6,8 +6,6 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
   { label: "Capabilities", href: "#services" },
   { label: "Engagements", href: "#case-studies" },
-  { label: "Perspectives", href: "#perspectives" },
-  { label: "Advisory Intel", href: "/advisory", isRoute: true },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -55,25 +53,15 @@ export default function Header() {
           </a>
 
           <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) =>
-              (link as any).isRoute ? (
-                <a
-                  key={link.href}
-                  href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}`}
-                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-cream-50 transition-colors duration-300"
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <button
-                  key={link.href}
-                  onClick={() => handleNav(link.href)}
-                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-cream-50 transition-colors duration-300"
-                >
-                  {link.label}
-                </button>
-              )
-            )}
+            {navLinks.map((link) => (
+              <button
+                key={link.href}
+                onClick={() => handleNav(link.href)}
+                className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-cream-50 transition-colors duration-300"
+              >
+                {link.label}
+              </button>
+            ))}
             <button
               onClick={() =>
                 document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })
@@ -103,26 +91,15 @@ export default function Header() {
             className="lg:hidden bg-navy-950/98 backdrop-blur-xl border-b border-cream-200/5"
           >
             <div className="px-6 py-8 flex flex-col gap-6">
-              {navLinks.map((link) =>
-                (link as any).isRoute ? (
-                  <a
-                    key={link.href}
-                    href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-cream-50 transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                ) : (
-                  <button
-                    key={link.href}
-                    onClick={() => handleNav(link.href)}
-                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-cream-50 transition-colors"
-                  >
-                    {link.label}
-                  </button>
-                )
-              )}
+              {navLinks.map((link) => (
+                <button
+                  key={link.href}
+                  onClick={() => handleNav(link.href)}
+                  className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-cream-50 transition-colors"
+                >
+                  {link.label}
+                </button>
+              ))}
               <button
                 onClick={() => {
                   setMobileOpen(false);

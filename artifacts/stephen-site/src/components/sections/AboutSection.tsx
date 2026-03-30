@@ -5,13 +5,9 @@ export function AboutSection() {
   const { data: profile } = useGetStephenProfile();
   const { data: statBlocks } = useListStephenContentBlocks({ type: "stat" });
 
-  const fallbackBio = `Over the past 15 years, I've operated at the intersection of enterprise technology, defense systems, and financial infrastructure — building platforms that handle real complexity at real scale.
+  const fallbackBio = `15 years at the intersection of defense systems, financial infrastructure, and enterprise technology — from architecting mission-critical DoD platforms to leading fintech engineering teams processing millions of daily transactions.
 
-My career started in the trenches of enterprise IT, architecting mission-critical systems for federal defense contractors where failure wasn't a slide in a post-mortem — it was a national security concern. From there I moved into fintech, leading engineering teams that built payment processing infrastructure handling millions of daily transactions across global markets.
-
-In 2022, I founded SZL Holdings to bring everything I'd learned into a single, vertically integrated technology company. Today, SZL operates six live products spanning maritime intelligence, cybersecurity simulation, creative production, and enterprise commerce — each built from the ground up, each solving problems I encountered firsthand.
-
-I don't advise from the sidelines. I build, I ship, and I operate. Every system in the SZL portfolio runs in production, serves real users, and generates real outcomes.`;
+In 2022, I founded SZL Holdings: six live products across maritime intelligence, cybersecurity, and AI-native creative production. I don't advise. I build, ship, and operate.`;
 
   const defaultStats = [
     { label: "Years in Enterprise Tech", value: "15+" },
@@ -23,12 +19,6 @@ I don't advise from the sidelines. I build, I ship, and I operate. Every system 
   const statsToDisplay = statBlocks && statBlocks.length > 0 
     ? statBlocks.map(block => ({ label: block.title, value: block.content }))
     : defaultStats;
-
-  const domains = [
-    "Enterprise Architecture", "Defense & Intelligence", "Fintech & Payments", 
-    "Maritime Operations", "Cybersecurity", "Cloud Infrastructure (AWS/GCP)", 
-    "Full-Stack Engineering", "Product Strategy", "M&A Technical Due Diligence"
-  ];
 
   return (
     <section id="about" className="py-32 bg-background relative border-t border-white/5">
@@ -63,20 +53,6 @@ I don't advise from the sidelines. I build, I ship, and I operate. Every system 
               ))}
             </div>
 
-            <div className="mt-12">
-              <h4 className="text-xs font-bold text-foreground/40 uppercase tracking-[0.2em] mb-5">Domain Expertise</h4>
-              <div className="flex flex-wrap gap-2.5">
-                {domains.map((domain) => (
-                  <motion.span
-                    key={domain}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="px-4 py-2 rounded-full border border-white/8 bg-white/[0.02] text-sm font-medium text-foreground/60 hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all duration-300 cursor-default"
-                  >
-                    {domain}
-                  </motion.span>
-                ))}
-              </div>
-            </div>
           </motion.div>
 
           <motion.div 

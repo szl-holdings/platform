@@ -31,7 +31,7 @@ export default function CaseStudies() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="lg:col-span-7 flex items-end"
           >
-            <p className="text-sm text-cream-200/40 font-light leading-relaxed max-w-xl">
+            <p className="text-sm text-cream-200/65 font-light leading-relaxed max-w-xl">
               Representative outcomes from recent advisory engagements. Client
               details are anonymized to protect confidentiality.
             </p>
@@ -69,7 +69,7 @@ export default function CaseStudies() {
                       {study.headline}
                     </h3>
 
-                    <p className="text-[13px] text-cream-200/30 leading-relaxed font-light mb-4 max-w-lg">
+                    <p className="text-[13px] text-cream-200/65 leading-relaxed font-light mb-4 max-w-lg">
                       {study.approach}
                     </p>
 

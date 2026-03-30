@@ -69,39 +69,40 @@ export function Contact() {
   };
 
   const inputClasses = (field: keyof FormErrors) =>
-    `w-full px-4 py-3 rounded-lg bg-szl-bg border text-szl-text placeholder-szl-text-muted text-sm focus:outline-none focus:ring-2 transition-all ${
+    `w-full px-4 py-3 rounded-lg bg-white border text-szl-text placeholder-szl-text-muted text-sm focus:outline-none focus:ring-2 transition-all ${
       errors[field]
-        ? "border-red-500/50 focus:ring-red-500/30"
-        : "border-szl-border focus:border-szl-primary focus:ring-szl-primary/20"
+        ? "border-red-400 focus:ring-red-400/20"
+        : "border-szl-border focus:border-szl-accent focus:ring-szl-accent/15"
     }`;
 
   return (
-    <section id="contact" className="py-20 lg:py-28 bg-szl-bg-secondary">
+    <section id="contact" className="py-24 lg:py-32 bg-szl-bg-secondary border-t border-szl-border">
       <div className="max-w-3xl mx-auto px-6">
         <m.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="mb-12"
         >
-          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text mb-4">
+          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">Contact</p>
+          <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text mb-3">
             {contact.title}
           </h2>
-          <p className="text-szl-text-secondary text-lg max-w-xl mx-auto">
+          <p className="text-szl-text-secondary text-base max-w-xl">
             {contact.subtitle}
           </p>
         </m.div>
 
         <m.form
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-szl-border bg-szl-surface p-6 sm:p-8 space-y-5"
+          className="rounded-2xl border border-szl-border bg-white p-6 sm:p-8 space-y-5"
         >
           <div className="grid sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="contact-name" className="block text-szl-text-secondary text-sm font-medium mb-1.5">{contact.labels.name}</label>
+              <label htmlFor="contact-name" className="block text-szl-text text-sm font-medium mb-1.5">{contact.labels.name}</label>
               <input
                 id="contact-name"
                 type="text"
@@ -111,10 +112,10 @@ export function Contact() {
                 placeholder={contact.placeholders.name}
                 className={inputClasses("name")}
               />
-              {errors.name && <p className="text-red-400 text-xs mt-1" role="alert">{errors.name}</p>}
+              {errors.name && <p className="text-red-500 text-xs mt-1" role="alert">{errors.name}</p>}
             </div>
             <div>
-              <label htmlFor="contact-email" className="block text-szl-text-secondary text-sm font-medium mb-1.5">{contact.labels.email}</label>
+              <label htmlFor="contact-email" className="block text-szl-text text-sm font-medium mb-1.5">{contact.labels.email}</label>
               <input
                 id="contact-email"
                 type="email"
@@ -124,13 +125,13 @@ export function Contact() {
                 placeholder={contact.placeholders.email}
                 className={inputClasses("email")}
               />
-              {errors.email && <p className="text-red-400 text-xs mt-1" role="alert">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1" role="alert">{errors.email}</p>}
             </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="contact-company" className="block text-szl-text-secondary text-sm font-medium mb-1.5">{contact.labels.company}</label>
+              <label htmlFor="contact-company" className="block text-szl-text text-sm font-medium mb-1.5">{contact.labels.company}</label>
               <input
                 id="contact-company"
                 type="text"
@@ -138,11 +139,11 @@ export function Contact() {
                 value={form.company}
                 onChange={handleChange}
                 placeholder={contact.placeholders.company}
-                className="w-full px-4 py-3 rounded-lg bg-szl-bg border border-szl-border text-szl-text placeholder-szl-text-muted text-sm focus:outline-none focus:ring-2 focus:border-szl-primary focus:ring-szl-primary/20 transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-white border border-szl-border text-szl-text placeholder-szl-text-muted text-sm focus:outline-none focus:ring-2 focus:border-szl-accent focus:ring-szl-accent/15 transition-all"
               />
             </div>
             <div>
-              <label htmlFor="contact-subject" className="block text-szl-text-secondary text-sm font-medium mb-1.5">{contact.labels.subject}</label>
+              <label htmlFor="contact-subject" className="block text-szl-text text-sm font-medium mb-1.5">{contact.labels.subject}</label>
               <input
                 id="contact-subject"
                 type="text"
@@ -152,12 +153,12 @@ export function Contact() {
                 placeholder={contact.placeholders.subject}
                 className={inputClasses("subject")}
               />
-              {errors.subject && <p className="text-red-400 text-xs mt-1" role="alert">{errors.subject}</p>}
+              {errors.subject && <p className="text-red-500 text-xs mt-1" role="alert">{errors.subject}</p>}
             </div>
           </div>
 
           <div>
-            <label htmlFor="contact-message" className="block text-szl-text-secondary text-sm font-medium mb-1.5">{contact.labels.message}</label>
+            <label htmlFor="contact-message" className="block text-szl-text text-sm font-medium mb-1.5">{contact.labels.message}</label>
             <textarea
               id="contact-message"
               name="message"
@@ -167,18 +168,18 @@ export function Contact() {
               rows={5}
               className={inputClasses("message")}
             />
-            {errors.message && <p className="text-red-400 text-xs mt-1" role="alert">{errors.message}</p>}
+            {errors.message && <p className="text-red-500 text-xs mt-1" role="alert">{errors.message}</p>}
           </div>
 
           {status === "success" && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
               <CheckCircle size={16} />
               {contact.successMessage}
             </div>
           )}
 
           {status === "error" && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
               <AlertCircle size={16} />
               {contact.errorMessage}
             </div>
@@ -187,13 +188,13 @@ export function Contact() {
           <button
             type="submit"
             disabled={status === "submitting"}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-szl-primary to-szl-accent text-white font-semibold text-sm hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_30px_rgba(99,102,241,0.3)]"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-szl-primary text-white font-semibold text-sm hover:bg-szl-primary-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {status === "submitting" ? (
               <>{contact.submittingLabel}</>
             ) : (
               <>
-                {contact.submitLabel} <Send size={16} />
+                {contact.submitLabel} <Send size={15} />
               </>
             )}
           </button>

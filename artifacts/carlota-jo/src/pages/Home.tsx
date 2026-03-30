@@ -2,9 +2,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
 import CaseStudies from "@/components/CaseStudies";
-import Perspectives from "@/components/Perspectives";
 import Testimonials from "@/components/Testimonials";
-import Pricing from "@/components/Pricing";
 import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 
@@ -15,9 +13,7 @@ export default function Home() {
       <Hero />
       <Services />
       <CaseStudies />
-      <Perspectives />
       <Testimonials />
-      <Pricing />
       <ContactForm />
       <Footer />
     </div>

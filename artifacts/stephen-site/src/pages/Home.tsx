@@ -2,10 +2,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { AboutSection } from "@/components/sections/AboutSection";
-import { ServicesSection } from "@/components/sections/ServicesSection";
 import { CaseStudiesSection } from "@/components/sections/CaseStudiesSection";
-import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
-import { ThoughtLeadershipSection } from "@/components/sections/ThoughtLeadershipSection";
+import { ServicesSection } from "@/components/sections/ServicesSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 
 export function Home() {
@@ -15,10 +13,8 @@ export function Home() {
       <main>
         <HeroSection />
         <AboutSection />
-        <ServicesSection />
         <CaseStudiesSection />
-        <ThoughtLeadershipSection />
-        <TestimonialsSection />
+        <ServicesSection />
         <ContactSection />
       </main>
       <Footer />
