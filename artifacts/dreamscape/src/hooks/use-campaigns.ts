@@ -1,4 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import type { DreamscapeCampaign } from "@/lib/api";
 
 export type Campaign = {
   id: number;
@@ -19,23 +21,35 @@ export type Campaign = {
   kpis?: { label: string; value: string; trend?: string }[];
 };
 
-const demoCampaigns: Campaign[] = [
-  { id: 1, name: "Vertex AI Brand Film", client: "Vertex Technologies", category: "brand_campaign", status: "production", deadline: new Date(Date.now() + 30 * 86400000).toISOString(), progress: 65, budget: "$120K", director: "Marcus Chen", kpis: [{ label: "Views", value: "2.4M", trend: "+18%" }, { label: "Engagement", value: "12.8%", trend: "+3.2%" }], createdAt: new Date(Date.now() - 45 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 2, name: "Nova Product Launch", client: "Nova Dynamics", category: "product_launch", status: "review", deadline: new Date(Date.now() + 14 * 86400000).toISOString(), progress: 82, budget: "$85K", director: "Sarah Kim", kpis: [{ label: "Reach", value: "890K", trend: "+24%" }, { label: "CTR", value: "4.2%", trend: "+1.1%" }], createdAt: new Date(Date.now() - 30 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 3, name: "Meridian Social Campaign", client: "Meridian Group", category: "social_media", status: "concept", deadline: new Date(Date.now() + 60 * 86400000).toISOString(), progress: 15, budget: "$45K", director: "James Park", kpis: [{ label: "Impressions", value: "1.2M", trend: "+8%" }, { label: "Shares", value: "34K", trend: "+12%" }], createdAt: new Date(Date.now() - 7 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 4, name: "Atlas Documentary Series", client: "Atlas Foundation", category: "video_production", status: "post_production", deadline: new Date(Date.now() + 21 * 86400000).toISOString(), progress: 90, budget: "$200K", director: "Elena Vasquez", kpis: [{ label: "Episodes", value: "6/8", trend: "+2" }, { label: "Runtime", value: "48min", trend: "avg" }], createdAt: new Date(Date.now() - 90 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 5, name: "Pinnacle Commercial Ads", client: "Pinnacle Financial", category: "commercial", status: "published", deadline: new Date(Date.now() - 5 * 86400000).toISOString(), progress: 100, budget: "$65K", director: "David Torres", kpis: [{ label: "Conversions", value: "2.8K", trend: "+32%" }, { label: "ROAS", value: "4.2x", trend: "+0.8x" }], createdAt: new Date(Date.now() - 60 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 6, name: "Summit Event Marketing", client: "Summit Events", category: "event_marketing", status: "production", deadline: new Date(Date.now() + 45 * 86400000).toISOString(), progress: 40, budget: "$95K", director: "Rachel Wong", kpis: [{ label: "Registrations", value: "1.4K", trend: "+22%" }, { label: "Sponsors", value: "18", trend: "+4" }], createdAt: new Date(Date.now() - 20 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 7, name: "Luminary Brand Story", client: "Luminary Labs", category: "brand_story", status: "review", deadline: new Date(Date.now() + 10 * 86400000).toISOString(), progress: 75, budget: "$110K", director: "Ana Petrov", kpis: [{ label: "Storyboards", value: "12/14", trend: "+3" }, { label: "Approval", value: "86%", trend: "+5%" }], createdAt: new Date(Date.now() - 35 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 8, name: "Zenith Product Teaser", client: "Zenith Corp", category: "product_launch", status: "production", deadline: new Date(Date.now() + 18 * 86400000).toISOString(), progress: 55, budget: "$72K", director: "Leo Zhang", kpis: [{ label: "Pre-orders", value: "4.1K", trend: "+45%" }, { label: "Buzz Score", value: "92", trend: "+11" }], createdAt: new Date(Date.now() - 14 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: 9, name: "Horizon Annual Gala", client: "Horizon Foundation", category: "event_marketing", status: "concept", deadline: new Date(Date.now() + 90 * 86400000).toISOString(), progress: 8, budget: "$150K", director: "Priya Sharma", kpis: [{ label: "RSVPs", value: "320", trend: "+15%" }, { label: "Sponsors", value: "6", trend: "+2" }], createdAt: new Date(Date.now() - 3 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-];
+function toCampaign(c: DreamscapeCampaign): Campaign {
+  const meta = (c.metadata || {}) as Record<string, unknown>;
+  return {
+    id: c.id,
+    name: c.name,
+    clientName: c.clientName,
+    client: (meta.client as string) ?? c.clientName,
+    category: c.category,
+    status: c.status,
+    deadline: c.deadline,
+    description: c.description,
+    targetAudience: c.targetAudience,
+    metadata: c.metadata,
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+    progress: (meta.progress as number) ?? 0,
+    budget: (meta.budget as string) ?? undefined,
+    director: (meta.director as string) ?? undefined,
+    kpis: (meta.kpis as Campaign["kpis"]) ?? [],
+  };
+}
 
 export function useCampaigns() {
   return useQuery({
     queryKey: ['campaigns'],
-    queryFn: async () => demoCampaigns,
-    staleTime: Infinity,
+    queryFn: async () => {
+      const rows = await api.campaigns.list();
+      return rows.map(toCampaign);
+    },
   });
 }
 
@@ -44,9 +58,11 @@ export function useCampaign(id: string) {
     queryKey: ['campaign', id],
     queryFn: async () => {
       const numId = parseInt(id, 10);
-      return demoCampaigns.find(c => c.id === numId) || demoCampaigns[0];
+      if (isNaN(numId)) throw new Error("Invalid campaign ID");
+      const row = await api.campaigns.get(numId);
+      return toCampaign(row);
     },
-    staleTime: Infinity,
+    enabled: !!id && !isNaN(parseInt(id, 10)),
   });
 }
 
@@ -54,20 +70,55 @@ export function useCreateCampaign() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<Campaign>) => {
-      const newCampaign: Campaign = {
-        id: Date.now(),
+      const row = await api.campaigns.create({
         name: data.name || "Untitled",
-        client: data.client || data.clientName || "Unknown",
+        clientName: data.client || data.clientName || "Unknown",
         category: data.category || "commercial",
         status: data.status || "concept",
         deadline: data.deadline || new Date(Date.now() + 30 * 86400000).toISOString(),
-        progress: 0,
-        budget: "$0",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      return newCampaign;
+        metadata: {
+          progress: 0,
+          budget: data.budget || "$0",
+          director: data.director || "",
+          kpis: data.kpis || [],
+          client: data.client || data.clientName || "Unknown",
+        },
+      });
+      return toCampaign(row);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaigns'] })
+  });
+}
+
+export function useUpdateCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Partial<Campaign> & { id: number }) => {
+      const { id, ...rest } = data;
+      const existing = await api.campaigns.get(id);
+      const existingMeta = (existing.metadata || {}) as Record<string, unknown>;
+      const updatedMeta = {
+        ...existingMeta,
+        ...(rest.progress !== undefined ? { progress: rest.progress } : {}),
+        ...(rest.budget !== undefined ? { budget: rest.budget } : {}),
+        ...(rest.director !== undefined ? { director: rest.director } : {}),
+        ...(rest.kpis !== undefined ? { kpis: rest.kpis } : {}),
+        ...(rest.client !== undefined ? { client: rest.client } : {}),
+      };
+      const row = await api.campaigns.update(id, {
+        name: rest.name,
+        clientName: rest.clientName || rest.client,
+        category: rest.category,
+        status: rest.status,
+        deadline: rest.deadline,
+        description: rest.description,
+        metadata: updatedMeta,
+      });
+      return toCampaign(row);
+    },
+    onSuccess: (_, v) => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', String(v.id)] });
+    }
   });
 }

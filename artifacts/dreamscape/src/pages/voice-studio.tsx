@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Volume2, Mic, Play, Pause, Download, Sliders, Music, Clock } from "lucide-react";
+import { Volume2, Mic, Play, Pause, Download, Music, Loader2 } from "lucide-react";
+import { useCampaigns } from "@/hooks/use-campaigns";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 const voices = [
   { id: "aria", name: "Aria", gender: "Female", accent: "American", style: "Professional", sample: "Warm and authoritative with a clear, trustworthy tone", color: "text-pink-400" },
@@ -12,14 +15,21 @@ const voices = [
   { id: "elara", name: "Elara", gender: "Female", accent: "French", style: "Sophisticated", sample: "Elegant, refined tone with subtle warmth", color: "text-cyan-400" },
 ];
 
-const recentProductions = [
-  { name: "Q1 Earnings Call Script", voice: "Marcus", duration: "4:32", status: "Completed", date: "Mar 28" },
-  { name: "Product Launch Announcement", voice: "Aria", duration: "1:15", status: "Completed", date: "Mar 27" },
-  { name: "Company Culture Video VO", voice: "Nova", duration: "3:08", status: "Processing", date: "Mar 30" },
-  { name: "Ad Campaign — Tech Audience", voice: "Titan", duration: "0:30", status: "Completed", date: "Mar 26" },
-];
-
 const sampleScript = "Welcome to our platform — the future of enterprise intelligence. In today's rapidly evolving landscape, organizations need tools that not only keep pace with change, but anticipate it. That's exactly what we've built for you.";
+
+function useAllVoiceAssets(campaignIds: number[]) {
+  return useQuery({
+    queryKey: ["all-voice-assets", campaignIds.join(",")],
+    queryFn: async () => {
+      if (!campaignIds.length) return [];
+      const results = await Promise.all(
+        campaignIds.map(id => api.voiceAssets.listForCampaign(id).catch(() => []))
+      );
+      return results.flat();
+    },
+    enabled: campaignIds.length > 0,
+  });
+}
 
 export default function VoiceStudio() {
   const [selectedVoice, setSelectedVoice] = useState("aria");
@@ -27,6 +37,18 @@ export default function VoiceStudio() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1.0);
   const [pitch, setPitch] = useState(0);
+
+  const { data: campaigns } = useCampaigns();
+  const campaignIds = (campaigns || []).map(c => c.id).slice(0, 6);
+  const { data: voiceAssets, isLoading: assetsLoading } = useAllVoiceAssets(campaignIds);
+
+  const recentProductions = (voiceAssets || []).slice(0, 6).map(v => ({
+    name: v.name,
+    voice: v.voiceId ?? v.provider ?? "—",
+    duration: (v.duration) ?? "—",
+    status: v.status === "ready" ? "Completed" : v.status === "generating" ? "Processing" : v.status === "failed" ? "Failed" : v.status.charAt(0).toUpperCase() + v.status.slice(1),
+    date: v.createdAt ? new Date(v.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—",
+  }));
 
   return (
     <div className="p-6 space-y-6">
@@ -117,18 +139,27 @@ export default function VoiceStudio() {
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Recent Productions</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              {recentProductions.map((p) => (
-                <div key={p.name} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40">
-                  <div className="flex items-start gap-2 min-w-0">
-                    <Music className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium truncate">{p.name}</p>
-                      <p className="text-[10px] text-muted-foreground">{p.voice} · {p.duration} · {p.date}</p>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className={`text-[10px] shrink-0 ml-2 ${p.status === "Completed" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" : "text-amber-400 bg-amber-500/10 border-amber-500/20"}`}>{p.status}</Badge>
+              {assetsLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground py-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-xs">Loading productions...</span>
                 </div>
-              ))}
+              ) : recentProductions.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-2">No voice assets yet. Create one in a campaign to see it here.</p>
+              ) : (
+                recentProductions.map((p, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/40">
+                    <div className="flex items-start gap-2 min-w-0">
+                      <Music className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{p.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{p.voice} · {p.duration} · {p.date}</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className={`text-[10px] shrink-0 ml-2 ${p.status === "Completed" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" : p.status === "Processing" ? "text-amber-400 bg-amber-500/10 border-amber-500/20" : "text-muted-foreground"}`}>{p.status}</Badge>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>

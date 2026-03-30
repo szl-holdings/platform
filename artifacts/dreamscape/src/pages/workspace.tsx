@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { format, addDays } from "date-fns";
-import { Plus, MoreHorizontal, Clock, Target, Sparkles, Film, Palette, Megaphone, Layers, TrendingUp, DollarSign, Users, Calendar, Image, FolderOpen, BarChart3, Eye } from "lucide-react";
+import { format } from "date-fns";
+import { Plus, MoreHorizontal, Clock, Target, Sparkles, Film, Palette, Megaphone, Layers, TrendingUp, DollarSign, Users, Calendar, Image, FolderOpen, Eye, Loader2 } from "lucide-react";
 import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useCampaigns, useCreateCampaign } from "@/hooks/use-campaigns";
 import { Button, Card, Badge, Input } from "@/components/ui";
@@ -51,16 +51,6 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string; st
   event_marketing: Palette,
 };
 
-const calendarEvents = [
-  { date: addDays(new Date(), 1), title: "Vertex Brand Film - Director Review", type: "review", campaign: "Vertex AI Brand Film" },
-  { date: addDays(new Date(), 2), title: "Nova Launch - Social Teasers Go Live", type: "publish", campaign: "Nova Product Launch" },
-  { date: addDays(new Date(), 3), title: "Meridian - Concept Pitch", type: "meeting", campaign: "Meridian Social Campaign" },
-  { date: addDays(new Date(), 5), title: "Atlas Documentary - Episode 7 Edit", type: "production", campaign: "Atlas Documentary Series" },
-  { date: addDays(new Date(), 7), title: "Summit Event - Venue Walkthrough Shoot", type: "production", campaign: "Summit Event Marketing" },
-  { date: addDays(new Date(), 10), title: "Luminary - Final Storyboard Approval", type: "review", campaign: "Luminary Brand Story" },
-  { date: addDays(new Date(), 12), title: "Zenith Teaser - V2 Cut Delivery", type: "delivery", campaign: "Zenith Product Teaser" },
-];
-
 const assetLibrary = [
   { name: "Brand Guidelines Pack", category: "Brand", count: 24, color: "from-violet-500 to-purple-500" },
   { name: "Stock Photography", category: "Photos", count: 1240, color: "from-blue-500 to-cyan-500" },
@@ -68,13 +58,6 @@ const assetLibrary = [
   { name: "Audio Library", category: "Audio", count: 312, color: "from-emerald-500 to-green-500" },
   { name: "Social Templates", category: "Design", count: 156, color: "from-pink-500 to-rose-500" },
   { name: "Font Collections", category: "Typography", count: 48, color: "from-indigo-500 to-blue-500" },
-];
-
-const quickStats = [
-  { label: "Active Campaigns", value: "9", trend: "+2 this month", icon: Film },
-  { label: "Team Members", value: "14", trend: "3 freelancers", icon: Users },
-  { label: "Total Views", value: "8.7M", trend: "+22% vs last month", icon: Eye },
-  { label: "Campaign Budget", value: "$942K", trend: "78% allocated", icon: DollarSign },
 ];
 
 function CampaignThumbnail({ category }: { category: string }) {
@@ -106,12 +89,13 @@ function CalendarEventBadge({ type }: { type: string }) {
     meeting: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     production: "bg-violet-500/10 text-violet-400 border-violet-500/20",
     delivery: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    deadline: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   };
   return <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${styles[type] || styles.meeting}`}>{type}</span>;
 }
 
 export function Workspace() {
-  const { data: campaigns } = useCampaigns();
+  const { data: campaigns, isLoading } = useCampaigns();
   const createCampaign = useCreateCampaign();
   const [isCreating, setIsCreating] = React.useState(false);
   const [newTitle, setNewTitle] = React.useState("");
@@ -125,6 +109,37 @@ export function Workspace() {
       }
     });
   };
+
+  const activeCampaigns = (campaigns || []).filter(c => c.status !== "archived" && c.status !== "published");
+  const totalBudget = (campaigns || []).reduce((sum, c) => {
+    const b = parseFloat((c.budget || "0").replace(/[^0-9.]/g, ""));
+    return sum + (isNaN(b) ? 0 : b);
+  }, 0);
+  const budgetStr = totalBudget >= 1000000
+    ? `$${(totalBudget / 1000000).toFixed(1)}M`
+    : totalBudget >= 1000
+    ? `$${(totalBudget / 1000).toFixed(0)}K`
+    : `$${totalBudget}`;
+
+  const quickStats = [
+    { label: "Active Campaigns", value: String(activeCampaigns.length || 0), trend: `${(campaigns || []).filter(c => c.status === "review").length} in review`, icon: Film },
+    { label: "Total Campaigns", value: String((campaigns || []).length), trend: `${(campaigns || []).filter(c => c.status === "published").length} published`, icon: Users },
+    { label: "In Production", value: String((campaigns || []).filter(c => ["production", "post_production", "pre_production"].includes(c.status)).length), trend: "active shoots & edits", icon: Eye },
+    { label: "Campaign Budget", value: budgetStr || "—", trend: "total portfolio value", icon: DollarSign },
+  ];
+
+  const calendarEvents = React.useMemo(() => {
+    return (campaigns || [])
+      .filter(c => c.deadline && c.status !== "archived")
+      .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
+      .slice(0, 7)
+      .map(c => ({
+        date: new Date(c.deadline!),
+        title: `${c.name} — Deadline`,
+        type: c.status === "review" ? "review" : c.status === "published" ? "publish" : c.status === "production" ? "production" : "deadline",
+        campaign: c.client ?? c.clientName ?? c.name,
+      }));
+  }, [campaigns]);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -164,7 +179,11 @@ export function Workspace() {
                   <stat.icon className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
+                  {isLoading ? (
+                    <div className="w-12 h-6 bg-muted/30 animate-pulse rounded" />
+                  ) : (
+                    <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
+                  )}
                   <p className="text-[11px] text-muted-foreground">{stat.trend}</p>
                 </div>
               </div>
@@ -172,6 +191,20 @@ export function Workspace() {
           </motion.div>
         ))}
       </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 text-primary animate-spin" />
+          <span className="ml-3 text-muted-foreground text-sm">Loading campaigns...</span>
+        </div>
+      )}
+
+      {!isLoading && (!campaigns || campaigns.length === 0) && (
+        <div className="text-center py-12">
+          <Film className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">No campaigns yet. Create your first campaign to get started.</p>
+        </div>
+      )}
 
       <motion.div 
         variants={container}
@@ -264,6 +297,15 @@ export function Workspace() {
               </Link>
             </div>
             <div className="space-y-2">
+              {isLoading && (
+                <div className="flex items-center gap-2 py-4 text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Loading deadlines...</span>
+                </div>
+              )}
+              {!isLoading && calendarEvents.length === 0 && (
+                <p className="text-sm text-muted-foreground py-4">No upcoming campaign deadlines.</p>
+              )}
               {calendarEvents.map((event, i) => (
                 <motion.div
                   key={i}
