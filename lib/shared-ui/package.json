@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./design-system": "./src/design-system/index.ts",
     "./tokens": "./src/tokens.ts",
     "./animations": "./src/animations.ts",
     "./components": "./src/components.ts",

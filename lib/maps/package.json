@@ -1,0 +1,30 @@
+{
+  "name": "@workspace/maps",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mapbox": "./src/mapbox-map-container.tsx",
+    "./mapbox-config": "./src/mapbox-config.ts",
+    "./vessel-map": "./src/vessel-map.tsx",
+    "./utils": "./src/utils.ts"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": false },
+    "react-dom": { "optional": false }
+  },
+  "dependencies": {
+    "mapbox-gl": "^3.20.0",
+    "react-map-gl": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/mapbox-gl": "*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:"
+  }
+}
