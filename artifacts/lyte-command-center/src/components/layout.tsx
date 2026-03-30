@@ -1,36 +1,18 @@
 import { Link, useLocation } from "wouter";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { 
-  Activity, 
-  AlertTriangle, 
-  Lightbulb, 
-  BookOpen, 
-  LayoutDashboard, 
+import {
+  Activity,
+  AlertTriangle,
+  LayoutDashboard,
   Zap,
-  Settings,
-  Bell,
-  Server,
-  Wifi,
-  WifiOff,
-  CreditCard,
-  Brain,
-  Network,
-  BarChart3,
+  Clock,
+  Users,
   DollarSign,
-  Phone,
+  BookOpen,
   Target,
   ChevronRight,
-  Users,
-  FileText,
-  Flag,
-  Workflow,
-  Code2,
-  Key,
-  Webhook,
-  BookMarked,
-  Package,
-  Puzzle,
-  ShieldCheck
+  Bell,
+  WifiOff,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@workspace/shared-ui/utils";
@@ -65,61 +47,36 @@ function DemoModeBanner() {
   return (
     <div className="border-b border-cyan-500/10 px-4 py-1 flex items-center gap-2 shrink-0">
       <span className="text-[10px] font-mono text-cyan-400/50 px-2 py-0.5 rounded-full border border-cyan-500/20 bg-cyan-500/5">DEMO</span>
-      <span className="text-[10px] text-cyan-400/40">Simulated data</span>
+      <span className="text-[10px] text-cyan-400/40">Business observability demo data</span>
     </div>
   );
 }
 
 const PRIMARY_NAV = [
-  { href: "/", label: "Command", icon: LayoutDashboard },
+  { href: "/", label: "Command Overview", icon: LayoutDashboard },
   { href: "/signals", label: "Signal Feed", icon: Activity },
-  { href: "/incidents", label: "Incidents", icon: AlertTriangle },
-  { href: "/recommendations", label: "Recommendations", icon: Lightbulb },
-  { href: "/playbooks", label: "Playbooks", icon: BookOpen },
-  { href: "/observability", label: "Observability", icon: Zap },
+  { href: "/insights", label: "Narrative Intelligence", icon: Zap },
+  { href: "/action-center", label: "Action Center", icon: AlertTriangle },
 ];
 
-const SECONDARY_NAV = [
-  { href: "/commerce", label: "Commerce", icon: CreditCard },
-  { href: "/intelligence", label: "Intelligence", icon: Brain },
-  { href: "/ai-ops", label: "AI Ops Center", icon: Activity },
-  { href: "/portfolio-observability", label: "Empire View", icon: Activity },
-  { href: "/qhapaq-nan", label: "Qhapaq Ñan", icon: Network },
-  { href: "/topology", label: "Topology", icon: Network },
-  { href: "/meridian-analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/anomaly-detection", label: "AI Anomaly Detection", icon: Brain },
-  { href: "/slo-tracking", label: "SLO / Error Budgets", icon: Target },
-  { href: "/cloud-cost", label: "Cloud Cost", icon: DollarSign },
-  { href: "/oncall", label: "On-Call", icon: Phone },
+const ANALYTICS_NAV = [
+  { href: "/workflow-latency", label: "Workflow Latency", icon: Clock },
+  { href: "/ownership-map", label: "Ownership Map", icon: Users },
+  { href: "/value-at-risk", label: "Value at Risk", icon: DollarSign },
+  { href: "/use-cases", label: "Use Cases", icon: BookOpen },
 ];
 
-const ADMIN_NAV = [
-  { href: "/admin/overview", label: "Overview", icon: Server },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/audit-log", label: "Audit Log", icon: FileText },
-  { href: "/admin/feature-flags", label: "Feature Flags", icon: Flag },
-  { href: "/admin/connectors", label: "Connectors", icon: Wifi },
-  { href: "/admin/workflows", label: "Workflows", icon: Workflow },
-  { href: "/admin/platform-health", label: "Platform Health", icon: ShieldCheck },
+const MARKETING_NAV = [
+  { href: "/platform", label: "Platform Overview", icon: Target },
 ];
 
-const DEVELOPER_NAV = [
-  { href: "/developer/getting-started", label: "Getting Started", icon: BookMarked },
-  { href: "/developer/api-explorer", label: "API Explorer", icon: Code2 },
-  { href: "/developer/api-keys", label: "API Keys", icon: Key },
-  { href: "/developer/webhooks", label: "Webhooks", icon: Webhook },
-  { href: "/developer/rate-limits", label: "Rate Limits", icon: BarChart3 },
-  { href: "/developer/sdk-guide", label: "SDK Guide", icon: Package },
-  { href: "/developer/plugins", label: "Plugin Docs", icon: Puzzle },
-];
-
-const ALL_NAV = [...PRIMARY_NAV, ...SECONDARY_NAV, ...ADMIN_NAV, ...DEVELOPER_NAV];
+const ALL_NAV = [...PRIMARY_NAV, ...ANALYTICS_NAV, ...MARKETING_NAV];
 
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
-  const [moreExpanded, setMoreExpanded] = useState(false);
-  const [adminExpanded, setAdminExpanded] = useState(location.startsWith("/admin"));
-  const [devExpanded, setDevExpanded] = useState(location.startsWith("/developer"));
+  const [analyticsExpanded, setAnalyticsExpanded] = useState(
+    location.startsWith("/workflow") || location.startsWith("/ownership") || location.startsWith("/value") || location.startsWith("/use-case")
+  );
 
   return (
     <div className="flex h-screen bg-background overflow-hidden selection:bg-primary/30">
@@ -134,7 +91,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-sm tracking-[0.1em] text-white leading-none">LYTE</span>
-              <span className="text-[9px] uppercase tracking-[0.15em] text-cyan-400/60 leading-none mt-0.5">Command Center</span>
+              <span className="text-[9px] uppercase tracking-[0.15em] text-cyan-400/60 leading-none mt-0.5">Business Observability</span>
             </div>
           </div>
         </div>
@@ -143,13 +100,13 @@ export function Layout({ children }: { children: ReactNode }) {
           {PRIMARY_NAV.map((item) => {
             const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
             return (
-              <Link 
-                key={item.href} 
+              <Link
+                key={item.href}
                 href={item.href}
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive 
-                    ? "bg-cyan-500/10 text-cyan-400" 
+                  isActive
+                    ? "bg-cyan-500/10 text-cyan-400"
                     : "text-slate-400 hover:bg-white/5 hover:text-white"
                 )}
               >
@@ -164,24 +121,24 @@ export function Layout({ children }: { children: ReactNode }) {
 
           <div className="pt-2">
             <button
-              onClick={() => setMoreExpanded(!moreExpanded)}
+              onClick={() => setAnalyticsExpanded(!analyticsExpanded)}
               className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all w-full"
             >
-              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
-              More pages
+              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", analyticsExpanded && "rotate-90")} />
+              <span className="flex-1 text-left">Analytics & Views</span>
             </button>
-            {moreExpanded && (
+            {analyticsExpanded && (
               <div className="mt-0.5 space-y-0.5">
-                {SECONDARY_NAV.map((item) => {
-                  const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+                {ANALYTICS_NAV.map((item) => {
+                  const isActive = location === item.href || location.startsWith(item.href);
                   return (
-                    <Link 
-                      key={item.href} 
+                    <Link
+                      key={item.href}
                       href={item.href}
                       className={cn(
                         "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 group relative ml-2",
-                        isActive 
-                          ? "bg-cyan-500/10 text-cyan-400" 
+                        isActive
+                          ? "bg-cyan-500/10 text-cyan-400"
                           : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
                       )}
                     >
@@ -194,70 +151,25 @@ export function Layout({ children }: { children: ReactNode }) {
             )}
           </div>
 
-          <div className="pt-2">
-            <button
-              onClick={() => setAdminExpanded(!adminExpanded)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all w-full"
-            >
-              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", adminExpanded && "rotate-90")} />
-              <span className="flex-1 text-left">Administration</span>
-              {location.startsWith("/admin") && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
-            </button>
-            {adminExpanded && (
-              <div className="mt-0.5 space-y-0.5">
-                {ADMIN_NAV.map((item) => {
-                  const isActive = location.startsWith(item.href);
-                  return (
-                    <Link 
-                      key={item.href} 
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 group relative ml-2",
-                        isActive 
-                          ? "bg-cyan-500/10 text-cyan-400" 
-                          : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
-                      )}
-                    >
-                      <item.icon className="w-3 h-3 shrink-0" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="pt-2">
-            <button
-              onClick={() => setDevExpanded(!devExpanded)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all w-full"
-            >
-              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", devExpanded && "rotate-90")} />
-              <span className="flex-1 text-left">Developer</span>
-              {location.startsWith("/developer") && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
-            </button>
-            {devExpanded && (
-              <div className="mt-0.5 space-y-0.5">
-                {DEVELOPER_NAV.map((item) => {
-                  const isActive = location.startsWith(item.href);
-                  return (
-                    <Link 
-                      key={item.href} 
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 group relative ml-2",
-                        isActive 
-                          ? "bg-cyan-500/10 text-cyan-400" 
-                          : "text-slate-500 hover:bg-white/5 hover:text-slate-300"
-                      )}
-                    >
-                      <item.icon className="w-3 h-3 shrink-0" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+          <div className="pt-2 border-t border-white/5 mt-2">
+            {MARKETING_NAV.map((item) => {
+              const isActive = location === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                    isActive
+                      ? "bg-cyan-500/10 text-cyan-400"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  )}
+                >
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -276,8 +188,17 @@ export function Layout({ children }: { children: ReactNode }) {
           <h1 className="font-display font-semibold text-base text-white/90 capitalize tracking-wide">
             {ALL_NAV.find(i => i.href === location || (i.href !== "/" && location.startsWith(i.href)))?.label || "Command Center"}
           </h1>
-          
+
           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[10px] font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-red-400">3 Critical</span>
+              <span className="text-slate-600 mx-1">·</span>
+              <span className="text-orange-400">5 High</span>
+              <span className="text-slate-600 mx-1">·</span>
+              <span className="text-amber-400">$17.6M at risk</span>
+            </div>
+            <div className="h-6 w-px bg-white/10" />
             <button className="relative p-1.5 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
               <Bell className="w-4 h-4" />
               <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />

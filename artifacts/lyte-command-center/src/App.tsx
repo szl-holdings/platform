@@ -12,38 +12,14 @@ import { Zap, Activity, AlertTriangle, BookOpen } from "lucide-react";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Signals = lazy(() => import("@/pages/signals"));
-const Recommendations = lazy(() => import("@/pages/recommendations"));
-const Incidents = lazy(() => import("@/pages/incidents"));
-const Playbooks = lazy(() => import("@/pages/playbooks"));
-const Commerce = lazy(() => import("@/pages/commerce"));
-const IntelligencePage = lazy(() => import("@/pages/intelligence"));
-const AIOps = lazy(() => import("@/pages/ai-ops"));
-const Topology = lazy(() => import("@/pages/topology"));
-const MeridianAnalytics = lazy(() => import("@/pages/meridian-analytics"));
+const Insights = lazy(() => import("@/pages/insights"));
+const ActionCenter = lazy(() => import("@/pages/action-center"));
+const WorkflowLatency = lazy(() => import("@/pages/workflow-latency"));
+const OwnershipMap = lazy(() => import("@/pages/ownership-map"));
+const ValueAtRisk = lazy(() => import("@/pages/value-at-risk"));
+const UseCases = lazy(() => import("@/pages/use-cases"));
+const Landing = lazy(() => import("@/pages/landing"));
 const NotFound = lazy(() => import("@/pages/not-found"));
-const ObservabilityPage = lazy(() => import("@/pages/observability"));
-const PortfolioObservability = lazy(() => import("@/pages/portfolio-observability"));
-const QhapaqNan = lazy(() => import("@/pages/qhapaq-nan"));
-const AnomalyDetection = lazy(() => import("@/pages/anomaly-detection"));
-const SLOTracking = lazy(() => import("@/pages/slo-tracking"));
-const CloudCost = lazy(() => import("@/pages/cloud-cost"));
-const OnCallManagement = lazy(() => import("@/pages/oncall-management"));
-
-const AdminOverview = lazy(() => import("@/pages/admin/overview"));
-const AdminUsers = lazy(() => import("@/pages/admin/users"));
-const AuditLog = lazy(() => import("@/pages/admin/audit-log"));
-const FeatureFlags = lazy(() => import("@/pages/admin/feature-flags"));
-const Connectors = lazy(() => import("@/pages/admin/connectors"));
-const WorkflowAutomation = lazy(() => import("@/pages/admin/workflows"));
-const PlatformHealth = lazy(() => import("@/pages/admin/platform-health"));
-
-const GettingStarted = lazy(() => import("@/pages/developer/GettingStarted"));
-const ApiExplorer = lazy(() => import("@/pages/developer/ApiExplorer"));
-const ApiKeys = lazy(() => import("@/pages/developer/ApiKeys"));
-const Webhooks = lazy(() => import("@/pages/developer/Webhooks"));
-const RateLimits = lazy(() => import("@/pages/developer/RateLimits"));
-const SdkGuide = lazy(() => import("@/pages/developer/SdkGuide"));
-const PluginDocs = lazy(() => import("@/pages/developer/PluginDocs"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,7 +34,7 @@ const queryClient = new QueryClient({
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }
@@ -69,35 +45,13 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/signals" component={Signals} />
-        <Route path="/recommendations" component={Recommendations} />
-        <Route path="/incidents" component={Incidents} />
-        <Route path="/playbooks" component={Playbooks} />
-        <Route path="/commerce" component={Commerce} />
-        <Route path="/intelligence" component={IntelligencePage} />
-        <Route path="/ai-ops" component={AIOps} />
-        <Route path="/observability" component={ObservabilityPage} />
-        <Route path="/portfolio-observability" component={PortfolioObservability} />
-        <Route path="/topology" component={Topology} />
-        <Route path="/qhapaq-nan" component={QhapaqNan} />
-        <Route path="/meridian-analytics" component={MeridianAnalytics} />
-        <Route path="/anomaly-detection" component={AnomalyDetection} />
-        <Route path="/slo-tracking" component={SLOTracking} />
-        <Route path="/cloud-cost" component={CloudCost} />
-        <Route path="/oncall" component={OnCallManagement} />
-        <Route path="/admin/overview" component={AdminOverview} />
-        <Route path="/admin/users" component={AdminUsers} />
-        <Route path="/admin/audit-log" component={AuditLog} />
-        <Route path="/admin/feature-flags" component={FeatureFlags} />
-        <Route path="/admin/connectors" component={Connectors} />
-        <Route path="/admin/workflows" component={WorkflowAutomation} />
-        <Route path="/admin/platform-health" component={PlatformHealth} />
-        <Route path="/developer/getting-started" component={GettingStarted} />
-        <Route path="/developer/api-explorer" component={ApiExplorer} />
-        <Route path="/developer/api-keys" component={ApiKeys} />
-        <Route path="/developer/webhooks" component={Webhooks} />
-        <Route path="/developer/rate-limits" component={RateLimits} />
-        <Route path="/developer/sdk-guide" component={SdkGuide} />
-        <Route path="/developer/plugins" component={PluginDocs} />
+        <Route path="/insights" component={Insights} />
+        <Route path="/action-center" component={ActionCenter} />
+        <Route path="/workflow-latency" component={WorkflowLatency} />
+        <Route path="/ownership-map" component={OwnershipMap} />
+        <Route path="/value-at-risk" component={ValueAtRisk} />
+        <Route path="/use-cases" component={UseCases} />
+        <Route path="/platform" component={Landing} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -105,27 +59,24 @@ function Router() {
 }
 
 const lyteCommands: CommandItem[] = [
-  { id: "nav-dashboard", label: "Dashboard", icon: "⚡", group: "Navigation", keywords: ["home", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
-  { id: "nav-signals", label: "Signals", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
-  { id: "nav-incidents", label: "Incidents", icon: "🚨", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/incidents"); } },
-  { id: "nav-playbooks", label: "Playbooks", icon: "📚", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/playbooks"); } },
-  { id: "nav-intelligence", label: "Intelligence", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/intelligence"); } },
-  { id: "nav-ai-ops", label: "AI Ops", icon: "🤖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-ops"); } },
-  { id: "nav-topology", label: "Topology", icon: "🗺️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/topology"); } },
-  { id: "nav-anomaly", label: "Anomaly Detection", icon: "⚠️", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/anomaly-detection"); } },
-  { id: "nav-slo", label: "SLO Tracking", icon: "📊", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/slo-tracking"); } },
-  { id: "nav-cloud-cost", label: "Cloud Cost", icon: "💰", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/cloud-cost"); } },
-  { id: "nav-oncall", label: "On-Call Management", icon: "📞", group: "Operations", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/oncall"); } },
-  { id: "nav-admin", label: "Admin Overview", icon: "⚙️", group: "Admin", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/admin/overview"); } },
+  { id: "nav-dashboard", label: "Command Overview", icon: "⚡", group: "Navigation", keywords: ["home", "overview", "dashboard"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-signals", label: "Signal Feed", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
+  { id: "nav-insights", label: "Narrative Intelligence", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/insights"); } },
+  { id: "nav-actions", label: "Action Center", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/action-center"); } },
+  { id: "nav-workflow", label: "Workflow Latency", icon: "⏱️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/workflow-latency"); } },
+  { id: "nav-ownership", label: "Ownership Map", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ownership-map"); } },
+  { id: "nav-var", label: "Value at Risk", icon: "💰", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/value-at-risk"); } },
+  { id: "nav-usecases", label: "Use Cases", icon: "📋", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/use-cases"); } },
+  { id: "nav-platform", label: "Platform Overview", icon: "🎯", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/platform"); } },
   { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
   { id: "app-vessels", label: "Switch to Vessels", icon: "🚢", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [
-  { key: "S", description: "Go to Signals", category: "Navigation" },
-  { key: "I", description: "Go to Incidents", category: "Navigation" },
-  { key: "P", description: "Go to Playbooks", category: "Navigation" },
-  { key: "A", description: "Go to AI Ops", category: "Navigation" },
+  { key: "S", description: "Signal Feed", category: "Navigation" },
+  { key: "I", description: "Narrative Intelligence", category: "Navigation" },
+  { key: "A", description: "Action Center", category: "Navigation" },
+  { key: "W", description: "Workflow Latency", category: "Navigation" },
 ];
 
 function App() {
@@ -134,9 +85,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte Command Center" accentColor="#f59e0b">
+        <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte Command Center" accentColor="#06b6d4">
           <div className="flex flex-col h-screen">
-            <EcosystemNav currentAppId="lyte" currentAppName="Lyte Command Center" accentColor="#f59e0b" />
+            <EcosystemNav currentAppId="lyte" currentAppName="Lyte Command Center" accentColor="#06b6d4" />
             <div className="flex-1 overflow-hidden">
               <Layout>
                 <Router />
@@ -148,7 +99,7 @@ function App() {
             onClose={() => setCmdOpen(false)}
             commands={lyteCommands}
             appName="Lyte"
-            accentColor="#f59e0b"
+            accentColor="#06b6d4"
           />
         </PowerUserProvider>
         <WelcomeOverlay
