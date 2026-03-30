@@ -1,0 +1,1006 @@
+SZL EVOLUTION EXECUTION PAYLOAD
+SOURCE OF TRUTH: YES
+OWNER: Stephen Lutar
+MODE: EXECUTE, NOT JUST PLAN
+OBJECTIVE: TURN SZL INTO A REAL PRODUCT ECOSYSTEM WITH GOVERNED SOFTWARE UNDER THE BRAND
+
+READ THIS FIRST
+Treat this as a build order, not a brainstorming document.
+Do the work in phases.
+Modify the codebase directly.
+Create files, tables, APIs, services, routes, configs, and mock data.
+Report changes after each phase.
+Do not stop at strategy language.
+Do not return only recommendations.
+Build.
+
+FINAL HIERARCHY
+This hierarchy is locked and must be reflected everywhere:
+
+- SZL Holdings = parent brand / public ecosystem authority
+- Alloy = workflow, intelligence, orchestration, and output engine
+- Lyte = business observability platform powered by Alloy
+- Vessels = maritime command platform powered by Alloy
+- Carlota Jo Consulting = premium service brand
+- Stephen Lutar = founder/operator identity
+- Lyte Readiness = module inside Lyte
+- Nimbus = removed publicly and absorbed into Alloy
+
+NON-NEGOTIABLE CONSOLIDATION RULES
+- remove every public Nimbus reference
+- replace Project Readiness with Lyte Readiness
+- remove duplicate founder/about narratives
+- do not let Alloy compete with Lyte or Vessels
+- do not keep equal-weight random venture grids
+- public surfaces explain and convert
+- private surfaces operate and control
+
+==================================================
+PHASE 0 — INVENTORY AND CLEANUP
+==================================================
+
+TASKS
+1. inventory current routes, pages, components, mocks, and shared styles
+2. identify public-only vs app/private surfaces
+3. remove or replace public Nimbus references
+4. rename Project Readiness references to Lyte Readiness
+5. identify duplicate founder/about copy
+6. identify existing static-only UI that should become stateful later
+
+OUTPUT
+- route inventory
+- component inventory
+- list of renamed references
+- list of duplicated founder sections
+- map of public vs private pages
+
+==================================================
+PHASE 1 — FILE STRUCTURE AND PLATFORM FOUNDATIONS
+==================================================
+
+CREATE OR REFACTOR INTO THIS STRUCTURE
+
+/app
+  /public
+    /szl
+    /alloy-marketing
+    /lyte-marketing
+    /vessels-marketing
+    /carlota-jo
+    /founder
+  /private
+    /lyte
+    /vessels
+    /alloy
+    /internal
+
+/src
+  /components
+    /design-system
+    /navigation
+    /hero
+    /cards
+    /proof
+    /forms
+    /charts
+    /maps
+    /signals
+    /actions
+    /readiness
+    /workflows
+    /artifacts
+  /features
+    /alloy
+      /api
+      /services
+      /schemas
+      /components
+      /pages
+    /lyte
+      /api
+      /services
+      /schemas
+      /components
+      /pages
+    /vessels
+      /api
+      /services
+      /schemas
+      /components
+      /pages
+    /auth
+    /flags
+    /audit
+    /telemetry
+  /lib
+    /db
+    /auth
+    /rls
+    /config
+    /flags
+    /telemetry
+    /jobs
+    /utils
+  /content
+    /platforms
+    /case-studies
+    /founder
+    /proof
+  /data
+    /seed
+    /demo
+    /mocks
+
+/db
+  /migrations
+  /seeds
+  /policies
+
+/jobs
+  /daily
+  /hourly
+  /workflows
+  /maintenance
+
+/docs
+  /architecture
+  /runbooks
+  /api
+  /security
+  /deployment
+
+TASKS
+1. create this structure if it does not exist
+2. move existing code into the proper buckets
+3. separate public marketing pages from private app pages
+4. create a central config layer for env flags and app metadata
+5. create shared design-system entry points
+6. create shared schema folder structure
+
+OUTPUT
+- files created
+- files moved
+- import path cleanup
+- new app boundary map
+
+==================================================
+PHASE 2 — CANONICAL DATA MODEL
+==================================================
+
+CREATE THESE TABLES
+
+USERS
+- id
+- email
+- full_name
+- role
+- team
+- is_active
+- created_at
+- updated_at
+
+ORGANIZATIONS
+- id
+- name
+- slug
+- type
+- created_at
+- updated_at
+
+MEMBERSHIPS
+- id
+- user_id
+- organization_id
+- role
+- created_at
+
+PRODUCTS
+- id
+- key
+- name
+- visibility
+- created_at
+
+SIGNALS
+- id
+- organization_id
+- product_key
+- source
+- category
+- severity
+- title
+- summary
+- why_it_matters
+- owner_id
+- owner_state
+- workflow_id
+- artifact_id
+- value_at_risk_cents
+- confidence
+- status
+- detected_at
+- updated_at
+- metadata_json
+
+ACTIONS
+- id
+- organization_id
+- signal_id
+- product_key
+- title
+- owner_id
+- urgency
+- due_at
+- status
+- recommended_action
+- estimated_value_protected_cents
+- escalation_state
+- created_at
+- updated_at
+- metadata_json
+
+WORKFLOWS
+- id
+- organization_id
+- product_key
+- name
+- trigger_type
+- status
+- current_step
+- approval_required
+- config_json
+- created_at
+- updated_at
+- last_run_at
+
+WORKFLOW_RUNS
+- id
+- workflow_id
+- organization_id
+- product_key
+- trigger_ref
+- state
+- input_json
+- output_json
+- error_json
+- retry_count
+- approval_state
+- started_at
+- ended_at
+- created_at
+
+APPROVALS
+- id
+- organization_id
+- workflow_run_id
+- artifact_id
+- approver_id
+- requested_by_user_id
+- status
+- requested_at
+- reviewed_at
+- notes
+
+ARTIFACTS
+- id
+- organization_id
+- workflow_run_id
+- product_key
+- type
+- title
+- content_json
+- content_uri
+- status
+- approved
+- created_by_system
+- created_at
+- updated_at
+
+COMMENTS
+- id
+- organization_id
+- entity_type
+- entity_id
+- user_id
+- body
+- created_at
+
+EVENT_LOG
+- id
+- organization_id
+- product_key
+- entity_type
+- entity_id
+- event_type
+- actor_user_id
+- payload_json
+- created_at
+
+FEATURE_FLAGS
+- id
+- key
+- description
+- enabled
+- scope
+- targeting_json
+- created_at
+- updated_at
+
+VESSELS
+- id
+- organization_id
+- vessel_ref
+- name
+- vessel_type
+- vessel_class
+- status
+- current_lat
+- current_lng
+- speed
+- heading
+- origin_port_id
+- destination_port_id
+- eta
+- utilization_pct
+- fuel_efficiency_score
+- maintenance_status
+- readiness_score
+- created_at
+- updated_at
+
+PORTS
+- id
+- code
+- name
+- country
+- lat
+- lng
+- created_at
+
+ROUTES
+- id
+- organization_id
+- name
+- origin_port_id
+- destination_port_id
+- status
+- geometry_json
+- created_at
+- updated_at
+
+VOYAGES
+- id
+- organization_id
+- vessel_id
+- route_id
+- departure_port_id
+- arrival_port_id
+- scheduled_departure
+- scheduled_arrival
+- estimated_arrival
+- progress_pct
+- cargo_state
+- weather_risk
+- revenue_estimate_cents
+- operating_cost_estimate_cents
+- margin_estimate_cents
+- delay_impact_estimate_cents
+- status
+- created_at
+- updated_at
+
+EXCEPTIONS
+- id
+- organization_id
+- product_key
+- vessel_id
+- voyage_id
+- route_id
+- severity
+- category
+- title
+- summary
+- why_it_matters
+- recommended_action
+- owner_id
+- status
+- detected_at
+- estimated_impact_cents
+- created_at
+- updated_at
+
+READINESS_ITEMS
+- id
+- organization_id
+- title
+- category
+- status
+- owner_id
+- dependency_json
+- blocker_summary
+- readiness_score
+- target_date
+- created_at
+- updated_at
+
+TASKS
+1. create migrations
+2. create seed/demo data
+3. add indexes for org, owner, status, detected_at, created_at
+4. keep canonical columns queryable
+5. only use json fields when true flexibility is needed
+
+OUTPUT
+- migration files
+- seed files
+- schema docs
+
+==================================================
+PHASE 3 — AUTH, ACCESS, AND RLS
+==================================================
+
+ROLES
+- anonymous_visitor
+- founder_admin
+- platform_admin
+- operator
+- analyst
+- executive_viewer
+- ops_manager
+- sales_delivery_user
+- maritime_ops_user
+- service_coordinator
+- pilot_customer_user
+
+TASKS
+1. implement auth for private routes
+2. implement org membership model
+3. implement row-level access policies
+4. ensure every object fetch by id is permission-checked
+5. ensure private routes cannot load data without valid org scope
+6. implement read-only executive scopes
+7. implement pilot_customer_user scoping to only their org rows
+8. protect artifact access by org + role + approval state
+
+PRIVATE ROUTES TO PROTECT
+- /app/lyte
+- /app/lyte/signals
+- /app/lyte/actions
+- /app/lyte/readiness
+- /app/vessels
+- /app/vessels/fleet
+- /app/vessels/exceptions
+- /app/vessels/routes
+- /app/alloy
+- /app/alloy/workflows
+- /app/alloy/runs
+- /app/alloy/artifacts
+- /app/alloy/admin
+- /app/internal
+- /app/internal/users
+- /app/internal/flags
+- /app/internal/audit
+- /app/internal/jobs
+
+OUTPUT
+- auth routes
+- policy files
+- role matrix doc
+- protected route map
+
+==================================================
+PHASE 4 — ALLOY PLATFORM CORE
+==================================================
+
+BUILD ALLOY AS THE REAL ENGINE
+
+API PREFIX
+/api/alloy
+
+ENDPOINTS
+POST /api/alloy/ingest/signal
+POST /api/alloy/ingest/batch
+POST /api/alloy/workflows
+GET  /api/alloy/workflows
+GET  /api/alloy/workflows/:id
+POST /api/alloy/workflows/:id/run
+GET  /api/alloy/runs
+GET  /api/alloy/runs/:id
+POST /api/alloy/runs/:id/retry
+POST /api/alloy/runs/:id/cancel
+GET  /api/alloy/artifacts
+GET  /api/alloy/artifacts/:id
+POST /api/alloy/artifacts/:id/approve
+POST /api/alloy/artifacts/:id/reject
+GET  /api/alloy/admin/flags
+POST /api/alloy/admin/flags/:key
+GET  /api/alloy/audit
+
+SERVICES
+- signalNormalizer()
+- severityAssigner()
+- ownerResolver()
+- valueAtRiskEstimator()
+- workflowPlanner()
+- artifactGenerator()
+- approvalRouter()
+- runLogger()
+- retryHandler()
+
+TASKS
+1. create schemas for inputs, workflows, runs, artifacts
+2. create workflow state machine
+3. create run history logging
+4. create artifact generation model
+5. create approval routing model
+6. create retry/cancel behavior
+7. create admin views for workflow runs and artifacts
+8. create structured audit log writes for privileged actions
+
+OUTPUT
+- API routes
+- services
+- schemas
+- run viewer
+- artifact queue
+- audit viewer
+
+==================================================
+PHASE 5 — LYTE PRODUCTIZATION
+==================================================
+
+API PREFIX
+/api/lyte
+
+ENDPOINTS
+GET  /api/lyte/dashboard
+GET  /api/lyte/signals
+GET  /api/lyte/signals/:id
+POST /api/lyte/signals/:id/acknowledge
+POST /api/lyte/signals/:id/assign
+POST /api/lyte/signals/:id/escalate
+POST /api/lyte/signals/:id/resolve
+POST /api/lyte/signals/:id/override
+GET  /api/lyte/actions
+GET  /api/lyte/actions/:id
+POST /api/lyte/actions/:id/update-status
+GET  /api/lyte/readiness
+GET  /api/lyte/readiness/:id
+POST /api/lyte/readiness/:id/update
+GET  /api/lyte/views
+POST /api/lyte/views
+POST /api/lyte/comments
+
+SERVICES
+- buildExecutiveDashboard()
+- buildOperationsDashboard()
+- buildDeliveryDashboard()
+- querySignals()
+- buildInsightNarratives()
+- buildActionQueue()
+- calculateReadinessScore()
+- trackSignalStateChange()
+
+MANDATORY LYTE CAPABILITIES
+- saved views
+- role-aware dashboards
+- filter chips
+- detail drawers/pages
+- owner assignment changes
+- comments and notes
+- signal history
+- action queue
+- value-at-risk surface
+- Lyte Readiness module
+- state transitions
+
+MANDATORY SIGNAL LOGIC
+Every signal must support:
+- what happened
+- why it matters
+- who owns it
+- what action comes next
+- what value is at risk
+
+TASKS
+1. wire frontend to real signal/action/readiness APIs
+2. create role-specific dashboard payloads
+3. create comments/timeline on signal detail
+4. create action queue with state transitions
+5. create saved views
+6. create readiness module inside Lyte
+7. create seeded demo data that matches business observability use cases
+
+OUTPUT
+- role dashboards
+- signal detail flow
+- readiness flow
+- saved view support
+- seeded observability demo dataset
+
+==================================================
+PHASE 6 — VESSELS PRODUCTIZATION
+==================================================
+
+API PREFIX
+/api/vessels
+
+ENDPOINTS
+GET  /api/vessels/dashboard
+GET  /api/vessels/fleet
+GET  /api/vessels/map
+GET  /api/vessels/vessels/:id
+GET  /api/vessels/voyages
+GET  /api/vessels/voyages/:id
+GET  /api/vessels/exceptions
+GET  /api/vessels/exceptions/:id
+POST /api/vessels/exceptions/:id/acknowledge
+POST /api/vessels/exceptions/:id/assign
+POST /api/vessels/exceptions/:id/escalate
+POST /api/vessels/exceptions/:id/resolve
+GET  /api/vessels/routes
+GET  /api/vessels/routes/:id
+GET  /api/vessels/corridors
+GET  /api/vessels/readiness
+
+SERVICES
+- buildFleetSummary()
+- buildMapPayload()
+- calculateEtaDrift()
+- detectRouteDeviation()
+- computeVoyageEconomics()
+- buildExceptionQueue()
+- buildMaintenanceWatch()
+- buildCorridorIntelligence()
+
+MANDATORY VESSELS CAPABILITIES
+- fleet list from backend
+- map payload from backend
+- vessel detail state
+- voyage economics
+- exceptions queue
+- maintenance readiness
+- corridor intelligence
+- command mode
+- exception state transitions
+
+TASKS
+1. create vessel, voyage, route, port, exception schemas
+2. wire frontend map and panels to backend
+3. create vessel detail page/drawer data model
+4. create route/corridor intelligence surfaces
+5. create economics cards and delay impact model
+6. create seeded maritime demo data
+7. create exception acknowledgment and escalation flows
+
+OUTPUT
+- fleet dashboard
+- vessel detail flow
+- exceptions flow
+- route intelligence flow
+- maritime demo dataset
+
+==================================================
+PHASE 7 — FEATURE FLAGS
+==================================================
+
+CREATE THESE FLAGS
+- lyte_readiness_enabled
+- lyte_value_at_risk_enabled
+- lyte_role_views_enabled
+- vessels_command_mode_enabled
+- vessels_corridor_intelligence_enabled
+- alloy_admin_enabled
+- alloy_artifact_approvals_enabled
+- internal_audit_console_enabled
+- pilot_customer_portal_enabled
+- advanced_export_enabled
+
+TASKS
+1. create flag schema and service
+2. create admin flag console
+3. gate unstable modules
+4. allow role/org targeting
+5. ensure working fallbacks when flags are off
+
+OUTPUT
+- flag service
+- admin console
+- gated features
+
+==================================================
+PHASE 8 — OBSERVABILITY AND ANALYTICS
+==================================================
+
+INSTRUMENT THESE SIGNALS
+
+TECHNICAL
+- request latency
+- endpoint error rate
+- DB query latency
+- job duration
+- workflow failure rate
+- retry count
+- auth failures
+- map render failures
+- deployment health
+
+PRODUCT/BUSINESS
+- signal count by severity
+- unresolved action count
+- action resolution time
+- approval wait time
+- readiness blocker count
+- exception count by vessel/route
+- artifact generation success/failure
+- dashboard engagement by role
+- filter/save-view usage
+
+TASKS
+1. add telemetry hooks in backend services
+2. add frontend product analytics hooks
+3. include workflow_run_id / signal_id / artifact_id correlation
+4. create basic internal health views
+5. ensure no secrets enter logs
+
+OUTPUT
+- telemetry layer
+- dashboards or log views
+- correlation strategy doc
+
+==================================================
+PHASE 9 — INTERNAL TOOLS
+==================================================
+
+BUILD MINIMAL INTERNAL ADMIN TOOLS
+
+PAGES
+- internal user list
+- internal feature flag console
+- internal workflow run viewer
+- internal artifact approval queue
+- internal audit viewer
+- internal demo data seeder
+- internal job status page
+
+TASKS
+1. build useful admin pages
+2. protect them behind admin roles
+3. prioritize function over visual polish
+4. connect them to real services
+
+OUTPUT
+- internal tools
+- admin access matrix
+
+==================================================
+PHASE 10 — JOBS AND SCHEDULES
+==================================================
+
+CREATE THESE JOBS
+
+DAILY
+- daily_lyte_digest
+- daily_readiness_digest
+- daily_exception_summary
+- daily_artifact_cleanup
+- daily_feature_flag_sync
+
+HOURLY
+- hourly_signal_normalization
+- hourly_stale_action_scan
+- hourly_vessel_eta_refresh
+- hourly_route_pressure_scan
+
+ON DEMAND
+- workflow_retry_job
+- artifact_generation_job
+- route_economics_recompute_job
+- readiness_score_recompute_job
+
+TASKS
+1. create job runner structure
+2. create job logs
+3. create failure alerts
+4. create retry policy
+5. create run history entry for each job
+
+OUTPUT
+- scheduled job files
+- run logging
+- failure handling
+
+==================================================
+PHASE 11 — PUBLIC BRAND SURFACES STAY SHARP
+==================================================
+
+Do not overengineer public pages.
+
+KEEP LIGHT
+- SZL public brand site
+- Alloy public overview pages
+- Lyte marketing pages
+- Vessels marketing pages
+- Carlota Jo public site
+- Founder pages
+- Case Studies / Insights
+
+ADD ONLY WHAT HELPS
+- strong routing
+- proof surfaces
+- analytics
+- contact routing
+- performance
+- SEO structure
+
+DO NOT TURN PUBLIC PAGES INTO
+- heavy authenticated apps
+- overcomplicated CMS systems
+- unnecessary backend dependencies
+
+==================================================
+PHASE 12 — DEPLOYMENT ASSIGNMENT
+==================================================
+
+ASSIGN DEPLOYMENTS
+
+STATIC
+- SZL public ecosystem
+- Carlota Jo public site
+- Founder pages
+- Case Studies / Insights
+- public Alloy / Lyte / Vessels marketing pages if frontend-only
+
+AUTOSCALE
+- authenticated Lyte app
+- authenticated Vessels app
+- Alloy backend/API
+- internal app surfaces
+
+SCHEDULED
+- digests
+- scans
+- normalization jobs
+- route refresh jobs
+- readiness refresh jobs
+
+RESERVED VM
+Use only if later required for:
+- always-on connected bots
+- persistent workers
+- long-running services that cannot scale to zero
+
+==================================================
+PHASE 13 — ENVIRONMENT VARIABLES
+==================================================
+
+CREATE / VERIFY
+- PUBLIC_APP_URL
+- PUBLIC_ANALYTICS_KEY
+- PUBLIC_MAPBOX_TOKEN
+- PUBLIC_POSTHOG_KEY
+- DATABASE_URL
+- DATABASE_URL_STAGING
+- AUTH_PROVIDER_URL
+- AUTH_PROVIDER_KEY
+- SERVICE_ROLE_KEY
+- POSTHOG_PERSONAL_API_KEY
+- TELEMETRY_EXPORT_ENDPOINT
+- CONTACT_ENDPOINT
+- CRM_ENDPOINT
+- WEATHER_API_KEY
+- FEATURE_FLAG_BACKEND_KEY
+- INTERNAL_ACCESS_PROVIDER_CONFIG
+- DEMO_MODE
+- APP_ENV
+- LOG_LEVEL
+
+RULES
+- never hardcode secrets
+- keep staging and production separate
+- keep demo mode explicit
+- rotate secrets when real users enter pilots
+
+==================================================
+PHASE 14 — SECURITY PASS
+==================================================
+
+MANDATORY SECURITY TASKS
+- auth on every private route
+- RLS on org-scoped tables
+- per-object authorization checks
+- protect artifact access
+- validate admin-only APIs
+- sanitize payloads
+- log privileged actions
+- no trust in client-submitted role
+- no raw sensitive object exposure
+- no public leakage of internal errors
+
+API SECURITY CHECKS
+- every GET by id checks org + role
+- every POST/PATCH checks permission + org
+- every artifact fetch checks approval/access rules
+- every admin route requires admin role
+- every internal route is protected
+
+==================================================
+PHASE 15 — DEFINITION OF DONE
+==================================================
+
+ALLOY IS REAL WHEN
+- signals ingest successfully
+- workflows run
+- runs are logged
+- artifacts are generated
+- approvals can happen
+- audit logs exist
+- admins can inspect runs and artifacts
+
+LYTE IS REAL WHEN
+- signals load from backend
+- actions can be assigned and updated
+- role dashboards differ meaningfully
+- comments and timelines persist
+- saved views work
+- readiness items persist
+- value-at-risk fields exist
+
+VESSELS IS REAL WHEN
+- fleet and map load from backend
+- vessel detail data persists
+- exceptions can be acknowledged and escalated
+- route/economics/readiness surfaces are real
+- seeded voyage and exception data exists
+
+PUBLIC SURFACES ARE REAL ENOUGH WHEN
+- routing works
+- copy is final
+- proof surfaces exist
+- performance is strong
+- analytics work
+- public pages remain lightweight
+
+==================================================
+PHASE 16 — REPORTING FORMAT
+==================================================
+
+After each major phase, report:
+- files created
+- files modified
+- tables created
+- APIs created
+- services created
+- routes created
+- roles/policies added
+- flags added
+- jobs added
+- deployment assignment updates
+- blockers
+- next highest-leverage tasks
+
+FINAL REPORT MUST INCLUDE
+- where Nimbus was removed
+- where Project Readiness became Lyte Readiness
+- public vs private boundary map
+- auth/RLS status
+- what is real vs mocked
+- what remains conceptual
+- next 10 highest-leverage improvements
+
+==================================================
+FINAL INSTRUCTION
+==================================================
+
+Do not stop at polished demos.
+Build the governed software layer.
+
+SZL remains the world.
+Alloy becomes the real engine.
+Lyte becomes a stateful business command app.
+Vessels becomes a consequence-aware maritime command app.
+Carlota Jo stays elegant publicly and leveraged privately.
+
+Execute this in phases.
+Modify the project directly.
+Return real file changes, not just ideas.
