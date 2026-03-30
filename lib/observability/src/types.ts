@@ -254,3 +254,45 @@ export interface LensBarData {
   overallStatus: "healthy" | "degraded" | "critical" | "unknown";
   lenses: LensScore[];
 }
+
+export type DoctrineLayer = "OBSERVE" | "UNDERSTAND" | "DECIDE" | "EXECUTE" | "TRUST" | "SIGNAL";
+
+export interface DoctrineContextModel {
+  source: string;
+  sourceApp: string;
+  severity: "info" | "warning" | "critical" | "low" | "medium" | "high";
+  confidence: number;
+  impactedEntities: string[];
+  causalFactors: string[];
+  suggestedNextAction: string;
+  businessImpact: string;
+  operationalImpact?: string;
+  layer: DoctrineLayer;
+  timestamp: number;
+}
+
+export interface ExplainabilityModel {
+  trigger: string;
+  contributingData: string[];
+  confidenceExplanation: string;
+  assumptions: string[];
+  recommendedAction: string;
+  alternativeActions?: string[];
+  modelId?: string;
+  layer: DoctrineLayer;
+}
+
+export interface NormalizedEvent {
+  id: string;
+  type: "alert" | "recommendation" | "anomaly" | "workflow" | "decision" | "execution" | "observation";
+  sourceApp: string;
+  layer: DoctrineLayer;
+  severity: "info" | "warning" | "critical";
+  title: string;
+  description: string;
+  entitiesInvolved: string[];
+  timestamp: number;
+  context?: DoctrineContextModel;
+  explainability?: ExplainabilityModel;
+  metadata?: Record<string, unknown>;
+}

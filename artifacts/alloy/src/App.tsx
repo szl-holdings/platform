@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Router as WouterRouter, Route, Switch, useLocation } from "wouter";
 import { AlloyLanding } from "./LandingPage";
+import type { NormalizedEvent, DoctrineLayer } from "@workspace/observability";
+import { doctrineEventBus, seedDoctrineEvents } from "@workspace/observability";
 import {
   MessageSquare, Send, Bot, User, Sparkles, Image as ImageIcon, BookOpen,
   Bell, GitCompare, Download, Copy, Check, Trash2, Plus, Search, RefreshCw,
@@ -107,7 +109,7 @@ interface ComparisonResult {
 type ModelProvider = "auto" | "openai" | "anthropic";
 type ImageProvider = "huggingface" | "openai";
 type ChatMode = "normal" | "image";
-type ActivePanel = "chat" | "kb" | "advisories" | "comparison" | "voice";
+type ActivePanel = "chat" | "kb" | "advisories" | "comparison" | "voice" | "events";
 type AppPage = "overview" | "architecture" | "workflows" | "use-cases" | "agents" | "outputs" | "governance" | "chat";
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
@@ -557,6 +559,275 @@ function ImageMessage({ data, onDownload, onCopy }: {
         <span className="px-1.5 py-0.5 bg-primary/10 rounded text-primary border border-primary/20">{data.provider === "openai" ? "OpenAI" : `HuggingFace`}</span>
         <span>{data.size}</span>
         <span>{data.generationTimeMs}ms</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── CrossAppEventStream ───────────────────────────────────────────────────────
+
+type DoctrineLayerType = DoctrineLayer;
+
+const LAYER_COLORS: Record<DoctrineLayerType, { color: string; bg: string }> = {
+  OBSERVE:    { color: "hsl(200, 85%, 55%)",  bg: "hsla(200, 85%, 55%, 0.12)" },
+  UNDERSTAND: { color: "hsl(270, 70%, 62%)",  bg: "hsla(270, 70%, 62%, 0.12)" },
+  DECIDE:     { color: "hsl(38, 90%, 55%)",   bg: "hsla(38, 90%, 55%, 0.12)" },
+  EXECUTE:    { color: "hsl(152, 65%, 48%)",  bg: "hsla(152, 65%, 48%, 0.12)" },
+  TRUST:      { color: "hsl(24, 60%, 56%)",   bg: "hsla(24, 60%, 56%, 0.12)" },
+  SIGNAL:     { color: "hsl(264, 56%, 60%)",  bg: "hsla(264, 56%, 60%, 0.12)" },
+};
+
+const SEVERITY_COLORS: Record<NormalizedEvent["severity"], string> = {
+  info:     "hsl(210, 80%, 56%)",
+  warning:  "hsl(38, 90%, 55%)",
+  critical: "hsl(4, 72%, 56%)",
+};
+
+const APP_ICONS: Record<string, string> = {
+  vessels:       "🚢",
+  firestorm:     "🔥",
+  inca:          "🧠",
+  lyte:          "⚡",
+  alloy:         "⚡",
+  "carlota-jo":  "✨",
+  msp:           "💻",
+  terra:         "🏢",
+  dreamscape:    "🎨",
+  "szl-holdings":"🏛️",
+  "stephen-site":"👤",
+};
+
+
+seedDoctrineEvents();
+
+function timeAgo(ts: number): string {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  return `${Math.floor(diff / 3600)}h ago`;
+}
+
+function CrossAppEventStream() {
+  const [events, setEvents] = useState<NormalizedEvent[]>(() => doctrineEventBus.getEvents());
+  const [filterLayer, setFilterLayer] = useState<DoctrineLayerType | "ALL">("ALL");
+  const [filterSeverity, setFilterSeverity] = useState<NormalizedEvent["severity"] | "ALL">("ALL");
+
+  useEffect(() => {
+    const unsubscribe = doctrineEventBus.subscribe((event) => {
+      setEvents((prev) => [event, ...prev].slice(0, 500));
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const fetchPersistedEvents = () => {
+      fetch("/api/doctrine/events?limit=100", { credentials: "include" })
+        .then((r) => r.ok ? r.json() : null)
+        .then((data: { data?: { events?: NormalizedEvent[] } } | null) => {
+          const persisted = data?.data?.events ?? [];
+          if (persisted.length > 0) {
+            setEvents((prev) => {
+              const prevIds = new Set(prev.map((e) => String(e.id)));
+              const newItems = persisted.filter((e: NormalizedEvent) => !prevIds.has(String(e.id)));
+              return [...newItems, ...prev].slice(0, 500);
+            });
+          }
+        })
+        .catch(() => {});
+    };
+    fetchPersistedEvents();
+    const interval = setInterval(fetchPersistedEvents, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const LAYERS: Array<DoctrineLayerType | "ALL"> = ["ALL", "OBSERVE", "UNDERSTAND", "DECIDE", "EXECUTE", "TRUST", "SIGNAL"];
+  const SEVERITIES: Array<NormalizedEvent["severity"] | "ALL"> = ["ALL", "critical", "warning", "info"];
+
+  const filtered = useMemo(() => events.filter((e) => {
+    if (filterLayer !== "ALL" && e.layer !== filterLayer) return false;
+    if (filterSeverity !== "ALL" && e.severity !== filterSeverity) return false;
+    return true;
+  }), [events, filterLayer, filterSeverity]);
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="px-4 py-3 border-b border-white/5">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Cross-App Event Stream</h2>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Normalized events across the OBSERVE · UNDERSTAND · DECIDE · EXECUTE architecture</p>
+          </div>
+          <div
+            style={{
+              fontSize: "10px",
+              padding: "2px 7px",
+              borderRadius: "4px",
+              background: "hsla(152, 65%, 48%, 0.12)",
+              color: "hsl(152, 65%, 48%)",
+              border: "1px solid hsla(152, 65%, 48%, 0.25)",
+              fontWeight: 700,
+              fontFamily: "monospace",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {filtered.length} events
+          </div>
+        </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {LAYERS.map((layer) => {
+            const active = filterLayer === layer;
+            const c = layer === "ALL" ? null : LAYER_COLORS[layer];
+            return (
+              <button
+                key={layer}
+                onClick={() => setFilterLayer(layer)}
+                style={{
+                  padding: "2px 7px",
+                  borderRadius: "4px",
+                  fontSize: "9px",
+                  fontWeight: 700,
+                  letterSpacing: "0.07em",
+                  textTransform: "uppercase",
+                  fontFamily: "monospace",
+                  cursor: "pointer",
+                  border: active ? `1px solid ${c ? c.color + "60" : "rgba(255,255,255,0.3)"}` : "1px solid rgba(255,255,255,0.07)",
+                  background: active ? (c ? c.bg : "rgba(255,255,255,0.1)") : "rgba(255,255,255,0.04)",
+                  color: active ? (c ? c.color : "rgba(255,255,255,0.85)") : "rgba(255,255,255,0.4)",
+                  transition: "all 0.15s",
+                }}
+              >
+                {layer}
+              </button>
+            );
+          })}
+          <div style={{ width: "1px", background: "rgba(255,255,255,0.1)", margin: "0 2px" }} />
+          {SEVERITIES.map((sev) => {
+            const active = filterSeverity === sev;
+            const sevColor = sev === "ALL" ? null : SEVERITY_COLORS[sev];
+            return (
+              <button
+                key={sev}
+                onClick={() => setFilterSeverity(sev)}
+                style={{
+                  padding: "2px 7px",
+                  borderRadius: "4px",
+                  fontSize: "9px",
+                  fontWeight: 700,
+                  letterSpacing: "0.07em",
+                  textTransform: "uppercase",
+                  fontFamily: "monospace",
+                  cursor: "pointer",
+                  border: active ? `1px solid ${sevColor ? sevColor + "60" : "rgba(255,255,255,0.3)"}` : "1px solid rgba(255,255,255,0.07)",
+                  background: active ? (sevColor ? sevColor + "20" : "rgba(255,255,255,0.1)") : "rgba(255,255,255,0.04)",
+                  color: active ? (sevColor || "rgba(255,255,255,0.85)") : "rgba(255,255,255,0.4)",
+                  transition: "all 0.15s",
+                }}
+              >
+                {sev}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 py-2">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-2">
+            <Activity className="w-6 h-6 opacity-30" />
+            <p className="text-xs">No events match the current filters</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {filtered.map((event) => {
+              const lc = LAYER_COLORS[event.layer];
+              const sevColor = SEVERITY_COLORS[event.severity];
+              const icon = APP_ICONS[event.sourceApp] || "◆";
+              return (
+                <div
+                  key={event.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "10px",
+                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    background: "rgba(255,255,255,0.025)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.025)"; }}
+                >
+                  <div
+                    style={{
+                      width: "3px",
+                      minWidth: "3px",
+                      height: "100%",
+                      minHeight: "32px",
+                      borderRadius: "2px",
+                      background: sevColor,
+                      marginTop: "1px",
+                    }}
+                  />
+                  <div style={{ fontSize: "16px", lineHeight: 1, marginTop: "1px", flexShrink: 0 }}>{icon}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px", flexWrap: "wrap" }}>
+                      <span
+                        style={{
+                          fontSize: "8px",
+                          fontWeight: 700,
+                          padding: "1px 5px",
+                          borderRadius: "3px",
+                          background: lc.bg,
+                          color: lc.color,
+                          border: `1px solid ${lc.color}30`,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.07em",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        {event.layer}
+                      </span>
+                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                        {event.sourceApp}
+                      </span>
+                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.2)", marginLeft: "auto" }}>
+                        {timeAgo(event.timestamp)}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.85)", lineHeight: 1.3, marginBottom: "2px" }}>
+                      {event.title}
+                    </div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>
+                      {event.description}
+                    </div>
+                    <div style={{ display: "flex", gap: "5px", marginTop: "4px", alignItems: "center" }}>
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          padding: "1px 5px",
+                          borderRadius: "3px",
+                          background: sevColor + "15",
+                          color: sevColor,
+                          border: `1px solid ${sevColor}30`,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          fontWeight: 700,
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        {event.severity}
+                      </span>
+                      <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        {event.type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1526,7 +1797,6 @@ function ChatInterface() {
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
             </div>
-          </div>
           <div className="flex-1 overflow-y-auto py-1">
             {loadingConversations ? (
               <div className="px-3 py-2 text-xs text-muted-foreground">Loading...</div>
@@ -1629,6 +1899,7 @@ function ChatInterface() {
                 { id: "chat" as ActivePanel, icon: <MessageSquare className="w-3 h-3" />, label: "Chat" },
                 { id: "kb" as ActivePanel, icon: <BookOpen className="w-3 h-3" />, label: "KB" },
                 { id: "advisories" as ActivePanel, icon: <Bell className="w-3 h-3" />, label: "Advisory" },
+                { id: "events" as ActivePanel, icon: <Activity className="w-3 h-3" />, label: "Events" },
                 { id: "comparison" as ActivePanel, icon: <GitCompare className="w-3 h-3" />, label: "Arena" },
                 { id: "voice" as ActivePanel, icon: <Mic className="w-3 h-3" />, label: "Voice" },
               ] as const).map(tab => (
@@ -1662,6 +1933,7 @@ function ChatInterface() {
             <div className="flex-1 overflow-hidden">
               {activePanel === "kb" && <KnowledgeBasePanel useKB={useKnowledgeBase} onToggleUseKB={() => setUseKnowledgeBase(v => !v)} />}
               {activePanel === "advisories" && <AdvisoryPanel />}
+              {activePanel === "events" && <CrossAppEventStream />}
               {activePanel === "comparison" && <ComparisonPanel onComparisonResult={result => {
                 setChatMessages(prev => [...prev, {
                   id: `comp-${Date.now()}`,
@@ -1860,6 +2132,52 @@ function ChatInterface() {
             </>
           )}
         </div>
+
+        {/* ── Knowledge Base Panel ── */}
+        {activePanel === "kb" && (
+          <div className="flex-1 overflow-hidden">
+            <KnowledgeBasePanel useKB={useKnowledgeBase} onToggleUseKB={() => setUseKnowledgeBase(v => !v)} />
+          </div>
+        )}
+
+        {/* ── Advisories Panel ── */}
+        {activePanel === "advisories" && (
+          <div className="flex-1 overflow-hidden">
+            <AdvisoryPanel />
+          </div>
+        )}
+
+        {/* ── Events Panel ── */}
+        {activePanel === "events" && (
+          <CrossAppEventStream />
+        )}
+
+        {/* ── Comparison Panel ── */}
+        {activePanel === "comparison" && (
+          <div className="flex-1 overflow-hidden overflow-y-auto">
+            <ComparisonPanel onComparisonResult={(result) => {
+              setChatMessages(prev => [...prev, {
+                id: `cmp-${Date.now()}`, role: "assistant",
+                content: `Model comparison complete`,
+                timestamp: new Date(),
+                type: "comparison",
+                comparisonData: result,
+              }]);
+              setActivePanel("chat");
+            }} />
+          </div>
+        )}
+
+        {/* ── Voice Panel ── */}
+        {activePanel === "voice" && (
+          <div className="flex-1 overflow-hidden overflow-y-auto max-w-sm mx-auto">
+            <VoicePanel onTranscribed={(text) => {
+              setInput(text);
+              setActivePanel("chat");
+              setTimeout(() => inputRef.current?.focus(), 100);
+            }} />
+          </div>
+        )}
 
         {/* Right feeds panel */}
         {showRightPanel && (

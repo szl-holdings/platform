@@ -37,6 +37,7 @@ import agentTrainingRouter from "./agent-training";
 import commentsRouter from "./comments";
 import agentOsRouter from "./agent-os";
 import cmsRouter from "./cms";
+import doctrineRouter from "./doctrine";
 
 const router: IRouter = Router();
 
@@ -127,5 +128,7 @@ router.use("/agent-os", readLimiter);
 router.use(agentOsRouter);
 router.use("/cms", readLimiter);
 router.use(cmsRouter);
+router.use("/doctrine", readLimiter);
+router.use(doctrineRouter);
 
 export default router;

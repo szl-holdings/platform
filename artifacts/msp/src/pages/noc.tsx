@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Activity, Clock, Bell, Shield, Wifi, Server, Database, Mail, Cloud, Monitor, ArrowUpRight, XCircle, Eye } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { alerts, uptimeData, incidentTimeline } from "@/data/mock-data";
+import { useEffect } from "react";
+import { doctrineEventBus } from "@workspace/observability";
+import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
 
 function UptimeBar({ service, uptime, incidents }: { service: string; uptime: number; incidents: number }) {
   const color = uptime >= 99.9 ? "bg-emerald-400" : uptime >= 99 ? "bg-amber-400" : "bg-red-400";
@@ -59,11 +62,42 @@ export default function NOCPage() {
   const unacknowledged = alerts.filter(a => !a.acknowledged).length;
   const avgUptime = Math.round(uptimeData.reduce((s, u) => s + u.uptime, 0) / uptimeData.length * 100) / 100;
 
+  useEffect(() => {
+    if (unacknowledged > 0) {
+      doctrineEventBus.emit({
+        type: "alert",
+        sourceApp: "msp",
+        layer: "OBSERVE",
+        severity: criticalCount > 0 ? "critical" : warningCount > 0 ? "warning" : "info",
+        title: `${unacknowledged} unacknowledged NOC alert${unacknowledged > 1 ? "s" : ""}`,
+        description: `MSP NOC: ${unacknowledged} unacknowledged alert(s). ${criticalCount} critical, ${warningCount} warning. Avg uptime: ${avgUptime}%`,
+        entitiesInvolved: [`${criticalCount} critical`, `${warningCount} warning`],
+        context: {
+          source: "noc",
+          sourceApp: "msp",
+          severity: criticalCount > 0 ? "critical" : warningCount > 0 ? "medium" : "low",
+          confidence: 0.95,
+          impactedEntities: [`${criticalCount} critical alerts`, `${warningCount} warning alerts`, `${avgUptime}% uptime`],
+          causalFactors: ["infrastructure anomaly", "threshold breach", "service degradation"],
+          suggestedNextAction: "Acknowledge and triage unresolved alerts; escalate critical issues to on-call team",
+          businessImpact: `${criticalCount} critical alert(s) pending — potential SLA breach for managed clients`,
+          operationalImpact: `${avgUptime}% avg uptime; ${unacknowledged} alerts require operator attention`,
+          layer: "OBSERVE",
+          timestamp: Date.now(),
+        },
+        metadata: { criticalCount, warningCount, unacknowledged, avgUptime, source: "noc" },
+      });
+    }
+  }, [unacknowledged, criticalCount]);
+
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">NOC Operations</h1>
+          <div className="flex items-center gap-3 mb-0.5">
+            <h1 className="text-2xl font-display font-bold text-foreground">NOC Operations</h1>
+            <DoctrineLayerBadge appId="msp" variant="compact" />
+          </div>
           <p className="text-sm text-muted-foreground mt-1">Network Operations Center — infrastructure uptime, alert triage, and incident correlation</p>
         </div>
         <div className="flex items-center gap-2">

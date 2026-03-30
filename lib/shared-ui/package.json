@@ -25,6 +25,8 @@
     "./keyboard-shortcuts": "./src/keyboard-shortcuts.tsx",
     "./inca-agent-indicator": "./src/inca-agent-indicator.tsx",
     "./UserButton": "./src/UserButton.tsx",
+    "./doctrine-layer-badge": "./src/doctrine-layer-badge.tsx",
+    "./explainability-panel": "./src/explainability-panel.tsx",
     "./utils": "./src/utils.ts",
     "./hooks/use-mobile": "./src/hooks/use-mobile.tsx",
     "./hooks/use-toast": "./src/hooks/use-toast.ts",

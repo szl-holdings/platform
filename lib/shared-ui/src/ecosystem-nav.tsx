@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { colors, effects, typography } from "./tokens";
 import { useNotificationCenter, type LiveNotification } from "./notification-center";
+import {
+  DOCTRINE_APP_MAP,
+  DOCTRINE_LAYER_COLORS,
+  DOCTRINE_LAYER_ORDER,
+  type DoctrineLayer,
+} from "./doctrine-layer";
 
 export interface EcosystemApp {
   id: string;
@@ -243,6 +249,98 @@ function AppGridIcon({ app, isCurrent }: { app: EcosystemApp; isCurrent: boolean
   );
 }
 
+function DoctrineLayerSection({
+  layer,
+  currentAppId,
+}: {
+  layer: DoctrineLayer;
+  currentAppId: string;
+}) {
+  const layerApps = DOCTRINE_APP_MAP.filter((c) => c.layers.includes(layer));
+  if (layerApps.length === 0) return null;
+
+  const c = DOCTRINE_LAYER_COLORS[layer];
+
+  return (
+    <div style={{ marginBottom: "12px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          marginBottom: "5px",
+          paddingBottom: "4px",
+          borderBottom: `1px solid ${c.border}`,
+        }}
+      >
+        <span
+          style={{
+            fontSize: "8px",
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: c.color,
+            fontFamily: "'Geist Mono', monospace",
+          }}
+        >
+          {layer}
+        </span>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+        {layerApps.map((docApp) => {
+          const app = ECOSYSTEM_APPS.find((a) => a.id === docApp.appId);
+          if (!app) return null;
+          const isCurrent = app.id === currentAppId;
+          return (
+            <a
+              key={app.id}
+              href={app.path}
+              title={docApp.primaryRole}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "4px 7px",
+                borderRadius: "6px",
+                textDecoration: "none",
+                background: isCurrent ? `${c.color}18` : "rgba(255,255,255,0.04)",
+                border: isCurrent ? `1px solid ${c.border}` : "1px solid rgba(255,255,255,0.07)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+                minWidth: "0",
+              }}
+              onMouseEnter={(e) => {
+                if (!isCurrent) {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
+                  (e.currentTarget as HTMLElement).style.border = "1px solid rgba(255,255,255,0.12)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isCurrent) {
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                  (e.currentTarget as HTMLElement).style.border = "1px solid rgba(255,255,255,0.07)";
+                }
+              }}
+            >
+              <span style={{ fontSize: "13px" }}>{app.icon}</span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: isCurrent ? 600 : 400,
+                  color: isCurrent ? c.color : "rgba(255,255,255,0.7)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {app.name}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AppSwitcherPanel({
   currentAppId,
   onClose,
@@ -250,13 +348,15 @@ function AppSwitcherPanel({
   currentAppId: string;
   onClose: () => void;
 }) {
+  const [viewMode, setViewMode] = useState<"layer" | "grid">("layer");
+
   return (
     <div
       style={{
         position: "absolute",
         top: "calc(100% + 8px)",
         right: "0",
-        width: "320px",
+        width: "340px",
         background: "rgba(10, 12, 20, 0.97)",
         backdropFilter: "blur(20px)",
         border: "1px solid rgba(255,255,255,0.1)",
@@ -271,7 +371,7 @@ function AppSwitcherPanel({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "14px",
+          marginBottom: "12px",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -298,39 +398,68 @@ function AppSwitcherPanel({
               textTransform: "uppercase",
             }}
           >
-            SZL Ecosystem
+            SZL Intelligence Architecture
           </span>
         </div>
-        <button
-          onClick={onClose}
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <button
+            onClick={() => setViewMode(viewMode === "layer" ? "grid" : "layer")}
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "rgba(255,255,255,0.5)",
+              cursor: "pointer",
+              fontSize: "9px",
+              fontWeight: 600,
+              padding: "2px 7px",
+              borderRadius: "4px",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+            }}
+          >
+            {viewMode === "layer" ? "Grid" : "Layers"}
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              color: "rgba(255,255,255,0.4)",
+              cursor: "pointer",
+              fontSize: "16px",
+              lineHeight: 1,
+              padding: "2px",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {viewMode === "layer" ? (
+        <div>
+          {DOCTRINE_LAYER_ORDER.map((layer) => (
+            <DoctrineLayerSection key={layer} layer={layer} currentAppId={currentAppId} />
+          ))}
+        </div>
+      ) : (
+        <div
           style={{
-            background: "none",
-            border: "none",
-            color: "rgba(255,255,255,0.4)",
-            cursor: "pointer",
-            fontSize: "16px",
-            lineHeight: 1,
-            padding: "2px",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "4px",
           }}
         >
-          ✕
-        </button>
-      </div>
+          {ECOSYSTEM_APPS.map((app) => (
+            <AppGridIcon key={app.id} app={app} isCurrent={app.id === currentAppId} />
+          ))}
+        </div>
+      )}
+
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "4px",
-        }}
-      >
-        {ECOSYSTEM_APPS.map((app) => (
-          <AppGridIcon key={app.id} app={app} isCurrent={app.id === currentAppId} />
-        ))}
-      </div>
-      <div
-        style={{
-          marginTop: "14px",
-          paddingTop: "12px",
+          marginTop: "12px",
+          paddingTop: "10px",
           borderTop: "1px solid rgba(255,255,255,0.07)",
           display: "flex",
           alignItems: "center",
@@ -352,8 +481,8 @@ function AppSwitcherPanel({
         >
           📋 All Projects
         </a>
-        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.25)" }}>
-          {ECOSYSTEM_APPS.length} apps
+        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", fontFamily: "'Geist Mono', monospace", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          OBSERVE · UNDERSTAND · DECIDE · EXECUTE
         </span>
       </div>
     </div>
@@ -888,6 +1017,45 @@ function getDomainSearchResults(q: string): SearchResult[] {
   return results;
 }
 
+function DoctrineNavBadge({ appId }: { appId: string }) {
+  const config = DOCTRINE_APP_MAP.find((c) => c.appId === appId);
+  if (!config || config.layers.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "2px",
+        padding: "2px 6px",
+        borderRadius: "4px",
+        background: "hsla(0 0% 100% / 0.04)",
+        border: "1px solid hsla(0 0% 100% / 0.08)",
+      }}
+    >
+      {config.layers.map((layer, i) => (
+        <React.Fragment key={layer}>
+          {i > 0 && (
+            <span style={{ fontSize: "7px", color: "rgba(255,255,255,0.2)", margin: "0 1px" }}>+</span>
+          )}
+          <span
+            style={{
+              fontSize: "8px",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              color: DOCTRINE_LAYER_COLORS[layer].color,
+              fontFamily: "'Geist Mono', monospace",
+              textTransform: "uppercase",
+            }}
+          >
+            {layer}
+          </span>
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 export function EcosystemNav({
   currentAppId,
   currentAppName,
@@ -1036,6 +1204,7 @@ export function EcosystemNav({
           >
             {currentAppName}
           </span>
+          <DoctrineNavBadge appId={currentAppId} />
         </div>
 
         <div style={{ flex: 1 }} />

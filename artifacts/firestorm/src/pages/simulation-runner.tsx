@@ -11,6 +11,8 @@ import { Progress } from "@workspace/shared-ui/ui/progress";
 import { Play, Clock, CheckCircle, XCircle, Activity, Target, Shield, Loader2, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { doctrineEventBus } from "@workspace/observability";
+import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
 
 const statusColors: Record<string, string> = {
   pending: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
@@ -139,6 +141,42 @@ export default function AdversaryEmulation() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", scenarioId: "", assessmentId: "" });
 
+  interface SimulationItem { id: number; status: string; name?: string; riskScore?: number; }
+  const allSimulations = simulations as SimulationItem[];
+  const completedSimulations = allSimulations.filter((s) => s.status === "completed");
+  const runningSimulations = allSimulations.filter((s) => s.status === "running");
+
+  useEffect(() => {
+    if (completedSimulations.length > 0) {
+      const latest = completedSimulations[0];
+      const riskScore = latest?.riskScore ?? 0;
+      const severity = riskScore > 70 ? "critical" : riskScore > 40 ? "warning" : "info";
+      doctrineEventBus.emit({
+        type: "anomaly",
+        sourceApp: "firestorm",
+        layer: "UNDERSTAND",
+        severity,
+        title: "Security simulation analysis complete",
+        description: `Firestorm blast radius analysis: ${completedSimulations.length} simulation(s) completed. ${runningSimulations.length} currently running.`,
+        entitiesInvolved: completedSimulations.slice(0, 3).map((s) => s.name ?? "simulation"),
+        context: {
+          source: "simulation-runner",
+          sourceApp: "firestorm",
+          severity: severity === "critical" ? "critical" : severity === "warning" ? "high" : "low",
+          confidence: 0.90,
+          impactedEntities: completedSimulations.slice(0, 5).map((s) => s.name ?? "simulation"),
+          causalFactors: ["adversary emulation", "attack path analysis", "blast radius mapping"],
+          suggestedNextAction: "Review simulation findings and apply recommended hardening controls",
+          businessImpact: `Risk score: ${riskScore}/100 — ${severity === "critical" ? "critical" : severity === "warning" ? "significant" : "minimal"} exposure identified`,
+          operationalImpact: `${completedSimulations.length} simulation(s) complete; ${runningSimulations.length} running`,
+          layer: "UNDERSTAND",
+          timestamp: Date.now(),
+        },
+        metadata: { completedCount: completedSimulations.length, runningCount: runningSimulations.length, source: "simulation-runner" },
+      });
+    }
+  }, [completedSimulations.length]);
+
   const createMut = useMutation({
     mutationFn: (data: any) => api.simulations.create(data),
     onSuccess: () => {
@@ -154,7 +192,10 @@ export default function AdversaryEmulation() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
-          <h1 className="font-display text-2xl font-bold">Adversary Emulation</h1>
+          <div className="flex items-center gap-3 mb-0.5">
+            <h1 className="font-display text-2xl font-bold">Adversary Emulation</h1>
+            <DoctrineLayerBadge appId="firestorm" variant="compact" />
+          </div>
           <p className="text-sm text-muted-foreground mt-1">Launch controlled red team exercises against target environments using real MITRE ATT&CK TTPs and validate detection coverage</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>

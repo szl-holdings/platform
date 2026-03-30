@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap, Clock, ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, Users, DollarSign, ArrowRight } from "lucide-react";
+import { doctrineEventBus } from "@workspace/observability";
+import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
 import { cn } from "@/lib/utils";
 import {
   actionItems,
@@ -139,11 +141,42 @@ export default function ActionCenter() {
   const openCount = actions.filter(a => a.status === "open").length;
   const inProgressCount = actions.filter(a => a.status === "in_progress").length;
 
+  useEffect(() => {
+    if (immediate.length > 0) {
+      doctrineEventBus.emit({
+        type: "decision",
+        sourceApp: "lyte",
+        layer: "DECIDE",
+        severity: "warning",
+        title: `${immediate.length} immediate action${immediate.length > 1 ? "s" : ""} pending decision`,
+        description: `Lyte Action Center: ${immediate.length} immediate action(s) require decision. ${openCount} total open items protecting ${formatCurrency(totalProtected)}.`,
+        entitiesInvolved: immediate.slice(0, 3).map((a: ActionItem) => a.title),
+        context: {
+          source: "action-center",
+          sourceApp: "lyte",
+          severity: "high",
+          confidence: 0.85,
+          impactedEntities: immediate.slice(0, 5).map((a: ActionItem) => a.title),
+          causalFactors: ["priority escalation", "value-at-risk threshold", "signal correlation"],
+          suggestedNextAction: "Review immediate items and assign ownership before SLA expiry",
+          businessImpact: `${formatCurrency(totalProtected)} value protected — ${immediate.length} action(s) require immediate decision`,
+          operationalImpact: `${openCount} total open actions pending; ${inProgressCount} in progress`,
+          layer: "DECIDE",
+          timestamp: Date.now(),
+        },
+        metadata: { role, immediateCount: immediate.length, openCount, totalProtected, source: "action-center" },
+      });
+    }
+  }, [immediate.length, role]);
+
   return (
     <div className="max-w-[900px] space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display font-bold text-2xl text-white tracking-tight">Action Center</h1>
+          <div className="flex items-center gap-3 mb-0.5">
+            <h1 className="font-display font-bold text-2xl text-white tracking-tight">Action Center</h1>
+            <DoctrineLayerBadge appId="lyte" variant="compact" />
+          </div>
           <p className="text-sm text-slate-400 mt-1">Prioritized actions · {formatCurrency(totalProtected)} value protected</p>
         </div>
         <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">

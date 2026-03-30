@@ -11,6 +11,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/shared-ui/u
 import { AlertTriangle, Bell, Shield, Plus, Clock, Trash2, BellOff } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { doctrineEventBus } from "@workspace/observability";
+import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
+
+interface FleetAlert {
+  id: number;
+  title: string;
+  message: string;
+  severity: "low" | "medium" | "high" | "critical";
+  status: "active" | "acknowledged" | "resolved" | "dismissed";
+  vesselId: number;
+  triggeredAt: string;
+}
+
+interface FleetVessel {
+  id: number;
+  name: string;
+}
+
+interface AlertRuleData {
+  id: number;
+  name: string;
+  description?: string;
+  ruleType: string;
+  severity: string;
+  isActive?: boolean;
+}
 
 const severityColors: Record<string, string> = {
   low: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -80,16 +106,19 @@ function AlertSkeleton() {
 
 export default function AlertCenterPage() {
   const qc = useQueryClient();
-  const { data: alerts = [], isLoading: loadingAlerts } = useQuery({ queryKey: ["alerts"], queryFn: api.alerts.list });
-  const { data: alertRules = [] } = useQuery({ queryKey: ["alertRules"], queryFn: api.alertRules.list });
-  const { data: vessels = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+  const { data: alertsRaw = [], isLoading: loadingAlerts } = useQuery({ queryKey: ["alerts"], queryFn: api.alerts.list });
+  const { data: alertRulesRaw = [] } = useQuery({ queryKey: ["alertRules"], queryFn: api.alertRules.list });
+  const { data: vesselsRaw = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+  const alerts = alertsRaw as FleetAlert[];
+  const alertRules = alertRulesRaw as AlertRuleData[];
+  const vessels = vesselsRaw as FleetVessel[];
   const [ruleOpen, setRuleOpen] = useState(false);
   const [ruleForm, setRuleForm] = useState({ name: "", ruleType: "speed", severity: "medium" });
 
   const createRuleMut = useMutation({
-    mutationFn: (data: any) => api.alertRules.create(data),
+    mutationFn: (data: Record<string, unknown>) => api.alertRules.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alertRules"] }); setRuleOpen(false); toast.success("Alert rule created"); },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteRuleMut = useMutation({
@@ -97,12 +126,44 @@ export default function AlertCenterPage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["alertRules"] }); toast.success("Rule deleted"); },
   });
 
-  const activeAlerts = alerts.filter((a: any) => a.status === "active");
+  const activeAlerts = alerts.filter((a) => a.status === "active");
+
+  useEffect(() => {
+    if (activeAlerts.length > 0) {
+      const hasCritical = activeAlerts.some((a) => a.severity === "critical");
+      doctrineEventBus.emit({
+        type: "alert",
+        sourceApp: "vessels",
+        layer: "OBSERVE",
+        severity: hasCritical ? "critical" : "warning",
+        title: `${activeAlerts.length} active maritime alert${activeAlerts.length > 1 ? "s" : ""}`,
+        description: `Fleet alert stream: ${activeAlerts.length} active alert(s) require attention across fleet operations.`,
+        entitiesInvolved: activeAlerts.slice(0, 3).map((a) => `vessel-${a.vesselId}`),
+        context: {
+          source: "alert-center",
+          sourceApp: "vessels",
+          severity: hasCritical ? "critical" : "medium",
+          confidence: 0.92,
+          impactedEntities: activeAlerts.slice(0, 5).map((a) => `vessel-${a.vesselId}`),
+          causalFactors: ["threshold breach", "anomaly detection", "rule violation"],
+          suggestedNextAction: "Acknowledge critical alerts and dispatch response team if required",
+          businessImpact: `${activeAlerts.length} fleet operation(s) at risk — potential regulatory and safety exposure`,
+          operationalImpact: "Active alert monitoring underway; fleet movements may require rerouting",
+          layer: "OBSERVE",
+          timestamp: Date.now(),
+        },
+        metadata: { alertCount: activeAlerts.length, source: "alert-center" },
+      });
+    }
+  }, [activeAlerts.length]);
 
   return (
     <div className="p-6 space-y-6">
       <div className="animate-fade-in-up">
-        <h1 className="font-display text-2xl font-bold">Alert Center</h1>
+        <div className="flex items-center gap-3 mb-0.5">
+          <h1 className="font-display text-2xl font-bold">Alert Center</h1>
+          <DoctrineLayerBadge appId="vessels" variant="compact" />
+        </div>
         <p className="text-sm text-muted-foreground mt-1">Active alert stream, rule configuration, and escalation thresholds across fleet operations</p>
       </div>
 
@@ -164,8 +225,8 @@ export default function AlertCenterPage() {
               </CardContent>
             </Card>
           ) : (
-            alerts.map((alert: any, i: number) => {
-              const vessel = vessels.find((v: any) => v.id === alert.vesselId);
+            alerts.map((alert, i: number) => {
+              const vessel = vessels.find((v) => v.id === alert.vesselId);
               const isCritical = alert.severity === "critical";
               const isActive = alert.status === "active";
               return (
@@ -256,7 +317,7 @@ export default function AlertCenterPage() {
                 <p className="text-xs text-muted-foreground/60 mt-1">Create rules to automatically trigger alerts</p>
               </CardContent>
             </Card>
-          ) : alertRules.map((rule: any, i: number) => (
+          ) : alertRules.map((rule, i: number) => (
             <Card key={rule.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">

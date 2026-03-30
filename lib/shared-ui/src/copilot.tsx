@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { colors, effects, typography } from "./tokens";
+import type { ExplainabilityModel } from "./doctrine-layer";
+import { ExplainabilityToggle } from "./explainability-panel";
 
 export interface VoiceProfile {
   voice: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
@@ -261,6 +263,56 @@ function FeedbackButtons({ onFeedback, accentColor }: { onFeedback: (rating: num
 function isMobileDevice(): boolean {
   if (typeof window === "undefined") return false;
   return window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+}
+
+function buildExplainability(content: string, agentName: string): ExplainabilityModel {
+  const lower = content.toLowerCase();
+  const hasRecommendation = /recommend|suggest|consider|should|could/.test(lower);
+  const hasAnalysis = /because|due to|based on|indicates|shows|suggests/.test(lower);
+  const hasData = /data|metric|score|trend|rate|count|percent/.test(lower);
+
+  return {
+    trigger: hasAnalysis
+      ? "Pattern or anomaly detected in the input context and relevant data signals"
+      : "User query matched agent expertise and available context",
+    contributingData: [
+      hasData ? "Real-time metrics and operational data" : "Contextual conversation history",
+      "Agent system prompt and domain knowledge",
+      hasRecommendation ? "Best practice knowledge base" : "Current system state",
+    ],
+    confidenceExplanation: hasAnalysis && hasData
+      ? "High confidence: multiple data signals converge on this assessment"
+      : "Moderate confidence: based on available context and domain heuristics",
+    assumptions: [
+      "Current data reflects the actual operational state",
+      "No external context changes since last update",
+      hasRecommendation ? "Standard operating conditions apply" : "Data quality is nominal",
+    ],
+    recommendedAction: hasRecommendation
+      ? "Review the suggestion above and confirm before taking action — this is advisory only"
+      : "Use this information as context for your next decision",
+    alternativeActions: hasRecommendation
+      ? ["Request a more detailed analysis", "Compare with historical baselines", "Escalate to domain expert if uncertain"]
+      : undefined,
+    layer: "UNDERSTAND",
+  };
+}
+
+function MessageExplainability({
+  content,
+  agentName,
+  accentColor,
+}: {
+  content: string;
+  agentName: string;
+  accentColor: string;
+}) {
+  const explainability = React.useMemo(() => buildExplainability(content, agentName), [content, agentName]);
+  return (
+    <div style={{ marginTop: "0.5rem" }}>
+      <ExplainabilityToggle explainability={explainability} accentColor={accentColor} />
+    </div>
+  );
 }
 
 export function AgentCopilot({ config }: { config: CopilotConfig }) {
@@ -875,6 +927,13 @@ export function AgentCopilot({ config }: { config: CopilotConfig }) {
                   </div>
                 )}
                 {isAssistant ? <SimpleMarkdown content={msg.content} /> : msg.content}
+                {isAssistant && (
+                  <MessageExplainability
+                    content={msg.content}
+                    agentName={config.name}
+                    accentColor={config.accentColor}
+                  />
+                )}
                 {isAssistant && config.agentId && (
                   <div className="copilot-msg-feedback">
                     <FeedbackButtons

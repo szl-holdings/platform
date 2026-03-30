@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, BellRing, AlertTriangle, CheckCircle2, Clock, Filter, XCircle, Shield, Zap, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { doctrineEventBus } from "@workspace/observability";
+import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
 
 const alerts = [
   { id: "ALT-001", title: "Model Drift Detected - DeepForecaster v3.2", severity: "high", source: "PredictionDrift Monitor", timestamp: "2 min ago", status: "open", category: "drift", description: "Prediction drift exceeded 5% threshold for Revenue Q3 forecast" },
@@ -33,14 +35,45 @@ export default function AlertsManagement() {
   const openCount = alerts.filter(a => a.status === "open").length;
   const criticalCount = alerts.filter(a => a.severity === "critical" && a.status !== "resolved").length;
 
+  useEffect(() => {
+    if (openCount > 0) {
+      doctrineEventBus.emit({
+        type: "alert",
+        sourceApp: "inca",
+        layer: "UNDERSTAND",
+        severity: criticalCount > 0 ? "critical" : "warning",
+        title: `${openCount} open AI system alert${openCount > 1 ? "s" : ""}`,
+        description: `INCA intelligence platform: ${openCount} open alert(s) including model drift, pipeline anomalies, and accuracy thresholds.`,
+        entitiesInvolved: alerts.filter(a => a.status === "open").slice(0, 3).map(a => a.source),
+        context: {
+          source: "alerts-management",
+          sourceApp: "inca",
+          severity: criticalCount > 0 ? "critical" : "high",
+          confidence: 0.88,
+          impactedEntities: alerts.filter(a => a.status === "open").slice(0, 5).map(a => a.source),
+          causalFactors: ["model drift", "pipeline anomaly", "accuracy threshold breach"],
+          suggestedNextAction: "Review and acknowledge open alerts, escalate critical items to ML engineering",
+          businessImpact: `${openCount} AI model(s) at risk — prediction reliability may be degraded`,
+          operationalImpact: "Active model monitoring underway; consider fallback model activation for critical issues",
+          layer: "UNDERSTAND",
+          timestamp: Date.now(),
+        },
+        metadata: { openCount, criticalCount, source: "alerts-management" },
+      });
+    }
+  }, [openCount, criticalCount]);
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
-            <BellRing className="w-6 h-6 text-primary" />
-            Alerts Management
-          </h1>
+          <div className="flex items-center gap-3 mb-0.5">
+            <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-3">
+              <BellRing className="w-6 h-6 text-primary" />
+              Alerts Management
+            </h1>
+            <DoctrineLayerBadge appId="inca" variant="compact" />
+          </div>
           <p className="text-sm text-muted-foreground mt-1">Drift alerts, pipeline failure notifications, and threshold-triggered events across all active models</p>
         </div>
         <div className="flex items-center gap-3">
