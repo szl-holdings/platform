@@ -1,0 +1,1079 @@
+SZL MASTER REPLIT PAYLOAD
+SOURCE OF TRUTH: YES
+OWNER: Stephen Lutar
+PROJECT: Full SZL Ecosystem Refactor
+MODE: Brand consolidation + product architecture + copy rewrite + design system + proof surfaces + deployment readiness
+
+MISSION
+Refactor the current ecosystem into a premium, coherent, command-centered digital brand system.
+
+This must no longer feel like:
+- random projects
+- multiple competing identities
+- duplicated founder/about pages
+- vague AI pages
+- disconnected products
+
+This must become:
+- one masterbrand
+- one engine
+- two flagship platforms
+- one premium service brand
+- one founder/operator narrative
+- one visual and verbal system
+
+FINAL BRAND HIERARCHY
+This hierarchy is final and must be reflected everywhere in navigation, routing, naming, copy, and visuals.
+
+1. SZL Holdings = parent brand / mothership / ecosystem authority
+2. Alloy = core systems, intelligence, and orchestration engine
+3. Lyte = flagship business observability platform
+4. Vessels = flagship maritime command platform
+5. Carlota Jo Consulting = premium service brand
+6. Stephen Lutar = founder/operator identity
+
+ABSORBED / INTERNAL
+7. Lyte Readiness = module / use case under Lyte
+8. Nimbus = absorbed into Alloy and removed publicly
+
+MANDATORY CONSOLIDATION RULES
+- remove all public Nimbus references
+- Alloy becomes the only engine brand
+- Project Readiness is no longer standalone
+- Project Readiness becomes Lyte Readiness
+- reduce duplicate founder storytelling across the ecosystem
+- do not let Alloy compete with Lyte or Vessels
+- do not let every project have equal public weight
+
+FINAL MARKET STORY
+SZL Holdings builds premium command systems.
+Alloy is the intelligence and orchestration layer.
+Lyte delivers business observability.
+Vessels delivers maritime command intelligence.
+Carlota Jo Consulting delivers high-trust operational support.
+
+PRIMARY NAVIGATION
+Use this exact nav:
+- Ecosystem
+- Alloy
+- Lyte
+- Vessels
+- Carlota Jo
+- Founder
+- Contact
+
+Optional secondary:
+- Case Studies
+- Insights
+
+REMOVE FROM NAV
+- Nimbus
+- Project Readiness standalone
+- duplicate About pages
+- extra AI pages
+- equal-weight random project links
+
+TARGET ROUTES
+/
+ /ecosystem
+ /ventures
+ /alloy
+ /alloy/architecture
+ /alloy/workflows
+ /alloy/agents
+ /alloy/outputs
+ /alloy/governance
+ /lyte
+ /lyte/use-cases
+ /lyte/demo
+ /lyte/readiness
+ /vessels
+ /vessels/platform
+ /vessels/fleet
+ /vessels/command
+ /vessels/routes
+ /carlota-jo
+ /carlota-jo/services
+ /carlota-jo/process
+ /carlota-jo/about
+ /founder
+ /contact
+
+GLOBAL VOICE RULES
+Write with:
+- premium restraint
+- executive clarity
+- technical credibility
+- modern authority
+- sharp hierarchy
+- low fluff
+
+Do NOT write with:
+- generic startup buzzwords
+- vague futurism
+- “revolutionary AI” language
+- empty innovation copy
+- template filler
+
+GLOBAL CTA LIBRARY
+Use only:
+- Explore the Ecosystem
+- Explore Alloy
+- Explore Lyte
+- Explore Vessels
+- Explore Carlota Jo
+- Meet the Founder
+- View Architecture
+- View Workflows
+- View Use Cases
+- View Command Mode
+- View Readiness
+- Request a Demo
+- Start a Conversation
+
+GLOBAL STATUS LABELS
+Use only:
+- Live
+- Pilot Ready
+- In Build
+- Strategic
+- Internal
+- Private Demo
+
+==================================================
+SZL HOMEPAGE
+==================================================
+
+PAGE TITLE
+SZL Holdings | Premium Command Systems
+
+META DESCRIPTION
+SZL Holdings is the parent ecosystem behind Alloy, Lyte, Vessels, and high-trust operating brands built for observability, command, and modern execution.
+
+HERO
+Headline:
+Building premium command systems across observability, operations, and specialized platforms.
+
+Subheadline:
+SZL Holdings is the ecosystem behind Alloy, Lyte, Vessels, and high-trust operating brands designed to turn visibility into action and execution into advantage.
+
+Primary CTA:
+Explore the Ecosystem
+
+Secondary CTA:
+Meet the Founder
+
+Support line:
+One ecosystem. One operating philosophy. Multiple command surfaces.
+
+HOMEPAGE SECTION ORDER
+1. Hero
+2. Featured Platforms
+3. How the Ecosystem Works
+4. Powered by Alloy
+5. Built by an Operator
+6. Proof of Execution
+7. What the System Solves
+8. Start the Right Conversation
+9. Footer
+
+FEATURED PLATFORMS
+Lyte
+Label: Business Observability Platform
+Copy: See risk, latency, ownership gaps, and workflow friction before they hit execution.
+CTA: Explore Lyte
+
+Vessels
+Label: Maritime Command Platform
+Copy: Turn fleet visibility, voyage performance, and operational exceptions into command.
+CTA: Explore Vessels
+
+Carlota Jo Consulting
+Label: High-Trust Service Brand
+Copy: Discreet operational and residence support for high-touch environments.
+CTA: Explore Carlota Jo
+
+HOW THE ECOSYSTEM WORKS
+Copy:
+SZL Holdings is the parent brand.
+Alloy is the systems and orchestration engine.
+Lyte delivers business observability.
+Vessels delivers maritime command intelligence.
+Carlota Jo Consulting delivers high-trust service execution.
+Together, they form one disciplined ecosystem built around visibility, action, and premium execution.
+
+POWERED BY ALLOY
+Copy:
+Alloy is the intelligence and orchestration layer powering workflows, signals, outputs, and decision support across the SZL ecosystem.
+
+Capability blocks:
+- Signal Ingestion
+- Workflow Orchestration
+- Action Routing
+- Output Generation
+- Human Approval
+
+BUILT BY AN OPERATOR
+Headline:
+Stephen Lutar builds systems that connect visibility, execution, and operating discipline.
+
+Copy:
+From observability and workflow design to product architecture and execution systems, Stephen’s work sits at the intersection of business clarity, technical structure, and command-centered thinking.
+
+PROOF OF EXECUTION PREVIEWS
+- Lyte Command View
+- Vessels Fleet View
+- Alloy Architecture
+- Lyte Readiness
+
+WHAT THE SYSTEM SOLVES
+- Approval Latency
+- Ownership Gaps
+- Forecast Drift
+- Readiness Tracking
+- Voyage Profitability
+- Operational Exceptions
+- Workflow Routing
+- White-Glove Execution Support
+
+CONTACT SEGMENTS
+- Investors / Partners
+- Clients
+- Recruiters
+- Strategic Conversations
+
+==================================================
+ALLOY PAGE
+==================================================
+
+PAGE TITLE
+Alloy | The Intelligence Layer Behind the Ecosystem
+
+META DESCRIPTION
+Alloy is the systems and orchestration engine powering workflows, signals, outputs, and human-guided execution across the SZL ecosystem.
+
+HERO
+Headline:
+The intelligence layer behind premium command systems.
+
+Subheadline:
+Alloy connects fragmented inputs, orchestrates workflows, generates outputs, and supports action across the SZL ecosystem.
+
+Primary CTA:
+View Architecture
+
+Secondary CTA:
+View Workflows
+
+Support line:
+From signals to structure to action.
+
+SECTION ORDER
+1. What Alloy Is
+2. What Alloy Powers
+3. How Alloy Works
+4. Workflow Engine
+5. Agent Roles
+6. Outputs
+7. Governance
+
+WHAT ALLOY IS
+Copy:
+Alloy is the systems engine behind the ecosystem. It ingests signals, structures inputs, applies logic, routes workflows, and generates outputs designed for accountable execution.
+
+WHAT ALLOY POWERS
+- Lyte
+- Vessels
+- Internal Workflows
+- Future SZL Systems
+
+HOW ALLOY WORKS
+Layers:
+- Inputs
+- Normalization
+- Reasoning
+- Orchestration
+- Outputs
+- Governance
+
+AGENT ROLES
+- Intake Agent
+- Monitoring Agent
+- Routing Agent
+- Summary Agent
+- Document Agent
+- Approval Agent
+- Workflow Coordinator
+
+OUTPUTS
+- Action Queues
+- Alerts
+- Summaries
+- Proposals
+- Readiness Artifacts
+- Executive Briefs
+- Routed Tasks
+- Operational Notes
+
+GOVERNANCE
+Copy:
+Alloy is designed for controlled execution. Critical workflows can be reviewed, escalated, approved, and constrained within clear operating boundaries.
+
+IMPORTANT
+Do not position Alloy as a chatbot.
+Do not keep Nimbus public.
+All public Nimbus mentions must be replaced by Alloy.
+
+==================================================
+LYTE PAGE
+==================================================
+
+PAGE TITLE
+Lyte | Business Observability Command Platform
+
+META DESCRIPTION
+Lyte is a business observability platform for seeing risk, latency, ownership gaps, and execution friction before they become visible in reporting.
+
+HERO
+Headline:
+See risk, latency, ownership gaps, and workflow friction before they hit execution.
+
+Subheadline:
+Lyte is a business observability command platform built to turn fragmented operational signals into explainable insight and accountable action.
+
+Primary CTA:
+See the Platform
+
+Secondary CTA:
+View Use Cases
+
+Support line:
+Signals. Insight. Action.
+
+SECTION ORDER
+1. What Lyte Does
+2. How Lyte Works
+3. Role-Based Command
+4. Use Cases
+5. Why It Matters
+6. Powered by Alloy
+7. Request a Demo
+
+WHAT LYTE DOES
+Copy:
+Lyte helps teams see what is slowing, drifting, stalling, or losing clarity across business operations. It surfaces what changed, why it matters, who should act, and what is at risk.
+
+HOW LYTE WORKS
+Sequence:
+- Detect the signal
+- Explain the consequence
+- Identify the owner
+- Recommend the next action
+- Protect value before slippage compounds
+
+ROLE-BASED COMMAND
+- Executive View
+- Operations View
+- Delivery / Sales View
+
+USE CASES
+- Approval Latency
+- Ownership Gaps
+- Forecast Drift
+- Handoff Failures
+- Pipeline Hygiene
+- Lyte Readiness
+
+WHY IT MATTERS
+Copy:
+Most dashboards describe outcomes after the damage is visible. Lyte is built to surface the friction behind the outcome early enough to change it.
+
+POWERED BY ALLOY
+Copy:
+Lyte runs on Alloy to interpret signals, coordinate logic, support workflows, and help route action with greater clarity.
+
+MANDATORY PRODUCT RULES
+Every Lyte insight must answer:
+1. what happened
+2. why it matters
+3. who owns it
+4. what action comes next
+5. what value is at risk
+
+MANDATORY LYTE MODULES
+- Command Overview
+- Signals Feed
+- Narrative Insight Rail
+- Action Center
+- Role-Based Dashboards
+- Workflow Latency View
+- Ownership Map
+- Value-at-Risk Panel
+- Drill-down Detail Drawer
+- Demo Mode
+- Lyte Readiness module
+
+==================================================
+VESSELS PAGE
+==================================================
+
+PAGE TITLE
+Vessels | Maritime Command Platform
+
+META DESCRIPTION
+Vessels is a maritime command platform for fleet visibility, voyage performance, operational exceptions, and readiness.
+
+HERO
+Headline:
+Turn fleet visibility, voyage performance, and operational exceptions into command.
+
+Subheadline:
+Vessels is a maritime command platform built to connect movement, readiness, risk, and economics in one operational layer.
+
+Primary CTA:
+View Command Mode
+
+Secondary CTA:
+Explore the Platform
+
+Support line:
+From vessel location to operational consequence.
+
+SECTION ORDER
+1. What Vessels Does
+2. Core Views
+3. What It Solves
+4. Why It Matters
+5. Powered by Alloy
+6. Request a Demo
+
+CORE VIEWS
+- Fleet Command
+- Voyage Performance
+- Exceptions Center
+- Readiness
+
+WHAT IT SOLVES
+- Route Visibility
+- Voyage Profitability
+- Delay Risk
+- Port Pressure
+- Maintenance Readiness
+- Operational Exceptions
+- Fleet Utilization
+- Command Awareness
+
+WHY IT MATTERS
+Copy:
+Tracking alone is not command. Vessels is built to connect what is moving with what matters operationally.
+
+POWERED BY ALLOY
+Copy:
+Alloy supports the intelligence layer behind Vessels, helping interpret events, structure workflows, and generate operational outputs.
+
+MANDATORY VESSELS MODULES
+- Command Overview
+- Live Fleet Map
+- Vessel Detail Experience
+- Voyage Economics
+- Exceptions Center
+- Maintenance Readiness
+- Command Mode
+- Performance Analytics
+- Route / Corridor View
+- Demo Data Mode
+
+==================================================
+CARLOTA JO CONSULTING PAGE
+==================================================
+
+PAGE TITLE
+Carlota Jo Consulting | Discreet Operational and Residence Support
+
+META DESCRIPTION
+Carlota Jo Consulting provides discreet, high-trust operational and residence support for high-touch environments.
+
+HERO
+Headline:
+Discreet operational and residence support for high-touch environments.
+
+Subheadline:
+Carlota Jo Consulting delivers refined, white-glove support with clarity, responsiveness, and discretion.
+
+Primary CTA:
+Explore Services
+
+Secondary CTA:
+Start a Conversation
+
+Support line:
+Quietly structured. Precisely executed.
+
+SECTION ORDER
+1. What We Do
+2. Services
+3. How We Work
+4. Why Clients Trust Us
+5. Start the Conversation
+
+SERVICES
+- Residence Support
+- Coordination and Oversight
+- Lifestyle and Property Operations
+- White-Glove Administrative Support
+
+TRUST PILLARS
+- Discretion
+- Responsiveness
+- Structure
+- Professionalism
+- High-Touch Execution
+
+IMPORTANT
+Carlota Jo must feel like quiet luxury.
+Do not style it like a software product.
+Do not overload it with product jargon.
+
+==================================================
+FOUNDER PAGE
+==================================================
+
+PAGE TITLE
+Stephen Lutar | Founder and Operator
+
+META DESCRIPTION
+Stephen Lutar is the founder behind SZL Holdings, building systems that connect observability, execution, workflow design, and command-centered thinking.
+
+HERO
+Headline:
+Builder. Operator. Systems thinker.
+
+Subheadline:
+Stephen Lutar builds command-centered systems that connect visibility, workflow discipline, and execution across products, operations, and modern business environments.
+
+Primary CTA:
+View the Ecosystem
+
+Secondary CTA:
+Start a Conversation
+
+SECTION ORDER
+1. Operating Thesis
+2. Areas of Focus
+3. Selected Work
+4. Why This Work Matters
+5. Connect
+
+AREAS OF FOCUS
+- Business Observability
+- Workflow Design
+- Command Systems
+- Product Architecture
+- Execution Models
+- Signal-to-Action Thinking
+
+IMPORTANT
+Use one canonical founder narrative.
+Remove duplicate founder/about copy from other pages.
+
+==================================================
+CONTACT PAGE
+==================================================
+
+PAGE TITLE
+Contact | SZL Holdings
+
+META DESCRIPTION
+Contact SZL Holdings for ecosystem discussions, product inquiries, strategic conversations, partnerships, and founder-related opportunities.
+
+HERO
+Headline:
+Start the right conversation.
+
+Subheadline:
+Choose the path that fits the conversation, and we will route it with clarity.
+
+CONTACT PATHS
+- Product / Platform Inquiry
+- Service Inquiry
+- Strategic Partnership
+- Founder / Recruiting
+- Ecosystem / General
+
+==================================================
+VISUAL DIRECTION
+==================================================
+
+OVERALL GOAL
+Make the ecosystem look as strong as the copy sounds.
+
+The visual system should feel like:
+a luxury operating company fused with enterprise command software
+
+NOT:
+- a startup template
+- a neon SaaS clone
+- a dribbble experiment
+- a generic portfolio grid
+- a random consulting site
+
+VISUAL PRINCIPLES
+1. clarity before decoration
+2. hierarchy before novelty
+3. motion with purpose
+4. data with narrative
+5. restraint over noise
+6. luxury through spacing, typography, and composition
+7. technical credibility through structure
+
+GLOBAL AESTHETIC
+- dark-first premium UI
+- excellent light mode
+- deep charcoal / graphite foundation
+- restrained accents
+- editorial typography
+- layered panels
+- controlled asymmetry
+- subtle motion only
+
+LANE ACCENT LOGIC
+SZL:
+- platinum / silver / graphite
+
+Alloy:
+- cool steel / restrained signal blue
+
+Lyte:
+- signal cyan / intelligent blue
+
+Vessels:
+- deep ocean / storm-teal / marine steel
+
+Carlota Jo:
+- warm ivory / taupe / brushed gold restraint
+
+Founder:
+- monochrome with subtle alloy tie-in
+
+==================================================
+DESIGN SYSTEM
+==================================================
+
+Create reusable tokens and components for:
+- colors
+- spacing
+- typography
+- borders
+- elevation
+- nav
+- buttons
+- cards
+- badges
+- KPI tiles
+- tabs
+- tables
+- drawers
+- forms
+- charts
+- proof frames
+- screenshot frames
+- diagram blocks
+- contact cards
+
+CARD TYPES
+- Platform Card
+- Feature Card
+- KPI Card
+- Use Case Card
+- Agent Card
+- Workflow Card
+- Founder Card
+- Proof Card
+- Contact Card
+- Command Panel Card
+- Alert Card
+- Status Card
+
+BUTTON TYPES
+- Primary
+- Secondary
+- Tertiary / Ghost
+- Inline CTA
+- Icon CTA
+
+MOTION
+Use only:
+- fade
+- slight lift
+- panel reveal
+- subtle node pulse
+- route tracing
+- section reveal
+- ambient diagram motion
+
+Do NOT use:
+- flashy gimmicks
+- glow spam
+- chaotic parallax
+- performance-heavy animation
+
+==================================================
+PROOF LAYER + ASSET REQUIREMENTS
+==================================================
+
+Every major page must have:
+1. strategic copy
+2. supporting visual
+3. proof or use-case reinforcement
+
+ASSET TYPES
+A. real proof
+B. high-end demo mocks
+C. structured placeholders
+
+SZL HOMEPAGE ASSETS
+- ecosystem hero visual
+- featured platform previews
+- ecosystem logic diagram
+- Alloy backbone strip
+- founder credibility block
+- proof of execution grid
+- use-case tile strip
+- segmented contact cards
+
+ALLOY ASSETS
+- architecture hero visual
+- ecosystem power map
+- inputs-to-outputs pipeline
+- agent grid
+- workflow diagrams
+- output surface mocks
+- governance / approval diagram
+
+LYTE ASSETS
+- hero dashboard preview
+- command overview
+- signal feed
+- narrative insight rail
+- role-view mocks
+- Lyte Readiness preview
+- action center
+- drill-down drawer
+
+VESSELS ASSETS
+- hero fleet command preview
+- live fleet map mock
+- vessel detail panel
+- voyage economics module
+- exceptions center
+- maintenance readiness
+- route/corridor view
+- command mode preview
+
+CARLOTA JO ASSETS
+- refined hero visual
+- service block visuals
+- process strip
+- trust pillar visuals
+- premium inquiry card
+
+FOUNDER ASSETS
+- founder hero visual
+- areas of focus tiles
+- selected work strip
+- operating thesis block
+- connect panel
+
+==================================================
+DEMO DATA
+==================================================
+
+Seed coherent demo data for Lyte and Vessels.
+
+LYTE DEMO DATA
+- realistic teams / business units
+- signals
+- severity
+- owners
+- ownership gaps
+- value at risk
+- approval delays
+- forecast drift
+- readiness blockers
+- action queue items
+
+VESSELS DEMO DATA
+- vessels
+- vessel classes
+- routes
+- ports
+- ETAs
+- alerts
+- weather events
+- maintenance watch items
+- economics variation
+- exceptions
+
+RULE
+Demo data must feel plausible, premium, and useful.
+No nonsense placeholder naming.
+
+==================================================
+CASE STUDY FRAMEWORK
+==================================================
+
+Create reusable case study modules with:
+- Problem
+- Context
+- Constraints
+- System Built
+- How It Worked
+- Outcome
+- Visual Proof
+- Why It Matters
+
+Create at least 3 case study shells:
+1. Lyte observability case
+2. Vessels route/exception case
+3. Alloy workflow/output case
+
+==================================================
+TECHNICAL REQUIREMENTS
+==================================================
+
+Refactor into a maintainable structure.
+
+Requirements:
+- reusable design system
+- route-based architecture
+- content-driven config where possible
+- typed data structures for products, use cases, assets, statuses
+- reusable proof components
+- reusable hero/layout primitives
+- SEO helpers
+- analytics hooks
+- clean mobile handling
+- no dead code
+- no fragile hacks
+
+Create structured content/data objects for:
+- ventures
+- statuses
+- use cases
+- proof assets
+- captions
+- agents
+- workflows
+- signals
+- vessels
+- routes
+- ports
+- contact types
+- founder proof cards
+- case studies
+
+Create reusable components for:
+- AppShell
+- TopNav
+- Footer
+- Hero
+- PlatformCard
+- ProofFrame
+- ScreenshotFrame
+- DiagramBlock
+- ProofGrid
+- UseCaseTile
+- ContactCard
+- StatusBadge
+- KpiCard
+- SignalCard
+- InsightRail
+- ActionCard
+- RoleSwitcher
+- FleetMap
+- VesselDetailPanel
+- AgentCard
+- WorkflowMap
+- GovernancePanel
+
+==================================================
+SEO
+==================================================
+
+Implement:
+- strong page titles
+- meta descriptions
+- clean H1/H2 hierarchy
+- sitemap
+- robots
+- open graph
+- alt text
+- readable URLs
+- people-first copy
+- no keyword stuffing
+
+==================================================
+PERFORMANCE + MOBILE
+==================================================
+
+Build for:
+- fast first render
+- optimized assets
+- lazy-loaded heavy modules
+- minimal JS waste
+- reduced layout shift
+- strong mobile experience
+- premium responsive behavior
+
+MOBILE RULES
+- preserve hierarchy
+- simplify diagrams elegantly
+- stack cards with rhythm
+- keep nav polished
+- keep hero visuals meaningful
+- convert wide command surfaces into usable mobile patterns
+
+==================================================
+DEPLOYMENT MODEL
+==================================================
+
+Prepare the ecosystem for this deployment model:
+
+Static:
+- SZL masterbrand
+- Carlota Jo public marketing pages
+- Founder pages
+- Alloy overview shell if frontend-only
+
+Autoscale:
+- Lyte if interactive/auth/data-backed
+- Vessels if live/API-backed
+- Alloy if backend/API-driven
+
+Scheduled:
+- digests
+- scans
+- readiness checks
+- routine jobs
+
+Reserved VM:
+- only if persistent workers are actually necessary
+
+ENVIRONMENT PLACEHOLDERS
+- API_BASE_URL
+- ANALYTICS_KEY
+- CONTACT_ENDPOINT
+- CRM_ENDPOINT
+- MAP_PROVIDER_KEY
+- WEATHER_API_KEY
+- AUTH_PROVIDER_KEY
+- FEATURE_FLAGS
+- DEMO_MODE
+- DATA_REFRESH_INTERVAL
+
+Never hardcode secrets.
+
+==================================================
+IMPLEMENTATION ORDER
+==================================================
+
+PHASE 1: CONSOLIDATION
+1. remove public Nimbus references
+2. convert Project Readiness to Lyte Readiness
+3. standardize names everywhere
+4. simplify nav and routes
+5. remove duplicate founder/about copy
+
+PHASE 2: MASTERBRAND
+6. rebuild SZL homepage hierarchy
+7. add ecosystem logic section
+8. add Alloy backbone section
+9. add founder block
+10. add proof of execution grid
+11. add segmented contact cards
+
+PHASE 3: PLATFORM PAGES
+12. refactor Alloy page
+13. refactor Lyte page
+14. refactor Vessels page
+15. refactor Carlota Jo page
+16. refactor Founder page
+17. refactor Contact page
+
+PHASE 4: DESIGN SYSTEM
+18. create tokens/components
+19. unify cards/buttons/badges/nav/footer
+20. apply lane accent logic
+21. improve visual hierarchy
+22. implement tasteful motion
+
+PHASE 5: PROOF + MOCKS
+23. create proof frames
+24. create mock product previews
+25. seed demo data
+26. create diagrams/workflow maps
+27. create use-case visuals
+28. create case-study shells
+
+PHASE 6: QUALITY
+29. SEO pass
+30. performance pass
+31. mobile pass
+32. deployment-readiness pass
+33. cleanup pass
+
+==================================================
+ACCEPTANCE CRITERIA
+==================================================
+
+The finished system must:
+- make the ecosystem immediately understandable
+- clearly show SZL as the parent brand
+- clearly show Alloy as the engine
+- clearly show Lyte and Vessels as flagship platforms
+- keep Carlota Jo distinct and high-trust
+- make Stephen credible without over-centering him
+- remove naming confusion
+- remove public Nimbus completely
+- absorb Project Readiness into Lyte
+- feel premium across copy and visuals
+- feel supported by proof, not just words
+- work across desktop and mobile
+- be launch-ready in structure and tone
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+After doing the work, report:
+- summary of architecture changes
+- files created / modified
+- where Nimbus references were removed
+- where Project Readiness became Lyte Readiness
+- where the design system was applied
+- which proof assets are real vs mocked
+- what remains conceptual vs implemented
+- recommended deployment type by page/app
+- next 10 highest-leverage improvements
+
+==================================================
+FINAL INSTRUCTION
+==================================================
+
+Make the ecosystem feel inevitable.
+
+SZL should feel like the world.
+Alloy should feel like the engine.
+Lyte should feel like the observability weapon.
+Vessels should feel like the maritime command weapon.
+Carlota Jo should feel like quiet luxury.
+The founder should feel like the operator who made the whole system real.
+
+Do not decorate.
+Compose.
+Do not overdesign.
+Elevate.
+Do not make it trendy.
+Make it enduring.
+
+Treat this as the single master build brief and execute against it directly.
