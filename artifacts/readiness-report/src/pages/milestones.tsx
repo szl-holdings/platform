@@ -3,7 +3,7 @@ import { useMilestones, useUpdateMilestoneStatus } from "@/hooks/use-readiness";
 import { Loader2, Calendar, User, Clock, CheckCircle2, AlertCircle, PlayCircle, XCircle } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const StatusIcon = {
   pending: Clock,

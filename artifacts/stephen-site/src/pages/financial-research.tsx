@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TrendingUp, TrendingDown, BarChart3, DollarSign, Activity, Globe, PieChart, ArrowUpRight, ArrowDownRight, Calendar, Brain } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const marketData = [
   { symbol: "AAPL", name: "Apple Inc.", price: 198.45, change: 2.34, changePercent: 1.19, volume: "52.3M", sector: "Technology" },

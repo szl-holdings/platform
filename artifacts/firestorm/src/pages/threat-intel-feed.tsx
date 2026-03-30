@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Rss, Globe, Shield, AlertTriangle, Clock, Radio, Eye, Filter, RefreshCw, ExternalLink, Tag } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const feedSources = [
   { name: "CISA Advisories", type: "government", reliability: "high" },

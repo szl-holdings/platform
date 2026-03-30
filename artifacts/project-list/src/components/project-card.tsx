@@ -1,5 +1,5 @@
 import { Project } from "@workspace/api-client-react";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@workspace/shared-ui/utils";
 import { formatDistanceToNow } from "date-fns";
 import { MoreVertical, Calendar, Clock, Edit2, Trash2 } from "lucide-react";
 import { useState } from "react";

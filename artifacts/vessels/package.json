@@ -76,6 +76,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
-    "@workspace/observability": "workspace:*"
+    "@workspace/observability": "workspace:*",
+    "@workspace/services": "workspace:*"
   }
 }

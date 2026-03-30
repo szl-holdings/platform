@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useRoute, Link } from "wouter";
 import { ArrowLeft, Building2, MapPin, Users, DollarSign, TrendingUp, Calendar, Wrench, User, AlertTriangle } from "lucide-react";
 import { properties, tenants, alerts } from "@/data/portfolio";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 function formatCurrency(n: number) {

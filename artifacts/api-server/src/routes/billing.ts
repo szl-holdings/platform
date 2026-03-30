@@ -344,4 +344,48 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/stripe/checkout", async (req: Request, res: Response) => {
+  try {
+    const { tierId, tierName, service, email, successUrl, cancelUrl } = req.body as {
+      tierId?: string; tierName?: string; service?: string;
+      email?: string; successUrl?: string; cancelUrl?: string;
+    };
+
+    if (!tierId || !successUrl || !cancelUrl) {
+      res.status(400).json({ error: "tierId, successUrl, and cancelUrl are required" });
+      return;
+    }
+
+    const tierPricing: Record<string, string> = {
+      "strategy-session": process.env.STRIPE_PRICE_STRATEGY_SESSION || "",
+      "portfolio-review": process.env.STRIPE_PRICE_PORTFOLIO_REVIEW || "",
+      "advisory-retainer": process.env.STRIPE_PRICE_ADVISORY_RETAINER || "",
+    };
+
+    const priceId = tierPricing[tierId];
+    if (!priceId) {
+      res.status(400).json({ error: `No Stripe price configured for tier "${tierId}". Set the corresponding STRIPE_PRICE_* environment variable.` });
+      return;
+    }
+
+    const session = await services.stripe.createCheckoutSession({
+      priceId,
+      mode: "payment",
+      successUrl,
+      cancelUrl,
+      customerEmail: email,
+      metadata: { tierId: tierId || "", tierName: tierName || "", service: service || "" },
+    });
+
+    res.json({
+      success: true,
+      sessionId: session.id,
+      url: session.url,
+      status: session.status,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to initiate checkout");
+  }
+});
+
 export default router;

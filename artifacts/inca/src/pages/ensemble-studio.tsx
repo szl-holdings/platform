@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Layers, Brain, GitBranch, BarChart3, TrendingUp, Zap, Settings, Play, CheckCircle2, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const ensembles = [
   {

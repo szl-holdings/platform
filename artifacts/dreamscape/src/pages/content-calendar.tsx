@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Calendar, Linkedin, Twitter, Briefcase, Clock, CheckCircle2, Edit, Eye } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const weeks = [
   {

@@ -5,7 +5,7 @@ import {
   ThumbsUp, ThumbsDown, BookOpen, Settings, AlertTriangle, CheckCircle,
   Loader2, RefreshCw, MessageSquare
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const API_BASE = "/api";
 

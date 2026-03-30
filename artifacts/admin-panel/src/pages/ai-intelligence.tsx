@@ -6,7 +6,7 @@ import {
   Network, Cpu, Sparkles
 } from "lucide-react";
 import { AnomalySparkline, SeverityMeter, TypewriterText } from "@workspace/shared-ui/ai-components";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -272,7 +272,7 @@ export default function AIIntelligence() {
                   <span className="text-xs font-mono text-muted-foreground flex-1 truncate">{entry.currentModel}</span>
                   <span className="text-xs text-muted-foreground">{entry.budgetUtilization}% budget</span>
                   {entry.highStakesDomains?.length > 0 && (
-                    <span title="Has maker-checker validation"><CheckCircle className="w-3.5 h-3.5 text-amber-400" /></span>
+                    <CheckCircle className="w-3.5 h-3.5 text-amber-400" aria-label="Has maker-checker validation" />
                   )}
                 </div>
               );

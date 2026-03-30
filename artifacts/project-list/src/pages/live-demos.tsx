@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Play, ExternalLink, Monitor, Shield, Brain, Zap, Ship, Building, Palette, Activity, Globe, Eye } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const demos = [
   { id: "firestorm", name: "Firestorm", subtitle: "Security Operations", icon: Shield, color: "from-red-500/20 to-orange-500/20", borderColor: "border-red-500/20", path: "/firestorm/", highlights: ["Live threat map with animated indicators", "SOC dashboard with real-time metrics", "MITRE ATT&CK framework matrix", "Incident timeline and response tracking"] },

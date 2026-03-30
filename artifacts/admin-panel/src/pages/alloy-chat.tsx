@@ -5,7 +5,7 @@ import {
   ChevronDown, ThumbsUp, ThumbsDown, Link, CheckCircle,
   Settings, X, Zap, Clock, Database, FileText, Brain, Cpu,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const API_BASE = "/api";
 

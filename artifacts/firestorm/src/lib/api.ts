@@ -1,21 +1,4 @@
-const API_BASE = "/api";
-
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-    credentials: "include",
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw new Error(err.error || `HTTP ${res.status}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return res.json();
-}
+import { apiFetch } from "@workspace/shared-ui";
 
 export const api = {
   scenarios: {
@@ -59,9 +42,6 @@ export const api = {
   },
   compliance: {
     list: (framework?: string) => apiFetch<any[]>(`/firestorm/compliance${framework ? `?framework=${framework}` : ""}`),
-    create: (data: any) => apiFetch<any>("/firestorm/compliance", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: any) => apiFetch<any>(`/firestorm/compliance/${id}`, { method: "PUT", body: JSON.stringify(data) }),
-    seed: () => apiFetch<any>("/firestorm/compliance/seed", { method: "POST" }),
   },
   alerts: {
     list: (status?: string) => apiFetch<any[]>(`/firestorm/alerts${status ? `?status=${status}` : ""}`),

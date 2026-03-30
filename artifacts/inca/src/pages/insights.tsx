@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CheckCircle, AlertTriangle, TrendingUp, Sparkles, ArrowUpRight } from "lucide-react";
 import { insights, type InsightCategory } from "@/data/seed-data";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const categoryConfig: Record<InsightCategory, {
   label: string; icon: any; color: string; bg: string; border: string;

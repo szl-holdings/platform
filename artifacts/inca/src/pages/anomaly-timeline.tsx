@@ -1,5 +1,5 @@
 import { AlertTriangle, Activity, Clock, Zap, Eye, Brain, Shield, TrendingUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const anomalies = [
   { id: "ANO-001", timestamp: "2026-03-29T14:32:00", title: "Unusual spike in API latency", severity: "high", model: "AnomalyDetector v2.5", confidence: 0.94, impact: "Performance degradation detected across 3 endpoints", resolution: "Auto-scaled resources, latency normalized", status: "resolved" },

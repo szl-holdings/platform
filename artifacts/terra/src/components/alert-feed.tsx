@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { motion } from "framer-motion";
 import { AlertTriangle, Home, Calendar, Wrench, CreditCard, TrendingDown, Check } from "lucide-react";
 import { alerts } from "@/data/portfolio";

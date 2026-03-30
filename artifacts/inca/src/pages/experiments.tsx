@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { experiments, projects, type Experiment } from "@/data/seed-data";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const statusColors: Record<string, string> = {

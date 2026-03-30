@@ -39,5 +39,8 @@
     "wouter": "^3.3.5",
     "@workspace/observability": "workspace:*",
     "@workspace/shared-ui": "workspace:*"
+  },
+  "dependencies": {
+    "@workspace/services": "workspace:*"
   }
 }

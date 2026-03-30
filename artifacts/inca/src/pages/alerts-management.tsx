@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, BellRing, AlertTriangle, CheckCircle2, Clock, Filter, XCircle, Shield, Zap, Volume2, VolumeX } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const alerts = [
   { id: "ALT-001", title: "Model Drift Detected - DeepForecaster v3.2", severity: "high", source: "PredictionDrift Monitor", timestamp: "2 min ago", status: "open", category: "drift", description: "Prediction drift exceeded 5% threshold for Revenue Q3 forecast" },

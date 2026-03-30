@@ -2,7 +2,7 @@ import { useSignals, useUpdateSignal } from "@/hooks/use-lyte";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, XCircle, AlertCircle, Info, Activity, Clock, Zap } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
 
 const severityColors = {

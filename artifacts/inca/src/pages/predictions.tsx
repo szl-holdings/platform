@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TrendingUp, TrendingDown, Activity, Brain, Target, BarChart3, Clock, Zap, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const predictions = [
   { id: "PRED-001", model: "DeepForecaster v3.2", target: "Revenue Q2", confidence: 0.94, prediction: "$2.4M", actual: null, status: "active", drift: 0.02, trend: "up" as const, category: "financial" },

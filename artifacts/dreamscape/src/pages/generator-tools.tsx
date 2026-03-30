@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Wand2, Image, FileText, Presentation, Users, Play, Settings, CheckCircle2, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const generators = [
   {

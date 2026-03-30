@@ -1,12 +1,7 @@
-import { ObservabilityProvider, ObservabilityPanel } from "@workspace/observability/react";
-import { stephenSiteConfig } from "@workspace/observability/configs";
+import { AppObservabilityPage } from "@workspace/shared-ui";
+  import { stephenSiteConfig } from "@workspace/observability/configs";
 
-export default function ObservabilityPage() {
-  return (
-    <ObservabilityProvider config={stephenSiteConfig}>
-      <div className="max-w-7xl mx-auto py-8 px-4">
-        <ObservabilityPanel />
-      </div>
-    </ObservabilityProvider>
-  );
-}
+  export default function ObservabilityPage() {
+    return <AppObservabilityPage config={stephenSiteConfig} className="max-w-7xl mx-auto py-8 px-4" />;
+  }
+  

@@ -5,7 +5,7 @@ import {
   Search, ExternalLink, Shield, Brain, Zap, Ship, Building, Palette, Activity,
   Globe, BarChart3, Laptop, Grid, List, ArrowUpRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const SpectrumAnalytics = lazy(() => import("@/pages/spectrum-analytics"));
 const Metrics = lazy(() => import("@/pages/metrics"));

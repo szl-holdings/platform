@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import {
   LayoutDashboard,
   Building2,

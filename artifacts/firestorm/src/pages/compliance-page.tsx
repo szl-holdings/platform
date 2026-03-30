@@ -1,13 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Card, CardContent } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Button } from "@workspace/shared-ui/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
 import { Progress } from "@workspace/shared-ui/ui/progress";
-import { ClipboardCheck, Shield, CheckCircle, AlertTriangle, XCircle, Download } from "lucide-react";
+import { ClipboardCheck, Shield, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 
 const frameworkLabels: Record<string, string> = {
   nist_csf: "NIST CSF",
@@ -39,22 +36,10 @@ function AnimatedProgress({ value, className }: { value: number; className?: str
 }
 
 export default function CompliancePage() {
-  const qc = useQueryClient();
-  const [framework, setFramework] = useState<string>("nist_csf");
+  const [framework] = useState<string>("nist_csf");
   const { data: controls = [], isLoading } = useQuery({
     queryKey: ["compliance", framework],
     queryFn: () => api.compliance.list(framework),
-  });
-
-  const seedMut = useMutation({
-    mutationFn: () => api.compliance.seed(),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["compliance"] }); toast.success("Controls seeded"); },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const updateMut = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => api.compliance.update(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["compliance"] }); toast.success("Control updated"); },
   });
 
   const implemented = controls.filter((c: any) => c.status === "implemented").length;
@@ -72,22 +57,9 @@ export default function CompliancePage() {
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
             <ClipboardCheck className="w-6 h-6 text-primary" /> Compliance Posture
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Framework alignment and control status tracking</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={framework} onValueChange={setFramework}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="nist_csf">NIST CSF</SelectItem>
-              <SelectItem value="fedramp">FedRAMP</SelectItem>
-              <SelectItem value="fisma">FISMA</SelectItem>
-            </SelectContent>
-          </Select>
-          {controls.length === 0 && (
-            <Button variant="outline" onClick={() => seedMut.mutate()} disabled={seedMut.isPending}>
-              <Download className="w-4 h-4 mr-2" /> {seedMut.isPending ? "Seeding..." : "Seed Controls"}
-            </Button>
-          )}
+          <p className="text-sm text-muted-foreground mt-1">
+            {frameworkLabels[framework] || framework} framework alignment — sourced from Readiness Report
+          </p>
         </div>
       </div>
 
@@ -147,7 +119,6 @@ export default function CompliancePage() {
           <CardContent className="p-16 text-center">
             <ClipboardCheck className="w-8 h-8 text-muted-foreground/30 mx-auto mb-4" />
             <p className="text-muted-foreground font-medium">No compliance controls for {frameworkLabels[framework] || framework}</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Click "Seed Controls" to load NIST CSF controls</p>
           </CardContent>
         </Card>
       ) : (
@@ -184,15 +155,9 @@ export default function CompliancePage() {
                               {control.description && <p className="text-xs text-muted-foreground ml-6">{control.description}</p>}
                               {control.evidenceNotes && <p className="text-xs text-emerald-400/80 ml-6 mt-1">{control.evidenceNotes}</p>}
                             </div>
-                            <Select value={control.status} onValueChange={v => updateMut.mutate({ id: control.id, data: { status: v } })}>
-                              <SelectTrigger className="w-44 h-7 text-xs"><SelectValue /></SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="implemented">Implemented</SelectItem>
-                                <SelectItem value="partial">Partially Implemented</SelectItem>
-                                <SelectItem value="not_implemented">Not Implemented</SelectItem>
-                                <SelectItem value="not_applicable">Not Applicable</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Badge variant="outline" className={statusColors[control.status] || ""}>
+                              {control.status?.replace(/_/g, " ") ?? "unknown"}
+                            </Badge>
                           </div>
                         </CardContent>
                       </Card>

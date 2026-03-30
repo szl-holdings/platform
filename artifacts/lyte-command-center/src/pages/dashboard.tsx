@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Activity, AlertTriangle, Lightbulb, ShieldAlert, ArrowUpRight, TrendingUp, Wifi, Server, Cpu, HardDrive, Network, Clock, Zap, BarChart3 } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Link } from "wouter";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { useSignals, useIncidents, useRecommendations, usePlaybooks } from "@/hooks/use-lyte";
 import { incidents as fallbackIncidents } from "@/lib/mock-data";
 

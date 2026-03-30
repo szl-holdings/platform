@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Server, Monitor, Wifi, Printer, Smartphone, Shield, AlertTriangle, CheckCircle2, XCircle, Activity, HardDrive, Clock, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { devices as mockDevices, type Device } from "@/data/mock-data";
 
 const typeIcons: Record<Device["type"], typeof Server> = {

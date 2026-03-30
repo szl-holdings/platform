@@ -1,7 +1,7 @@
 import { useRecommendations, useUpdateRecommendation } from "@/hooks/use-lyte";
 import { motion } from "framer-motion";
 import { Lightbulb, TrendingUp, Shield, Activity, DollarSign, Check, X, ArrowRight, Sparkles, Zap } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const categoryIcons = {
   cost_optimization: DollarSign,

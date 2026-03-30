@@ -97,7 +97,7 @@ AI-powered domain agents for each application, merged from GitHub repos. Located
 - Intelligence API routes: `/api/intelligence/ai-models`, `/api/intelligence/ai-models/summary`, `/api/intelligence/model-registry`
 
 ### Shared Libraries
-- `lib/shared-ui`: Design system (56 UI components), AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy, `ErrorBoundary`, `useRealtimeChannel`, `useFeatureFlag` hooks
+- `lib/shared-ui`: Design system (56 UI components), AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy, `ErrorBoundary`, `useRealtimeChannel`, `useFeatureFlag` hooks, `AppObservabilityPage` component, `cn` utility (canonical location — all app `src/lib/utils.ts` re-export from here)
 - `lib/db`: Drizzle ORM schemas, connection pool (min/max/idle timeout/statement timeout), slow-query logging in dev (includes `conversations` + `messages` tables for AlloyChat, and `agent_training_pairs`, `agent_behavior_prefs`, `agent_feedback`, `advisory_audit` for Agent Training Studio)
 - `lib/config`: Application-to-connector dependency mapping
 - `lib/services`: 24 service adapters with health checks and mock fallback
@@ -119,6 +119,17 @@ AI-powered domain agents for each application, merged from GitHub repos. Located
 - `stephen.ts` route: Zod schemas defined locally (api-zod does not have stephen-specific schema variants); `zod` added as api-server dependency
 - `project-list/roadmap.tsx`: `keyof typeof quarterBadge` cast for string indexing
 - `stephen-site/App.tsx`: Home lazy import fixed to use named export `m.Home`
+
+### Architectural Conventions (Post Task #64 Consolidation)
+- **AI Integration Packages:** Canonical packages are `lib/integrations-anthropic-ai/`, `lib/integrations-gemini-ai/`, `lib/integrations-openai-ai-react/`, `lib/integrations-openai-ai-server/`. No nested duplicate `lib/integrations/` subdirectory.
+- **`cn` Utility:** Canonical `cn` (clsx + tailwind-merge) lives in `lib/shared-ui/src/utils.ts`. All app `src/lib/utils.ts` files re-export from `@workspace/shared-ui/utils` — do not duplicate the implementation.
+- **API Route Files:** Each domain has a single route file in `artifacts/api-server/src/routes/`. Standard + live routes are merged into one file (e.g., `vessels.ts`, `firestorm.ts`, `lyte.ts`, etc.). No `-live.ts` split files — only `msp-live.ts` remains (MSP live routes not yet merged).
+- **Observability Pages:** All app-specific `/observability` pages (vessels, firestorm, msp, terra, inca, carlota-jo, dreamscape, lyte-command-center, readiness-report, szl-holdings, stephen-site) use the shared `AppObservabilityPage` component from `@workspace/shared-ui`. Import pattern: `import { AppObservabilityPage } from "@workspace/shared-ui"` with `import { xyzConfig } from "@workspace/observability/configs"`.
+- **API Fetch Wrapper:** Canonical `apiFetch<T>` function lives in `lib/shared-ui/src/api-fetch.ts` and is exported from `@workspace/shared-ui`. All per-app `src/lib/api.ts` files import from there instead of duplicating the implementation. Also exports `PaginationMeta` and `PaginatedResponse<T>` types.
+- **Stripe Checkout:** Single `/stripe/checkout` endpoint in `artifacts/api-server/src/routes/billing.ts`. Do not add checkout routes to domain-specific route files (carlota-jo.ts, etc.).
+- **Compliance Controls Ownership:** Readiness Report is the sole owner of compliance control data. `DEMO_COMPLIANCE_CONTROLS` is exported from `readiness.ts` and imported by `firestorm.ts` for read-only use. The Firestorm compliance routes are GET-only (no POST/PUT/seed). Do not add compliance mutation routes to Firestorm.
+- **Mock Data Centralization:** App-specific mock data is canonically stored in `lib/services/src/providers/`. Domain mock files: `vessels-domain-mock.ts`, `msp-mock.ts`, `lyte-mock.ts`, `readiness-mock.ts`. App-level `mock-data.ts` files are thin re-exports from `@workspace/services`. When adding new mock data, extend the provider files in `lib/services/src/providers/`.
+- **Utils Cleanup:** Per-app `src/lib/utils.ts` shim files have been deleted. All components import `cn` and other utilities (formatDate, formatCurrency, formatNumber, getApiUrl) directly from `@workspace/shared-ui/utils`.
 
 ### Infrastructure Hardening (Task #58)
 - **Graceful Shutdown:** SIGTERM/SIGINT handlers drain HTTP connections, flush job queue, and close DB pool within 10s

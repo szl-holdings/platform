@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, TrendingUp, DollarSign, Shield, Search, Filter, CheckCircle, ArrowUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { contracts as mockContracts, type Contract } from "@/data/mock-data";
 
 const typeLabels: Record<Contract["type"], string> = {

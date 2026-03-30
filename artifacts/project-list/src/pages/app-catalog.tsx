@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Search, Grid, List, Shield, Brain, Building, Ship, Zap, Palette, Activity, Globe, BarChart3, FileText, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Search, Filter, Grid, List, ExternalLink, Star, Activity, Shield, Brain, Building, Ship, Zap, Palette, Globe, BarChart3, FileText, Users, Eye, Play } from "lucide-react";
+import { cn } from "@workspace/shared-ui/utils";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",

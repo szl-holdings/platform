@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, Users, DollarSign, Building2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { properties, revenueHistory, portfolioSummary } from "@/data/portfolio";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 function formatCurrency(n: number) {

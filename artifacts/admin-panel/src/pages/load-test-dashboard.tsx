@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Gauge, Play, Square, BarChart3, Activity, Clock, Users, Zap, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const testProfiles = [
   { id: "LT-SMOKE", name: "Smoke Test", description: "Quick validation of all endpoints", duration: "2 min", vus: 10, rps: 50, status: "ready" },

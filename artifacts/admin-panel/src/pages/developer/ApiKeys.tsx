@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Key, Plus, Trash2, Copy, Check, AlertCircle, Eye, EyeOff } from "lucide-react";
-import { apiFetch, isAuthenticated } from "../../lib/api";
+import { isAuthenticated } from "../../lib/api";
+import { apiFetch } from "@workspace/shared-ui";
 import AuthGate from "@workspace/shared-ui/AuthGate";
 
 interface ApiKeyData {

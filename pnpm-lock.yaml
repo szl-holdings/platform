@@ -1019,6 +1019,9 @@ importers:
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@workspace/services':
+        specifier: workspace:*
+        version: link:../../lib/services
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -1400,6 +1403,10 @@ importers:
         version: 3.25.76
 
   artifacts/msp:
+    dependencies:
+      '@workspace/services':
+        specifier: workspace:*
+        version: link:../../lib/services
     devDependencies:
       '@radix-ui/react-dialog':
         specifier: ^1.1.7
@@ -1689,6 +1696,9 @@ importers:
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@workspace/services':
+        specifier: workspace:*
+        version: link:../../lib/services
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -2211,6 +2221,9 @@ importers:
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@workspace/services':
+        specifier: workspace:*
+        version: link:../../lib/services
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -2471,6 +2484,10 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/integrations-gemini-ai:
     dependencies:
@@ -2483,6 +2500,10 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/integrations-openai-ai-react:
     devDependencies:
@@ -2501,6 +2522,10 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/notifications:
     devDependencies:

@@ -5,7 +5,7 @@ import {
   Server, Compass, Zap, ChevronRight, RefreshCw, Play, AlertTriangle,
   CheckCircle, XCircle, Clock, MessageSquare, Database, Eye, ArrowRight
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {

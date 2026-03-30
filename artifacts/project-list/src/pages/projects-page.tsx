@@ -2,7 +2,7 @@ import { useListProjects, Project } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ExternalLink, Loader2, ArrowRight, Search, Grid3X3, List } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const projectAppUrls: Record<string, string> = {
   "Vessels Maritime Intelligence": "/vessels/",

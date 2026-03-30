@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, AlertTriangle, Clock, User, ArrowUp, ArrowDown, Minus, CheckCircle2, Circle, Pause, Timer, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { tickets, type Ticket } from "@/data/mock-data";
 
 function formatTimeRemaining(deadline: string, breached: boolean): { text: string; urgency: "breached" | "critical" | "warning" | "ok" } {

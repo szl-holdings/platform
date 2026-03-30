@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, MapPin, DollarSign, Building2, Clock, BarChart3 } from "lucide-react";
 import { marketData } from "@/data/portfolio";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 
 function formatCurrency(n: number) {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus, CheckCircle, Activity } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { clients as mockClients, type Client } from "@/data/mock-data";
 
 function HealthBadge({ score }: { score: number }) {

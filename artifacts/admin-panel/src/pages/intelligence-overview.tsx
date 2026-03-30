@@ -1,14 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { apiFetch } from "@workspace/shared-ui";
 import { Activity, Shield, Globe, Brain, FileText, Zap, Clock, TrendingUp, ArrowRight, Radio, Ship, AlertTriangle, Database, Server } from "lucide-react";
 import { useState, useEffect } from "react";
-
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
 
 function AnimatedCounter({ value, duration = 1200 }: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);

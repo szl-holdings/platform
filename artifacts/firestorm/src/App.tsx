@@ -5,7 +5,7 @@ import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));

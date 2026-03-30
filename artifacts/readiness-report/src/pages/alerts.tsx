@@ -2,7 +2,7 @@ import { Shell } from "@/components/layout/shell";
 import { useAlerts, useMarkAlertRead } from "@/hooks/use-readiness";
 import { Loader2, BellRing, TrendingDown, Clock, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { formatDistanceToNow } from "date-fns";
 
 const TypeIcon = {

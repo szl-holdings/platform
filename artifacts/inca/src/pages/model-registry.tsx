@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Database, Brain, CheckCircle2, Clock, AlertTriangle, Tag, GitBranch, Activity, Box, Upload, Shield } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const models = [
   { id: "MDL-001", name: "DeepForecaster", version: "3.2", framework: "PyTorch", status: "deployed", stage: "production", accuracy: 94.2, size: "2.4 GB", created: "2026-02-15", lastTrained: "2026-03-25", deployedAt: "2026-03-26", endpoints: 3, requests: "12.4K/hr" },

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { User, CheckCircle2, Clock, Phone, Wrench, AlertTriangle, BarChart3 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { technicians, type Technician } from "@/data/mock-data";
 
 const statusConfig = {

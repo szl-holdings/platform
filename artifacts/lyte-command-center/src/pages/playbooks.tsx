@@ -1,7 +1,7 @@
 import { usePlaybooks } from "@/hooks/use-lyte";
 import { BookOpen, Search, ChevronRight, FileText, Lock, CheckCircle2, Circle, Hash } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Playbooks() {

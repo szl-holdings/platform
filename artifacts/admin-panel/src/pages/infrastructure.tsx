@@ -1,5 +1,5 @@
 import { Server, Globe, Database, Shield, Network, HardDrive, Bell, Lock, Box, Cloud, Layers, Activity } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const infraModules = [
   { name: "Container App", icon: Box, status: "healthy", type: "Compute", details: "Azure Container Apps", config: { cpu: "2 vCPU", memory: "4 GiB", replicas: "2-8 (auto-scale)", image: "szl-platform:latest", ingress: "External (HTTPS)" } },

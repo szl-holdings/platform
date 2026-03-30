@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Building2, LayoutDashboard, TrendingUp, Handshake, BarChart3, AlertTriangle, Home, ChevronLeft, ChevronRight, DollarSign, Activity, Percent, Users, Thermometer } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
 
 interface NavItem {

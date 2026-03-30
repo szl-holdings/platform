@@ -5,7 +5,7 @@ import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown, EyeOff, ShieldAlert, Shield, ChevronRight } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 
 const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));

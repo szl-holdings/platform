@@ -2,7 +2,7 @@ import { Shell } from "@/components/layout/shell";
 import { useRisks, useUpdateRiskStatus } from "@/hooks/use-readiness";
 import { Loader2, ShieldAlert, AlertTriangle, Info, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { format } from "date-fns";
 
 const SeverityColors = {

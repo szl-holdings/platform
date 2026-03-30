@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
-import { cn } from "@/lib/utils";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { cn } from "@workspace/shared-ui/utils";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
 function LiveClock() {
   const [time, setTime] = useState(new Date());

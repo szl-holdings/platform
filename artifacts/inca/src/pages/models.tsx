@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { models, projects } from "@/data/seed-data";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 
 const statusColors: Record<string, string> = {

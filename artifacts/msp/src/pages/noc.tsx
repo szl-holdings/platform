@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Activity, Clock, Bell, Shield, Wifi, Server, Database, Mail, Cloud, Monitor, ArrowUpRight, XCircle, Eye } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { alerts, uptimeData, incidentTimeline } from "@/data/mock-data";
 
 function UptimeBar({ service, uptime, incidents }: { service: string; uptime: number; incidents: number }) {

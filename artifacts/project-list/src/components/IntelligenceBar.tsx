@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Shield, Ship, Activity, Zap, TrendingUp, Radio, Brain, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { RiskPill } from "@workspace/shared-ui/ai-components";
 
 const API_BASE = "/api";

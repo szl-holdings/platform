@@ -6,3 +6,5 @@ export * from "./themes";
 export * from "./premium-components";
 export * from "./intelligence-philosophy";
 export * from "./lens-bar";
+export { default as AppObservabilityPage } from "./AppObservabilityPage";
+export { apiFetch, type PaginationMeta, type PaginatedResponse } from "./api-fetch";

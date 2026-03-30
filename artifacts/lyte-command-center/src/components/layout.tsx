@@ -21,7 +21,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
 import { LyteLogo } from "./LyteLogo";
 

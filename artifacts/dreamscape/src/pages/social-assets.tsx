@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Image, Linkedin, Twitter, Youtube, Instagram, Monitor, Filter, Download, Eye, Grid, List } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const bannerAssets = [
   { id: "BNR-001", name: "LinkedIn Company Banner", platform: "linkedin", dimensions: "1128×191", category: "profile", campaign: "Brand", status: "active" },

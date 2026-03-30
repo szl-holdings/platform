@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TrendingUp, TrendingDown, Activity, AlertTriangle, CheckCircle2, BarChart3, Clock, Target } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const driftData = [
   { model: "DeepForecaster v3.2", metric: "MAE", current: 0.032, baseline: 0.028, drift: 14.3, status: "warning", history: [2.1, 2.4, 2.8, 3.0, 3.2, 3.1, 3.2] },

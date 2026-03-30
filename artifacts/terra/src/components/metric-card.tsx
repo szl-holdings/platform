@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 

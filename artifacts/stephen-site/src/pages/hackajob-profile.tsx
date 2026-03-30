@@ -1,5 +1,5 @@
 import { Briefcase, Code, Award, Star, ExternalLink, Github, Linkedin, MapPin, GraduationCap, CheckCircle2, Zap } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const skills = [
   { name: "TypeScript", level: 95, category: "Language" },

@@ -1,5 +1,5 @@
 import { FileText, Download, Eye, BookOpen, Image, Presentation, Users, ExternalLink } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 
 const pdfGuides = [
   { id: "PDF-001", title: "SZL Holdings Marketing Playbook", description: "Comprehensive marketing strategy guide covering brand voice, content pillars, audience targeting, and campaign execution framework", pages: 24, category: "strategy", size: "4.2 MB" },

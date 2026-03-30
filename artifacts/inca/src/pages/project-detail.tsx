@@ -1,7 +1,7 @@
 import { useParams, Link } from "wouter";
 import { ArrowLeft, Calendar, Clock, Users, TrendingUp, FlaskConical, Cpu } from "lucide-react";
 import { projects, experiments, models, type ProjectStatus } from "@/data/seed-data";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const statusColors: Record<ProjectStatus, string> = {

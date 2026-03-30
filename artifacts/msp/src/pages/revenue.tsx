@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { DollarSign, TrendingUp, TrendingDown, Users, BarChart3, PieChart, ArrowUpRight, ArrowDownRight, CreditCard, ArrowUp, ArrowDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { clients, revenueData } from "@/data/mock-data";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, Legend } from "recharts";
 
