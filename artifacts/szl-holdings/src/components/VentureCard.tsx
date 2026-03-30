@@ -76,7 +76,7 @@ export function VentureCard({ venture, index = 0, size = "default" }: VentureCar
           )}
 
           <div className="flex items-center gap-1.5 text-xs font-semibold text-szl-text-muted group-hover:text-szl-accent transition-colors">
-            Enter Lane <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            Explore {venture.name} <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </div>
         </div>
       </Link>

@@ -33,7 +33,7 @@ export default function PortfolioPage() {
   const [status, setStatus] = useState<VentureStatus | "All">("All");
 
   useEffect(() => {
-    document.title = "Portfolio — SZL Holdings";
+    document.title = "Ecosystem — SZL Holdings";
     const cleanup = initScrollDepthTracking("portfolio");
     return cleanup;
   }, []);
@@ -69,12 +69,12 @@ export default function PortfolioPage() {
               transition={{ duration: 0.5 }}
             >
               <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-3">
-                Portfolio
+                Ecosystem
               </p>
               <h1 className="font-[var(--font-display)] text-4xl sm:text-5xl font-extrabold text-szl-text leading-tight tracking-tight mb-4">
-                Eight ventures.
+                One ecosystem.
                 <br />
-                <span className="text-szl-accent">One ecosystem.</span>
+                <span className="text-szl-accent">Four command surfaces.</span>
               </h1>
               <p className="text-szl-text-secondary text-base max-w-xl leading-relaxed">
                 Each venture commands its vertical — sharing intelligence, infrastructure, and a common operating philosophy that makes the whole more valuable than the sum of its parts.

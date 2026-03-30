@@ -40,8 +40,8 @@ export function Sidebar() {
           <Command className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="font-display font-bold text-lg leading-tight text-white tracking-wide">SZL Readiness</h1>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Command Center</p>
+          <h1 className="font-display font-bold text-lg leading-tight text-white tracking-wide">Lyte Readiness</h1>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Lyte Module</p>
         </div>
       </div>
       

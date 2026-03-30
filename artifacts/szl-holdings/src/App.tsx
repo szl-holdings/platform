@@ -1,20 +1,10 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
-import { Navbar } from "@/components/Navbar";
-import { Hero } from "@/components/Hero";
-import { FeaturedVentures } from "@/components/FeaturedVentures";
-import { PortfolioStrip } from "@/components/PortfolioStrip";
-import { AlloyStrip } from "@/components/AlloyStrip";
-import { StrategicThesis } from "@/components/StrategicThesis";
-import { Milestones } from "@/components/Milestones";
-import { LatestDevelopments } from "@/components/LatestDevelopments";
-import { TrustSection } from "@/components/TrustSection";
-import { ContactCTA } from "@/components/ContactCTA";
-import { Footer } from "@/components/Footer";
 
+const HomePage = lazy(() => import("@/pages/home"));
 const PortfolioPage = lazy(() => import("@/pages/portfolio"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const VenturesPage = lazy(() => import("@/pages/ventures"));
@@ -38,44 +28,8 @@ const queryClient = new QueryClient({
 
 function PageLoader() {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        background: "hsl(210,12%,5%)",
-      }}
-    >
-      <div style={{
-        width: "24px",
-        height: "24px",
-        border: "2px solid hsla(0,0%,100%,0.10)",
-        borderTopColor: "hsl(210,8%,72%)",
-        borderRadius: "50%",
-        animation: "spin 0.8s linear infinite",
-      }} />
-    </div>
-  );
-}
-
-function HomePage() {
-  useEffect(() => {
-    document.title = "SZL Holdings — Strategic Technology Portfolio";
-  }, []);
-  return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <Navbar />
-      <Hero />
-      <FeaturedVentures />
-      <PortfolioStrip />
-      <StrategicThesis />
-      <AlloyStrip />
-      <Milestones />
-      <LatestDevelopments />
-      <TrustSection />
-      <ContactCTA />
-      <Footer />
+    <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="w-6 h-6 border-2 border-szl-border border-t-szl-primary rounded-full animate-spin" />
     </div>
   );
 }

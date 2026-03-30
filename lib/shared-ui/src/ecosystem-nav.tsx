@@ -149,6 +149,38 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     icon: "🏛️",
     description: "Holdings Dashboard",
   },
+  {
+    id: "readiness-report",
+    name: "Lyte Readiness",
+    subtitle: "Lyte Module",
+    path: "/readiness-report/",
+    accent: "#84cc16",
+    icon: "📊",
+  },
+  {
+    id: "stephen-site",
+    name: "Stephen Lutar",
+    subtitle: "Personal Site",
+    path: "/stephen/",
+    accent: "#64748b",
+    icon: "👤",
+  },
+  {
+    id: "admin",
+    name: "Admin Panel",
+    subtitle: "Control Plane",
+    path: "/admin/",
+    accent: "#f97316",
+    icon: "⚙️",
+  },
+  {
+    id: "alloy",
+    name: "Alloy",
+    subtitle: "Unified AI Command",
+    path: "/alloy/",
+    accent: "#00d4ff",
+    icon: "⚡",
+  },
 ];
 
 const LEVEL_COLORS: Record<EcosystemNotification["level"], string> = {

@@ -90,9 +90,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <PowerUserProvider shortcuts={readinessShortcuts} appName="Aegis" accentColor="#10b981">
+          <PowerUserProvider shortcuts={readinessShortcuts} appName="Lyte Readiness" accentColor="#84cc16">
             <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-              <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Control Plane & Risk Register" accentColor="#10b981" />
+              <EcosystemNav currentAppId="readiness-report" currentAppName="Lyte Readiness" accentColor="#84cc16" />
               <div style={{ flex: 1 }}>
                 <Router />
               </div>
@@ -101,16 +101,16 @@ function App() {
               open={cmdOpen}
               onClose={() => setCmdOpen(false)}
               commands={readinessCommands}
-              appName="Aegis"
-              accentColor="#10b981"
+              appName="Lyte Readiness"
+              accentColor="#84cc16"
             />
           </PowerUserProvider>
           <WelcomeOverlay
-            appId="aegis"
-            appName="Aegis"
-            subtitle="Control Plane, Risk Register & Governance — DECIDE Layer"
-            description="Enterprise control plane for risk register management, compliance scoring, remediation tracking, and governance automation across NIST CSF 2.0, FedRAMP, and CMMC frameworks."
-            accentColor="#10b981"
+            appId="readiness-report"
+            appName="Lyte Readiness"
+            subtitle="Lyte Module"
+            description="Assess your compliance posture, track remediation milestones, and generate audit-ready reports across SOC 2, ISO 27001, HIPAA, and other major frameworks."
+            accentColor="#84cc16"
             icon={ClipboardCheck}
             features={[
               { icon: BarChart3, title: "Gap Analysis", description: "Framework-level scoring with control-by-control breakdowns" },

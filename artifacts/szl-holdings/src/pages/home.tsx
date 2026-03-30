@@ -14,8 +14,10 @@ const FEATURED_PLATFORMS = [
     category: "Business Observability",
     status: "Live",
     tagline: "See risk, latency, ownership gaps, and workflow friction before they hit execution.",
+    audience: "Executives, ops leaders, and delivery teams in complex service environments.",
     href: "/lyte-command-center/",
     accent: "#06b6d4",
+    tier: 1,
   },
   {
     id: "vessels",
@@ -23,8 +25,10 @@ const FEATURED_PLATFORMS = [
     category: "Maritime Command",
     status: "Live",
     tagline: "Turn fleet visibility, voyage performance, and operational exceptions into command.",
+    audience: "Fleet operators, maritime managers, and owners requiring real-time vessel intelligence.",
     href: "/vessels/",
     accent: "#3b82f6",
+    tier: 1,
   },
   {
     id: "carlota-jo",
@@ -32,8 +36,10 @@ const FEATURED_PLATFORMS = [
     category: "Premium Services",
     status: "Pilot Ready",
     tagline: "Discreet operational and residence support for high-touch environments.",
+    audience: "HNWI families, principals, and estate managers requiring white-glove execution.",
     href: "/carlota-jo/",
     accent: "#d97706",
+    tier: 2,
   },
 ];
 
@@ -83,41 +89,39 @@ const PROOF_CARDS = [
   },
 ];
 
-const PROBLEM_TILES = [
-  "Approval chains that stall without anyone noticing",
-  "Fleet exceptions that surface too late to act on",
-  "Workflow handoffs that break between systems",
-  "Ownership gaps that let high-value items drift",
-  "Forecast drift caught too late to course-correct",
-  "Residence and estate operations without a trusted operator",
-  "Operational intelligence without a command surface",
-  "AI infrastructure without governance or explainability",
+const CASE_STUDIES = [
+  { tag: "Observability", title: "Approval Latency", body: "Lyte surfaced critical approval queue stalls 8 days before the weekly review would have caught them." },
+  { tag: "Ownership", title: "Ownership Gaps", body: "Lyte mapped ownership accountability across 12 teams — exposing 34 unassigned high-risk items in a single scan." },
+  { tag: "Forecasting", title: "Forecast Drift", body: "Lyte detected forecast variance 11 days before quarter close — enough lead time to course-correct." },
+  { tag: "Operational", title: "Readiness Tracking", body: "Lyte Readiness quantified framework maturity across 6 domains, replacing manual spreadsheet audits." },
+  { tag: "Maritime", title: "Voyage Profitability", body: "Vessels isolated an underperforming voyage leg costing 14% margin compression across 3 routes." },
+  { tag: "Maritime", title: "Operational Exceptions", body: "Vessels flagged dark vessel activity 34 days before formal sanctions designation." },
 ];
 
 const CONTACT_PATHS = [
   {
-    audience: "Product / Platform",
-    headline: "Demo a platform or request a pilot",
+    audience: "Investors / Partners",
+    headline: "Capital, co-development, and strategic alignment opportunities",
+    cta: "Start a Conversation",
+    href: "/contact?type=partner",
+  },
+  {
+    audience: "Clients",
+    headline: "Demo a platform or request a pilot deployment",
     cta: "Request a Demo",
     href: "/contact?type=client",
   },
   {
-    audience: "Service",
+    audience: "Recruiters",
+    headline: "Executive search, advisory, and strategic operator roles",
+    cta: "Connect with Stephen",
+    href: "/contact?type=recruiter",
+  },
+  {
+    audience: "Strategic Conversations",
     headline: "Carlota Jo — discreet, high-trust operational support",
     cta: "Start a Conversation",
     href: "/contact?type=client",
-  },
-  {
-    audience: "Strategic Partnership",
-    headline: "Integration and co-development opportunities",
-    cta: "Explore the Model",
-    href: "/contact?type=partner",
-  },
-  {
-    audience: "Founder / Recruiting",
-    headline: "Executive search, advisory, and strategic roles",
-    cta: "Connect with Stephen",
-    href: "/contact?type=recruiter",
   },
 ];
 
@@ -134,14 +138,13 @@ export default function HomePage() {
 
       <main>
         <HeroSection />
-        <EcosystemSection />
         <FeaturedPlatformsSection />
-        <HowItWorksSection />
-        <PoweredByAlloySection />
+        <EcosystemLogicSection />
+        <AlloyBackboneSection />
         <FounderSection />
         <ProofSection />
-        <ProblemTilesSection />
-        <ContactPathsSection />
+        <CaseStudyStripSection />
+        <ContactByAudienceSection />
       </main>
 
       <SiteFooter />
@@ -188,11 +191,11 @@ function HeroSection() {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="font-[var(--font-display)] text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.02] mb-6 tracking-tight text-szl-text"
         >
-          Building premium command systems
+          SZL Holdings builds
           <br />
-          <span className="text-szl-accent">across observability, operations,</span>
+          <span className="text-szl-accent">premium command systems</span>
           <br />
-          <span className="text-szl-accent">and specialized platforms.</span>
+          across observability and operations.
         </m.h1>
 
         <m.p
@@ -201,8 +204,8 @@ function HeroSection() {
           transition={{ duration: 0.7, delay: 0.35 }}
           className="text-szl-text-secondary text-base sm:text-lg max-w-2xl mx-auto mb-3 leading-relaxed"
         >
-          Alloy orchestrates the intelligence layer. Lyte delivers business observability. Vessels commands maritime operations.
-          Carlota Jo provides high-trust operational support.
+          One parent company. One intelligence backbone. Four purpose-built platforms — Lyte for business observability,
+          Vessels for maritime command, Carlota Jo for high-trust operational support, and Alloy powering the ecosystem.
         </m.p>
 
         <m.p
@@ -211,14 +214,14 @@ function HeroSection() {
           transition={{ duration: 0.7, delay: 0.45 }}
           className="text-szl-text-muted text-sm mb-10 tracking-wide"
         >
-          One ecosystem. One operating philosophy. Multiple command surfaces.
+          One ecosystem. One operating philosophy. One standard of execution.
         </m.p>
 
         <m.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-20"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10"
         >
           <Link
             href="/portfolio"
@@ -237,47 +240,107 @@ function HeroSection() {
             <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </m.div>
+
+        <m.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.65 }}
+          className="flex flex-wrap items-center justify-center gap-4 mb-20"
+        >
+          <a
+            href="/lyte-command-center/"
+            onClick={() => analytics.heroCTAClick("Explore Lyte")}
+            className="text-xs font-semibold text-szl-text-muted hover:text-szl-accent transition-colors flex items-center gap-1"
+          >
+            Explore Lyte <ArrowRight className="w-3 h-3" />
+          </a>
+          <span className="text-szl-border">·</span>
+          <a
+            href="/vessels/"
+            onClick={() => analytics.heroCTAClick("Explore Vessels")}
+            className="text-xs font-semibold text-szl-text-muted hover:text-szl-accent transition-colors flex items-center gap-1"
+          >
+            Explore Vessels <ArrowRight className="w-3 h-3" />
+          </a>
+          <span className="text-szl-border">·</span>
+          <a
+            href="/carlota-jo/"
+            onClick={() => analytics.heroCTAClick("Explore Carlota Jo")}
+            className="text-xs font-semibold text-szl-text-muted hover:text-szl-accent transition-colors flex items-center gap-1"
+          >
+            Explore Carlota Jo <ArrowRight className="w-3 h-3" />
+          </a>
+        </m.div>
       </div>
     </section>
   );
 }
 
-function EcosystemSection() {
+function EcosystemLogicSection() {
+  const HIERARCHY = [
+    { level: "Parent Company", name: "SZL Holdings", desc: "The holding company. Sets operating standards, allocates capital, and governs the ecosystem.", accent: "#2563eb", tier: 0 },
+    { level: "Intelligence Backbone", name: "Alloy", desc: "Core systems and orchestration engine. Powers signal ingestion, workflow orchestration, action routing, output generation, and human approval gates across all platforms.", accent: "#06b6d4", tier: 1, href: "/alloy/" },
+    { level: "Platform — Observability", name: "Lyte", desc: "Business observability. Surfaces risk, latency, ownership gaps, and workflow friction — before they hit execution.", accent: "#f59e0b", tier: 2, href: "/lyte-command-center/", status: "Live" },
+    { level: "Platform — Maritime", name: "Vessels", desc: "Maritime command. Turns fleet visibility, voyage performance, and operational exceptions into decisive action.", accent: "#3b82f6", tier: 2, href: "/vessels/", status: "Live" },
+    { level: "Service Brand", name: "Carlota Jo", desc: "Premium service brand. Discreet, high-trust operational and residence support for demanding environments.", accent: "#d97706", tier: 2, href: "/carlota-jo/", status: "Pilot Ready" },
+  ];
+
   return (
     <section className="py-20 lg:py-28 bg-szl-bg-secondary border-t border-szl-border">
       <div className="max-w-6xl mx-auto px-6">
         <SectionHeader
-          eyebrow="The Ecosystem"
-          title="One operating fabric. Four command surfaces."
-          subtitle="SZL Holdings is the parent company behind Alloy, Lyte, Vessels, and Carlota Jo. Each platform is purpose-built. All share one intelligence layer, one operating philosophy, and one standard of execution."
-          align="center"
+          eyebrow="Ecosystem Logic"
+          title="The hierarchy is intentional."
+          subtitle="SZL Holdings is the parent entity. Alloy is the intelligence backbone shared across every platform. Lyte, Vessels, and Carlota Jo are purpose-built command surfaces — each solving a specific domain problem, all running on the same operating fabric."
         />
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
-          {[
-            { name: "Alloy", role: "Core Systems & Orchestration Engine", desc: "The intelligence layer that powers every platform in the ecosystem.", status: "Live", href: "/alloy/" },
-            { name: "Lyte", role: "Business Observability Platform", desc: "See risk, latency, ownership gaps, and workflow friction before they hit execution.", status: "Live", href: "/lyte-command-center/" },
-            { name: "Vessels", role: "Maritime Command Platform", desc: "Turn fleet visibility, voyage performance, and operational exceptions into command.", status: "Live", href: "/vessels/" },
-            { name: "Carlota Jo", role: "Premium Service Brand", desc: "Discreet operational and residence support for high-touch environments.", status: "Pilot Ready", href: "/carlota-jo/" },
-          ].map((platform, i) => (
-            <m.a
-              key={platform.name}
-              href={platform.href}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
+        <div className="mt-12 space-y-3">
+          {HIERARCHY.map((item, i) => (
+            <m.div
+              key={item.name}
+              initial={{ opacity: 0, x: -16 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.07 }}
-              className="group block rounded-2xl border border-szl-border bg-white p-6 hover:border-szl-border-hover hover:shadow-sm transition-all duration-200"
+              transition={{ duration: 0.4, delay: i * 0.06 }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-[var(--font-display)] text-base font-bold text-szl-text">{platform.name}</h3>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-szl-border bg-szl-bg-secondary text-szl-text-muted">{platform.status}</span>
-              </div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-szl-text-muted mb-2">{platform.role}</p>
-              <p className="text-xs text-szl-text-secondary leading-relaxed">{platform.desc}</p>
-            </m.a>
+              {item.href ? (
+                <a href={item.href} className="group flex items-start gap-6 rounded-2xl border border-szl-border bg-white p-5 hover:border-szl-border-hover hover:shadow-sm transition-all duration-200 block"
+                  style={{ marginLeft: item.tier === 2 ? "1.5rem" : item.tier === 1 ? "0.5rem" : "0" }}>
+                  <div className="w-2 h-2 rounded-full shrink-0 mt-2" style={{ backgroundColor: item.accent }} />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-szl-text-muted">{item.level}</p>
+                      {item.status && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border border-szl-border bg-szl-bg-secondary text-szl-text-muted">{item.status}</span>
+                      )}
+                    </div>
+                    <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-1 group-hover:text-szl-accent transition-colors">{item.name}</h3>
+                    <p className="text-xs text-szl-text-secondary leading-relaxed">{item.desc}</p>
+                  </div>
+                </a>
+              ) : (
+                <div className="flex items-start gap-6 rounded-2xl border border-szl-border bg-white p-5">
+                  <div className="w-2 h-2 rounded-full shrink-0 mt-2" style={{ backgroundColor: item.accent }} />
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-szl-text-muted mb-1">{item.level}</p>
+                    <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-1">{item.name}</h3>
+                    <p className="text-xs text-szl-text-secondary leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              )}
+            </m.div>
           ))}
         </div>
+
+        <m.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="text-xs text-szl-text-muted text-center mt-8"
+        >
+          Stephen Lutar — Founder & Operator
+        </m.p>
       </div>
     </section>
   );
@@ -310,7 +373,8 @@ function FeaturedPlatformsSection() {
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-szl-border bg-szl-bg-secondary text-szl-text-muted">{p.status}</span>
                 </div>
                 <h3 className="font-[var(--font-display)] text-xl font-bold text-szl-text mb-3">{p.name}</h3>
-                <p className="text-sm text-szl-text-secondary leading-relaxed mb-5">{p.tagline}</p>
+                <p className="text-sm text-szl-text-secondary leading-relaxed mb-3">{p.tagline}</p>
+                <p className="text-xs text-szl-text-muted leading-relaxed mb-5 italic">{p.audience}</p>
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-szl-text-secondary group-hover:text-szl-accent transition-colors">
                   Explore {p.name} <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -323,48 +387,7 @@ function FeaturedPlatformsSection() {
   );
 }
 
-function HowItWorksSection() {
-  return (
-    <section className="py-20 lg:py-28 bg-szl-bg-secondary border-t border-szl-border">
-      <div className="max-w-6xl mx-auto px-6">
-        <SectionHeader
-          eyebrow="How the Ecosystem Works"
-          title="The hierarchy is intentional."
-          subtitle="SZL Holdings is the parent entity. Alloy is the intelligence and orchestration engine shared across every platform. Lyte, Vessels, and Carlota Jo are purpose-built command surfaces, each solving a specific domain problem — all running on the same operating fabric."
-        />
-
-        <div className="mt-12 space-y-3">
-          {[
-            { level: "Parent", name: "SZL Holdings", desc: "The holding company. Sets operating standards, allocates capital, and governs the ecosystem." },
-            { level: "Engine", name: "Alloy", desc: "Core systems and orchestration layer. Powers signal ingestion, workflow orchestration, and action routing across all platforms." },
-            { level: "Platform", name: "Lyte", desc: "Business observability. Surfaces risk, latency, ownership gaps, and workflow friction — before they hit execution." },
-            { level: "Platform", name: "Vessels", desc: "Maritime command. Turns fleet visibility, voyage performance, and operational exceptions into decisive action." },
-            { level: "Service Brand", name: "Carlota Jo", desc: "Premium service brand. Discreet, high-trust operational and residence support for demanding environments." },
-          ].map((item, i) => (
-            <m.div
-              key={item.name}
-              initial={{ opacity: 0, x: -16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.06 }}
-              className="flex items-start gap-6 rounded-2xl border border-szl-border bg-white p-5"
-            >
-              <div className="w-24 shrink-0 pt-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-szl-text-muted">{item.level}</span>
-              </div>
-              <div>
-                <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-1">{item.name}</h3>
-                <p className="text-xs text-szl-text-secondary leading-relaxed">{item.desc}</p>
-              </div>
-            </m.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PoweredByAlloySection() {
+function AlloyBackboneSection() {
   return (
     <section className="py-20 lg:py-28 bg-szl-primary border-t border-szl-primary">
       <div className="max-w-6xl mx-auto px-6">
@@ -374,7 +397,7 @@ function PoweredByAlloySection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Powered by Alloy</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Alloy Backbone</p>
           <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-white mb-4">
             The intelligence layer behind every platform.
           </h2>
@@ -407,7 +430,7 @@ function PoweredByAlloySection() {
             href="/alloy/"
             className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 text-white text-sm font-semibold hover:bg-white/10 transition-colors"
           >
-            View Architecture <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            Explore Alloy <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </a>
         </div>
       </div>
@@ -426,16 +449,13 @@ function FounderSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-4">Built by an Operator</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-4">Founder & Operator</p>
             <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight mb-5">
               Stephen Lutar.<br />
               <span className="text-szl-accent">Builder. Operator. Systems thinker.</span>
             </h2>
-            <p className="text-szl-text-secondary text-base leading-relaxed mb-4">
-              Stephen founded SZL Holdings with a specific conviction: the most defensible positions in enterprise software are won by understanding the operational reality of an industry deeply enough to build the systems it actually needs.
-            </p>
             <p className="text-szl-text-secondary text-base leading-relaxed mb-8">
-              Every platform in the ecosystem was designed around operational problems he has personally encountered — not market research, not feature requests. The result is software that solves real problems at the command level.
+              Stephen Lutar builds systems that connect visibility, execution, and operating discipline. Every platform in the ecosystem was designed around operational problems he has personally encountered — not market research, not feature requests. The result is command-grade software built by an operator, for operators.
             </p>
             <div className="flex flex-wrap gap-3 mb-8">
               {["Systems over tools", "Proprietary data before features", "Operators not consultants", "Ship to learn"].map((p) => (
@@ -484,8 +504,8 @@ function ProofSection() {
       <div className="max-w-6xl mx-auto px-6">
         <SectionHeader
           eyebrow="Proof of Execution"
-          title="Real outcomes from a real ecosystem."
-          subtitle="Not projections. Not hypotheticals. Operational results from platforms in active deployment."
+          title="Real outcomes. Active deployment."
+          subtitle="Not projections. Not hypotheticals. Documented results from platforms operating in production environments."
         />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
@@ -511,28 +531,30 @@ function ProofSection() {
   );
 }
 
-function ProblemTilesSection() {
+function CaseStudyStripSection() {
   return (
     <section className="py-20 lg:py-28 bg-white border-t border-szl-border">
       <div className="max-w-6xl mx-auto px-6">
         <SectionHeader
-          eyebrow="What the System Solves"
-          title="Built for operational problems that don't fit in a single dashboard."
+          eyebrow="Case Studies"
+          title="Real outcomes. Documented results."
+          subtitle="Specific operational outcomes from platforms in active deployment — not projections, not hypotheticals."
           align="center"
         />
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-12">
-          {PROBLEM_TILES.map((tile, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
+          {CASE_STUDIES.map((item, i) => (
             <m.div
-              key={tile}
+              key={item.title}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.35, delay: i * 0.05 }}
-              className="rounded-xl border border-szl-border bg-szl-bg-secondary p-5"
+              className="rounded-xl border border-szl-border bg-szl-bg-secondary p-5 hover:border-szl-border-hover hover:bg-white transition-all duration-200"
             >
-              <div className="w-4 h-4 rounded-full border-2 border-szl-accent mb-3" />
-              <p className="text-sm font-medium text-szl-text leading-snug">{tile}</p>
+              <span className="inline-block px-2 py-0.5 rounded-full bg-white border border-szl-border text-[9px] font-bold uppercase tracking-wider text-szl-text-muted mb-3">{item.tag}</span>
+              <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-2">{item.title}</h3>
+              <p className="text-xs text-szl-text-secondary leading-relaxed">{item.body}</p>
             </m.div>
           ))}
         </div>
@@ -541,7 +563,7 @@ function ProblemTilesSection() {
   );
 }
 
-function ContactPathsSection() {
+function ContactByAudienceSection() {
   return (
     <section className="py-20 lg:py-28 bg-szl-primary border-t border-szl-primary">
       <div className="max-w-6xl mx-auto px-6">
@@ -551,9 +573,9 @@ function ContactPathsSection() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Start the Right Conversation</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Contact by Audience</p>
           <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-white mb-4">
-            Four ways in.
+            Start the right conversation.
           </h2>
           <p className="text-white/60 text-base max-w-xl mx-auto">
             Different audiences, different contexts. Tell us what applies to you.
