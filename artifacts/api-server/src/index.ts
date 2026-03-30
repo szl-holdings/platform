@@ -9,6 +9,7 @@ import "./lib/platform-jobs";
 import { startPlatformScheduledJobs } from "./lib/platform-jobs";
 import { ensurePlatformFlags } from "./lib/platform-flags";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
+import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
@@ -50,6 +51,7 @@ const server = http.createServer(app);
 
 initWebSocket(server);
 startDomainNotificationGenerators();
+startSelfMonitoring();
 
 import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
@@ -107,6 +109,7 @@ async function shutdown(signal: string) {
   }
 
   stopDomainNotificationGenerators();
+  stopSelfMonitoring();
   providerHealth.stopActiveProbes();
   agentScheduler.stop();
 

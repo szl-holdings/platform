@@ -13,20 +13,21 @@ const kpis = [
 ];
 
 const capabilities = [
-  { icon: Globe, title: "Fleet Command", desc: "Live positions, ETAs, and port data — one unified view.", tag: "Core" },
-  { icon: AlertTriangle, title: "Exception Center", desc: "Prioritized alerts with business context and response actions.", tag: "Intelligence" },
-  { icon: DollarSign, title: "Voyage Economics", desc: "Revenue, cost, and margin per voyage in real time.", tag: "Commercial" },
-  { icon: Shield, title: "Sanctions & Compliance", desc: "Automated screening, dark vessel detection, and monitoring.", tag: "Security" },
-  { icon: BarChart3, title: "Performance Analytics", desc: "Utilization, delay trends, and corridor profitability dashboards.", tag: "Analytics" },
-  { icon: Activity, title: "Command Mode", desc: "Focused dashboard for time-sensitive decisions.", tag: "Operations" },
-  { icon: Navigation, title: "Route Intelligence", desc: "Weather-adjusted routing and corridor performance data.", tag: "Planning" },
-  { icon: Anchor, title: "Port Analytics", desc: "Congestion forecasting and turnaround benchmarking.", tag: "Intelligence" },
+  { icon: Globe, title: "Fleet Command", desc: "Live AIS positions, route lines, ETA predictions, and port data across your entire fleet in a unified command view.", tag: "Core" },
+  { icon: AlertTriangle, title: "Exception Center", desc: "Prioritized operational exceptions with business context, root cause analysis, and recommended response actions.", tag: "Intelligence" },
+  { icon: DollarSign, title: "Voyage Economics", desc: "Revenue, cost, and margin per voyage — per charter, per route. Real-time P&L visibility at the voyage level.", tag: "Commercial" },
+  { icon: Shield, title: "Sanctions & Compliance", desc: "Automated sanctions screening, dark vessel detection, and regulatory compliance monitoring across all jurisdictions.", tag: "Security" },
+  { icon: BarChart3, title: "Performance Analytics", desc: "Fleet utilization, delay frequency, corridor profitability, and trend analysis with customizable KPI dashboards.", tag: "Analytics" },
+  { icon: Activity, title: "Command Mode", desc: "Focused operational dashboard for time-sensitive decision-making during critical voyage events.", tag: "Operations" },
+  { icon: Navigation, title: "Route Intelligence", desc: "Corridor analysis, weather-adjusted routing, and historical route performance data for optimized planning.", tag: "Planning" },
+  { icon: Anchor, title: "Port Analytics", desc: "Port congestion forecasting, berth availability tracking, and turnaround time benchmarking.", tag: "Intelligence" },
 ];
 
 const useCases = [
-  { role: "Fleet Executives", headline: "Strategic confidence, not status updates.", desc: "Portfolio margins, exception exposure, and board-ready metrics — no assembly required.", icon: TrendingUp },
-  { role: "Operations Teams", headline: "See what matters. Act before it escalates.", desc: "Exception triage, vessel status, and ETA deviation — one interface, full context.", icon: Eye },
-  { role: "Commercial Teams", headline: "Voyage economics, not just positions.", desc: "Charter performance and route profitability per voyage. Negotiate from data.", icon: DollarSign },
+  { role: "Fleet Executives", headline: "Strategic confidence, not status updates.", desc: "Portfolio-level margin visibility, exception exposure, and performance vs budget across active voyages. Board-ready metrics without the manual assembly.", icon: TrendingUp },
+  { role: "Operations Teams", headline: "See what matters. Act before it escalates.", desc: "Real-time exception triage, vessel status, ETA deviation, and maintenance watch in one interface. Every alert enriched with business context.", icon: Eye },
+  { role: "Commercial Teams", headline: "Voyage economics, not just positions.", desc: "Charter performance, delay cost impact, and route profitability comparison — per voyage. Negotiate from data, not instinct.", icon: DollarSign },
+];
 ];
 
 const trustSignals = [
@@ -122,9 +123,9 @@ export default function MarketingHomePage() {
             </span>
           </m.h1>
 
-          <m.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="text-base sm:text-lg text-sky-300/50 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Fleet operations, voyage economics, and maritime risk — one command platform.
-          </m.p>
+          <p className="text-base sm:text-lg text-sky-300/50 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Built for fleet executives, operations teams, and commercial managers who need more than a vessel tracker — a command platform that connects movement to consequence.
+          </p>
 
           <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/demo">
@@ -157,7 +158,7 @@ export default function MarketingHomePage() {
           <div className="text-center mb-12 sm:mb-16">
             <p className="text-[11px] font-semibold text-sky-400/60 tracking-[0.15em] uppercase mb-3">Capabilities</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-sky-50 mb-4">Every layer of fleet intelligence</h2>
-            <p className="text-sky-300/40 text-[14px] sm:text-[15px] max-w-2xl mx-auto">Positions to economics. Everything your operations team needs.</p>
+            <p className="text-sky-300/40 text-[14px] sm:text-[15px] max-w-2xl mx-auto">From vessel positions to voyage economics — Vessels gives operations teams everything they need to act with precision.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {capabilities.map((c, i) => (
@@ -205,10 +206,10 @@ export default function MarketingHomePage() {
               <h2 className="text-2xl sm:text-3xl font-bold text-sky-50 mb-6">Command-grade infrastructure</h2>
               <div className="space-y-4">
                 {[
-                  { label: "Real-time AIS ingestion", desc: "Sub-minute positions with historical replay." },
-                  { label: "Multi-tenant architecture", desc: "Data isolation and RBAC per team and vessel group." },
-                  { label: "API-first design", desc: "REST and webhook access to every data point." },
-                  { label: "Enterprise security", desc: "SOC 2 compliant with full audit logging." },
+                  { label: "Real-time AIS ingestion", desc: "Sub-minute position updates across your entire fleet with historical replay." },
+                  { label: "Multi-tenant architecture", desc: "Complete data isolation with role-based access control per team and vessel group." },
+                  { label: "API-first design", desc: "Every data point accessible via REST and webhook — integrate with your existing stack." },
+                  { label: "Enterprise security", desc: "SOC 2 compliant, encrypted at rest and in transit, with audit logging on every action." },
                 ].map(item => (
                   <div key={item.label} className="flex gap-3">
                     <div className="mt-1 w-5 h-5 rounded-full bg-sky-500/10 border border-sky-500/15 flex items-center justify-center shrink-0">
@@ -264,7 +265,7 @@ export default function MarketingHomePage() {
               <span className="bg-gradient-to-r from-sky-300 to-cyan-400 bg-clip-text text-transparent">in action?</span>
             </h2>
             <p className="text-sky-300/40 text-[15px] mb-10 max-w-xl mx-auto leading-relaxed">
-              A private demo tailored to your fleet and operational profile.
+              Request a private demo tailored to your fleet size, trade routes, and operational profile.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link href="/demo">

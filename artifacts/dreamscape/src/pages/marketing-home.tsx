@@ -18,12 +18,12 @@ const impactColors: Record<string, string> = {
 };
 
 const capabilities = [
-  { icon: TrendingUp, title: "Predictive Intelligence", desc: "Forecast revenue, churn, and operational risk before they happen.", tag: "Core" },
-  { icon: Target, title: "Scenario Planning", desc: "Monte Carlo simulations for stress-testing strategic decisions.", tag: "Strategy" },
-  { icon: Eye, title: "Model Explainability", desc: "Glass-box AI. Every prediction with confidence and causal factors.", tag: "Trust" },
-  { icon: Lightbulb, title: "Opportunity Engine", desc: "Surface revenue opportunities and efficiency gains automatically.", tag: "Growth" },
-  { icon: LineChart, title: "Forecasting Center", desc: "Multi-horizon forecasts from next quarter to three years out.", tag: "Planning" },
-  { icon: Layers, title: "Decision Intelligence", desc: "Connect predictions to actions with outcome tracking.", tag: "Operations" },
+  { icon: TrendingUp, title: "Predictive Intelligence", desc: "Machine learning models that forecast revenue, churn, pipeline velocity, and operational risk before they happen.", tag: "Core" },
+  { icon: Target, title: "Risk Scenario Planning", desc: "Monte Carlo simulations and scenario modeling for stress-testing strategic decisions against uncertainty.", tag: "Strategy" },
+  { icon: Eye, title: "Model Explainability", desc: "Glass-box AI with full reasoning transparency. Every prediction includes confidence intervals and causal factors.", tag: "Trust" },
+  { icon: Lightbulb, title: "Opportunity Engine", desc: "Automated pattern detection across your data to surface revenue opportunities, efficiency gains, and market timing.", tag: "Growth" },
+  { icon: LineChart, title: "Forecasting Center", desc: "Multi-horizon forecasts with ensemble methods — from next-quarter revenue to three-year strategic planning.", tag: "Planning" },
+  { icon: Layers, title: "Decision Intelligence", desc: "Connect predictions to actions with structured decision frameworks and outcome tracking.", tag: "Operations" },
 ];
 
 const stats = [
@@ -133,7 +133,7 @@ export default function DreamscapeMarketingHome() {
           </m.h1>
 
           <m.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            ML forecasting and scenario planning for leadership teams.
+            Dreamscape combines predictive ML models, scenario planning, and decision intelligence to give leadership teams foresight — not hindsight.
           </m.p>
 
           <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -189,7 +189,7 @@ export default function DreamscapeMarketingHome() {
           <div className="text-center mb-12 sm:mb-16">
             <p className="text-[11px] font-semibold text-purple-400/60 tracking-[0.15em] uppercase mb-3">Capabilities</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Full-spectrum predictive intelligence</h2>
-            <p className="text-gray-500 text-[14px] sm:text-[15px] max-w-2xl mx-auto">Every prediction explainable. Every decision traceable.</p>
+            <p className="text-gray-500 text-[14px] sm:text-[15px] max-w-2xl mx-auto">From revenue forecasting to risk scenarios — every prediction explainable, every decision traceable.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {capabilities.map((c, i) => (

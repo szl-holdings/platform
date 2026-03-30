@@ -90,13 +90,17 @@ export interface LyteAction {
   title: string;
   description?: string;
   state: string;
+  priority?: string;
   urgency?: string;
+  signalCategory?: string;
   assignedTo?: string;
   owner?: string;
   ownerTeam?: string;
   signalId?: number;
   incidentId?: number;
+  valueAtRisk?: string;
   valueProtected?: number;
+  dueAt?: string;
   dueBy?: string;
   notes?: string;
   stateHistory?: Array<{ from: string; to: string; at: string }>;
@@ -147,10 +151,15 @@ export interface LyteReadinessItem {
 }
 
 export interface LyteDashboard {
-  signals: { total: number; critical: number; high: number; medium: number; unresolved: number };
-  actions: { total: number; open: number; critical: number; inProgress: number };
-  incidents: { total: number; open: number };
-  readiness: { score: number; complete: number; total: number };
+  summary: {
+    totalSignals: number;
+    criticalUnresolved: number;
+    openIncidents: number;
+    openActions: number;
+    pendingRecommendations: number;
+    readinessScore: number;
+  };
+  recentSignals: LyteSignal[];
   fetchedAt: string;
 }
 
@@ -229,7 +238,7 @@ export const api = {
   },
   dashboard: () => apiFetch<LyteDashboard>("/lyte/dashboard"),
   executiveSummary: () => apiFetch<Record<string, unknown>>("/lyte/executive-summary"),
-  insights: () => apiFetch<{ narratives: unknown[]; fetchedAt: string }>("/lyte/insights"),
+  insights: () => apiFetch<{ narratives: Array<{ type: string; priority: string; headline: string; detail: string }>; signalSummary: Record<string, number>; sourceSummary: Record<string, number> }>("/lyte/insights/narratives"),
   live: {
     techNews: () => apiFetch<any>("/lyte/live/tech-news"),
     blsEmployment: () => apiFetch<any>("/lyte/live/bls-employment"),

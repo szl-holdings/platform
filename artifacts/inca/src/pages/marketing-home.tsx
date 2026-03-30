@@ -20,14 +20,14 @@ const severityColors: Record<string, string> = {
 };
 
 const capabilities = [
-  { icon: Search, title: "Signal Ingestion", desc: "Unified pipeline. Every signal normalized, enriched, and indexed.", tag: "Core" },
-  { icon: Brain, title: "AI Triage Engine", desc: "Explainable scoring. See why a signal matters, not just that it does.", tag: "Intelligence" },
-  { icon: Eye, title: "Explainability Layer", desc: "Traceable reasoning chains. Audit-ready, not black-box.", tag: "Trust" },
-  { icon: GitBranch, title: "Decision Workflows", desc: "Structured triage and escalation with full audit trail.", tag: "Operations" },
-  { icon: Shield, title: "Secure Architecture", desc: "Multi-tenant isolation, RBAC, and zero-trust encryption.", tag: "Security" },
-  { icon: BarChart3, title: "Analytical Dashboards", desc: "Threat landscape, signal volume, and model performance views.", tag: "Analytics" },
-  { icon: Layers, title: "Knowledge Graph", desc: "Entity-relationship mapping to discover hidden patterns.", tag: "Intelligence" },
-  { icon: Target, title: "Adversary Profiles", desc: "TTPs, infrastructure fingerprints, and campaign data.", tag: "Research" },
+  { icon: Search, title: "Signal Ingestion", desc: "Unified intelligence pipeline across structured and unstructured sources. Every signal normalized, enriched, and indexed.", tag: "Core" },
+  { icon: Brain, title: "AI Triage Engine", desc: "Machine-assisted prioritization with explainable scoring. Analysts see why a signal matters, not just that it does.", tag: "Intelligence" },
+  { icon: Eye, title: "Explainability Layer", desc: "Every model output includes traceable reasoning chains — audit-ready decision support, not black-box scores.", tag: "Trust" },
+  { icon: GitBranch, title: "Decision Workflows", desc: "Structured triage, escalation, and resolution workflows with full audit trail from signal to action.", tag: "Operations" },
+  { icon: Shield, title: "Secure Architecture", desc: "Multi-tenant isolation, role-based access, and enterprise-grade encryption with zero-trust principles.", tag: "Security" },
+  { icon: BarChart3, title: "Analytical Dashboards", desc: "Custom views across threat landscape, signal volume, model performance, and team response metrics.", tag: "Analytics" },
+  { icon: Layers, title: "Knowledge Graph", desc: "Entity-relationship mapping across signals, actors, and infrastructure — discover hidden patterns.", tag: "Intelligence" },
+  { icon: Target, title: "Adversary Profiles", desc: "TTPs, infrastructure fingerprints, and historical campaign data for known and emerging threat actors.", tag: "Research" },
 ];
 
 const stats = [
@@ -208,8 +208,9 @@ export default function IncaMarketingHome() {
       <section className="border-t border-violet-500/10 bg-[#0a0814]/50 py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
-            <p className="text-[11px] font-semibold text-violet-400/60 tracking-[0.15em] uppercase mb-2">Live signal feed</p>
-            <h2 className="text-xl font-bold text-violet-100">What the platform surfaces</h2>
+            <p className="text-[11px] font-semibold text-violet-400/60 tracking-[0.15em] uppercase mb-3">Live Signal Feed</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-violet-100 mb-3">Real threats. Traceable decisions.</h2>
+            <p className="text-violet-300/40 text-[14px] max-w-xl mx-auto">INCA continuously processes, correlates, and surfaces intelligence signals with explainable reasoning.</p>
           </div>
           <div className="space-y-3">
             {signalFindings.map((s, i) => (
@@ -276,7 +277,7 @@ export default function IncaMarketingHome() {
           <div className="text-center mb-12 sm:mb-16">
             <p className="text-[11px] font-semibold text-violet-400/60 tracking-[0.15em] uppercase mb-3">Core Capabilities</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-violet-50 mb-4">Built for intelligence-first operations</h2>
-            <p className="text-violet-300/40 text-[14px] sm:text-[15px] max-w-2xl mx-auto">From signal ingestion to explainable decision output.</p>
+            <p className="text-violet-300/40 text-[14px] sm:text-[15px] max-w-2xl mx-auto">Every layer of the intelligence stack — from signal ingestion to explainable decision output.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {capabilities.map((c, i) => (

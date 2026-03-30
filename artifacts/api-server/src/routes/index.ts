@@ -90,7 +90,7 @@ router.use(filesRouter);
 
 router.use(stephenRouter);
 router.use("/lyte", readLimiter);
-router.use(lyteExtendedRouter);
+router.use("/lyte", lyteExtendedRouter);
 router.use("/vessels", readLimiter);
 router.use(vesselsExtendedRouter);
 router.use("/lyte/platform", readLimiter);

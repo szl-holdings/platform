@@ -1,26 +1,13 @@
 import { useState } from "react";
 import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { Link } from "wouter";
-import { AlertTriangle, TrendingDown, TrendingUp, ChevronRight, Clock, DollarSign, Users, Zap, Target, Activity, ArrowUpRight } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, BarChart, Bar, Cell } from "recharts";
+import { TrendingDown, TrendingUp, ChevronRight, Clock, Zap, Target, Activity, ArrowUpRight, RefreshCw, Shield, CheckCircle2 } from "lucide-react";
+import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import {
-  signals,
-  narrativeInsights,
-  actionItems,
-  kpiCards,
-  varTrend,
-  signalTrend,
-  totalValueAtRisk,
-  valueAtRiskBreakdown,
-  severityColors,
-  signalTypeLabels,
-  getKPIsForRole,
-  getActionsForRole,
-  roleLabels,
-  type RoleView,
-  type SignalSeverity,
-} from "@/lib/business-data";
+import { api, type LyteSignal, type LyteDashboard } from "@/lib/api";
+import { severityColors } from "@/lib/business-data";
+import type { SignalSeverity } from "@/lib/business-data";
 
 function formatCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -28,8 +15,18 @@ function formatCurrency(n: number): string {
   return `$${n}`;
 }
 
-function SeverityBadge({ severity }: { severity: SignalSeverity }) {
-  const c = severityColors[severity];
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+function SeverityBadge({ severity }: { severity: string }) {
+  const sev = (["critical", "high", "medium", "low", "stable"].includes(severity) ? severity : "medium") as SignalSeverity;
+  const c = severityColors[sev];
   return (
     <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wide", c.text, c.bg, c.border)}>
       {severity}
@@ -37,43 +34,26 @@ function SeverityBadge({ severity }: { severity: SignalSeverity }) {
   );
 }
 
-function KPICard({ kpi }: { kpi: ReturnType<typeof getKPIsForRole>[number] }) {
-  const c = severityColors[kpi.severity];
-  const isNegativeTrend = kpi.trend > 0 && (kpi.id !== "kpi-var" || true);
+function LiveSignalCard({ signal }: { signal: LyteSignal }) {
+  const sev = (["critical", "high", "medium", "low"].includes(signal.severity) ? signal.severity : "medium") as SignalSeverity;
+  const c = severityColors[sev];
+  const meta = (signal.metadata ?? {}) as Record<string, unknown>;
   return (
-    <div className={cn("rounded-xl p-4 border bg-white/[0.03] hover:bg-white/[0.05] transition-all", c.border)}>
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-[11px] text-slate-400 font-medium leading-tight">{kpi.label}</span>
-        <span className={cn("text-[10px] font-mono flex items-center gap-0.5", isNegativeTrend ? "text-red-400" : "text-emerald-400")}>
-          {isNegativeTrend ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          {Math.abs(kpi.trend).toFixed(1)}%
-        </span>
-      </div>
-      <div className={cn("text-xl font-display font-bold mb-1", c.text)}>{kpi.value}</div>
-      {kpi.sublabel && <div className="text-[10px] text-slate-500">{kpi.sublabel}</div>}
-      <div className="text-[10px] text-slate-600 mt-1">{kpi.trendLabel}</div>
-    </div>
-  );
-}
-
-function SignalCard({ signal }: { signal: typeof signals[number] }) {
-  const c = severityColors[signal.severity];
-  return (
-    <Link href={`/signals?id=${signal.id}`}>
+    <Link href={`/signals`}>
       <div className={cn("rounded-lg p-3 border bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer group", c.border)}>
         <div className="flex items-start gap-2.5">
-          <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", c.dot, signal.severity === "critical" && "animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.7)]")} />
+          <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", c.dot, sev === "critical" && "animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.7)]")} />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
               <span className="text-[11px] font-medium text-white/90 leading-tight line-clamp-2">{signal.title}</span>
               <ChevronRight className="w-3 h-3 text-slate-600 group-hover:text-slate-400 shrink-0 mt-0.5 transition-colors" />
             </div>
             <div className="flex items-center gap-3 text-[10px] text-slate-500">
-              <span className={c.text}>{signalTypeLabels[signal.type]}</span>
+              <span className={c.text}>{signal.source}</span>
               <span className="text-slate-600">•</span>
-              <span>{signal.affectedFunction}</span>
+              <span>{(meta.affectedFunction as string) ?? signal.sourceType}</span>
               <span className="text-slate-600">•</span>
-              <span className={cn("font-mono", c.text)}>{formatCurrency(signal.valueAtRisk)} at risk</span>
+              <span className="font-mono text-slate-400">{timeAgo(signal.receivedAt ?? signal.createdAt)}</span>
             </div>
           </div>
         </div>
@@ -83,63 +63,144 @@ function SignalCard({ signal }: { signal: typeof signals[number] }) {
 }
 
 export default function Dashboard() {
-  const [role, setRole] = useState<RoleView>("executive");
-  const kpis = getKPIsForRole(role);
-  const actions = getActionsForRole(role);
-  const criticalSignals = signals.filter(s => s.severity === "critical");
-  const highSignals = signals.filter(s => s.severity === "high");
+  const [showDetails, setShowDetails] = useState(false);
+
+  const { data: dashboardData, isLoading: dashLoading, error: dashError, refetch: refetchDash } = useQuery<LyteDashboard>({
+    queryKey: ["lyte-dashboard"],
+    queryFn: () => api.dashboard(),
+    refetchInterval: 60_000,
+  });
+
+  const { data: insightsData, isLoading: insightsLoading } = useQuery({
+    queryKey: ["lyte-insights-narratives"],
+    queryFn: () => api.insights(),
+    refetchInterval: 120_000,
+  });
+
+  const { data: signals = [], isLoading: signalsLoading } = useQuery({
+    queryKey: ["lyte-signals-feed"],
+    queryFn: () => api.signals.list(),
+    refetchInterval: 30_000,
+  });
+
+  const summary = dashboardData?.summary;
+  const recentSignals = dashboardData?.recentSignals ?? signals.slice(0, 8);
+
+  const criticalSignals = signals.filter(s => s.severity === "critical" && s.status !== "resolved");
+  const highSignals = signals.filter(s => s.severity === "high" && s.status !== "resolved");
+
+  const signalTrendData = (() => {
+    const buckets: Record<string, { critical: number; high: number; medium: number; low: number; date: string }> = {};
+    const now = Date.now();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now - i * 86400000);
+      const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      buckets[key] = { date: key, critical: 0, high: 0, medium: 0, low: 0 };
+    }
+    for (const s of signals) {
+      const d = new Date(s.receivedAt ?? s.createdAt);
+      const key = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (buckets[key]) {
+        const sev = s.severity as keyof typeof buckets[string];
+        if (sev === "critical" || sev === "high" || sev === "medium" || sev === "low") {
+          buckets[key][sev]++;
+        }
+      }
+    }
+    return Object.values(buckets);
+  })();
+
+  const isLoading = dashLoading || signalsLoading;
+
+  const kpiCards = [
+    {
+      label: "Total Signals",
+      value: isLoading ? "—" : (summary?.totalSignals ?? signals.length),
+      sublabel: `${criticalSignals.length} critical unresolved`,
+      severity: criticalSignals.length > 0 ? "critical" : "low" as SignalSeverity,
+      trend: criticalSignals.length > 2 ? "up" : "down",
+      trendLabel: criticalSignals.length > 2 ? "Needs attention" : "Under control",
+    },
+    {
+      label: "Open Incidents",
+      value: isLoading ? "—" : (summary?.openIncidents ?? "—"),
+      sublabel: "Active investigations",
+      severity: (summary?.openIncidents ?? 0) > 3 ? "high" : "medium" as SignalSeverity,
+      trend: (summary?.openIncidents ?? 0) > 2 ? "up" : "down",
+      trendLabel: (summary?.openIncidents ?? 0) > 2 ? "Rising" : "Stable",
+    },
+    {
+      label: "Open Actions",
+      value: isLoading ? "—" : (summary?.openActions ?? "—"),
+      sublabel: "Requiring resolution",
+      severity: (summary?.openActions ?? 0) > 5 ? "high" : "medium" as SignalSeverity,
+      trend: "neutral",
+      trendLabel: "In progress",
+    },
+    {
+      label: "Readiness Score",
+      value: isLoading ? "—" : `${summary?.readinessScore ?? 0}%`,
+      sublabel: "Platform readiness",
+      severity: (summary?.readinessScore ?? 0) > 80 ? "low" : (summary?.readinessScore ?? 0) > 60 ? "medium" : "high" as SignalSeverity,
+      trend: (summary?.readinessScore ?? 0) > 70 ? "down" : "up",
+      trendLabel: (summary?.readinessScore ?? 0) > 70 ? "Healthy" : "Needs work",
+    },
+    {
+      label: "Pending Recommendations",
+      value: isLoading ? "—" : (summary?.pendingRecommendations ?? "—"),
+      sublabel: "Awaiting action",
+      severity: "medium" as SignalSeverity,
+      trend: "neutral",
+      trendLabel: "Review queue",
+    },
+  ];
 
   return (
     <div className="space-y-6 max-w-[1400px]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display font-bold text-2xl text-white tracking-tight">Command Overview</h1>
-          <p className="text-sm text-slate-400 mt-1">Business observability · {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Live SZL platform health · {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+            {dashboardData?.fetchedAt && (
+              <span className="ml-2 text-slate-600">· updated {timeAgo(dashboardData.fetchedAt)}</span>
+            )}
+          </p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
-          {(Object.keys(roleLabels) as RoleView[]).map(r => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              className={cn(
-                "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
-                role === r ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "text-slate-400 hover:text-white"
-              )}
-            >
-              {roleLabels[r]}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          {dashError && (
+            <span className="text-[10px] text-red-400 font-mono bg-red-500/10 border border-red-500/20 px-2 py-1 rounded">Dashboard API error</span>
+          )}
+          <button
+            onClick={() => refetchDash()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all"
+          >
+            <RefreshCw className={cn("w-3 h-3", dashLoading && "animate-spin")} />
+            Refresh
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-3 xl:grid-cols-4">
-        <div className="col-span-4 xl:col-span-1 rounded-xl p-5 border border-red-500/30 bg-red-500/5 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-[11px] text-red-400 font-mono uppercase tracking-wide">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            Total Value at Risk
-          </div>
-          <div className="font-display font-bold text-3xl text-red-300">{formatCurrency(totalValueAtRisk)}</div>
-          <div className="text-[11px] text-slate-400">Across {signals.filter(s => s.status === "active").length} active signals</div>
-          <div className="mt-2 h-16">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={varTrend}>
-                <defs>
-                  <linearGradient id="varGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="amount" stroke="#ef4444" strokeWidth={1.5} fill="url(#varGrad)" dot={false} />
-                <Tooltip
-                  contentStyle={{ background: "#0f172a", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, fontSize: 11 }}
-                  formatter={(v: number) => [`$${v}M`, "Value at Risk"]}
-                  labelStyle={{ color: "#94a3b8" }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-        {kpis.slice(0, 7).map(k => <KPICard key={k.id} kpi={k} />)}
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
+        {kpiCards.map((kpi, i) => {
+          const c = severityColors[kpi.severity];
+          const isNeg = kpi.trend === "up";
+          return (
+            <div key={i} className={cn("rounded-xl p-4 border bg-white/[0.03] hover:bg-white/[0.05] transition-all", c.border)}>
+              <div className="flex items-start justify-between mb-2">
+                <span className="text-[11px] text-slate-400 font-medium leading-tight">{kpi.label}</span>
+                {kpi.trend !== "neutral" && (
+                  <span className={cn("text-[10px] font-mono flex items-center gap-0.5", isNeg ? "text-red-400" : "text-emerald-400")}>
+                    {isNeg ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  </span>
+                )}
+              </div>
+              <div className={cn("text-xl font-display font-bold mb-1", c.text)}>{kpi.value}</div>
+              {kpi.sublabel && <div className="text-[10px] text-slate-500">{kpi.sublabel}</div>}
+              <div className="text-[10px] text-slate-600 mt-1">{kpi.trendLabel}</div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-12 gap-4">
@@ -149,58 +210,30 @@ export default function Dashboard() {
               <h2 className="font-display font-semibold text-sm text-white flex items-center gap-2">
                 <Activity className="w-4 h-4 text-red-400" />
                 Active Signals
+                <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono uppercase">Live</span>
               </h2>
               <Link href="/signals" className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors">
                 View all <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="space-y-2">
-              {criticalSignals.map(s => <SignalCard key={s.id} signal={s} />)}
-              {highSignals.slice(0, 3).map(s => <SignalCard key={s.id} signal={s} />)}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-semibold text-sm text-white flex items-center gap-2">
-                <Target className="w-4 h-4 text-cyan-400" />
-                Value at Risk by Category
-              </h2>
-            </div>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={valueAtRiskBreakdown} layout="vertical" margin={{ left: 0, right: 20 }}>
-                  <XAxis type="number" hide tickFormatter={(v: number) => `$${(v / 1_000_000).toFixed(1)}M`} />
-                  <Tooltip
-                    contentStyle={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 11 }}
-                    formatter={(v: number) => [formatCurrency(v), "At Risk"]}
-                    labelStyle={{ color: "#94a3b8" }}
-                  />
-                  <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
-                    {valueAtRiskBreakdown.map((entry, i) => (
-                      <Cell
-                        key={i}
-                        fill={entry.trend > 20 ? "#ef4444" : entry.trend > 10 ? "#f97316" : entry.trend > 0 ? "#f59e0b" : "#22c55e"}
-                        fillOpacity={0.8}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {valueAtRiskBreakdown.map(r => (
-                <div key={r.category} className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">{r.category}</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-white">{formatCurrency(r.amount)}</span>
-                    <span className={cn("text-[10px]", r.trend > 0 ? "text-red-400" : "text-emerald-400")}>
-                      {r.trend > 0 ? "+" : ""}{r.trend.toFixed(1)}%
-                    </span>
+            {signalsLoading ? (
+              <div className="space-y-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-12 rounded-lg bg-white/[0.02] border border-white/5 animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {criticalSignals.slice(0, 4).map(s => <LiveSignalCard key={s.id} signal={s} />)}
+                {highSignals.slice(0, 3).map(s => <LiveSignalCard key={s.id} signal={s} />)}
+                {criticalSignals.length === 0 && highSignals.length === 0 && (
+                  <div className="flex items-center gap-3 p-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="text-[12px] text-emerald-300">No critical or high severity signals — system nominal</span>
                   </div>
-                </div>
-              ))}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
@@ -209,11 +242,11 @@ export default function Dashboard() {
                 <Activity className="w-4 h-4 text-amber-400" />
                 Signal Volume Trend
               </h2>
-              <span className="text-[10px] text-slate-500">Past 30 days</span>
+              <span className="text-[10px] text-slate-500">Past 7 days</span>
             </div>
             <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={signalTrend}>
+                <AreaChart data={signalTrendData}>
                   <defs>
                     <linearGradient id="critGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#ef4444" stopOpacity={0.4} />
@@ -235,6 +268,49 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
           </div>
+
+          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display font-semibold text-sm text-white flex items-center gap-2">
+                <Target className="w-4 h-4 text-cyan-400" />
+                Recent Signals
+              </h2>
+              <button
+                onClick={() => setShowDetails(!showDetails)}
+                className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                {showDetails ? "Less" : "More"} details
+              </button>
+            </div>
+            <div className="space-y-2">
+              {recentSignals.slice(0, 6).map(s => {
+                const sev = (["critical", "high", "medium", "low"].includes(s.severity) ? s.severity : "medium") as SignalSeverity;
+                const c = severityColors[sev];
+                return (
+                  <div key={s.id} className="flex items-center justify-between text-[11px] p-2.5 rounded-lg border border-white/5 bg-white/[0.01]">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", c.dot)} />
+                      <SeverityBadge severity={s.severity} />
+                      <span className="text-slate-300 truncate">{s.title}</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 ml-2 text-slate-500">
+                      {showDetails && <span className="hidden xl:block">{s.source}</span>}
+                      <span className="font-mono">{timeAgo(s.receivedAt ?? s.createdAt)}</span>
+                      <span className={cn(
+                        "text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase",
+                        s.status === "resolved" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" :
+                        s.status === "acknowledged" ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" :
+                        "text-slate-400 bg-white/5 border-white/10"
+                      )}>{s.status}</span>
+                    </div>
+                  </div>
+                );
+              })}
+              {recentSignals.length === 0 && !isLoading && (
+                <div className="text-center py-4 text-slate-500 text-sm">No signals yet</div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="col-span-12 lg:col-span-4 space-y-4">
@@ -242,67 +318,59 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-display font-semibold text-sm text-white flex items-center gap-2">
                 <Zap className="w-4 h-4 text-cyan-400" />
-                Top Actions Required
+                Actions Required
               </h2>
               <Link href="/action-center" className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors">
                 All <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="space-y-2">
-              {actions.slice(0, 4).map(a => (
-                <div key={a.id} className={cn(
-                  "p-3 rounded-lg border transition-all",
-                  a.urgency === "immediate" ? "border-red-500/20 bg-red-500/5" : "border-white/5 bg-white/[0.02]"
-                )}>
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="text-[11px] font-medium text-white/90 leading-tight">{a.title}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px]">
-                    <span className={cn(
-                      "px-1.5 py-0.5 rounded font-mono uppercase tracking-wide border",
-                      a.urgency === "immediate" ? "text-red-400 bg-red-500/10 border-red-500/20" :
-                        a.urgency === "today" ? "text-orange-400 bg-orange-500/10 border-orange-500/20" :
-                          "text-amber-400 bg-amber-500/10 border-amber-500/20"
-                    )}>
-                      {a.urgency.replace("_", " ")}
-                    </span>
-                    <span className="text-slate-500">{a.owner}</span>
-                    <span className="ml-auto text-emerald-400 font-mono">{formatCurrency(a.valueProtected)}</span>
-                  </div>
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-3 rounded-lg border border-amber-500/15 bg-amber-500/5">
+                <div className="text-[10px] text-slate-400 mb-1">Open</div>
+                <div className="font-display font-bold text-xl text-amber-300">{isLoading ? "—" : (summary?.openActions ?? "—")}</div>
+              </div>
+              <div className="p-3 rounded-lg border border-red-500/15 bg-red-500/5">
+                <div className="text-[10px] text-slate-400 mb-1">Critical</div>
+                <div className="font-display font-bold text-xl text-red-300">{isLoading ? "—" : (summary?.criticalUnresolved ?? criticalSignals.length)}</div>
+              </div>
+              <div className="p-3 rounded-lg border border-violet-500/15 bg-violet-500/5">
+                <div className="text-[10px] text-slate-400 mb-1">Incidents</div>
+                <div className="font-display font-bold text-xl text-violet-300">{isLoading ? "—" : (summary?.openIncidents ?? "—")}</div>
+              </div>
+              <div className="p-3 rounded-lg border border-cyan-500/15 bg-cyan-500/5">
+                <div className="text-[10px] text-slate-400 mb-1">Readiness</div>
+                <div className="font-display font-bold text-xl text-cyan-300">{isLoading ? "—" : `${summary?.readinessScore ?? 0}%`}</div>
+              </div>
             </div>
           </div>
 
           <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-display font-semibold text-sm text-white flex items-center gap-2">
-                <Users className="w-4 h-4 text-orange-400" />
-                Ownership Gaps
+                <Shield className="w-4 h-4 text-violet-400" />
+                Platform Health
               </h2>
-              <Link href="/ownership-map" className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors">
-                Map <ArrowUpRight className="w-3 h-3" />
+              <Link href="/signals" className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors">
+                Signals <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
             <div className="space-y-2">
               {[
-                { area: "Enterprise Renewals (60d)", items: 7, risk: 2300000, status: "missing" as const },
-                { area: "Implementation Queue", items: 14, risk: 890000, status: "missing" as const },
-                { area: "Mid-Market Forecast Recovery", items: 22, risk: 3800000, status: "ambiguous" as const },
-                { area: "Discount Approvals", items: 11, risk: 870000, status: "ambiguous" as const },
-              ].map(g => (
-                <div key={g.area} className={cn(
-                  "flex items-center justify-between p-2.5 rounded-lg border text-[11px]",
-                  g.status === "missing" ? "border-red-500/15 bg-red-500/5" : "border-amber-500/15 bg-amber-500/5"
-                )}>
-                  <div>
-                    <div className="font-medium text-white/90 mb-0.5">{g.area}</div>
-                    <div className="text-slate-500">{g.items} items · {formatCurrency(g.risk)}</div>
-                  </div>
+                { label: "API Server", count: signals.filter(s => s.source.toLowerCase().includes("api") && s.status !== "resolved").length },
+                { label: "Vessels", count: signals.filter(s => s.source.toLowerCase().includes("vessel") && s.status !== "resolved").length },
+                { label: "MSP/Security", count: signals.filter(s => (s.source.toLowerCase().includes("msp") || s.source.toLowerCase().includes("rosie")) && s.status !== "resolved").length },
+                { label: "Terra/Beacon", count: signals.filter(s => (s.source.toLowerCase().includes("terra") || s.source.toLowerCase().includes("beacon")) && s.status !== "resolved").length },
+                { label: "INCA", count: signals.filter(s => s.source.toLowerCase().includes("inca") && s.status !== "resolved").length },
+                { label: "Firestorm", count: signals.filter(s => s.source.toLowerCase().includes("firestorm") && s.status !== "resolved").length },
+              ].map(item => (
+                <div key={item.label} className="flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">{item.label}</span>
                   <span className={cn(
-                    "text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase",
-                    g.status === "missing" ? "text-red-400 bg-red-500/10 border-red-500/20" : "text-amber-400 bg-amber-500/10 border-amber-500/20"
-                  )}>{g.status}</span>
+                    "font-mono font-medium",
+                    item.count === 0 ? "text-emerald-400" : item.count <= 2 ? "text-amber-400" : "text-red-400"
+                  )}>
+                    {signalsLoading ? "—" : item.count === 0 ? "nominal" : `${item.count} signal${item.count > 1 ? "s" : ""}`}
+                  </span>
                 </div>
               ))}
             </div>
@@ -311,65 +379,41 @@ export default function Dashboard() {
           <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-display font-semibold text-sm text-white flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-violet-400" />
+                <Clock className="w-4 h-4 text-violet-400" />
                 Narrative Intelligence
               </h2>
               <Link href="/insights" className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors">
                 All <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="space-y-3">
-              {narrativeInsights.slice(0, 2).map(ins => {
-                const c = severityColors[ins.severity];
-                return (
-                  <div key={ins.id} className={cn("p-3 rounded-lg border", c.border, c.bg)}>
-                    <div className="flex items-start gap-2 mb-2">
-                      <div className={cn("w-1 h-1 rounded-full mt-1.5 shrink-0", c.dot)} />
-                      <span className="text-[11px] font-semibold text-white/90 leading-tight">{ins.title}</span>
+            {insightsLoading ? (
+              <div className="space-y-2">
+                {[...Array(2)].map((_, i) => (
+                  <div key={i} className="h-16 rounded-lg bg-white/[0.02] border border-white/5 animate-pulse" />
+                ))}
+              </div>
+            ) : insightsData?.narratives.length === 0 ? (
+              <div className="flex items-center gap-2 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-[11px] text-emerald-300">No narrative events — system nominal</span>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {insightsData?.narratives.slice(0, 2).map((ins, i) => {
+                  const sev = (ins.priority === "critical" ? "critical" : ins.priority === "high" ? "high" : ins.priority === "medium" ? "medium" : "low") as SignalSeverity;
+                  const c = severityColors[sev];
+                  return (
+                    <div key={i} className={cn("p-3 rounded-lg border", c.border, c.bg)}>
+                      <div className="flex items-start gap-2 mb-1.5">
+                        <div className={cn("w-1 h-1 rounded-full mt-1.5 shrink-0", c.dot)} />
+                        <span className="text-[11px] font-semibold text-white/90 leading-tight">{ins.headline}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-relaxed line-clamp-2 pl-3">{ins.detail}</p>
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-relaxed line-clamp-3">{ins.body}</p>
-                    <div className="flex items-center gap-2 mt-2 text-[10px]">
-                      <span className="text-slate-500">{ins.function}</span>
-                      <span className={cn("ml-auto font-mono", c.text)}>{formatCurrency(ins.valueAtRisk)}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-display font-semibold text-sm text-white flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-400" />
-                Workflow Latency
-              </h2>
-              <Link href="/workflow-latency" className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors">
-                View <ArrowUpRight className="w-3 h-3" />
-              </Link>
-            </div>
-            <div className="space-y-2">
-              {[
-                { name: "Enterprise Approval", actual: 14.2, expected: 3.2, risk: 2100000 },
-                { name: "Implementation Handoff", actual: 11.4, expected: 2.0, risk: 890000 },
-                { name: "PS SOW Signing", actual: 19.0, expected: 7.0, risk: 1100000 },
-              ].map(w => {
-                const ratio = w.actual / w.expected;
-                const color = ratio > 3 ? "bg-red-400" : ratio > 2 ? "bg-orange-400" : "bg-amber-400";
-                const pct = Math.min((w.actual / (w.expected * 5)) * 100, 100);
-                return (
-                  <div key={w.name}>
-                    <div className="flex items-center justify-between text-[11px] mb-1">
-                      <span className="text-slate-300">{w.name}</span>
-                      <span className="font-mono text-slate-400">{w.actual}d / {w.expected}d target</span>
-                    </div>
-                    <div className="relative h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <div className={cn("absolute inset-y-0 left-0 rounded-full", color)} style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

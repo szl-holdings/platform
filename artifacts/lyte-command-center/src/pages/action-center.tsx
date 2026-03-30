@@ -5,13 +5,6 @@ import { doctrineEventBus } from "@workspace/observability";
 import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
 import { cn } from "@/lib/utils";
 import { api, type LyteAction } from "@/lib/api";
-import {
-  actionItems,
-  getActionsForRole,
-  roleLabels,
-  type RoleView,
-  type ActionItem,
-} from "@/lib/business-data";
 
 function formatCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -43,8 +36,8 @@ const statusConfig = {
 type UrgencyKey = keyof typeof urgencyConfig;
 type StatusKey = keyof typeof statusConfig;
 
-function priorityToUrgency(priority: string): UrgencyKey {
-  if (priority === "critical") return "immediate";
+function priorityToUrgency(priority?: string): UrgencyKey {
+  if (priority === "urgent" || priority === "critical") return "immediate";
   if (priority === "high") return "today";
   if (priority === "medium") return "this_week";
   return "next_week";
@@ -82,12 +75,12 @@ function liveActionToDisplay(a: LyteAction): DisplayAction {
   return {
     id: `A-${a.id}`,
     title: a.title,
-    urgency: priorityToUrgency(a.priority),
+    urgency: priorityToUrgency(a.priority ?? a.urgency),
     status: stateToStatus(a.state),
     owner: a.assignedTo ?? a.owner ?? "Unassigned",
-    ownerTeam: (meta.team as string) ?? a.signalCategory,
-    dueBy: formatDate(a.dueAt),
-    valueProtected: a.valueAtRisk ? parseFloat(a.valueAtRisk) : 0,
+    ownerTeam: (meta.team as string) ?? a.ownerTeam ?? a.signalCategory ?? "Platform",
+    dueBy: formatDate(a.dueAt ?? a.dueBy),
+    valueProtected: a.valueAtRisk ? parseFloat(a.valueAtRisk) : (a.valueProtected ?? 0),
     signalIds: a.signalId ? [`S-${a.signalId}`] : [],
     dependencies: Array.isArray(meta.dependencies) ? (meta.dependencies as string[]) : [],
     description: a.description,
@@ -95,21 +88,6 @@ function liveActionToDisplay(a: LyteAction): DisplayAction {
   };
 }
 
-function mockActionToDisplay(a: ActionItem): DisplayAction {
-  return {
-    id: a.id,
-    title: a.title,
-    urgency: a.urgency as UrgencyKey,
-    status: a.status as StatusKey,
-    owner: a.owner,
-    ownerTeam: a.ownerTeam,
-    dueBy: a.dueBy,
-    valueProtected: a.valueProtected,
-    signalIds: a.signalIds,
-    dependencies: a.dependencies,
-    backendId: undefined,
-  };
-}
 
 function ActionCard({ action, expanded, onToggle, onUpdate }: {
   action: DisplayAction;
@@ -215,7 +193,6 @@ function ActionCard({ action, expanded, onToggle, onUpdate }: {
 }
 
 export default function ActionCenter() {
-  const [role, setRole] = useState<RoleView>("executive");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -233,11 +210,7 @@ export default function ActionCenter() {
     },
   });
 
-  const mockActions = getActionsForRole(role);
-  const useLive = liveActions.length > 0;
-  const actions: DisplayAction[] = useLive
-    ? liveActions.map(liveActionToDisplay)
-    : mockActions.map(mockActionToDisplay);
+  const actions: DisplayAction[] = liveActions.map(liveActionToDisplay);
 
   const immediate = actions.filter(a => a.urgency === "immediate");
   const today = actions.filter(a => a.urgency === "today");
@@ -275,10 +248,10 @@ export default function ActionCenter() {
           layer: "DECIDE",
           timestamp: Date.now(),
         },
-        metadata: { role, immediateCount: immediate.length, openCount, totalProtected, source: "action-center", live: useLive },
+        metadata: { immediateCount: immediate.length, openCount, totalProtected, source: "action-center", live: true },
       });
     }
-  }, [immediate.length, role, useLive]);
+  }, [immediate.length]);
 
   const sections = [
     { key: "immediate", items: immediate, label: "Immediate", icon: Zap, color: "text-red-300", badgeColor: "text-red-400 bg-red-500/10 border-red-500/20" },
@@ -294,30 +267,12 @@ export default function ActionCenter() {
           <div className="flex items-center gap-3 mb-0.5">
             <h1 className="font-display font-bold text-2xl text-white tracking-tight">Action Center</h1>
             <DoctrineLayerBadge appId="lyte" variant="compact" />
-            {useLive && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono uppercase tracking-wide">Live</span>
-            )}
+            <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono uppercase tracking-wide">Live</span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
             Prioritized actions{totalProtected > 0 ? ` · ${formatCurrency(totalProtected)} value protected` : ""}
           </p>
         </div>
-        {!useLive && (
-          <div className="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-white/10">
-            {(Object.keys(roleLabels) as RoleView[]).map(r => (
-              <button
-                key={r}
-                onClick={() => setRole(r)}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
-                  role === r ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "text-slate-400 hover:text-white"
-                )}
-              >
-                {roleLabels[r]}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-4 gap-3">

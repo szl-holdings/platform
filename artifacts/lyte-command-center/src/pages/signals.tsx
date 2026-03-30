@@ -5,8 +5,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { api, type LyteSignal } from "@/lib/api";
 import {
-  signals,
-  narrativeInsights,
   severityColors,
   signalTypeLabels,
   type BusinessSignal,
@@ -245,6 +243,12 @@ export default function SignalsFeed() {
     refetchInterval: 30_000,
   });
 
+  const { data: insightsData } = useQuery({
+    queryKey: ["lyte-insights-narratives"],
+    queryFn: () => api.insights(),
+    refetchInterval: 120_000,
+  });
+
   const acknowledgeMutation = useMutation({
     mutationFn: (id: number) => api.signals.acknowledge(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
@@ -258,8 +262,7 @@ export default function SignalsFeed() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
   });
 
-  const liveDisplaySignals = liveSignals.map(lyteSignalToDisplay);
-  const allSignals = [...liveDisplaySignals, ...signals];
+  const allSignals = liveSignals.map(lyteSignalToDisplay);
 
   const selectedSignal = selectedId ? allSignals.find(s => s.id === selectedId) || null : null;
 
@@ -392,25 +395,28 @@ export default function SignalsFeed() {
             <h2 className="font-display font-semibold text-sm text-white">Narrative Intelligence</h2>
           </div>
           <p className="text-[11px] text-slate-500 leading-relaxed">Operating intelligence translated from raw signals into decision-ready language.</p>
-          {narrativeInsights.map(ins => {
-            const c = severityColors[ins.severity];
+          {insightsData?.narratives.map((ins, i) => {
+            const sev = (ins.priority === "critical" ? "critical" : ins.priority === "high" ? "high" : ins.priority === "medium" ? "medium" : "low") as SignalSeverity;
+            const c = severityColors[sev];
             return (
-              <div key={ins.id} className={cn("p-4 rounded-xl border", c.border, c.bg)}>
+              <div key={i} className={cn("p-4 rounded-xl border", c.border, c.bg)}>
                 <div className="mb-2">
-                  <div className="text-[10px] text-slate-500 mb-1">{ins.function} · {timeAgo(ins.detectedAt)}</div>
-                  <h3 className="text-[12px] font-semibold text-white/90 leading-snug mb-2">{ins.title}</h3>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">{ins.body}</p>
+                  <div className="text-[10px] text-slate-500 mb-1 uppercase tracking-wide font-mono">{ins.type}</div>
+                  <h3 className="text-[12px] font-semibold text-white/90 leading-snug mb-2">{ins.headline}</h3>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">{ins.detail}</p>
                   <div className="flex items-center gap-2 mt-2 text-[10px]">
-                    <span className={cn("font-mono font-semibold", c.text)}>{formatCurrency(ins.valueAtRisk)}</span>
-                    <span className="text-slate-600">·</span>
-                    <span className={cn(ins.trend === "worsening" ? "text-red-400" : ins.trend === "stable" ? "text-amber-400" : "text-emerald-400")}>
-                      {ins.trend}
-                    </span>
+                    <span className={cn("font-mono font-semibold uppercase", c.text)}>{ins.priority}</span>
                   </div>
                 </div>
               </div>
             );
           })}
+          {!insightsData && (
+            <div className="text-[11px] text-slate-600 text-center py-4">Loading narratives...</div>
+          )}
+          {insightsData?.narratives.length === 0 && (
+            <div className="text-[11px] text-slate-500 text-center py-4">No active narratives — system is nominal.</div>
+          )}
         </div>
       )}
 
