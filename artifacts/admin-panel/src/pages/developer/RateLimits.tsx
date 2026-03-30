@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Gauge, TrendingUp, AlertTriangle, BarChart3 } from "lucide-react";
 import { apiFetch, isAuthenticated } from "../../lib/api";
-import AuthGate from "../../components/AuthGate";
+import AuthGate from "@workspace/shared-ui/AuthGate";
 
 interface UsageStats {
   totalRequests: number;

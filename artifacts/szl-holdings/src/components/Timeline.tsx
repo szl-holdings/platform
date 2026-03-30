@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import milestonesData from "@/data/milestones.json";
 import siteData from "@/data/site.json";
 
@@ -8,7 +8,7 @@ export function Timeline() {
   return (
     <section id="timeline" className="py-20 lg:py-28">
       <div className="max-w-5xl mx-auto px-6">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -20,7 +20,7 @@ export function Timeline() {
           <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
             {timeline.subtitle}
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="relative">
           <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-szl-primary/50 via-szl-accent/30 to-szl-border" />
@@ -28,7 +28,7 @@ export function Timeline() {
           {milestonesData.map((milestone, index) => {
             const isLeft = index % 2 === 0;
             return (
-              <motion.div
+              <m.div
                 key={`${milestone.year}-${milestone.quarter}`}
                 initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -68,7 +68,7 @@ export function Timeline() {
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>

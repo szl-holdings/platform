@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Calendar, Mail, MapPin, Shield, Clock } from "lucide-react";
 
 import { useCreateStephenBookingRequest } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/shared-ui/ui/button";
 import {
   Form,
   FormControl,
@@ -13,11 +13,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+} from "@workspace/shared-ui/ui/form";
+import { Input } from "@workspace/shared-ui/ui/input";
+import { Textarea } from "@workspace/shared-ui/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
+import { useToast } from "@workspace/shared-ui/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   Ship, Sparkles, Shield, Zap, BarChart3, Palette,
   ExternalLink, ArrowRight, TrendingUp,
@@ -37,7 +37,7 @@ export function Portfolio() {
   return (
     <section id="portfolio" className="py-20 lg:py-28 bg-szl-bg-secondary">
       <div className="max-w-7xl mx-auto px-6">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -49,7 +49,7 @@ export function Portfolio() {
           <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
             {portfolio.subtitle}
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="flex flex-wrap justify-center gap-2 mb-10">
           {categories.map((cat) => (
@@ -67,12 +67,12 @@ export function Portfolio() {
           ))}
         </div>
 
-        <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <m.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {filtered.map((company) => {
               const Icon = iconMap[company.icon] || Sparkles;
               return (
-                <motion.div
+                <m.div
                   key={company.id}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -138,11 +138,11 @@ export function Portfolio() {
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </m.div>
               );
             })}
           </AnimatePresence>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

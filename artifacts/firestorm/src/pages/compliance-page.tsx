@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Button } from "@workspace/shared-ui/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
+import { Progress } from "@workspace/shared-ui/ui/progress";
 import { ClipboardCheck, Shield, CheckCircle, AlertTriangle, XCircle, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";

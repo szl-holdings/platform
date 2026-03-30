@@ -1,33 +1,10 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation, Link } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@workspace/shared-ui/ui/toaster";
+import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { nexusConfig } from "@workspace/shared-ui/copilot-configs";
-import DashboardPage from "@/pages/dashboard";
-import AppsPage from "@/pages/apps";
-import ConnectorsPage from "@/pages/connectors";
-import IntegrationHealthPage from "@/pages/integration-health";
-import IntegrationActivityPage from "@/pages/integration-activity";
-import UsersPage from "@/pages/users";
-import AuditLogPage from "@/pages/audit-log";
-import WebhooksPage from "@/pages/webhooks";
-import FeatureFlagsPage from "@/pages/feature-flags";
-import BillingPage from "@/pages/billing";
-import FilesPage from "@/pages/files";
-import EnvironmentPage from "@/pages/environment";
-import SeedManagerPage from "@/pages/seed-manager";
-import SystemHealthPage from "@/pages/system-health";
-import IntelligenceOverview from "@/pages/intelligence-overview";
-import AIIntelligence from "@/pages/ai-intelligence";
-import SystemObservability from "@/pages/observability";
-import AlloyChatPage from "@/pages/alloy-chat";
-import InfrastructurePage from "@/pages/infrastructure";
-import PlatformHealthPage from "@/pages/platform-health";
-import LoadTestDashboardPage from "@/pages/load-test-dashboard";
-import WorkflowAutomation from "@/pages/workflow-automation";
-import DeveloperPortal from "@/pages/developer-portal";
-import NotFound from "@/pages/not-found";
 import { api } from "@/lib/api";
 import {
   LayoutDashboard,
@@ -53,6 +30,31 @@ import {
   FileText,
   Gauge,
 } from "lucide-react";
+
+const DashboardPage = lazy(() => import("@/pages/dashboard"));
+const AppsPage = lazy(() => import("@/pages/apps"));
+const ConnectorsPage = lazy(() => import("@/pages/connectors"));
+const IntegrationHealthPage = lazy(() => import("@/pages/integration-health"));
+const IntegrationActivityPage = lazy(() => import("@/pages/integration-activity"));
+const UsersPage = lazy(() => import("@/pages/users"));
+const AuditLogPage = lazy(() => import("@/pages/audit-log"));
+const WebhooksPage = lazy(() => import("@/pages/webhooks"));
+const FeatureFlagsPage = lazy(() => import("@/pages/feature-flags"));
+const BillingPage = lazy(() => import("@/pages/billing"));
+const FilesPage = lazy(() => import("@/pages/files"));
+const EnvironmentPage = lazy(() => import("@/pages/environment"));
+const SeedManagerPage = lazy(() => import("@/pages/seed-manager"));
+const SystemHealthPage = lazy(() => import("@/pages/system-health"));
+const IntelligenceOverview = lazy(() => import("@/pages/intelligence-overview"));
+const AIIntelligence = lazy(() => import("@/pages/ai-intelligence"));
+const SystemObservability = lazy(() => import("@/pages/observability"));
+const AlloyChatPage = lazy(() => import("@/pages/alloy-chat"));
+const InfrastructurePage = lazy(() => import("@/pages/infrastructure"));
+const PlatformHealthPage = lazy(() => import("@/pages/platform-health"));
+const LoadTestDashboardPage = lazy(() => import("@/pages/load-test-dashboard"));
+const WorkflowAutomation = lazy(() => import("@/pages/workflow-automation"));
+const DeveloperPortal = lazy(() => import("@/pages/developer-portal"));
+const NotFound = lazy(() => import("@/pages/not-found"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,6 +99,14 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/workflows", label: "Workflows", icon: <Activity className="w-4 h-4" />, section: "Automation" },
   { path: "/developer", label: "Developer Portal", icon: <Globe className="w-4 h-4" />, section: "Developer" },
 ];
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function HealthBadge() {
   const { data } = useQuery({
@@ -214,32 +224,34 @@ function Sidebar() {
 
 function AppRouter() {
   return (
-    <Switch>
-      <Route path="/" component={DashboardPage} />
-      <Route path="/health" component={SystemHealthPage} />
-      <Route path="/apps" component={AppsPage} />
-      <Route path="/connectors" component={ConnectorsPage} />
-      <Route path="/integration-health" component={IntegrationHealthPage} />
-      <Route path="/integration-activity" component={IntegrationActivityPage} />
-      <Route path="/users" component={UsersPage} />
-      <Route path="/audit-log" component={AuditLogPage} />
-      <Route path="/webhooks" component={WebhooksPage} />
-      <Route path="/feature-flags" component={FeatureFlagsPage} />
-      <Route path="/billing" component={BillingPage} />
-      <Route path="/files" component={FilesPage} />
-      <Route path="/environment" component={EnvironmentPage} />
-      <Route path="/seed" component={SeedManagerPage} />
-      <Route path="/intelligence" component={IntelligenceOverview} />
-      <Route path="/ai-analyzer" component={AIIntelligence} />
-      <Route path="/observability" component={SystemObservability} />
-      <Route path="/alloy-chat" component={AlloyChatPage} />
-      <Route path="/infrastructure" component={InfrastructurePage} />
-      <Route path="/platform-health" component={PlatformHealthPage} />
-      <Route path="/load-tests" component={LoadTestDashboardPage} />
-      <Route path="/workflows" component={WorkflowAutomation} />
-      <Route path="/developer" component={DeveloperPortal} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={DashboardPage} />
+        <Route path="/health" component={SystemHealthPage} />
+        <Route path="/apps" component={AppsPage} />
+        <Route path="/connectors" component={ConnectorsPage} />
+        <Route path="/integration-health" component={IntegrationHealthPage} />
+        <Route path="/integration-activity" component={IntegrationActivityPage} />
+        <Route path="/users" component={UsersPage} />
+        <Route path="/audit-log" component={AuditLogPage} />
+        <Route path="/webhooks" component={WebhooksPage} />
+        <Route path="/feature-flags" component={FeatureFlagsPage} />
+        <Route path="/billing" component={BillingPage} />
+        <Route path="/files" component={FilesPage} />
+        <Route path="/environment" component={EnvironmentPage} />
+        <Route path="/seed" component={SeedManagerPage} />
+        <Route path="/intelligence" component={IntelligenceOverview} />
+        <Route path="/ai-analyzer" component={AIIntelligence} />
+        <Route path="/observability" component={SystemObservability} />
+        <Route path="/alloy-chat" component={AlloyChatPage} />
+        <Route path="/infrastructure" component={InfrastructurePage} />
+        <Route path="/platform-health" component={PlatformHealthPage} />
+        <Route path="/load-tests" component={LoadTestDashboardPage} />
+        <Route path="/workflows" component={WorkflowAutomation} />
+        <Route path="/developer" component={DeveloperPortal} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

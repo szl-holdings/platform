@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Lock, Loader2, CheckCircle, Crown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/shared-ui/ui/button";
 
 interface StripeProduct {
   id: string;

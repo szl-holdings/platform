@@ -1,5 +1,5 @@
 import { Shell } from "@/components/layout/shell";
-import { Gauge } from "@/components/ui/gauge";
+import { Gauge } from "@workspace/shared-ui/ui/gauge";
 import { usePrograms, useDimensions, useAlerts, useRisks } from "@/hooks/use-readiness";
 import { ArrowUpRight, ArrowDownRight, Activity, ShieldAlert, Target, BellRing } from "lucide-react";
 import { motion } from "framer-motion";

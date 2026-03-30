@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { navigatorConfig } from "@workspace/shared-ui/copilot-configs";
 import ProjectsPage from "@/pages/projects-page";
-import SpectrumAnalytics from "@/pages/spectrum-analytics";
 import { AppCatalog } from "@/pages/app-catalog";
 import { LiveDemos } from "@/pages/live-demos";
 import { cn } from "@/lib/utils";
+
+const SpectrumAnalytics = lazy(() => import("@/pages/spectrum-analytics"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,6 +18,14 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function AppContent({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: "projects" | "catalog" | "demos") => void }) {
   return (
@@ -54,7 +63,11 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <Switch>
-          <Route path="/spectrum" component={SpectrumAnalytics} />
+          <Route path="/spectrum">
+            <Suspense fallback={<PageLoader />}>
+              <SpectrumAnalytics />
+            </Suspense>
+          </Route>
           <Route path="/">
             <AppContent activeTab={activeTab} setActiveTab={setActiveTab} />
           </Route>

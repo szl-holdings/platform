@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Shield, AlertTriangle, Activity, Clock, Users, Bell, Zap, TrendingUp, Crosshair, Flame, Eye, Target } from "lucide-react";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar } from "recharts";

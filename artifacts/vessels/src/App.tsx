@@ -1,29 +1,30 @@
+import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
-import FleetDashboard from "@/pages/fleet-dashboard";
-import VesselDetailPage from "@/pages/vessel-detail";
-import RoutePlanningPage from "@/pages/route-planning";
-import AlertCenterPage from "@/pages/alert-center";
-import WeatherPage from "@/pages/weather-page";
-import SimulationsPage from "@/pages/simulations-page";
-import MaritimeIntelligence from "@/pages/maritime-intelligence";
-import VesselsIntelligence from "@/pages/intelligence";
-import FleetAPMPage from "@/pages/fleet-apm";
-import InfrastructurePage from "@/pages/infrastructure";
-import LogsExplorerPage from "@/pages/logs-explorer";
-import DigitalExperiencePage from "@/pages/digital-experience";
-import SyntheticsCompliancePage from "@/pages/synthetics-compliance";
-import CO2EmissionsPage from "@/pages/co2-emissions";
-import AppliedIntelligencePage from "@/pages/applied-intelligence";
-import ObservabilityPage from "@/pages/observability";
-import PortAnalyticsPage from "@/pages/port-analytics";
-import { useState } from "react";
+
+const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));
+const VesselDetailPage = lazy(() => import("@/pages/vessel-detail"));
+const RoutePlanningPage = lazy(() => import("@/pages/route-planning"));
+const AlertCenterPage = lazy(() => import("@/pages/alert-center"));
+const WeatherPage = lazy(() => import("@/pages/weather-page"));
+const SimulationsPage = lazy(() => import("@/pages/simulations-page"));
+const MaritimeIntelligence = lazy(() => import("@/pages/maritime-intelligence"));
+const VesselsIntelligence = lazy(() => import("@/pages/intelligence"));
+const FleetAPMPage = lazy(() => import("@/pages/fleet-apm"));
+const InfrastructurePage = lazy(() => import("@/pages/infrastructure"));
+const LogsExplorerPage = lazy(() => import("@/pages/logs-explorer"));
+const DigitalExperiencePage = lazy(() => import("@/pages/digital-experience"));
+const SyntheticsCompliancePage = lazy(() => import("@/pages/synthetics-compliance"));
+const CO2EmissionsPage = lazy(() => import("@/pages/co2-emissions"));
+const AppliedIntelligencePage = lazy(() => import("@/pages/applied-intelligence"));
+const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const PortAnalyticsPage = lazy(() => import("@/pages/port-analytics"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -77,6 +78,14 @@ const navSections: NavSection[] = [
     ],
   },
 ];
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 interface AppHealthSummary {
   services: { name: string; status: string }[];
@@ -264,30 +273,32 @@ function Sidebar() {
 
 function AppRouter() {
   return (
-    <Switch>
-      <Route path="/" component={FleetDashboard} />
-      <Route path="/intelligence" component={MaritimeIntelligence} />
-      <Route path="/ai-intel" component={VesselsIntelligence} />
-      <Route path="/fleet-apm" component={FleetAPMPage} />
-      <Route path="/infrastructure" component={InfrastructurePage} />
-      <Route path="/logs" component={LogsExplorerPage} />
-      <Route path="/digital-experience" component={DigitalExperiencePage} />
-      <Route path="/synthetics" component={SyntheticsCompliancePage} />
-      <Route path="/co2-emissions" component={CO2EmissionsPage} />
-      <Route path="/applied-intelligence" component={AppliedIntelligencePage} />
-      <Route path="/port-analytics" component={PortAnalyticsPage} />
-      <Route path="/vessel/:id" component={VesselDetailPage} />
-      <Route path="/routes" component={RoutePlanningPage} />
-      <Route path="/weather" component={WeatherPage} />
-      <Route path="/simulations" component={SimulationsPage} />
-      <Route path="/alerts" component={AlertCenterPage} />
-      <Route path="/observability" component={ObservabilityPage} />
-      <Route>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-muted-foreground">Page not found</p>
-        </div>
-      </Route>
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={FleetDashboard} />
+        <Route path="/intelligence" component={MaritimeIntelligence} />
+        <Route path="/ai-intel" component={VesselsIntelligence} />
+        <Route path="/fleet-apm" component={FleetAPMPage} />
+        <Route path="/infrastructure" component={InfrastructurePage} />
+        <Route path="/logs" component={LogsExplorerPage} />
+        <Route path="/digital-experience" component={DigitalExperiencePage} />
+        <Route path="/synthetics" component={SyntheticsCompliancePage} />
+        <Route path="/co2-emissions" component={CO2EmissionsPage} />
+        <Route path="/applied-intelligence" component={AppliedIntelligencePage} />
+        <Route path="/port-analytics" component={PortAnalyticsPage} />
+        <Route path="/vessel/:id" component={VesselDetailPage} />
+        <Route path="/routes" component={RoutePlanningPage} />
+        <Route path="/weather" component={WeatherPage} />
+        <Route path="/simulations" component={SimulationsPage} />
+        <Route path="/alerts" component={AlertCenterPage} />
+        <Route path="/observability" component={ObservabilityPage} />
+        <Route>
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">Page not found</p>
+          </div>
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
 

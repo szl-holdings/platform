@@ -1,26 +1,28 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Dashboard from "@/pages/dashboard";
-import Projects from "@/pages/projects";
-import ProjectDetail from "@/pages/project-detail";
-import Experiments from "@/pages/experiments";
-import Models from "@/pages/models";
-import Insights from "@/pages/insights";
-import ObservabilityPage from "@/pages/observability";
-import Predictions from "@/pages/predictions";
-import AlertsManagement from "@/pages/alerts-management";
-import EnsembleStudio from "@/pages/ensemble-studio";
-import PredictionDrift from "@/pages/prediction-drift";
-import AnomalyTimeline from "@/pages/anomaly-timeline";
-import AlertCorrelation from "@/pages/alert-correlation";
-import ConfidenceHistogram from "@/pages/confidence-histogram";
-import ScenarioBuilder from "@/pages/scenario-builder";
-import CorrelationAnalysis from "@/pages/correlation-analysis";
-import ModelRegistry from "@/pages/model-registry";
-import NeuralExplorer from "@/pages/neural-explorer";
-import Benchmarking from "@/pages/benchmarking";
+
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Projects = lazy(() => import("@/pages/projects"));
+const ProjectDetail = lazy(() => import("@/pages/project-detail"));
+const Experiments = lazy(() => import("@/pages/experiments"));
+const Models = lazy(() => import("@/pages/models"));
+const Insights = lazy(() => import("@/pages/insights"));
+const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const Predictions = lazy(() => import("@/pages/predictions"));
+const AlertsManagement = lazy(() => import("@/pages/alerts-management"));
+const EnsembleStudio = lazy(() => import("@/pages/ensemble-studio"));
+const PredictionDrift = lazy(() => import("@/pages/prediction-drift"));
+const AnomalyTimeline = lazy(() => import("@/pages/anomaly-timeline"));
+const AlertCorrelation = lazy(() => import("@/pages/alert-correlation"));
+const ConfidenceHistogram = lazy(() => import("@/pages/confidence-histogram"));
+const ScenarioBuilder = lazy(() => import("@/pages/scenario-builder"));
+const CorrelationAnalysis = lazy(() => import("@/pages/correlation-analysis"));
+const ModelRegistry = lazy(() => import("@/pages/model-registry"));
+const NeuralExplorer = lazy(() => import("@/pages/neural-explorer"));
+const Benchmarking = lazy(() => import("@/pages/benchmarking"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -46,6 +48,14 @@ const navItems = [
   { path: "/neural-explorer", label: "Neural Explorer", icon: Brain },
   { path: "/benchmarking", label: "Benchmarking", icon: Trophy },
 ];
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function Sidebar() {
   const [location] = useLocation();
@@ -105,32 +115,34 @@ function Sidebar() {
 
 function AppRouter() {
   return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/projects" component={Projects} />
-      <Route path="/projects/:id" component={ProjectDetail} />
-      <Route path="/experiments" component={Experiments} />
-      <Route path="/models" component={Models} />
-      <Route path="/insights" component={Insights} />
-      <Route path="/observability" component={ObservabilityPage} />
-      <Route path="/predictions" component={Predictions} />
-      <Route path="/alerts" component={AlertsManagement} />
-      <Route path="/ensemble" component={EnsembleStudio} />
-      <Route path="/drift" component={PredictionDrift} />
-      <Route path="/anomalies" component={AnomalyTimeline} />
-      <Route path="/correlation-alerts" component={AlertCorrelation} />
-      <Route path="/confidence" component={ConfidenceHistogram} />
-      <Route path="/scenarios" component={ScenarioBuilder} />
-      <Route path="/correlations" component={CorrelationAnalysis} />
-      <Route path="/registry" component={ModelRegistry} />
-      <Route path="/neural-explorer" component={NeuralExplorer} />
-      <Route path="/benchmarking" component={Benchmarking} />
-      <Route>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-muted-foreground font-mono">404 — Page not found</p>
-        </div>
-      </Route>
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/projects" component={Projects} />
+        <Route path="/projects/:id" component={ProjectDetail} />
+        <Route path="/experiments" component={Experiments} />
+        <Route path="/models" component={Models} />
+        <Route path="/insights" component={Insights} />
+        <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/predictions" component={Predictions} />
+        <Route path="/alerts" component={AlertsManagement} />
+        <Route path="/ensemble" component={EnsembleStudio} />
+        <Route path="/drift" component={PredictionDrift} />
+        <Route path="/anomalies" component={AnomalyTimeline} />
+        <Route path="/correlation-alerts" component={AlertCorrelation} />
+        <Route path="/confidence" component={ConfidenceHistogram} />
+        <Route path="/scenarios" component={ScenarioBuilder} />
+        <Route path="/correlations" component={CorrelationAnalysis} />
+        <Route path="/registry" component={ModelRegistry} />
+        <Route path="/neural-explorer" component={NeuralExplorer} />
+        <Route path="/benchmarking" component={Benchmarking} />
+        <Route>
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground font-mono">404 — Page not found</p>
+          </div>
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
 

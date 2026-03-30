@@ -1,24 +1,26 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
-import SOCDashboard from "@/pages/soc-dashboard";
-import ThreatIntelligence from "@/pages/threat-intelligence";
-import ThreatIntelFeed from "@/pages/threat-intel-feed";
-import IncidentsPage from "@/pages/incidents-page";
-import FindingsPage from "@/pages/findings-page";
-import MitreAttackPage from "@/pages/mitre-attack-page";
-import CompliancePage from "@/pages/compliance-page";
-import AlertsPage from "@/pages/alerts-page";
-import RiskScoringPage from "@/pages/risk-scoring";
-import ReportsPage from "@/pages/reports-page";
-import ObservabilityPage from "@/pages/observability";
-import SentinelDashboard from "@/pages/sentinel-dashboard";
-import Watchlists from "@/pages/watchlists";
-import ForensicsTimeline from "@/pages/forensics-timeline";
+
+const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
+const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
+const ThreatIntelFeed = lazy(() => import("@/pages/threat-intel-feed"));
+const IncidentsPage = lazy(() => import("@/pages/incidents-page"));
+const FindingsPage = lazy(() => import("@/pages/findings-page"));
+const MitreAttackPage = lazy(() => import("@/pages/mitre-attack-page"));
+const CompliancePage = lazy(() => import("@/pages/compliance-page"));
+const AlertsPage = lazy(() => import("@/pages/alerts-page"));
+const RiskScoringPage = lazy(() => import("@/pages/risk-scoring"));
+const ReportsPage = lazy(() => import("@/pages/reports-page"));
+const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const SentinelDashboard = lazy(() => import("@/pages/sentinel-dashboard"));
+const Watchlists = lazy(() => import("@/pages/watchlists"));
+const ForensicsTimeline = lazy(() => import("@/pages/forensics-timeline"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -40,6 +42,14 @@ const navItems = [
   { path: "/watchlists", label: "Watchlists", icon: Target },
   { path: "/forensics", label: "Forensics", icon: Flame },
 ];
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function StatusBar() {
   const { data: socData } = useQuery({
@@ -119,27 +129,29 @@ function Sidebar() {
 
 function AppRouter() {
   return (
-    <Switch>
-      <Route path="/" component={SOCDashboard} />
-      <Route path="/threat-intel" component={ThreatIntelligence} />
-      <Route path="/threat-feed" component={ThreatIntelFeed} />
-      <Route path="/incidents" component={IncidentsPage} />
-      <Route path="/findings" component={FindingsPage} />
-      <Route path="/mitre-attack" component={MitreAttackPage} />
-      <Route path="/compliance" component={CompliancePage} />
-      <Route path="/alerts" component={AlertsPage} />
-      <Route path="/risk-scoring" component={RiskScoringPage} />
-      <Route path="/reports" component={ReportsPage} />
-      <Route path="/observability" component={ObservabilityPage} />
-      <Route path="/sentinel" component={SentinelDashboard} />
-      <Route path="/watchlists" component={Watchlists} />
-      <Route path="/forensics" component={ForensicsTimeline} />
-      <Route>
-        <div className="flex items-center justify-center h-full">
-          <p className="text-muted-foreground">Page not found</p>
-        </div>
-      </Route>
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={SOCDashboard} />
+        <Route path="/threat-intel" component={ThreatIntelligence} />
+        <Route path="/threat-feed" component={ThreatIntelFeed} />
+        <Route path="/incidents" component={IncidentsPage} />
+        <Route path="/findings" component={FindingsPage} />
+        <Route path="/mitre-attack" component={MitreAttackPage} />
+        <Route path="/compliance" component={CompliancePage} />
+        <Route path="/alerts" component={AlertsPage} />
+        <Route path="/risk-scoring" component={RiskScoringPage} />
+        <Route path="/reports" component={ReportsPage} />
+        <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/sentinel" component={SentinelDashboard} />
+        <Route path="/watchlists" component={Watchlists} />
+        <Route path="/forensics" component={ForensicsTimeline} />
+        <Route>
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">Page not found</p>
+          </div>
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
 

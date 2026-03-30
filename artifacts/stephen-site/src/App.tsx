@@ -1,18 +1,20 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
+import { Toaster } from "@workspace/shared-ui/ui/toaster";
+import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { stephenAIConfig } from "@workspace/shared-ui/copilot-configs";
-import { Home } from "@/pages/Home";
-import CheckoutSuccess from "@/pages/checkout-success";
-import CheckoutCancel from "@/pages/checkout-cancel";
-import ObservabilityPage from "@/pages/observability";
-import FinancialResearch from "@/pages/financial-research";
-import HackajobProfile from "@/pages/hackajob-profile";
-import CareerCommand from "@/pages/career-command";
 import { Server, AlertTriangle } from "lucide-react";
+
+const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home || m.default })));
+const NotFound = lazy(() => import("@/pages/not-found"));
+const CheckoutSuccess = lazy(() => import("@/pages/checkout-success"));
+const CheckoutCancel = lazy(() => import("@/pages/checkout-cancel"));
+const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const FinancialResearch = lazy(() => import("@/pages/financial-research"));
+const HackajobProfile = lazy(() => import("@/pages/hackajob-profile"));
+const CareerCommand = lazy(() => import("@/pages/career-command"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +28,14 @@ const queryClient = new QueryClient({
 interface AppHealthSummary {
   services: { name: string; status: string }[];
   summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
+}
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 }
 
 function DemoModeBanner() {
@@ -63,16 +73,18 @@ function DemoModeBanner() {
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/checkout/success" component={CheckoutSuccess} />
-      <Route path="/checkout/cancel" component={CheckoutCancel} />
-      <Route path="/observability" component={ObservabilityPage} />
-      <Route path="/financial-research" component={FinancialResearch} />
-      <Route path="/hackajob" component={HackajobProfile} />
-      <Route path="/career" component={CareerCommand} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/checkout/success" component={CheckoutSuccess} />
+        <Route path="/checkout/cancel" component={CheckoutCancel} />
+        <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/financial-research" component={FinancialResearch} />
+        <Route path="/hackajob" component={HackajobProfile} />
+        <Route path="/career" component={CareerCommand} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

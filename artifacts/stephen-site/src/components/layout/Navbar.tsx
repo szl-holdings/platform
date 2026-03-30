@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/shared-ui/ui/button";
 import { Link } from "wouter";
 
 const navLinks = [

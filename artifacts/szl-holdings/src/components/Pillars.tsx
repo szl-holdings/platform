@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Brain, ShieldCheck, Anchor, Lightbulb, Target } from "lucide-react";
 import pillarsData from "@/data/pillars.json";
 import siteData from "@/data/site.json";
@@ -13,7 +13,7 @@ export function Pillars() {
   return (
     <section id="pillars" className="py-20 lg:py-28 bg-szl-bg-secondary">
       <div className="max-w-7xl mx-auto px-6">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -25,13 +25,13 @@ export function Pillars() {
           <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
             {pillars.subtitle}
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pillarsData.map((pillar, index) => {
             const Icon = iconMap[pillar.icon] || Brain;
             return (
-              <motion.div
+              <m.div
                 key={pillar.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -77,7 +77,7 @@ export function Pillars() {
                     </p>
                   )}
                 </div>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>

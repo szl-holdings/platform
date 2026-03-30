@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ArrowDown, ChevronRight } from "lucide-react";
 import siteData from "@/data/site.json";
 
@@ -67,7 +67,7 @@ export function Hero() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-primary/20 to-transparent" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -80,9 +80,9 @@ export function Hero() {
             </span>
             {hero.badge}
           </span>
-        </motion.div>
+        </m.div>
 
-        <motion.h1
+        <m.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -93,18 +93,18 @@ export function Hero() {
           <span className="bg-gradient-to-r from-szl-primary via-szl-accent to-szl-cyan bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
             {hero.headlineAccent}
           </span>
-        </motion.h1>
+        </m.h1>
 
-        <motion.p
+        <m.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-szl-text-secondary text-lg sm:text-xl max-w-3xl mx-auto mb-12 leading-relaxed"
         >
           {hero.subheadline}
-        </motion.p>
+        </m.p>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
@@ -123,9 +123,9 @@ export function Hero() {
           >
             {hero.ctaSecondary}
           </a>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9 }}
@@ -144,10 +144,10 @@ export function Hero() {
               </p>
             </div>
           ))}
-        </motion.div>
+        </m.div>
       </div>
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.4 }}
@@ -156,7 +156,7 @@ export function Hero() {
         <a href="#ecosystem" className="text-szl-text-muted hover:text-szl-text-secondary transition-colors">
           <ArrowDown size={20} className="animate-bounce" />
         </a>
-      </motion.div>
+      </m.div>
     </section>
   );
 }

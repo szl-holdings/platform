@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Button } from "@workspace/shared-ui/ui/button";
+import { Input } from "@workspace/shared-ui/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
 import { Globe, Shield, AlertTriangle, Search, Radio, Brain, MapPin, Crosshair, Activity, FileText, Clock, TrendingUp, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 

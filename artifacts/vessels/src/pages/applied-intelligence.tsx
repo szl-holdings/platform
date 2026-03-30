@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { dataProvider } from "@/data/data-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Brain, Sparkles, Wrench, TrendingUp, AlertTriangle, Info, CheckCircle, Target, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area, AreaChart } from "recharts";
 

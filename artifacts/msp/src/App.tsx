@@ -1,7 +1,7 @@
+import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 import {
   LayoutDashboard,
   Building2,
@@ -19,18 +19,19 @@ import {
   Server,
   Wrench,
 } from "lucide-react";
-import LandingPage from "@/pages/landing";
-import ClientsPage from "@/pages/clients";
-import ServiceDeskPage from "@/pages/service-desk";
-import TicketsPage from "@/pages/tickets";
-import DevicesPage from "@/pages/devices";
-import ContractsPage from "@/pages/contracts";
-import NOCPage from "@/pages/noc";
-import RevenuePage from "@/pages/revenue";
-import TechniciansPage from "@/pages/technicians";
-import DispatchPage from "@/pages/dispatch";
-import ObservabilityPage from "@/pages/observability";
-import NotFound from "@/pages/not-found";
+
+const LandingPage = lazy(() => import("@/pages/landing"));
+const ClientsPage = lazy(() => import("@/pages/clients"));
+const ServiceDeskPage = lazy(() => import("@/pages/service-desk"));
+const TicketsPage = lazy(() => import("@/pages/tickets"));
+const DevicesPage = lazy(() => import("@/pages/devices"));
+const ContractsPage = lazy(() => import("@/pages/contracts"));
+const NOCPage = lazy(() => import("@/pages/noc"));
+const RevenuePage = lazy(() => import("@/pages/revenue"));
+const TechniciansPage = lazy(() => import("@/pages/technicians"));
+const DispatchPage = lazy(() => import("@/pages/dispatch"));
+const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const NotFound = lazy(() => import("@/pages/not-found"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -72,6 +73,14 @@ const navSections: NavSection[] = [
     ],
   },
 ];
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function Sidebar() {
   const [location] = useLocation();
@@ -148,21 +157,23 @@ function Sidebar() {
 
 function AppRouter() {
   return (
-    <Switch>
-      <Route path="/" component={LandingPage} />
-      <Route path="/dashboard" component={ClientsPage} />
-      <Route path="/clients" component={ClientsPage} />
-      <Route path="/tickets" component={TicketsPage} />
-      <Route path="/service-desk" component={ServiceDeskPage} />
-      <Route path="/devices" component={DevicesPage} />
-      <Route path="/contracts" component={ContractsPage} />
-      <Route path="/noc" component={NOCPage} />
-      <Route path="/revenue" component={RevenuePage} />
-      <Route path="/technicians" component={TechniciansPage} />
-      <Route path="/dispatch" component={DispatchPage} />
-      <Route path="/observability" component={ObservabilityPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={LandingPage} />
+        <Route path="/dashboard" component={ClientsPage} />
+        <Route path="/clients" component={ClientsPage} />
+        <Route path="/tickets" component={TicketsPage} />
+        <Route path="/service-desk" component={ServiceDeskPage} />
+        <Route path="/devices" component={DevicesPage} />
+        <Route path="/contracts" component={ContractsPage} />
+        <Route path="/noc" component={NOCPage} />
+        <Route path="/revenue" component={RevenuePage} />
+        <Route path="/technicians" component={TechniciansPage} />
+        <Route path="/dispatch" component={DispatchPage} />
+        <Route path="/observability" component={ObservabilityPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
@@ -173,7 +184,9 @@ function DashboardLayout() {
   if (isLanding) {
     return (
       <main className="flex-1 overflow-auto">
-        <LandingPage />
+        <Suspense fallback={<PageLoader />}>
+          <LandingPage />
+        </Suspense>
       </main>
     );
   }

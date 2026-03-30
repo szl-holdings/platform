@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import { api } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Button } from "@workspace/shared-ui/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/shared-ui/ui/tabs";
 import { ArrowLeft, Ship, MapPin, Package, Navigation, Clock } from "lucide-react";
 
 const statusColors: Record<string, string> = {

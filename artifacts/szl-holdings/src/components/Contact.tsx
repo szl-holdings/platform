@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Send, CheckCircle, AlertCircle } from "lucide-react";
 import siteData from "@/data/site.json";
 
@@ -78,7 +78,7 @@ export function Contact() {
   return (
     <section id="contact" className="py-20 lg:py-28 bg-szl-bg-secondary">
       <div className="max-w-3xl mx-auto px-6">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -90,9 +90,9 @@ export function Contact() {
           <p className="text-szl-text-secondary text-lg max-w-xl mx-auto">
             {contact.subtitle}
           </p>
-        </motion.div>
+        </m.div>
 
-        <motion.form
+        <m.form
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -197,7 +197,7 @@ export function Contact() {
               </>
             )}
           </button>
-        </motion.form>
+        </m.form>
       </div>
     </section>
   );

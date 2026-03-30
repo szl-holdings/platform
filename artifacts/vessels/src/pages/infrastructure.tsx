@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { dataProvider } from "@/data/data-provider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
+import { Badge } from "@workspace/shared-ui/ui/badge";
+import { Progress } from "@workspace/shared-ui/ui/progress";
 import { Wrench, Cog, Ship, AlertTriangle, CheckCircle, Clock, Shield, Activity } from "lucide-react";
 
 const severityColors: Record<string, string> = {

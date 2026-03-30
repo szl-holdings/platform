@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import portfolioData from "@/data/portfolio.json";
 import siteData from "@/data/site.json";
 
@@ -341,7 +341,7 @@ export function Constellation() {
   return (
     <section id="ecosystem" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-6">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -354,9 +354,9 @@ export function Constellation() {
           <p className="text-szl-text-secondary text-lg max-w-2xl mx-auto">
             {ecosystem.subtitle}
           </p>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           ref={containerRef}
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -382,7 +382,7 @@ export function Constellation() {
               <a key={company.id} href={company.link}>{company.name} - {company.status}</a>
             ))}
           </nav>
-        </motion.div>
+        </m.div>
 
         <div className="mt-6 flex flex-wrap justify-center gap-8 text-sm text-szl-text-muted">
           <span className="flex items-center gap-2">

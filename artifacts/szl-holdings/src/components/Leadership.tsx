@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { Quote } from "lucide-react";
 import siteData from "@/data/site.json";
 
@@ -8,7 +8,7 @@ export function Leadership() {
   return (
     <section id="leadership" className="py-20 lg:py-28">
       <div className="max-w-6xl mx-auto px-6">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -17,9 +17,9 @@ export function Leadership() {
           <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold text-szl-text mb-4">
             {leadership.title}
           </h2>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -37,20 +37,20 @@ export function Leadership() {
           </div>
           <div className="absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-primary/40 to-transparent" />
           <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-accent/20 to-transparent" />
-        </motion.div>
+        </m.div>
 
-        <motion.p
+        <m.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-szl-text-secondary text-lg text-center max-w-4xl mx-auto mb-14 leading-relaxed"
         >
           {leadership.vision}
-        </motion.p>
+        </m.p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {leadership.values.map((value, index) => (
-            <motion.div
+            <m.div
               key={value.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -67,7 +67,7 @@ export function Leadership() {
               <p className="text-szl-text-secondary text-sm leading-relaxed">
                 {value.description}
               </p>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

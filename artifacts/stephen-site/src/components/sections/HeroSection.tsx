@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/shared-ui/ui/button";
 import { useGetStephenProfile } from "@workspace/api-client-react";
 import { useRef, useEffect } from "react";
 
