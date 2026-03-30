@@ -3,7 +3,11 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown, EyeOff, ShieldAlert, Shield, ChevronRight } from "lucide-react";
+import {
+  Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
+  BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
+  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor
+} from "lucide-react";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
@@ -14,26 +18,29 @@ import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/k
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
+const VesselsLandingPage = lazy(() => import("@/pages/vessels-landing"));
+const CommandOverviewPage = lazy(() => import("@/pages/command-overview"));
+const FleetMapPage = lazy(() => import("@/pages/fleet-map"));
+const VesselDetailEnhancedPage = lazy(() => import("@/pages/vessel-detail-enhanced"));
+const VoyageEconomicsPage = lazy(() => import("@/pages/voyage-economics"));
+const ExceptionsCenterPage = lazy(() => import("@/pages/exceptions-center"));
+const MaintenanceReadinessPage = lazy(() => import("@/pages/maintenance-readiness"));
+const CommandModePage = lazy(() => import("@/pages/command-mode"));
+const PerformanceAnalyticsPage = lazy(() => import("@/pages/performance-analytics"));
+const VesselsListPage = lazy(() => import("@/pages/vessels-list"));
+const CorridorRoutesPage = lazy(() => import("@/pages/corridor-routes"));
+
 const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));
-const VesselDetailPage = lazy(() => import("@/pages/vessel-detail"));
 const RoutePlanningPage = lazy(() => import("@/pages/route-planning"));
 const AlertCenterPage = lazy(() => import("@/pages/alert-center"));
 const WeatherPage = lazy(() => import("@/pages/weather-page"));
 const SimulationsPage = lazy(() => import("@/pages/simulations-page"));
 const MaritimeIntelligence = lazy(() => import("@/pages/maritime-intelligence"));
-const VesselsIntelligence = lazy(() => import("@/pages/intelligence"));
 const FleetAPMPage = lazy(() => import("@/pages/fleet-apm"));
-const InfrastructurePage = lazy(() => import("@/pages/infrastructure"));
-const LogsExplorerPage = lazy(() => import("@/pages/logs-explorer"));
-const DigitalExperiencePage = lazy(() => import("@/pages/digital-experience"));
-const SyntheticsCompliancePage = lazy(() => import("@/pages/synthetics-compliance"));
-const CO2EmissionsPage = lazy(() => import("@/pages/co2-emissions"));
-const AppliedIntelligencePage = lazy(() => import("@/pages/applied-intelligence"));
-const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const PortAnalyticsPage = lazy(() => import("@/pages/port-analytics"));
-const DarkVesselDetection = lazy(() => import("@/pages/dark-vessel-detection"));
-const CommoditiesTracking = lazy(() => import("@/pages/commodities-tracking"));
+const CO2EmissionsPage = lazy(() => import("@/pages/co2-emissions"));
 const RiskScoringPage = lazy(() => import("@/pages/risk-scoring"));
+const DarkVesselDetection = lazy(() => import("@/pages/dark-vessel-detection"));
 const SanctionsScreening = lazy(() => import("@/pages/sanctions-screening"));
 const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
 const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
@@ -43,34 +50,33 @@ const queryClient = new QueryClient({
 });
 
 const primaryNavItems = [
-  { path: "/", label: "Fleet Command", icon: LayoutDashboard },
-  { path: "/intelligence", label: "Maritime Intel", icon: Globe },
-  { path: "/alerts", label: "Alerts", icon: AlertTriangle },
-  { path: "/routes", label: "Route Planning", icon: Navigation },
-  { path: "/fleet-apm", label: "Fleet APM", icon: BarChart3 },
-  { path: "/weather", label: "Weather", icon: CloudRain },
+  { path: "/platform", label: "Command Overview", icon: LayoutDashboard },
+  { path: "/fleet", label: "Fleet Map", icon: MapPin },
+  { path: "/vessels-list", label: "Vessel Roster", icon: List },
+  { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
+  { path: "/economics", label: "Voyage Economics", icon: DollarSign },
+  { path: "/maintenance", label: "Maintenance", icon: Wrench },
+  { path: "/corridors", label: "Corridors", icon: Navigation },
+  { path: "/command", label: "Command Mode", icon: Activity },
+  { path: "/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
-const secondaryNavItems = [
-  { path: "/risk-scoring", label: "Risk Scoring", icon: Shield },
-  { path: "/dark-vessel-detection", label: "Dark Vessels", icon: EyeOff },
-  { path: "/sanctions-screening", label: "Sanctions", icon: ShieldAlert },
-  { path: "/co2-emissions", label: "CO2 & Emissions", icon: Leaf },
-  { path: "/cyber-threats", label: "Cyber Threats", icon: ShieldCheck },
-  { path: "/incidents", label: "Incidents", icon: AlertTriangle },
-  { path: "/port-analytics", label: "Port Analytics", icon: Anchor },
-  { path: "/observability", label: "Observability", icon: Activity },
-  { path: "/logs", label: "Logs", icon: ScrollText },
-  { path: "/simulations", label: "Simulations", icon: Activity },
-  { path: "/applied-intelligence", label: "Applied AI", icon: Brain },
-  { path: "/commodities-tracking", label: "Commodities", icon: Package },
-  { path: "/infrastructure", label: "Infrastructure", icon: Cog },
+const legacyNavItems = [
+  { path: "/intelligence", label: "Maritime Intel", icon: Globe },
+  { path: "/routes", label: "Route Planning", icon: Navigation },
+  { path: "/alerts", label: "Alerts", icon: AlertTriangle },
+  { path: "/weather", label: "Weather", icon: Activity },
+  { path: "/port-analytics", label: "Port Analytics", icon: Ship },
+  { path: "/co2-emissions", label: "CO2 & Emissions", icon: Activity },
+  { path: "/risk-scoring", label: "Risk Scoring", icon: Activity },
+  { path: "/dark-vessel-detection", label: "Dark Vessels", icon: Activity },
+  { path: "/sanctions-screening", label: "Sanctions", icon: Activity },
 ];
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-sky-500/40 border-t-sky-400 rounded-full animate-spin" />
     </div>
   );
 }
@@ -88,7 +94,6 @@ function DemoModeBanner() {
   });
 
   if (!data) return null;
-
   const hasDemoMode = data.summary.mockedDemoMode > 0;
   const hasUnhealthy = data.summary.manualRequired > 0;
   if (!hasDemoMode && !hasUnhealthy) return null;
@@ -105,7 +110,7 @@ function DemoModeBanner() {
   return (
     <div className="border-b border-sky-500/10 px-4 py-1 flex items-center gap-2 shrink-0">
       <span className="text-[10px] font-mono text-sky-400/50 px-2 py-0.5 rounded-full border border-sky-500/20 bg-sky-500/5">DEMO</span>
-      <span className="text-[10px] text-sky-400/40">Simulated data</span>
+      <span className="text-[10px] text-sky-400/40">Simulated operational data · 10 vessels</span>
     </div>
   );
 }
@@ -160,9 +165,8 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
 
 function Sidebar() {
   const [location] = useLocation();
-  const { user } = useAuth();
   const [hovered, setHovered] = useState(false);
-  const [moreExpanded, setMoreExpanded] = useState(false);
+  const [legacyExpanded, setLegacyExpanded] = useState(false);
   const expanded = hovered;
 
   return (
@@ -172,25 +176,25 @@ function Sidebar() {
         expanded ? "w-52" : "w-14"
       )}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setMoreExpanded(false); }}
+      onMouseLeave={() => { setHovered(false); setLegacyExpanded(false); }}
     >
-      {/* Logo */}
-      <div className="px-3 py-4 border-b border-sky-500/10 flex items-center gap-2.5 overflow-hidden">
-        <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
-          <Ship className="w-4 h-4 text-sky-400 animate-wave-float" />
-        </div>
-        {expanded && (
-          <div className="flex-1 min-w-0 overflow-hidden">
-            <h1 className="font-display text-sm font-bold text-sky-50 truncate">Vessels</h1>
-            <p className="text-[10px] text-sky-400/50 truncate">Maritime Intelligence</p>
+      <Link href="/">
+        <div className="px-3 py-4 border-b border-sky-500/10 flex items-center gap-2.5 overflow-hidden cursor-pointer hover:bg-sky-500/5 transition-colors">
+          <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
+            <Ship className="w-4 h-4 text-sky-400 animate-wave-float" />
           </div>
-        )}
-      </div>
+          {expanded && (
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h1 className="font-display text-sm font-bold text-sky-50 truncate">Vessels</h1>
+              <p className="text-[10px] text-sky-400/50 truncate">Maritime Command</p>
+            </div>
+          )}
+        </div>
+      </Link>
 
-      {/* Nav */}
       <nav className="flex-1 px-1.5 py-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
         {primaryNavItems.map(({ path, label, icon: Icon }) => {
-          const isActive = path === "/" ? location === "/" : location.startsWith(path);
+          const isActive = location.startsWith(path);
           return (
             <Link key={path} href={path}>
               <div
@@ -216,23 +220,23 @@ function Sidebar() {
         {expanded && (
           <div className="pt-2">
             <button
-              onClick={() => setMoreExpanded(!moreExpanded)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-sky-400/40 hover:text-sky-300 hover:bg-sky-500/5 transition-all w-full"
+              onClick={() => setLegacyExpanded(!legacyExpanded)}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-sky-400/30 hover:text-sky-300 hover:bg-sky-500/5 transition-all w-full"
             >
-              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
+              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", legacyExpanded && "rotate-90")} />
               More pages
             </button>
-            {moreExpanded && (
+            {legacyExpanded && (
               <div className="mt-0.5 space-y-0.5">
-                {secondaryNavItems.map(({ path, label, icon: Icon }) => {
-                  const isActive = path === "/" ? location === "/" : location.startsWith(path);
+                {legacyNavItems.map(({ path, label, icon: Icon }) => {
+                  const isActive = location.startsWith(path);
                   return (
                     <Link key={path} href={path}>
                       <div className={cn(
                         "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
                         isActive
                           ? "bg-sky-500/10 text-sky-300"
-                          : "text-sky-400/40 hover:text-sky-200 hover:bg-sky-500/5"
+                          : "text-sky-400/30 hover:text-sky-200 hover:bg-sky-500/5"
                       )}>
                         <Icon className="w-3 h-3 shrink-0" />
                         {label}
@@ -246,7 +250,6 @@ function Sidebar() {
         )}
       </nav>
 
-      {/* Footer */}
       <div className="px-1.5 py-3 border-t border-sky-500/10 space-y-2">
         <UserButton showName={expanded} className="w-full" />
         <RoleSelector expanded={expanded} />
@@ -259,32 +262,62 @@ function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={FleetDashboard} />
+        <Route path="/" component={VesselsLandingPage} />
+        <Route path="/platform" component={CommandOverviewPage} />
+        <Route path="/fleet" component={FleetMapPage} />
+        <Route path="/vessel/:id" component={VesselDetailEnhancedPage} />
+        <Route path="/vessels/:id" component={VesselDetailEnhancedPage} />
+        <Route path="/vessels-list" component={VesselsListPage} />
+        <Route path="/corridors" component={CorridorRoutesPage} />
+        <Route path="/exceptions" component={ExceptionsCenterPage} />
+        <Route path="/economics" component={VoyageEconomicsPage} />
+        <Route path="/maintenance" component={MaintenanceReadinessPage} />
+        <Route path="/command" component={CommandModePage} />
+        <Route path="/analytics" component={PerformanceAnalyticsPage} />
         <Route path="/intelligence" component={MaritimeIntelligence} />
-        <Route path="/ai-intel" component={VesselsIntelligence} />
-        <Route path="/fleet-apm" component={FleetAPMPage} />
-        <Route path="/infrastructure" component={InfrastructurePage} />
-        <Route path="/logs" component={LogsExplorerPage} />
-        <Route path="/digital-experience" component={DigitalExperiencePage} />
-        <Route path="/synthetics" component={SyntheticsCompliancePage} />
-        <Route path="/co2-emissions" component={CO2EmissionsPage} />
-        <Route path="/applied-intelligence" component={AppliedIntelligencePage} />
-        <Route path="/port-analytics" component={PortAnalyticsPage} />
-        <Route path="/vessel/:id" component={VesselDetailPage} />
-        <Route path="/routes" component={RoutePlanningPage} />
+        <Route path="/routes" component={CorridorRoutesPage} />
+        <Route path="/alerts" component={AlertCenterPage} />
         <Route path="/weather" component={WeatherPage} />
         <Route path="/simulations" component={SimulationsPage} />
-        <Route path="/alerts" component={AlertCenterPage} />
-        <Route path="/observability" component={ObservabilityPage} />
-        <Route path="/dark-vessel-detection" component={DarkVesselDetection} />
-        <Route path="/commodities-tracking" component={CommoditiesTracking} />
+        <Route path="/fleet-apm" component={FleetAPMPage} />
+        <Route path="/port-analytics" component={PortAnalyticsPage} />
+        <Route path="/co2-emissions" component={CO2EmissionsPage} />
         <Route path="/risk-scoring" component={RiskScoringPage} />
+        <Route path="/dark-vessel-detection" component={DarkVesselDetection} />
         <Route path="/sanctions-screening" component={SanctionsScreening} />
         <Route path="/cyber-threats" component={CyberThreatPanel} />
         <Route path="/incidents" component={IncidentReporting} />
+        <Route path="/use-cases">
+          <div className="p-6 max-w-2xl mx-auto space-y-6">
+            <h1 className="font-display text-2xl font-bold text-sky-50">Use Cases</h1>
+            <p className="text-sky-400/50 text-sm">Vessels is designed for three core operational personas: fleet executives who need portfolio-level margin visibility, operations teams who manage exceptions and ETA deviations in real time, and commercial teams tracking charter performance and voyage P&L.</p>
+            <div className="grid gap-4">
+              {[{ title: "Fleet Executive", desc: "Strategic fleet position — utilization, TCE, margin, and exception exposure at a glance." }, { title: "Fleet Operations", desc: "Real-time exception triage, vessel status, ETA monitoring, and maintenance readiness." }, { title: "Commercial", desc: "Voyage charter performance, route profitability, and delay cost impact per voyage." }].map(u => (
+                <div key={u.title} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+                  <p className="text-sm font-semibold text-sky-100">{u.title}</p>
+                  <p className="text-xs text-sky-400/50 mt-1">{u.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Route>
+        <Route path="/contact">
+          <div className="p-6 max-w-xl mx-auto space-y-4">
+            <h1 className="font-display text-2xl font-bold text-sky-50">Contact</h1>
+            <p className="text-sky-400/50 text-sm">For fleet demo requests, commercial inquiries, and integration questions:</p>
+            <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4 space-y-2">
+              {[{ label: "Maritime Operations", value: "maritime@vessels.io" }, { label: "Commercial Enquiries", value: "commercial@vessels.io" }, { label: "Demo Request", value: "demo@vessels.io" }].map(c => (
+                <div key={c.label} className="flex items-center gap-3">
+                  <span className="text-[10px] text-sky-400/40 w-32 shrink-0">{c.label}</span>
+                  <span className="text-xs font-mono text-sky-300">{c.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Route>
         <Route>
           <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">Page not found</p>
+            <p className="text-sky-400/40">Page not found</p>
           </div>
         </Route>
       </Switch>
@@ -293,26 +326,24 @@ function AppRouter() {
 }
 
 const vesselsCommands: CommandItem[] = [
-  { id: "nav-fleet", label: "Fleet Command", icon: "🚢", group: "Navigation", keywords: ["dashboard", "home", "fleet"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
-  { id: "nav-intel", label: "Maritime Intelligence", icon: "🌊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/intelligence"); } },
-  { id: "nav-alerts", label: "Alerts", icon: "⚠️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alerts"); } },
-  { id: "nav-routes", label: "Route Planning", icon: "🗺️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/routes"); } },
-  { id: "nav-fleet-apm", label: "Fleet APM", icon: "📊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/fleet-apm"); } },
-  { id: "nav-weather", label: "Weather", icon: "🌦️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/weather"); } },
-  { id: "nav-risk", label: "Risk Scoring", icon: "🛡️", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/risk-scoring"); } },
-  { id: "nav-dark-vessel", label: "Dark Vessel Detection", icon: "🔦", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/dark-vessel-detection"); } },
-  { id: "nav-port", label: "Port Analytics", icon: "⚓", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/port-analytics"); } },
-  { id: "nav-co2", label: "CO2 & Emissions", icon: "🌿", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/co2-emissions"); } },
-  { id: "nav-sanctions", label: "Sanctions Screening", icon: "🚫", group: "Intelligence", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/sanctions-screening"); } },
+  { id: "nav-landing", label: "Vessels Home", icon: "🚢", group: "Navigation", keywords: ["landing", "home", "start"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-platform", label: "Command Overview", icon: "📊", group: "Navigation", keywords: ["dashboard", "overview", "kpi"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/platform"); } },
+  { id: "nav-fleet", label: "Fleet Map", icon: "🗺️", group: "Navigation", keywords: ["map", "fleet", "positions"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/fleet"); } },
+  { id: "nav-vessels-list", label: "Vessel Roster", icon: "📋", group: "Navigation", keywords: ["list", "roster", "vessels"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/vessels-list"); } },
+  { id: "nav-exceptions", label: "Exceptions Center", icon: "⚠️", group: "Navigation", keywords: ["exceptions", "alerts", "issues"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/exceptions"); } },
+  { id: "nav-economics", label: "Voyage Economics", icon: "💰", group: "Navigation", keywords: ["economics", "revenue", "margin"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/economics"); } },
+  { id: "nav-maintenance", label: "Maintenance Readiness", icon: "🔧", group: "Navigation", keywords: ["maintenance", "readiness", "health"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/maintenance"); } },
+  { id: "nav-command", label: "Command Mode", icon: "🎯", group: "Navigation", keywords: ["command", "operational", "focused"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/command"); } },
+  { id: "nav-analytics", label: "Performance Analytics", icon: "📈", group: "Navigation", keywords: ["analytics", "performance", "trends"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/analytics"); } },
   { id: "app-firestorm", label: "Switch to Firestorm", icon: "🔥", group: "Switch App", description: "Security Simulation", action: () => { window.location.href = "/firestorm/"; } },
   { id: "app-inca", label: "Switch to INCA", icon: "🧠", group: "Switch App", description: "AI Research", action: () => { window.location.href = "/inca/"; } },
 ];
 
 const vesselsShortcuts: KeyboardShortcut[] = [
-  { key: "F", description: "Go to Fleet Command", category: "Navigation" },
-  { key: "A", description: "Go to Alerts", category: "Navigation" },
-  { key: "R", description: "Go to Route Planning", category: "Navigation" },
-  { key: "W", description: "Go to Weather", category: "Navigation" },
+  { key: "P", description: "Go to Command Overview", category: "Navigation" },
+  { key: "F", description: "Go to Fleet Map", category: "Navigation" },
+  { key: "E", description: "Go to Exceptions Center", category: "Navigation" },
+  { key: "C", description: "Go to Command Mode", category: "Navigation" },
 ];
 
 function App() {
