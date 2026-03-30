@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
@@ -37,10 +37,34 @@ const InterventionWorkspace = lazy(() => import("@/pages/intervention-workspace"
 const ActionQueue = lazy(() => import("@/pages/action-queue"));
 const ReadinessModule = lazy(() => import("@/pages/readiness-module"));
 const AdminJobsPage = lazy(() => import("@/pages/admin/jobs"));
+const AdminUsersPage = lazy(() => import("@/pages/admin/users"));
+const AdminFlagsPage = lazy(() => import("@/pages/admin/feature-flags"));
+const AdminAuditPage = lazy(() => import("@/pages/admin/audit-log"));
+const AdminOverviewPage = lazy(() => import("@/pages/admin/overview"));
+const AdminRunViewerPage = lazy(() => import("@/pages/admin/run-viewer"));
+const AdminApprovalQueuePage = lazy(() => import("@/pages/admin/approval-queue"));
+const AdminSeederPage = lazy(() => import("@/pages/admin/seeder"));
 const SignalsPage = lazy(() => import("@/pages/signals-page"));
 const ActionsPage = lazy(() => import("@/pages/actions-page"));
 const ReadinessPage = lazy(() => import("@/pages/readiness-page"));
 const LyteMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
+
+const ADMIN_ROLES = ["admin", "super_admin", "ops"];
+
+function AdminRoute({ component: Component }: { component: React.ComponentType }) {
+  const { user } = useAuth();
+  const userRoles: string[] = (user as { roles?: string[] })?.roles ?? [];
+  const isAdmin = userRoles.some((r) => ADMIN_ROLES.includes(r));
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-3">
+        <Shield className="w-8 h-8 text-amber-500/40" />
+        <p className="text-sm text-slate-400">You do not have permission to access this page.</p>
+      </div>
+    );
+  }
+  return <Component />;
+}
 
 function PrivateRouter() {
   return (
@@ -56,7 +80,14 @@ function PrivateRouter() {
         <Route path="/escalation" component={EscalationCenter} />
         <Route path="/intervention" component={InterventionWorkspace} />
         <Route path="/readiness-module" component={ReadinessModule} />
-        <Route path="/admin/jobs" component={AdminJobsPage} />
+        <Route path="/admin/jobs">{() => <AdminRoute component={AdminJobsPage} />}</Route>
+        <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>
+        <Route path="/admin/flags">{() => <AdminRoute component={AdminFlagsPage} />}</Route>
+        <Route path="/admin/audit">{() => <AdminRoute component={AdminAuditPage} />}</Route>
+        <Route path="/admin/overview">{() => <AdminRoute component={AdminOverviewPage} />}</Route>
+        <Route path="/admin/runs">{() => <AdminRoute component={AdminRunViewerPage} />}</Route>
+        <Route path="/admin/approvals">{() => <AdminRoute component={AdminApprovalQueuePage} />}</Route>
+        <Route path="/admin/seeder">{() => <AdminRoute component={AdminSeederPage} />}</Route>
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

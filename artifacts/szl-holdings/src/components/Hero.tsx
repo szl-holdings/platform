@@ -10,7 +10,6 @@ const platforms = [
   { name: "Vessels", role: "Maritime Command", color: "hsl(205,85%,55%)" },
   { name: "Firestorm", role: "Cyber Defense", color: "hsl(0,80%,55%)" },
   { name: "INCA", role: "AI Research Cortex", color: "hsl(265,80%,60%)" },
-  { name: "Dreamscape", role: "Predictive Intelligence", color: "hsl(270,70%,55%)" },
   { name: "Terra", role: "Business Telemetry", color: "hsl(160,70%,45%)" },
   { name: "Rosie", role: "Threat & Incident Ops", color: "hsl(215,80%,55%)" },
   { name: "Carlota Jo", role: "High-Trust Advisory", color: "hsl(38,55%,58%)" },

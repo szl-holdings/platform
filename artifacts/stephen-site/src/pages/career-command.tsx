@@ -24,7 +24,7 @@ const projectDeepDives = [
   { name: "Vessels Maritime Intelligence", tech: ["React", "TypeScript", "Real-time Data", "SVG Maps"], impact: "Monitoring 200+ vessels across global shipping lanes", status: "Live" },
   { name: "Firestorm Security Operations", tech: ["SOC Dashboard", "MITRE ATT&CK", "Threat Intel"], impact: "Enterprise-grade security operations center", status: "Live" },
   { name: "INCA AI Research Platform", tech: ["Neural Networks", "Model Benchmarking", "GPU Clusters"], impact: "Training and evaluating custom AI models", status: "Live" },
-  { name: "Dreamscape Creative Engine", tech: ["AI Generation", "Asset Pipeline", "Brand Management"], impact: "End-to-end creative production workflow", status: "Live" },
+  { name: "Alloy Workflow Engine", tech: ["Signal Normalization", "Workflow Orchestration", "Artifact Generation"], impact: "Governs cross-platform signal routing, workflows, and approvals", status: "Live" },
   { name: "Lyte Command Center", tech: ["Infrastructure", "AIOps", "Observability"], impact: "Full-stack infrastructure intelligence platform", status: "Live" },
 ];
 

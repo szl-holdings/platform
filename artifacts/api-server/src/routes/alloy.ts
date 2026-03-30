@@ -316,22 +316,64 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/alloy/runs", authMiddleware(), async (req, res) => {
+router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-    const rows = await db.select().from(alloyWorkflowRunsTable).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable);
+    const stateFilter = typeof req.query.state === "string" ? req.query.state : null;
+    const validStates = ["queued", "running", "waiting_approval", "completed", "failed", "canceled"];
+
+    const stateCondition = stateFilter && validStates.includes(stateFilter)
+      ? eq(alloyWorkflowRunsTable.state, stateFilter as "queued" | "running" | "waiting_approval" | "completed" | "failed" | "canceled")
+      : undefined;
+
+    if (!isGlobalAdmin(req.user)) {
+      const orgIds = getUserOrgIds(req.user);
+      if (orgIds.length === 0) {
+        sendSuccess(res, [], 200, { page, limit, total: 0 });
+        return;
+      }
+      const allowedWorkflowIds = (await db
+        .select({ id: alloyWorkflowsTable.id })
+        .from(alloyWorkflowsTable)
+        .where(inArray(alloyWorkflowsTable.orgId, orgIds)))
+        .map(r => r.id);
+
+      if (allowedWorkflowIds.length === 0) {
+        sendSuccess(res, [], 200, { page, limit, total: 0 });
+        return;
+      }
+      const orgWorkflowFilter = inArray(alloyWorkflowRunsTable.workflowId, allowedWorkflowIds);
+      const whereClause = stateCondition ? and(orgWorkflowFilter, stateCondition) : orgWorkflowFilter;
+      const rows = await db.select().from(alloyWorkflowRunsTable).where(whereClause).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset);
+      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable).where(whereClause);
+      sendSuccess(res, rows, 200, { page, limit, total: count });
+      return;
+    }
+
+    const rows = stateCondition
+      ? await db.select().from(alloyWorkflowRunsTable).where(stateCondition).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset)
+      : await db.select().from(alloyWorkflowRunsTable).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset);
+    const [{ count }] = stateCondition
+      ? await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable).where(stateCondition)
+      : await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable);
     sendSuccess(res, rows, 200, { page, limit, total: count });
   } catch (err) {
     handleRouteError(res, err, "Failed to list runs");
   }
 });
 
-router.get("/alloy/runs/:id", authMiddleware(), async (req, res) => {
+router.get("/alloy/runs/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
     if (!row) { sendNotFound(res, "Run"); return; }
+    if (!isGlobalAdmin(req.user)) {
+      const orgIds = getUserOrgIds(req.user);
+      const [wf] = await db.select({ orgId: alloyWorkflowsTable.orgId }).from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, row.workflowId));
+      if (wf?.orgId != null && !orgIds.includes(wf.orgId)) {
+        sendNotFound(res, "Run"); return;
+      }
+    }
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to get run");

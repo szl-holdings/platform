@@ -63,13 +63,13 @@ const DOMAIN_AGENTS: Record<string, { systemPrompt: string; capabilities: string
     systemPrompt: "You are a managed services operations analyst. Monitor SLA compliance, ticket patterns, client health, and service delivery quality.",
     capabilities: ["sla-monitoring", "ticket-analysis", "client-health", "capacity-planning"],
   },
-  dreamscape: {
-    systemPrompt: "You are a creative strategy analyst. Evaluate campaign performance, content effectiveness, brand consistency, and creative trends.",
-    capabilities: ["campaign-analysis", "content-scoring", "brand-monitoring", "trend-detection"],
+  alloy: {
+    systemPrompt: "You are an Alloy intelligence analyst. Evaluate workflow execution, signal patterns, artifact quality, and operational orchestration across the SZL ecosystem.",
+    capabilities: ["workflow-analysis", "signal-routing", "artifact-review", "orchestration-health"],
   },
 };
 
-const PLANNER_SYSTEM_PROMPT = `You are the Nimbus Orchestration Planner. Given a user query, determine which domain agents should be consulted and what specific task each agent should perform.
+const PLANNER_SYSTEM_PROMPT = `You are the Alloy Orchestration Planner. Given a user query, determine which domain agents should be consulted and what specific task each agent should perform.
 
 Available domains and their capabilities:
 ${Object.entries(DOMAIN_AGENTS).map(([domain, agent]) => `- ${domain}: ${agent.capabilities.join(", ")}`).join("\n")}
@@ -79,7 +79,7 @@ AGENT: <domain> | TASK: <specific task description>
 
 Only include agents that are relevant to the query. Include 1-4 agents maximum.`;
 
-const SYNTHESIS_SYSTEM_PROMPT = `You are the Nimbus Intelligence Synthesizer. Given multiple domain-specific analyses, produce a unified executive briefing. Structure your response as:
+const SYNTHESIS_SYSTEM_PROMPT = `You are the Alloy Intelligence Synthesizer. Given multiple domain-specific analyses, produce a unified executive briefing. Structure your response as:
 
 1. **Key Finding** — The single most important insight
 2. **Cross-Domain Connections** — How findings relate across domains
@@ -132,7 +132,7 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
 
   const planResponse = await gatewayInfer({
     messages: planMessages,
-    agentId: "nimbus-planner",
+    agentId: "alloy-planner",
     domain: "orchestration",
     strategy: "fastest",
     maxTokens: 500,
@@ -217,7 +217,7 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
     try {
       const synthResponse = await gatewayInfer({
         messages: synthMessages,
-        agentId: "nimbus-synthesizer",
+        agentId: "alloy-synthesizer",
         domain: "orchestration",
         strategy: "preferred",
         preferredProvider: "anthropic",

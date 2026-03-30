@@ -34,7 +34,7 @@ export default function GettingStarted() {
             { icon: Shield, name: "Security", desc: "Firestorm — threat detection, compliance, red team simulations", color: "text-red-400 bg-red-500/10" },
             { icon: Globe, name: "Analytics", desc: "Lyte — decision analytics, metrics, observability", color: "text-blue-400 bg-blue-500/10" },
             { icon: Globe, name: "Maritime", desc: "Vessels — fleet tracking, voyage management, maritime intelligence", color: "text-cyan-400 bg-cyan-500/10" },
-            { icon: Zap, name: "AI / ML", desc: "INCA, Dreamscape — predictive AI, intelligence, creative", color: "text-violet-400 bg-violet-500/10" },
+            { icon: Zap, name: "AI / ML", desc: "INCA, Alloy — agentic intelligence, workflow orchestration, signal analysis", color: "text-violet-400 bg-violet-500/10" },
             { icon: Globe, name: "Real Estate", desc: "Terra — portfolio intelligence, climate risk, property analytics", color: "text-emerald-400 bg-emerald-500/10" },
             { icon: Globe, name: "Platform", desc: "Auth, CMS, ecosystem health, extensions", color: "text-amber-400 bg-amber-500/10" },
           ].map((domain) => (

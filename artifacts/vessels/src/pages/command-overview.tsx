@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown,
   ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3,
-  CheckCircle2, XCircle, Minus
+  CheckCircle2, XCircle, Minus, RefreshCw
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
@@ -13,9 +13,11 @@ import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/ho
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
+  active: { label: "Active", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
   in_port: { label: "In Port", color: "text-sky-400 bg-sky-500/10 border-sky-500/20", dot: "bg-sky-400" },
   anchored: { label: "Anchored", color: "text-amber-400 bg-amber-500/10 border-amber-500/20", dot: "bg-amber-400" },
   maintenance: { label: "Maintenance", color: "text-red-400 bg-red-500/10 border-red-500/20", dot: "bg-red-400" },
+  under_maintenance: { label: "Maintenance", color: "text-red-400 bg-red-500/10 border-red-500/20", dot: "bg-red-400" },
   delayed: { label: "Delayed", color: "text-orange-400 bg-orange-500/10 border-orange-500/20", dot: "bg-orange-400" },
   loading: { label: "Loading", color: "text-violet-400 bg-violet-500/10 border-violet-500/20", dot: "bg-violet-400" },
   risk_watch: { label: "Risk Watch", color: "text-amber-400 bg-amber-500/10 border-amber-500/20", dot: "bg-amber-400" },
@@ -26,6 +28,7 @@ const severityConfig: Record<string, { color: string; label: string }> = {
   critical: { color: "text-red-400 bg-red-500/10 border-red-500/20", label: "Critical" },
   high: { color: "text-orange-400 bg-orange-500/10 border-orange-500/20", label: "High" },
   watch: { color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Watch" },
+  medium: { color: "text-amber-400 bg-amber-500/10 border-amber-500/20", label: "Medium" },
   normal: { color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Normal" },
 };
 
@@ -59,6 +62,7 @@ type ViewProps = {
 
 function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps) {
   const activeVoyages = vessels.filter(v => ["at_sea", "loading", "exception_active"].includes(v.status)).length;
+  const totalVessels = vessels.length;
   const totalRevenue = voyageEconomics.filter(v => v.status === "active").reduce((a, v) => a + v.estimatedRevenue, 0);
   const totalMargin = voyageEconomics.filter(v => v.status === "active").reduce((a, v) => a + v.marginEstimate, 0);
   const avgMarginPct = totalRevenue > 0 ? totalMargin / totalRevenue * 100 : 0;
@@ -73,7 +77,7 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
       <div>
         <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Strategic Fleet Position</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard label="Active Voyages" value={activeVoyages} sub={`of ${vessels.length} vessels`} accent="border-emerald-500/10" icon={Ship} trend="up" />
+          <StatCard label="Active Voyages" value={activeVoyages} sub={`of ${totalVessels} vessels`} accent="border-emerald-500/10" icon={Ship} trend="up" />
           <StatCard label="Fleet Utilization" value={`${fleetUtil.toFixed(1)}%`} sub="excluding maintenance" accent="border-sky-500/10" icon={Activity} trend="up" />
           <StatCard label="Avg TCE" value={`$${(avgTCE / 1000).toFixed(1)}K`} sub="per vessel/day" accent="border-violet-500/10" icon={DollarSign} trend="up" />
           <StatCard label="Critical Exceptions" value={criticalExc} sub="require immediate action" accent="border-red-500/10" icon={AlertTriangle} pulse={criticalExc > 0} />
@@ -81,7 +85,7 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
       </div>
 
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Voyage P&L Snapshot</h3>
+        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Voyage P&amp;L Snapshot</h3>
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
             <p className="text-[10px] text-sky-400/50 uppercase tracking-wider">Estimated Revenue</p>
@@ -128,22 +132,25 @@ function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps)
 function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProps) {
   const activeExceptions = fleetExceptions.filter(e => e.status === "active");
   const maintenanceWatch = maintenanceItems.filter(m => ["overdue", "in_progress", "due_soon"].includes(m.status));
-  const delayedVessels = vessels.filter(v => ["delayed", "exception_active", "anchored"].includes(v.status));
+  const maintenanceCount = maintenanceWatch.length;
+  const delayedCount = vessels.filter(v => ["delayed", "exception_active", "anchored"].includes(v.status)).length;
+  const inPortCount = vessels.filter(v => v.status === "in_port" || v.status === "loading").length;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Active Exceptions" value={activeExceptions.length} sub="require response" accent="border-red-500/10" icon={AlertTriangle} pulse={activeExceptions.filter(e => e.severity === "critical").length > 0} />
-        <StatCard label="Delayed / Disrupted" value={delayedVessels.length} sub="vessels off schedule" accent="border-orange-500/10" icon={Clock} />
-        <StatCard label="Maintenance Watch" value={maintenanceWatch.length} sub="action items" accent="border-amber-500/10" icon={Wrench} />
-        <StatCard label="In Port" value={vessels.filter(v => v.status === "in_port").length} sub="turnaround vessels" accent="border-sky-500/10" icon={Ship} />
+        <StatCard label="Active Exceptions" value={activeExceptions.length} sub="require response" accent="border-red-500/10" icon={AlertTriangle} pulse={activeExceptions.some(e => e.severity === "critical")} />
+        <StatCard label="Delayed / Disrupted" value={delayedCount} sub="vessels off schedule" accent="border-orange-500/10" icon={Clock} />
+        <StatCard label="Maintenance Watch" value={maintenanceCount} sub="vessels in maintenance" accent="border-amber-500/10" icon={Wrench} />
+        <StatCard label="In Port" value={inPortCount} sub="turnaround vessels" accent="border-sky-500/10" icon={Ship} />
       </div>
 
       <div>
         <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Exception Queue</h3>
         <div className="space-y-2">
-          {activeExceptions.map(exc => {
-            const sc = severityConfig[exc.severity];
+          {activeExceptions.map((exc) => {
+            const sc = severityConfig[exc.severity] ?? severityConfig.normal;
+            const impact = (exc as { estimatedImpactUSD?: number; estimatedImpact?: number; valueAtRiskUsd?: string }).estimatedImpactUSD ?? ((exc as { valueAtRiskUsd?: string }).valueAtRiskUsd ? parseFloat((exc as { valueAtRiskUsd: string }).valueAtRiskUsd) : ((exc as { estimatedImpact?: number }).estimatedImpact ?? 0));
             return (
               <Link key={exc.id} href="/exceptions">
                 <div className="px-4 py-3 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg hover:border-sky-500/20 transition-all cursor-pointer">
@@ -151,12 +158,14 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
                     <Badge variant="outline" className={cn("text-[9px] shrink-0 mt-0.5", sc.color)}>{sc.label}</Badge>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-sky-100">{exc.title}</p>
-                      <p className="text-[10px] text-sky-400/50 mt-0.5">{exc.vesselName} · {exc.route}</p>
+                      <p className="text-[10px] text-sky-400/50 mt-0.5">{exc.vesselName ?? ""}</p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-[10px] font-mono text-amber-400">${(exc.estimatedImpactUSD / 1000).toFixed(0)}K</p>
-                      <p className="text-[9px] text-sky-400/40">exposure</p>
-                    </div>
+                    {impact > 0 && (
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] font-mono text-amber-400">${(impact / 1000).toFixed(0)}K</p>
+                        <p className="text-[9px] text-sky-400/40">exposure</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -168,18 +177,27 @@ function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProp
       <div>
         <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Maintenance Watch</h3>
         <div className="space-y-2">
-          {maintenanceWatch.slice(0, 5).map(m => (
-            <div key={m.id} className="flex items-center gap-3 px-4 py-2.5 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg">
-              <div className={cn("w-2 h-2 rounded-full shrink-0", m.status === "overdue" ? "bg-red-400" : m.status === "in_progress" ? "bg-amber-400" : "bg-sky-400")} />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sky-100 truncate">{m.vesselName} — {m.component}</p>
-                <p className="text-[10px] text-sky-400/50">{m.status === "overdue" ? `${Math.abs(m.daysToDue)}d overdue` : `Due in ${m.daysToDue}d`}</p>
+          {maintenanceWatch.slice(0, 5).map((m) => {
+            const mv = m as { id: number | string; name?: string; vesselName?: string; component?: string; vesselType?: string | null; flag?: string | null; priority?: string; status?: string; daysToDue?: number };
+            const label = mv.vesselName ?? mv.name ?? "—";
+            const sub = mv.component ?? mv.vesselType ?? mv.flag ?? "";
+            return (
+              <div key={mv.id} className="flex items-center gap-3 px-4 py-2.5 bg-[#0a1628]/60 border border-sky-500/10 rounded-lg">
+                <div className={cn("w-2 h-2 rounded-full shrink-0", mv.status === "overdue" ? "bg-red-400" : mv.status === "in_progress" ? "bg-amber-400" : "bg-sky-400")} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-sky-100 truncate">{label}{sub ? ` — ${sub}` : ""}</p>
+                  {mv.daysToDue !== undefined && (
+                    <p className="text-[10px] text-sky-400/50">{mv.status === "overdue" ? `${Math.abs(mv.daysToDue)}d overdue` : `Due in ${mv.daysToDue}d`}</p>
+                  )}
+                </div>
+                {mv.priority && (
+                  <Badge variant="outline" className={cn("text-[9px]", mv.priority === "critical" ? "text-red-400 border-red-500/20 bg-red-500/10" : mv.priority === "high" ? "text-orange-400 border-orange-500/20 bg-orange-500/10" : "text-amber-400 border-amber-500/20 bg-amber-500/10")}>
+                    {mv.priority}
+                  </Badge>
+                )}
               </div>
-              <Badge variant="outline" className={cn("text-[9px]", m.priority === "critical" ? "text-red-400 border-red-500/20 bg-red-500/10" : m.priority === "high" ? "text-orange-400 border-orange-500/20 bg-orange-500/10" : "text-amber-400 border-amber-500/20 bg-amber-500/10")}>
-                {m.priority}
-              </Badge>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
@@ -201,7 +219,7 @@ function CommercialView({ voyageEconomics }: ViewProps) {
       </div>
 
       <div>
-        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Voyage P&L by Charter</h3>
+        <h3 className="text-[10px] font-mono text-sky-400/50 uppercase tracking-wider mb-3">Voyage P&amp;L by Charter</h3>
         <div className="space-y-2">
           {activeVoyages.map(v => {
             const perf = v.performanceVsBudget;
@@ -244,13 +262,13 @@ type TabId = "exec" | "ops" | "commercial";
 
 export default function CommandOverviewPage() {
   const { user } = useAuth();
-  const { vessels, isLive: vesselsLive } = useVessels();
+  const { vessels, isLive, refetch } = useVessels();
   const { fleetExceptions } = useFleetExceptions();
   const { voyageEconomics } = useVoyages();
   const { maintenanceItems } = useMaintenance();
 
   const [activeTab, setActiveTab] = useState<TabId>(
-    user.role === "exec" ? "exec" : user.role === "commercial" || user.role === "charterer" || user.role === "finance" ? "commercial" : "ops"
+    user.role === "exec" ? "exec" : user.role === "compliance" ? "commercial" : "ops"
   );
 
   const viewProps: ViewProps = { vessels, fleetExceptions, voyageEconomics, maintenanceItems };
@@ -280,9 +298,17 @@ export default function CommandOverviewPage() {
             {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · All times UTC
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] text-sky-400/50 font-mono">Live · {totalVessels} vessels tracked</span>
+        <div className="flex items-center gap-3">
+          {!isLive && (
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">DEMO DATA</span>
+          )}
+          <button onClick={() => refetch()} className="p-1.5 rounded-lg hover:bg-sky-500/10 text-sky-400/50 hover:text-sky-300 transition-colors">
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <span className={cn("w-2 h-2 rounded-full", isLive ? "bg-emerald-400 animate-pulse" : "bg-amber-400")} />
+            <span className="text-[10px] text-sky-400/50 font-mono">{isLive ? "Live" : "Demo"} · {totalVessels} vessels tracked</span>
+          </div>
         </div>
       </div>
 

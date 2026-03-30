@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
-import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, Bell, ChevronRight, Zap, Menu, X, Package, ListTodo, Activity, Radio, Shield } from "lucide-react";
+import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, ChevronRight, Zap, Menu, X, Package, ListTodo, Activity, Radio, Shield, Settings, Flag, FileText, Database, Play, ChevronDown, Bell } from "lucide-react";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -22,8 +22,61 @@ const NAV = [
   { href: "/escalation", label: "Escalation Center", icon: AlertOctagon },
   { href: "/intervention", label: "Intervention Workspace", icon: Wrench },
   { href: "/readiness-module", label: "Readiness Module", icon: Package },
+];
+
+const ADMIN_NAV = [
+  { href: "/admin/overview", label: "System Overview", icon: Settings },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/flags", label: "Feature Flags", icon: Flag },
+  { href: "/admin/runs", label: "Workflow Runs", icon: Play },
+  { href: "/admin/approvals", label: "Approval Queue", icon: CheckSquare },
+  { href: "/admin/audit", label: "Audit Log", icon: FileText },
+  { href: "/admin/seeder", label: "Demo Data Seeder", icon: Database },
   { href: "/admin/jobs", label: "Job Status", icon: Activity },
 ];
+
+function AdminNavSection({ location }: { location: string }) {
+  const [open, setOpen] = useState(false);
+  const isInAdmin = location.startsWith("/admin");
+  if (!open && !isInAdmin) {
+    return (
+      <div className="mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 w-full text-slate-500 hover:text-white hover:bg-white/5"
+        >
+          <Settings className="w-3.5 h-3.5 shrink-0" />
+          <span>Admin</span>
+          <ChevronDown className="w-3 h-3 ml-auto" />
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+      <button
+        onClick={() => setOpen(false)}
+        className="flex items-center gap-2 px-3 pb-1.5 w-full"
+      >
+        <span className="text-[9px] uppercase tracking-widest font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Admin</span>
+        <ChevronDown className="w-3 h-3 ml-auto rotate-180" style={{ color: "rgba(255,255,255,0.2)" }} />
+      </button>
+      {ADMIN_NAV.map((item) => {
+        const isActive = location.startsWith(item.href);
+        return (
+          <Link key={item.href} href={item.href} className={cn(
+            "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+            isActive ? "text-amber-400" : "text-slate-500 hover:text-white hover:bg-white/5"
+          )} style={{ background: isActive ? "rgba(245,158,11,0.08)" : undefined }}>
+            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#f59e0b" }} />}
+            <item.icon className={cn("w-3 h-3 shrink-0", isActive ? "text-amber-400" : "text-slate-600 group-hover:text-slate-400")} />
+            <span className="text-[11px]">{item.label}</span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
 
 export function LyteLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -92,6 +145,8 @@ export function LyteLayout({ children }: { children: ReactNode }) {
               </Link>
             );
           })}
+
+          <AdminNavSection location={location} />
         </nav>
 
         <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
