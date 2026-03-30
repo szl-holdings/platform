@@ -2,6 +2,7 @@ import { useListProjects, Project } from "@workspace/api-client-react";
 import { useState } from "react";
 import { BarChart3, Filter, Grid3X3, TrendingUp, Eye, ArrowUp, ArrowDown, Search, Layers, Zap, RefreshCw, AlertCircle, Clock } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const healthDimensions = ["Performance", "Security", "Reliability", "Scalability", "Maintainability"];
 
@@ -60,6 +61,11 @@ function ProjectHealthCard({ project, index }: { project: Project; index: number
 }
 
 export default function SpectrumAnalytics() {
+  usePageMeta({
+    title: "Spectrum Analytics | SZL Holdings – Platform Health Intelligence",
+    description: "Real-time health analytics for the SZL Holdings application portfolio. Monitor performance, security, reliability, and maintainability across all platforms.",
+    canonical: "https://szlholdings.com/spectrum",
+  });
   const { data: projects = [], isLoading } = useListProjects();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

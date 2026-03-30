@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Target, DollarSign, FileText, Calendar, TrendingUp, Search, Building2, CheckCircle } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const deals = [
   { id: "MA-001", target: "NovaSec Intelligence", sector: "Cybersecurity AI", stage: "LOI Signed", valuation: "$28M", multiple: "8.2x ARR", arr: "$3.4M", strategic: "Enhances Firestorm threat intel capabilities", status: "Active", dd: 65, lead: "K. Wilson" },
@@ -28,6 +29,11 @@ const stageColor: Record<string, string> = {
 };
 
 export default function MATracker() {
+  usePageMeta({
+    title: "M&A Tracker | SZL Holdings – Mergers & Acquisitions Pipeline",
+    description: "SZL Holdings mergers and acquisitions pipeline tracker. Monitor deal stages, valuations, due diligence progress, and strategic rationale for acquisition targets.",
+    canonical: "https://szlholdings.com/ma-tracker",
+  });
   const [selected, setSelected] = useState(deals[0]);
 
   return (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Brain, Send, BookOpen, TrendingUp, Lightbulb, Search, Sparkles } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const insightCards = [
   { title: "Market Entry Strategy — Southeast Asia", type: "Market Research", summary: "Consumer spending in SEA projected to reach $4.7T by 2028. Key opportunity in B2B SaaS with government digitization initiatives in Singapore, Indonesia, and Vietnam. Recommend phased entry starting with Singapore's regulatory sandbox.", tags: ["Market Entry", "SEA", "B2B SaaS"], confidence: 87 },
@@ -17,6 +18,11 @@ const conversationHistory = [
 ];
 
 export default function AIAdvisory() {
+  usePageMeta({
+    title: "AI Advisory | Carlota Jo Consulting – Strategy Intelligence",
+    description: "AI-powered brand strategy advisory from Carlota Jo Consulting. Get instant market entry analysis, risk assessments, and competitive intelligence.",
+    canonical: "https://szlholdings.com/carlota-jo/ai-advisory",
+  });
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(conversationHistory);
 

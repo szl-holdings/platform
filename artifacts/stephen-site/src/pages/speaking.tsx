@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Mic, Calendar, MapPin, Users, Video, ExternalLink, Star, Globe } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const upcomingEvents = [
   { name: "SaaStr Annual 2026", topic: "AIOps at Enterprise Scale: Lessons from 50+ Platform Integrations", date: "May 12-14, 2026", location: "San Mateo, CA", format: "Keynote", audience: "18,000+", status: "Confirmed" },
@@ -25,6 +26,11 @@ const topics = [
 ];
 
 export default function Speaking() {
+  usePageMeta({
+    title: "Speaking Engagements | Stephen Lutar – Keynotes & Conference Talks",
+    description: "Book Stephen Lutar for keynotes and conference talks on AI strategy, enterprise architecture, and technology leadership. SaaStr, Gartner, Web Summit, and more.",
+    canonical: "https://szlholdings.com/stephen/speaking",
+  });
   return (
     <div className="p-6 space-y-6">
       <div>

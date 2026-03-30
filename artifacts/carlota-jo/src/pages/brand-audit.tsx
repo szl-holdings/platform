@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Search, AlertTriangle, CheckCircle, XCircle, Eye, Globe, Instagram, Twitter, Linkedin } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const auditSections = [
   {
@@ -74,6 +75,11 @@ const sectionStatusColor: Record<string, string> = {
 };
 
 export default function BrandAudit() {
+  usePageMeta({
+    title: "Brand Audit | Carlota Jo Consulting – Brand Health Assessment",
+    description: "Comprehensive brand audit tools from Carlota Jo Consulting. Assess visual identity, messaging consistency, digital presence, and competitive positioning.",
+    canonical: "https://szlholdings.com/carlota-jo/brand-audit",
+  });
   const [active, setActive] = useState(auditSections[0]);
   const overallScore = Math.round(auditSections.reduce((a, s) => a + s.score, 0) / auditSections.length);
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const advisoryMetrics = [
   { label: "Active Engagements", value: "12", change: "+3 this quarter" },
@@ -22,6 +23,11 @@ const insightCategories = [
 ];
 
 export default function AdvisoryIntel() {
+  usePageMeta({
+    title: "Strategic Advisory Intelligence | Carlota Jo Consulting",
+    description: "Real-time advisory analytics, active engagement tracking, and strategic intelligence for Carlota Jo Consulting clients.",
+    canonical: "https://szlholdings.com/carlota-jo/advisory",
+  });
   const [activeTab, setActiveTab] = useState<"overview" | "cases" | "insights">("overview");
 
   return (

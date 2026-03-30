@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/u
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Users, TrendingUp, AlertCircle, CheckCircle, Star, MessageSquare, BarChart3, Search, Globe, Flame, Target, Award } from "lucide-react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar } from "recharts";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const clients = [
   {
@@ -61,6 +62,11 @@ const sentimentIcon: Record<string, React.ReactNode> = {
 };
 
 export default function ClientIntel() {
+  usePageMeta({
+    title: "Client Intelligence | Carlota Jo Consulting – Portfolio CRM",
+    description: "360-degree client intelligence for Carlota Jo engagements. Track NPS scores, churn risk, ARR by client, and engagement health across the consulting portfolio.",
+    canonical: "https://szlholdings.com/carlota-jo/client-intel",
+  });
   const [selected, setSelected] = useState(clients[0]);
 
   return (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Briefcase, CheckCircle, Clock, ArrowRight, FileText, Users, DollarSign, Target } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const engagements = [
   { id: "ENG-001", client: "Apex Capital Partners", type: "Growth Strategy", stage: "Delivery", value: "$240K", started: "Jan 15, 2026", due: "Apr 30, 2026", health: "Green", pm: "C. Martinez", team: 4, completion: 68 },
@@ -35,6 +36,11 @@ const pipeline = [
 ];
 
 export default function EngagementWorkflow() {
+  usePageMeta({
+    title: "Engagement Workflow | Carlota Jo Consulting – Client Project Management",
+    description: "Manage consulting engagements end-to-end with Carlota Jo's workflow platform. Track milestones, deliverables, and client outcomes in real time.",
+    canonical: "https://szlholdings.com/carlota-jo/engagements",
+  });
   const [selected, setSelected] = useState(engagements[0]);
 
   return (

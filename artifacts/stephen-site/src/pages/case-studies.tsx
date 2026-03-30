@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { BookOpen, TrendingUp, ArrowRight, Target, DollarSign } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const studies = [
   {
@@ -76,6 +77,11 @@ const studies = [
 ];
 
 export default function CaseStudies() {
+  usePageMeta({
+    title: "Case Studies | Stephen Lutar – Enterprise Technology Projects",
+    description: "Deep-dive case studies from Stephen Lutar's portfolio: AI infrastructure at scale, maritime intelligence platforms, fintech systems, and enterprise transformations.",
+    canonical: "https://szlholdings.com/stephen/case-studies",
+  });
   const [selected, setSelected] = useState(studies[0]);
 
   return (

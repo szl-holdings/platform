@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { BookOpen, Eye, Heart, MessageSquare, Calendar, ExternalLink, ArrowRight } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",
@@ -112,6 +113,11 @@ const szlInsights = [
 ];
 
 export default function ThoughtLeadership() {
+  usePageMeta({
+    title: "Thought Leadership | Stephen Lutar – Technology Strategy & Innovation",
+    description: "Insights on enterprise technology, AI strategy, and the future of business observability. Published in Harvard Business Review, Forbes, and MIT Technology Review.",
+    canonical: "https://szlholdings.com/stephen/thought-leadership",
+  });
   return (
     <div className="p-6 space-y-6">
       <div>

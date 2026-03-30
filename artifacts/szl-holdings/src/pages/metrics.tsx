@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { TrendingUp, Users, Globe, Clock, BarChart3, Activity } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const trafficData = [
   { month: "Oct", visits: 2400, uniqueUsers: 1800 },
@@ -28,6 +29,11 @@ const deviceData = [
 ];
 
 export default function Metrics() {
+  usePageMeta({
+    title: "Platform Metrics | SZL Holdings – Traffic & Engagement Analytics",
+    description: "Platform-wide metrics for SZL Holdings: traffic analytics, user engagement, geographic distribution, and performance benchmarks across all portfolio applications.",
+    canonical: "https://szlholdings.com/metrics",
+  });
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-8">

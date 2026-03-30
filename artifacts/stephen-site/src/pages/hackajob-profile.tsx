@@ -1,5 +1,6 @@
 import { Briefcase, Code, Award, Star, ExternalLink, Github, Linkedin, MapPin, GraduationCap, CheckCircle2, Zap } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const skills = [
   { name: "TypeScript", level: 95, category: "Language" },
@@ -25,6 +26,11 @@ const experience = [
 ];
 
 export default function HackajobProfile() {
+  usePageMeta({
+    title: "Hackajob Profile | Stephen Lutar – Senior Software Engineer",
+    description: "Stephen Lutar's professional engineering profile: TypeScript, React, Node.js, and cloud infrastructure expertise with 15+ years of enterprise delivery.",
+    canonical: "https://szlholdings.com/stephen/hackajob",
+  });
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">

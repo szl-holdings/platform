@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Map, CheckCircle, Circle, Clock, Sparkles, Shield, Brain, Zap, Building2, Ship, Palette, Laptop, FileText, Globe } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const quarters = [
   {
@@ -73,6 +74,11 @@ const quarterBadge = {
 };
 
 export default function Roadmap() {
+  usePageMeta({
+    title: "Roadmap | SZL Holdings – Platform Development Roadmap",
+    description: "The SZL Holdings platform roadmap: upcoming features, quarterly milestones, and product priorities across Firestorm, INCA, Terra, Vessels, Lyte, and Dreamscape.",
+    canonical: "https://szlholdings.com/roadmap",
+  });
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-6 py-10 space-y-8">

@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { GitBranch, Sparkles, Bug, Zap, Shield, RefreshCw } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const entries = [
   {
@@ -98,6 +99,11 @@ const versionBadge: Record<string, string> = {
 };
 
 export default function Changelog() {
+  usePageMeta({
+    title: "Changelog | SZL Holdings – Platform Release Notes",
+    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, INCA, Terra, Vessels, Lyte, and more.",
+    canonical: "https://szlholdings.com/changelog",
+  });
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">

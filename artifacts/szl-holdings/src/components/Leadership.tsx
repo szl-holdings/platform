@@ -56,7 +56,8 @@ export function Leadership() {
               <div className="w-14 h-14 rounded-xl overflow-hidden mb-4">
                 <img
                   src={member.photo}
-                  alt={member.name}
+                  alt={`${member.name} - ${member.role} at SZL Holdings`}
+                  loading="lazy"
                   className="w-full h-full object-cover object-top"
                 />
               </div>

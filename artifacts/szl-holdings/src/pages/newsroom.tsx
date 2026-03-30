@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Newspaper, ExternalLink, Calendar, Tag } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const pressItems = [
   {
@@ -54,6 +55,11 @@ const typeColor: Record<string, string> = {
 };
 
 export default function Newsroom() {
+  usePageMeta({
+    title: "Newsroom | SZL Holdings – Press Releases & Media Coverage",
+    description: "Latest news from SZL Holdings: press releases, media coverage, product launches, and strategic announcements. Follow the story of a technology holding company.",
+    canonical: "https://szlholdings.com/newsroom",
+  });
   const featured = pressItems[0];
   const rest = pressItems.slice(1);
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ExternalLink, Loader2, ArrowRight, Search, Grid3X3, List } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const projectAppUrls: Record<string, string> = {
   "Vessels Maritime Intelligence": "/vessels/",
@@ -205,6 +206,11 @@ function ProjectCardLarge({ project, index }: { project: Project; index: number 
 }
 
 export default function ProjectsPage() {
+  usePageMeta({
+    title: "SZL Holdings | Project Portfolio",
+    description: "Browse the full SZL Holdings project portfolio. Enterprise-grade applications across AI/ML, cybersecurity, maritime intelligence, real estate analytics, and creative technology.",
+    canonical: "https://szlholdings.com/projects",
+  });
   const { data: projects, isLoading, isError } = useListProjects();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState(ALL_CATEGORIES);

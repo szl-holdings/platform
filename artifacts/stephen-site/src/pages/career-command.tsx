@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const careerTimeline = [
   { year: "2024-Present", role: "Founder & CEO", company: "SZL Holdings", description: "Leading a diversified technology holding company spanning AI, maritime intelligence, cybersecurity, and creative technology.", highlight: true },
@@ -28,6 +29,11 @@ const projectDeepDives = [
 ];
 
 export default function CareerCommand() {
+  usePageMeta({
+    title: "Career | Stephen Lutar – Technology Executive & Full-Stack Engineer",
+    description: "Explore Stephen Lutar's career journey: from Lead Engineer to Founder & CEO of SZL Holdings. 15+ years building enterprise systems at scale.",
+    canonical: "https://szlholdings.com/stephen/career",
+  });
   return (
     <div className="min-h-screen bg-background">
       <section className="py-24 sm:py-32">

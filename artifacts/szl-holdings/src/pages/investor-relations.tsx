@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/u
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { TrendingUp, FileText, Calendar, Download, BarChart3, PieChart, Users } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const fundMetrics = [
   { label: "Fund III Target", value: "$85M", sub: "Final close Q1 2026", color: "text-szl-accent" },
@@ -43,6 +44,11 @@ const docColor: Record<string, string> = {
 };
 
 export default function InvestorRelations() {
+  usePageMeta({
+    title: "Investor Relations | SZL Holdings – Fund Performance & Reports",
+    description: "Investor relations for SZL Holdings: fund performance metrics, LP updates, portfolio company reports, and strategic outlook for institutional investors.",
+    canonical: "https://szlholdings.com/ir",
+  });
   return (
     <div className="min-h-screen bg-szl-bg text-szl-text p-8">
       <div className="max-w-6xl mx-auto space-y-8">

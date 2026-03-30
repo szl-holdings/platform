@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Lightbulb, Target, Layers, ArrowRight, CheckCircle, TrendingUp, Globe, Shield, Brain, Zap } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const thesis = [
   {
@@ -53,6 +54,11 @@ const stages = [
 ];
 
 export default function VenturesThesis() {
+  usePageMeta({
+    title: "Investment Thesis | SZL Holdings – Ventures & Capital Strategy",
+    description: "SZL Holdings investment thesis: six frontier technology pillars, capital deployment strategy, and the frameworks guiding our portfolio construction.",
+    canonical: "https://szlholdings.com/thesis",
+  });
   return (
     <div className="min-h-screen bg-szl-bg text-szl-text p-8">
       <div className="max-w-6xl mx-auto space-y-8">

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/u
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Network, TrendingUp, DollarSign, BarChart3, ArrowUpRight, Globe } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const portfolio = [
   { name: "Terra", sector: "PropTech", stage: "Growth", ownership: 100, arr: "$2.4M", growth: "+34%", headcount: 18, color: "#22c55e", status: "Scaling" },
@@ -31,6 +32,11 @@ const statusColor: Record<string, string> = {
 };
 
 export default function EcosystemViz() {
+  usePageMeta({
+    title: "Ecosystem | SZL Holdings – Portfolio Visualization & Analytics",
+    description: "Interactive visualization of the SZL Holdings technology ecosystem. Explore portfolio companies, revenue metrics, growth trajectories, and organizational data.",
+    canonical: "https://szlholdings.com/ecosystem",
+  });
   const totalHeadcount = portfolio.reduce((a, p) => a + p.headcount, 0);
 
   return (

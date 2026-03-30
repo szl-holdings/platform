@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TrendingUp, TrendingDown, BarChart3, DollarSign, Activity, Globe, PieChart, ArrowUpRight, ArrowDownRight, Calendar, Brain } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const marketData = [
   { symbol: "AAPL", name: "Apple Inc.", price: 198.45, change: 2.34, changePercent: 1.19, volume: "52.3M", sector: "Technology" },
@@ -28,6 +29,11 @@ const portfolioAllocation = [
 ];
 
 export default function FinancialResearch() {
+  usePageMeta({
+    title: "Financial Research | Stephen Lutar – Market Intelligence & Analysis",
+    description: "Real-time market intelligence, equity research, and financial analysis by Stephen Lutar. Technology sector focus with portfolio insights and market commentary.",
+    canonical: "https://szlholdings.com/stephen/financial-research",
+  });
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">

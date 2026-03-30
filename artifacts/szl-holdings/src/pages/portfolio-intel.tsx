@@ -3,6 +3,7 @@ import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Building2, TrendingUp, DollarSign, BarChart3, Globe, Shield, Zap, Brain, Target, Flame, GitMerge, Activity } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis } from "recharts";
 import { useState } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const companies = [
   { name: "Firestorm", vertical: "Cybersecurity", stage: "Growth", arr: "$2.4M", growth: "+84%", employees: 28, valuation: "$18M", status: "Performing", icon: Shield, color: "#ef4444" },
@@ -34,6 +35,11 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function PortfolioIntel() {
+  usePageMeta({
+    title: "Portfolio Intelligence | SZL Holdings – Company Performance Metrics",
+    description: "Deep-dive analytics for the SZL Holdings portfolio. Track ARR growth, valuation metrics, team headcount, and operational performance across all portfolio companies.",
+    canonical: "https://szlholdings.com/portfolio",
+  });
   const totalARR = companies.reduce((a, c) => a + parseFloat(c.arr.replace(/[$M]/g, "")), 0);
 
   return (

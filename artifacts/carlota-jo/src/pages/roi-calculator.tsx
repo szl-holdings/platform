@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { DollarSign, TrendingUp, Target, Zap, ArrowRight, Calculator } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const benchmarks = [
@@ -46,6 +47,11 @@ function RangeInput({ label, value, min, max, step = 1, prefix = "", suffix = ""
 }
 
 export default function ROICalculator() {
+  usePageMeta({
+    title: "ROI Calculator | Carlota Jo Consulting – Brand Investment Returns",
+    description: "Calculate the return on investment from brand strategy consulting. See how improved brand positioning translates to revenue lift and engagement growth.",
+    canonical: "https://szlholdings.com/carlota-jo/roi-calculator",
+  });
   const [monthlyRevenue, setMonthlyRevenue] = useState(150000);
   const [conversionLift, setConversionLift] = useState(35);
   const [engagementLift, setEngagementLift] = useState(80);

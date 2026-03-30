@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, Filter, Grid, List, ExternalLink, Star, Activity, Shield, Brain, Building, Ship, Zap, Palette, Globe, BarChart3, FileText, Users, Eye, Play } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const LENS_ICONS: Record<string, string> = {
   signal: "◎",
@@ -193,6 +194,11 @@ const apps = [
 const categories = ["all", "security", "ai", "intelligence", "operations", "compliance", "consulting", "creative", "platform"];
 
 export function AppCatalog() {
+  usePageMeta({
+    title: "SZL Holdings | Application Catalog",
+    description: "Explore the complete SZL Holdings application catalog: Firestorm, INCA, Terra, Vessels, Lyte, Dreamscape, and more enterprise solutions.",
+    canonical: "https://szlholdings.com/",
+  });
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");

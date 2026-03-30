@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Cpu, Code2, BarChart3, Globe, Shield, Brain, Database, Terminal, Layers } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const stackCategories = [
   {
@@ -91,6 +92,11 @@ const principles = [
 ];
 
 export default function TechStack() {
+  usePageMeta({
+    title: "Technology Stack | Stephen Lutar – Tools, Frameworks & Platforms",
+    description: "Stephen Lutar's technology stack: from React and TypeScript to Kubernetes and AI/ML frameworks. The tools powering enterprise-grade systems at SZL Holdings.",
+    canonical: "https://szlholdings.com/stephen/tech-stack",
+  });
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-5xl mx-auto px-8 py-16 space-y-12">

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useMemo } from "react";
+import { lazy, Suspense, useState, useMemo, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Link } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
@@ -324,6 +324,11 @@ function AppDirectory() {
 }
 
 function CorporateSite() {
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "SZL Holdings | Corporate Overview – Technology Holding Company";
+    return () => { document.title = prev; };
+  }, []);
   return (
     <div className="min-h-screen bg-szl-bg">
       <Navbar />

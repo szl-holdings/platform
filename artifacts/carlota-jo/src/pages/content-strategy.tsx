@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { FileText, Calendar, TrendingUp, Target, Layers, PenTool } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const pillars = [
@@ -50,6 +51,11 @@ const statusColor: Record<string, string> = {
 };
 
 export default function ContentStrategy() {
+  usePageMeta({
+    title: "Content Strategy | Carlota Jo Consulting – Brand Content Planning",
+    description: "AI-assisted content strategy from Carlota Jo Consulting. Build content calendars, track performance, and align content with brand pillars and business goals.",
+    canonical: "https://szlholdings.com/carlota-jo/content-strategy",
+  });
   const [activeView, setActiveView] = useState<"calendar" | "performance">("calendar");
 
   return (
