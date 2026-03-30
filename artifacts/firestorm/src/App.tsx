@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { DemoModeProvider } from "@workspace/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -273,6 +274,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(firestormCommands);
 
   return (
+    <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={firestormShortcuts} appName="Firestorm" accentColor="#ef4444">
@@ -316,6 +318,7 @@ function App() {
       </WouterRouter>
       <AgentCopilot config={sentinelConfig} />
     </QueryClientProvider>
+    </DemoModeProvider>
   );
 }
 

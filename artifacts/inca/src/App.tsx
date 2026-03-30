@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation, Redirect } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { DemoModeProvider } from "@workspace/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight, Plus, Radio, Sun, Network, Settings, Users, FileText, Shield } from "lucide-react";
@@ -433,11 +434,13 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(incaCommands);
 
   return (
+    <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </WouterRouter>
     </QueryClientProvider>
+    </DemoModeProvider>
   );
 }
 

@@ -7,6 +7,7 @@ import {
   DOCTRINE_LAYER_ORDER,
   type DoctrineLayer,
 } from "./doctrine-layer";
+import { DemoModeSwitcher } from "./demo-mode";
 
 export interface EcosystemApp {
   id: string;
@@ -1248,6 +1249,9 @@ export function EcosystemNav({
             gap: "6px",
           }}
         >
+          <div style={{ display: "none" }} className="eco-nav-demomode">
+            <DemoModeSwitcher compact />
+          </div>
           <button
             onClick={() => setShowSearch(true)}
             style={{
@@ -1445,6 +1449,7 @@ export function EcosystemNav({
           .eco-nav-brand-label { display: inline !important; }
           .eco-nav-search-label { display: inline !important; }
           .eco-nav-user-info { display: block !important; }
+          .eco-nav-demomode { display: flex !important; }
         }
       `}</style>
     </>

@@ -23,6 +23,7 @@ export let signals = [
   { id: 22, source: "CloudFlare", sourceType: "cdn", severity: "info" as const, title: "WAF rule triggered 2.1k times in 1hr — managed rule: SQL injection attempts blocked", status: "dismissed", receivedAt: new Date(Date.now() - 1000 * 60 * 320).toISOString() },
   { id: 23, source: "Datadog Synthetics", sourceType: "monitoring", severity: "low" as const, title: "Synthetic check failing: /health endpoint returning 503 on canary deployment v3.15.0-rc1", status: "new", receivedAt: new Date(Date.now() - 1000 * 60 * 360).toISOString() },
   { id: 24, source: "AWS CloudWatch", sourceType: "monitoring", severity: "info" as const, title: "CloudFront distribution E2K4G1XYZABC invalidation completed — 12,847 objects purged", status: "resolved", receivedAt: new Date(Date.now() - 1000 * 60 * 400).toISOString() },
+  { id: 25, source: "Vessels Maritime AI", sourceType: "security", severity: "critical" as const, title: "[CROSS-APP] EXC-001 — Crimson Voyager AIS-dark vessel approach, Persian Gulf — escalated by INCA SENTINEL-GAT-v4 (94% confidence)", status: "new", receivedAt: new Date("2026-03-30T04:41:02Z").toISOString() },
 ];
 
 export let incidents = [
@@ -136,6 +137,15 @@ export let incidents = [
     assignee: "Nina Johansson (Comms Eng)",
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(),
     resolvedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+  },
+  {
+    id: 113,
+    title: "Maritime Security Escalation — Crimson Voyager AIS-Dark Incident [WF-MAR-001]",
+    description: "Cross-platform escalation workflow triggered at 04:41 UTC. Vessels fleet telemetry (IMO 9654321 — Crimson Voyager, Persian Gulf corridor) detected AIS-dark vessel approach at <800m. INCA SENTINEL-GAT-v4 (confidence 94%) flagged STS transfer signature and pushed intelligence package to Firestorm SOC (case FIR-2026-0330). Lyte AIOps auto-generated this incident and initiated coordination runbook: (1) Coast Guard notification sent, (2) Carlota Jo maritime operations advisor loop-in pending, (3) KPI impact flag raised — maritime TCE at risk $12.4M. Awaiting Firestorm case resolution for incident close.",
+    severity: "critical",
+    status: "investigating",
+    assignee: "Alex Chen (SRE Lead)",
+    createdAt: new Date("2026-03-30T04:41:02Z").toISOString(),
   },
 ];
 

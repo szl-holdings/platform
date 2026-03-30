@@ -17,6 +17,7 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { DemoModeProvider } from "@workspace/shared-ui";
 
 // Marketing pages
 const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
@@ -473,6 +474,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
   return (
+    <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -495,6 +497,7 @@ function App() {
       </AuthProvider>
       <AgentCopilot config={helmsmanConfig} />
     </QueryClientProvider>
+    </DemoModeProvider>
   );
 }
 

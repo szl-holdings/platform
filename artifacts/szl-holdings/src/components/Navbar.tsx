@@ -10,6 +10,8 @@ const navLinks = [
   { label: "Roadmap", href: "/roadmap" },
   { label: "About", href: "/about" },
   { label: "Updates", href: "/updates" },
+  { label: "Ecosystem Map", href: "/ecosystem" },
+  { label: "KPI Dashboard", href: "/kpis" },
   { label: "Contact", href: "/contact" },
 ];
 

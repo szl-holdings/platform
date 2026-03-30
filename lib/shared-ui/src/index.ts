@@ -15,3 +15,6 @@ export { apiFetch, type PaginationMeta, type PaginatedResponse } from "./api-fet
 export { useNotificationCenter, type LiveNotification, type ApiNotification, type NotificationCenterState } from "./notification-center";
 export { AgentInsightsWidget, type KnowledgeEntry as AgentKnowledgeEntry, type AgentRun } from "./agent-insights-widget";
 export { ExplainabilityDrawer, useExplainability, ExplainButton, type ExplainabilityMetadata, type ExplainabilityDrawerProps } from "./explainability";
+export { DemoModeProvider, useDemoMode, DemoModeSwitcher, type DemoMode, type DemoModeState, MODE_LABELS, MODE_DESCRIPTIONS, MODE_ICONS, MODE_COLORS } from "./demo-mode";
+export { EcosystemMap, ECOSYSTEM_NODES, LAYER_CONFIG, CONNECTION_PAIRS, type EcosystemNode, type EcosystemMapProps } from "./ecosystem-map";
+export { CompanyKPIDashboard, DEMO_COMPANY_KPIS, type CompanyKPI, type CompanyKPIDashboardProps } from "./company-kpi-dashboard";

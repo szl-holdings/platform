@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Router as WouterRouter, Route, Switch, useLocation } from "wouter";
+import { DemoModeProvider } from "@workspace/shared-ui";
 import { AlloyLanding } from "./LandingPage";
 import type { NormalizedEvent, DoctrineLayer } from "@workspace/observability";
 import { doctrineEventBus, seedDoctrineEvents } from "@workspace/observability";
@@ -2429,8 +2430,10 @@ function AlloyRouter() {
 
 export default function AlloyApp() {
   return (
+    <DemoModeProvider>
     <WouterRouter base={import.meta.env.BASE_URL?.replace(/\/$/, "") || "/alloy"}>
       <AlloyRouter />
     </WouterRouter>
+    </DemoModeProvider>
   );
 }

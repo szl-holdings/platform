@@ -42,7 +42,7 @@ export const kpiRibbon = {
       display: "inline-flex",
       alignItems: "center",
       gap: "0.25rem",
-      color: colors.status.success,
+      color: colors.semantic.success,
       fontSize: "0.8125rem",
       fontWeight: "500",
     },
@@ -50,7 +50,7 @@ export const kpiRibbon = {
       display: "inline-flex",
       alignItems: "center",
       gap: "0.25rem",
-      color: colors.status.error,
+      color: colors.semantic.error,
       fontSize: "0.8125rem",
       fontWeight: "500",
     },
@@ -207,23 +207,23 @@ export const statusPill = {
   },
   variants: {
     success: {
-      background: colors.status.successMuted,
-      color: colors.status.success,
+      background: colors.semantic.successMuted,
+      color: colors.semantic.success,
       border: `1px solid hsla(152, 60%, 48%, 0.20)`,
     },
     warning: {
-      background: colors.status.warningMuted,
-      color: colors.status.warning,
+      background: colors.semantic.warningMuted,
+      color: colors.semantic.warning,
       border: `1px solid hsla(38, 90%, 54%, 0.20)`,
     },
     error: {
-      background: colors.status.errorMuted,
-      color: colors.status.error,
+      background: colors.semantic.errorMuted,
+      color: colors.semantic.error,
       border: `1px solid hsla(4, 72%, 56%, 0.20)`,
     },
     info: {
-      background: colors.status.infoMuted,
-      color: colors.status.info,
+      background: colors.semantic.infoMuted,
+      color: colors.semantic.info,
       border: `1px solid hsla(210, 80%, 56%, 0.20)`,
     },
     neutral: {
@@ -252,22 +252,22 @@ export const alertBanner = {
   },
   variants: {
     info: {
-      background: colors.status.infoMuted,
+      background: colors.semantic.infoMuted,
       border: `1px solid hsla(210, 80%, 56%, 0.18)`,
       color: colors.text.primary,
     },
     success: {
-      background: colors.status.successMuted,
+      background: colors.semantic.successMuted,
       border: `1px solid hsla(152, 60%, 48%, 0.18)`,
       color: colors.text.primary,
     },
     warning: {
-      background: colors.status.warningMuted,
+      background: colors.semantic.warningMuted,
       border: `1px solid hsla(38, 90%, 54%, 0.18)`,
       color: colors.text.primary,
     },
     error: {
-      background: colors.status.errorMuted,
+      background: colors.semantic.errorMuted,
       border: `1px solid hsla(4, 72%, 56%, 0.18)`,
       color: colors.text.primary,
     },
@@ -427,8 +427,8 @@ export const premiumFormElements = {
     boxShadow: `0 0 0 3px ${colors.primary.muted}`,
   },
   inputError: {
-    borderColor: colors.status.error,
-    boxShadow: `0 0 0 3px ${colors.status.errorMuted}`,
+    borderColor: colors.semantic.error,
+    boxShadow: `0 0 0 3px ${colors.semantic.errorMuted}`,
   },
   select: {
     background: colors.background.tertiary,
@@ -480,7 +480,7 @@ export const premiumFormElements = {
     lineHeight: "1.5",
   },
   errorText: {
-    color: colors.status.error,
+    color: colors.semantic.error,
     fontSize: "0.8125rem",
     marginTop: "0.3125rem",
     lineHeight: "1.5",
@@ -523,7 +523,7 @@ export const premiumFormElements = {
       lineHeight: "1.5",
     },
     danger: {
-      background: colors.status.error,
+      background: colors.semantic.error,
       color: colors.text.primary,
       border: "none",
       borderRadius: effects.borderRadius.md,

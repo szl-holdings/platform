@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
+import { DemoModeProvider } from "@workspace/shared-ui";
 
 const HomePage = lazy(() => import("@/pages/home"));
 const PortfolioPage = lazy(() => import("@/pages/portfolio"));
@@ -21,6 +22,8 @@ const LegalPrivacy = lazy(() => import("@/pages/legal-privacy"));
 const LegalTerms = lazy(() => import("@/pages/legal-terms"));
 const TrustCenter = lazy(() => import("@/pages/trust-center"));
 const InvestorStory = lazy(() => import("@/pages/investor-story"));
+const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
+const EcosystemMapPage = lazy(() => import("@/pages/ecosystem-map"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +41,7 @@ function PageLoader() {
 
 function App() {
   return (
+    <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
       <LazyMotion features={domMax} strict>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -93,6 +97,12 @@ function App() {
             <Route path="/investor">
               <Suspense fallback={<PageLoader />}><InvestorStory /></Suspense>
             </Route>
+            <Route path="/kpis">
+              <Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense>
+            </Route>
+            <Route path="/ecosystem">
+              <Suspense fallback={<PageLoader />}><EcosystemMapPage /></Suspense>
+            </Route>
             <Route>
               <Suspense fallback={<PageLoader />}><HomePage /></Suspense>
             </Route>
@@ -101,6 +111,7 @@ function App() {
       </LazyMotion>
       <IncaAgentIndicator agentName="Portfolio Analyst" systemType="inti" currentTask="Monitoring portfolio performance metrics" confidence={0.88} />
     </QueryClientProvider>
+    </DemoModeProvider>
   );
 }
 

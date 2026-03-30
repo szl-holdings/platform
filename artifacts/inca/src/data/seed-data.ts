@@ -678,6 +678,11 @@ export const insights: Insight[] = [
     description: "NEXUS VLM's cross-attention layers learn spatial-semantic correspondences that transfer to ORACLE's knowledge extraction pipeline. Pre-trained visual features improve relation extraction F1 by 4.2% — suggesting universal multimodal representations emerge at scale. This mirrors findings from DeepMind's Gemini and OpenAI's GPT-4V research.",
     sourceExperiment: "Cross-Attention VLM Training", confidence: 85, date: "2026-01-28", impact: "medium",
   },
+  {
+    id: "ins-017", category: "warning", title: "SENTINEL flags maritime AIS-dark vessel pattern — Crimson Voyager incident",
+    description: "SENTINEL-GAT-v4 detected a network-layer anomaly correlated with AIS signal suppression pattern from Vessels fleet telemetry at 04:41 UTC on 2026-03-30. The GNN flagged the Crimson Voyager (IMO 9654321) as the target: an unidentified dark vessel approached within 800m in the Persian Gulf corridor. Threat profile matches documented ship-to-ship (STS) transfer signatures in the CISA maritime threat database. Intelligence package escalated to Firestorm SOC (case FIR-2026-0330) and Lyte AIOps workflow (WF-MAR-001) for coordinated response. Potential cargo seizure risk valued at $12.4M.",
+    sourceExperiment: "GNN Lateral Movement Detection", confidence: 94, date: "2026-03-30", impact: "high",
+  },
 ];
 
 export function getProjectsByStatus(status: ProjectStatus): Project[] {
