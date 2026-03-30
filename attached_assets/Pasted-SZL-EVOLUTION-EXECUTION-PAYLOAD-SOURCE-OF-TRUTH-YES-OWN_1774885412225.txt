@@ -1,0 +1,320 @@
+SZL EVOLUTION EXECUTION PAYLOAD
+SOURCE OF TRUTH: YES
+OWNER: Stephen Lutar
+MODE: EXECUTE, NOT JUST PLAN
+OBJECTIVE: TURN SZL INTO A REAL PRODUCT ECOSYSTEM WITH GOVERNED SOFTWARE UNDER THE BRAND
+
+READ THIS FIRST
+Treat this as a build order, not a brainstorming document.
+Do the work in phases.
+Modify the codebase directly.
+Create files, tables, APIs, services, routes, configs, and mock data.
+Report changes after each phase.
+Do not stop at strategy language.
+Do not return only recommendations.
+Build.
+
+FINAL HIERARCHY
+This hierarchy is locked and must be reflected everywhere:
+
+- SZL Holdings = parent brand / public ecosystem authority
+- Alloy = workflow, intelligence, orchestration, and output engine
+- Lyte = business observability platform powered by Alloy
+- Vessels = maritime command platform powered by Alloy
+- Carlota Jo Consulting = premium service brand
+- Stephen Lutar = founder/operator identity
+- Lyte Readiness = module inside Lyte
+- Nimbus = removed publicly and absorbed into Alloy
+
+NON-NEGOTIABLE CONSOLIDATION RULES
+- remove every public Nimbus reference
+- replace Project Readiness with Lyte Readiness
+- remove duplicate founder/about narratives
+- do not let Alloy compete with Lyte or Vessels
+- do not keep equal-weight random venture grids
+- public surfaces explain and convert
+- private surfaces operate and control
+
+==================================================
+PHASE 0 — INVENTORY AND CLEANUP
+==================================================
+
+TASKS
+1. inventory current routes, pages, components, mocks, and shared styles
+2. identify public-only vs app/private surfaces
+3. remove or replace public Nimbus references
+4. rename Project Readiness references to Lyte Readiness
+5. identify duplicate founder/about copy
+6. identify existing static-only UI that should become stateful later
+
+OUTPUT
+- route inventory
+- component inventory
+- list of renamed references
+- list of duplicated founder sections
+- map of public vs private pages
+
+==================================================
+PHASE 1 — FILE STRUCTURE AND PLATFORM FOUNDATIONS
+==================================================
+
+CREATE OR REFACTOR INTO THIS STRUCTURE
+
+/app
+  /public
+    /szl
+    /alloy-marketing
+    /lyte-marketing
+    /vessels-marketing
+    /carlota-jo
+    /founder
+  /private
+    /lyte
+    /vessels
+    /alloy
+    /internal
+
+/src
+  /components
+    /design-system
+    /navigation
+    /hero
+    /cards
+    /proof
+    /forms
+    /charts
+    /maps
+    /signals
+    /actions
+    /readiness
+    /workflows
+    /artifacts
+  /features
+    /alloy
+      /api
+      /services
+      /schemas
+      /components
+      /pages
+    /lyte
+      /api
+      /services
+      /schemas
+      /components
+      /pages
+    /vessels
+      /api
+      /services
+      /schemas
+      /components
+      /pages
+    /auth
+    /flags
+    /audit
+    /telemetry
+  /lib
+    /db
+    /auth
+    /rls
+    /config
+    /flags
+    /telemetry
+    /jobs
+    /utils
+  /content
+    /platforms
+    /case-studies
+    /founder
+    /proof
+  /data
+    /seed
+    /demo
+    /mocks
+
+/db
+  /migrations
+  /seeds
+  /policies
+
+/jobs
+  /daily
+  /hourly
+  /workflows
+  /maintenance
+
+/docs
+  /architecture
+  /runbooks
+  /api
+  /security
+  /deployment
+
+TASKS
+1. create this structure if it does not exist
+2. move existing code into the proper buckets
+3. separate public marketing pages from private app pages
+4. create a central config layer for env flags and app metadata
+5. create shared design-system entry points
+6. create shared schema folder structure
+
+OUTPUT
+- files created
+- files moved
+- import path cleanup
+- new app boundary map
+
+==================================================
+PHASE 2 — CANONICAL DATA MODEL
+==================================================
+
+CREATE THESE TABLES
+
+USERS
+- id
+- email
+- full_name
+- role
+- team
+- is_active
+- created_at
+- updated_at
+
+ORGANIZATIONS
+- id
+- name
+- slug
+- type
+- created_at
+- updated_at
+
+MEMBERSHIPS
+- id
+- user_id
+- organization_id
+- role
+- created_at
+
+PRODUCTS
+- id
+- key
+- name
+- visibility
+- created_at
+
+SIGNALS
+- id
+- organization_id
+- product_key
+- source
+- category
+- severity
+- title
+- summary
+- why_it_matters
+- owner_id
+- owner_state
+- workflow_id
+- artifact_id
+- value_at_risk_cents
+- confidence
+- status
+- detected_at
+- updated_at
+- metadata_json
+
+ACTIONS
+- id
+- organization_id
+- signal_id
+- product_key
+- title
+- owner_id
+- urgency
+- due_at
+- status
+- recommended_action
+- estimated_value_protected_cents
+- escalation_state
+- created_at
+- updated_at
+- metadata_json
+
+WORKFLOWS
+- id
+- organization_id
+- product_key
+- name
+- trigger_type
+- status
+- current_step
+- approval_required
+- config_json
+- created_at
+- updated_at
+- last_run_at
+
+WORKFLOW_RUNS
+- id
+- workflow_id
+- organization_id
+- product_key
+- trigger_ref
+- state
+- input_json
+- output_json
+- error_json
+- retry_count
+- approval_state
+- started_at
+- ended_at
+- created_at
+
+APPROVALS
+- id
+- organization_id
+- workflow_run_id
+- artifact_id
+- approver_id
+- requested_by_user_id
+- status
+- requested_at
+- reviewed_at
+- notes
+
+ARTIFACTS
+- id
+- organization_id
+- workflow_run_id
+- product_key
+- type
+- title
+- content_json
+- content_uri
+- status
+- approved
+- created_by_system
+- created_at
+- updated_at
+
+COMMENTS
+- id
+- organization_id
+- entity_type
+- entity_id
+- user_id
+- body
+- created_at
+
+EVENT_LOG
+- id
+- organization_id
+- product_key
+- entity_type
+- entity_id
+- event_type
+- actor_user_id
+- payload_json
+- created_at
+
+FEATURE_FLAGS
+- id
