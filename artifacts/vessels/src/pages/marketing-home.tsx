@@ -55,12 +55,12 @@ export default function MarketingHomePage() {
           </div>
 
           <h1 className="font-display text-4xl md:text-6xl font-bold text-sky-50 leading-tight mb-6">
-            Move from location awareness<br />
-            <span className="text-sky-400">to operational command.</span>
+            Turn fleet visibility, voyage performance,<br />
+            <span className="text-sky-400">and operational exceptions into command.</span>
           </h1>
 
           <p className="text-lg text-sky-300/60 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Built for fleet executives, operations teams, and commercial managers who need more than a vessel tracker — they need a command platform.
+            Built for fleet executives, operations teams, and commercial managers who need more than a vessel tracker — a command platform that connects movement to consequence.
           </p>
 
           <div className="flex items-center justify-center gap-4 flex-wrap">

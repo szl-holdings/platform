@@ -27,11 +27,11 @@ export default function Hero() {
               transition={{ duration: 0.9, delay: 0.15 }}
               className="font-serif text-5xl md:text-6xl lg:text-[4.5rem] font-light text-ink-900 leading-[1.08] mb-6"
             >
-              Bespoke advisory
+              Discreet operational
               <br />
-              for clients who value
+              and residence support
               <br />
-              <span className="italic">discretion and precision.</span>
+              <span className="italic">for high-touch environments.</span>
             </motion.h1>
 
             <motion.p

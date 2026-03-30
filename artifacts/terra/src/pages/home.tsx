@@ -220,16 +220,16 @@ export default function HomePage() {
             </span>
           </motion.div>
 
-          <motion.h1 custom={1} initial="hidden" animate="visible" variants={heroReveal} className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-extrabold leading-[1.05] mb-6">
-            <span className="text-terra-text">Real Estate</span>
+          <motion.h1 custom={1} initial="hidden" animate="visible" variants={heroReveal} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-extrabold leading-[1.05] mb-6">
+            <span className="text-terra-text">Turn listings, broker workflow,</span>
             <br />
-            <span className="bg-gradient-to-r from-terra-primary via-terra-accent to-terra-emerald bg-clip-text text-transparent">Intelligence</span>
+            <span className="bg-gradient-to-r from-terra-primary via-terra-accent to-terra-emerald bg-clip-text text-transparent">and market visibility</span>
             <br />
-            <span className="text-terra-text">Platform</span>
+            <span className="text-terra-text">into command.</span>
           </motion.h1>
 
           <motion.p custom={2} initial="hidden" animate="visible" variants={heroReveal} className="text-base sm:text-lg md:text-xl text-terra-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed">
-            Command-center visibility into your portfolio — ownership intelligence, off-market deals, climate risk, and investment scenario modeling in one unified platform.
+            Terra is the real estate broker platform that connects listings, pipeline management, distress intelligence, and team performance in one command surface — built for brokers who operate at scale.
           </motion.p>
 
           <motion.div custom={3} initial="hidden" animate="visible" variants={heroReveal} className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -247,9 +247,9 @@ export default function HomePage() {
 
           <motion.div custom={4} initial="hidden" animate="visible" variants={heroReveal} className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
             {[
-              { label: "Portfolio Value", value: "$454M+" },
-              { label: "Avg Occupancy", value: "92.8%" },
-              { label: "Properties", value: "8" },
+              { label: "Active Listings", value: "50+" },
+              { label: "Distress Properties", value: "50+" },
+              { label: "Deal Conversion", value: "Alloy" },
             ].map(stat => (
               <div key={stat.label} className="text-center">
                 <p className="text-2xl sm:text-3xl font-display font-extrabold bg-gradient-to-r from-terra-primary to-terra-accent bg-clip-text text-transparent">{stat.value}</p>

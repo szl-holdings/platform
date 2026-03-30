@@ -43,7 +43,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.35 }}
             className="text-lg sm:text-xl text-foreground/55 max-w-2xl mb-4 leading-relaxed font-light"
           >
-            Systems, visibility, and execution for modern operations.
+            Builder. Operator. Systems thinker.
           </motion.p>
 
           <motion.p
@@ -52,7 +52,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.42 }}
             className="text-base text-foreground/35 max-w-xl mb-12 leading-relaxed font-light"
           >
-            Founder of SZL Holdings — building structured ventures across observability, maritime command, and high-trust services. Built to operate with clarity and compound over time.
+            Founder of SZL Holdings — building premium command systems across observability, maritime intelligence, real estate operations, and high-trust services. Every platform is purpose-built, governed, and designed to compound over time.
           </motion.p>
 
           <motion.div

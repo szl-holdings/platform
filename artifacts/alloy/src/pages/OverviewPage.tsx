@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ArrowRight, ExternalLink, ChevronRight } from "lucide-react";
-import { cn } from "../lib/utils";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { trackEvent } from "../App";
 
 const BASE_PATH = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/alloy";
@@ -29,104 +28,54 @@ interface NavProps {
   onNavigate: (page: string) => void;
 }
 
-function EcosystemNode({ label, subtitle, accent, x, y, isCentral = false }: {
-  label: string; subtitle: string; accent: string; x: string; y: string; isCentral?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "absolute flex flex-col items-center gap-1 -translate-x-1/2 -translate-y-1/2",
-      )}
-      style={{ left: x, top: y }}
-    >
-      <div
-        className={cn(
-          "flex items-center justify-center rounded-xl font-bold text-white",
-          isCentral ? "w-20 h-20 text-base shadow-2xl" : "w-14 h-14 text-sm shadow-lg"
-        )}
-        style={{
-          background: isCentral
-            ? `radial-gradient(circle, ${accent}40, ${accent}20)`
-            : `${accent}20`,
-          border: `2px solid ${accent}60`,
-          boxShadow: isCentral ? `0 0 40px ${accent}40` : `0 0 15px ${accent}25`,
-        }}
-      >
-        {isCentral ? "⬡" : label.charAt(0)}
-      </div>
-      <span className={cn("text-center font-semibold leading-tight", isCentral ? "text-sm" : "text-xs")} style={{ color: accent }}>
-        {label}
-      </span>
-      <span className="text-[10px] text-white/40 text-center leading-tight">{subtitle}</span>
-    </div>
-  );
-}
+const WHAT_ALLOY_IS = [
+  { num: "01", title: "An orchestration engine", desc: "Alloy sequences multi-step workflows across systems, teams, and time — with conditional logic, human approval gates, and structured outputs at every stage." },
+  { num: "02", title: "A signal processing layer", desc: "Alloy ingests operational, financial, and environmental signals from connected platforms and classifies them by severity, function, and required action." },
+  { num: "03", title: "An output generation system", desc: "From raw signals to structured reports, briefings, and decision-ready documents — Alloy produces outputs without manual effort." },
+  { num: "04", title: "A governance framework", desc: "Every consequential action passes through configurable approval flows. Every decision is logged. Humans stay in the loop where it matters." },
+];
 
-function ConnectionLine({ x1, y1, x2, y2, accent }: { x1: number; y1: number; x2: number; y2: number; accent: string }) {
-  return (
-    <line
-      x1={`${x1}%`} y1={`${y1}%`}
-      x2={`${x2}%`} y2={`${y2}%`}
-      stroke={accent} strokeWidth="1.5" strokeDasharray="4 4" strokeOpacity="0.4"
-    />
-  );
-}
+const WHAT_ALLOY_POWERS = [
+  { platform: "Lyte", accent: "#06b6d4", desc: "Business observability — signals classified, incidents triaged, and operators alerted with context, not noise.", href: "/lyte-command-center/" },
+  { platform: "Vessels", accent: "#3b82f6", desc: "Maritime intelligence — AIS signal interpretation, deviation detection, and fleet briefings for operations teams.", href: "/vessels/" },
+  { platform: "Terra", accent: "#a07848", desc: "Real estate broker platform — deal conversion, lead routing, and distress property workflows for active pipelines.", href: "/terra/" },
+  { platform: "Carlota Jo", accent: "#d97706", desc: "High-trust service coordination — vendor orchestration, residence logistics, and cross-border operational workflows.", href: "/carlota-jo/" },
+];
 
-function EcosystemMap() {
-  return (
-    <div className="relative w-full aspect-[4/3] max-w-2xl mx-auto">
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <ConnectionLine x1={50} y1={50} x2={20} y2={25} accent="#00d4ff" />
-        <ConnectionLine x1={50} y1={50} x2={80} y2={25} accent="#00d4ff" />
-        <ConnectionLine x1={50} y1={50} x2={20} y2={75} accent="#00d4ff" />
-        <ConnectionLine x1={50} y1={50} x2={80} y2={75} accent="#00d4ff" />
-        <ConnectionLine x1={50} y1={50} x2={50} y2={15} accent="#00d4ff" />
-        <ConnectionLine x1={50} y1={50} x2={50} y2={85} accent="#a78bfa" />
-      </svg>
-      <EcosystemNode label="Alloy" subtitle="Intelligence Engine" accent="#00d4ff" x="50%" y="50%" isCentral />
-      <EcosystemNode label="Lyte" subtitle="Business Observability" accent="#f59e0b" x="20%" y="25%" />
-      <EcosystemNode label="Vessels" subtitle="Maritime Command" accent="#3b82f6" x="80%" y="25%" />
-      <EcosystemNode label="Carlota Jo" subtitle="Operational Workflows" accent="#f472b6" x="20%" y="75%" />
-      <EcosystemNode label="Future" subtitle="App Endpoints" accent="#6366f1" x="80%" y="75%" />
-      <EcosystemNode label="Humans" subtitle="Approval & Oversight" accent="#10b981" x="50%" y="15%" />
-      <EcosystemNode label="Actions" subtitle="Execution Layer" accent="#a78bfa" x="50%" y="85%" />
-    </div>
-  );
-}
+const HOW_ALLOY_WORKS = [
+  { step: "01", label: "Ingest", accent: "#06b6d4", desc: "Signals, data, and requests enter Alloy from connected platforms and external sources. Every input is timestamped, classified, and attributed." },
+  { step: "02", label: "Classify", accent: "#3b82f6", desc: "Alloy normalises and structures incoming data — assigning severity, ownership, and consequence before any action is taken." },
+  { step: "03", label: "Orchestrate", accent: "#8b5cf6", desc: "Multi-step workflows are sequenced with conditional logic. Each step has a defined owner, trigger condition, and output requirement." },
+  { step: "04", label: "Route", accent: "#a78bfa", desc: "Actions, alerts, and decisions are distributed to the right person at the right time — based on role, urgency, and context." },
+  { step: "05", label: "Output", accent: "#10b981", desc: "Structured reports, narratives, briefings, and decision documents are generated without manual drafting." },
+  { step: "06", label: "Approve", accent: "#f59e0b", desc: "High-stakes outputs route through human approval gates. Every approval is logged. Every rejection is recorded with reason." },
+  { step: "07", label: "Execute", accent: "#f472b6", desc: "Confirmed actions are executed. Downstream systems are updated. The audit trail is complete and explainable." },
+];
 
-function PipelineStep({ step, label, description, accent }: { step: number; label: string; description: string; accent: string }) {
-  return (
-    <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
-      <div
-        className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold border-2 shrink-0"
-        style={{ borderColor: `${accent}60`, background: `${accent}15`, color: accent }}
-      >
-        {step}
-      </div>
-      <div className="text-center">
-        <div className="text-xs font-semibold text-white/90">{label}</div>
-        <div className="text-[10px] text-white/40 mt-0.5 leading-tight">{description}</div>
-      </div>
-    </div>
-  );
-}
+const AGENT_ROLES = [
+  { name: "Signal Agent", desc: "Monitors connected platforms for anomalies, classifies by severity and function, and surfaces context-rich alerts." },
+  { name: "Workflow Agent", desc: "Manages multi-step process execution — sequencing, gating, re-routing on failure, and escalating on timeout." },
+  { name: "Document Agent", desc: "Drafts structured outputs — briefings, reports, and decision summaries — from structured data and signal context." },
+  { name: "Routing Agent", desc: "Distributes tasks, alerts, and approvals to the right owner at the right time based on role and urgency." },
+  { name: "Audit Agent", desc: "Maintains complete decision logs, approval trails, and output histories across all workflow runs." },
+];
 
-const PIPELINE_STEPS = [
-  { label: "Inputs", description: "Signals, data, requests", accent: "#00d4ff" },
-  { label: "Normalise", description: "Structure & classify", accent: "#3b82f6" },
-  { label: "Reason", description: "Analyse & synthesise", accent: "#8b5cf6" },
-  { label: "Orchestrate", description: "Sequence & coordinate", accent: "#a78bfa" },
-  { label: "Outputs", description: "Actions & documents", accent: "#10b981" },
-  { label: "Approve", description: "Human review gate", accent: "#f59e0b" },
-  { label: "Execute", description: "Confirmed actions", accent: "#f472b6" },
+const OUTPUTS = [
+  { label: "Signal Briefings", desc: "Human-readable summaries of what is happening, why it matters, and what action is required." },
+  { label: "Workflow Status Reports", desc: "Step-by-step execution summaries with owner attribution, completion status, and exception notes." },
+  { label: "Decision Packages", desc: "Structured documents ready for executive or operator review — with context, risk, and recommended action." },
+  { label: "Audit Trails", desc: "Complete logs of every decision, approval, rejection, and execution event — timestamped and attributable." },
+  { label: "Exception Alerts", desc: "Prioritised notifications for anomalies, stalls, ownership gaps, and time-sensitive actions." },
 ];
 
 export default function OverviewPage({ onNavigate }: NavProps) {
   const heroRef = useSectionEngagement("hero");
-  const ecosystemRef = useSectionEngagement("ecosystem_map");
-  const pipelineRef = useSectionEngagement("input_pipeline");
-  const useCasesRef = useSectionEngagement("use_cases_preview");
-  const poweredRef = useSectionEngagement("powered_products");
+  const whatRef = useSectionEngagement("what_alloy_is");
+  const powersRef = useSectionEngagement("what_alloy_powers");
+  const worksRef = useSectionEngagement("how_alloy_works");
+  const agentsRef = useSectionEngagement("agent_roles");
+  const outputsRef = useSectionEngagement("outputs");
+  const govRef = useSectionEngagement("governance");
 
   return (
     <div className="min-h-screen text-white" style={{ background: "hsl(224, 25%, 4%)" }}>
@@ -134,147 +83,163 @@ export default function OverviewPage({ onNavigate }: NavProps) {
       {/* Hero */}
       <section ref={heroRef} className="relative overflow-hidden px-6 pt-20 pb-24 max-w-6xl mx-auto">
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: "radial-gradient(circle, #00d4ff, transparent)" }} />
-          <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-8" style={{ background: "radial-gradient(circle, #6366f1, transparent)" }} />
+          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-8" style={{ background: "radial-gradient(circle, #6e9ef5, transparent)" }} />
+          <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-6" style={{ background: "radial-gradient(circle, #8b5cf6, transparent)" }} />
         </div>
 
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6 border" style={{ background: "rgba(0,212,255,0.08)", borderColor: "rgba(0,212,255,0.25)", color: "#00d4ff" }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-            SZL Holdings — Execute Layer
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm text-xs font-medium mb-6 border" style={{ background: "rgba(110,158,245,0.08)", borderColor: "rgba(110,158,245,0.25)", color: "#6e9ef5" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            SZL Holdings — Intelligence Backbone
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight mb-6">
-            Alloy turns fragmented operational inputs into structured, explainable{" "}
-            <span style={{ color: "#00d4ff" }}>execution.</span>
+            The intelligence layer behind{" "}
+            <span style={{ color: "#6e9ef5" }}>premium command systems.</span>
           </h1>
 
-          <p className="text-lg text-white/55 leading-relaxed mb-10 max-w-2xl">
-            Built to orchestrate workflows without losing accountability. Alloy is the intelligence, orchestration, and workflow backbone powering Lyte, Vessels, and the entire SZL ecosystem.
+          <p className="text-lg leading-relaxed mb-4 max-w-2xl" style={{ color: "rgba(255,255,255,0.55)" }}>
+            Alloy is the orchestration, workflow, and output engine powering every platform in the SZL ecosystem.
+            It sequences processes, routes actions, generates structured outputs, and keeps humans in the loop
+            on consequential decisions.
+          </p>
+
+          <p className="text-sm leading-relaxed mb-10 max-w-xl" style={{ color: "rgba(255,255,255,0.35)" }}>
+            Alloy is not a chatbot. It is an execution fabric — built for precision, governance, and scale.
           </p>
 
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => { trackEvent("cta_click", { label: "Explore Architecture", from: "overview_hero" }); onNavigate("architecture"); }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-black transition-all hover:brightness-110"
-              style={{ background: "#00d4ff" }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm text-sm font-semibold text-black transition-all hover:brightness-110"
+              style={{ background: "#6e9ef5" }}
             >
               Explore Architecture <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={() => { trackEvent("cta_click", { label: "View Workflows", from: "overview_hero" }); onNavigate("workflows"); }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium border transition-all hover:bg-white/5"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm text-sm font-medium border transition-all hover:bg-white/5"
               style={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.75)" }}
             >
               View Workflows <ChevronRight className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => { trackEvent("cta_click", { label: "Open Command Interface", from: "overview_hero" }); onNavigate("chat"); }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium border transition-all hover:bg-white/5"
-              style={{ borderColor: "rgba(0,212,255,0.25)", color: "#00d4ff" }}
+          </div>
+        </div>
+      </section>
+
+      {/* What Alloy Is */}
+      <section ref={whatRef} className="px-6 py-16 max-w-6xl mx-auto">
+        <div className="mb-10">
+          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#6e9ef5" }}>What Alloy Is</div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">An orchestration and output engine — not a chatbot.</h2>
+          <p className="max-w-xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Alloy manages structured workflows, processes operational signals, routes actions to the right people,
+            and generates explainable outputs. Every step is governed, logged, and attributable.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-5">
+          {WHAT_ALLOY_IS.map((item) => (
+            <div key={item.num} className="p-5 rounded-sm border" style={{ borderColor: "rgba(110,158,245,0.12)", background: "rgba(110,158,245,0.04)" }}>
+              <div className="text-xs font-mono mb-2" style={{ color: "rgba(110,158,245,0.6)" }}>{item.num}</div>
+              <h3 className="text-sm font-semibold mb-2" style={{ color: "rgba(255,255,255,0.9)" }}>{item.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* What Alloy Powers */}
+      <section ref={powersRef} className="px-6 py-16 max-w-6xl mx-auto">
+        <div className="mb-10">
+          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#6e9ef5" }}>What Alloy Powers</div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Every platform in the SZL ecosystem runs on Alloy.</h2>
+          <p className="max-w-xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Alloy is the shared intelligence backbone. Signal processing, workflow orchestration, and output generation
+            are Alloy capabilities — surfaced through each platform's command interface.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-5">
+          {WHAT_ALLOY_POWERS.map((p) => (
+            <a
+              key={p.platform}
+              href={p.href}
+              className="group flex items-start gap-4 p-5 rounded-sm border transition-all hover:border-white/15"
+              style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
             >
-              Open Command Interface <ExternalLink className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Ecosystem Power Map */}
-      <section ref={ecosystemRef} className="px-6 py-16 max-w-6xl mx-auto">
-        <div className="mb-10">
-          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Ecosystem Power Map</div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">Alloy at the center of the SZL ecosystem</h2>
-          <p className="text-white/50 max-w-xl">Every product in the ecosystem connects to Alloy. Intelligence flows in, structured execution flows out — with human approval where it matters.</p>
-        </div>
-
-        <div className="rounded-2xl border p-8 md:p-12" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
-          <EcosystemMap />
-        </div>
-      </section>
-
-      {/* Pipeline Visual */}
-      <section ref={pipelineRef} className="px-6 py-16 max-w-6xl mx-auto">
-        <div className="mb-10">
-          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Inputs-to-Actions Pipeline</div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">From raw signal to confirmed action</h2>
-          <p className="text-white/50 max-w-xl">Every piece of information entering Alloy passes through a structured pipeline. Nothing executes without passing through reasoning, orchestration, and — where required — human approval.</p>
-        </div>
-
-        <div className="rounded-2xl border p-6 md:p-10" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
-          <div className="flex flex-wrap gap-3 items-center justify-between">
-            {PIPELINE_STEPS.map((step, i) => (
-              <div key={step.label} className="flex items-center gap-2 flex-1 min-w-0">
-                <PipelineStep step={i + 1} {...step} />
-                {i < PIPELINE_STEPS.length - 1 && (
-                  <div className="w-4 h-px shrink-0" style={{ background: "rgba(255,255,255,0.1)" }} />
-                )}
+              <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: p.accent }} />
+              <div>
+                <div className="text-sm font-semibold mb-1.5" style={{ color: p.accent }}>{p.platform}</div>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{p.desc}</p>
+                <div className="mt-2 flex items-center gap-1 text-[11px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: p.accent }}>
+                  Open platform <ArrowRight className="w-3 h-3" />
+                </div>
               </div>
-            ))}
-          </div>
+            </a>
+          ))}
         </div>
       </section>
 
-      {/* Use Case Highlights */}
-      <section ref={useCasesRef} className="px-6 py-16 max-w-6xl mx-auto">
+      {/* How Alloy Works */}
+      <section ref={worksRef} className="px-6 py-16 max-w-6xl mx-auto">
         <div className="mb-10">
-          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Use Cases</div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">What Alloy powers across the ecosystem</h2>
-          <p className="text-white/50 max-w-xl">From maritime signal interpretation to document generation, Alloy handles the operational workflows that keep the ecosystem moving.</p>
+          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#6e9ef5" }}>How Alloy Works</div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">A seven-step execution sequence.</h2>
+          <p className="max-w-xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Every input that enters Alloy follows a structured path from ingestion to execution.
+            Nothing acts without classification. Nothing executes without approval where required.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {[
-            { icon: "⚡", label: "Lyte Observability", desc: "Signals classified, incidents triaged, and operators alerted with context — not noise." },
-            { icon: "🚢", label: "Maritime Intelligence", desc: "AIS signal interpretation, deviation detection, and fleet briefings for Vessels operators." },
-            { icon: "📄", label: "Document Generation", desc: "From data to approval-ready documents via structured drafting and human review workflows." },
-            { icon: "🔀", label: "Workflow Routing", desc: "Inbound requests triaged, classified, and routed to the right team or workflow automatically." },
-            { icon: "⚠️", label: "Exception Handling", desc: "Anomalies detected, assessed, and converted into structured remediation action plans." },
-            { icon: "🎯", label: "Command Workflows", desc: "Cross-product operational digests and pending decision queues for founders and operators." },
-          ].map(uc => (
-            <div key={uc.label} className="p-5 rounded-xl border hover:border-white/15 transition-colors group cursor-pointer" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
-              onClick={() => onNavigate("use-cases")}>
-              <div className="text-2xl mb-3">{uc.icon}</div>
-              <div className="text-sm font-semibold text-white/90 mb-1.5">{uc.label}</div>
-              <div className="text-xs text-white/40 leading-relaxed">{uc.desc}</div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#00d4ff" }}>
-                View use case <ArrowRight className="w-3 h-3" />
+        <div className="space-y-3">
+          {HOW_ALLOY_WORKS.map((step) => (
+            <div key={step.step} className="flex items-start gap-5 p-5 rounded-sm border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+              <div className="shrink-0 w-8 h-8 rounded-sm flex items-center justify-center text-xs font-bold font-mono border" style={{ borderColor: `${step.accent}40`, background: `${step.accent}12`, color: step.accent }}>
+                {step.step}
+              </div>
+              <div>
+                <div className="text-sm font-semibold mb-1" style={{ color: step.accent }}>{step.label}</div>
+                <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{step.desc}</p>
               </div>
             </div>
           ))}
         </div>
-
-        <button onClick={() => onNavigate("use-cases")} className="inline-flex items-center gap-2 text-sm font-medium" style={{ color: "#00d4ff" }}>
-          See all use cases <ArrowRight className="w-4 h-4" />
-        </button>
       </section>
 
-      {/* Governance Preview */}
+      {/* Workflow Engine */}
       <section className="px-6 py-16 max-w-6xl mx-auto">
-        <div className="rounded-2xl border p-8 md:p-12" style={{ borderColor: "rgba(0,212,255,0.15)", background: "linear-gradient(135deg, rgba(0,212,255,0.04), rgba(99,102,241,0.04))" }}>
+        <div className="rounded-sm border p-8 md:p-12" style={{ borderColor: "rgba(110,158,245,0.12)", background: "linear-gradient(135deg, rgba(110,158,245,0.04), rgba(139,92,246,0.04))" }}>
           <div className="md:flex md:items-start md:gap-12">
             <div className="md:flex-1 mb-8 md:mb-0">
-              <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Governance</div>
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">Human-in-the-loop by design</h2>
-              <p className="text-white/55 leading-relaxed mb-6">
-                Alloy never acts unilaterally on consequential decisions. Every high-stakes output passes through configurable approval flows. Every decision is logged. Every rejection is recorded.
+              <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#6e9ef5" }}>Workflow Engine</div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">Structured processes. No black boxes.</h2>
+              <p className="leading-relaxed mb-6 text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+                Alloy workflows are defined, versioned, and explainable. Every step has a clear trigger,
+                owner, and output. Multi-step sequences handle branching logic, timeout escalation,
+                and human approval gates without losing traceability.
               </p>
-              <button onClick={() => onNavigate("governance")} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all hover:bg-white/5" style={{ borderColor: "rgba(0,212,255,0.3)", color: "#00d4ff" }}>
-                View Governance Controls <ArrowRight className="w-4 h-4" />
+              <button
+                onClick={() => { trackEvent("cta_click", { label: "View Workflows", from: "workflow_engine" }); onNavigate("workflows"); }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium border transition-all hover:bg-white/5"
+                style={{ borderColor: "rgba(110,158,245,0.3)", color: "#6e9ef5" }}
+              >
+                View Workflow Library <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-
-            <div className="md:flex-1 grid grid-cols-2 gap-3">
+            <div className="md:flex-1 space-y-3">
               {[
-                { icon: "👤", label: "Human Approval Flows" },
-                { icon: "📊", label: "Confidence Signals" },
-                { icon: "📋", label: "Complete Audit Trails" },
-                { icon: "💬", label: "Explainable Outputs" },
-                { icon: "🔼", label: "Structured Escalation" },
-                { icon: "🔑", label: "Role-Based Control" },
-              ].map(g => (
-                <div key={g.label} className="flex items-center gap-2.5 p-3 rounded-lg border" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)" }}>
-                  <span className="text-lg">{g.icon}</span>
-                  <span className="text-xs font-medium text-white/75">{g.label}</span>
+                { label: "Conditional branching", desc: "Workflows adapt based on signal type, severity, or operator input." },
+                { label: "Multi-step sequencing", desc: "Processes execute in defined order with dependency awareness." },
+                { label: "Timeout escalation", desc: "Stalled steps automatically escalate to the right owner." },
+                { label: "Parallel execution", desc: "Independent workflow branches run concurrently when permitted." },
+              ].map((f) => (
+                <div key={f.label} className="flex items-start gap-3 p-3 rounded-sm border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: "#6e9ef5" }} />
+                  <div>
+                    <div className="text-xs font-semibold mb-0.5" style={{ color: "rgba(255,255,255,0.85)" }}>{f.label}</div>
+                    <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>{f.desc}</div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -282,48 +247,116 @@ export default function OverviewPage({ onNavigate }: NavProps) {
         </div>
       </section>
 
-      {/* Powered Products */}
-      <section ref={poweredRef} className="px-6 py-16 max-w-6xl mx-auto">
-        <div className="mb-8">
-          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Powered by Alloy</div>
-          <h2 className="text-2xl font-bold">Products running on Alloy intelligence</h2>
+      {/* Agent Roles */}
+      <section ref={agentsRef} className="px-6 py-16 max-w-6xl mx-auto">
+        <div className="mb-10">
+          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#6e9ef5" }}>Agent Roles</div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Specialized agents. Coordinated execution.</h2>
+          <p className="max-w-xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Alloy's agent layer is composed of purpose-built agents, each with a defined scope and output contract.
+            No agent acts outside its role. Every action is attributable.
+          </p>
         </div>
-        <div className="flex flex-wrap gap-4">
-          {[
-            { name: "Lyte Command Center", path: "/lyte-command-center/", icon: "⚡", accent: "#f59e0b", desc: "Business observability & ITOps" },
-            { name: "Vessels", path: "/vessels/", icon: "🚢", accent: "#3b82f6", desc: "Maritime intelligence platform" },
-            { name: "Carlota Jo", path: "/carlota-jo/", icon: "✨", accent: "#f472b6", desc: "Operational consulting workflows" },
-          ].map(p => (
-            <a key={p.name} href={p.path} onClick={() => trackEvent("cross_nav_click", { destination: p.name, destination_path: p.path, from: "overview_powered_products" })} className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-all hover:border-white/20" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg" style={{ background: `${p.accent}15`, border: `1px solid ${p.accent}30` }}>{p.icon}</div>
-              <div>
-                <div className="text-sm font-semibold text-white/90">{p.name}</div>
-                <div className="text-xs text-white/40">{p.desc}</div>
-              </div>
-              <div className="text-xs ml-2 px-2 py-0.5 rounded text-xs font-medium" style={{ background: `${p.accent}15`, color: p.accent }}>Powered by Alloy</div>
-            </a>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {AGENT_ROLES.map((a) => (
+            <div key={a.name} className="p-5 rounded-sm border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+              <div className="text-sm font-semibold mb-2" style={{ color: "rgba(255,255,255,0.85)" }}>{a.name}</div>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.40)" }}>{a.desc}</p>
+            </div>
           ))}
+        </div>
+      </section>
+
+      {/* Outputs */}
+      <section ref={outputsRef} className="px-6 py-16 max-w-6xl mx-auto">
+        <div className="mb-10">
+          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#6e9ef5" }}>Outputs</div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Structured outputs. Ready to act on.</h2>
+          <p className="max-w-xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Alloy produces outputs that operators can act on immediately — without interpretation, without decoding,
+            without additional analysis required.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {OUTPUTS.map((o) => (
+            <div key={o.label} className="p-5 rounded-sm border" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+              <div className="text-sm font-semibold mb-2" style={{ color: "rgba(255,255,255,0.85)" }}>{o.label}</div>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.40)" }}>{o.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Governance */}
+      <section ref={govRef} className="px-6 py-16 max-w-6xl mx-auto">
+        <div className="rounded-sm border p-8 md:p-12" style={{ borderColor: "rgba(110,158,245,0.15)", background: "linear-gradient(135deg, rgba(110,158,245,0.04), rgba(99,102,241,0.04))" }}>
+          <div className="md:flex md:items-start md:gap-12">
+            <div className="md:flex-1 mb-8 md:mb-0">
+              <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#6e9ef5" }}>Governance</div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4">Human-in-the-loop by design.</h2>
+              <p className="leading-relaxed mb-6 text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                Alloy never acts unilaterally on consequential decisions. Every high-stakes output
+                passes through configurable approval flows. Every decision is logged. Every rejection
+                is recorded with reason and attribution.
+              </p>
+              <button
+                onClick={() => { trackEvent("cta_click", { label: "View Governance Controls", from: "governance" }); onNavigate("governance"); }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-sm text-sm font-medium border transition-all hover:bg-white/5"
+                style={{ borderColor: "rgba(110,158,245,0.3)", color: "#6e9ef5" }}
+              >
+                View Governance Controls <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="md:flex-1 grid grid-cols-2 gap-3">
+              {[
+                { label: "Human Approval Flows" },
+                { label: "Confidence Signals" },
+                { label: "Complete Audit Trails" },
+                { label: "Explainable Outputs" },
+                { label: "Structured Escalation" },
+                { label: "Role-Based Control" },
+              ].map(g => (
+                <div key={g.label} className="flex items-center gap-2.5 p-3 rounded-sm border" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)" }}>
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "#6e9ef5" }} />
+                  <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.75)" }}>{g.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="px-6 py-20 max-w-6xl mx-auto text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to explore the architecture?</h2>
-        <p className="text-white/50 mb-8 max-w-md mx-auto">See how Alloy's six-layer system turns inputs into accountable, explainable actions.</p>
+        <p className="mb-8 max-w-md mx-auto text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+          See how Alloy's execution fabric turns operational inputs into structured, explainable actions.
+        </p>
         <div className="flex flex-wrap justify-center gap-3">
-          <button onClick={() => { trackEvent("cta_click", { label: "View Architecture", from: "overview_bottom_cta" }); onNavigate("architecture"); }} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-black" style={{ background: "#00d4ff" }}>
+          <button
+            onClick={() => { trackEvent("cta_click", { label: "View Architecture", from: "overview_bottom_cta" }); onNavigate("architecture"); }}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-sm text-sm font-semibold text-black"
+            style={{ background: "#6e9ef5" }}
+          >
             View Architecture <ArrowRight className="w-4 h-4" />
           </button>
-          <button onClick={() => { trackEvent("cta_click", { label: "Meet the Agents", from: "overview_bottom_cta" }); onNavigate("agents"); }} className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border" style={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.75)" }}>
+          <button
+            onClick={() => { trackEvent("cta_click", { label: "Meet the Agents", from: "overview_bottom_cta" }); onNavigate("agents"); }}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-sm text-sm font-medium border"
+            style={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.75)" }}
+          >
             Meet the Agents
           </button>
           <a
-            href="/stephen-site/"
-            onClick={() => trackEvent("cta_click", { label: "Request Demo", from: "overview_bottom_cta" })}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border transition-all hover:bg-white/5"
-            style={{ borderColor: "rgba(0,212,255,0.3)", color: "#00d4ff" }}
+            href="/szl-holdings/"
+            onClick={() => trackEvent("cta_click", { label: "Back to Ecosystem", from: "overview_bottom_cta" })}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-sm text-sm font-medium border transition-all hover:bg-white/5"
+            style={{ borderColor: "rgba(110,158,245,0.3)", color: "#6e9ef5" }}
           >
-            Request Demo <ExternalLink className="w-3.5 h-3.5" />
+            Back to Ecosystem <ArrowRight className="w-3.5 h-3.5" />
           </a>
         </div>
       </section>
