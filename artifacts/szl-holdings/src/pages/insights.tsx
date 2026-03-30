@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { m } from "framer-motion";
 import { ArrowRight, Clock, Calendar, Tag, Rss, ChevronRight } from "lucide-react";
 import { insights, CATEGORIES, getInsightsByCategory } from "@/data/insights";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const CATEGORY_COLORS: Record<string, string> = {
   "Annual Letter": "text-amber-600 bg-amber-50 border-amber-200",
@@ -31,7 +31,7 @@ export default function InsightsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
+      <SiteNav />
 
       <main className="pt-24">
         <section className="bg-white border-b border-szl-border">
@@ -216,7 +216,7 @@ export default function InsightsPage() {
         </section>
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

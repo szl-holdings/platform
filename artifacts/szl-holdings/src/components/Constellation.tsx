@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { m } from "framer-motion";
+import { useLocation } from "wouter";
 import portfolioData from "@/data/portfolio.json";
 import siteData from "@/data/site.json";
+import { ventures } from "@/data/ventures";
+import { analytics } from "@/lib/analytics";
 
 interface Node {
   id: string;
@@ -66,6 +69,7 @@ export function Constellation() {
   const animFrameRef = useRef<number>(0);
   const timeRef = useRef(0);
   const { ecosystem } = siteData;
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -331,8 +335,14 @@ export function Constellation() {
     for (const node of nodes) {
       if (node.id === "szl") continue;
       const dist = Math.hypot(node.x - mx, node.y - my);
-      if (dist < node.radius + 10 && node.link !== "#") {
-        window.location.href = node.link;
+      if (dist < node.radius + 10) {
+        analytics.ecosystemNodeClick(node.id);
+        const venture = ventures.find((v) => v.id === node.id);
+        if (venture) {
+          navigate(venture.path);
+        } else if (node.link !== "#") {
+          window.location.href = node.link;
+        }
         break;
       }
     }
@@ -378,8 +388,8 @@ export function Constellation() {
             aria-hidden="true"
           />
           <nav aria-label="Portfolio company links" className="sr-only">
-            {portfolioData.filter(c => c.link !== "#").map(company => (
-              <a key={company.id} href={company.link}>{company.name} - {company.status}</a>
+            {ventures.map(venture => (
+              <a key={venture.id} href={venture.path}>{venture.name} - {venture.status}</a>
             ))}
           </nav>
         </m.div>

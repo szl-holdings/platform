@@ -12,8 +12,8 @@ import {
   User,
 } from "lucide-react";
 import { getInsightBySlug, getRelatedInsights } from "@/data/insights";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { useState } from "react";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -138,7 +138,7 @@ export default function InsightsArticlePage() {
   if (!article) {
     return (
       <div className="min-h-screen bg-white">
-        <Navbar />
+        <SiteNav />
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 pt-24">
           <p className="text-szl-text-secondary text-lg">Article not found.</p>
           <button
@@ -149,7 +149,7 @@ export default function InsightsArticlePage() {
             Back to Insights
           </button>
         </div>
-        <Footer />
+        <SiteFooter />
       </div>
     );
   }
@@ -165,7 +165,7 @@ export default function InsightsArticlePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
+      <SiteNav />
 
       <main className="pt-24">
         <div className="max-w-6xl mx-auto px-6 py-10">
@@ -321,7 +321,7 @@ export default function InsightsArticlePage() {
         </div>
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }
