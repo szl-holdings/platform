@@ -13,6 +13,7 @@ import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
 import { initializeOpenTelemetry } from "@workspace/observability";
+import { seedTerraDemo } from "./lib/terra-seed";
 
 failFastOnInvalidConfig();
 
@@ -62,6 +63,10 @@ startNamedScheduledJobs();
 
 seedPlatformData().catch(err => {
   logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
+});
+
+seedTerraDemo().catch(err => {
+  logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
 });
 
 server.listen(port, "0.0.0.0", () => {

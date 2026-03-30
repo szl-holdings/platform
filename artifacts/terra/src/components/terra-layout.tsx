@@ -4,7 +4,7 @@ import { ReactNode, useState } from "react";
 import {
   Building2, LayoutDashboard, Activity, Flame, Home,
   UserCheck, Users, Brain, Zap, FileText, ClipboardList,
-  ArrowLeftRight, Bell, Menu, X
+  ArrowLeftRight, Bell, Menu, X, Inbox, MapPin
 } from "lucide-react";
 
 const NAV = [
@@ -12,6 +12,8 @@ const NAV = [
   { href: "/distress-engine", label: "Distress Engine", icon: Flame, highlight: true },
   { href: "/deals", label: "Deal Pipeline", icon: Activity },
   { href: "/listings", label: "Listings", icon: Home },
+  { href: "/inquiries", label: "Inquiry Routing", icon: Inbox },
+  { href: "/agents", label: "Agents + Brokerage", icon: Users },
   { href: "/leads", label: "Leads + CRM", icon: UserCheck },
   { href: "/offers", label: "Offers", icon: ArrowLeftRight },
   { href: "/transactions", label: "Transactions", icon: ClipboardList },
@@ -19,6 +21,7 @@ const NAV = [
   { href: "/team", label: "Team Performance", icon: Users },
   { href: "/predictions", label: "Alloy Intelligence", icon: Brain },
   { href: "/automations", label: "Alloy Workflows", icon: Zap },
+  { href: "/case-study", label: "Case Study", icon: FileText },
 ];
 
 export function TerraLayout({ children }: { children: ReactNode }) {

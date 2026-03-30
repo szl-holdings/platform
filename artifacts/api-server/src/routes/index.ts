@@ -35,6 +35,7 @@ import domainAgentsRouter from "./domain-agents/index";
 import govDataRouter from "./gov-data";
 import terraRouter from "./terra";
 import terraDistressRouter from "./terra-distress";
+import terraBrokerRouter from "./terra-broker";
 import mspLiveRouter from "./msp-live";
 import terraLiveRouter from "./terra-live";
 import agentTrainingRouter from "./agent-training";
@@ -119,6 +120,9 @@ router.use("/terra", readLimiter);
 router.use(terraDistressRouter);
 router.use("/beacon", readLimiter);
 router.use(terraDistressRouter);
+
+router.use("/terra", readLimiter);
+router.use(terraBrokerRouter);
 
 router.use("/msp", readLimiter);
 router.use(mspLiveRouter);

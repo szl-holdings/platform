@@ -5,6 +5,7 @@ const nav = [
   { label: "Alloy", href: "/alloy/", external: true },
   { label: "Lyte", href: "/lyte-command-center/", external: true },
   { label: "Vessels", href: "/vessels/", external: true },
+  { label: "Terra", href: "/terra/", external: true },
   { label: "Carlota Jo", href: "/carlota-jo/", external: true },
   { label: "Founder", href: "/founder", external: false },
   { label: "Contact", href: "/contact", external: false },

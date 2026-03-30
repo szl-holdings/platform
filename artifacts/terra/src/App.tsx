@@ -22,6 +22,9 @@ const Deals = lazy(() => import("@/pages/deals"));
 const Listings = lazy(() => import("@/pages/listings"));
 const Leads = lazy(() => import("@/pages/leads"));
 const Team = lazy(() => import("@/pages/team"));
+const InquiriesPage = lazy(() => import("@/pages/inquiries-command"));
+const AgentsPage = lazy(() => import("@/pages/agents-command"));
+const CaseStudyPage = lazy(() => import("@/pages/case-study"));
 const Market = lazy(() => import("@/pages/market"));
 const Transactions = lazy(() => import("@/pages/transactions"));
 const Documents = lazy(() => import("@/pages/documents"));
@@ -48,6 +51,9 @@ function Router() {
         <Route path="/listings" component={Listings} />
         <Route path="/leads" component={Leads} />
         <Route path="/team" component={Team} />
+        <Route path="/inquiries" component={InquiriesPage} />
+        <Route path="/agents" component={AgentsPage} />
+        <Route path="/case-study" component={CaseStudyPage} />
         <Route path="/market" component={Market} />
         <Route path="/transactions" component={Transactions} />
         <Route path="/documents" component={Documents} />

@@ -4,6 +4,179 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
+export const terraBrokeragesTable = pgTable("terra_brokerages", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  licenseNumber: text("license_number"),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  specialty: text("specialty"),
+  headCount: integer("head_count").notNull().default(1),
+  activeListings: integer("active_listings").notNull().default(0),
+  closedVolumeLtm: numeric("closed_volume_ltm", { precision: 16, scale: 2 }),
+  status: text("status", { enum: ["active", "inactive"] }).notNull().default("active"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_brokerage_slug_idx").on(t.slug),
+  index("terra_brokerage_status_idx").on(t.status),
+  index("terra_brokerage_created_idx").on(t.createdAt),
+]);
+
+export const terraAgentsTable = pgTable("terra_agents", {
+  id: serial("id").primaryKey(),
+  brokerageId: integer("brokerage_id").references(() => terraBrokeragesTable.id, { onDelete: "set null" }),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull().unique(),
+  phone: text("phone"),
+  licenseNumber: text("license_number"),
+  specialty: text("specialty", { enum: ["office", "retail", "industrial", "multifamily", "mixed-use", "land", "residential"] }).notNull().default("office"),
+  status: text("status", { enum: ["active", "inactive", "on_leave"] }).notNull().default("active"),
+  activeListings: integer("active_listings").notNull().default(0),
+  closedDealsLtm: integer("closed_deals_ltm").notNull().default(0),
+  closeRatePct: numeric("close_rate_pct", { precision: 5, scale: 2 }),
+  avgDaysToContract: integer("avg_days_to_contract"),
+  inquiryConversionPct: numeric("inquiry_conversion_pct", { precision: 5, scale: 2 }),
+  lastActivityAt: timestamp("last_activity_at"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_agent_brokerage_idx").on(t.brokerageId),
+  index("terra_agent_status_idx").on(t.status),
+  index("terra_agent_specialty_idx").on(t.specialty),
+  index("terra_agent_created_idx").on(t.createdAt),
+]);
+
+export const terraPropertiesTable = pgTable("terra_properties", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  zipCode: text("zip_code"),
+  submarket: text("submarket"),
+  propertyType: text("property_type", { enum: ["office", "retail", "industrial", "multifamily", "mixed-use", "land", "hospitality", "other"] }).notNull(),
+  sqft: integer("sqft"),
+  yearBuilt: integer("year_built"),
+  floors: integer("floors"),
+  units: integer("units"),
+  parkingSpaces: integer("parking_spaces"),
+  latitude: numeric("latitude", { precision: 10, scale: 7 }),
+  longitude: numeric("longitude", { precision: 10, scale: 7 }),
+  assessedValue: numeric("assessed_value", { precision: 16, scale: 2 }),
+  zoning: text("zoning"),
+  ownerName: text("owner_name"),
+  ownerType: text("owner_type", { enum: ["individual", "llc", "trust", "corporate", "reit", "unknown"] }).notNull().default("unknown"),
+  isActive: boolean("is_active").notNull().default(true),
+  isDemo: boolean("is_demo").notNull().default(false),
+  tags: jsonb("tags").$type<string[]>().notNull().default([]),
+  rawData: jsonb("raw_data"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_property_type_idx").on(t.propertyType),
+  index("terra_property_submarket_idx").on(t.submarket),
+  index("terra_property_zip_idx").on(t.zipCode),
+  index("terra_property_active_idx").on(t.isActive),
+  index("terra_property_owner_idx").on(t.ownerName),
+  index("terra_property_owner_type_idx").on(t.ownerType),
+  index("terra_property_created_idx").on(t.createdAt),
+]);
+
+export const terraListingsTable = pgTable("terra_listings", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  propertyId: integer("property_id").references(() => terraPropertiesTable.id, { onDelete: "cascade" }),
+  agentId: integer("agent_id").references(() => terraAgentsTable.id, { onDelete: "set null" }),
+  brokerageId: integer("brokerage_id").references(() => terraBrokeragesTable.id, { onDelete: "set null" }),
+  status: text("status", { enum: ["active", "pending", "under_contract", "closed", "expired", "withdrawn"] }).notNull().default("active"),
+  listPrice: numeric("list_price", { precision: 16, scale: 2 }).notNull(),
+  pricePerSqft: numeric("price_per_sqft", { precision: 10, scale: 2 }),
+  originalListPrice: numeric("original_list_price", { precision: 16, scale: 2 }),
+  capRate: numeric("cap_rate", { precision: 5, scale: 2 }),
+  noi: numeric("noi", { precision: 14, scale: 2 }),
+  daysOnMarket: integer("days_on_market").notNull().default(0),
+  inquiryCount: integer("inquiry_count").notNull().default(0),
+  viewCount: integer("view_count").notNull().default(0),
+  priceReductions: integer("price_reductions").notNull().default(0),
+  listDate: text("list_date").notNull(),
+  expirationDate: text("expiration_date"),
+  closedDate: text("closed_date"),
+  closedPrice: numeric("closed_price", { precision: 16, scale: 2 }),
+  opportunityScore: integer("opportunity_score").notNull().default(50),
+  marketNotes: text("market_notes"),
+  priceHistory: jsonb("price_history").$type<Array<{ date: string; price: number; changeType: string }>>().notNull().default([]),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_listing_status_idx").on(t.status),
+  index("terra_listing_agent_idx").on(t.agentId),
+  index("terra_listing_brokerage_idx").on(t.brokerageId),
+  index("terra_listing_property_idx").on(t.propertyId),
+  index("terra_listing_created_idx").on(t.createdAt),
+  index("terra_listing_score_idx").on(t.opportunityScore),
+]);
+
+export const terraInquiriesTable = pgTable("terra_inquiries", {
+  id: serial("id").primaryKey(),
+  listingId: integer("listing_id").references(() => terraListingsTable.id, { onDelete: "set null" }),
+  assignedAgentId: integer("assigned_agent_id").references(() => terraAgentsTable.id, { onDelete: "set null" }),
+  buyerName: text("buyer_name").notNull(),
+  buyerEmail: text("buyer_email"),
+  buyerPhone: text("buyer_phone"),
+  buyerType: text("buyer_type", { enum: ["investor", "owner_occupant", "developer", "family_office", "reit", "unknown"] }).notNull().default("unknown"),
+  financingStatus: text("financing_status", { enum: ["cash", "pre_approved", "seeking_financing", "unknown"] }).notNull().default("unknown"),
+  qualificationScore: integer("qualification_score").notNull().default(50),
+  status: text("status", { enum: ["new", "contacted", "qualified", "showing_scheduled", "offer_submitted", "converted", "lost", "do_not_contact"] }).notNull().default("new"),
+  source: text("source", { enum: ["web", "email", "phone", "referral", "portal", "direct", "other"] }).notNull().default("other"),
+  message: text("message"),
+  routingReason: text("routing_reason"),
+  lastContactAt: timestamp("last_contact_at"),
+  nextFollowUpAt: timestamp("next_follow_up_at"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_inquiry_listing_idx").on(t.listingId),
+  index("terra_inquiry_agent_idx").on(t.assignedAgentId),
+  index("terra_inquiry_status_idx").on(t.status),
+  index("terra_inquiry_created_idx").on(t.createdAt),
+  index("terra_inquiry_score_idx").on(t.qualificationScore),
+]);
+
+export const terraTransactionsTable = pgTable("terra_transactions", {
+  id: serial("id").primaryKey(),
+  listingId: integer("listing_id").references(() => terraListingsTable.id, { onDelete: "set null" }),
+  propertyId: integer("property_id").references(() => terraPropertiesTable.id, { onDelete: "set null" }),
+  agentId: integer("agent_id").references(() => terraAgentsTable.id, { onDelete: "set null" }),
+  brokerageId: integer("brokerage_id").references(() => terraBrokeragesTable.id, { onDelete: "set null" }),
+  buyerName: text("buyer_name"),
+  sellerName: text("seller_name"),
+  salePrice: numeric("sale_price", { precision: 16, scale: 2 }).notNull(),
+  listPrice: numeric("list_price", { precision: 16, scale: 2 }),
+  commission: numeric("commission", { precision: 14, scale: 2 }),
+  commissionPct: numeric("commission_pct", { precision: 5, scale: 2 }),
+  daysOnMarket: integer("days_on_market"),
+  daysToClose: integer("days_to_close"),
+  closedDate: text("closed_date").notNull(),
+  financingType: text("financing_type", { enum: ["cash", "conventional", "bridge", "cmbs", "life_co", "agency", "other"] }).notNull().default("conventional"),
+  status: text("status", { enum: ["completed", "fallen_through", "pending_recording"] }).notNull().default("completed"),
+  notes: text("notes"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_transaction_agent_idx").on(t.agentId),
+  index("terra_transaction_brokerage_idx").on(t.brokerageId),
+  index("terra_transaction_property_idx").on(t.propertyId),
+  index("terra_transaction_closed_idx").on(t.closedDate),
+  index("terra_transaction_status_idx").on(t.status),
+]);
+
 export const terraDistressPropertiesTable = pgTable("terra_distress_properties", {
   id: serial("id").primaryKey(),
   externalId: text("external_id").unique(),
@@ -103,3 +276,27 @@ export type TerraDistressAlert = typeof terraDistressAlertsTable.$inferSelect;
 export const insertTerraIngestionRunSchema = createInsertSchema(terraIngestionRunsTable).omit({ id: true, startedAt: true });
 export type InsertTerraIngestionRun = z.infer<typeof insertTerraIngestionRunSchema>;
 export type TerraIngestionRun = typeof terraIngestionRunsTable.$inferSelect;
+
+export const insertTerraBrokerageSchema = createInsertSchema(terraBrokeragesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraBrokerage = z.infer<typeof insertTerraBrokerageSchema>;
+export type TerraBrokerage = typeof terraBrokeragesTable.$inferSelect;
+
+export const insertTerraAgentSchema = createInsertSchema(terraAgentsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraAgent = z.infer<typeof insertTerraAgentSchema>;
+export type TerraAgent = typeof terraAgentsTable.$inferSelect;
+
+export const insertTerraPropertySchema = createInsertSchema(terraPropertiesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraProperty = z.infer<typeof insertTerraPropertySchema>;
+export type TerraProperty = typeof terraPropertiesTable.$inferSelect;
+
+export const insertTerraListingSchema = createInsertSchema(terraListingsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraListing = z.infer<typeof insertTerraListingSchema>;
+export type TerraListing = typeof terraListingsTable.$inferSelect;
+
+export const insertTerraInquirySchema = createInsertSchema(terraInquiriesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraInquiry = z.infer<typeof insertTerraInquirySchema>;
+export type TerraInquiry = typeof terraInquiriesTable.$inferSelect;
+
+export const insertTerraTransactionSchema = createInsertSchema(terraTransactionsTable).omit({ id: true, createdAt: true });
+export type InsertTerraTransaction = z.infer<typeof insertTerraTransactionSchema>;
+export type TerraTransaction = typeof terraTransactionsTable.$inferSelect;

@@ -14,6 +14,9 @@ const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const InsightsPage = lazy(() => import("@/pages/insights"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
+const TerraPage = lazy(() => import("@/pages/terra"));
+const TerraPlatformPage = lazy(() => import("@/pages/terra-platform"));
+const TerraListingsPage = lazy(() => import("@/pages/terra-listings"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -150,6 +153,15 @@ function App() {
             </Route>
             <Route path="/portfolio">
               <Redirect to="/ventures" />
+            </Route>
+            <Route path="/terra">
+              <Suspense fallback={<PageLoader />}><TerraPage /></Suspense>
+            </Route>
+            <Route path="/terra/platform">
+              <Suspense fallback={<PageLoader />}><TerraPlatformPage /></Suspense>
+            </Route>
+            <Route path="/terra/listings">
+              <Suspense fallback={<PageLoader />}><TerraListingsPage /></Suspense>
             </Route>
             <Route>
               <Redirect to="/" />

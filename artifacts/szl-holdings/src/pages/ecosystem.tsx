@@ -38,6 +38,14 @@ const brands = [
     href: "/vessels/",
   },
   {
+    name: "Terra",
+    role: "Real estate broker command platform",
+    description: "The full broker command surface for commercial real estate. Listings intelligence, inquiry routing, agent coordination, distress signals, and brokerage-level visibility — all unified into one operational layer.",
+    accent: "hsl(30,55%,52%)",
+    status: "Live",
+    href: "/terra/",
+  },
+  {
     name: "Carlota Jo Consulting",
     role: "Premium Service Brand",
     description: "Discreet, white-glove operational and residence support for high-touch environments. Quietly structured. Precisely executed.",
@@ -92,7 +100,7 @@ export default function EcosystemPage() {
                 Ecosystem
               </p>
               <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: "700", letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: "1.08", marginBottom: "1.25rem" }}>
-                One masterbrand. One engine.<br />Two flagships. One service brand.
+                One masterbrand. One engine.<br />Three flagships. One service brand.
               </h1>
               <p style={{ fontSize: "1rem", lineHeight: "1.7", color: "hsl(210,5%,58%)", maxWidth: "36rem" }}>
                 The SZL ecosystem is built around a clear hierarchy — every entity has a defined role, and nothing competes with anything else.

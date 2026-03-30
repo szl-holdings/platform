@@ -8,6 +8,7 @@ const navLinks = [
   { label: "Alloy", href: "/alloy", external: "/alloy/" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
+  { label: "Terra", href: "/terra", external: "/terra/" },
   { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/" },
   { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },

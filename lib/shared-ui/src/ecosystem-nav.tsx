@@ -81,11 +81,11 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "terra",
     name: "Terra",
-    subtitle: "Platform · Real Estate Intelligence",
+    subtitle: "Flagship · Broker Command",
     path: "/terra/",
-    accent: "#a07848",
+    accent: "#c87941",
     icon: "⬢",
-    description: "Elite Real Estate Broker Platform",
+    description: "Real Estate Broker Command Platform",
   },
   {
     id: "carlota-jo",

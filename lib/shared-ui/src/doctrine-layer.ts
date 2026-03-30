@@ -85,9 +85,9 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
   {
     appId: "terra",
     appName: "Terra",
-    layers: ["OBSERVE", "DECIDE"],
-    description: "Real estate broker platform — listings, deal pipeline, distress engine, and market intelligence.",
-    primaryRole: "Real Estate Intelligence Platform",
+    layers: ["OBSERVE", "DECIDE", "EXECUTE"],
+    description: "Listings intelligence, inquiry routing, agent coordination, and distress signals for commercial real estate brokers.",
+    primaryRole: "Real Estate Broker Command Platform",
   },
   {
     appId: "carlota-jo",
