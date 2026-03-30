@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
-import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, Bell, ChevronRight, Zap, Menu, X, Package, ListTodo } from "lucide-react";
+import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, Bell, ChevronRight, Zap, Menu, X, Package, ListTodo, Activity } from "lucide-react";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -19,6 +19,7 @@ const NAV = [
   { href: "/escalation", label: "Escalation Center", icon: AlertOctagon },
   { href: "/intervention", label: "Intervention Workspace", icon: Wrench },
   { href: "/readiness", label: "Readiness", icon: Package },
+  { href: "/admin/jobs", label: "Job Status", icon: Activity },
 ];
 
 export function LyteLayout({ children }: { children: ReactNode }) {

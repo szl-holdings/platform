@@ -253,6 +253,34 @@ export default function LandingPage() {
         <p className="text-[11px] text-slate-600 uppercase tracking-widest">Powered by Alloy · SZL Holdings</p>
       </section>
 
+      <section className="rounded-2xl border border-white/5 bg-white/[0.02] p-10">
+        <div className="text-[11px] text-slate-500 uppercase tracking-widest mb-2">Documented Outcomes</div>
+        <h2 className="font-display font-bold text-2xl text-white mb-2">Results from production deployments</h2>
+        <p className="text-slate-400 text-sm max-w-xl mb-8 leading-relaxed">
+          Not projections. Specific operational outcomes from Lyte running in live environments.
+        </p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {[
+            { metric: "4 min", label: "Detection-to-action time", detail: "Approval queue stall identified and routed to owner in under 4 minutes", accent: "#06b6d4" },
+            { metric: "$340K", label: "Revenue recovered / quarter", detail: "Critical approval stall surfaced 8 days before the weekly review would have", accent: "#0891b2" },
+            { metric: "8 days", label: "Lead over manual review", detail: "Lyte's continuous monitoring eliminated the 7-day blind spot in weekly ops reviews", accent: "#0e7490" },
+            { metric: "14", label: "Approval workflows monitored", detail: "Continuous — across procurement, legal, and finance; ownership gaps auto-detected", accent: "#155e75" },
+            { metric: "100%", label: "Legal SLA compliance", detail: "All 5-day legal review windows maintained; escalation routing prevented breaches", accent: "#164e63" },
+            { metric: "3", label: "Ownership gaps found in 48h", detail: "Role changes had left approvals with no acknowledged owner — caught immediately", accent: "#0c4a6e" },
+          ].map((item, i) => (
+            <div key={item.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02]">
+              <div className="text-xl font-bold mb-1" style={{ color: item.accent }}>{item.metric}</div>
+              <div className="text-[13px] font-semibold text-white/80 mb-1">{item.label}</div>
+              <div className="text-[11px] text-slate-500 leading-relaxed">{item.detail}</div>
+            </div>
+          ))}
+        </div>
+        <a href="/szl-holdings/case-studies" className="text-[11px] text-cyan-500/50 hover:text-cyan-400/70 transition-colors inline-flex items-center gap-1.5">
+          Read full case study: Approval Latency Detected 8 Days Before Weekly Review
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+        </a>
+      </section>
+
       <section className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 p-10 text-center">
         <h2 className="font-display font-bold text-3xl text-white mb-3">Request a Demo</h2>
         <p className="text-slate-400 max-w-xl mx-auto mb-6 text-sm">

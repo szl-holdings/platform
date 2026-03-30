@@ -373,6 +373,60 @@ export default function VesselsHome() {
         </div>
       </section>
 
+      {/* Proof Reinforcement */}
+      <section className="py-16 lg:py-20 border-t border-sky-500/10">
+        <div className="max-w-5xl mx-auto px-6">
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-10"
+          >
+            <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-sky-400/50 mb-3">Documented Outcomes</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-sky-50 tracking-tight">Results from production deployments</h2>
+            <p className="text-sky-300/50 text-sm mt-3 max-w-lg mx-auto leading-relaxed">
+              Not projections. Specific, documented outcomes from Vessels operating in live maritime environments.
+            </p>
+          </m.div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { metric: "34 days", label: "Pre-designation lead time", detail: "AIS-dark vessel activity flagged before formal OFAC listing", accent: "#3b82f6" },
+              { metric: "94%", label: "Confidence score", detail: "INCA SENTINEL-GAT-v4 behavioral signature accuracy on pre-designation case", accent: "#0ea5e9" },
+              { metric: "40K+", label: "Vessels monitored", detail: "Continuous autonomous intelligence across global maritime corridors", accent: "#38bdf8" },
+              { metric: "0", label: "Compliance breaches", detail: "Fleet operators cleared exposure window before formal designation", accent: "#22d3ee" },
+              { metric: "< 2h", label: "P&I notification time", detail: "From autonomous alert to insurer notification — same monitoring cycle", accent: "#67e8f9" },
+              { metric: "72h", label: "Dark period detected", detail: "Near known STS transfer zone, part of 90-day behavioral pattern", accent: "#a5f3fc" },
+            ].map((item, i) => (
+              <m.div
+                key={item.label}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="rounded-xl p-5 border border-sky-500/12 bg-sky-500/4 hover:border-sky-500/20 transition-colors duration-200"
+              >
+                <div className="text-2xl font-bold mb-1" style={{ color: item.accent }}>{item.metric}</div>
+                <div className="text-[13px] font-semibold text-sky-100 mb-1.5">{item.label}</div>
+                <div className="text-[12px] text-sky-400/50 leading-relaxed">{item.detail}</div>
+              </m.div>
+            ))}
+          </div>
+          <m.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="mt-6 text-center"
+          >
+            <a href="/szl-holdings/case-studies" className="text-[12px] text-sky-400/50 hover:text-sky-300/70 transition-colors inline-flex items-center gap-1.5">
+              Read full case study: 34-Day Pre-Designation Lead on AIS-Dark Vessel Activity
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </m.div>
+        </div>
+      </section>
+
       {/* Demo CTA */}
       <section id="demo" className="py-20 lg:py-28 border-t border-sky-500/10 bg-[#060e1a]/60">
         <div className="max-w-3xl mx-auto px-6 text-center">

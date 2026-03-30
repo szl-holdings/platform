@@ -4,6 +4,7 @@ import { logger } from "./lib/logger";
 import { failFastOnInvalidConfig } from "./lib/startup-validation";
 import { initWebSocket } from "./lib/websocket";
 import { jobQueue, startScheduledJobs } from "./lib/job-queue";
+import { startNamedScheduledJobs } from "./lib/scheduled-jobs";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
 import { agentScheduler } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
@@ -54,6 +55,7 @@ ensureAlloyTables()
     process.exit(1);
   });
 startScheduledJobs();
+startNamedScheduledJobs();
 
 seedPlatformData().catch(err => {
   logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");

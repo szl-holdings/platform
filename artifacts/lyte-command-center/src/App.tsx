@@ -36,6 +36,7 @@ const EscalationCenter = lazy(() => import("@/pages/escalation-center"));
 const InterventionWorkspace = lazy(() => import("@/pages/intervention-workspace"));
 const ActionQueue = lazy(() => import("@/pages/action-queue"));
 const ReadinessModule = lazy(() => import("@/pages/readiness-module"));
+const AdminJobsPage = lazy(() => import("@/pages/admin/jobs"));
 
 function Router() {
   return (
@@ -48,6 +49,7 @@ function Router() {
         <Route path="/escalation" component={EscalationCenter} />
         <Route path="/intervention" component={InterventionWorkspace} />
         <Route path="/readiness" component={ReadinessModule} />
+        <Route path="/admin/jobs" component={AdminJobsPage} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

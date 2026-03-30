@@ -522,6 +522,45 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Proof Reinforcement */}
+      <section className="py-16 px-6 border-t border-terra-border">
+        <div className="max-w-6xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-10">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-terra-primary/20 bg-terra-primary/8 text-terra-primary text-[10px] font-semibold tracking-widest uppercase mb-4">
+              Documented Outcomes
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-terra-text">Results from production deployments</h2>
+            <p className="text-terra-text-secondary text-sm mt-2 max-w-lg leading-relaxed">
+              Specific, documented outcomes from Terra operating in live real estate environments. Not projections.
+            </p>
+          </motion.div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {[
+              { metric: "92/100", label: "Lead score", detail: "Institutional buyer identified from Friday evening inquiry — $85M budget, firmographic + behavioral scoring", accent: "#22c55e" },
+              { metric: "36 min", label: "Inquiry response time", detail: "From form submission to acquisitions director reply — before any human manual review", accent: "#16a34a" },
+              { metric: "6 days", label: "Advantage over manual review", detail: "Monday review process was bypassed entirely — deal initiated Friday evening", accent: "#15803d" },
+              { metric: "$85M", label: "Acquisition target value", detail: "Meridian Tower, Miami — multifamily asset, Terra inquiry scoring identified the lead", accent: "#166534" },
+              { metric: "< 48h", label: "NDA signed", detail: "From inquiry to executed NDA — three competing brokers arrived too late to displace the process", accent: "#14532d" },
+              { metric: "3", label: "Competing brokers too late", detail: "All contacted Monday — deal was already in structured process with signed NDA", accent: "#052e16" },
+            ].map((item, i) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}
+                className="rounded-xl p-5 border border-terra-border bg-terra-surface/50 hover:border-terra-border-hover transition-colors duration-200"
+              >
+                <div className="text-2xl font-display font-extrabold mb-1 bg-gradient-to-r from-terra-primary to-terra-accent bg-clip-text text-transparent">{item.metric}</div>
+                <div className="text-[13px] font-semibold text-terra-text mb-1.5">{item.label}</div>
+                <div className="text-[12px] text-terra-text-secondary leading-relaxed">{item.detail}</div>
+              </motion.div>
+            ))}
+          </div>
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
+            <a href="/szl-holdings/case-studies" className="text-[12px] text-terra-primary/60 hover:text-terra-primary transition-colors inline-flex items-center gap-1.5">
+              Read full case study: High-Intent Acquisition Lead Identified Before Manual Review
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       <footer className="border-t border-terra-border py-8 px-6">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-terra-text-muted">

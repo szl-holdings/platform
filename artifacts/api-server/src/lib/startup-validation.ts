@@ -14,6 +14,8 @@ const ENV_SPECS: EnvVarSpec[] = [
   { key: "SESSION_SECRET", required: false, description: "Session encryption secret" },
   { key: "CORS_ORIGINS", required: false, description: "Comma-separated allowed CORS origins" },
   { key: "LOG_LEVEL", required: false, description: "Pino log level", defaultValue: "info" },
+  { key: "DEMO_MODE", required: false, description: "Enable demo seed data mode (true/false)", defaultValue: "false" },
+  { key: "APP_ENV", required: false, description: "Application environment identifier (development/staging/production)", defaultValue: "development" },
 ];
 
 export interface ValidationResult {

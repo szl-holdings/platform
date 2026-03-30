@@ -69,6 +69,7 @@ const CMSPage = lazy(() => import("@/pages/cms"));
 const MediaPage = lazy(() => import("@/pages/media"));
 const SiteSettingsPage = lazy(() => import("@/pages/site-settings"));
 const AnalyticsOverviewPage = lazy(() => import("@/pages/analytics-overview"));
+const JobsPage = lazy(() => import("@/pages/jobs"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -151,6 +152,7 @@ const NAV_SECTIONS: NavSection[] = [
       { path: "/infrastructure", label: "Infrastructure", icon: <Cloud className="w-4 h-4" /> },
       { path: "/observability", label: "Observability", icon: <Activity className="w-4 h-4" /> },
       { path: "/workflows", label: "Workflows", icon: <Activity className="w-4 h-4" /> },
+      { path: "/jobs", label: "Scheduled Jobs", icon: <Zap className="w-4 h-4" /> },
       { path: "/developer", label: "Developer Portal", icon: <Globe className="w-4 h-4" /> },
     ],
   },
@@ -334,6 +336,7 @@ function AppRouter() {
         <Route path="/media" component={MediaPage} />
         <Route path="/site-settings" component={SiteSettingsPage} />
         <Route path="/analytics-overview" component={AnalyticsOverviewPage} />
+        <Route path="/jobs" component={JobsPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

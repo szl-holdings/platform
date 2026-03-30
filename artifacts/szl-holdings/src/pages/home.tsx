@@ -698,6 +698,7 @@ function ProofSection() {
               transition={{ duration: 0.4, delay: i * 0.07 }}
               className="rounded-sm p-5 transition-all duration-220"
               style={{ background: "var(--color-szl-surface)", border: "1px solid var(--color-szl-border)" }}
+
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.borderColor = `rgba(${item.accentRgb}, 0.24)`;
@@ -724,6 +725,23 @@ function ProofSection() {
             </m.div>
           ))}
         </div>
+
+        <m.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mt-8 text-center"
+        >
+          <Link
+            href="/case-studies"
+            className="inline-flex items-center gap-2 text-sm font-medium transition-colors duration-200"
+            style={{ color: "var(--color-szl-accent)", fontFamily: "var(--font-mono)" }}
+          >
+            View full case studies with constraints, systems, and documented outcomes
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </m.div>
       </div>
     </section>
   );

@@ -30,6 +30,7 @@ const Changelog = lazy(() => import("@/pages/changelog"));
 const Roadmap = lazy(() => import("@/pages/roadmap"));
 const PortfolioIntel = lazy(() => import("@/pages/portfolio-intel"));
 const AdminPage = lazy(() => import("@/pages/admin"));
+const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -165,6 +166,9 @@ function App() {
             </Route>
             <Route path="/admin/:section">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/case-studies">
+              <Suspense fallback={<PageLoader />}><CaseStudiesPage /></Suspense>
             </Route>
             <Route>
               <HomePage />
