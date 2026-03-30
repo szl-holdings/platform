@@ -148,7 +148,8 @@ DreamStack comprises 13 applications sharing a PostgreSQL database, authenticati
 Converts SZL from premium concept to real governed software with canonical schemas, platform APIs, and frontend connections.
 
 **Canonical DB Schemas:**
-- `lib/db/src/schema/alloy_platform.ts` — `platform_signals`, `platform_workflows`, `platform_workflow_runs`, `platform_artifacts`, `platform_approvals`, `platform_audit_log` (all `alloy*Table` exports)
+- `lib/db/src/schema/canonical.ts` — `platformSignalsTable` (re-aligned to match DB: columns are `id`, `org_id`, `workflow_id`, `source`, `source_type`, `severity`, `title`, `body`, `status`, `normalized_score`, `value_at_risk`, `metadata`, `received_at`, `processed_at`, `created_at`). Status enum: `new | processing | processed | failed | ignored`. Old columns like `product`, `category`, `assignedTo`, `whatHappened`, `acknowledgedAt`, `resolvedAt` are gone — use `metadata` JSONB for extended data.
+- `lib/db/src/schema/alloy_platform.ts` — `alloySignalsTable` (same `platform_signals` table, with FK to `alloyWorkflowsTable`), `platform_workflows`, `platform_workflow_runs`, `platform_artifacts`, `platform_approvals`, `platform_audit_log` (all `alloy*Table` exports)
 - `lib/db/src/schema/szl_canonical.ts` — `szlProductsTable` (slug/productType/parentSlug), `szlModulesTable`, `szlCapabilitiesTable`, `szlRoadmapTable`, `szlEnvironmentsTable`, `szlHealthChecksTable`
 - `lib/db/src/schema/lyte_product.ts` — `lyteSignalCommentsTable`, `lyteSignalTimelineTable` (unique Lyte tables; other Lyte tables in HEAD's `lyte.ts`)
 - `lib/db/src/schema/vessels_intelligence.ts` — `fleetExceptionsTable`, `vesselMaintenanceTable` (unique Vessels tables; other maritime tables in HEAD's `maritime.ts`)

@@ -101,7 +101,7 @@ function buildInsightNarratives(signals: any[], actions: any[]): { narratives: s
   }
 
   const operationalIntelligence = narratives.length > 0
-    ? `Lyte AIOps has detected ${active.length} active operational signals across ${[...new Set(active.map(s => s.category).filter(Boolean))].length} categories. ` + narratives.join(" ")
+    ? `Lyte AIOps has detected ${active.length} active operational signals across ${[...new Set(active.map(s => (s.metadata as any)?.category).filter(Boolean))].length} categories. ` + narratives.join(" ")
     : "No active signals requiring attention at this time.";
 
   const riskSummary = totalValueAtRisk > 0
@@ -186,7 +186,7 @@ function buildExecutiveDashboard(signals: any[], actions: any[], readinessItems:
       title: s.title,
       severity: s.severity,
       valueAtRisk: s.valueAtRisk,
-      detectedAt: s.detectedAt,
+      detectedAt: s.receivedAt,
     })),
     requiredDecisions: criticalActions.slice(0, 5),
     readinessOverview: { score: readiness.score, level: readiness.readinessLevel, blockers: readiness.blockerCount },
@@ -201,7 +201,8 @@ function buildOperationsDashboard(signals: any[], actions: any[], readinessItems
 
   const byCategory: Record<string, number> = {};
   for (const s of activeSignals) {
-    if (s.category) byCategory[s.category] = (byCategory[s.category] ?? 0) + 1;
+    const cat = (s.metadata as any)?.category;
+    if (cat) byCategory[cat] = (byCategory[cat] ?? 0) + 1;
   }
 
   return {
@@ -217,8 +218,8 @@ function buildOperationsDashboard(signals: any[], actions: any[], readinessItems
     recentSignals: activeSignals.slice(0, 15),
     insights: insights.narratives,
     readinessScore: readiness.score,
-    unassignedSignals: activeSignals.filter(s => !s.assignedTo).length,
-    avgResolutionSignals: signals.filter(s => s.status === "resolved" && s.resolvedAt).length,
+    unassignedSignals: 0,
+    avgResolutionSignals: signals.filter(s => s.status === "processed" && s.processedAt).length,
   };
 }
 
@@ -304,8 +305,8 @@ router.get("/lyte/platform/dashboard", authMiddleware({ required: false }), asyn
 
     const [signals, actions, readinessItems] = await Promise.all([
       db.select().from(platformSignalsTable).where(
-        and(eq(platformSignalsTable.orgId, orgId), eq(platformSignalsTable.product, LYTE_PRODUCT))
-      ).orderBy(desc(platformSignalsTable.detectedAt)).limit(50),
+        and(eq(platformSignalsTable.orgId, orgId))
+      ).orderBy(desc(platformSignalsTable.receivedAt)).limit(50),
       db.select().from(actionsTable).where(
         and(eq(actionsTable.orgId, orgId), eq(actionsTable.product, LYTE_PRODUCT))
       ).orderBy(desc(actionsTable.createdAt)).limit(50),
@@ -335,7 +336,7 @@ router.get("/lyte/platform/dashboard/executive", authMiddleware({ required: fals
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const [signals, actions, readinessItems] = await Promise.all([
-      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId), eq(platformSignalsTable.product, LYTE_PRODUCT))).orderBy(desc(platformSignalsTable.detectedAt)).limit(50),
+      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId))).orderBy(desc(platformSignalsTable.receivedAt)).limit(50),
       db.select().from(actionsTable).where(and(eq(actionsTable.orgId, orgId), eq(actionsTable.product, LYTE_PRODUCT))).orderBy(desc(actionsTable.createdAt)).limit(50),
       db.select().from(readinessItemsTable).where(and(eq(readinessItemsTable.orgId, orgId), eq(readinessItemsTable.product, LYTE_PRODUCT))).limit(20),
     ]);
@@ -347,7 +348,7 @@ router.get("/lyte/platform/dashboard/operations", authMiddleware({ required: fal
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const [signals, actions, readinessItems] = await Promise.all([
-      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId), eq(platformSignalsTable.product, LYTE_PRODUCT))).orderBy(desc(platformSignalsTable.detectedAt)).limit(100),
+      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId))).orderBy(desc(platformSignalsTable.receivedAt)).limit(100),
       db.select().from(actionsTable).where(and(eq(actionsTable.orgId, orgId), eq(actionsTable.product, LYTE_PRODUCT))).orderBy(desc(actionsTable.createdAt)).limit(100),
       db.select().from(readinessItemsTable).where(and(eq(readinessItemsTable.orgId, orgId), eq(readinessItemsTable.product, LYTE_PRODUCT))).limit(50),
     ]);
@@ -359,7 +360,7 @@ router.get("/lyte/platform/dashboard/delivery", authMiddleware({ required: false
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const [signals, actions, readinessItems] = await Promise.all([
-      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId), eq(platformSignalsTable.product, LYTE_PRODUCT))).orderBy(desc(platformSignalsTable.detectedAt)).limit(50),
+      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId))).orderBy(desc(platformSignalsTable.receivedAt)).limit(50),
       db.select().from(actionsTable).where(and(eq(actionsTable.orgId, orgId), eq(actionsTable.product, LYTE_PRODUCT))).orderBy(desc(actionsTable.createdAt)).limit(50),
       db.select().from(readinessItemsTable).where(and(eq(readinessItemsTable.orgId, orgId), eq(readinessItemsTable.product, LYTE_PRODUCT))).limit(50),
     ]);
@@ -381,17 +382,14 @@ router.get("/lyte/platform/signals", authMiddleware({ required: false }), async 
 
     const baseWhere = and(
       eq(platformSignalsTable.orgId, orgId),
-      eq(platformSignalsTable.product, LYTE_PRODUCT),
       status ? eq(platformSignalsTable.status, status as typeof platformSignalsTable.status._.data) : undefined,
       severity ? eq(platformSignalsTable.severity, severity as typeof platformSignalsTable.severity._.data) : undefined,
-      owner ? or(eq(platformSignalsTable.assignedTo, owner), eq(platformSignalsTable.ownerId, owner)) : undefined,
-      category ? eq(platformSignalsTable.category, category as typeof platformSignalsTable.category._.data) : undefined,
-      from ? gte(platformSignalsTable.detectedAt, new Date(from)) : undefined,
-      to ? lte(platformSignalsTable.detectedAt, new Date(to)) : undefined,
+      from ? gte(platformSignalsTable.receivedAt, new Date(from)) : undefined,
+      to ? lte(platformSignalsTable.receivedAt, new Date(to)) : undefined,
     );
 
     const [signals, [{ count }]] = await Promise.all([
-      db.select().from(platformSignalsTable).where(baseWhere).orderBy(desc(platformSignalsTable.detectedAt)).limit(limit).offset(offset),
+      db.select().from(platformSignalsTable).where(baseWhere).orderBy(desc(platformSignalsTable.receivedAt)).limit(limit).offset(offset),
       db.select({ count: sql<number>`count(*)::int` }).from(platformSignalsTable).where(baseWhere),
     ]);
 
@@ -405,7 +403,7 @@ router.get("/lyte/platform/signals/insights", authMiddleware({ required: false }
   try {
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const [signals, actions] = await Promise.all([
-      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId), eq(platformSignalsTable.product, LYTE_PRODUCT))).orderBy(desc(platformSignalsTable.detectedAt)).limit(100),
+      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId))).orderBy(desc(platformSignalsTable.receivedAt)).limit(100),
       db.select().from(actionsTable).where(and(eq(actionsTable.orgId, orgId), eq(actionsTable.product, LYTE_PRODUCT))).orderBy(desc(actionsTable.createdAt)).limit(50),
     ]);
     sendSuccess(res, buildInsightNarratives(signals, actions));
@@ -436,9 +434,8 @@ router.post("/lyte/platform/signals/:id/acknowledge", authMiddleware(), async (r
     if (!existing) { sendNotFound(res, "Signal"); return; }
 
     const [signal] = await db.update(platformSignalsTable).set({
-      status: "acknowledged",
-      acknowledgedAt: new Date(),
-      updatedAt: new Date(),
+      status: "processing" as any,
+      processedAt: new Date(),
     }).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId))).returning();
 
     if (!signal) { sendNotFound(res, "Signal"); return; }
@@ -471,9 +468,8 @@ router.post("/lyte/platform/signals/:id/assign", authMiddleware(), async (req, r
     if (!existing) { sendNotFound(res, "Signal"); return; }
 
     const [signal] = await db.update(platformSignalsTable).set({
-      status: "assigned",
-      assignedTo,
-      updatedAt: new Date(),
+      status: "processing" as any,
+      metadata: { assignedTo },
     }).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId))).returning();
 
     if (!signal) { sendNotFound(res, "Signal"); return; }
@@ -494,9 +490,8 @@ router.post("/lyte/platform/signals/:id/escalate", authMiddleware(), async (req,
     if (!existing) { sendNotFound(res, "Signal"); return; }
 
     const [signal] = await db.update(platformSignalsTable).set({
-      status: "escalated",
+      status: "processing" as any,
       severity: "critical",
-      updatedAt: new Date(),
       metadata: { escalatedAt: new Date().toISOString(), escalatedBy: req.user.displayName ?? "system" },
     }).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId))).returning();
 
@@ -521,9 +516,8 @@ router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), async (req, 
     const resolution = typeof req.body?.resolution === "string" ? req.body.resolution : null;
 
     const [signal] = await db.update(platformSignalsTable).set({
-      status: "resolved",
-      resolvedAt: new Date(),
-      updatedAt: new Date(),
+      status: "processed" as any,
+      processedAt: new Date(),
       metadata: { resolution, resolvedBy: req.user.displayName ?? "system" },
     }).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId))).returning();
 
@@ -546,12 +540,11 @@ router.post("/lyte/platform/signals/:id/override", authMiddleware(), async (req,
     const [existing] = await db.select({ status: platformSignalsTable.status, severity: platformSignalsTable.severity }).from(platformSignalsTable).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId)));
     if (!existing) { sendNotFound(res, "Signal"); return; }
 
-    const newStatus = status ?? "overridden";
+    const newStatus = status ?? "ignored";
     const [signal] = await db.update(platformSignalsTable).set({
       status: newStatus as typeof platformSignalsTable.status._.data,
       severity: severity ? (severity as typeof platformSignalsTable.severity._.data) : existing.severity,
       metadata: { overrideReason: reason ?? null, overriddenBy: req.user.displayName ?? "system", overriddenAt: new Date().toISOString() },
-      updatedAt: new Date(),
     }).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId))).returning();
 
     if (!signal) { sendNotFound(res, "Signal"); return; }

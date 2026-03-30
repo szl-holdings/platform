@@ -18,37 +18,25 @@ export const productsTable = pgTable("products", {
 
 export const platformSignalsTable = pgTable("platform_signals", {
   id: serial("id").primaryKey(),
-  orgId: integer("org_id").notNull().references(() => organizationsTable.id, { onDelete: "cascade" }),
-  product: text("product").notNull(),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  workflowId: integer("workflow_id"),
   source: text("source").notNull(),
-  sourceType: text("source_type", { enum: ["connector", "webhook", "manual", "monitoring", "scheduler", "ingest"] }).notNull().default("ingest"),
-  externalId: text("external_id"),
+  sourceType: text("source_type", { enum: ["connector", "webhook", "api", "manual", "scheduled", "monitoring"] }).notNull(),
+  severity: text("severity", { enum: ["critical", "high", "medium", "low", "info"] }).notNull().default("info"),
   title: text("title").notNull(),
   body: text("body"),
-  severity: text("severity", { enum: ["critical", "high", "medium", "low", "info"] }).notNull().default("medium"),
-  status: text("status", { enum: ["new", "acknowledged", "assigned", "escalated", "resolved", "dismissed", "overridden"] }).notNull().default("new"),
-  ownerId: integer("owner_id").references(() => usersTable.id, { onDelete: "set null" }),
-  assignedTo: integer("assigned_to").references(() => usersTable.id, { onDelete: "set null" }),
+  status: text("status", { enum: ["new", "processing", "processed", "failed", "ignored"] }).notNull().default("new"),
+  normalizedScore: numeric("normalized_score", { precision: 5, scale: 2 }),
   valueAtRisk: numeric("value_at_risk", { precision: 15, scale: 2 }),
-  valueAtRiskCurrency: text("value_at_risk_currency").default("USD"),
-  whatHappened: text("what_happened"),
-  whyItMatters: text("why_it_matters"),
-  nextAction: text("next_action"),
-  category: text("category"),
-  tags: jsonb("tags").$type<string[]>().default([]),
   metadata: jsonb("metadata"),
-  detectedAt: timestamp("detected_at").notNull().defaultNow(),
-  acknowledgedAt: timestamp("acknowledged_at"),
-  resolvedAt: timestamp("resolved_at"),
+  receivedAt: timestamp("received_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (t) => [
   index("signals_org_idx").on(t.orgId),
   index("signals_status_idx").on(t.status),
   index("signals_severity_idx").on(t.severity),
-  index("signals_detected_idx").on(t.detectedAt),
-  index("signals_owner_idx").on(t.ownerId),
-  index("signals_product_idx").on(t.product),
+  index("signals_received_idx").on(t.receivedAt),
 ]);
 
 export const actionsTable = pgTable("actions", {
@@ -243,7 +231,7 @@ export const insertProductSchema = createInsertSchema(productsTable).omit({ id: 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof productsTable.$inferSelect;
 
-export const insertPlatformSignalSchema = createInsertSchema(platformSignalsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPlatformSignalSchema = createInsertSchema(platformSignalsTable).omit({ id: true, createdAt: true });
 export type InsertPlatformSignal = z.infer<typeof insertPlatformSignalSchema>;
 export type PlatformSignal = typeof platformSignalsTable.$inferSelect;
 
