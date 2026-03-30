@@ -19,7 +19,7 @@ import {
 } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
@@ -43,7 +43,7 @@ router.get("/vessels/fleets/:id", authMiddleware({ required: false }), async (re
   }
 });
 
-router.post("/vessels/fleets", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/fleets", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const data = insertVesselFleetSchema.parse(req.body);
     const [fleet] = await db.insert(vesselsFleetsTable).values(data).returning();
@@ -53,7 +53,7 @@ router.post("/vessels/fleets", authMiddleware({ required: false }), async (req, 
   }
 });
 
-router.put("/vessels/fleets/:id", authMiddleware({ required: false }), async (req, res) => {
+router.put("/vessels/fleets/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const data = insertVesselFleetSchema.partial().parse(req.body);
@@ -65,7 +65,7 @@ router.put("/vessels/fleets/:id", authMiddleware({ required: false }), async (re
   }
 });
 
-router.delete("/vessels/fleets/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/vessels/fleets/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [fleet] = await db.delete(vesselsFleetsTable).where(eq(vesselsFleetsTable.id, id)).returning();
@@ -96,7 +96,7 @@ router.get("/vessels/:id", authMiddleware({ required: false }), async (req, res)
   }
 });
 
-router.post("/vessels", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const data = insertVesselSchema.parse(req.body);
     const [vessel] = await db.insert(vesselsTable).values(data).returning();
@@ -106,7 +106,7 @@ router.post("/vessels", authMiddleware({ required: false }), async (req, res) =>
   }
 });
 
-router.put("/vessels/:id", authMiddleware({ required: false }), async (req, res) => {
+router.put("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const data = insertVesselSchema.partial().parse(req.body);
@@ -118,7 +118,7 @@ router.put("/vessels/:id", authMiddleware({ required: false }), async (req, res)
   }
 });
 
-router.delete("/vessels/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [vessel] = await db.delete(vesselsTable).where(eq(vesselsTable.id, id)).returning();
@@ -168,7 +168,7 @@ router.get("/vessels/:id/routes", authMiddleware({ required: false }), async (re
   }
 });
 
-router.post("/vessels/routes", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/routes", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const data = insertVesselRouteSchema.parse(req.body);
     const [route] = await db.insert(vesselsRoutesTable).values(data).returning();
@@ -178,7 +178,7 @@ router.post("/vessels/routes", authMiddleware({ required: false }), async (req, 
   }
 });
 
-router.put("/vessels/routes/:id", authMiddleware({ required: false }), async (req, res) => {
+router.put("/vessels/routes/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const data = insertVesselRouteSchema.partial().parse(req.body);
@@ -190,7 +190,7 @@ router.put("/vessels/routes/:id", authMiddleware({ required: false }), async (re
   }
 });
 
-router.delete("/vessels/routes/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/vessels/routes/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [route] = await db.delete(vesselsRoutesTable).where(eq(vesselsRoutesTable.id, id)).returning();
@@ -210,7 +210,7 @@ router.get("/vessels/alert-rules/all", authMiddleware({ required: false }), asyn
   }
 });
 
-router.post("/vessels/alert-rules", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/alert-rules", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const data = insertVesselAlertRuleSchema.parse(req.body);
     const [rule] = await db.insert(vesselsAlertRulesTable).values(data).returning();
@@ -220,7 +220,7 @@ router.post("/vessels/alert-rules", authMiddleware({ required: false }), async (
   }
 });
 
-router.put("/vessels/alert-rules/:id", authMiddleware({ required: false }), async (req, res) => {
+router.put("/vessels/alert-rules/:id", authMiddleware(), requireRole("ops", "exec", "admin", "editor"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const data = insertVesselAlertRuleSchema.partial().parse(req.body);
@@ -232,7 +232,7 @@ router.put("/vessels/alert-rules/:id", authMiddleware({ required: false }), asyn
   }
 });
 
-router.delete("/vessels/alert-rules/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/vessels/alert-rules/:id", authMiddleware(), requireRole("ops", "exec", "admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [rule] = await db.delete(vesselsAlertRulesTable).where(eq(vesselsAlertRulesTable.id, id)).returning();
@@ -274,7 +274,7 @@ router.get("/vessels/simulations/all", authMiddleware({ required: false }), asyn
   }
 });
 
-router.post("/vessels/simulations", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/simulations", authMiddleware(), requireRole("ops", "exec", "admin", "analyst"), async (req, res) => {
   try {
     const data = insertVesselSimulationSchema.parse(req.body);
     const [simulation] = await db.insert(vesselsSimulationsTable).values({

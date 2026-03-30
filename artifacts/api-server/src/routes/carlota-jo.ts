@@ -6,10 +6,14 @@ import {
   carlotaReservationsTable,
   carlotaServicesTable,
   carlotaClientProfilesTable,
+  clientAccountsTable,
+  clientDocumentsTable,
+  clientUpdatesTable,
+  clientMessagesTable,
 } from "@workspace/db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
-import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@workspace/services";
 import { logger } from "../lib/logger";
 
@@ -272,7 +276,7 @@ router.delete("/booking/services/:id", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/booking/clients", authMiddleware(), async (req, res) => {
+router.get("/booking/clients", authMiddleware(), requireRole("admin", "editor", "exec"), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(carlotaClientProfilesTable).orderBy(desc(carlotaClientProfilesTable.createdAt)).limit(limit).offset(offset);
@@ -281,6 +285,66 @@ router.get("/booking/clients", authMiddleware(), async (req, res) => {
   } catch (err) {
     handleRouteError(res, err, "Failed to list clients");
   }
+});
+
+router.get("/portal/my-account", authMiddleware(), async (req, res) => {
+  try {
+    const [account] = await db.select().from(clientAccountsTable)
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+    if (!account) { sendNotFound(res, "Client account"); return; }
+    sendSuccess(res, account);
+  } catch (err) { handleRouteError(res, err, "Failed to get client account"); }
+});
+
+router.get("/portal/documents", authMiddleware(), async (req, res) => {
+  try {
+    const [account] = await db.select({ id: clientAccountsTable.id }).from(clientAccountsTable)
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+    if (!account) { sendNotFound(res, "Client account"); return; }
+    const rows = await db.select().from(clientDocumentsTable)
+      .where(and(eq(clientDocumentsTable.clientAccountId, account.id), eq(clientDocumentsTable.visibility, "client")))
+      .orderBy(desc(clientDocumentsTable.createdAt));
+    sendSuccess(res, rows);
+  } catch (err) { handleRouteError(res, err, "Failed to list client documents"); }
+});
+
+router.get("/portal/updates", authMiddleware(), async (req, res) => {
+  try {
+    const [account] = await db.select({ id: clientAccountsTable.id }).from(clientAccountsTable)
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+    if (!account) { sendNotFound(res, "Client account"); return; }
+    const rows = await db.select().from(clientUpdatesTable)
+      .where(eq(clientUpdatesTable.clientAccountId, account.id))
+      .orderBy(desc(clientUpdatesTable.createdAt));
+    sendSuccess(res, rows);
+  } catch (err) { handleRouteError(res, err, "Failed to list client updates"); }
+});
+
+router.get("/portal/messages", authMiddleware(), async (req, res) => {
+  try {
+    const [account] = await db.select({ id: clientAccountsTable.id }).from(clientAccountsTable)
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+    if (!account) { sendNotFound(res, "Client account"); return; }
+    const rows = await db.select().from(clientMessagesTable)
+      .where(eq(clientMessagesTable.clientAccountId, account.id))
+      .orderBy(desc(clientMessagesTable.createdAt));
+    sendSuccess(res, rows);
+  } catch (err) { handleRouteError(res, err, "Failed to list client messages"); }
+});
+
+router.post("/portal/messages", authMiddleware(), async (req, res) => {
+  try {
+    const [account] = await db.select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId }).from(clientAccountsTable)
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+    if (!account) { sendNotFound(res, "Client account"); return; }
+    const [msg] = await db.insert(clientMessagesTable).values({
+      ...req.body,
+      clientAccountId: account.id,
+      organizationId: account.organizationId,
+      senderUserId: req.user!.id,
+    }).returning();
+    sendSuccess(res, msg, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to send message"); }
 });
 
 const carlotaLiveLimit = rateLimit({

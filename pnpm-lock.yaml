@@ -1983,12 +1983,18 @@ importers:
 
   artifacts/vessels:
     dependencies:
+      '@types/mapbox-gl':
+        specifier: ^3.5.0
+        version: 3.5.0
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
       '@workspace/services':
         specifier: workspace:*
         version: link:../../lib/services
+      mapbox-gl:
+        specifier: ^3.20.0
+        version: 3.20.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0

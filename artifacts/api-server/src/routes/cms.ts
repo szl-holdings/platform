@@ -40,25 +40,33 @@ router.patch("/cms/sites/:id", authMiddleware({ required: false }), async (req, 
 
 // ─── Pages ───────────────────────────────────────────────────────────────────
 
-router.get("/cms/pages", async (req, res) => {
+router.get("/cms/pages", authMiddleware({ required: false }), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const siteSlug = req.query.site as string | undefined;
-    let query = db.select().from(pagesTable).$dynamic();
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
+    const conditions: ReturnType<typeof eq>[] = [];
+    if (!isEditor) conditions.push(eq(pagesTable.status, "published"));
     if (siteSlug) {
       const [site] = await db.select({ id: sitesTable.id }).from(sitesTable).where(eq(sitesTable.slug, siteSlug));
-      if (site) query = query.where(eq(pagesTable.siteId, site.id));
+      if (site) conditions.push(eq(pagesTable.siteId, site.id));
     }
-    const rows = await query.orderBy(desc(pagesTable.updatedAt)).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(pagesTable);
+    const rows = await db.select().from(pagesTable)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(pagesTable.updatedAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(pagesTable)
+      .where(conditions.length ? and(...conditions) : undefined);
     sendSuccess(res, { data: rows, meta: { page, limit, total: count } });
   } catch (err) { handleRouteError(res, err, "Failed to list pages"); }
 });
 
-router.get("/cms/pages/:id", async (req, res) => {
+router.get("/cms/pages/:id", authMiddleware({ required: false }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const [row] = await db.select().from(pagesTable).where(eq(pagesTable.id, id));
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
+    const [row] = await db.select().from(pagesTable).where(
+      isEditor ? eq(pagesTable.id, id) : and(eq(pagesTable.id, id), eq(pagesTable.status, "published"))
+    );
     if (!row) { sendNotFound(res, "Page"); return; }
     sendSuccess(res, row);
   } catch (err) { handleRouteError(res, err, "Failed to get page"); }
@@ -167,13 +175,18 @@ router.delete("/cms/ventures/:id", authMiddleware({ required: false }), async (r
 
 // ─── Articles ────────────────────────────────────────────────────────────────
 
-router.get("/cms/articles", async (req, res) => {
+router.get("/cms/articles", authMiddleware({ required: false }), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-    const status = req.query.status as string | undefined;
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
+    const statusParam = req.query.status as string | undefined;
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     const conditions = [];
-    if (status) conditions.push(eq(articlesTable.status, status as "draft" | "published"));
+    if (!isEditor) {
+      conditions.push(eq(articlesTable.status, "published"));
+    } else if (statusParam) {
+      conditions.push(eq(articlesTable.status, statusParam as "draft" | "published"));
+    }
     if (siteId) conditions.push(eq(articlesTable.siteId, siteId));
     const rows = await db.select().from(articlesTable)
       .where(conditions.length ? and(...conditions) : undefined)
@@ -185,9 +198,12 @@ router.get("/cms/articles", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list articles"); }
 });
 
-router.get("/cms/articles/:slug", async (req, res) => {
+router.get("/cms/articles/:slug", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const [row] = await db.select().from(articlesTable).where(eq(articlesTable.slug, req.params.slug));
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
+    const [row] = await db.select().from(articlesTable).where(
+      isEditor ? eq(articlesTable.slug, req.params.slug) : and(eq(articlesTable.slug, req.params.slug), eq(articlesTable.status, "published"))
+    );
     if (!row) { sendNotFound(res, "Article"); return; }
     sendSuccess(res, row);
   } catch (err) { handleRouteError(res, err, "Failed to get article"); }
@@ -219,21 +235,29 @@ router.delete("/cms/articles/:id", authMiddleware({ required: false }), async (r
 
 // ─── Case Studies ─────────────────────────────────────────────────────────────
 
-router.get("/cms/case-studies", async (req, res) => {
+router.get("/cms/case-studies", authMiddleware({ required: false }), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
-    let query = db.select().from(caseStudiesTable).$dynamic();
-    if (siteId) query = query.where(eq(caseStudiesTable.siteId, siteId));
-    const rows = await query.orderBy(desc(caseStudiesTable.publishedAt)).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(caseStudiesTable);
+    const conditions = [];
+    if (!isEditor) conditions.push(eq(caseStudiesTable.status, "published"));
+    if (siteId) conditions.push(eq(caseStudiesTable.siteId, siteId));
+    const rows = await db.select().from(caseStudiesTable)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(caseStudiesTable.publishedAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(caseStudiesTable)
+      .where(conditions.length ? and(...conditions) : undefined);
     sendSuccess(res, { data: rows, meta: { page, limit, total: count } });
   } catch (err) { handleRouteError(res, err, "Failed to list case studies"); }
 });
 
-router.get("/cms/case-studies/:slug", async (req, res) => {
+router.get("/cms/case-studies/:slug", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const [row] = await db.select().from(caseStudiesTable).where(eq(caseStudiesTable.slug, req.params.slug));
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
+    const [row] = await db.select().from(caseStudiesTable).where(
+      isEditor ? eq(caseStudiesTable.slug, req.params.slug) : and(eq(caseStudiesTable.slug, req.params.slug), eq(caseStudiesTable.status, "published"))
+    );
     if (!row) { sendNotFound(res, "Case study"); return; }
     sendSuccess(res, row);
   } catch (err) { handleRouteError(res, err, "Failed to get case study"); }
@@ -523,14 +547,19 @@ router.post("/cms/use-cases", authMiddleware({ required: false }), async (req, r
 
 // ─── Updates ─────────────────────────────────────────────────────────────────
 
-router.get("/cms/updates", async (req, res) => {
+router.get("/cms/updates", authMiddleware({ required: false }), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
-    let query = db.select().from(updatesTable).$dynamic();
-    if (siteId) query = query.where(eq(updatesTable.siteId, siteId));
-    const rows = await query.orderBy(desc(updatesTable.publishedAt)).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(updatesTable);
+    const conditions = [];
+    if (!isEditor) conditions.push(eq(updatesTable.status, "published"));
+    if (siteId) conditions.push(eq(updatesTable.siteId, siteId));
+    const rows = await db.select().from(updatesTable)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(updatesTable.publishedAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(updatesTable)
+      .where(conditions.length ? and(...conditions) : undefined);
     sendSuccess(res, { data: rows, meta: { page, limit, total: count } });
   } catch (err) { handleRouteError(res, err, "Failed to list updates"); }
 });
@@ -679,12 +708,16 @@ router.delete("/cms/media-assets/:id", authMiddleware({ required: false }), asyn
 
 // ─── Downloads ────────────────────────────────────────────────────────────────
 
-router.get("/cms/downloads", async (req, res) => {
+router.get("/cms/downloads", authMiddleware({ required: false }), async (req, res) => {
   try {
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
-    let query = db.select().from(downloadsTable).$dynamic();
-    if (siteId) query = query.where(eq(downloadsTable.siteId, siteId));
-    const rows = await query.orderBy(desc(downloadsTable.createdAt));
+    const conditions = [];
+    if (!isEditor) conditions.push(eq(downloadsTable.status, "published"));
+    if (siteId) conditions.push(eq(downloadsTable.siteId, siteId));
+    const rows = await db.select().from(downloadsTable)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(downloadsTable.createdAt));
     sendSuccess(res, rows);
   } catch (err) { handleRouteError(res, err, "Failed to list downloads"); }
 });

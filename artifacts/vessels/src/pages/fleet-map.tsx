@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
 import { vesselsDomainMockData, type VesselProfile } from "@/data/mock-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
   X, Ship, MapPin, Radio, Navigation, Clock, Filter, ChevronRight,
-  AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown
+  AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown, Layers, Play, Pause
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 
@@ -31,39 +32,6 @@ const statusLabels: Record<string, string> = {
   risk_watch: "Risk Watch",
   exception_active: "Exception",
 };
-
-const portLocations = [
-  { name: "Singapore", lat: 1.3, lon: 103.8 },
-  { name: "Rotterdam", lat: 51.9, lon: 4.5 },
-  { name: "Shanghai", lat: 31.2, lon: 121.5 },
-  { name: "Fujairah", lat: 25.2, lon: 56.3 },
-  { name: "Yokohama", lat: 35.4, lon: 139.6 },
-  { name: "Mumbai", lat: 19.1, lon: 72.9 },
-  { name: "Hamburg", lat: 53.5, lon: 10.0 },
-  { name: "Port Hedland", lat: -20.3, lon: 118.6 },
-  { name: "Murmansk", lat: 68.9, lon: 33.1 },
-  { name: "Genoa", lat: 44.4, lon: 8.9 },
-];
-
-const routeLines = [
-  { from: { lat: -20.3, lon: 118.6 }, to: { lat: 35.4, lon: 139.6 }, vesselId: 1, color: "#22c55e" },
-  { from: { lat: 40.7, lon: -74.0 }, to: { lat: 53.5, lon: 10.0 }, vesselId: 2, color: "#0ea5e9" },
-  { from: { lat: 26.5, lon: 50.2 }, to: { lat: 25.2, lon: 56.3 }, vesselId: 3, color: "#22c55e" },
-  { from: { lat: 53.5, lon: 8.6 }, to: { lat: 59.9, lon: 10.7 }, vesselId: 4, color: "#f59e0b" },
-  { from: { lat: -32.9, lon: 151.7 }, to: { lat: -27.5, lon: 153.0 }, vesselId: 5, color: "#22c55e" },
-  { from: { lat: 44.4, lon: 22.8 }, to: { lat: 44.4, lon: 8.9 }, vesselId: 7, color: "#ef4444" },
-  { from: { lat: 68.4, lon: 17.4 }, to: { lat: 68.9, lon: 33.1 }, vesselId: 8, color: "#f97316" },
-  { from: { lat: 26.5, lon: 50.2 }, to: { lat: 29.9, lon: 121.6 }, vesselId: 9, color: "#a78bfa" },
-  { from: { lat: -4.8, lon: 11.9 }, to: { lat: -33.9, lon: 18.4 }, vesselId: 10, color: "#f59e0b" },
-];
-
-function toMapCoords(lat: number, lon: number, W: number, H: number) {
-  const x = ((lon + 180) / 360) * W;
-  const latRad = (lat * Math.PI) / 180;
-  const mercN = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-  const y = H / 2 - (mercN / Math.PI) * (H / 2);
-  return { x, y };
-}
 
 function VesselSidePanel({ vessel, onClose }: { vessel: VesselProfile; onClose: () => void }) {
   const exceptions = fleetExceptions.filter(e => e.vesselId === vessel.id && e.status === "active");
@@ -176,50 +144,404 @@ function VesselSidePanel({ vessel, onClose }: { vessel: VesselProfile; onClose: 
 }
 
 type FilterState = {
-  region: string;
+  fleet: string;
   status: string;
-  vesselClass: string;
+  type: string;
 };
+
+const ROUTE_LINES = [
+  { fromLat: -20.3, fromLon: 118.6, toLat: 35.4, toLon: 139.6, vesselId: 1 },
+  { fromLat: 40.7, fromLon: -74.0, toLat: 53.5, toLon: 10.0, vesselId: 2 },
+  { fromLat: 26.5, fromLon: 50.2, toLat: 25.2, toLon: 56.3, vesselId: 3 },
+  { fromLat: 53.5, fromLon: 8.6, toLat: 59.9, toLon: 10.7, vesselId: 4 },
+  { fromLat: -32.9, fromLon: 151.7, toLat: -27.5, toLon: 153.0, vesselId: 5 },
+  { fromLat: 44.4, fromLon: 22.8, toLat: 44.4, toLon: 8.9, vesselId: 7 },
+  { fromLat: 68.4, fromLon: 17.4, toLat: 68.9, toLon: 33.1, vesselId: 8 },
+  { fromLat: 26.5, fromLon: 50.2, toLat: 29.9, toLon: 121.6, vesselId: 9 },
+  { fromLat: -4.8, fromLon: 11.9, toLat: -33.9, toLon: 18.4, vesselId: 10 },
+];
+
+function MapboxFleetMap({
+  filteredVessels,
+  selectedVessel,
+  onVesselSelect,
+}: {
+  filteredVessels: VesselProfile[];
+  selectedVessel: VesselProfile | null;
+  onVesselSelect: (v: VesselProfile | null) => void;
+}) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<Map<number, any>>(new Map());
+  const popupRef = useRef<any>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || (typeof window !== "undefined" ? (window as any).__MAPBOX_TOKEN__ : null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    let mapboxgl: any;
+
+    import("mapbox-gl").then((module) => {
+      mapboxgl = module.default;
+
+      if (MAPBOX_TOKEN) {
+        mapboxgl.accessToken = MAPBOX_TOKEN;
+      }
+
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current!,
+        style: MAPBOX_TOKEN
+          ? "mapbox://styles/mapbox/dark-v11"
+          : {
+              version: 8,
+              sources: {},
+              layers: [
+                {
+                  id: "background",
+                  type: "background",
+                  paint: { "background-color": "#060e1a" },
+                },
+              ],
+            },
+        center: [20, 20],
+        zoom: 1.8,
+        projection: "mercator" as any,
+        antialias: true,
+      });
+
+      mapRef.current = map;
+
+      map.on("load", () => {
+        if (!MAPBOX_TOKEN) {
+          map.addSource("ocean-tiles", {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            attribution: "© OpenStreetMap contributors",
+          });
+          map.addLayer({
+            id: "ocean-layer",
+            type: "raster",
+            source: "ocean-tiles",
+            paint: { "raster-opacity": 0.3, "raster-hue-rotate": 210, "raster-brightness-min": 0.05, "raster-saturation": -0.8 },
+          });
+        }
+
+        map.addSource("routes", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: ROUTE_LINES.map((r) => ({
+              type: "Feature",
+              properties: { vesselId: r.vesselId },
+              geometry: {
+                type: "LineString",
+                coordinates: [
+                  [r.fromLon, r.fromLat],
+                  [r.toLon, r.toLat],
+                ],
+              },
+            })),
+          },
+        });
+
+        map.addLayer({
+          id: "route-lines",
+          type: "line",
+          source: "routes",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: {
+            "line-color": "#38bdf8",
+            "line-width": 1.2,
+            "line-opacity": 0.25,
+            "line-dasharray": [4, 4],
+          },
+        });
+
+        setMapLoaded(true);
+      });
+
+      map.on("error", (e: any) => {
+        if (e?.error?.message?.includes("access token")) {
+          setMapError("no-token");
+        }
+      });
+
+      return () => {
+        map.remove();
+        mapRef.current = null;
+      };
+    }).catch(() => {
+      setMapError("load-failed");
+    });
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+    const map = mapRef.current;
+
+    import("mapbox-gl").then((module) => {
+      const mapboxgl = module.default;
+
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current.clear();
+      if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
+
+      filteredVessels.forEach((vessel) => {
+        const color = statusColors[vessel.status] || "#666";
+        const isSelected = selectedVessel?.id === vessel.id;
+
+        const el = document.createElement("div");
+        el.className = "vessel-marker";
+        el.style.cssText = `
+          width: ${isSelected ? 18 : 12}px;
+          height: ${isSelected ? 18 : 12}px;
+          background-color: ${color};
+          border-radius: 50%;
+          border: 2px solid ${isSelected ? "#fff" : `${color}80`};
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 0 ${isSelected ? 12 : 6}px ${color}80;
+          position: relative;
+        `;
+
+        if (vessel.alertCount > 0 && !isSelected) {
+          const badge = document.createElement("div");
+          badge.style.cssText = `
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 1px solid #060e1a;
+          `;
+          el.appendChild(badge);
+        }
+
+        if (vessel.status === "at_sea") {
+          const pulse = document.createElement("div");
+          pulse.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: ${color};
+            opacity: 0.4;
+            animation: vessel-pulse 2.4s ease-out infinite;
+          `;
+          el.style.position = "relative";
+          el.appendChild(pulse);
+        }
+
+        const popup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          offset: 15,
+          className: "vessel-popup",
+          maxWidth: "280px",
+        }).setHTML(`
+          <div style="background:#0a1628;border:1px solid rgba(56,189,248,0.2);border-radius:10px;padding:10px;font-family:monospace;min-width:200px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="color:#e0f2fe;font-size:11px;font-weight:700;">${vessel.name}</span>
+              <span style="color:rgba(56,189,248,0.4);font-size:9px;">IMO ${vessel.imo}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <span style="width:6px;height:6px;border-radius:50%;background:${color};display:inline-block;"></span>
+              <span style="color:${color};font-size:10px;">${statusLabels[vessel.status] || vessel.status}</span>
+              <span style="color:rgba(56,189,248,0.3);font-size:9px;margin-left:auto;">${vessel.type}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;">
+              <div style="color:rgba(56,189,248,0.4);">Speed</div><div style="color:#e0f2fe;">${vessel.currentSpeed} kn</div>
+              <div style="color:rgba(56,189,248,0.4);">Heading</div><div style="color:#e0f2fe;">${vessel.heading}°</div>
+              <div style="color:rgba(56,189,248,0.4);">Next port</div><div style="color:#e0f2fe;">${vessel.nextPort}</div>
+              <div style="color:rgba(56,189,248,0.4);">Progress</div><div style="color:#e0f2fe;">${vessel.routeProgress}%</div>
+            </div>
+          </div>
+        `);
+
+        el.addEventListener("mouseenter", () => {
+          if (!isSelected) {
+            popup.setLngLat([vessel.lon, vessel.lat]).addTo(map);
+          }
+        });
+        el.addEventListener("mouseleave", () => {
+          popup.remove();
+        });
+        el.addEventListener("click", () => {
+          popup.remove();
+          onVesselSelect(selectedVessel?.id === vessel.id ? null : vessel);
+        });
+
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([vessel.lon, vessel.lat])
+          .addTo(map);
+
+        markersRef.current.set(vessel.id, marker);
+      });
+
+      if (selectedVessel) {
+        const map2 = mapRef.current;
+        if (map2) {
+          map2.flyTo({
+            center: [selectedVessel.lon, selectedVessel.lat],
+            zoom: Math.max(map2.getZoom(), 4),
+            duration: 800,
+            essential: true,
+          });
+        }
+      }
+    });
+  }, [mapLoaded, filteredVessels, selectedVessel, onVesselSelect]);
+
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+    const map = mapRef.current;
+
+    const visibleVesselIds = new Set(filteredVessels.map(v => v.vesselId || v.id));
+    const routeFeatures = ROUTE_LINES
+      .filter(r => filteredVessels.some(v => v.id === r.vesselId))
+      .map(r => ({
+        type: "Feature" as const,
+        properties: { vesselId: r.vesselId },
+        geometry: {
+          type: "LineString" as const,
+          coordinates: [[r.fromLon, r.fromLat], [r.toLon, r.toLat]],
+        },
+      }));
+
+    try {
+      const source = map.getSource("routes") as any;
+      if (source) {
+        source.setData({ type: "FeatureCollection", features: routeFeatures });
+      }
+    } catch {}
+  }, [mapLoaded, filteredVessels]);
+
+  if (mapError === "load-failed") {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-[#060e1a]">
+        <div className="text-center space-y-2">
+          <Ship className="w-8 h-8 text-sky-400/30 mx-auto" />
+          <p className="text-sm text-sky-400/50">Map failed to load</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 relative overflow-hidden">
+      <style>{`
+        @keyframes vessel-pulse {
+          0% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+          100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+        }
+        .vessel-popup .mapboxgl-popup-content {
+          background: transparent !important;
+          padding: 0 !important;
+          box-shadow: none !important;
+        }
+        .vessel-popup .mapboxgl-popup-tip {
+          border-top-color: rgba(56,189,248,0.2) !important;
+        }
+        .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right {
+          display: none;
+        }
+        .mapboxgl-ctrl-top-right {
+          top: 8px;
+          right: 8px;
+        }
+        .mapboxgl-ctrl-zoom-in, .mapboxgl-ctrl-zoom-out {
+          background-color: rgba(6,14,26,0.9) !important;
+          border-color: rgba(56,189,248,0.2) !important;
+          color: rgba(56,189,248,0.7) !important;
+        }
+      `}</style>
+      <div ref={mapContainerRef} className="absolute inset-0" />
+      {!mapLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#060e1a] z-10">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-sky-500/30 border-t-sky-400 rounded-full animate-spin" />
+            <p className="text-xs text-sky-400/40">Loading fleet map…</p>
+          </div>
+        </div>
+      )}
+      {!MAPBOX_TOKEN && mapLoaded && (
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-1.5 z-10">
+          <p className="text-[10px] text-amber-400">Add MAPBOX_ACCESS_TOKEN to enable full map tiles</p>
+        </div>
+      )}
+      <div className="absolute bottom-3 right-3 text-[10px] text-sky-400/40 font-mono bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10 z-10">
+        <Radio className="w-3 h-3 inline mr-1 text-emerald-400 animate-pulse" />
+        {filteredVessels.length} vessels · AIS live
+      </div>
+    </div>
+  );
+}
 
 export default function FleetMapPage() {
   const [selectedVessel, setSelectedVessel] = useState<VesselProfile | null>(null);
-  const [hoveredVessel, setHoveredVessel] = useState<VesselProfile | null>(null);
-  const [filters, setFilters] = useState<FilterState>({ region: "all", status: "all", vesselClass: "all" });
+  const [filters, setFilters] = useState<FilterState>({ fleet: "all", status: "all", type: "all" });
   const [showFilters, setShowFilters] = useState(false);
-
-  const W = 1200;
-  const H = 560;
+  const [playbackActive, setPlaybackActive] = useState(false);
 
   const filteredVessels = useMemo(() => {
     return vessels.filter(v => {
-      if (filters.region !== "all" && v.region !== filters.region) return false;
       if (filters.status !== "all" && v.status !== filters.status) return false;
-      if (filters.vesselClass !== "all" && v.vesselClass !== filters.vesselClass) return false;
+      if (filters.type !== "all" && v.type !== filters.type) return false;
       return true;
     });
   }, [filters]);
 
-  const regions = ["all", ...Array.from(new Set(vessels.map(v => v.region)))];
   const statuses = ["all", ...Array.from(new Set(vessels.map(v => v.status)))];
-  const vesselClasses = ["all", ...Array.from(new Set(vessels.map(v => v.vesselClass)))];
+  const types = ["all", ...Array.from(new Set(vessels.map(v => v.type)))];
+
+  const handleVesselSelect = useCallback((v: VesselProfile | null) => {
+    setSelectedVessel(v);
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-[#060e1a]">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-3 shrink-0">
         <div>
           <h1 className="font-display text-sm font-bold text-sky-50">Fleet Map</h1>
-          <p className="text-[10px] text-sky-400/40">Live vessel positions · AIS-based tracking</p>
+          <p className="text-[10px] text-sky-400/40">Live vessel positions · AIS-based tracking · Mapbox GL</p>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <div className="flex items-center gap-3">
-            {Object.entries({ at_sea: "#22c55e", in_port: "#0ea5e9", delayed: "#f97316", maintenance: "#ef4444", exception_active: "#ef4444" }).map(([key, color]) => (
+          <div className="hidden lg:flex items-center gap-3">
+            {Object.entries({ at_sea: "#22c55e", in_port: "#0ea5e9", delayed: "#f97316", maintenance: "#ef4444" }).map(([key, color]) => (
               <span key={key} className="flex items-center gap-1 text-[10px] text-sky-400/50">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
                 {statusLabels[key]}
               </span>
             ))}
           </div>
+
+          <button
+            onClick={() => setPlaybackActive(p => !p)}
+            title="AIS Playback (future feature)"
+            className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[10px] transition-all",
+              playbackActive ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "border-sky-500/10 text-sky-400/40 hover:text-sky-300"
+            )}
+          >
+            {playbackActive ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            Playback
+          </button>
 
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -234,9 +556,8 @@ export default function FleetMapPage() {
       {showFilters && (
         <div className="px-4 py-2 border-b border-sky-500/10 flex items-start gap-4 shrink-0 flex-wrap">
           {[
-            { label: "Region", key: "region" as const, opts: regions },
             { label: "Status", key: "status" as const, opts: statuses },
-            { label: "Class", key: "vesselClass" as const, opts: vesselClasses },
+            { label: "Type", key: "type" as const, opts: types },
           ].map(({ label, key, opts }) => (
             <div key={key} className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] text-sky-400/40 shrink-0">{label}:</span>
@@ -258,212 +579,11 @@ export default function FleetMapPage() {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 relative overflow-hidden">
-          <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <radialGradient id="ocean-bg" cx="50%" cy="40%" r="80%">
-                <stop offset="0%" stopColor="#0d2847" />
-                <stop offset="60%" stopColor="#080f1e" />
-                <stop offset="100%" stopColor="#060c18" />
-              </radialGradient>
-              <filter id="vessel-glow">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-              <filter id="port-glow">
-                <feGaussianBlur stdDeviation="2" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-            </defs>
-
-            <rect width={W} height={H} fill="url(#ocean-bg)" />
-
-            <g opacity="0.08" stroke="rgba(56,189,248,0.5)" strokeWidth="0.4" fill="none">
-              {[-60, -30, 0, 30, 60].map(lat => {
-                const { y } = toMapCoords(lat, 0, W, H);
-                return <line key={`lat-${lat}`} x1={0} y1={y} x2={W} y2={y} strokeDasharray="3 5" />;
-              })}
-              {[-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150].map(lon => {
-                const { x } = toMapCoords(0, lon, W, H);
-                return <line key={`lon-${lon}`} x1={x} y1={0} x2={x} y2={H} strokeDasharray="3 5" />;
-              })}
-            </g>
-
-            <g opacity="0.12" fill="rgba(56,189,248,0.05)" stroke="rgba(56,189,248,0.12)" strokeWidth="0.6">
-              {[
-                "M225,100 L230,95 L240,95 L245,100 L250,110 L260,115 L270,108 L280,100 L290,98 L295,100 L300,110 L305,115 L310,125 L315,135 L320,150 L325,160 L330,170 L335,175 L330,180 L320,182 L310,180 L305,175 L300,170 L295,165 L290,158 L280,155 L270,160 L260,170 L255,180 L250,185 L240,188 L235,185 L230,180 L225,170 L220,160 L215,150 L220,140 L225,130 L225,120 Z",
-                "M430,85 L445,78 L460,80 L475,90 L480,105 L485,115 L490,125 L495,135 L500,145 L505,155 L510,165 L520,170 L535,172 L545,175 L550,180 L540,185 L530,190 L515,188 L500,185 L490,180 L480,170 L470,160 L460,155 L450,150 L445,140 L440,130 L435,120 L430,110 L428,100 Z",
-                "M540,110 L560,105 L580,108 L600,115 L620,118 L640,120 L660,115 L680,110 L700,108 L720,112 L730,120 L740,130 L730,140 L720,148 L700,150 L680,148 L660,145 L640,140 L620,138 L600,140 L580,145 L560,148 L550,145 L545,135 L540,125 Z",
-                "M620,170 L640,165 L660,168 L680,175 L700,185 L710,195 L700,210 L690,220 L680,230 L670,235 L660,230 L650,220 L640,210 L635,200 L630,190 L625,180 Z",
-                "M340,230 L360,215 L380,210 L390,215 L395,225 L400,240 L395,260 L385,280 L375,295 L365,310 L355,320 L345,325 L338,315 L335,300 L332,285 L330,270 L332,255 L335,240 Z",
-                "M720,240 L740,230 L760,232 L780,240 L790,255 L785,275 L775,295 L765,310 L755,320 L745,325 L735,320 L728,310 L722,295 L720,275 L718,260 Z",
-                "M830,210 L855,200 L875,205 L890,215 L895,235 L890,255 L880,275 L870,290 L855,295 L845,290 L835,275 L828,255 L826,235 Z",
-              ].map((d, i) => <path key={i} d={d} />)}
-            </g>
-
-            {routeLines.map(route => {
-              const from = toMapCoords(route.from.lat, route.from.lon, W, H);
-              const to = toMapCoords(route.to.lat, route.to.lon, W, H);
-              const vessel = vessels.find(v => v.id === route.vesselId);
-              if (!vessel || !filteredVessels.find(v => v.id === vessel.id)) return null;
-              return (
-                <line key={route.vesselId}
-                  x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                  stroke={route.color} strokeWidth="0.8" opacity="0.2" strokeDasharray="4 4"
-                />
-              );
-            })}
-
-            {portLocations.map(port => {
-              const { x, y } = toMapCoords(port.lat, port.lon, W, H);
-              return (
-                <g key={port.name} filter="url(#port-glow)">
-                  <rect x={x - 3} y={y - 3} width={6} height={6} fill="#0ea5e9" opacity={0.5} transform={`rotate(45 ${x} ${y})`} />
-                  <text x={x + 6} y={y + 3} fill="rgba(56,189,248,0.4)" fontSize="7" fontFamily="monospace">{port.name}</text>
-                </g>
-              );
-            })}
-
-            {(() => {
-              const CLUSTER_THRESHOLD = 30;
-              const mapped = filteredVessels.map(v => ({ v, ...toMapCoords(v.lat, v.lon, W, H) }));
-              const visited = new Set<number>();
-              const clusters: { cx: number; cy: number; vessels: VesselProfile[] }[] = [];
-
-              mapped.forEach((a, i) => {
-                if (visited.has(i)) return;
-                const group: typeof mapped = [a];
-                visited.add(i);
-                mapped.forEach((b, j) => {
-                  if (i === j || visited.has(j)) return;
-                  const dist = Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
-                  if (dist < CLUSTER_THRESHOLD) {
-                    group.push(b);
-                    visited.add(j);
-                  }
-                });
-                clusters.push({
-                  cx: group.reduce((s, p) => s + p.x, 0) / group.length,
-                  cy: group.reduce((s, p) => s + p.y, 0) / group.length,
-                  vessels: group.map(g => g.v),
-                });
-              });
-
-              return clusters.map((cluster, ci) => {
-                if (cluster.vessels.length === 1) {
-                  const v = cluster.vessels[0];
-                  const { x, y } = toMapCoords(v.lat, v.lon, W, H);
-                  const color = statusColors[v.status] || "#666";
-                  const isSelected = selectedVessel?.id === v.id;
-                  const isHovered = hoveredVessel?.id === v.id;
-                  const hasAlert = v.alertCount > 0;
-                  return (
-                    <g key={v.id}
-                      onMouseEnter={() => setHoveredVessel(v)}
-                      onMouseLeave={() => setHoveredVessel(null)}
-                      onClick={() => setSelectedVessel(isSelected ? null : v)}
-                      style={{ cursor: "pointer" }}
-                      role="button"
-                      aria-label={`${v.name} — ${statusLabels[v.status]}`}
-                    >
-                      <circle cx={x} cy={y} r={20} fill="transparent" />
-                      {(isSelected || isHovered) && <circle cx={x} cy={y} r={14} fill={color} opacity={0.1} />}
-                      {v.status === "at_sea" && (
-                        <circle cx={x} cy={y} r={6} fill="none" stroke={color} strokeWidth="0.8" opacity="0.35">
-                          <animate attributeName="r" from="5" to="14" dur="2.4s" repeatCount="indefinite" />
-                          <animate attributeName="opacity" from="0.35" to="0" dur="2.4s" repeatCount="indefinite" />
-                        </circle>
-                      )}
-                      {isSelected && (
-                        <circle cx={x} cy={y} r={10} fill="none" stroke={color} strokeWidth="1" opacity={0.5}>
-                          <animate attributeName="r" from="10" to="20" dur="1.6s" repeatCount="indefinite" />
-                          <animate attributeName="opacity" from="0.5" to="0" dur="1.6s" repeatCount="indefinite" />
-                        </circle>
-                      )}
-                      <circle cx={x} cy={y} r={isSelected || isHovered ? 6 : 4} fill={color} filter={isSelected || isHovered ? "url(#vessel-glow)" : undefined} />
-                      {hasAlert && !isSelected && (
-                        <circle cx={x + 4} cy={y - 4} r={3} fill="#ef4444">
-                          <animate attributeName="opacity" values="1;0.4;1" dur="1.2s" repeatCount="indefinite" />
-                        </circle>
-                      )}
-                    </g>
-                  );
-                }
-
-                const { cx, cy } = cluster;
-                const hasAlert = cluster.vessels.some(v => v.alertCount > 0);
-                const hasCritical = cluster.vessels.some(v => ["exception_active", "maintenance"].includes(v.status));
-                const clusterColor = hasCritical ? "#ef4444" : hasAlert ? "#f97316" : "#0ea5e9";
-                const isSelected = cluster.vessels.some(v => selectedVessel?.id === v.id);
-
-                return (
-                  <g key={`cluster-${ci}`}
-                    onClick={() => {
-                      const nonSelected = cluster.vessels.find(v => selectedVessel?.id !== v.id);
-                      setSelectedVessel(nonSelected || null);
-                    }}
-                    style={{ cursor: "pointer" }}
-                    role="button"
-                    aria-label={`${cluster.vessels.length} vessels clustered`}
-                  >
-                    <circle cx={cx} cy={cy} r={22} fill={clusterColor} opacity={0.08} />
-                    <circle cx={cx} cy={cy} r={16} fill={clusterColor} opacity={0.12} />
-                    <circle cx={cx} cy={cy} r={12} fill={clusterColor} opacity={0.25} />
-                    {isSelected && (
-                      <circle cx={cx} cy={cy} r={14} fill="none" stroke={clusterColor} strokeWidth="1" opacity={0.6}>
-                        <animate attributeName="r" from="12" to="24" dur="1.8s" repeatCount="indefinite" />
-                        <animate attributeName="opacity" from="0.6" to="0" dur="1.8s" repeatCount="indefinite" />
-                      </circle>
-                    )}
-                    <text x={cx} y={cy + 4} textAnchor="middle" fill={clusterColor} fontSize="9" fontWeight="700" fontFamily="monospace">{cluster.vessels.length}</text>
-                    {hasAlert && (
-                      <circle cx={cx + 10} cy={cy - 10} r={4} fill="#ef4444">
-                        <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" />
-                      </circle>
-                    )}
-                  </g>
-                );
-              });
-            })()}
-          </svg>
-
-          {hoveredVessel && !selectedVessel && (() => {
-            const { x, y } = toMapCoords(hoveredVessel.lat, hoveredVessel.lon, W, H);
-            const pctX = (x / W) * 100;
-            const pctY = (y / H) * 100;
-            const color = statusColors[hoveredVessel.status] || "#666";
-            return (
-              <div
-                className="absolute z-10 bg-[#0a1628]/98 backdrop-blur border border-sky-500/20 rounded-xl shadow-2xl p-3 pointer-events-none"
-                style={{ left: `${Math.min(Math.max(pctX, 20), 80)}%`, top: `${Math.max(pctY - 5, 5)}%`, transform: "translate(-50%, -110%)", minWidth: 220 }}
-              >
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <p className="text-xs font-bold text-sky-100">{hoveredVessel.name}</p>
-                  <span className="text-[9px] font-mono text-sky-400/50">IMO {hoveredVessel.imo}</span>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                  <span className="text-[10px] text-sky-200/70 capitalize">{statusLabels[hoveredVessel.status]}</span>
-                  {hoveredVessel.currentSpeed > 0 && <span className="text-[10px] text-sky-400/40 ml-auto font-mono">{hoveredVessel.currentSpeed} kn</span>}
-                </div>
-                <div className="flex items-center gap-1 text-[10px] text-sky-400/50">
-                  <Navigation className="w-2.5 h-2.5" />
-                  <span>{hoveredVessel.nextPort}</span>
-                  {hoveredVessel.etaDelta !== 0 && (
-                    <span className={cn("ml-auto font-mono", hoveredVessel.etaDelta < 0 ? "text-emerald-400" : "text-orange-400")}>
-                      {hoveredVessel.etaDelta > 0 ? `+${hoveredVessel.etaDelta}h` : `${hoveredVessel.etaDelta}h`}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
-          <div className="absolute bottom-3 right-3 text-[10px] text-sky-400/40 font-mono bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
-            <Radio className="w-3 h-3 inline mr-1 text-emerald-400 animate-pulse" />
-            {filteredVessels.length} vessels · AIS live
-          </div>
-        </div>
+        <MapboxFleetMap
+          filteredVessels={filteredVessels}
+          selectedVessel={selectedVessel}
+          onVesselSelect={handleVesselSelect}
+        />
 
         {selectedVessel && (
           <VesselSidePanel vessel={selectedVessel} onClose={() => setSelectedVessel(null)} />
@@ -471,14 +591,14 @@ export default function FleetMapPage() {
       </div>
 
       {!selectedVessel && (
-        <div className="px-4 py-2 border-t border-sky-500/10 flex items-center gap-4 shrink-0">
+        <div className="px-4 py-2 border-t border-sky-500/10 flex items-center gap-4 shrink-0 overflow-x-auto">
           {vessels.map(v => {
             const color = statusColors[v.status] || "#666";
             return (
               <button
                 key={v.id}
                 onClick={() => setSelectedVessel(v)}
-                className="flex items-center gap-1.5 text-[10px] text-sky-400/50 hover:text-sky-200 transition-colors"
+                className="flex items-center gap-1.5 text-[10px] text-sky-400/50 hover:text-sky-200 transition-colors whitespace-nowrap"
               >
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
                 {v.name}

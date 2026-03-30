@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { db, usersTable, sessionsTable, userRolesTable, rolesTable } from "@workspace/db";
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@workspace/db";
+import { ROLE_HIERARCHY } from "@workspace/db";
 
 export interface AuthenticatedUser {
   id: number;
@@ -86,17 +87,33 @@ export function requireRole(...allowedRoles: RoleName[]) {
       return;
     }
 
-    if (req.user.roles.includes("super_admin")) {
+    if (req.user.roles.includes("super_admin") || req.user.roles.includes("admin")) {
       next();
       return;
     }
 
-    const hasRole = allowedRoles.some((role) => req.user!.roles.includes(role));
+    const userGrantedRoles = new Set<RoleName>();
+    for (const userRole of req.user.roles) {
+      const implied = ROLE_HIERARCHY[userRole];
+      if (implied) implied.forEach((r: RoleName) => userGrantedRoles.add(r));
+    }
+
+    const hasRole = allowedRoles.some((role) => userGrantedRoles.has(role));
     if (!hasRole) {
       res.status(403).json({ error: "Insufficient permissions" });
       return;
     }
 
+    next();
+  };
+}
+
+export function requireAnyAuth() {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
     next();
   };
 }
