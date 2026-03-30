@@ -16,8 +16,8 @@ import { isFlagEnabled } from "../lib/platform-flags";
 
 const adminRouter: IRouter = Router();
 
-adminRouter.use(authMiddleware());
-adminRouter.use(requireRole("admin"));
+adminRouter.use("/admin", authMiddleware());
+adminRouter.use("/admin", requireRole("admin"));
 
 const SZL_APPS = [
   { id: "project-list", name: "Project List", description: "Portfolio project management", status: "active", url: "/" },
