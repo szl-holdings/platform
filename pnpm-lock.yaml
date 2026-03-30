@@ -2451,6 +2451,9 @@ importers:
 
   lib/shared-ui:
     dependencies:
+      '@workspace/observability':
+        specifier: workspace:*
+        version: link:../observability
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
