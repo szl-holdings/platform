@@ -93,6 +93,28 @@ export class AIAdapter extends ServiceAdapter {
     return ["AI_INTEGRATIONS_OPENAI_API_KEY or OPENAI_API_KEY or ANTHROPIC_API_KEY"];
   }
 
+  async chatCompletionForProvider(
+    provider: "replit-proxy" | "openai" | "anthropic",
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): Promise<ChatCompletionResult> {
+    if (!this.isLive) {
+      return this.mockChatCompletion(messages);
+    }
+
+    if (provider === "replit-proxy" && this.hasReplitProxy) {
+      return this.replitProxyCompletion(messages, options);
+    }
+    if (provider === "openai" && this.openaiKey) {
+      return this.openaiCompletion(messages, options);
+    }
+    if (provider === "anthropic" && this.anthropicKey) {
+      return this.anthropicCompletion(messages, options);
+    }
+
+    throw new Error(`Provider "${provider}" is not configured or unavailable`);
+  }
+
   async chatCompletion(
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },

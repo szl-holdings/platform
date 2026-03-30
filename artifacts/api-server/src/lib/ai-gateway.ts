@@ -6,6 +6,9 @@ import type { ChatMessage, ChatCompletionResult } from "@workspace/services";
 
 export type RoutingStrategy = "fastest" | "cheapest" | "preferred" | "fallback";
 
+const VALID_STRATEGIES = new Set<RoutingStrategy>(["fastest", "cheapest", "preferred", "fallback"]);
+const VALID_PROVIDERS = new Set<InferenceProvider>(["openai", "anthropic", "replit-proxy", "gemini", "huggingface", "mock"]);
+
 export interface GatewayRequest {
   messages: ChatMessage[];
   model?: string;
@@ -41,6 +44,8 @@ interface ProviderCandidate {
   reason: string;
 }
 
+type AdapterProvider = "replit-proxy" | "openai" | "anthropic";
+
 const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: string }[]> = {
   reasoning: [
     { provider: "replit-proxy", model: "gpt-5.2" },
@@ -64,19 +69,44 @@ const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: stri
   ],
 };
 
+const ADAPTER_PROVIDER_MAP: Record<string, AdapterProvider> = {
+  "replit-proxy": "replit-proxy",
+  "openai": "openai",
+  "anthropic": "anthropic",
+};
+
+function isAdapterProvider(provider: InferenceProvider): provider is AdapterProvider {
+  return provider in ADAPTER_PROVIDER_MAP;
+}
+
 function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
   const strategy = request.strategy ?? "fastest";
   const candidates: ProviderCandidate[] = [];
   const taskType = detectTaskType(request.messages);
   const modelList = PROVIDER_MODELS[taskType] ?? PROVIDER_MODELS["default"]!;
 
+  if (strategy === "preferred" && request.preferredProvider) {
+    const preferred = request.preferredProvider;
+    const preferredEntry = modelList.find(e => e.provider === preferred);
+    const model = request.model ?? preferredEntry?.model ?? modelList[0]?.model ?? "gpt-5.2";
+    const health = providerHealth.getStatus(preferred);
+
+    if (health.status !== "down") {
+      candidates.push({
+        provider: preferred,
+        model,
+        score: 200,
+        reason: `preferred: provider=${preferred}, health=${health.status}`,
+      });
+    }
+  }
+
   for (const { provider, model } of modelList) {
+    if (candidates.some(c => c.provider === provider)) continue;
     const health = providerHealth.getStatus(provider);
     if (health.status === "down") continue;
 
     let score = 100;
-
-    if (request.preferredProvider === provider) score += 50;
 
     if (strategy === "fastest") {
       const avgLatency = inferenceTelemetry.getProviderLatencyForModel(provider, model);
@@ -113,14 +143,19 @@ function detectTaskType(messages: ChatMessage[]): string {
   return "default";
 }
 
-async function executeInference(
+async function executeProviderInference(
+  provider: InferenceProvider,
   messages: ChatMessage[],
   model: string,
   maxTokens: number,
   timeoutMs: number,
 ): Promise<ChatCompletionResult> {
+  const inferencePromise = isAdapterProvider(provider)
+    ? services.ai.chatCompletionForProvider(ADAPTER_PROVIDER_MAP[provider]!, messages, { model, maxTokens })
+    : services.ai.chatCompletion(messages, { model, maxTokens });
+
   const result = await Promise.race([
-    services.ai.chatCompletion(messages, { model, maxTokens }),
+    inferencePromise,
     new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error(`Inference timeout after ${timeoutMs}ms`)), timeoutMs)
     ),
@@ -138,7 +173,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
 
   const candidates = selectCandidates(request);
   if (candidates.length === 0) {
-    candidates.push({ provider: "mock", model: "mock-model", score: 0, reason: "No healthy providers available" });
+    throw new Error("No healthy providers available for inference");
   }
 
   const attemptedProviders: InferenceProvider[] = [];
@@ -150,7 +185,8 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
       const attemptStart = Date.now();
 
       try {
-        const result = await executeInference(
+        const result = await executeProviderInference(
+          candidate.provider,
           request.messages,
           candidate.model,
           request.maxTokens ?? 1024,
@@ -225,37 +261,7 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
   }
 
   logger.error({ agentId, domain, attemptedProviders, error: lastError?.message }, "All gateway inference attempts exhausted");
-
-  const mockResult = await services.ai.chatCompletion(request.messages, { model: "mock-model" });
-  const telemetryRecord = inferenceTelemetry.record({
-    provider: "mock",
-    model: "mock-model",
-    agentId,
-    domain,
-    latencyMs: Date.now() - startTime,
-    promptTokens: 0,
-    completionTokens: 0,
-    success: true,
-    routingStrategy: "fallback",
-    retryCount: 0,
-    cached: false,
-  });
-
-  return {
-    content: mockResult.content,
-    model: "mock-model",
-    provider: "mock",
-    usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-    routing: {
-      strategy: "fallback",
-      selectedProvider: "mock",
-      attemptedProviders,
-      retryCount: 0,
-      totalLatencyMs: Date.now() - startTime,
-      cached: false,
-    },
-    telemetryId: telemetryRecord.id,
-  };
+  throw new Error(`All providers exhausted after ${attemptedProviders.length} attempts: ${lastError?.message ?? "unknown error"}`);
 }
 
 export function getGatewayStatus(): {
@@ -264,7 +270,7 @@ export function getGatewayStatus(): {
   supportedStrategies: RoutingStrategy[];
   taskTypes: string[];
 } {
-  const providers: InferenceProvider[] = ["replit-proxy", "openai", "anthropic", "huggingface"];
+  const providers: InferenceProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
   const availableProviders = providers.map(p => {
     const health = providerHealth.getStatus(p);
     const stats = inferenceTelemetry.getProviderStats(300000).find(s => s.provider === p);
@@ -281,4 +287,12 @@ export function getGatewayStatus(): {
     supportedStrategies: ["fastest", "cheapest", "preferred", "fallback"],
     taskTypes: Object.keys(PROVIDER_MODELS),
   };
+}
+
+export function isValidStrategy(s: string): s is RoutingStrategy {
+  return VALID_STRATEGIES.has(s as RoutingStrategy);
+}
+
+export function isValidProvider(p: string): p is InferenceProvider {
+  return VALID_PROVIDERS.has(p as InferenceProvider);
 }

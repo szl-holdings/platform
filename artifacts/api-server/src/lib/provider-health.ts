@@ -16,6 +16,8 @@ export interface ProviderHealthRecord {
   lastSuccessAt?: number;
   degradedSince?: number;
   downSince?: number;
+  lastProbeAt?: number;
+  lastProbeSuccess?: boolean;
 }
 
 export interface HealthSummary {
@@ -25,6 +27,7 @@ export interface HealthSummary {
   degradedCount: number;
   downCount: number;
   lastUpdated: number;
+  probeIntervalMs: number;
 }
 
 const DEGRADED_THRESHOLD_FAILURES = 3;
@@ -32,9 +35,13 @@ const DOWN_THRESHOLD_FAILURES = 8;
 const RECOVERY_THRESHOLD_SUCCESSES = 3;
 const LATENCY_WINDOW = 20;
 const DEGRADED_LATENCY_MS = 5000;
+const PROBE_INTERVAL_MS = 120_000;
+
+const KNOWN_PROVIDERS: InferenceProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
 
 class ProviderHealthMonitor {
   private providers: Map<InferenceProvider, ProviderHealthRecord> = new Map();
+  private probeTimer: ReturnType<typeof setInterval> | null = null;
 
   private getOrCreate(provider: InferenceProvider): ProviderHealthRecord {
     let record = this.providers.get(provider);
@@ -129,12 +136,101 @@ class ProviderHealthMonitor {
       degradedCount: degraded,
       downCount: down,
       lastUpdated: Date.now(),
+      probeIntervalMs: PROBE_INTERVAL_MS,
     };
   }
 
   reset(provider: InferenceProvider): void {
     this.providers.delete(provider);
     logger.info({ provider }, "Provider health record reset");
+  }
+
+  startActiveProbes(): void {
+    if (this.probeTimer) return;
+
+    for (const p of KNOWN_PROVIDERS) {
+      this.getOrCreate(p);
+    }
+
+    this.probeTimer = setInterval(() => {
+      this.runProbes().catch(err => {
+        logger.error({ error: String(err) }, "Active health probe cycle failed");
+      });
+    }, PROBE_INTERVAL_MS);
+
+    logger.info({ intervalMs: PROBE_INTERVAL_MS, providers: KNOWN_PROVIDERS }, "Active health probing started");
+  }
+
+  stopActiveProbes(): void {
+    if (this.probeTimer) {
+      clearInterval(this.probeTimer);
+      this.probeTimer = null;
+      logger.info("Active health probing stopped");
+    }
+  }
+
+  private async runProbes(): Promise<void> {
+    for (const provider of KNOWN_PROVIDERS) {
+      const record = this.getOrCreate(provider);
+      try {
+        const start = Date.now();
+        const ok = await this.probeProvider(provider);
+        const latencyMs = Date.now() - start;
+        record.lastProbeAt = Date.now();
+        record.lastProbeSuccess = ok;
+
+        if (ok) {
+          this.recordSuccess(provider, latencyMs);
+        } else {
+          this.recordFailure(provider, "probe returned not-ok");
+        }
+      } catch (err) {
+        record.lastProbeAt = Date.now();
+        record.lastProbeSuccess = false;
+        this.recordFailure(provider, `probe error: ${String(err).slice(0, 100)}`);
+      }
+    }
+  }
+
+  private async probeProvider(provider: InferenceProvider): Promise<boolean> {
+    const probeEndpoints: Record<string, string | undefined> = {
+      "replit-proxy": process.env.AI_INTEGRATIONS_OPENAI_BASE_URL ? `${process.env.AI_INTEGRATIONS_OPENAI_BASE_URL}/models` : undefined,
+      "openai": process.env.OPENAI_API_KEY ? "https://api.openai.com/v1/models" : undefined,
+      "anthropic": process.env.ANTHROPIC_API_KEY ? "https://api.anthropic.com/v1/messages" : undefined,
+      "gemini": process.env.GEMINI_API_KEY ? "https://generativelanguage.googleapis.com/v1beta/models" : undefined,
+      "huggingface": process.env.HUGGINGFACE_API_KEY ? "https://api-inference.huggingface.co/status" : undefined,
+    };
+
+    const endpoint = probeEndpoints[provider];
+    if (!endpoint) return true;
+
+    const headers: Record<string, string> = {};
+    if (provider === "replit-proxy" && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+      headers["Authorization"] = `Bearer ${process.env.AI_INTEGRATIONS_OPENAI_API_KEY}`;
+    } else if (provider === "openai" && process.env.OPENAI_API_KEY) {
+      headers["Authorization"] = `Bearer ${process.env.OPENAI_API_KEY}`;
+    } else if (provider === "anthropic" && process.env.ANTHROPIC_API_KEY) {
+      headers["x-api-key"] = process.env.ANTHROPIC_API_KEY;
+      headers["anthropic-version"] = "2023-06-01";
+    } else if (provider === "gemini" && process.env.GEMINI_API_KEY) {
+      headers["x-goog-api-key"] = process.env.GEMINI_API_KEY;
+    } else if (provider === "huggingface" && process.env.HUGGINGFACE_API_KEY) {
+      headers["Authorization"] = `Bearer ${process.env.HUGGINGFACE_API_KEY}`;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const resp = await fetch(endpoint, {
+        method: provider === "anthropic" ? "OPTIONS" : "GET",
+        headers,
+        signal: controller.signal,
+      });
+      return resp.status < 500;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 }
 

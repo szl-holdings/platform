@@ -45,6 +45,9 @@ const server = http.createServer(app);
 
 initWebSocket(server);
 startDomainNotificationGenerators();
+
+import { providerHealth } from "./lib/provider-health";
+providerHealth.startActiveProbes();
 ensureAlloyTables()
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {
@@ -90,6 +93,7 @@ async function shutdown(signal: string) {
   }
 
   stopDomainNotificationGenerators();
+  providerHealth.stopActiveProbes();
   agentScheduler.stop();
 
   try {

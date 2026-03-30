@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 
-export type InferenceProvider = "openai" | "anthropic" | "replit-proxy" | "huggingface" | "mock";
+export type InferenceProvider = "openai" | "anthropic" | "replit-proxy" | "gemini" | "huggingface" | "mock";
 
 export interface InferenceRecord {
   id: string;

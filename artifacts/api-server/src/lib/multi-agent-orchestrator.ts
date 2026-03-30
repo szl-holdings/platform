@@ -2,10 +2,12 @@ import { logger } from "./logger";
 import { gatewayInfer, type GatewayResponse } from "./ai-gateway";
 import type { ChatMessage } from "@workspace/services";
 
+export type OrchestrationDepth = "shallow" | "standard" | "deep";
+
 export interface OrchestrationRequest {
   query: string;
   domains?: string[];
-  depth?: "shallow" | "standard" | "deep";
+  depth?: OrchestrationDepth;
   sessionId?: string;
 }
 

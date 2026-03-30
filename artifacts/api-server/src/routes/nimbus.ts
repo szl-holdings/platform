@@ -1,13 +1,22 @@
 import { Router, type IRouter } from "express";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { gatewayInfer, getGatewayStatus } from "../lib/ai-gateway";
+import { gatewayInfer, getGatewayStatus, isValidStrategy, isValidProvider } from "../lib/ai-gateway";
+import type { RoutingStrategy } from "../lib/ai-gateway";
 import { inferenceTelemetry } from "../lib/inference-telemetry";
+import type { InferenceProvider } from "../lib/inference-telemetry";
 import { providerHealth } from "../lib/provider-health";
-import { getRegistrySummary, getAllModelCards, getModelCard } from "../lib/model-registry";
+import { getRegistrySummary, getAllModelCards, getModelCard, getAllAgentIds } from "../lib/model-registry";
 import { orchestrate, getOrchestratorCapabilities } from "../lib/multi-agent-orchestrator";
+import type { OrchestrationDepth } from "../lib/multi-agent-orchestrator";
 import { executePipeline, listPipelines, getPipelineConfig } from "../lib/intelligence-pipelines";
 import type { ChatMessage } from "@workspace/services";
+
+const VALID_DEPTHS = new Set<OrchestrationDepth>(["shallow", "standard", "deep"]);
+
+function isValidDepth(d: string): d is OrchestrationDepth {
+  return VALID_DEPTHS.has(d as OrchestrationDepth);
+}
 
 const nimbusRouter: IRouter = Router();
 
@@ -58,14 +67,27 @@ nimbusRouter.post("/nimbus/gateway/infer", authMiddleware(), async (req, res) =>
       return;
     }
 
+    if (strategy && !isValidStrategy(strategy)) {
+      sendError(res, `Invalid strategy "${strategy}". Valid: fastest, cheapest, preferred, fallback`, 400);
+      return;
+    }
+
+    if (preferredProvider && !isValidProvider(preferredProvider)) {
+      sendError(res, `Invalid provider "${preferredProvider}". Valid: openai, anthropic, replit-proxy, gemini, huggingface`, 400);
+      return;
+    }
+
+    const validatedStrategy: RoutingStrategy | undefined = strategy && isValidStrategy(strategy) ? strategy : undefined;
+    const validatedProvider: InferenceProvider | undefined = preferredProvider && isValidProvider(preferredProvider) ? preferredProvider : undefined;
+
     const response = await gatewayInfer({
       messages,
       model,
       maxTokens,
       agentId: agentId ?? "api-caller",
       domain: domain ?? "general",
-      preferredProvider: preferredProvider as any,
-      strategy: strategy as any,
+      preferredProvider: validatedProvider,
+      strategy: validatedStrategy,
       timeoutMs,
       maxRetries,
     });
@@ -95,8 +117,12 @@ nimbusRouter.get("/nimbus/registry/models", (_req, res) => {
 nimbusRouter.get("/nimbus/registry/models/:agentId", (req, res) => {
   try {
     const agentId = req.params.agentId as string;
+    const knownAgents = getAllAgentIds();
+    if (!knownAgents.includes(agentId)) {
+      sendError(res, "Model not found", 404);
+      return;
+    }
     const card = getModelCard(agentId);
-    if (!card) { sendError(res, "Model not found", 404); return; }
     sendSuccess(res, card);
   } catch (err) { handleRouteError(res, err, "Failed to get model card"); }
 });
@@ -128,7 +154,11 @@ nimbusRouter.get("/nimbus/telemetry/records", (req, res) => {
     const provider = req.query.provider as string | undefined;
     const agentId = req.query.agentId as string | undefined;
     const limit = parseInt(req.query.limit as string) || 50;
-    sendSuccess(res, inferenceTelemetry.getRecords({ windowMs, provider: provider as any, agentId, limit }));
+
+    const validatedProvider: InferenceProvider | undefined =
+      provider && isValidProvider(provider) ? provider : undefined;
+
+    sendSuccess(res, inferenceTelemetry.getRecords({ windowMs, provider: validatedProvider, agentId, limit }));
   } catch (err) { handleRouteError(res, err, "Failed to get telemetry records"); }
 });
 
@@ -141,7 +171,11 @@ nimbusRouter.get("/nimbus/providers/health", (_req, res) => {
 nimbusRouter.post("/nimbus/providers/:provider/reset", authMiddleware(), (req, res) => {
   try {
     const provider = req.params.provider as string;
-    providerHealth.reset(provider as any);
+    if (!isValidProvider(provider)) {
+      sendError(res, `Invalid provider "${provider}". Valid: openai, anthropic, replit-proxy, gemini, huggingface`, 400);
+      return;
+    }
+    providerHealth.reset(provider);
     sendSuccess(res, { provider, status: "reset" });
   } catch (err) { handleRouteError(res, err, "Failed to reset provider"); }
 });
@@ -160,10 +194,18 @@ nimbusRouter.post("/nimbus/orchestrate", authMiddleware(), async (req, res) => {
       return;
     }
 
+    if (depth && !isValidDepth(depth)) {
+      sendError(res, `Invalid depth "${depth}". Valid: shallow, standard, deep`, 400);
+      return;
+    }
+
+    const validatedDepth: OrchestrationDepth | undefined =
+      depth && isValidDepth(depth) ? depth : undefined;
+
     const result = await orchestrate({
       query: query.trim(),
       domains,
-      depth: depth as any,
+      depth: validatedDepth,
       sessionId,
     });
 
@@ -219,6 +261,11 @@ nimbusRouter.post("/nimbus/recommendations", authMiddleware(), async (req, res) 
 
     if (!context || typeof context !== "string" || context.trim().length === 0) {
       sendError(res, "context is required", 400);
+      return;
+    }
+
+    if (depth && !isValidDepth(depth)) {
+      sendError(res, `Invalid depth "${depth}". Valid: shallow, standard, deep`, 400);
       return;
     }
 
