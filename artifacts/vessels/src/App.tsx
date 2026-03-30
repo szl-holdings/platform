@@ -16,7 +16,6 @@ import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/aut
 import { PrivateAppGuard } from "@workspace/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import { DemoModeProvider } from "@workspace/shared-ui";
 
 // Marketing pages
@@ -485,20 +484,6 @@ function App() {
       <AuthProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-          <WelcomeOverlay
-            appId="vessels"
-            appName="Vessels"
-            subtitle="Maritime Intelligence Built for Operators"
-            description="Vessels gives fleet executives, operations teams, and commercial directors a single command surface for the signals that matter — voyage exceptions, route economics, maintenance readiness, and sanctions exposure — before they compound."
-            accentColor="#3b82f6"
-            icon={Ship}
-            features={[
-              { icon: Globe, title: "Fleet command", description: "Real-time vessel positions, route lines, and port status in a single operational surface. Not a map widget — a command view built for decisions." },
-              { icon: EyeOff, title: "Voyage economics", description: "Revenue, operating cost, and margin estimates per voyage, per charter, per route. See where the money is before the voyage closes." },
-              { icon: ShieldAlert, title: "Exceptions at speed", description: "Prioritised exception queue with operational context, recommended response, and business consequence. Act before disruptions escalate." },
-              { icon: Anchor, title: "Executive clarity", description: "Fleet-level dashboards that translate operational complexity into the metrics executives need to decide — utilisation, TCE, margin, and risk." },
-            ]}
-          />
         </WouterRouter>
       </AuthProvider>
       <AgentCopilot config={helmsmanConfig} />

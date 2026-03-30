@@ -48,7 +48,7 @@ export default function ForensicsTimeline() {
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <Clock className="w-6 h-6 text-primary" /> Forensics Timeline
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Forensic event reconstruction with artifact chain-of-custody, timeline correlation, and IOC extraction</p>
+        <p className="text-sm text-muted-foreground mt-1">Event reconstruction with chain-of-custody, timeline correlation, and IOC extraction</p>
       </div>
 
       <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 flex items-center gap-3">

@@ -140,7 +140,7 @@ export default function ThreatIntelligence() {
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
             <Globe className="w-6 h-6 text-primary" /> Threat Intelligence Center
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Global threat landscape — APT tracking, CVE intelligence feeds, and geopolitical cyber risk indicators</p>
+          <p className="text-sm text-muted-foreground mt-1">APT tracking, CVE intelligence, and geopolitical cyber risk indicators</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse">

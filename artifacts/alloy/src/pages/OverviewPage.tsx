@@ -29,10 +29,10 @@ interface NavProps {
 }
 
 const WHAT_ALLOY_IS = [
-  { num: "01", title: "An orchestration engine", desc: "Alloy sequences multi-step workflows across systems, teams, and time — with conditional logic, human approval gates, and structured outputs at every stage." },
-  { num: "02", title: "A signal processing layer", desc: "Alloy ingests operational, financial, and environmental signals from connected platforms and classifies them by severity, function, and required action." },
-  { num: "03", title: "An output generation system", desc: "From raw signals to structured reports, briefings, and decision-ready documents — Alloy produces outputs without manual effort." },
-  { num: "04", title: "A governance framework", desc: "Every consequential action passes through configurable approval flows. Every decision is logged. Humans stay in the loop where it matters." },
+  { num: "01", title: "An orchestration engine", desc: "Multi-step workflows across systems and teams — with conditional logic, approval gates, and structured outputs." },
+  { num: "02", title: "A signal processing layer", desc: "Operational, financial, and environmental signals ingested, classified by severity, function, and required action." },
+  { num: "03", title: "An output generation system", desc: "Raw signals transformed into structured reports, briefings, and decision-ready documents — automatically." },
+  { num: "04", title: "A governance framework", desc: "Configurable approval flows on every consequential action. Every decision logged. Humans in the loop where it matters." },
 ];
 
 const WHAT_ALLOY_POWERS = [
@@ -43,28 +43,28 @@ const WHAT_ALLOY_POWERS = [
 ];
 
 const HOW_ALLOY_WORKS = [
-  { step: "01", label: "Ingest", accent: "#06b6d4", desc: "Signals, data, and requests enter Alloy from connected platforms and external sources. Every input is timestamped, classified, and attributed." },
-  { step: "02", label: "Classify", accent: "#3b82f6", desc: "Alloy normalises and structures incoming data — assigning severity, ownership, and consequence before any action is taken." },
-  { step: "03", label: "Orchestrate", accent: "#8b5cf6", desc: "Multi-step workflows are sequenced with conditional logic. Each step has a defined owner, trigger condition, and output requirement." },
-  { step: "04", label: "Route", accent: "#a78bfa", desc: "Actions, alerts, and decisions are distributed to the right person at the right time — based on role, urgency, and context." },
-  { step: "05", label: "Output", accent: "#10b981", desc: "Structured reports, narratives, briefings, and decision documents are generated without manual drafting." },
-  { step: "06", label: "Approve", accent: "#f59e0b", desc: "High-stakes outputs route through human approval gates. Every approval is logged. Every rejection is recorded with reason." },
-  { step: "07", label: "Execute", accent: "#f472b6", desc: "Confirmed actions are executed. Downstream systems are updated. The audit trail is complete and explainable." },
+  { step: "01", label: "Ingest", accent: "#06b6d4", desc: "Signals and requests enter from connected platforms. Every input is timestamped and attributed." },
+  { step: "02", label: "Classify", accent: "#3b82f6", desc: "Incoming data is normalised — severity, ownership, and consequence assigned before any action." },
+  { step: "03", label: "Orchestrate", accent: "#8b5cf6", desc: "Workflows sequenced with conditional logic. Each step has a defined owner and output requirement." },
+  { step: "04", label: "Route", accent: "#a78bfa", desc: "Actions and decisions distributed to the right person — by role, urgency, and context." },
+  { step: "05", label: "Output", accent: "#10b981", desc: "Structured reports, briefings, and decision documents generated automatically." },
+  { step: "06", label: "Approve", accent: "#f59e0b", desc: "High-stakes outputs route through human approval gates. Every decision logged with reason." },
+  { step: "07", label: "Execute", accent: "#f472b6", desc: "Confirmed actions executed. Downstream systems updated. Audit trail complete and explainable." },
 ];
 
 const AGENT_ROLES = [
-  { name: "Signal Agent", desc: "Monitors connected platforms for anomalies, classifies by severity and function, and surfaces context-rich alerts." },
-  { name: "Workflow Agent", desc: "Manages multi-step process execution — sequencing, gating, re-routing on failure, and escalating on timeout." },
-  { name: "Document Agent", desc: "Drafts structured outputs — briefings, reports, and decision summaries — from structured data and signal context." },
-  { name: "Routing Agent", desc: "Distributes tasks, alerts, and approvals to the right owner at the right time based on role and urgency." },
-  { name: "Audit Agent", desc: "Maintains complete decision logs, approval trails, and output histories across all workflow runs." },
+  { name: "Signal Agent", desc: "Monitors platforms for anomalies, classifies by severity, and surfaces context-rich alerts." },
+  { name: "Workflow Agent", desc: "Sequences multi-step execution — gating, re-routing on failure, escalating on timeout." },
+  { name: "Document Agent", desc: "Drafts briefings, reports, and decision summaries from structured data and signal context." },
+  { name: "Routing Agent", desc: "Distributes tasks, alerts, and approvals to the right owner by role and urgency." },
+  { name: "Audit Agent", desc: "Maintains decision logs, approval trails, and output histories across all workflow runs." },
 ];
 
 const OUTPUTS = [
-  { label: "Signal Briefings", desc: "Human-readable summaries of what is happening, why it matters, and what action is required." },
-  { label: "Workflow Status Reports", desc: "Step-by-step execution summaries with owner attribution, completion status, and exception notes." },
-  { label: "Decision Packages", desc: "Structured documents ready for executive or operator review — with context, risk, and recommended action." },
-  { label: "Audit Trails", desc: "Complete logs of every decision, approval, rejection, and execution event — timestamped and attributable." },
+  { label: "Signal Briefings", desc: "What is happening, why it matters, and what action is required — in plain language." },
+  { label: "Workflow Status Reports", desc: "Execution summaries with owner attribution, completion status, and exception notes." },
+  { label: "Decision Packages", desc: "Executive-ready documents with context, risk, and recommended action." },
+  { label: "Audit Trails", desc: "Every decision, approval, rejection, and execution — timestamped and attributable." },
   { label: "Exception Alerts", desc: "Prioritised notifications for anomalies, stalls, ownership gaps, and time-sensitive actions." },
 ];
 

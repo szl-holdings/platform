@@ -23,7 +23,7 @@ export default function AnomalyTimeline() {
             <Eye className="w-6 h-6 text-primary" />
             Anomaly Timeline
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Chronological view of detected anomalies across all models and systems</p>
+          <p className="text-sm text-muted-foreground mt-1">Detected anomalies across models and systems — chronological view</p>
         </div>
         <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
           {openCount} unresolved

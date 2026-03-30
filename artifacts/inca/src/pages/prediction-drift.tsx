@@ -42,7 +42,7 @@ export default function PredictionDrift() {
           <Activity className="w-6 h-6 text-primary" />
           Prediction Drift Tracker
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Monitor model performance drift and detect degradation before it impacts predictions</p>
+        <p className="text-sm text-muted-foreground mt-1">Model drift detection and degradation alerting before it impacts predictions</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

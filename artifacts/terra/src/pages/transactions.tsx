@@ -175,7 +175,7 @@ export default function TransactionsPage() {
     <div className="p-6 space-y-6 overflow-auto">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-display font-bold text-terra-text">Transaction Workflow</h1>
-        <p className="text-sm text-terra-text-secondary mt-1">Step-by-step transaction management — from accepted offer to commission payout</p>
+        <p className="text-sm text-terra-text-secondary mt-1">Transaction management — accepted offer to commission payout</p>
       </motion.div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

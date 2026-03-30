@@ -184,7 +184,7 @@ export function AIStudio() {
             </div>
             AI Creative Studio
           </h1>
-          <p className="text-muted-foreground mt-1">Production-grade AI tools for ideation, generation, and post-production.</p>
+          <p className="text-muted-foreground mt-1">AI tools for ideation, generation, and post-production.</p>
         </div>
       </div>
 

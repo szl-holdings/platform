@@ -46,12 +46,12 @@ const heroVariant = {
 };
 
 const features = [
-  { icon: Monitor, title: "Remote Monitoring & Management", description: "Real-time visibility into every device across your entire client portfolio. Automated alerts, patch management, and proactive remediation.", gradient: "from-blue-500 to-cyan-400" },
-  { icon: Headphones, title: "Service Desk & Ticketing", description: "Intelligent ticket routing with SLA tracking, priority queuing, and automated escalation workflows that keep your team efficient.", gradient: "from-violet-500 to-purple-400" },
-  { icon: Shield, title: "Security Operations Center", description: "24/7 threat monitoring, incident response automation, and compliance reporting. Protect your clients from evolving cyber threats.", gradient: "from-emerald-500 to-green-400" },
-  { icon: BarChart3, title: "Revenue & Profitability", description: "Track MRR per client, service utilization, and profitability metrics. Make data-driven decisions about your service delivery.", gradient: "from-amber-500 to-yellow-400" },
-  { icon: Clock, title: "SLA & Contract Management", description: "Automated compliance tracking, renewal alerts, and performance reporting. Never miss an SLA target or contract deadline.", gradient: "from-pink-500 to-rose-400" },
-  { icon: Users, title: "Technician Dispatch", description: "Optimize team workloads, track assignments in real-time, and ensure the right technician is matched to every job.", gradient: "from-orange-500 to-red-400" },
+  { icon: Monitor, title: "Remote Monitoring & Management", description: "Device visibility across your client portfolio — alerts, patch management, and proactive remediation.", gradient: "from-blue-500 to-cyan-400" },
+  { icon: Headphones, title: "Service Desk & Ticketing", description: "SLA-tracked ticket routing with priority queuing and automated escalation.", gradient: "from-violet-500 to-purple-400" },
+  { icon: Shield, title: "Security Operations Center", description: "Threat monitoring, incident response automation, and compliance reporting.", gradient: "from-emerald-500 to-green-400" },
+  { icon: BarChart3, title: "Revenue & Profitability", description: "MRR per client, service utilization, and profitability metrics in one view.", gradient: "from-amber-500 to-yellow-400" },
+  { icon: Clock, title: "SLA & Contract Management", description: "Compliance tracking, renewal alerts, and performance reporting.", gradient: "from-pink-500 to-rose-400" },
+  { icon: Users, title: "Technician Dispatch", description: "Workload optimization, assignment tracking, and technician-to-job matching.", gradient: "from-orange-500 to-red-400" },
 ];
 
 const stats = [

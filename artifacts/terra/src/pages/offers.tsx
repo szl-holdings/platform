@@ -209,7 +209,7 @@ export default function OffersPage() {
     <div className="p-6 space-y-6 overflow-auto">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-display font-bold text-terra-text">Offers + Negotiation</h1>
-        <p className="text-sm text-terra-text-secondary mt-1">Incoming and outgoing offers, comparison surface, expiration tracking, and broker approvals</p>
+        <p className="text-sm text-terra-text-secondary mt-1">Incoming and outgoing offers, comparison, expiration tracking, and approvals</p>
       </motion.div>
 
       {/* Alert Banners */}

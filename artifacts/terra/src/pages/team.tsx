@@ -116,7 +116,7 @@ export default function TeamPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold text-terra-text">Team Performance</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Management surface — deal volume, conversion, days-to-close, coaching opportunities, and workload distribution</p>
+            <p className="text-sm text-terra-text-secondary mt-1">Deal volume, conversion, days-to-close, coaching, and workload distribution</p>
           </div>
           <div className="flex rounded-lg border border-terra-border overflow-hidden">
             <button onClick={() => setView("agents")} className={cn("px-3 py-2 text-xs font-medium", view === "agents" ? "bg-terra-primary text-white" : "bg-terra-surface text-terra-text-muted")}>Agents</button>

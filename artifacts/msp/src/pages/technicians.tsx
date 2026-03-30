@@ -86,7 +86,7 @@ export default function TechniciansPage() {
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">Technician Dispatch</h1>
-        <p className="text-sm text-muted-foreground mt-1">Technician utilization, active ticket load, skill certifications, and dispatch availability</p>
+        <p className="text-sm text-muted-foreground mt-1">Utilization, active ticket load, certifications, and dispatch availability</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -8,7 +8,6 @@ import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import {
   LayoutDashboard,
   Building2,
@@ -283,20 +282,6 @@ function App() {
           />
           <IncaAgentIndicator agentName="IT Sentinel" systemType="mama-quilla" currentTask="Monitoring endpoint health and anomaly signals across managed clients" confidence={0.88} />
         </PowerUserProvider>
-        <WelcomeOverlay
-          appId="rosie"
-          appName="Rosie"
-          subtitle="Threat & Incident Command"
-          description="Rosie gives managed service providers a single command surface for incident triage, client health, service desk operations, and revenue visibility. Built for MSP teams who need to move from alert to action without losing context."
-          accentColor="#ef4444"
-          icon={Monitor}
-          features={[
-            { icon: Building2, title: "Client command", description: "Health scoring and churn risk for every managed account. Know which clients need attention before they escalate." },
-            { icon: Ticket, title: "Service desk", description: "Priority-based ticketing with SLA breach prediction and technician dispatch. Triage at speed, resolve with context." },
-            { icon: Activity, title: "NOC operations", description: "Real-time alerts across all managed environments. Every anomaly is classified, attributed, and actioned — not just logged." },
-            { icon: DollarSign, title: "Revenue clarity", description: "Per-client margin, MRR, and profitability tracking. Know where you make money and where you lose it." },
-          ]}
-        />
       </WouterRouter>
       <Toaster position="bottom-right" richColors />
     </QueryClientProvider>

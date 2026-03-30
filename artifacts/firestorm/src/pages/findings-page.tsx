@@ -101,7 +101,7 @@ export default function FindingsPage() {
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Findings</h1>
-          <p className="text-sm text-muted-foreground mt-1">Vulnerability findings with CVSS scores, affected assets, proof-of-concept evidence, and remediation status</p>
+          <p className="text-sm text-muted-foreground mt-1">Findings with CVSS scores, affected assets, and remediation status</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

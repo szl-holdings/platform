@@ -27,7 +27,7 @@ export default function ModelRegistry() {
           <Database className="w-6 h-6 text-primary" />
           Model Registry
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Central registry for all trained models with versioning, staging, and deployment tracking</p>
+        <p className="text-sm text-muted-foreground mt-1">Model registry with versioning, staging, and deployment tracking</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

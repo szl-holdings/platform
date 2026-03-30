@@ -7,7 +7,6 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import { PrivateAppGuard } from "@workspace/shared-ui";
 import { Zap, Inbox, CheckSquare, Users, AlertOctagon } from "lucide-react";
 
@@ -97,20 +96,6 @@ function App() {
             accentColor="#f59e0b"
           />
         </PowerUserProvider>
-        <WelcomeOverlay
-          appId="lyte"
-          appName="Lyte"
-          subtitle="Command & Orchestration"
-          description="Lyte interprets what Beacon sees and routes accountability to the right owner. It is the execution layer for human decisions — approvals, escalations, and interventions."
-          accentColor="#f59e0b"
-          icon={Zap}
-          features={[
-            { icon: Inbox, title: "Command Inbox", description: "Prioritized actions, approvals, exceptions, and stalled workflow assignments" },
-            { icon: CheckSquare, title: "Approvals Center", description: "Aging approvals with impact estimates and escalation recommendations" },
-            { icon: Users, title: "Ownership Map", description: "Who owns each step, missing ownership, broken handoffs, overloaded teams" },
-            { icon: AlertOctagon, title: "Escalation Center", description: "What needs escalation, why, to whom, with Alloy rationale attached" },
-          ]}
-        />
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>

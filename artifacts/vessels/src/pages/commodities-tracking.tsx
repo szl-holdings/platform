@@ -45,7 +45,7 @@ export default function CommoditiesTracking() {
           <Package className="w-6 h-6 text-primary" />
           Commodities & Cargo Tracking
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time trade flow analysis across 40+ commodity categories — powered by vessel position correlation</p>
+        <p className="text-sm text-muted-foreground mt-1">Trade flow analysis across 40+ commodity categories — correlated from vessel positions</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

@@ -35,7 +35,7 @@ export default function ExecutiveRisk() {
           <BarChart3 className="w-6 h-6 text-primary" />
           Executive Risk Dashboard
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">CVSS-scored vulnerability trending, compliance posture, and board-level security metrics</p>
+        <p className="text-sm text-muted-foreground mt-1">Vulnerability trending, compliance posture, and board-level security metrics</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

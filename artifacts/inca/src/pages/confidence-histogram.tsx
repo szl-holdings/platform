@@ -36,7 +36,7 @@ export default function ConfidenceHistogram() {
           <BarChart3 className="w-6 h-6 text-primary" />
           Confidence Histogram
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Distribution of prediction confidence scores across all active models</p>
+        <p className="text-sm text-muted-foreground mt-1">Prediction confidence distribution across active models</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

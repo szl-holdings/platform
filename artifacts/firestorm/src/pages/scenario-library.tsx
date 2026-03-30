@@ -93,7 +93,7 @@ export default function ScenarioLibrary() {
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Scenario Library</h1>
-          <p className="text-sm text-muted-foreground mt-1">Curated attack playbooks — ransomware, lateral movement, data exfiltration, and privilege escalation scenarios</p>
+          <p className="text-sm text-muted-foreground mt-1">Attack playbooks — ransomware, lateral movement, data exfiltration, and privilege escalation</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

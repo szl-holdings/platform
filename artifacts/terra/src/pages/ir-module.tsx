@@ -38,7 +38,7 @@ export default function IRModule() {
           <Users className="w-6 h-6 text-primary" />
           Investor Relations & LP Reporting
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">LP reporting templates, distribution waterfall calculations, and investor relationship management</p>
+        <p className="text-sm text-muted-foreground mt-1">LP reporting, distribution waterfall calculations, and investor relationship management</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

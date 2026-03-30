@@ -6,10 +6,8 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import { PrivateAppGuard } from "@workspace/shared-ui";
 import { TerraLayout } from "@/components/terra-layout";
-import { Building2, Activity, Flame, Home, UserCheck } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
@@ -109,20 +107,6 @@ function App() {
             accentColor="#a07848"
           />
         </PowerUserProvider>
-        <WelcomeOverlay
-          appId="terra"
-          appName="Terra"
-          subtitle="Real Estate Broker Platform"
-          description="Terra turns listings, broker workflow, and market visibility into command. Distress engine, deal pipeline, listing intelligence, and lead routing — all in one platform."
-          accentColor="#a07848"
-          icon={Building2}
-          features={[
-            { icon: Flame, title: "Distress Engine", description: "NYC pre-foreclosure tracking, auction intelligence, and opportunity scoring in real time" },
-            { icon: Activity, title: "Deal Pipeline", description: "Track acquisitions and dispositions through every stage from sourcing to closing" },
-            { icon: Home, title: "Listing Intelligence", description: "Active listings, market comps, and off-market deal discovery" },
-            { icon: UserCheck, title: "Leads + CRM", description: "Broker and agent lead management, routing, and conversion tracking" },
-          ]}
-        />
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>

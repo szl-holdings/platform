@@ -50,7 +50,7 @@ export default function VesselsIntelligence() {
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Brain className="w-7 h-7 text-cyan-400" /> AI Maritime Intelligence
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Real-time risk analysis, NER-powered sanctions monitoring, and AI route safety</p>
+          <p className="text-sm text-slate-400 mt-1">Risk analysis, sanctions monitoring, and AI route safety</p>
         </div>
         <span className="inline-flex items-center gap-2 text-xs text-cyan-400 bg-cyan-400/10 px-3 py-1.5 rounded-full border border-cyan-400/20">
           <Radio className="w-3 h-3 animate-pulse" /> Live Feed

@@ -62,7 +62,7 @@ export default function MitreAttackPage() {
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
             <Grid3X3 className="w-6 h-6 text-primary" /> MITRE ATT&CK Matrix
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Detection coverage mapped to MITRE ATT&CK tactics and techniques — identify gaps in adversary visibility</p>
+          <p className="text-sm text-muted-foreground mt-1">Detection coverage mapped to MITRE ATT&CK — identify gaps in adversary visibility</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">

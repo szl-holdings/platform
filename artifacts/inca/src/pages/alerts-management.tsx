@@ -74,7 +74,7 @@ export default function AlertsManagement() {
             </h1>
             <DoctrineLayerBadge appId="inca" variant="compact" />
           </div>
-          <p className="text-sm text-muted-foreground mt-1">Drift alerts, pipeline failure notifications, and threshold-triggered events across all active models</p>
+          <p className="text-sm text-muted-foreground mt-1">Drift alerts, pipeline failures, and threshold-triggered events across active models</p>
         </div>
         <div className="flex items-center gap-3">
           {criticalCount > 0 && (

@@ -5,7 +5,6 @@ import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AlloyLayout } from "@/components/alloy-layout";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import { PrivateAppGuard } from "@workspace/shared-ui";
 import { Zap, Activity, GitBranch, Network, Shield } from "lucide-react";
 
@@ -85,20 +84,6 @@ function App() {
             accentColor="#00d4ff"
           />
         </PowerUserProvider>
-        <WelcomeOverlay
-          appId="alloy"
-          appName="Alloy"
-          subtitle="Execution Fabric"
-          description="Alloy is the execution layer of the Command Loop. It runs workflows, manages connectors, enforces governance, and verifies outcomes — closing the loop from Beacon detection to verified resolution."
-          accentColor="#00d4ff"
-          icon={Zap}
-          features={[
-            { icon: Activity, title: "Execution Runs", description: "Live and historical workflow runs with step-level visibility, retry logic, and exception handling" },
-            { icon: GitBranch, title: "Workflow Orchestration", description: "Visual workflow management with step owners, SLA tracking, blocked steps, and reroute capabilities" },
-            { icon: Network, title: "Connector Mesh", description: "All integrations and data connectors with health monitoring and API credential management" },
-            { icon: Shield, title: "Governance & Audit", description: "Full audit trail, policy enforcement, compliance tracking, and exception documentation" },
-          ]}
-        />
       </WouterRouter>
     </QueryClientProvider>
     </PrivateAppGuard>

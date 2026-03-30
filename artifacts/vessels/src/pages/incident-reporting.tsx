@@ -45,7 +45,7 @@ export default function IncidentReporting() {
           <AlertTriangle className="w-6 h-6 text-red-400" />
           Maritime Incident & Threat Feed
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time piracy, sanctions zone, war risk, and regional threat intelligence with global incident reporting</p>
+        <p className="text-sm text-muted-foreground mt-1">Piracy, sanctions zone, war risk, and regional threat intelligence with incident reporting</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

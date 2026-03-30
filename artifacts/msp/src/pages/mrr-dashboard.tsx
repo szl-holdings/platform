@@ -42,7 +42,7 @@ export default function MRRDashboard() {
           <DollarSign className="w-6 h-6 text-primary" />
           Financial Dashboard — MRR & Profitability
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">MRR tracking, contract profitability, technician utilization, and client revenue analytics</p>
+        <p className="text-sm text-muted-foreground mt-1">MRR, contract profitability, technician utilization, and client revenue analytics</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

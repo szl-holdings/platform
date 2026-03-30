@@ -48,7 +48,7 @@ export default function CyberThreatPanel() {
           <Shield className="w-6 h-6 text-primary" />
           Fleet Cyber Threat Monitoring
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">OT/IT security monitoring across all fleet vessels — ECDIS, VSAT, AIS, bridge systems, and engine room networks</p>
+        <p className="text-sm text-muted-foreground mt-1">OT/IT security across fleet vessels — ECDIS, VSAT, AIS, bridge, and engine room systems</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

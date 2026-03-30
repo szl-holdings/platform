@@ -33,7 +33,7 @@ export default function VendorRisk() {
         <h1 className="font-display text-lg font-bold text-orange-50 flex items-center gap-2">
           <Shield className="w-5 h-5 text-orange-400" /> Vendor Risk Management
         </h1>
-        <p className="text-xs text-orange-400/50 mt-0.5">Third-party security assessments, vendor risk scoring, and continuous supply chain monitoring</p>
+        <p className="text-xs text-orange-400/50 mt-0.5">Third-party security assessments, vendor risk scoring, and supply chain monitoring</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

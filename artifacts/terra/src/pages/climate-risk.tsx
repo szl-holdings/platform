@@ -37,7 +37,7 @@ export default function ClimateRisk() {
           <Thermometer className="w-6 h-6 text-orange-400" />
           Climate Risk & Insurance Overlay
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Physical climate risk scoring, insurance cost projections, and regulatory watch across all portfolio assets</p>
+        <p className="text-sm text-muted-foreground mt-1">Climate risk scoring, insurance projections, and regulatory watch across all assets</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

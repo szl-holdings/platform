@@ -64,7 +64,7 @@ export function GeneratorTools() {
           <Wand2 className="w-6 h-6 text-primary" />
           Generator Tools
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Create banners, carousels, playbooks, and profile kits with automated generation</p>
+        <p className="text-sm text-muted-foreground mt-1">Banners, carousels, playbooks, and profile kits — automated generation</p>
       </div>
 
       <div className="grid grid-cols-4 gap-3">

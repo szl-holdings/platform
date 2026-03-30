@@ -7,8 +7,7 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { alloyPredictiveConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
-import { Brain, AlertTriangle, GitBranch, Target, TrendingUp } from "lucide-react";
+import { Brain, TrendingUp } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,20 +84,6 @@ function App() {
             accentColor="#8b5cf6"
           />
         </PowerUserProvider>
-        <WelcomeOverlay
-          appId="alloy-predictive"
-          appName="Alloy — Predictive Intelligence"
-          subtitle="Powered by Alloy"
-          description="Alloy's predictive intelligence layer transforms Beacon detections and Lyte signals into forward-looking decisions. It models what will happen next, surfaces risks before they materialize, and recommends actions with confidence scores."
-          accentColor="#8b5cf6"
-          icon={Brain}
-          features={[
-            { icon: Brain, title: "Predictive Intelligence", description: "Confidence-weighted predictions with causal chains, correlation IDs, and Beacon signal inputs" },
-            { icon: AlertTriangle, title: "Risk Scenario Planning", description: "Multi-variable risk models with mitigation strategies and confidence scores" },
-            { icon: GitBranch, title: "Model Explainability", description: "Why Alloy made each prediction — factor weights, data sources, and confidence drivers" },
-            { icon: Target, title: "Opportunity Engine", description: "What to do next — revenue opportunities ranked by confidence, effort, and expected impact" },
-          ]}
-        />
       </WouterRouter>
       <AgentCopilot config={alloyPredictiveConfig} />
     </QueryClientProvider>

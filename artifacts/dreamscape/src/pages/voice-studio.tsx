@@ -35,7 +35,7 @@ export default function VoiceStudio() {
           <Volume2 className="w-6 h-6 text-primary" />
           Voice Generation Studio
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Multi-voice generation with full script-to-audio pipeline — professional production quality</p>
+        <p className="text-sm text-muted-foreground mt-1">Multi-voice generation with script-to-audio pipeline — professional production quality</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">

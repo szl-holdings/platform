@@ -43,7 +43,7 @@ export default function PortAnalytics() {
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <Anchor className="w-6 h-6 text-primary" /> Port Analytics
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Berth utilization, dwell time analysis, and cargo throughput across global port networks</p>
+        <p className="text-sm text-muted-foreground mt-1">Berth utilization, dwell time, and cargo throughput across global port networks</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">

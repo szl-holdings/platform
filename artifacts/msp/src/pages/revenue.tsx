@@ -86,7 +86,7 @@ export default function RevenuePage() {
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">Revenue & Billing</h1>
-        <p className="text-sm text-muted-foreground mt-1">Per-client MRR, gross margin breakdown, and profitability trends across service tiers</p>
+        <p className="text-sm text-muted-foreground mt-1">Per-client MRR, gross margin, and profitability trends across service tiers</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

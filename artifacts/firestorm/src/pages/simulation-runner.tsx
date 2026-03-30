@@ -196,7 +196,7 @@ export default function AdversaryEmulation() {
             <h1 className="font-display text-2xl font-bold">Adversary Emulation</h1>
             <DoctrineLayerBadge appId="firestorm" variant="compact" />
           </div>
-          <p className="text-sm text-muted-foreground mt-1">Launch controlled red team exercises against target environments using real MITRE ATT&CK TTPs and validate detection coverage</p>
+          <p className="text-sm text-muted-foreground mt-1">Controlled red team exercises using MITRE ATT&CK TTPs — validate detection coverage</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

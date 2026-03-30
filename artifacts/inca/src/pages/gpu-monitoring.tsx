@@ -33,7 +33,7 @@ export default function GPUMonitoring() {
           <Server className="w-6 h-6 text-primary" />
           GPU Cluster Monitoring
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time GPU utilization, memory, thermal, and training throughput for A100/H100 clusters</p>
+        <p className="text-sm text-muted-foreground mt-1">GPU utilization, memory, thermal, and training throughput for A100/H100 clusters</p>
       </div>
 
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">

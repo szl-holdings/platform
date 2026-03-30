@@ -47,7 +47,7 @@ export default function RMMConsole() {
           <Monitor className="w-6 h-6 text-primary" />
           RMM Console — Endpoint Monitoring
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Unified remote monitoring across all managed endpoints — patch management, threat status, and remote access</p>
+        <p className="text-sm text-muted-foreground mt-1">Remote monitoring across managed endpoints — patch management, threat status, and remote access</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

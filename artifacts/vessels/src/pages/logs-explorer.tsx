@@ -43,7 +43,7 @@ export default function LogsExplorerPage() {
         <h1 className="font-display text-2xl font-bold flex items-center gap-2">
           <ScrollText className="w-6 h-6 text-primary" /> Logs Explorer
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Searchable operational log stream — AIS events, system alerts, compliance entries, and crew reports</p>
+        <p className="text-sm text-muted-foreground mt-1">AIS events, system alerts, compliance entries, and crew reports — searchable log stream</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-4 animate-fade-in-up stagger-1">

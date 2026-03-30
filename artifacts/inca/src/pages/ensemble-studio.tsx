@@ -45,7 +45,7 @@ export default function EnsembleStudio() {
             <Layers className="w-6 h-6 text-primary" />
             Ensemble Studio
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Build, manage, and monitor model ensembles for superior prediction accuracy</p>
+          <p className="text-sm text-muted-foreground mt-1">Build, manage, and monitor model ensembles for superior accuracy</p>
         </div>
       </div>
 

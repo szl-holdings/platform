@@ -131,7 +131,7 @@ export function Workspace() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h1 className="text-3xl font-display font-bold text-foreground">Campaign Workspace</h1>
-          <p className="text-muted-foreground mt-1">All active productions at a glance — brand films, social campaigns, product launches, and event content in one command view.</p>
+          <p className="text-muted-foreground mt-1">Brand films, social campaigns, product launches, and event content — in one command view.</p>
         </motion.div>
         
         {isCreating ? (

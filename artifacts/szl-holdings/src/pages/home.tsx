@@ -10,6 +10,20 @@ import { analytics, initScrollDepthTracking } from "@/lib/analytics";
 
 const FEATURED_PLATFORMS = [
   {
+    id: "alloy",
+    name: "Alloy",
+    category: "Intelligence Backbone",
+    status: "Live",
+    tagline: "The orchestration and output engine powering every platform in the ecosystem.",
+    audience: "Platform teams requiring workflow automation, signal processing, and governance.",
+    href: "/alloy/",
+    accent: "#6e9ef5",
+    accentRgb: "110, 158, 245",
+    tier: 0,
+    metric: "7-step",
+    metricLabel: "Execution pipeline",
+  },
+  {
     id: "lyte",
     name: "Lyte",
     category: "Business Observability",
@@ -28,8 +42,8 @@ const FEATURED_PLATFORMS = [
     name: "Vessels",
     category: "Maritime Command",
     status: "Live",
-    tagline: "Turn fleet visibility, voyage performance, and operational exceptions into command.",
-    audience: "Fleet operators, maritime managers, and principals requiring real-time vessel intelligence.",
+    tagline: "Fleet visibility, voyage performance, and operational exceptions — in one command surface.",
+    audience: "Fleet operators and maritime managers requiring real-time vessel intelligence.",
     href: "/vessels/",
     accent: "#3b82f6",
     accentRgb: "59, 130, 246",
@@ -38,12 +52,40 @@ const FEATURED_PLATFORMS = [
     metricLabel: "Pre-designation lead time",
   },
   {
+    id: "terra",
+    name: "Terra",
+    category: "Real Estate Intelligence",
+    status: "Live",
+    tagline: "Deal pipeline, lead routing, and distress property workflows — for active brokerages.",
+    audience: "Real estate teams requiring command-level visibility into listings, deals, and agents.",
+    href: "/terra/",
+    accent: "#a07848",
+    accentRgb: "160, 120, 72",
+    tier: 1,
+    metric: "Pipeline",
+    metricLabel: "Deal & lead command",
+  },
+  {
+    id: "firestorm",
+    name: "Firestorm",
+    category: "Security Simulation",
+    status: "Live",
+    tagline: "Threat detection, SOC operations, and incident response — built for simulation and training.",
+    audience: "Security teams and MSPs requiring threat modeling and SOC workflow simulation.",
+    href: "/firestorm/",
+    accent: "#ef4444",
+    accentRgb: "239, 68, 68",
+    tier: 1,
+    metric: "MITRE",
+    metricLabel: "Mapped threat intel",
+  },
+  {
     id: "carlota-jo",
     name: "Carlota Jo",
     category: "Premium Services",
     status: "Pilot Ready",
-    tagline: "Discreet operational and residence support for high-touch environments.",
-    audience: "HNWI families, principals, and estate managers requiring white-glove execution.",
+    tagline: "Discreet operational and residence support for demanding principals.",
+    audience: "HNWI families and estate managers requiring white-glove execution.",
     href: "/carlota-jo/",
     accent: "#d97706",
     accentRgb: "217, 119, 6",
@@ -55,10 +97,10 @@ const FEATURED_PLATFORMS = [
 
 const ALLOY_CAPABILITIES = [
   { num: "01", name: "Signal Ingestion", desc: "Cross-platform data acquisition from operational, financial, and environmental sources." },
-  { num: "02", name: "Workflow Orchestration", desc: "Multi-step process sequencing with conditional logic and human approval gates." },
-  { num: "03", name: "Action Routing", desc: "Intelligent distribution of tasks and alerts to the right person at the right time." },
-  { num: "04", name: "Output Generation", desc: "Structured reports, narratives, and decision briefs produced without manual effort." },
-  { num: "05", name: "Human Approval", desc: "Built-in governance checkpoints that keep humans in the loop on high-stakes decisions." },
+  { num: "02", name: "Workflow Orchestration", desc: "Multi-step sequencing with conditional logic and approval gates." },
+  { num: "03", name: "Action Routing", desc: "Task and alert distribution to the right person at the right time." },
+  { num: "04", name: "Output Generation", desc: "Reports, narratives, and decision briefs — produced automatically." },
+  { num: "05", name: "Human Approval", desc: "Governance checkpoints that keep humans in the loop on high-stakes decisions." },
 ];
 
 const PROOF_METRICS = [
@@ -74,36 +116,36 @@ const PROOF_CARDS = [
     accentColor: "var(--color-szl-lyte)",
     accentRgb: "6, 182, 212",
     title: "Approval latency detected in 4 minutes",
-    body: "Lyte surfaced a critical approval queue stall 8 days before the weekly review would have caught it. Revenue leakage recovered: $340K/quarter.",
+    body: "Lyte surfaced a critical approval queue stall 8 days before the weekly review. $340K/quarter recovered.",
   },
   {
     tag: "Maritime",
     accentColor: "var(--color-szl-vessels)",
     accentRgb: "59, 130, 246",
     title: "34-day dark vessel pre-detection lead",
-    body: "Vessels flagged dark vessel activity 34 days before formal sanctions designation — a capability unavailable in traditional maritime data.",
+    body: "Vessels flagged dark activity 34 days before formal sanctions designation — unavailable in traditional maritime data.",
   },
   {
     tag: "Operations",
     accentColor: "var(--color-szl-carlota)",
     accentRgb: "217, 119, 6",
     title: "Zero coordination gaps across 90-day relocation",
-    body: "Carlota Jo coordinated 14 vendors, 6 household staff, and cross-border logistics. The principal described the transition as invisible.",
+    body: "Carlota Jo coordinated 14 vendors, 6 household staff, and cross-border logistics. The principal called the transition invisible.",
   },
   {
     tag: "Ecosystem",
     accentColor: "var(--color-szl-accent)",
     accentRgb: "201, 169, 110",
     title: "40% lower infrastructure overhead",
-    body: "Multiple platforms under one holding structure produces shared cloud spend, unified security overhead, and engineering leverage no standalone company can match.",
+    body: "Shared architecture produces cloud spend leverage, unified security, and engineering depth no standalone company can match.",
   },
 ];
 
 const CONTACT_PATHS = [
-  { audience: "Investors / Partners", headline: "Capital, co-development, and strategic alignment opportunities", cta: "Start a Conversation", href: "/contact?type=partner" },
+  { audience: "Investors / Partners", headline: "Capital, co-development, and strategic alignment", cta: "Start a Conversation", href: "/contact?type=partner" },
   { audience: "Clients", headline: "Demo a platform or request a pilot deployment", cta: "Request a Demo", href: "/contact?type=client" },
   { audience: "Recruiters", headline: "Executive search, advisory, and strategic operator roles", cta: "Connect with Stephen", href: "/contact?type=recruiter" },
-  { audience: "Strategic", headline: "Carlota Jo — discreet, high-trust operational support", cta: "Start a Conversation", href: "/contact?type=client" },
+  { audience: "Strategic", headline: "Carlota Jo — high-trust operational support", cta: "Inquire Privately", href: "/contact?type=client" },
 ];
 
 function CountUpNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
@@ -187,7 +229,7 @@ function HeroSection() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-50" />
               <span className="relative inline-flex rounded-full w-2 h-2 bg-emerald-500" />
             </span>
-            SZL-HOLDINGS · ALLOY · LYTE · VESSELS · CARLOTA-JO
+            SZL-HOLDINGS · ALLOY · LYTE · VESSELS · TERRA · FIRESTORM · CARLOTA-JO
           </span>
         </m.div>
 
@@ -321,7 +363,7 @@ function FeaturedPlatformsSection() {
         <SectionHeader
           eyebrow="Featured Platforms"
           title="Command-grade products."
-          subtitle="Built for the real work. Each platform solves a specific domain problem — all running on the same intelligence backbone."
+          subtitle="Each platform solves a specific domain problem. All run on the same intelligence backbone."
         />
 
         <div className="grid lg:grid-cols-3 gap-5 mt-12">
@@ -371,11 +413,8 @@ function FeaturedPlatformsSection() {
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", fontWeight: 700, color: "var(--color-szl-text)", marginBottom: "0.75rem", letterSpacing: "-0.02em" }}>
                   {p.name}
                 </h3>
-                <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.65, marginBottom: "0.75rem" }}>
+                <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.65, marginBottom: "1.5rem" }}>
                   {p.tagline}
-                </p>
-                <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-muted)", lineHeight: 1.55, marginBottom: "1.5rem", fontStyle: "italic" }}>
-                  {p.audience}
                 </p>
 
                 <div
@@ -407,11 +446,11 @@ function FeaturedPlatformsSection() {
 
 function EcosystemLogicSection() {
   const HIERARCHY = [
-    { level: "Parent Company", name: "SZL Holdings", desc: "The holding company. Sets operating standards, allocates capital, and governs the ecosystem.", accent: "#c9a96e", accentRgb: "201, 169, 110", tier: 0 },
-    { level: "Intelligence Backbone", name: "Alloy", desc: "Core systems and orchestration engine. Powers signal ingestion, workflow orchestration, action routing, output generation, and human approval gates across all platforms.", accent: "#6e9ef5", accentRgb: "110, 158, 245", tier: 1, href: "/alloy/" },
-    { level: "Platform — Observability", name: "Lyte", desc: "Business observability. Surfaces risk, latency, ownership gaps, and workflow friction — before they hit execution.", accent: "#06b6d4", accentRgb: "6, 182, 212", tier: 2, href: "/lyte-command-center/", status: "Live" },
-    { level: "Platform — Maritime", name: "Vessels", desc: "Maritime command. Turns fleet visibility, voyage performance, and operational exceptions into decisive action.", accent: "#3b82f6", accentRgb: "59, 130, 246", tier: 2, href: "/vessels/", status: "Live" },
-    { level: "Service Brand", name: "Carlota Jo", desc: "Premium service brand. Discreet, high-trust operational and residence support for demanding environments.", accent: "#d97706", accentRgb: "217, 119, 6", tier: 2, href: "/carlota-jo/", status: "Pilot Ready" },
+    { level: "Parent Company", name: "SZL Holdings", desc: "Sets operating standards, allocates capital, and governs the ecosystem.", accent: "#c9a96e", accentRgb: "201, 169, 110", tier: 0 },
+    { level: "Intelligence Backbone", name: "Alloy", desc: "The execution layer. Signal ingestion, workflow orchestration, action routing, output generation, and human approval gates across all platforms.", accent: "#6e9ef5", accentRgb: "110, 158, 245", tier: 1, href: "/alloy/" },
+    { level: "Platform — Observability", name: "Lyte", desc: "Business observability. Risk, latency, ownership gaps, and workflow friction — surfaced before they hit execution.", accent: "#06b6d4", accentRgb: "6, 182, 212", tier: 2, href: "/lyte-command-center/", status: "Live" },
+    { level: "Platform — Maritime", name: "Vessels", desc: "Maritime command. Fleet visibility, voyage performance, and exceptions — in one operational surface.", accent: "#3b82f6", accentRgb: "59, 130, 246", tier: 2, href: "/vessels/", status: "Live" },
+    { level: "Service Brand", name: "Carlota Jo", desc: "Discreet, high-trust operational and residence support for demanding principals.", accent: "#d97706", accentRgb: "217, 119, 6", tier: 2, href: "/carlota-jo/", status: "Pilot Ready" },
   ];
 
   return (
@@ -420,7 +459,7 @@ function EcosystemLogicSection() {
         <SectionHeader
           eyebrow="How the Ecosystem Works"
           title="The hierarchy is intentional."
-          subtitle="SZL Holdings is the parent entity. Alloy is the intelligence backbone shared across every platform. Lyte, Vessels, and Carlota Jo are purpose-built command surfaces — each solving a specific domain problem, all running on the same operating fabric."
+          subtitle="One parent. One backbone. Purpose-built command surfaces for each domain — all running on the same operating fabric."
         />
 
         <div className="mt-12 space-y-2.5">
@@ -526,7 +565,7 @@ function AlloyBackboneSection() {
             The intelligence layer behind every platform.
           </h2>
           <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "1rem", maxWidth: "38rem", margin: "0 auto", lineHeight: 1.7 }}>
-            Alloy is not a product you buy. It is the operating infrastructure that makes every SZL platform credible — shared signal ingestion, workflow orchestration, action routing, output generation, and human approval gates.
+            Alloy is the operating infrastructure behind every SZL platform — signal ingestion, workflow orchestration, action routing, output generation, and human approval gates.
           </p>
         </m.div>
 
@@ -675,7 +714,7 @@ function ProofSection() {
             className="inline-flex items-center gap-2 text-sm font-medium transition-colors duration-200"
             style={{ color: "var(--color-szl-accent)", fontFamily: "var(--font-mono)" }}
           >
-            View full case studies with constraints, systems, and documented outcomes
+            View all case studies
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </m.div>
@@ -703,7 +742,7 @@ function FounderSection() {
               <span style={{ color: "var(--color-szl-accent)" }}>Builder. Operator. Systems thinker.</span>
             </h2>
             <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "1rem", lineHeight: 1.7, marginBottom: "2rem" }}>
-              Stephen Lutar builds systems that connect visibility, execution, and operating discipline. Every platform in the ecosystem was designed around operational problems he has personally encountered — not market research, not feature requests. The result is command-grade software built by an operator, for operators.
+              Builds systems that connect visibility, execution, and operating discipline. Every platform was designed around operational problems encountered firsthand — not market research. Command-grade software built by an operator, for operators.
             </p>
             <div className="flex flex-wrap gap-2.5 mb-8">
               {["Systems over tools", "Proprietary data before features", "Operators not consultants", "Ship to learn"].map((p) => (
@@ -752,7 +791,7 @@ function FounderSection() {
           >
             {[
               { value: "5+", label: "Years Operating", note: "Across enterprise verticals" },
-              { value: "4", label: "Platforms Live", note: "Alloy, Lyte, Vessels, Carlota Jo" },
+              { value: "6", label: "Platforms Live", note: "Alloy, Lyte, Vessels, Terra, Firestorm, Carlota Jo" },
               { value: "34 days", label: "Dark Vessel Lead", note: "Before formal designation" },
               { value: "100%", label: "Client Retention", note: "Carlota Jo pilot cohort" },
             ].map((stat) => (
@@ -864,7 +903,7 @@ function CapitalAndCredibilitySection() {
     {
       num: "01",
       title: "Bank-Ready Operating Discipline",
-      body: "Financial structure, use-of-funds clarity, and operating model documentation built from the ground up — not assembled at the time of application. Lenders see organized, consistent financial architecture before they ask for it.",
+      body: "Financial structure, use-of-funds clarity, and operating model documentation maintained continuously — so lenders see organized architecture before they ask.",
       accent: "#3b82f6",
       accentRgb: "59, 130, 246",
       tag: "BANK / SBA",
@@ -872,7 +911,7 @@ function CapitalAndCredibilitySection() {
     {
       num: "02",
       title: "Investor-Ready Architecture",
-      body: "Cap table structure, traction narrative, milestone-based planning, and diligence posture prepared in advance. Investor conversations open with clarity — not scramble.",
+      body: "Cap table, traction narrative, milestone planning, and diligence posture prepared in advance. Investor conversations open with clarity.",
       accent: "#10b981",
       accentRgb: "16, 185, 129",
       tag: "ANGEL / EQUITY",
@@ -880,7 +919,7 @@ function CapitalAndCredibilitySection() {
     {
       num: "03",
       title: "Certification-Aware Growth Posture",
-      body: "Eligibility research, ownership/control documentation, and application readiness for NY MWBE, WOSB, VOSB, 8(a), and SAM — tracked and organized before opportunities arise, not after.",
+      body: "Eligibility research and documentation for NY MWBE, WOSB, VOSB, 8(a), and SAM — tracked before opportunities arise.",
       accent: "#c9a96e",
       accentRgb: "201, 169, 110",
       tag: "MWBE · WOSB · 8(A) · SAM",
@@ -888,7 +927,7 @@ function CapitalAndCredibilitySection() {
     {
       num: "04",
       title: "Contract-Ready Potential",
-      body: "Government and institutional procurement requires more than capability — it requires documentation, registrations, and certifications in order. SZL tracks its readiness posture as an ongoing operating discipline.",
+      body: "Government and institutional procurement requires documentation and registrations in order. SZL tracks readiness as an ongoing discipline.",
       accent: "#8b5cf6",
       accentRgb: "139, 92, 246",
       tag: "PROCUREMENT",
@@ -896,7 +935,7 @@ function CapitalAndCredibilitySection() {
     {
       num: "05",
       title: "Structured Diligence Posture",
-      body: "Data rooms, diligence checklists, and artifact organization maintained continuously — so diligence requests from lenders, investors, or institutional clients can be answered from a position of preparation, not reaction.",
+      body: "Data rooms and diligence artifacts maintained continuously — so requests from lenders, investors, or clients can be answered from preparation.",
       accent: "#f59e0b",
       accentRgb: "245, 158, 11",
       tag: "DILIGENCE",
@@ -941,7 +980,7 @@ function CapitalAndCredibilitySection() {
               maxWidth: "42rem", lineHeight: 1.7,
             }}
           >
-            SZL Holdings is built to be bank-ready, investor-ready, and certification-aware before those conversations happen — not in response to them. Capital and credibility are treated as operating disciplines, tracked the same way risk and performance are tracked.
+            Bank-ready, investor-ready, and certification-aware before those conversations happen. Capital and credibility treated as operating disciplines.
           </p>
           <p
             style={{
@@ -949,7 +988,7 @@ function CapitalAndCredibilitySection() {
               marginTop: "1rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em",
             }}
           >
-            NOTE: SZL Holdings does not claim any certifications or active funding. The postures below represent structured readiness and intentional organizational discipline.
+            NOTE: SZL Holdings does not claim active certifications or funding. These postures represent structured readiness.
           </p>
         </m.div>
 

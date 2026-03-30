@@ -39,7 +39,7 @@ export default function MeridianAnalytics() {
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <BarChart3 className="w-6 h-6 text-primary" /> Operational Analytics
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Advanced infrastructure performance metrics and resource utilization</p>
+        <p className="text-sm text-muted-foreground mt-1">Infrastructure performance metrics and resource utilization</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

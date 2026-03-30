@@ -40,7 +40,7 @@ export default function CloudCost() {
           <DollarSign className="w-6 h-6 text-cyan-400" />
           Cloud Cost Monitoring
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time cloud spend tracking, waste identification, and AI-powered optimization recommendations</p>
+        <p className="text-sm text-muted-foreground mt-1">Cloud spend tracking, waste identification, and optimization recommendations</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

@@ -115,7 +115,7 @@ export default function ContractsPage() {
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">Contracts & SLAs</h1>
-        <p className="text-sm text-muted-foreground mt-1">Active MSAs, SLA attainment, renewal timelines, and contract value by service tier</p>
+        <p className="text-sm text-muted-foreground mt-1">MSAs, SLA attainment, renewal timelines, and contract value by tier</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

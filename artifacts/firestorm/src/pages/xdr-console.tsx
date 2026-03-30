@@ -50,7 +50,7 @@ export default function XDRConsole() {
           <Layers className="w-6 h-6 text-primary" />
           Unified XDR Console
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Correlate endpoint, network, identity, and cloud telemetry in a single pane — powered by AI-driven behavioral analytics</p>
+        <p className="text-sm text-muted-foreground mt-1">Endpoint, network, identity, and cloud telemetry correlated in a single pane</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

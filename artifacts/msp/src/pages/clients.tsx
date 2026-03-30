@@ -104,7 +104,7 @@ export default function ClientsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Client Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">Client health, contract status, and endpoint coverage across all managed accounts</p>
+          <p className="text-sm text-muted-foreground mt-1">Client health, contract status, and endpoint coverage across managed accounts</p>
         </div>
         <div className="flex items-center gap-2">
           <ExportButton

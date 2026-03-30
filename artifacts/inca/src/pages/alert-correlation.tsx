@@ -54,7 +54,7 @@ export default function AlertCorrelation() {
           <Link2 className="w-6 h-6 text-primary" />
           Alert Correlation Analysis
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">AI-powered alert grouping to identify root causes and cascading failures</p>
+        <p className="text-sm text-muted-foreground mt-1">Alert grouping to identify root causes and cascading failures</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

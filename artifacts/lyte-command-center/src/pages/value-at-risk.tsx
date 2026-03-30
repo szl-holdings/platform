@@ -41,7 +41,7 @@ export default function ValueAtRiskPage() {
     <div className="max-w-[1100px] space-y-6">
       <div>
         <h1 className="font-display font-bold text-2xl text-white tracking-tight">Value at Risk</h1>
-        <p className="text-sm text-slate-400 mt-1">Business value exposed by workflow failures, ownership gaps, and execution delays</p>
+        <p className="text-sm text-slate-400 mt-1">Value at risk from workflow failures, ownership gaps, and execution delays</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

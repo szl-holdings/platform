@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import Header from "@/components/Header";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
@@ -102,7 +102,7 @@ function App() {
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#c8a96a">
         <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo Consulting" accentColor="#c8a96a" />
+          <Header />
           <div style={{ flex: 1 }}>
             <Router />
           </div>

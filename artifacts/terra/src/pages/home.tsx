@@ -4,12 +4,12 @@ import { Link } from "wouter";
 import { useState } from "react";
 
 const features = [
-  { icon: BarChart3, title: "Portfolio Analytics", description: "Track occupancy, revenue, NOI, and cap rates across your entire portfolio in real time.", gradient: "from-terra-primary to-terra-accent" },
-  { icon: TrendingUp, title: "Market Intelligence", description: "Regional trend data, comparable sales, and price-per-sqft visualizations to stay ahead.", gradient: "from-terra-emerald to-green-400" },
-  { icon: Shield, title: "Risk Monitoring", description: "Proactive alerts for vacancies, lease expirations, maintenance issues, and payment risks.", gradient: "from-terra-amber to-yellow-400" },
-  { icon: Zap, title: "Deal Pipeline", description: "Track acquisitions and dispositions through every stage from sourcing to closing.", gradient: "from-terra-violet to-purple-400" },
-  { icon: Globe, title: "Regional Insights", description: "Deep-dive into market dynamics across all your active regions with comparative analysis.", gradient: "from-terra-rose to-pink-400" },
-  { icon: Lock, title: "Tenant Intelligence", description: "Complete tenant profiles, lease schedules, payment history, and renewal forecasting.", gradient: "from-cyan-500 to-blue-400" },
+  { icon: BarChart3, title: "Portfolio Analytics", description: "Occupancy, revenue, NOI, and cap rates across your entire portfolio.", gradient: "from-terra-primary to-terra-accent" },
+  { icon: TrendingUp, title: "Market Intelligence", description: "Comparable sales and price-per-sqft visualizations to stay ahead.", gradient: "from-terra-emerald to-green-400" },
+  { icon: Shield, title: "Risk Monitoring", description: "Alerts for vacancies, lease expirations, maintenance issues, and payment risks.", gradient: "from-terra-amber to-yellow-400" },
+  { icon: Zap, title: "Deal Pipeline", description: "Acquisitions and dispositions tracked through every stage.", gradient: "from-terra-violet to-purple-400" },
+  { icon: Globe, title: "Regional Insights", description: "Market dynamics across your active regions with comparative analysis.", gradient: "from-terra-rose to-pink-400" },
+  { icon: Lock, title: "Tenant Intelligence", description: "Tenant profiles, lease schedules, payment history, and renewal forecasting.", gradient: "from-cyan-500 to-blue-400" },
 ];
 
 const heroReveal = {
@@ -337,12 +337,12 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {[
-              { icon: Flame, label: "Pre-Foreclosure Tracking", description: "Monitor lis pendens filings from Kings, Queens, NY, Bronx, and Richmond county court systems in real time.", color: "from-amber-500 to-orange-500" },
-              { icon: Gavel, label: "Auction Intelligence", description: "NYC auction calendar with 30-day advance notice, property details, debt-to-value analysis, and action windows.", color: "from-purple-500 to-violet-500" },
-              { icon: Bell, label: "Distress Alert System", description: "Configurable alerts for new liens, approaching auctions, price drops, and expired listings in any zip code.", color: "from-red-500 to-rose-500" },
-              { icon: FileText, label: "Tax Lien Discovery", description: "NYC Dept of Finance tax lien database cross-referenced with property ownership and estimated equity.", color: "from-orange-500 to-amber-500" },
-              { icon: Star, label: "Opportunity Scoring", description: "0-100 opportunity score for every distressed property based on distress type, equity, location demand, and time in distress.", color: "from-terra-emerald to-green-400" },
-              { icon: Zap, label: "Deal Conversion", description: "One-click convert distressed properties to CRM leads, active deals, or outreach workflows via Alloy.", color: "from-terra-primary to-terra-accent" },
+              { icon: Flame, label: "Pre-Foreclosure Tracking", description: "Lis pendens filings from Kings, Queens, NY, Bronx, and Richmond county court systems.", color: "from-amber-500 to-orange-500" },
+              { icon: Gavel, label: "Auction Intelligence", description: "NYC auction calendar with 30-day advance notice, debt-to-value analysis, and action windows.", color: "from-purple-500 to-violet-500" },
+              { icon: Bell, label: "Distress Alert System", description: "Alerts for new liens, approaching auctions, price drops, and expired listings by zip code.", color: "from-red-500 to-rose-500" },
+              { icon: FileText, label: "Tax Lien Discovery", description: "Tax lien database cross-referenced with property ownership and estimated equity.", color: "from-orange-500 to-amber-500" },
+              { icon: Star, label: "Opportunity Scoring", description: "0-100 score per distressed property based on distress type, equity, location, and time in distress.", color: "from-terra-emerald to-green-400" },
+              { icon: Zap, label: "Deal Conversion", description: "Convert distressed properties to CRM leads, active deals, or Alloy outreach workflows in one click.", color: "from-terra-primary to-terra-accent" },
             ].map((item, i) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
                 className="group p-5 rounded-xl border border-terra-border bg-terra-surface/50 hover:border-terra-border-hover hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300">

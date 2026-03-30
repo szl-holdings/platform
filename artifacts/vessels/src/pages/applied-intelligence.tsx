@@ -28,7 +28,7 @@ export default function AppliedIntelligencePage() {
         <h1 className="font-display text-2xl font-bold flex items-center gap-2">
           <Brain className="w-6 h-6 text-primary" /> Applied Intelligence
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">AI executive briefings, predictive maintenance, and forecasting with confidence intervals</p>
+        <p className="text-sm text-muted-foreground mt-1">Executive briefings, predictive maintenance, and forecasting with confidence intervals</p>
       </div>
 
       <div className="animate-fade-in-up stagger-1">

@@ -111,7 +111,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg text-slate-400 leading-relaxed mb-8 max-w-2xl mx-auto">
-            Lyte is the business observability platform that converts operational signals into prioritized, explainable decisions. Not another alerting tool — a command surface built for the real work.
+            Lyte converts operational signals into prioritized, explainable decisions. Not another alerting tool — a command surface built for the real work.
           </p>
 
           <div className="flex items-center justify-center gap-3">
@@ -235,7 +235,7 @@ export default function LandingPage() {
         <div className="text-[11px] text-slate-500 uppercase tracking-widest mb-4">Why It Matters</div>
         <h2 className="font-display font-bold text-3xl text-white mb-4">Explainability is the product.</h2>
         <p className="text-slate-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-          Lyte does not just show you what's wrong. It shows you what's wrong, why it matters, what's at stake, who owns it, and what to do. Every signal carries context. Every insight tells a story. Every action has a clear owner and value case.
+          Lyte shows you what's wrong, why it matters, what's at stake, who owns it, and what to do. Every signal carries context. Every action has a clear owner and value case.
         </p>
         <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
           {[

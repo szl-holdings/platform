@@ -31,7 +31,7 @@ export default function AnomalyDetection() {
           <Brain className="w-6 h-6 text-cyan-400" />
           Watchdog AI Anomaly Detection
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">ML-powered anomaly detection across all infrastructure signals — 98% noise reduction with behavioral baselines</p>
+        <p className="text-sm text-muted-foreground mt-1">ML-powered anomaly detection — 98% noise reduction with behavioral baselines</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

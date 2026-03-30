@@ -170,7 +170,7 @@ export default function Experiments() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Experiments</h1>
-          <p className="text-sm text-muted-foreground mt-1">Compare training runs, validate hypotheses, and surface the experiments that advance model performance</p>
+          <p className="text-sm text-muted-foreground mt-1">Compare training runs and surface the experiments that advance model performance</p>
         </div>
         <ExportButton
           data={experiments.map(e => {

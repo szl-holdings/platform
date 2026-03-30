@@ -8,7 +8,6 @@ import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Bea
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
 // Marketing pages
 const IncaMarketingHome = lazy(() => import("@/pages/marketing-home"));
@@ -369,20 +368,6 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         commands={incaCommands}
         appName="INCA"
         accentColor="#f59e0b"
-      />
-      <WelcomeOverlay
-        appId="inca"
-        appName="INCA"
-        subtitle="AI Research Command Center"
-        description="INCA is the intelligence layer where models are evaluated, agents are governed, and AI outputs become traceable decisions. Every experiment is versioned, every recommendation is attributed, every output is explainable."
-        accentColor="#f59e0b"
-        icon={Brain}
-        features={[
-          { icon: FlaskConical, title: "Experiment management", description: "Structured experiment workflows with versioned models, reproducible results, and measurable outcomes. Research that can be audited." },
-          { icon: Cpu, title: "Model governance", description: "Model registry, drift monitoring, and performance benchmarking. Know which version produced which prediction and why." },
-          { icon: TrendingUp, title: "Explainable outputs", description: "AI recommendations include confidence scores, contributing factors, and reasoning chains. No black-box scoring at any layer." },
-          { icon: Layers, title: "Agent coordination", description: "The Quipu command layer orchestrates agents across the platform. Outputs are attributed, approval gates are enforced, chains are traceable." },
-        ]}
       />
     </PowerUserProvider>
   );

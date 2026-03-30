@@ -44,7 +44,7 @@ export default function ThreatHunting() {
           <Target className="w-6 h-6 text-primary" />
           Threat Hunting Workbench
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Proactive IOC search, behavioral queries, and historical timeline investigation</p>
+        <p className="text-sm text-muted-foreground mt-1">IOC search, behavioral queries, and historical timeline investigation</p>
       </div>
 
       <Card>

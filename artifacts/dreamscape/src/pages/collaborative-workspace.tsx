@@ -34,7 +34,7 @@ export default function CollaborativeWorkspace() {
           <Users className="w-6 h-6 text-primary" />
           Collaborative Approval Workspace
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Streamlined review workflows, feedback annotations, and multi-stakeholder approval chains</p>
+        <p className="text-sm text-muted-foreground mt-1">Review workflows, feedback annotations, and multi-stakeholder approvals</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

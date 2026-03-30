@@ -11,7 +11,6 @@ import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
@@ -301,20 +300,6 @@ function App() {
               commands={firestormCommands}
               appName="Firestorm"
               accentColor="#ef4444"
-            />
-            <WelcomeOverlay
-              appId="firestorm"
-              appName="Firestorm"
-              subtitle="Threat & Incident Command"
-              description="Firestorm is a SOC-grade security command platform for teams who need to detect, triage, and respond — not just report. Full kill chain coverage, real-time incident management, and compliance readiness built for organisations where the cost of slow response is quantifiable."
-              accentColor="#ef4444"
-              icon={Flame}
-              features={[
-                { icon: Shield, title: "Incident command", description: "Real-time incident monitoring with response timer discipline. Threats are classified, attributed, and actioned — not just logged." },
-                { icon: Target, title: "MITRE ATT&CK coverage", description: "Full kill chain mapping with visual heatmaps. Know where your coverage is and where adversaries can move undetected." },
-                { icon: Search, title: "Threat hunting", description: "Natural language queries across event data. Surface attacker patterns before they trigger alerts." },
-                { icon: Layers, title: "XDR correlation", description: "Correlated detection across endpoints, cloud, and network. One console for the signals that matter." },
-              ]}
             />
           </div>
         </PowerUserProvider>

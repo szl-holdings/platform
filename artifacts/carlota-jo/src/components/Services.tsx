@@ -19,7 +19,7 @@ const iconMap: Record<string, React.ElementType> = {
 
 export default function Services() {
   return (
-    <section id="services" className="py-24 lg:py-32 bg-[#07090d] border-t border-[#f5f0e8]/5">
+    <section id="services" className="py-24 lg:py-32 bg-stone-50 border-t border-stone-200">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-16">
           <motion.div
@@ -29,13 +29,11 @@ export default function Services() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-5"
           >
-            <p className="text-[11px] font-medium tracking-[0.35em] uppercase text-warm-gold mb-6">
-              Services
-            </p>
+            <p className="cj-eyebrow mb-6">Services</p>
             <h2 className="font-serif text-4xl md:text-5xl font-light text-ink-900 leading-tight">
               Four practice areas.
               <br />
-              <span className="italic opacity-80">One clear standard.</span>
+              <span className="italic opacity-80">One standard.</span>
             </h2>
           </motion.div>
 
@@ -46,8 +44,8 @@ export default function Services() {
             transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-7 flex items-end"
           >
-            <p className="text-sm text-ink-600 font-light leading-relaxed max-w-xl">
-              Each service area draws on a proprietary operational framework and a network built over years of high-trust engagement. We bring cross-domain precision to every mandate — and we measure ourselves only on outcomes that matter to the principal.
+            <p className="text-sm text-ink-500 font-light leading-relaxed max-w-xl">
+              Precision execution across every mandate. We measure ourselves only on outcomes that matter to the principal.
             </p>
           </motion.div>
         </div>

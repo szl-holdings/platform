@@ -158,7 +158,7 @@ export default function Projects() {
     <div className="p-6 lg:p-8 space-y-5 max-w-[1600px]">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">Project Pipeline</h1>
-        <p className="text-sm text-muted-foreground mt-1">Full lifecycle visibility across active research initiatives — from hypothesis to deployed model</p>
+        <p className="text-sm text-muted-foreground mt-1">Research initiatives tracked from hypothesis to deployed model</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

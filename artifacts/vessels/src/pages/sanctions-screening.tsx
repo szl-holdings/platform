@@ -56,7 +56,7 @@ export default function SanctionsScreening() {
           <ShieldAlert className="w-6 h-6 text-red-400" />
           Sanctions Compliance Screening
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Continuous vessel, owner, and beneficial owner screening against global sanctions lists</p>
+        <p className="text-sm text-muted-foreground mt-1">Vessel, owner, and beneficial owner screening against global sanctions lists</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

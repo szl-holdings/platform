@@ -27,7 +27,7 @@ export default function DashboardPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold text-terra-text">Brokerage Command Center</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Real-time visibility across listings, deals, leads, and pipeline — March 30, 2026</p>
+            <p className="text-sm text-terra-text-secondary mt-1">Listings, deals, leads, and pipeline — {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
           </div>
           <div className="flex items-center gap-2">
             {criticalSignals.length > 0 && (

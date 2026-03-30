@@ -37,7 +37,7 @@ export default function OnCallManagement() {
           <Phone className="w-6 h-6 text-cyan-400" />
           On-Call Management
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Intelligent escalation policies, schedule optimization, and team on-call health tracking</p>
+        <p className="text-sm text-muted-foreground mt-1">Escalation policies, schedule optimization, and on-call health tracking</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

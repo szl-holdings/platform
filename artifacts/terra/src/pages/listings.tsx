@@ -177,7 +177,7 @@ export default function ListingsPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold text-terra-text">Listings + Inventory</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Active listing portfolio — buyer activity, showings, offers, and risk flags</p>
+            <p className="text-sm text-terra-text-secondary mt-1">Buyer activity, showings, offers, and risk flags across active listings</p>
           </div>
         </div>
       </motion.div>

@@ -31,7 +31,7 @@ export default function SLOTracking() {
           <Target className="w-6 h-6 text-cyan-400" />
           SLA / SLO Tracking & Error Budgets
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time error budget burn rates, SLO compliance, and reliability targets per service</p>
+        <p className="text-sm text-muted-foreground mt-1">Error budget burn rates, SLO compliance, and reliability targets per service</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

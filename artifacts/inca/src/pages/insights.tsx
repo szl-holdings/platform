@@ -79,7 +79,7 @@ export default function Insights() {
     <div className="p-6 lg:p-8 space-y-5 max-w-[1200px]">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">Research Insights</h1>
-        <p className="text-sm text-muted-foreground mt-1">Actionable findings surfaced from experiment results, model evaluations, and cross-project analysis</p>
+        <p className="text-sm text-muted-foreground mt-1">Findings from experiment results, model evaluations, and cross-project analysis</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

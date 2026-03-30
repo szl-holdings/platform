@@ -63,7 +63,7 @@ export default function RiskScoringPage() {
           <Shield className="w-6 h-6 text-primary" />
           Behavioral Risk Scoring Engine
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Voyage anomaly detection, flag state risk, ownership chain analysis, and behavioral pattern scoring</p>
+        <p className="text-sm text-muted-foreground mt-1">Voyage anomaly detection, flag state risk, ownership chain analysis, and behavioral scoring</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

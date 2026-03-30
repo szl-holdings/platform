@@ -83,10 +83,10 @@ export function CaseStudiesSection() {
             Selected work
           </p>
           <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight">
-            Selected work and operating ideas.
+            Selected work.
           </h2>
           <p className="text-white/40 text-lg mt-4 max-w-2xl font-light">
-            A growing body of work focused on visibility, execution, systems alignment, and practical frameworks for modern organizations.
+            Platforms, infrastructure, and operating ideas — built and shipped.
           </p>
         </motion.div>
 

@@ -92,7 +92,7 @@ export default function LLMEvaluation() {
           <MessageSquare className="w-6 h-6 text-primary" />
           LLM Evaluation Suite
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Live prompt testing, response quality scoring, and hallucination detection across model versions</p>
+        <p className="text-sm text-muted-foreground mt-1">Prompt testing, response quality scoring, and hallucination detection across model versions</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

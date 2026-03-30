@@ -39,7 +39,7 @@ export default function MotionGraphics() {
           <Film className="w-6 h-6 text-primary" />
           Motion Graphics Generator
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">AI-powered motion graphics for every social format — Reels, Stories, Shorts, and broadcast-quality video</p>
+        <p className="text-sm text-muted-foreground mt-1">Motion graphics for every format — Reels, Stories, Shorts, and broadcast-quality video</p>
       </div>
 
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">

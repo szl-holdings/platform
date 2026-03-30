@@ -45,7 +45,7 @@ export default function CorrelationAnalysis() {
           <GitBranch className="w-6 h-6 text-primary" />
           Correlation Analysis
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Feature correlation discovery and relationship mapping across data dimensions</p>
+        <p className="text-sm text-muted-foreground mt-1">Feature correlation and relationship mapping across data dimensions</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

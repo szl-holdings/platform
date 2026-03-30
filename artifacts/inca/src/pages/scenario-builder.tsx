@@ -63,7 +63,7 @@ export default function ScenarioBuilder() {
           <Boxes className="w-6 h-6 text-primary" />
           Scenario Builder
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Define parameter ranges, run counterfactual simulations, and compare outcome distributions side-by-side</p>
+        <p className="text-sm text-muted-foreground mt-1">Parameter ranges, counterfactual simulations, and outcome distributions side-by-side</p>
       </div>
 
       <div className="grid grid-cols-4 gap-3">

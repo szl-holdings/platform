@@ -37,7 +37,7 @@ export default function IdentityThreat() {
           <Users className="w-6 h-6 text-primary" />
           Identity Threat Detection
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Anomalous login patterns, credential compromise detection, impossible travel, and privileged access monitoring</p>
+        <p className="text-sm text-muted-foreground mt-1">Login anomalies, credential compromise, impossible travel, and privileged access alerts</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">
