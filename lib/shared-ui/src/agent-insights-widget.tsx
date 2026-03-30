@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Brain, AlertTriangle, TrendingUp, Zap, CheckCircle, Clock, RefreshCw, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
 export interface KnowledgeEntry {
@@ -97,18 +96,46 @@ export function AgentInsightsWidget({
 }: AgentInsightsWidgetProps) {
   const [expanded, setExpanded] = useState(!compact);
   const [activeTab, setActiveTab] = useState<"findings" | "correlations" | "runs">("findings");
+  const [feed, setFeed] = useState<AgentFeedResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [dataUpdatedAt, setDataUpdatedAt] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const { data: feed, isLoading, error, refetch, dataUpdatedAt } = useQuery<AgentFeedResponse>({
-    queryKey: ["agent-insights-feed", domain],
-    queryFn: async () => {
-      const resp = await fetch(`${apiBase}/agent-os/feed/${domain}`);
+  const fetchFeed = useCallback(async () => {
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      const resp = await fetch(`${apiBase}/agent-os/feed/${domain}`, { signal: controller.signal });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      return resp.json();
-    },
-    refetchInterval: 60000,
-    staleTime: 30000,
-    retry: 2,
-  });
+      const data = await resp.json() as AgentFeedResponse;
+      if (!mountedRef.current) return;
+      setFeed(data);
+      setError(null);
+      setDataUpdatedAt(Date.now());
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      if (!mountedRef.current) return;
+      setError(err instanceof Error ? err : new Error(String(err)));
+    } finally {
+      if (mountedRef.current) setIsLoading(false);
+    }
+  }, [domain, apiBase]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    setIsLoading(true);
+    fetchFeed();
+    intervalRef.current = setInterval(fetchFeed, 60000);
+    return () => {
+      mountedRef.current = false;
+      if (abortRef.current) abortRef.current.abort();
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [fetchFeed]);
 
   if (error && !feed) {
     return null;
@@ -171,7 +198,7 @@ export function AgentInsightsWidget({
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={e => { e.stopPropagation(); refetch(); }}
+            onClick={e => { e.stopPropagation(); fetchFeed(); }}
             className="p-1 rounded-md hover:bg-accent/10 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
           >
             <RefreshCw className="w-3 h-3" />

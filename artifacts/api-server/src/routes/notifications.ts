@@ -10,9 +10,13 @@ const router: IRouter = Router();
 const validTypes = ["info", "warning", "error", "success", "action_required"] as const;
 const validChannels = ["in_app", "email", "sms", "slack"] as const;
 
-router.get("/notifications", authMiddleware(), async (req, res) => {
+router.get("/notifications", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const userId = req.user!.id;
+    if (!req.user) {
+      sendSuccess(res, []);
+      return;
+    }
+    const userId = req.user.id;
     const notifications = await db
       .select()
       .from(notificationsTable)
