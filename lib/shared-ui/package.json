@@ -94,7 +94,6 @@
     "./core-observability-data": "./src/core-observability-data.ts"
   },
   "dependencies": {
-    "@workspace/replit-auth-web": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.4",
     "@radix-ui/react-alert-dialog": "^1.1.7",
     "@radix-ui/react-aspect-ratio": "^1.1.3",
@@ -122,6 +121,9 @@
     "@radix-ui/react-toggle": "^1.1.3",
     "@radix-ui/react-toggle-group": "^1.1.3",
     "@radix-ui/react-tooltip": "^1.2.0",
+    "@tanstack/react-query": "catalog:",
+    "@workspace/observability": "workspace:*",
+    "@workspace/replit-auth-web": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "^1.1.1",
@@ -136,16 +138,19 @@
     "recharts": "^2.15.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "catalog:",
-    "vaul": "^1.1.2",
-    "@workspace/observability": "workspace:*"
+    "vaul": "^1.1.2"
   },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": false },
-    "react-dom": { "optional": false }
+    "react": {
+      "optional": false
+    },
+    "react-dom": {
+      "optional": false
+    }
   },
   "devDependencies": {
     "@types/node": "catalog:",

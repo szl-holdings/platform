@@ -58,7 +58,7 @@ catalogs:
       specifier: ^7.55.0
       version: 7.71.2
     recharts:
-      specifier: ^2.15.4
+      specifier: 2.15.4
       version: 2.15.4
     tailwind-merge:
       specifier: 3.5.0
@@ -263,6 +263,10 @@ importers:
         version: 3.25.76
 
   artifacts/alloy:
+    dependencies:
+      recharts:
+        specifier: 'catalog:'
+        version: 2.15.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     devDependencies:
       '@radix-ui/react-dialog':
         specifier: ^1.1.7
@@ -2689,6 +2693,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.0
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.90.21(react@19.1.0)
       '@workspace/observability':
         specifier: workspace:*
         version: link:../observability
