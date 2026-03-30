@@ -3,7 +3,7 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight } from "lucide-react";
+import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
@@ -36,16 +36,16 @@ const queryClient = new QueryClient({
 
 const primaryNavItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/projects", label: "Projects", icon: FolderKanban },
   { path: "/experiments", label: "Experiments", icon: FlaskConical },
   { path: "/models", label: "Models", icon: Cpu },
-  { path: "/insights", label: "Insights", icon: Lightbulb },
-  { path: "/gpu-monitoring", label: "GPU Monitor", icon: Cpu },
+  { path: "/registry", label: "Model Registry", icon: Database },
+  { path: "/predictions", label: "Predictions", icon: TrendingUp },
+  { path: "/gpu-monitoring", label: "GPU Monitor", icon: Activity },
 ];
 
 const secondaryNavItems = [
-  { path: "/observability", label: "Observability", icon: Activity },
-  { path: "/predictions", label: "Predictions", icon: TrendingUp },
+  { path: "/projects", label: "Projects", icon: FolderKanban },
+  { path: "/insights", label: "Insights", icon: Lightbulb },
   { path: "/alerts", label: "Alerts", icon: BellRing },
   { path: "/ensemble", label: "Ensemble Studio", icon: Layers },
   { path: "/drift", label: "Prediction Drift", icon: Activity },
@@ -54,10 +54,10 @@ const secondaryNavItems = [
   { path: "/confidence", label: "Confidence", icon: BarChart3 },
   { path: "/scenarios", label: "Scenario Builder", icon: Boxes },
   { path: "/correlations", label: "Correlations", icon: GitBranch },
-  { path: "/registry", label: "Model Registry", icon: Database },
   { path: "/neural-explorer", label: "Neural Explorer", icon: Brain },
   { path: "/benchmarking", label: "Benchmarking", icon: Trophy },
   { path: "/llm-eval", label: "LLM Evaluation", icon: FlaskConical },
+  { path: "/observability", label: "Observability", icon: Activity },
 ];
 
 function PageLoader() {
@@ -73,15 +73,15 @@ function Sidebar() {
   const [moreExpanded, setMoreExpanded] = useState(false);
 
   return (
-    <aside className="w-56 bg-card/50 border-r border-border flex flex-col h-screen sticky top-0 backdrop-blur-sm">
-      <div className="px-4 py-4 border-b border-border">
+    <aside className="w-56 bg-[#0d0a1a]/80 border-r border-violet-500/10 flex flex-col h-screen sticky top-0 backdrop-blur-sm">
+      <div className="px-4 py-4 border-b border-violet-500/10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-            <Brain className="w-4 h-4 text-primary animate-neural-pulse" />
+          <div className="w-8 h-8 rounded-xl bg-violet-500/15 flex items-center justify-center shrink-0">
+            <Brain className="w-4 h-4 text-violet-400" />
           </div>
           <div>
-            <h1 className="font-display text-sm font-bold text-foreground tracking-tight">INCA</h1>
-            <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-[0.1em]">AI Research</p>
+            <h1 className="font-display text-sm font-bold text-white tracking-tight">INCA</h1>
+            <p className="text-[10px] text-violet-400/60 font-mono uppercase tracking-widest">AI Research</p>
           </div>
         </div>
       </div>
@@ -94,11 +94,11 @@ function Sidebar() {
               <div className={cn(
                 "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
                 isActive
-                  ? "bg-primary/12 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  ? "bg-violet-500/12 text-violet-300"
+                  : "text-violet-400/50 hover:text-violet-200 hover:bg-violet-500/8"
               )}>
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-primary rounded-r-full" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-violet-400 rounded-r-full" />
                 )}
                 <Icon className="w-3.5 h-3.5 shrink-0" />
                 {label}
@@ -110,10 +110,10 @@ function Sidebar() {
         <div className="pt-2">
           <button
             onClick={() => setMoreExpanded(!moreExpanded)}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30 transition-all w-full"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-violet-400/30 hover:text-violet-300 hover:bg-violet-500/5 transition-all w-full"
           >
             <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
-            More pages
+            More tools
           </button>
           {moreExpanded && (
             <div className="mt-0.5 space-y-0.5">
@@ -124,8 +124,8 @@ function Sidebar() {
                     <div className={cn(
                       "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
                       isActive
-                        ? "bg-primary/12 text-primary"
-                        : "text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30"
+                        ? "bg-violet-500/12 text-violet-300"
+                        : "text-violet-400/30 hover:text-violet-200 hover:bg-violet-500/5"
                     )}>
                       <Icon className="w-3 h-3 shrink-0" />
                       {label}
@@ -138,10 +138,10 @@ function Sidebar() {
         </div>
       </nav>
 
-      <div className="px-4 py-3 border-t border-border space-y-2">
+      <div className="px-4 py-3 border-t border-violet-500/10 space-y-2">
         <UserButton showName className="w-full" />
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground/40">
-          <Beaker className="w-3 h-3" />
+        <div className="flex items-center gap-2 text-[10px] text-violet-400/25">
+          <Brain className="w-3 h-3" />
           <span className="font-mono">SZL Holdings</span>
         </div>
       </div>

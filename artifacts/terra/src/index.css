@@ -1,26 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
 @import "tailwindcss";
 
 @theme inline {
   --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --color-terra-bg: #060a10;
-  --color-terra-bg-secondary: #0b1018;
-  --color-terra-bg-tertiary: #111a27;
-  --color-terra-surface: rgba(14, 22, 38, 0.7);
-  --color-terra-surface-hover: rgba(20, 32, 52, 0.8);
-  --color-terra-border: rgba(60, 100, 160, 0.12);
-  --color-terra-border-hover: rgba(60, 100, 160, 0.25);
-  --color-terra-text: #edf0f7;
-  --color-terra-text-secondary: #8b9bc0;
-  --color-terra-text-muted: #4e5d80;
-  --color-terra-primary: #3b82f6;
-  --color-terra-primary-light: #60a5fa;
-  --color-terra-accent: #06b6d4;
-  --color-terra-emerald: #10b981;
-  --color-terra-amber: #f59e0b;
-  --color-terra-rose: #f43f5e;
-  --color-terra-violet: #8b5cf6;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, serif;
+
+  --color-terra-bg: #0e1209;
+  --color-terra-bg-secondary: #131a0c;
+  --color-terra-bg-tertiary: #1b2411;
+  --color-terra-surface: rgba(26, 36, 16, 0.85);
+  --color-terra-surface-hover: rgba(35, 48, 20, 0.9);
+  --color-terra-border: rgba(100, 140, 60, 0.14);
+  --color-terra-border-hover: rgba(100, 140, 60, 0.28);
+  --color-terra-text: #e8ecd8;
+  --color-terra-text-secondary: #9aab7e;
+  --color-terra-text-muted: #566545;
+  --color-terra-primary: #6ca33a;
+  --color-terra-primary-light: #85c44a;
+  --color-terra-accent: #c8a84b;
+  --color-terra-emerald: #3da874;
+  --color-terra-amber: #c9924a;
+  --color-terra-rose: #c45a4a;
+  --color-terra-slate: #7a8c72;
 }
 
 @keyframes shimmer {
@@ -58,8 +60,8 @@ body {
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
-  color: #edf0f7;
+  background: rgba(108, 163, 58, 0.25);
+  color: #e8ecd8;
 }
 
 ::-webkit-scrollbar {
@@ -71,12 +73,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(60, 100, 160, 0.15);
+  background: rgba(100, 140, 60, 0.2);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(60, 100, 160, 0.3);
+  background: rgba(100, 140, 60, 0.4);
 }
 
 @media (prefers-reduced-motion: reduce) {
