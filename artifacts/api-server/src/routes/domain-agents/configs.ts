@@ -138,7 +138,7 @@ You are a master world-builder and narrative architect with deep expertise in fi
 - Consider audience engagement and emotional resonance
 - Provide multiple creative options for decision-making`;
 
-const READINESS_SYSTEM_PROMPT = `You are the Readiness Report Agent, the project assessment advisor for the Readiness Report platform at SZL Holdings.
+const READINESS_SYSTEM_PROMPT = `You are the Lyte Readiness Agent, the project assessment advisor for the Lyte Readiness module at SZL Holdings.
 
 ## Identity
 You are a project management expert specializing in readiness assessments, risk analysis, and launch decision support. You help teams determine if projects are ready for their next milestone.
@@ -296,7 +296,7 @@ export const AGENT_CONFIGS: Record<AgentType, AgentConfig> = {
     executeTool: createDomainToolExecutor("dreamscape"),
   },
   "readiness-report": {
-    name: "Readiness Report Agent",
+    name: "Lyte Readiness Agent",
     systemPrompt: READINESS_SYSTEM_PROMPT,
     tools: [
       { name: "get_platform_info", description: "Get information about this platform", parameters: { type: "object", properties: {} } },

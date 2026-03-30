@@ -85,6 +85,12 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     liveFeeds: ["HuggingFace Hub — AI Creative Tools (live API)", "Cross-Platform Analytics Benchmarks"],
     doctrineRole: "EXECUTE",
   },
+  dreamscape: {
+    connectors: ["ai", "figma", "storage", "google-drive", "dropbox", "elevenlabs"],
+    description: "Alloy predictive intelligence layer — scenario modeling, confidence scoring, and prediction surfaces using HuggingFace Hub model discovery and media analytics benchmarks. Absorbed into Alloy (formerly Nimbus).",
+    liveFeeds: ["HuggingFace Hub — AI Creative Tools (live API)", "Content Marketing RSS Intelligence", "Cross-Platform Media Analytics Benchmarks"],
+    doctrineRole: "EXECUTE",
+  },
   aegis: {
     connectors: ["ai", "notion", "confluence", "google-docs", "slack", "monitoring"],
     description: "Aegis (formerly Readiness) control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, FedRAMP, and CMMC frameworks.",

@@ -2,7 +2,7 @@ export type Severity = "critical" | "high" | "medium" | "low" | "info";
 export type EntityType = "workflow" | "approval" | "task" | "opportunity" | "recommendation" | "execution_run" | "exception" | "owner" | "signal";
 export type EntityState = "healthy" | "degraded" | "blocked" | "pending_approval" | "escalated" | "executing" | "retried" | "completed" | "failed" | "recovered";
 export type CommandPhase = "DETECT" | "INTERPRET" | "DECIDE" | "EXECUTE" | "VERIFY";
-export type ProductId = "beacon" | "lyte" | "alloy";
+export type ProductId = "beacon" | "lyte" | "alloy" | "alloyscape";
 
 export interface ObsEvent {
   event_id: string;
@@ -305,7 +305,7 @@ export const PREDICTIONS: PredictionEntity[] = [
   },
   {
     id: "pred-004",
-    title: "Alloy reroute will recover 6.2h cycle time on contract workflow",
+    title: "AlloyScape reroute will recover 6.2h cycle time on contract workflow",
     prediction_type: "recovery",
     confidence: 85,
     probability: 0.85,
@@ -315,7 +315,7 @@ export const PREDICTIONS: PredictionEntity[] = [
     linked_beacon_events: ["evt-001"],
     linked_lyte_states: ["apr-001"],
     rationale: "If the Northgate contract is rerouted to the secondary approver (CFO backup), the parallel path reduces approval time by 6.2 hours. Historical reroute success rate for similar contracts is 91%.",
-    recommended_action: "Execute reroute in Alloy to CFO backup approver. Notify original approver. Set 2h SLA on new path.",
+    recommended_action: "Execute reroute in AlloyScape to CFO backup approver. Notify original approver. Set 2h SLA on new path.",
     correlation_id: GOLDEN_FLOW_CORRELATION_ID,
     created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
   },
@@ -487,7 +487,7 @@ export const EVENTS: ObsEvent[] = [
   {
     event_id: "evt-005",
     event_type: "intervention_executed",
-    source_product: "alloy",
+    source_product: "alloyscape",
     entity_type: "execution_run",
     entity_id: "run-002",
     entity_name: "Contract Workflow Reroute",
@@ -540,7 +540,7 @@ export const WORKFLOWS_UI: WorkflowUI[] = WORKFLOWS.map(w => {
   const stepMap: Record<string, WorkflowStep[]> = {
     "wf-001": [
       { name: "CRM Trigger", status: "completed", assignee: "System" },
-      { name: "Contract Gen", status: "completed", assignee: "Alloy" },
+      { name: "Contract Gen", status: "completed", assignee: "AlloyScape" },
       { name: "Internal Review", status: "completed", assignee: "Jordan Alvarez" },
       { name: "Legal Review", status: "blocked", assignee: undefined },
       { name: "DocuSign", status: "pending" },
@@ -674,18 +674,20 @@ export const KPI_FRAMEWORK = {
   alloy: {
     predictions_active: { label: "Active Predictions", value: "17", trend: 21 },
     avg_confidence: { label: "Avg Confidence", value: "81%", trend: 4 },
+    high_probability_risks: { label: "High-Prob Risks", value: "4", trend: -25 },
+  },
+  alloyscape: {
     runs_24h: { label: "Runs (24h)", value: "1,247", trend: 8 },
     success_rate: { label: "Success Rate", value: "94.2%", trend: 2 },
     exceptions_open: { label: "Open Exceptions", value: "6", trend: -33 },
-    high_probability_risks: { label: "High-Prob Risks", value: "4", trend: -25 },
   },
 };
 
 export const COMMAND_LOOP_PHASES: { phase: CommandPhase; label: string; description: string; product: ProductId; color: string }[] = [
   { phase: "DETECT", label: "Detect", description: "Surface signals, drift, and degradation", product: "beacon", color: "#0ea5e9" },
   { phase: "INTERPRET", label: "Interpret", description: "Route accountability and orchestrate response", product: "lyte", color: "#f59e0b" },
-  { phase: "DECIDE", label: "Decide", description: "Model scenarios and recommend actions", product: "alloy", color: "#6366f1" },
-  { phase: "EXECUTE", label: "Execute", description: "Run automations and manage interventions", product: "alloy", color: "#6366f1" },
+  { phase: "DECIDE", label: "Decide", description: "Model scenarios and recommend actions", product: "alloy", color: "#8b5cf6" },
+  { phase: "EXECUTE", label: "Execute", description: "Run automations and manage interventions", product: "alloyscape", color: "#00d4ff" },
   { phase: "VERIFY", label: "Verify", description: "Confirm recovery and measure value restored", product: "beacon", color: "#10b981" },
 ];
 

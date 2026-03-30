@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { NimbusLayout } from "@/components/nimbus-layout";
+import { AlloyIntelligenceLayout } from "@/components/nimbus-layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { alloyPredictiveConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
@@ -72,9 +72,9 @@ function App() {
           <div className="flex flex-col h-screen bg-[#080c14]">
             <EcosystemNav currentAppId="alloy" currentAppName="Alloy — Predictive Intelligence" accentColor="#8b5cf6" />
             <div className="flex-1 overflow-hidden">
-              <NimbusLayout>
+              <AlloyIntelligenceLayout>
                 <Router />
-              </NimbusLayout>
+              </AlloyIntelligenceLayout>
             </div>
           </div>
           <CommandPalette

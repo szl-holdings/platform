@@ -271,7 +271,7 @@ async function seed() {
     { slug: "firestorm", name: "Firestorm Marketing", description: "Campaign management and lead generation", icon: "Flame", color: "#f97316", status: "active", version: "0.3.0" },
     { slug: "lyte-command-center", name: "Lyte Command Center", description: "Business observability and operational decisions", icon: "Monitor", color: "#0ea5e9", status: "active", version: "1.0.0" },
     { slug: "dreamscape", name: "Dreamscape Creative", description: "Creative campaign engine for storytelling and media", icon: "Palette", color: "#f59e0b", status: "active", version: "1.0.0" },
-    { slug: "readiness-report", name: "Readiness Report", description: "Maturity scoring and project status visibility", icon: "Shield", color: "#10b981", status: "active", version: "1.0.0" },
+    { slug: "readiness-report", name: "Lyte Readiness", description: "Operational readiness and maturity scoring module within Lyte", icon: "Shield", color: "#10b981", status: "active", version: "1.0.0" },
     { slug: "control-plane", name: "Admin Control Plane", description: "Platform administration and configuration", icon: "Settings", color: "#64748b", status: "active", version: "0.2.0" },
   ]);
   console.log("  ✓ apps registry");
@@ -311,7 +311,7 @@ async function seed() {
     { name: "Firestorm Campaign Engine", description: "Build automated campaign management system", status: "active" },
     { name: "Lyte Command Center Build", description: "Business observability command center for portfolio operations", status: "active" },
     { name: "Dreamscape Creative Pipeline", description: "Creative campaign engine for storytelling and media workflows", status: "active" },
-    { name: "Readiness Report Platform", description: "Portfolio-wide maturity scoring and readiness tracking", status: "completed" },
+    { name: "Lyte Readiness Module", description: "Portfolio-wide maturity scoring and readiness tracking within Lyte", status: "completed" },
     { name: "MSP Command Center", description: "Next-generation managed service provider platform for IT service delivery", status: "active" },
   ]).returning();
   console.log(`  ✓ ${projects.length} projects`);

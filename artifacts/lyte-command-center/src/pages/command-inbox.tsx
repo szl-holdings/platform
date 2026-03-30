@@ -49,7 +49,7 @@ const ACTIONS: ActionItem[] = [
     action_href: "/escalation",
     correlation_id: "corr-churn-techcorp",
     linked_product: "Alloy modeled",
-    linked_href: "/dreamscape/",
+    linked_href: "/alloy/",
   },
   {
     id: "act-003",
@@ -82,14 +82,14 @@ const ACTIONS: ActionItem[] = [
   {
     id: "act-005",
     type: "exception",
-    title: "Alloy Run Failed — Contract Workflow Step 4",
+    title: "AlloyScape Run Failed — Contract Workflow Step 4",
     subtitle: "No approver assigned · Retry available · Reroute recommended",
     priority: "high",
     impact: 840000,
-    action_label: "View in Alloy",
+    action_label: "View in AlloyScape",
     action_href: "/alloy/",
     correlation_id: "gf-2026-q1-001",
-    linked_product: "Alloy exception",
+    linked_product: "AlloyScape exception",
     linked_href: "/alloy/",
   },
   {

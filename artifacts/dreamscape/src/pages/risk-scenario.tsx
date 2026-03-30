@@ -8,7 +8,7 @@ const SCENARIOS = [
     probability: 72,
     severity: "critical" as const,
     impact: 2800000,
-    drivers: ["Legal capacity at 94%", "48h SLA breach on Northgate", "Q1 close window closing", "Alloy retry pending"],
+    drivers: ["Legal capacity at 94%", "48h SLA breach on Northgate", "Q1 close window closing", "AlloyScape retry pending"],
     mitigations: ["Parallel CFO approval path", "CEO-to-VP escalation", "Contract scope reduction to accelerate"],
     correlation_id: "gf-2026-q1-001",
     time_horizon: "6 days",
@@ -46,7 +46,7 @@ export default function RiskScenario() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <AlertTriangle className="w-4 h-4" style={{ color: "#8b5cf6" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#6366f1" }}>Alloy · Risk Scenario Planning</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#8b5cf6" }}>Alloy · Risk Scenario Planning</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Risk Scenario Planning</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Multi-variable risk models with mitigation strategies and Alloy confidence scores.</p>

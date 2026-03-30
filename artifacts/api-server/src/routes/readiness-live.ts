@@ -19,7 +19,7 @@ router.get("/readiness/live/metrics", authMiddleware({ required: false }), async
 router.get("/readiness/live/summary", authMiddleware({ required: false }), async (_req, res) => {
   try {
     sendSuccess(res, {
-      source: "Readiness Report Live",
+      source: "Lyte Readiness Live",
       status: "operational",
       frameworks: ["SOC 2", "ISO 27001", "NIST CSF", "HIPAA"],
       overallScore: 87,

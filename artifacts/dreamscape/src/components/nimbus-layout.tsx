@@ -19,7 +19,7 @@ const NAV = [
   { href: "/forecasting", label: "Forecasting Center", icon: TrendingUp },
 ];
 
-export function NimbusLayout({ children }: { children: ReactNode }) { 
+export function AlloyIntelligenceLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

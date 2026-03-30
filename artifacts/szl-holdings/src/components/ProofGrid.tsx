@@ -39,8 +39,8 @@ const proofs = [
   {
     platform: "Lyte",
     view: "Lyte Readiness",
-    desc: "Lyte Readiness — execution tracking, maturity scoring, and go/no-go gate management as a first-class Lyte module.",
-    accent: "hsl(190,90%,55%)",
+    desc: "Lyte Readiness is a first-class module within Lyte for execution tracking and maturity scoring.",
+    accent: "hsl(192, 80%, 48%)",
     accentRgb: "6, 182, 212",
     href: "/lyte-command-center/",
     status: "Live",

@@ -269,11 +269,11 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: "dreamscape",
-    appName: "Alloy Predict",
+    appName: "Alloy",
     generators: [
       () => ({
         appId: "dreamscape",
-        appName: "Alloy Predict",
+        appName: "Alloy",
         title: "Scenario Model Updated",
         message: `${["Q3 Risk Model", "Revenue Forecast", "Fleet Demand Scenario"][Math.floor(Math.random() * 3)]} recalculated — confidence ${72 + Math.floor(Math.random() * 20)}%`,
         severity: "info" as NotifSeverity,
@@ -281,7 +281,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "dreamscape",
-        appName: "Alloy Predict",
+        appName: "Alloy",
         title: "High-Risk Scenario Detected",
         message: `${2 + Math.floor(Math.random() * 3)} risk scenarios exceeded confidence threshold — review recommended`,
         severity: "warning" as NotifSeverity,
@@ -289,7 +289,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "dreamscape",
-        appName: "Alloy Predict",
+        appName: "Alloy",
         title: "Prediction Confidence Drop",
         message: `Model confidence dropped below 70% — insufficient signal data for ${["Q3 Forecast", "Maritime Demand", "AIOps Prediction"][Math.floor(Math.random() * 3)]}`,
         severity: "warning" as NotifSeverity,
@@ -297,7 +297,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "dreamscape",
-        appName: "Alloy Predict",
+        appName: "Alloy",
         title: "Opportunity Surfaced",
         message: `New high-confidence opportunity identified — ${85 + Math.floor(Math.random() * 12)}% confidence, estimated $${(1.2 + Math.random() * 2.8).toFixed(1)}M upside`,
         severity: "info" as NotifSeverity,

@@ -10,7 +10,7 @@ const OPPORTUNITIES = [
     effort: "low",
     expected_impact: 840000,
     time_horizon: "6 days",
-    steps: ["CFO backup approval path", "Alloy contract execution", "Billing activation"],
+    steps: ["CFO backup approval path", "AlloyScape contract execution", "Billing activation"],
     correlation_id: "gf-2026-q1-001",
     status: "immediate",
   },
@@ -34,7 +34,7 @@ const OPPORTUNITIES = [
     effort: "medium",
     expected_impact: 780000,
     time_horizon: "14 days",
-    steps: ["Assign compliance temp resource", "Fast-track low-risk vendors", "Automate via Alloy"],
+    steps: ["Assign compliance temp resource", "Fast-track low-risk vendors", "Automate via AlloyScape"],
     correlation_id: "corr-vendor-apex",
     status: "high",
   },
@@ -46,7 +46,7 @@ const OPPORTUNITIES = [
     effort: "high",
     expected_impact: 1200000,
     time_horizon: "30 days",
-    steps: ["Identify bottleneck deal steps", "Assign dedicated RevOps resource", "Alloy automation of admin steps"],
+    steps: ["Identify bottleneck deal steps", "Assign dedicated RevOps resource", "AlloyScape automation of admin steps"],
     correlation_id: "corr-q1-pipeline",
     status: "planned",
   },
@@ -70,7 +70,7 @@ export default function OpportunityEngine() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Target className="w-4 h-4" style={{ color: "#8b5cf6" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#6366f1" }}>Alloy · Opportunity Engine</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#8b5cf6" }}>Alloy · Opportunity Engine</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Opportunity Engine</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>What to do next — revenue and recovery opportunities ranked by Alloy confidence, effort, and expected impact.</p>

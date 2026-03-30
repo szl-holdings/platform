@@ -2,7 +2,7 @@ import type { DomainConfig } from "../types.js";
 
 export const readinessReportConfig: DomainConfig = {
   appSlug: "readiness-report",
-  appName: "Readiness Report",
+  appName: "Lyte Readiness",
   domain: "compliance-readiness",
   description: "Compliance gaps, audit readiness, and framework adherence observability",
   connectors: ["ai", "notion"],

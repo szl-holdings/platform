@@ -196,7 +196,7 @@ The platform includes these registered applications:
 - MSP Command Center — managed service provider operations dashboard
 - SZL Holdings — family office investment management
 - Vessels Maritime Intelligence — vessel fleet management and compliance
-- Readiness Report — organizational readiness assessment platform
+- Lyte Readiness — operational readiness and maturity assessment module within Lyte
 - Lyte Command Center — ITOps signal processing and incident response
 - Dreamscape Creative Engine — AI-powered creative campaign platform
 - Carlota Jo Consulting — consulting services booking and management

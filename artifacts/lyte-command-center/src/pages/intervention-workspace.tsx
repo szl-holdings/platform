@@ -9,7 +9,7 @@ const THREADS = [
     correlation_id: "gf-2026-q1-001",
     comments: [
       { author: "Jordan Alvarez", time: "2h ago", text: "Legal team is at capacity. VP unavailable until tomorrow. Recommending reroute to CFO backup." },
-      { author: "System (Alloy)", time: "1.5h ago", text: "Reroute initiated to CFO backup approver. ETA: 2 hours. Correlation ID: gf-2026-q1-001." },
+      { author: "System (AlloyScape)", time: "1.5h ago", text: "Reroute initiated to CFO backup approver. ETA: 2 hours. Correlation ID: gf-2026-q1-001." },
       { author: "Priya Mehta", time: "45m ago", text: "CFO backup has been notified. Contract is under review." },
     ],
     actions_available: ["approve", "reroute", "escalate", "defer", "abort"],
@@ -86,9 +86,9 @@ export default function InterventionWorkspace() {
                 {selectedThread.comments.map((c, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{
-                      background: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(99,102,241,0.15)" : "rgba(14,165,233,0.15)",
-                      color: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "#6366f1" : "#0ea5e9",
-                      border: `1px solid ${c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(99,102,241,0.3)" : "rgba(14,165,233,0.3)"}`,
+                      background: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(139,92,246,0.15)" : "rgba(14,165,233,0.15)",
+                      color: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "#8b5cf6" : "#0ea5e9",
+                      border: `1px solid ${c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(139,92,246,0.3)" : "rgba(14,165,233,0.3)"}`,
                     }}>
                       {c.author.startsWith("System") ? "AS" : c.author.startsWith("Alloy") ? "AL" : c.author.split(" ").map(n => n[0]).join("")}
                     </div>
@@ -115,7 +115,7 @@ export default function InterventionWorkspace() {
                     );
                   })}
                   <a href="/alloy/" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}>
-                    <ExternalLink className="w-3 h-3" /> Run in Alloy
+                    <ExternalLink className="w-3 h-3" /> Run in AlloyScape
                   </a>
                 </div>
                 <div className="flex items-center gap-2">

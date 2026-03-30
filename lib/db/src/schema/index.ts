@@ -37,3 +37,4 @@ export * from "./entities";
 export * from "./platform_events";
 export * from "./alloy";
 export * from "./terra";
+export * from "./szl_canonical";
