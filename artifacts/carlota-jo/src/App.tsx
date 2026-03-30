@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 
 const Home = lazy(() => import("@/pages/Home"));
 const BookingFlow = lazy(() => import("@/pages/BookingFlow"));
@@ -50,7 +51,12 @@ function Router() {
 function App() {
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <Router />
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <EcosystemNav currentAppId="carlota-jo" currentAppName="Carlota Jo Consulting" accentColor="#f472b6" />
+        <div style={{ flex: 1 }}>
+          <Router />
+        </div>
+      </div>
     </WouterRouter>
   );
 }

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy, ChevronRight } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
@@ -183,11 +184,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex h-screen bg-background">
-          <Sidebar />
-          <main className="flex-1 overflow-auto">
-            <AppRouter />
-          </main>
+        <div className="flex flex-col h-screen bg-background">
+          <EcosystemNav currentAppId="inca" currentAppName="INCA AI Research Command Center" accentColor="#8b5cf6" />
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar />
+            <main className="flex-1 overflow-auto">
+              <AppRouter />
+            </main>
+          </div>
         </div>
       </WouterRouter>
     </QueryClientProvider>

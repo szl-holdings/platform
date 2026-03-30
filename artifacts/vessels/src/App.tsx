@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown, EyeOff, ShieldAlert, Shield, ChevronRight } from "lucide-react";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
@@ -290,13 +291,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex h-screen bg-[#060e1a]">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-auto min-w-0">
-              <DemoModeBanner />
-              <main className="flex-1 overflow-auto">
-                <AppRouter />
-              </main>
+          <div className="flex flex-col h-screen bg-[#060e1a]">
+            <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#3b82f6" />
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar />
+              <div className="flex-1 flex flex-col overflow-auto min-w-0">
+                <DemoModeBanner />
+                <main className="flex-1 overflow-auto">
+                  <AppRouter />
+                </main>
+              </div>
             </div>
           </div>
           <Toaster />

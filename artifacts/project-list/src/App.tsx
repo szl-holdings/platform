@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useMemo } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Search, ExternalLink, Shield, Brain, Zap, Ship, Building, Palette, Activity,
@@ -397,30 +398,35 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Switch>
-          <Route path="/spectrum">
-            <Suspense fallback={<PageLoader />}>
-              <SpectrumAnalytics />
-            </Suspense>
-          </Route>
-          <Route path="/metrics">
-            <Suspense fallback={<PageLoader />}>
-              <Metrics />
-            </Suspense>
-          </Route>
-          <Route path="/changelog">
-            <Suspense fallback={<PageLoader />}>
-              <Changelog />
-            </Suspense>
-          </Route>
-          <Route path="/roadmap">
-            <Suspense fallback={<PageLoader />}>
-              <Roadmap />
-            </Suspense>
-          </Route>
-          <Route path="/" component={AppDirectory} />
-          <Route component={AppDirectory} />
-        </Switch>
+        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+          <EcosystemNav currentAppId="project-list" currentAppName="Project List" accentColor="#a855f7" />
+          <div style={{ flex: 1 }}>
+            <Switch>
+              <Route path="/spectrum">
+                <Suspense fallback={<PageLoader />}>
+                  <SpectrumAnalytics />
+                </Suspense>
+              </Route>
+              <Route path="/metrics">
+                <Suspense fallback={<PageLoader />}>
+                  <Metrics />
+                </Suspense>
+              </Route>
+              <Route path="/changelog">
+                <Suspense fallback={<PageLoader />}>
+                  <Changelog />
+                </Suspense>
+              </Route>
+              <Route path="/roadmap">
+                <Suspense fallback={<PageLoader />}>
+                  <Roadmap />
+                </Suspense>
+              </Route>
+              <Route path="/" component={AppDirectory} />
+              <Route component={AppDirectory} />
+            </Switch>
+          </div>
+        </div>
       </WouterRouter>
     </QueryClientProvider>
   );

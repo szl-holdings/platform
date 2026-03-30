@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { LazyMotion, domMax } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
@@ -41,6 +42,7 @@ function App() {
   return (
     <LazyMotion features={domMax} strict>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <EcosystemNav currentAppId="szl-holdings" currentAppName="SZL Holdings" accentColor="#a855f7" />
         <Switch>
           <Route path="/" component={HomePage} />
           <Route path="/observability">

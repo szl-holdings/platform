@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { terraConfig } from "@workspace/shared-ui/copilot-configs";
 import { Sidebar } from "@/components/sidebar";
@@ -55,11 +56,14 @@ function App() {
   return (
     <>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex h-screen bg-terra-bg">
-          <Sidebar />
-          <main className="flex-1 overflow-auto">
-            <AppRouter />
-          </main>
+        <div className="flex flex-col h-screen bg-terra-bg">
+          <EcosystemNav currentAppId="terra" currentAppName="Terra Real Estate Intelligence" accentColor="#10b981" />
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar />
+            <main className="flex-1 overflow-auto">
+              <AppRouter />
+            </main>
+          </div>
         </div>
       </WouterRouter>
       <AgentCopilot config={terraConfig} />

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { Layout } from "@/components/layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
@@ -71,9 +72,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Layout>
-          <Router />
-        </Layout>
+        <div className="flex flex-col h-screen">
+          <EcosystemNav currentAppId="lyte" currentAppName="Lyte Command Center" accentColor="#f59e0b" />
+          <div className="flex-1 overflow-hidden">
+            <Layout>
+              <Router />
+            </Layout>
+          </div>
+        </div>
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>

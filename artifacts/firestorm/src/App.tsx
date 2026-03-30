@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight } from "lucide-react";
@@ -211,13 +212,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <div className="flex h-screen bg-background">
-          <Sidebar />
-          <div className="flex-1 flex flex-col overflow-auto">
-            <DemoModeBanner />
-            <main className="flex-1 overflow-auto">
-              <AppRouter />
-            </main>
+        <div className="flex flex-col h-screen bg-background">
+          <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Security Simulation" accentColor="#ef4444" />
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col overflow-auto">
+              <DemoModeBanner />
+              <main className="flex-1 overflow-auto">
+                <AppRouter />
+              </main>
+            </div>
           </div>
         </div>
         <Toaster />

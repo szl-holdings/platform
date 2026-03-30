@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { cn } from "@workspace/shared-ui/utils";
 import {
   LayoutDashboard,
@@ -200,7 +201,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={basePath}>
-        <DashboardLayout />
+        <div className="flex flex-col h-screen">
+          <EcosystemNav currentAppId="msp" currentAppName="Evolve MSP Command Center" accentColor="#06b6d4" />
+          <div className="flex-1 overflow-hidden">
+            <DashboardLayout />
+          </div>
+        </div>
       </WouterRouter>
     </QueryClientProvider>
   );

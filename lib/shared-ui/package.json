@@ -18,6 +18,7 @@
     "./hooks": "./src/hooks.tsx",
     "./error-boundary": "./src/error-boundary.tsx",
     "./AuthGate": "./src/AuthGate.tsx",
+    "./ecosystem-nav": "./src/ecosystem-nav.tsx",
     "./utils": "./src/utils.ts",
     "./hooks/use-mobile": "./src/hooks/use-mobile.tsx",
     "./hooks/use-toast": "./src/hooks/use-toast.ts",

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation, Link } from "wouter";
+import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
@@ -320,13 +321,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex min-h-screen bg-background">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-auto">
-              <DemoModeBanner />
-              <main className="flex-1 p-6">
-                <AppRouter />
-              </main>
+          <div className="flex flex-col min-h-screen bg-background">
+            <EcosystemNav currentAppId="admin" currentAppName="Admin Control Plane" accentColor="#f97316" />
+            <div className="flex flex-1 overflow-auto">
+              <Sidebar />
+              <div className="flex-1 flex flex-col overflow-auto">
+                <DemoModeBanner />
+                <main className="flex-1 p-6">
+                  <AppRouter />
+                </main>
+              </div>
             </div>
           </div>
         </WouterRouter>
