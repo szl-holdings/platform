@@ -11,6 +11,8 @@ import Playbooks from "@/pages/playbooks";
 import Commerce from "@/pages/commerce";
 import IntelligencePage from "@/pages/intelligence";
 import AIOps from "@/pages/ai-ops";
+import Topology from "@/pages/topology";
+import MeridianAnalytics from "@/pages/meridian-analytics";
 import NotFound from "@/pages/not-found";
 import ObservabilityPage from "@/pages/observability";
 import PortfolioObservability from "@/pages/portfolio-observability";
@@ -38,6 +40,8 @@ function Router() {
       <Route path="/ai-ops" component={AIOps} />
       <Route path="/observability" component={ObservabilityPage} />
       <Route path="/portfolio-observability" component={PortfolioObservability} />
+      <Route path="/topology" component={Topology} />
+      <Route path="/meridian-analytics" component={MeridianAnalytics} />
       <Route component={NotFound} />
     </Switch>
   );

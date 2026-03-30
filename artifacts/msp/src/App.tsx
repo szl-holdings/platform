@@ -16,15 +16,19 @@ import {
   ChevronRight,
   ExternalLink,
   Sparkles,
+  Server,
+  Wrench,
 } from "lucide-react";
 import LandingPage from "@/pages/landing";
 import ClientsPage from "@/pages/clients";
 import ServiceDeskPage from "@/pages/service-desk";
+import TicketsPage from "@/pages/tickets";
 import DevicesPage from "@/pages/devices";
 import ContractsPage from "@/pages/contracts";
 import NOCPage from "@/pages/noc";
 import RevenuePage from "@/pages/revenue";
 import TechniciansPage from "@/pages/technicians";
+import DispatchPage from "@/pages/dispatch";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -50,13 +54,14 @@ const navSections: NavSection[] = [
       { path: "/tickets", label: "Service Desk", icon: Ticket },
       { path: "/devices", label: "Device Inventory", icon: Monitor },
       { path: "/contracts", label: "Contracts & SLAs", icon: FileText },
+      { path: "/dispatch", label: "Technician Dispatch", icon: Wrench },
     ],
   },
   {
     title: "Business",
     items: [
       { path: "/revenue", label: "Revenue & Billing", icon: DollarSign },
-      { path: "/technicians", label: "Technician Dispatch", icon: Users },
+      { path: "/technicians", label: "Technicians", icon: Users },
     ],
   },
 ];
@@ -118,6 +123,10 @@ function Sidebar() {
           <Sparkles className="w-3.5 h-3.5 shrink-0" />
           {!collapsed && "Portfolio"}
         </a>
+        <div className={cn("flex items-center gap-2 px-3 py-2 text-[10px] text-emerald-400 font-medium", collapsed && "justify-center")}>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          {!collapsed && "Systems Operational"}
+        </div>
       </div>
 
       <button
@@ -135,12 +144,15 @@ function AppRouter() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/dashboard" component={ClientsPage} />
-      <Route path="/tickets" component={ServiceDeskPage} />
+      <Route path="/clients" component={ClientsPage} />
+      <Route path="/tickets" component={TicketsPage} />
+      <Route path="/service-desk" component={ServiceDeskPage} />
       <Route path="/devices" component={DevicesPage} />
       <Route path="/contracts" component={ContractsPage} />
       <Route path="/noc" component={NOCPage} />
       <Route path="/revenue" component={RevenuePage} />
       <Route path="/technicians" component={TechniciansPage} />
+      <Route path="/dispatch" component={DispatchPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -169,9 +181,10 @@ function DashboardLayout() {
 }
 
 function App() {
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
   return (
     <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+      <WouterRouter base={basePath}>
         <DashboardLayout />
       </WouterRouter>
     </QueryClientProvider>

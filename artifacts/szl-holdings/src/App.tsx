@@ -9,6 +9,8 @@ import { Leadership } from "@/components/Leadership";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import ObservabilityPage from "@/pages/observability";
+import { NexusMap } from "@/components/NexusMap";
+import { VentureNetwork } from "@/components/VentureNetwork";
 
 function HomePage() {
   return (
@@ -16,7 +18,9 @@ function HomePage() {
       <Navbar />
       <Hero />
       <Constellation />
+      <NexusMap />
       <Portfolio />
+      <VentureNetwork />
       <Timeline />
       <Pillars />
       <Leadership />

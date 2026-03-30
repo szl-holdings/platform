@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { AlertTriangle, CheckCircle2, Activity, Clock, Bell, Shield, Wifi, Server, Database, Mail, Cloud, Monitor, ArrowUpRight, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Activity, Clock, Bell, Shield, Wifi, Server, Database, Mail, Cloud, Monitor, ArrowUpRight, XCircle, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { alerts, uptimeData, incidentTimeline } from "@/data/mock-data";
 
@@ -24,7 +24,7 @@ function AlertRow({ alert, index }: { alert: typeof alerts[0]; index: number }) 
     warning: { color: "text-amber-400 bg-amber-500/10", icon: AlertTriangle },
     info: { color: "text-blue-400 bg-blue-500/10", icon: Activity },
   };
-  const config = severityConfig[alert.severity];
+  const config = severityConfig[alert.severity as keyof typeof severityConfig] || severityConfig.info;
   const Icon = config.icon;
 
   return (
@@ -103,7 +103,8 @@ export default function NOCPage() {
         </div>
 
         <div className="glass-card rounded-xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-border/40">
+          <div className="px-5 py-4 border-b border-border/40 flex items-center gap-2">
+             <Eye className="w-4 h-4 text-blue-400" />
             <h2 className="text-sm font-semibold text-foreground">Incident Timeline</h2>
           </div>
           <div className="p-4 space-y-0 max-h-[500px] overflow-y-auto">

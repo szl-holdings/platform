@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus } from "lucide-react";
+import { Search, Filter, ArrowUpDown, Building2, Monitor, Ticket, AlertTriangle, TrendingUp, TrendingDown, ChevronRight, Plus, CheckCircle, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { clients, type Client } from "@/data/mock-data";
+import { clients as mockClients, type Client } from "@/data/mock-data";
 
 function HealthBadge({ score }: { score: number }) {
   const color = score >= 90 ? "text-emerald-400 bg-emerald-500/10" : score >= 75 ? "text-amber-400 bg-amber-500/10" : "text-red-400 bg-red-500/10";
@@ -84,7 +84,7 @@ export default function ClientsPage() {
   const [sortBy, setSortBy] = useState<"name" | "health" | "mrr">("health");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const filtered = clients
+  const filtered = mockClients
     .filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.industry.toLowerCase().includes(search.toLowerCase()))
     .filter(c => filterStatus === "all" || c.contractStatus === filterStatus)
     .sort((a, b) => {
@@ -93,10 +93,10 @@ export default function ClientsPage() {
       return a.name.localeCompare(b.name);
     });
 
-  const totalDevices = clients.reduce((s, c) => s + c.deviceCount, 0);
-  const totalTickets = clients.reduce((s, c) => s + c.openTickets, 0);
-  const totalMRR = clients.reduce((s, c) => s + c.mrr, 0);
-  const avgHealth = Math.round(clients.reduce((s, c) => s + c.healthScore, 0) / clients.length);
+  const totalDevices = mockClients.reduce((s, c) => s + c.deviceCount, 0);
+  const totalTickets = mockClients.reduce((s, c) => s + c.openTickets, 0);
+  const totalMRR = mockClients.reduce((s, c) => s + c.mrr, 0);
+  const avgHealth = Math.round(mockClients.reduce((s, c) => s + c.healthScore, 0) / mockClients.length);
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -112,14 +112,17 @@ export default function ClientsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Clients", value: clients.length.toString(), sub: `${clients.filter(c => c.contractStatus === "active").length} active`, color: "text-primary" },
-          { label: "Avg Health Score", value: avgHealth.toString(), sub: avgHealth >= 85 ? "Good" : "Needs Attention", color: avgHealth >= 85 ? "text-emerald-400" : "text-amber-400" },
-          { label: "Total Devices", value: totalDevices.toLocaleString(), sub: `${clients.length} organizations`, color: "text-cyan-400" },
-          { label: "Monthly Revenue", value: `$${(totalMRR / 1000).toFixed(1)}K`, sub: `${totalTickets} open tickets`, color: "text-violet-400" },
+          { label: "Total Clients", value: mockClients.length.toString(), sub: `${mockClients.filter(c => c.contractStatus === "active").length} active`, color: "text-primary", icon: CheckCircle },
+          { label: "Avg Health Score", value: avgHealth.toString(), sub: avgHealth >= 85 ? "Good" : "Needs Attention", color: avgHealth >= 85 ? "text-emerald-400" : "text-amber-400", icon: Activity },
+          { label: "Total Devices", value: totalDevices.toLocaleString(), sub: `${mockClients.length} organizations`, color: "text-cyan-400", icon: Monitor },
+          { label: "Monthly Revenue", value: `$${(totalMRR / 1000).toFixed(1)}K`, sub: `${totalTickets} open tickets`, color: "text-violet-400", icon: Building2 },
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
-            <p className={cn("text-2xl font-display font-bold mt-1", stat.color)}>{stat.value}</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
+              <stat.icon className={cn("w-4 h-4", stat.color)} />
+            </div>
+            <p className={cn("text-2xl font-display font-bold", stat.color)}>{stat.value}</p>
             <p className="text-xs text-muted-foreground mt-1">{stat.sub}</p>
           </motion.div>
         ))}

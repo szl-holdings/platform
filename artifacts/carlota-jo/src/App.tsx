@@ -6,6 +6,7 @@ import BookingCancel from "@/pages/BookingCancel";
 import BookingFollowUp from "@/pages/BookingFollowUp";
 import NotFound from "@/pages/NotFound";
 import ObservabilityPage from "@/pages/observability";
+import AdvisoryIntel from "@/pages/AdvisoryIntel";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/booking/cancel" component={BookingCancel} />
       <Route path="/booking/follow-up" component={BookingFollowUp} />
       <Route path="/observability" component={ObservabilityPage} />
+      <Route path="/advisory" component={AdvisoryIntel} />
       <Route component={NotFound} />
     </Switch>
   );

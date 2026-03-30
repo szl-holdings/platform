@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { DollarSign, TrendingUp, TrendingDown, Users, BarChart3, PieChart, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Users, BarChart3, PieChart, ArrowUpRight, ArrowDownRight, CreditCard, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { clients, revenueData } from "@/data/mock-data";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, Legend } from "recharts";
@@ -159,8 +159,12 @@ export default function RevenuePage() {
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/40">
+        <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Client Profitability</h2>
+           <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-muted-foreground">Analysis</span>
+          </div>
         </div>
         <div className="grid grid-cols-6 gap-4 px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider border-b border-border/30">
           <div className="col-span-2">Client</div>

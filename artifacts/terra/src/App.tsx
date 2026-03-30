@@ -9,6 +9,7 @@ import PipelinePage from "@/pages/pipeline";
 import PropertyDetailPage from "@/pages/property-detail";
 import AnalyticsPage from "@/pages/analytics";
 import AlertsPage from "@/pages/alerts-page";
+import InvestmentAnalysis from "@/pages/investment-analysis";
 
 function AppRouter() {
   return (
@@ -20,6 +21,7 @@ function AppRouter() {
       <Route path="/property/:id" component={PropertyDetailPage} />
       <Route path="/analytics" component={AnalyticsPage} />
       <Route path="/alerts" component={AlertsPage} />
+      <Route path="/investment-analysis" component={InvestmentAnalysis} />
       <Route>
         <div className="flex items-center justify-center h-full">
           <p className="text-terra-text-secondary">Page not found</p>

@@ -41,17 +41,17 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **Admin Panel (`admin-panel`, route: `/admin/`):** System administration — health monitoring, app registry, connectors, user roles, audit logs, webhooks, feature flags, billing, and environment readiness.
 
 #### Application Portfolio
-- **Project List (`project-list`, route: `/`):** Main portfolio with hero section, project showcase, and social links.
-- **Stephen Site (`stephen-site`, route: `/stephen/`):** Founder/CEO personal brand with case studies ($12M fuel savings, 52% faster incident response) and strategic advisory rates.
-- **SZL Holdings (`szl-holdings`, route: `/szl-holdings/`):** Holding company corporate portal with animated hero, interactive portfolio visualization, and 11-milestone funding timeline.
-- **Vessels (`vessels`, route: `/vessels/`):** Maritime intelligence command center — 18 realistic vessels, CII emissions (IMO MEPC.352(78)), chokepoint intelligence, and sanctions monitoring.
-- **Firestorm (`firestorm`, route: `/firestorm/`):** SOC Operations Center — incidents (Kanban), MITRE ATT&CK mapping, compliance frameworks (NIST CSF, FedRAMP), and real-time NVD CVE proxy.
-- **Lyte Command Center (`lyte-command-center`, route: `/lyte-command-center/`):** Operations command — real-time infrastructure telemetry (4 regions, 12 K8s clusters), 24 realistic signals, and cost optimization.
-- **INCA (`inca`, route: `/inca/`):** AI Research Command Center — 10 programs (TITAN LLM, AEGIS Nav), 25 experiments with ML hyperparameters, and compute utilization (A100/H100).
-- **Readiness Report (`readiness-report`, route: `/readiness-report/`):** Organizational readiness — NIST CSF/ISO 27001/CMMC frameworks and Zero-Trust Architecture Migration programs.
-- **Terra (`terra`, route: `/terra/`):** Real estate intelligence — portfolio dashboard (8 properties), market intelligence, deal pipeline, and revenue/occupancy analytics.
-- **Dreamscape (`dreamscape`, route: `/dreamscape/`):** Creative production platform — 6 campaigns, AI tools (SDXL, RunwayML), and department-based approval workflows.
-- **Carlota Jo (`carlota-jo`, route: `/carlota-jo/`):** Strategic advisory — "Counsel for Consequential Decisions" for Fortune 500/sovereign wealth. Porter's Five Forces, BCG matrix, and COSO ERM frameworks.
+- **Project List (`project-list`, route: `/`):** Main portfolio with hero section, project showcase, spectrum analytics (`/spectrum`), and social links.
+- **Stephen Site (`stephen-site`, route: `/stephen/`):** Founder/CEO personal brand with case studies ($12M fuel savings, 52% faster incident response), career command center (`/career`), and strategic advisory rates.
+- **SZL Holdings (`szl-holdings`, route: `/szl-holdings/`):** Holding company corporate portal with animated hero, interactive portfolio visualization, NEXUS network map, venture network sections, and 11-milestone funding timeline.
+- **Vessels (`vessels`, route: `/vessels/`):** Maritime intelligence command center — 18 realistic vessels, CII emissions (IMO MEPC.352(78)), chokepoint intelligence, port analytics (`/port-analytics`), and sanctions monitoring.
+- **Firestorm (`firestorm`, route: `/firestorm/`):** SOC Operations Center — incidents (Kanban), MITRE ATT&CK mapping, compliance frameworks (NIST CSF, FedRAMP), real-time NVD CVE proxy, SENTINEL threat watch (`/sentinel`), watchlists (`/watchlists`), and forensics timeline (`/forensics`).
+- **Lyte Command Center (`lyte-command-center`, route: `/lyte-command-center/`):** Operations command — real-time infrastructure telemetry (4 regions, 12 K8s clusters), 24 realistic signals, infrastructure topology (`/topology`), Meridian analytics (`/meridian-analytics`), and cost optimization.
+- **INCA (`inca`, route: `/inca/`):** AI Research Command Center — 10 programs (TITAN LLM, AEGIS Nav), 25 experiments with ML hyperparameters, neural architecture explorer (`/neural-explorer`), benchmarking (`/benchmarking`), and compute utilization (A100/H100).
+- **Readiness Report (`readiness-report`, route: `/readiness-report/`):** Organizational readiness — NIST CSF/ISO 27001/CMMC frameworks, vital signs dashboard (`/vital-signs`), and Zero-Trust Architecture Migration programs.
+- **Terra (`terra`, route: `/terra/`):** Real estate intelligence — portfolio dashboard (8 properties), market intelligence, deal pipeline, investment analysis (`/investment-analysis`), and revenue/occupancy analytics.
+- **Dreamscape (`dreamscape`, route: `/dreamscape/`):** Creative production platform — 6 campaigns, AI tools (SDXL, RunwayML), Aurora generative effects gallery (`/aurora`), and department-based approval workflows.
+- **Carlota Jo (`carlota-jo`, route: `/carlota-jo/`):** Strategic advisory — "Counsel for Consequential Decisions" for Fortune 500/sovereign wealth. Porter's Five Forces, BCG matrix, COSO ERM frameworks, and advisory intel page (`/advisory`).
 - **MSP Command Center (`msp`, route: `/msp/`):** Managed Service Provider platform — client management, service desk, device inventory, contract/SLA tracking, NOC operations, revenue analytics, and technician dispatch.
 
 ### Database Schema

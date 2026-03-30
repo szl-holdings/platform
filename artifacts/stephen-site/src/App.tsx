@@ -11,6 +11,7 @@ import CheckoutCancel from "@/pages/checkout-cancel";
 import ObservabilityPage from "@/pages/observability";
 import FinancialResearch from "@/pages/financial-research";
 import HackajobProfile from "@/pages/hackajob-profile";
+import CareerCommand from "@/pages/career-command";
 import { Server, AlertTriangle } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -69,6 +70,7 @@ function Router() {
       <Route path="/observability" component={ObservabilityPage} />
       <Route path="/financial-research" component={FinancialResearch} />
       <Route path="/hackajob" component={HackajobProfile} />
+      <Route path="/career" component={CareerCommand} />
       <Route component={NotFound} />
     </Switch>
   );

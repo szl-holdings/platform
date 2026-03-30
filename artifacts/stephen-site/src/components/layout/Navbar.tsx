@@ -8,6 +8,7 @@ const navLinks = [
   { name: "About", href: "#about" },
   { name: "Services", href: "#services" },
   { name: "Work", href: "#portfolio" },
+  { name: "Career Command", href: "/career", isRoute: true },
   { name: "Testimonials", href: "#ecosystem" },
   { name: "Contact", href: "#contact" },
 ];
@@ -42,7 +43,7 @@ export function Navbar() {
           {navLinks.map((link) => (
             <a
               key={link.name}
-              href={link.href}
+              href={(link as any).isRoute ? `${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}` : link.href}
               className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
             >
               {link.name}
@@ -77,7 +78,7 @@ export function Navbar() {
               {navLinks.map((link) => (
                 <a
                   key={link.name}
-                  href={link.href}
+                  href={(link as any).isRoute ? `${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}` : link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-lg font-medium text-foreground py-2 border-b border-white/5 hover:text-primary transition-colors duration-300"
                 >

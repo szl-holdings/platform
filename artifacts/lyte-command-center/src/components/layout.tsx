@@ -13,7 +13,9 @@ import {
   Wifi,
   WifiOff,
   CreditCard,
-  Brain
+  Brain,
+  Network,
+  BarChart3
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -93,6 +95,8 @@ const NAV_ITEMS = [
   { href: "/ai-ops", label: "AI Ops Center", icon: Activity },
   { href: "/observability", label: "Observability", icon: Zap },
   { href: "/portfolio-observability", label: "Portfolio Health", icon: Activity },
+  { href: "/topology", label: "Topology", icon: Network },
+  { href: "/meridian-analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

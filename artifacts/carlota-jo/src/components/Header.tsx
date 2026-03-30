@@ -8,6 +8,7 @@ const navLinks = [
   { label: "Engagements", href: "#case-studies" },
   { label: "Perspectives", href: "#testimonials" },
   { label: "Models", href: "#pricing" },
+  { label: "Advisory Intel", href: "/advisory", isRoute: true },
   { label: "Inquire", href: "#contact" },
 ];
 
@@ -55,15 +56,25 @@ export default function Header() {
           </a>
 
           <nav className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => handleNav(link.href)}
-                className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-gold-400 transition-colors duration-300"
-              >
-                {link.label}
-              </button>
-            ))}
+            {navLinks.map((link) =>
+              (link as any).isRoute ? (
+                <a
+                  key={link.href}
+                  href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}`}
+                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-gold-400 transition-colors duration-300"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <button
+                  key={link.href}
+                  onClick={() => handleNav(link.href)}
+                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-gold-400 transition-colors duration-300"
+                >
+                  {link.label}
+                </button>
+              )
+            )}
             <a
               href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/book`}
               className="ml-4 px-7 py-2.5 text-[11px] font-medium tracking-[0.2em] uppercase border border-gold-500/30 text-gold-400/80 hover:bg-gold-500/5 hover:border-gold-500/50 transition-all duration-300"
@@ -91,15 +102,26 @@ export default function Header() {
             className="lg:hidden bg-navy-950/98 backdrop-blur-xl border-b border-gold-500/8"
           >
             <div className="px-6 py-8 flex flex-col gap-6">
-              {navLinks.map((link) => (
-                <button
-                  key={link.href}
-                  onClick={() => handleNav(link.href)}
-                  className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-gold-400 transition-colors"
-                >
-                  {link.label}
-                </button>
-              ))}
+              {navLinks.map((link) =>
+                (link as any).isRoute ? (
+                  <a
+                    key={link.href}
+                    href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}`}
+                    onClick={() => setMobileOpen(false)}
+                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-gold-400 transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <button
+                    key={link.href}
+                    onClick={() => handleNav(link.href)}
+                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-gold-400 transition-colors"
+                  >
+                    {link.label}
+                  </button>
+                )
+              )}
               <a
                 href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/book`}
                 className="mt-2 px-6 py-3.5 text-[11px] font-medium tracking-[0.2em] uppercase border border-gold-500/30 text-gold-400/80 hover:bg-gold-500/5 transition-all text-center"

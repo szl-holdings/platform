@@ -22,6 +22,7 @@ import SyntheticsCompliancePage from "@/pages/synthetics-compliance";
 import CO2EmissionsPage from "@/pages/co2-emissions";
 import AppliedIntelligencePage from "@/pages/applied-intelligence";
 import ObservabilityPage from "@/pages/observability";
+import PortAnalyticsPage from "@/pages/port-analytics";
 import { useState } from "react";
 
 const queryClient = new QueryClient({
@@ -72,6 +73,7 @@ const navSections: NavSection[] = [
       { path: "/applied-intelligence", label: "Applied Intelligence", icon: Brain },
       { path: "/ai-intel", label: "AI Intelligence", icon: Brain },
       { path: "/observability", label: "Observability", icon: Activity },
+      { path: "/port-analytics", label: "Port Analytics", icon: Anchor },
     ],
   },
 ];
@@ -273,6 +275,7 @@ function AppRouter() {
       <Route path="/synthetics" component={SyntheticsCompliancePage} />
       <Route path="/co2-emissions" component={CO2EmissionsPage} />
       <Route path="/applied-intelligence" component={AppliedIntelligencePage} />
+      <Route path="/port-analytics" component={PortAnalyticsPage} />
       <Route path="/vessel/:id" component={VesselDetailPage} />
       <Route path="/routes" component={RoutePlanningPage} />
       <Route path="/weather" component={WeatherPage} />

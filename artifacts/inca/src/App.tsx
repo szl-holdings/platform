@@ -1,6 +1,6 @@
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database } from "lucide-react";
+import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Beaker, TrendingUp, BellRing, Layers, Activity, Eye, Link2, BarChart3, Boxes, GitBranch, Database, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
@@ -19,6 +19,8 @@ import ConfidenceHistogram from "@/pages/confidence-histogram";
 import ScenarioBuilder from "@/pages/scenario-builder";
 import CorrelationAnalysis from "@/pages/correlation-analysis";
 import ModelRegistry from "@/pages/model-registry";
+import NeuralExplorer from "@/pages/neural-explorer";
+import Benchmarking from "@/pages/benchmarking";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -41,6 +43,8 @@ const navItems = [
   { path: "/scenarios", label: "Scenario Builder", icon: Boxes },
   { path: "/correlations", label: "Correlations", icon: GitBranch },
   { path: "/registry", label: "Model Registry", icon: Database },
+  { path: "/neural-explorer", label: "Neural Explorer", icon: Brain },
+  { path: "/benchmarking", label: "Benchmarking", icon: Trophy },
 ];
 
 function Sidebar() {
@@ -119,6 +123,8 @@ function AppRouter() {
       <Route path="/scenarios" component={ScenarioBuilder} />
       <Route path="/correlations" component={CorrelationAnalysis} />
       <Route path="/registry" component={ModelRegistry} />
+      <Route path="/neural-explorer" component={NeuralExplorer} />
+      <Route path="/benchmarking" component={Benchmarking} />
       <Route>
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground font-mono">404 — Page not found</p>

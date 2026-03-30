@@ -10,6 +10,7 @@ import { ContentCalendar } from "@/pages/content-calendar";
 import { SocialAssets } from "@/pages/social-assets";
 import { ContentGuides } from "@/pages/content-guides";
 import { GeneratorTools } from "@/pages/generator-tools";
+import AuroraGallery from "@/pages/aurora-gallery";
 import NotFound from "@/pages/not-found";
 import ObservabilityPage from "@/pages/observability";
 
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/social-assets" component={SocialAssets} />
       <Route path="/content-guides" component={ContentGuides} />
       <Route path="/generators" component={GeneratorTools} />
+      <Route path="/aurora" component={AuroraGallery} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -16,6 +16,9 @@ import AlertsPage from "@/pages/alerts-page";
 import RiskScoringPage from "@/pages/risk-scoring";
 import ReportsPage from "@/pages/reports-page";
 import ObservabilityPage from "@/pages/observability";
+import SentinelDashboard from "@/pages/sentinel-dashboard";
+import Watchlists from "@/pages/watchlists";
+import ForensicsTimeline from "@/pages/forensics-timeline";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -33,6 +36,9 @@ const navItems = [
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
   { path: "/reports", label: "Reports", icon: FileText },
   { path: "/observability", label: "Observability", icon: Search },
+  { path: "/sentinel", label: "Sentinel Watch", icon: Search },
+  { path: "/watchlists", label: "Watchlists", icon: Target },
+  { path: "/forensics", label: "Forensics", icon: Flame },
 ];
 
 function StatusBar() {
@@ -125,6 +131,9 @@ function AppRouter() {
       <Route path="/risk-scoring" component={RiskScoringPage} />
       <Route path="/reports" component={ReportsPage} />
       <Route path="/observability" component={ObservabilityPage} />
+      <Route path="/sentinel" component={SentinelDashboard} />
+      <Route path="/watchlists" component={Watchlists} />
+      <Route path="/forensics" component={ForensicsTimeline} />
       <Route>
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">Page not found</p>

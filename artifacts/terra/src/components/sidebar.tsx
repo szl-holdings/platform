@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Building2, LayoutDashboard, TrendingUp, Handshake, BarChart3, AlertTriangle, Home, ChevronLeft, ChevronRight } from "lucide-react";
+import { Building2, LayoutDashboard, TrendingUp, Handshake, BarChart3, AlertTriangle, Home, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -23,6 +23,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     items: [
       { path: "/market", label: "Market Intel", icon: TrendingUp },
       { path: "/analytics", label: "Analytics", icon: BarChart3 },
+      { path: "/investment-analysis", label: "Investment Analysis", icon: DollarSign },
     ],
   },
   {

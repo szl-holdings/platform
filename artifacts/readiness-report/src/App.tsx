@@ -14,6 +14,7 @@ import Alerts from "@/pages/alerts";
 import Trends from "@/pages/trends";
 import Rollup from "@/pages/rollup";
 import AIInsights from "@/pages/ai-insights";
+import VitalSigns from "@/pages/vital-signs";
 import NotFound from "@/pages/not-found";
 import ObservabilityPage from "@/pages/observability";
 
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/rollup" component={Rollup} />
       <Route path="/ai-insights" component={AIInsights} />
       <Route path="/observability" component={ObservabilityPage} />
+      <Route path="/vital-signs" component={VitalSigns} />
       <Route component={NotFound} />
     </Switch>
   );

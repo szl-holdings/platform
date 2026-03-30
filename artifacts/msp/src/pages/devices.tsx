@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Server, Monitor, Wifi, Printer, Smartphone, Shield, AlertTriangle, CheckCircle2, XCircle, Activity } from "lucide-react";
+import { Search, Filter, Server, Monitor, Wifi, Printer, Smartphone, Shield, AlertTriangle, CheckCircle2, XCircle, Activity, HardDrive, Clock, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { devices, type Device } from "@/data/mock-data";
+import { devices as mockDevices, type Device } from "@/data/mock-data";
 
 const typeIcons: Record<Device["type"], typeof Server> = {
   server: Server,
@@ -38,8 +38,8 @@ function UsageBar({ value, label, thresholds }: { value: number; label: string; 
 }
 
 function DeviceCard({ device, index }: { device: Device; index: number }) {
-  const TypeIcon = typeIcons[device.type];
-  const status = statusConfig[device.status];
+  const TypeIcon = typeIcons[device.type] || Server;
+  const status = statusConfig[device.status as keyof typeof statusConfig] || statusConfig.offline;
   const StatusIcon = status.icon;
 
   return (
@@ -99,7 +99,7 @@ export default function DevicesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [groupBy, setGroupBy] = useState<"none" | "client" | "type">("client");
 
-  const filtered = devices
+  const filtered = mockDevices
     .filter(d => d.hostname.toLowerCase().includes(search.toLowerCase()) || d.client.toLowerCase().includes(search.toLowerCase()) || d.ipAddress.includes(search))
     .filter(d => typeFilter === "all" || d.type === typeFilter)
     .filter(d => statusFilter === "all" || d.status === statusFilter);
@@ -113,10 +113,10 @@ export default function DevicesPage() {
         return acc;
       }, {} as Record<string, Device[]>);
 
-  const online = devices.filter(d => d.status === "online").length;
-  const warning = devices.filter(d => d.status === "warning").length;
-  const critical = devices.filter(d => d.status === "critical").length;
-  const offline = devices.filter(d => d.status === "offline").length;
+  const online = mockDevices.filter(d => d.status === "online").length;
+  const warning = mockDevices.filter(d => d.status === "warning").length;
+  const critical = mockDevices.filter(d => d.status === "critical").length;
+  const offline = mockDevices.filter(d => d.status === "offline").length;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">

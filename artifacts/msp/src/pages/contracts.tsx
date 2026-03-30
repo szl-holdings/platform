@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, TrendingUp, DollarSign, Shield, Search, Filter } from "lucide-react";
+import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, TrendingUp, DollarSign, Shield, Search, Filter, CheckCircle, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { contracts, type Contract } from "@/data/mock-data";
+import { contracts as mockContracts, type Contract } from "@/data/mock-data";
 
 const typeLabels: Record<Contract["type"], string> = {
   "managed-services": "Managed Services",
@@ -103,13 +103,13 @@ export default function ContractsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const filtered = contracts
+  const filtered = mockContracts
     .filter(c => c.client.toLowerCase().includes(search.toLowerCase()) || c.name.toLowerCase().includes(search.toLowerCase()))
     .filter(c => statusFilter === "all" || c.status === statusFilter);
 
-  const totalValue = contracts.filter(c => c.status !== "expired").reduce((s, c) => s + c.value, 0);
-  const expiringCount = contracts.filter(c => c.status === "expiring").length;
-  const avgCompliance = Math.round(contracts.filter(c => c.status !== "expired").reduce((s, c) => s + c.slaActual, 0) / contracts.filter(c => c.status !== "expired").length * 10) / 10;
+  const totalValue = mockContracts.filter(c => c.status !== "expired").reduce((s, c) => s + c.value, 0);
+  const expiringCount = mockContracts.filter(c => c.status === "expiring").length;
+  const avgCompliance = Math.round(mockContracts.filter(c => c.status !== "expired").reduce((s, c) => s + c.slaActual, 0) / mockContracts.filter(c => c.status !== "expired").length * 10) / 10;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -120,7 +120,7 @@ export default function ContractsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Active Contracts", value: contracts.filter(c => c.status === "active").length.toString(), color: "text-emerald-400", icon: FileText },
+          { label: "Active Contracts", value: mockContracts.filter(c => c.status === "active").length.toString(), color: "text-emerald-400", icon: FileText },
           { label: "Total Contract Value", value: `$${(totalValue / 1000).toFixed(0)}K`, color: "text-primary", icon: DollarSign },
           { label: "Expiring Soon", value: expiringCount.toString(), color: "text-amber-400", icon: Clock },
           { label: "Avg SLA Compliance", value: `${avgCompliance}%`, color: avgCompliance >= 97 ? "text-emerald-400" : "text-amber-400", icon: Shield },
