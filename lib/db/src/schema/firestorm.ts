@@ -172,6 +172,47 @@ export const firestormAnalyticsTable = pgTable("firestorm_analytics", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const firestormAssetsTable = pgTable("firestorm_assets", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  assetType: text("asset_type", { enum: ["server", "endpoint", "network_device", "cloud_resource", "application", "database", "api", "iam_identity", "container", "other"] }).notNull(),
+  owner: text("owner").notNull(),
+  team: text("team"),
+  environment: text("environment", { enum: ["production", "staging", "development", "dmz", "internal"] }).notNull().default("production"),
+  exposureLevel: text("exposure_level", { enum: ["public", "internal", "restricted", "critical"] }).notNull().default("internal"),
+  riskScore: numeric("risk_score", { precision: 4, scale: 1 }).notNull().default("0"),
+  criticalFindings: integer("critical_findings").notNull().default(0),
+  highFindings: integer("high_findings").notNull().default(0),
+  lastScannedAt: timestamp("last_scanned_at"),
+  tags: jsonb("tags"),
+  metadata: jsonb("metadata"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const firestormWorkflowActionsTable = pgTable("firestorm_workflow_actions", {
+  id: serial("id").primaryKey(),
+  entityType: text("entity_type", { enum: ["finding", "incident", "asset", "simulation"] }).notNull(),
+  entityId: integer("entity_id").notNull(),
+  actionType: text("action_type", { enum: ["assign_owner", "escalate", "acknowledge", "remediate", "route_to_response", "create_ticket", "notify"] }).notNull(),
+  assignedTo: text("assigned_to"),
+  status: text("status", { enum: ["pending", "in_progress", "completed", "failed"] }).notNull().default("pending"),
+  notes: text("notes"),
+  triggeredBy: text("triggered_by"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFirestormAssetSchema = createInsertSchema(firestormAssetsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormAsset = z.infer<typeof insertFirestormAssetSchema>;
+export type FirestormAsset = typeof firestormAssetsTable.$inferSelect;
+
+export const insertFirestormWorkflowActionSchema = createInsertSchema(firestormWorkflowActionsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormWorkflowAction = z.infer<typeof insertFirestormWorkflowActionSchema>;
+export type FirestormWorkflowAction = typeof firestormWorkflowActionsTable.$inferSelect;
+
 export const insertFirestormScenarioSchema = createInsertSchema(firestormScenariosTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertFirestormScenario = z.infer<typeof insertFirestormScenarioSchema>;
 export type FirestormScenario = typeof firestormScenariosTable.$inferSelect;

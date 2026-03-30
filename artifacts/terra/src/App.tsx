@@ -19,6 +19,7 @@ const WorkflowHealth = lazy(() => import("@/pages/workflow-health"));
 const ValueRecovery = lazy(() => import("@/pages/value-recovery"));
 const DriftDetection = lazy(() => import("@/pages/drift-detection"));
 const CausalDrilldown = lazy(() => import("@/pages/causal-drilldown"));
+const UnifiedCommand = lazy(() => import("@/pages/unified-command"));
 
 function PageLoader() {
   return (
@@ -32,7 +33,8 @@ function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={ExecutiveOverview} />
+        <Route path="/" component={UnifiedCommand} />
+        <Route path="/executive-overview" component={ExecutiveOverview} />
         <Route path="/workflow-health" component={WorkflowHealth} />
         <Route path="/value-recovery" component={ValueRecovery} />
         <Route path="/drift-detection" component={DriftDetection} />

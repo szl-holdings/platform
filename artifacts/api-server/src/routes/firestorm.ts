@@ -9,6 +9,8 @@ import {
   firestormRiskScoresTable,
   firestormIncidentsTable,
   firestormAlertsTable,
+  firestormAssetsTable,
+  firestormWorkflowActionsTable,
   insertFirestormScenarioSchema,
   insertFirestormAssessmentSchema,
   insertFirestormSimulationRunSchema,
@@ -16,6 +18,8 @@ import {
   insertFirestormRiskScoreSchema,
   insertFirestormIncidentSchema,
   insertFirestormAlertSchema,
+  insertFirestormAssetSchema,
+  insertFirestormWorkflowActionSchema,
 } from "@workspace/db";
 import { DEMO_COMPLIANCE_CONTROLS } from "./readiness.js";
 import { eq, desc, sql } from "drizzle-orm";
@@ -777,6 +781,92 @@ router.post("/firestorm/ingest/webhook", authMiddleware({ required: false }), as
     }).returning();
     sendCreated(res, { message: "Security event ingested", alertId: alert.id, severity: normalizedSeverity, source });
   } catch (err) { handleRouteError(res, err, "Failed to ingest webhook event"); }
+});
+
+router.get("/firestorm/assets", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const assets = await db.select().from(firestormAssetsTable).orderBy(desc(firestormAssetsTable.riskScore));
+    sendSuccess(res, assets);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list assets");
+  }
+});
+
+router.get("/firestorm/assets/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [asset] = await db.select().from(firestormAssetsTable).where(eq(firestormAssetsTable.id, id));
+    if (!asset) { sendNotFound(res, "Asset"); return; }
+    sendSuccess(res, asset);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get asset");
+  }
+});
+
+router.post("/firestorm/assets", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const data = insertFirestormAssetSchema.parse(req.body);
+    const [asset] = await db.insert(firestormAssetsTable).values(data).returning();
+    sendCreated(res, asset);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create asset");
+  }
+});
+
+router.put("/firestorm/assets/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const data = insertFirestormAssetSchema.partial().parse(req.body);
+    const [asset] = await db.update(firestormAssetsTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormAssetsTable.id, id)).returning();
+    if (!asset) { sendNotFound(res, "Asset"); return; }
+    sendSuccess(res, asset);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update asset");
+  }
+});
+
+router.get("/firestorm/workflow-actions", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const entityType = req.query.entityType as string | undefined;
+    const entityId = req.query.entityId ? parseInt(req.query.entityId as string, 10) : undefined;
+    let query = db.select().from(firestormWorkflowActionsTable).orderBy(desc(firestormWorkflowActionsTable.createdAt));
+    const actions = await query;
+    const filtered = actions.filter(a => {
+      if (entityType && a.entityType !== entityType) return false;
+      if (entityId && a.entityId !== entityId) return false;
+      return true;
+    });
+    sendSuccess(res, filtered);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list workflow actions");
+  }
+});
+
+router.post("/firestorm/workflow-actions", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const data = insertFirestormWorkflowActionSchema.parse(req.body);
+    const [action] = await db.insert(firestormWorkflowActionsTable).values(data).returning();
+    sendCreated(res, action);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create workflow action");
+  }
+});
+
+router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const { status, notes, assignedTo, completedAt } = req.body;
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
+    if (status) updateData.status = status;
+    if (notes) updateData.notes = notes;
+    if (assignedTo) updateData.assignedTo = assignedTo;
+    if (completedAt) updateData.completedAt = completedAt;
+    const [action] = await db.update(firestormWorkflowActionsTable).set(updateData).where(eq(firestormWorkflowActionsTable.id, id)).returning();
+    if (!action) { sendNotFound(res, "Workflow action"); return; }
+    sendSuccess(res, action);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update workflow action");
+  }
 });
 
 router.post("/firestorm/ingest/syslog", authMiddleware({ required: false }), async (req, res) => {

@@ -53,6 +53,7 @@ const DarkVesselDetection = lazy(() => import("@/pages/dark-vessel-detection"));
 const SanctionsScreening = lazy(() => import("@/pages/sanctions-screening"));
 const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
 const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
+const CommandWorkflowsPage = lazy(() => import("@/pages/command-workflows"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -84,6 +85,7 @@ const legacyNavItems = [
   { path: "/intelligence", label: "Maritime Intel", icon: Globe },
   { path: "/corridors", label: "Corridors", icon: Navigation },
   { path: "/agent-insights", label: "Agent Insights", icon: Brain },
+  { path: "/command-workflows", label: "Command Workflows", icon: ShieldAlert },
 ];
 
 function PageLoader() {
@@ -373,6 +375,7 @@ function DashboardRouter() {
         <Route path="/cyber-threats" component={CyberThreatPanel} />
         <Route path="/incidents" component={IncidentReporting} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
+        <Route path="/command-workflows" component={CommandWorkflowsPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -445,7 +448,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/dark-vessel-detection") || location.startsWith("/sanctions-screening") ||
     location.startsWith("/cyber-threats") || location.startsWith("/incidents") ||
     location.startsWith("/agent-insights") || location.startsWith("/vessels-list") ||
-    location.startsWith("/routes");
+    location.startsWith("/routes") || location.startsWith("/command-workflows");
 
   if (isDashboard) {
     return <DashboardShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;

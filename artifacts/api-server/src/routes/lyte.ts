@@ -8,6 +8,9 @@ import {
   lyteIncidentsTable,
   lytePlaybooksTable,
   lyteRecommendationsTable,
+  lyteActionsTable,
+  lyteSavedViewsTable,
+  lyteReadinessItemsTable,
 } from "@workspace/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
@@ -292,6 +295,118 @@ router.get("/lyte/executive-summary", authMiddleware({ required: false }), async
   } catch (err) {
     handleRouteError(res, err, "Failed to build executive summary");
   }
+});
+
+router.get("/lyte/actions", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const role = req.query.role as string | undefined;
+    const state = req.query.state as string | undefined;
+    const rows = await db.select().from(lyteActionsTable).orderBy(desc(lyteActionsTable.createdAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(lyteActionsTable);
+    const filtered = rows.filter(r => {
+      if (state && r.state !== state) return false;
+      if (role) {
+        const rv = r.roleVisibility as any;
+        if (rv && !rv[role]) return false;
+      }
+      return true;
+    });
+    sendSuccess(res, filtered, 200, { page, limit, total: count });
+  } catch (err) { handleRouteError(res, err, "Failed to list actions"); }
+});
+
+router.post("/lyte/actions", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const [row] = await db.insert(lyteActionsTable).values(req.body).returning();
+    sendSuccess(res, row, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to create action"); }
+});
+
+router.patch("/lyte/actions/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const current = await db.select().from(lyteActionsTable).where(eq(lyteActionsTable.id, id)).limit(1);
+    if (!current[0]) { sendNotFound(res, "Action"); return; }
+
+    const { state, assignedTo, notes, ...rest } = req.body;
+    const stateHistory = (current[0].stateHistory as any[]) ?? [];
+    if (state && state !== current[0].state) {
+      stateHistory.push({ from: current[0].state, to: state, at: new Date().toISOString() });
+    }
+
+    const [row] = await db.update(lyteActionsTable).set({
+      ...rest,
+      ...(state ? { state } : {}),
+      ...(assignedTo !== undefined ? { assignedTo } : {}),
+      ...(notes !== undefined ? { notes } : {}),
+      stateHistory,
+      updatedAt: new Date(),
+      ...(state === "resolved" ? { resolvedAt: new Date() } : {}),
+    }).where(eq(lyteActionsTable.id, id)).returning();
+    sendSuccess(res, row);
+  } catch (err) { handleRouteError(res, err, "Failed to update action"); }
+});
+
+router.get("/lyte/views", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const role = req.query.role as string | undefined;
+    const rows = await db.select().from(lyteSavedViewsTable).orderBy(desc(lyteSavedViewsTable.createdAt));
+    const filtered = role ? rows.filter(r => !r.role || r.role === role) : rows;
+    sendSuccess(res, filtered);
+  } catch (err) { handleRouteError(res, err, "Failed to list views"); }
+});
+
+router.post("/lyte/views", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const [row] = await db.insert(lyteSavedViewsTable).values(req.body).returning();
+    sendSuccess(res, row, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to create view"); }
+});
+
+router.patch("/lyte/views/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.update(lyteSavedViewsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteSavedViewsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "View"); return; }
+    sendSuccess(res, row);
+  } catch (err) { handleRouteError(res, err, "Failed to update view"); }
+});
+
+router.delete("/lyte/views/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.delete(lyteSavedViewsTable).where(eq(lyteSavedViewsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "View"); return; }
+    sendSuccess(res, { deleted: true });
+  } catch (err) { handleRouteError(res, err, "Failed to delete view"); }
+});
+
+router.get("/lyte/readiness", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const rows = await db.select().from(lyteReadinessItemsTable).orderBy(desc(lyteReadinessItemsTable.createdAt));
+    const total = rows.length;
+    const complete = rows.filter(r => r.status === "complete").length;
+    const blocked = rows.filter(r => r.status === "blocked").length;
+    const score = total > 0 ? Math.round((complete / total) * 100) : 0;
+    sendSuccess(res, { items: rows, summary: { total, complete, blocked, score } });
+  } catch (err) { handleRouteError(res, err, "Failed to list readiness items"); }
+});
+
+router.post("/lyte/readiness", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const [row] = await db.insert(lyteReadinessItemsTable).values(req.body).returning();
+    sendSuccess(res, row, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to create readiness item"); }
+});
+
+router.patch("/lyte/readiness/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.update(lyteReadinessItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteReadinessItemsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Readiness item"); return; }
+    sendSuccess(res, row);
+  } catch (err) { handleRouteError(res, err, "Failed to update readiness item"); }
 });
 
 const lyteLiveLimit = rateLimit({

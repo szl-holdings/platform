@@ -5,7 +5,7 @@ import { DemoModeProvider } from "@workspace/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight, ShieldCheck, Building2, TrendingUp, Brain as BrainIcon } from "lucide-react";
+import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight, ShieldCheck, Building2, TrendingUp, Brain as BrainIcon, Package } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
@@ -34,6 +34,7 @@ const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
 const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
+const AssetInventoryPage = lazy(() => import("@/pages/asset-inventory"));
 
 const ReadinessDashboard = lazy(() => import("@/pages/compliance/readiness-dashboard"));
 const FrameworkScorecards = lazy(() => import("@/pages/compliance/framework-scorecards"));
@@ -52,6 +53,7 @@ const primaryNavItems = [
   { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
   { path: "/incidents", label: "Incidents", icon: Shield },
   { path: "/alerts", label: "Alerts", icon: Bell },
+  { path: "/asset-inventory", label: "Asset Inventory", icon: Package },
   { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
   { path: "/threat-intel", label: "Threat Intel", icon: AlertTriangle },
   { path: "/findings", label: "Findings", icon: Target },
@@ -209,6 +211,7 @@ function AppRouter() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={SOCDashboard} />
+        <Route path="/asset-inventory" component={AssetInventoryPage} />
         <Route path="/threat-intel" component={ThreatIntelligence} />
         <Route path="/threat-feed" component={ThreatIntelFeed} />
         <Route path="/incidents" component={IncidentsPage} />

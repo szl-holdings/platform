@@ -3,7 +3,7 @@ import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
 import {
   LayoutDashboard, Activity, TrendingDown, Radar, GitBranch,
-  Bell, ChevronRight, Zap, Eye, Menu, X
+  Bell, ChevronRight, Zap, Eye, Menu, X, Globe
 } from "lucide-react";
 
 const COMMAND_LOOP = [
@@ -15,7 +15,8 @@ const COMMAND_LOOP = [
 ];
 
 const NAV = [
-  { href: "/", label: "Executive Overview", icon: LayoutDashboard, phase: "DETECT" },
+  { href: "/", label: "Unified Command", icon: Globe, phase: "DETECT" },
+  { href: "/executive-overview", label: "Executive Overview", icon: LayoutDashboard, phase: "DETECT" },
   { href: "/workflow-health", label: "Workflow Health", icon: Activity, phase: "DETECT" },
   { href: "/value-recovery", label: "Value Recovery", icon: TrendingDown, phase: "VERIFY" },
   { href: "/drift-detection", label: "Drift Detection", icon: Radar, phase: "DETECT" },

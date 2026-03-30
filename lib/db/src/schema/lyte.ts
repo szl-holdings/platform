@@ -86,6 +86,73 @@ export const lyteRecommendationsTable = pgTable("lyte_recommendations", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const lyteActionsTable = pgTable("lyte_actions", {
+  id: serial("id").primaryKey(),
+  workspaceId: integer("workspace_id").references(() => lyteWorkspacesTable.id, { onDelete: "cascade" }),
+  signalId: integer("signal_id").references(() => lyteSignalsTable.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  signalCategory: text("signal_category", { enum: [
+    "approval_latency", "ownership_gap", "forecast_drift", "stalled_workflow",
+    "handoff_failure", "status_conflict", "readiness_blocker", "pipeline_hygiene"
+  ] }).notNull(),
+  state: text("state", { enum: ["new", "acknowledged", "assigned", "escalated", "resolved", "dismissed"] }).notNull().default("new"),
+  priority: text("priority", { enum: ["urgent", "high", "medium", "low"] }).notNull().default("medium"),
+  owner: text("owner"),
+  assignedTo: text("assigned_to"),
+  valueAtRisk: numeric("value_at_risk", { precision: 14, scale: 2 }),
+  dueAt: timestamp("due_at"),
+  resolvedAt: timestamp("resolved_at"),
+  notes: text("notes"),
+  stateHistory: jsonb("state_history"),
+  roleVisibility: jsonb("role_visibility"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const lyteSavedViewsTable = pgTable("lyte_saved_views", {
+  id: serial("id").primaryKey(),
+  workspaceId: integer("workspace_id").references(() => lyteWorkspacesTable.id, { onDelete: "cascade" }),
+  userId: text("user_id"),
+  name: text("name").notNull(),
+  description: text("description"),
+  role: text("role", { enum: ["executive", "operations", "delivery"] }),
+  filters: jsonb("filters").notNull().default({}),
+  sortBy: text("sort_by"),
+  isDefault: boolean("is_default").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const lyteReadinessItemsTable = pgTable("lyte_readiness_items", {
+  id: serial("id").primaryKey(),
+  workspaceId: integer("workspace_id").references(() => lyteWorkspacesTable.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  itemType: text("item_type", { enum: ["launch_gate", "blocker", "dependency", "milestone", "owner_check"] }).notNull(),
+  status: text("status", { enum: ["not_started", "in_progress", "blocked", "complete", "waived"] }).notNull().default("not_started"),
+  owner: text("owner"),
+  dueAt: timestamp("due_at"),
+  readinessScore: integer("readiness_score"),
+  blockedBy: jsonb("blocked_by"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertLyteActionSchema = createInsertSchema(lyteActionsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLyteAction = z.infer<typeof insertLyteActionSchema>;
+export type LyteAction = typeof lyteActionsTable.$inferSelect;
+
+export const insertLyteSavedViewSchema = createInsertSchema(lyteSavedViewsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLyteSavedView = z.infer<typeof insertLyteSavedViewSchema>;
+export type LyteSavedView = typeof lyteSavedViewsTable.$inferSelect;
+
+export const insertLyteReadinessItemSchema = createInsertSchema(lyteReadinessItemsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLyteReadinessItem = z.infer<typeof insertLyteReadinessItemSchema>;
+export type LyteReadinessItem = typeof lyteReadinessItemsTable.$inferSelect;
+
 export const insertLyteWorkspaceSchema = createInsertSchema(lyteWorkspacesTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertLyteWorkspace = z.infer<typeof insertLyteWorkspaceSchema>;
 export type LyteWorkspace = typeof lyteWorkspacesTable.$inferSelect;

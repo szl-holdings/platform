@@ -120,6 +120,43 @@ export const vesselsSimulationsTable = pgTable("vessels_simulations", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const vesselsEventsTable = pgTable("vessels_events", {
+  id: serial("id").primaryKey(),
+  vesselId: integer("vessel_id").notNull().references(() => vesselsTable.id, { onDelete: "cascade" }),
+  eventType: text("event_type", { enum: [
+    "status_change", "route_deviation", "eta_drift", "weather_pressure",
+    "maintenance_watch", "port_congestion", "delay_event", "alert_classification",
+    "ais_dark", "speed_anomaly", "cargo_issue", "sanctions_flag"
+  ] }).notNull(),
+  severity: text("severity", { enum: ["watch", "warning", "critical"] }).notNull().default("watch"),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status", { enum: ["open", "acknowledged", "assigned", "resolved"] }).notNull().default("open"),
+  assignedTo: text("assigned_to"),
+  consequenceData: jsonb("consequence_data"),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedAt: timestamp("resolved_at"),
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const vesselsCommandWorkflowsTable = pgTable("vessels_command_workflows", {
+  id: serial("id").primaryKey(),
+  vesselId: integer("vessel_id").references(() => vesselsTable.id, { onDelete: "cascade" }),
+  eventId: integer("event_id").references(() => vesselsEventsTable.id, { onDelete: "set null" }),
+  workflowType: text("workflow_type", { enum: [
+    "exception_queue", "owner_assignment", "acknowledgment",
+    "escalation", "maintenance_followup", "route_intervention"
+  ] }).notNull(),
+  status: text("status", { enum: ["pending", "in_progress", "completed", "failed"] }).notNull().default("pending"),
+  assignedTo: text("assigned_to"),
+  notes: text("notes"),
+  consequenceImpact: jsonb("consequence_impact"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertVesselFleetSchema = createInsertSchema(vesselsFleetsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertVesselFleet = z.infer<typeof insertVesselFleetSchema>;
 export type VesselFleet = typeof vesselsFleetsTable.$inferSelect;
@@ -155,3 +192,11 @@ export type VesselWeatherSnapshot = typeof vesselsWeatherSnapshotsTable.$inferSe
 export const insertVesselSimulationSchema = createInsertSchema(vesselsSimulationsTable).omit({ id: true, createdAt: true });
 export type InsertVesselSimulation = z.infer<typeof insertVesselSimulationSchema>;
 export type VesselSimulation = typeof vesselsSimulationsTable.$inferSelect;
+
+export const insertVesselsExceptionEventSchema = createInsertSchema(vesselsEventsTable).omit({ id: true, createdAt: true });
+export type InsertVesselsExceptionEvent = z.infer<typeof insertVesselsExceptionEventSchema>;
+export type VesselsExceptionEvent = typeof vesselsEventsTable.$inferSelect;
+
+export const insertVesselCommandWorkflowSchema = createInsertSchema(vesselsCommandWorkflowsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertVesselCommandWorkflow = z.infer<typeof insertVesselCommandWorkflowSchema>;
+export type VesselCommandWorkflow = typeof vesselsCommandWorkflowsTable.$inferSelect;

@@ -11,11 +11,15 @@ import {
   vesselsAlertsTable,
   vesselsWeatherSnapshotsTable,
   vesselsSimulationsTable,
+  vesselsEventsTable,
+  vesselsCommandWorkflowsTable,
   insertVesselFleetSchema,
   insertVesselSchema,
   insertVesselRouteSchema,
   insertVesselAlertRuleSchema,
   insertVesselSimulationSchema,
+  insertVesselsExceptionEventSchema,
+  insertVesselCommandWorkflowSchema,
 } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendBadRequest, handleRouteError } from "../lib/api-response";
@@ -516,6 +520,88 @@ router.get("/vessels/live/weather-marine", vesselsLiveLimit, authMiddleware({ re
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch marine weather"); }
+});
+
+router.get("/vessels/events", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
+    const status = req.query.status as string | undefined;
+    const events = await db.select().from(vesselsEventsTable).orderBy(desc(vesselsEventsTable.occurredAt));
+    const filtered = events.filter(e => {
+      if (vesselId && e.vesselId !== vesselId) return false;
+      if (status && e.status !== status) return false;
+      return true;
+    });
+    sendSuccess(res, filtered);
+  } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
+});
+
+router.get("/vessels/:id/events", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const events = await db.select().from(vesselsEventsTable).where(eq(vesselsEventsTable.vesselId, id)).orderBy(desc(vesselsEventsTable.occurredAt));
+    sendSuccess(res, events);
+  } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
+});
+
+router.post("/vessels/events", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const data = insertVesselsExceptionEventSchema.parse(req.body);
+    const [event] = await db.insert(vesselsEventsTable).values(data).returning();
+    sendCreated(res, event);
+  } catch (err) { handleRouteError(res, err, "Failed to create vessel event"); }
+});
+
+router.patch("/vessels/events/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const { status, assignedTo, ...rest } = req.body;
+    const updateData: Record<string, unknown> = { ...rest };
+    if (status) updateData.status = status;
+    if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
+    if (status === "acknowledged") updateData.acknowledgedAt = new Date();
+    if (status === "resolved") updateData.resolvedAt = new Date();
+    const [event] = await db.update(vesselsEventsTable).set(updateData).where(eq(vesselsEventsTable.id, id)).returning();
+    if (!event) { sendNotFound(res, "Vessel event"); return; }
+    sendSuccess(res, event);
+  } catch (err) { handleRouteError(res, err, "Failed to update vessel event"); }
+});
+
+router.get("/vessels/command-workflows", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
+    const status = req.query.status as string | undefined;
+    const workflows = await db.select().from(vesselsCommandWorkflowsTable).orderBy(desc(vesselsCommandWorkflowsTable.createdAt));
+    const filtered = workflows.filter(w => {
+      if (vesselId && w.vesselId !== vesselId) return false;
+      if (status && w.status !== status) return false;
+      return true;
+    });
+    sendSuccess(res, filtered);
+  } catch (err) { handleRouteError(res, err, "Failed to list command workflows"); }
+});
+
+router.post("/vessels/command-workflows", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const data = insertVesselCommandWorkflowSchema.parse(req.body);
+    const [workflow] = await db.insert(vesselsCommandWorkflowsTable).values(data).returning();
+    sendCreated(res, workflow);
+  } catch (err) { handleRouteError(res, err, "Failed to create command workflow"); }
+});
+
+router.patch("/vessels/command-workflows/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const { status, assignedTo, notes, ...rest } = req.body;
+    const updateData: Record<string, unknown> = { ...rest, updatedAt: new Date() };
+    if (status) updateData.status = status;
+    if (assignedTo !== undefined) updateData.assignedTo = assignedTo;
+    if (notes !== undefined) updateData.notes = notes;
+    if (status === "completed") updateData.completedAt = new Date();
+    const [workflow] = await db.update(vesselsCommandWorkflowsTable).set(updateData).where(eq(vesselsCommandWorkflowsTable.id, id)).returning();
+    if (!workflow) { sendNotFound(res, "Command workflow"); return; }
+    sendSuccess(res, workflow);
+  } catch (err) { handleRouteError(res, err, "Failed to update command workflow"); }
 });
 
 export default router;

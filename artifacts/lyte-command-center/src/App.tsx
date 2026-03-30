@@ -33,16 +33,20 @@ const ApprovalsCenter = lazy(() => import("@/pages/approvals-center"));
 const OwnershipMap = lazy(() => import("@/pages/ownership-map-new"));
 const EscalationCenter = lazy(() => import("@/pages/escalation-center"));
 const InterventionWorkspace = lazy(() => import("@/pages/intervention-workspace"));
+const ActionQueue = lazy(() => import("@/pages/action-queue"));
+const ReadinessModule = lazy(() => import("@/pages/readiness-module"));
 
 function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandInbox} />
+        <Route path="/action-queue" component={ActionQueue} />
         <Route path="/approvals" component={ApprovalsCenter} />
         <Route path="/ownership" component={OwnershipMap} />
         <Route path="/escalation" component={EscalationCenter} />
         <Route path="/intervention" component={InterventionWorkspace} />
+        <Route path="/readiness" component={ReadinessModule} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

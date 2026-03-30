@@ -54,6 +54,28 @@ export const api = {
   cves: {
     list: (keyword?: string) => apiFetch<any[]>(`/firestorm/cves${keyword ? `?keyword=${encodeURIComponent(keyword)}` : ""}`),
   },
+  assets: {
+    list: (params?: { type?: string; owner?: string; exposureLevel?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.type) q.set("type", params.type);
+      if (params?.owner) q.set("owner", params.owner);
+      if (params?.exposureLevel) q.set("exposureLevel", params.exposureLevel);
+      return apiFetch<any[]>(`/firestorm/assets${q.toString() ? `?${q}` : ""}`);
+    },
+    get: (id: number) => apiFetch<any>(`/firestorm/assets/${id}`),
+    create: (data: any) => apiFetch<any>("/firestorm/assets", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/assets/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  },
+  workflowActions: {
+    list: (entityType?: string, entityId?: number) => {
+      const q = new URLSearchParams();
+      if (entityType) q.set("entityType", entityType);
+      if (entityId) q.set("entityId", String(entityId));
+      return apiFetch<any[]>(`/firestorm/workflow-actions${q.toString() ? `?${q}` : ""}`);
+    },
+    create: (data: any) => apiFetch<any>("/firestorm/workflow-actions", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/workflow-actions/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  },
   live: {
     nvdCves: (severity?: string, keyword?: string, limit?: number) => {
       const params = new URLSearchParams();
