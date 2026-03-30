@@ -8,7 +8,8 @@ import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { PrivateAppGuard } from "@workspace/shared-ui";
-import { Zap, Inbox, CheckSquare, Users, AlertOctagon } from "lucide-react";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { Zap, Inbox, CheckSquare, Users, AlertOctagon, Activity, Shield } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,19 +37,23 @@ const InterventionWorkspace = lazy(() => import("@/pages/intervention-workspace"
 const ActionQueue = lazy(() => import("@/pages/action-queue"));
 const ReadinessModule = lazy(() => import("@/pages/readiness-module"));
 const AdminJobsPage = lazy(() => import("@/pages/admin/jobs"));
-const ReadinessPage = lazy(() => import("@/pages/readiness"));
+const SignalsPage = lazy(() => import("@/pages/signals-page"));
+const ActionsPage = lazy(() => import("@/pages/actions-page"));
+const ReadinessPage = lazy(() => import("@/pages/readiness-page"));
 
 function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandInbox} />
+        <Route path="/signals" component={SignalsPage} />
+        <Route path="/actions" component={ActionsPage} />
+        <Route path="/readiness" component={ReadinessPage} />
         <Route path="/action-queue" component={ActionQueue} />
         <Route path="/approvals" component={ApprovalsCenter} />
         <Route path="/ownership" component={OwnershipMap} />
         <Route path="/escalation" component={EscalationCenter} />
         <Route path="/intervention" component={InterventionWorkspace} />
-        <Route path="/readiness" component={ReadinessPage} />
         <Route path="/readiness-module" component={ReadinessModule} />
         <Route path="/admin/jobs" component={AdminJobsPage} />
         <Route>
@@ -61,6 +66,9 @@ function Router() {
 
 const lyteCommands: CommandItem[] = [
   { id: "nav-inbox", label: "Command Inbox", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-signals", label: "Signals Feed", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
+  { id: "nav-actions", label: "Action Center", icon: "🎯", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/actions"); } },
+  { id: "nav-readiness", label: "Readiness Module", icon: "🛡️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/readiness"); } },
   { id: "nav-approvals", label: "Approvals Center", icon: "✅", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/approvals"); } },
   { id: "nav-ownership", label: "Ownership Map", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ownership"); } },
   { id: "nav-escalation", label: "Escalation Center", icon: "🚨", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/escalation"); } },
@@ -69,7 +77,9 @@ const lyteCommands: CommandItem[] = [
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [
-  { key: "A", description: "Approvals Center", category: "Navigation" },
+  { key: "S", description: "Signals Feed", category: "Navigation" },
+  { key: "A", description: "Action Center", category: "Navigation" },
+  { key: "R", description: "Readiness Module", category: "Navigation" },
   { key: "O", description: "Ownership Map", category: "Navigation" },
   { key: "E", description: "Escalation Center", category: "Navigation" },
   { key: "I", description: "Intervention Workspace", category: "Navigation" },
@@ -99,6 +109,22 @@ function App() {
             accentColor="#f59e0b"
           />
         </PowerUserProvider>
+        <WelcomeOverlay
+          appId="lyte"
+          appName="Lyte"
+          subtitle="Command & Orchestration"
+          description="Lyte interprets what Beacon sees and routes accountability to the right owner. It is the execution layer for human decisions — approvals, escalations, and interventions."
+          accentColor="#f59e0b"
+          icon={Zap}
+          features={[
+            { icon: Inbox, title: "Command Inbox", description: "Prioritized actions, approvals, exceptions, and stalled workflow assignments" },
+            { icon: Activity, title: "Signals Feed", description: "Live signal feed from all sources with state transitions and detail history" },
+            { icon: CheckSquare, title: "Action Center", description: "Assigned actions with state transitions, role-based views, and optimistic updates" },
+            { icon: Shield, title: "Readiness Module", description: "Operational readiness items with scores, owners, and completion tracking" },
+            { icon: Users, title: "Ownership Map", description: "Who owns each step, missing ownership, broken handoffs, overloaded teams" },
+            { icon: AlertOctagon, title: "Escalation Center", description: "What needs escalation, why, to whom, with Alloy rationale attached" },
+          ]}
+        />
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>

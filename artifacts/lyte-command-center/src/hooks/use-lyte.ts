@@ -1,24 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, type LyteIncident } from "../lib/api";
-import { signals as demoSignals, incidents as demoIncidents, recommendations as demoRecommendations, playbooks as demoPlaybooks } from "../lib/mock-data";
-
-function isAuthError(e: unknown): boolean {
-  if (!(e instanceof Error)) return false;
-  const msg = e.message.toLowerCase();
-  return msg.includes("401") || msg.includes("403") || msg.includes("unauthorized") || msg.includes("forbidden") || msg.includes("not authenticated");
-}
+import { api, type LyteIncident, type LyteAction, type LyteSavedView } from "../lib/api";
 
 export function useSignals() {
   return useQuery({
     queryKey: ["signals"],
-    queryFn: async () => {
-      try {
-        return await api.signals.list();
-      } catch (e) {
-        if (isAuthError(e)) return demoSignals;
-        throw e;
-      }
-    },
+    queryFn: () => api.signals.list(),
   });
 }
 
@@ -35,14 +21,7 @@ export function useUpdateSignal() {
 export function useIncidents() {
   return useQuery({
     queryKey: ["incidents"],
-    queryFn: async () => {
-      try {
-        return await api.incidents.list();
-      } catch (e) {
-        if (isAuthError(e)) return demoIncidents;
-        throw e;
-      }
-    },
+    queryFn: () => api.incidents.list(),
   });
 }
 
@@ -69,14 +48,7 @@ export function useUpdateIncident() {
 export function useRecommendations() {
   return useQuery({
     queryKey: ["recommendations"],
-    queryFn: async () => {
-      try {
-        return await api.recommendations.list();
-      } catch (e) {
-        if (isAuthError(e)) return demoRecommendations;
-        throw e;
-      }
-    },
+    queryFn: () => api.recommendations.list(),
   });
 }
 
@@ -93,41 +65,91 @@ export function useUpdateRecommendation() {
 export function usePlaybooks() {
   return useQuery({
     queryKey: ["playbooks"],
-    queryFn: async () => {
-      try {
-        return await api.playbooks.list();
-      } catch (e) {
-        if (isAuthError(e)) return demoPlaybooks;
-        throw e;
-      }
-    },
+    queryFn: () => api.playbooks.list(),
   });
 }
 
 export function useCommandCards() {
   return useQuery({
     queryKey: ["commandCards"],
-    queryFn: async () => {
-      try {
-        return await api.commandCards.list();
-      } catch (e) {
-        if (isAuthError(e)) return [];
-        throw e;
-      }
-    },
+    queryFn: () => api.commandCards.list(),
   });
 }
 
 export function useExecutiveSummary() {
   return useQuery({
     queryKey: ["executiveSummary"],
-    queryFn: async () => {
-      try {
-        return await api.executiveSummary();
-      } catch (e) {
-        if (isAuthError(e)) return {};
-        throw e;
+    queryFn: () => api.executiveSummary(),
+  });
+}
+
+export function useActions(params?: { role?: string; state?: string }) {
+  return useQuery({
+    queryKey: ["actions", params],
+    queryFn: () => api.actions.list(params),
+  });
+}
+
+export function useUpdateAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: { id: number } & Partial<LyteAction>) => {
+      return await api.actions.update(id, data);
+    },
+    onMutate: async ({ id, ...data }) => {
+      await queryClient.cancelQueries({ queryKey: ["actions"] });
+      const previous = queryClient.getQueriesData({ queryKey: ["actions"] });
+      queryClient.setQueriesData({ queryKey: ["actions"] }, (old: LyteAction[] | undefined) => {
+        if (!old) return old;
+        return old.map(a => a.id === id ? { ...a, ...data } : a);
+      });
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        context.previous.forEach(([key, data]) => queryClient.setQueryData(key, data));
       }
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["actions"] }),
+  });
+}
+
+export function useSavedViews(role?: string) {
+  return useQuery({
+    queryKey: ["savedViews", role],
+    queryFn: () => api.views.list(role),
+  });
+}
+
+export function useCreateSavedView() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Partial<LyteSavedView>) => api.views.create(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savedViews"] }),
+  });
+}
+
+export function useDeleteSavedView() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api.views.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savedViews"] }),
+  });
+}
+
+export function useReadiness() {
+  return useQuery({
+    queryKey: ["readiness"],
+    queryFn: () => api.readiness.get(),
+  });
+}
+
+export function useUpdateReadinessItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...data }: { id: number; status?: string; score?: number }) => {
+      return await api.readiness.update(id, data);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["readiness"] }),
   });
 }

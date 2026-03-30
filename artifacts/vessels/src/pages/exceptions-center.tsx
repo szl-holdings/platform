@@ -1,25 +1,51 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, type FleetException } from "@/lib/api";
+import { apiFetch } from "@workspace/shared-ui";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
-  AlertTriangle, Clock, DollarSign, User, ChevronDown, ChevronRight,
-  CheckCircle2, Filter, Ship, CloudLightning, Anchor, Wrench, Fuel, Navigation, Radio,
+  AlertTriangle, Clock, User, ChevronDown, ChevronRight,
+  CheckCircle2, Ship, CloudLightning, Anchor, Wrench, Fuel, Navigation, Radio,
   RefreshCw, CheckCheck, ArrowUpCircle,
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 
-type ExceptionSeverity = "critical" | "high" | "watch" | "normal";
-type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert";
+export type ExceptionSeverity = "critical" | "high" | "watch" | "normal" | "medium" | "low";
+export type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert";
 
-const severityConfig: Record<ExceptionSeverity, { label: string; color: string; dot: string; badgeColor: string }> = {
+export interface VesselsException {
+  id: number;
+  orgId: number;
+  vesselId?: number | null;
+  vesselName?: string | null;
+  exceptionType: string;
+  severity: string;
+  status: string;
+  title: string;
+  description?: string | null;
+  whyItMatters?: string | null;
+  recommendedResponse?: string | null;
+  businessConsequence?: string | null;
+  route?: string | null;
+  estimatedImpactUSD?: number | null;
+  owner?: string | null;
+  ownerFunction?: string | null;
+  detectedAt: string;
+  acknowledgedAt?: string | null;
+  resolvedAt?: string | null;
+  acknowledgedBy?: number | null;
+  metadata?: Record<string, unknown> | null;
+}
+
+const severityConfig: Record<string, { label: string; color: string; dot: string; badgeColor: string }> = {
   critical: { label: "Critical", color: "text-red-400", dot: "bg-red-400", badgeColor: "text-red-400 bg-red-500/10 border-red-500/20" },
   high: { label: "High", color: "text-orange-400", dot: "bg-orange-400", badgeColor: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
   watch: { label: "Watch", color: "text-amber-400", dot: "bg-amber-400", badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+  medium: { label: "Medium", color: "text-amber-400", dot: "bg-amber-400", badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+  low: { label: "Low", color: "text-blue-400", dot: "bg-blue-400", badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
   normal: { label: "Normal", color: "text-emerald-400", dot: "bg-emerald-400", badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
 };
 
-const typeConfig: Record<ExceptionType, { label: string; icon: React.ElementType }> = {
+const typeConfig: Record<string, { label: string; icon: React.ElementType }> = {
   route_deviation: { label: "Route Deviation", icon: Navigation },
   delay_risk: { label: "Delay Risk", icon: Clock },
   port_congestion: { label: "Port Congestion", icon: Anchor },
@@ -30,41 +56,115 @@ const typeConfig: Record<ExceptionType, { label: string; icon: React.ElementType
   security_alert: { label: "Security Alert", icon: AlertTriangle },
 };
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; color: string }> = {
   active: { label: "Active", color: "text-red-400 bg-red-500/10 border-red-500/20" },
   acknowledged: { label: "Acknowledged", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
   resolved: { label: "Resolved", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
   dismissed: { label: "Dismissed", color: "text-slate-400 bg-slate-500/10 border-slate-500/20" },
 };
 
-function formatImpact(usd?: string): string {
-  if (!usd) return "Unknown";
-  const v = parseFloat(usd);
-  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
-  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`;
-  return `$${v.toFixed(0)}`;
+function useExceptions(status?: string, severity?: string) {
+  return useQuery({
+    queryKey: ["vesselExceptions", status, severity],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (status && status !== "all") params.set("status", status);
+      if (severity && severity !== "all") params.set("severity", severity);
+      const qs = params.toString();
+      const resp = await apiFetch<VesselsException[] | { data: VesselsException[] }>(
+        `/vessels/platform/exceptions${qs ? `?${qs}` : ""}`
+      );
+      if (resp && typeof resp === "object" && "data" in resp) return resp.data;
+      return resp as VesselsException[];
+    },
+    refetchInterval: 60_000,
+  });
 }
 
-function ExceptionCard({ exc }: { exc: FleetException }) {
+function useAcknowledgeException() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes?: string }) =>
+      apiFetch<VesselsException>(`/vessels/platform/exceptions/${id}/acknowledge`, {
+        method: "POST",
+        body: JSON.stringify({ notes }),
+      }),
+    onMutate: async ({ id }) => {
+      await qc.cancelQueries({ queryKey: ["vesselExceptions"] });
+      const previous = qc.getQueriesData({ queryKey: ["vesselExceptions"] });
+      qc.setQueriesData({ queryKey: ["vesselExceptions"] }, (old: VesselsException[] | undefined) =>
+        old ? old.map(e => e.id === id ? { ...e, status: "acknowledged" } : e) : old
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      context?.previous?.forEach(([key, data]) => qc.setQueryData(key, data));
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["vesselExceptions"] }),
+  });
+}
+
+function useEscalateException() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes?: string }) =>
+      apiFetch<VesselsException>(`/vessels/platform/exceptions/${id}/escalate`, {
+        method: "POST",
+        body: JSON.stringify({ notes }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["vesselExceptions"] }),
+  });
+}
+
+function useResolveException() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, notes }: { id: number; notes: string }) =>
+      apiFetch<VesselsException>(`/vessels/platform/exceptions/${id}/resolve`, {
+        method: "POST",
+        body: JSON.stringify({ notes }),
+      }),
+    onMutate: async ({ id }) => {
+      await qc.cancelQueries({ queryKey: ["vesselExceptions"] });
+      const previous = qc.getQueriesData({ queryKey: ["vesselExceptions"] });
+      qc.setQueriesData({ queryKey: ["vesselExceptions"] }, (old: VesselsException[] | undefined) =>
+        old ? old.map(e => e.id === id ? { ...e, status: "resolved" } : e) : old
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      context?.previous?.forEach(([key, data]) => qc.setQueryData(key, data));
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["vesselExceptions"] }),
+  });
+}
+
+function ExceptionCard({
+  exc,
+  onAcknowledge,
+  onEscalate,
+  onResolve,
+}: {
+  exc: VesselsException;
+  onAcknowledge: (id: number) => void;
+  onEscalate: (id: number) => void;
+  onResolve: (id: number, notes: string) => void;
+}) {
   const [expanded, setExpanded] = useState(exc.severity === "critical");
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [resolutionNote, setResolutionNote] = useState("");
   const [showResolveForm, setShowResolveForm] = useState(false);
-  const queryClient = useQueryClient();
+  const [resolutionNote, setResolutionNote] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const sev = severityConfig[exc.severity as ExceptionSeverity] ?? severityConfig.watch;
-  const typeConf = typeConfig[exc.exceptionType as ExceptionType] ?? { label: exc.exceptionType, icon: AlertTriangle };
-  const TypeIcon = typeConf.icon;
-  const stat = statusConfig[exc.status as keyof typeof statusConfig] ?? statusConfig.active;
+  const sev = severityConfig[exc.severity] ?? severityConfig.watch;
+  const type = typeConfig[exc.exceptionType] ?? { label: exc.exceptionType, icon: AlertTriangle };
+  const TypeIcon = type.icon;
+  const stat = statusConfig[exc.status] ?? statusConfig.active;
+  const impact = exc.estimatedImpactUSD ?? 0;
+  const isPositive = impact < 0;
 
-  const mutate = async (action: () => Promise<unknown>, label: string) => {
-    setActionLoading(label);
-    try {
-      await action();
-      queryClient.invalidateQueries({ queryKey: ["vessels-exceptions"] });
-    } finally {
-      setActionLoading(null);
-    }
+  const handleAction = async (fn: () => void, key: string) => {
+    setActionLoading(key);
+    try { fn(); } finally { setActionLoading(null); }
   };
 
   return (
@@ -86,15 +186,18 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
           <div className="flex items-start gap-2 flex-wrap">
             <p className="text-xs font-semibold text-sky-100">{exc.title}</p>
             <div className="flex items-center gap-1.5 flex-wrap ml-auto">
-              <span className="text-[10px] font-mono text-sky-500/50">{exc.exceptionRef}</span>
               <Badge variant="outline" className={cn("text-[9px] shrink-0", sev.badgeColor)}>{sev.label}</Badge>
               <Badge variant="outline" className={cn("text-[9px] shrink-0", stat.color)}>{stat.label}</Badge>
             </div>
           </div>
           <div className="flex items-center gap-3 mt-1 text-[10px] text-sky-400/50">
-            <span className="flex items-center gap-1"><DollarSign className="w-2.5 h-2.5" />{formatImpact(exc.estimatedImpactUsd ?? undefined)} exposure</span>
-            <span className="text-sky-400/30">·</span>
-            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Detected {new Date(exc.detectedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} UTC</span>
+            {exc.vesselName && <span className="flex items-center gap-1"><Ship className="w-2.5 h-2.5" />{exc.vesselName}</span>}
+            {exc.route && <><span className="text-sky-400/30">·</span><span className="truncate">{exc.route}</span></>}
+            {Math.abs(impact) > 0 && (
+              <span className={cn("ml-auto font-mono shrink-0", isPositive ? "text-emerald-400" : "text-amber-400")}>
+                {isPositive ? "+" : ""}${(Math.abs(impact) / 1000).toFixed(0)}K {isPositive ? "opportunity" : "exposure"}
+              </span>
+            )}
           </div>
         </div>
 
@@ -105,10 +208,12 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
         <div className="px-4 pb-4 space-y-3 border-t border-sky-500/10 pt-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-2">
-              <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1.5">What Happened</p>
-                <p className="text-[11px] text-sky-200/80">{exc.description}</p>
-              </div>
+              {exc.description && (
+                <div className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
+                  <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1.5">What Happened</p>
+                  <p className="text-[11px] text-sky-200/80">{exc.description}</p>
+                </div>
+              )}
               {exc.whyItMatters && (
                 <div className="bg-amber-500/5 rounded-lg p-3 border border-amber-500/10">
                   <p className="text-[9px] text-amber-400/60 uppercase tracking-wider mb-1.5">Why It Matters</p>
@@ -124,7 +229,7 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
                 </div>
               )}
               {exc.businessConsequence && (
-                <div className="bg-red-500/5 rounded-lg p-3 border border-red-500/10">
+                <div className={cn("rounded-lg p-3 border", impact < 0 ? "bg-emerald-500/5 border-emerald-500/10" : "bg-red-500/5 border-red-500/10")}>
                   <p className="text-[9px] text-sky-400/40 uppercase tracking-wider mb-1.5">Business Consequence</p>
                   <p className="text-[11px] text-sky-200/80">{exc.businessConsequence}</p>
                 </div>
@@ -134,7 +239,8 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
 
           <div className="flex items-center gap-4 pt-1 border-t border-sky-500/10 text-[10px] text-sky-400/40">
             {exc.owner && <span className="flex items-center gap-1"><User className="w-2.5 h-2.5" />{exc.owner}{exc.ownerFunction ? ` · ${exc.ownerFunction}` : ""}</span>}
-            <Badge variant="outline" className="text-[9px] text-sky-400/50 border-sky-500/20 ml-auto">{typeConf.label}</Badge>
+            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Detected {new Date(exc.detectedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} UTC</span>
+            <Badge variant="outline" className="text-[9px] text-sky-400/50 border-sky-500/20 ml-auto">{type.label}</Badge>
           </div>
 
           {exc.status !== "resolved" && exc.status !== "dismissed" && (
@@ -142,7 +248,7 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
               {exc.status === "active" && (
                 <button
                   disabled={actionLoading === "ack"}
-                  onClick={() => mutate(() => api.exceptions.acknowledge(exc.id), "ack")}
+                  onClick={() => handleAction(() => onAcknowledge(exc.id), "ack")}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-amber-500/10 border border-amber-500/20 text-amber-300 hover:bg-amber-500/20 transition-all disabled:opacity-50"
                 >
                   {actionLoading === "ack" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
@@ -151,7 +257,7 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
               )}
               <button
                 disabled={actionLoading === "escalate"}
-                onClick={() => mutate(() => api.exceptions.escalate(exc.id, exc.owner ?? undefined, "Escalated via command center"), "escalate")}
+                onClick={() => handleAction(() => onEscalate(exc.id), "escalate")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-orange-500/10 border border-orange-500/20 text-orange-300 hover:bg-orange-500/20 transition-all disabled:opacity-50"
               >
                 {actionLoading === "escalate" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <ArrowUpCircle className="w-3 h-3" />}
@@ -179,7 +285,7 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
                 disabled={!resolutionNote.trim() || actionLoading === "resolve"}
                 onClick={() => {
                   setShowResolveForm(false);
-                  mutate(() => api.exceptions.resolve(exc.id, resolutionNote), "resolve");
+                  handleAction(() => onResolve(exc.id, resolutionNote), "resolve");
                 }}
                 className="px-3 py-2 rounded-lg text-[11px] font-medium bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 hover:bg-emerald-500/25 transition-all disabled:opacity-40"
               >
@@ -194,31 +300,28 @@ function ExceptionCard({ exc }: { exc: FleetException }) {
 }
 
 type StatusFilter = "all" | "active" | "acknowledged" | "resolved";
-type SeverityFilter = "all" | ExceptionSeverity;
+type SeverityFilter = "all" | string;
 
 export default function ExceptionsCenterPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
-  const queryClient = useQueryClient();
 
-  const { data: exceptions = [], isLoading, isError, refetch } = useQuery({
-    queryKey: ["vessels-exceptions"],
-    queryFn: () => api.exceptions.list(),
-    refetchInterval: 60_000,
-  });
+  const { data: exceptions = [], isLoading, isError, refetch } = useExceptions(
+    statusFilter !== "all" ? statusFilter : undefined,
+    severityFilter !== "all" ? severityFilter : undefined,
+  );
+  const acknowledgeExc = useAcknowledgeException();
+  const escalateExc = useEscalateException();
+  const resolveExc = useResolveException();
 
-  const filtered = exceptions.filter(e => {
-    if (statusFilter !== "all" && e.status !== statusFilter) return false;
-    if (severityFilter !== "all" && e.severity !== severityFilter) return false;
-    return true;
-  }).sort((a, b) => {
-    const order: Record<string, number> = { critical: 0, high: 1, watch: 2, normal: 3 };
+  const filtered = exceptions.slice().sort((a, b) => {
+    const order: Record<string, number> = { critical: 0, high: 1, watch: 2, medium: 2, normal: 3, low: 3 };
     return (order[a.severity] ?? 9) - (order[b.severity] ?? 9);
   });
 
   const totalExposure = exceptions
-    .filter(e => e.status !== "resolved" && e.estimatedImpactUsd)
-    .reduce((a, e) => a + parseFloat(e.estimatedImpactUsd ?? "0"), 0);
+    .filter(e => e.status !== "resolved" && (e.estimatedImpactUSD ?? 0) > 0)
+    .reduce((a, e) => a + (e.estimatedImpactUSD ?? 0), 0);
   const criticalCount = exceptions.filter(e => e.severity === "critical" && e.status === "active").length;
   const activeCount = exceptions.filter(e => e.status === "active").length;
   const ackCount = exceptions.filter(e => e.status === "acknowledged").length;
@@ -300,7 +403,15 @@ export default function ExceptionsCenterPage() {
               <p className="text-sm text-sky-400/40">No exceptions match current filters</p>
             </div>
           ) : (
-            filtered.map(exc => <ExceptionCard key={exc.id} exc={exc} />)
+            filtered.map(exc => (
+              <ExceptionCard
+                key={exc.id}
+                exc={exc}
+                onAcknowledge={id => acknowledgeExc.mutate({ id })}
+                onEscalate={id => escalateExc.mutate({ id, notes: "Escalated via command center" })}
+                onResolve={(id, notes) => resolveExc.mutate({ id, notes })}
+              />
+            ))
           )}
         </div>
       )}

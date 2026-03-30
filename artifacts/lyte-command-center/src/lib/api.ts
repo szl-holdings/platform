@@ -86,51 +86,60 @@ export interface LyteCommandCard {
 
 export interface LyteAction {
   id: number;
-  workspaceId: number;
-  signalId?: number;
+  workspaceId?: number;
   title: string;
   description?: string;
-  signalCategory: string;
   state: string;
-  priority: string;
-  owner?: string;
+  urgency?: string;
   assignedTo?: string;
-  valueAtRisk?: string;
-  dueAt?: string;
-  resolvedAt?: string;
+  owner?: string;
+  ownerTeam?: string;
+  signalId?: number;
+  incidentId?: number;
+  valueProtected?: number;
+  dueBy?: string;
   notes?: string;
-  stateHistory?: unknown;
-  roleVisibility?: unknown;
+  stateHistory?: Array<{ from: string; to: string; at: string }>;
+  roleVisibility?: Record<string, boolean>;
   metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+  resolvedAt?: string;
 }
 
 export interface LyteSavedView {
   id: number;
-  workspaceId: number;
+  workspaceId?: number;
   userId?: number;
   name: string;
-  viewType: string;
-  filters: Record<string, unknown>;
+  description?: string;
+  viewType?: string;
+  role?: string;
+  filters?: Record<string, unknown>;
   sortBy?: string;
-  sortOrder: string;
-  isDefault: boolean;
-  isShared: boolean;
+  sortOrder?: string;
+  columns?: string[];
+  isDefault?: boolean;
+  isShared?: boolean;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface LyteReadinessItem {
   id: number;
-  workspaceId: number;
+  workspaceId?: number;
   title: string;
   description?: string;
-  itemType: string;
+  category?: string;
+  itemType?: string;
   status: string;
-  owner?: string;
-  dueAt?: string;
+  score?: number;
   readinessScore?: number;
+  owner?: string;
+  ownerTeam?: string;
+  dueAt?: string;
+  dueBy?: string;
   blockedBy?: unknown;
   metadata?: Record<string, unknown>;
   createdAt: string;
@@ -143,6 +152,11 @@ export interface LyteDashboard {
   incidents: { total: number; open: number };
   readiness: { score: number; complete: number; total: number };
   fetchedAt: string;
+}
+
+export interface LyteReadinessSummary {
+  items: LyteReadinessItem[];
+  summary: { total: number; complete: number; blocked: number; score: number };
 }
 
 export const api = {
@@ -186,21 +200,28 @@ export const api = {
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/command-cards/${id}`, { method: "DELETE" }),
   },
   actions: {
-    list: (workspaceId?: number) => apiFetchList<LyteAction>(`/lyte/actions${workspaceId ? `?workspaceId=${workspaceId}` : ""}`),
+    list: (params?: { workspaceId?: number; role?: string; state?: string }) => {
+      const qs = params ? new URLSearchParams(Object.entries(params).filter(([, v]) => v != null) as [string, string][]).toString() : "";
+      return apiFetchList<LyteAction>(`/lyte/actions${qs ? `?${qs}` : ""}`);
+    },
     get: (id: number) => apiFetch<LyteAction>(`/lyte/actions/${id}`),
     create: (data: Partial<LyteAction>) => apiFetch<LyteAction>("/lyte/actions", { method: "POST", body: JSON.stringify(data) }),
     update: (id: number, data: Partial<LyteAction>) => apiFetch<LyteAction>(`/lyte/actions/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/actions/${id}`, { method: "DELETE" }),
   },
-  savedViews: {
-    list: (workspaceId?: number) => apiFetchList<LyteSavedView>(`/lyte/saved-views${workspaceId ? `?workspaceId=${workspaceId}` : ""}`),
-    create: (data: Partial<LyteSavedView>) => apiFetch<LyteSavedView>("/lyte/saved-views", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<LyteSavedView>) => apiFetch<LyteSavedView>(`/lyte/saved-views/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/saved-views/${id}`, { method: "DELETE" }),
+  views: {
+    list: (params?: { workspaceId?: number; role?: string }) => {
+      const qs = params ? new URLSearchParams(Object.entries(params).filter(([, v]) => v != null) as [string, string][]).toString() : "";
+      return apiFetchList<LyteSavedView>(`/lyte/views${qs ? `?${qs}` : ""}`);
+    },
+    create: (data: Partial<LyteSavedView>) => apiFetch<LyteSavedView>("/lyte/views", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<LyteSavedView>) => apiFetch<LyteSavedView>(`/lyte/views/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/views/${id}`, { method: "DELETE" }),
   },
   readiness: {
+    get: () => apiFetch<LyteReadinessSummary>("/lyte/readiness"),
     list: (workspaceId?: number) => apiFetchList<LyteReadinessItem>(`/lyte/readiness${workspaceId ? `?workspaceId=${workspaceId}` : ""}`),
-    get: (id: number) => apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`),
+    getItem: (id: number) => apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`),
     create: (data: Partial<LyteReadinessItem>) => apiFetch<LyteReadinessItem>("/lyte/readiness", { method: "POST", body: JSON.stringify(data) }),
     update: (id: number, data: Partial<LyteReadinessItem>) => apiFetch<LyteReadinessItem>(`/lyte/readiness/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/readiness/${id}`, { method: "DELETE" }),

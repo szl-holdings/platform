@@ -391,6 +391,49 @@ SZL has been converted from a premium concept into a real governed software syst
 - **Dependency Catalog:** recharts, react-hook-form, framer-motion, lucide-react normalized via pnpm catalog
 - **Vite Build:** `manualChunks` splits vendor code into recharts/d3, framer-motion, radix-ui, tanstack, lucide-react, and react chunks; `cssCodeSplit` enabled
 
+## Deployment Model
+
+### Surface Tiers
+Three deployment modes are used across the platform, aligned to access pattern and compute profile:
+
+1. **Static / Marketing surfaces** (no auth required)
+   - SZL Holdings landing page, Carlota Jo marketing, Stephen Lutar founder site
+   - Deployed via Replit autoscale with aggressive CDN caching (`Cache-Control: public, max-age=31536000` on assets)
+   - Routes: `/szl-holdings/`, `/carlota-jo/`, `/stephen-site/`
+
+2. **Authenticated App Surfaces + API** (requires Replit Auth session)
+   - Lyte Command Center, Alloy, Vessels, Terra, Beacon/Dreamscape, Firestorm, INCA, MSP/Rosie
+   - API Server: Express 5 on a single autoscale instance, all routes under `/api/`
+   - Private app surfaces wrap content in `PrivateAppGuard` — redirects unauthenticated users to sign-in
+   - Routes: `/lyte-command-center/`, `/alloy/`, `/vessels/`, `/terra/`, etc.
+   - API routes use `authMiddleware()` for session verification, `requireRole()` for RBAC enforcement
+   - Real-time via WebSocket (`/ws`) for live signals, co-presence, and copilot streaming
+
+3. **Scheduled / Background jobs**
+   - Alloy migrations (`ensureAlloyTables`) run at API server startup
+   - Named scheduled jobs: health scan (5 min), alert check (15 min), daily digest (24 h), cert digest (7:30 UTC), capital digest (8:15 UTC)
+   - NYC Open Data ingestion runs every 6 hours
+   - Live government data feeds cached with TTL (varies by source: 15 min – 24 h)
+
+### Private Route Structure
+- **Lyte:** `/lyte-command-center/` → `/`, `/signals`, `/actions`, `/readiness`, `/action-queue`, `/approvals`, `/ownership`, `/escalation`, `/intervention`, `/readiness-module`, `/admin/jobs`
+- **Vessels:** `/vessels/` → `/dashboard`, `/dashboard/fleet`, `/dashboard/vessels`, `/dashboard/vessels/:id`, `/dashboard/routes`, `/dashboard/alerts`, `/dashboard/reports`, `/dashboard/billing`, `/dashboard/settings`, `/dashboard/team`, `/dashboard/audit-log`
+- **Alloy:** `/alloy/` → `/`, `/execution-runs`, `/workflow-orchestration`, `/governance`, `/artifacts`, `/admin`
+
+### API Endpoint Mapping (Private Apps → API Server)
+- Lyte signals: `GET/POST/PATCH/DELETE /lyte/signals`, `GET /lyte/signals/:id`
+- Lyte actions: `GET /lyte/actions`, `PATCH /lyte/actions/:id`
+- Lyte views: `GET /lyte/views`, `POST/PATCH/DELETE /lyte/views/:id`
+- Lyte readiness: `GET /lyte/readiness`, `PATCH /lyte/readiness/:id`
+- Vessels fleet: `GET /vessels/platform/dashboard`, `GET /vessels/platform/map`
+- Vessels exceptions: `GET /vessels/platform/exceptions`, `POST /vessels/platform/exceptions/:id/acknowledge`
+- Alloy workflows: `GET/POST/PATCH /alloy/workflows`, `GET /alloy/workflows/:id`
+- Alloy runs: `GET/POST /alloy/runs`, `PATCH /alloy/runs/:id`, `POST /alloy/runs/:id/retry`, `POST /alloy/runs/:id/cancel`
+- Alloy artifacts: `GET /alloy/artifacts`, `POST /alloy/artifacts/:id/approve`, `POST /alloy/artifacts/:id/reject`
+
+### Optimistic Updates
+All state-transition mutations (signal status, action state, exception acknowledge, run cancel/retry, workflow activate/pause) implement optimistic updates using TanStack Query's `onMutate` → rollback on error pattern.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth
