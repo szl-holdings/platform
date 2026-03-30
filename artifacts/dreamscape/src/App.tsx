@@ -117,15 +117,15 @@ function App() {
         <WelcomeOverlay
           appId="nimbus"
           appName="Nimbus"
-          subtitle="Predictive Intelligence — UNDERSTAND Layer"
-          description="Prediction, scenario modeling, and confidence scoring platform — powering the SZL UNDERSTAND layer with probabilistic outputs, assumption tracking, and model-backed decision intelligence."
+          subtitle="Predictive Intelligence Platform"
+          description="Nimbus surfaces what is likely to happen next and why. Scenario modelling, confidence scoring, drift monitoring, and anomaly correlation — forward signal analysis for teams that need structured reasoning about what comes next."
           accentColor="#ec4899"
-          icon={Palette}
+          icon={Sparkles}
           features={[
-            { icon: Sparkles, title: "AI Studio", description: "Generate copy, visuals, and scripts with AI assistance" },
-            { icon: Calendar, title: "Content Calendar", description: "Schedule and track all content deliverables in one view" },
-            { icon: FolderOpen, title: "Asset Library", description: "Centralized brand guidelines, templates, and media files" },
-            { icon: Palette, title: "Campaigns", description: "Manage brand films, social campaigns, and product launches" },
+            { icon: Sparkles, title: "Scenario modelling", description: "Build structured scenarios with assumption tracking and confidence scoring. Every prediction is traceable to its inputs." },
+            { icon: Calendar, title: "Anomaly correlation", description: "Surface patterns across operational timelines. Anomalies are attributed, contextualised, and connected to business impact." },
+            { icon: FolderOpen, title: "Drift monitoring", description: "Track when model outputs deviate from expected ranges. Know when your predictions need recalibration before decisions degrade." },
+            { icon: Palette, title: "Forward signals", description: "Translate historical patterns into structured forward indicators. Give decision-makers a reasoned view of likely outcomes." },
           ]}
         />
       </WouterRouter>

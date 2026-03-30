@@ -300,15 +300,15 @@ function App() {
             <WelcomeOverlay
               appId="firestorm"
               appName="Firestorm"
-              subtitle="Operational Security Command"
-              description="SOC-grade incident management, threat intelligence, and compliance operations — calm, confident security at enterprise scale."
+              subtitle="Threat & Incident Command"
+              description="Firestorm is a SOC-grade security command platform for teams who need to detect, triage, and respond — not just report. Full kill chain coverage, real-time incident management, and compliance readiness built for organisations where the cost of slow response is quantifiable."
               accentColor="#ef4444"
               icon={Flame}
               features={[
-                { icon: Shield, title: "SOC Dashboard", description: "Real-time incident monitoring with 1-10-60 response timers" },
-                { icon: Target, title: "MITRE ATT&CK", description: "Full kill chain coverage with heatmap visualizations" },
-                { icon: Search, title: "Threat Hunting", description: "Natural language queries across millions of events" },
-                { icon: Layers, title: "XDR Console", description: "Correlated detection across endpoints, cloud, and network" },
+                { icon: Shield, title: "Incident command", description: "Real-time incident monitoring with response timer discipline. Threats are classified, attributed, and actioned — not just logged." },
+                { icon: Target, title: "MITRE ATT&CK coverage", description: "Full kill chain mapping with visual heatmaps. Know where your coverage is and where adversaries can move undetected." },
+                { icon: Search, title: "Threat hunting", description: "Natural language queries across event data. Surface attacker patterns before they trigger alerts." },
+                { icon: Layers, title: "XDR correlation", description: "Correlated detection across endpoints, cloud, and network. One console for the signals that matter." },
               ]}
             />
           </div>

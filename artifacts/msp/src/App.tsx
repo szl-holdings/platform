@@ -259,15 +259,15 @@ function App() {
         <WelcomeOverlay
           appId="rosie"
           appName="Rosie"
-          subtitle="Threat & Anomaly Visibility — OBSERVE Layer"
-          description="Evidence-backed incident command delivering threat detection, anomaly visibility, and MSP-grade operational intelligence — with AI-powered ticket routing and churn risk prediction."
+          subtitle="Threat & Incident Command"
+          description="Rosie gives managed service providers a single command surface for incident triage, client health, service desk operations, and revenue visibility. Built for MSP teams who need to move from alert to action without losing context."
           accentColor="#ef4444"
           icon={Monitor}
           features={[
-            { icon: Building2, title: "Client Management", description: "Health scoring and churn risk for every account" },
-            { icon: Ticket, title: "Service Desk", description: "Priority-based ticketing with SLA breach prediction" },
-            { icon: Activity, title: "NOC Dashboard", description: "Real-time alerts across all managed environments" },
-            { icon: DollarSign, title: "Profitability", description: "Per-client margin and MRR tracking with cost analysis" },
+            { icon: Building2, title: "Client command", description: "Health scoring and churn risk for every managed account. Know which clients need attention before they escalate." },
+            { icon: Ticket, title: "Service desk", description: "Priority-based ticketing with SLA breach prediction and technician dispatch. Triage at speed, resolve with context." },
+            { icon: Activity, title: "NOC operations", description: "Real-time alerts across all managed environments. Every anomaly is classified, attributed, and actioned — not just logged." },
+            { icon: DollarSign, title: "Revenue clarity", description: "Per-client margin, MRR, and profitability tracking. Know where you make money and where you lose it." },
           ]}
         />
       </WouterRouter>

@@ -480,15 +480,15 @@ function App() {
           <WelcomeOverlay
             appId="vessels"
             appName="Vessels"
-            subtitle="Maritime Visibility Built for Command"
-            description="Vessels is designed to bring fleet, route, and voyage intelligence into one modern operating layer, helping teams see movement clearly, reduce uncertainty, and act with confidence."
+            subtitle="Maritime Intelligence Built for Operators"
+            description="Vessels gives fleet executives, operations teams, and commercial directors a single command surface for the signals that matter — voyage exceptions, route economics, maintenance readiness, and sanctions exposure — before they compound."
             accentColor="#3b82f6"
             icon={Ship}
             features={[
-              { icon: Globe, title: "Fleet visibility", description: "Track vessels and assets through a cleaner, more structured operational interface designed for real-time awareness." },
-              { icon: EyeOff, title: "Route intelligence", description: "Bring route and voyage details into a more usable workflow, with a stronger understanding of movement, timing, and state." },
-              { icon: ShieldAlert, title: "Operational alerts", description: "Surface anomalies, events, or priority states in a way that supports quicker review and more confident action." },
-              { icon: Anchor, title: "Executive clarity", description: "Translate complex operational movement into digestible dashboards and reporting views for leadership." },
+              { icon: Globe, title: "Fleet command", description: "Real-time vessel positions, route lines, and port status in a single operational surface. Not a map widget — a command view built for decisions." },
+              { icon: EyeOff, title: "Voyage economics", description: "Revenue, operating cost, and margin estimates per voyage, per charter, per route. See where the money is before the voyage closes." },
+              { icon: ShieldAlert, title: "Exceptions at speed", description: "Prioritised exception queue with operational context, recommended response, and business consequence. Act before disruptions escalate." },
+              { icon: Anchor, title: "Executive clarity", description: "Fleet-level dashboards that translate operational complexity into the metrics executives need to decide — utilisation, TCE, margin, and risk." },
             ]}
           />
         </WouterRouter>

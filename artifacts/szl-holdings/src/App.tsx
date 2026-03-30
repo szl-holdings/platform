@@ -19,6 +19,8 @@ const AboutPage = lazy(() => import("@/pages/about"));
 const UpdatesPage = lazy(() => import("@/pages/updates"));
 const LegalPrivacy = lazy(() => import("@/pages/legal-privacy"));
 const LegalTerms = lazy(() => import("@/pages/legal-terms"));
+const TrustCenter = lazy(() => import("@/pages/trust-center"));
+const InvestorStory = lazy(() => import("@/pages/investor-story"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +86,12 @@ function App() {
             </Route>
             <Route path="/legal/terms">
               <Suspense fallback={<PageLoader />}><LegalTerms /></Suspense>
+            </Route>
+            <Route path="/trust">
+              <Suspense fallback={<PageLoader />}><TrustCenter /></Suspense>
+            </Route>
+            <Route path="/investor">
+              <Suspense fallback={<PageLoader />}><InvestorStory /></Suspense>
             </Route>
             <Route>
               <Suspense fallback={<PageLoader />}><HomePage /></Suspense>

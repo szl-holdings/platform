@@ -141,7 +141,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6 border" style={{ background: "rgba(0,212,255,0.08)", borderColor: "rgba(0,212,255,0.25)", color: "#00d4ff" }}>
             <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-            SZL Ecosystem Intelligence Layer
+            SZL Holdings — Execute Layer
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight mb-6">

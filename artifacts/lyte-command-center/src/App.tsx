@@ -107,15 +107,15 @@ function App() {
         <WelcomeOverlay
           appId="lyte"
           appName="Lyte"
-          subtitle="Operations Command Center"
-          description="See the system, understand the signal, reduce uncertainty. Lyte surfaces incidents, tracks SLOs, and runs playbooks across your entire operations stack."
+          subtitle="Business Telemetry Platform"
+          description="Lyte connects operational signals to business outcomes. It surfaces what is stalled, what is at risk, and what to act on next — with context, attribution, and value estimates — so teams spend less time correlating and more time deciding."
           accentColor="#06b6d4"
           icon={Zap}
           features={[
-            { icon: Activity, title: "Signal Detection", description: "Correlate signals across infra, product, and revenue" },
-            { icon: AlertTriangle, title: "Incident Management", description: "Priority-based incidents with blast radius analysis" },
-            { icon: BookOpen, title: "Playbooks", description: "Automated runbooks for common incident patterns" },
-            { icon: Zap, title: "AI Ops", description: "Intelligent noise reduction and root cause analysis" },
+            { icon: Activity, title: "Signal intelligence", description: "Correlate signals across infrastructure, product, and revenue in one feed. Every anomaly carries severity, owner, and value-at-risk." },
+            { icon: AlertTriangle, title: "Incident command", description: "Priority-based incident management with blast radius, dependency chain, and escalation path — designed for teams who need to move fast." },
+            { icon: BookOpen, title: "Playbooks", description: "Structured runbooks for common operational patterns. Automated where safe, human-confirmed where it matters." },
+            { icon: Zap, title: "Narrative intelligence", description: "Correlated signals become readable paragraphs explaining what is happening, why it matters, and what to do next. No decoding required." },
           ]}
         />
       </WouterRouter>

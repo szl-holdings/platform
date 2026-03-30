@@ -43,7 +43,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.35 }}
             className="text-lg sm:text-xl text-foreground/55 max-w-2xl mb-4 leading-relaxed font-light"
           >
-            Builder. Operator. Systems thinker.
+            Platform architect. Systems thinker. Founder.
           </motion.p>
 
           <motion.p
@@ -52,7 +52,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.42 }}
             className="text-base text-foreground/35 max-w-xl mb-12 leading-relaxed font-light"
           >
-            Founder of SZL Holdings. Building Alloy, Lyte, Vessels, and Carlota Jo — premium command systems across observability, maritime operations, and high-trust service.
+            Founder of SZL Holdings — building the infrastructure for Business Observability. Four platform layers: Observe, Understand, Execute, Advise. Built to compound across verticals.
           </motion.p>
 
           <motion.div
