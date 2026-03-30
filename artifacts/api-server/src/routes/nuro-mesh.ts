@@ -371,18 +371,38 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
     res.write(`data: ${JSON.stringify({ type: "synthesis_start", message: "Alloy synthesizing domain intelligence..." })}\n\n`);
 
     let synthesisContent = "";
-    const synthStream = await openai.chat.completions.create({
-      model: alloyAgent.preferredModel,
-      max_completion_tokens: 4096,
-      messages: [{ role: "user", content: aggregationPrompt }],
-      stream: true,
-    });
+    let synthStream;
+    try {
+      synthStream = await openai.chat.completions.create({
+        model: alloyAgent.preferredModel,
+        max_completion_tokens: 4096,
+        messages: [{ role: "user", content: aggregationPrompt }],
+        stream: true,
+      });
+    } catch (streamInitErr) {
+      const initErrMsg = streamInitErr instanceof Error ? streamInitErr.message : "Failed to initialize synthesis stream";
+      res.write(`data: ${JSON.stringify({ type: "error", error: `Synthesis unavailable: ${initErrMsg}. Domain agent responses were collected successfully.`, partial: true, agentResponses: agentResponses.map(r => ({ agentId: r.agentId, agentName: r.agentName, domain: r.domain, confidence: r.confidence })) })}\n\n`);
+      res.end();
+      return;
+    }
 
-    for await (const chunk of synthStream) {
-      const delta = chunk.choices[0]?.delta?.content;
-      if (delta) {
-        synthesisContent += delta;
-        res.write(`data: ${JSON.stringify({ type: "synthesis_chunk", content: delta })}\n\n`);
+    let streamError: string | null = null;
+    try {
+      for await (const chunk of synthStream) {
+        const delta = chunk.choices[0]?.delta?.content;
+        if (delta) {
+          synthesisContent += delta;
+          res.write(`data: ${JSON.stringify({ type: "synthesis_chunk", content: delta })}\n\n`);
+        }
+      }
+    } catch (streamChunkErr) {
+      streamError = streamChunkErr instanceof Error ? streamChunkErr.message : "Stream interrupted";
+      if (synthesisContent.length > 0) {
+        res.write(`data: ${JSON.stringify({ type: "synthesis_interrupted", message: "Synthesis stream was interrupted. Partial response delivered.", error: streamError })}\n\n`);
+      } else {
+        res.write(`data: ${JSON.stringify({ type: "error", error: `Synthesis stream failed: ${streamError}. Domain agent responses were collected. Please retry.`, retryable: true })}\n\n`);
+        res.end();
+        return;
       }
     }
 

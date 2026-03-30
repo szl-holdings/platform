@@ -3,7 +3,8 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { UserButton } from "@workspace/shared-ui/UserButton";
-import { cn } from "@workspace/shared-ui/utils";
+import { Toaster } from "sonner";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Building2,
@@ -117,7 +118,7 @@ function Sidebar() {
               {section.items.map(({ path, label, icon: Icon }) => {
                 const isActive = location === path;
                 return (
-                  <Link key={path} href={path}>
+                  <Link key={path} href={path} aria-current={isActive ? "page" : undefined}>
                     <div className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
                       collapsed && "justify-center",
@@ -125,8 +126,8 @@ function Sidebar() {
                         ? "bg-primary/10 text-primary shadow-sm"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )} title={collapsed ? label : undefined}>
-                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />}
-                      <Icon className={cn("w-4 h-4 shrink-0 transition-transform duration-200", isActive && "scale-110")} />
+                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" aria-hidden="true" />}
+                      <Icon className={cn("w-4 h-4 shrink-0 transition-transform duration-200", isActive && "scale-110")} aria-hidden="true" />
                       {!collapsed && label}
                     </div>
                   </Link>
@@ -155,9 +156,10 @@ function Sidebar() {
 
       <button
         onClick={() => setCollapsed(!collapsed)}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         className="p-3 border-t border-border text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
       >
-        {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        {collapsed ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : <ChevronLeft className="w-4 h-4" aria-hidden="true" />}
       </button>
     </aside>
   );
@@ -190,8 +192,11 @@ function AppRouter() {
 function DashboardLayout() {
   return (
     <div className="flex h-screen bg-background">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
+        Skip to main content
+      </a>
       <Sidebar />
-      <main className="flex-1 overflow-auto">
+      <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
         <AppRouter />
       </main>
     </div>
@@ -210,6 +215,7 @@ function App() {
           </div>
         </div>
       </WouterRouter>
+      <Toaster position="bottom-right" richColors />
     </QueryClientProvider>
   );
 }

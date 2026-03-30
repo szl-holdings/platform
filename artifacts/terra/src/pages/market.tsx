@@ -1,11 +1,20 @@
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, MapPin, DollarSign, Building2, Clock, BarChart3, Percent, RefreshCw } from "lucide-react";
+import { TrendingUp, TrendingDown, MapPin, DollarSign, Clock, BarChart3, RefreshCw, AlertCircle } from "lucide-react";
 import { marketData } from "@/data/portfolio";
 import { cn } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { LiveDataBadge } from "@/lib/live-badge";
+import { toast } from "sonner";
+import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+
+const API_BASE = "/api";
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -38,22 +47,59 @@ const comparableSales = [
   { address: "50 Milk St, Boston", price: 78000000, sqft: 165000, pricePerSqft: 473, type: "Office", date: "Mar 2026" },
 ];
 
-const radarData = marketData.map(m => ({
-  region: m.region.split(",")[0],
-  "Price Growth": Math.max(0, m.yoyChange * 10),
-  "Cap Rate": m.avgCapRate * 10,
-  "Low Vacancy": (10 - m.vacancyRate) * 10,
-  "Market Speed": Math.max(0, (60 - m.daysOnMarket)) * 2,
-}));
+interface MarketIntelligence {
+  source: string;
+  fetchedAt: string;
+  regions: Array<{
+    region: string;
+    medianPrice: number;
+    pricePerSqft: number;
+    yoyChange: number;
+    avgCapRate: number;
+    vacancyRate: number;
+    daysOnMarket: number;
+    inventory: number;
+  }>;
+}
+
+function TableRowSkeleton() {
+  return (
+    <tr className="border-b border-terra-border/50">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <td key={i} className="py-3 px-3">
+          <Skeleton className="h-4 w-16" />
+        </td>
+      ))}
+    </tr>
+  );
+}
 
 export default function MarketPage() {
-  const priceData = marketData.map(m => ({
-    region: m.region.split(",")[0],
-    "Price/SqFt": m.pricePerSqft,
-    "YoY Change": m.yoyChange,
+  const { data: liveData, isLoading, isError, refetch, isFetching } = useQuery<{ data: MarketIntelligence }>({
+    queryKey: ["terra-market-intelligence"],
+    queryFn: () => apiFetch<{ data: MarketIntelligence }>("/terra/market-intelligence"),
+    staleTime: 5 * 60_000,
+    retry: 2,
+  });
+
+  const displayMarketData = liveData?.data?.regions ?? marketData;
+  const source = liveData?.data?.source;
+
+  const priceData = displayMarketData.map((m: any) => ({
+    region: (m.region ?? m.city ?? "").split(",")[0],
+    "Price/SqFt": m.pricePerSqft ?? m.medianPricePerSqft ?? 0,
+    "YoY Change": m.yoyChange ?? m.yoyChangePercent ?? 0,
   }));
 
-  const { data: mortgageData, isLoading: mortgageLoading, refetch: refetchMortgage } = useQuery({
+  const radarData = displayMarketData.slice(0, 4).map((m: any) => ({
+    region: (m.region ?? m.city ?? "").split(",")[0],
+    "Price Growth": Math.max(0, (m.yoyChange ?? 0) * 10),
+    "Cap Rate": (m.avgCapRate ?? m.capRate ?? 0) * 10,
+    "Low Vacancy": (10 - (m.vacancyRate ?? 5)) * 10,
+    "Market Speed": Math.max(0, (60 - (m.daysOnMarket ?? 30))) * 2,
+  }));
+
+  const { data: mortgageData, isLoading: mortgageLoading } = useQuery({
     queryKey: ["terra-mortgage-rates"],
     queryFn: () => api.live.mortgageRates(),
     staleTime: 3600000 * 6,
@@ -72,13 +118,33 @@ export default function MarketPage() {
 
   return (
     <div className="p-6 space-y-6 overflow-auto">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-terra-text">Market Intelligence</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Regional trends, comparables, and live market indicators</p>
-          </div>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-terra-text">Market Intelligence</h1>
+          <p className="text-sm text-terra-text-secondary mt-1">
+            {source ? (
+              <span>Live data from {source}</span>
+            ) : (
+              "Regional trends, comparables, and live market indicators"
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
           <LiveDataBadge isLive={isAnyLive} isLoading={mortgageLoading || blsLoading} />
+          {isError && (
+            <div className="flex items-center gap-2 text-xs text-terra-rose bg-terra-rose/10 px-3 py-2 rounded-lg border border-terra-rose/20">
+              <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
+              Using cached data
+            </div>
+          )}
+          <button
+            onClick={() => { refetch(); if (!isFetching) toast.info("Refreshing market data…"); }}
+            disabled={isFetching}
+            className="flex items-center gap-2 text-xs text-terra-text-secondary hover:text-terra-text transition-colors border border-terra-border rounded-lg px-3 py-2 disabled:opacity-50"
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5", isFetching && "animate-spin")} aria-hidden="true" />
+            {isFetching ? "Refreshing…" : "Refresh"}
+          </button>
         </div>
       </motion.div>
 
@@ -95,7 +161,7 @@ export default function MarketPage() {
             </p>
             {mortgageRates?.weeklyChange30yr != null && (
               <p className={cn("text-xs mt-1 flex items-center gap-1", mortgageRates.weeklyChange30yr <= 0 ? "text-terra-emerald" : "text-terra-rose")}>
-                {mortgageRates.weeklyChange30yr <= 0 ? <TrendingDown className="w-3 h-3" /> : <TrendingUp className="w-3 h-3" />}
+                {mortgageRates.weeklyChange30yr <= 0 ? <TrendingDown className="w-3 h-3" aria-hidden="true" /> : <TrendingUp className="w-3 h-3" aria-hidden="true" />}
                 {mortgageRates.weeklyChange30yr >= 0 ? "+" : ""}{mortgageRates.weeklyChange30yr}% WoW
               </p>
             )}
@@ -125,7 +191,7 @@ export default function MarketPage() {
             {blsConstruction?.monthlyChange && (
               <p className={cn("text-xs mt-1 flex items-center gap-1",
                 +blsConstruction.monthlyChange > 0 ? "text-terra-emerald" : "text-terra-rose")}>
-                {+blsConstruction.monthlyChange > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {+blsConstruction.monthlyChange > 0 ? <TrendingUp className="w-3 h-3" aria-hidden="true" /> : <TrendingDown className="w-3 h-3" aria-hidden="true" />}
                 {+blsConstruction.monthlyChange > 0 ? "+" : ""}{(+blsConstruction.monthlyChange).toLocaleString()} MoM
               </p>
             )}
@@ -144,50 +210,62 @@ export default function MarketPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm p-5">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="w-4 h-4 text-terra-primary" />
+            <BarChart3 className="w-4 h-4 text-terra-primary" aria-hidden="true" />
             <h3 className="font-display font-bold text-terra-text">Price Per Sq Ft by Region</h3>
           </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={priceData} margin={{ top: 5, right: 10, left: 10, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(60,100,160,0.08)" />
-                <XAxis dataKey="region" tick={{ fill: "#4e5d80", fontSize: 10 }} axisLine={false} tickLine={false} angle={-35} textAnchor="end" height={60} />
-                <YAxis tick={{ fill: "#4e5d80", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="Price/SqFt" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {isLoading ? (
+            <div className="h-72 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-terra-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={priceData} margin={{ top: 5, right: 10, left: 10, bottom: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(60,100,160,0.08)" />
+                  <XAxis dataKey="region" tick={{ fill: "#4e5d80", fontSize: 10 }} axisLine={false} tickLine={false} angle={-35} textAnchor="end" height={60} />
+                  <YAxis tick={{ fill: "#4e5d80", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="Price/SqFt" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm p-5">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 text-terra-emerald" />
+            <TrendingUp className="w-4 h-4 text-terra-emerald" aria-hidden="true" />
             <h3 className="font-display font-bold text-terra-text">Market Performance Radar</h3>
           </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData.slice(0, 4)}>
-                <PolarGrid stroke="rgba(60,100,160,0.1)" />
-                <PolarAngleAxis dataKey="region" tick={{ fill: "#8b9bc0", fontSize: 10 }} />
-                <PolarRadiusAxis tick={false} axisLine={false} />
-                <Radar name="Price Growth" dataKey="Price Growth" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} />
-                <Radar name="Cap Rate" dataKey="Cap Rate" stroke="#10b981" fill="#10b981" fillOpacity={0.1} />
-                <Radar name="Low Vacancy" dataKey="Low Vacancy" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.1} />
-                <Legend wrapperStyle={{ fontSize: 11, color: "#8b9bc0" }} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
+          {isLoading ? (
+            <div className="h-72 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-terra-emerald border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                  <PolarGrid stroke="rgba(60,100,160,0.1)" />
+                  <PolarAngleAxis dataKey="region" tick={{ fill: "#8b9bc0", fontSize: 10 }} />
+                  <PolarRadiusAxis tick={false} axisLine={false} />
+                  <Radar name="Price Growth" dataKey="Price Growth" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} />
+                  <Radar name="Cap Rate" dataKey="Cap Rate" stroke="#10b981" fill="#10b981" fillOpacity={0.1} />
+                  <Radar name="Low Vacancy" dataKey="Low Vacancy" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.1} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: "#8b9bc0" }} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </motion.div>
       </div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm p-5">
         <div className="flex items-center gap-2 mb-4">
-          <MapPin className="w-4 h-4 text-terra-primary" />
+          <MapPin className="w-4 h-4 text-terra-primary" aria-hidden="true" />
           <h3 className="font-display font-bold text-terra-text">Regional Market Overview</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" role="table">
             <thead>
               <tr className="border-b border-terra-border">
                 <th className="text-left py-3 px-3 text-xs font-semibold text-terra-text-muted uppercase tracking-wider">Region</th>
@@ -201,35 +279,50 @@ export default function MarketPage() {
               </tr>
             </thead>
             <tbody>
-              {marketData.map((m, i) => (
-                <motion.tr key={m.region} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} className="border-b border-terra-border/50 hover:bg-terra-surface-hover transition-colors">
-                  <td className="py-3 px-3 font-medium text-terra-text">{m.region}</td>
-                  <td className="py-3 px-3 text-right text-terra-text">{formatCurrency(m.medianPrice)}</td>
-                  <td className="py-3 px-3 text-right text-terra-text">${m.pricePerSqft}</td>
-                  <td className="py-3 px-3 text-right">
-                    <span className={cn("inline-flex items-center gap-1", m.yoyChange >= 0 ? "text-terra-emerald" : "text-terra-rose")}>
-                      {m.yoyChange >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {m.yoyChange >= 0 ? "+" : ""}{m.yoyChange}%
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right text-terra-text">{m.avgCapRate}%</td>
-                  <td className="py-3 px-3 text-right">
-                    <span className={cn(m.vacancyRate <= 5 ? "text-terra-emerald" : m.vacancyRate <= 7 ? "text-terra-amber" : "text-terra-rose")}>
-                      {m.vacancyRate}%
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-right text-terra-text">{m.daysOnMarket}</td>
-                  <td className="py-3 px-3 text-right text-terra-text-secondary">{m.inventory.toLocaleString()}</td>
-                </motion.tr>
-              ))}
+              {isLoading
+                ? Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} />)
+                : displayMarketData.map((m: any, i: number) => {
+                  const region = m.region ?? m.city ?? "Unknown";
+                  const medianPrice = m.medianPrice ?? m.medianListPrice ?? 0;
+                  const pricePerSqft = m.pricePerSqft ?? m.medianPricePerSqft ?? 0;
+                  const yoyChange = m.yoyChange ?? m.yoyChangePercent ?? 0;
+                  const capRate = m.avgCapRate ?? m.capRate ?? 0;
+                  const vacancyRate = m.vacancyRate ?? 0;
+                  const daysOnMarket = m.daysOnMarket ?? 0;
+                  const inventory = m.inventory ?? m.activeListings ?? 0;
+                  return (
+                    <motion.tr key={region} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} className="border-b border-terra-border/50 hover:bg-terra-surface-hover transition-colors">
+                      <td className="py-3 px-3 font-medium text-terra-text">{region}</td>
+                      <td className="py-3 px-3 text-right text-terra-text">{formatCurrency(medianPrice)}</td>
+                      <td className="py-3 px-3 text-right text-terra-text">${pricePerSqft}</td>
+                      <td className="py-3 px-3 text-right">
+                        <span className={cn("inline-flex items-center gap-1", yoyChange >= 0 ? "text-terra-emerald" : "text-terra-rose")}>
+                          {yoyChange >= 0 ? <TrendingUp className="w-3 h-3" aria-hidden="true" /> : <TrendingDown className="w-3 h-3" aria-hidden="true" />}
+                          {yoyChange >= 0 ? "+" : ""}{yoyChange}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right text-terra-text">{capRate}%</td>
+                      <td className="py-3 px-3 text-right">
+                        <span className={cn(vacancyRate <= 5 ? "text-terra-emerald" : vacancyRate <= 7 ? "text-terra-amber" : "text-terra-rose")}>
+                          {vacancyRate}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right text-terra-text">{daysOnMarket}</td>
+                      <td className="py-3 px-3 text-right text-terra-text-secondary">{inventory.toLocaleString()}</td>
+                    </motion.tr>
+                  );
+                })}
             </tbody>
           </table>
+          {!isLoading && displayMarketData.length === 0 && (
+            <div className="text-center py-12 text-terra-text-muted text-sm">No market data available</div>
+          )}
         </div>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm p-5">
         <div className="flex items-center gap-2 mb-4">
-          <DollarSign className="w-4 h-4 text-terra-emerald" />
+          <DollarSign className="w-4 h-4 text-terra-emerald" aria-hidden="true" />
           <h3 className="font-display font-bold text-terra-text">Recent Comparable Sales</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -237,7 +330,7 @@ export default function MarketPage() {
             <motion.div key={sale.address} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.05 }} className="p-4 rounded-lg border border-terra-border bg-terra-bg-secondary hover:border-terra-border-hover transition-all">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-terra-primary/10 text-terra-primary uppercase">{sale.type}</span>
-                <span className="text-xs text-terra-text-muted flex items-center gap-1"><Clock className="w-3 h-3" />{sale.date}</span>
+                <span className="text-xs text-terra-text-muted flex items-center gap-1"><Clock className="w-3 h-3" aria-hidden="true" />{sale.date}</span>
               </div>
               <p className="text-sm font-semibold text-terra-text mb-1">{sale.address}</p>
               <div className="grid grid-cols-2 gap-2 mt-3">

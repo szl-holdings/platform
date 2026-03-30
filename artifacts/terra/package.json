@@ -18,6 +18,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "@workspace/observability": "workspace:*",
     "@workspace/shared-ui": "workspace:*",
     "clsx": "catalog:",
     "framer-motion": "catalog:",
@@ -29,7 +30,9 @@
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "@tanstack/react-query": "catalog:",
-    "wouter": "^3.3.5",
-    "@workspace/observability": "workspace:*"
+    "sonner": "^2.0.7",
+    "wouter": "^3.3.5"
+  },
+  "dependencies": {
   }
 }

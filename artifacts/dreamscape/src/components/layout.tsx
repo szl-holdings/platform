@@ -22,6 +22,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background flex w-full overflow-hidden text-foreground">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
+        Skip to main content
+      </a>
       {/* Sidebar */}
       <aside className={cn(
         "border-r border-border bg-card/60 backdrop-blur-xl flex flex-col justify-between hidden md:flex shrink-0 transition-all duration-300",
@@ -73,15 +76,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className="w-full p-3 border-t border-border/50 text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center"
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {collapsed ? <ChevronRight className="w-4 h-4" aria-hidden="true" /> : <ChevronLeft className="w-4 h-4" aria-hidden="true" />}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <main id="main-content" className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden" tabIndex={-1}>
         {/* Top Header */}
         <header className="h-14 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-10 sticky top-0">
           <div className="flex items-center gap-4 flex-1">
@@ -95,12 +99,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="text-muted-foreground hover:text-primary transition-colors relative">
-              <Bell className="w-4.5 h-4.5" />
-              <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-primary rounded-full"></span>
+            <button aria-label="Notifications" className="text-muted-foreground hover:text-primary transition-colors relative">
+              <Bell className="w-4.5 h-4.5" aria-hidden="true" />
+              <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-primary rounded-full" aria-hidden="true"></span>
             </button>
-            <button className="text-muted-foreground hover:text-foreground transition-colors">
-              <Settings className="w-4.5 h-4.5" />
+            <button aria-label="Settings" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Settings className="w-4.5 h-4.5" aria-hidden="true" />
             </button>
           </div>
         </header>

@@ -324,12 +324,15 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <div className="flex flex-col min-h-screen bg-background">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
+              Skip to main content
+            </a>
             <EcosystemNav currentAppId="admin" currentAppName="Admin Control Plane" accentColor="#f97316" />
             <div className="flex flex-1 overflow-auto">
               <Sidebar />
               <div className="flex-1 flex flex-col overflow-auto">
                 <DemoModeBanner />
-                <main className="flex-1 p-6">
+                <main id="main-content" className="flex-1 p-6" tabIndex={-1}>
                   <AppRouter />
                 </main>
               </div>

@@ -1,10 +1,20 @@
 import type { Response, Request } from "express";
+import { randomUUID } from "crypto";
 import { InvalidIdError } from "../middlewares/auth";
 
 export interface ApiError {
   error: string;
   code?: string;
+  correlationId?: string;
   details?: unknown;
+}
+
+function getOrCreateCorrelationId(res: Response): string {
+  const existing = res.getHeader("X-Correlation-ID") as string | undefined;
+  if (existing) return existing;
+  const id = randomUUID();
+  res.setHeader("X-Correlation-ID", id);
+  return id;
 }
 
 export function sendSuccess<T>(res: Response, data: T, status = 200, meta?: Record<string, unknown>) {
@@ -24,7 +34,8 @@ export function sendNoContent(res: Response) {
 }
 
 export function sendError(res: Response, error: string, status = 500, code?: string, details?: unknown) {
-  const body: ApiError = { error };
+  const correlationId = getOrCreateCorrelationId(res);
+  const body: ApiError = { error, correlationId };
   if (code) body.code = code;
   if (details) body.details = details;
   res.status(status).json(body);

@@ -122,6 +122,9 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden selection:bg-primary/30">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-cyan-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+        Skip to main content
+      </a>
       <aside className="w-56 border-r border-white/5 bg-card/40 backdrop-blur-xl flex flex-col shrink-0 relative z-20">
         <div className="h-14 flex items-center px-4 border-b border-white/5">
           <div className="flex items-center gap-2.5">
@@ -291,7 +294,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto custom-scrollbar p-6 relative">
+        <main id="main-content" className="flex-1 overflow-auto custom-scrollbar p-6 relative" tabIndex={-1}>
           {children}
         </main>
       </div>

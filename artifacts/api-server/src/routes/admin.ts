@@ -1,8 +1,12 @@
 import { Router, type IRouter } from "express";
 import { services } from "@workspace/services";
 import { APP_INTEGRATIONS, PLATFORM_APPS } from "@workspace/config";
-import { db, pool, billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable } from "@workspace/db";
-import { desc, sql } from "drizzle-orm";
+import {
+  db, pool,
+  billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable,
+  usersTable, rolesTable, userRolesTable, auditEventsTable, featureFlagsTable, webhookEventsTable,
+} from "@workspace/db";
+import { desc, sql, ilike, or, eq } from "drizzle-orm";
 
 const adminRouter: IRouter = Router();
 
@@ -15,42 +19,6 @@ const SZL_APPS = [
   { id: "stephen-site", name: "Stephen Lutar", description: "Personal portfolio site", status: "active", url: "/stephen/" },
   { id: "mockup-sandbox", name: "Component Preview", description: "Design system preview", status: "active", url: "/__mockup/" },
   { id: "terra", name: "Terra Real Estate Intelligence", description: "Real estate portfolio observability platform", status: "active", url: "/terra/" },
-];
-
-const MOCK_USERS = [
-  { id: "usr_001", email: "admin@szl.com", name: "SZL Admin", role: "admin", status: "active", lastLogin: "2026-03-25T08:00:00Z" },
-  { id: "usr_002", email: "dev@szl.com", name: "Dev User", role: "developer", status: "active", lastLogin: "2026-03-24T16:30:00Z" },
-  { id: "usr_003", email: "viewer@szl.com", name: "Read-Only User", role: "viewer", status: "active", lastLogin: "2026-03-20T10:00:00Z" },
-  { id: "usr_004", email: "ops@szl.com", name: "Ops Manager", role: "ops", status: "inactive", lastLogin: "2026-02-15T12:00:00Z" },
-];
-
-const MOCK_AUDIT_LOG = [
-  { id: "log_001", action: "connector.test", actor: "admin@szl.com", target: "stripe", result: "success", timestamp: "2026-03-25T08:15:00Z", details: "Connection test passed" },
-  { id: "log_002", action: "user.login", actor: "admin@szl.com", target: "system", result: "success", timestamp: "2026-03-25T08:00:00Z", details: "Admin login from 10.0.0.1" },
-  { id: "log_003", action: "connector.sync", actor: "system", target: "github", result: "success", timestamp: "2026-03-25T07:00:00Z", details: "Synced 12 repositories" },
-  { id: "log_004", action: "feature_flag.toggle", actor: "dev@szl.com", target: "dark_mode", result: "success", timestamp: "2026-03-24T16:45:00Z", details: "Enabled dark_mode flag" },
-  { id: "log_005", action: "seed.run", actor: "admin@szl.com", target: "demo_data", result: "success", timestamp: "2026-03-24T10:00:00Z", details: "Re-seeded demo data" },
-  { id: "log_006", action: "connector.test", actor: "dev@szl.com", target: "slack", result: "failure", timestamp: "2026-03-24T09:30:00Z", details: "Missing webhook URL" },
-  { id: "log_007", action: "user.create", actor: "admin@szl.com", target: "usr_003", result: "success", timestamp: "2026-03-23T14:00:00Z", details: "Created viewer account" },
-  { id: "log_008", action: "billing.update", actor: "system", target: "subscription", result: "success", timestamp: "2026-03-22T00:00:00Z", details: "Monthly billing cycle renewed" },
-];
-
-const MOCK_FEATURE_FLAGS: Record<string, { enabled: boolean; description: string; updatedAt: string }> = {
-  dark_mode: { enabled: true, description: "Enable dark mode across all apps", updatedAt: "2026-03-24T16:45:00Z" },
-  vessel_tracking: { enabled: true, description: "Real-time vessel tracking features", updatedAt: "2026-03-20T10:00:00Z" },
-  ai_assistant: { enabled: false, description: "AI-powered portfolio assistant", updatedAt: "2026-03-18T12:00:00Z" },
-  webhook_processing: { enabled: true, description: "Process incoming webhooks", updatedAt: "2026-03-15T08:00:00Z" },
-  beta_features: { enabled: false, description: "Experimental beta features", updatedAt: "2026-03-10T14:00:00Z" },
-  export_csv: { enabled: true, description: "CSV export functionality", updatedAt: "2026-03-05T09:00:00Z" },
-  notifications: { enabled: true, description: "Push and email notifications", updatedAt: "2026-03-01T11:00:00Z" },
-};
-
-const MOCK_WEBHOOK_EVENTS = [
-  { id: "wh_001", source: "github", event: "push", status: "processed", payload: { ref: "refs/heads/main", commits: 3 }, receivedAt: "2026-03-25T07:00:00Z" },
-  { id: "wh_002", source: "stripe", event: "invoice.paid", status: "processed", payload: { invoiceId: "inv_001", amount: 9900 }, receivedAt: "2026-03-24T23:00:00Z" },
-  { id: "wh_003", source: "slack", event: "message", status: "processed", payload: { channel: "#general", user: "U123" }, receivedAt: "2026-03-24T15:00:00Z" },
-  { id: "wh_004", source: "github", event: "pull_request", status: "failed", payload: { action: "opened", number: 42 }, receivedAt: "2026-03-24T12:00:00Z" },
-  { id: "wh_005", source: "hubspot", event: "contact.creation", status: "processed", payload: { contactId: "hs_003" }, receivedAt: "2026-03-23T10:00:00Z" },
 ];
 
 const MOCK_BILLING = {
@@ -160,9 +128,21 @@ const SEED_TABLE_EXPECTATIONS = [
   { table: "readiness_alerts", minRows: 3, description: "Readiness alerts" },
 ];
 
-adminRouter.get("/admin/overview", (_req, res) => {
+adminRouter.get("/admin/overview", async (_req, res) => {
   const matrix = services.getHealthMatrix();
-  const dbStatus = { status: "healthy", latency: 12, connections: 5, maxConnections: 100 };
+  const dbStart = Date.now();
+  let dbStatus = { status: "healthy", latency: 0, connections: 0, maxConnections: 100 };
+  let userCounts = { total: 0, active: 0 };
+  try {
+    const [, userResult] = await Promise.all([
+      pool.query("SELECT COUNT(*)::int as tbl_count FROM pg_tables WHERE schemaname = 'public'"),
+      pool.query("SELECT COUNT(*)::int as total, COUNT(*) FILTER (WHERE is_active = true)::int as active FROM users"),
+    ]);
+    dbStatus = { status: "healthy", latency: Date.now() - dbStart, connections: 5, maxConnections: 100 };
+    userCounts = { total: userResult.rows[0]?.total ?? 0, active: userResult.rows[0]?.active ?? 0 };
+  } catch {
+    dbStatus = { status: "degraded", latency: Date.now() - dbStart, connections: 0, maxConnections: 100 };
+  }
   const storageStatus = { status: services.storage.status === "LIVE_CONFIGURED" ? "healthy" : "demo", usedBytes: 52428800, totalBytes: 5368709120 };
 
   res.json({
@@ -182,8 +162,8 @@ adminRouter.get("/admin/overview", (_req, res) => {
       activeApps: SZL_APPS.filter((a) => a.status === "active").length,
       connectors: matrix.summary.total,
       liveConnectors: matrix.summary.liveConfigured,
-      users: MOCK_USERS.length,
-      activeUsers: MOCK_USERS.filter((u) => u.status === "active").length,
+      users: userCounts.total,
+      activeUsers: userCounts.active,
     },
   });
 });
@@ -512,8 +492,52 @@ adminRouter.post("/admin/connectors/:name/sync", async (req, res) => {
   res.json(syncResult);
 });
 
-adminRouter.get("/admin/users", (_req, res) => {
-  res.json({ users: MOCK_USERS });
+adminRouter.get("/admin/users", async (_req, res) => {
+  try {
+    const users = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        displayName: usersTable.displayName,
+        avatarUrl: usersTable.avatarUrl,
+        isActive: usersTable.isActive,
+        lastLoginAt: usersTable.lastLoginAt,
+        createdAt: usersTable.createdAt,
+      })
+      .from(usersTable)
+      .orderBy(desc(usersTable.createdAt));
+
+    const userIds = users.map((u) => u.id);
+    const roleRows = userIds.length > 0
+      ? await db
+          .select({ userId: userRolesTable.userId, roleName: rolesTable.name })
+          .from(userRolesTable)
+          .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
+          .where(sql`${userRolesTable.userId} = ANY(${sql.raw(`ARRAY[${userIds.join(",")}]`)})`)
+      : [];
+
+    const roleMap = new Map<number, string[]>();
+    for (const r of roleRows) {
+      const existing = roleMap.get(r.userId) ?? [];
+      existing.push(r.roleName);
+      roleMap.set(r.userId, existing);
+    }
+
+    const enriched = users.map((u) => ({
+      id: `usr_${u.id}`,
+      email: u.email,
+      name: u.displayName,
+      roles: roleMap.get(u.id) ?? [],
+      role: (roleMap.get(u.id) ?? ["viewer"])[0] ?? "viewer",
+      status: u.isActive ? "active" : "inactive",
+      lastLogin: u.lastLoginAt?.toISOString() ?? null,
+      createdAt: u.createdAt.toISOString(),
+    }));
+
+    res.json({ users: enriched, total: enriched.length });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
 });
 
 adminRouter.post("/admin/users", (req, res) => {
@@ -529,46 +553,101 @@ adminRouter.post("/admin/users", (req, res) => {
   res.status(201).json(newUser);
 });
 
-adminRouter.get("/admin/audit-log", (req, res) => {
-  let logs = [...MOCK_AUDIT_LOG];
-  const action = req.query["action"] as string | undefined;
-  const actor = req.query["actor"] as string | undefined;
-  const search = req.query["search"] as string | undefined;
+adminRouter.get("/admin/audit-log", async (req, res) => {
+  try {
+    const action = req.query["action"] as string | undefined;
+    const search = req.query["search"] as string | undefined;
+    const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
+    const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
 
-  if (action) logs = logs.filter((l) => l.action.includes(action));
-  if (actor) logs = logs.filter((l) => l.actor.includes(actor));
-  if (search) {
-    const q = search.toLowerCase();
-    logs = logs.filter((l) =>
-      l.action.toLowerCase().includes(q) ||
-      l.actor.toLowerCase().includes(q) ||
-      l.target.toLowerCase().includes(q) ||
-      l.details.toLowerCase().includes(q),
-    );
+    let query = db
+      .select({
+        id: auditEventsTable.id,
+        action: auditEventsTable.action,
+        entityType: auditEventsTable.entityType,
+        entityId: auditEventsTable.entityId,
+        userId: auditEventsTable.userId,
+        userName: usersTable.displayName,
+        userEmail: usersTable.email,
+        oldValues: auditEventsTable.oldValues,
+        newValues: auditEventsTable.newValues,
+        ipAddress: auditEventsTable.ipAddress,
+        createdAt: auditEventsTable.createdAt,
+      })
+      .from(auditEventsTable)
+      .leftJoin(usersTable, eq(auditEventsTable.userId, usersTable.id))
+      .orderBy(desc(auditEventsTable.createdAt))
+      .limit(limit)
+      .$dynamic();
+
+    if (action) {
+      query = query.where(ilike(auditEventsTable.action, `%${action}%`));
+    } else if (search) {
+      query = query.where(
+        or(
+          ilike(auditEventsTable.action, `%${search}%`),
+          ilike(auditEventsTable.entityType, `%${search}%`),
+          ilike(usersTable.email, `%${search}%`),
+          ilike(usersTable.displayName, `%${search}%`),
+        ),
+      );
+    }
+
+    const rows = await query;
+    const logs = rows.map((r) => ({
+      id: `log_${r.id}`,
+      action: r.action,
+      actor: r.userEmail ?? r.userName ?? `user_${r.userId}`,
+      target: r.entityType + (r.entityId ? `/${r.entityId}` : ""),
+      result: "success",
+      timestamp: r.createdAt.toISOString(),
+      details: r.newValues ? JSON.stringify(r.newValues).slice(0, 120) : null,
+      ipAddress: r.ipAddress,
+    }));
+
+    res.json({ logs, total: logs.length });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch audit log" });
   }
-
-  res.json({ logs, total: logs.length });
 });
 
-adminRouter.get("/admin/feature-flags", (_req, res) => {
-  const flags = Object.entries(MOCK_FEATURE_FLAGS).map(([key, val]) => ({
-    key,
-    ...val,
-  }));
-  res.json({ flags });
+adminRouter.get("/admin/feature-flags", async (_req, res) => {
+  try {
+    const rows = await db
+      .select()
+      .from(featureFlagsTable)
+      .orderBy(featureFlagsTable.key);
+    const flags = rows.map((r) => ({
+      key: r.key,
+      name: r.name,
+      enabled: r.isEnabled,
+      description: r.description ?? "",
+      rolloutPercentage: r.rolloutPercentage,
+      updatedAt: r.updatedAt.toISOString(),
+    }));
+    res.json({ flags });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch feature flags" });
+  }
 });
 
-adminRouter.put("/admin/feature-flags/:key", (req, res) => {
-  const key = req.params["key"]!;
-  const flag = MOCK_FEATURE_FLAGS[key];
-  if (!flag) {
-    res.status(404).json({ error: "Flag not found" });
-    return;
+adminRouter.put("/admin/feature-flags/:key", async (req, res) => {
+  try {
+    const key = req.params["key"]!;
+    const { enabled } = req.body as { enabled: boolean };
+    const [updated] = await db
+      .update(featureFlagsTable)
+      .set({ isEnabled: enabled, updatedAt: new Date() })
+      .where(eq(featureFlagsTable.key, key))
+      .returning();
+    if (!updated) {
+      res.status(404).json({ error: "Flag not found" });
+      return;
+    }
+    res.json({ key: updated.key, name: updated.name, enabled: updated.isEnabled, updatedAt: updated.updatedAt.toISOString() });
+  } catch {
+    res.status(500).json({ error: "Failed to update feature flag" });
   }
-  const { enabled } = req.body as { enabled: boolean };
-  flag.enabled = enabled;
-  flag.updatedAt = new Date().toISOString();
-  res.json({ key, ...flag });
 });
 
 adminRouter.get("/admin/billing", async (_req, res) => {
@@ -608,8 +687,38 @@ adminRouter.get("/admin/billing", async (_req, res) => {
   }
 });
 
-adminRouter.get("/admin/webhooks", (_req, res) => {
-  res.json({ events: MOCK_WEBHOOK_EVENTS });
+adminRouter.get("/admin/webhooks", async (req, res) => {
+  try {
+    const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
+    const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
+    const source = req.query["source"] as string | undefined;
+
+    let query = db
+      .select()
+      .from(webhookEventsTable)
+      .orderBy(desc(webhookEventsTable.createdAt))
+      .limit(limit)
+      .$dynamic();
+
+    if (source) {
+      query = query.where(eq(webhookEventsTable.source, source));
+    }
+
+    const rows = await query;
+    const events = rows.map((r) => ({
+      id: `wh_${r.id}`,
+      source: r.source,
+      event: r.eventType,
+      status: r.status,
+      payload: r.payload,
+      errorMessage: r.errorMessage,
+      processedAt: r.processedAt?.toISOString() ?? null,
+      receivedAt: r.createdAt.toISOString(),
+    }));
+    res.json({ events, total: events.length });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch webhook events" });
+  }
 });
 
 adminRouter.get("/admin/files", async (_req, res) => {

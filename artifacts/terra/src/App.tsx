@@ -1,13 +1,14 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { terraConfig } from "@workspace/shared-ui/copilot-configs";
 import { Sidebar } from "@/components/sidebar";
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
+  defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 2 } },
 });
 
 const HomePage = lazy(() => import("@/pages/home"));
@@ -62,16 +63,20 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <div className="flex flex-col h-screen bg-terra-bg">
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:text-sm focus:font-medium">
+            Skip to main content
+          </a>
           <EcosystemNav currentAppId="terra" currentAppName="Terra Real Estate Intelligence" accentColor="#10b981" />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar />
-            <main className="flex-1 overflow-auto">
+            <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
               <AppRouter />
             </main>
           </div>
         </div>
       </WouterRouter>
       <AgentCopilot config={terraConfig} />
+      <Toaster position="bottom-right" richColors />
     </QueryClientProvider>
   );
 }

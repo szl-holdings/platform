@@ -187,10 +187,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <div className="flex flex-col h-screen bg-background">
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
+            Skip to main content
+          </a>
           <EcosystemNav currentAppId="inca" currentAppName="INCA AI Research Command Center" accentColor="#8b5cf6" />
           <div className="flex flex-1 overflow-hidden">
             <Sidebar />
-            <main className="flex-1 overflow-auto">
+            <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
               <AppRouter />
             </main>
           </div>
