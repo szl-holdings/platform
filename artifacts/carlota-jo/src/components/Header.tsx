@@ -35,20 +35,20 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-navy-950/97 backdrop-blur-md border-b border-cream-200/8"
+          ? "bg-stone-50/95 backdrop-blur-md border-b border-stone-200"
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-16">
         <div className="flex items-center justify-between h-20">
           <a
             href={import.meta.env.BASE_URL}
             className="flex items-baseline gap-3"
           >
-            <span className="font-serif text-2xl font-semibold tracking-wide text-cream-50 hover:text-gold-400 transition-colors">
+            <span className="font-serif text-2xl font-light tracking-wide text-ink-900 hover:text-warm-gold transition-colors duration-300">
               Carlota Jo
             </span>
-            <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-cream-300/40 font-medium">
+            <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-stone-400 font-medium">
               Advisory
             </span>
           </a>
@@ -58,7 +58,7 @@ export default function Header() {
               <button
                 key={link.href}
                 onClick={() => handleNav(link.href)}
-                className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-100/75 hover:text-cream-50 transition-colors duration-300"
+                className="text-[11px] font-light tracking-[0.2em] uppercase text-ink-600 hover:text-ink-900 transition-colors duration-300"
               >
                 {link.label}
               </button>
@@ -67,19 +67,19 @@ export default function Header() {
               onClick={() =>
                 document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="ml-4 px-7 py-2.5 text-[11px] font-medium tracking-[0.15em] uppercase border border-gold-500/30 text-gold-400/90 hover:border-gold-400/60 hover:text-gold-300 transition-all duration-300"
+              className="ml-4 px-7 py-2.5 text-[11px] font-medium tracking-[0.15em] uppercase border border-ink-900/30 text-ink-900 hover:bg-ink-900 hover:text-stone-50 transition-all duration-300"
             >
-              Start a Conversation
+              Inquire Privately
             </button>
             <UserButton />
           </nav>
 
           <button
-            className="lg:hidden text-cream-100"
+            className="lg:hidden text-ink-900"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
@@ -90,14 +90,14 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-navy-950/98 backdrop-blur-xl border-b border-cream-200/8"
+            className="lg:hidden bg-stone-50/98 backdrop-blur-xl border-b border-stone-200"
           >
             <div className="px-6 py-8 flex flex-col gap-6">
               {navLinks.map((link) => (
                 <button
                   key={link.href}
                   onClick={() => handleNav(link.href)}
-                  className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-100/75 hover:text-cream-50 transition-colors"
+                  className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-ink-600 hover:text-ink-900 transition-colors"
                 >
                   {link.label}
                 </button>
@@ -107,9 +107,9 @@ export default function Header() {
                   setMobileOpen(false);
                   document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="mt-2 px-6 py-3.5 text-[11px] font-medium tracking-[0.15em] uppercase border border-gold-500/30 text-gold-400 hover:text-gold-300 transition-all text-center"
+                className="mt-2 px-6 py-3.5 text-[11px] font-medium tracking-[0.15em] uppercase border border-ink-900/30 text-ink-900 hover:bg-ink-900 hover:text-stone-50 transition-all text-center"
               >
-                Start a Conversation
+                Inquire Privately
               </button>
             </div>
           </motion.div>

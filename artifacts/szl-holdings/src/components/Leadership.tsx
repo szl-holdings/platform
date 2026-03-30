@@ -1,93 +1,77 @@
 import { m } from "framer-motion";
-import siteData from "@/data/site.json";
 
-const teamMembers = [
+const principles = [
   {
-    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80&auto=format&fit=crop",
-    name: "Stephen Lutar", role: "Founder & CEO", focus: "Enterprise Architecture",
+    number: "01",
+    title: "Vertical Integration",
+    body: "We don't build tools. We build operating systems for entire industries — full-stack ownership from data ingestion to decision output.",
   },
   {
-    photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&q=80&auto=format&fit=crop",
-    name: "Thomas Franklin", role: "Chief Technology Officer", focus: "AI & Infrastructure",
+    number: "02",
+    title: "Compounding Intelligence",
+    body: "Every model trained, every dataset enriched, every prediction validated makes every platform in the ecosystem measurably stronger.",
   },
   {
-    photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80&auto=format&fit=crop",
-    name: "Maria Reyes", role: "Chief Investment Officer", focus: "Capital Deployment",
+    number: "03",
+    title: "Infrastructure-Grade",
+    body: "Our platforms serve organizations that cannot afford downtime — shipping operators, defense contractors, enterprise security teams.",
   },
   {
-    photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80&auto=format&fit=crop",
-    name: "James Chen", role: "VP Operations", focus: "Platform Delivery",
+    number: "04",
+    title: "Capital Efficiency",
+    body: "Shared infrastructure across six verticals means 40% lower cloud spend, unified security, and engineering leverage that standalone companies cannot replicate.",
   },
 ];
 
 export function Leadership() {
-  const { leadership } = siteData;
-
   return (
-    <section id="leadership" className="py-24 lg:py-32 bg-szl-bg-secondary border-t border-szl-border">
+    <section id="leadership" className="py-24 lg:py-36 bg-szl-bg-secondary border-t border-szl-border">
       <div className="max-w-6xl mx-auto px-6">
         <m.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-16"
+          className="mb-20"
         >
-          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">Leadership</p>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight">
-              Built by operators.
+          <p className="text-szl-text-muted text-[10px] font-medium uppercase tracking-[0.25em] mb-6">Founding Thesis</p>
+          <div className="max-w-4xl">
+            <h2 className="font-[var(--font-display)] text-4xl sm:text-5xl text-szl-text leading-[1.05] mb-8">
+              Built by operators.<br />
+              <span className="italic" style={{ color: "var(--color-szl-text-secondary)" }}>Designed to compound.</span>
             </h2>
-            <p className="text-szl-text-secondary text-sm max-w-sm leading-relaxed">
-              Founders and executives who have shipped production systems at scale.
-            </p>
           </div>
         </m.div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-          {teamMembers.map((member, index) => (
-            <m.div
-              key={member.name}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.08 }}
-              className="rounded-xl border border-szl-border bg-white p-5 hover:border-szl-border-hover hover:shadow-sm transition-all duration-200"
-            >
-              <div className="w-14 h-14 rounded-xl overflow-hidden mb-4">
-                <img
-                  src={member.photo}
-                  alt={`${member.name} - ${member.role} at SZL Holdings`}
-                  loading="lazy"
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-              <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-0.5">
-                {member.name}
-              </h3>
-              <p className="text-szl-text-muted text-[11px] font-medium uppercase tracking-wider mb-1">
-                {member.role}
-              </p>
-              <p className="text-szl-text-secondary text-xs">
-                {member.focus}
-              </p>
-            </m.div>
-          ))}
-        </div>
 
         <m.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="rounded-2xl border border-szl-border bg-white p-8 sm:p-10"
+          className="border border-szl-border p-10 sm:p-14 mb-20 max-w-4xl"
         >
-          <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-6">Founding Thesis</p>
-          <blockquote className="font-[var(--font-display)] text-lg sm:text-xl text-szl-text leading-relaxed mb-6 max-w-4xl">
-            "{leadership.quote}"
+          <blockquote className="font-[var(--font-display)] text-xl sm:text-2xl text-szl-text leading-relaxed mb-8">
+            "The next generation of durable businesses won't be built on a single product — they'll emerge from intelligently orchestrated ecosystems where data flows between verticals, AI compounds across domains, and every platform makes the others exponentially more valuable. That's not a vision. It's an engineering problem."
           </blockquote>
-          <p className="text-szl-text-secondary text-sm font-semibold">
-            — {leadership.attribution}
+          <p className="text-szl-text-muted text-sm font-medium tracking-wide">
+            — Stephen Lutar, Founder & CEO, SZL Holdings
           </p>
         </m.div>
+
+        <div className="grid sm:grid-cols-2 gap-px bg-szl-border">
+          {principles.map((p, index) => (
+            <m.div
+              key={p.number}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08 }}
+              className="bg-szl-bg-secondary hover:bg-szl-bg-tertiary transition-colors duration-300 p-8 lg:p-10"
+            >
+              <p className="font-[var(--font-display)] text-szl-accent text-2xl mb-5">{p.number}</p>
+              <h3 className="font-[var(--font-display)] text-xl text-szl-text mb-3">{p.title}</h3>
+              <p className="text-szl-text-secondary text-sm leading-relaxed font-light">{p.body}</p>
+            </m.div>
+          ))}
+        </div>
       </div>
     </section>
   );

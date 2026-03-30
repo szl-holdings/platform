@@ -1,24 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Instrument Serif', 'Georgia', serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  --color-szl-bg: #ffffff;
-  --color-szl-bg-secondary: #f8f9fb;
-  --color-szl-bg-tertiary: #f1f3f8;
-  --color-szl-surface: #ffffff;
-  --color-szl-surface-hover: #f8f9fb;
-  --color-szl-border: rgba(15, 23, 42, 0.08);
-  --color-szl-border-hover: rgba(15, 23, 42, 0.15);
-  --color-szl-text: #0f172a;
-  --color-szl-text-secondary: #475569;
-  --color-szl-text-muted: #94a3b8;
-  --color-szl-primary: #0f172a;
-  --color-szl-primary-light: #1e293b;
-  --color-szl-accent: #2563eb;
-  --color-szl-accent-light: #3b82f6;
+  --color-szl-bg: #0e100f;
+  --color-szl-bg-secondary: #131614;
+  --color-szl-bg-tertiary: #1a1d1b;
+  --color-szl-surface: #161918;
+  --color-szl-surface-hover: #1e2220;
+  --color-szl-border: rgba(255, 255, 255, 0.06);
+  --color-szl-border-hover: rgba(255, 255, 255, 0.12);
+  --color-szl-text: #f0ede8;
+  --color-szl-text-secondary: #a8a49d;
+  --color-szl-text-muted: #5a5752;
+  --color-szl-primary: #f0ede8;
+  --color-szl-primary-light: #ffffff;
+  --color-szl-accent: #c9a96e;
+  --color-szl-accent-light: #dcc08a;
+  --color-szl-accent-dim: rgba(201, 169, 110, 0.12);
+  --color-szl-graphite: #1e2220;
+  --color-szl-stone: #2a2d2b;
 }
 
 * {
@@ -41,25 +44,25 @@ body {
 }
 
 ::selection {
-  background: rgba(37, 99, 235, 0.15);
-  color: #0f172a;
+  background: rgba(201, 169, 110, 0.2);
+  color: #f0ede8;
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f8f9fb;
+  background: #0e100f;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.12);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(15, 23, 42, 0.2);
+  background: rgba(201, 169, 110, 0.3);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -3,52 +3,48 @@ import testimonialsData from "@/data/testimonials.json";
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="py-24 lg:py-32 bg-navy-900/20 border-t border-cream-200/5">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+    <section id="testimonials" className="py-24 lg:py-40 bg-stone-50 border-t border-stone-200">
+      <div className="max-w-7xl mx-auto px-6 lg:px-16">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mb-20"
+          className="mb-20 lg:mb-28"
         >
-          <p className="text-[11px] font-medium tracking-[0.35em] uppercase text-gold-400 mb-5">
+          <p className="text-[11px] font-medium tracking-[0.35em] uppercase text-warm-gold mb-6">
             Client Perspectives
           </p>
-          <h2 className="font-serif text-4xl md:text-5xl font-light text-cream-50">
+          <h2 className="font-serif text-4xl md:text-5xl font-light text-ink-900">
             In their words
           </h2>
         </motion.div>
 
-        <div className="space-y-px">
+        <div className="space-y-px bg-stone-200">
           {testimonialsData.slice(0, 3).map((t, idx) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 py-10 border-b border-cream-200/5 last:border-b-0"
+              className="bg-stone-50 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16 px-8 lg:px-12 py-12"
             >
               <div className="lg:col-span-8">
-                <p className="font-serif text-xl lg:text-2xl font-light text-cream-100 leading-relaxed italic">
+                <p className="font-serif text-xl lg:text-2xl font-light text-ink-900 leading-relaxed italic">
                   "{t.quote}"
                 </p>
               </div>
               <div className="lg:col-span-4 flex items-end">
                 <div>
-                  <p className="text-sm font-medium text-cream-50 tracking-wide">
+                  <p className="text-sm font-medium text-ink-900 tracking-wide mb-1">
                     {t.name}
                   </p>
-                  <p className="text-xs text-cream-300/40 mt-1">
-                    {t.title}
-                  </p>
-                  <p className="text-xs text-cream-300/30 mt-0.5">
-                    {t.company}
-                  </p>
-                  <p className="text-[10px] text-gold-400/40 mt-1.5 tracking-wider uppercase">
-                    {t.context}
-                  </p>
+                  <p className="text-xs text-ink-500 mb-0.5 font-light">{t.title}</p>
+                  <p className="text-xs text-stone-400 font-light">{t.company}</p>
+                  {t.context && (
+                    <p className="text-[10px] text-warm-gold/70 mt-2 tracking-wider uppercase font-medium">{t.context}</p>
+                  )}
                 </div>
               </div>
             </motion.div>
