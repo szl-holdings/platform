@@ -1,67 +1,86 @@
 [
   {
-    "id": "ai-ml",
-    "title": "Artificial Intelligence",
-    "description": "Proprietary AI infrastructure powering predictive analytics, natural language processing, computer vision, and autonomous decision-making across every portfolio company. Our models are trained on domain-specific datasets that no horizontal AI company can replicate.",
-    "icon": "Brain",
+    "id": "signal",
+    "title": "Signal Lens",
+    "tagline": "See everything that matters, nothing that doesn't.",
+    "description": "Every portfolio company drowns in noise. The Signal Lens cuts through — AI-ranked priority surfaces the 3–5 signals that actually matter right now. Not dashboards of metrics. Curated signals with the context needed to act.",
+    "icon": "Radio",
     "metrics": [
-      { "label": "Models in Production", "value": "640+" },
-      { "label": "Daily Inference Requests", "value": "18M+" },
-      { "label": "Global AI Market (2030)", "value": "$1.81T" }
+      { "label": "Avg. Alert Reduction", "value": "73%" },
+      { "label": "Time to Top Signal", "value": "<30s" },
+      { "label": "AI-Ranked Signals/Day", "value": "18K+" }
     ],
-    "color": "#f59e0b",
-    "source": "Grand View Research, 2024"
+    "color": "#06b6d4",
+    "lensId": "signal"
   },
   {
-    "id": "cybersecurity",
-    "title": "Cybersecurity & Defense",
-    "description": "Advanced threat simulation, continuous security validation, and zero-trust architecture serving enterprises and government agencies. In a landscape where the average data breach costs $4.45M (IBM, 2023), our platforms help organizations identify vulnerabilities before adversaries do.",
-    "icon": "ShieldCheck",
+    "id": "impact",
+    "title": "Impact Lens",
+    "tagline": "Every technical event has a dollar sign.",
+    "description": "Technology exists to serve business outcomes. The Impact Lens translates every operational event into financial consequence — a vessel delay becomes fuel cost, a security incident becomes a compliance fine exposure, a missed campaign launch becomes lost brand value.",
+    "icon": "DollarSign",
     "metrics": [
-      { "label": "Threat Scenarios Modeled", "value": "2,800+" },
-      { "label": "Platform Uptime", "value": "99.997%" },
-      { "label": "Global Cyber Market", "value": "$266B" }
-    ],
-    "color": "#ef4444",
-    "source": "Mordor Intelligence, 2024"
-  },
-  {
-    "id": "maritime",
-    "title": "Maritime Intelligence",
-    "description": "AI-powered maritime domain awareness across 340+ shipping lanes and 2,500+ ports. With 90% of global trade moving by sea — roughly $14 trillion in annual cargo — our platform provides the intelligence layer for the world's most critical supply chain.",
-    "icon": "Anchor",
-    "metrics": [
-      { "label": "Vessels Monitored", "value": "52,000+" },
-      { "label": "Ports Connected", "value": "2,500+" },
-      { "label": "Maritime Analytics Market", "value": "$15.4B" }
-    ],
-    "color": "#3b82f6",
-    "source": "Allied Market Research, 2024"
-  },
-  {
-    "id": "creative-tech",
-    "title": "Creative Technology",
-    "description": "The intersection of generative AI and creative production. Our platforms enable studios and agencies to produce broadcast-quality content at 10x speed, addressing a creative tools market being reshaped by AI at unprecedented velocity.",
-    "icon": "Lightbulb",
-    "metrics": [
-      { "label": "Creative Assets Generated", "value": "1.4M+" },
-      { "label": "Enterprise Clients", "value": "85+" },
-      { "label": "AI Creative Tools Market", "value": "$14.8B" }
-    ],
-    "color": "#a855f7",
-    "source": "MarketsandMarkets, 2024"
-  },
-  {
-    "id": "consulting",
-    "title": "Strategic Intelligence",
-    "description": "Data-driven advisory reimagined for the AI era. We combine deep industry expertise with proprietary analytical models to deliver strategic recommendations that outperform traditional consulting methodologies — at a fraction of the cost and timeline.",
-    "icon": "Target",
-    "metrics": [
-      { "label": "Enterprise Pilot Clients", "value": "12" },
-      { "label": "Avg. Client ROI", "value": "340%" },
-      { "label": "Consulting Market Size", "value": "$340B" }
+      { "label": "Avg. Cost Identified/Month", "value": "$2.1M" },
+      { "label": "Revenue Events Correlated", "value": "94%" },
+      { "label": "Impact Models Active", "value": "11" }
     ],
     "color": "#10b981",
-    "source": "Statista, 2024"
+    "lensId": "impact"
+  },
+  {
+    "id": "anticipation",
+    "title": "Anticipation Lens",
+    "tagline": "Know before it happens.",
+    "description": "The best incident is the one that never happens. The Anticipation Lens projects the current state forward — predicting failures, forecasting outcomes, and surfacing risks before they materialize. Vessel arrival predictions. Attack trajectory modeling. Market trend forecasting.",
+    "icon": "Brain",
+    "metrics": [
+      { "label": "Prediction Accuracy", "value": "87%" },
+      { "label": "Avg. Lead Time", "value": "48h" },
+      { "label": "Prevented Events/Month", "value": "340+" }
+    ],
+    "color": "#8b5cf6",
+    "lensId": "anticipation"
+  },
+  {
+    "id": "topology",
+    "title": "Topology Lens",
+    "tagline": "Everything is connected.",
+    "description": "No entity operates in isolation. The Topology Lens reveals the relationship graph — fleet vessel networks, attack surface dependencies, property-market connections, creative asset hierarchies. When one node changes, the ripple is visible.",
+    "icon": "Network",
+    "metrics": [
+      { "label": "Entities Mapped", "value": "340K+" },
+      { "label": "Relationship Types", "value": "48" },
+      { "label": "Cross-App Dependencies", "value": "1,200+" }
+    ],
+    "color": "#f59e0b",
+    "lensId": "topology"
+  },
+  {
+    "id": "posture",
+    "title": "Posture Lens",
+    "tagline": "One number tells the story.",
+    "description": "Complexity collapses into one number. The Posture Lens synthesizes every signal, metric, and risk factor into a single real-time score — front and center, always visible. Fleet Readiness. Security Posture. Portfolio Health. One authoritative score per domain.",
+    "icon": "Shield",
+    "metrics": [
+      { "label": "Composite Posture Score", "value": "87/100" },
+      { "label": "Portfolio-Wide Health", "value": "Healthy" },
+      { "label": "Dimensions Synthesized", "value": "6" }
+    ],
+    "color": "#f43f5e",
+    "lensId": "posture"
+  },
+  {
+    "id": "velocity",
+    "title": "Velocity Lens",
+    "tagline": "How fast are we getting better?",
+    "description": "Speed without stability is chaos. Stability without speed is stagnation. The Velocity Lens tracks the rate of improvement — DORA metrics for engineering, throughput for research, deal pipeline velocity for real estate, content production rate for creative.",
+    "icon": "Rocket",
+    "metrics": [
+      { "label": "Avg. Improvement Rate", "value": "+12% MoM" },
+      { "label": "Portfolio Velocity Score", "value": "84/100" },
+      { "label": "Domains Improving", "value": "9/11" }
+    ],
+    "color": "#6366f1",
+    "lensId": "velocity"
   }
 ]

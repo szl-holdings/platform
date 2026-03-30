@@ -1,6 +1,15 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { type AppObservabilityState, type PillarId, PILLARS } from "@workspace/observability";
+import { type AppObservabilityState, type LensId, LENSES } from "@workspace/observability";
 import { ALL_CONFIGS } from "@workspace/observability/configs";
+
+const LENS_ICONS: Record<string, string> = {
+  signal: "◎",
+  impact: "$",
+  anticipation: "◈",
+  topology: "⬡",
+  posture: "◆",
+  velocity: "▲",
+};
 
 function statusColor(status: string): string {
   switch (status) {
@@ -38,55 +47,67 @@ function PortfolioScoreRing({ score, size = 120 }: { score: number; size?: numbe
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-3xl font-bold text-white">{score}</span>
-        <span className="text-xs text-slate-400">Portfolio</span>
+        <span className="text-xs text-slate-400">Posture</span>
       </div>
     </div>
   );
 }
 
-function AppHealthCard({ state }: { state: AppObservabilityState }) {
+function AppLensCard({ state }: { state: AppObservabilityState }) {
   const config = ALL_CONFIGS.find((c) => c.appSlug === state.appSlug);
   const name = config?.appName || state.appSlug;
+  const lenses = state.lenses || state.pillars || [];
+  const postureScore = state.postureScore ?? state.overallScore;
 
   return (
     <div className={`rounded-xl border p-4 ${statusBg(state.overallStatus)} transition-all hover:scale-[1.01]`}>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-1">
         <h4 className="text-sm font-semibold text-white truncate pr-2">{name}</h4>
-        <span className={`text-lg font-bold ${statusColor(state.overallStatus)}`}>{state.overallScore}</span>
+        <span className={`text-lg font-bold ${statusColor(state.overallStatus)}`}>{postureScore}</span>
       </div>
-      <div className="grid grid-cols-3 gap-1.5">
-        {state.pillars.slice(0, 6).map((p) => (
-          <div key={p.pillarId} className="flex flex-col items-center">
-            <span className={`text-xs font-mono font-bold ${statusColor(p.status)}`}>{p.score}</span>
-            <span className="text-[9px] text-slate-500 truncate max-w-full text-center">
-              {PILLARS.find((pd) => pd.id === p.pillarId)?.name.split(" ")[0]}
-            </span>
-          </div>
-        ))}
+      {state.topSignal && (
+        <p className="text-[10px] text-white/40 truncate mb-2">◎ {state.topSignal}</p>
+      )}
+      <div className="grid grid-cols-3 gap-1">
+        {lenses.map((lens) => {
+          const lensId = (lens.lensId || (lens as { pillarId?: string }).pillarId || "") as string;
+          return (
+            <div key={lensId} className="flex flex-col items-center py-1">
+              <span className={`text-xs font-mono font-bold ${statusColor(lens.status)}`}>{lens.score}</span>
+              <span className="text-[8px] text-slate-500">{LENS_ICONS[lensId] || lensId.slice(0, 3)}</span>
+            </div>
+          );
+        })}
       </div>
-      <div className="flex items-center justify-between mt-3 text-xs text-slate-500">
-        <span>{state.metrics.length} metrics</span>
+      <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
+        <span>{state.metrics.length} signals</span>
         <span>{state.events.filter((e) => e.severity !== "info").length} alerts</span>
       </div>
     </div>
   );
 }
 
-function PillarAggregateRow({ pillarId, apps }: { pillarId: PillarId; apps: AppObservabilityState[] }) {
-  const pillar = PILLARS.find((p) => p.id === pillarId)!;
-  const scores = apps.map((a) => a.pillars.find((p) => p.pillarId === pillarId)?.score ?? 0);
+function LensAggregateRow({ lensId, apps }: { lensId: LensId; apps: AppObservabilityState[] }) {
+  const lens = LENSES.find((l) => l.id === lensId)!;
+  const scores = apps.map((a) => {
+    const lenses = a.lenses || a.pillars || [];
+    return (lenses.find((l) => l.lensId === lensId || (l as { pillarId?: string }).pillarId === lensId))?.score ?? 0;
+  });
   const avg = scores.length > 0 ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : 0;
   const status = avg >= 80 ? "healthy" : avg >= 50 ? "degraded" : "critical";
 
   return (
     <div className="flex items-center gap-4 py-3 px-4 rounded-lg hover:bg-white/5 transition-colors">
-      <div className="flex-1">
-        <div className="text-sm font-medium text-white">{pillar.name}</div>
-        <div className="text-xs text-slate-500">{pillar.description}</div>
+      <div className="w-7 h-7 rounded flex items-center justify-center bg-white/5 text-white/40 text-sm flex-shrink-0">
+        {LENS_ICONS[lensId] || "◆"}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex-1">
+        <div className="text-sm font-medium text-white">{lens.name}</div>
+        <div className="text-xs text-slate-500 line-clamp-1">{lens.tagline}</div>
+      </div>
+      <div className="flex items-center gap-1">
         {scores.map((s, i) => (
-          <div key={i} className={`w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${s >= 80 ? "bg-emerald-400/10 text-emerald-400" : s >= 50 ? "bg-amber-400/10 text-amber-400" : "bg-red-400/10 text-red-400"}`}>
+          <div key={i} className={`w-6 h-6 rounded text-[9px] font-bold flex items-center justify-center ${s >= 80 ? "bg-emerald-400/10 text-emerald-400" : s >= 50 ? "bg-amber-400/10 text-amber-400" : "bg-red-400/10 text-red-400"}`}>
             {s}
           </div>
         ))}
@@ -114,9 +135,13 @@ export default function PortfolioObservability() {
           const data = await res.json();
           return {
             appSlug: data.appSlug,
-            pillars: data.pillars,
+            lenses: data.lenses || data.pillars,
+            pillars: data.lenses || data.pillars,
             overallScore: data.overallScore,
             overallStatus: data.overallStatus,
+            postureScore: data.postureScore,
+            topSignal: data.topSignal,
+            velocityTrend: data.velocityTrend,
             metrics: data.metrics || [],
             events: data.events || [],
             lastUpdated: Date.now(),
@@ -153,14 +178,14 @@ export default function PortfolioObservability() {
       .slice(0, 15);
   }, [appStates]);
 
-  const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
+  const lensIds: LensId[] = ["signal", "impact", "anticipation", "topology", "posture", "velocity"];
 
   if (appStates.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
-          <span className="text-sm text-slate-500 animate-pulse">Loading portfolio observability...</span>
+          <span className="text-sm text-slate-500 animate-pulse">Loading portfolio intelligence...</span>
         </div>
       </div>
     );
@@ -170,14 +195,15 @@ export default function PortfolioObservability() {
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Portfolio Observability</h2>
-          <p className="text-sm text-slate-400 mt-1">Cross-app health intelligence across {appStates.length} applications</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium ${statusBg(portfolioStatus)} ${statusColor(portfolioStatus)}`}>
-            <span className={`w-2 h-2 rounded-full ${portfolioStatus === "healthy" ? "bg-emerald-400" : portfolioStatus === "degraded" ? "bg-amber-400" : "bg-red-400"}`} />
-            Portfolio: {portfolioStatus}
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-white">Portfolio Observability</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">6 Lenses</span>
           </div>
+          <p className="text-sm text-slate-400 mt-1">The 6 Lenses of Business Observability across {appStates.length} portfolio applications</p>
+        </div>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium ${statusBg(portfolioStatus)} ${statusColor(portfolioStatus)}`}>
+          <span className={`w-2 h-2 rounded-full ${portfolioStatus === "healthy" ? "bg-emerald-400" : portfolioStatus === "degraded" ? "bg-amber-400" : "bg-red-400"}`} />
+          Portfolio: {portfolioStatus}
         </div>
       </div>
 
@@ -185,7 +211,7 @@ export default function PortfolioObservability() {
         <div className="flex flex-col items-center gap-4">
           <PortfolioScoreRing score={portfolioScore} />
           <div className="text-center">
-            <div className="text-sm text-slate-400">Overall Health</div>
+            <div className="text-sm text-slate-400">Portfolio Posture</div>
             <div className={`text-sm font-semibold capitalize ${statusColor(portfolioStatus)}`}>{portfolioStatus}</div>
           </div>
           <div className="grid grid-cols-2 gap-3 w-full">
@@ -195,50 +221,53 @@ export default function PortfolioObservability() {
             </div>
             <div className="rounded-lg bg-white/[0.03] border border-white/5 p-3 text-center">
               <div className="text-lg font-bold text-white">{appStates.reduce((s, a) => s + a.metrics.length, 0)}</div>
-              <div className="text-xs text-slate-500">Metrics</div>
+              <div className="text-xs text-slate-500">Signals</div>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
           {appStates.map((state) => (
-            <AppHealthCard key={state.appSlug} state={state} />
+            <AppLensCard key={state.appSlug} state={state} />
           ))}
         </div>
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/[0.02]">
         <div className="p-4 border-b border-white/10">
-          <h3 className="text-lg font-semibold text-white">Pillar Aggregates</h3>
-          <p className="text-xs text-slate-400">Cross-app pillar scores (each box = one app)</p>
+          <h3 className="text-lg font-semibold text-white">Lens Aggregates — Portfolio-Wide</h3>
+          <p className="text-xs text-slate-400">Average score per lens across all {appStates.length} applications (each box = one app)</p>
         </div>
         <div className="divide-y divide-white/5">
-          {pillarIds.map((id) => (
-            <PillarAggregateRow key={id} pillarId={id} apps={appStates} />
+          {lensIds.map((id) => (
+            <LensAggregateRow key={id} lensId={id} apps={appStates} />
           ))}
         </div>
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/[0.02]">
         <div className="p-4 border-b border-white/10">
-          <h3 className="text-lg font-semibold text-white">Cross-Portfolio Events</h3>
+          <h3 className="text-lg font-semibold text-white">Cross-Portfolio Lens Events</h3>
         </div>
         <div className="divide-y divide-white/5">
-          {recentEvents.map((e) => (
-            <div key={e.id} className="flex items-start gap-3 py-2 px-4 hover:bg-white/5 transition-colors">
-              <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs flex-shrink-0 mt-0.5 ${e.severity === "critical" ? "text-red-400 bg-red-400/10" : e.severity === "warning" ? "text-amber-400 bg-amber-400/10" : "text-blue-400 bg-blue-400/10"}`}>
-                {e.severity === "critical" ? "!" : e.severity === "warning" ? "▲" : "●"}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm text-white/80 truncate">{e.message}</div>
-                <div className="text-xs text-slate-500 flex gap-2 mt-0.5">
-                  <span className="text-cyan-400">{ALL_CONFIGS.find((c) => c.appSlug === e.appSlug)?.appName || e.appSlug}</span>
-                  <span>·</span>
-                  <span className="capitalize">{e.pillar.replace(/([A-Z])/g, " $1").trim()}</span>
+          {recentEvents.map((e) => {
+            const lensId = e.lens || e.pillar;
+            return (
+              <div key={e.id} className="flex items-start gap-3 py-2 px-4 hover:bg-white/5 transition-colors">
+                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs flex-shrink-0 mt-0.5 ${e.severity === "critical" ? "text-red-400 bg-red-400/10" : e.severity === "warning" ? "text-amber-400 bg-amber-400/10" : "text-blue-400 bg-blue-400/10"}`}>
+                  {e.severity === "critical" ? "!" : e.severity === "warning" ? "▲" : "●"}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm text-white/80 truncate">{e.message}</div>
+                  <div className="text-xs text-slate-500 flex gap-2 mt-0.5">
+                    <span className="text-cyan-400">{ALL_CONFIGS.find((c) => c.appSlug === e.appSlug)?.appName || e.appSlug}</span>
+                    <span>·</span>
+                    <span className="capitalize text-white/30">{LENS_ICONS[lensId] || "◆"} {lensId} lens</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,27 +1,23 @@
 import { useState, useMemo } from "react";
 import { useObservability } from "./provider.js";
-import { PILLARS, type PillarId, type PillarScore, type MetricSnapshot, type ObservabilityEvent } from "../types.js";
+import { LENSES, type LensId, type LensScore, type MetricSnapshot, type ObservabilityEvent } from "../types.js";
 
-const PILLAR_ACCENTS: Record<string, string> = {
-  performance: "#3b82f6",
-  business: "#10b981",
-  userExperience: "#8b5cf6",
-  predictiveHealth: "#f59e0b",
-  operational: "#94a3b8",
-  strategic: "#f43f5e",
-  securityPosture: "#ef4444",
-  innovationVelocity: "#6366f1",
+const LENS_ACCENTS: Record<string, string> = {
+  signal: "#06b6d4",
+  impact: "#10b981",
+  anticipation: "#8b5cf6",
+  topology: "#f59e0b",
+  posture: "#f43f5e",
+  velocity: "#6366f1",
 };
 
-const PILLAR_ICONS: Record<string, string> = {
-  performance: "⚡",
-  business: "📈",
-  userExperience: "👥",
-  predictiveHealth: "🧠",
-  operational: "🖥️",
-  strategic: "🎯",
-  securityPosture: "🛡️",
-  innovationVelocity: "🚀",
+const LENS_ICONS: Record<string, string> = {
+  signal: "◎",
+  impact: "$",
+  anticipation: "◈",
+  topology: "⬡",
+  posture: "◆",
+  velocity: "▲",
 };
 
 function formatValue(value: number, unit: string): string {
@@ -110,18 +106,19 @@ function SparkLine({ data, color = "#10b981" }: { data: number[]; color?: string
   );
 }
 
-function PillarCard({ pillar, score }: { pillar: typeof PILLARS[0]; score: PillarScore }) {
+function LensCard({ lens, score }: { lens: typeof LENSES[0]; score: LensScore }) {
   const circumference = 2 * Math.PI * 18;
-  const offset = circumference - (score.score / 100) * circumference;
-  const accent = PILLAR_ACCENTS[pillar.id] || "#94a3b8";
-  const icon = PILLAR_ICONS[pillar.id] || "●";
+  const scoreVal = score.score;
+  const offset = circumference - (scoreVal / 100) * circumference;
+  const accent = LENS_ACCENTS[lens.id] || "#94a3b8";
+  const icon = LENS_ICONS[lens.id] || "◆";
 
   return (
     <div className={`rounded-xl border p-4 ${statusBg(score.status)} transition-all hover:scale-[1.02]`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-base flex-shrink-0">{icon}</span>
-          <h4 className="text-sm font-medium text-white/90 truncate">{pillar.name}</h4>
+          <span className="text-base flex-shrink-0 text-white/60">{icon}</span>
+          <h4 className="text-sm font-medium text-white/90 truncate">{lens.name}</h4>
         </div>
         <div className="relative w-10 h-10 flex-shrink-0">
           <svg width="40" height="40" viewBox="0 0 40 40" className="-rotate-90">
@@ -135,28 +132,27 @@ function PillarCard({ pillar, score }: { pillar: typeof PILLARS[0]; score: Pilla
             />
           </svg>
           <span className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${statusColor(score.status)}`}>
-            {score.score}
+            {scoreVal}
           </span>
         </div>
       </div>
-      <p className="text-xs text-slate-400 line-clamp-2">{pillar.description}</p>
+      <p className="text-xs text-slate-400 italic mb-1">{lens.tagline}</p>
+      <p className="text-xs text-slate-500 line-clamp-2">{lens.description}</p>
       <div className="flex items-center justify-between mt-3 text-xs text-slate-500">
-        <span>{score.metricCount} metrics</span>
+        <span>{score.metricCount} signals</span>
         {score.anomalyCount > 0 && (
           <span className="text-red-400">{score.anomalyCount} anomal{score.anomalyCount === 1 ? "y" : "ies"}</span>
         )}
-      </div>
-      <div className="mt-2 pt-2 border-t border-white/5">
-        <span className="text-[10px] text-white/20 uppercase tracking-wider">{pillar.inspiredBy}</span>
       </div>
     </div>
   );
 }
 
-function MetricRow({ snapshot, config }: { snapshot: MetricSnapshot; config: { metrics: { id: string; name: string; unit: string; pillar: PillarId }[] } }) {
+function MetricRow({ snapshot, config }: { snapshot: MetricSnapshot; config: { metrics: { id: string; name: string; unit: string; lens?: LensId; pillar?: string }[] } }) {
   const def = config.metrics.find((m) => m.id === snapshot.metricId);
   if (!def) return null;
 
+  const lensId = def.lens || def.pillar || "";
   const sparkColor = snapshot.status === "critical" ? "#ef4444" : snapshot.status === "warning" ? "#f59e0b" : "#10b981";
 
   return (
@@ -164,8 +160,8 @@ function MetricRow({ snapshot, config }: { snapshot: MetricSnapshot; config: { m
       <div className="flex-1 min-w-0">
         <div className="text-sm text-white/90 truncate">{def.name}</div>
         <div className="text-xs text-slate-500 flex items-center gap-1.5">
-          <span>{PILLAR_ICONS[def.pillar] || "●"}</span>
-          <span className="capitalize">{def.pillar.replace(/([A-Z])/g, " $1").trim()}</span>
+          <span>{LENS_ICONS[lensId] || "◆"}</span>
+          <span className="capitalize">{lensId} lens</span>
         </div>
       </div>
       <SparkLine data={snapshot.trend} color={sparkColor} />
@@ -182,6 +178,7 @@ function MetricRow({ snapshot, config }: { snapshot: MetricSnapshot; config: { m
 }
 
 function EventRow({ event }: { event: ObservabilityEvent }) {
+  const lensId = event.lens || event.pillar;
   return (
     <div className="flex items-start gap-3 py-2 px-3 rounded-lg hover:bg-white/5 transition-colors">
       <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs flex-shrink-0 mt-0.5 ${severityColor(event.severity)}`}>
@@ -190,8 +187,8 @@ function EventRow({ event }: { event: ObservabilityEvent }) {
       <div className="flex-1 min-w-0">
         <div className="text-sm text-white/80 truncate">{event.message}</div>
         <div className="text-xs text-slate-500 flex gap-2 mt-0.5">
-          <span>{PILLAR_ICONS[event.pillar] || "●"}</span>
-          <span className="capitalize">{event.pillar.replace(/([A-Z])/g, " $1").trim()}</span>
+          <span>{LENS_ICONS[lensId] || "◆"}</span>
+          <span className="capitalize">{lensId} lens</span>
           <span>·</span>
           <span>{event.type.replace(/_/g, " ")}</span>
           <span>·</span>
@@ -202,34 +199,50 @@ function EventRow({ event }: { event: ObservabilityEvent }) {
   );
 }
 
-type TabId = "pillars" | "metrics" | "events";
+type TabId = "lenses" | "metrics" | "events";
 
 export function ObservabilityPanel() {
   const { state, config } = useObservability();
-  const [activeTab, setActiveTab] = useState<TabId>("pillars");
-  const [pillarFilter, setPillarFilter] = useState<PillarId | "all">("all");
+  const [activeTab, setActiveTab] = useState<TabId>("lenses");
+  const [lensFilter, setLensFilter] = useState<LensId | "all">("all");
+
+  const lenses = state.lenses || state.pillars || [];
 
   const filteredMetrics = useMemo(() => {
-    if (pillarFilter === "all") return state.metrics;
+    if (lensFilter === "all") return state.metrics;
     return state.metrics.filter((m) => {
       const def = config.metrics.find((d) => d.id === m.metricId);
-      return def?.pillar === pillarFilter;
+      return (def as Record<string, unknown>)?.lens === lensFilter || (def as Record<string, unknown>)?.pillar === lensFilter;
     });
-  }, [state.metrics, config.metrics, pillarFilter]);
+  }, [state.metrics, config.metrics, lensFilter]);
 
   const filteredEvents = useMemo(() => {
-    if (pillarFilter === "all") return state.events;
-    return state.events.filter((e) => e.pillar === pillarFilter);
-  }, [state.events, pillarFilter]);
+    if (lensFilter === "all") return state.events;
+    return state.events.filter((e) => (e.lens || e.pillar) === lensFilter);
+  }, [state.events, lensFilter]);
+
+  const domainLabels = (config as Record<string, unknown>).domainLensLabels as {
+    postureScoreName?: string;
+    topSignalLabel?: string;
+    velocityTrendLabel?: string;
+  } | undefined;
+
+  const postureLabel = domainLabels?.postureScoreName || "Posture Score";
+  const topSignalLabel = domainLabels?.topSignalLabel || "Top Signal";
+  const velocityLabel = domainLabels?.velocityTrendLabel || "Velocity Trend";
 
   const tabs: { id: TabId; label: string }[] = [
-    { id: "pillars", label: "8 Pillars" },
+    { id: "lenses", label: "6 Lenses" },
     { id: "metrics", label: "Metrics" },
     { id: "events", label: "Events" },
   ];
 
-  const maturityLevel = config.maturityLevel || 3;
-  const maturityNames = ["", "Reactive", "Proactive", "Predictive", "Intelligent", "Autonomous"];
+  const postureScore = state.postureScore ?? state.overallScore;
+  const topSignal = state.topSignal;
+  const velocityTrendArr = state.velocityTrend;
+  const velocityTrend = velocityTrendArr && velocityTrendArr.length >= 2
+    ? Number((((velocityTrendArr[velocityTrendArr.length - 1] - velocityTrendArr[0]) / Math.max(1, velocityTrendArr[0])) * 100).toFixed(1))
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -237,25 +250,39 @@ export function ObservabilityPanel() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <span className="text-sm font-bold text-white">◆</span>
+              <span className="text-sm font-bold text-white">6</span>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">{config.appName}</h2>
-              <p className="text-xs text-indigo-400/70 font-medium">DreamStack Intelligence</p>
+              <p className="text-xs text-indigo-400/70 font-medium">The 6 Lenses of Business Observability</p>
             </div>
           </div>
           <p className="text-sm text-slate-400 mt-1">{config.description}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-medium text-indigo-400">
-            L{maturityLevel} {maturityNames[maturityLevel]}
-          </div>
+          {topSignal && (
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/50 max-w-[280px] truncate">
+              <span className="text-cyan-400 flex-shrink-0">◎ {topSignalLabel}:</span>
+              <span className="truncate">{topSignal}</span>
+            </div>
+          )}
           <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium ${statusBg(state.overallStatus)} ${statusColor(state.overallStatus)}`}>
             <span className={`w-2 h-2 rounded-full ${state.overallStatus === "healthy" ? "bg-emerald-400" : state.overallStatus === "degraded" ? "bg-amber-400" : "bg-red-400"}`} />
-            Score: {state.overallScore}
+            {postureLabel}: {postureScore}
           </div>
         </div>
       </div>
+
+      {velocityTrend !== undefined && (
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 text-xs">
+            <span className="text-indigo-400">▲ {velocityLabel}</span>
+            <span className={`font-bold ${velocityTrend > 0 ? "text-emerald-400" : velocityTrend < 0 ? "text-red-400" : "text-slate-400"}`}>
+              {velocityTrend > 0 ? "+" : ""}{velocityTrend}%
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 border-b border-white/10 pb-1">
         {tabs.map((tab) => (
@@ -273,25 +300,25 @@ export function ObservabilityPanel() {
         ))}
         <div className="ml-auto">
           <select
-            value={pillarFilter}
-            onChange={(e) => setPillarFilter(e.target.value as PillarId | "all")}
+            value={lensFilter}
+            onChange={(e) => setLensFilter(e.target.value as LensId | "all")}
             className="bg-white/5 border border-white/10 text-sm text-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-400"
           >
-            <option value="all">All Pillars</option>
-            {PILLARS.map((p) => (
-              <option key={p.id} value={p.id}>{PILLAR_ICONS[p.id]} {p.name}</option>
+            <option value="all">All Lenses</option>
+            {LENSES.map((l) => (
+              <option key={l.id} value={l.id}>{LENS_ICONS[l.id]} {l.name}</option>
             ))}
           </select>
         </div>
       </div>
 
-      {activeTab === "pillars" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {PILLARS.map((pillar) => {
-            const score = state.pillars.find((p) => p.pillarId === pillar.id);
+      {activeTab === "lenses" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {LENSES.map((lens) => {
+            const score = lenses.find((l) => l.lensId === lens.id || (l as { pillarId?: string }).pillarId === lens.id);
             if (!score) return null;
-            if (pillarFilter !== "all" && pillar.id !== pillarFilter) return null;
-            return <PillarCard key={pillar.id} pillar={pillar} score={score} />;
+            if (lensFilter !== "all" && lens.id !== lensFilter) return null;
+            return <LensCard key={lens.id} lens={lens} score={score as LensScore} />;
           })}
         </div>
       )}
@@ -299,7 +326,7 @@ export function ObservabilityPanel() {
       {activeTab === "metrics" && (
         <div className="rounded-xl border border-white/10 bg-white/[0.02] divide-y divide-white/5">
           {filteredMetrics.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-sm">No metrics for selected pillar</div>
+            <div className="p-8 text-center text-slate-500 text-sm">No signals for selected lens</div>
           ) : (
             filteredMetrics.map((m) => (
               <MetricRow key={m.metricId} snapshot={m} config={config} />
@@ -311,7 +338,7 @@ export function ObservabilityPanel() {
       {activeTab === "events" && (
         <div className="rounded-xl border border-white/10 bg-white/[0.02] divide-y divide-white/5">
           {filteredEvents.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-sm">No events for selected pillar</div>
+            <div className="p-8 text-center text-slate-500 text-sm">No events for selected lens</div>
           ) : (
             filteredEvents.slice(0, 20).map((e) => (
               <EventRow key={e.id} event={e} />

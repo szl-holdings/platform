@@ -1,7 +1,9 @@
-import type { MetricValue, MetricDefinition, MetricSnapshot, ObservabilityEvent, PillarScore, PillarId, AppObservabilityState, DomainConfig } from "./types.js";
+import type { MetricValue, MetricDefinition, MetricSnapshot, ObservabilityEvent, LensScore, LensId, AppObservabilityState, DomainConfig } from "./types.js";
 
 const MAX_HISTORY = 60;
 const MAX_EVENTS = 100;
+
+const LENS_IDS: LensId[] = ["signal", "impact", "anticipation", "topology", "posture", "velocity"];
 
 export class MetricCollector {
   private metrics: Map<string, MetricValue[]> = new Map();
@@ -44,37 +46,60 @@ export class MetricCollector {
   }
 
   private generateInitialEvents(now: number): ObservabilityEvent[] {
-    const pillars: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
     const events: ObservabilityEvent[] = [];
     const eventTypes: ObservabilityEvent["type"][] = ["metric_threshold", "anomaly", "status_change", "deployment", "security", "compliance"];
 
+    const domainLabels = this.config.domainLensLabels;
+
+    const lensMessages: Record<LensId, string[]> = {
+      signal: [
+        domainLabels ? `Top signal: ${domainLabels.topSignalLabel} — ranked critical` : "Priority signal detected — AI-ranked critical",
+        "Signal correlation identified across 3 entities",
+        "Noise filter active — 12 low-priority alerts suppressed",
+      ],
+      impact: [
+        domainLabels ? `${domainLabels.impact} — exposure quantified` : "Business impact quantified — revenue correlation active",
+        "Cost-of-delay model updated with new data",
+        "Opportunity cost projection recalculated",
+      ],
+      anticipation: [
+        domainLabels ? `${domainLabels.anticipation} — forecast horizon updated` : "Predictive model updated — 48h forecast horizon",
+        "Anomaly trajectory converging — intervention recommended",
+        "Behavioral model flagged emerging risk pattern",
+      ],
+      topology: [
+        domainLabels ? `${domainLabels.topology} — dependency map refreshed` : "Dependency topology refreshed — 3 new relationships mapped",
+        "Graph traversal identified downstream impact path",
+        "Relationship health: all critical dependencies nominal",
+      ],
+      posture: [
+        domainLabels ? `${domainLabels.postureScoreName} recalculated — status: healthy` : "Posture score recalculated — all dimensions nominal",
+        "Continuous monitoring checkpoint passed",
+        "Posture drift within acceptable bounds",
+      ],
+      velocity: [
+        domainLabels ? `${domainLabels.velocity} — trend: improving` : "Improvement velocity trending positive — 7-day MA up 4%",
+        "Resolution throughput increased — new baseline established",
+        "Learning rate metric: week-over-week improvement confirmed",
+      ],
+    };
+
     for (let i = 0; i < 8; i++) {
-      const pillar = pillars[Math.floor(Math.random() * pillars.length)];
+      const lens = LENS_IDS[Math.floor(Math.random() * LENS_IDS.length)];
       const type = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+      const messages = lensMessages[lens];
       events.push({
         id: `evt_${now}_${i}_${Math.random().toString(36).slice(2, 8)}`,
         type,
-        message: this.getEventMessage(type, pillar),
-        pillar,
+        message: messages[Math.floor(Math.random() * messages.length)],
+        pillar: lens,
+        lens,
         severity: Math.random() > 0.7 ? "warning" : "info",
         timestamp: now - Math.floor(Math.random() * 3600000),
       });
     }
 
     return events.sort((a, b) => b.timestamp - a.timestamp);
-  }
-
-  private getEventMessage(type: ObservabilityEvent["type"], pillar: PillarId): string {
-    const messages: Record<string, string[]> = {
-      metric_threshold: ["Metric approaching threshold", "KPI target exceeded", "Value within normal range"],
-      anomaly: ["Unusual pattern detected", "Trend deviation identified", "Predictive model flagged potential issue"],
-      status_change: ["Status improved to healthy", "Component recovered", "Dependency check passed"],
-      deployment: ["Configuration updated", "New baseline established", "Calibration complete"],
-      security: ["Security posture verified", "Compliance check passed", "Threat surface scan complete"],
-      compliance: ["Framework alignment validated", "Zero-trust boundary verified", "Audit trail checkpoint"],
-    };
-    const pool = messages[type] || messages.status_change;
-    return pool[Math.floor(Math.random() * pool.length)];
   }
 
   record(metricId: string, value: number, labels?: Record<string, string>) {
@@ -94,6 +119,7 @@ export class MetricCollector {
           type: "metric_threshold",
           message: `${def.name} reached critical level: ${value.toFixed(1)}${def.unit}`,
           pillar: def.pillar,
+          lens: def.pillar,
           severity: "critical",
         });
       }
@@ -115,19 +141,35 @@ export class MetricCollector {
 
   getSnapshot(): AppObservabilityState {
     const metricSnapshots = this.config.metrics.map((def) => this.getMetricSnapshot(def));
-    const pillarScores = this.computePillarScores(metricSnapshots);
-    const overallScore = pillarScores.length > 0
-      ? Math.round(pillarScores.reduce((s, p) => s + p.score, 0) / pillarScores.length)
+    const lensScores = this.computeLensScores(metricSnapshots);
+    const overallScore = lensScores.length > 0
+      ? Math.round(lensScores.reduce((s, p) => s + p.score, 0) / lensScores.length)
       : 0;
+
+    const postureScore = lensScores.find(l => l.lensId === "posture")?.score ?? overallScore;
+    const velocityLens = lensScores.find(l => l.lensId === "velocity");
+    const velocityTrend = velocityLens ? [
+      velocityLens.score - 5,
+      velocityLens.score - 3,
+      velocityLens.score - 1,
+      velocityLens.score,
+    ] : [];
+
+    const domainLabels = this.config.domainLensLabels;
+    const topSignal = domainLabels?.topSignalLabel || "Primary signal active";
 
     return {
       appSlug: this.config.appSlug,
-      pillars: pillarScores,
+      lenses: lensScores,
+      pillars: lensScores,
       overallScore,
       overallStatus: overallScore >= 80 ? "healthy" : overallScore >= 50 ? "degraded" : "critical",
       metrics: metricSnapshots,
       events: [...this.events],
       lastUpdated: Date.now(),
+      postureScore,
+      topSignal,
+      velocityTrend,
     };
   }
 
@@ -150,29 +192,44 @@ export class MetricCollector {
       }
     }
 
-    return { metricId: def.id, current, trend, status, changePercent };
+    return { metricId: def.id, current, trend, status, changePercent, lensContribution: def.pillar };
   }
 
-  private computePillarScores(snapshots: MetricSnapshot[]): PillarScore[] {
-    const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
+  private computeLensScores(snapshots: MetricSnapshot[]): LensScore[] {
     const now = Date.now();
 
-    return pillarIds.map((pillarId) => {
-      const pillarMetrics = this.config.metrics.filter((m) => m.pillar === pillarId);
-      const pillarSnapshots = pillarMetrics.map((m) => snapshots.find((s) => s.metricId === m.id)).filter(Boolean) as MetricSnapshot[];
+    return LENS_IDS.map((lensId) => {
+      const lensMetrics = this.config.metrics.filter((m) => m.pillar === lensId);
+      const lensSnapshots = lensMetrics.map((m) => snapshots.find((s) => s.metricId === m.id)).filter(Boolean) as MetricSnapshot[];
 
-      if (pillarSnapshots.length === 0) {
-        return { pillarId, score: 85 + Math.floor(Math.random() * 10), status: "healthy" as const, metricCount: 0, anomalyCount: 0, lastUpdated: now };
+      if (lensSnapshots.length === 0) {
+        return {
+          lensId,
+          pillarId: lensId,
+          score: 85 + Math.floor(Math.random() * 10),
+          status: "healthy" as const,
+          metricCount: 0,
+          anomalyCount: 0,
+          lastUpdated: now,
+        };
       }
 
-      const critCount = pillarSnapshots.filter((s) => s.status === "critical").length;
-      const warnCount = pillarSnapshots.filter((s) => s.status === "warning").length;
-      const total = pillarSnapshots.length;
+      const critCount = lensSnapshots.filter((s) => s.status === "critical").length;
+      const warnCount = lensSnapshots.filter((s) => s.status === "warning").length;
+      const total = lensSnapshots.length;
 
       const score = Math.max(0, Math.min(100, Math.round(100 - (critCount / total) * 50 - (warnCount / total) * 20 + Math.random() * 5)));
       const status = score >= 80 ? "healthy" : score >= 50 ? "degraded" : "critical";
 
-      return { pillarId, score, status, metricCount: total, anomalyCount: critCount, lastUpdated: now };
+      return {
+        lensId,
+        pillarId: lensId,
+        score,
+        status,
+        metricCount: total,
+        anomalyCount: critCount,
+        lastUpdated: now,
+      };
     });
   }
 

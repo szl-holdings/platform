@@ -64,14 +64,25 @@ router.get("/observability/:appSlug", authMiddleware({ required: false }), (req,
   const snapshot = collector.getSnapshot();
   const isAuthenticated = !!req.user || process.env.NODE_ENV !== "production";
 
+  const lensMetadata = config.domainLensLabels ? {
+    postureScoreName: config.domainLensLabels.postureScoreName,
+    topSignalLabel: config.domainLensLabels.topSignalLabel,
+    velocityTrendLabel: config.domainLensLabels.velocityTrendLabel,
+  } : null;
+
   const response: Record<string, unknown> = {
     appSlug,
     domain: config.domain,
     appName: config.appName,
     timestamp: new Date().toISOString(),
+    lenses: snapshot.lenses,
     pillars: snapshot.pillars,
     overallScore: snapshot.overallScore,
     overallStatus: snapshot.overallStatus,
+    postureScore: snapshot.postureScore,
+    topSignal: snapshot.topSignal,
+    velocityTrend: snapshot.velocityTrend,
+    lensMetadata,
     metrics: snapshot.metrics,
     events: snapshot.events.slice(0, 20),
     dataSources: buildDataSources(isAuthenticated),
@@ -110,7 +121,11 @@ router.get("/observability", authMiddleware({ required: false }), (req, res) => 
       domain: config.domain,
       overallScore: snapshot.overallScore,
       overallStatus: snapshot.overallStatus,
+      lenses: snapshot.lenses,
       pillars: snapshot.pillars,
+      postureScore: snapshot.postureScore,
+      topSignal: snapshot.topSignal,
+      velocityTrend: snapshot.velocityTrend,
       metrics: snapshot.metrics,
       events: snapshot.events.slice(0, 10),
     };

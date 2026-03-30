@@ -1,12 +1,21 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { type AppObservabilityState, type PillarId, PILLARS } from "@workspace/observability";
+import { type AppObservabilityState, type LensId, LENSES } from "@workspace/observability";
 import { ALL_CONFIGS } from "@workspace/observability/configs";
+
+const LENS_ICONS: Record<string, string> = {
+  signal: "◎",
+  impact: "$",
+  anticipation: "◈",
+  topology: "⬡",
+  posture: "◆",
+  velocity: "▲",
+};
 
 const DATA_SOURCE_LABELS: Record<string, { label: string; real: boolean }> = {
   server_telemetry: { label: "API Latency & Throughput", real: true },
   integration_health: { label: "Service Health Checks", real: true },
   client_vitals: { label: "Web Vitals (LCP/CLS/INP)", real: true },
-  domain_simulation: { label: "Domain KPI Simulation", real: false },
+  domain_simulation: { label: "Domain Signal Simulation", real: false },
 };
 
 interface ServerTelemetrySnapshot {
@@ -48,7 +57,8 @@ export default function SystemObservability() {
         if (data.apps) {
           const states: AppObservabilityState[] = data.apps.map((app: Record<string, unknown>) => ({
             appSlug: app.appSlug as string,
-            pillars: app.pillars,
+            lenses: (app.lenses || app.pillars) as AppObservabilityState["lenses"],
+            pillars: (app.lenses || app.pillars) as AppObservabilityState["pillars"],
             overallScore: app.overallScore as number,
             overallStatus: app.overallStatus as string,
             metrics: (app as Record<string, unknown>).metrics || [],
@@ -77,7 +87,8 @@ export default function SystemObservability() {
         const data = await res.json();
         return {
           appSlug: data.appSlug,
-          pillars: data.pillars,
+          lenses: data.lenses || data.pillars,
+          pillars: data.lenses || data.pillars,
           overallScore: data.overallScore,
           overallStatus: data.overallStatus,
           metrics: data.metrics || [],
@@ -118,10 +129,13 @@ export default function SystemObservability() {
     return Math.round(appStates.reduce((s, a) => s + a.overallScore, 0) / appStates.length);
   }, [appStates]);
 
-  const pillarAverages = useMemo(() => {
-    const pillarIds: PillarId[] = ["performance", "business", "userExperience", "predictiveHealth", "operational", "strategic", "securityPosture", "innovationVelocity"];
-    return pillarIds.map((id) => {
-      const scores = appStates.map((a) => a.pillars.find((p) => p.pillarId === id)?.score ?? 0);
+  const lensAverages = useMemo(() => {
+    const lensIds: LensId[] = ["signal", "impact", "anticipation", "topology", "posture", "velocity"];
+    return lensIds.map((id) => {
+      const scores = appStates.map((a) => {
+        const lenses = a.lenses || a.pillars || [];
+        return (lenses.find((p) => p.lensId === id || (p as { pillarId?: string }).pillarId === id))?.score ?? 0;
+      });
       const avg = scores.length > 0 ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : 0;
       return { id, avg, status: avg >= 80 ? "healthy" : avg >= 50 ? "degraded" : "critical" };
     });
@@ -142,13 +156,16 @@ export default function SystemObservability() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">System Observability</h1>
-        <p className="text-sm text-muted-foreground mt-1">Real-time observability across {appStates.length} applications</p>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold">Portfolio Observability</h1>
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">6 Lenses Active</span>
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">The 6 Lenses of Business Observability across {appStates.length} portfolio applications</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="rounded-xl border bg-card p-4">
-          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Portfolio Score</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Portfolio Posture</div>
           <div className={`text-3xl font-bold ${statusColor(portfolioScore >= 80 ? "healthy" : portfolioScore >= 50 ? "degraded" : "critical")}`}>{portfolioScore}</div>
         </div>
         <div className="rounded-xl border bg-card p-4">
@@ -156,7 +173,7 @@ export default function SystemObservability() {
           <div className="text-3xl font-bold text-foreground">{appStates.length}</div>
         </div>
         <div className="rounded-xl border bg-card p-4">
-          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Metrics</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Signals</div>
           <div className="text-3xl font-bold text-foreground">{totalMetrics}</div>
         </div>
         <div className="rounded-xl border bg-card p-4">
@@ -200,27 +217,33 @@ export default function SystemObservability() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-xl border bg-card">
           <div className="p-4 border-b">
-            <h3 className="font-semibold">Application Health Matrix</h3>
+            <h3 className="font-semibold">Application Lens Matrix</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">All 6 Lenses per application — signal · impact · anticipation · topology · posture · velocity</p>
           </div>
           <div className="divide-y">
             {appStates.map((state) => {
               const config = ALL_CONFIGS.find((c) => c.appSlug === state.appSlug);
+              const lenses = state.lenses || state.pillars || [];
               return (
                 <div key={state.appSlug} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{config?.appName || state.appSlug}</div>
-                    <div className="text-xs text-muted-foreground">{config?.domain}</div>
+                    <div className="text-xs text-muted-foreground capitalize">{config?.domain}</div>
                   </div>
                   <div className="flex gap-1">
-                    {state.pillars.map((p) => (
-                      <div
-                        key={p.pillarId}
-                        className={`w-7 h-7 rounded text-[10px] font-bold flex items-center justify-center ${statusBg(p.status)} ${statusColor(p.status)}`}
-                        title={PILLARS.find((pd) => pd.id === p.pillarId)?.name}
-                      >
-                        {p.score}
-                      </div>
-                    ))}
+                    {lenses.map((lens) => {
+                      const lensId = (lens.lensId || (lens as { pillarId?: string }).pillarId || "") as string;
+                      return (
+                        <div
+                          key={lensId}
+                          className={`w-8 h-8 rounded text-[9px] font-bold flex flex-col items-center justify-center ${statusBg(lens.status)} ${statusColor(lens.status)} gap-0`}
+                          title={LENSES.find((l) => l.id === lensId)?.name}
+                        >
+                          <span className="text-[8px] opacity-60">{LENS_ICONS[lensId] || lensId.slice(0, 2)}</span>
+                          <span>{lens.score}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                   <div className={`text-lg font-bold min-w-[36px] text-right ${statusColor(state.overallStatus)}`}>
                     {state.overallScore}
@@ -233,16 +256,20 @@ export default function SystemObservability() {
 
         <div className="rounded-xl border bg-card">
           <div className="p-4 border-b">
-            <h3 className="font-semibold">Pillar Aggregates (System-wide)</h3>
+            <h3 className="font-semibold">Lens Averages — Portfolio-Wide</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Aggregate score per lens across all {appStates.length} applications</p>
           </div>
           <div className="divide-y">
-            {pillarAverages.map(({ id, avg, status }) => {
-              const pillar = PILLARS.find((p) => p.id === id)!;
+            {lensAverages.map(({ id, avg, status }) => {
+              const lens = LENSES.find((l) => l.id === id);
               return (
                 <div key={id} className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors">
+                  <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center text-sm flex-shrink-0">
+                    {LENS_ICONS[id] || "◆"}
+                  </div>
                   <div className="flex-1">
-                    <div className="text-sm font-medium">{pillar.name}</div>
-                    <div className="text-xs text-muted-foreground">{pillar.description}</div>
+                    <div className="text-sm font-medium">{lens?.name || id}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-1">{lens?.tagline}</div>
                   </div>
                   <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
                     <div
@@ -303,28 +330,33 @@ export default function SystemObservability() {
 
       <div className="rounded-xl border bg-card">
         <div className="p-4 border-b">
-          <h3 className="font-semibold">Recent System Events</h3>
+          <h3 className="font-semibold">Recent Lens Events</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Domain signals across all 6 Lenses, portfolio-wide</p>
         </div>
         <div className="divide-y max-h-[400px] overflow-y-auto">
           {appStates
             .flatMap((a) => a.events.map((e) => ({ ...e, appSlug: a.appSlug })))
             .sort((a, b) => b.timestamp - a.timestamp)
             .slice(0, 30)
-            .map((e) => (
-              <div key={e.id} className="flex items-start gap-3 p-3 hover:bg-muted/50 transition-colors">
-                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs flex-shrink-0 mt-0.5 ${e.severity === "critical" ? "text-red-400 bg-red-400/10" : e.severity === "warning" ? "text-amber-400 bg-amber-400/10" : "text-blue-400 bg-blue-400/10"}`}>
-                  {e.severity === "critical" ? "!" : e.severity === "warning" ? "▲" : "●"}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate">{e.message}</div>
-                  <div className="text-xs text-muted-foreground flex gap-2">
-                    <span className="text-primary">{ALL_CONFIGS.find((c) => c.appSlug === e.appSlug)?.appName || e.appSlug}</span>
-                    <span>·</span>
-                    <span className="capitalize">{e.pillar.replace(/([A-Z])/g, " $1").trim()}</span>
+            .map((e) => {
+              const lensId = e.lens || e.pillar;
+              const lensIcon = LENS_ICONS[lensId] || "◆";
+              return (
+                <div key={e.id} className="flex items-start gap-3 p-3 hover:bg-muted/50 transition-colors">
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs flex-shrink-0 mt-0.5 ${e.severity === "critical" ? "text-red-400 bg-red-400/10" : e.severity === "warning" ? "text-amber-400 bg-amber-400/10" : "text-blue-400 bg-blue-400/10"}`}>
+                    {e.severity === "critical" ? "!" : e.severity === "warning" ? "▲" : "●"}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm truncate">{e.message}</div>
+                    <div className="text-xs text-muted-foreground flex gap-2">
+                      <span className="text-primary">{ALL_CONFIGS.find((c) => c.appSlug === e.appSlug)?.appName || e.appSlug}</span>
+                      <span>·</span>
+                      <span className="capitalize text-white/40">{lensIcon} {lensId} lens</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
       </div>
     </div>

@@ -201,7 +201,7 @@ function AppDirectory() {
               </div>
               <div>
                 <h1 className="text-base font-display font-bold text-foreground leading-none">SZL Holdings</h1>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Application Directory</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Application Directory · 6 Lenses Active</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -377,13 +377,16 @@ function AppDirectory() {
       </main>
 
       <footer className="border-t border-border/50 mt-auto">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <p className="text-[11px] text-muted-foreground">
             &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
           </p>
-          <p className="text-[11px] text-muted-foreground">
-            {apps.filter(a => a.status === "live").length} live &middot; {apps.filter(a => a.status === "beta").length} beta
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-muted-foreground/50 hidden sm:block">The 6 Lenses of Business Observability: ◎ Signal · $ Impact · ◈ Anticipation · ⬡ Topology · ◆ Posture · ▲ Velocity</span>
+            <span className="text-[11px] text-muted-foreground">
+              {apps.filter(a => a.status === "live").length} live &middot; {apps.filter(a => a.status === "beta").length} beta
+            </span>
+          </div>
         </div>
       </footer>
     </div>

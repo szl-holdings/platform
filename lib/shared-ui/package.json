@@ -14,6 +14,7 @@
     "./copilot-configs": "./src/copilot-configs.ts",
     "./ai-components": "./src/ai-components.tsx",
     "./intelligence-philosophy": "./src/intelligence-philosophy.tsx",
+    "./lens-bar": "./src/lens-bar.tsx",
     "./hooks": "./src/hooks.tsx",
     "./error-boundary": "./src/error-boundary.tsx",
     "./AuthGate": "./src/AuthGate.tsx",
