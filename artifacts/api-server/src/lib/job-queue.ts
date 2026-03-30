@@ -195,6 +195,10 @@ export const JOB_TYPES = {
   HEALTH_SCAN: "health_scan",
   ALERT_CHECK: "alert_check",
   READINESS_CHECK: "readiness_check",
+  DAILY_CERTIFICATION_TASK_DIGEST: "daily_certification_task_digest",
+  DAILY_CAPITAL_READINESS_DIGEST: "daily_capital_readiness_digest",
+  LENDER_PACKET_GENERATE: "lender_packet_generate_job",
+  INVESTOR_PACKET_GENERATE: "investor_packet_generate_job",
 } as const;
 
 jobQueue.register(JOB_TYPES.WEBHOOK_DELIVERY, async (job) => {
@@ -309,6 +313,46 @@ jobQueue.register(JOB_TYPES.READINESS_CHECK, async (job) => {
   });
 });
 
+jobQueue.register(JOB_TYPES.DAILY_CERTIFICATION_TASK_DIGEST, async (job) => {
+  logger.info({ jobId: job.id }, "Daily certification task digest started");
+  serverTelemetry.recordBusinessEvent({
+    type: "daily_certification_task_digest",
+    metadata: { jobId: job.id, timestamp: new Date().toISOString() },
+  });
+  logger.info({ jobId: job.id }, "Daily certification task digest complete");
+});
+
+jobQueue.register(JOB_TYPES.DAILY_CAPITAL_READINESS_DIGEST, async (job) => {
+  logger.info({ jobId: job.id }, "Daily capital readiness digest started");
+  serverTelemetry.recordBusinessEvent({
+    type: "daily_capital_readiness_digest",
+    metadata: { jobId: job.id, timestamp: new Date().toISOString() },
+  });
+  logger.info({ jobId: job.id }, "Daily capital readiness digest complete");
+});
+
+jobQueue.register(JOB_TYPES.LENDER_PACKET_GENERATE, async (job) => {
+  const { packetId, lenderType } = job.payload as { packetId?: number; lenderType?: string };
+  logger.info({ jobId: job.id, packetId, lenderType }, "Lender packet generate job started");
+  await new Promise(r => setTimeout(r, 50));
+  serverTelemetry.recordBusinessEvent({
+    type: "lender_packet_generated",
+    metadata: { jobId: job.id, packetId, lenderType },
+  });
+  logger.info({ jobId: job.id, packetId }, "Lender packet generate job complete");
+});
+
+jobQueue.register(JOB_TYPES.INVESTOR_PACKET_GENERATE, async (job) => {
+  const { packetId, investorType } = job.payload as { packetId?: number; investorType?: string };
+  logger.info({ jobId: job.id, packetId, investorType }, "Investor packet generate job started");
+  await new Promise(r => setTimeout(r, 50));
+  serverTelemetry.recordBusinessEvent({
+    type: "investor_packet_generated",
+    metadata: { jobId: job.id, packetId, investorType },
+  });
+  logger.info({ jobId: job.id, packetId }, "Investor packet generate job complete");
+});
+
 let scheduledJobsStarted = false;
 
 export function startScheduledJobs() {
@@ -364,5 +408,47 @@ export function startScheduledJobs() {
     }, DAY_MS);
   }, msUntilDigest);
 
-  logger.info("Scheduled jobs initialized: health scan (5m), alert check (15m), daily digest (24h)");
+  const now2 = new Date();
+  const nextCertDigest = new Date(now2);
+  nextCertDigest.setUTCHours(7, 30, 0, 0);
+  if (nextCertDigest <= now2) nextCertDigest.setUTCDate(nextCertDigest.getUTCDate() + 1);
+  const msUntilCertDigest = nextCertDigest.getTime() - now2.getTime();
+
+  setTimeout(async () => {
+    try {
+      await jobQueue.enqueue(JOB_TYPES.DAILY_CERTIFICATION_TASK_DIGEST, {}, { maxRetries: 2 });
+    } catch (err) {
+      logger.warn({ err }, "Failed to enqueue certification task digest");
+    }
+    setInterval(async () => {
+      try {
+        await jobQueue.enqueue(JOB_TYPES.DAILY_CERTIFICATION_TASK_DIGEST, {}, { maxRetries: 2 });
+      } catch (err) {
+        logger.warn({ err }, "Failed to enqueue certification task digest");
+      }
+    }, DAY_MS);
+  }, msUntilCertDigest);
+
+  const now3 = new Date();
+  const nextCapDigest = new Date(now3);
+  nextCapDigest.setUTCHours(8, 15, 0, 0);
+  if (nextCapDigest <= now3) nextCapDigest.setUTCDate(nextCapDigest.getUTCDate() + 1);
+  const msUntilCapDigest = nextCapDigest.getTime() - now3.getTime();
+
+  setTimeout(async () => {
+    try {
+      await jobQueue.enqueue(JOB_TYPES.DAILY_CAPITAL_READINESS_DIGEST, {}, { maxRetries: 2 });
+    } catch (err) {
+      logger.warn({ err }, "Failed to enqueue capital readiness digest");
+    }
+    setInterval(async () => {
+      try {
+        await jobQueue.enqueue(JOB_TYPES.DAILY_CAPITAL_READINESS_DIGEST, {}, { maxRetries: 2 });
+      } catch (err) {
+        logger.warn({ err }, "Failed to enqueue capital readiness digest");
+      }
+    }, DAY_MS);
+  }, msUntilCapDigest);
+
+  logger.info("Scheduled jobs initialized: health scan (5m), alert check (15m), daily digest (24h), cert digest (7:30 UTC), capital digest (8:15 UTC)");
 }

@@ -148,6 +148,7 @@ export default function HomePage() {
         <ProofMetricsSection />
         <ProofSection />
         <FounderSection />
+        <CapitalAndCredibilitySection />
         <ContactByAudienceSection />
       </main>
       <SiteFooter />
@@ -822,6 +823,204 @@ function FounderSection() {
                 <p style={{ fontSize: "0.625rem", color: "var(--color-szl-text-faint)", marginTop: "0.25rem", fontFamily: "var(--font-mono)" }}>{stat.note}</p>
               </div>
             ))}
+          </m.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CapitalAndCredibilitySection() {
+  const PILLARS = [
+    {
+      num: "01",
+      title: "Bank-Ready Operating Discipline",
+      body: "Financial structure, use-of-funds clarity, and operating model documentation built from the ground up — not assembled at the time of application. Lenders see organized, consistent financial architecture before they ask for it.",
+      accent: "#3b82f6",
+      accentRgb: "59, 130, 246",
+      tag: "BANK / SBA",
+    },
+    {
+      num: "02",
+      title: "Investor-Ready Architecture",
+      body: "Cap table structure, traction narrative, milestone-based planning, and diligence posture prepared in advance. Investor conversations open with clarity — not scramble.",
+      accent: "#10b981",
+      accentRgb: "16, 185, 129",
+      tag: "ANGEL / EQUITY",
+    },
+    {
+      num: "03",
+      title: "Certification-Aware Growth Posture",
+      body: "Eligibility research, ownership/control documentation, and application readiness for NY MWBE, WOSB, VOSB, 8(a), and SAM — tracked and organized before opportunities arise, not after.",
+      accent: "#c9a96e",
+      accentRgb: "201, 169, 110",
+      tag: "MWBE · WOSB · 8(A) · SAM",
+    },
+    {
+      num: "04",
+      title: "Contract-Ready Potential",
+      body: "Government and institutional procurement requires more than capability — it requires documentation, registrations, and certifications in order. SZL tracks its readiness posture as an ongoing operating discipline.",
+      accent: "#8b5cf6",
+      accentRgb: "139, 92, 246",
+      tag: "PROCUREMENT",
+    },
+    {
+      num: "05",
+      title: "Structured Diligence Posture",
+      body: "Data rooms, diligence checklists, and artifact organization maintained continuously — so diligence requests from lenders, investors, or institutional clients can be answered from a position of preparation, not reaction.",
+      accent: "#f59e0b",
+      accentRgb: "245, 158, 11",
+      tag: "DILIGENCE",
+    },
+  ];
+
+  return (
+    <section
+      className="relative overflow-hidden"
+      style={{ padding: "5rem 0 5.5rem", borderBottom: "1px solid var(--color-szl-border)", background: "var(--color-szl-bg-secondary)" }}
+    >
+      <div className="absolute inset-0 szl-depth-glow-gold pointer-events-none opacity-30" />
+      <div className="relative z-10 max-w-6xl mx-auto px-6">
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-14"
+        >
+          <p
+            style={{
+              fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600,
+              letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-accent)",
+              marginBottom: "0.75rem",
+            }}
+          >
+            Capital and Credibility
+          </p>
+          <h2
+            style={{
+              fontFamily: "var(--font-display)", fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+              fontWeight: 700, color: "var(--color-szl-text)", lineHeight: 1.08,
+              marginBottom: "1.25rem", letterSpacing: "-0.025em", maxWidth: "30rem",
+            }}
+          >
+            Structurally ready.<br />
+            <span style={{ color: "var(--color-szl-accent)" }}>Not reactively assembled.</span>
+          </h2>
+          <p
+            style={{
+              color: "var(--color-szl-text-secondary)", fontSize: "1rem",
+              maxWidth: "42rem", lineHeight: 1.7,
+            }}
+          >
+            SZL Holdings is built to be bank-ready, investor-ready, and certification-aware before those conversations happen — not in response to them. Capital and credibility are treated as operating disciplines, tracked the same way risk and performance are tracked.
+          </p>
+          <p
+            style={{
+              color: "var(--color-szl-text-muted)", fontSize: "0.75rem",
+              marginTop: "1rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em",
+            }}
+          >
+            NOTE: SZL Holdings does not claim any certifications or active funding. The postures below represent structured readiness and intentional organizational discipline.
+          </p>
+        </m.div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {PILLARS.map((pillar, i) => (
+            <m.div
+              key={pillar.num}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.07 }}
+              className="rounded-sm p-6 relative transition-all duration-220"
+              style={{ background: "var(--color-szl-surface)", border: "1px solid var(--color-szl-border)" }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = `rgba(${pillar.accentRgb}, 0.24)`;
+                el.style.background = "var(--color-szl-elevated)";
+                el.style.boxShadow = `0 0 16px rgba(${pillar.accentRgb}, 0.08)`;
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = "var(--color-szl-border)";
+                el.style.background = "var(--color-szl-surface)";
+                el.style.boxShadow = "none";
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500,
+                    color: pillar.accent, letterSpacing: "0.05em",
+                  }}
+                >
+                  {pillar.num}
+                </span>
+                <span
+                  style={{
+                    fontSize: "0.5625rem", fontWeight: 600, padding: "2px 7px",
+                    borderRadius: "2px", fontFamily: "var(--font-mono)", letterSpacing: "0.08em",
+                    background: `rgba(${pillar.accentRgb}, 0.08)`,
+                    border: `1px solid rgba(${pillar.accentRgb}, 0.18)`,
+                    color: pillar.accent,
+                  }}
+                >
+                  {pillar.tag}
+                </span>
+              </div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-display)", fontSize: "0.9375rem", fontWeight: 700,
+                  color: "var(--color-szl-text)", marginBottom: "0.625rem", letterSpacing: "-0.015em",
+                }}
+              >
+                {pillar.title}
+              </h3>
+              <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.65 }}>
+                {pillar.body}
+              </p>
+            </m.div>
+          ))}
+
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: PILLARS.length * 0.07 }}
+            className="rounded-sm p-6 flex flex-col justify-between"
+            style={{ background: "var(--color-szl-overlay)", border: "1px solid hsla(38, 55%, 60%, 0.16)" }}
+          >
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-mono)", fontSize: "0.625rem", fontWeight: 700,
+                  letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                Operating Philosophy
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)", fontSize: "1.0625rem", fontWeight: 700,
+                  color: "var(--color-szl-accent)", lineHeight: 1.45, marginBottom: "0.875rem",
+                  letterSpacing: "-0.015em",
+                }}
+              >
+                "Capital follows readiness. Credibility is built before it's needed."
+              </p>
+              <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-muted)", lineHeight: 1.65 }}>
+                Most founders prepare for capital conversations when someone asks. SZL treats capital and credibility readiness as a continuous operating discipline — tracked, structured, and organized before the opportunity appears.
+              </p>
+            </div>
+            <p
+              style={{
+                marginTop: "1.5rem", fontFamily: "var(--font-mono)", fontSize: "0.625rem",
+                color: "var(--color-szl-text-faint)", letterSpacing: "0.06em",
+              }}
+            >
+              STEPHEN LUTAR — FOUNDER
+            </p>
           </m.div>
         </div>
       </div>

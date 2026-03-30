@@ -45,6 +45,8 @@ import doctrineRouter from "./doctrine";
 import alloyRouter from "./alloy";
 import lytePlatformRouter from "./lyte-platform";
 import vesselsPlatformRouter from "./vessels-platform";
+import capitalReadinessRouter from "./capital-readiness";
+import certificationReadinessRouter from "./certification-readiness";
 
 const router: IRouter = Router();
 
@@ -153,5 +155,11 @@ router.use(lytePlatformRouter);
 
 router.use("/vessels/platform", readLimiter);
 router.use(vesselsPlatformRouter);
+
+router.use("/capital", writeLimiter);
+router.use(capitalReadinessRouter);
+
+router.use("/certification", writeLimiter);
+router.use(certificationReadinessRouter);
 
 export default router;

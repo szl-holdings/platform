@@ -7,9 +7,12 @@ import {
   Lock, ArrowLeft, RefreshCw, Users, Map, BookOpen, Star, MessageSquare,
   HelpCircle, MousePointer, Navigation, Image, Gauge, ClipboardList, X,
   TrendingUp, CheckSquare, Circle, Clock, ExternalLink, ChevronDown, ChevronUp,
+  DollarSign,
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { CapitalReadinessOS } from "@/components/CapitalReadinessOS";
+import { CertificationReadinessOS } from "@/components/CertificationReadinessOS";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = `${BASE}/api`;
@@ -474,6 +477,8 @@ function AnalyticsPanel() {
 
 const ADMIN_SECTIONS = [
   { id: "dashboard", label: "Dashboard", icon: Gauge },
+  { id: "capital-readiness", label: "Capital Readiness", icon: DollarSign },
+  { id: "certification-readiness", label: "Cert Readiness", icon: Shield },
   { id: "pages", label: "Pages", icon: FileText },
   { id: "ventures", label: "Ventures", icon: Building2 },
   { id: "services", label: "Services", icon: Star },
@@ -939,6 +944,8 @@ export default function AdminPage() {
             transition={{ duration: 0.15 }}
           >
             {activeSection === "dashboard" && <DashboardPanel />}
+            {activeSection === "capital-readiness" && <CapitalReadinessOS />}
+            {activeSection === "certification-readiness" && <CertificationReadinessOS />}
             {activeSection === "pages" && <PagesPanel />}
             {activeSection === "ventures" && <VenturesPanel />}
             {activeSection === "services" && <ServicesPanel />}
