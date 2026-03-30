@@ -210,10 +210,13 @@ _Prepared: March 30, 2026_
 - Vessels dashboard routes
 - All `/api/*` endpoints (except health and stephen)
 
-### Issues Found:
-- SZL Holdings `/admin` route has no frontend auth gate (API endpoints are protected)
-- SZL Holdings `/kpis` route is publicly accessible
-- Vessels marketing `/sign-in` page exists but sign-in flow not fully wired
+### Issues Resolved:
+- SZL Holdings `/admin` and `/admin/:section` routes now wrapped in `RequireAuth` (OIDC login gate)
+- SZL Holdings `/kpis` route now wrapped in `RequireAuth` (OIDC login gate)
+- Both routes show "Authentication Required" prompt and Sign In button for unauthenticated users
+
+### Remaining Items:
+- Vessels marketing `/sign-in` page exists but sign-in flow not fully wired (marketing site only)
 
 ## 9. Mobile / Responsive Pass
 

@@ -1,8 +1,9 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@workspace/shared-ui";
+import { useAuth } from "@workspace/replit-auth-web";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { FeaturedPlatforms } from "@/components/FeaturedPlatforms";
@@ -35,6 +36,36 @@ const queryClient = new QueryClient({
     queries: { refetchOnWindowFocus: false, retry: false, staleTime: 5 * 60 * 1000 },
   },
 });
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { isLoading, isAuthenticated, login } = useAuth();
+  if (isLoading) return <PageLoader />;
+  if (!isAuthenticated) {
+    return (
+      <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center", maxWidth: "400px", padding: "2rem" }}>
+          <h2 style={{ color: "hsl(0,0%,90%)", fontSize: "1.5rem", marginBottom: "0.5rem" }}>Authentication Required</h2>
+          <p style={{ color: "hsl(0,0%,60%)", marginBottom: "1.5rem" }}>Sign in to access this section.</p>
+          <button
+            onClick={login}
+            style={{
+              padding: "0.625rem 1.5rem",
+              background: "hsl(210,8%,18%)",
+              color: "hsl(0,0%,90%)",
+              border: "1px solid hsl(210,8%,25%)",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "0.875rem",
+            }}
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
 
 function PageLoader() {
   return (
@@ -121,13 +152,13 @@ function App() {
               <Suspense fallback={<PageLoader />}><InvestorStory /></Suspense>
             </Route>
             <Route path="/kpis">
-              <Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense>
+              <RequireAuth><Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin">
-              <Suspense fallback={<PageLoader />}><AdminPage /></Suspense>
+              <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/:section">
-              <Suspense fallback={<PageLoader />}><AdminPage /></Suspense>
+              <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
             </Route>
             <Route>
               <HomePage />
