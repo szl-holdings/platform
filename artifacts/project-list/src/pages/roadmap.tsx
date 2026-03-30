@@ -89,7 +89,7 @@ export default function Roadmap() {
             <div key={q.quarter}>
               <div className="flex items-center gap-3 mb-4">
                 <h2 className="text-base font-bold text-foreground">{q.quarter}</h2>
-                <Badge variant="outline" className={`text-[10px] ${quarterBadge[q.status]}`}>
+                <Badge variant="outline" className={`text-[10px] ${quarterBadge[q.status as keyof typeof quarterBadge]}`}>
                   {q.status === "completed" ? "Completed" : q.status === "in_progress" ? "In Progress" : "Planned"}
                 </Badge>
                 <span className="text-xs text-muted-foreground">·</span>

@@ -104,9 +104,21 @@ AI-powered domain agents for each application, merged from GitHub repos. Located
 - `lib/api-spec`: OpenAPI 3.1 specification
 - `lib/api-zod`: Generated Zod schemas
 - `lib/api-client-react`: Generated React Query hooks
-- `lib/integrations-openai-ai-server`: OpenAI server-side integration via Replit AI Integrations
+- `lib/integrations-openai-ai-server`: OpenAI server-side integration via Replit AI Integrations (exports `toFile` from openai)
 - `lib/integrations-openai-ai-react`: OpenAI React client hooks
 - `lib/integrations-anthropic-ai`: Anthropic server-side integration via Replit AI Integrations
+- `lib/integrations-gemini-ai`: Gemini AI server-side integration via Replit AI Integrations
+
+### TypeScript Fixes (Task #63)
+- All 14 Vite configs use `const port = Number(process.env.PORT) || 3000` (no runtime throws)
+- All 7 Dreamscape pages have explicit `export default`
+- `shared-ui` toast hook uses relative imports (not `@/`)
+- SZL Holdings uses `domMax` (not `domAnimation`) for layout animations
+- API server routes: `alloy-chat.ts`, `ai-safety.ts`, `agent-training.ts`, `gov-data.ts`, `msp-live.ts`, `nuro-mesh.ts`, `stephen.ts` all pass TS type checks
+- Integration packages (`openai`, `anthropic`, `gemini`): replaced `pRetry.AbortError` with named `AbortError` import; replaced `types:["node"]` with `skipLibCheck:true`
+- `stephen.ts` route: Zod schemas defined locally (api-zod does not have stephen-specific schema variants); `zod` added as api-server dependency
+- `project-list/roadmap.tsx`: `keyof typeof quarterBadge` cast for string indexing
+- `stephen-site/App.tsx`: Home lazy import fixed to use named export `m.Home`
 
 ### Infrastructure Hardening (Task #58)
 - **Graceful Shutdown:** SIGTERM/SIGINT handlers drain HTTP connections, flush job queue, and close DB pool within 10s

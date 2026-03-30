@@ -52,12 +52,12 @@ const DEMO_FEDERAL_CONTRACTS = [
 ];
 
 const DEMO_FEDRAMP_PRODUCTS = [
-  { productId: "MS-1084", productName: "Microsoft Azure Government", category: "Infrastructure and Platform as a Service", authorizationType: "Agency ATO", impact: "High", status: "Authorized", cso: "Microsoft", authorizationDate: "2014-05-01", agencies: ["DOD", "IC", "CFO Act Agencies"] },
-  { productId: "GCP-7734", productName: "Google Cloud Platform", category: "Infrastructure and Platform as a Service", authorizationType: "Agency ATO", impact: "High", status: "Authorized", cso: "Google LLC", authorizationDate: "2017-01-01", agencies: ["GSA", "FTC", "USDA"] },
-  { productId: "AWS-0012", productName: "AWS GovCloud (US-East)", category: "Infrastructure as a Service", authorizationType: "Agency ATO", impact: "High", status: "Authorized", cso: "Amazon Web Services", authorizationDate: "2011-06-01", agencies: ["DOD", "DOJ", "HHS", "DHS"] },
-  { productId: "CRW-2341", productName: "CrowdStrike Falcon GovCloud", category: "Security as a Service", authorizationType: "Agency ATO", impact: "Moderate", status: "Authorized", cso: "CrowdStrike", authorizationDate: "2020-09-15", agencies: ["DOD", "DHS CISA"] },
-  { productId: "ZSC-8821", productName: "Zscaler Zero Trust Exchange", category: "Network Security as a Service", authorizationType: "JAB P-ATO", impact: "Moderate", status: "Authorized", cso: "Zscaler", authorizationDate: "2022-03-10", agencies: ["GSA", "CBP", "TSA"] },
-  { productId: "SFD-4512", productName: "Salesforce Government Cloud", category: "Software as a Service", authorizationType: "JAB P-ATO", impact: "Moderate", status: "Authorized", cso: "Salesforce", authorizationDate: "2019-11-01", agencies: ["VA", "HHS", "DOE"] },
+  { productId: "MS-1084", productName: "Microsoft Azure Government", category: "Infrastructure and Platform as a Service", authorizationType: "Agency ATO", impactLevel: "High", status: "Authorized", cso: "Microsoft", authorizationDate: "2014-05-01", agencies: ["DOD", "IC", "CFO Act Agencies"] },
+  { productId: "GCP-7734", productName: "Google Cloud Platform", category: "Infrastructure and Platform as a Service", authorizationType: "Agency ATO", impactLevel: "High", status: "Authorized", cso: "Google LLC", authorizationDate: "2017-01-01", agencies: ["GSA", "FTC", "USDA"] },
+  { productId: "AWS-0012", productName: "AWS GovCloud (US-East)", category: "Infrastructure as a Service", authorizationType: "Agency ATO", impactLevel: "High", status: "Authorized", cso: "Amazon Web Services", authorizationDate: "2011-06-01", agencies: ["DOD", "DOJ", "HHS", "DHS"] },
+  { productId: "CRW-2341", productName: "CrowdStrike Falcon GovCloud", category: "Security as a Service", authorizationType: "Agency ATO", impactLevel: "Moderate", status: "Authorized", cso: "CrowdStrike", authorizationDate: "2020-09-15", agencies: ["DOD", "DHS CISA"] },
+  { productId: "ZSC-8821", productName: "Zscaler Zero Trust Exchange", category: "Network Security as a Service", authorizationType: "JAB P-ATO", impactLevel: "Moderate", status: "Authorized", cso: "Zscaler", authorizationDate: "2022-03-10", agencies: ["GSA", "CBP", "TSA"] },
+  { productId: "SFD-4512", productName: "Salesforce Government Cloud", category: "Software as a Service", authorizationType: "JAB P-ATO", impactLevel: "Moderate", status: "Authorized", cso: "Salesforce", authorizationDate: "2019-11-01", agencies: ["VA", "HHS", "DOE"] },
 ];
 
 const DEMO_CMMC_MATURITY = {

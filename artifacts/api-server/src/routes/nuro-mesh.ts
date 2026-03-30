@@ -395,6 +395,7 @@ Synthesize these domain expert responses into a unified, actionable answer. Prio
           content: `Query: "${query.slice(0, 100)}" — ${synthesisContent.slice(0, 300)}`,
           importance: Math.round(agentResponses.reduce((sum, r) => sum + r.confidence, 0) / agentResponses.length / 10),
           tags: targetAgents.map(a => a.domain),
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         }).onConflictDoNothing();
       }
     } catch {}

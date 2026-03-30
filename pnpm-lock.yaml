@@ -447,6 +447,9 @@ importers:
       ws:
         specifier: ^8.20.0
         version: 8.20.0
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/compression':
         specifier: ^1.8.1
@@ -2481,7 +2484,11 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1
 
-  lib/integrations-openai-ai-react: {}
+  lib/integrations-openai-ai-react:
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
 
   lib/integrations-openai-ai-server:
     dependencies:

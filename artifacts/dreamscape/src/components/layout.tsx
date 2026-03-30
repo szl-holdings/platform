@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff, Sparkles, Activity, Calendar, Image, BookOpen, Wand2, Palette } from "lucide-react";
+import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff, Sparkles, Activity, Calendar, Image, BookOpen, Wand2, Palette, Users } from "lucide-react";
 import { cn } from "./ui";
 
 function DemoModeBanner() {

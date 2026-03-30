@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
 
-const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home || m.default })));
+const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const CheckoutSuccess = lazy(() => import("@/pages/checkout-success"));
 const CheckoutCancel = lazy(() => import("@/pages/checkout-cancel"));

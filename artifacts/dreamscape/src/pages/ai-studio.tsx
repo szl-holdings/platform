@@ -359,3 +359,5 @@ export function AIStudio() {
     </div>
   );
 }
+
+export default AIStudio;

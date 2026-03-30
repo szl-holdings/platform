@@ -272,7 +272,7 @@ export default function AIIntelligence() {
                   <span className="text-xs font-mono text-muted-foreground flex-1 truncate">{entry.currentModel}</span>
                   <span className="text-xs text-muted-foreground">{entry.budgetUtilization}% budget</span>
                   {entry.highStakesDomains?.length > 0 && (
-                    <CheckCircle className="w-3.5 h-3.5 text-amber-400" title="Has maker-checker validation" />
+                    <span title="Has maker-checker validation"><CheckCircle className="w-3.5 h-3.5 text-amber-400" /></span>
                   )}
                 </div>
               );

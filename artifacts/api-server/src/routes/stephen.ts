@@ -8,20 +8,53 @@ import {
   stephenCaseStudiesTable,
   stephenBookingRequestsTable,
 } from "@workspace/db";
-import {
-  CreateStephenContentBlockBody,
-  UpdateStephenContentBlockParams,
-  UpdateStephenContentBlockBody,
-  DeleteStephenContentBlockParams,
-  ListStephenContentBlocksQueryParams,
-  CreateStephenPortfolioCaseStudyBody,
-  GetStephenPortfolioCaseStudyParams,
-  UpdateStephenPortfolioCaseStudyParams,
-  UpdateStephenPortfolioCaseStudyBody,
-  DeleteStephenPortfolioCaseStudyParams,
-  CreateStephenBookingRequestBody,
-} from "@workspace/api-zod";
+import { z } from "zod";
 import { eq, desc, asc } from "drizzle-orm";
+
+const CONTENT_BLOCK_TYPES = ["achievement", "about", "service", "stat", "skill"] as const;
+const BOOKING_TYPES = ["consultation", "project", "recruitment", "partnership", "investment", "speaking", "other"] as const;
+
+const ListStephenContentBlocksQueryParams = z.object({ type: z.enum(CONTENT_BLOCK_TYPES).optional() });
+const CreateStephenContentBlockBody = z.object({
+  type: z.enum(CONTENT_BLOCK_TYPES),
+  title: z.string().default(""),
+  content: z.string(),
+  icon: z.string().optional(),
+  date: z.string().optional(),
+  sortOrder: z.number().optional(),
+  featured: z.boolean().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+const UpdateStephenContentBlockParams = z.object({ id: z.coerce.number() });
+const UpdateStephenContentBlockBody = CreateStephenContentBlockBody.partial();
+const DeleteStephenContentBlockParams = z.object({ id: z.coerce.number() });
+const CreateStephenPortfolioCaseStudyBody = z.object({
+  title: z.string(),
+  slug: z.string(),
+  summary: z.string().default(""),
+  content: z.string().default(""),
+  coverImageUrl: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  featured: z.boolean().optional(),
+  client: z.string().optional(),
+  duration: z.string().optional(),
+  outcome: z.string().optional(),
+});
+const GetStephenPortfolioCaseStudyParams = z.object({ slug: z.string() });
+const UpdateStephenPortfolioCaseStudyParams = z.object({ slug: z.string() });
+const UpdateStephenPortfolioCaseStudyBody = CreateStephenPortfolioCaseStudyBody.partial();
+const DeleteStephenPortfolioCaseStudyParams = z.object({ slug: z.string() });
+const CreateStephenBookingRequestBody = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  company: z.string().optional(),
+  role: z.string().optional(),
+  type: z.enum(BOOKING_TYPES),
+  serviceInterest: z.string().optional(),
+  message: z.string(),
+  preferredDate: z.string().optional(),
+  budget: z.string().optional(),
+});
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 

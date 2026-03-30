@@ -251,7 +251,7 @@ safetyRouter.get("/ai-safety/model-registry", safetyRateLimit, async (_req: Requ
 
 safetyRouter.put("/ai-safety/model-registry/:agentId", safetyRateLimit, async (req: Request, res: Response) => {
   try {
-    const { agentId } = req.params;
+    const agentId = String(req.params["agentId"] ?? "");
     const { model, provider, tokenBudget } = req.body as {
       model?: string;
       provider?: string;

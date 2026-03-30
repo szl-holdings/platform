@@ -481,11 +481,10 @@ async function fetchNoaaStation(station: typeof NOAA_COOPS_STATIONS[0], demoEntr
       windSpeed,
       windDir,
       timestamp: new Date().toISOString(),
-      source: "live",
-    };
+    } as typeof demoEntry;
   } catch {
     clearTimeout(timer);
-    return { ...demoEntry, source: "demo" };
+    return demoEntry;
   }
 }
 

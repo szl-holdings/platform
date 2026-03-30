@@ -52,7 +52,7 @@ trainingRouter.post("/agent-training/pairs", async (req: Request, res: Response)
 
 trainingRouter.delete("/agent-training/pairs/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params["id"]!, 10);
+    const id = parseInt(String(req.params["id"]!), 10);
     await db
       .update(agentTrainingPairs)
       .set({ isActive: false })
@@ -210,7 +210,7 @@ trainingRouter.post("/agent-training/advisory-audit", async (req: Request, res: 
 
 trainingRouter.patch("/agent-training/advisory-audit/:id/action", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params["id"]!, 10);
+    const id = parseInt(String(req.params["id"]!), 10);
     const { status } = req.body as { status: string };
     const [updated] = await db
       .update(advisoryAudit)
@@ -249,8 +249,7 @@ trainingRouter.post("/agent-training/transcribe", upload.single("audio"), async 
       : mimeType.includes("wav") ? "wav"
       : "webm";
 
-    const openaiModule = await import("openai");
-    const toFile = openaiModule.toFile;
+    const { toFile } = await import("@workspace/integrations-openai-ai-server");
     const audioFile = await toFile(audioBuffer, `audio.${ext}`, { type: mimeType });
 
     const transcription = await openai.audio.transcriptions.create({

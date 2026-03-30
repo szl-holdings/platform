@@ -157,3 +157,5 @@ export function GeneratorTools() {
     </div>
   );
 }
+
+export default GeneratorTools;

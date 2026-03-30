@@ -162,3 +162,5 @@ export function ContentCalendar() {
     </div>
   );
 }
+
+export default ContentCalendar;

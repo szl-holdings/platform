@@ -61,6 +61,28 @@ ensureTables().catch(() => {});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+interface AdminOverview {
+  system?: { memoryUsage?: { heapUsed: number }; uptime?: number; nodeVersion?: string };
+  database?: { status?: string; connections?: number };
+  storage?: { status?: string };
+  counts?: { activeApps?: number; apps?: number; liveConnectors?: number; connectors?: number };
+}
+
+interface AdminHealth {
+  status?: string;
+  summary?: { healthy?: number; degraded?: number; down?: number };
+  checks?: Array<{ status: string; name: string; details: string }>;
+}
+
+interface AdminConnectors {
+  summary?: { total?: number; liveConfigured?: number; mockedDemoMode?: number; manualRequired?: number };
+  connectors?: Array<{ status: string; name: string }>;
+}
+
+interface AdminFeatureFlags {
+  flags?: Array<{ enabled: boolean; key: string }>;
+}
+
 type ModelProvider = "auto" | "openai" | "anthropic";
 
 function routeModel(content: string, provider: ModelProvider): { provider: "openai" | "anthropic"; model: string; reason: string } {
@@ -96,10 +118,10 @@ async function buildSystemPrompt(req: Request): Promise<string> {
         fetch(`${baseUrl}/api/admin/feature-flags`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
       ]);
 
-      const overview = overviewRes.status === "fulfilled" ? overviewRes.value : null;
-      const health = healthRes.status === "fulfilled" ? healthRes.value : null;
-      const connectors = connectorsRes.status === "fulfilled" ? connectorsRes.value : null;
-      const featureFlags = flagsRes.status === "fulfilled" ? flagsRes.value : null;
+      const overview = overviewRes.status === "fulfilled" ? overviewRes.value as AdminOverview : null;
+      const health = healthRes.status === "fulfilled" ? healthRes.value as AdminHealth : null;
+      const connectors = connectorsRes.status === "fulfilled" ? connectorsRes.value as AdminConnectors : null;
+      const featureFlags = flagsRes.status === "fulfilled" ? flagsRes.value as AdminFeatureFlags : null;
 
       if (overview) {
         const mem = overview.system?.memoryUsage;
@@ -236,7 +258,7 @@ alloyChatRouter.post("/alloy-chat/conversations", async (req: Request, res: Resp
 
 alloyChatRouter.get("/alloy-chat/conversations/:id/messages", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params["id"]!, 10);
+    const id = parseInt(String(req.params["id"]!), 10);
     if (isNaN(id)) { res.status(400).json({ error: "Invalid conversation ID" }); return; }
     const msgs = await db
       .select()
@@ -251,7 +273,7 @@ alloyChatRouter.get("/alloy-chat/conversations/:id/messages", async (req: Reques
 
 alloyChatRouter.delete("/alloy-chat/conversations/:id", async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params["id"]!, 10);
+    const id = parseInt(String(req.params["id"]!), 10);
     if (isNaN(id)) { res.status(400).json({ error: "Invalid conversation ID" }); return; }
     await db.delete(conversations).where(eq(conversations.id, id));
     res.json({ success: true });
@@ -261,7 +283,7 @@ alloyChatRouter.delete("/alloy-chat/conversations/:id", async (req: Request, res
 });
 
 alloyChatRouter.post("/alloy-chat/conversations/:id/messages", async (req: Request, res: Response) => {
-  const id = parseInt(req.params["id"]!, 10);
+  const id = parseInt(String(req.params["id"]!), 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid conversation ID" }); return; }
 
   const { content, provider = "auto" } = req.body as { content: string; provider?: ModelProvider };
@@ -373,14 +395,14 @@ alloyChatRouter.get("/alloy-chat/suggested-prompts", async (_req: Request, res: 
       fetch(`https://${devDomain}/api/admin/connectors`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
     ]);
 
-    const health = healthRes.status === "fulfilled" ? healthRes.value : null;
-    const connectors = connectorsRes.status === "fulfilled" ? connectorsRes.value : null;
+    const health = healthRes.status === "fulfilled" ? healthRes.value as AdminHealth : null;
+    const connectors = connectorsRes.status === "fulfilled" ? connectorsRes.value as AdminConnectors : null;
 
     const contextualPrompts: string[] = [];
     if (health?.status === "degraded" || health?.status === "down") contextualPrompts.push("Diagnose the current system health issues");
-    if (health?.summary?.degraded > 0) contextualPrompts.push(`What's causing the ${health.summary.degraded} degraded service(s)?`);
-    if (connectors?.summary?.manualRequired > 0) contextualPrompts.push(`Which connectors need configuration and how do I set them up?`);
-    if (connectors?.summary?.mockedDemoMode > 0) contextualPrompts.push(`Which integrations are in demo mode and what data is simulated?`);
+    if ((health?.summary?.degraded ?? 0) > 0) contextualPrompts.push(`What's causing the ${health!.summary!.degraded} degraded service(s)?`);
+    if ((connectors?.summary?.manualRequired ?? 0) > 0) contextualPrompts.push(`Which connectors need configuration and how do I set them up?`);
+    if ((connectors?.summary?.mockedDemoMode ?? 0) > 0) contextualPrompts.push(`Which integrations are in demo mode and what data is simulated?`);
 
     res.json({ prompts: [...contextualPrompts, ...defaultPrompts].slice(0, 8) });
   } catch {

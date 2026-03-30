@@ -4,27 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const rawPort = process.env.PORT;
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
-
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
-  );
-}
+const port = Number(process.env.PORT) || 3000;
+const basePath = process.env.BASE_PATH || "/readiness-report/";
 
 export default defineConfig({
   base: basePath,
@@ -60,7 +41,7 @@ export default defineConfig({
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks(id) {
+        manualChunks(id): string | undefined {
           if (id.includes('node_modules')) {
             if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
             if (id.includes('framer-motion')) return 'vendor-motion';
@@ -70,6 +51,7 @@ export default defineConfig({
             if (id.includes('react-dom')) return 'vendor-react';
             if (id.includes('react/')) return 'vendor-react';
           }
+          return undefined;
         },
       },
     },

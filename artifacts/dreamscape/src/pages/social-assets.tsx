@@ -132,3 +132,5 @@ export function SocialAssets() {
     </div>
   );
 }
+
+export default SocialAssets;
