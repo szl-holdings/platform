@@ -170,8 +170,7 @@ export default function Experiments() {
           <p className="text-sm text-muted-foreground mt-1">Compare training runs, validate hypotheses, and surface the experiments that advance model performance</p>
         </div>
         <ExportButton
-          filename="experiments"
-          csvData={experiments.map(e => {
+          data={experiments.map(e => {
             const last = e.metrics[e.metrics.length - 1];
             const proj = projects.find(p => p.id === e.projectId);
             return {
@@ -185,8 +184,7 @@ export default function Experiments() {
               Duration: e.duration || "",
             };
           })}
-          pdfTitle="ML Experiments"
-          accentColor="#8b5cf6"
+          options={{ filename: "experiments", title: "ML Experiments", accentColor: "#8b5cf6" }}
         />
       </div>
 

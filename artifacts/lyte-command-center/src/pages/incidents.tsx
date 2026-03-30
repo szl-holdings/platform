@@ -127,8 +127,7 @@ export default function Incidents() {
             />
           </div>
           <ExportButton
-            filename="incidents"
-            csvData={(filtered || []).map((i: any) => ({
+            data={(filtered || []).map((i: any) => ({
               ID: i.id,
               Title: i.title,
               Severity: i.severity,
@@ -136,8 +135,7 @@ export default function Incidents() {
               "Assigned To": i.assignedTo || "",
               "Created At": i.createdAt || "",
             }))}
-            pdfTitle="Incident Tracker"
-            accentColor="#06b6d4"
+            options={{ filename: "incidents", title: "Incident Tracker", accentColor: "#06b6d4" }}
           />
           <button 
             onClick={handleCreate}

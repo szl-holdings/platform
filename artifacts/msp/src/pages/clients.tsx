@@ -108,8 +108,7 @@ export default function ClientsPage() {
         </div>
         <div className="flex items-center gap-2">
           <ExportButton
-            filename="msp-clients"
-            csvData={mockClients.map(c => ({
+            data={mockClients.map(c => ({
               Name: c.name,
               Industry: c.industry,
               "Contract Status": c.contractStatus,
@@ -118,8 +117,7 @@ export default function ClientsPage() {
               "Open Tickets": c.openTickets,
               "MRR ($)": c.mrr,
             }))}
-            pdfTitle="Client Management Report"
-            accentColor="#3b82f6"
+            options={{ filename: "msp-clients", title: "Client Management Report", accentColor: "#3b82f6" }}
           />
           <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
             <Plus className="w-4 h-4" /> Add Client

@@ -63,8 +63,7 @@ export default function Tickets() {
         </div>
         <div className="flex items-center gap-2">
           <ExportButton
-            filename="service-desk-tickets"
-            csvData={tickets.map(t => ({
+            data={tickets.map(t => ({
               ID: t.id,
               Subject: t.subject,
               Client: t.client,
@@ -76,8 +75,7 @@ export default function Tickets() {
               "SLA Status": t.slaStatus,
               Category: t.category,
             }))}
-            pdfTitle="Service Desk Tickets"
-            accentColor="#3b82f6"
+            options={{ filename: "service-desk-tickets", title: "Service Desk Tickets", accentColor: "#3b82f6" }}
           />
           <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
             <Plus className="w-4 h-4" /> New Ticket

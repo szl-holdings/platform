@@ -212,7 +212,7 @@ export function ObservabilityPanel() {
     if (lensFilter === "all") return state.metrics;
     return state.metrics.filter((m) => {
       const def = config.metrics.find((d) => d.id === m.metricId);
-      return (def as Record<string, unknown>)?.lens === lensFilter || (def as Record<string, unknown>)?.pillar === lensFilter;
+      return (def as unknown as Record<string, unknown>)?.lens === lensFilter || (def as unknown as Record<string, unknown>)?.pillar === lensFilter;
     });
   }, [state.metrics, config.metrics, lensFilter]);
 
@@ -221,7 +221,7 @@ export function ObservabilityPanel() {
     return state.events.filter((e) => (e.lens || e.pillar) === lensFilter);
   }, [state.events, lensFilter]);
 
-  const domainLabels = (config as Record<string, unknown>).domainLensLabels as {
+  const domainLabels = (config as unknown as Record<string, unknown>).domainLensLabels as {
     postureScoreName?: string;
     topSignalLabel?: string;
     velocityTrendLabel?: string;

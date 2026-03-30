@@ -521,8 +521,7 @@ export default function FleetDashboard() {
                 <span className="font-display text-xs font-bold text-sky-50 uppercase tracking-wider">Fleet Command</span>
                 <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 ml-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE</span>
                 <ExportButton
-                  filename="fleet-manifest"
-                  csvData={mockVessels.map((v: any) => ({
+                  data={mockVessels.map((v: any) => ({
                     Name: v.name,
                     IMO: v.imoNumber || v.imo || "",
                     Flag: v.flag || "",
@@ -531,8 +530,7 @@ export default function FleetDashboard() {
                     "Current Port": v.currentPort || "",
                     Destination: v.destination || "",
                   }))}
-                  pdfTitle="Fleet Manifest"
-                  accentColor="#0ea5e9"
+                  options={{ filename: "fleet-manifest", title: "Fleet Manifest", accentColor: "#0ea5e9" }}
                 />
               </div>
               <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />

@@ -1261,7 +1261,7 @@ export function useEcosystemNotifications(appId: string) {
   const [notifications, setNotifications] = useState<EcosystemNotification[]>([]);
 
   const publish = useCallback(
-    (notification: Omit<EcosystemNotification, "id" | "appId" | "timestamp">) => {
+    (notification: Omit<EcosystemNotification, "id" | "appId" | "appName" | "timestamp">) => {
       const appData = ECOSYSTEM_APPS.find((a) => a.id === appId);
       const n: EcosystemNotification = {
         id: `${appId}-${Date.now()}-${Math.random().toString(36).slice(2)}`,

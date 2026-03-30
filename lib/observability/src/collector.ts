@@ -3,7 +3,7 @@ import type { MetricValue, MetricDefinition, MetricSnapshot, ObservabilityEvent,
 const MAX_HISTORY = 60;
 const MAX_EVENTS = 100;
 
-const LENS_IDS: LensId[] = ["signal", "impact", "anticipation", "topology", "posture", "velocity"];
+const LENS_IDS: LensId[] = ["signal", "impact", "anticipation", "topology", "posture", "velocity", "userExperience"];
 
 export class MetricCollector {
   private metrics: Map<string, MetricValue[]> = new Map();
@@ -81,6 +81,11 @@ export class MetricCollector {
         domainLabels ? `${domainLabels.velocity} — trend: improving` : "Improvement velocity trending positive — 7-day MA up 4%",
         "Resolution throughput increased — new baseline established",
         "Learning rate metric: week-over-week improvement confirmed",
+      ],
+      userExperience: [
+        "User interaction tracked — session data updated",
+        "Client error detected — error count incremented",
+        "Page load performance recorded",
       ],
     };
 

@@ -57,13 +57,14 @@ export function ObservabilityProvider({ config, children }: { config: DomainConf
         if (data.pillars && data.metrics && data.events) {
           setState({
             appSlug: data.appSlug,
+            lenses: data.lenses ?? data.pillars,
             pillars: data.pillars,
             overallScore: data.overallScore,
             overallStatus: data.overallStatus,
             metrics: data.metrics,
             events: data.events,
             lastUpdated: Date.now(),
-          });
+          } as AppObservabilityState);
           setDataSource("api");
         }
         if (data.serverTelemetry) {

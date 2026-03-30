@@ -78,8 +78,7 @@ export default function IncidentsPage() {
             <Button variant={view === "kanban" ? "default" : "ghost"} size="sm" onClick={() => setView("kanban")}>Kanban</Button>
           </div>
           <ExportButton
-            filename="incidents"
-            csvData={incidents.map((i: any) => ({
+            data={incidents.map((i: any) => ({
               ID: i.id,
               Title: i.title,
               Severity: i.severity,
@@ -88,8 +87,7 @@ export default function IncidentsPage() {
               "ATT&CK Technique": i.attackTechnique || "",
               "Created At": i.createdAt ? new Date(i.createdAt).toLocaleString() : "",
             }))}
-            pdfTitle="Incident Response Log"
-            accentColor="#ef4444"
+            options={{ filename: "incidents", title: "Incident Response Log", accentColor: "#ef4444" }}
           />
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>

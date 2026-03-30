@@ -4,7 +4,8 @@ export type LensId =
   | "anticipation"
   | "topology"
   | "posture"
-  | "velocity";
+  | "velocity"
+  | "userExperience";
 
 export type PillarId = LensId;
 
