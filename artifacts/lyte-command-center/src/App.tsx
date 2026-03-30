@@ -7,6 +7,8 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { Zap, Activity, AlertTriangle, BookOpen } from "lucide-react";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Signals = lazy(() => import("@/pages/signals"));
@@ -149,6 +151,20 @@ function App() {
             accentColor="#f59e0b"
           />
         </PowerUserProvider>
+        <WelcomeOverlay
+          appId="lyte"
+          appName="Lyte"
+          subtitle="Business Operations Command Center"
+          description="Detect signals, manage incidents, and automate response across your entire business infrastructure — with AI-driven anomaly detection and runbook automation."
+          accentColor="#f59e0b"
+          icon={Zap}
+          features={[
+            { icon: Activity, title: "Signal Detection", description: "Correlate signals across infra, product, and revenue" },
+            { icon: AlertTriangle, title: "Incident Management", description: "Priority-based incidents with blast radius analysis" },
+            { icon: BookOpen, title: "Playbooks", description: "Automated runbooks for common incident patterns" },
+            { icon: Zap, title: "AI Ops", description: "Intelligent noise reduction and root cause analysis" },
+          ]}
+        />
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>

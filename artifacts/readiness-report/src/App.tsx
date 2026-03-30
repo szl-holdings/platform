@@ -8,6 +8,8 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { compassConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { BarChart3, ClipboardCheck, AlertTriangle, TrendingUp } from "lucide-react";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Scorecards = lazy(() => import("@/pages/scorecards"));
@@ -103,6 +105,20 @@ function App() {
               accentColor="#84cc16"
             />
           </PowerUserProvider>
+          <WelcomeOverlay
+            appId="readiness-report"
+            appName="Readiness Report"
+            subtitle="Compliance Engine"
+            description="Assess your compliance posture, track remediation milestones, and generate audit-ready reports across SOC 2, ISO 27001, HIPAA, and other major frameworks."
+            accentColor="#84cc16"
+            icon={ClipboardCheck}
+            features={[
+              { icon: BarChart3, title: "Gap Analysis", description: "Framework-level scoring with control-by-control breakdowns" },
+              { icon: TrendingUp, title: "Milestones", description: "Track remediation tasks toward your next audit date" },
+              { icon: AlertTriangle, title: "Risk Register", description: "Prioritized risk items with owner assignment" },
+              { icon: ClipboardCheck, title: "Audit Reports", description: "Generate board-ready compliance status reports" },
+            ]}
+          />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

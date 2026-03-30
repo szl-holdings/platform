@@ -9,6 +9,8 @@ import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { Sidebar } from "@/components/sidebar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { Building2, TrendingUp, BarChart3, DollarSign } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 2 } },
@@ -115,6 +117,20 @@ function App() {
             confidence={0.84} 
           />
         </PowerUserProvider>
+        <WelcomeOverlay
+          appId="terra"
+          appName="Terra"
+          subtitle="Real Estate Intelligence"
+          description="Unified portfolio analytics with property-level performance tracking, market trend analysis, AI-powered valuations, and occupancy intelligence across all asset classes."
+          accentColor="#10b981"
+          icon={Building2}
+          features={[
+            { icon: Building2, title: "Portfolio Dashboard", description: "Consolidated view of value, occupancy, and cap rates" },
+            { icon: TrendingUp, title: "Market Trends", description: "12-month revenue and NOI trend analysis" },
+            { icon: BarChart3, title: "Property Intel", description: "Per-property performance signals and alerts" },
+            { icon: DollarSign, title: "Valuations", description: "AI-driven cap rate and valuation estimates" },
+          ]}
+        />
       </WouterRouter>
       <AgentCopilot config={terraConfig} />
       <Toaster position="bottom-right" richColors />

@@ -10,6 +10,7 @@ import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
@@ -292,6 +293,20 @@ function App() {
               commands={firestormCommands}
               appName="Firestorm"
               accentColor="#ef4444"
+            />
+            <WelcomeOverlay
+              appId="firestorm"
+              appName="Firestorm"
+              subtitle="Security Simulation Platform"
+              description="Military-grade cybersecurity simulation for red team/blue team exercises, continuous security validation, and real-time threat detection across your entire environment."
+              accentColor="#ef4444"
+              icon={Flame}
+              features={[
+                { icon: Shield, title: "SOC Dashboard", description: "Real-time incident monitoring with 1-10-60 response timers" },
+                { icon: Target, title: "MITRE ATT&CK", description: "Full kill chain coverage with heatmap visualizations" },
+                { icon: Search, title: "Threat Hunting", description: "Natural language queries across millions of events" },
+                { icon: Layers, title: "XDR Console", description: "Correlated detection across endpoints, cloud, and network" },
+              ]}
             />
           </div>
         </PowerUserProvider>

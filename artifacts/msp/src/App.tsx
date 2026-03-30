@@ -8,6 +8,7 @@ import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import {
   LayoutDashboard,
   Building2,
@@ -249,8 +250,22 @@ function App() {
             appName="Evolve MSP"
             accentColor="#06b6d4"
           />
+          <IncaAgentIndicator agentName="IT Sentinel" systemType="mama-quilla" currentTask="Monitoring endpoint health across managed clients" confidence={0.88} />
         </PowerUserProvider>
-        <IncaAgentIndicator agentName="IT Sentinel" systemType="mama-quilla" currentTask="Monitoring endpoint health across managed clients" confidence={0.88} />
+        <WelcomeOverlay
+          appId="msp"
+          appName="Evolve MSP"
+          subtitle="Managed Services Platform"
+          description="A complete managed service provider platform for client IT management, NOC operations, and SLA compliance — with AI-powered ticket routing and churn risk prediction."
+          accentColor="#06b6d4"
+          icon={Monitor}
+          features={[
+            { icon: Building2, title: "Client Management", description: "Health scoring and churn risk for every account" },
+            { icon: Ticket, title: "Service Desk", description: "Priority-based ticketing with SLA breach prediction" },
+            { icon: Activity, title: "NOC Dashboard", description: "Real-time alerts across all managed environments" },
+            { icon: DollarSign, title: "Profitability", description: "Per-client margin and MRR tracking with cost analysis" },
+          ]}
+        />
       </WouterRouter>
       <Toaster position="bottom-right" richColors />
     </QueryClientProvider>

@@ -82,7 +82,10 @@
     "./ui/toast": "./src/ui/toast.tsx",
     "./ui/toggle-group": "./src/ui/toggle-group.tsx",
     "./ui/toggle": "./src/ui/toggle.tsx",
-    "./ui/tooltip": "./src/ui/tooltip.tsx"
+    "./ui/tooltip": "./src/ui/tooltip.tsx",
+    "./WelcomeOverlay": "./src/WelcomeOverlay.tsx",
+    "./EmptyState": "./src/EmptyState.tsx",
+    "./EcosystemTour": "./src/EcosystemTour.tsx"
   },
   "dependencies": {
     "@workspace/replit-auth-web": "workspace:*",

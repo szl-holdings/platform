@@ -12,6 +12,7 @@ import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/aut
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
 const FleetDashboard = lazy(() => import("@/pages/fleet-dashboard"));
 const VesselDetailPage = lazy(() => import("@/pages/vessel-detail"));
@@ -347,6 +348,20 @@ function App() {
             />
             <IncaAgentIndicator agentName="Maritime Analyst" systemType="inti" currentTask="Scanning AIS transponder anomalies across fleet" confidence={0.91} />
           </PowerUserProvider>
+          <WelcomeOverlay
+            appId="vessels"
+            appName="Vessels"
+            subtitle="Maritime Intelligence Platform"
+            description="Real-time maritime operations with AIS tracking, sanctions screening, dark vessel detection, and port congestion forecasting across global shipping lanes."
+            accentColor="#3b82f6"
+            icon={Ship}
+            features={[
+              { icon: Globe, title: "Fleet Tracking", description: "Live AIS positions for vessels worldwide with behavioral AI scoring" },
+              { icon: EyeOff, title: "Dark Vessels", description: "Detect AIS manipulation and signal gaps in high-risk zones" },
+              { icon: ShieldAlert, title: "Sanctions Screening", description: "Real-time OFAC and EU sanctions list matching" },
+              { icon: Anchor, title: "Port Analytics", description: "Congestion forecasting and wait time prediction" },
+            ]}
+          />
         </WouterRouter>
       </AuthProvider>
       <AgentCopilot config={helmsmanConfig} />

@@ -1,12 +1,15 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useMemo } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Shield, Brain, Zap, Ship, Building, Palette,
-  Laptop, Globe, Activity, BarChart3, ArrowUpRight, Layers,
+  Search, ExternalLink, Shield, Brain, Zap, Ship, Building, Palette, Activity,
+  Globe, BarChart3, Laptop, Grid, List, ArrowUpRight, Map, Layers,
 } from "lucide-react";
 import { UserButton } from "@workspace/shared-ui/UserButton";
+import { cn } from "@workspace/shared-ui/utils";
+import { EcosystemTour } from "@workspace/shared-ui/EcosystemTour";
+import { EmptyState } from "@workspace/shared-ui/EmptyState";
 
 const SpectrumAnalytics = lazy(() => import("@/pages/spectrum-analytics"));
 const Metrics = lazy(() => import("@/pages/metrics"));
@@ -31,82 +34,122 @@ const apps = [
   {
     id: "firestorm",
     name: "Firestorm",
-    tagline: "Cybersecurity operations center",
+    subtitle: "Security Simulation",
+    category: "security",
+    status: "live",
     icon: Shield,
     accent: "#ef4444",
     path: "/firestorm/",
+    description: "Military-grade cybersecurity simulation with SOC operations, MITRE ATT&CK mapping, XDR console, threat hunting, and compliance tools.",
+    features: ["SOC Dashboard", "Threat Intel", "MITRE ATT&CK", "Compliance & Readiness"],
   },
   {
     id: "inca",
     name: "INCA",
-    tagline: "AI & ML research platform",
+    subtitle: "AI Research Command",
+    category: "ai",
+    status: "live",
     icon: Brain,
     accent: "#8b5cf6",
     path: "/inca/",
+    description: "AI/ML research platform with experiment tracking, model registry, and ensemble management.",
+    features: ["Experiments", "Model Registry", "Predictions", "Ensemble Studio"],
   },
   {
     id: "terra",
     name: "Terra",
-    tagline: "Real estate intelligence",
+    subtitle: "Real Estate Intelligence",
+    category: "intelligence",
+    status: "live",
     icon: Building,
     accent: "#10b981",
     path: "/terra/",
+    description: "Real estate analytics with property intelligence, market trends, and AI-powered valuations.",
+    features: ["Property Intel", "Market Trends", "Portfolio", "Valuations"],
   },
   {
     id: "vessels",
     name: "Vessels",
-    tagline: "Maritime fleet management",
+    subtitle: "Maritime Intelligence",
+    category: "intelligence",
+    status: "live",
     icon: Ship,
     accent: "#3b82f6",
     path: "/vessels/",
+    description: "Maritime operations platform with vessel tracking, port analytics, and route optimization.",
+    features: ["Fleet Tracking", "Port Analytics", "Routes", "Risk Assessment"],
   },
   {
     id: "lyte",
     name: "Lyte",
-    tagline: "Operations command center",
+    subtitle: "Command Center",
+    category: "operations",
+    status: "live",
     icon: Zap,
     accent: "#f59e0b",
     path: "/lyte-command-center/",
+    description: "Business operations command center with signal detection, incident management, AI ops, administration, and developer tools.",
+    features: ["Signals", "Incidents", "Playbooks", "Administration"],
   },
   {
     id: "dreamscape",
     name: "Dreamscape",
-    tagline: "Creative production engine",
+    subtitle: "Creative Engine",
+    category: "creative",
+    status: "live",
     icon: Palette,
     accent: "#ec4899",
     path: "/dreamscape/",
+    description: "Content creation and campaign management platform with AI studio and voice tools.",
+    features: ["Campaigns", "AI Studio", "Content Calendar", "Assets"],
   },
   {
     id: "msp",
     name: "Evolve MSP",
-    tagline: "Managed IT services portal",
+    subtitle: "Managed Services",
+    category: "operations",
+    status: "live",
     icon: Laptop,
     accent: "#06b6d4",
     path: "/msp/",
+    description: "Managed service provider platform for client IT management and NOC operations.",
+    features: ["Client Management", "Service Desk", "NOC", "Billing"],
   },
   {
     id: "carlota-jo",
     name: "Carlota Jo",
-    tagline: "Luxury strategy consulting",
+    subtitle: "Brand Consulting",
+    category: "creative",
+    status: "beta",
     icon: Globe,
-    accent: "#d4a853",
+    accent: "#f472b6",
     path: "/carlota-jo/",
+    description: "AI-enhanced brand strategy engine for consumer sentiment and competitive analysis.",
+    features: ["Brand Strategy", "Sentiment Analysis", "Competitive Intel", "Positioning"],
   },
   {
     id: "admin",
     name: "Admin Panel",
-    tagline: "Internal control plane",
+    subtitle: "Control Plane",
+    category: "platform",
+    status: "live",
     icon: Activity,
-    accent: "#6b7280",
+    accent: "#a3a3a3",
     path: "/admin/",
+    description: "System administration with connector management, feature flags, and infrastructure monitoring.",
+    features: ["System Health", "Connectors", "Feature Flags", "Infrastructure"],
   },
   {
     id: "readiness",
     name: "Readiness Report",
-    tagline: "Compliance & risk management",
+    subtitle: "Compliance Engine",
+    category: "platform",
+    status: "live",
     icon: BarChart3,
     accent: "#14b8a6",
     path: "/readiness-report/",
+    description: "Compliance assessment and audit readiness engine for regulated industries.",
+    features: ["Gap Analysis", "Remediation", "Audit Trail", "Reports"],
   },
   {
     id: "alloy",
@@ -122,72 +165,272 @@ const apps = [
   },
 ];
 
+const categories = [
+  { id: "all", label: "All Apps" },
+  { id: "security", label: "Security" },
+  { id: "ai", label: "AI / ML" },
+  { id: "intelligence", label: "Intelligence" },
+  { id: "operations", label: "Operations" },
+  { id: "creative", label: "Creative" },
+  { id: "platform", label: "Platform" },
+];
+
+function StatusDot({ status }: { status: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className={cn(
+        "w-1.5 h-1.5 rounded-full",
+        status === "live" ? "bg-emerald-400" : status === "beta" ? "bg-amber-400" : "bg-zinc-400"
+      )} />
+      <span className={cn(
+        "text-[11px] font-medium capitalize",
+        status === "live" ? "text-emerald-400" : status === "beta" ? "text-amber-400" : "text-zinc-400"
+      )}>
+        {status}
+      </span>
+    </span>
+  );
+}
+
+const ecosystemTourSteps = [
+  {
+    id: "welcome",
+    title: "Welcome to the SZL Ecosystem",
+    description: "This is the application directory for SZL Holdings — home to specialized intelligence platforms across security, AI, maritime, real estate, and more.",
+    icon: Globe,
+    accentColor: "#a855f7",
+    tip: "Each app opens in a new tab. You can filter by category or search to find what you need.",
+  },
+  {
+    id: "security",
+    title: "Security & Threat Intelligence",
+    description: "Firestorm is your cybersecurity simulation platform — SOC dashboards, MITRE ATT&CK coverage, threat hunting, and XDR-style incident response.",
+    icon: Shield,
+    accentColor: "#ef4444",
+    tip: "Look for the MITRE ATT&CK heatmap to visualize coverage gaps across your kill chain.",
+  },
+  {
+    id: "ai-research",
+    title: "AI & ML Research",
+    description: "INCA gives you experiment tracking, model registry, GPU optimization, and ensemble studio. Alloy unifies all domain agents into one command center.",
+    icon: Brain,
+    accentColor: "#8b5cf6",
+    tip: "Start with the Research Command Center dashboard to see your pipeline health at a glance.",
+  },
+  {
+    id: "maritime",
+    title: "Maritime & Real Estate Intelligence",
+    description: "Vessels tracks global shipping with sanctions screening and dark vessel detection. Terra covers real estate portfolios with AI-driven valuations.",
+    icon: Ship,
+    accentColor: "#3b82f6",
+    tip: "Vessels uses live AIS data — check the fleet map for real-time vessel positions.",
+  },
+  {
+    id: "operations",
+    title: "Operations & Creative",
+    description: "Lyte Command Center handles business operations and incident management. Evolve MSP runs your managed services. Dreamscape powers content creation.",
+    icon: Zap,
+    accentColor: "#f59e0b",
+    tip: "Each app has its own AI copilot — look for the assistant icon in the bottom-right corner.",
+  },
+];
+
+function TourLauncher() {
+  const [show, setShow] = useState(false);
+  const key = "szl_tour_dismissed_project-list-v1";
+
+  const handleLaunch = () => {
+    try { localStorage.removeItem(key); } catch {}
+    setShow(false);
+    setTimeout(() => setShow(true), 50);
+  };
+
+  return (
+    <>
+      <button
+        onClick={handleLaunch}
+        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border/50 hover:border-border rounded-lg px-2.5 py-1.5 transition-colors"
+      >
+        <Map className="w-3 h-3" />
+        Ecosystem Tour
+      </button>
+      {show && (
+        <EcosystemTour
+          steps={ecosystemTourSteps}
+          storageKey="project-list-v1-manual"
+          onDismiss={() => setShow(false)}
+          onComplete={() => setShow(false)}
+        />
+      )}
+    </>
+  );
+}
+
 function AppDirectory() {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  const filtered = useMemo(() => {
+    return apps.filter(a =>
+      (category === "all" || a.category === category) &&
+      (search === "" ||
+        a.name.toLowerCase().includes(search.toLowerCase()) ||
+        a.description.toLowerCase().includes(search.toLowerCase()) ||
+        a.subtitle.toLowerCase().includes(search.toLowerCase()))
+    );
+  }, [search, category]);
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border/40 px-8 py-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-display font-bold text-foreground tracking-tight">SZL Holdings</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">Platform Applications</p>
+      <header className="border-b border-border/40 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-3">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search apps..."
+                className="w-full bg-muted/40 border border-border/50 rounded-lg pl-8 pr-3 py-1.5 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/40 focus:bg-muted/60 transition-all"
+              />
             </div>
-            <div className="flex items-center gap-6">
-              <a
-                href="/szl-holdings/"
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-              >
-                Corporate <ArrowUpRight className="w-3 h-3" />
-              </a>
-              <a
-                href="/stephen/"
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-              >
-                Stephen Lutar <ArrowUpRight className="w-3 h-3" />
-              </a>
+            <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategory(cat.id)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors",
+                    category === cat.id
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
+            <div className="flex items-center gap-0.5 ml-auto">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn("p-1.5 rounded-md transition-colors", viewMode === "grid" ? "text-foreground bg-muted/60" : "text-muted-foreground hover:text-foreground")}
+              >
+                <Grid className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={cn("p-1.5 rounded-md transition-colors", viewMode === "list" ? "text-foreground bg-muted/60" : "text-muted-foreground hover:text-foreground")}
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <UserButton />
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-8 py-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {apps.map(app => {
-            const AppIcon = app.icon;
-            return (
-              <a
-                key={app.id}
-                href={app.path}
-                className="group flex flex-col items-center gap-3 p-5 rounded-2xl border border-border/60 hover:border-border hover:shadow-lg hover:shadow-black/8 transition-all duration-200 text-center bg-card"
-              >
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
-                  style={{ backgroundColor: `${app.accent}18` }}
-                >
-                  <AppIcon className="w-6 h-6" style={{ color: app.accent }} />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight">
-                    {app.name}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                    {app.tagline}
-                  </div>
-                </div>
-              </a>
-            );
-          })}
+      <main className="max-w-6xl mx-auto px-6 py-6">
+        <div className="flex items-center justify-between mb-5">
+          <p className="text-xs text-muted-foreground">
+            {filtered.length} {filtered.length === 1 ? "application" : "applications"}
+          </p>
+          <TourLauncher />
         </div>
+
+        {viewMode === "grid" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map(app => {
+              const AppIcon = app.icon;
+              return (
+                <a
+                  key={app.id}
+                  href={app.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group bg-card border border-border rounded-xl p-5 hover:border-border/80 hover:shadow-lg hover:shadow-black/10 transition-all duration-200 block"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: `${app.accent}15` }}
+                    >
+                      <AppIcon className="w-5 h-5" style={{ color: app.accent }} />
+                    </div>
+                    <StatusDot status={app.status} />
+                  </div>
+                  <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{app.name}</h3>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">{app.subtitle}</p>
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-2">{app.description}</p>
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {app.features.map(f => (
+                      <span key={f} className="text-[10px] text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded-md">{f}</span>
+                    ))}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {filtered.map(app => {
+              const AppIcon = app.icon;
+              return (
+                <a
+                  key={app.id}
+                  href={app.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-4 bg-card border border-border rounded-xl px-5 py-3.5 hover:border-border/80 hover:bg-card/80 transition-all duration-200"
+                >
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: `${app.accent}15` }}
+                  >
+                    <AppIcon className="w-4.5 h-4.5" style={{ color: app.accent }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{app.name}</h3>
+                      <span className="text-[11px] text-muted-foreground">{app.subtitle}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{app.description}</p>
+                  </div>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className="text-[11px] text-muted-foreground capitalize px-2 py-0.5 rounded-md bg-muted hidden sm:block">
+                      {app.category}
+                    </span>
+                    <StatusDot status={app.status} />
+                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        {filtered.length === 0 && (
+          <EmptyState
+            icon={Search}
+            headline="No applications found"
+            description="No applications match your current search or filter. Try clearing your search or selecting a different category."
+            accentColor="#a855f7"
+            className="py-20"
+          />
+        )}
       </main>
 
-      <footer className="border-t border-border/40 px-8 py-4 mt-auto">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+      <footer className="border-t border-border/50 mt-auto">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <p className="text-[11px] text-muted-foreground">
-            &copy; {new Date().getFullYear()} SZL Holdings
+            &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
           </p>
-          <p className="text-[11px] text-muted-foreground">
-            {apps.length} applications
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-muted-foreground/50 hidden sm:block">The 6 Lenses of Business Observability: ◎ Signal · $ Impact · ◈ Anticipation · ⬡ Topology · ◆ Posture · ▲ Velocity</span>
+            <span className="text-[11px] text-muted-foreground">
+              {apps.filter(a => a.status === "live").length} live &middot; {apps.filter(a => a.status === "beta").length} beta
+            </span>
+          </div>
         </div>
       </footer>
     </div>
@@ -227,6 +470,10 @@ function App() {
             </Switch>
           </div>
         </div>
+        <EcosystemTour
+          steps={ecosystemTourSteps}
+          storageKey="project-list-v1"
+        />
       </WouterRouter>
     </QueryClientProvider>
   );

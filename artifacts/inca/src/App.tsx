@@ -7,6 +7,7 @@ import { Brain, FlaskConical, LayoutDashboard, FolderKanban, Lightbulb, Cpu, Bea
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const QuipuCommand = lazy(() => import("@/pages/quipu-command"));
@@ -290,6 +291,20 @@ function App() {
             commands={incaCommands}
             appName="INCA"
             accentColor="#f59e0b"
+          />
+          <WelcomeOverlay
+            appId="inca"
+            appName="INCA"
+            subtitle="AI Research Command Center"
+            description="Track experiments, manage model versions, and optimize GPU costs across your entire ML research pipeline — from hypothesis to production deployment."
+            accentColor="#8b5cf6"
+            icon={Brain}
+            features={[
+              { icon: FlaskConical, title: "Experiments", description: "Parallel experiment tracking with hyperparameter importance analysis" },
+              { icon: Cpu, title: "Model Registry", description: "Version control and lineage graph for every production model" },
+              { icon: TrendingUp, title: "Predictions", description: "Live inference monitoring with drift and anomaly detection" },
+              { icon: Layers, title: "Ensemble Studio", description: "Combine models and build multi-model voting pipelines" },
+            ]}
           />
         </PowerUserProvider>
       </WouterRouter>

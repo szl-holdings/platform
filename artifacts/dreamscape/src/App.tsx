@@ -8,6 +8,8 @@ import { museConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
+import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { Palette, Sparkles, Calendar, FolderOpen } from "lucide-react";
 
 const Workspace = lazy(() => import("@/pages/workspace").then(m => ({ default: m.Workspace })));
 const CampaignDetail = lazy(() => import("@/pages/campaign-detail").then(m => ({ default: m.CampaignDetail })));
@@ -110,6 +112,20 @@ function App() {
             confidence={0.93} 
           />
         </PowerUserProvider>
+        <WelcomeOverlay
+          appId="dreamscape"
+          appName="Dreamscape"
+          subtitle="Creative Engine"
+          description="A full-stack content creation platform for brand films, social campaigns, and product launches — with AI tools, an asset library, and a shared content calendar."
+          accentColor="#ec4899"
+          icon={Palette}
+          features={[
+            { icon: Sparkles, title: "AI Studio", description: "Generate copy, visuals, and scripts with AI assistance" },
+            { icon: Calendar, title: "Content Calendar", description: "Schedule and track all content deliverables in one view" },
+            { icon: FolderOpen, title: "Asset Library", description: "Centralized brand guidelines, templates, and media files" },
+            { icon: Palette, title: "Campaigns", description: "Manage brand films, social campaigns, and product launches" },
+          ]}
+        />
       </WouterRouter>
       <AgentCopilot config={museConfig} />
     </QueryClientProvider>
