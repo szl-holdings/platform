@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Shield, CheckSquare, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2,
   Circle, Clock, Loader2, Calendar, TrendingUp, FileSearch, Users, AlertCircle,
-  ArrowRight, ChevronRight, Building2, Globe, Map,
+  ArrowRight, ChevronRight, Building2, Globe, Map, Database, BookOpen, RefreshCw,
 } from "lucide-react";
 import { m, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -77,8 +77,9 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 const PROGRAM_COLORS: Record<string, string> = {
-  "ny-mwbe": "#c9a96e", "wosb-edwosb": "#3b82f6", "vosb-sdvosb": "#10b981",
-  "sba-8a": "#8b5cf6", "sam-registration": "#06b6d4",
+  "ny-mwbe": "#c9a96e", "ny-wbe": "#d4a85a",
+  "federal-wosb": "#3b82f6", "federal-edwosb": "#2563eb",
+  "vosb-sdvosb": "#10b981", "sba-8a": "#8b5cf6", "sam-registration": "#06b6d4",
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -447,21 +448,272 @@ function OpportunityTracker() {
   );
 }
 
-type CertTab = "dashboard" | "programs" | "ownership" | "calendar" | "opportunities";
+interface NaicsCode {
+  id: number; naicsCode: string; title: string; description?: string;
+  businessLine?: string; isSetAsideEligible: boolean; notes?: string;
+}
+
+interface LegalReview {
+  id: number; programId?: number; taskId?: number; title: string; description?: string;
+  reviewType: string; status: string; isMandatory: boolean; reviewerName?: string;
+  scheduledAt?: string; completedAt?: string; legalDisclaimerAcknowledged: boolean;
+  outcomeNotes?: string;
+}
+
+function NaicsView() {
+  const { data: naics = [], isLoading } = useQuery<NaicsCode[]>({
+    queryKey: ["cert-naics"],
+    queryFn: () => apiFetch("/certification/naics"),
+  });
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-foreground">NAICS Code Mapping</p>
+        <p className="text-xs text-muted-foreground mt-0.5">SZL business lines mapped to federal procurement NAICS codes.</p>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-4"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+      ) : naics.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl p-6 text-center">
+          <Database className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm text-foreground">No NAICS codes yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Seed certification data to populate NAICS codes.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {naics.map(n => (
+            <div key={n.id} className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-primary">{n.naicsCode}</span>
+                    <span className="text-sm font-medium text-foreground">{n.title}</span>
+                  </div>
+                  {n.businessLine && <p className="text-xs text-muted-foreground mt-0.5">Business line: {n.businessLine}</p>}
+                  {n.notes && <p className="text-xs text-muted-foreground mt-1">{n.notes}</p>}
+                </div>
+                {n.isSetAsideEligible && (
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 rounded shrink-0">Set-aside eligible</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LegalReviewsView() {
+  const { data: reviews = [], isLoading } = useQuery<LegalReview[]>({
+    queryKey: ["cert-legal-reviews"],
+    queryFn: () => apiFetch("/certification/legal-reviews"),
+  });
+
+  const statusColors: Record<string, string> = {
+    pending: "#f59e0b", scheduled: "#3b82f6", in_review: "#8b5cf6",
+    complete: "#10b981", waived: "#6b7280",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-foreground">Legal Review Checkpoints</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Attorney and CPA review requirements before certification submissions.</p>
+      </div>
+
+      <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-700">This module tracks review requirements only. It does not provide legal advice or conclusions. All items marked "attorney review required" must be reviewed by qualified legal counsel before any certification application is submitted.</p>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-4"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+      ) : reviews.length === 0 ? (
+        <div className="bg-card border border-border rounded-xl p-6 text-center">
+          <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+          <p className="text-sm text-foreground">No legal review checkpoints</p>
+          <p className="text-xs text-muted-foreground mt-1">Legal review items are added when certification tasks require professional review.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {reviews.map(r => {
+            const color = statusColors[r.status] ?? "#6b7280";
+            return (
+              <div key={r.id} className="bg-card border border-border rounded-xl p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">{r.title}</p>
+                      {r.isMandatory && <span className="text-[10px] bg-red-500/10 text-red-600 border border-red-500/20 rounded px-1.5 py-0.5">Mandatory</span>}
+                    </div>
+                    {r.description && <p className="text-xs text-muted-foreground mt-0.5">{r.description}</p>}
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[10px] font-mono bg-muted/50 text-muted-foreground px-1.5 py-0.5 rounded">{r.reviewType} review</span>
+                      {r.reviewerName && <span className="text-[10px] text-muted-foreground">Reviewer: {r.reviewerName}</span>}
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded shrink-0" style={{ background: `${color}18`, color }}>{r.status}</span>
+                </div>
+                {!r.legalDisclaimerAcknowledged && (
+                  <p className="text-[10px] text-red-500 mt-2">Legal disclaimer not yet acknowledged</p>
+                )}
+                {r.outcomeNotes && <p className="text-xs text-muted-foreground mt-2 bg-muted/30 rounded px-2 py-1.5">{r.outcomeNotes}</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface MomLedRequirement {
+  id: number; requirementKey: string; title: string; description?: string;
+  category: string; isRequired: boolean; reviewType: string;
+  status: "met" | "unmet" | "check" | "legal_review"; note: string;
+}
+interface MomLedProgramReadiness {
+  programId: number; slug: string; name: string; shortName?: string;
+  programType: string; requiresAttorneyReview: boolean; requiresCpaReview: boolean;
+  isSecondaryOnly: boolean; requiresLegalReview: boolean;
+  requirementCount: number; gapCount: number; legalItemCount: number;
+  checkItemCount: number; metItemCount: number;
+  requirements: MomLedRequirement[];
+}
+interface MomLedReadinessData {
+  preferredScenario: { id: number; scenarioName: string; description?: string; status: string } | null;
+  programReadiness: MomLedProgramReadiness[];
+}
+
+function MomLedSummary() {
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+
+  const { data, isLoading, isError } = useQuery<MomLedReadinessData>({
+    queryKey: ["cert-mom-led-readiness"],
+    queryFn: () => apiFetch("/certification/mom-led-readiness"),
+  });
+
+  const priorityOrder = ["sam-registration", "ny-mwbe", "ny-wbe", "federal-wosb", "federal-edwosb", "sba-8a", "vosb-sdvosb"];
+  const sorted = [...(data?.programReadiness ?? [])].sort((a, b) => {
+    const ai = priorityOrder.indexOf(a.slug);
+    const bi = priorityOrder.indexOf(b.slug);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        <span className="text-xs">Loading readiness data...</span>
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="bg-red-500/5 border border-red-500/20 rounded-xl px-4 py-3">
+        <p className="text-xs text-red-600">Failed to load mom-led readiness. Ensure programs are seeded and you have access.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-foreground">Mom-Led Eligibility Readiness</p>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Per-program readiness evaluation derived from stored requirements and the preferred ownership scenario.
+          {data.preferredScenario
+            ? <> Active scenario: <span className="font-medium">{data.preferredScenario.scenarioName}</span>.</>
+            : <> No preferred ownership scenario set — add one in the Ownership tab to improve accuracy.</>}
+        </p>
+      </div>
+
+      <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+        <div className="flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-700">Internal decision support only. "Check" items require verification. "Legal review" items require attorney consultation before any application. No certification eligibility is determined or claimed here.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2">
+        {sorted.map(program => {
+          const isExpanded = selectedSlug === program.slug;
+          const accentColor = PROGRAM_COLORS[program.slug] ?? "#6b7280";
+
+          return (
+            <div key={program.programId} className={cn("bg-card border rounded-xl overflow-hidden", program.isSecondaryOnly ? "border-muted opacity-70" : "border-border")}>
+              <button
+                onClick={() => setSelectedSlug(isExpanded ? null : program.slug)}
+                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/20 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: accentColor }} />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{program.shortName ?? program.name}</p>
+                    {program.isSecondaryOnly && <p className="text-[10px] text-muted-foreground">Secondary / separate entity only</p>}
+                    {program.requiresLegalReview && !program.isSecondaryOnly && <p className="text-[10px] text-amber-600">Attorney review required</p>}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {program.metItemCount > 0 && <span className="text-[10px] text-emerald-600">{program.metItemCount} met</span>}
+                  {program.gapCount > 0 && <span className="text-[10px] text-red-500">{program.gapCount} gap{program.gapCount !== 1 ? "s" : ""}</span>}
+                  {program.legalItemCount > 0 && <span className="text-[10px] text-amber-600 flex items-center gap-1"><AlertTriangle className="w-3 h-3" />Legal</span>}
+                  {program.checkItemCount > 0 && <span className="text-[10px] text-blue-500">{program.checkItemCount} to verify</span>}
+                  {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                </div>
+              </button>
+              <AnimatePresence>
+                {isExpanded && (
+                  <m.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                    <div className="px-4 pb-4 space-y-2 border-t border-border bg-muted/5">
+                      {program.requirements.length === 0 ? (
+                        <p className="text-xs text-muted-foreground pt-3">No requirements loaded for this program. Run seed to populate.</p>
+                      ) : program.requirements.map(req => (
+                        <div key={req.id} className="flex items-start gap-2 pt-2">
+                          {req.status === "met"
+                            ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                            : req.status === "unmet"
+                            ? <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                            : req.status === "legal_review"
+                            ? <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                            : <Circle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />}
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium text-foreground">{req.title}</p>
+                            <p className="text-[10px] text-muted-foreground">{req.note}</p>
+                            {req.description && req.description !== req.title && (
+                              <p className="text-[10px] text-muted-foreground/70 mt-0.5 italic">{req.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </m.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+type CertTab = "dashboard" | "programs" | "mom-led" | "ownership" | "calendar" | "opportunities" | "naics" | "legal-reviews";
 
 export function CertificationReadinessOS() {
   const [activeTab, setActiveTab] = useState<CertTab>("dashboard");
   const [selectedProgram, setSelectedProgram] = useState<CertProgram | null>(null);
+  const qc = useQueryClient();
 
   const { data: dashboard, isLoading: dashLoading } = useQuery<CertDashboard>({
     queryKey: ["cert-dashboard"],
     queryFn: () => apiFetch("/certification/dashboard"),
-  });
-
-  const { data: allTasks = [] } = useQuery<CertTask[]>({
-    queryKey: ["cert-tasks"],
-    queryFn: () => apiFetch("/certification/tasks"),
-    enabled: activeTab === "dashboard" || activeTab === "programs",
   });
 
   const { data: calendar = [] } = useQuery<CalendarEvent[]>({
@@ -470,22 +722,53 @@ export function CertificationReadinessOS() {
     enabled: activeTab === "calendar",
   });
 
+  const seedMut = useMutation({
+    mutationFn: () => apiFetch("/certification/seed", { method: "POST" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["cert-dashboard"] });
+      qc.invalidateQueries({ queryKey: ["cert-naics"] });
+    },
+  });
+
+  const hasPrograms = (dashboard?.programs?.length ?? 0) > 0;
+
   const TABS: { id: CertTab; label: string; icon: React.ElementType }[] = [
     { id: "dashboard", label: "Dashboard", icon: Shield },
     { id: "programs", label: "Programs", icon: CheckSquare },
-    { id: "ownership", label: "Ownership", icon: Users },
+    { id: "mom-led", label: "Mom-Led Summary", icon: Users },
+    { id: "ownership", label: "Ownership", icon: Map },
     { id: "calendar", label: "Calendar", icon: Calendar },
     { id: "opportunities", label: "Opportunities", icon: Globe },
+    { id: "naics", label: "NAICS", icon: Database },
+    { id: "legal-reviews", label: "Legal Reviews", icon: BookOpen },
   ];
 
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-          <Shield className="w-4 h-4 text-primary" /> Certification & Procurement Readiness OS
-        </h2>
-        <p className="text-xs text-muted-foreground mt-0.5">NY MWBE, WOSB/EDWOSB, VOSB/SDVOSB, 8(a), SAM — readiness and decision support only.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Shield className="w-4 h-4 text-primary" /> Certification & Procurement Readiness OS
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">NY MWBE, WOSB/EDWOSB, VOSB/SDVOSB, 8(a), SAM — readiness and decision support only.</p>
+        </div>
+        {!hasPrograms && (
+          <button
+            onClick={() => seedMut.mutate()}
+            disabled={seedMut.isPending}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-60 shrink-0 transition-colors"
+          >
+            {seedMut.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            {seedMut.isPending ? "Seeding..." : "Seed Programs"}
+          </button>
+        )}
       </div>
+
+      {seedMut.isSuccess && !hasPrograms && (
+        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl px-4 py-3">
+          <p className="text-xs text-emerald-600">Certification programs seeded successfully. Refresh to see all programs.</p>
+        </div>
+      )}
 
       <div className="flex gap-1 flex-wrap">
         {TABS.map(tab => (
@@ -507,6 +790,12 @@ export function CertificationReadinessOS() {
         <div className="space-y-5">
           {dashLoading ? (
             <div className="flex items-center gap-2 py-6"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+          ) : !hasPrograms ? (
+            <div className="bg-card border border-border rounded-xl p-8 text-center">
+              <Shield className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-semibold text-foreground">No certification programs loaded</p>
+              <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">Click "Seed Programs" above to load real data for NY MWBE, WOSB/EDWOSB, SAM, 8(a), and more.</p>
+            </div>
           ) : (
             <>
               <div className="grid grid-cols-3 gap-3">
@@ -574,13 +863,17 @@ export function CertificationReadinessOS() {
             </div>
           ) : (
             <div className="space-y-3">
-              {(dashboard?.programs ?? []).map(p => (
+              {(dashboard?.programs ?? []).length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-6">No programs yet. Use "Seed Programs" to load data.</p>
+              ) : (dashboard?.programs ?? []).map(p => (
                 <ProgramCard key={p.id} program={p} onSelect={() => setSelectedProgram(p)} />
               ))}
             </div>
           )}
         </div>
       )}
+
+      {activeTab === "mom-led" && <MomLedSummary />}
 
       {activeTab === "ownership" && <OwnershipScenarioPlanner />}
 
@@ -591,6 +884,7 @@ export function CertificationReadinessOS() {
             <div className="bg-card border border-border rounded-xl p-6 text-center">
               <Calendar className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
               <p className="text-sm text-foreground">No calendar events yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Add renewal and deadline events to track important dates.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -616,6 +910,8 @@ export function CertificationReadinessOS() {
       )}
 
       {activeTab === "opportunities" && <OpportunityTracker />}
+      {activeTab === "naics" && <NaicsView />}
+      {activeTab === "legal-reviews" && <LegalReviewsView />}
     </div>
   );
 }

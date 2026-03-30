@@ -187,6 +187,44 @@ export const certificationCalendarTable = pgTable("certification_calendar", {
   index("cert_calendar_date_idx").on(t.eventDate),
 ]);
 
+// ─── LEGAL REVIEW CHECKPOINTS ─────────────────────────────────────────────────
+
+export const legalReviewCheckpointsTable = pgTable("legal_review_checkpoints", {
+  id: serial("id").primaryKey(),
+  programId: integer("program_id").references(() => certificationProgramsTable.id, { onDelete: "cascade" }),
+  taskId: integer("task_id").references(() => certificationTasksTable.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  reviewType: text("review_type", { enum: ["attorney", "cpa", "both"] }).notNull().default("attorney"),
+  triggerCondition: text("trigger_condition"),
+  isMandatory: boolean("is_mandatory").notNull().default(true),
+  status: text("status", { enum: ["pending", "scheduled", "in_review", "complete", "waived"] }).notNull().default("pending"),
+  reviewerName: text("reviewer_name"),
+  scheduledAt: timestamp("scheduled_at"),
+  completedAt: timestamp("completed_at"),
+  outcomeNotes: text("outcome_notes"),
+  legalDisclaimerAcknowledged: boolean("legal_disclaimer_acknowledged").notNull().default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("legal_review_program_idx").on(t.programId),
+  index("legal_review_status_idx").on(t.status),
+]);
+
+// ─── NAICS CODE MAPPING ────────────────────────────────────────────────────────
+
+export const naicsCodeMappingTable = pgTable("naics_code_mapping", {
+  id: serial("id").primaryKey(),
+  naicsCode: text("naics_code").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description"),
+  businessLine: text("business_line"),
+  isSetAsideEligible: boolean("is_set_aside_eligible").notNull().default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // ─── INSERT SCHEMAS & TYPES ───────────────────────────────────────────────────
 
 export const insertCertificationProgramSchema = createInsertSchema(certificationProgramsTable).omit({ id: true, createdAt: true, updatedAt: true });
@@ -220,3 +258,11 @@ export type ProcurementContact = typeof procurementContactsTable.$inferSelect;
 export const insertCertificationCalendarSchema = createInsertSchema(certificationCalendarTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertCertificationCalendar = z.infer<typeof insertCertificationCalendarSchema>;
 export type CertificationCalendar = typeof certificationCalendarTable.$inferSelect;
+
+export const insertLegalReviewCheckpointSchema = createInsertSchema(legalReviewCheckpointsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLegalReviewCheckpoint = z.infer<typeof insertLegalReviewCheckpointSchema>;
+export type LegalReviewCheckpoint = typeof legalReviewCheckpointsTable.$inferSelect;
+
+export const insertNaicsCodeMappingSchema = createInsertSchema(naicsCodeMappingTable).omit({ id: true, createdAt: true });
+export type InsertNaicsCodeMapping = z.infer<typeof insertNaicsCodeMappingSchema>;
+export type NaicsCodeMapping = typeof naicsCodeMappingTable.$inferSelect;
