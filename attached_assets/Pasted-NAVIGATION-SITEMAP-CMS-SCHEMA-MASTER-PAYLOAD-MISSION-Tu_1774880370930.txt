@@ -1,0 +1,1608 @@
+NAVIGATION + SITEMAP + CMS + SCHEMA MASTER PAYLOAD
+
+MISSION
+Turn the SZL ecosystem from a strong concept into a build-ready, structured platform family.
+
+This payload defines:
+- global navigation
+- sitemap
+- route structure
+- page inventory
+- admin CMS schema
+- Supabase schema
+- role and permission model
+- content relationships
+- shared components
+- implementation rules
+
+The ecosystem includes:
+1. SZL Holdings
+2. Vessels
+3. INCA
+4. Carlota Jo Consulting
+5. Stephen Site
+6. Admin
+
+This system must support premium public-facing sites, gated product/dashboard experiences where relevant, and one shared admin/content spine.
+
+==================================================
+SECTION 1: GLOBAL INFORMATION ARCHITECTURE
+==================================================
+
+ARCHITECTURE GOAL
+Build one ecosystem with:
+- one parent system
+- distinct lane identities
+- reusable components
+- reusable content patterns
+- shared auth model
+- shared admin
+- scalable data model
+
+TOP-LEVEL APPS
+- szl-holdings
+- vessels
+- inca
+- carlota-jo
+- stephen-site
+- admin
+
+SHARED PACKAGES
+- ui
+- brand
+- analytics
+- email
+- maps
+- lib
+- types
+- config
+
+SHARED CONTENT STRATEGY
+Allow a hybrid content model:
+- structured content in Supabase tables
+- static seed content in JSON/MDX where useful
+- admin-controlled publish state
+- SEO and OG metadata editable
+- reusable CTA library
+- reusable testimonials/case studies where applicable
+
+==================================================
+SECTION 2: GLOBAL NAVIGATION SYSTEM
+==================================================
+
+GLOBAL NAVIGATION RULES
+- navigation must be clean and premium
+- no overcrowded top nav
+- each lane should have a focused nav
+- product/dashboard nav must differ from marketing nav
+- mobile nav must remain elegant and usable
+
+MASTER ECOSYSTEM NAVIGATION
+Used in SZL Holdings and optionally shared in footer across lanes.
+
+Primary:
+- Ventures
+- Roadmap
+- About
+- Contact
+
+Secondary / Utility:
+- Sign in
+- Admin (only visible to authorized users)
+
+Primary CTA:
+- Explore the portfolio
+
+FOOTER ECOSYSTEM LINKS
+- SZL Holdings
+- Vessels
+- INCA
+- Carlota Jo Consulting
+- Stephen Site
+- Contact
+- Privacy
+- Terms
+
+==================================================
+SECTION 3: PER-LANE NAVIGATION
+==================================================
+
+-------------------------
+SZL HOLDINGS NAV
+-------------------------
+Top Nav:
+- Ventures
+- Roadmap
+- About
+- Updates
+- Contact
+
+CTA:
+- Explore the portfolio
+
+Footer:
+- Portfolio
+- Strategic thesis
+- Latest developments
+- Contact
+- Privacy
+- Terms
+
+-------------------------
+VESSELS MARKETING NAV
+-------------------------
+Top Nav:
+- Platform
+- Capabilities
+- Use Cases
+- Security
+- Pricing (if enabled)
+- Sign In
+
+CTA:
+- Request a private demo
+
+Footer:
+- Platform
+- Demo
+- Security
+- Contact
+- Privacy
+- Terms
+
+VESSELS PRODUCT NAV
+Sidebar or top/side hybrid:
+- Overview
+- Fleet
+- Routes
+- Alerts
+- Reports
+- Billing
+- Settings
+
+Admin/Org utility:
+- Team
+- API / Integrations (future-ready)
+- Audit Log
+
+-------------------------
+INCA MARKETING NAV
+-------------------------
+Top Nav:
+- Platform
+- Capabilities
+- Security
+- Insights
+- Request Access
+- Sign In
+
+CTA:
+- Schedule a private walkthrough
+
+Footer:
+- Platform
+- Security
+- Insights
+- Contact
+- Privacy
+- Terms
+
+INCA PRODUCT NAV
+Sidebar:
+- Overview
+- Signals
+- Findings
+- Investigations
+- Alerts
+- Reports
+- Settings
+
+Admin/Org utility:
+- Team
+- Access
+- Audit Log
+
+-------------------------
+CARLOTA JO NAV
+-------------------------
+Top Nav:
+- Services
+- Approach
+- About
+- Inquiries
+- Client Portal
+
+CTA:
+- Inquire privately
+
+Footer:
+- Services
+- Approach
+- Private inquiry
+- Client Portal
+- Privacy
+- Terms
+
+Optional client portal nav:
+- Overview
+- Updates
+- Documents
+- Messages
+- Settings
+
+-------------------------
+STEPHEN SITE NAV
+-------------------------
+Top Nav:
+- Work
+- Thesis
+- Writing
+- About
+- Contact
+
+CTA:
+- Start a conversation
+
+Footer:
+- Selected work
+- Writing
+- About
+- Contact
+- Privacy
+- Terms
+
+==================================================
+SECTION 4: FULL SITEMAP
+==================================================
+
+-------------------------
+SZL HOLDINGS SITEMAP
+-------------------------
+/
+- homepage
+
+/ventures
+- all ventures overview
+
+/ventures/vessels
+- venture detail or redirect into Vessels
+
+/ventures/inca
+- venture detail or redirect into INCA
+
+/ventures/carlota-jo
+- venture detail or redirect into Carlota Jo
+
+/ventures/stephen
+- venture detail or redirect into Stephen Site
+
+/roadmap
+- ecosystem roadmap page
+
+/about
+- SZL background / philosophy / positioning
+
+/updates
+- latest developments / milestone updates
+
+/contact
+- contact form / strategic inquiry
+
+/legal/privacy
+/legal/terms
+
+-------------------------
+VESSELS SITEMAP
+-------------------------
+/
+- marketing homepage
+
+/platform
+- platform overview
+
+/capabilities
+- deeper platform modules
+
+/use-cases
+- use-case page
+
+/security
+- security/trust page
+
+/pricing
+- pricing page if monetized
+
+/demo
+- demo request page
+
+/sign-in
+- auth
+
+/dashboard
+- auth required
+
+/dashboard/fleet
+- fleet list and overview
+
+/dashboard/fleet/[fleetId]
+- fleet detail
+
+/dashboard/vessels
+- vessel list
+
+/dashboard/vessels/[vesselId]
+- vessel detail
+
+/dashboard/routes
+- routes / journeys
+
+/dashboard/routes/[routeId]
+- route detail
+
+/dashboard/alerts
+- alerts feed
+
+/dashboard/reports
+- reports / exports
+
+/dashboard/billing
+- billing status / subscription
+
+/dashboard/settings
+- account / org settings
+
+/dashboard/team
+- team management
+
+/dashboard/audit-log
+- audit history
+
+/legal/privacy
+/legal/terms
+
+-------------------------
+INCA SITEMAP
+-------------------------
+/
+- marketing homepage
+
+/platform
+- platform overview
+
+/capabilities
+- capabilities page
+
+/security
+- security and trust page
+
+/insights
+- articles / whitepapers / insights
+
+/request-access
+- inquiry / access request
+
+/sign-in
+- auth
+
+/dashboard
+- auth required
+
+/dashboard/signals
+- signals list
+
+/dashboard/signals/[signalId]
+- signal detail
+
+/dashboard/findings
+- findings list
+
+/dashboard/findings/[findingId]
+- finding detail
+
+/dashboard/investigations
+- investigations list
+
+/dashboard/investigations/[investigationId]
+- investigation detail
+
+/dashboard/alerts
+- alerts page
+
+/dashboard/reports
+- reporting page
+
+/dashboard/settings
+- account / org settings
+
+/dashboard/team
+- team and access
+
+/dashboard/audit-log
+- audit history
+
+/legal/privacy
+/legal/terms
+
+-------------------------
+CARLOTA JO SITEMAP
+-------------------------
+/
+- homepage
+
+/services
+- services overview
+
+/approach
+- methodology / process
+
+/about
+- brand story / founder-led philosophy
+
+/inquiries
+- private inquiry page
+
+/client-portal
+- auth entry
+
+/client-portal/overview
+- auth required
+
+/client-portal/documents
+- client docs
+
+/client-portal/updates
+- client updates
+
+/client-portal/messages
+- client messages placeholder or integration-ready structure
+
+/client-portal/settings
+- client settings
+
+/legal/privacy
+/legal/terms
+
+-------------------------
+STEPHEN SITE SITEMAP
+-------------------------
+/
+- homepage
+
+/work
+- selected work landing
+
+/work/[slug]
+- case study detail
+
+/thesis
+- thesis / framework page
+
+/writing
+- writing index
+
+/writing/[slug]
+- article detail
+
+/about
+- about page
+
+/contact
+- contact page
+
+/downloads
+- downloadable one-pager / dossier
+
+/legal/privacy
+/legal/terms
+
+-------------------------
+ADMIN SITEMAP
+-------------------------
+/admin
+- admin dashboard
+
+/admin/content
+- content overview
+
+/admin/content/pages
+- all page records
+
+/admin/content/ventures
+- venture records
+
+/admin/content/services
+- services records
+
+/admin/content/articles
+- writing / insight records
+
+/admin/content/case-studies
+- case study records
+
+/admin/content/testimonials
+- testimonials records
+
+/admin/content/roadmap
+- roadmap items
+
+/admin/content/faqs
+- faq records
+
+/admin/content/ctas
+- CTA library
+
+/admin/content/navigation
+- menu management
+
+/admin/content/site-settings
+- site-wide settings
+
+/admin/media
+- media library
+
+/admin/users
+- user management
+
+/admin/organizations
+- org management
+
+/admin/analytics
+- internal analytics summary
+
+/admin/audit-log
+- admin audit history
+
+==================================================
+SECTION 5: PAGE STRUCTURE BY LANE
+==================================================
+
+-------------------------
+SZL HOMEPAGE SECTIONS
+-------------------------
+1. Header
+2. Hero
+3. Portfolio strip
+4. Strategic thesis
+5. Milestones / roadmap
+6. Featured ventures
+7. Latest developments
+8. Trust / capability strip
+9. Final CTA
+10. Footer
+
+-------------------------
+VESSELS HOMEPAGE SECTIONS
+-------------------------
+1. Header
+2. Hero with product visual
+3. KPI strip
+4. Capabilities grid
+5. Product walkthrough
+6. Use cases
+7. Security / trust
+8. Demo CTA
+9. Footer
+
+VESSELS DASHBOARD SECTIONS
+- overview metrics
+- fleet snapshot
+- alerts summary
+- recent activity
+- quick actions
+- billing state
+- team / org context
+
+-------------------------
+INCA HOMEPAGE SECTIONS
+-------------------------
+1. Header
+2. Hero
+3. Signal/finding preview
+4. Capabilities
+5. Explainability / trust
+6. Security architecture
+7. Use cases
+8. Request access CTA
+9. Footer
+
+INCA DASHBOARD SECTIONS
+- overview
+- active signals
+- findings queue
+- investigations
+- alerts
+- reports
+- audit trail
+
+-------------------------
+CARLOTA JO HOMEPAGE SECTIONS
+-------------------------
+1. Header
+2. Hero
+3. Services
+4. Approach
+5. Trust / proof
+6. Founder-led section
+7. Private inquiry
+8. Final CTA
+9. Footer
+
+CLIENT PORTAL SECTIONS
+- welcome / overview
+- deliverables or documents
+- updates
+- messages
+- settings
+
+-------------------------
+STEPHEN HOMEPAGE SECTIONS
+-------------------------
+1. Header
+2. Hero
+3. Selected work
+4. Core themes
+5. Frameworks / thesis
+6. Writing
+7. Credentials / proof
+8. Contact CTA
+9. Footer
+
+==================================================
+SECTION 6: CMS / ADMIN CONTENT MODEL
+==================================================
+
+ADMIN GOAL
+Allow content to be edited without redeploying, while preserving premium structure and validation.
+
+CORE CONTENT TYPES
+- sites
+- pages
+- sections
+- ventures
+- services
+- features
+- use_cases
+- roadmap_items
+- updates
+- testimonials
+- faqs
+- ctas
+- articles
+- case_studies
+- downloads
+- navigation_items
+- seo_records
+- media_assets
+- forms
+- settings
+
+CMS BEHAVIOR RULES
+- draft and published states
+- scheduled publish optional
+- slug validation
+- role-based content editing
+- preview mode
+- media selection
+- reusable CTA references
+- reusable testimonials references
+- reusable SEO records
+- audit logging on edits
+
+==================================================
+SECTION 7: SUGGESTED CMS TABLE FIELDS
+==================================================
+
+TABLE: sites
+Fields:
+- id
+- slug
+- name
+- brand_label
+- description
+- is_active
+- created_at
+- updated_at
+
+Seed site slugs:
+- szl-holdings
+- vessels
+- inca
+- carlota-jo
+- stephen-site
+
+TABLE: pages
+Fields:
+- id
+- site_id
+- title
+- slug
+- page_type
+- status (draft/published)
+- template_key
+- meta_title
+- meta_description
+- og_title
+- og_description
+- canonical_url
+- noindex
+- created_at
+- updated_at
+- published_at
+
+TABLE: sections
+Fields:
+- id
+- page_id
+- section_key
+- section_type
+- heading
+- subheading
+- body_richtext
+- eyebrow
+- sort_order
+- is_enabled
+- style_variant
+- data_json
+- created_at
+- updated_at
+
+TABLE: ventures
+Fields:
+- id
+- slug
+- name
+- short_description
+- long_description
+- status_badge
+- stage
+- category
+- primary_cta_label
+- primary_cta_url
+- secondary_cta_label
+- secondary_cta_url
+- accent_token
+- featured_image_url
+- is_featured
+- sort_order
+- created_at
+- updated_at
+
+TABLE: services
+Fields:
+- id
+- site_id
+- slug
+- title
+- short_description
+- full_description
+- category
+- icon_key
+- is_featured
+- sort_order
+- created_at
+- updated_at
+
+TABLE: features
+Fields:
+- id
+- site_id
+- slug
+- title
+- description
+- group_key
+- icon_key
+- sort_order
+- created_at
+- updated_at
+
+TABLE: use_cases
+Fields:
+- id
+- site_id
+- slug
+- title
+- description
+- audience
+- sort_order
+- created_at
+- updated_at
+
+TABLE: roadmap_items
+Fields:
+- id
+- site_id
+- title
+- description
+- phase_label
+- status
+- target_quarter
+- sort_order
+- created_at
+- updated_at
+
+TABLE: updates
+Fields:
+- id
+- site_id
+- title
+- summary
+- body_richtext
+- slug
+- status
+- published_at
+- featured_image_url
+- created_at
+- updated_at
+
+TABLE: testimonials
+Fields:
+- id
+- site_id
+- quote
+- attribution_name
+- attribution_title
+- attribution_company
+- is_public
+- sort_order
+- created_at
+- updated_at
+
+TABLE: faqs
+Fields:
+- id
+- site_id
+- question
+- answer_richtext
+- category
+- sort_order
+- created_at
+- updated_at
+
+TABLE: ctas
+Fields:
+- id
+- site_id
+- label
+- url
+- variant
+- helper_text
+- created_at
+- updated_at
+
+TABLE: articles
+Fields:
+- id
+- site_id
+- slug
+- title
+- excerpt
+- body_richtext_or_mdx
+- author_name
+- status
+- cover_image_url
+- meta_title
+- meta_description
+- published_at
+- created_at
+- updated_at
+
+TABLE: case_studies
+Fields:
+- id
+- site_id
+- slug
+- title
+- summary
+- challenge
+- approach
+- outcome
+- takeaway
+- cover_image_url
+- status
+- published_at
+- created_at
+- updated_at
+
+TABLE: downloads
+Fields:
+- id
+- site_id
+- title
+- slug
+- description
+- file_url
+- file_type
+- requires_form
+- status
+- created_at
+- updated_at
+
+TABLE: navigation_items
+Fields:
+- id
+- site_id
+- nav_group
+- label
+- url
+- sort_order
+- is_external
+- is_enabled
+- requires_auth
+- created_at
+- updated_at
+
+TABLE: site_settings
+Fields:
+- id
+- site_id
+- key
+- value_json
+- updated_at
+
+TABLE: media_assets
+Fields:
+- id
+- site_id
+- file_name
+- file_url
+- alt_text
+- mime_type
+- width
+- height
+- created_at
+- updated_at
+
+TABLE: forms
+Fields:
+- id
+- site_id
+- form_key
+- title
+- description
+- success_message
+- notify_email
+- created_at
+- updated_at
+
+==================================================
+SECTION 8: PRODUCT / APP DATA MODEL
+==================================================
+
+NOTE
+Use separate product tables for Vessels, INCA, and client-portal functions where needed.
+All protected tables must support organization-aware access.
+
+-------------------------
+COMMON CORE TABLES
+-------------------------
+
+TABLE: organizations
+Fields:
+- id
+- slug
+- name
+- org_type
+- status
+- billing_customer_id
+- created_at
+- updated_at
+
+TABLE: profiles
+Fields:
+- id (references auth.users)
+- full_name
+- email
+- avatar_url
+- default_site
+- created_at
+- updated_at
+
+TABLE: organization_memberships
+Fields:
+- id
+- organization_id
+- user_id
+- role
+- status
+- created_at
+- updated_at
+
+TABLE: audit_logs
+Fields:
+- id
+- organization_id nullable
+- site_id nullable
+- actor_user_id
+- action_type
+- entity_type
+- entity_id
+- payload_json
+- created_at
+
+TABLE: subscriptions
+Fields:
+- id
+- organization_id
+- product_key
+- stripe_customer_id
+- stripe_subscription_id
+- plan_key
+- status
+- current_period_start
+- current_period_end
+- created_at
+- updated_at
+
+==================================================
+SECTION 9: VESSELS PRODUCT TABLES
+==================================================
+
+TABLE: fleets
+Fields:
+- id
+- organization_id
+- name
+- description
+- created_at
+- updated_at
+
+TABLE: vessels_assets
+Fields:
+- id
+- fleet_id
+- organization_id
+- name
+- asset_type
+- imo_or_identifier
+- status
+- latitude
+- longitude
+- metadata_json
+- created_at
+- updated_at
+
+TABLE: journeys
+Fields:
+- id
+- organization_id
+- vessel_asset_id
+- origin_label
+- destination_label
+- start_time
+- end_time
+- route_geojson
+- status
+- created_at
+- updated_at
+
+TABLE: vessel_events
+Fields:
+- id
+- organization_id
+- vessel_asset_id
+- event_type
+- severity
+- title
+- description
+- occurred_at
+- metadata_json
+- created_at
+
+TABLE: vessel_alerts
+Fields:
+- id
+- organization_id
+- vessel_asset_id
+- journey_id nullable
+- alert_type
+- severity
+- title
+- description
+- status
+- created_at
+- updated_at
+
+TABLE: vessel_reports
+Fields:
+- id
+- organization_id
+- title
+- report_type
+- generated_at
+- report_url
+- created_at
+
+==================================================
+SECTION 10: INCA PRODUCT TABLES
+==================================================
+
+TABLE: signals
+Fields:
+- id
+- organization_id
+- source_key
+- title
+- description
+- severity
+- status
+- occurred_at
+- metadata_json
+- created_at
+- updated_at
+
+TABLE: findings
+Fields:
+- id
+- organization_id
+- signal_id nullable
+- title
+- summary
+- confidence_score
+- severity
+- status
+- created_at
+- updated_at
+
+TABLE: investigations
+Fields:
+- id
+- organization_id
+- title
+- description
+- status
+- owner_user_id nullable
+- opened_at
+- closed_at nullable
+- created_at
+- updated_at
+
+TABLE: investigation_items
+Fields:
+- id
+- investigation_id
+- entity_type
+- entity_id
+- note
+- created_at
+
+TABLE: inca_alerts
+Fields:
+- id
+- organization_id
+- finding_id nullable
+- title
+- severity
+- status
+- triggered_at
+- metadata_json
+- created_at
+- updated_at
+
+TABLE: reports
+Fields:
+- id
+- organization_id
+- title
+- report_type
+- generated_at
+- report_url
+- created_at
+
+==================================================
+SECTION 11: CARLOTA JO CLIENT TABLES
+==================================================
+
+TABLE: client_accounts
+Fields:
+- id
+- organization_id
+- display_name
+- primary_contact_user_id nullable
+- status
+- created_at
+- updated_at
+
+TABLE: client_documents
+Fields:
+- id
+- organization_id
+- client_account_id
+- title
+- description
+- file_url
+- file_type
+- visibility
+- created_at
+- updated_at
+
+TABLE: client_updates
+Fields:
+- id
+- organization_id
+- client_account_id
+- title
+- summary
+- body_richtext
+- published_at
+- created_at
+- updated_at
+
+TABLE: client_messages
+Fields:
+- id
+- organization_id
+- client_account_id
+- sender_user_id
+- subject
+- body_richtext
+- created_at
+
+==================================================
+SECTION 12: FORMS / LEADS / INQUIRIES
+==================================================
+
+TABLE: contact_submissions
+Fields:
+- id
+- site_id
+- form_key
+- full_name
+- email
+- company
+- message
+- preferred_timeline
+- metadata_json
+- created_at
+
+Use form keys like:
+- szl_contact
+- vessels_demo
+- inca_access
+- carlota_private_inquiry
+- stephen_contact
+
+Optional lead status table:
+TABLE: lead_status
+Fields:
+- id
+- contact_submission_id
+- status
+- owner_user_id nullable
+- notes
+- updated_at
+
+==================================================
+SECTION 13: SEO / OG / SEARCH MODEL
+==================================================
+
+SEO STRATEGY
+Every page record should support:
+- meta title
+- meta description
+- OG title
+- OG description
+- canonical URL
+- index/noindex
+- structured title hierarchy
+
+OPTIONAL TABLE: redirects
+Fields:
+- id
+- from_path
+- to_path
+- status_code
+- created_at
+
+OPTIONAL TABLE: search_index
+If building internal site search.
+Fields:
+- id
+- site_id
+- entity_type
+- entity_id
+- title
+- excerpt
+- url
+- published_at
+
+==================================================
+SECTION 14: ROLE MODEL AND PERMISSIONS
+==================================================
+
+ROLES
+- public
+- authenticated
+- member
+- client
+- editor
+- admin
+- super_admin
+
+ROLE INTENT
+public:
+- can view public pages
+
+authenticated:
+- signed-in baseline user
+
+member:
+- org member for product dashboards
+
+client:
+- client portal access for Carlota Jo
+
+editor:
+- content editing in allowed scopes
+
+admin:
+- admin controls for site/org
+
+super_admin:
+- full ecosystem control
+
+PERMISSION GUIDELINES
+public:
+- read published public content only
+
+authenticated:
+- read own profile
+- update own profile
+
+member:
+- read org-authorized product data
+- create/update limited product actions depending on product
+
+client:
+- access only own client account documents/updates/messages
+
+editor:
+- manage content records in assigned sites
+- publish content if granted
+
+admin:
+- manage site settings
+- manage content
+- manage org members where appropriate
+- view analytics
+- manage forms and leads
+
+super_admin:
+- manage all sites
+- manage all orgs
+- full admin and audit visibility
+
+==================================================
+SECTION 15: RLS / SECURITY IMPLEMENTATION RULES
+==================================================
+
+NON-NEGOTIABLES
+- enable RLS on all protected tables
+- default deny
+- create explicit read/write policies
+- public content must be separated from protected data
+- organization_id must exist on org-scoped data
+- use auth.uid() for profile and membership checks
+- index policy-critical foreign keys
+- keep admin write paths server-side where possible
+- do not leak secrets in client bundles
+
+PUBLIC CONTENT POLICY PATTERN
+Allow public read only where:
+- status = published
+and
+- site/page/record is public
+
+ORG DATA POLICY PATTERN
+Allow read/write only where:
+- auth user belongs to organization via organization_memberships
+and
+- role is sufficient for action
+
+CLIENT DATA POLICY PATTERN
+Allow access only where:
+- authenticated user maps to client account membership or ownership
+- record belongs to that client account / organization
+
+ADMIN POLICY PATTERN
+Admin actions should require:
+- editor/admin/super_admin membership checks
+- ideally via secured server actions or API routes
+
+==================================================
+SECTION 16: ANALYTICS EVENT TAXONOMY
+==================================================
+
+STANDARD EVENT NAMES
+- page_view
+- cta_click
+- form_submit
+- demo_request
+- access_request
+- private_inquiry_submit
+- download_asset
+- sign_in
+- sign_up
+- dashboard_view
+- alert_view
+- report_view
+- billing_portal_open
+- checkout_started
+- checkout_completed
+- article_view
+- case_study_view
+
+Event properties examples:
+- site
+- page
+- section
+- cta_label
+- form_key
+- product_key
+- organization_id if allowed
+- plan_key
+- content_slug
+
+==================================================
+SECTION 17: EMAIL / AUTOMATION CONTENT MAPPING
+==================================================
+
+EMAIL FLOWS BY SITE
+
+SZL
+- contact confirmation
+- internal inquiry notification
+
+Vessels
+- demo request confirmation
+- internal demo request notification
+- sign-up / verify / reset
+- billing event emails
+
+INCA
+- access request confirmation
+- internal access request notification
+- sign-up / verify / reset
+- billing event emails
+
+Carlota Jo
+- private inquiry confirmation
+- internal inquiry notification
+- client onboarding email
+- portal invite
+- document/update notification
+
+Stephen Site
+- contact confirmation
+- download follow-up
+- internal contact notification
+
+==================================================
+SECTION 18: SHARED COMPONENT INVENTORY
+==================================================
+
+REUSABLE COMPONENTS
+- site header
+- site footer
+- hero block
+- CTA row
+- feature grid
+- services grid
+- testimonial block
+- roadmap timeline
+- updates feed
+- article cards
+- case study cards
+- form block
+- KPI strip
+- stats row
+- dashboard shell
+- sidebar nav
+- table/list view
+- alerts panel
+- empty state
+- loading skeleton
+- section wrapper
+- SEO metadata wrapper
+- dynamic OG renderer
+
+==================================================
+SECTION 19: CONTENT SEEDING RULES
+==================================================
+
+SEED CONTENT GOALS
+- create all initial public pages
+- seed key ventures
+- seed starter CTAs
+- seed starter services for Carlota Jo
+- seed starter writing/thesis records for Stephen Site
+- seed roadmap and updates for SZL
+- seed capabilities/use cases for Vessels and INCA
+
+SEED STATUS RULE
+- public pages start as published where ready
+- experimental product pages can begin draft or internal-only
+- avoid lorem ipsum completely
+
+==================================================
+SECTION 20: IMPLEMENTATION ORDER
+==================================================
+
+PHASE 1
+- create database schema
+- create shared types
+- set up auth and memberships
+- establish site records
+
+PHASE 2
+- build shared components
+- build public marketing routes for all lanes
+- seed CMS content
+
+PHASE 3
+- build admin CMS
+- connect page/section rendering to CMS
+
+PHASE 4
+- build Vessels product shell
+- build INCA product shell
+- build Carlota client portal shell
+
+PHASE 5
+- connect forms, email, analytics, and billing
+- add audit logs
+- tighten RLS and role handling
+
+PHASE 6
+- finalize SEO, dynamic OG, performance, and polish
+
+==================================================
+SECTION 21: FILE / FOLDER IMPLEMENTATION GUIDE
+==================================================
+
+Suggested structure:
+
+/apps/szl-holdings/app/...
+/apps/vessels/app/...
+/apps/inca/app/...
+/apps/carlota-jo/app/...
+/apps/stephen-site/app/...
+/apps/admin/app/...
+
+/packages/ui/components/...
+/packages/ui/styles/...
+/packages/types/src/...
+/packages/lib/src/...
+/packages/analytics/src/...
+/packages/email/src/...
+/packages/maps/src/...
+/packages/config/src/...
+
+/supabase/migrations/...
+/supabase/seed/...
+/content/seed/...
+
+==================================================
+SECTION 22: FINAL QUALITY BAR
+==================================================
+
+The finished structure must ensure:
+- every site feels premium
+- every route has a purpose
+- content is editable without redeploy
+- protected data is actually protected
+- product shells are believable and scalable
+- admin is clean and useful
+- navigation is elegant
+- analytics are structured
+- SEO is ready
+- the whole ecosystem feels like one coordinated operating family
+
+ABSOLUTE DO NOTS
+- no dead routes
+- no empty nav items
+- no unprotected admin content
+- no mixed component styles
+- no copy drift across lanes
+- no schema chaos
+- no placeholder database design
+- no “we’ll fix later” content debt in public pages
