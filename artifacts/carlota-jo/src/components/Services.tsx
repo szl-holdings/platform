@@ -42,7 +42,7 @@ export default function Services() {
             className="lg:col-span-7 flex items-end"
           >
             <p className="text-sm font-light leading-relaxed max-w-xl" style={{ color: "var(--color-ink-600)" }}>
-              Each service area draws on years of high-trust engagement with private families and principals. Rosa brings cross-domain precision and absolute discretion to every mandate — measuring only on outcomes that matter to the principal.
+              Cross-domain precision and absolute discretion across every engagement.
             </p>
           </motion.div>
         </div>
@@ -73,15 +73,12 @@ export default function Services() {
                 <h3 className="font-serif text-xl font-medium mb-3" style={{ color: "var(--color-ink-900)", fontWeight: 400 }}>
                   {service.title}
                 </h3>
-                <p className="text-[13px] font-light leading-relaxed mb-4" style={{ color: "var(--color-ink-600)" }}>
+                <p className="text-[13px] font-light leading-relaxed mb-5" style={{ color: "var(--color-ink-600)" }}>
                   {service.summary}
-                </p>
-                <p className="text-xs font-light leading-relaxed mb-5" style={{ color: "var(--color-ink-500)" }}>
-                  {service.description}
                 </p>
 
                 <ul className="space-y-2 mb-6">
-                  {service.capabilities.slice(0, 3).map((cap) => (
+                  {service.capabilities.map((cap) => (
                     <li key={cap} className="text-xs flex items-start gap-2 font-light" style={{ color: "var(--color-ink-500)" }}>
                       <span style={{ color: "var(--color-gold)", marginTop: "0.1rem" }}>—</span>
                       {cap}
@@ -96,7 +93,7 @@ export default function Services() {
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-gold)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(154,125,82,0.7)"; }}
                 >
-                  Request a consultation
+                  Inquire
                   <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform duration-300" />
                 </Link>
               </motion.div>

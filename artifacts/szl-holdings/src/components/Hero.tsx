@@ -226,7 +226,7 @@ export function Hero() {
                 fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
               }}
             >
-              Building premium command systems across observability, operations, and specialized platforms
+              Visibility. Execution.{"\n              "}Advantage.
             </m.h1>
 
             <m.p
@@ -241,7 +241,7 @@ export function Hero() {
                 marginBottom: "2.5rem",
               }}
             >
-              SZL Holdings is the ecosystem behind Alloy, Lyte, Vessels, Terra, and high-trust operating brands designed to turn visibility into action and execution into advantage.
+              The holding company behind Alloy, Lyte, Vessels, Terra, and a portfolio of high-trust operating brands.
             </m.p>
 
             <m.div

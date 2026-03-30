@@ -35,11 +35,8 @@ export default function ServicesPage() {
                 <br />
                 <span style={{ fontStyle: "italic" }}>One uncompromising standard.</span>
               </h1>
-              <p className="text-base font-light leading-relaxed mb-4" style={{ color: "var(--color-ink-600)" }}>
-                Every engagement is conducted through Rosa directly. There are no associates, no handoffs, and no templated service models. What you get is one trusted operator with deep expertise across every area she works in.
-              </p>
-              <p className="text-sm font-light leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
-                Rosa works with a deliberately small number of clients. This is what makes the level of service possible.
+              <p className="text-base font-light leading-relaxed" style={{ color: "var(--color-ink-600)" }}>
+                Every engagement is conducted through Rosa directly. No associates, no handoffs, no templated service models.
               </p>
             </motion.div>
           </div>
@@ -70,16 +67,13 @@ export default function ServicesPage() {
                       <h2 className="font-serif text-xl font-light mb-2" style={{ color: "var(--color-ink-900)" }}>
                         {service.title}
                       </h2>
-                      <p className="text-[13px] font-light leading-relaxed mb-4" style={{ color: "var(--color-ink-600)" }}>
+                      <p className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-600)" }}>
                         {service.summary}
-                      </p>
-                      <p className="text-[12px] font-light leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
-                        {service.description}
                       </p>
                     </div>
                     <div className="md:col-span-7 md:pl-8">
                       <p className="text-[10px] font-medium tracking-[0.2em] uppercase mb-4" style={{ color: "var(--color-stone-400)" }}>
-                        Scope of support
+                        Scope
                       </p>
                       <ul className="space-y-3 mb-6">
                         {service.capabilities.map((cap) => (
@@ -96,7 +90,7 @@ export default function ServicesPage() {
                         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
                       >
-                        Discuss this service
+                        Inquire
                         <ArrowRight size={11} />
                       </Link>
                     </div>
@@ -117,10 +111,10 @@ export default function ServicesPage() {
               className="max-w-2xl"
             >
               <h3 className="font-serif text-2xl font-light mb-4" style={{ color: "var(--color-ink-900)" }}>
-                Request a confidential consultation
+                Begin a conversation
               </h3>
               <p className="text-sm font-light mb-6 leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
-                Rosa responds to substantive enquiries within two business days. All conversations are conducted with complete discretion.
+                All conversations are conducted with complete discretion.
               </p>
               <Link
                 href="/contact"
@@ -129,7 +123,7 @@ export default function ServicesPage() {
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
               >
-                Request a Confidential Consultation
+                Request a Consultation
               </Link>
             </motion.div>
           </div>

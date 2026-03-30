@@ -213,11 +213,11 @@ export function Layout({ children }: { children: ReactNode }) {
             <div className="h-6 w-px bg-white/10" />
             <div className="flex items-center gap-2">
               <div className="text-right">
-                <div className="text-xs font-medium text-white">Exec User</div>
+                <div className="text-xs font-medium text-white">Stephen Lutar</div>
                 <div className="text-[10px] text-cyan-400/70">SZL Holdings</div>
               </div>
               <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-600 to-blue-800 flex items-center justify-center text-xs font-bold border border-white/10">
-                EU
+                SL
               </div>
             </div>
           </div>

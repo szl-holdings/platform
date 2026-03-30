@@ -1,86 +1,74 @@
 [
   {
     "id": "residence-operations",
-    "title": "Residence Operations Support",
+    "title": "Residence Operations",
     "icon": "Home",
     "summary": "The operational backbone of a well-run private residence.",
-    "description": "Full-spectrum residence operations management — from daily household logistics to seasonal transitions and long-term property oversight. Rosa serves as the single point of contact across all operational matters, ensuring every residence runs to the standard the principal expects.",
+    "description": "",
     "capabilities": [
-      "Day-to-day household operations management",
-      "Seasonal opening, closing, and transition coordination",
-      "Property systems oversight and maintenance scheduling",
-      "Household inventory and supply management",
-      "Standards documentation and operational briefing"
+      "Daily household logistics & oversight",
+      "Seasonal transitions & property activation",
+      "Systems maintenance & scheduling"
     ]
   },
   {
     "id": "property-coordination",
     "title": "Property Coordination",
     "icon": "Building",
-    "summary": "Multi-property oversight with one trusted coordinator.",
-    "description": "For principals with multiple residences, consistent standards across properties require a dedicated coordinator who understands how each home should function. Rosa manages the operational layer across locations — ensuring nothing falls through the gaps between properties.",
+    "summary": "Multi-property oversight through one trusted coordinator.",
+    "description": "",
     "capabilities": [
-      "Cross-property operational coordination",
-      "Property activation and deactivation management",
-      "Inter-residence logistics and preparation",
-      "Ownership and leasing administration support",
-      "Long-distance property oversight and reporting"
+      "Cross-property operational alignment",
+      "Activation & deactivation management",
+      "Long-distance oversight & reporting"
     ]
   },
   {
     "id": "household-systems",
-    "title": "Household Systems Oversight",
+    "title": "Household Systems",
     "icon": "Settings",
-    "summary": "The systems behind a seamlessly run home.",
-    "description": "A high-functioning residence depends on invisible systems — staff scheduling, service protocols, vendor management, and contingency procedures. Rosa designs, documents, and maintains these systems so the household runs consistently, regardless of the principal's presence.",
+    "summary": "The invisible systems behind a seamlessly run home.",
+    "description": "",
     "capabilities": [
-      "Household staff scheduling and coverage planning",
-      "Service standard documentation and enforcement",
-      "Emergency and contingency protocol development",
-      "Security and access management coordination",
-      "Household technology and systems management"
+      "Staff scheduling & coverage planning",
+      "Service protocols & documentation",
+      "Security & access coordination"
     ]
   },
   {
     "id": "vendor-coordination",
-    "title": "Vendor & Service Coordination",
+    "title": "Vendor Management",
     "icon": "Users",
-    "summary": "Trusted relationships. Managed with precision.",
-    "description": "Managing vendors for a private residence requires a different standard than commercial property management. Rosa maintains an established network of vetted service providers — and manages every relationship with the discretion and accountability that the principal's environment demands.",
+    "summary": "Trusted relationships, managed with precision.",
+    "description": "",
     "capabilities": [
-      "Vendor vetting, onboarding, and performance management",
-      "Service scheduling and quality oversight",
-      "Contract and pricing negotiation support",
-      "Trusted provider network across 40+ service categories",
-      "NDA-level discretion across all engagements"
+      "Vetted provider network — 40+ categories",
+      "Performance oversight & quality control",
+      "Contract negotiation & NDA compliance"
     ]
   },
   {
     "id": "lifestyle-administrative",
-    "title": "Lifestyle & Administrative Support",
+    "title": "Lifestyle & Admin",
     "icon": "Briefcase",
-    "summary": "Discreet, capable support for the administrative layer of a complex life.",
-    "description": "The principals Rosa works with have lives that extend well beyond the residence. Administrative coordination, personal logistics, schedule alignment, and lifestyle management — handled with absolute discretion, a single point of contact, and a standard of execution that doesn't require the principal's attention.",
+    "summary": "Discreet support for the administrative layer of a complex life.",
+    "description": "",
     "capabilities": [
-      "Personal schedule and calendar coordination",
-      "Private travel logistics and preparation",
-      "Personal administrative task management",
-      "Confidential correspondence and communication support",
-      "Lifestyle project coordination and follow-through"
+      "Schedule & calendar coordination",
+      "Private travel logistics",
+      "Confidential correspondence"
     ]
   },
   {
     "id": "transitional-projects",
-    "title": "Transitional & Special Project Support",
+    "title": "Special Projects",
     "icon": "Compass",
     "summary": "High-stakes transitions managed without noise.",
-    "description": "Estate activations, cross-border relocations, significant renovation projects, and time-critical transitions — these require a trusted operator who can hold the complexity without involving the principal unnecessarily. Rosa has managed these projects at every scale, always with complete discretion.",
+    "description": "",
     "capabilities": [
-      "Estate activation and full-residence setup",
+      "Estate activation & full setup",
       "Cross-border relocation coordination",
-      "Renovation project oversight and principal liaison",
-      "Time-critical logistics with zero margin for error",
-      "Post-project documentation and handover"
+      "Renovation oversight & liaison"
     ]
   }
 ]

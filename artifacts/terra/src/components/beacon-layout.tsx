@@ -139,10 +139,10 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             <div className="h-5 w-px hidden sm:block" style={{ background: "rgba(255,255,255,0.08)" }} />
             <div className="hidden sm:flex items-center gap-2">
               <div className="text-right">
-                <div className="text-xs font-medium text-white">Exec User</div>
+                <div className="text-xs font-medium text-white">Stephen Lutar</div>
                 <div className="text-[10px]" style={{ color: "rgba(14,165,233,0.7)" }}>SZL Holdings</div>
               </div>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border" style={{ background: "linear-gradient(135deg, #0ea5e9, #3b82f6)", borderColor: "rgba(255,255,255,0.1)" }}>EU</div>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border" style={{ background: "linear-gradient(135deg, #0ea5e9, #3b82f6)", borderColor: "rgba(255,255,255,0.1)" }}>SL</div>
             </div>
           </div>
         </header>

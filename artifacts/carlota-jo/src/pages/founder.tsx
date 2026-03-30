@@ -4,49 +4,19 @@ import Footer from "@/components/Footer";
 import { Link } from "wouter";
 
 const QUALITIES = [
-  {
-    title: "Warm and approachable",
-    desc: "Rosa builds relationships with principals and household teams alike. Her presence creates calm, not complexity.",
-  },
-  {
-    title: "Detail-oriented by nature",
-    desc: "The operational precision that defines Carlota Jo comes naturally — not from systems alone, but from how Rosa thinks about every engagement.",
-  },
-  {
-    title: "Discreet above all",
-    desc: "Confidentiality is not a feature Rosa offers — it's the foundation on which every client relationship is built.",
-  },
-  {
-    title: "Capable across every domain",
-    desc: "From estate management to cross-border logistics, Rosa's range of operational capability is what allows her to serve as a genuine single point of contact.",
-  },
-  {
-    title: "Understated confidence",
-    desc: "Rosa doesn't announce what she can do. She demonstrates it — through delivery, consistency, and the quiet confidence of someone who has handled far more complex situations than the one in front of her.",
-  },
+  { title: "Warm & approachable", desc: "Builds lasting relationships with principals and household teams alike." },
+  { title: "Detail-oriented", desc: "Operational precision that comes naturally, not just from systems." },
+  { title: "Discreet above all", desc: "Confidentiality is the foundation, not a feature." },
+  { title: "Cross-domain capability", desc: "Estate management to logistics — a genuine single point of contact." },
+  { title: "Understated confidence", desc: "Demonstrated through delivery, consistency, and quiet resolve." },
 ];
 
 const EXPERIENCE = [
-  {
-    area: "Residence Operations",
-    detail: "Full lifecycle management across primary and secondary residences for high-net-worth families, including multi-country coordination and seasonal transitions.",
-  },
-  {
-    area: "Household Systems & Staff",
-    detail: "Designed and documented household operating systems for principals with exacting standards, including staff vetting, performance protocols, and coverage planning.",
-  },
-  {
-    area: "Vendor & Service Management",
-    detail: "Built and maintained principal-facing vendor networks across 40+ service categories, managing relationships with discretion and precision.",
-  },
-  {
-    area: "Estate Transitions",
-    detail: "Managed complex estate activations, cross-border relocations, and large-scale renovation projects — coordinating up to 20 vendors simultaneously without principal involvement.",
-  },
-  {
-    area: "Administrative & Lifestyle Support",
-    detail: "Provided comprehensive administrative and lifestyle coordination for principals with demanding schedules and high standards across personal and professional domains.",
-  },
+  { area: "Residence Operations", detail: "Full lifecycle management across primary and secondary residences, including multi-country coordination." },
+  { area: "Household Systems", detail: "Operating systems, staff vetting, performance protocols, and coverage planning." },
+  { area: "Vendor Management", detail: "Principal-facing vendor networks across 40+ service categories." },
+  { area: "Estate Transitions", detail: "Complex activations, cross-border relocations, and renovation oversight." },
+  { area: "Lifestyle Support", detail: "Administrative and lifestyle coordination for demanding schedules." },
 ];
 
 export default function FounderPage() {
@@ -72,13 +42,10 @@ export default function FounderPage() {
                   <span style={{ fontStyle: "italic", opacity: 0.75 }}>and Residence</span>
                 </h1>
                 <p className="text-base font-light leading-relaxed mb-5" style={{ color: "var(--color-ink-600)" }}>
-                  Rosa Lutar founded Carlota Jo Consulting to bring a level of operational capability to private residential environments that simply wasn't available through traditional property management or household staffing channels.
-                </p>
-                <p className="text-sm font-light leading-relaxed mb-5" style={{ color: "var(--color-ink-500)" }}>
-                  The principals Rosa works with share a common challenge: their environments are complex, their standards are non-negotiable, and they need someone they can trust absolutely — not a company, not a team, but one person who holds the whole picture and keeps it moving.
+                  Rosa founded Carlota Jo for principals who need one person they can trust absolutely to manage the operational layer of their residential life.
                 </p>
                 <p className="text-sm font-light leading-relaxed mb-10" style={{ color: "var(--color-ink-500)" }}>
-                  Rosa built her career at the intersection of estate management, operational design, and high-trust client service. She operates with the warmth that builds long-term relationships, the discretion that principals require, and the operational precision that makes everything look effortless from the outside.
+                  She operates with warmth, discretion, and the operational precision that makes everything look effortless from the outside.
                 </p>
                 <Link
                   href="/contact"
@@ -87,7 +54,7 @@ export default function FounderPage() {
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
                 >
-                  Request a Confidential Consultation
+                  Request a Consultation
                 </Link>
               </div>
 
@@ -96,13 +63,13 @@ export default function FounderPage() {
                   <p className="text-[10px] font-medium tracking-[0.3em] uppercase mb-6" style={{ color: "var(--color-gold)" }}>
                     How Rosa works
                   </p>
-                  <div className="space-y-5">
+                  <div className="space-y-4">
                     {[
-                      "Single point of contact across every engagement",
-                      "Deep immersion in the client's environment before advising",
-                      "Absolute confidentiality — always, without exception",
-                      "Proactive, not reactive — she anticipates before she responds",
-                      "Long-term relationships over transactional engagements",
+                      "Single point of contact — every engagement",
+                      "Deep immersion before advising",
+                      "Absolute confidentiality, without exception",
+                      "Proactive — anticipates before she responds",
+                      "Long-term relationships over transactions",
                     ].map((item) => (
                       <div key={item} className="flex items-start gap-3">
                         <span style={{ color: "var(--color-gold)", marginTop: "0.15rem" }}>—</span>
@@ -173,7 +140,7 @@ export default function FounderPage() {
                     className="p-7"
                     style={{ background: "var(--color-cream-warm)" }}
                   >
-                    <h3 className="font-serif text-base font-light mb-3" style={{ color: "var(--color-ink-900)" }}>{q.title}</h3>
+                    <h3 className="font-serif text-base font-light mb-2" style={{ color: "var(--color-ink-900)" }}>{q.title}</h3>
                     <p className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-500)" }}>{q.desc}</p>
                   </motion.div>
                 ))}
@@ -194,7 +161,7 @@ export default function FounderPage() {
                 Rosa accepts a limited number of new clients each year.
               </p>
               <p className="text-xs tracking-wide mb-8" style={{ color: "var(--color-stone-400)" }}>
-                All enquiries are handled with complete confidentiality.
+                All enquiries handled with complete confidentiality.
               </p>
               <Link
                 href="/contact"
@@ -203,7 +170,7 @@ export default function FounderPage() {
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
               >
-                Request a Confidential Consultation
+                Begin a Conversation
               </Link>
             </motion.div>
           </div>

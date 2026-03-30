@@ -19,7 +19,9 @@ export default function AboutPage() {
                 About
               </p>
               <h1 className="font-serif font-light leading-[1.1] mb-8" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--color-ink-900)" }}>
-                A different kind of residential advisory practice
+                A different kind of
+                <br />
+                <span style={{ fontStyle: "italic" }}>residential advisory practice.</span>
               </h1>
             </motion.div>
 
@@ -30,16 +32,10 @@ export default function AboutPage() {
               className="space-y-6 mb-14"
             >
               <p className="text-[14.5px] font-light leading-loose" style={{ color: "var(--color-ink-600)" }}>
-                Carlota Jo Consulting was founded by Rosa Lutar to provide a level of private residential and operational support that simply was not available through traditional channels — estate agencies, household staffing firms, or lifestyle management services.
+                Carlota Jo was founded for principals who need one trusted operator to manage the operational layer of their residential life — not an agency, not rotating staff, but someone who understands their standard and holds it consistently.
               </p>
               <p className="text-[14.5px] font-light leading-loose" style={{ color: "var(--color-ink-600)" }}>
-                The principals Rosa works with don't need more vendors in their life. They need one trusted operator who understands their environment completely, holds everything that needs to be held, and operates with the discretion their situation demands.
-              </p>
-              <p className="text-[14.5px] font-light leading-loose" style={{ color: "var(--color-ink-600)" }}>
-                Carlota Jo is a small practice by design. Every client receives Rosa's direct attention — not delegation to a coordinator who briefs her before calls. This model limits how many clients she can serve, and that is precisely the point.
-              </p>
-              <p className="text-[14.5px] font-light leading-loose" style={{ color: "var(--color-ink-600)" }}>
-                Carlota Jo Consulting operates as a premium service brand under SZL Holdings — a strategic technology and services portfolio. The advisory practice is operationally independent, with absolute confidentiality and discretion as its foundational commitments.
+                A small practice by design. Every client receives Rosa's direct attention. This limits how many clients she can serve — and that is precisely the point.
               </p>
             </motion.div>
 
@@ -58,9 +54,8 @@ export default function AboutPage() {
                 {[
                   "A traditional property management firm",
                   "A household staffing agency",
-                  "A lifestyle concierge service with rotating account managers",
-                  "Available for short-term projects without operational context",
-                  "Structured around scale or volume — the model requires depth",
+                  "A concierge service with rotating account managers",
+                  "Structured around scale or volume",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <span className="w-1 h-1 rounded-full mt-2.5 shrink-0" style={{ background: "var(--color-stone-300)" }} />
@@ -79,10 +74,10 @@ export default function AboutPage() {
               style={{ background: "var(--color-stone-50)", border: "1px solid var(--color-stone-200)" }}
             >
               <h3 className="font-serif text-[18px] font-light mb-3" style={{ color: "var(--color-ink-900)" }}>
-                Request a confidential consultation
+                Begin a conversation
               </h3>
               <p className="text-[13px] font-light mb-5 leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
-                Rosa responds to substantive enquiries from principals, family offices, and trusted referrals within two business days.
+                Rosa responds to enquiries from principals, family offices, and trusted referrals within two business days.
               </p>
               <Link
                 href="/contact"
@@ -91,7 +86,7 @@ export default function AboutPage() {
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
               >
-                Request a Confidential Consultation
+                Request a Consultation
               </Link>
             </motion.div>
           </div>
