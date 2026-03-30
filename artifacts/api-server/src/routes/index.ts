@@ -52,6 +52,7 @@ import nimbusRouter from "./nimbus";
 import ownershipControlRouter from "./ownership-control";
 import lyteExtendedRouter from "./lyte-extended";
 import vesselsExtendedRouter from "./vessels-extended";
+import terraCrmRouter from "./terra-crm";
 
 const router: IRouter = Router();
 
@@ -177,5 +178,10 @@ router.use(ownershipControlRouter);
 
 router.use("/nimbus", readLimiter);
 router.use(nimbusRouter);
+
+router.use("/terra", writeLimiter);
+router.use(terraCrmRouter);
+router.use("/beacon", writeLimiter);
+router.use(terraCrmRouter);
 
 export default router;

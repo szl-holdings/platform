@@ -4,17 +4,19 @@ import { ReactNode, useState } from "react";
 import {
   Building2, LayoutDashboard, Activity, Flame, Home,
   UserCheck, Users, Brain, Zap, FileText, ClipboardList,
-  ArrowLeftRight, Bell, Menu, X, Inbox, MapPin
+  ArrowLeftRight, Bell, Menu, X, Inbox, MapPin, BarChart3, Upload
 } from "lucide-react";
 
 const NAV = [
   { href: "/", label: "Command Center", icon: LayoutDashboard },
+  { href: "/broker-overview", label: "Broker Overview", icon: BarChart3, highlight: false },
   { href: "/distress-engine", label: "Distress Engine", icon: Flame, highlight: true },
   { href: "/deals", label: "Deal Pipeline", icon: Activity },
   { href: "/listings", label: "Listings", icon: Home },
   { href: "/inquiries", label: "Inquiry Routing", icon: Inbox },
   { href: "/agents", label: "Agents + Brokerage", icon: Users },
   { href: "/leads", label: "Leads + CRM", icon: UserCheck },
+  { href: "/ingestion", label: "Ingestion", icon: Upload },
   { href: "/offers", label: "Offers", icon: ArrowLeftRight },
   { href: "/transactions", label: "Transactions", icon: ClipboardList },
   { href: "/documents", label: "Docs + Compliance", icon: FileText },

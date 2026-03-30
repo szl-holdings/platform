@@ -4,11 +4,23 @@ import {
   Flame, MapPin, List, Filter, Search, AlertTriangle, Clock, DollarSign,
   ChevronRight, X, Building2, TrendingDown, Gavel, FileText, ShieldAlert,
   Calendar, User, Tag, ArrowRight, Bell, BarChart3, Eye, Zap, Target,
-  CheckCircle, ArrowUpRight, LinkIcon, Layers
+  CheckCircle, ArrowUpRight, LinkIcon, Layers, Loader2
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { distressedProperties, distressAlerts, distressStats, type DistressedProperty, type DistressType, type Borough } from "@/data/distress";
 import { Link } from "wouter";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE = BASE.replace(/\/[^/]+$/, "/api");
+
+async function postJson(path: string, body: unknown) {
+  const r = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+}
 
 const DISTRESS_TYPE_CONFIG: Record<DistressType, { label: string; color: string; bg: string; icon: typeof Flame; pinColor: string }> = {
   "pre-foreclosure": { label: "Pre-Foreclosure", color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/30", icon: AlertTriangle, pinColor: "#f59e0b" },
@@ -154,7 +166,7 @@ function MapPlaceholder({ properties, selectedId, onSelectPin }: {
   );
 }
 
-function PropertyDetailPanel({ property, onClose }: { property: DistressedProperty; onClose: () => void }) {
+function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property: DistressedProperty; onClose: () => void; onConvertToLead: (p: DistressedProperty) => void }) {
   const cfg = DISTRESS_TYPE_CONFIG[property.distressType];
   const equityPercent = property.debtAmount
     ? Math.round(((property.estimatedValue - property.debtAmount) / property.estimatedValue) * 100)
@@ -296,7 +308,9 @@ function PropertyDetailPanel({ property, onClose }: { property: DistressedProper
         <div className="space-y-2">
           <p className="text-[10px] text-terra-text-muted uppercase tracking-wider font-semibold">Actions</p>
           <div className="grid grid-cols-2 gap-2">
-            <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-terra-primary/10 border border-terra-primary/30 text-terra-primary text-xs font-semibold hover:bg-terra-primary/20 transition-colors">
+            <button
+              onClick={() => { onConvertToLead(property); onClose(); }}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-terra-primary/10 border border-terra-primary/30 text-terra-primary text-xs font-semibold hover:bg-terra-primary/20 transition-colors">
               <LinkIcon className="w-3 h-3" /> Convert to Lead
             </button>
             <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-terra-emerald/10 border border-terra-emerald/30 text-terra-emerald text-xs font-semibold hover:bg-terra-emerald/20 transition-colors">
@@ -357,6 +371,26 @@ export default function DistressEnginePage() {
   const [sortBy, setSortBy] = useState("score");
   const [searchQuery, setSearchQuery] = useState("");
   const [showAlerts, setShowAlerts] = useState(false);
+  const [conversionState, setConversionState] = useState<{ status: "idle" | "loading" | "success" | "error"; message?: string }>({ status: "idle" });
+
+  async function handleConvertToLead(property: DistressedProperty) {
+    setConversionState({ status: "loading" });
+    try {
+      const res = await postJson("/terra/convert/distress-to-lead", {
+        propertyId: property.id,
+        notes: `Converted from Distress Engine — ${property.distressType} at ${property.address}`,
+      });
+      if (res.error) {
+        setConversionState({ status: "error", message: res.error });
+      } else {
+        setConversionState({ status: "success", message: `Lead created for ${property.address}` });
+        setTimeout(() => setConversionState({ status: "idle" }), 4000);
+      }
+    } catch {
+      setConversionState({ status: "error", message: "Failed to convert — check connection" });
+      setTimeout(() => setConversionState({ status: "idle" }), 4000);
+    }
+  }
 
   const filtered = useMemo(() => {
     let results = [...distressedProperties];
@@ -390,6 +424,29 @@ export default function DistressEnginePage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {/* Conversion toast notification */}
+      {conversionState.status !== "idle" && (
+        <div className={cn(
+          "fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl border shadow-xl text-sm font-medium transition-all",
+          conversionState.status === "loading" ? "bg-terra-bg-secondary border-terra-border text-terra-text-muted" :
+          conversionState.status === "success" ? "bg-emerald-900/90 border-emerald-500/50 text-emerald-200" :
+          "bg-rose-900/90 border-rose-500/50 text-rose-200"
+        )}>
+          {conversionState.status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
+          {conversionState.status === "success" && <CheckCircle className="w-4 h-4" />}
+          {conversionState.status === "error" && <AlertTriangle className="w-4 h-4" />}
+          <span>
+            {conversionState.status === "loading" && "Converting to lead..."}
+            {conversionState.status === "success" && (conversionState.message ?? "Lead created successfully")}
+            {conversionState.status === "error" && (conversionState.message ?? "Conversion failed")}
+          </span>
+          {conversionState.status !== "loading" && (
+            <button onClick={() => setConversionState({ status: "idle" })} className="ml-2 hover:opacity-70">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
       <div className="flex-shrink-0 px-4 pt-4 pb-2 space-y-3 border-b border-terra-border bg-terra-bg-secondary">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -519,7 +576,7 @@ export default function DistressEnginePage() {
               </div>
               {selectedProperty && (
                 <div className="border-l border-terra-border overflow-y-auto bg-terra-bg-secondary">
-                  <PropertyDetailPanel property={selectedProperty} onClose={() => setSelectedId(null)} />
+                  <PropertyDetailPanel property={selectedProperty} onClose={() => setSelectedId(null)} onConvertToLead={handleConvertToLead} />
                 </div>
               )}
             </div>
@@ -575,7 +632,7 @@ export default function DistressEnginePage() {
             </div>
             {selectedProperty && (
               <div className="w-80 border-l border-terra-border overflow-y-auto bg-terra-bg-secondary">
-                <PropertyDetailPanel property={selectedProperty} onClose={() => setSelectedId(null)} />
+                <PropertyDetailPanel property={selectedProperty} onClose={() => setSelectedId(null)} onConvertToLead={handleConvertToLead} />
               </div>
             )}
           </div>

@@ -265,6 +265,93 @@ export const terraIngestionRunsTable = pgTable("terra_ingestion_runs", {
   index("terra_ingestion_status_idx").on(t.status),
 ]);
 
+export const terraLeadsTable = pgTable("terra_leads", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  type: text("type", { enum: ["buyer", "seller", "investor", "both"] }).notNull().default("buyer"),
+  source: text("source", { enum: ["distress-engine", "referral", "website", "zillow", "realtor", "open-house", "social", "cold-call", "past-client", "csv-import", "manual"] }).notNull().default("manual"),
+  stage: text("stage", { enum: ["new", "engaged", "nurtured", "hot", "inactive", "converted"] }).notNull().default("new"),
+  score: integer("score").notNull().default(50),
+  conversionProbability: numeric("conversion_probability", { precision: 5, scale: 4 }).notNull().default("0.5"),
+  ownerUserId: integer("owner_user_id"),
+  ownerName: text("owner_name"),
+  assignedDate: text("assigned_date"),
+  lastContact: text("last_contact"),
+  nextFollowUp: text("next_follow_up"),
+  distressPropertyId: integer("distress_property_id").references(() => terraDistressPropertiesTable.id, { onDelete: "set null" }),
+  distressPropertyExternalId: text("distress_property_external_id"),
+  linkedDealId: integer("linked_deal_id"),
+  budget: jsonb("budget").$type<{ min: number; max: number } | null>(),
+  desiredAreas: jsonb("desired_areas").$type<string[]>().notNull().default([]),
+  notes: text("notes"),
+  tags: jsonb("tags").$type<string[]>().notNull().default([]),
+  timeline: jsonb("timeline").$type<Array<{ date: string; event: string; type: string }>>().notNull().default([]),
+  nextAction: text("next_action"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_leads_stage_idx").on(t.stage),
+  index("terra_leads_source_idx").on(t.source),
+  index("terra_leads_score_idx").on(t.score),
+  index("terra_leads_active_idx").on(t.isActive),
+  index("terra_leads_distress_idx").on(t.distressPropertyId),
+]);
+
+export const terraDealsTable = pgTable("terra_deals", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  address: text("address").notNull(),
+  borough: text("borough"),
+  county: text("county"),
+  zipCode: text("zip_code"),
+  stage: text("stage", {
+    enum: ["lead", "qualified", "showing", "offer", "negotiation", "accepted", "inspection", "financing", "under-contract", "clear-to-close", "closed", "lost"]
+  }).notNull().default("lead"),
+  type: text("type", { enum: ["acquisition", "disposition", "assignment", "wholesale"] }).notNull().default("acquisition"),
+  price: numeric("price", { precision: 14, scale: 2 }),
+  askingPrice: numeric("asking_price", { precision: 14, scale: 2 }),
+  arv: numeric("arv", { precision: 14, scale: 2 }),
+  probability: integer("probability").notNull().default(25),
+  riskLevel: text("risk_level", { enum: ["low", "medium", "high", "critical"] }).notNull().default("medium"),
+  ownerUserId: integer("owner_user_id"),
+  ownerName: text("owner_name"),
+  clientName: text("client_name"),
+  distressPropertyId: integer("distress_property_id").references(() => terraDistressPropertiesTable.id, { onDelete: "set null" }),
+  distressPropertyExternalId: text("distress_property_external_id"),
+  leadId: integer("lead_id").references(() => terraLeadsTable.id, { onDelete: "set null" }),
+  stageEnteredAt: timestamp("stage_entered_at").notNull().defaultNow(),
+  estimatedCloseDate: text("estimated_close_date"),
+  actualCloseDate: text("actual_close_date"),
+  nextAction: text("next_action"),
+  notes: text("notes"),
+  timeline: jsonb("timeline").$type<Array<{ date: string; event: string; type: string; userId?: number }>>().notNull().default([]),
+  documents: jsonb("documents").$type<Array<{ name: string; status: string; url?: string }>>().notNull().default([]),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_deals_stage_idx").on(t.stage),
+  index("terra_deals_active_idx").on(t.isActive),
+  index("terra_deals_distress_idx").on(t.distressPropertyId),
+  index("terra_deals_lead_idx").on(t.leadId),
+]);
+
+export const terraSavedOpportunitiesTable = pgTable("terra_saved_opportunities", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  distressPropertyId: integer("distress_property_id").notNull().references(() => terraDistressPropertiesTable.id, { onDelete: "cascade" }),
+  note: text("note"),
+  savedAt: timestamp("saved_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_saved_user_idx").on(t.userId),
+  index("terra_saved_property_idx").on(t.distressPropertyId),
+]);
+
 export const insertTerraDistressPropertySchema = createInsertSchema(terraDistressPropertiesTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertTerraDistressProperty = z.infer<typeof insertTerraDistressPropertySchema>;
 export type TerraDistressProperty = typeof terraDistressPropertiesTable.$inferSelect;
@@ -300,3 +387,15 @@ export type TerraInquiry = typeof terraInquiriesTable.$inferSelect;
 export const insertTerraTransactionSchema = createInsertSchema(terraTransactionsTable).omit({ id: true, createdAt: true });
 export type InsertTerraTransaction = z.infer<typeof insertTerraTransactionSchema>;
 export type TerraTransaction = typeof terraTransactionsTable.$inferSelect;
+
+export const insertTerraLeadSchema = createInsertSchema(terraLeadsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraLead = z.infer<typeof insertTerraLeadSchema>;
+export type TerraLead = typeof terraLeadsTable.$inferSelect;
+
+export const insertTerraDealSchema = createInsertSchema(terraDealsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraDeal = z.infer<typeof insertTerraDealSchema>;
+export type TerraDeal = typeof terraDealsTable.$inferSelect;
+
+export const insertTerraSavedOpportunitySchema = createInsertSchema(terraSavedOpportunitiesTable).omit({ id: true, savedAt: true });
+export type InsertTerraSavedOpportunity = z.infer<typeof insertTerraSavedOpportunitySchema>;
+export type TerraSavedOpportunity = typeof terraSavedOpportunitiesTable.$inferSelect;

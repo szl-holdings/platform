@@ -29,6 +29,8 @@ const Documents = lazy(() => import("@/pages/documents"));
 const Offers = lazy(() => import("@/pages/offers"));
 const Predictions = lazy(() => import("@/pages/predictions"));
 const Automations = lazy(() => import("@/pages/automations"));
+const BrokerOverview = lazy(() => import("@/pages/broker-overview"));
+const Ingestion = lazy(() => import("@/pages/ingestion"));
 
 function PageLoader() {
   return (
@@ -58,6 +60,8 @@ function Router() {
         <Route path="/offers" component={Offers} />
         <Route path="/predictions" component={Predictions} />
         <Route path="/automations" component={Automations} />
+        <Route path="/broker-overview" component={BrokerOverview} />
+        <Route path="/ingestion" component={Ingestion} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -75,6 +79,8 @@ const terraCommands: CommandItem[] = [
   { id: "nav-leads", label: "Leads + CRM", icon: "👤", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/leads"); } },
   { id: "nav-team", label: "Team Performance", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/team"); } },
   { id: "nav-market", label: "Market Intelligence", icon: "📈", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/market"); } },
+  { id: "nav-broker-overview", label: "Broker Overview", icon: "📊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/broker-overview"); } },
+  { id: "nav-ingestion", label: "Ingestion Framework", icon: "⬆️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ingestion"); } },
 ];
 
 const terraShortcuts: KeyboardShortcut[] = [
