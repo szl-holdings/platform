@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useRoute, Link } from "wouter";
 import { ArrowLeft, Building2, MapPin, Users, DollarSign, TrendingUp, Calendar, Wrench, User, AlertTriangle } from "lucide-react";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { properties, tenants, alerts } from "@/data/portfolio";
 import { cn } from "@workspace/shared-ui/utils";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -224,6 +225,11 @@ export default function PropertyDetailPage() {
           </div>
         </motion.div>
       </div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CommentThread entityType="property" entityId={property.id} title="Property Discussion" collapsible={false} />
+        <ActivityFeed entityType="property" title="Portfolio Activity" limit={6} compact />
+      </motion.div>
 
       {propertyAlerts.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="rounded-xl border border-terra-border bg-terra-surface/50 p-5">

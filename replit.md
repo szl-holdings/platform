@@ -55,7 +55,21 @@ DreamStack comprises 13 applications sharing a PostgreSQL database, authenticati
 - **Carlota Jo (`carlota-jo`, route: `/carlota-jo/`):** Editorial luxury advisory brand — light warm neutral palette: stone-50 (#faf9f7), taupe, warm-gold (#9a7d52), ink-900 (#1c1a17). Cormorant Garamond serif. "Counsel for consequential decisions." CTAs: "Inquire privately" / "Book a discovery conversation." Sections: Hero, Services (grid), Case Studies (rows), Testimonials, ContactForm (minimalist underline inputs), Footer, Perspectives. Header: light bg, ink-colored nav.
 - **MSP Command Center (`msp`, route: `/msp/`):** Managed IT services — dark with cyan accents (NinjaOne-style). MRR as hero stat ($184,200), client health table, NOC alerts, service desk, device inventory, contract/SLA tracking.
 - **API Server (`api-server`):** Shared backend for all apps.
-- **Mockup Sandbox (`mockup-sandbox`):** Design sandbox for UI component prototyping.
+- **Component Preview Server (`mockup-sandbox`):** Design sandbox for UI component prototyping.
+
+### In-App Collaboration Layer (Task #84)
+A platform-wide collaboration system enabling team discussions directly inside each app.
+- **`comments` table** (`lib/db/src/schema/comments.ts`): Central store for all comments. Fields: `entityType`, `entityId`, `authorId`, `authorName`, `authorInitials`, `content`, `mentions` (jsonb array), `parentId`, `isDeleted` (boolean), timestamps. Indexed by entity, author, and timestamp.
+- **API Routes** (`artifacts/api-server/src/routes/comments.ts`):
+  - `GET /api/comments/activity-feed` — cross-app activity feed, filterable by `entityType` (SQL-filtered at DB level)
+  - `GET /api/comments/:entityType/:entityId` — comments for a specific item
+  - `POST /api/comments/:entityType/:entityId` — create a comment (supports `authorName` for unauthenticated users)
+  - `PATCH /api/comments/:id` — edit own comment (requires auth; 401 if unauthenticated; 403 if wrong owner or anon comment)
+  - `DELETE /api/comments/:id` — soft-delete own comment (same strict auth rules)
+- **Shared UI Components** (`lib/shared-ui/src/collaboration.tsx`, exported as `@workspace/shared-ui/collaboration`):
+  - `CommentThread` — collapsible comment panel with avatar/initials, timestamps, @mention highlighting, delete button, and markdown-friendly input
+  - `ActivityFeed` — chronological list of recent comments across entities, filterable by entity type, with entity links
+- **Integration:** `CommentThread` and `ActivityFeed` components added to all major detail/list pages and dashboards: Vessels (fleet dashboard + vessel detail), Firestorm (SOC dashboard + incidents), MSP (dashboard + service desk tickets with AI triage), Terra (dashboard + property detail), INCA (dashboard + experiments), Dreamscape (workspace + campaign detail "Discussion" tab), Lyte (dashboard + incident expanded view), Readiness (risk register)
 
 ### Domain Agent System
 AI-powered domain agents are implemented for each application, with specialized system prompts, tool definitions, and connections to existing API routes for data retrieval.
@@ -133,6 +147,8 @@ AI-powered domain agents are implemented for each application, with specialized 
 - **Dreamscape:** campaigns, scripts, storyboards, voice_assets, campaign_assets, reviews
 - **Readiness:** programs, dimensions, score_history, milestones, risks, alerts
 - **Stephen/Holdings:** content_blocks, case studies, booking_requests, site_contacts, testimonials, portfolio_items
+- **Alloy:** conversations, messages (added for Alloy flagship)
+- **Collaboration:** comments (entityType, entityId, authorId, authorName, authorInitials, content, mentions jsonb, parentId, isDeleted boolean)
 
 ### Technical Implementations & Feature Specifications
 - **Authentication & RBAC:** Middleware handles Bearer token sessions and Replit Auth. Seven roles (`super_admin`, `exec`, `ops`, `compliance`, `maintenance`, `analyst`, `viewer`) control access.

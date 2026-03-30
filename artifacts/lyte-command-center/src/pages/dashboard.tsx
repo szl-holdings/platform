@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { Link } from "wouter";
 import { AlertTriangle, TrendingDown, TrendingUp, ChevronRight, Clock, DollarSign, Users, Zap, Target, Activity, ArrowUpRight } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, BarChart, Bar, Cell } from "recharts";
@@ -372,6 +373,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <ActivityFeed entityType="incident" title="Operations Team Activity" limit={8} compact />
     </div>
   );
 }

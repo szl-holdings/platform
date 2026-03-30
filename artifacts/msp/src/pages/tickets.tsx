@@ -1,6 +1,7 @@
-import { Ticket, Clock, AlertTriangle, CheckCircle, User, Filter, Plus, Sparkles, Loader2, X, ChevronRight } from "lucide-react";
+import { Ticket, Clock, AlertTriangle, CheckCircle, User, Filter, Plus, Sparkles, Loader2, X, ChevronRight, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { ExportButton } from "@workspace/shared-ui/data-export";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 interface TicketItem {
   id: string;
@@ -150,8 +151,9 @@ export default function Tickets() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div className={`rounded-xl border border-border bg-card overflow-hidden ${selectedTicket ? "lg:col-span-3" : "lg:col-span-5"}`}>
+      <div className={`grid grid-cols-1 gap-6 ${selectedTicket ? "lg:grid-cols-5" : "lg:grid-cols-3"}`}>
+        {/* Ticket List */}
+        <div className={`rounded-xl border border-border bg-card overflow-hidden ${selectedTicket ? "lg:col-span-2" : "lg:col-span-2"}`}>
           <div className="divide-y divide-border">
             {filtered.map((ticket) => (
               <div
@@ -188,6 +190,7 @@ export default function Tickets() {
           </div>
         </div>
 
+        {/* AI Triage Panel — shown when ticket selected */}
         {selectedTicket && (
           <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5 space-y-4">
             <div className="flex items-start justify-between">
@@ -248,6 +251,24 @@ export default function Tickets() {
             </div>
           </div>
         )}
+
+        {/* Collaboration: Discussion + Team Activity */}
+        <div className="space-y-4">
+          {selectedTicket ? (
+            <CommentThread
+              entityType="ticket"
+              entityId={selectedTicket.id}
+              title={`${selectedTicket.id} Discussion`}
+              collapsible={false}
+            />
+          ) : (
+            <div className="rounded-xl border border-border bg-card p-6 text-center">
+              <MessageCircle className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">Select a ticket to view its discussion thread</p>
+            </div>
+          )}
+          <ActivityFeed entityType="ticket" title="Team Activity" limit={6} compact />
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Shield, AlertTriangle, Activity, Clock, Crosshair, Flame, Target, TrendingUp, TrendingDown, Zap, Terminal, Search, BookOpen, Network, ChevronRight } from "lucide-react";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -465,6 +466,17 @@ export default function SOCDashboard() {
       {/* Blast Radius + MITRE */}
       <BlastRadiusViz />
       <MitreHeatMap />
+
+      {/* Collaboration: Active Incident Comments + Team Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <CommentThread
+          entityType="incident"
+          entityId={triageQueue[0].id}
+          title={`${triageQueue[0].id} Discussion`}
+          collapsible={false}
+        />
+        <ActivityFeed entityType="incident" title="SOC Team Activity" limit={8} compact />
+      </div>
 
       {/* Threat Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

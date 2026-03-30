@@ -5,6 +5,7 @@ import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExportButton } from "@workspace/shared-ui/data-export";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 const severityColors = {
   critical: "bg-red-500/20 text-red-400 border-red-500/30",
@@ -251,6 +252,9 @@ export default function Incidents() {
                           </div>
                         </div>
                       </div>
+                      <div className="mt-4">
+                        <CommentThread entityType="incident" entityId={String(inc.id)} title="Incident Discussion" defaultCollapsed={true} />
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -268,6 +272,10 @@ export default function Incidents() {
             <p className="text-lg">No incidents found.</p>
           </motion.div>
         )}
+      </div>
+
+      <div className="mt-6">
+        <ActivityFeed entityType="incident" title="Incident Team Activity" limit={8} compact />
       </div>
     </div>
   );

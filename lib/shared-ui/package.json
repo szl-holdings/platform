@@ -20,6 +20,7 @@
     "./AuthGate": "./src/AuthGate.tsx",
     "./ecosystem-nav": "./src/ecosystem-nav.tsx",
     "./command-palette": "./src/command-palette.tsx",
+    "./collaboration": "./src/collaboration.tsx",
     "./data-export": "./src/data-export.tsx",
     "./keyboard-shortcuts": "./src/keyboard-shortcuts.tsx",
     "./inca-agent-indicator": "./src/inca-agent-indicator.tsx",

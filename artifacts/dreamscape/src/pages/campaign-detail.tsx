@@ -1,10 +1,11 @@
 import * as React from "react";
 import { useRoute, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, FileText, LayoutTemplate, Mic2, FolderArchive, Eye, ArrowLeft, Calendar, CreditCard, TrendingUp, DollarSign, Users } from "lucide-react";
+import { ChevronRight, FileText, LayoutTemplate, Mic2, FolderArchive, Eye, ArrowLeft, Calendar, CreditCard, TrendingUp, DollarSign, Users, MessageCircle } from "lucide-react";
 import { useCampaign } from "@/hooks/use-campaigns";
 import { Badge, Button } from "@/components/ui";
 import { format } from "date-fns";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 import { ScriptEditor } from "@/components/scripts/script-editor";
 import { StoryboardBoard } from "@/components/storyboards/storyboard-board";
@@ -28,7 +29,7 @@ export function CampaignDetail() {
   const campaignId = params?.id || "";
   const { data: campaign, isLoading } = useCampaign(campaignId);
   
-  const [activeTab, setActiveTab] = React.useState<"scripts"|"storyboards"|"voice"|"vault"|"preview"|"billing">("scripts");
+  const [activeTab, setActiveTab] = React.useState<"scripts"|"storyboards"|"voice"|"vault"|"preview"|"billing"|"discussion">("scripts");
 
   if (isLoading) {
     return (
@@ -77,6 +78,7 @@ export function CampaignDetail() {
     { id: "vault", label: "Asset Vault", icon: FolderArchive },
     { id: "preview", label: "Review & Approval", icon: Eye },
     { id: "billing", label: "Billing", icon: CreditCard },
+    { id: "discussion", label: "Discussion", icon: MessageCircle },
   ] as const;
 
   return (
@@ -200,6 +202,14 @@ export function CampaignDetail() {
             {activeTab === "vault" && <AssetVault campaignId={campaignId} />}
             {activeTab === "preview" && <CreativePreview campaignId={campaignId} />}
             {activeTab === "billing" && <CampaignBilling campaignId={campaignId} campaignName={campaign.name} />}
+            {activeTab === "discussion" && (
+              <div className="h-full overflow-y-auto space-y-4 p-1">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <CommentThread entityType="campaign" entityId={campaignId} title="Campaign Discussion" collapsible={false} />
+                  <ActivityFeed entityType="campaign" title="Campaign Activity" limit={10} compact />
+                </div>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

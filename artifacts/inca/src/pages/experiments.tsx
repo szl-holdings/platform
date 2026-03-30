@@ -4,6 +4,7 @@ import { experiments, projects, type Experiment } from "@/data/seed-data";
 import { cn } from "@workspace/shared-ui/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { ExportButton } from "@workspace/shared-ui/data-export";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 const statusColors: Record<string, string> = {
   running: "text-amber-400 bg-amber-400/10",
@@ -101,6 +102,8 @@ function ExperimentRow({ experiment, isExpanded, onToggle }: {
               </div>
             </div>
           )}
+
+          <CommentThread entityType="experiment" entityId={experiment.id} title="Experiment Discussion" defaultCollapsed={true} />
         </div>
       )}
     </div>
@@ -218,6 +221,11 @@ export default function Experiments() {
       </div>
 
       <ComparisonTable />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ActivityFeed entityType="experiment" title="Research Activity Feed" limit={8} compact />
+        <CommentThread entityType="experiment" entityId="general" title="Team Discussion" />
+      </div>
     </div>
   );
 }

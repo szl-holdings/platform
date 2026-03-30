@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Building2, DollarSign, TrendingUp, Users, Percent, AlertTriangle, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
+import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { AlertFeed } from "@/components/alert-feed";
 import { properties, portfolioSummary, revenueHistory } from "@/data/portfolio";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -179,6 +180,10 @@ export default function DashboardPage() {
               );
             })}
           </div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <ActivityFeed entityType="property" title="Portfolio Team Activity" limit={8} compact />
         </motion.div>
       </div>
     </div>

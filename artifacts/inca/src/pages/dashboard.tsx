@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Brain, FlaskConical, Cpu, Lightbulb, Activity, TrendingUp, TrendingDown, ArrowRight, Radio, Shield, Zap, ChevronUp, ChevronDown, ArrowUpDown, GitBranch, BarChart3, Layers, CheckCircle, AlertCircle, Clock, DollarSign, GitMerge, Users } from "lucide-react";
+import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
 import { cn } from "@workspace/shared-ui/utils";
@@ -560,6 +561,7 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+        <ActivityFeed entityType="experiment" title="Research Team Activity" limit={8} compact />
       </div>
     </div>
   );

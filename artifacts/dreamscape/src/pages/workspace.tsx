@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { format, addDays } from "date-fns";
 import { Plus, MoreHorizontal, Clock, Target, Sparkles, Film, Palette, Megaphone, Layers, TrendingUp, DollarSign, Users, Calendar, Image, FolderOpen, BarChart3, Eye } from "lucide-react";
+import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useCampaigns, useCreateCampaign } from "@/hooks/use-campaigns";
 import { Button, Card, Badge, Input } from "@/components/ui";
 
@@ -317,6 +318,10 @@ export function Workspace() {
               ))}
             </div>
           </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+          <ActivityFeed entityType="campaign" title="Creative Team Activity" limit={8} compact />
         </motion.div>
       </div>
     </div>

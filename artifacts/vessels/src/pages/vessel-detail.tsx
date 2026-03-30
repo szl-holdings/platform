@@ -6,6 +6,7 @@ import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Button } from "@workspace/shared-ui/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/shared-ui/ui/tabs";
 import { ArrowLeft, Ship, MapPin, Package, Navigation, Clock } from "lucide-react";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -134,6 +135,13 @@ export default function VesselDetailPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up stagger-5">
+        <div className="lg:col-span-2">
+          <ActivityFeed entityType="vessel" title="Recent Vessel Activity" compact />
+        </div>
+        <CommentThread entityType="vessel" entityId={vesselId} title="Discussion" collapsible={false} />
       </div>
 
       <Tabs defaultValue="routes" className="space-y-4 animate-fade-in-up stagger-5">

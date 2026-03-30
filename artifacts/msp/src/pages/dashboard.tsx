@@ -1,4 +1,5 @@
 import { BarChart3, Users, Ticket, Server, AlertTriangle, CheckCircle, Clock, DollarSign, ArrowUp, ArrowDown, Activity, Wifi, Shield, TrendingUp, ChevronRight, RefreshCw, Bell, MapPin, Star, AlertCircle } from "lucide-react";
+import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
@@ -564,6 +565,8 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      <ActivityFeed entityType="ticket" title="Service Desk Team Activity" limit={8} compact />
     </div>
   );
 }

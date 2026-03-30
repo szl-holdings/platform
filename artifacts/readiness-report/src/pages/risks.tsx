@@ -4,6 +4,7 @@ import { Loader2, ShieldAlert, AlertTriangle, Info, CheckCircle2 } from "lucide-
 import { motion } from "framer-motion";
 import { cn } from "@workspace/shared-ui/utils";
 import { format } from "date-fns";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 const SeverityColors = {
   critical: "text-destructive bg-destructive/10 border-destructive/20",
@@ -47,6 +48,11 @@ export default function Risks() {
         </header>
 
         <div className="grid gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <ActivityFeed entityType="risk" title="Risk Register Activity" limit={6} compact />
+            <CommentThread entityType="risk" entityId="general" title="Risk Discussion" />
+          </div>
+
           {risks?.map((risk, i) => {
             const Icon = SeverityIcon[risk.severity];
             const isResolved = risk.status === 'resolved' || risk.status === 'accepted';
@@ -119,6 +125,9 @@ export default function Risks() {
                       </div>
                     )}
                   </div>
+                </div>
+                <div className="mt-4 border-t border-white/5 pt-4">
+                  <CommentThread entityType="risk" entityId={String(risk.id)} title="Discussion" defaultCollapsed={true} />
                 </div>
               </motion.div>
             );

@@ -7,6 +7,7 @@ import { Link } from "wouter";
 import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { ExportButton } from "@workspace/shared-ui/data-export";
+import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -614,6 +615,11 @@ export default function FleetDashboard() {
         {selectedVessel && (
           <VesselDrawer vessel={selectedVessel} onClose={() => setSelectedVessel(null)} />
         )}
+      </div>
+
+      {/* Fleet Team Activity */}
+      <div className="shrink-0 px-4 pb-4">
+        <ActivityFeed entityType="vessel" title="Fleet Team Activity" limit={6} compact />
       </div>
 
       {/* Intelligence Panel — full width bottom strip */}

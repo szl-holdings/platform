@@ -9,6 +9,7 @@ import { Label } from "@workspace/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
 import { Textarea } from "@workspace/shared-ui/ui/textarea";
 import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight } from "lucide-react";
+import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ExportButton } from "@workspace/shared-ui/data-export";
@@ -35,6 +36,7 @@ export default function IncidentsPage() {
   const { data: incidents = [], isLoading } = useQuery({ queryKey: ["incidents"], queryFn: api.incidents.list });
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"list" | "kanban">("list");
+  const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(null);
   const [form, setForm] = useState({ title: "", description: "", severity: "medium", assignedAnalyst: "", attackTechnique: "" });
 
   const createMut = useMutation({
@@ -199,43 +201,60 @@ export default function IncidentsPage() {
             </Card>
           ) : (
             incidents.map((incident: any) => (
-              <Card key={incident.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 ${incident.severity === "critical" && incident.status !== "closed" ? "ring-1 ring-red-500/10" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-sm">{incident.title}</h3>
+              <div key={incident.id}>
+                <Card
+                  className={`bg-card border-border hover:border-primary/20 transition-all duration-300 cursor-pointer ${incident.severity === "critical" && incident.status !== "closed" ? "ring-1 ring-red-500/10" : ""} ${selectedIncidentId === incident.id ? "border-primary/40" : ""}`}
+                  onClick={() => setSelectedIncidentId(selectedIncidentId === incident.id ? null : incident.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-sm">{incident.title}</h3>
+                        </div>
+                        {incident.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{incident.description}</p>}
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                          {incident.assignedAnalyst && <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {incident.assignedAnalyst}</span>}
+                          {incident.attackTechnique && <span className="font-mono bg-muted px-1.5 py-0.5 rounded">{incident.attackTechnique}</span>}
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(incident.detectedAt).toLocaleString()}</span>
+                        </div>
                       </div>
-                      {incident.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{incident.description}</p>}
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                        {incident.assignedAnalyst && <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {incident.assignedAnalyst}</span>}
-                        {incident.attackTechnique && <span className="font-mono bg-muted px-1.5 py-0.5 rounded">{incident.attackTechnique}</span>}
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(incident.detectedAt).toLocaleString()}</span>
+                      <div className="flex items-center gap-2 ml-4" onClick={e => e.stopPropagation()}>
+                        <Badge variant="outline" className={severityColors[incident.severity] || ""}>{incident.severity}</Badge>
+                        <Select value={incident.status} onValueChange={v => {
+                          const updates: any = { status: v };
+                          if (v === "closed") updates.resolvedAt = new Date().toISOString();
+                          updateMut.mutate({ id: incident.id, data: updates });
+                        }}>
+                          <SelectTrigger className="w-36 h-7 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {statusOrder.map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteMut.mutate(incident.id)}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <Badge variant="outline" className={severityColors[incident.severity] || ""}>{incident.severity}</Badge>
-                      <Select value={incident.status} onValueChange={v => {
-                        const updates: any = { status: v };
-                        if (v === "closed") updates.resolvedAt = new Date().toISOString();
-                        updateMut.mutate({ id: incident.id, data: updates });
-                      }}>
-                        <SelectTrigger className="w-36 h-7 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {statusOrder.map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteMut.mutate(incident.id)}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+                  </CardContent>
+                </Card>
+                {selectedIncidentId === incident.id && (
+                  <div className="ml-4 border-l-2 border-primary/20 pl-4 mt-1">
+                    <CommentThread
+                      entityType="incident"
+                      entityId={String(incident.id)}
+                      title={`${incident.title} — Discussion`}
+                      collapsible={false}
+                    />
                   </div>
-                </CardContent>
-              </Card>
+                )}
+              </div>
             ))
           )}
         </div>
       )}
+
+      <ActivityFeed entityType="incident" title="Incident Response Team Activity" limit={8} compact />
     </div>
   );
 }
