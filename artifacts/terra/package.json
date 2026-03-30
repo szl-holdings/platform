@@ -20,6 +20,7 @@
     "@vitejs/plugin-react": "catalog:",
     "@workspace/observability": "workspace:*",
     "@workspace/analytics": "workspace:*",
+    "@workspace/replit-auth-web": "workspace:*",
     "@workspace/shared-ui": "workspace:*",
     "clsx": "catalog:",
     "framer-motion": "catalog:",

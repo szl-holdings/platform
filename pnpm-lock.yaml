@@ -324,6 +324,9 @@ importers:
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@workspace/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
       '@workspace/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
@@ -1158,6 +1161,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
       '@workspace/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
@@ -2111,6 +2117,9 @@ importers:
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@workspace/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
       '@workspace/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui

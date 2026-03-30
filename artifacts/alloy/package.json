@@ -30,6 +30,7 @@
     "@vitejs/plugin-react": "catalog:",
     "@workspace/analytics": "workspace:*",
     "@workspace/observability": "workspace:*",
+    "@workspace/replit-auth-web": "workspace:*",
     "@workspace/shared-ui": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",

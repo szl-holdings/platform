@@ -6,8 +6,8 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { PrivateAppGuard } from "@workspace/shared-ui";
 import { TerraLayout } from "@/components/terra-layout";
+import { useAuth } from "@workspace/replit-auth-web";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
@@ -31,6 +31,7 @@ const Predictions = lazy(() => import("@/pages/predictions"));
 const Automations = lazy(() => import("@/pages/automations"));
 const BrokerOverview = lazy(() => import("@/pages/broker-overview"));
 const Ingestion = lazy(() => import("@/pages/ingestion"));
+const BeaconMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 
 function PageLoader() {
   return (
@@ -40,7 +41,7 @@ function PageLoader() {
   );
 }
 
-function Router() {
+function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -89,34 +90,60 @@ const terraShortcuts: KeyboardShortcut[] = [
   { key: "T", description: "Team", category: "Navigation" },
 ];
 
+function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  return (
+    <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#a07848">
+      <div className="flex flex-col h-screen bg-terra-bg">
+        <EcosystemNav currentAppId="terra" currentAppName="Terra" accentColor="#a07848" />
+        <div className="flex-1 overflow-hidden">
+          <TerraLayout>
+            <PrivateRouter />
+          </TerraLayout>
+        </div>
+      </div>
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        commands={terraCommands}
+        appName="Terra"
+        accentColor="#a07848"
+      />
+    </PowerUserProvider>
+  );
+}
+
+function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const { isLoading, isAuthenticated, login } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#080c14" }}>
+        <div style={{ width: 24, height: 24, border: "2px solid rgba(160,120,72,0.25)", borderTopColor: "#a07848", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Suspense fallback={<div style={{ height: "100vh", background: "#080c14" }} />}>
+        <BeaconMarketingLanding onSignIn={login} />
+      </Suspense>
+    );
+  }
+
+  return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(terraCommands);
 
   return (
-    <PrivateAppGuard appName="Terra" accentColor="#a07848">
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#a07848">
-          <div className="flex flex-col h-screen bg-terra-bg">
-            <EcosystemNav currentAppId="terra" currentAppName="Terra" accentColor="#a07848" />
-            <div className="flex-1 overflow-hidden">
-              <TerraLayout>
-                <Router />
-              </TerraLayout>
-            </div>
-          </div>
-          <CommandPalette
-            open={cmdOpen}
-            onClose={() => setCmdOpen(false)}
-            commands={terraCommands}
-            appName="Terra"
-            accentColor="#a07848"
-          />
-        </PowerUserProvider>
+        <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+        <AgentCopilot config={beaconConfig} />
       </WouterRouter>
-      <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>
-    </PrivateAppGuard>
   );
 }
 

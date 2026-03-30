@@ -1,12 +1,11 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AlloyLayout } from "@/components/alloy-layout";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { PrivateAppGuard } from "@workspace/shared-ui";
-import { Zap, Activity, GitBranch, Network, Shield } from "lucide-react";
+import { useAuth } from "@workspace/replit-auth-web";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,8 +27,9 @@ const ConnectorMesh = lazy(() => import("@/pages/connector-mesh"));
 const GovernanceAudit = lazy(() => import("@/pages/governance-audit"));
 const AutomationAnalytics = lazy(() => import("@/pages/automation-analytics"));
 const ConsolePage = lazy(() => import("@/pages/ConsolePage"));
+const AlloyMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 
-function Router() {
+function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -64,33 +64,59 @@ const alloyShortcuts: KeyboardShortcut[] = [
   { key: "P", description: "Platform Console", category: "Navigation" },
 ];
 
+function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  return (
+    <PowerUserProvider shortcuts={alloyShortcuts} appName="Alloy" accentColor="#00d4ff">
+      <div className="flex flex-col h-screen bg-[#080c14]">
+        <EcosystemNav currentAppId="alloy" currentAppName="Alloy" accentColor="#00d4ff" />
+        <div className="flex-1 overflow-hidden">
+          <AlloyLayout>
+            <PrivateRouter />
+          </AlloyLayout>
+        </div>
+      </div>
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        commands={alloyCommands}
+        appName="Alloy"
+        accentColor="#00d4ff"
+      />
+    </PowerUserProvider>
+  );
+}
+
+function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const { isLoading, isAuthenticated, login } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#080c14" }}>
+        <div style={{ width: 24, height: 24, border: "2px solid #00d4ff40", borderTopColor: "#00d4ff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Suspense fallback={<div style={{ height: "100vh", background: "#080c14" }} />}>
+        <AlloyMarketingLanding onSignIn={login} />
+      </Suspense>
+    );
+  }
+
+  return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(alloyCommands);
 
   return (
-    <PrivateAppGuard appName="Alloy" accentColor="#00d4ff">
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={alloyShortcuts} appName="Alloy" accentColor="#00d4ff">
-          <div className="flex flex-col h-screen bg-[#080c14]">
-            <EcosystemNav currentAppId="alloy" currentAppName="Alloy" accentColor="#00d4ff" />
-            <div className="flex-1 overflow-hidden">
-              <AlloyLayout>
-                <Router />
-              </AlloyLayout>
-            </div>
-          </div>
-          <CommandPalette
-            open={cmdOpen}
-            onClose={() => setCmdOpen(false)}
-            commands={alloyCommands}
-            appName="Alloy"
-            accentColor="#00d4ff"
-          />
-        </PowerUserProvider>
+        <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </WouterRouter>
     </QueryClientProvider>
-    </PrivateAppGuard>
   );
 }
 
