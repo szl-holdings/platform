@@ -129,7 +129,7 @@ export default function FirestormMarketingHome() {
           </m.h1>
 
           <m.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Firestorm unifies XDR, identity threat detection, adversary emulation, and SOC automation into a single command platform — built for security teams that refuse to be reactive.
+            Unified XDR, threat detection, and SOC automation. One platform.
           </m.p>
 
           <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -163,7 +163,7 @@ export default function FirestormMarketingHome() {
           <div className="text-center mb-8">
             <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">Live Threat Feed</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Real threats. Real time.</h2>
-            <p className="text-gray-500 text-[14px] max-w-xl mx-auto">Firestorm continuously ingests, correlates, and triages security events across your entire attack surface.</p>
+            <p className="text-gray-500 text-[14px] max-w-xl mx-auto">Continuous event correlation and triage across your attack surface.</p>
           </div>
           <div className="space-y-3">
             {threatFeed.map((t, i) => (
@@ -185,7 +185,7 @@ export default function FirestormMarketingHome() {
           <div className="text-center mb-12 sm:mb-16">
             <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">Capabilities</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Full-spectrum cyber defense</h2>
-            <p className="text-gray-500 text-[14px] sm:text-[15px] max-w-2xl mx-auto">From alert triage to adversary emulation — every layer of your security operation, unified.</p>
+            <p className="text-gray-500 text-[14px] sm:text-[15px] max-w-2xl mx-auto">Every layer of your security operation, unified.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {capabilities.map((c, i) => (
@@ -224,7 +224,7 @@ export default function FirestormMarketingHome() {
           <div className="text-center mb-12">
             <p className="text-[11px] font-semibold text-red-400/60 tracking-[0.15em] uppercase mb-3">Coverage</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">MITRE ATT&CK — mapped and measured</h2>
-            <p className="text-gray-500 text-[14px] max-w-2xl mx-auto">Firestorm maps every detection rule and response playbook to MITRE ATT&CK techniques, giving you real-time visibility into your coverage posture.</p>
+            <p className="text-gray-500 text-[14px] max-w-2xl mx-auto">Every detection rule mapped to ATT&CK techniques. Real-time coverage visibility.</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
             {["Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Exfiltration", "Command & Control", "Impact", "Reconnaissance", "Resource Development"].map((tactic, i) => (

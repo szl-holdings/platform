@@ -177,7 +177,7 @@ export default function IncaMarketingHome() {
               <span className="bg-gradient-to-r from-violet-400 to-purple-300 bg-clip-text text-transparent">Decisions you can trace.</span>
             </h1>
             <p className="text-violet-300/50 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-              INCA provides enterprise teams with structured visibility, explainable AI triage, and auditable decision workflows — for operations where accountability is non-negotiable.
+              Explainable AI triage and auditable decisions for enterprise teams.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link href="/request-access">
@@ -210,7 +210,7 @@ export default function IncaMarketingHome() {
           <div className="text-center mb-8">
             <p className="text-[11px] font-semibold text-violet-400/60 tracking-[0.15em] uppercase mb-3">Live Signal Feed</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-violet-100 mb-3">Real threats. Traceable decisions.</h2>
-            <p className="text-violet-300/40 text-[14px] max-w-xl mx-auto">INCA continuously processes, correlates, and surfaces intelligence signals with explainable reasoning.</p>
+            <p className="text-violet-300/40 text-[14px] max-w-xl mx-auto">Continuous signal processing with explainable reasoning.</p>
           </div>
           <div className="space-y-3">
             {signalFindings.map((s, i) => (
@@ -277,7 +277,7 @@ export default function IncaMarketingHome() {
           <div className="text-center mb-12 sm:mb-16">
             <p className="text-[11px] font-semibold text-violet-400/60 tracking-[0.15em] uppercase mb-3">Core Capabilities</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-violet-50 mb-4">Built for intelligence-first operations</h2>
-            <p className="text-violet-300/40 text-[14px] sm:text-[15px] max-w-2xl mx-auto">Every layer of the intelligence stack — from signal ingestion to explainable decision output.</p>
+            <p className="text-violet-300/40 text-[14px] sm:text-[15px] max-w-2xl mx-auto">From signal ingestion to explainable decision output.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {capabilities.map((c, i) => (

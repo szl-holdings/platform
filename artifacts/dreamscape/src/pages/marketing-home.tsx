@@ -133,7 +133,7 @@ export default function DreamscapeMarketingHome() {
           </m.h1>
 
           <m.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Dreamscape combines predictive ML models, scenario planning, and decision intelligence to give leadership teams foresight — not hindsight.
+            ML forecasting and scenario planning for leadership teams.
           </m.p>
 
           <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -167,7 +167,7 @@ export default function DreamscapeMarketingHome() {
           <div className="text-center mb-8">
             <p className="text-[11px] font-semibold text-purple-400/60 tracking-[0.15em] uppercase mb-3">Live Predictions</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Foresight in real time</h2>
-            <p className="text-gray-500 text-[14px] max-w-xl mx-auto">Dreamscape continuously generates predictions, surfaces opportunities, and flags risks across your business data.</p>
+            <p className="text-gray-500 text-[14px] max-w-xl mx-auto">Continuous predictions, opportunities, and risk signals across your data.</p>
           </div>
           <div className="space-y-3">
             {predictions.map((p, i) => (
@@ -189,7 +189,7 @@ export default function DreamscapeMarketingHome() {
           <div className="text-center mb-12 sm:mb-16">
             <p className="text-[11px] font-semibold text-purple-400/60 tracking-[0.15em] uppercase mb-3">Capabilities</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Full-spectrum predictive intelligence</h2>
-            <p className="text-gray-500 text-[14px] sm:text-[15px] max-w-2xl mx-auto">From revenue forecasting to risk scenarios — every prediction explainable, every decision traceable.</p>
+            <p className="text-gray-500 text-[14px] sm:text-[15px] max-w-2xl mx-auto">Every prediction explainable. Every decision traceable.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {capabilities.map((c, i) => (
