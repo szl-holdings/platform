@@ -1,58 +1,86 @@
 [
   {
-    "id": "residence-management",
-    "title": "Residence Management",
-    "icon": "Shield",
-    "summary": "The operational backbone of a complex life.",
-    "description": "Full-spectrum estate and residence management — from vendor relationships and household infrastructure to property logistics and cross-residence coordination. We handle the operational layer so principals can focus entirely on what matters.",
+    "id": "residence-operations",
+    "title": "Residence Operations Support",
+    "icon": "Home",
+    "summary": "The operational backbone of a well-run private residence.",
+    "description": "Full-spectrum residence operations management — from daily household logistics to seasonal transitions and long-term property oversight. Rosa serves as the single point of contact across all operational matters, ensuring every residence runs to the standard the principal expects.",
     "capabilities": [
-      "Single point of contact across all residence operations",
-      "Vetted vendor network across 40+ service categories",
-      "Cross-residence coordination for multi-property principals",
-      "Property activation and transition management",
-      "Secure digital briefing system for principal preferences"
+      "Day-to-day household operations management",
+      "Seasonal opening, closing, and transition coordination",
+      "Property systems oversight and maintenance scheduling",
+      "Household inventory and supply management",
+      "Standards documentation and operational briefing"
     ]
   },
   {
-    "id": "household-operations",
-    "title": "Household Staff Coordination",
+    "id": "property-coordination",
+    "title": "Property Coordination",
+    "icon": "Building",
+    "summary": "Multi-property oversight with one trusted coordinator.",
+    "description": "For principals with multiple residences, consistent standards across properties require a dedicated coordinator who understands how each home should function. Rosa manages the operational layer across locations — ensuring nothing falls through the gaps between properties.",
+    "capabilities": [
+      "Cross-property operational coordination",
+      "Property activation and deactivation management",
+      "Inter-residence logistics and preparation",
+      "Ownership and leasing administration support",
+      "Long-distance property oversight and reporting"
+    ]
+  },
+  {
+    "id": "household-systems",
+    "title": "Household Systems Oversight",
+    "icon": "Settings",
+    "summary": "The systems behind a seamlessly run home.",
+    "description": "A high-functioning residence depends on invisible systems — staff scheduling, service protocols, vendor management, and contingency procedures. Rosa designs, documents, and maintains these systems so the household runs consistently, regardless of the principal's presence.",
+    "capabilities": [
+      "Household staff scheduling and coverage planning",
+      "Service standard documentation and enforcement",
+      "Emergency and contingency protocol development",
+      "Security and access management coordination",
+      "Household technology and systems management"
+    ]
+  },
+  {
+    "id": "vendor-coordination",
+    "title": "Vendor & Service Coordination",
+    "icon": "Users",
+    "summary": "Trusted relationships. Managed with precision.",
+    "description": "Managing vendors for a private residence requires a different standard than commercial property management. Rosa maintains an established network of vetted service providers — and manages every relationship with the discretion and accountability that the principal's environment demands.",
+    "capabilities": [
+      "Vendor vetting, onboarding, and performance management",
+      "Service scheduling and quality oversight",
+      "Contract and pricing negotiation support",
+      "Trusted provider network across 40+ service categories",
+      "NDA-level discretion across all engagements"
+    ]
+  },
+  {
+    "id": "lifestyle-administrative",
+    "title": "Lifestyle & Administrative Support",
+    "icon": "Briefcase",
+    "summary": "Discreet, capable support for the administrative layer of a complex life.",
+    "description": "The principals Rosa works with have lives that extend well beyond the residence. Administrative coordination, personal logistics, schedule alignment, and lifestyle management — handled with absolute discretion, a single point of contact, and a standard of execution that doesn't require the principal's attention.",
+    "capabilities": [
+      "Personal schedule and calendar coordination",
+      "Private travel logistics and preparation",
+      "Personal administrative task management",
+      "Confidential correspondence and communication support",
+      "Lifestyle project coordination and follow-through"
+    ]
+  },
+  {
+    "id": "transitional-projects",
+    "title": "Transitional & Special Project Support",
     "icon": "Compass",
-    "summary": "The right people. In the right place. At the right time.",
-    "description": "Vetting, onboarding, scheduling, and day-to-day management of household staff across one or multiple residences. We maintain the operational standards that define a high-touch environment — without the principal managing the infrastructure.",
+    "summary": "High-stakes transitions managed without noise.",
+    "description": "Estate activations, cross-border relocations, significant renovation projects, and time-critical transitions — these require a trusted operator who can hold the complexity without involving the principal unnecessarily. Rosa has managed these projects at every scale, always with complete discretion.",
     "capabilities": [
-      "Household staff vetting and onboarding",
-      "Schedule management and coverage planning",
-      "Staff performance and accountability oversight",
-      "Multi-residence staff coordination and deployment",
-      "NDA-standard confidentiality across all placements"
-    ]
-  },
-  {
-    "id": "travel-architecture",
-    "title": "Bespoke Travel Architecture",
-    "icon": "TrendingUp",
-    "summary": "Travel designed around your standard, not a template.",
-    "description": "End-to-end travel design for principals with complex schedules, security requirements, and non-negotiable standards of experience. From private aviation coordination to ground logistics, accommodation, and itinerary construction.",
-    "capabilities": [
-      "Private aviation planning and coordination",
-      "Ground transportation and logistics management",
-      "Accommodation selection and preparation",
-      "Security and protocol integration",
-      "Complex multi-destination itinerary architecture"
-    ]
-  },
-  {
-    "id": "discreet-projects",
-    "title": "Discreet Project Execution",
-    "icon": "Handshake",
-    "summary": "High-stakes projects managed without noise.",
-    "description": "Sensitive, time-critical projects that require discretion, precision, and a trusted operator who can coordinate complex moving parts without visibility into the principal's life. From estate activations to time-sensitive personal logistics.",
-    "capabilities": [
-      "Confidential project management and coordination",
-      "Time-critical logistics with no margin for error",
-      "Multi-vendor orchestration under NDA",
-      "Estate activation and transition execution",
-      "24/7 escalation protocol for urgent needs"
+      "Estate activation and full-residence setup",
+      "Cross-border relocation coordination",
+      "Renovation project oversight and principal liaison",
+      "Time-critical logistics with zero margin for error",
+      "Post-project documentation and handover"
     ]
   }
 ]

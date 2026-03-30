@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { TrendingUp, FileText, Calendar, Download, BarChart3, PieChart, Users } from "lucide-react";
+import { TrendingUp, FileText, Calendar, Download, BarChart3, PieChart, Users, Lock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { useRole } from "@workspace/shared-ui";
 
 const fundMetrics = [
   { label: "Fund III Target", value: "$85M", sub: "Final close Q1 2026", color: "text-szl-accent" },
@@ -44,11 +45,27 @@ const docColor: Record<string, string> = {
 };
 
 export default function InvestorRelations() {
+  const { isInvestor, isAdmin, isLoading } = useRole();
   usePageMeta({
     title: "Investor Relations | SZL Holdings – Fund Performance & Reports",
     description: "Investor relations for SZL Holdings: fund performance metrics, LP updates, portfolio company reports, and strategic outlook for institutional investors.",
     canonical: "https://szlholdings.com/ir",
   });
+
+  if (!isLoading && !isInvestor && !isAdmin) {
+    return (
+      <div className="min-h-screen bg-szl-bg flex items-center justify-center p-8">
+        <div className="text-center space-y-4 max-w-sm">
+          <div className="w-14 h-14 rounded-full bg-szl-surface border border-szl-border flex items-center justify-center mx-auto">
+            <Lock className="w-6 h-6 text-szl-text-secondary" />
+          </div>
+          <h2 className="text-xl font-bold text-szl-text">Investor Access Required</h2>
+          <p className="text-szl-text-secondary text-sm">This section is restricted to verified limited partners and fund investors. Please contact the team if you need access.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-szl-bg text-szl-text p-8">
       <div className="max-w-6xl mx-auto space-y-8">

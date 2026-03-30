@@ -1,4 +1,5 @@
-import { TrendingUp, DollarSign, Building2, BarChart3, ArrowUp, ArrowDown, Target, PieChart, Calculator } from "lucide-react";
+import { TrendingUp, DollarSign, Building2, BarChart3, ArrowUp, ArrowDown, Target, PieChart, Calculator, Lock } from "lucide-react";
+import { useRole } from "@workspace/shared-ui";
 
 const investmentMetrics = [
   { label: "Portfolio Value", value: "$47.2M", change: "+8.4%", trend: "up" },
@@ -23,8 +24,23 @@ const marketComps = [
 ];
 
 export default function InvestmentAnalysis() {
+  const { isInvestor, isAdmin, isLoading } = useRole();
   const totalValue = properties.reduce((a, p) => a + p.value, 0);
   const totalNOI = properties.reduce((a, p) => a + p.noi, 0);
+
+  if (!isLoading && !isInvestor && !isAdmin) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center space-y-3 max-w-xs">
+          <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center mx-auto">
+            <Lock className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <h2 className="font-display font-semibold text-foreground">Investor Access Required</h2>
+          <p className="text-sm text-muted-foreground">Portfolio analysis is restricted to verified investors. Contact your account manager for access.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

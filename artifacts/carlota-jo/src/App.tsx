@@ -9,6 +9,9 @@ const ServicesPage = lazy(() => import("@/pages/Services"));
 const ApproachPage = lazy(() => import("@/pages/Approach"));
 const AboutPage = lazy(() => import("@/pages/About"));
 const InquiriesPage = lazy(() => import("@/pages/Inquiries"));
+const FounderPage = lazy(() => import("@/pages/founder"));
+const WhoWeServePage = lazy(() => import("@/pages/who-we-serve"));
+const ContactPage = lazy(() => import("@/pages/contact"));
 const { ClientPortalOverview, ClientPortalDocuments, ClientPortalUpdates, ClientPortalMessages, ClientPortalSettings } = {
   ClientPortalOverview: lazy(() => import("@/pages/ClientPortal").then(m => ({ default: m.ClientPortalOverview }))),
   ClientPortalDocuments: lazy(() => import("@/pages/ClientPortal").then(m => ({ default: m.ClientPortalDocuments }))),
@@ -47,6 +50,9 @@ function Router() {
         {/* Marketing / public pages */}
         <Route path="/" component={Home} />
         <Route path="/services" component={ServicesPage} />
+        <Route path="/who-we-serve" component={WhoWeServePage} />
+        <Route path="/founder" component={FounderPage} />
+        <Route path="/contact" component={ContactPage} />
         <Route path="/approach" component={ApproachPage} />
         <Route path="/about" component={AboutPage} />
         <Route path="/inquiries" component={InquiriesPage} />
@@ -82,12 +88,11 @@ function Router() {
 const carlotaCommands: CommandItem[] = [
   { id: "nav-home", label: "Home", icon: "✨", group: "Navigation", keywords: ["overview", "main"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
   { id: "nav-services", label: "Services", icon: "📋", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/services"); } },
-  { id: "nav-approach", label: "Approach", icon: "🧭", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/approach"); } },
-  { id: "nav-about", label: "About", icon: "ℹ️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/about"); } },
-  { id: "nav-inquiries", label: "Private Inquiry", icon: "📬", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/inquiries"); } },
+  { id: "nav-who-we-serve", label: "Who We Serve", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/who-we-serve"); } },
+  { id: "nav-founder", label: "About Rosa", icon: "👤", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/founder"); } },
+  { id: "nav-contact", label: "Request Consultation", icon: "📬", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/contact"); } },
   { id: "nav-portal", label: "Client Portal", icon: "🔐", group: "Actions", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/client-portal"); } },
-  { id: "nav-advisory", label: "Advisory Intel", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/advisory"); } },
-  { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/szl-holdings/"; } },
+  { id: "app-szl", label: "SZL Holdings", icon: "🏛️", group: "Switch App", description: "Portfolio", action: () => { window.location.href = "/"; } },
 ];
 
 const carlotaShortcuts: KeyboardShortcut[] = [

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Users, DollarSign, FileText, TrendingUp, Download, Mail, Clock } from "lucide-react";
+import { Users, DollarSign, FileText, TrendingUp, Download, Mail, Clock, Lock } from "lucide-react";
+import { useRole } from "@workspace/shared-ui";
 
 const lpInvestors = [
   { name: "Sovereign Capital Partners", commitment: "$45M", deployed: "$38M", distributions: "$12.4M", netIRR: 19.2, moic: 1.68, tier: "Anchor LP" },
@@ -30,6 +31,23 @@ type IRTab = "investors" | "reports" | "distributions";
 
 export default function IRModule() {
   const [activeTab, setActiveTab] = useState<IRTab>("investors");
+  const { isInvestor, isAdmin, isLoading } = useRole();
+
+  if (!isLoading && !isInvestor && !isAdmin) {
+    return (
+      <div className="p-6 flex flex-col items-center justify-center min-h-[400px] gap-4 text-center">
+        <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+          <Lock className="w-5 h-5 text-amber-400" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Investor Access Required</h2>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            The Investor Relations module is restricted to users with the investor role. Contact your administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

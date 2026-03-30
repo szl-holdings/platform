@@ -13,6 +13,8 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { doctrineEventBus } from "@workspace/observability";
 import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
+import { useRole } from "@workspace/shared-ui";
+import { Lock } from "lucide-react";
 
 const statusColors: Record<string, string> = {
   pending: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
@@ -134,6 +136,7 @@ function RunningExerciseDisplay() {
 }
 
 export default function AdversaryEmulation() {
+  const { isSecurity, isAdmin, isLoading: rolesLoading } = useRole();
   const qc = useQueryClient();
   const { data: simulations = [], isLoading } = useQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
   const { data: scenarios = [] } = useQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
@@ -145,6 +148,8 @@ export default function AdversaryEmulation() {
   const allSimulations = simulations as SimulationItem[];
   const completedSimulations = allSimulations.filter((s) => s.status === "completed");
   const runningSimulations = allSimulations.filter((s) => s.status === "running");
+
+  const accessDenied = !rolesLoading && !isSecurity && !isAdmin;
 
   useEffect(() => {
     if (completedSimulations.length > 0) {
@@ -187,6 +192,22 @@ export default function AdversaryEmulation() {
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  if (accessDenied) {
+    return (
+      <div className="p-6 flex flex-col items-center justify-center min-h-[400px] gap-4 text-center">
+        <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+          <Lock className="w-5 h-5 text-red-400" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Security Access Required</h2>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            Launching and managing adversary simulations is restricted to users with the security role. Contact your administrator to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

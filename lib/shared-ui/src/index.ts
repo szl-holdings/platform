@@ -18,6 +18,7 @@ export { AgentInsightsWidget, type KnowledgeEntry as AgentKnowledgeEntry, type A
 export { ExplainabilityDrawer, useExplainability, ExplainButton, type ExplainabilityMetadata, type ExplainabilityDrawerProps } from "./explainability";
 export { DemoModeProvider, useDemoMode, DemoModeSwitcher, type DemoMode, type DemoModeState, MODE_LABELS, MODE_DESCRIPTIONS, MODE_ICONS, MODE_COLORS } from "./demo-mode";
 export { PrivateAppGuard, type PrivateAppGuardProps } from "./PrivateAppGuard";
+export { useRole, RoleGate, type UserRoles, type AppRole } from "./use-role";
 export { default as AuthGate, type AuthGateProps } from "./AuthGate";
 export { EcosystemMap, ECOSYSTEM_NODES, LAYER_CONFIG, CONNECTION_PAIRS, type EcosystemNode, type EcosystemMapProps } from "./ecosystem-map";
 export { CompanyKPIDashboard, DEMO_COMPANY_KPIS, type CompanyKPI, type CompanyKPIDashboardProps } from "./company-kpi-dashboard";

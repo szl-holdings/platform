@@ -22,6 +22,25 @@ SZL Command Systems — a pnpm monorepo containing a suite of 13 interconnected 
 - Status labels: Live, Pilot Ready, In Build, Strategic, Internal, Private Demo
 - Approved CTAs defined in `APPROVED_CTAS` export
 
+### Role-Aware UI Enforcement (Task #137 Phase 6-8)
+`lib/shared-ui/src/use-role.tsx` — `useRole()` hook and `RoleGate` component. Fetches `/api/auth/roles`. Provides `isAdmin`, `isInvestor`, `isSecurity`, `isOperator`, `hasRole()`.
+
+Role gates applied:
+- **Terra `/ir-module`** — investor + admin only (lock screen for others)
+- **Terra `/investment-analysis`** — investor + admin only (lock screen for others)
+- **Firestorm `/simulation-runner`** — security + admin only (lock screen for others)
+- **SZL Holdings `/investor-relations`** — investor + admin only (lock screen for others); route added to App.tsx
+- **SZL Holdings `/admin`** — auth-required (existing) + PIN gate (existing)
+
+### Carlota Jo Overhaul (Task #137 Phase 6-8)
+Rebuilt as Rosa Lutar's residential advisory brand.
+- **Brand identity:** Light luxury, serif + clean sans, warm ivory/taupe/brushed gold palette (`var(--color-gold): #9a7d52`, `var(--color-cream-warm): #f9f7f3`, `var(--color-ink-900): #1c1a17`). Light cream background, NOT dark.
+- **Rosa Lutar persona:** Fractional Director of Properties and Residence. Tone: elegant, warm, discreet, capable. CTA: "Request a Confidential Consultation".
+- **6 services:** Residence Operations Support, Property Coordination, Household Systems Oversight, Vendor & Service Coordination, Lifestyle & Administrative Support, Transitional & Special Project Support.
+- **Pages:** Home (Hero + services overview), Services (`/services`), Who We Serve (`/who-we-serve`, 5 client profiles), Founder (`/founder`, Rosa Lutar bio), Contact (`/contact`, 5 conversation paths).
+- **Nav updated:** Services, Who We Serve, About Rosa, Contact.
+- **SZL Holdings FeaturedPlatforms:** Carlota Jo copy updated to "A refined advisory brand for high-trust private client operations" (status: Pilot Ready).
+
 ## User Preferences
 I prefer detailed explanations.
 I want iterative development.

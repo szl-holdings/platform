@@ -28,15 +28,15 @@ const platforms = [
   },
   {
     name: "Carlota Jo Consulting",
-    label: "High-Trust Service Brand",
-    copy: "Discreet operational and residence support for high-touch environments.",
+    label: "Private Advisory & Residential Support",
+    copy: "A refined advisory brand for high-trust private client operations.",
     cta: "Explore Carlota Jo",
     href: "/carlota-jo/",
     accent: "hsl(38,55%,58%)",
     accentRgb: "191,152,82",
     accentBg: "hsla(38,55%,58%,0.05)",
     accentBorder: "hsla(38,55%,58%,0.12)",
-    status: "Live",
+    status: "Pilot Ready",
   },
 ];
 
