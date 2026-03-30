@@ -303,21 +303,32 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
     let recommendations: unknown[];
     try {
       const cleaned = response.content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      recommendations = JSON.parse(cleaned);
-    } catch {
-      recommendations = [{
-        id: "rec-parse-error",
-        title: "Raw Recommendation",
-        domain: domain ?? "general",
-        score: 75,
-        confidence: 0.7,
-        severity: "medium",
-        reasoning: response.content.slice(0, 300),
-        recommended_action: "Review the raw analysis output",
-        estimated_impact: "Depends on further analysis",
-        timeframe: "short-term",
-      }];
+      const parsed = JSON.parse(cleaned);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        throw new Error("Response is not a non-empty JSON array");
+      }
+      const REQUIRED_FIELDS = ["id", "title", "score", "reasoning", "recommended_action"] as const;
+      for (const rec of parsed) {
+        if (typeof rec !== "object" || rec === null) throw new Error("Recommendation item is not an object");
+        for (const field of REQUIRED_FIELDS) {
+          if (!(field in rec)) throw new Error(`Missing required field: ${field}`);
+        }
+      }
+      recommendations = parsed;
+    } catch (parseErr) {
+      logger.warn({ error: parseErr instanceof Error ? parseErr.message : String(parseErr) }, "Recommendation output validation failed — returning structured error");
+      res.status(422).json({
+        success: false,
+        error: "AI response did not conform to expected recommendation schema",
+        rawPreview: response.content.slice(0, 500),
+        model: response.model,
+        provider: response.provider,
+      });
+      return;
     }
+
+    const telemetryRecord = inferenceTelemetry.getRecords({ limit: 1 })[0];
+    const estimatedCost = telemetryRecord?.estimatedCostUsd ?? 0;
 
     sendSuccess(res, {
       recommendations,
@@ -326,6 +337,7 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
         provider: response.provider,
         latencyMs: response.routing.totalLatencyMs,
         telemetryId: response.telemetryId,
+        estimatedCostUsd: estimatedCost,
         domain: domain ?? "general",
         depth: depth ?? "standard",
         generatedAt: new Date().toISOString(),

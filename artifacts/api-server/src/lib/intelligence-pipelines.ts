@@ -1,5 +1,6 @@
 import { logger } from "./logger";
 import { gatewayInfer } from "./ai-gateway";
+import { writeAuditLog } from "./alloy-orchestration";
 import type { ChatMessage } from "@workspace/services";
 
 export type PipelineStageType = "ingest" | "classify" | "score" | "enrich" | "recommend" | "audit";
@@ -225,12 +226,23 @@ export async function executePipeline(pipelineId: string, input: string): Promis
 
   logger.info({ runId, pipelineId, pipelineName: pipeline.name }, "Pipeline execution started");
 
+  void writeAuditLog({
+    entityType: "workflow",
+    entityId: 0,
+    action: "pipeline_started",
+    actorType: "system",
+    newState: { runId, pipelineId, pipelineName: pipeline.name, stageCount: pipeline.stages.length },
+    correlationId: runId,
+  });
+
   const stageResults: PipelineStageResult[] = [];
   let previousOutput = "";
   let totalTokens = 0;
 
-  for (const stage of pipeline.stages) {
+  for (let i = 0; i < pipeline.stages.length; i++) {
+    const stage = pipeline.stages[i]!;
     const stageStart = Date.now();
+    const stageNumber = i + 1;
     const variables: Record<string, string> = { input, previousOutput };
     const userPrompt = renderTemplate(stage.userPromptTemplate, variables);
 
@@ -261,6 +273,15 @@ export async function executePipeline(pipelineId: string, input: string): Promis
         tokensUsed: response.usage.totalTokens,
       });
 
+      void writeAuditLog({
+        entityType: "workflow",
+        entityId: 0,
+        action: "pipeline_stage_completed",
+        actorType: "system",
+        newState: { runId, stage: stage.name, stageNumber, stageType: stage.type, durationMs: stageDuration, tokensUsed: response.usage.totalTokens, provider: response.provider },
+        correlationId: runId,
+      });
+
       logger.debug({ runId, stage: stage.name, durationMs: stageDuration }, "Pipeline stage completed");
     } catch (err) {
       const stageDuration = Date.now() - stageStart;
@@ -273,9 +294,18 @@ export async function executePipeline(pipelineId: string, input: string): Promis
         tokensUsed: 0,
       });
 
+      void writeAuditLog({
+        entityType: "workflow",
+        entityId: 0,
+        action: "pipeline_stage_failed",
+        actorType: "system",
+        newState: { runId, stage: stage.name, stageNumber, stageType: stage.type, error: err instanceof Error ? err.message : String(err) },
+        correlationId: runId,
+      });
+
       logger.error({ runId, stage: stage.name, error: err instanceof Error ? err.message : String(err) }, "Pipeline stage failed");
 
-      for (const remaining of pipeline.stages.slice(pipeline.stages.indexOf(stage) + 1)) {
+      for (const remaining of pipeline.stages.slice(i + 1)) {
         stageResults.push({
           stageName: remaining.name,
           stageType: remaining.type,
@@ -305,6 +335,16 @@ export async function executePipeline(pipelineId: string, input: string): Promis
     startedAt,
     completedAt,
   };
+
+  void writeAuditLog({
+    entityType: "workflow",
+    entityId: 0,
+    action: "pipeline_completed",
+    actorType: "system",
+    previousState: { runId, pipelineId },
+    newState: { runId, status, totalStages: stageResults.length, completedStages: completedStages.length, totalDurationMs: result.totalDurationMs, totalTokens },
+    correlationId: runId,
+  });
 
   logger.info({ runId, pipelineId, status, stages: stageResults.length, completed: completedStages.length, durationMs: result.totalDurationMs }, "Pipeline execution finished");
   return result;

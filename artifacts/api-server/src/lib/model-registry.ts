@@ -171,6 +171,21 @@ export function getModelCard(agentId: string): ModelCard {
   const latencies = successRecords.map(r => r.latencyMs).sort((a, b) => a - b);
   const failures = records.filter(r => !r.success).length;
 
+  let lifecycle: ModelCard["lifecycle"] = "active";
+  if (records.length === 0) {
+    lifecycle = "staging";
+  } else if (records.length > 0 && records.length < 10) {
+    lifecycle = "canary";
+  } else {
+    const errorRate = records.length > 0 ? failures / records.length : 0;
+    lifecycle = errorRate > 0.5 ? "deprecated" : "active";
+  }
+
+  const lastRequestRecord = records.length > 0 ? records[0] : null;
+  const lastDeployed = lastRequestRecord
+    ? new Date(lastRequestRecord.timestamp).toISOString()
+    : new Date(Date.now() - 3 * 86400000).toISOString();
+
   return {
     id: `model-${agentId}`,
     name: `${agentId.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())} Agent`,
@@ -178,7 +193,7 @@ export function getModelCard(agentId: string): ModelCard {
     model: config.model,
     version: "2.0.0",
     purpose: meta.purpose,
-    lifecycle: "active",
+    lifecycle,
     category: config.category,
     capabilities: meta.capabilities,
     contextWindow: MODEL_CONTEXT_WINDOWS[config.model] ?? 128000,
@@ -192,7 +207,7 @@ export function getModelCard(agentId: string): ModelCard {
       errorRate: records.length > 0 ? parseFloat((failures / records.length).toFixed(4)) : 0,
       successRate: records.length > 0 ? parseFloat((successRecords.length / records.length).toFixed(4)) : 1,
     },
-    lastDeployed: new Date(Date.now() - 3 * 86400000).toISOString(),
+    lastDeployed,
     lastReviewed: LAST_REVIEWED,
   };
 }
