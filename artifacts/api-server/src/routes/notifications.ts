@@ -1,8 +1,9 @@
 import { Router, type IRouter } from "express";
 import { db, notificationsTable, notificationPreferencesTable } from "@workspace/db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { publish, WS_CHANNELS } from "../lib/websocket";
 
 const router: IRouter = Router();
 
@@ -55,6 +56,9 @@ router.post("/notifications", authMiddleware(), requireRole("ops"), async (req, 
       message: message.trim(),
       actionUrl: actionUrl ?? null,
     }).returning();
+
+    publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notification);
+
     sendCreated(res, notification);
   } catch (err) {
     req.log?.error({ err }, "Failed to create notification");
@@ -83,6 +87,22 @@ router.patch("/notifications/:id/read", authMiddleware(), async (req, res) => {
   }
 });
 
+router.patch("/notifications/read-all", authMiddleware(), async (req, res) => {
+  try {
+    const userId = req.user!.id;
+    await db.update(notificationsTable).set({
+      isRead: true,
+      readAt: new Date(),
+    }).where(
+      and(eq(notificationsTable.userId, userId), eq(notificationsTable.isRead, false))
+    );
+    sendNoContent(res);
+  } catch (err) {
+    req.log?.error({ err }, "Failed to mark all notifications as read");
+    handleRouteError(res, err, "Failed to mark all notifications as read");
+  }
+});
+
 router.delete("/notifications/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
@@ -99,5 +119,29 @@ router.delete("/notifications/:id", authMiddleware(), async (req, res) => {
     handleRouteError(res, err, "Failed to delete notification");
   }
 });
+
+export { publishNotification };
+
+async function publishNotification(params: {
+  type: (typeof validTypes)[number];
+  title: string;
+  message: string;
+  actionUrl?: string;
+  appId?: string;
+  severity?: "info" | "warning" | "critical";
+}): Promise<void> {
+  const notifData = {
+    id: `demo-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    type: params.type,
+    title: params.title,
+    message: params.message,
+    actionUrl: params.actionUrl ?? null,
+    appId: params.appId ?? "system",
+    severity: params.severity ?? "info",
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  };
+  publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", notifData);
+}
 
 export default router;

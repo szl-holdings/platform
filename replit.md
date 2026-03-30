@@ -79,10 +79,21 @@ DreamStack comprises 12 applications sharing a PostgreSQL database, authenticati
 - **Observability (DreamStack Intelligence):** Structured logging via pino. The DreamStack Intelligence framework (`@workspace/observability`) provides **8-pillar** domain-native observability across all apps. 5-level maturity model (Reactive → Proactive → Predictive → Intelligent → Autonomous).
 - **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
 
+### Performance Optimizations
+- **Shared UI:** 56 shadcn/ui components consolidated in `@workspace/shared-ui` (no local `src/components/ui/` in apps)
+- **Code Splitting:** All 13 routed apps use `React.lazy()` + `Suspense` for route-level code splitting
+- **Framer Motion:** szl-holdings uses `LazyMotion` + `m` components (lighter than `motion`); all apps split framer-motion into `vendor-motion` chunk
+- **Recharts:** Lazy-loaded via route-level code splitting + isolated in `vendor-charts` chunk
+- **Dependency Catalog:** recharts, react-hook-form, framer-motion, lucide-react normalized via pnpm catalog
+- **Vite Build:** `manualChunks` splits vendor code into recharts/d3, framer-motion, radix-ui, tanstack, lucide-react, and react chunks; `cssCodeSplit` enabled
+
+### Domain Agent System
+AI-powered domain agents are implemented for each application, with specialized system prompts, tool definitions, and connections to existing API routes for data retrieval.
+
 ### Shared Libraries
-- `lib/shared-ui`: Design system (56 shadcn/ui components), `AgentCopilot`, AI components, `ErrorBoundary`, `UserButton`, `AuthGate`, `useRealtimeChannel`, `useFeatureFlag`
-- `lib/replit-auth-web`: `useAuth()` React hook — fetches `/api/auth/user`, triggers login/logout via server-side OIDC redirects
-- `lib/db`: Drizzle ORM schemas, connection pool (min/max/idle timeout/statement timeout)
+- `lib/shared-ui`: Design system (56 UI components), AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy, `ErrorBoundary`, `useRealtimeChannel`, `useFeatureFlag`, `useNotificationCenter` hooks, `UserButton` (real auth sign-in/out), `AuthGate`
+- `lib/replit-auth-web`: `useAuth()` React hook — fetches `/api/auth/user`, triggers login/logout via server-side OIDC redirects. Used by `UserButton` and `AuthGate`.
+- `lib/db`: Drizzle ORM schemas, connection pool (min/max/idle timeout/statement timeout), slow-query logging in dev (includes `conversations` + `messages` tables for AlloyChat, and `agent_training_pairs`, `agent_behavior_prefs`, `agent_feedback`, `advisory_audit` for Agent Training Studio)
 - `lib/config`: Application-to-connector dependency mapping
 - `lib/services`: 27 service adapters with health checks and mock fallback
 - `lib/api-spec`: OpenAPI 3.1 specification
@@ -93,12 +104,20 @@ DreamStack comprises 12 applications sharing a PostgreSQL database, authenticati
 - `lib/integrations-anthropic-ai`: Anthropic server-side integration via Replit AI Integrations
 - `lib/integrations-gemini-ai`: Gemini AI server-side integration via Replit AI Integrations
 - `lib/observability`: DreamStack Intelligence framework
+
 ### TypeScript Fixes (Task #63)
 - All Vite configs use `const port = Number(process.env.PORT) || 3000` (no runtime throws)
 - All 7 Dreamscape pages have explicit `export default`
 - `shared-ui` toast hook uses relative imports (not `@/`)
 - SZL Holdings uses `domMax` (not `domAnimation`) for layout animations
 - API server routes: `alloy-chat.ts`, `ai-safety.ts`, `agent-training.ts`, `gov-data.ts`, `msp-live.ts`, `nuro-mesh.ts`, `stephen.ts` all pass TS type checks
+
+### Universal Notification & Real-Time Alerting System (Task #82)
+- **NotificationCenter Hook (`lib/shared-ui/src/notification-center.tsx`):** `useNotificationCenter(appName)` hook auto-fetches from `GET /api/notifications` on mount (gracefully handles 401 for unauthenticated users), subscribes to the `notifications` WebSocket channel for real-time pushes, and exposes `markRead(id)`, `markAllRead()`, and `isConnected` state. Notifications are represented as `LiveNotification` objects with severity levels (`info`/`warning`/`critical`).
+- **EcosystemNav Integration:** `EcosystemNav` is self-managing — it calls `useNotificationCenter` internally, requiring no prop changes from apps. The NotificationsPanel now shows: unread count badge, severity-colored dots, timestamps, per-item `actionUrl` navigation, "Mark all read" action, and up to 20 recent notifications.
+- **API Endpoints:** `GET /notifications` (list for authenticated user), `POST /notifications` (create, ops-only), `PATCH /notifications/:id/read` (mark single read), `PATCH /notifications/read-all` (mark all read), `DELETE /notifications/:id`. All PATCH/DELETE endpoints publish via WebSocket on change.
+- **Domain Notification Generators (`artifacts/api-server/src/lib/domain-notifications.ts`):** Periodic background generators produce realistic domain-specific notifications for 7 apps: Firestorm (threat alerts, SLA breaches, MITRE ATT&CK, compliance drift), Vessels (dark vessel alerts, route deviations, port congestion), MSP (SLA breaches, device offline, contract renewals, NOC escalations), Lyte (P1 incidents, SLO burn rate, anomalies, on-call escalations), Terra (lease expiry, vacancy spikes, market updates, investment alerts), INCA (model drift, training completion, GPU warnings, model registry), Dreamscape (campaign milestones, content approvals, brand voice deviations, social publishing). Notifications publish via WebSocket to all connected clients every ~45s with per-domain jitter. Started in `index.ts` after WebSocket init.
+- **Graceful Fallback:** When unauthenticated, `useNotificationCenter` suppresses the 401 error and shows an empty notifications panel. WS notifications still flow to all connected clients regardless of auth state.
 
 ### Infrastructure Hardening (Task #58)
 - **Graceful Shutdown:** SIGTERM/SIGINT handlers drain HTTP connections, flush job queue, and close DB pool within 10s

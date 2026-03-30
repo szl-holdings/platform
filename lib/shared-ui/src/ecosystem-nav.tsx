@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { colors, effects, typography } from "./tokens";
+import { useNotificationCenter, type LiveNotification } from "./notification-center";
 
 export interface EcosystemApp {
   id: string;
@@ -358,14 +359,23 @@ function AppSwitcherPanel({
 function NotificationsPanel({
   notifications,
   onRead,
+  onMarkAllRead,
   onClose,
 }: {
-  notifications: EcosystemNotification[];
+  notifications: LiveNotification[];
   onRead: (id: string) => void;
+  onMarkAllRead: () => void;
   onClose: () => void;
 }) {
   const unread = notifications.filter((n) => !n.read);
-  const recent = [...notifications].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 8);
+  const recent = [...notifications].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 20);
+
+  const handleItemClick = (n: LiveNotification) => {
+    onRead(n.id);
+    if (n.actionUrl) {
+      window.location.href = n.actionUrl;
+    }
+  };
 
   return (
     <div
@@ -373,7 +383,7 @@ function NotificationsPanel({
         position: "absolute",
         top: "calc(100% + 8px)",
         right: "0",
-        width: "340px",
+        width: "360px",
         background: "rgba(10, 12, 20, 0.97)",
         backdropFilter: "blur(20px)",
         border: "1px solid rgba(255,255,255,0.1)",
@@ -389,24 +399,25 @@ function NotificationsPanel({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "14px 16px",
+          padding: "12px 16px",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
         }}
       >
-        <span
-          style={{
-            fontSize: "12px",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.9)",
-            letterSpacing: "0.5px",
-            textTransform: "uppercase",
-          }}
-        >
-          Notifications
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span
+            style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.9)",
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+            }}
+          >
+            Notifications
+          </span>
           {unread.length > 0 && (
             <span
               style={{
-                marginLeft: "8px",
                 background: "#ef4444",
                 color: "#fff",
                 fontSize: "10px",
@@ -418,23 +429,44 @@ function NotificationsPanel({
               {unread.length}
             </span>
           )}
-        </span>
-        <button
-          onClick={onClose}
-          style={{
-            background: "none",
-            border: "none",
-            color: "rgba(255,255,255,0.4)",
-            cursor: "pointer",
-            fontSize: "16px",
-            lineHeight: 1,
-            padding: "2px",
-          }}
-        >
-          ✕
-        </button>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {unread.length > 0 && (
+            <button
+              onClick={onMarkAllRead}
+              style={{
+                background: "none",
+                border: "none",
+                color: "rgba(255,255,255,0.4)",
+                cursor: "pointer",
+                fontSize: "11px",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.7)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
+            >
+              Mark all read
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            style={{
+              background: "none",
+              border: "none",
+              color: "rgba(255,255,255,0.4)",
+              cursor: "pointer",
+              fontSize: "16px",
+              lineHeight: 1,
+              padding: "2px",
+            }}
+          >
+            ✕
+          </button>
+        </div>
       </div>
-      <div style={{ maxHeight: "360px", overflowY: "auto" }}>
+      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
         {recent.length === 0 ? (
           <div
             style={{
@@ -450,11 +482,11 @@ function NotificationsPanel({
           recent.map((n) => (
             <div
               key={n.id}
-              onClick={() => onRead(n.id)}
+              onClick={() => handleItemClick(n)}
               style={{
                 padding: "12px 16px",
                 borderBottom: "1px solid rgba(255,255,255,0.05)",
-                cursor: "pointer",
+                cursor: n.actionUrl ? "pointer" : "default",
                 background: n.read ? "transparent" : LEVEL_BG[n.level],
                 transition: "background 0.15s",
               }}
@@ -522,6 +554,11 @@ function NotificationsPanel({
                   >
                     {n.message}
                   </div>
+                  {n.actionUrl && !n.read && (
+                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", marginTop: "4px" }}>
+                      Click to view →
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -847,8 +884,6 @@ function getDomainSearchResults(q: string): SearchResult[] {
   return results;
 }
 
-const EMPTY_NOTIFICATIONS: EcosystemNotification[] = [];
-
 export function EcosystemNav({
   currentAppId,
   currentAppName,
@@ -859,18 +894,15 @@ export function EcosystemNav({
   userName = "Admin",
   userRole = "Operator",
 }: EcosystemNavProps) {
-  const notifications = notificationsProp ?? EMPTY_NOTIFICATIONS;
+  const appData = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
+  const notificationCenter = useNotificationCenter(appData?.name ?? currentAppName);
+
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [localNotifications, setLocalNotifications] = useState<EcosystemNotification[]>(notifications);
 
   const appSwitcherRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setLocalNotifications(notifications);
-  }, [notifications]);
 
   useClickOutside(appSwitcherRef, () => setShowAppSwitcher(false));
   useClickOutside(notificationsRef, () => setShowNotifications(false));
@@ -891,14 +923,14 @@ export function EcosystemNav({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const unreadCount = localNotifications.filter((n) => !n.read).length;
+  const { notifications: liveNotifications, unreadCount, markRead, markAllRead } = notificationCenter;
 
   const handleNotificationRead = useCallback(
     (id: string) => {
-      setLocalNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+      markRead(id);
       onNotificationRead?.(id);
     },
-    [onNotificationRead]
+    [markRead, onNotificationRead]
   );
 
   const currentApp = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
@@ -1111,8 +1143,9 @@ export function EcosystemNav({
             </button>
             {showNotifications && (
               <NotificationsPanel
-                notifications={localNotifications}
+                notifications={liveNotifications}
                 onRead={handleNotificationRead}
+                onMarkAllRead={markAllRead}
                 onClose={() => setShowNotifications(false)}
               />
             )}

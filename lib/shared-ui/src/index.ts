@@ -8,3 +8,4 @@ export * from "./intelligence-philosophy";
 export * from "./lens-bar";
 export { default as AppObservabilityPage } from "./AppObservabilityPage";
 export { apiFetch, type PaginationMeta, type PaginatedResponse } from "./api-fetch";
+export { useNotificationCenter, type LiveNotification, type ApiNotification, type NotificationCenterState } from "./notification-center";
