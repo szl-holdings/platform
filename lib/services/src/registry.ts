@@ -23,6 +23,16 @@ import { HubSpotAdapter } from "./adapters/hubspot.js";
 import { ElevenLabsAdapter } from "./adapters/elevenlabs.js";
 import { FigmaAdapter } from "./adapters/figma.js";
 import { HuggingFaceAdapter } from "./adapters/huggingface.js";
+import { CisaAdapter } from "./adapters/cisa.js";
+import { ArxivAdapter } from "./adapters/arxiv.js";
+import { AbuseIPDBAdapter } from "./adapters/abuseipdb.js";
+import { NOAAAdapter } from "./adapters/noaa.js";
+import { NVDAdapter } from "./adapters/nvd.js";
+import { BLSAdapter } from "./adapters/bls.js";
+import { WorldBankAdapter } from "./adapters/worldbank.js";
+import { OpenMeteoAdapter } from "./adapters/openmeteo.js";
+import { MITREAdapter } from "./adapters/mitre.js";
+import { GDELTAdapter } from "./adapters/gdelt.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -60,6 +70,16 @@ export class ServiceRegistry {
   readonly elevenlabs: ElevenLabsAdapter;
   readonly figma: FigmaAdapter;
   readonly huggingface: HuggingFaceAdapter;
+  readonly cisa: CisaAdapter;
+  readonly arxiv: ArxivAdapter;
+  readonly abuseipdb: AbuseIPDBAdapter;
+  readonly noaa: NOAAAdapter;
+  readonly nvd: NVDAdapter;
+  readonly bls: BLSAdapter;
+  readonly worldbank: WorldBankAdapter;
+  readonly openmeteo: OpenMeteoAdapter;
+  readonly mitre: MITREAdapter;
+  readonly gdelt: GDELTAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -88,6 +108,16 @@ export class ServiceRegistry {
     this.elevenlabs = new ElevenLabsAdapter();
     this.figma = new FigmaAdapter();
     this.huggingface = new HuggingFaceAdapter();
+    this.cisa = new CisaAdapter();
+    this.arxiv = new ArxivAdapter();
+    this.abuseipdb = new AbuseIPDBAdapter();
+    this.noaa = new NOAAAdapter();
+    this.nvd = new NVDAdapter();
+    this.bls = new BLSAdapter();
+    this.worldbank = new WorldBankAdapter();
+    this.openmeteo = new OpenMeteoAdapter();
+    this.mitre = new MITREAdapter();
+    this.gdelt = new GDELTAdapter();
 
     this.adapters = [
       this.ai,
@@ -114,6 +144,16 @@ export class ServiceRegistry {
       this.elevenlabs,
       this.figma,
       this.huggingface,
+      this.cisa,
+      this.arxiv,
+      this.abuseipdb,
+      this.noaa,
+      this.nvd,
+      this.bls,
+      this.worldbank,
+      this.openmeteo,
+      this.mitre,
+      this.gdelt,
     ];
   }
 

@@ -49,6 +49,17 @@ export { ConfluenceAdapter, type ConfluencePage } from "./adapters/confluence.js
 export { HubSpotAdapter, type HubSpotContact, type HubSpotDeal } from "./adapters/hubspot.js";
 export { ElevenLabsAdapter, type ElevenLabsVoice, type TTSResult } from "./adapters/elevenlabs.js";
 export { FigmaAdapter, type FigmaFile, type FigmaProject } from "./adapters/figma.js";
+export { CisaAdapter, type CisaKevEntry, type MitreAttackTechnique } from "./adapters/cisa.js";
+export { ArxivAdapter, type ArxivPaper } from "./adapters/arxiv.js";
+export { AbuseIPDBAdapter, type IpReputationResult } from "./adapters/abuseipdb.js";
+export { NOAAAdapter } from "./adapters/noaa.js";
+export { NVDAdapter } from "./adapters/nvd.js";
+export { BLSAdapter } from "./adapters/bls.js";
+export { WorldBankAdapter } from "./adapters/worldbank.js";
+export { OpenMeteoAdapter } from "./adapters/openmeteo.js";
+export { MITREAdapter } from "./adapters/mitre.js";
+export { GDELTAdapter } from "./adapters/gdelt.js";
+
 export {
   HuggingFaceAdapter,
   type HFTextGenerationResult,
