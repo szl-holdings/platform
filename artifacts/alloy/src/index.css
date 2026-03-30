@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -36,7 +36,7 @@
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
 
   --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   --radius-sm: 0.25rem;
@@ -102,10 +102,14 @@ body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image:
+    linear-gradient(hsla(226, 72%, 60%, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, hsla(226, 72%, 60%, 0.022) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
@@ -131,11 +135,12 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid hsl(var(--border));
   border-top: 1px solid hsla(226 72% 60% / 0.14);
   border-radius: var(--radius);
-  transition: border-color 0.18s ease;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 .alloy-surface:hover {
-  border-color: hsla(226 72% 60% / 0.22);
-  border-top-color: hsla(226 72% 60% / 0.22);
+  border-color: hsla(226 72% 60% / 0.24);
+  border-top-color: hsla(226 72% 60% / 0.30);
+  box-shadow: 0 0 18px hsla(226 72% 60% / 0.08), 0 4px 24px rgba(0,0,0,0.32);
 }
 
 /* Alloy panel glow — restrained electric signal, not neon */
@@ -159,8 +164,9 @@ h1, h2, h3, h4, h5, h6 {
   transition: border-left-color 0.18s ease, background 0.18s ease;
 }
 .alloy-kpi:hover {
-  border-left-color: hsla(226 72% 60% / 0.65);
+  border-left-color: hsla(226 72% 60% / 0.70);
   background: hsl(223 20% 7%);
+  box-shadow: 0 0 14px hsla(226 72% 60% / 0.06);
 }
 
 /* ─── Signal / status badge system ─── */

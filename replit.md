@@ -22,22 +22,28 @@ The platform is built as a pnpm monorepo using Node.js 24 and TypeScript 5.9.
 - **Bundling:** esbuild (CJS) and Vite.
 
 ### UI/UX Design System
-A premium design system via `@workspace/shared-ui` ensures consistent aesthetics. Each app has a **unique visual identity** matching its market lane. Typography system-wide: **DM Sans** (display/headings), **Inter** (body), **JetBrains Mono** (data/code). Common components include KPI ribbons, chart containers, data table shells, `AgentCopilot`, and advanced form elements. Demo Mode banners and loading states with skeleton placeholders are integrated.
+A premium command-grade design system — Palantir Foundry / Anduril Lattice aesthetic DNA, entirely SZL-branded. Each app has a **unique visual identity** matching its market lane. Typography system-wide: **Space Grotesk** (display/headings), **Inter** (body), **JetBrains Mono** (data/metrics/code). Common components include KPI ribbons, chart containers, data table shells, `AgentCopilot`, and advanced form elements. Demo Mode banners and loading states with skeleton placeholders are integrated.
 
-**SZL Visual Ascension design system applied across all apps:**
-- **Alloy:** Cool electric steel (hsl 226 72% 60%), orchestration signal-flow motion, `.alloy-surface`, `.alloy-kpi`, `.arch-node` utility classes
-- **Lyte:** Signal cyan (hsl 192 85% 46%), severity-pulse and insight-reveal motion, `.signal-panel`, `.kpi-tile`, `.insight-rail` classes  
-- **Vessels:** Deep ocean blue (hsl 202 80% 48%), maritime motion (route-dash, wave-float, vessel-ping), `.vessel-panel`, `.vessel-card` classes
-- **Carlota Jo:** Light mode — warm ivory/cream background, Cormorant Garamond serif, brushed gold accent (hsl 32 40% 48%), near-static elegant motion
-- **Stephen Lutar:** Near-monochrome dark with warm silver accent (hsl 38 45% 56%), operator-editorial feel, `.work-strip`, `.focus-tile` classes
-- **INCA:** Steel indigo (hsl 248 58% 58%), research intelligence surface, `.evidence-card`, `.research-panel` classes
-- **Firestorm:** Operational amber (hsl 32 88% 52%), tactical command surfaces, `.soc-panel`, `.threat-card` classes
-- **MSP:** Enterprise blue (hsl 214 88% 52%), NOC-grade surfaces, `.noc-panel`, `.client-card` classes
-- **Terra:** Forest green earthy palette (CSS custom properties), `.deal-card`, `.property-panel`, `.map-panel` classes
-- **Dreamscape:** Premium violet (hsl 262 62% 56%), creative studio surfaces, `.studio-card`, `.project-card` classes
-- **SZL Holdings:** Dark carbon (szl-bg #0e100f), warm gold accent (#c9a96e), `.szl-card`, `.platform-card`, `.ecosystem-node` classes
+**Command-Grade Design Language (Task #133 — fully implemented):**
+- **5-level depth surface system** in SZL Holdings CSS: `--color-szl-bg` → `--color-szl-base` → `--color-szl-surface` → `--color-szl-elevated` → `--color-szl-overlay`
+- **Domain accent tokens**: `--color-szl-lyte` (cyan), `--color-szl-vessels` (ocean blue), `--color-szl-alloy` (slate blue), `--color-szl-carlota` (warm gold), `--color-szl-inca` (violet), `--color-szl-firestorm` (amber), `--color-szl-rosie` (crimson), `--color-szl-terra` (emerald)
+- **Hover glow micro-interactions** added to all artifacts via `box-shadow` on hover — domain-accent colored, restrained luminosity
+- **Particle/constellation hero** in SZL Holdings via `HeroParticles` canvas component
 
-**Design principles enforced:** No neon gradients, no gamer colors, no neural-network backgrounds. Dark-first (except Carlota Jo), command-surface aesthetic, purposeful motion only (fade/lift/panel reveal/node pulse). Reduced motion support in all apps.
+**Per-artifact identity:**
+- **Alloy:** Cool electric steel (hsl 226 72% 60%), `.alloy-surface`, `.alloy-kpi`, `.arch-node` — glow hover applied
+- **Lyte:** Signal cyan (hsl 192 85% 46%), `.signal-panel`, `.kpi-tile`, `.insight-rail` — glow hover applied
+- **Vessels:** Deep ocean blue (hsl 202 80% 48%), `.vessel-panel`, `.vessel-card` — glow hover applied
+- **Carlota Jo:** Light mode — warm ivory/cream, Cormorant Garamond serif, brushed gold. NOT dark command theme.
+- **Stephen Lutar:** Near-monochrome dark, Instrument Serif + Inter editorial design, warm silver accent
+- **INCA:** Steel indigo (hsl 248 58% 58%), `.evidence-card`, `.research-panel`, `.model-card` — glow hover applied
+- **Firestorm:** Operational amber (hsl 32 88% 52%), `.soc-panel`, `.threat-card` — glow hover applied
+- **MSP (Rosie):** Crimson/enterprise blue (hsl 214 88% 52%), `.noc-panel`, `.client-card` — glow hover applied
+- **Terra:** Forest green palette, `.deal-card`, `.property-panel`, `.map-panel` — glow hover applied
+- **Dreamscape:** Premium violet (hsl 262 62% 56%), `.studio-card`, `.project-card` — glow hover applied
+- **SZL Holdings:** Full command overhaul. Dark carbon base, particle hero, glassmorphic nav, Space Grotesk headlines, JetBrains Mono data labels, domain-accented platform cards with glow hover
+
+**Design principles enforced:** No neon gradients, no gamer colors, no neural-network backgrounds. Dark-first (except Carlota Jo), command-surface aesthetic, purposeful motion only (fade/lift/panel reveal/node pulse). Reduced motion support in all apps. Sharp corners (`border-radius: 4px`) — not large rounded corners.
 
 **Bug fixed in `lib/shared-ui/src/tokens.ts`:** Added missing `_legacy.glassmorphism`, `_legacyGlass`, and `status` token objects that `components.ts` was referencing (caused Firestorm crash).
 

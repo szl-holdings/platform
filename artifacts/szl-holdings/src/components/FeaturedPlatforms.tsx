@@ -9,8 +9,9 @@ const platforms = [
     cta: "Explore Lyte",
     href: "/lyte-command-center/",
     accent: "hsl(190,90%,50%)",
-    accentBg: "hsla(190,90%,50%,0.06)",
-    accentBorder: "hsla(190,90%,50%,0.14)",
+    accentRgb: "14,188,212",
+    accentBg: "hsla(190,90%,50%,0.05)",
+    accentBorder: "hsla(190,90%,50%,0.12)",
     status: "Live",
   },
   {
@@ -20,8 +21,9 @@ const platforms = [
     cta: "Explore Vessels",
     href: "/vessels/",
     accent: "hsl(205,85%,55%)",
-    accentBg: "hsla(205,85%,55%,0.06)",
-    accentBorder: "hsla(205,85%,55%,0.14)",
+    accentRgb: "38,155,212",
+    accentBg: "hsla(205,85%,55%,0.05)",
+    accentBorder: "hsla(205,85%,55%,0.12)",
     status: "Live",
   },
   {
@@ -30,9 +32,10 @@ const platforms = [
     copy: "Discreet operational and residence support for high-touch environments.",
     cta: "Explore Carlota Jo",
     href: "/carlota-jo/",
-    accent: "hsl(38,45%,65%)",
-    accentBg: "hsla(38,45%,65%,0.06)",
-    accentBorder: "hsla(38,45%,65%,0.14)",
+    accent: "hsl(38,55%,58%)",
+    accentRgb: "191,152,82",
+    accentBg: "hsla(38,55%,58%,0.05)",
+    accentBorder: "hsla(38,55%,58%,0.12)",
     status: "Live",
   },
 ];
@@ -55,15 +58,30 @@ export function FeaturedPlatforms() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="mb-12"
         >
-          <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
+          <p style={{
+            fontSize: "10px",
+            fontWeight: "600",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "hsl(210,5%,40%)",
+            marginBottom: "0.75rem",
+            fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+          }}>
             Featured Platforms
           </p>
-          <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)", fontWeight: "700", letterSpacing: "-0.022em", color: "hsl(38,12%,94%)", lineHeight: "1.1" }}>
+          <h2 style={{
+            fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+            fontWeight: "700",
+            letterSpacing: "-0.026em",
+            color: "hsl(38,12%,94%)",
+            lineHeight: "1.06",
+            fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+          }}>
             Two flagships. One service brand.
           </h2>
         </m.div>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-3 gap-4">
           {platforms.map((p, i) => (
             <m.div
               key={p.name}
@@ -75,69 +93,84 @@ export function FeaturedPlatforms() {
               <a
                 href={p.href}
                 style={{
-                  display: "block",
+                  display: "flex",
+                  flexDirection: "column",
                   background: p.accentBg,
                   border: `1px solid ${p.accentBorder}`,
-                  borderRadius: "0.875rem",
+                  borderRadius: "6px",
                   padding: "1.75rem",
                   textDecoration: "none",
                   transition: "all 0.22s ease",
                   height: "100%",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = `hsla(0,0%,100%,0.04)`;
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 24px hsla(0,0%,0%,0.28)";
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = `rgba(${p.accentRgb}, 0.07)`;
+                  el.style.borderColor = `rgba(${p.accentRgb}, 0.26)`;
+                  el.style.boxShadow = `0 0 22px rgba(${p.accentRgb}, 0.09), 0 8px 28px rgba(0,0,0,0.32)`;
+                  el.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = p.accentBg;
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = p.accentBg;
+                  el.style.borderColor = p.accentBorder;
+                  el.style.boxShadow = "none";
+                  el.style.transform = "translateY(0)";
                 }}
               >
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-5">
                   <span style={{
                     fontSize: "10px",
                     fontWeight: "600",
                     letterSpacing: "0.1em",
                     textTransform: "uppercase",
                     color: p.accent,
+                    opacity: 0.85,
+                    fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
                   }}>
-                    {p.label}
+                    {p.name}
                   </span>
                   <span style={{
-                    fontSize: "10px",
-                    fontWeight: "500",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                    background: "hsla(152,50%,42%,0.1)",
-                    border: "1px solid hsla(152,50%,42%,0.2)",
-                    color: "hsl(152,50%,50%)",
-                    letterSpacing: "0.04em",
+                    fontSize: "9.5px",
+                    fontWeight: "600",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "hsl(142,62%,46%)",
+                    background: "hsla(142,62%,46%,0.10)",
+                    border: "1px solid hsla(142,62%,46%,0.18)",
+                    padding: "2px 7px",
+                    borderRadius: "3px",
+                    fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
                   }}>
                     {p.status}
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: "1.25rem", fontWeight: "700", letterSpacing: "-0.016em", color: "hsl(38,12%,94%)", marginBottom: "0.75rem", lineHeight: "1.2" }}>
-                  {p.name}
-                </h3>
+                <div style={{ flex: 1 }}>
+                  <p style={{
+                    fontSize: "0.875rem",
+                    fontWeight: "600",
+                    color: "hsl(38,12%,86%)",
+                    marginBottom: "0.5rem",
+                    letterSpacing: "-0.012em",
+                    lineHeight: "1.3",
+                    fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+                  }}>
+                    {p.label}
+                  </p>
+                  <p style={{
+                    fontSize: "12.5px",
+                    lineHeight: "1.6",
+                    color: "hsl(210,5%,52%)",
+                    marginBottom: "1.5rem",
+                  }}>
+                    {p.copy}
+                  </p>
+                </div>
 
-                <p style={{ fontSize: "0.875rem", lineHeight: "1.6", color: "hsl(210,5%,58%)", marginBottom: "1.5rem" }}>
-                  {p.copy}
-                </p>
-
-                <div style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  fontSize: "12.5px",
-                  fontWeight: "500",
-                  color: p.accent,
-                  letterSpacing: "-0.003em",
-                }}>
+                <div className="flex items-center gap-1.5" style={{ color: p.accent, fontSize: "12.5px", fontWeight: "600", letterSpacing: "-0.003em" }}>
                   {p.cta}
-                  <ArrowRight size={12} strokeWidth={2.5} />
+                  <ArrowRight size={13} strokeWidth={2.5} />
                 </div>
               </a>
             </m.div>

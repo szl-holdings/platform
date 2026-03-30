@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
@@ -26,9 +26,7 @@ export function SiteNav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location]);
+  useEffect(() => { setMobileOpen(false); }, [location]);
 
   const handleNavClick = (label: string, href: string) => {
     analytics.navLinkClick(label, href);
@@ -41,9 +39,7 @@ export function SiteNav() {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled
-          ? "bg-white/95 backdrop-blur-xl border-b border-szl-border shadow-sm"
-          : "bg-transparent"
+        scrolled ? "szl-glass" : "bg-transparent"
       )}
       role="navigation"
       aria-label="Main navigation"
@@ -54,37 +50,85 @@ export function SiteNav() {
           className="flex items-center gap-2.5"
           onClick={() => handleNavClick("SZL Holdings", "/")}
         >
-          <div className="w-8 h-8 rounded-lg bg-szl-primary flex items-center justify-center">
-            <span className="text-white font-bold text-xs font-[var(--font-display)] tracking-tight">SZL</span>
+          <div
+            className="w-8 h-8 flex items-center justify-center rounded-sm"
+            style={{
+              background: "linear-gradient(135deg, var(--color-szl-accent) 0%, hsla(38, 55%, 45%, 1) 100%)",
+            }}
+          >
+            <span
+              style={{
+                color: "hsl(214, 16%, 4%)",
+                fontWeight: 700,
+                fontSize: "0.6875rem",
+                fontFamily: "var(--font-display)",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              SZL
+            </span>
           </div>
-          <span className="font-[var(--font-display)] font-semibold text-[15px] text-szl-text tracking-tight">
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 600,
+              fontSize: "0.9375rem",
+              color: "var(--color-szl-text)",
+              letterSpacing: "-0.02em",
+            }}
+          >
             SZL Holdings
           </span>
         </Link>
 
         <div className="hidden lg:flex items-center gap-6">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => handleNavClick(link.label, link.href)}
-              className={cn(
-                "text-sm font-medium transition-colors duration-200",
-                location === link.href
-                  ? "text-szl-text"
-                  : "text-szl-text-secondary hover:text-szl-text"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const isActive = location === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => handleNavClick(link.label, link.href)}
+                style={{
+                  fontSize: "0.8125rem",
+                  fontWeight: 500,
+                  fontFamily: "var(--font-body)",
+                  transition: "color 0.2s ease",
+                  color: isActive ? "var(--color-szl-text)" : "var(--color-szl-text-secondary)",
+                  position: "relative",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                onMouseLeave={(e) => {
+                  if (!isActive) (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)";
+                }}
+              >
+                {link.label}
+                {isActive && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      bottom: "-2px",
+                      left: 0,
+                      right: 0,
+                      height: "1px",
+                      background: "var(--color-szl-accent)",
+                      opacity: 0.8,
+                    }}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </div>
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden text-szl-text-secondary hover:text-szl-text p-1.5"
+          className="lg:hidden p-1.5 transition-colors"
+          style={{ color: "var(--color-szl-text-secondary)" }}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
         >
           {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -96,7 +140,12 @@ export function SiteNav() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white/97 backdrop-blur-xl border-b border-szl-border overflow-hidden"
+            className="lg:hidden overflow-hidden"
+            style={{
+              background: "hsla(214, 14%, 6%, 0.97)",
+              backdropFilter: "blur(20px)",
+              borderBottom: "1px solid var(--color-szl-border)",
+            }}
           >
             <div className="px-6 py-6 flex flex-col gap-4">
               {NAV_LINKS.map((link) => (
@@ -104,7 +153,14 @@ export function SiteNav() {
                   key={link.href}
                   href={link.href}
                   onClick={() => handleNavClick(link.label, link.href)}
-                  className="text-szl-text-secondary text-[15px] font-medium hover:text-szl-text transition-colors"
+                  style={{
+                    fontSize: "0.9375rem",
+                    fontWeight: 500,
+                    color: "var(--color-szl-text-secondary)",
+                    transition: "color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
                 >
                   {link.label}
                 </Link>

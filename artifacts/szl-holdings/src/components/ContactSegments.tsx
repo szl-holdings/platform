@@ -8,24 +8,28 @@ const segments = [
     headline: "Ecosystem-level conversations",
     body: "Strategic partnership, capital conversations, and ecosystem integration opportunities across the SZL portfolio.",
     type: "partner",
+    accentRgb: "148,163,184",
   },
   {
     audience: "Clients",
     headline: "Platform demos and pilot programs",
     body: "Product demonstrations, pilot programs, and enterprise deployments for Lyte and Vessels.",
     type: "client",
+    accentRgb: "14,201,224",
   },
   {
     audience: "Service Clients",
     headline: "Carlota Jo — operational support",
     body: "Discreet, high-trust operational and residence support for high-touch environments.",
     type: "client",
+    accentRgb: "191,152,82",
   },
   {
     audience: "Recruiters",
     headline: "Executive and strategic roles",
     body: "Executive search, advisory engagements, and strategic recruiting aligned to the ecosystem.",
     type: "recruiter",
+    accentRgb: "148,163,184",
   },
 ];
 
@@ -48,10 +52,25 @@ export function ContactSegments() {
           className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10"
         >
           <div>
-            <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
+            <p style={{
+              fontSize: "10px",
+              fontWeight: "600",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "hsl(210,5%,40%)",
+              marginBottom: "0.75rem",
+              fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+            }}>
               Start the Right Conversation
             </p>
-            <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: "700", letterSpacing: "-0.022em", color: "hsl(38,12%,94%)", lineHeight: "1.1" }}>
+            <h2 style={{
+              fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
+              fontWeight: "700",
+              letterSpacing: "-0.026em",
+              color: "hsl(38,12%,94%)",
+              lineHeight: "1.06",
+              fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+            }}>
               Four paths. Choose yours.
             </h2>
           </div>
@@ -63,7 +82,7 @@ export function ContactSegments() {
               gap: "6px",
               fontSize: "13px",
               fontWeight: "500",
-              color: "hsl(210,5%,60%)",
+              color: "hsl(210,5%,56%)",
               textDecoration: "none",
               transition: "all 0.18s ease",
               flexShrink: 0,
@@ -72,7 +91,7 @@ export function ContactSegments() {
               (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,60%)";
+              (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,56%)";
             }}
           >
             Start a Conversation
@@ -80,7 +99,7 @@ export function ContactSegments() {
           </Link>
         </m.div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-3">
           {segments.map((s, i) => (
             <m.div
               key={s.audience}
@@ -95,25 +114,48 @@ export function ContactSegments() {
                   display: "block",
                   textDecoration: "none",
                   padding: "1.5rem",
-                  borderRadius: "0.875rem",
-                  background: "hsla(0,0%,100%,0.025)",
-                  border: "1px solid hsla(0,0%,100%,0.06)",
-                  transition: "all 0.2s ease",
+                  borderRadius: "4px",
+                  background: "hsla(0,0%,100%,0.02)",
+                  border: "1px solid hsla(0,0%,100%,0.055)",
+                  transition: "all 0.22s ease",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = `rgba(${s.accentRgb}, 0.05)`;
+                  el.style.borderColor = `rgba(${s.accentRgb}, 0.16)`;
+                  el.style.boxShadow = `0 0 18px rgba(${s.accentRgb}, 0.07), 0 4px 20px rgba(0,0,0,0.28)`;
+                  el.style.transform = "translateY(-1px)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.025)";
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = "hsla(0,0%,100%,0.02)";
+                  el.style.borderColor = "hsla(0,0%,100%,0.055)";
+                  el.style.boxShadow = "none";
+                  el.style.transform = "translateY(0)";
                 }}
               >
-                <p style={{ fontSize: "10px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.625rem" }}>
+                <p style={{
+                  fontSize: "10px",
+                  fontWeight: "600",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "hsl(210,5%,42%)",
+                  marginBottom: "0.5rem",
+                  fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+                }}>
                   {s.audience}
                 </p>
-                <p style={{ fontSize: "14px", fontWeight: "600", color: "hsl(38,12%,88%)", marginBottom: "0.5rem", letterSpacing: "-0.005em" }}>
+                <p style={{
+                  fontSize: "0.9375rem",
+                  fontWeight: "600",
+                  color: "hsl(38,12%,88%)",
+                  marginBottom: "0.5rem",
+                  letterSpacing: "-0.012em",
+                  fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+                }}>
                   {s.headline}
                 </p>
-                <p style={{ fontSize: "12.5px", lineHeight: "1.6", color: "hsl(210,5%,54%)" }}>
+                <p style={{ fontSize: "12.5px", lineHeight: "1.6", color: "hsl(210,5%,52%)" }}>
                   {s.body}
                 </p>
               </Link>

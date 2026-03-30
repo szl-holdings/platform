@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -39,7 +39,7 @@
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
   --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
@@ -102,9 +102,13 @@
     @apply bg-background text-foreground antialiased font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-image:
+      linear-gradient(hsla(202, 80%, 48%, 0.022) 1px, transparent 1px),
+      linear-gradient(90deg, hsla(202, 80%, 48%, 0.022) 1px, transparent 1px);
+    background-size: 64px 64px;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
   ::selection {
@@ -125,11 +129,12 @@
   border: 1px solid hsl(var(--border));
   border-top: 1px solid hsla(202 80% 48% / 0.15);
   border-radius: var(--radius-lg);
-  transition: border-color 0.18s ease;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 .vessel-panel:hover {
-  border-top-color: hsla(202 80% 48% / 0.28);
-  border-color: hsla(202 80% 48% / 0.16);
+  border-top-color: hsla(202 80% 48% / 0.32);
+  border-color: hsla(202 80% 48% / 0.20);
+  box-shadow: 0 0 18px hsla(202 80% 48% / 0.09), 0 4px 24px rgba(0,0,0,0.32);
 }
 
 /* KPI stat panel */

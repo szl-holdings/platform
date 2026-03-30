@@ -1,35 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme inline {
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --color-szl-bg: hsl(210, 12%, 5%);
-  --color-szl-bg-secondary: hsl(210, 12%, 7%);
-  --color-szl-bg-tertiary: hsl(210, 10%, 10%);
-  --color-szl-surface: hsla(210, 10%, 12%, 0.50);
-  --color-szl-surface-hover: hsla(210, 10%, 15%, 0.65);
-  --color-szl-border: hsla(0, 0%, 100%, 0.06);
-  --color-szl-border-hover: hsla(0, 0%, 100%, 0.10);
-  --color-szl-text: hsl(38, 12%, 94%);
-  --color-szl-text-secondary: hsl(210, 6%, 68%);
-  --color-szl-text-muted: hsl(210, 5%, 46%);
+  /* ── Depth surface system (5 levels) ── */
+  --color-szl-base:      hsl(214, 16%, 3%);
+  --color-szl-bg:        hsl(214, 14%, 5%);
+  --color-szl-bg-secondary: hsl(214, 12%, 7%);
+  --color-szl-bg-tertiary:  hsl(214, 10%, 9%);
+  --color-szl-surface:   hsla(214, 10%, 11%, 0.80);
+  --color-szl-elevated:  hsla(214, 10%, 14%, 0.90);
+  --color-szl-overlay:   hsla(214, 10%, 18%, 0.95);
 
-  --color-szl-platinum: hsl(210, 8%, 82%);
-  --color-szl-silver: hsl(210, 6%, 72%);
-  --color-szl-accent: hsl(32, 40%, 58%);
-  --color-szl-accent-light: hsl(32, 40%, 70%);
-  --color-szl-accent-muted: hsla(32, 40%, 58%, 0.12);
+  --color-szl-border:       hsla(0, 0%, 100%, 0.06);
+  --color-szl-border-hover: hsla(0, 0%, 100%, 0.11);
+  --color-szl-border-glow:  hsla(0, 0%, 100%, 0.16);
 
-  --color-szl-graphite: hsl(210, 8%, 16%);
-  --color-szl-smoke: hsl(210, 6%, 24%);
-  --color-szl-charcoal: hsl(210, 12%, 10%);
+  /* ── Text hierarchy ── */
+  --color-szl-text:           hsl(38, 10%, 94%);
+  --color-szl-text-secondary: hsl(214, 8%, 66%);
+  --color-szl-text-muted:     hsl(214, 6%, 44%);
+  --color-szl-text-faint:     hsl(214, 5%, 32%);
 
-  --color-szl-vessels: hsl(208, 65%, 38%);
-  --color-szl-lyte: hsl(192, 70%, 46%);
-  --color-szl-alloy: hsl(218, 50%, 58%);
-  --color-szl-carlota: hsl(32, 38%, 52%);
-  --color-szl-inca: hsl(246, 45%, 50%);
+  /* ── SZL Holdings brand accent (warm gold / platinum) ── */
+  --color-szl-accent:       hsl(38, 55%, 60%);
+  --color-szl-accent-light: hsl(38, 55%, 72%);
+  --color-szl-accent-muted: hsla(38, 55%, 60%, 0.12);
+  --color-szl-accent-glow:  hsla(38, 55%, 60%, 0.06);
+  --color-szl-platinum:     hsl(210, 8%, 80%);
+  --color-szl-silver:       hsl(210, 6%, 68%);
+
+  /* ── Primary action (deep blue) ── */
+  --color-szl-primary:       hsl(218, 72%, 52%);
+  --color-szl-primary-light: hsl(218, 72%, 62%);
+  --color-szl-primary-muted: hsla(218, 72%, 52%, 0.12);
+  --color-szl-primary-glow:  hsla(218, 72%, 52%, 0.08);
+
+  /* ── Domain accent colors (per-platform) ── */
+  --color-szl-lyte:     hsl(192, 80%, 48%);
+  --color-szl-vessels:  hsl(210, 78%, 44%);
+  --color-szl-alloy:    hsl(222, 68%, 58%);
+  --color-szl-carlota:  hsl(36, 52%, 54%);
+  --color-szl-inca:     hsl(250, 58%, 58%);
+  --color-szl-firestorm: hsl(24, 88%, 52%);
+  --color-szl-rosie:    hsl(356, 70%, 52%);
+  --color-szl-terra:    hsl(140, 56%, 40%);
+
+  /* ── Status semantic ── */
+  --color-szl-success: hsl(142, 64%, 42%);
+  --color-szl-warning: hsl(38, 88%, 50%);
+  --color-szl-danger:  hsl(0, 72%, 52%);
 }
 
 *, *::before, *::after {
@@ -51,82 +74,85 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
 ::selection {
-  background: hsla(32, 40%, 58%, 0.22);
-  color: hsl(38, 12%, 94%);
+  background: hsla(38, 55%, 60%, 0.22);
+  color: hsl(38, 10%, 94%);
 }
 
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(210, 12%, 5%);
-}
-
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: hsl(214, 14%, 5%); }
 ::-webkit-scrollbar-thumb {
-  background: hsla(0, 0%, 100%, 0.10);
+  background: hsla(0, 0%, 100%, 0.08);
   border-radius: 2px;
 }
+::-webkit-scrollbar-thumb:hover { background: hsla(38, 55%, 60%, 0.28); }
 
-::-webkit-scrollbar-thumb:hover {
-  background: hsla(32, 40%, 58%, 0.30);
-}
-
-/* ─── SZL ecosystem card surfaces ─── */
+/* ─── Depth surface cards ─── */
 .szl-card {
   background: var(--color-szl-surface);
   border: 1px solid var(--color-szl-border);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
 }
 .szl-card:hover {
+  background: var(--color-szl-elevated);
   border-color: var(--color-szl-border-hover);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px var(--color-szl-border), 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Platform card — large asymmetric accent */
+/* ─── Platform card with accent-top glow ─── */
 .platform-card {
   background: var(--color-szl-surface);
   border: 1px solid var(--color-szl-border);
-  border-top: 1px solid rgba(201, 169, 110, 0.18);
-  transition: border-color 0.25s ease;
+  border-top: 1px solid rgba(201, 169, 110, 0.20);
+  backdrop-filter: blur(6px);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease;
 }
 .platform-card:hover {
   border-color: var(--color-szl-border-hover);
-  border-top-color: rgba(201, 169, 110, 0.32);
+  border-top-color: rgba(201, 169, 110, 0.40);
+  box-shadow: 0 0 24px rgba(201, 169, 110, 0.06), 0 4px 32px rgba(0, 0, 0, 0.36);
 }
 
-/* Accent rule — horizontal gold divider */
+/* ─── Accent rule ─── */
 .szl-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.2) 30%, rgba(201, 169, 110, 0.2) 70%, transparent);
+  background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.18) 30%, rgba(201, 169, 110, 0.18) 70%, transparent);
 }
 
-/* Ecosystem section label */
+/* ─── Eyebrow label ─── */
 .szl-eyebrow {
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-szl-accent);
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-/* Ecosystem node — for ecosystem map visual */
-.ecosystem-node {
-  background: var(--color-szl-surface);
-  border: 1px solid var(--color-szl-border);
-  transition: border-color 0.2s ease;
+/* ─── Glow hover for accent borders ─── */
+.szl-glow-accent:hover {
+  box-shadow: 0 0 16px hsla(38, 55%, 60%, 0.12), 0 2px 16px rgba(0, 0, 0, 0.3);
 }
-.ecosystem-node:hover {
-  border-color: rgba(201, 169, 110, 0.3);
+.szl-glow-lyte:hover {
+  box-shadow: 0 0 16px hsla(192, 80%, 48%, 0.14), 0 2px 16px rgba(0, 0, 0, 0.3);
+}
+.szl-glow-vessels:hover {
+  box-shadow: 0 0 16px hsla(210, 78%, 44%, 0.14), 0 2px 16px rgba(0, 0, 0, 0.3);
+}
+.szl-glow-alloy:hover {
+  box-shadow: 0 0 16px hsla(222, 68%, 58%, 0.14), 0 2px 16px rgba(0, 0, 0, 0.3);
 }
 
-/* Badge system */
+/* ─── Badge system ─── */
 .szl-badge {
-  background: rgba(201, 169, 110, 0.1);
-  border: 1px solid rgba(201, 169, 110, 0.2);
+  background: rgba(201, 169, 110, 0.08);
+  border: 1px solid rgba(201, 169, 110, 0.18);
   color: var(--color-szl-accent-light);
   font-size: 0.6875rem;
   font-weight: 500;
@@ -136,32 +162,137 @@ body {
   border-radius: 0.125rem;
 }
 
+/* ─── Metric mono display ─── */
+.szl-metric {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--color-szl-text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.szl-metric-sm {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+/* ─── Status pulse dot ─── */
+.szl-pulse-green {
+  position: relative;
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+}
+.szl-pulse-green::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: hsl(142, 64%, 42%);
+  animation: pulse-ring 2s ease-out infinite;
+}
+.szl-pulse-green::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 50%;
+  background: hsl(142, 64%, 52%);
+}
+
+/* ─── Glassmorphic nav surface ─── */
+.szl-glass {
+  background: hsla(214, 14%, 5%, 0.85);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid var(--color-szl-border);
+}
+
+/* ─── Command grid background texture ─── */
+.szl-grid-texture {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ─── Particle canvas overlay ─── */
+.szl-particle-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+/* ─── Radial depth glow ─── */
+.szl-depth-glow-gold {
+  background: radial-gradient(ellipse at 50% 0%, hsla(38, 55%, 60%, 0.07) 0%, transparent 65%);
+}
+.szl-depth-glow-blue {
+  background: radial-gradient(ellipse at 50% 0%, hsla(218, 72%, 52%, 0.07) 0%, transparent 65%);
+}
+.szl-depth-glow-lyte {
+  background: radial-gradient(ellipse at 50% 0%, hsla(192, 80%, 48%, 0.06) 0%, transparent 60%);
+}
+.szl-depth-glow-vessels {
+  background: radial-gradient(ellipse at 50% 0%, hsla(210, 78%, 44%, 0.06) 0%, transparent 60%);
+}
+
+/* ─── Keyframe animations ─── */
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fade-in {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
 }
-@keyframes ecosystem-drift {
-  0%, 100% { transform: translateY(0); opacity: 0.7; }
-  50% { transform: translateY(-3px); opacity: 1; }
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 0.8; }
+  70%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
-@keyframes constellation-link {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.6; }
+@keyframes data-pulse {
+  0%, 100% { opacity: 0.3; transform: scaleX(0.95); }
+  50%       { opacity: 1; transform: scaleX(1); }
+}
+@keyframes grid-scan {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+@keyframes node-drift {
+  0%, 100% { transform: translateY(0px); opacity: 0.7; }
+  50%       { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes border-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(201, 169, 110, 0.1); }
+  50%       { box-shadow: 0 0 20px rgba(201, 169, 110, 0.22); }
+}
+@keyframes link-pulse {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.55; }
 }
 
-.animate-fade-in-up { animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-fade-in { animation: fade-in 0.45s ease-out both; }
-.animate-scale-in { animation: scale-in 0.45s ease-out both; }
-.animate-ecosystem-drift { animation: ecosystem-drift 6s ease-in-out infinite; }
-.animate-constellation-link { animation: constellation-link 4s ease-in-out infinite; }
+.animate-fade-in-up       { animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in          { animation: fade-in 0.45s ease-out both; }
+.animate-scale-in         { animation: scale-in 0.45s ease-out both; }
+.animate-node-drift       { animation: node-drift 6s ease-in-out infinite; }
+.animate-link-pulse       { animation: link-pulse 4s ease-in-out infinite; }
+.animate-data-pulse       { animation: data-pulse 2.4s ease-in-out infinite; }
+.animate-border-glow      { animation: border-glow 3s ease-in-out infinite; }
+.animate-count-up         { animation: count-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 .stagger-1 { animation-delay: 0.06s; }
 .stagger-2 { animation-delay: 0.12s; }
@@ -169,6 +300,8 @@ body {
 .stagger-4 { animation-delay: 0.24s; }
 .stagger-5 { animation-delay: 0.30s; }
 .stagger-6 { animation-delay: 0.36s; }
+.stagger-7 { animation-delay: 0.42s; }
+.stagger-8 { animation-delay: 0.48s; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
