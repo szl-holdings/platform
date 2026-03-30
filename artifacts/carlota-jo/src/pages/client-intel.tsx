@@ -203,7 +203,7 @@ function SocialListeningPanel() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2"><Globe className="w-4 h-4 text-primary" /> Social Listening Dashboard</CardTitle>
-          <Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20">Brandwatch-style · Mock Data</Badge>
+          <Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20">Simulated Brandwatch Feed</Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -244,7 +244,7 @@ function CompetitiveBenchmarkPanel() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2"><Target className="w-4 h-4 text-primary" /> Competitive Benchmarking</CardTitle>
-          <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Mock Industry Data</Badge>
+          <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Industry Benchmark</Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -286,7 +286,7 @@ function CampaignROIPanel() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2"><Award className="w-4 h-4 text-primary" /> Campaign ROI Attribution</CardTitle>
-          <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Mock Data</Badge>
+          <Badge variant="outline" className="text-[10px] bg-muted text-muted-foreground">Simulated</Badge>
         </div>
       </CardHeader>
       <CardContent>

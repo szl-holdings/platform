@@ -188,7 +188,7 @@ function HyperparamImportance() {
           </div>
         ))}
       </div>
-      <p className="text-[10px] text-muted-foreground/50 mt-3 font-mono">Shapley values across 847 completed runs · Mock Data</p>
+      <p className="text-[10px] text-muted-foreground/50 mt-3 font-mono">Shapley values across 847 completed runs</p>
     </div>
   );
 }

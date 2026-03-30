@@ -41,7 +41,7 @@ export default function AlertsManagement() {
             <BellRing className="w-6 h-6 text-primary" />
             Alerts Management
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Monitor and manage model alerts, drift notifications, and pipeline events</p>
+          <p className="text-sm text-muted-foreground mt-1">Drift alerts, pipeline failure notifications, and threshold-triggered events across all active models</p>
         </div>
         <div className="flex items-center gap-3">
           {criticalCount > 0 && (

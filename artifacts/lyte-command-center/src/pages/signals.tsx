@@ -69,7 +69,7 @@ export default function Signals() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h2 className="text-3xl font-display font-bold text-white mb-2">Signal Ingestion</h2>
-          <p className="text-slate-400">Real-time normalized events across infrastructure.</p>
+          <p className="text-slate-400">Correlated, normalized event stream across all infrastructure layers — triaged by severity, ready for action.</p>
         </motion.div>
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3">
           {criticalCount > 0 && (

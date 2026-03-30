@@ -165,7 +165,7 @@ export default function Experiments() {
     <div className="p-6 lg:p-8 space-y-5 max-w-[1200px]">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">Experiments</h1>
-        <p className="text-sm text-muted-foreground mt-1">Track hypotheses, metrics, and training results</p>
+        <p className="text-sm text-muted-foreground mt-1">Compare training runs, validate hypotheses, and surface the experiments that advance model performance</p>
       </div>
 
       <div className="flex flex-wrap gap-2">

@@ -181,7 +181,7 @@ function MASignalsPanel() {
           <CardTitle className="text-sm text-szl-text flex items-center gap-2">
             <GitMerge className="w-4 h-4 text-szl-accent" /> M&A Pipeline Intelligence
           </CardTitle>
-          <Badge variant="outline" className="text-[10px] bg-szl-accent/10 text-szl-accent border-szl-accent/20">Mock Data</Badge>
+          <Badge variant="outline" className="text-[10px] bg-szl-accent/10 text-szl-accent border-szl-accent/20">Simulated</Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -234,7 +234,7 @@ function IRRModelPanel() {
             {(["bear", "base", "bull"] as const).map(s => (
               <button key={s} onClick={() => setScenario(s)} className={`text-[10px] px-2 py-1 rounded-lg transition-colors capitalize ${scenario === s ? "bg-szl-accent text-white" : "bg-black/20 text-szl-text-secondary hover:text-szl-text"}`}>{s}</button>
             ))}
-            <Badge variant="outline" className="text-[10px] bg-muted/20 text-szl-text-secondary border-szl-border ml-2">Mock Data</Badge>
+            <Badge variant="outline" className="text-[10px] bg-muted/20 text-szl-text-secondary border-szl-border ml-2">Simulated</Badge>
           </div>
         </div>
       </CardHeader>

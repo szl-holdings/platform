@@ -48,7 +48,7 @@ export default function Dispatch() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold">Technician Dispatch</h1>
-        <p className="text-sm text-muted-foreground mt-1">Field technician management and job assignment</p>
+        <p className="text-sm text-muted-foreground mt-1">Onsite job scheduling, technician routing, and field service coordination</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">

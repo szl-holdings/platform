@@ -116,7 +116,7 @@ export default function ServiceDeskPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Service Desk</h1>
-          <p className="text-sm text-muted-foreground mt-1">Ticket management and priority queue</p>
+          <p className="text-sm text-muted-foreground mt-1">SLA-tracked ticket queue with priority escalation and technician assignment</p>
         </div>
         <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
           <Plus className="w-4 h-4" /> New Ticket

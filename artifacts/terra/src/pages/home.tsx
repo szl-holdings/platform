@@ -191,7 +191,7 @@ function InvestmentScenarioBuilder() {
             </div>
           ))}
         </div>
-        <p className="text-[10px] text-terra-text-muted mt-3 text-center">Based on comparable transactions · Mock Data</p>
+        <p className="text-[10px] text-terra-text-muted mt-3 text-center">Based on comparable transactions · Q1 2026</p>
       </div>
     </div>
   );

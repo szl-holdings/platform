@@ -161,7 +161,7 @@ export default function VesselDetailPage() {
                     <div>
                       <p className="font-semibold text-sm">{route.originPort} → {route.destinationPort}</p>
                       <p className="text-xs text-muted-foreground">
-                        {route.departureAt ? new Date(route.departureAt).toLocaleDateString() : "TBD"} — {route.arrivalAt ? new Date(route.arrivalAt).toLocaleDateString() : "TBD"}
+                        {route.departureAt ? new Date(route.departureAt).toLocaleDateString() : "Unscheduled"} — {route.arrivalAt ? new Date(route.arrivalAt).toLocaleDateString() : "Pending ETA"}
                         {route.distanceNm ? ` | ${Number(route.distanceNm).toLocaleString()} nm` : ""}
                       </p>
                     </div>

@@ -197,7 +197,7 @@ function DemoModeBanner() {
   return (
     <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center gap-2">
       <Server className="w-4 h-4 text-amber-400" />
-      <span className="text-xs text-amber-400 font-medium">Demo Mode Active</span>
+      <span className="text-xs text-amber-400 font-medium">Sandbox Environment</span>
       <span className="text-xs text-amber-400/60">— {data.demoCount} of {data.total} integrations using simulated data</span>
     </div>
   );

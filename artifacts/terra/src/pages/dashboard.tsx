@@ -50,7 +50,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-display font-bold text-terra-text">Portfolio Dashboard</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Real-time overview of your real estate portfolio</p>
+            <p className="text-sm text-terra-text-secondary mt-1">Unified view of portfolio value, occupancy, cap rates, and asset-level performance signals</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-terra-text-muted uppercase tracking-wider mb-1">Monthly Revenue</p>

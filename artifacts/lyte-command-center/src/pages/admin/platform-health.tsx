@@ -23,7 +23,7 @@ function AppCard({ slug }: { slug: string }) {
   });
 
   const status = !data ? "unknown" : data.summary.manualRequired > 0 ? "needs_config" : data.summary.mockedDemoMode > 0 ? "demo" : "live";
-  const statusText = { live: "Live", demo: "Demo Mode", needs_config: "Needs Config", unknown: "Loading" }[status];
+  const statusText = { live: "Live", demo: "Sandbox", needs_config: "Needs Config", unknown: "Loading" }[status];
   const statusColor = { live: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", demo: "text-amber-400 bg-amber-500/10 border-amber-500/20", needs_config: "text-red-400 bg-red-500/10 border-red-500/20", unknown: "text-muted-foreground bg-muted border-border" }[status];
   const StatusIcon = { live: CheckCircle, demo: AlertTriangle, needs_config: WifiOff, unknown: Server }[status];
 

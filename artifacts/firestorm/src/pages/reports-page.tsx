@@ -58,7 +58,7 @@ export default function ReportsPage() {
     <div className="p-6 space-y-6">
       <div className="animate-fade-in-up">
         <h1 className="font-display text-2xl font-bold">Executive Reports</h1>
-        <p className="text-sm text-muted-foreground mt-1">Generate comprehensive security assessment reports</p>
+        <p className="text-sm text-muted-foreground mt-1">Executive-ready assessment reports with CVSS scoring, remediation timelines, and compliance evidence</p>
       </div>
 
       <Card className="bg-card border-border animate-fade-in-up stagger-1">

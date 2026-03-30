@@ -391,7 +391,7 @@ export default function SOCDashboard() {
             <Flame className="w-4.5 h-4.5 text-red-400" />
             Security Operations Center
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Real-time threat detection and response</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Continuous threat detection, incident triage, and coordinated response across all monitored environments</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[11px]">

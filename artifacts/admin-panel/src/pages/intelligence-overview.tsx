@@ -36,7 +36,7 @@ export default function IntelligenceOverview() {
           <h1 className="text-xl font-semibold flex items-center gap-2">
             <Brain className="w-5 h-5 text-primary" /> Intelligence Overview
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Global threat intelligence aggregation and platform-wide analytics</p>
+          <p className="text-sm text-muted-foreground mt-1">Cross-portfolio threat signals, anomaly correlation, and intelligence fusion across all SZL verticals</p>
         </div>
         <span className="inline-flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20 animate-pulse">
           <Radio className="w-3 h-3" /> All Systems Live

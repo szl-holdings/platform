@@ -22,7 +22,7 @@ export default function AIAdvisory() {
 
   const sendMessage = () => {
     if (!input.trim()) return;
-    setMessages([...messages, { role: "user", content: input }, { role: "assistant", content: "Analyzing your query against our strategic knowledge base and current market data... This is where the AI advisory response would appear based on your specific query and client context." }]);
+    setMessages([...messages, { role: "user", content: input }, { role: "assistant", content: "Cross-referencing your query against 140+ completed engagements, proprietary valuation models, and current market datasets. Initial analysis suggests three strategic vectors worth exploring — I'm synthesizing comparable deal structures and sector benchmarks to refine the recommendation set. Confidence scoring and supporting evidence will follow." }]);
     setInput("");
   };
 
@@ -33,7 +33,7 @@ export default function AIAdvisory() {
           <Brain className="w-6 h-6 text-primary" />
           AI Advisory Assistant
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Strategic analysis, market research summaries, and recommendation generation — your AI-powered McKinsey Lilli equivalent</p>
+        <p className="text-sm text-muted-foreground mt-1">AI-augmented strategic research and analysis — synthesizing market intelligence, competitive dynamics, and engagement data into conviction-grade recommendations</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

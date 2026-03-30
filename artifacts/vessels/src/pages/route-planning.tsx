@@ -93,7 +93,7 @@ export default function RoutePlanningPage() {
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Route Planning</h1>
-          <p className="text-sm text-muted-foreground mt-1">Plan and manage vessel routes with waypoints</p>
+          <p className="text-sm text-muted-foreground mt-1">Voyage planning with waypoint optimization, ETA forecasting, and weather-adjusted routing</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

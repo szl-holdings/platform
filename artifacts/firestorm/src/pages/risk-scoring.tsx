@@ -173,7 +173,7 @@ export default function RiskScoringPage() {
     <div className="p-6 space-y-6">
       <div className="animate-fade-in-up">
         <h1 className="font-display text-2xl font-bold">Risk Scoring</h1>
-        <p className="text-sm text-muted-foreground mt-1">Aggregate risk scores across assessments and categories</p>
+        <p className="text-sm text-muted-foreground mt-1">Weighted risk scores by category, assessment rollup, and remediation priority ranking</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

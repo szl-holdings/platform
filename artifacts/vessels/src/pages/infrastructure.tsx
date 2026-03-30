@@ -52,7 +52,7 @@ export default function InfrastructurePage() {
         <h1 className="font-display text-2xl font-bold flex items-center gap-2">
           <Cog className="w-6 h-6 text-primary" /> Infrastructure
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Engine systems, hull condition, and maintenance backlog tracking</p>
+        <p className="text-sm text-muted-foreground mt-1">Main engine telemetry, hull fouling index, dry-dock schedules, and predictive maintenance alerts</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">

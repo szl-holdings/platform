@@ -37,7 +37,7 @@ export default function FinancialResearch() {
               <BarChart3 className="w-8 h-8 text-primary" />
               Financial Research
             </h1>
-            <p className="text-muted-foreground mt-1">Market analysis, portfolio tracking, and investment research</p>
+            <p className="text-muted-foreground mt-1">Equity screening, sector allocation modeling, and thesis-driven research notes</p>
           </div>
           <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

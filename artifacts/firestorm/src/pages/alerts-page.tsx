@@ -80,7 +80,7 @@ export default function AlertsPage() {
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
             <Bell className="w-6 h-6 text-primary" /> Alert Center
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Security alerts and notification management</p>
+          <p className="text-sm text-muted-foreground mt-1">Correlated security alerts with severity triage, acknowledgment tracking, and escalation rules</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

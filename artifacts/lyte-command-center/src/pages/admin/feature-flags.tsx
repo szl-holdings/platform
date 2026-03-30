@@ -49,7 +49,7 @@ export default function FeatureFlags() {
     <div className="space-y-5">
       <div>
         <h1 className="text-xl font-display font-bold flex items-center gap-2"><Flag className="w-5 h-5 text-primary" />Feature Flags</h1>
-        <p className="text-xs text-muted-foreground mt-1">Toggle features and control rollout percentages in real-time</p>
+        <p className="text-xs text-muted-foreground mt-1">Feature rollout controls with per-category targeting and percentage-based gates</p>
       </div>
 
       {error ? (

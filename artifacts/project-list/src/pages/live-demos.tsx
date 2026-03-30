@@ -21,7 +21,7 @@ export function LiveDemos() {
           <Play className="w-6 h-6 text-primary" />
           Live Demos
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">Interactive previews of each platform application</p>
+        <p className="text-sm text-muted-foreground mt-1">Live-rendered previews of each portfolio application running against demo data</p>
       </div>
 
       <div className="grid grid-cols-2 gap-6">

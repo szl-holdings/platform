@@ -63,7 +63,7 @@ export default function AdminOverview() {
           <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
             <Server className="w-5 h-5 text-primary" /> Administration Overview
           </h1>
-          <p className="text-xs text-muted-foreground mt-1">Live system health and infrastructure metrics</p>
+          <p className="text-xs text-muted-foreground mt-1">Runtime health, heap utilization, database connectivity, and app registry status</p>
         </div>
         <div className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5" />

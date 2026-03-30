@@ -46,7 +46,7 @@ export default function SentinelDashboard() {
           <h1 className="text-2xl font-display font-bold flex items-center gap-2">
             <Shield className="w-6 h-6 text-primary" /> Sentinel Threat Watch
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time threat detection and continuous monitoring</p>
+          <p className="text-sm text-muted-foreground mt-1">Continuous threat detection across endpoints, identity, and cloud — correlated alerts with MITRE mapping</p>
         </div>
         <div className="flex items-center gap-2 text-xs">
           <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />

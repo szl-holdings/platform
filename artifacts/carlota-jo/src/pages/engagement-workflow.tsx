@@ -6,7 +6,7 @@ import { Briefcase, CheckCircle, Clock, ArrowRight, FileText, Users, DollarSign,
 const engagements = [
   { id: "ENG-001", client: "Apex Capital Partners", type: "Growth Strategy", stage: "Delivery", value: "$240K", started: "Jan 15, 2026", due: "Apr 30, 2026", health: "Green", pm: "C. Martinez", team: 4, completion: 68 },
   { id: "ENG-002", client: "NovaTech Industries", type: "Market Entry", stage: "Discovery", value: "$85K", started: "Mar 1, 2026", due: "May 15, 2026", health: "Green", pm: "L. Park", team: 2, completion: 22 },
-  { id: "ENG-003", client: "Summit Healthcare", type: "Operational Excellence", stage: "Proposal", value: "$165K", started: "Mar 20, 2026", due: "TBD", health: "Yellow", pm: "C. Martinez", team: 3, completion: 5 },
+  { id: "ENG-003", client: "Summit Healthcare", type: "Operational Excellence", stage: "Proposal", value: "$165K", started: "Mar 20, 2026", due: "Jun 30, 2026", health: "Yellow", pm: "C. Martinez", team: 3, completion: 5 },
   { id: "ENG-004", client: "Pacific Ventures", type: "M&A Due Diligence", stage: "SOW Review", value: "$320K", started: "Mar 28, 2026", due: "Jun 15, 2026", health: "Green", pm: "R. Santos", team: 5, completion: 2 },
 ];
 

@@ -37,7 +37,7 @@ export default function Benchmarking() {
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <Trophy className="w-6 h-6 text-amber-400" /> AI Model Benchmarking
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Compare model performance across standard benchmarks</p>
+        <p className="text-sm text-muted-foreground mt-1">Head-to-head model evaluation on industry-standard benchmarks — accuracy, latency, and throughput profiling</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">

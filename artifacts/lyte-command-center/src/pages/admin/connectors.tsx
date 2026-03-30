@@ -64,7 +64,7 @@ export default function Connectors() {
             {[
               { label: "Total", value: summary.total, color: "text-foreground" },
               { label: "Live", value: summary.liveConfigured, color: "text-emerald-400" },
-              { label: "Demo Mode", value: summary.mockedDemoMode, color: "text-amber-400" },
+              { label: "Sandbox", value: summary.mockedDemoMode, color: "text-amber-400" },
               { label: "Needs Config", value: summary.manualRequired, color: "text-red-400" },
             ].map(({ label, value, color }) => (
               <div key={label} className="rounded-xl border border-border bg-card p-4">

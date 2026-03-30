@@ -69,7 +69,7 @@ export default function IncidentsPage() {
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">
             <Shield className="w-6 h-6 text-primary" /> Incident Response
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage security incidents through their lifecycle</p>
+          <p className="text-sm text-muted-foreground mt-1">Incident triage, containment actions, root cause tracking, and post-incident review workflows</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex bg-muted rounded-lg p-0.5">

@@ -64,7 +64,7 @@ export default function NOCPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">NOC Operations</h1>
-          <p className="text-sm text-muted-foreground mt-1">Network Operations Center — Real-time monitoring</p>
+          <p className="text-sm text-muted-foreground mt-1">Network Operations Center — infrastructure uptime, alert triage, and incident correlation</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

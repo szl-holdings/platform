@@ -58,7 +58,7 @@ export default function Tickets() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold">Service Desk</h1>
-          <p className="text-sm text-muted-foreground mt-1">Ticket management with SLA tracking</p>
+          <p className="text-sm text-muted-foreground mt-1">Open tickets, SLA countdown timers, and escalation status across all client accounts</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
           <Plus className="w-4 h-4" /> New Ticket

@@ -25,7 +25,7 @@ export default function DigitalExperiencePage() {
         <h1 className="font-display text-2xl font-bold flex items-center gap-2">
           <Package className="w-6 h-6 text-primary" /> Digital Experience
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Shipment tracking, delivery reliability, and customer satisfaction metrics</p>
+        <p className="text-sm text-muted-foreground mt-1">Cargo visibility scores, on-time delivery rates, and charterer satisfaction benchmarks</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in-up stagger-1">

@@ -103,7 +103,7 @@ export default function SimulationsPage() {
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold">Simulations</h1>
-          <p className="text-sm text-muted-foreground mt-1">Run route risk assessments and impact analyses</p>
+          <p className="text-sm text-muted-foreground mt-1">Monte Carlo route simulations, fuel consumption modeling, and risk scenario analysis</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

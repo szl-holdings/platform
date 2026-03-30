@@ -82,8 +82,8 @@ export default function Incidents() {
 
   const handleCreate = () => {
     createMutation.mutate({
-      title: "New Automated Incident",
-      description: "Generated placeholder incident.",
+      title: "New Incident",
+      description: "Incident opened manually. Update with affected services, observed symptoms, and initial scope assessment.",
       severity: "medium",
       assignee: "Unassigned",
     });
@@ -104,7 +104,7 @@ export default function Incidents() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h2 className="text-3xl font-display font-bold text-white mb-2">Incident Tracker</h2>
-          <p className="text-slate-400">Track and manage operational issues to resolution.</p>
+          <p className="text-slate-400">End-to-end incident lifecycle management — triage, escalate, and drive resolution with full audit trail.</p>
         </motion.div>
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3 w-full md:w-auto items-center">
           <div className="flex items-center gap-2 text-xs">

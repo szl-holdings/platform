@@ -35,7 +35,7 @@ export default function LoadTestDashboard() {
           <Gauge className="w-5 h-5 text-primary" />
           Load Test Dashboard
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Configure and run load tests against the platform API</p>
+        <p className="text-sm text-muted-foreground mt-1">Concurrent user simulation, throughput profiling, and p99 latency analysis against platform endpoints</p>
       </div>
 
       <div className="bg-card border border-border rounded-xl p-5">

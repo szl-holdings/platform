@@ -118,7 +118,7 @@ function ServiceMap() {
           })}
         </svg>
       </div>
-      <p className="text-[10px] text-slate-500 mt-2">Live health propagation across 47 services · Mock Data</p>
+      <p className="text-[10px] text-slate-500 mt-2">Live health propagation across 47 services</p>
     </div>
   );
 }

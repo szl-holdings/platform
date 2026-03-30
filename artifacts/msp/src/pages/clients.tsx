@@ -103,7 +103,7 @@ export default function ClientsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Client Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">Monitor and manage all your MSP clients</p>
+          <p className="text-sm text-muted-foreground mt-1">Client health, contract status, and endpoint coverage across all managed accounts</p>
         </div>
         <button className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
           <Plus className="w-4 h-4" /> Add Client

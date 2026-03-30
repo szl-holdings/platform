@@ -28,7 +28,7 @@ export default function NeuralExplorer() {
         <h1 className="text-2xl font-display font-bold flex items-center gap-2">
           <Brain className="w-6 h-6 text-primary" /> Neural Architecture Explorer
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">Explore, visualize, and compare model architectures</p>
+        <p className="text-sm text-muted-foreground mt-1">Layer-by-layer architecture inspection, parameter counts, and topology comparison across model families</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">

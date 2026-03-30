@@ -96,7 +96,7 @@ export default function AlertCenterPage() {
     <div className="p-6 space-y-6">
       <div className="animate-fade-in-up">
         <h1 className="font-display text-2xl font-bold">Alert Center</h1>
-        <p className="text-sm text-muted-foreground mt-1">Monitor triggered alerts and manage alert rules</p>
+        <p className="text-sm text-muted-foreground mt-1">Active alert stream, rule configuration, and escalation thresholds across fleet operations</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

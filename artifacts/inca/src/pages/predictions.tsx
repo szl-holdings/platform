@@ -34,7 +34,7 @@ export default function Predictions() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Predictions Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">Real-time predictive model outputs and validation tracking</p>
+          <p className="text-sm text-muted-foreground mt-1">Live inference outputs, prediction accuracy scoring, and ground-truth validation across deployed models</p>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

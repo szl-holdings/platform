@@ -117,7 +117,7 @@ export default function WeatherPage() {
       <div className="animate-fade-in-up flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">Weather Impact</h1>
-          <p className="text-sm text-muted-foreground mt-1">Weather conditions and risk analysis along active routes</p>
+          <p className="text-sm text-muted-foreground mt-1">Sea state forecasts, wind and wave conditions, and storm avoidance routing for active voyages</p>
         </div>
         <LiveDataBadge isLive={marineIsLive} isLoading={marineLoading} />
       </div>
