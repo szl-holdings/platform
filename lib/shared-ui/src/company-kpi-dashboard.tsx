@@ -100,7 +100,7 @@ export const DEMO_COMPANY_KPIS: CompanyKPI[] = [
     change: -61,
     changeLabel: "vs 30d ago",
     lane: "company",
-    description: "P95 end-to-end workflow execution latency across AlloyScape",
+    description: "P95 end-to-end workflow execution latency across Alloy",
   },
   {
     id: "approval-latency",

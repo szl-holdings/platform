@@ -22,7 +22,7 @@ export default function ExecutionRuns() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Activity className="w-4 h-4" style={{ color: "#00d4ff" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>AlloyScape · Execution Runs</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>Alloy · Execution Runs</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Execution Runs</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Live and historical workflow runs with step-level visibility, retry logic, and exception handling.</p>

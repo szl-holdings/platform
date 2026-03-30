@@ -27,7 +27,7 @@ const PROJECT_RISK_SCORES = [
   { name: "Vessels", score: 22, tooltip: "Low risk - stable maritime ops, monitored AIS feeds" },
   { name: "Firestorm", score: 68, tooltip: "Elevated - 3 critical CVEs detected, patch cycle pending" },
   { name: "Lyte", score: 35, tooltip: "Moderate - normal signal processing, SLA at 98.4%" },
-  { name: "Nimbus", score: 15, tooltip: "Minimal - prediction pipeline healthy, no anomalies" },
+  { name: "Alloy", score: 15, tooltip: "Minimal - execution engine healthy, no anomalies" },
   { name: "Aegis", score: 42, tooltip: "Moderate - 2 compliance dimensions below industry avg" },
   { name: "Admin", score: 28, tooltip: "Low - all integrations healthy, no audit flags" },
   { name: "Stephen Site", score: 12, tooltip: "Minimal - portfolio site stable, uptime 99.99%" },

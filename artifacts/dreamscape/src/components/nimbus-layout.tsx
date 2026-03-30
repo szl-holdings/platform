@@ -19,7 +19,7 @@ const NAV = [
   { href: "/forecasting", label: "Forecasting Center", icon: TrendingUp },
 ];
 
-export function NimbusLayout({ children }: { children: ReactNode }) {
+export function NimbusLayout({ children }: { children: ReactNode }) { 
   const [location] = useLocation();
 
   return (
@@ -31,7 +31,7 @@ export function NimbusLayout({ children }: { children: ReactNode }) {
               <Brain className="w-4 h-4 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm tracking-wide text-white leading-none">NIMBUS</span>
+              <span className="font-bold text-sm tracking-wide text-white leading-none">ALLOY</span>
               <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#8b5cf6" }}>Predictive Intelligence</span>
             </div>
           </div>

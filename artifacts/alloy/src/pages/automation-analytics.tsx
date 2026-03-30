@@ -34,7 +34,7 @@ export default function AutomationAnalytics() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <BarChart2 className="w-4 h-4" style={{ color: "#00d4ff" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>AlloyScape · Automation Analytics</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>Alloy · Automation Analytics</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Automation Analytics</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Execution volume, success rates, connector performance, and automation ROI across all workflows.</p>

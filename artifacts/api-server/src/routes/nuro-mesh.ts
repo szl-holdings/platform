@@ -32,7 +32,7 @@ export interface AgentDefinition {
 export const AGENT_REGISTRY: AgentDefinition[] = [
   {
     id: "alloy",
-    name: "AlloyScape",
+    name: "Alloy",
     domain: "orchestration",
     preferredModel: "gpt-5.2",
     preferredProvider: "openai",

@@ -6,12 +6,12 @@ import { useState } from "react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const companies = [
+  { name: "Alloy", vertical: "Execution Fabric · ENGINE", stage: "Core Platform", arr: "$5.1M", growth: "+148%", employees: 22, valuation: "$42M", status: "Outperforming", icon: Brain, color: "#6366f1" },
+  { name: "Lyte", vertical: "AIOps · Powered by Alloy", stage: "Growth", arr: "$4.2M", growth: "+93%", employees: 41, valuation: "$35M", status: "Outperforming", icon: Zap, color: "#f59e0b" },
+  { name: "Vessels", vertical: "Maritime Intelligence · Powered by Alloy", stage: "Series A", arr: "$1.2M", growth: "+48%", employees: 22, valuation: "$14M", status: "Performing", icon: Globe, color: "#3b82f6" },
   { name: "Firestorm", vertical: "Cybersecurity", stage: "Growth", arr: "$2.4M", growth: "+84%", employees: 28, valuation: "$18M", status: "Performing", icon: Shield, color: "#ef4444" },
   { name: "INCA", vertical: "AI / ML Research", stage: "Series A", arr: "$1.8M", growth: "+112%", employees: 19, valuation: "$22M", status: "Outperforming", icon: Brain, color: "#8b5cf6" },
   { name: "Beacon", vertical: "Business Telemetry · OBSERVE", stage: "Growth", arr: "$3.1M", growth: "+61%", employees: 34, valuation: "$28M", status: "Performing", icon: Building2, color: "#0ea5e9" },
-  { name: "Vessels", vertical: "Maritime Tech", stage: "Series A", arr: "$1.2M", growth: "+48%", employees: 22, valuation: "$14M", status: "Performing", icon: Globe, color: "#3b82f6" },
-  { name: "Lyte", vertical: "AIOps", stage: "Growth", arr: "$4.2M", growth: "+93%", employees: 41, valuation: "$35M", status: "Outperforming", icon: Zap, color: "#f59e0b" },
-  { name: "Nimbus", vertical: "Predictive Intel · UNDERSTAND", stage: "Seed+", arr: "$680K", growth: "+220%", employees: 11, valuation: "$8M", status: "Scaling", icon: Brain, color: "#ec4899" },
 ];
 
 const portfolioValue = [
@@ -20,12 +20,12 @@ const portfolioValue = [
 ];
 
 const sectorAllocation = [
-  { name: "AIOps", value: 25, color: "#f59e0b" },
-  { name: "Business Intel", value: 20, color: "#0ea5e9" },
-  { name: "Cybersecurity", value: 18, color: "#ef4444" },
-  { name: "AI Research", value: 17, color: "#8b5cf6" },
-  { name: "Maritime", value: 10, color: "#3b82f6" },
-  { name: "Prediction", value: 10, color: "#ec4899" },
+  { name: "Execution Engine", value: 30, color: "#6366f1" },
+  { name: "AIOps", value: 22, color: "#f59e0b" },
+  { name: "Business Intel", value: 18, color: "#0ea5e9" },
+  { name: "Cybersecurity", value: 15, color: "#ef4444" },
+  { name: "AI Research", value: 9, color: "#8b5cf6" },
+  { name: "Maritime", value: 6, color: "#3b82f6" },
 ];
 
 const statusStyle: Record<string, string> = {
@@ -56,7 +56,7 @@ export default function PortfolioIntel() {
         <div className="grid grid-cols-4 gap-4">
           {[
             { label: "Portfolio Value", value: "$185M", sub: "2026 estimate", color: "text-szl-accent" },
-            { label: "Total ARR", value: `$${totalARR.toFixed(1)}M`, sub: "Across 6 companies", color: "text-emerald-400" },
+            { label: "Total ARR", value: `$${totalARR.toFixed(1)}M`, sub: "Across 6 platforms", color: "text-emerald-400" },
             { label: "Avg Growth Rate", value: "103%", sub: "YoY ARR growth", color: "text-emerald-400" },
             { label: "Portfolio Employees", value: "155", sub: "+42 this year", color: "text-szl-text" },
           ].map(({ label, value, sub, color }) => (
@@ -213,12 +213,12 @@ function MASignalsPanel() {
 
 // ─── IRR Model ────────────────────────────────────────────────────────────────
 const irrData = [
+  { company: "Alloy", invested: 3.2, currentVal: 42, moic: 13.1, irr: 148, stage: "Core Platform" },
   { company: "Lyte", invested: 4.2, currentVal: 35, moic: 8.3, irr: 94, stage: "Growth" },
   { company: "INCA", invested: 2.1, currentVal: 22, moic: 10.5, irr: 112, stage: "Series A" },
   { company: "Beacon", invested: 3.8, currentVal: 28, moic: 7.4, irr: 78, stage: "Growth" },
   { company: "Firestorm", invested: 2.5, currentVal: 18, moic: 7.2, irr: 84, stage: "Growth" },
   { company: "Vessels", invested: 1.8, currentVal: 14, moic: 7.8, irr: 61, stage: "Series A" },
-  { company: "Nimbus", invested: 0.4, currentVal: 8, moic: 20.0, irr: 220, stage: "Seed+" },
 ];
 
 function IRRModelPanel() {

@@ -15,7 +15,7 @@ const pdfGuides = [
 const screenshots = [
   { name: "Firestorm SOC Dashboard", app: "Firestorm", description: "Security Operations Center with live threat map and alert feed" },
   { name: "INCA Research Command", app: "INCA", description: "AI Research dashboard with model health scores and experiment tracking" },
-  { name: "Nimbus Prediction Studio", app: "Nimbus", description: "Predictive intelligence with scenario modeling and confidence scoring" },
+  { name: "Alloy Prediction Studio", app: "Alloy", description: "Predictive intelligence with scenario modeling and confidence scoring" },
   { name: "Beacon Intelligence Map", app: "Beacon", description: "Business telemetry with KPI drift detection and market signals" },
   { name: "Vessels Maritime", app: "Vessels", description: "Maritime intelligence dashboard with fleet tracking" },
   { name: "Lyte Command Center", app: "Lyte", description: "Business operations command center with signal feed" },

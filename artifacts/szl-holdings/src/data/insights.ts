@@ -89,8 +89,8 @@ Vessels has the most patient capital profile in our portfolio and the largest lo
 ### Beacon — Business Telemetry · OBSERVE
 $3.1M ARR. 34 enterprise clients. The business observability market is undergoing its most significant technology adoption cycle since Splunk. Beacon's continuous telemetry and anomaly detection suite are genuinely differentiated. The pipeline for 2026 includes a Business Telemetry API public launch and two potential platform license deals with institutional operators.
 
-### Nimbus — Predictive Intelligence · UNDERSTAND
-Nimbus is attacking the decision intelligence market — the enterprise vertical that still relies on manual scenario analysis and disconnected forecasting tools. AI-native scenario modeling, confidence scoring, and assumption tracking are the core thesis. Early signals from strategic planning and operations teams are strong.
+### Alloy — Execution Fabric · ENGINE
+Alloy is the platform backbone powering Lyte, Vessels, and every SZL subsidiary — orchestrating connectors, DAGs, automations, and the predictive intelligence layer. Scenario modeling, confidence scoring, and agent coordination are core capabilities embedded directly into the execution layer.
 
 ## The Forward Thesis
 
@@ -378,9 +378,9 @@ What those platforms did not anticipate was the degree to which creative product
 
 ## The AI-Native Creative Architecture
 
-Nimbus is built for the decision-making environment that actually exists in 2026, not the one that enterprise analytics was designed for in 2015.
+Alloy is built for the execution environment that actually exists in 2026, not the one that enterprise analytics was designed for in 2015.
 
-**Intelligence is embedded in the workflow, not adjacent to it.** Rather than exporting performance data from one system, analyzing it in another, and manually applying insights back into a third system, Nimbus maintains a connected intelligence layer across the full decision lifecycle. The scenario that goes into the system is informed by confidence scores from similar past scenarios. The predictions generated are ranked by modeled confidence and assumption sensitivity against the target outcome. The review and approval workflow surfaces model drift and assumption risk before the decision-maker sees the final recommendation, not after.
+**Intelligence is embedded in the workflow, not adjacent to it.** Rather than exporting performance data from one system, analyzing it in another, and manually applying insights back into a third system, Alloy maintains a connected intelligence layer across the full decision lifecycle. The scenario that goes into the system is informed by confidence scores from similar past scenarios. The predictions generated are ranked by modeled confidence and assumption sensitivity against the target outcome. The review and approval workflow surfaces model drift and assumption risk before the decision-maker sees the final recommendation, not after.
 
 **Brand governance is a continuous function, not a gate.** Large brands produce creative content across hundreds of campaigns, dozens of agencies and internal teams, multiple geographies and languages, simultaneously. Maintaining brand consistency across that distributed production environment is an enormous operational challenge that most organizations solve with guidelines documents and manual review — neither of which scale. AI-native brand intelligence can monitor every asset in production against brand standards continuously, flagging deviations before they reach approval rather than after they reach distribution.
 

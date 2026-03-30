@@ -9,7 +9,7 @@ const THREADS = [
     correlation_id: "gf-2026-q1-001",
     comments: [
       { author: "Jordan Alvarez", time: "2h ago", text: "Legal team is at capacity. VP unavailable until tomorrow. Recommending reroute to CFO backup." },
-      { author: "System (AlloyScape)", time: "1.5h ago", text: "Reroute initiated to CFO backup approver. ETA: 2 hours. Correlation ID: gf-2026-q1-001." },
+      { author: "System (Alloy)", time: "1.5h ago", text: "Reroute initiated to CFO backup approver. ETA: 2 hours. Correlation ID: gf-2026-q1-001." },
       { author: "Priya Mehta", time: "45m ago", text: "CFO backup has been notified. Contract is under review." },
     ],
     actions_available: ["approve", "reroute", "escalate", "defer", "abort"],
@@ -21,7 +21,7 @@ const THREADS = [
     correlation_id: "corr-churn-techcorp",
     comments: [
       { author: "Marcus Webb", time: "1h ago", text: "TechCorp usage dropped 35% this month. NPS is 42 points down. Competitive offer confirmed." },
-      { author: "Nimbus (AI)", time: "55m ago", text: "Model predicts 88% churn probability if no executive contact within 12h. Recommend CEO engagement." },
+      { author: "Alloy (AI)", time: "55m ago", text: "Model predicts 88% churn probability if no executive contact within 12h. Recommend CEO engagement." },
     ],
     actions_available: ["escalate", "approve", "assign", "defer"],
     status: "pending",
@@ -49,7 +49,7 @@ export default function InterventionWorkspace() {
           <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#f59e0b" }}>Lyte · Intervention Workspace</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Intervention Workspace</h1>
-        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Comment threads, action selection, reroute/escalate/approve/defer/assign — all in context of the workflow and Nimbus intelligence.</p>
+        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Comment threads, action selection, reroute/escalate/approve/defer/assign — all in context of the workflow and Alloy intelligence.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4 h-[600px]">
@@ -86,11 +86,11 @@ export default function InterventionWorkspace() {
                 {selectedThread.comments.map((c, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{
-                      background: c.author.startsWith("System") || c.author.startsWith("Nimbus") ? "rgba(139,92,246,0.15)" : "rgba(14,165,233,0.15)",
-                      color: c.author.startsWith("System") || c.author.startsWith("Nimbus") ? "#8b5cf6" : "#0ea5e9",
-                      border: `1px solid ${c.author.startsWith("System") || c.author.startsWith("Nimbus") ? "rgba(139,92,246,0.3)" : "rgba(14,165,233,0.3)"}`,
+                      background: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(99,102,241,0.15)" : "rgba(14,165,233,0.15)",
+                      color: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "#6366f1" : "#0ea5e9",
+                      border: `1px solid ${c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(99,102,241,0.3)" : "rgba(14,165,233,0.3)"}`,
                     }}>
-                      {c.author.startsWith("System") ? "AS" : c.author.startsWith("Nimbus") ? "NB" : c.author.split(" ").map(n => n[0]).join("")}
+                      {c.author.startsWith("System") ? "AS" : c.author.startsWith("Alloy") ? "AL" : c.author.split(" ").map(n => n[0]).join("")}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -115,7 +115,7 @@ export default function InterventionWorkspace() {
                     );
                   })}
                   <a href="/alloy/" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}>
-                    <ExternalLink className="w-3 h-3" /> Run in AlloyScape
+                    <ExternalLink className="w-3 h-3" /> Run in Alloy
                   </a>
                 </div>
                 <div className="flex items-center gap-2">

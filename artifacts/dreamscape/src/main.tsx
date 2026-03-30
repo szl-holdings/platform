@@ -5,13 +5,13 @@ import App from "./App";
 import "./index.css";
 
 configurePlausible({
-  domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || "nimbus.szlholdings.com",
+  domain: import.meta.env.VITE_PLAUSIBLE_DOMAIN || "alloy.szlholdings.com",
   debugMode: import.meta.env.DEV,
   trackLocalhost: false,
 });
 
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary appName="Dreamscape Creative Engine">
+  <ErrorBoundary appName="Alloy Predictive Intelligence">
     <App />
   </ErrorBoundary>,
 );

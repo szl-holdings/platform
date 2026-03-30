@@ -66,9 +66,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={alloyShortcuts} appName="AlloyScape" accentColor="#00d4ff">
+        <PowerUserProvider shortcuts={alloyShortcuts} appName="Alloy" accentColor="#00d4ff">
           <div className="flex flex-col h-screen bg-[#080c14]">
-            <EcosystemNav currentAppId="alloy" currentAppName="AlloyScape" accentColor="#00d4ff" />
+            <EcosystemNav currentAppId="alloy" currentAppName="Alloy" accentColor="#00d4ff" />
             <div className="flex-1 overflow-hidden">
               <AlloyLayout>
                 <Router />
@@ -79,15 +79,15 @@ function App() {
             open={cmdOpen}
             onClose={() => setCmdOpen(false)}
             commands={alloyCommands}
-            appName="AlloyScape"
+            appName="Alloy"
             accentColor="#00d4ff"
           />
         </PowerUserProvider>
         <WelcomeOverlay
           appId="alloy"
-          appName="AlloyScape"
+          appName="Alloy"
           subtitle="Execution Fabric"
-          description="AlloyScape is the execution layer of the Command Loop. It runs workflows, manages connectors, enforces governance, and verifies outcomes — closing the loop from Beacon detection to verified resolution."
+          description="Alloy is the execution layer of the Command Loop. It runs workflows, manages connectors, enforces governance, and verifies outcomes — closing the loop from Beacon detection to verified resolution."
           accentColor="#00d4ff"
           icon={Zap}
           features={[

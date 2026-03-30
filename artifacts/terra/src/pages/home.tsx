@@ -342,7 +342,7 @@ export default function HomePage() {
               { icon: Bell, label: "Distress Alert System", description: "Configurable alerts for new liens, approaching auctions, price drops, and expired listings in any zip code.", color: "from-red-500 to-rose-500" },
               { icon: FileText, label: "Tax Lien Discovery", description: "NYC Dept of Finance tax lien database cross-referenced with property ownership and estimated equity.", color: "from-orange-500 to-amber-500" },
               { icon: Star, label: "Opportunity Scoring", description: "0-100 opportunity score for every distressed property based on distress type, equity, location demand, and time in distress.", color: "from-terra-emerald to-green-400" },
-              { icon: Zap, label: "Deal Conversion", description: "One-click convert distressed properties to CRM leads, active deals, or outreach workflows via AlloyScape.", color: "from-terra-primary to-terra-accent" },
+              { icon: Zap, label: "Deal Conversion", description: "One-click convert distressed properties to CRM leads, active deals, or outreach workflows via Alloy.", color: "from-terra-primary to-terra-accent" },
             ].map((item, i) => (
               <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
                 className="group p-5 rounded-xl border border-terra-border bg-terra-surface/50 hover:border-terra-border-hover hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300">

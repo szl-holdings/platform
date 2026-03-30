@@ -100,7 +100,7 @@ function App() {
             { icon: Inbox, title: "Command Inbox", description: "Prioritized actions, approvals, exceptions, and stalled workflow assignments" },
             { icon: CheckSquare, title: "Approvals Center", description: "Aging approvals with impact estimates and escalation recommendations" },
             { icon: Users, title: "Ownership Map", description: "Who owns each step, missing ownership, broken handoffs, overloaded teams" },
-            { icon: AlertOctagon, title: "Escalation Center", description: "What needs escalation, why, to whom, with Nimbus rationale attached" },
+            { icon: AlertOctagon, title: "Escalation Center", description: "What needs escalation, why, to whom, with Alloy rationale attached" },
           ]}
         />
       </WouterRouter>

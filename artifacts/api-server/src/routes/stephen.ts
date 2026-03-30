@@ -373,7 +373,7 @@ router.get("/stephen/ecosystem-status", async (_req, res) => {
     { name: "Vessels", slug: "vessels", status: "operational", description: "Maritime fleet & cargo intelligence", lastChecked: now },
     { name: "Firestorm", slug: "firestorm", status: "operational", description: "Cybersecurity simulation engine", lastChecked: now },
     { name: "Lyte", slug: "lyte", status: "operational", description: "Enterprise commerce platform", lastChecked: now },
-    { name: "Nimbus", slug: "dreamscape", status: "operational", description: "Predictive intelligence · UNDERSTAND", lastChecked: now },
+    { name: "Alloy", slug: "alloy", status: "operational", description: "Execution fabric & predictive intelligence · ENGINE", lastChecked: now },
     { name: "Aegis", slug: "aegis", status: "operational", description: "Control plane & risk register · DECIDE", lastChecked: now },
     { name: "INCA", slug: "inca", status: "operational", description: "AI research command center", lastChecked: now },
   ];

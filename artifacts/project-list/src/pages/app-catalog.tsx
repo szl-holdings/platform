@@ -94,20 +94,20 @@ const apps = [
     lensHighlight: { posture: 88, signal: 92, impact: 85, anticipation: 87, topology: 83, velocity: 90 },
   },
   {
-    id: "dreamscape",
-    name: "Nimbus",
-    subtitle: "Predictive Intelligence · UNDERSTAND",
+    id: "alloy",
+    name: "Alloy",
+    subtitle: "Execution Fabric · ENGINE",
     category: "intelligence",
     status: "live",
     icon: Palette,
-    color: "text-pink-400 bg-pink-400/10",
-    description: "Prediction, scenario modeling, and confidence scoring — powering the UNDERSTAND layer with probabilistic outputs and model-backed decision intelligence",
-    features: ["Scenario Modeling", "Confidence Scoring", "Prediction Studio", "Assumptions"],
-    postureScore: 81,
-    postureLabel: "Prediction Confidence Score",
-    topSignal: "Model confidence drift detected — recalibration recommended",
+    color: "text-indigo-400 bg-indigo-400/10",
+    description: "Execution fabric and predictive intelligence engine — scenario modeling, confidence scoring, agent coordination, and decision intelligence powering the SZL ecosystem.",
+    features: ["Scenario Modeling", "Confidence Scoring", "Agent Coordination", "DAG Execution"],
+    postureScore: 89,
+    postureLabel: "Execution Confidence Score",
+    topSignal: "Alloy model confidence updated — 3 new scenarios scored",
     velocityUp: true,
-    lensHighlight: { posture: 81, signal: 84, impact: 79, anticipation: 83, topology: 77, velocity: 86 },
+    lensHighlight: { posture: 89, signal: 87, impact: 84, anticipation: 90, topology: 82, velocity: 88 },
   },
   {
     id: "msp",
@@ -196,7 +196,7 @@ const categories = ["all", "security", "ai", "intelligence", "operations", "comp
 export function AppCatalog() {
   usePageMeta({
     title: "SZL Holdings | Application Catalog",
-    description: "Explore the complete SZL Holdings application catalog: Firestorm, INCA, Beacon, Vessels, Lyte, Nimbus, Rosie, Aegis, and more enterprise solutions.",
+    description: "Explore the complete SZL Holdings application catalog: Firestorm, INCA, Beacon, Vessels, Lyte, Alloy, Rosie, Aegis, and more enterprise solutions.",
     canonical: "https://szlholdings.com/",
   });
   const [search, setSearch] = useState("");

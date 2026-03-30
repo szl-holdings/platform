@@ -53,10 +53,10 @@ export default function ModelExplainability() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <GitBranch className="w-4 h-4" style={{ color: "#8b5cf6" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#8b5cf6" }}>Nimbus · Model Explainability</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#6366f1" }}>Alloy · Model Explainability</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Model Explainability</h1>
-        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Why Nimbus made each prediction — factor weights, data sources, and confidence drivers.</p>
+        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Why Alloy made each prediction — factor weights, data sources, and confidence drivers.</p>
       </div>
 
       <div className="space-y-6">

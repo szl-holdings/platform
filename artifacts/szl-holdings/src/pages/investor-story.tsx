@@ -18,14 +18,14 @@ const laneProducts = [
     accent: "hsl(246,50%,60%)",
     products: [
       { name: "INCA", tagline: "The intelligence layer where AI outputs become traceable, versioned, and accountable decisions." },
-      { name: "Nimbus", tagline: "Forward signal analysis and scenario reasoning for teams that need to see around corners." },
+      { name: "Alloy", tagline: "Execution fabric and predictive intelligence engine — the platform backbone that Lyte, Vessels, and every SZL subsidiary runs on." },
     ],
   },
   {
     layer: "Execute",
     accent: "hsl(200,65%,46%)",
     products: [
-      { name: "AlloyScape", tagline: "The execution fabric that turns intelligence into confirmed, accountable action." },
+      { name: "Alloy", tagline: "The execution fabric that turns intelligence into confirmed, accountable action." },
     ],
   },
   {
@@ -50,7 +50,7 @@ const defensibility = [
   },
   {
     title: "Agent network and orchestration",
-    body: "AlloyScape's agent coordination layer is the connective tissue of the platform. Agents are coordinated under a governance framework that maintains accountability across the network.",
+    body: "Alloy's agent coordination layer is the connective tissue of the platform. Agents are coordinated under a governance framework that maintains accountability across the network.",
     accent: "hsl(200,65%,46%)",
   },
   {

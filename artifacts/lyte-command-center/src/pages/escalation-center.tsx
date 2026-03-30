@@ -10,7 +10,7 @@ const ESCALATIONS = [
     team: "Revenue Operations",
     urgency: "critical" as const,
     impact: 840000,
-    nimbus_rationale: "pred-001",
+    alloy_rationale: "pred-001",
     correlation_id: "gf-2026-q1-001",
     recommended_action: "CEO-to-VP escalation + parallel approval path via CFO backup",
     age_hours: 48,
@@ -23,7 +23,7 @@ const ESCALATIONS = [
     team: "Customer Success",
     urgency: "critical" as const,
     impact: 480000,
-    nimbus_rationale: "pred-003",
+    alloy_rationale: "pred-003",
     correlation_id: "corr-churn-techcorp",
     recommended_action: "CEO-to-CEO outreach + approve 30% retention offer",
     age_hours: 24,
@@ -36,7 +36,7 @@ const ESCALATIONS = [
     team: "Procurement",
     urgency: "high" as const,
     impact: 780000,
-    nimbus_rationale: "pred-002",
+    alloy_rationale: "pred-002",
     correlation_id: "corr-vendor-apex",
     recommended_action: "Assign dedicated compliance resource + fast-track approval for low-risk vendors",
     age_hours: 144,
@@ -55,7 +55,7 @@ export default function EscalationCenter() {
           <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#f59e0b" }}>Lyte · Escalation Center</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Escalation Center</h1>
-        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>What needs escalation, why, to whom — with Nimbus rationale and recommended actions attached.</p>
+        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>What needs escalation, why, to whom — with Alloy rationale and recommended actions attached.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -73,7 +73,7 @@ export default function EscalationCenter() {
 
       <div className="space-y-4">
         {ESCALATIONS.map(esc => {
-          const nimbusPred = PREDICTIONS.find(p => p.id === esc.nimbus_rationale);
+          const alloyPred = PREDICTIONS.find(p => p.id === esc.alloy_rationale);
           const borderColor = esc.urgency === "critical" ? "rgba(239,68,68,0.2)" : "rgba(249,115,22,0.15)";
           const bgColor = esc.urgency === "critical" ? "rgba(239,68,68,0.03)" : "rgba(249,115,22,0.02)";
 
@@ -112,14 +112,14 @@ export default function EscalationCenter() {
                 </div>
               </div>
 
-              {nimbusPred && (
+              {alloyPred && (
                 <div className="rounded-lg p-3 mb-4" style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)" }}>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Brain className="w-3 h-3" style={{ color: "#8b5cf6" }} />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "#8b5cf6" }}>Nimbus Rationale</span>
-                    <span className="text-[9px] ml-1" style={{ color: "rgba(139,92,246,0.6)" }}>Confidence: {nimbusPred.confidence}%</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "#8b5cf6" }}>Alloy Rationale</span>
+                    <span className="text-[9px] ml-1" style={{ color: "rgba(139,92,246,0.6)" }}>Confidence: {alloyPred.confidence}%</span>
                   </div>
-                  <div className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{nimbusPred.rationale}</div>
+                  <div className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{alloyPred.rationale}</div>
                 </div>
               )}
 
@@ -130,8 +130,8 @@ export default function EscalationCenter() {
                 <a href="/intervention" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
                   Open Intervention <ArrowRight className="w-3 h-3" />
                 </a>
-                <a href="/dreamscape/" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.15)" }}>
-                  <ExternalLink className="w-3 h-3" /> Nimbus Full Analysis
+                <a href="/alloy/" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1" style={{ color: "#6366f1", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)" }}>
+                  <ExternalLink className="w-3 h-3" /> Alloy Full Analysis
                 </a>
               </div>
             </div>

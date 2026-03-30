@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { NimbusLayout } from "@/components/nimbus-layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
-import { museConfig } from "@workspace/shared-ui/copilot-configs";
+import { alloyPredictiveConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
@@ -47,7 +47,7 @@ function Router() {
   );
 }
 
-const nimbusCommands: CommandItem[] = [
+const alloyPredictiveCommands: CommandItem[] = [
   { id: "nav-predictions", label: "Predictive Intelligence", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
   { id: "nav-risk", label: "Risk Scenario Planning", icon: "⚠️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/risk"); } },
   { id: "nav-explain", label: "Model Explainability", icon: "🔍", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/explainability"); } },
@@ -55,7 +55,7 @@ const nimbusCommands: CommandItem[] = [
   { id: "nav-forecast", label: "Forecasting Center", icon: "📈", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/forecasting"); } },
 ];
 
-const nimbusShortcuts: KeyboardShortcut[] = [
+const alloyPredictiveShortcuts: KeyboardShortcut[] = [
   { key: "R", description: "Risk Scenario Planning", category: "Navigation" },
   { key: "E", description: "Model Explainability", category: "Navigation" },
   { key: "O", description: "Opportunity Engine", category: "Navigation" },
@@ -63,14 +63,14 @@ const nimbusShortcuts: KeyboardShortcut[] = [
 ];
 
 function App() {
-  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(nimbusCommands);
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(alloyPredictiveCommands);
 
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={nimbusShortcuts} appName="Nimbus" accentColor="#8b5cf6">
+        <PowerUserProvider shortcuts={alloyPredictiveShortcuts} appName="Alloy Predictive Intelligence" accentColor="#8b5cf6">
           <div className="flex flex-col h-screen bg-[#080c14]">
-            <EcosystemNav currentAppId="nimbus" currentAppName="Nimbus" accentColor="#8b5cf6" />
+            <EcosystemNav currentAppId="alloy" currentAppName="Alloy — Predictive Intelligence" accentColor="#8b5cf6" />
             <div className="flex-1 overflow-hidden">
               <NimbusLayout>
                 <Router />
@@ -80,27 +80,27 @@ function App() {
           <CommandPalette
             open={cmdOpen}
             onClose={() => setCmdOpen(false)}
-            commands={nimbusCommands}
-            appName="Nimbus"
+            commands={alloyPredictiveCommands}
+            appName="Alloy Predictive Intelligence"
             accentColor="#8b5cf6"
           />
         </PowerUserProvider>
         <WelcomeOverlay
-          appId="nimbus"
-          appName="Nimbus"
-          subtitle="Predictive Intelligence"
-          description="Nimbus transforms Beacon detections and Lyte signals into forward-looking decisions. It models what will happen next, surfaces risks before they materialize, and recommends actions with confidence scores."
+          appId="alloy-predictive"
+          appName="Alloy — Predictive Intelligence"
+          subtitle="Powered by Alloy"
+          description="Alloy's predictive intelligence layer transforms Beacon detections and Lyte signals into forward-looking decisions. It models what will happen next, surfaces risks before they materialize, and recommends actions with confidence scores."
           accentColor="#8b5cf6"
           icon={Brain}
           features={[
             { icon: Brain, title: "Predictive Intelligence", description: "Confidence-weighted predictions with causal chains, correlation IDs, and Beacon signal inputs" },
-            { icon: AlertTriangle, title: "Risk Scenario Planning", description: "Multi-variable risk models with mitigation strategies and Nimbus confidence scores" },
-            { icon: GitBranch, title: "Model Explainability", description: "Why Nimbus made each prediction — factor weights, data sources, and confidence drivers" },
+            { icon: AlertTriangle, title: "Risk Scenario Planning", description: "Multi-variable risk models with mitigation strategies and confidence scores" },
+            { icon: GitBranch, title: "Model Explainability", description: "Why Alloy made each prediction — factor weights, data sources, and confidence drivers" },
             { icon: Target, title: "Opportunity Engine", description: "What to do next — revenue opportunities ranked by confidence, effort, and expected impact" },
           ]}
         />
       </WouterRouter>
-      <AgentCopilot config={museConfig} />
+      <AgentCopilot config={alloyPredictiveConfig} />
     </QueryClientProvider>
   );
 }

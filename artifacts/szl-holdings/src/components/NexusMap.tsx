@@ -1,14 +1,13 @@
 const ecosystemNodes = [
-  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "firestorm", "inca", "lyte", "nimbus", "beacon", "rosie", "aegis", "alloyscpe"] },
+  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "firestorm", "inca", "lyte", "alloy", "beacon", "rosie", "aegis"] },
+  { id: "alloy", name: "Alloy · ENGINE", type: "engine", x: 48, y: 20, connections: ["szl", "lyte", "vessels", "aegis"] },
   { id: "vessels", name: "Vessels · OBSERVE", type: "subsidiary", x: 20, y: 20, connections: ["szl", "lyte", "rosie"] },
   { id: "rosie", name: "Rosie · OBSERVE", type: "subsidiary", x: 80, y: 15, connections: ["szl", "lyte", "firestorm"] },
   { id: "beacon", name: "Beacon · OBSERVE", type: "subsidiary", x: 15, y: 55, connections: ["szl", "aegis"] },
-  { id: "inca", name: "INCA · UNDERSTAND", type: "subsidiary", x: 15, y: 80, connections: ["szl", "nimbus"] },
-  { id: "nimbus", name: "Nimbus · UNDERSTAND", type: "subsidiary", x: 50, y: 88, connections: ["szl", "inca", "aegis"] },
-  { id: "aegis", name: "Aegis · DECIDE", type: "subsidiary", x: 82, y: 55, connections: ["szl", "alloyscpe", "nimbus"] },
+  { id: "inca", name: "INCA · UNDERSTAND", type: "subsidiary", x: 15, y: 80, connections: ["szl", "alloy"] },
+  { id: "aegis", name: "Aegis · DECIDE", type: "subsidiary", x: 82, y: 55, connections: ["szl", "alloy"] },
   { id: "lyte", name: "Lyte · EXECUTE", type: "subsidiary", x: 85, y: 78, connections: ["szl", "firestorm", "vessels"] },
   { id: "firestorm", name: "Firestorm · EXECUTE", type: "subsidiary", x: 65, y: 18, connections: ["szl", "lyte"] },
-  { id: "alloyscpe", name: "AlloyScape · EXECUTE", type: "subsidiary", x: 48, y: 20, connections: ["szl", "aegis"] },
 ];
 
 export function NexusMap() {

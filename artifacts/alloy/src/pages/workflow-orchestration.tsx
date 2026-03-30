@@ -11,7 +11,7 @@ export default function WorkflowOrchestration() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <GitBranch className="w-4 h-4" style={{ color: "#00d4ff" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>AlloyScape · Workflow Orchestration</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>Alloy · Workflow Orchestration</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Workflow Orchestration</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Visual workflow management — step owners, SLA tracking, blocked steps, and reroute capabilities.</p>

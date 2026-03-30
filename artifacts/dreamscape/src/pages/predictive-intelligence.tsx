@@ -23,7 +23,7 @@ export default function PredictiveIntelligence() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Brain className="w-4 h-4" style={{ color: "#8b5cf6" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#8b5cf6" }}>Nimbus · Predictive Intelligence</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#6366f1" }}>Alloy · Predictive Intelligence</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Predictive Intelligence</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Confidence-weighted predictions derived from Beacon detections, Lyte signals, and historical patterns.</p>
@@ -90,7 +90,7 @@ export default function PredictiveIntelligence() {
                 Route in Lyte <ArrowRight className="w-3 h-3" />
               </a>
               <a href="/alloy/" className="text-[9px] px-2.5 py-1.5 rounded-lg font-medium hover:opacity-80 flex items-center gap-1" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.15)" }}>
-                Execute in AlloyScape <ArrowRight className="w-3 h-3" />
+                Execute in Alloy <ArrowRight className="w-3 h-3" />
               </a>
               <a href="/explainability" className="text-[9px] px-2.5 py-1.5 rounded-lg font-medium hover:opacity-80" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.15)" }}>
                 Why? →

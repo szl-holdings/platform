@@ -399,7 +399,7 @@ const DEMO_ECOSYSTEM_HEALTH = [
   { app: "Vessels", status: "operational", uptime: 99.95, latency: 48, activeUsers: 18, lastIncident: "2026-03-15" },
   { app: "Lyte Command", status: "operational", uptime: 99.98, latency: 29, activeUsers: 31, lastIncident: "2026-03-01" },
   { app: "Aegis", status: "operational", uptime: 99.97, latency: 41, activeUsers: 12, lastIncident: "2026-02-28" },
-  { app: "Nimbus", status: "degraded", uptime: 99.82, latency: 87, activeUsers: 15, lastIncident: "2026-03-25" },
+  { app: "Alloy", status: "operational", uptime: 99.94, latency: 61, activeUsers: 28, lastIncident: "2026-03-20" },
   { app: "Admin Panel", status: "operational", uptime: 99.99, latency: 22, activeUsers: 8, lastIncident: "2026-02-15" },
   { app: "API Server", status: "operational", uptime: 99.99, latency: 18, activeUsers: 156, lastIncident: "2026-03-05" },
 ];
@@ -1335,7 +1335,7 @@ const DOMAIN_AGENTS: Record<string, { name: string; systemPrompt: string; model:
     systemPrompt: `You are Carlota AI, a McKinsey-caliber strategic advisor with expertise in market strategy, competitive intelligence, organizational transformation, and ROI analysis. You synthesize market data, competitive landscapes, and financial models to generate boardroom-ready strategic recommendations. You understand go-to-market strategy, pricing architecture, supply chain optimization, and digital transformation. Be direct, data-driven, and action-oriented. Today's date: ${new Date().toISOString().split("T")[0]}.`,
   },
   platform: {
-    name: "AlloyScape",
+    name: "Alloy",
     provider: "openai",
     model: "gpt-5.2",
     systemPrompt: `You are Alloy, a Palantir-grade platform intelligence orchestrator with full visibility across the SZL ecosystem. You correlate intelligence across maritime, security, research, real estate, and operations domains to surface cross-cutting insights. You can diagnose system health, analyze connector status, interpret platform metrics, and generate cross-domain correlation analysis. Be authoritative, synthesizing, and operationally focused. Today's date: ${new Date().toISOString().split("T")[0]}.`,

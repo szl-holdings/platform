@@ -60,10 +60,10 @@ export default function ForecastingCenter() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <TrendingUp className="w-4 h-4" style={{ color: "#8b5cf6" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#8b5cf6" }}>Nimbus · Forecasting Center</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#6366f1" }}>Alloy · Forecasting Center</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Forecasting Center</h1>
-        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Scenario-adjusted revenue forecasts powered by Nimbus models and Beacon signal inputs.</p>
+        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Scenario-adjusted revenue forecasts powered by Alloy models and Beacon signal inputs.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

@@ -63,9 +63,9 @@ const internal = [
     accent: "hsl(190,90%,55%)",
   },
   {
-    name: "Alloy Engine (Nimbus absorbed)",
-    role: "Internal / Absorbed",
-    description: "Predictive intelligence capabilities previously under Nimbus are now absorbed into Alloy. No public presence.",
+    name: "Alloy — Predictive Intelligence",
+    role: "Internal / Alloy Capability",
+    description: "Predictive intelligence is a core embedded capability within Alloy. No separate public presence.",
     accent: "hsl(214,80%,65%)",
   },
 ];

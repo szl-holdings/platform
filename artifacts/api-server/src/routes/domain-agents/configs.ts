@@ -345,7 +345,7 @@ function createStaticToolExecutor(appKey: string) {
   const platformInfo: Record<string, object> = {
     "readiness-report": {
       platform: "Aegis",
-      description: "Project readiness assessment platform",
+      description: "Lyte Readiness and governance assessment platform",
       features: ["Comprehensive readiness scoring", "Risk matrices and heatmaps", "Go/no-go decision support", "Launch checklist management", "Stakeholder readiness tracking"],
     },
     stephen: {

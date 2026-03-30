@@ -424,7 +424,7 @@ const brandVoiceProfiles = [
 const channelPreviews: Record<string, { icon: string; caption: string; maxChars: number }> = {
   "Instagram": { icon: "📸", caption: "The future of storytelling is here 🎬 We're rewriting what's possible when ambitious creative teams meet cutting-edge AI. Ready to level up?\n\n#Creative #AI #Innovation", maxChars: 150 },
   "LinkedIn": { icon: "💼", caption: "We've spent 18 months rethinking how high-performance creative teams collaborate. Today, we're sharing what we learned — and why the biggest gains came from the smallest process changes.", maxChars: 300 },
-  "Email": { icon: "📧", caption: "Subject: The creative tool your team didn't know they needed\n\nHi {first_name},\n\nThe biggest bottleneck in creative teams isn't talent — it's tooling. That's why we built Dreamscape.\n\nI'd love 15 minutes to walk you through it personally.", maxChars: 500 },
+  "Email": { icon: "📧", caption: "Subject: The intelligent execution layer your team didn't know they needed\n\nHi {first_name},\n\nThe biggest bottleneck in decision-driven teams isn't data — it's acting on it with confidence. That's why we built Alloy.\n\nI'd love 15 minutes to walk you through it personally.", maxChars: 500 },
   "Twitter/X": { icon: "𝕏", caption: "The creative teams crushing it in 2026 have one thing in common: they stopped waiting for the \"right tools.\"\n\nHere's what they're using instead 🧵", maxChars: 280 },
 };
 

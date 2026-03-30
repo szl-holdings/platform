@@ -40,8 +40,8 @@ const entries = [
     changes: [
       { type: "feature", text: "INCA: GPU Cluster Monitoring with thermal, utilization, and memory pressure tracking" },
       { type: "feature", text: "INCA: LLM Evaluation Studio with automated regression testing and A/B model comparison" },
-      { type: "feature", text: "Nimbus: Prediction Studio with multi-channel scenario modeling" },
-      { type: "feature", text: "Nimbus: Confidence Scoring with probabilistic output and assumption tracking" },
+      { type: "feature", text: "Alloy: Prediction Studio with multi-channel scenario modeling" },
+      { type: "feature", text: "Alloy: Confidence Scoring with probabilistic output and assumption tracking" },
       { type: "improvement", text: "Aegis: Risk Register redesign with dynamic filtering and bulk status updates" },
     ],
   },
@@ -101,7 +101,7 @@ const versionBadge: Record<string, string> = {
 export default function Changelog() {
   usePageMeta({
     title: "Changelog | SZL Holdings – Platform Release Notes",
-    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, INCA, Beacon, Vessels, Lyte, Nimbus, Rosie, and Aegis.",
+    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, INCA, Beacon, Vessels, Lyte, Alloy, Rosie, and Aegis.",
     canonical: "https://szlholdings.com/changelog",
   });
   return (

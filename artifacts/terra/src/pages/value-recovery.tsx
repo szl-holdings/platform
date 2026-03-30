@@ -12,7 +12,7 @@ export default function ValueRecovery() {
       title: "Northgate Contract — Approval Reroute",
       before: { status: "blocked", latency: "48h", value_at_risk: 840000, approval_sla: "BREACHED" },
       after: { status: "executing", latency: "2h remaining", value_at_risk: 0, approval_sla: "ON TRACK" },
-      action: "Rerouted to CFO backup via AlloyScape",
+      action: "Rerouted to CFO backup via Alloy",
       cycle_time_saved: "6.2h",
       correlation_id: "gf-2026-q1-001",
       recovered: 840000,
@@ -36,7 +36,7 @@ export default function ValueRecovery() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Total Value at Risk", value: formatCurrency(atRisk), color: "#ef4444", sub: `${atRiskBreakdown.length} workflows affected` },
-          { label: "Value Recovered (30d)", value: formatCurrency(recoveredAmount), color: "#10b981", sub: "Via AlloyScape interventions" },
+          { label: "Value Recovered (30d)", value: formatCurrency(recoveredAmount), color: "#10b981", sub: "Via Alloy interventions" },
           { label: "Recovery Rate", value: "91%", color: "#0ea5e9", sub: "Intervention success rate" },
         ].map(c => (
           <div key={c.label} className="rounded-xl border p-5" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>

@@ -11,7 +11,7 @@ configurePlausible({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary appName="AlloyScape">
+  <ErrorBoundary appName="Alloy">
     <App />
   </ErrorBoundary>,
 );

@@ -77,24 +77,24 @@
     "marketContext": "Personal authority platform for modern operational clarity and execution leadership"
   },
   {
-    "id": "nimbus",
-    "name": "Nimbus",
-    "doctrineRole": "UNDERSTAND",
-    "tagline": "Predictive Intelligence Engine",
-    "description": "Prediction, scenario modeling, and confidence scoring platform — transforming the SZL creative and analytics surface into a predictive intelligence layer. Nimbus powers scenario planning with probabilistic outputs, assumption tracking, and model-backed confidence scores for high-stakes decisions.",
+    "id": "alloy",
+    "name": "Alloy",
+    "doctrineRole": "EXECUTE",
+    "tagline": "Execution Fabric & Predictive Intelligence Engine",
+    "description": "Alloy is the execution engine of the SZL platform — orchestrating connectors, DAGs, automations, and the predictive intelligence layer across every subsidiary. Scenario modeling, confidence scoring, agent coordination, and workflow automation (35+ connectors, 4,800+ workflows/day) are embedded capabilities, not bolted-on tools.",
     "status": "Live",
-    "category": "Predictive Intelligence",
-    "link": "/dreamscape/",
-    "icon": "Sparkles",
-    "color": "#a855f7",
-    "cta": "View Dreamscape",
+    "category": "Execution Fabric",
+    "link": "/alloy/",
+    "icon": "Workflow",
+    "color": "#6366f1",
+    "cta": "View Alloy",
     "metrics": [
-      { "label": "Scenarios Modeled", "value": "12,400+" },
-      { "label": "Est. Annual Revenue", "value": "$5.1M ARR" },
-      { "label": "Enterprise Clients", "value": "85+" },
-      { "label": "Addressable Market", "value": "$14.8B" }
+      { "label": "Prediction Models", "value": "12,400+" },
+      { "label": "ARR (Embedded)", "value": "$5.1M" },
+      { "label": "Automations / Day", "value": "48K+" },
+      { "label": "Connectors Active", "value": "35+" }
     ],
-    "marketContext": "AI-powered predictive analytics market expected to reach $14.8B by 2028 (MarketsandMarkets)"
+    "marketContext": "AI-powered execution and predictive analytics market expected to reach $14.8B by 2028 (MarketsandMarkets)"
   },
   {
     "id": "firestorm",
@@ -189,25 +189,6 @@
       { "label": "Addressable Market", "value": "$29B" }
     ],
     "marketContext": "Business intelligence and analytics market projected at $29B by 2027 (Mordor Intelligence)"
-  },
-  {
-    "id": "alloyscape",
-    "name": "AlloyScape",
-    "doctrineRole": "EXECUTE",
-    "tagline": "Execution Fabric — Connectors, Automations & DAGs",
-    "description": "AlloyScape is the unified execution layer across the SZL ecosystem — managing connector orchestration, workflow automation, and directed acyclic graph (DAG) execution. Every AI recommendation from Aegis or Nimbus is executed through AlloyScape.",
-    "status": "Live",
-    "category": "Automation",
-    "link": "/alloy/",
-    "icon": "Workflow",
-    "color": "#8b5cf6",
-    "metrics": [
-      { "label": "Connectors Active", "value": "35+" },
-      { "label": "Workflows Executed/Day", "value": "4,800+" },
-      { "label": "Automation Success Rate", "value": "99.7%" },
-      { "label": "Addressable Market", "value": "$8.6B" }
-    ],
-    "marketContext": "Workflow automation market projected at $8.6B by 2027 (MarketsandMarkets)"
   },
   {
     "id": "inca",

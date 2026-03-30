@@ -9,13 +9,13 @@ const demos = [
   { id: "terra", name: "Beacon", subtitle: "Business Telemetry · OBSERVE", icon: Building, color: "from-sky-500/20 to-blue-500/20", borderColor: "border-sky-500/20", path: "/terra/", highlights: ["KPI drift detection and telemetry", "Market anomaly signals", "Portfolio observability dashboard", "Business health scoring and analytics"] },
   { id: "vessels", name: "Vessels", subtitle: "Maritime Intelligence", icon: Ship, color: "from-cyan-500/20 to-blue-500/20", borderColor: "border-cyan-500/20", path: "/vessels/", highlights: ["Real-time vessel tracking", "Port performance analytics", "Route optimization engine", "Maritime risk assessment"] },
   { id: "lyte", name: "Lyte", subtitle: "Command Center", icon: Zap, color: "from-blue-500/20 to-indigo-500/20", borderColor: "border-blue-500/20", path: "/lyte-command-center/", highlights: ["Signal feed with pattern detection", "Incident management workflow", "Operational playbooks library", "AI-powered operations center"] },
-  { id: "dreamscape", name: "Nimbus", subtitle: "Predictive Intelligence · UNDERSTAND", icon: Palette, color: "from-pink-500/20 to-rose-500/20", borderColor: "border-pink-500/20", path: "/dreamscape/", highlights: ["Scenario modeling and what-if analysis", "Confidence scoring and uncertainty tracking", "Prediction studio with assumption management", "Cross-ecosystem signal synthesis"] },
+  { id: "alloy", name: "Alloy", subtitle: "Execution Fabric · ENGINE", icon: Palette, color: "from-indigo-500/20 to-violet-500/20", borderColor: "border-indigo-500/20", path: "/alloy/", highlights: ["Scenario modeling and what-if analysis", "Confidence scoring and uncertainty tracking", "Agent coordination and DAG execution", "Cross-ecosystem signal synthesis"] },
 ];
 
 export function LiveDemos() {
   usePageMeta({
     title: "SZL Holdings | Live Application Demos",
-    description: "Try live demos of SZL Holdings enterprise applications: Firestorm security simulation, INCA AI research, Beacon business telemetry, Nimbus prediction intelligence, and more.",
+    description: "Try live demos of SZL Holdings enterprise applications: Firestorm security simulation, INCA AI research, Beacon business telemetry, Alloy execution fabric, and more.",
     canonical: "https://szlholdings.com/demos",
   });
   const [hoveredDemo, setHoveredDemo] = useState<string | null>(null);

@@ -194,14 +194,14 @@ export default function ExecutiveOverview() {
           <span className="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ml-2" style={{ color: "#0ea5e9", background: "rgba(14,165,233,0.15)", border: "1px solid rgba(14,165,233,0.3)" }}>LIVE TRACE</span>
         </div>
         <p className="text-xs leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-          Beacon detected approval SLA breach on Northgate contract → Lyte routed accountability to Revenue Operations → Nimbus predicted Q1 revenue miss → AlloyScape rerouted workflow to CFO backup → Beacon verifying recovery.
+          Beacon detected approval SLA breach on Northgate contract → Lyte routed accountability to Revenue Operations → Alloy predicted Q1 revenue miss → Alloy rerouted workflow to CFO backup → Beacon verifying recovery.
         </p>
         <div className="flex gap-2">
           {[
             { label: "DETECT", desc: "Beacon saw it", color: "#0ea5e9", active: true },
             { label: "INTERPRET", desc: "Lyte routed it", color: "#f59e0b", active: true },
-            { label: "DECIDE", desc: "Nimbus modeled it", color: "#8b5cf6", active: true },
-            { label: "EXECUTE", desc: "AlloyScape ran it", color: "#00d4ff", active: true },
+            { label: "DECIDE", desc: "Alloy modeled it", color: "#8b5cf6", active: true },
+            { label: "EXECUTE", desc: "Alloy ran it", color: "#00d4ff", active: true },
             { label: "VERIFY", desc: "Beacon confirms", color: "#10b981", active: false },
           ].map(p => (
             <div key={p.label} className="flex-1 rounded-lg p-2.5 text-center" style={{ background: p.active ? `${p.color}10` : "rgba(255,255,255,0.02)", border: `1px solid ${p.active ? p.color + "30" : "rgba(255,255,255,0.06)"}` }}>

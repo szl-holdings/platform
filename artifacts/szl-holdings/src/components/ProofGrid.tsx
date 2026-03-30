@@ -38,9 +38,9 @@ const proofs = [
   },
   {
     platform: "Lyte",
-    view: "Readiness",
-    desc: "Project Readiness absorbed into Lyte as a first-class module for execution tracking.",
-    accent: "hsl(192, 80%, 48%)",
+    view: "Lyte Readiness",
+    desc: "Lyte Readiness — execution tracking, maturity scoring, and go/no-go gate management as a first-class Lyte module.",
+    accent: "hsl(190,90%,55%)",
     accentRgb: "6, 182, 212",
     href: "/lyte-command-center/",
     status: "Live",

@@ -84,7 +84,7 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
   {
     appId: "alloy",
     appName: "Alloy",
-    displayName: "AlloyScape",
+    displayName: "Alloy",
     layers: ["EXECUTE"],
     description: "Connectors, automations, DAGs, retries, and execution history.",
     primaryRole: "Execution + Automation Engine",

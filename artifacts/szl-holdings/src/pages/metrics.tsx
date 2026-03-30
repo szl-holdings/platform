@@ -13,13 +13,13 @@ const trafficData = [
 ];
 
 const appUsage = [
-  { name: "Firestorm", sessions: 1840, avgDuration: "8m 42s", bounce: "18%" },
   { name: "Lyte", sessions: 2120, avgDuration: "11m 15s", bounce: "12%" },
-  { name: "INCA", sessions: 980, avgDuration: "14m 33s", bounce: "9%" },
+  { name: "Firestorm", sessions: 1840, avgDuration: "8m 42s", bounce: "18%" },
   { name: "Beacon", sessions: 1340, avgDuration: "7m 22s", bounce: "22%" },
-  { name: "Vessels", sessions: 760, avgDuration: "9m 18s", bounce: "16%" },
-  { name: "Nimbus", sessions: 1100, avgDuration: "6m 44s", bounce: "28%" },
   { name: "Rosie", sessions: 890, avgDuration: "12m 07s", bounce: "11%" },
+  { name: "INCA", sessions: 980, avgDuration: "14m 33s", bounce: "9%" },
+  { name: "Vessels", sessions: 760, avgDuration: "9m 18s", bounce: "16%" },
+  { name: "Alloy", sessions: 1420, avgDuration: "9m 12s", bounce: "14%" },
 ];
 
 const usageChart = appUsage.map(a => ({ name: a.name, sessions: a.sessions }));
@@ -48,7 +48,7 @@ export default function Metrics() {
         <div className="grid grid-cols-4 gap-4">
           {[
             { label: "Monthly Visitors", value: "7,400", sub: "+27% MoM", icon: Users, color: "text-foreground" },
-            { label: "Total Sessions", value: "11,030", sub: "Across 7 apps", icon: Globe, color: "text-emerald-400" },
+            { label: "Total Sessions", value: "11,350", sub: "Across 7 platforms", icon: Globe, color: "text-emerald-400" },
             { label: "Avg Session Duration", value: "9m 54s", sub: "+18% vs last month", icon: Clock, color: "text-primary" },
             { label: "Avg Bounce Rate", value: "16.6%", sub: "Below 20% target", icon: Activity, color: "text-emerald-400" },
           ].map(({ label, value, sub, icon: Icon, color }) => (

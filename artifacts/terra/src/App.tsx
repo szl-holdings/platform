@@ -93,7 +93,7 @@ function App() {
             { icon: Activity, title: "Workflow Health", description: "Latency indicators, blocked steps, and ownership gaps across all workflows" },
             { icon: TrendingDown, title: "Value Recovery", description: "Risk estimation, intervention impact, and before/after recovery comparison" },
             { icon: Radar, title: "Drift Detection", description: "Unexpected changes, timing anomalies, and causal attribution" },
-            { icon: GitBranch, title: "Causal Drilldown", description: "Root factors linked to Lyte actions, Nimbus predictions, and AlloyScape runs" },
+            { icon: GitBranch, title: "Causal Drilldown", description: "Root factors linked to Lyte actions, Alloy predictions, and Alloy runs" },
           ]}
         />
       </WouterRouter>

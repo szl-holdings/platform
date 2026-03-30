@@ -14,7 +14,7 @@ const quarters = [
       { app: "INCA", icon: Brain, color: "#8b5cf6", title: "GPU Monitoring + LLM Evaluation Studio", status: "done" },
       { app: "Beacon", icon: Building2, color: "#0ea5e9", title: "Portfolio Performance + Climate Risk Overlay", status: "done" },
       { app: "Rosie", icon: Laptop, color: "#ef4444", title: "RMM Console + MRR Dashboard", status: "done" },
-      { app: "Nimbus", icon: Palette, color: "#ec4899", title: "Brand Voice Engine + Voice Studio", status: "done" },
+      { app: "Alloy", icon: Palette, color: "#6366f1", title: "Predictive Intelligence Engine + Confidence Scoring", status: "done" },
       { app: "Aegis", icon: FileText, color: "#10b981", title: "Vendor Risk Assessment + Risk Register", status: "done" },
       { app: "Carlota Jo", icon: Globe, color: "#f472b6", title: "AI Brand Advisory + Engagement Workflow", status: "done" },
     ],
@@ -31,7 +31,7 @@ const quarters = [
       { app: "Beacon", icon: Building2, color: "#0ea5e9", title: "AI Lease Abstraction + Tenant Intelligence", status: "planned" },
       { app: "Admin", icon: Globe, color: "#a3a3a3", title: "Deployment Visualization + Git Integration", status: "planned" },
       { app: "SZL Holdings", icon: Globe, color: "#6c63ff", title: "Portfolio Intelligence Dashboard + IR Module", status: "in_progress" },
-      { app: "Nimbus", icon: Palette, color: "#ec4899", title: "Scenario Model Library + Collaborative Workspace", status: "planned" },
+      { app: "Alloy", icon: Palette, color: "#6366f1", title: "Scenario Model Library + Collaborative Workspace", status: "planned" },
     ],
   },
   {
@@ -76,7 +76,7 @@ const quarterBadge = {
 export default function Roadmap() {
   usePageMeta({
     title: "Roadmap | SZL Holdings – Platform Development Roadmap",
-    description: "The SZL Holdings platform roadmap: upcoming features, quarterly milestones, and product priorities across Firestorm, INCA, Beacon, Vessels, Lyte, Nimbus, Rosie, and Aegis.",
+    description: "The SZL Holdings platform roadmap: upcoming features, quarterly milestones, and product priorities across Alloy, Lyte, Vessels, Firestorm, INCA, Beacon, Rosie, and Carlota Jo.",
     canonical: "https://szlholdings.com/roadmap",
   });
   return (

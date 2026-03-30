@@ -23,10 +23,10 @@ export default function ConnectorMesh() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Network className="w-4 h-4" style={{ color: "#00d4ff" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>AlloyScape · Connector Mesh</span>
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>Alloy · Connector Mesh</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Connector Mesh</h1>
-        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>All integrations, data connectors, health status, and API credentials powering AlloyScape automation.</p>
+        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>All integrations, data connectors, health status, and API credentials powering Alloy automation.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">

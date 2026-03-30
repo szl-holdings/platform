@@ -51,7 +51,7 @@ const descriptions: Record<string, string> = {
   lyte: "Observability intelligence and SRE recommendation engine",
   "szl-holdings": "Portfolio concierge and investment analysis",
   "carlota-jo": "Strategic consulting and engagement analysis",
-  "readiness-report": "Project readiness and risk assessment engine",
+  "readiness-report": "Lyte Readiness and risk assessment engine",
   msp: "Managed services performance and compliance engine",
   terra: "Real estate market intelligence and property analysis",
   admin: "Platform administration and control decision support",

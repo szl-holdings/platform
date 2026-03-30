@@ -44,13 +44,13 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Intelligence",
     items: [
       { path: "/team", label: "Team Performance", icon: Users },
-      { path: "/predictions", label: "Nimbus Intelligence", icon: Brain },
+      { path: "/predictions", label: "Alloy Intelligence", icon: Brain },
     ],
   },
   {
     title: "Platform",
     items: [
-      { path: "/automations", label: "AlloyScape", icon: Zap },
+      { path: "/automations", label: "Alloy", icon: Zap },
     ],
   },
 ];

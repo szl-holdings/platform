@@ -7,9 +7,9 @@ import { Link } from "wouter";
 
 const commandLoopItems = [
   { label: "DETECT", desc: "Pipeline & listing health", icon: Activity, color: "text-blue-400" },
-  { label: "INTERPRET", desc: "Risk signals & Nimbus intel", icon: Shield, color: "text-violet-400" },
+  { label: "INTERPRET", desc: "Risk signals & Alloy intel", icon: Shield, color: "text-violet-400" },
   { label: "DECIDE", desc: "Owner actions & approvals", icon: Users, color: "text-amber-400" },
-  { label: "EXECUTE", desc: "AlloyScape automations", icon: Zap, color: "text-emerald-400" },
+  { label: "EXECUTE", desc: "Alloy automations", icon: Zap, color: "text-emerald-400" },
   { label: "VERIFY", desc: "Compliance & audit trail", icon: CheckCircle, color: "text-terra-primary" },
 ];
 
@@ -202,7 +202,7 @@ export default function DashboardPage() {
             <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-terra-primary" />
-                <h3 className="font-display font-bold text-terra-text">AlloyScape — Recent Runs</h3>
+                <h3 className="font-display font-bold text-terra-text">Alloy — Recent Runs</h3>
               </div>
               <Link href="/automations">
                 <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer">View All →</span>
