@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
 import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users, ChevronRight, ShieldCheck, Building2, TrendingUp } from "lucide-react";
@@ -30,6 +30,7 @@ const ThreatHunting = lazy(() => import("@/pages/threat-hunting"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
+const AdversaryEmulation = lazy(() => import("@/pages/simulation-runner"));
 
 const ReadinessDashboard = lazy(() => import("@/pages/compliance/readiness-dashboard"));
 const FrameworkScorecards = lazy(() => import("@/pages/compliance/framework-scorecards"));
@@ -65,6 +66,7 @@ const secondaryNavItems = [
   { path: "/sentinel", label: "Sentinel Watch", icon: Search },
   { path: "/watchlists", label: "Watchlists", icon: Target },
   { path: "/observability", label: "Observability", icon: Search },
+  { path: "/adversary-emulation", label: "Red Team Exercises", icon: Target },
 ];
 
 const complianceNavItems = [
@@ -84,38 +86,6 @@ function PageLoader() {
   );
 }
 
-interface AppHealthSummary {
-  services: { name: string; status: string }[];
-  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
-}
-
-function DemoModeBanner() {
-  const { data } = useQuery<AppHealthSummary>({
-    queryKey: ["app-health-firestorm"],
-    queryFn: () => fetch("/api/services/health/app/firestorm").then((r) => r.json()),
-    refetchInterval: 60000,
-  });
-
-  if (!data) return null;
-  const hasDemoMode = data.summary.mockedDemoMode > 0;
-  const hasUnhealthy = data.summary.manualRequired > 0;
-  if (!hasDemoMode && !hasUnhealthy) return null;
-
-  if (hasUnhealthy) {
-    return (
-      <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center gap-2 shrink-0">
-        <span className="text-[11px] text-red-400">{data.summary.manualRequired} integration(s) not configured</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="border-b border-orange-500/10 px-4 py-1 flex items-center gap-2 shrink-0">
-      <span className="text-[10px] font-mono text-orange-400/50 px-2 py-0.5 rounded-full border border-orange-500/20 bg-orange-500/5">DEMO</span>
-      <span className="text-[10px] text-orange-400/40">Simulated data</span>
-    </div>
-  );
-}
 
 function Sidebar() {
   const [location] = useLocation();
@@ -131,7 +101,7 @@ function Sidebar() {
           </div>
           <div>
             <h1 className="font-display text-sm font-bold text-orange-50">Firestorm</h1>
-            <p className="text-[10px] text-orange-400/50">Security Operations</p>
+            <p className="text-[10px] text-orange-400/50">Cyber Command</p>
           </div>
         </div>
       </div>
@@ -259,6 +229,7 @@ function AppRouter() {
         <Route path="/cr/milestones" component={MilestonesTrends} />
         <Route path="/cr/ai-insights" component={ReadinessAIInsights} />
         <Route path="/sacsayhuaman-shield" component={SacsayhuamanShield} />
+        <Route path="/adversary-emulation" component={AdversaryEmulation} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>
@@ -305,11 +276,10 @@ function App() {
             <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
               Skip to main content
             </a>
-            <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Security Simulation" accentColor="#ef4444" />
+            <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Cyber Command" accentColor="#ef4444" />
             <div className="flex flex-1 overflow-hidden">
               <Sidebar />
               <div className="flex-1 flex flex-col overflow-auto">
-                <DemoModeBanner />
                 <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
                   <AppRouter />
                 </main>

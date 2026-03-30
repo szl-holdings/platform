@@ -87,14 +87,14 @@ function SimSkeleton() {
   );
 }
 
-const simPhases = ["Initializing", "Scanning targets", "Analyzing vectors", "Executing payloads", "Generating report"];
+const exercisePhases = ["Initializing emulation", "Enumerating targets", "Mapping attack surface", "Executing TTPs", "Generating debrief"];
 
-function RunningSimDisplay() {
+function RunningExerciseDisplay() {
   const [phase, setPhase] = useState(0);
   const [progress, setProgress] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
-      setPhase(p => (p + 1) % simPhases.length);
+      setPhase(p => (p + 1) % exercisePhases.length);
     }, 2500);
     const progInterval = setInterval(() => {
       setProgress(p => Math.min(p + Math.random() * 5, 95));
@@ -110,10 +110,10 @@ function RunningSimDisplay() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 text-sm text-amber-400">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="font-medium">Simulation in progress</span>
+            <span className="font-medium">Exercise in progress</span>
           </div>
           <div className="flex items-center gap-1.5">
-            {simPhases.map((_, idx) => (
+            {exercisePhases.map((_, idx) => (
               <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${idx <= phase ? "bg-amber-400" : "bg-amber-400/20"}`} />
             ))}
           </div>
@@ -122,7 +122,7 @@ function RunningSimDisplay() {
         <div className="flex items-center justify-between mt-2 text-xs text-amber-400/60">
           <span className="flex items-center gap-1">
             <Zap className="w-3 h-3" />
-            {simPhases[phase]}...
+            {exercisePhases[phase]}...
           </span>
           <span>{Math.round(progress)}%</span>
         </div>
@@ -131,7 +131,7 @@ function RunningSimDisplay() {
   );
 }
 
-export default function SimulationRunner() {
+export default function AdversaryEmulation() {
   const qc = useQueryClient();
   const { data: simulations = [], isLoading } = useQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
   const { data: scenarios = [] } = useQuery({ queryKey: ["scenarios"], queryFn: api.scenarios.list });
@@ -144,7 +144,7 @@ export default function SimulationRunner() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["simulations"] });
       setOpen(false);
-      toast.success("Simulation started");
+      toast.success("Exercise launched");
       setTimeout(() => qc.invalidateQueries({ queryKey: ["simulations"] }), 5000);
     },
     onError: (e: any) => toast.error(e.message),
@@ -154,21 +154,21 @@ export default function SimulationRunner() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
-          <h1 className="font-display text-2xl font-bold">Simulation Runner</h1>
-          <p className="text-sm text-muted-foreground mt-1">Launch attack simulations against target environments and validate detection coverage in real time</p>
+          <h1 className="font-display text-2xl font-bold">Adversary Emulation</h1>
+          <p className="text-sm text-muted-foreground mt-1">Launch controlled red team exercises against target environments using real MITRE ATT&CK TTPs and validate detection coverage</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Play className="w-4 h-4 mr-2" /> Run Simulation</Button>
+            <Button><Play className="w-4 h-4 mr-2" /> Launch Exercise</Button>
           </DialogTrigger>
           <DialogContent className="bg-card border-border">
-            <DialogHeader><DialogTitle className="font-display">New Simulation</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-display">New Red Team Exercise</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              <div><Label>Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Network Pentest Run #1" /></div>
+              <div><Label>Exercise Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. APT29 Emulation — Q1 2026" /></div>
               <div>
-                <Label>Scenario</Label>
+                <Label>Playbook</Label>
                 <Select value={form.scenarioId} onValueChange={v => setForm(p => ({ ...p, scenarioId: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select scenario" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Select playbook" /></SelectTrigger>
                   <SelectContent>{scenarios.map((s: any) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
@@ -183,7 +183,7 @@ export default function SimulationRunner() {
                 if (!form.name || !form.scenarioId || !form.assessmentId) { toast.error("All fields required"); return; }
                 createMut.mutate({ name: form.name, scenarioId: Number(form.scenarioId), assessmentId: Number(form.assessmentId) });
               }} disabled={createMut.isPending} className="w-full">
-                {createMut.isPending ? "Starting..." : "Start Simulation"}
+                {createMut.isPending ? "Launching..." : "Launch Exercise"}
               </Button>
             </div>
           </DialogContent>
@@ -194,7 +194,7 @@ export default function SimulationRunner() {
         <Card className="bg-card border-border animate-fade-in-up stagger-1 hover:border-primary/20 transition-all duration-300 group">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Runs</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Exercises</p>
               <p className="text-2xl font-bold font-display mt-1"><AnimatedCounter value={simulations.length} /></p>
             </div>
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -205,7 +205,7 @@ export default function SimulationRunner() {
         <Card className={`bg-card border-border animate-fade-in-up stagger-2 hover:border-chart-3/20 transition-all duration-300 group ${simulations.filter((s: any) => s.status === "running").length > 0 ? "ring-1 ring-chart-3/10" : ""}`}>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Running</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">In Progress</p>
               <p className="text-2xl font-bold font-display mt-1 text-chart-3"><AnimatedCounter value={simulations.filter((s: any) => s.status === "running").length} /></p>
             </div>
             <div className={`w-10 h-10 rounded-lg bg-chart-3/10 flex items-center justify-center group-hover:scale-110 transition-transform ${simulations.filter((s: any) => s.status === "running").length > 0 ? "animate-pulse" : ""}`}>
@@ -236,8 +236,8 @@ export default function SimulationRunner() {
             <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
               <Activity className="w-8 h-8 text-muted-foreground/30" />
             </div>
-            <p className="text-muted-foreground font-medium">No simulation runs yet</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Run your first simulation to begin security testing</p>
+            <p className="text-muted-foreground font-medium">No exercises launched yet</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Launch your first red team exercise to begin adversary emulation</p>
           </CardContent>
         </Card>
       ) : (
@@ -279,7 +279,7 @@ export default function SimulationRunner() {
                     </Badge>
                   </div>
 
-                  {isRunning && <RunningSimDisplay />}
+                  {isRunning && <RunningExerciseDisplay />}
 
                   {sim.status === "completed" && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">

@@ -172,11 +172,11 @@ export default function ReportsPage() {
           {report.summary?.simulationsRun > 0 && (
             <Card className="bg-card border-border animate-fade-in-up stagger-5">
               <CardHeader>
-                <CardTitle className="text-sm font-display">Simulation Summary</CardTitle>
+                <CardTitle className="text-sm font-display">Red Team Exercise Summary</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-sm text-muted-foreground">
-                  {report.summary.simulationsRun} simulation{report.summary.simulationsRun > 1 ? "s" : ""} executed
+                  {report.summary.simulationsRun} exercise{report.summary.simulationsRun > 1 ? "s" : ""} completed
                 </p>
               </CardContent>
             </Card>

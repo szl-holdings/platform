@@ -4,7 +4,7 @@ import App from "./App";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary appName="Firestorm Security Simulation">
+  <ErrorBoundary appName="Firestorm Cyber Command">
     <App />
   </ErrorBoundary>,
 );

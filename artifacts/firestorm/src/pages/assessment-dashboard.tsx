@@ -285,7 +285,7 @@ export default function AssessmentDashboard() {
                     <span className={`flex items-center gap-1 ${hasCritical ? "text-red-400 animate-threat-pulse" : ""}`}>
                       <AlertTriangle className="w-3 h-3" /> {critCount} critical, {highCount} high
                     </span>
-                    <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> {aSims.length} simulations</span>
+                    <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> {aSims.length} exercises</span>
                   </div>
                 </CardContent>
               </Card>

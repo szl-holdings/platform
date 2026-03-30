@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Rss, Globe, Shield, AlertTriangle, Clock, Radio, Eye, ExternalLink, RefreshCw } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@workspace/shared-ui/utils";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { api } from "@/lib/api";
 
@@ -10,6 +10,14 @@ const feedSources = [
   { name: "CISA KEV Catalog", type: "government", reliability: "high", url: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog" },
   { name: "The Hacker News", type: "news", reliability: "high", url: "https://thehackernews.com/" },
   { name: "MITRE ATT&CK", type: "framework", reliability: "high", url: "https://attack.mitre.org/" },
+  { name: "CERT-RO Romania", type: "national-cert", reliability: "high", url: "https://www.cert.ro/" },
+  { name: "NCSC UK", type: "national-cert", reliability: "high", url: "https://www.ncsc.gov.uk/" },
+  { name: "ANSSI France", type: "national-cert", reliability: "high", url: "https://www.cert.ssi.gouv.fr/" },
+  { name: "BSI Germany", type: "national-cert", reliability: "high", url: "https://www.bsi.bund.de/" },
+  { name: "JPCERT/CC", type: "national-cert", reliability: "high", url: "https://www.jpcert.or.jp/" },
+  { name: "AusCERT", type: "national-cert", reliability: "high", url: "https://www.auscert.org.au/" },
+  { name: "Abuse.ch URLhaus", type: "malware", reliability: "high", url: "https://urlhaus.abuse.ch/" },
+  { name: "ENISA EU", type: "national-cert", reliability: "high", url: "https://www.enisa.europa.eu/" },
 ];
 
 const severityColors: Record<string, string> = {
@@ -34,7 +42,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function ThreatIntelFeed() {
-  const [activeTab, setActiveTab] = useState<"cves" | "kev" | "news">("cves");
+  const [activeTab, setActiveTab] = useState<"cves" | "kev" | "news" | "certs">("cves");
 
   const { data: cveData, isLoading: cveLoading, refetch: refetchCves } = useQuery({
     queryKey: ["live-nvd-cves"],
@@ -57,21 +65,32 @@ export default function ThreatIntelFeed() {
     refetchInterval: 600000,
   });
 
+  const { data: certData, isLoading: certLoading, refetch: refetchCerts } = useQuery({
+    queryKey: ["live-cert-advisories"],
+    queryFn: () => api.live.certAdvisories(),
+    staleTime: 3600000,
+    refetchInterval: 3600000,
+  });
+
   const cves = cveData?.vulnerabilities ?? [];
   const kevVulns = kevData?.vulnerabilities ?? [];
   const newsItems = newsData?.news ?? [];
+  const certFeeds = certData?.feeds ?? [];
+  const allCertAdvisories = certFeeds.flatMap((f: any) => f.advisories ?? []);
 
   const isLive = (cveData?.fetchedAt != null && cves.length > 0) ||
     (kevData?.liveFeed === true) ||
-    (newsData?.liveData === true);
+    (newsData?.liveData === true) ||
+    (certData?.liveFeeds > 0);
 
   const handleRefresh = () => {
     if (activeTab === "cves") refetchCves();
     else if (activeTab === "kev") refetchKev();
+    else if (activeTab === "certs") refetchCerts();
     else refetchNews();
   };
 
-  const isLoading = activeTab === "cves" ? cveLoading : activeTab === "kev" ? kevLoading : newsLoading;
+  const isLoading = activeTab === "cves" ? cveLoading : activeTab === "kev" ? kevLoading : activeTab === "certs" ? certLoading : newsLoading;
 
   return (
     <div className="p-6 space-y-6">
@@ -117,13 +136,13 @@ export default function ThreatIntelFeed() {
         </div>
       </div>
 
-      <div className="flex gap-1 border-b border-border pb-0">
-        {(["cves", "kev", "news"] as const).map(tab => (
+      <div className="flex gap-1 border-b border-border pb-0 flex-wrap">
+        {(["cves", "kev", "news", "certs"] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={cn("px-4 py-2 text-sm font-medium rounded-t-lg transition-colors capitalize",
               activeTab === tab ? "bg-card border border-b-card border-border text-foreground -mb-px" : "text-muted-foreground hover:text-foreground"
             )}>
-            {tab === "cves" ? "NVD CVEs" : tab === "kev" ? "CISA KEV" : "Threat News"}
+            {tab === "cves" ? "NVD CVEs" : tab === "kev" ? "CISA KEV" : tab === "certs" ? "CERT Advisories" : "Threat News"}
           </button>
         ))}
       </div>
@@ -291,8 +310,67 @@ export default function ThreatIntelFeed() {
         </div>
       )}
 
+      {activeTab === "certs" && (
+        <div className="space-y-4">
+          {certLoading ? (
+            <div className="flex items-center justify-center h-40 text-muted-foreground">
+              <Radio className="w-4 h-4 animate-pulse mr-2" /> Loading CERT advisories...
+            </div>
+          ) : allCertAdvisories.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground text-sm">No CERT advisory data available</div>
+          ) : (
+            <>
+              {certFeeds.filter((f: any) => f.advisories?.length > 0).map((feed: any) => (
+                <div key={feed.feedId}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={cn("w-2 h-2 rounded-full", feed.liveData ? "bg-emerald-400 animate-pulse" : "bg-red-400")} />
+                    <h3 className="text-sm font-semibold text-foreground">{feed.feedName}</h3>
+                    <span className="text-xs text-muted-foreground">{feed.country} · {feed.region}</span>
+                    <span className="text-xs text-muted-foreground ml-auto">{feed.advisoryCount} advisories</span>
+                  </div>
+                  <div className="space-y-2 mb-4">
+                    {feed.advisories.map((adv: any) => (
+                      <div key={adv.id} className="bg-card border border-border rounded-xl p-4 hover:border-primary/20 transition-all">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium uppercase border", severityColors[adv.severity])}>
+                                {adv.severity}
+                              </span>
+                              <span className="text-xs text-muted-foreground">{feed.feedName}</span>
+                              {adv.publishedAt && (
+                                <span className="text-xs text-muted-foreground ml-auto flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {timeAgo(adv.publishedAt)}
+                                </span>
+                              )}
+                            </div>
+                            <h4 className="text-sm font-medium text-foreground mb-1">{adv.title}</h4>
+                            {adv.summary && <p className="text-xs text-muted-foreground line-clamp-2">{adv.summary}</p>}
+                          </div>
+                          {adv.url && adv.url !== "#" && (
+                            <a href={adv.url} target="_blank" rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-primary transition-colors shrink-0">
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {certData?.fetchedAt && (
+                <p className="text-xs text-muted-foreground text-center">
+                  {certData.liveFeeds} of {certData.totalFeeds} feeds live · Updated {new Date(certData.fetchedAt).toLocaleTimeString()}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
       <div className="bg-card border border-border rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-foreground mb-3">Connected Live Sources</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-3">Connected Intelligence Sources</h3>
         <div className="grid grid-cols-2 gap-3">
           {feedSources.map(src => (
             <div key={src.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">

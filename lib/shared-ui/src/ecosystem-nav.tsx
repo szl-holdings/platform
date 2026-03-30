@@ -46,7 +46,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "firestorm",
     name: "Firestorm",
-    subtitle: "Security Simulation",
+    subtitle: "Cyber Operations",
     path: "/firestorm/",
     accent: "#ef4444",
     icon: "🔥",

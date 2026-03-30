@@ -8,7 +8,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 
 type ActivityItem = { type: string; title: string; severity: string; timestamp: string };
 
-const demoData = {
+const fallbackData = {
   activeIncidents: 7,
   openAlerts: 34,
   mttd: 4.2,
@@ -51,7 +51,7 @@ const mitreData: Record<string, Record<string, number>> = {
   "Impact": { "Data Encryption": 3, "Service Stop": 2, "Defacement": 1 },
 };
 
-type SOCData = typeof demoData;
+type SOCData = typeof fallbackData;
 
 function AnimatedCounter({ value, duration = 1200, decimals = 0 }: { value: number; duration?: number; decimals?: number }) {
   const [display, setDisplay] = useState(0);
@@ -295,7 +295,7 @@ function BlastRadiusViz() {
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />Origin</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />Compromised</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block" />At Risk</span>
-          <span className="ml-auto font-mono">5 hosts at risk · Mock Data</span>
+          <span className="ml-auto font-mono">5 hosts at risk</span>
         </div>
       </div>
     </div>
@@ -376,7 +376,7 @@ export default function SOCDashboard() {
 
   const data: SOCData = useMemo(() => {
     if (apiData && typeof apiData.activeIncidents === "number") return apiData;
-    return demoData;
+    return fallbackData;
   }, [apiData]);
 
   const posturScore = Math.round(

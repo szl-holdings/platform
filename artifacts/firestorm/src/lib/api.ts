@@ -73,5 +73,12 @@ export const api = {
     threatNews: () => apiFetch<any>("/firestorm/live/threat-news"),
     threatIndicators: (type?: string) =>
       apiFetch<any>(`/firestorm/live/threat-indicators${type ? `?type=${type}` : ""}`),
+    certAdvisories: (certId?: string) =>
+      apiFetch<any>(`/firestorm/live/cert-advisories${certId ? `?cert=${certId}` : ""}`),
+    feedStatus: () => apiFetch<any>("/firestorm/live/feed-status"),
+  },
+  ingest: {
+    webhook: (payload: any) => apiFetch<any>("/firestorm/ingest/webhook", { method: "POST", body: JSON.stringify(payload) }),
+    syslog: (payload: any) => apiFetch<any>("/firestorm/ingest/syslog", { method: "POST", body: JSON.stringify(payload) }),
   },
 };

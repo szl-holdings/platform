@@ -102,7 +102,7 @@ export default function ScenarioLibrary() {
           <DialogContent className="bg-card border-border">
             <DialogHeader><DialogTitle className="font-display">Create Scenario</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              <div><Label>Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Phishing Campaign Simulation" /></div>
+              <div><Label>Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Phishing Campaign — APT28 TTP" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Category</Label>
