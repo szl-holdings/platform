@@ -1,0 +1,675 @@
+REPLIT MASTER PAYLOAD — SZL CORE MOAT / BUSINESS OBSERVABILITY OS
+
+MISSION
+Take Beacon, Lyte, Nimbus, and AlloyScape and evolve them into the flagship center of the SZL ecosystem.
+
+These four products must stop feeling like adjacent apps and start functioning like one unified operating system for:
+- execution visibility
+- workflow control
+- predictive intelligence
+- traceable action
+
+PRIMARY THESIS
+This is not a dashboard suite.
+This is a Business Observability and Execution Intelligence OS.
+
+CORE CATEGORY DEFINITION
+Business Observability means:
+the ability to trace workflows, approvals, risks, recommendations, actions, and outcomes end-to-end so users can understand:
+- what is happening
+- why it is happening
+- what is blocked
+- what is likely next
+- what action should be taken now
+- what value, time, or risk is at stake
+
+NON-NEGOTIABLE OUTCOME
+When someone sees the core flow across Beacon, Lyte, Nimbus, and AlloyScape, their reaction should be:
+“This is one coherent command system.”
+
+==================================================
+SECTION 1 — PRODUCT ROLES
+==================================================
+
+DEFINE EACH PRODUCT AS A CLEAR PART OF ONE ENGINE:
+
+BEACON
+Role:
+Observability Core
+
+Purpose:
+Surface business state, workflow health, drift, bottlenecks, value leakage, and operational signals.
+
+BEACON ANSWERS:
+- what changed
+- where execution is drifting
+- where bottlenecks are emerging
+- what impact is building
+
+LYTE
+Role:
+Command and Orchestration Layer
+
+Purpose:
+Route work, clarify ownership, manage approvals, escalate issues, and turn signal into accountable action.
+
+LYTE ANSWERS:
+- who owns this
+- what needs action now
+- what is waiting
+- what should be escalated
+
+NIMBUS
+Role:
+Predictive Intelligence Layer
+
+Purpose:
+Forecast likely next states, model scenarios, assign confidence, and explain recommendations.
+
+NIMBUS ANSWERS:
+- what is likely to happen next
+- how confident we are
+- what assumptions drive the prediction
+- what action has the best expected outcome
+
+ALLOYSCAPE
+Role:
+Execution Fabric
+
+Purpose:
+Run workflows, manage automations, connect systems, track retries, support intervention, and audit what happened.
+
+ALLOYSCAPE ANSWERS:
+- what was executed
+- what failed
+- what was retried
+- where intervention is needed
+- what the final outcome was
+
+==================================================
+SECTION 2 — THE GOLDEN FLOW
+==================================================
+
+BUILD A SINGLE CROSS-PRODUCT DEMONSTRATION FLOW:
+
+1. BEACON detects workflow degradation
+2. LYTE routes accountability and required action
+3. NIMBUS predicts likely outcome and recommends next move
+4. ALLOYSCAPE executes workflow / automation / escalation
+5. BEACON reflects updated state and value recovered
+
+THIS FLOW MUST BE CLEAR, DEMO-READY, AND VISUALLY CONNECTED.
+
+NAME THIS:
+THE SZL COMMAND LOOP
+
+SZL COMMAND LOOP STEPS:
+- detect
+- interpret
+- decide
+- execute
+- verify
+
+ALL FOUR PRODUCTS MUST REFERENCE THIS LOOP IN UI, COPY, DOCS, AND DEMOS.
+
+==================================================
+SECTION 3 — SHARED UX DOCTRINE
+==================================================
+
+ALL FOUR PRODUCTS MUST FEEL LIKE ONE COMPANY.
+
+MANDATE A SHARED INTERFACE SYSTEM:
+
+GLOBAL LAYOUT
+- left nav
+- top command/status strip
+- central working canvas
+- right context drawer
+- persistent action bar where relevant
+
+GLOBAL DESIGN CHARACTER
+- premium
+- dark-mode first
+- high-legibility
+- disciplined motion
+- enterprise credible
+- dense information made clear
+- cinematic but restrained
+
+GLOBAL COMPONENTS
+- ExecutiveSummaryStrip
+- InsightCard
+- ImpactCard
+- RecommendationPanel
+- ConfidenceBadge
+- RiskBadge
+- OwnerBadge
+- ApprovalChip
+- WorkflowTraceView
+- ActivityTimeline
+- EntityDrawer
+- AlertRail
+- DecisionPanel
+- ActionQueue
+- AuditPanel
+- RunStatusTable
+- EscalationCard
+
+GLOBAL RULES
+- every alert must lead to context
+- every context view must lead to a suggested action
+- every recommendation must show rationale
+- every execution must show status and auditability
+- every screen must balance executive and operator usefulness
+
+==================================================
+SECTION 4 — SHARED DATA MODEL
+==================================================
+
+CREATE A SINGLE CORE EVENT MODEL ACROSS ALL FOUR PRODUCTS.
+
+STANDARD EVENT SCHEMA
+- event_id
+- event_type
+- source_product
+- entity_type
+- entity_id
+- actor_type
+- actor_id
+- severity
+- confidence
+- status
+- timestamp
+- correlation_id
+- workflow_stage
+- recommendation_id
+- business_value_impact
+- operational_impact
+- technical_metadata
+
+STANDARD ENTITY TYPES
+- workflow
+- approval
+- task
+- opportunity
+- case
+- recommendation
+- execution_run
+- exception
+- owner
+- team
+- client
+- account
+- project
+- milestone
+- dependency
+- signal
+
+STANDARD STATE CONCEPTS
+- healthy
+- degraded
+- blocked
+- pending_approval
+- escalated
+- executing
+- retried
+- completed
+- failed
+- recovered
+
+BUILD THIS AS SHARED PACKAGE:
+ /packages/core-observability
+
+==================================================
+SECTION 5 — BEACON EVOLUTION
+==================================================
+
+POSITIONING
+Beacon is the observability heart of the platform.
+
+BUILD THESE CORE SCREENS:
+
+1. EXECUTIVE OVERVIEW
+- KPI strip
+- workflow health summary
+- value leakage summary
+- top bottlenecks
+- biggest approval delays
+- high-risk items
+- recommendations summary
+
+2. WORKFLOW HEALTH
+- workflow list with status
+- latency indicators
+- ownership gaps
+- blocked-step heatmap
+- dependency bottlenecks
+
+3. VALUE RECOVERY VIEW
+- where value is at risk
+- how much risk is estimated
+- what intervention could recover
+- before/after comparisons
+
+4. DRIFT DETECTION
+- what changed unexpectedly
+- when it changed
+- why it may be happening
+- which related workflows are affected
+
+5. CAUSAL DRILLDOWN
+- root contributing factors
+- related approvals
+- related owners
+- linked actions in Lyte
+- linked predictions in Nimbus
+- linked runs in AlloyScape
+
+BEACON MUST FEEL:
+like a command-quality operational intelligence surface, not a BI dashboard
+
+==================================================
+SECTION 6 — LYTE EVOLUTION
+==================================================
+
+POSITIONING
+Lyte is the command center where action gets routed and ownership becomes clear.
+
+BUILD THESE CORE SCREENS:
+
+1. COMMAND INBOX
+- prioritized actions
+- approvals needed
+- exceptions
+- escalations
+- stalled workflows
+- ownership gaps
+
+2. APPROVALS CENTER
+- pending approvals
+- aging approvals
+- thresholds
+- approval impact estimate
+- escalation recommendations
+
+3. OWNERSHIP MAP
+- who owns each step
+- where ownership is missing
+- where handoffs are breaking down
+- overloaded owners / teams
+
+4. ESCALATION CENTER
+- what needs escalation
+- why
+- to whom
+- urgency
+- linked Nimbus rationale
+- linked AlloyScape run path
+
+5. INTERVENTION WORKSPACE
+- comment/context thread
+- action selection
+- reroute
+- escalate
+- approve
+- defer
+- assign
+- attach note
+
+LYTE MUST FEEL:
+like a real operational command layer, not a project management clone
+
+==================================================
+SECTION 7 — NIMBUS EVOLUTION
+==================================================
+
+POSITIONING
+Nimbus is the predictive intelligence brain.
+
+BUILD THESE CORE SCREENS:
+
+1. PREDICTION OVERVIEW
+- likely-next-event cards
+- forecast bands
+- confidence indicators
+- major projected bottlenecks
+- projected delays
+- projected recovery opportunities
+
+2. SCENARIO MODELING
+- best case
+- expected case
+- risk case
+- confidence intervals
+- projected outcome deltas
+
+3. RECOMMENDATION ENGINE
+- recommendation
+- rationale
+- confidence
+- impact estimate
+- urgency
+- assumptions
+- linked data inputs
+
+4. ASSUMPTIONS PANEL
+- what assumptions are driving the model
+- what data is incomplete
+- what could change the recommendation
+
+5. EXPLAINABILITY VIEW
+- why this prediction exists
+- which signals drove it
+- related Beacon events
+- related Lyte states
+- related AlloyScape outcomes
+
+NIMBUS MUST NEVER OUTPUT VAGUE AI LANGUAGE.
+
+EVERY INTELLIGENT OUTPUT MUST SHOW:
+- confidence
+- rationale
+- assumptions
+- recommended next action
+- expected impact
+
+==================================================
+SECTION 8 — ALLOYSCAPE EVOLUTION
+==================================================
+
+POSITIONING
+AlloyScape is the execution engine.
+
+BUILD THESE CORE SCREENS:
+
+1. CONNECTOR HUB
+- connected systems
+- health status
+- auth state
+- sync history
+- issues
+
+2. WORKFLOW DAG VIEW
+- nodes
+- dependencies
+- approvals
+- decision points
+- human intervention steps
+- retry branches
+
+3. RUN HISTORY
+- execution logs
+- durations
+- failures
+- retries
+- outcomes
+- linked events
+
+4. EXCEPTION QUEUE
+- failed runs
+- blocked jobs
+- intervention required
+- cause summary
+- linked Lyte action
+
+5. HUMAN OVERRIDE PANEL
+- approve
+- retry
+- reroute
+- abort
+- annotate
+- escalate
+
+6. AUDIT VIEW
+- who triggered what
+- when
+- why
+- result
+- before/after state where possible
+
+ALLOYSCAPE MUST FEEL:
+like the backbone of disciplined execution
+
+==================================================
+SECTION 9 — THE COMMAND LOOP UI
+==================================================
+
+ADD A SHARED COMMAND LOOP PANEL ACROSS ALL FOUR PRODUCTS.
+
+DISPLAY:
+DETECT → INTERPRET → DECIDE → EXECUTE → VERIFY
+
+IN EACH PRODUCT:
+- Beacon emphasizes DETECT + VERIFY
+- Lyte emphasizes INTERPRET + ACT
+- Nimbus emphasizes DECIDE
+- AlloyScape emphasizes EXECUTE
+
+THE USER SHOULD ALWAYS SEE WHERE THEY ARE IN THE LOOP.
+
+==================================================
+SECTION 10 — KPI SYSTEM
+==================================================
+
+BUILD A SHARED KPI FRAMEWORK FOR THE CORE MOAT.
+
+TOP KPIs
+- time_to_insight
+- time_to_action
+- time_to_resolution
+- workflow_latency
+- approval_latency
+- escalation_rate
+- blocked_workflow_count
+- recommendation_acceptance_rate
+- automation_success_rate
+- retry_rate
+- value_at_risk
+- value_recovered
+- confidence_weighted_accuracy
+- operator_intervention_rate
+
+BEACON KPIs
+- workflows degraded
+- value leakage detected
+- bottleneck count
+- health score
+
+LYTE KPIs
+- pending approvals
+- aging approvals
+- intervention count
+- escalation turnaround
+
+NIMBUS KPIs
+- forecast accuracy
+- recommendation adoption
+- confidence spread
+- scenario deviation
+
+ALLOYSCAPE KPIs
+- successful runs
+- failed runs
+- retries
+- connector health
+- audit completeness
+
+==================================================
+SECTION 11 — SEEDED DEMO DATA
+==================================================
+
+CREATE DEMO DATA THAT FEELS ENTERPRISE-REAL.
+
+INCLUDE:
+- stalled approvals
+- delayed workflows
+- conflicting ownership
+- missed handoffs
+- recovery interventions
+- automation retries
+- high-value workflows at risk
+- recommendations with varied confidence
+- successful recovery scenarios
+
+DEMO STORY EXAMPLES:
+1. approval delay creates downstream bottleneck
+2. workflow owner missing causes drift
+3. Nimbus predicts escalation risk before SLA miss
+4. AlloyScape reroutes workflow and recovers cycle time
+5. Beacon shows value recovered after intervention
+
+==================================================
+SECTION 12 — SCREENSHOT / DEMO ASSET GENERATION
+==================================================
+
+GENERATE 3 POLISHED SCREENSHOTS FOR EACH PRODUCT.
+
+BEACON
+- executive overview
+- workflow health grid
+- value recovery drilldown
+
+LYTE
+- command inbox
+- approvals center
+- intervention workspace
+
+NIMBUS
+- prediction overview
+- scenario modeling
+- explainability panel
+
+ALLOYSCAPE
+- workflow DAG
+- run history
+- human override panel
+
+STYLE ALL SCREENSHOTS:
+- premium dark mode
+- consistent design system
+- realistic content
+- no placeholder lorem ipsum
+- clean spacing
+- legible density
+
+STORE IN:
+ /assets/screenshots/core-moat
+
+==================================================
+SECTION 13 — DOCS / POSITIONING
+==================================================
+
+CREATE:
+ /docs/core-moat.md
+
+CONTENT MUST EXPLAIN:
+- what Business Observability is
+- why Beacon/Lyte/Nimbus/AlloyScape are one system
+- the SZL Command Loop
+- how signal becomes action
+- how action becomes outcome
+- why this is differentiated from normal dashboards, PM tools, or AI assistants
+
+CREATE:
+ /docs/core-demo-script.md
+
+SCRIPT:
+1. Start in Beacon showing degradation
+2. Move to Lyte showing accountability and approvals
+3. Move to Nimbus showing prediction and rationale
+4. Move to AlloyScape showing execution and recovery
+5. Return to Beacon showing improved state and value recovered
+
+==================================================
+SECTION 14 — COPY SYSTEM
+==================================================
+
+USE THIS HOUSE VOICE:
+- calm
+- authoritative
+- technically literate
+- premium
+- direct
+- no fluff
+- no vague “AI-powered” clichés unless explained
+
+ONE-LINERS:
+
+BEACON
+The observability core that shows where execution is drifting, why it matters, and what is at risk.
+
+LYTE
+The orchestration layer that routes action, clarifies ownership, and keeps work moving.
+
+NIMBUS
+The predictive intelligence layer that explains what is likely next and what action is worth taking.
+
+ALLOYSCAPE
+The execution fabric that runs workflows across systems with traceability, control, and human override.
+
+CORE SUITE
+A command system for turning operational signal into accountable action and measurable outcomes.
+
+==================================================
+SECTION 15 — WINNING STANDARD
+==================================================
+
+THIS CORE MOAT IS “WORLD-CLASS” ONLY IF IT ACHIEVES ALL OF THE FOLLOWING:
+
+1. It feels like one unified operating system
+2. It has a crystal-clear command loop
+3. Every recommendation is explainable
+4. Every action is auditable
+5. Every screen ties signal to action
+6. It is equally persuasive to executives and operators
+7. It has demo-ready seeded data and polished visuals
+8. It looks premium and enterprise credible
+9. It feels original, not like stitched-together SaaS tropes
+10. It clearly becomes the center of gravity for all SZL lanes
+
+==================================================
+SECTION 16 — EXECUTION ORDER
+==================================================
+
+PHASE 1
+- shared design system enforcement
+- shared data/event model
+- command loop architecture
+- core copy rewrite
+
+PHASE 2
+- Beacon polish
+- Lyte command inbox and approvals
+- Nimbus explainability and scenarios
+- AlloyScape workflow and audit views
+
+PHASE 3
+- demo data
+- screenshots
+- docs
+- core demo script
+- homepage ecosystem integration
+
+PHASE 4
+- connect the security lane to this core
+- connect the maritime lane to this core
+- make the entire company orbit this moat
+
+==================================================
+SECTION 17 — FINAL INTENT
+==================================================
+
+Do not build four adjacent products.
+Build one command architecture with four expressions:
+
+Beacon sees.
+Lyte routes.
+Nimbus reasons.
+AlloyScape executes.
+
+Together they become the SZL core moat:
+the Business Observability and Execution Intelligence OS.
+
+TARGET REACTION
+“This is the clearest, strongest, and most original part of the company.
+Everything else now makes sense because this center exists.”
