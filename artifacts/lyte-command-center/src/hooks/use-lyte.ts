@@ -3,7 +3,9 @@ import { api, type LyteIncident } from "../lib/api";
 import { signals as demoSignals, incidents as demoIncidents, recommendations as demoRecommendations, playbooks as demoPlaybooks } from "../lib/mock-data";
 
 function isAuthError(e: unknown): boolean {
-  return e instanceof Error && (e.message.includes("HTTP 401") || e.message.includes("HTTP 403"));
+  if (!(e instanceof Error)) return false;
+  const msg = e.message.toLowerCase();
+  return msg.includes("401") || msg.includes("403") || msg.includes("unauthorized") || msg.includes("forbidden") || msg.includes("not authenticated");
 }
 
 export function useSignals() {
