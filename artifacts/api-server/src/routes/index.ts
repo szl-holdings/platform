@@ -24,6 +24,7 @@ import holdingsRouter from "./holdings";
 import carlotaJoRouter from "./carlota-jo";
 import observabilityRouter from "./observability";
 import alloyChatRouter from "./alloy-chat";
+import jobsRouter from "./jobs";
 
 const router: IRouter = Router();
 
@@ -69,5 +70,7 @@ router.use(carlotaJoRouter);
 router.use("/observability", readLimiter);
 router.use(observabilityRouter);
 router.use(alloyChatRouter);
+router.use("/jobs", readLimiter);
+router.use(jobsRouter);
 
 export default router;

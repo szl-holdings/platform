@@ -2,6 +2,12 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
+import compression from "compression";
+import swaggerUi from "swagger-ui-express";
+import { readFileSync } from "fs";
+import { parse } from "yaml";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { correlationMiddleware } from "./middlewares/correlation";
@@ -13,6 +19,9 @@ const app: Express = express();
 app.set("trust proxy", 1);
 
 const isProduction = process.env.NODE_ENV === "production";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 app.use(correlationMiddleware);
 
@@ -41,6 +50,14 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id"],
   exposedHeaders: ["X-Correlation-Id"],
   maxAge: 86400,
+}));
+
+app.use(compression({
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers["x-no-compression"]) return false;
+    return compression.filter(req, res);
+  },
 }));
 
 app.use(globalLimiter);
@@ -134,6 +151,21 @@ app.get("/api/health/ready", async (_req: Request, res: Response) => {
     },
   });
 });
+
+try {
+  const specPath = join(__dirname, "../../../lib/api-spec/openapi.yaml");
+  const specContent = readFileSync(specPath, "utf-8");
+  const swaggerDocument = parse(specContent) as Record<string, unknown>;
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+    customSiteTitle: "SZL Holdings API Docs",
+    swaggerOptions: { persistAuthorization: true },
+  }));
+  app.get("/api/docs.json", (_req: Request, res: Response) => {
+    res.json(swaggerDocument);
+  });
+} catch (err) {
+  logger.warn({ err }, "Failed to load OpenAPI spec — /api/docs will be unavailable");
+}
 
 app.use("/api", router);
 

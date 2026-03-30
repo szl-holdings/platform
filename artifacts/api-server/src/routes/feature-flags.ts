@@ -106,4 +106,34 @@ router.delete("/feature-flags/:id", authMiddleware(), requireRole("ops"), async 
   }
 });
 
+router.get("/feature-flags/check/:key", async (req, res) => {
+  try {
+    const { key } = req.params;
+    if (!key || typeof key !== "string") {
+      sendBadRequest(res, "key is required");
+      return;
+    }
+    const [flag] = await db
+      .select()
+      .from(featureFlagsTable)
+      .where(eq(featureFlagsTable.key, key))
+      .limit(1);
+
+    if (!flag) {
+      sendSuccess(res, { key, isEnabled: false, exists: false });
+      return;
+    }
+
+    let isEnabled = flag.isEnabled;
+    if (isEnabled && flag.rolloutPercentage < 100) {
+      const hash = Array.from(key).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+      isEnabled = (hash % 100) < flag.rolloutPercentage;
+    }
+
+    sendSuccess(res, { key, isEnabled, rolloutPercentage: flag.rolloutPercentage, exists: true });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to check feature flag");
+  }
+});
+
 export default router;

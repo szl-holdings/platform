@@ -76,8 +76,8 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
 
 ### Shared Libraries
-- `lib/shared-ui`: Design system, AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy component
-- `lib/db`: Drizzle ORM schemas and database connection (includes `conversations` + `messages` tables for AlloyChat)
+- `lib/shared-ui`: Design system, AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy, `ErrorBoundary`, `useRealtimeChannel`, `useFeatureFlag` hooks
+- `lib/db`: Drizzle ORM schemas, connection pool (min/max/idle timeout/statement timeout), slow-query logging in dev (includes `conversations` + `messages` tables for AlloyChat)
 - `lib/config`: Application-to-connector dependency mapping
 - `lib/services`: 24 service adapters with health checks and mock fallback
 - `lib/api-spec`: OpenAPI 3.1 specification
@@ -86,6 +86,18 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - `lib/integrations-openai-ai-server`: OpenAI server-side integration via Replit AI Integrations
 - `lib/integrations-openai-ai-react`: OpenAI React client hooks
 - `lib/integrations-anthropic-ai`: Anthropic server-side integration via Replit AI Integrations
+
+### Infrastructure Hardening (Task #58)
+- **Graceful Shutdown:** SIGTERM/SIGINT handlers drain HTTP connections, flush job queue, and close DB pool within 10s
+- **Response Compression:** `compression` middleware (gzip) on all responses ≥1KB
+- **WebSocket Layer:** `/ws` endpoint with channel-based pub/sub (`WS_CHANNELS`), heartbeat/reconnect logic
+- **API Documentation:** Swagger UI at `/api/docs`, raw OpenAPI JSON at `/api/docs.json`
+- **Error Code Taxonomy:** `lib/error-codes.ts` — structured codes (AUTH_001, BILLING_002, etc.)
+- **CI/CD Pipeline:** `.github/workflows/ci.yml` (typecheck, lint, build, security audit, migration check) and `.github/workflows/security.yml` (weekly dep scan, secret detection)
+- **Error Boundaries:** `ErrorBoundary` from `@workspace/shared-ui/error-boundary` wraps all 13 React apps
+- **Feature Flags Runtime:** `/api/feature-flags/check/:key` endpoint for client-side flag evaluation; `useFeatureFlag` React hook
+- **Background Job Queue:** In-process `jobQueue` with retry backoff for WEBHOOK_DELIVERY, REPORT_GENERATION, NOTIFICATION_DISPATCH, EMAIL_SEND; API at `/api/jobs/stats`, `/api/jobs/recent`, `/api/jobs/enqueue`
+- **DB Pool Tuning:** Configurable via `DB_POOL_MIN`, `DB_POOL_MAX`, `DB_IDLE_TIMEOUT_MS`, `DB_CONNECT_TIMEOUT_MS`, `DB_STATEMENT_TIMEOUT_MS`
 
 ### Post-Merge Script
 `scripts/post-merge.sh` runs `pnpm install --frozen-lockfile` then `yes '' | pnpm --filter db push || true` to handle interactive drizzle-kit prompts automatically.

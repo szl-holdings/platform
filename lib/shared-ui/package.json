@@ -13,7 +13,9 @@
     "./copilot": "./src/copilot.tsx",
     "./copilot-configs": "./src/copilot-configs.ts",
     "./ai-components": "./src/ai-components.tsx",
-    "./intelligence-philosophy": "./src/intelligence-philosophy.tsx"
+    "./intelligence-philosophy": "./src/intelligence-philosophy.tsx",
+    "./hooks": "./src/hooks.tsx",
+    "./error-boundary": "./src/error-boundary.tsx"
   },
   "dependencies": {
     "framer-motion": "catalog:",
