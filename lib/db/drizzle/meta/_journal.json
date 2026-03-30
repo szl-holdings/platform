@@ -15,6 +15,20 @@
       "when": 1774877701115,
       "tag": "0001_exotic_tony_stark",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774900000000,
+      "tag": "0002_cms_schema_and_product_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774960000000,
+      "tag": "0003_terra_distress_pipeline",
+      "breakpoints": true
     }
   ]
 }

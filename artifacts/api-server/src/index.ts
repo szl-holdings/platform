@@ -8,6 +8,8 @@ import { startDomainNotificationGenerators, stopDomainNotificationGenerators } f
 import { agentScheduler } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
+import "./lib/terra-nyc-ingestion";
+import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 
 failFastOnInvalidConfig();
 
@@ -41,6 +43,7 @@ ensureAlloyTables()
 
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
+  scheduleNycIngestionJob();
 });
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;

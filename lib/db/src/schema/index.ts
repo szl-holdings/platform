@@ -36,3 +36,4 @@ export * from "./audit_logs";
 export * from "./entities";
 export * from "./platform_events";
 export * from "./alloy";
+export * from "./terra";
