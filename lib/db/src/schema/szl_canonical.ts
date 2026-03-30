@@ -41,7 +41,7 @@ export type ApprovalState = (typeof APPROVAL_STATES)[number];
 
 // ─── PRODUCTS ──────────────────────────────────────────────────────────────────
 
-export const productsTable = pgTable("szl_products", {
+export const szlProductsTable = pgTable("szl_products", {
   id: serial("id").primaryKey(),
   orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
   slug: text("slug").notNull().unique(),
@@ -393,9 +393,9 @@ export const szlReadinessItemsTable = pgTable("szl_readiness_items", {
 
 // ─── INSERT SCHEMAS ────────────────────────────────────────────────────────────
 
-export const insertProductSchema = createInsertSchema(productsTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type Product = typeof productsTable.$inferSelect;
+export const insertSzlProductSchema = createInsertSchema(szlProductsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertSzlProduct = z.infer<typeof insertSzlProductSchema>;
+export type SzlProduct = typeof szlProductsTable.$inferSelect;
 
 export const insertSzlSignalSchema = createInsertSchema(szlSignalsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertSzlSignal = z.infer<typeof insertSzlSignalSchema>;

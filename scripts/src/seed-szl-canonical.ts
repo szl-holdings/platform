@@ -1,6 +1,6 @@
 import {
   db,
-  productsTable,
+  szlProductsTable,
   szlVesselsTable,
   szlPortsTable,
   szlRoutesTable,
@@ -22,7 +22,7 @@ async function seedCanonical() {
   console.log("Seeding SZL canonical data...");
 
   // ─── PRODUCTS ─────────────────────────────────────────────────────────────
-  const productRows = await db.insert(productsTable).values([
+  const productRows = await db.insert(szlProductsTable).values([
     { slug: "szl-holdings", name: "SZL Holdings", description: "Parent holding company — portfolio, ventures, strategic oversight", productType: "platform", isActive: true },
     { slug: "alloy", name: "AlloyScape", description: "Execution fabric and predictive intelligence engine powering Lyte and Vessels", productType: "platform", parentSlug: "szl-holdings", isActive: true },
     { slug: "lyte", name: "Lyte", description: "Business observability command center — signals, ownership, approvals, escalations", productType: "platform", parentSlug: "alloy", isActive: true },

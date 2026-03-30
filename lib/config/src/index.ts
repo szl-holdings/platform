@@ -137,11 +137,6 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     description: "Legacy slug for Career — Founder Identity site",
     doctrineRole: "EXECUTE",
   },
-  dreamscape: {
-    connectors: ["ai", "figma", "storage", "google-drive", "dropbox", "elevenlabs"],
-    description: "Legacy slug for Alloy Predictive Intelligence (now a core Alloy capability)",
-    doctrineRole: "EXECUTE",
-  },
   terra: {
     connectors: ["ai", "monitoring", "storage"],
     description: "Legacy slug for Beacon — Business Telemetry",
