@@ -52,6 +52,7 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **Terra (`terra`, route: `/terra/`):** Real estate intelligence — portfolio dashboard (8 properties), market intelligence, deal pipeline, and revenue/occupancy analytics.
 - **Dreamscape (`dreamscape`, route: `/dreamscape/`):** Creative production platform — 6 campaigns, AI tools (SDXL, RunwayML), and department-based approval workflows.
 - **Carlota Jo (`carlota-jo`, route: `/carlota-jo/`):** Strategic advisory — "Counsel for Consequential Decisions" for Fortune 500/sovereign wealth. Porter's Five Forces, BCG matrix, and COSO ERM frameworks.
+- **MSP Command Center (`msp`, route: `/msp/`):** Managed Service Provider platform — client management, service desk, device inventory, contract/SLA tracking, NOC operations, revenue analytics, and technician dispatch.
 
 ### Database Schema
 90+ tables across 20+ schema files in `lib/db/src/schema/`:

@@ -312,6 +312,7 @@ async function seed() {
     { name: "Lyte Command Center Build", description: "Business observability command center for portfolio operations", status: "active" },
     { name: "Dreamscape Creative Pipeline", description: "Creative campaign engine for storytelling and media workflows", status: "active" },
     { name: "Readiness Report Platform", description: "Portfolio-wide maturity scoring and readiness tracking", status: "completed" },
+    { name: "MSP Command Center", description: "Next-generation managed service provider platform for IT service delivery", status: "active" },
   ]).returning();
   console.log(`  ✓ ${projects.length} projects`);
 

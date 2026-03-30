@@ -405,6 +405,7 @@ const projectAppUrls: Record<string, string> = {
   "Service Integration Layer": "/admin/",
   "Stephen L. Portfolio": "/",
   "Terra Real Estate Intelligence": "/terra/",
+  "MSP Command Center": "/msp/",
 };
 
 function ProjectPortfolioCard({ project, index }: { project: Project; index: number }) {
