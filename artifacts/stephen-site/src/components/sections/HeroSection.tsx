@@ -7,6 +7,7 @@ function SubtleGrid() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     let animFrame: number;
@@ -15,6 +16,7 @@ function SubtleGrid() {
     resize();
     window.addEventListener("resize", resize);
     const draw = () => {
+      if (document.hidden) { animFrame = requestAnimationFrame(draw); return; }
       time += 0.003;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const cols = 15, rows = 10;
@@ -36,7 +38,7 @@ function SubtleGrid() {
     draw();
     return () => { cancelAnimationFrame(animFrame); window.removeEventListener("resize", resize); };
   }, []);
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />;
 }
 
 export function HeroSection() {
