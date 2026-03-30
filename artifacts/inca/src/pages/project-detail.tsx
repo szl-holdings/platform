@@ -12,10 +12,10 @@ const statusColors: Record<ProjectStatus, string> = {
 };
 
 const statusLabels: Record<ProjectStatus, string> = {
-  research: "Research",
-  development: "Development",
-  testing: "Testing",
-  deployed: "Deployed",
+  research: "Under review",
+  development: "Requires triage",
+  testing: "Priority signal",
+  deployed: "Resolved",
 };
 
 export default function ProjectDetail() {

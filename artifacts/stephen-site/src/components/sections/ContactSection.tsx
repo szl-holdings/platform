@@ -26,14 +26,10 @@ export function ContactSection() {
               Contact
             </p>
             <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight mb-8">
-              Request
-              <br />
-              <span className="text-white/40 font-normal">a briefing</span>
+              Start a conversation.
             </h2>
             <p className="text-white/50 text-base font-light leading-relaxed mb-10">
-              If you're building something at scale, facing a technical decision with
-              long-term consequences, or looking for a fractional technical partner
-              — let's talk.
+              If you are building around visibility, workflow clarity, observability, or modern operating systems, let's connect.
             </p>
             <div className="space-y-4">
               {[
@@ -64,7 +60,7 @@ export function ContactSection() {
                 <div className="w-8 h-[1px] bg-[#7ba3d4] mb-7" />
                 <h3 className="text-2xl font-semibold text-white mb-3 tracking-tight">Request received</h3>
                 <p className="text-white/45 text-base font-light leading-relaxed max-w-sm">
-                  I'll be in touch within 48 hours.
+                  I'll be in touch within 24 hours.
                 </p>
               </div>
             ) : (

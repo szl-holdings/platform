@@ -53,15 +53,15 @@ export default function Services() {
             className="lg:col-span-5"
           >
             <p className="text-[11px] font-medium tracking-[0.35em] uppercase text-[#c8a96a]/70 mb-6">
-              Practice areas
+              Services
             </p>
             <h2
               className="text-4xl md:text-5xl font-light text-[#f5f0e8] leading-tight"
               style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
             >
-              Six integrated
+              Private support,
               <br />
-              capabilities
+              <span className="italic opacity-80">tailored with care.</span>
             </h2>
           </motion.div>
 
@@ -73,9 +73,7 @@ export default function Services() {
             className="lg:col-span-7 flex items-end"
           >
             <p className="text-[#f5f0e8]/50 text-base font-light leading-relaxed max-w-xl">
-              Each practice draws on structured analytical methods and direct senior experience.
-              We work across industries and geographies, bringing cross-sector perspective
-              to every engagement.
+              Carlota Jo is built around thoughtful service, tailored coordination, and the belief that premium support should feel seamless, discreet, and deeply reliable.
             </p>
           </motion.div>
         </div>

@@ -16,7 +16,7 @@ export default function Footer() {
               </p>
             </div>
             <p className="text-[13px] text-[#f5f0e8]/28 leading-relaxed max-w-xs font-light">
-              Principal advisory for boards, leadership teams, and investors navigating consequential decisions.
+              Discreet. Tailored. Trusted.
             </p>
           </div>
 

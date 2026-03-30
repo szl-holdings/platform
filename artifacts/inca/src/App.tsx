@@ -11,6 +11,7 @@ import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const IncaHome = lazy(() => import("@/pages/inca-home"));
+const PlatformPage = lazy(() => import("@/pages/platform"));
 const QuipuCommand = lazy(() => import("@/pages/quipu-command"));
 const AgentSpawner = lazy(() => import("@/pages/agent-spawner"));
 const ChasquiRelay = lazy(() => import("@/pages/chasqui-relay"));
@@ -193,7 +194,12 @@ function Sidebar() {
         </div>
       </nav>
 
-      <div className="px-4 py-3 border-t border-white/6 space-y-2">
+      <div className="px-4 py-3 border-t border-violet-500/10 space-y-2">
+        <Link href="/platform">
+          <div className="w-full text-xs font-medium bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 hover:text-violet-300 rounded-lg px-3 py-2 transition-colors text-center cursor-pointer">
+            Request access
+          </div>
+        </Link>
         <UserButton showName className="w-full" />
         <div className="flex items-center gap-2 text-[10px] text-primary/25">
           <Brain className="w-3 h-3" />
@@ -208,7 +214,10 @@ function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/">
+          <Suspense fallback={<PageLoader />}><PlatformPage /></Suspense>
+        </Route>
+        <Route path="/dashboard" component={Dashboard} />
         <Route path="/quipu-command" component={QuipuCommand} />
         <Route path="/agent-spawner" component={AgentSpawner} />
         <Route path="/chasqui-relay" component={ChasquiRelay} />
@@ -235,6 +244,9 @@ function AppRouter() {
         <Route path="/gpu-monitoring" component={GPUMonitoring} />
         <Route path="/llm-eval" component={LLMEvaluation} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
+        <Route path="/platform">
+          <Suspense fallback={<PageLoader />}><PlatformPage /></Suspense>
+        </Route>
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground font-mono">404 — Page not found</p>
@@ -282,12 +294,12 @@ function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
   }
 
   return (
-    <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#3b6af8">
+    <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#f59e0b">
       <div className="flex flex-col h-screen bg-background">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
           Skip to main content
         </a>
-        <EcosystemNav currentAppId="inca" currentAppName="INCA Intelligence Platform" accentColor="#3b6af8" />
+        <EcosystemNav currentAppId="inca" currentAppName="INCA — Agentic Intelligence Cortex" accentColor="#f59e0b" />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
           <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
@@ -300,20 +312,20 @@ function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         onClose={() => setCmdOpen(false)}
         commands={incaCommands}
         appName="INCA"
-        accentColor="#3b6af8"
+        accentColor="#f59e0b"
       />
       <WelcomeOverlay
         appId="inca"
         appName="INCA"
-        subtitle="Secure Intelligence Platform"
-        description="Turn signals into visibility. INCA surfaces evidence, tracks risk state, and runs analytical workflows across your intelligence pipeline — from collection to insight."
-        accentColor="#3b6af8"
+        subtitle="Intelligence With Structure"
+        description="INCA is built to turn signals, findings, and operational noise into clearer visibility, more structured triage, and more informed action."
+        accentColor="#f59e0b"
         icon={Brain}
         features={[
-          { icon: FlaskConical, title: "Experiments", description: "Parallel experiment tracking with hyperparameter importance analysis" },
-          { icon: Cpu, title: "Model Registry", description: "Version control and lineage graph for every production model" },
-          { icon: TrendingUp, title: "Predictions", description: "Live inference monitoring with drift and anomaly detection" },
-          { icon: Layers, title: "Ensemble Studio", description: "Combine models and build multi-model voting pipelines" },
+          { icon: FlaskConical, title: "Signal visibility", description: "Bring fragmented indicators into a cleaner, more structured interface designed to support review and prioritization." },
+          { icon: Cpu, title: "Triage workflows", description: "Move from raw inputs to more organized action paths with workflows that support clarity, ownership, and follow-through." },
+          { icon: TrendingUp, title: "Explainable outputs", description: "Support better decisions with outputs that are easier to understand, validate, and communicate." },
+          { icon: Layers, title: "Traceable operations", description: "Build trust through audit-friendly workflows, historical views, and stronger visibility into what happened and why." },
         ]}
       />
     </PowerUserProvider>

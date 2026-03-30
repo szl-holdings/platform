@@ -4,7 +4,7 @@ import { cn } from "@workspace/shared-ui/utils";
 
 const alerts = [
   { id: "ALT-001", title: "Model Drift Detected - DeepForecaster v3.2", severity: "high", source: "PredictionDrift Monitor", timestamp: "2 min ago", status: "open", category: "drift", description: "Prediction drift exceeded 5% threshold for Revenue Q3 forecast" },
-  { id: "ALT-002", title: "Anomaly in Training Pipeline", severity: "critical", source: "Pipeline Monitor", timestamp: "8 min ago", status: "open", category: "pipeline", description: "GPU memory overflow during batch processing of NeuralSentiment training job" },
+  { id: "ALT-002", title: "Anomaly in Training Pipeline", severity: "critical", source: "Pipeline Monitor", timestamp: "8 min ago", status: "escalated", category: "pipeline", description: "GPU memory overflow during batch processing of NeuralSentiment training job" },
   { id: "ALT-003", title: "Data Quality Alert", severity: "medium", source: "Data Validator", timestamp: "15 min ago", status: "acknowledged", category: "data", description: "Missing values detected in 3.2% of incoming feature vectors" },
   { id: "ALT-004", title: "Model Accuracy Below Threshold", severity: "high", source: "Accuracy Monitor", timestamp: "32 min ago", status: "acknowledged", category: "accuracy", description: "CausalInference v1.3 accuracy dropped to 78% (threshold: 85%)" },
   { id: "ALT-005", title: "Ensemble Disagreement", severity: "medium", source: "EnsembleStudio", timestamp: "1 hr ago", status: "resolved", category: "ensemble", description: "Models in Revenue Ensemble showing >15% prediction variance" },
@@ -56,11 +56,17 @@ export default function AlertsManagement() {
       </div>
 
       <div className="flex gap-2">
-        {["all", "open", "acknowledged", "resolved"].map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)}
-            className={cn("px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors",
-              statusFilter === s ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted/50"
-            )}>{s}</button>
+        {[
+          { value: "all", label: "All" },
+          { value: "open", label: "Requires triage" },
+          { value: "escalated", label: "Escalated" },
+          { value: "acknowledged", label: "Under review" },
+          { value: "resolved", label: "Resolved" },
+        ].map(({ value, label }) => (
+          <button key={value} onClick={() => setStatusFilter(value)}
+            className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+              statusFilter === value ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted/50"
+            )}>{label}</button>
         ))}
         <div className="w-px bg-border mx-2" />
         {["all", "critical", "high", "medium", "low", "info"].map(s => (
@@ -72,6 +78,12 @@ export default function AlertsManagement() {
       </div>
 
       <div className="space-y-2">
+        {filtered.length === 0 && (
+          <div className="bg-card/40 border border-border/50 rounded-xl p-12 text-center">
+            <p className="text-muted-foreground text-sm font-medium">No findings match this view.</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">This section will update as new material is added.</p>
+          </div>
+        )}
         {filtered.map(alert => {
           const config = severityConfig[alert.severity] || severityConfig.info;
           const SeverityIcon = config.icon;
@@ -90,9 +102,15 @@ export default function AlertsManagement() {
                     <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider border", config.color)}>{alert.severity}</span>
                     <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium capitalize",
                       alert.status === "open" ? "bg-cyan-400/10 text-cyan-400" :
+                      alert.status === "escalated" ? "bg-red-400/10 text-red-400" :
                       alert.status === "acknowledged" ? "bg-amber-400/10 text-amber-400" :
                       "bg-emerald-400/10 text-emerald-400"
-                    )}>{alert.status}</span>
+                    )}>{
+                      alert.status === "open" ? "Requires triage" :
+                      alert.status === "escalated" ? "Escalated" :
+                      alert.status === "acknowledged" ? "Under review" :
+                      "Resolved"
+                    }</span>
                   </div>
                   <h3 className="text-sm font-semibold text-foreground">{alert.title}</h3>
                   <p className="text-xs text-muted-foreground mt-1">{alert.description}</p>

@@ -1,9 +1,7 @@
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
-import Approach from "@/components/Approach";
-import Proof from "@/components/Proof";
-import About from "@/components/About";
-import InquiryForm from "@/components/InquiryForm";
+import ApproachSection from "@/components/ApproachSection";
+import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -11,10 +9,8 @@ export default function Home() {
     <div className="min-h-screen bg-[#07090d]">
       <Hero />
       <Services />
-      <Approach />
-      <Proof />
-      <About />
-      <InquiryForm />
+      <ApproachSection />
+      <ContactForm />
       <Footer />
     </div>
   );

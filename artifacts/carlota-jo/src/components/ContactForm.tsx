@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle, AlertCircle, Lock } from "lucide-react";
-import testimonialsData from "@/data/testimonials.json";
 
 interface FormData {
   name: string;
@@ -28,8 +27,8 @@ export default function ContactForm() {
     const newErrors: Partial<FormData> = {};
     if (!form.name.trim()) newErrors.name = "Name is required";
     if (!form.email.trim()) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Invalid email";
-    if (!form.message.trim()) newErrors.message = "Please describe your strategic context";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Invalid email address";
+    if (!form.message.trim()) newErrors.message = "Please describe your needs";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,8 +80,6 @@ export default function ContactForm() {
     );
   }
 
-  const featuredTestimonial = testimonialsData[0];
-
   return (
     <section id="contact" className="py-24 lg:py-40 bg-taupe-50 border-t border-stone-200">
       <div className="max-w-7xl mx-auto px-6 lg:px-16">
@@ -100,10 +97,10 @@ export default function ContactForm() {
               <h2 className="font-serif text-4xl md:text-5xl font-light text-ink-900 leading-tight mb-6">
                 Inquire
                 <br />
-                <span className="italic">privately</span>
+                <span className="italic">privately.</span>
               </h2>
               <p className="text-sm text-ink-600 font-light leading-relaxed mb-12 max-w-sm">
-                Share the broad contours of your strategic situation. All inquiries are reviewed personally by Carlota and held in strict confidence.
+                Tell us a bit about your needs, priorities, or the type of support you are exploring. We will follow up with discretion and care.
               </p>
             </motion.div>
 
@@ -114,33 +111,19 @@ export default function ContactForm() {
               transition={{ duration: 0.6, delay: 0.15 }}
               className="border-t border-stone-200 pt-8 mb-12"
             >
-              <p className="font-serif text-base text-ink-600 leading-relaxed italic mb-5">
-                "{featuredTestimonial.quote.slice(0, 150)}..."
-              </p>
-              <div>
-                <p className="text-xs font-medium text-ink-900 tracking-wide">{featuredTestimonial.name}</p>
-                <p className="text-[11px] text-ink-500 mt-0.5 font-light">{featuredTestimonial.title}, {featuredTestimonial.company}</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-2 gap-px bg-stone-200"
-            >
-              {[
-                { metric: "95%", label: "Client retention" },
-                { metric: "140+", label: "Engagements" },
-                { metric: "12", label: "Industries" },
-                { metric: "$4.8B", label: "Client value" },
-              ].map((item) => (
-                <div key={item.label} className="bg-taupe-50 p-5">
-                  <p className="font-serif text-2xl font-light text-warm-gold mb-1">{item.metric}</p>
-                  <p className="text-[10px] tracking-wider uppercase text-stone-400 font-light">{item.label}</p>
-                </div>
-              ))}
+              <ul className="space-y-4">
+                {[
+                  "Tailored service approach",
+                  "Discreet client experience",
+                  "Structured, high-touch support",
+                  "Confidential communications",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-ink-500 font-light">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-warm-gold shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </motion.div>
           </div>
 
@@ -156,40 +139,44 @@ export default function ContactForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-9">
                 <div>
                   <label className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-1.5 block font-medium">
-                    Full Name *
+                    Name
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Sarah Chen"
+                    placeholder="Your name"
                     value={form.name}
                     onChange={(e) => updateField("name", e.target.value)}
                     className={inputClass("name")}
                   />
-                  {errors.name && <p className="text-xs text-red-500/70 mt-1.5">{errors.name}</p>}
+                  {errors.name && (
+                    <p className="text-xs text-red-500/70 mt-1.5">Please complete the required fields.</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-1.5 block font-medium">
-                    Email Address *
+                    Email
                   </label>
                   <input
                     type="email"
-                    placeholder="s.chen@company.com"
+                    placeholder="your@email.com"
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
                     className={inputClass("email")}
                   />
-                  {errors.email && <p className="text-xs text-red-500/70 mt-1.5">{errors.email}</p>}
+                  {errors.email && (
+                    <p className="text-xs text-red-500/70 mt-1.5">Please complete the required fields.</p>
+                  )}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-9">
                 <div>
                   <label className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-1.5 block font-medium">
-                    Organization
+                    How can we help?
                   </label>
                   <input
                     type="text"
-                    placeholder="Company or fund"
+                    placeholder="Brief description of your needs"
                     value={form.company}
                     onChange={(e) => updateField("company", e.target.value)}
                     className={inputClass("company")}
@@ -197,11 +184,11 @@ export default function ContactForm() {
                 </div>
                 <div>
                   <label className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-1.5 block font-medium">
-                    Phone
+                    Preferred timeline
                   </label>
                   <input
-                    type="tel"
-                    placeholder="Direct line preferred"
+                    type="text"
+                    placeholder="e.g. This quarter, flexible"
                     value={form.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
                     className={inputClass("phone")}
@@ -211,41 +198,41 @@ export default function ContactForm() {
 
               <div>
                 <label className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-1.5 block font-medium">
-                  Practice Area
+                  Type of support
                 </label>
                 <select
                   value={form.service}
                   onChange={(e) => updateField("service", e.target.value)}
                   className={`${inputClass("service")} appearance-none cursor-pointer bg-transparent`}
                 >
-                  <option value="">Select a practice area</option>
-                  <option value="strategic-advisory">Strategic Advisory</option>
-                  <option value="portfolio-optimization">Portfolio Optimization</option>
-                  <option value="technology-transformation">Technology Transformation</option>
-                  <option value="risk-compliance">Risk & Compliance</option>
-                  <option value="growth-strategy">Growth Strategy</option>
-                  <option value="ma-advisory">M&A Advisory</option>
+                  <option value="">Select a service area</option>
+                  <option value="advisory-support">Advisory support</option>
+                  <option value="coordination-oversight">Coordination and oversight</option>
+                  <option value="private-client-experience">Private client experience</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
 
               <div>
                 <label className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-1.5 block font-medium">
-                  Strategic Context *
+                  Additional context
                 </label>
                 <textarea
-                  placeholder="Describe the challenge or decision you are facing."
+                  placeholder="Share a few details and we will follow up thoughtfully."
                   rows={4}
                   value={form.message}
                   onChange={(e) => updateField("message", e.target.value)}
                   className={`${inputClass("message")} resize-none`}
                 />
-                {errors.message && <p className="text-xs text-red-500/70 mt-1.5">{errors.message}</p>}
+                {errors.message && (
+                  <p className="text-xs text-red-500/70 mt-1.5">Please complete the required fields.</p>
+                )}
               </div>
 
               {status === "error" && (
                 <div className="flex items-center gap-2 text-sm text-red-500/70">
                   <AlertCircle size={14} />
-                  An error occurred. Please try again.
+                  Please complete the required fields.
                 </div>
               )}
 
@@ -254,9 +241,11 @@ export default function ContactForm() {
                 disabled={status === "submitting"}
                 className="w-full py-4 bg-ink-900 text-stone-50 text-xs font-medium tracking-[0.15em] uppercase hover:bg-ink-700 transition-colors duration-300 flex items-center justify-center gap-2.5 disabled:opacity-50"
               >
-                {status === "submitting" ? "Submitting..." : (
+                {status === "submitting" ? (
+                  "Sending..."
+                ) : (
                   <>
-                    Submit confidential inquiry
+                    Send private inquiry
                     <Send size={13} />
                   </>
                 )}

@@ -2,109 +2,111 @@
   {
     "id": "vessels",
     "name": "Vessels",
-    "tagline": "Maritime Intelligence Platform",
-    "description": "Full-spectrum maritime domain awareness integrating AIS data, satellite imagery, and multi-source sensor fusion to deliver real-time vessel tracking, route optimization, dark vessel detection, and predictive risk analytics across global shipping lanes. The only platform that identifies sanctions evasion events an average of 34 days before formal designations.",
+    "tagline": "Maritime Command Platform",
+    "description": "A maritime command platform designed to bring visibility, coordination, and operational intelligence to fleet and voyage workflows.",
     "status": "Live",
     "category": "Maritime",
     "link": "/vessels/",
     "icon": "Ship",
     "color": "#3b82f6",
+    "cta": "View Vessels",
     "metrics": [
-      { "label": "Vessels Tracked", "value": "52,000+" },
-      { "label": "Est. Annual Revenue", "value": "$8.2M ARR" },
-      { "label": "Shipping Lanes Monitored", "value": "340+" },
-      { "label": "Addressable Market", "value": "$15.4B" }
+      { "label": "Fleet visibility", "value": "Unified" },
+      { "label": "Route intelligence", "value": "Active" },
+      { "label": "Operational alerts", "value": "Structured" },
+      { "label": "Executive clarity", "value": "Built in" }
     ],
-    "marketContext": "Global maritime analytics market projected to reach $15.4B by 2028 (Allied Market Research)"
+    "marketContext": "Maritime command and fleet visibility platform for modern operations"
+  },
+  {
+    "id": "inca",
+    "name": "INCA",
+    "tagline": "Intelligence and Visibility Platform",
+    "description": "A secure intelligence layer built for visibility, triage, and more structured decision-making across complex operating environments.",
+    "status": "In Development",
+    "category": "Intelligence",
+    "link": "/inca/",
+    "icon": "BarChart3",
+    "color": "#10b981",
+    "cta": "View INCA",
+    "metrics": [
+      { "label": "Signal visibility", "value": "Structured" },
+      { "label": "Triage workflows", "value": "Organized" },
+      { "label": "Explainable outputs", "value": "Built in" },
+      { "label": "Traceable operations", "value": "Audit-ready" }
+    ],
+    "marketContext": "Secure intelligence and visibility platform for complex operating environments"
+  },
+  {
+    "id": "carlota-jo",
+    "name": "Carlota Jo Consulting",
+    "tagline": "Private Advisory Brand",
+    "description": "A private advisory brand delivering thoughtful, tailored support for clients who value discretion, precision, and calm execution.",
+    "status": "Live",
+    "category": "Advisory",
+    "link": "/carlota-jo/",
+    "icon": "Palette",
+    "color": "#ec4899",
+    "cta": "Review services",
+    "metrics": [
+      { "label": "Advisory support", "value": "High-trust" },
+      { "label": "Coordination", "value": "Structured" },
+      { "label": "Client experience", "value": "Discreet" },
+      { "label": "Execution", "value": "Tailored" }
+    ],
+    "marketContext": "Private advisory brand for clients who value discretion and precision"
+  },
+  {
+    "id": "stephen-site",
+    "name": "Stephen Site",
+    "tagline": "Personal Authority Platform",
+    "description": "A personal authority platform focused on business observability, systems thinking, execution leadership, and modern operational clarity.",
+    "status": "Live",
+    "category": "Authority",
+    "link": "/stephen/",
+    "icon": "Zap",
+    "color": "#f59e0b",
+    "cta": "Explore the thesis",
+    "metrics": [
+      { "label": "Business observability", "value": "Core focus" },
+      { "label": "Systems thinking", "value": "Framework-led" },
+      { "label": "Execution leadership", "value": "Structured" },
+      { "label": "AI and operations", "value": "Explored" }
+    ],
+    "marketContext": "Personal authority platform for modern operational clarity and execution leadership"
   },
   {
     "id": "dreamscape",
     "name": "Dreamscape",
-    "tagline": "AI Creative Production Engine",
-    "description": "Enterprise creative production platform combining generative AI, real-time collaboration, and automated asset pipelines — enabling studios, agencies, and brands to produce broadcast-quality content at 10x the velocity of traditional workflows. AI-native from the ground up, not bolted on.",
+    "tagline": "Creative Production Engine",
+    "description": "Enterprise creative production platform combining generative AI, real-time collaboration, and automated asset pipelines.",
     "status": "Live",
     "category": "Creative Tech",
     "link": "/dreamscape/",
     "icon": "Sparkles",
     "color": "#a855f7",
+    "cta": "View Dreamscape",
     "metrics": [
       { "label": "Projects Delivered", "value": "12,400+" },
-      { "label": "Est. Annual Revenue", "value": "$5.1M ARR" },
-      { "label": "Enterprise Clients", "value": "85+" },
-      { "label": "Addressable Market", "value": "$14.8B" }
+      { "label": "Enterprise Clients", "value": "85+" }
     ],
-    "marketContext": "AI-powered creative tools market expected to reach $14.8B by 2028 (MarketsandMarkets)"
+    "marketContext": "AI-powered creative tools for modern production workflows"
   },
   {
     "id": "firestorm",
     "name": "Firestorm",
-    "tagline": "Cyber Range & Threat Simulation",
-    "description": "Military-grade cybersecurity simulation platform delivering continuous adversarial testing, automated MITRE ATT&CK coverage, and real-time remediation verification for enterprises, defense contractors, and government agencies. The platform that makes annual penetration testing obsolete.",
+    "tagline": "Security Simulation Platform",
+    "description": "Cybersecurity simulation platform delivering continuous adversarial testing and real-time remediation verification.",
     "status": "Live",
     "category": "Cybersecurity",
     "link": "/firestorm/",
     "icon": "Shield",
     "color": "#ef4444",
+    "cta": "View Firestorm",
     "metrics": [
       { "label": "Simulations Executed", "value": "31,200+" },
-      { "label": "Est. Annual Revenue", "value": "$11.4M ARR" },
-      { "label": "Threat Scenarios", "value": "2,800+" },
-      { "label": "Addressable Market", "value": "$266B" }
+      { "label": "Threat Scenarios", "value": "2,800+" }
     ],
-    "marketContext": "Global cybersecurity market size projected at $266B in 2027 (Mordor Intelligence)"
-  },
-  {
-    "id": "lyte",
-    "name": "Lyte",
-    "tagline": "AIOps Command Center",
-    "description": "Centralized AIOps and MLOps platform orchestrating model training, deployment, monitoring, and autonomous remediation at scale — the operating system for enterprise AI infrastructure. Powers 18M+ daily inference requests across the SZL ecosystem and external enterprise clients.",
-    "status": "Beta",
-    "category": "AI/ML",
-    "link": "/lyte-command-center/",
-    "icon": "Zap",
-    "color": "#f59e0b",
-    "metrics": [
-      { "label": "Models in Production", "value": "640+" },
-      { "label": "Inference Requests/Day", "value": "18M+" },
-      { "label": "GPU Hours Orchestrated", "value": "1.2M+" },
-      { "label": "Addressable Market", "value": "$1.8T" }
-    ],
-    "marketContext": "Global AI market projected to reach $1.81T by 2030 (Grand View Research)"
-  },
-  {
-    "id": "inca",
-    "name": "INCA",
-    "tagline": "AI Research Command Center",
-    "description": "AI-native research platform transforming unstructured enterprise data into strategic intelligence — combining experiment tracking, model registry, LLM evaluation, and automated reporting for high-stakes decision environments. $14M Series A closed February 2026.",
-    "status": "In Development",
-    "category": "AI/ML",
-    "link": "#",
-    "icon": "BarChart3",
-    "color": "#10b981",
-    "metrics": [
-      { "label": "Status", "value": "Private Alpha" },
-      { "label": "Series A", "value": "$14M · Feb 2026" },
-      { "label": "Pilot Clients", "value": "12" },
-      { "label": "Addressable Market", "value": "$340B" }
-    ],
-    "marketContext": "Management consulting and AI evaluation market combined exceeds $340B globally (Statista, 2024)"
-  },
-  {
-    "id": "carlota-jo",
-    "name": "Carlota Jo",
-    "tagline": "Brand Intelligence Platform",
-    "description": "AI-enhanced brand strategy engine synthesizing consumer sentiment, competitive landscape analysis, and cultural trend intelligence into actionable brand positioning — the system that makes guesswork in brand strategy structurally impossible for agencies, DTC brands, and Fortune 500 marketing teams.",
-    "status": "In Development",
-    "category": "Creative Tech",
-    "link": "#",
-    "icon": "Palette",
-    "color": "#ec4899",
-    "metrics": [
-      { "label": "Status", "value": "Private Alpha" },
-      { "label": "Brands in Pilot", "value": "8" },
-      { "label": "Sentiment Data Points", "value": "2.1B+" },
-      { "label": "Addressable Market", "value": "$8.4B" }
-    ],
-    "marketContext": "Brand analytics and intelligence market projected at $8.4B by 2027 (Research and Markets)"
+    "marketContext": "Cybersecurity simulation for modern threat environments"
   }
 ]

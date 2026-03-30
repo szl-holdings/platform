@@ -33,7 +33,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="text-5xl md:text-6xl lg:text-[4.75rem] font-semibold text-white leading-[1.06] tracking-tight mb-7"
+              className="text-5xl md:text-6xl lg:text-[4.75rem] font-serif font-normal text-white leading-[1.06] tracking-tight mb-7"
             >
               Stephen Lutar
             </motion.h1>
@@ -42,11 +42,18 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="text-base md:text-[1.1rem] text-white/55 font-light max-w-lg leading-relaxed mb-10"
+              className="text-base md:text-[1.1rem] text-white/55 font-light max-w-2xl leading-relaxed mb-4"
             >
-              I build enterprise-grade systems and founding teams — from maritime intelligence
-              platforms tracking global fleets to fintech infrastructure processing millions in
-              daily transactions.
+              Systems operator. I build the infrastructure that powers enterprises — from defense platforms and fintech architectures to a six-company technology holding company. I focus on the intersection of business observability, workflow clarity, AI-adjacent operating models, and execution leadership, building frameworks that help organizations see more clearly and move with greater confidence.
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.35 }}
+              className="text-[13px] text-white/35 max-w-xl mb-10 leading-relaxed font-light"
+            >
+              15 years. £2B+ in systems architected. 5 live products in production.
             </motion.p>
 
             <motion.div

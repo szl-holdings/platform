@@ -31,7 +31,8 @@ export function Footer() {
               Strategic technology portfolio. Building at the intersection of maritime intelligence,
               AI, advisory, and enterprise operations.
             </p>
-            <p className="text-neutral-400 text-[12px]">Washington, D.C. · London · Singapore</p>
+            <p className="text-neutral-400 text-xs mt-2 italic">Structured ventures. Clear direction.</p>
+            <p className="text-neutral-400 text-[12px] mt-3">Washington, D.C. · London · Singapore</p>
           </div>
 
           <div>

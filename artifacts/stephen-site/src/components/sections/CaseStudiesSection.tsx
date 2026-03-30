@@ -35,7 +35,40 @@ const work = [
   },
 ];
 
+const operatingIdeas = [
+  {
+    id: "obs-layer",
+    tag: "Observability",
+    title: "Business observability as an operating layer",
+    description: "A framework for building clearer operational awareness across workflows, ownership, and decision-making — turning visibility into a structural advantage.",
+    metrics: ["Visibility frameworks", "Operational clarity", "Structural advantage"],
+  },
+  {
+    id: "pipeline-hygiene",
+    tag: "Execution",
+    title: "Pipeline hygiene and workflow clarity",
+    description: "Structured approaches to keeping delivery pipelines clean, ownership clear, and execution moving with less friction across cross-functional teams.",
+    metrics: ["Clean delivery pipelines", "Ownership clarity", "Friction reduction"],
+  },
+  {
+    id: "structured-visibility",
+    tag: "Visibility",
+    title: "Structured visibility across cross-functional execution",
+    description: "Frameworks for aligning teams around shared visibility — reducing the cost of low-visibility execution and improving coordination across functions.",
+    metrics: ["Team alignment", "Reduced coordination cost", "Cross-functional visibility"],
+  },
+  {
+    id: "premium-ops",
+    tag: "Operations",
+    title: "Premium operating models for modern teams",
+    description: "Exploring what premium operational execution looks like in practice — the structures, habits, and systems that distinguish high-performing teams.",
+    metrics: ["High-performance habits", "Execution systems", "Modern operating models"],
+  },
+];
+
 export function CaseStudiesSection() {
+  const allWork = [...work, ...operatingIdeas];
+
   return (
     <section id="work" className="py-24 lg:py-32 bg-[#0a0e14] border-t border-white/5">
       <div className="max-w-6xl mx-auto px-6 lg:px-12">
@@ -50,14 +83,15 @@ export function CaseStudiesSection() {
             Selected work
           </p>
           <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight">
-            Systems built.
-            <br />
-            <span className="text-white/40 font-normal">Problems solved.</span>
+            Selected work and operating ideas.
           </h2>
+          <p className="text-white/40 text-lg mt-4 max-w-2xl font-light">
+            A growing body of work focused on visibility, execution, systems alignment, and practical frameworks for modern organizations.
+          </p>
         </motion.div>
 
         <div className="space-y-px bg-white/5">
-          {work.map((item, i) => (
+          {allWork.map((item, i) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 14 }}

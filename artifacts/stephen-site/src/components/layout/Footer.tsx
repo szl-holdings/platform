@@ -1,18 +1,20 @@
 export function Footer() {
   return (
-    <footer className="bg-[#080c11] border-t border-white/5 py-12 lg:py-14">
-      <div className="max-w-6xl mx-auto px-6 lg:px-12">
-        <div className="grid md:grid-cols-12 gap-10">
+    <footer className="bg-[#080c11] border-t border-white/5 pt-20 pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
           <div className="md:col-span-4">
-            <h3 className="text-[17px] font-semibold text-white tracking-tight mb-1">
-              Stephen Lutar
-            </h3>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-[#4a6fa5] flex items-center justify-center">
+                <span className="font-serif font-bold text-white text-lg">SL</span>
+              </div>
+              <span className="font-serif font-semibold text-2xl text-white">Stephen Lutar</span>
+            </div>
             <p className="text-[9px] tracking-[0.28em] uppercase text-[#7ba3d4]/40 font-medium mb-5">
               Founder & CEO, SZL Holdings
             </p>
-            <p className="text-[13px] text-white/25 font-light leading-relaxed max-w-xs">
-              Builder of enterprise infrastructure, AI platforms, and founder-led teams.
-              London, UK.
+            <p className="text-white/40 max-w-sm mb-8 leading-relaxed font-light text-[13px]">
+              Clarity for modern execution. Builder of enterprise infrastructure, AI platforms, and founder-led teams.
             </p>
           </div>
 

@@ -44,7 +44,7 @@ export function ServicesSection() {
               Capabilities
             </p>
             <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight">
-              What I do
+              Areas of focus.
             </h2>
           </motion.div>
           <motion.div
@@ -55,7 +55,7 @@ export function ServicesSection() {
             className="lg:col-span-6 flex items-end"
           >
             <p className="text-white/45 text-base font-light leading-relaxed">
-              Available for select fractional engagements alongside full-time focus on SZL portfolio companies.
+              This site is a place to document operating ideas, selected work, and frameworks around visibility, execution, and modern systems leadership.
             </p>
           </motion.div>
         </div>

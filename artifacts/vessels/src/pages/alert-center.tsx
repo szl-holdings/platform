@@ -26,6 +26,13 @@ const alertStatusColors: Record<string, string> = {
   dismissed: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
 };
 
+const alertStatusLabels: Record<string, string> = {
+  active: "Requires review",
+  acknowledged: "Priority event",
+  resolved: "Operational change",
+  dismissed: "Route variance",
+};
+
 function AnimatedCounter({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
   const ref = useRef<number>(0);
@@ -152,8 +159,8 @@ export default function AlertCenterPage() {
                 <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center mx-auto mb-4">
                   <BellOff className="w-8 h-8 text-muted-foreground/30" />
                 </div>
-                <p className="text-muted-foreground font-medium">No alerts triggered</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">All systems operating normally</p>
+                <p className="text-muted-foreground font-medium">No active vessels in this view.</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Nothing to display yet.</p>
               </CardContent>
             </Card>
           ) : (
@@ -183,7 +190,7 @@ export default function AlertCenterPage() {
                           {isCritical && isActive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5 animate-pulse-dot" />}
                           {alert.severity}
                         </Badge>
-                        <Badge variant="outline" className={alertStatusColors[alert.status] || ""}>{alert.status}</Badge>
+                        <Badge variant="outline" className={alertStatusColors[alert.status] || ""}>{alertStatusLabels[alert.status] || alert.status}</Badge>
                       </div>
                     </div>
                   </CardContent>

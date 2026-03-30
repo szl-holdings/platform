@@ -28,11 +28,9 @@ export default function Hero() {
               className="text-5xl md:text-6xl lg:text-[4.5rem] font-light text-[#f5f0e8] leading-[1.08] mb-8"
               style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
             >
-              Counsel for
+              Bespoke advisory for clients who value
               <br />
-              <em>consequential</em>
-              <br />
-              decisions
+              <span className="italic">discretion and precision.</span>
             </motion.h1>
 
             <motion.p
@@ -41,8 +39,7 @@ export default function Hero() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-base md:text-lg text-[#f5f0e8]/70 font-light max-w-lg leading-relaxed mb-10"
             >
-              A founder-led advisory practice serving boards, leadership teams,
-              and investors on their most critical strategic challenges.
+              Carlota Jo Consulting provides thoughtful, tailored support for clients seeking trusted guidance, calm execution, and a higher standard of private service.
             </motion.p>
 
             <motion.div
@@ -62,7 +59,7 @@ export default function Hero() {
                 onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}
                 className="px-7 py-3.5 text-[13px] font-medium tracking-[0.08em] text-[#f5f0e8]/60 border border-[#f5f0e8]/15 hover:border-[#f5f0e8]/30 hover:text-[#f5f0e8]/90 transition-all duration-300"
               >
-                Explore our practice
+                Review services
               </button>
             </motion.div>
           </div>
@@ -78,34 +75,24 @@ export default function Hero() {
               onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}
             >
               <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-[#c8a96a]/70 mb-4">
-                Principal Advisory
+                Private support
               </p>
               <p className="text-[11px] tracking-wider uppercase text-[#f5f0e8]/35 mb-3">
-                Engagement Type
+                Advisory services
               </p>
               <h3
                 className="text-xl md:text-2xl font-light text-[#f5f0e8] leading-snug mb-6 group-hover:text-[#c8a96a]/90 transition-colors duration-300"
                 style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
               >
-                Board-level governance and capital allocation advisory — discreet, direct, and deeply engaged.
+                High-trust guidance designed around each client's goals, pace, and operating needs.
               </h3>
               <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.15em] uppercase text-[#c8a96a]/60 group-hover:text-[#c8a96a] transition-colors">
-                View practice areas
+                Review services
                 <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform duration-300" />
               </span>
             </div>
 
             <div className="mt-px grid grid-cols-3 gap-px bg-stone-200">
-              {[
-                { value: "95%", label: "Retention rate" },
-                { value: "140+", label: "Engagements" },
-                { value: "12", label: "Industries" },
-              ].map((stat) => (
-                <div key={stat.label} className="bg-stone-50 px-4 py-5 text-center">
-                  <p className="font-serif text-2xl font-light text-ink-900 mb-1">{stat.value}</p>
-                  <p className="text-[9px] tracking-wider uppercase text-stone-400">{stat.label}</p>
-                </div>
-              ))}
             </div>
           </motion.div>
         </div>
@@ -117,9 +104,9 @@ export default function Hero() {
           className="mt-20 pt-8 border-t border-[#f5f0e8]/5 flex flex-wrap items-center gap-x-10 gap-y-3"
         >
           <p className="text-[10px] tracking-[0.25em] uppercase text-[#f5f0e8]/25">
-            Clients include
+            Built on
           </p>
-          {["FTSE 250 Boards", "Global Private Equity", "Family Offices", "Sovereign Wealth Funds"].map((name) => (
+          {["Tailored service approach", "Discreet client experience", "Structured high-touch support", "Thoughtful execution"].map((name) => (
             <span key={name} className="text-[11px] tracking-wider text-[#f5f0e8]/22 font-light">
               {name}
             </span>

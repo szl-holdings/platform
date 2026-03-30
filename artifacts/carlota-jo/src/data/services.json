@@ -1,86 +1,38 @@
 [
   {
-    "id": "strategic-advisory",
-    "title": "Strategic Advisory",
+    "id": "advisory-support",
+    "title": "Advisory support",
     "icon": "Compass",
-    "summary": "Clarity at inflection points.",
-    "description": "Senior partner-led counsel for boards and C-suites navigating market disruption, competitive repositioning, and organizational redesign. Our methodology integrates Porter's Five Forces competitive analysis with proprietary scenario planning to deliver conviction-grade strategic options.",
+    "summary": "High-trust guidance designed around each client's goals, pace, and operating needs.",
+    "description": "Thoughtful counsel shaped around each client's specific situation. We work at a measured pace, with strong attention to the nuances that define each engagement.",
     "capabilities": [
-      "Corporate strategy & competitive positioning",
-      "Market entry & expansion planning",
-      "Blue Ocean Strategy opportunity mapping",
-      "Board advisory & governance counsel",
-      "Executive alignment & leadership offsites"
+      "Tailored guidance around client goals",
+      "Structured support for evolving priorities",
+      "Calm, considered advisory at each stage"
     ]
   },
   {
-    "id": "portfolio-optimization",
-    "title": "Portfolio Optimization",
+    "id": "coordination-oversight",
+    "title": "Coordination and oversight",
     "icon": "BarChart3",
-    "summary": "Disciplined allocation. Maximum value.",
-    "description": "Evaluate, restructure, and enhance multi-asset portfolios using our proprietary Value Architecture methodology. We apply BCG growth-share matrix principles alongside discounted cash flow analysis to identify underperforming assets and unlock trapped value across conglomerates and PE-backed platforms.",
+    "summary": "Structured support that helps keep priorities aligned, details managed, and execution moving with less friction.",
+    "description": "We provide the behind-the-scenes coordination that helps complex priorities stay organized and forward-moving, without unnecessary noise or friction.",
     "capabilities": [
-      "Asset-level DCF & relative valuation",
-      "Portfolio rationalization & pruning",
-      "Synergy capture & value creation planning",
-      "Divestiture strategy & carve-out structuring",
-      "Capital allocation framework design"
+      "Priority alignment and oversight",
+      "Detail management and follow-through",
+      "Structured execution support"
     ]
   },
   {
-    "id": "technology-transformation",
-    "title": "Technology Transformation",
-    "icon": "Cpu",
-    "summary": "Digital futures with measurable impact.",
-    "description": "Outcomes-driven digital transformation from strategic vision through enterprise architecture and scaled implementation. We leverage Gartner digital maturity models and McKinsey's digital quotient framework to build transformation roadmaps that deliver measurable ROI within 12-18 months.",
-    "capabilities": [
-      "Digital maturity assessment & benchmarking",
-      "Enterprise architecture & cloud strategy",
-      "Vendor evaluation & technology due diligence",
-      "Data & analytics strategy",
-      "Organizational change management"
-    ]
-  },
-  {
-    "id": "risk-compliance",
-    "title": "Risk & Compliance",
+    "id": "private-client-experience",
+    "title": "Private client experience",
     "icon": "Shield",
-    "summary": "Protect value. Enable agility.",
-    "description": "Proactive enterprise risk management and governance frameworks calibrated for complex, multi-jurisdictional regulatory environments. We integrate COSO ERM principles with emerging ESG reporting standards (TCFD, CSRD) to build resilient compliance architectures that protect value while enabling strategic agility.",
+    "summary": "A discreet and highly considered service model for clients who value responsiveness, clarity, and professionalism.",
+    "description": "A service model built around discretion, trust, and a consistently high standard of communication and responsiveness.",
     "capabilities": [
-      "Enterprise risk management (COSO framework)",
-      "Multi-jurisdictional regulatory compliance",
-      "ESG strategy & TCFD/CSRD reporting",
-      "Crisis preparedness & scenario testing",
-      "Internal audit & controls optimization"
-    ]
-  },
-  {
-    "id": "growth-strategy",
-    "title": "Growth Strategy",
-    "icon": "TrendingUp",
-    "summary": "Find growth. Capture it.",
-    "description": "Rigorous market intelligence, TAM/SAM/SOM sizing, and financial modeling to build conviction around high-impact growth initiatives. We combine Ansoff Matrix strategic direction with jobs-to-be-done customer segmentation to identify whitespace opportunities and design go-to-market strategies that scale.",
-    "capabilities": [
-      "TAM/SAM/SOM market sizing & forecasting",
-      "Jobs-to-be-done customer segmentation",
-      "Go-to-market strategy & channel design",
-      "Revenue model innovation & pricing strategy",
-      "Strategic partnership & alliance development"
-    ]
-  },
-  {
-    "id": "ma-advisory",
-    "title": "M&A Advisory",
-    "icon": "Handshake",
-    "summary": "Superior transaction outcomes.",
-    "description": "End-to-end transaction support from target identification through commercial diligence, negotiation, and post-merger integration. Our structured approach combines rigorous financial modeling with deep operational due diligence to ensure clients achieve synergy capture targets and avoid the value destruction that plagues 60-70% of transactions.",
-    "capabilities": [
-      "Target screening & strategic fit analysis",
-      "Commercial & operational due diligence",
-      "Valuation, structuring & negotiation support",
-      "Integration planning & Day 1 readiness",
-      "Carve-out advisory & TSA structuring"
+      "Discreet and confidential service approach",
+      "Responsive communication at every stage",
+      "Premium professionalism throughout"
     ]
   }
 ]

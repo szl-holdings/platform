@@ -255,6 +255,13 @@ function Sidebar() {
       </nav>
 
       <div className="px-1.5 py-3 border-t border-sky-500/10 space-y-2">
+        {expanded && (
+          <Link href="/platform">
+            <div className="w-full text-xs font-medium bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 rounded-lg px-3 py-2 transition-colors text-center cursor-pointer">
+              Request demo
+            </div>
+          </Link>
+        )}
         <UserButton showName={expanded} className="w-full" />
         <RoleSelector expanded={expanded} />
       </div>
@@ -404,15 +411,15 @@ function App() {
           <WelcomeOverlay
             appId="vessels"
             appName="Vessels"
-            subtitle="Maritime Intelligence Platform"
-            description="Real-time maritime operations with AIS tracking, sanctions screening, dark vessel detection, and port congestion forecasting across global shipping lanes."
-            accentColor="#0ea5e9"
+            subtitle="Maritime Visibility Built for Command"
+            description="Vessels is designed to bring fleet, route, and voyage intelligence into one modern operating layer, helping teams see movement clearly, reduce uncertainty, and act with confidence."
+            accentColor="#3b82f6"
             icon={Ship}
             features={[
-              { icon: Globe, title: "Fleet Tracking", description: "Live AIS positions for vessels worldwide with behavioral AI scoring" },
-              { icon: EyeOff, title: "Dark Vessels", description: "Detect AIS manipulation and signal gaps in high-risk zones" },
-              { icon: ShieldAlert, title: "Sanctions Screening", description: "Real-time OFAC and EU sanctions list matching" },
-              { icon: Anchor, title: "Port Analytics", description: "Congestion forecasting and wait time prediction" },
+              { icon: Globe, title: "Fleet visibility", description: "Track vessels and assets through a cleaner, more structured operational interface designed for real-time awareness." },
+              { icon: EyeOff, title: "Route intelligence", description: "Bring route and voyage details into a more usable workflow, with a stronger understanding of movement, timing, and state." },
+              { icon: ShieldAlert, title: "Operational alerts", description: "Surface anomalies, events, or priority states in a way that supports quicker review and more confident action." },
+              { icon: Anchor, title: "Executive clarity", description: "Translate complex operational movement into digestible dashboards and reporting views for leadership." },
             ]}
           />
         </WouterRouter>
