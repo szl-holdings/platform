@@ -90,7 +90,8 @@
     "./WelcomeOverlay": "./src/WelcomeOverlay.tsx",
     "./EmptyState": "./src/EmptyState.tsx",
     "./EcosystemTour": "./src/EcosystemTour.tsx",
-    "./agent-insights-widget": "./src/agent-insights-widget.tsx"
+    "./agent-insights-widget": "./src/agent-insights-widget.tsx",
+    "./core-observability-data": "./src/core-observability-data.ts"
   },
   "dependencies": {
     "@workspace/replit-auth-web": "workspace:*",

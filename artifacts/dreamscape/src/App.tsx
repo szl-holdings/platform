@@ -2,130 +2,101 @@ import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { Layout } from "@/components/layout";
+import { NimbusLayout } from "@/components/nimbus-layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { museConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
-import { Palette, Sparkles, Calendar, FolderOpen } from "lucide-react";
+import { Brain, AlertTriangle, GitBranch, Target, TrendingUp } from "lucide-react";
 
-const Workspace = lazy(() => import("@/pages/workspace").then(m => ({ default: m.Workspace })));
-const CampaignDetail = lazy(() => import("@/pages/campaign-detail").then(m => ({ default: m.CampaignDetail })));
-const AIStudio = lazy(() => import("@/pages/ai-studio").then(m => ({ default: m.AIStudio })));
-const ContentCalendar = lazy(() => import("@/pages/content-calendar").then(m => ({ default: m.ContentCalendar })));
-const SocialAssets = lazy(() => import("@/pages/social-assets").then(m => ({ default: m.SocialAssets })));
-const ContentGuides = lazy(() => import("@/pages/content-guides").then(m => ({ default: m.ContentGuides })));
-const GeneratorTools = lazy(() => import("@/pages/generator-tools").then(m => ({ default: m.GeneratorTools })));
-const AuroraGallery = lazy(() => import("@/pages/aurora-gallery"));
-const NotFound = lazy(() => import("@/pages/not-found"));
-const ObservabilityPage = lazy(() => import("@/pages/observability"));
-const BrandVoiceEngine = lazy(() => import("@/pages/brand-voice-engine"));
-const VoiceStudio = lazy(() => import("@/pages/voice-studio"));
-const MotionGraphics = lazy(() => import("@/pages/motion-graphics"));
-const CollaborativeWorkspace = lazy(() => import("@/pages/collaborative-workspace"));
-const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
-
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5, retry: 1 },
+  },
+});
 
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }
+
+const PredictiveIntelligence = lazy(() => import("@/pages/predictive-intelligence"));
+const RiskScenario = lazy(() => import("@/pages/risk-scenario"));
+const ModelExplainability = lazy(() => import("@/pages/model-explainability"));
+const OpportunityEngine = lazy(() => import("@/pages/opportunity-engine"));
+const ForecastingCenter = lazy(() => import("@/pages/forecasting-center"));
 
 function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={Workspace} />
-        <Route path="/campaigns" component={Workspace} />
-        <Route path="/campaigns/:id" component={CampaignDetail} />
-        <Route path="/ai-studio" component={AIStudio} />
-        <Route path="/observability" component={ObservabilityPage} />
-        <Route path="/content-calendar" component={ContentCalendar} />
-        <Route path="/social-assets" component={SocialAssets} />
-        <Route path="/content-guides" component={ContentGuides} />
-        <Route path="/generators" component={GeneratorTools} />
-        <Route path="/aurora" component={AuroraGallery} />
-        <Route path="/brand-voice" component={BrandVoiceEngine} />
-        <Route path="/voice-studio" component={VoiceStudio} />
-        <Route path="/motion-graphics" component={MotionGraphics} />
-        <Route path="/collab" component={CollaborativeWorkspace} />
-        <Route path="/agent-insights" component={AgentInsightsPage} />
-        <Route component={NotFound} />
+        <Route path="/" component={PredictiveIntelligence} />
+        <Route path="/risk" component={RiskScenario} />
+        <Route path="/explainability" component={ModelExplainability} />
+        <Route path="/opportunities" component={OpportunityEngine} />
+        <Route path="/forecasting" component={ForecastingCenter} />
+        <Route>
+          <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
+        </Route>
       </Switch>
     </Suspense>
   );
 }
 
-const dreamscapeCommands: CommandItem[] = [
-  { id: "nav-workspace", label: "Workspace", icon: "🎨", group: "Navigation", keywords: ["home", "campaigns", "overview"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
-  { id: "nav-ai-studio", label: "AI Studio", icon: "🤖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ai-studio"); } },
-  { id: "nav-calendar", label: "Content Calendar", icon: "📅", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/content-calendar"); } },
-  { id: "nav-social", label: "Social Assets", icon: "📱", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/social-assets"); } },
-  { id: "nav-guides", label: "Content Guides", icon: "📖", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/content-guides"); } },
-  { id: "nav-generators", label: "Generator Tools", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/generators"); } },
-  { id: "nav-aurora", label: "Aurora Gallery", icon: "🌅", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/aurora"); } },
-  { id: "nav-brand-voice", label: "Brand Voice Engine", icon: "🎙️", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/brand-voice"); } },
-  { id: "nav-voice-studio", label: "Voice Studio", icon: "🎤", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/voice-studio"); } },
-  { id: "nav-motion", label: "Motion Graphics", icon: "🎬", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/motion-graphics"); } },
-  { id: "nav-collab", label: "Collaborative Workspace", icon: "👥", group: "Creative", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/collab"); } },
-  { id: "app-carlota-jo", label: "Switch to Carlota Jo", icon: "✨", group: "Switch App", description: "Brand Consulting", action: () => { window.location.href = "/carlota-jo/"; } },
-  { id: "app-inca", label: "Switch to INCA", icon: "🧠", group: "Switch App", description: "AI Research", action: () => { window.location.href = "/inca/"; } },
+const nimbusCommands: CommandItem[] = [
+  { id: "nav-predictions", label: "Predictive Intelligence", icon: "🧠", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-risk", label: "Risk Scenario Planning", icon: "⚠️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/risk"); } },
+  { id: "nav-explain", label: "Model Explainability", icon: "🔍", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/explainability"); } },
+  { id: "nav-opp", label: "Opportunity Engine", icon: "🎯", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/opportunities"); } },
+  { id: "nav-forecast", label: "Forecasting Center", icon: "📈", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/forecasting"); } },
 ];
 
-const dreamscapeShortcuts: KeyboardShortcut[] = [
-  { key: "C", description: "Go to Content Calendar", category: "Navigation" },
-  { key: "S", description: "Go to AI Studio", category: "Navigation" },
-  { key: "G", description: "Go to Generator Tools", category: "Navigation" },
-  { key: "B", description: "Go to Brand Voice Engine", category: "Navigation" },
+const nimbusShortcuts: KeyboardShortcut[] = [
+  { key: "R", description: "Risk Scenario Planning", category: "Navigation" },
+  { key: "E", description: "Model Explainability", category: "Navigation" },
+  { key: "O", description: "Opportunity Engine", category: "Navigation" },
+  { key: "F", description: "Forecasting Center", category: "Navigation" },
 ];
 
 function App() {
-  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(dreamscapeCommands);
+  const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(nimbusCommands);
 
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={dreamscapeShortcuts} appName="Nimbus" accentColor="#ec4899">
-          <div className="flex flex-col h-screen">
-            <EcosystemNav currentAppId="nimbus" currentAppName="Nimbus — Predictive Intelligence" accentColor="#ec4899" />
+        <PowerUserProvider shortcuts={nimbusShortcuts} appName="Nimbus" accentColor="#8b5cf6">
+          <div className="flex flex-col h-screen bg-[#080c14]">
+            <EcosystemNav currentAppId="nimbus" currentAppName="Nimbus" accentColor="#8b5cf6" />
             <div className="flex-1 overflow-hidden">
-              <Layout>
+              <NimbusLayout>
                 <Router />
-              </Layout>
+              </NimbusLayout>
             </div>
           </div>
           <CommandPalette
             open={cmdOpen}
             onClose={() => setCmdOpen(false)}
-            commands={dreamscapeCommands}
+            commands={nimbusCommands}
             appName="Nimbus"
-            accentColor="#ec4899"
-          />
-          <IncaAgentIndicator 
-            agentName="Prediction Engine" 
-            systemType="inti" 
-            currentTask="Modeling scenario confidence scores and forecasting decision outcomes" 
-            confidence={0.93} 
+            accentColor="#8b5cf6"
           />
         </PowerUserProvider>
         <WelcomeOverlay
           appId="nimbus"
           appName="Nimbus"
-          subtitle="Predictive Intelligence Platform"
-          description="Nimbus surfaces what is likely to happen next and why. Scenario modelling, confidence scoring, drift monitoring, and anomaly correlation — forward signal analysis for teams that need structured reasoning about what comes next."
-          accentColor="#ec4899"
-          icon={Sparkles}
+          subtitle="Predictive Intelligence"
+          description="Nimbus transforms Beacon detections and Lyte signals into forward-looking decisions. It models what will happen next, surfaces risks before they materialize, and recommends actions with confidence scores."
+          accentColor="#8b5cf6"
+          icon={Brain}
           features={[
-            { icon: Sparkles, title: "Scenario modelling", description: "Build structured scenarios with assumption tracking and confidence scoring. Every prediction is traceable to its inputs." },
-            { icon: Calendar, title: "Anomaly correlation", description: "Surface patterns across operational timelines. Anomalies are attributed, contextualised, and connected to business impact." },
-            { icon: FolderOpen, title: "Drift monitoring", description: "Track when model outputs deviate from expected ranges. Know when your predictions need recalibration before decisions degrade." },
-            { icon: Palette, title: "Forward signals", description: "Translate historical patterns into structured forward indicators. Give decision-makers a reasoned view of likely outcomes." },
+            { icon: Brain, title: "Predictive Intelligence", description: "Confidence-weighted predictions with causal chains, correlation IDs, and Beacon signal inputs" },
+            { icon: AlertTriangle, title: "Risk Scenario Planning", description: "Multi-variable risk models with mitigation strategies and Nimbus confidence scores" },
+            { icon: GitBranch, title: "Model Explainability", description: "Why Nimbus made each prediction — factor weights, data sources, and confidence drivers" },
+            { icon: Target, title: "Opportunity Engine", description: "What to do next — revenue opportunities ranked by confidence, effort, and expected impact" },
           ]}
         />
       </WouterRouter>
