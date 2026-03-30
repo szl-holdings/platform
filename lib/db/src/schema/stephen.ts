@@ -44,7 +44,7 @@ export const stephenBookingRequestsTable = pgTable("stephen_booking_requests", {
   email: text("email").notNull(),
   company: text("company"),
   role: text("role"),
-  type: text("type", { enum: ["consultation", "project", "recruitment", "partnership", "other"] }).notNull(),
+  type: text("type", { enum: ["consultation", "project", "recruitment", "partnership", "investment", "speaking", "other"] }).notNull(),
   message: text("message").notNull(),
   preferredDate: text("preferred_date"),
   status: text("status", { enum: ["pending", "confirmed", "declined", "completed"] }).notNull().default("pending"),

@@ -53,7 +53,7 @@ router.post("/booking/inquiries", async (req: Request, res: Response) => {
 
 router.get("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.select().from(carlotaInquiriesTable).where(eq(carlotaInquiriesTable.id, id));
     if (!row) { sendNotFound(res, "Inquiry"); return; }
     sendSuccess(res, row);
@@ -64,7 +64,7 @@ router.get("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
 
 router.patch("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaInquiriesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaInquiriesTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Inquiry"); return; }
     sendSuccess(res, row);
@@ -75,7 +75,7 @@ router.patch("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
 
 router.delete("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaInquiriesTable).where(eq(carlotaInquiriesTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Inquiry"); return; }
     sendSuccess(res, { deleted: true });
@@ -132,7 +132,7 @@ router.post("/booking/reservations", async (req: Request, res: Response) => {
 
 router.get("/booking/reservations/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.select().from(carlotaReservationsTable).where(eq(carlotaReservationsTable.id, id));
     if (!row) { sendNotFound(res, "Reservation"); return; }
     sendSuccess(res, row);
@@ -143,7 +143,7 @@ router.get("/booking/reservations/:id", authMiddleware(), async (req, res) => {
 
 router.patch("/booking/reservations/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaReservationsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaReservationsTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Reservation"); return; }
     sendSuccess(res, row);
@@ -154,7 +154,7 @@ router.patch("/booking/reservations/:id", authMiddleware(), async (req, res) => 
 
 router.delete("/booking/reservations/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaReservationsTable).where(eq(carlotaReservationsTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Reservation"); return; }
     sendSuccess(res, { deleted: true });
@@ -251,7 +251,7 @@ router.post("/booking/services", authMiddleware(), async (req, res) => {
 
 router.patch("/booking/services/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaServicesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaServicesTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Service"); return; }
     sendSuccess(res, row);
@@ -262,7 +262,7 @@ router.patch("/booking/services/:id", authMiddleware(), async (req, res) => {
 
 router.delete("/booking/services/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     const [row] = await db.delete(carlotaServicesTable).where(eq(carlotaServicesTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Service"); return; }
     sendSuccess(res, { deleted: true });

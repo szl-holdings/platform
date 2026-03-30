@@ -511,8 +511,24 @@ router.get("/firestorm/cves", authMiddleware({ required: false }), async (req, r
       return;
     }
 
-    const data = await response.json();
-    const cves = (data.vulnerabilities || []).map((v: any) => {
+    interface NvdCveDescription { lang: string; value: string; }
+    interface NvdCvssMetric { cvssData?: { baseScore?: number }; }
+    interface NvdCpeMatch { criteria?: string; }
+    interface NvdCpeNode { cpeMatch?: NvdCpeMatch[]; }
+    interface NvdConfiguration { nodes?: NvdCpeNode[]; }
+    interface NvdCveItem {
+      id?: string;
+      descriptions?: NvdCveDescription[];
+      metrics?: { cvssMetricV31?: NvdCvssMetric[]; cvssMetricV30?: NvdCvssMetric[]; cvssMetricV2?: NvdCvssMetric[]; };
+      configurations?: NvdConfiguration[];
+      published?: string;
+      lastModified?: string;
+    }
+    interface NvdVulnerability { cve: NvdCveItem; }
+    interface NvdApiResponse { vulnerabilities?: NvdVulnerability[]; }
+
+    const data = (await response.json()) as NvdApiResponse;
+    const cves = (data.vulnerabilities || []).map((v: NvdVulnerability) => {
       const cve = v.cve;
       const metrics = cve.metrics?.cvssMetricV31?.[0] || cve.metrics?.cvssMetricV30?.[0] || cve.metrics?.cvssMetricV2?.[0];
       const score = metrics?.cvssData?.baseScore || 0;
@@ -520,7 +536,7 @@ router.get("/firestorm/cves", authMiddleware({ required: false }), async (req, r
 
       return {
         id: cve.id,
-        description: cve.descriptions?.find((d: any) => d.lang === "en")?.value || "",
+        description: cve.descriptions?.find((d: NvdCveDescription) => d.lang === "en")?.value || "",
         score,
         severity,
         published: cve.published,

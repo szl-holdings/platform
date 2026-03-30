@@ -403,9 +403,13 @@ const projectAppUrls: Record<string, string> = {
   "Readiness Report": "/readiness-report/",
   "Admin Control Plane": "/admin/",
   "Service Integration Layer": "/admin/",
-  "Stephen L. Portfolio": "/",
+  "Stephen L. Portfolio": "/stephen/",
   "Terra Real Estate Intelligence": "/terra/",
   "MSP Command Center": "/msp/",
+  "INCA AI Research Command Center": "/inca/",
+  "INCA": "/inca/",
+  "SZL Holdings": "/szl-holdings/",
+  "Carlota Jo Consulting": "/carlota-jo/",
 };
 
 function ProjectPortfolioCard({ project, index }: { project: Project; index: number }) {
