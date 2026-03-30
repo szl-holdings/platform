@@ -162,13 +162,13 @@ Hidden from public (internal/dev only): Terra, Firestorm, INCA, Dreamscape, MSP/
 - **Resolved**: Dreamscape references → Alloy
 - **Resolved**: Terra and Firestorm hidden from public nav
 - **Warning**: `dreamscape` slug still exists in config (intentional as legacy reference)
-- **Warning**: Admin page at `/admin` on SZL Holdings is not auth-gated in the frontend router
+- **Resolved**: Admin page at `/admin` and `/kpis` on SZL Holdings now auth-gated via RequireAuth wrapper
 
 ## 10. Production Risks
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| Admin page accessible without auth check in SZL frontend | Medium | API endpoints require auth; frontend just shows UI |
+| ~~Admin page accessible without auth check~~ | ~~Medium~~ | Resolved — RequireAuth wrapper added to /admin and /kpis |
 | Demo data visible in Vessels dashboard | Low | Demo mode banner shown; data clearly labeled |
 | NYC open data API returning 400s | Low | Graceful fallback — ingestion logs 0 records, no crash |
 | 401 responses on observability vitals | Low | Auth required but clients not sending tokens — cosmetic noise |
