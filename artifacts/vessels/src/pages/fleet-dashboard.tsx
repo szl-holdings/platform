@@ -118,7 +118,7 @@ function FleetMap({ mockVessels, onVesselClick, selectedVesselId }: { mockVessel
           );
         })}
         {mockVessels.map((v) => {
-          const { x, y } = toMapCoords(v.currentLat, v.currentLon, W, H);
+          const { x, y } = toMapCoords(v.lat ?? v.currentLat, v.lon ?? v.currentLon, W, H);
           const color = vesselStatusDotColors[v.status] || "#666";
           const isHovered = hoveredVessel?.id === v.id;
           const isSelected = selectedVesselId === v.id;
@@ -148,7 +148,7 @@ function FleetMap({ mockVessels, onVesselClick, selectedVesselId }: { mockVessel
       </svg>
 
       {hoveredVessel && !selectedVesselId && (() => {
-        const { x, y } = toMapCoords(hoveredVessel.currentLat, hoveredVessel.currentLon, W, H);
+        const { x, y } = toMapCoords(hoveredVessel.lat ?? hoveredVessel.currentLat, hoveredVessel.lon ?? hoveredVessel.currentLon, W, H);
         const pctX = (x / W) * 100;
         const pctY = (y / H) * 100;
         return (
@@ -413,8 +413,8 @@ function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void })
           <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">Position & Navigation</h4>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: "Latitude", value: `${vessel.currentLat?.toFixed(4)}°` },
-              { label: "Longitude", value: `${vessel.currentLon?.toFixed(4)}°` },
+              { label: "Latitude", value: `${(vessel.lat ?? vessel.currentLat)?.toFixed(4)}°` },
+              { label: "Longitude", value: `${(vessel.lon ?? vessel.currentLon)?.toFixed(4)}°` },
               { label: "Speed", value: `${vessel.currentSpeed || 0} kn` },
               { label: "Heading", value: `${vessel.heading || Math.floor(seededValue(vid, 1, 360))}°` },
             ].map(item => (

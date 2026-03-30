@@ -1121,7 +1121,7 @@ export default function AlloyApp() {
   const [selectedProvider, setSelectedProvider] = useState<ModelProvider>("auto");
   const [showProviderMenu, setShowProviderMenu] = useState(false);
   const [loadingConversations, setLoadingConversations] = useState(true);
-  const [showConvSidebar, setShowConvSidebar] = useState(true);
+  const [showConvSidebar, setShowConvSidebar] = useState(() => window.innerWidth >= 768);
 
   const [chatMode, setChatMode] = useState<ChatMode>("normal");
   const [imageProvider, setImageProvider] = useState<ImageProvider>("huggingface");
@@ -1130,7 +1130,7 @@ export default function AlloyApp() {
   const [isTyping, setIsTyping] = useState(false);
 
   const [useKnowledgeBase, setUseKnowledgeBase] = useState(false);
-  const [showRightPanel, setShowRightPanel] = useState(true);
+  const [showRightPanel, setShowRightPanel] = useState(() => window.innerWidth >= 1024);
   const [rightFeedsCollapsed, setRightFeedsCollapsed] = useState(false);
 
   const [input, setInput] = useState("");
