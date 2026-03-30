@@ -9,7 +9,7 @@ import "./lib/platform-jobs";
 import { startPlatformScheduledJobs } from "./lib/platform-jobs";
 import { ensurePlatformFlags } from "./lib/platform-flags";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
-import { agentScheduler } from "./lib/agent-scheduler";
+import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
 import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
@@ -57,7 +57,7 @@ ensureAlloyTables()
   .then(() => ensurePlatformOpsTables())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {
-    agentScheduler.start();
+    registerDefaultSchedules();
   })
   .catch(err => {
     logger.fatal({ err }, "Schema bootstrap failed — cannot guarantee data integrity, shutting down");

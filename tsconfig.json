@@ -47,6 +47,18 @@
     },
     {
       "path": "./lib/replit-auth-web"
+    },
+    {
+      "path": "./lib/data-connectors"
+    },
+    {
+      "path": "./lib/workflow-engine"
+    },
+    {
+      "path": "./lib/audit"
+    },
+    {
+      "path": "./lib/ai-engine"
     }
   ]
 }
