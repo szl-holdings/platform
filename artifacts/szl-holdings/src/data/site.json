@@ -9,10 +9,9 @@
   },
   "nav": {
     "links": [
-      { "label": "Ecosystem", "href": "#ecosystem" },
       { "label": "Portfolio", "href": "#portfolio" },
-      { "label": "Timeline", "href": "#timeline" },
       { "label": "Innovation", "href": "#pillars" },
+      { "label": "Timeline", "href": "#timeline" },
       { "label": "Leadership", "href": "#leadership" },
       { "label": "Contact", "href": "#contact" }
     ],
@@ -99,10 +98,9 @@
       "connect": "Connect"
     },
     "companyLinks": [
-      { "label": "Ecosystem", "href": "#ecosystem" },
       { "label": "Portfolio", "href": "#portfolio" },
-      { "label": "Timeline", "href": "#timeline" },
       { "label": "Innovation", "href": "#pillars" },
+      { "label": "Timeline", "href": "#timeline" },
       { "label": "Leadership", "href": "#leadership" }
     ],
     "contactUsLabel": "Contact Us",

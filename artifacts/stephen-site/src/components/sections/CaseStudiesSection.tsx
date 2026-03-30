@@ -51,7 +51,7 @@ export function CaseStudiesSection() {
   const displayStudies = caseStudies?.length ? caseStudies : fallbackStudies;
 
   return (
-    <section className="py-32 bg-background relative border-t border-white/5">
+    <section id="case-studies" className="py-32 bg-background relative border-t border-white/5">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="mb-20">
           <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.2em] mb-4">Impact in Practice</h2>

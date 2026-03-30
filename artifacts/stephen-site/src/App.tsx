@@ -1,11 +1,8 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/toaster";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
-import { AgentCopilot } from "@workspace/shared-ui/copilot";
-import { stephenAIConfig } from "@workspace/shared-ui/copilot-configs";
-import { Server, AlertTriangle } from "lucide-react";
 
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home || m.default })));
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -21,52 +18,26 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000,
+      retry: false,
     },
   },
 });
 
-interface AppHealthSummary {
-  services: { name: string; status: string }[];
-  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
-}
-
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-}
-
-function DemoModeBanner() {
-  const { data } = useQuery<AppHealthSummary>({
-    queryKey: ["app-health-stephen"],
-    queryFn: () => fetch("/api/services/health/app/stephen-site").then((r) => r.json()),
-    refetchInterval: 120000,
-  });
-
-  if (!data) return null;
-
-  const hasDemoMode = data.summary.mockedDemoMode > 0;
-  const hasUnhealthy = data.summary.manualRequired > 0;
-  if (!hasDemoMode && !hasUnhealthy) return null;
-
-  const demoNames = data.services.filter((s) => s.status === "MOCKED_DEMO_MODE").map((s) => s.name);
-
-  if (hasUnhealthy) {
-    return (
-      <div className="fixed top-0 left-0 right-0 z-50 bg-red-500/10 border-b border-red-500/30 px-4 py-2 flex items-center justify-center gap-2">
-        <AlertTriangle className="w-4 h-4 text-red-400" />
-        <span className="text-xs text-red-400 font-medium">{data.summary.manualRequired} integration(s) not configured</span>
+    <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-2 border-primary/20 rounded-full" />
+          <div className="absolute inset-0 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center font-bold text-primary tracking-tighter text-xl">
+            SL
+          </div>
+        </div>
+        <div className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase animate-pulse">
+          Loading Experience
+        </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500/10 backdrop-blur-sm border-b border-amber-500/30 px-4 py-2 flex items-center justify-center gap-2">
-      <Server className="w-4 h-4 text-amber-400" />
-      <span className="text-xs text-amber-400 font-medium">Demo Mode</span>
-      <span className="text-xs text-amber-400/60">— {demoNames.join(", ")} using simulated data</span>
     </div>
   );
 }
@@ -76,12 +47,12 @@ function Router() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/career" component={CareerCommand} />
+        <Route path="/financial-research" component={FinancialResearch} />
+        <Route path="/hackajob" component={HackajobProfile} />
         <Route path="/checkout/success" component={CheckoutSuccess} />
         <Route path="/checkout/cancel" component={CheckoutCancel} />
         <Route path="/observability" component={ObservabilityPage} />
-        <Route path="/financial-research" component={FinancialResearch} />
-        <Route path="/hackajob" component={HackajobProfile} />
-        <Route path="/career" component={CareerCommand} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -97,12 +68,18 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <DemoModeBanner />
-          <Router />
+          <Suspense fallback={
+            <div className="min-h-screen bg-background flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center animate-pulse">
+                <span className="font-serif font-bold text-primary text-lg">SL</span>
+              </div>
+            </div>
+          }>
+            <Router />
+          </Suspense>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
-      <AgentCopilot config={stephenAIConfig} />
     </QueryClientProvider>
   );
 }

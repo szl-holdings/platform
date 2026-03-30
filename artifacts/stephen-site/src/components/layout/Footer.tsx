@@ -32,10 +32,10 @@ export function Footer() {
             <h4 className="font-semibold text-foreground mb-6">Navigate</h4>
             <ul className="space-y-4">
               <li><a href="#about" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">About</a></li>
-              <li><a href="#timeline" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Achievements</a></li>
               <li><a href="#services" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Services</a></li>
-              <li><a href="#portfolio" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Portfolio</a></li>
-              <li><a href="#ecosystem" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Ecosystem</a></li>
+              <li><a href="#case-studies" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Case Studies</a></li>
+              <li><a href="#insights" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Insights</a></li>
+              <li><a href="#testimonials" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Testimonials</a></li>
               <li><a href="#contact" className="text-muted-foreground hover:text-primary inline-block transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full">Contact</a></li>
             </ul>
           </div>
@@ -43,11 +43,11 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-6">Ecosystem</h4>
             <ul className="space-y-4">
-              <li><span className="text-muted-foreground flex items-center gap-1">Vessels <ArrowUpRight size={14} /></span></li>
-              <li><span className="text-muted-foreground flex items-center gap-1">Firestorm <ArrowUpRight size={14} /></span></li>
-              <li><span className="text-muted-foreground flex items-center gap-1">Lyte <ArrowUpRight size={14} /></span></li>
-              <li><span className="text-muted-foreground flex items-center gap-1">Dreamscape <ArrowUpRight size={14} /></span></li>
-              <li><span className="text-muted-foreground flex items-center gap-1">Readiness Report <ArrowUpRight size={14} /></span></li>
+              <li><a href="/vessels/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Vessels <ArrowUpRight size={14} /></a></li>
+              <li><a href="/firestorm/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Firestorm <ArrowUpRight size={14} /></a></li>
+              <li><a href="/lyte-command-center/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Lyte <ArrowUpRight size={14} /></a></li>
+              <li><a href="/dreamscape/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Dreamscape <ArrowUpRight size={14} /></a></li>
+              <li><a href="/readiness-report/" className="text-muted-foreground flex items-center gap-1 hover:text-primary transition-colors">Readiness Report <ArrowUpRight size={14} /></a></li>
             </ul>
           </div>
         </div>

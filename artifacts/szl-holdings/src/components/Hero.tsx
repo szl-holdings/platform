@@ -51,20 +51,16 @@ export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_40%,rgba(99,102,241,0.12)_0%,transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(167,139,250,0.08)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_90%,rgba(34,211,238,0.06)_0%,transparent_50%)]" />
-        <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-szl-primary/[0.07] rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/5 w-[400px] h-[400px] bg-szl-accent/[0.05] rounded-full blur-[100px]" />
-        <div className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-szl-cyan/[0.04] rounded-full blur-[80px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_40%,rgba(15,23,42,0.6)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(30,41,59,0.4)_0%,transparent_50%)]" />
+        <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-szl-primary/[0.05] rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/5 w-[400px] h-[400px] bg-szl-accent/[0.04] rounded-full blur-[100px]" />
       </div>
 
-      <div className="absolute inset-0 opacity-[0.025]" style={{
-        backgroundImage: `linear-gradient(rgba(99,102,241,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.4) 1px, transparent 1px)`,
+      <div className="absolute inset-0 opacity-[0.02]" style={{
+        backgroundImage: `linear-gradient(rgba(148,163,184,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.3) 1px, transparent 1px)`,
         backgroundSize: "80px 80px"
       }} />
-
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-szl-primary/20 to-transparent" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
         <m.div
@@ -90,7 +86,7 @@ export function Hero() {
         >
           <span className="text-szl-text">{hero.headline}</span>
           <br />
-          <span className="bg-gradient-to-r from-szl-primary via-szl-accent to-szl-cyan bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">
+          <span className="text-szl-primary-light">
             {hero.headlineAccent}
           </span>
         </m.h1>
@@ -111,8 +107,8 @@ export function Hero() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
         >
           <a
-            href="#ecosystem"
-            className="group px-8 py-4 rounded-xl bg-gradient-to-r from-szl-primary to-szl-accent text-white font-semibold text-base hover:opacity-90 transition-all hover:shadow-[0_0_40px_rgba(99,102,241,0.4)] flex items-center gap-2"
+            href="#portfolio"
+            className="group px-8 py-4 rounded-xl bg-szl-primary text-white font-semibold text-base hover:bg-szl-primary/90 transition-all hover:shadow-[0_0_40px_rgba(99,102,241,0.3)] flex items-center gap-2"
           >
             {hero.cta}
             <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -153,7 +149,7 @@ export function Hero() {
         transition={{ delay: 1.4 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
-        <a href="#ecosystem" className="text-szl-text-muted hover:text-szl-text-secondary transition-colors">
+        <a href="#portfolio" className="text-szl-text-muted hover:text-szl-text-secondary transition-colors">
           <ArrowDown size={20} className="animate-bounce" />
         </a>
       </m.div>

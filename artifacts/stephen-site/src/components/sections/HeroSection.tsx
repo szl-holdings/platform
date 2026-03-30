@@ -106,26 +106,13 @@ const textReveal = {
 };
 
 export function HeroSection() {
-  const { data: profile } = useGetStephenProfile();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
-  const fallback = {
-    name: "Stephen Lutar",
-    title: "Founder & CEO, SZL Holdings",
-    tagline: "I build the systems that power enterprises. From fintech platforms processing millions in transactions to maritime intelligence tracking global fleets — I architect, ship, and scale technology that moves industries forward.",
-  };
-
-  const name = profile?.name || fallback.name;
-  const title = profile?.title || fallback.title;
-  const tagline = profile?.tagline || fallback.tagline;
-
   return (
     <section id="hero" ref={ref} className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-      <GeometricMesh />
-
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary/12 rounded-full blur-[150px] animate-hero-glow" />
         <div className="absolute bottom-1/3 right-1/4 w-[350px] h-[350px] bg-yellow-600/8 rounded-full blur-[130px] animate-hero-glow-delayed" />
@@ -134,12 +121,7 @@ export function HeroSection() {
 
       <motion.div style={{ y, opacity }} className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         <div className="max-w-5xl">
-          <motion.div
-            custom={0}
-            initial="hidden"
-            animate="visible"
-            variants={textReveal}
-          >
+          <motion.div custom={0} initial="hidden" animate="visible" variants={textReveal}>
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass-panel mb-10 border-primary/20">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-sm font-medium text-foreground/70 tracking-wide">Founder & CEO at SZL Holdings</span>
@@ -153,7 +135,7 @@ export function HeroSection() {
             variants={textReveal}
             className="text-5xl sm:text-7xl md:text-[5.5rem] font-serif font-bold text-foreground leading-[1.05] mb-4 tracking-tight"
           >
-            {name}
+            Stephen Lutar
           </motion.h1>
 
           <motion.h2
@@ -173,17 +155,11 @@ export function HeroSection() {
             variants={textReveal}
             className="text-base sm:text-lg md:text-xl text-foreground/60 max-w-3xl mb-14 leading-relaxed font-light"
           >
-            {tagline}
+            I build the systems that power enterprises. From fintech platforms processing millions in transactions to maritime intelligence tracking global fleets — I architect, ship, and scale technology that moves industries forward.
           </motion.p>
 
-          <motion.div
-            custom={4}
-            initial="hidden"
-            animate="visible"
-            variants={textReveal}
-            className="flex flex-wrap items-center gap-6"
-          >
-            <a href="#portfolio">
+          <motion.div custom={4} initial="hidden" animate="visible" variants={textReveal} className="flex flex-wrap items-center gap-6">
+            <a href="#case-studies">
               <Button size="lg" className="rounded-full px-10 py-7 text-base shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-105 transition-all duration-300 group font-semibold">
                 Explore My Work
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
