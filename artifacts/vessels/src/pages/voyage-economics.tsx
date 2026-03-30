@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { vesselsDomainMockData, type VoyageEconomics } from "@/data/mock-data";
+import { type VoyageEconomics } from "@/data/mock-data";
+import { useVoyages, useVessels } from "@/hooks/use-vessels-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, Fuel, Clock, Anchor, Ship, BarChart3, Minus } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-
-const { voyageEconomics, vessels } = vesselsDomainMockData;
 
 const charterColors: Record<string, string> = {
   time_charter: "text-sky-400 bg-sky-500/10 border-sky-500/20",
@@ -27,7 +26,7 @@ function CostBar({ label, value, total, color }: { label: string; value: number;
   );
 }
 
-function VoyageCard({ voyage }: { voyage: VoyageEconomics }) {
+function VoyageCard({ voyage, vessels }: { voyage: VoyageEconomics; vessels: ReturnType<typeof useVessels>["vessels"] }) {
   const [expanded, setExpanded] = useState(false);
   const perf = voyage.performanceVsBudget;
   const isUp = perf > 0;
@@ -142,6 +141,8 @@ function VoyageCard({ voyage }: { voyage: VoyageEconomics }) {
 }
 
 export default function VoyageEconomicsPage() {
+  const { voyageEconomics, isLive } = useVoyages();
+  const { vessels } = useVessels();
   const [sortBy, setSortBy] = useState<"margin" | "tce" | "performance">("margin");
 
   const sorted = [...voyageEconomics].sort((a, b) => {
@@ -154,8 +155,9 @@ export default function VoyageEconomicsPage() {
   const totalMargin = voyageEconomics.reduce((a, v) => a + v.marginEstimate, 0);
   const totalFuel = voyageEconomics.reduce((a, v) => a + v.fuelCost, 0);
   const totalDelay = voyageEconomics.reduce((a, v) => a + v.delayCost, 0);
-  const avgTCE = voyageEconomics.filter(v => v.tce > 0).reduce((a, v) => a + v.tce, 0) / voyageEconomics.filter(v => v.tce > 0).length;
-  const avgPerf = voyageEconomics.reduce((a, v) => a + v.performanceVsBudget, 0) / voyageEconomics.length;
+  const tceVoyages = voyageEconomics.filter(v => v.tce > 0);
+  const avgTCE = tceVoyages.length > 0 ? tceVoyages.reduce((a, v) => a + v.tce, 0) / tceVoyages.length : 0;
+  const avgPerf = voyageEconomics.length > 0 ? voyageEconomics.reduce((a, v) => a + v.performanceVsBudget, 0) / voyageEconomics.length : 0;
 
   return (
     <div className="p-6 space-y-6">
@@ -220,7 +222,7 @@ export default function VoyageEconomicsPage() {
       </div>
 
       <div className="space-y-3">
-        {sorted.map(v => <VoyageCard key={v.voyageId} voyage={v} />)}
+        {sorted.map(v => <VoyageCard key={v.voyageId} voyage={v} vessels={vessels} />)}
       </div>
     </div>
   );

@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { vesselsDomainMockData } from "@/data/mock-data";
+import { useVessels } from "@/hooks/use-vessels-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Ship, ChevronRight, AlertTriangle, Wrench, TrendingUp, TrendingDown, Search } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-
-const { vessels } = vesselsDomainMockData;
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dotColor: "bg-emerald-400" },
@@ -26,6 +24,7 @@ const readinessColors: Record<string, string> = {
 };
 
 export default function VesselsListPage() {
+  const { vessels, isLive } = useVessels();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"name" | "tce" | "readiness" | "utilization">("tce");

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { vesselsDomainMockData, type VesselProfile } from "@/data/mock-data";
+import { useVessels, useFleetExceptions, useMaintenance } from "@/hooks/use-vessels-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
   Ship, AlertTriangle, Clock, MapPin, Navigation, Radio, ChevronRight,
@@ -8,7 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 
-const { vessels, fleetExceptions, maintenanceItems, eventLogs } = vesselsDomainMockData;
+const { eventLogs } = vesselsDomainMockData;
 
 const statusColors: Record<string, string> = {
   at_sea: "#22c55e",
@@ -70,7 +71,7 @@ function VesselRail({ vessel, selected, onSelect }: { vessel: VesselProfile; sel
   );
 }
 
-function AlertStream() {
+function AlertStream({ fleetExceptions }: { fleetExceptions: ReturnType<typeof useFleetExceptions>["fleetExceptions"] }) {
   const alerts = [
     ...fleetExceptions.filter(e => e.status === "active").map(e => ({
       id: e.id, type: "exception" as const, severity: e.severity,
@@ -105,7 +106,7 @@ function AlertStream() {
   );
 }
 
-function CommandMap({ selectedVessel }: { selectedVessel: VesselProfile | null }) {
+function CommandMap({ selectedVessel, vessels }: { selectedVessel: VesselProfile | null; vessels: ReturnType<typeof useVessels>["vessels"] }) {
   const W = 900;
   const H = 420;
 
@@ -205,16 +206,29 @@ function CommandMap({ selectedVessel }: { selectedVessel: VesselProfile | null }
 }
 
 export default function CommandModePage() {
-  const [selectedVessel, setSelectedVessel] = useState<VesselProfile>(vessels[0]);
+  const { vessels } = useVessels();
+  const { fleetExceptions } = useFleetExceptions();
+  const { maintenanceItems } = useMaintenance();
+
+  const defaultVessel = vessels[0] ?? vesselsDomainMockData.vessels[0];
+  const [selectedVessel, setSelectedVessel] = useState<VesselProfile | null>(null);
   const [tick, setTick] = useState(0);
+
+  const activeVessel = selectedVessel ?? defaultVessel;
+
+  useEffect(() => {
+    if (!selectedVessel && vessels.length > 0) {
+      setSelectedVessel(vessels[0]);
+    }
+  }, [vessels, selectedVessel]);
 
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const vesselExceptions = fleetExceptions.filter(e => e.vesselId === selectedVessel.id && e.status === "active");
-  const vesselMaint = maintenanceItems.filter(m => m.vesselId === selectedVessel.id && m.status !== "completed");
+  const vesselExceptions = fleetExceptions.filter(e => e.vesselId === activeVessel.id && e.status === "active");
+  const vesselMaint = maintenanceItems.filter(m => m.vesselId === activeVessel.id && m.status !== "completed");
   const criticalCount = fleetExceptions.filter(e => e.severity === "critical" && e.status === "active").length;
   const activeExcCount = fleetExceptions.filter(e => e.status === "active").length;
 
@@ -250,14 +264,14 @@ export default function CommandModePage() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {vessels.map(v => (
-              <VesselRail key={v.id} vessel={v} selected={selectedVessel.id === v.id} onSelect={() => setSelectedVessel(v)} />
+              <VesselRail key={v.id} vessel={v} selected={activeVessel.id === v.id} onSelect={() => setSelectedVessel(v)} />
             ))}
           </div>
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden p-3 gap-3">
           <div className="flex-1 min-h-0">
-            <CommandMap selectedVessel={selectedVessel} />
+            <CommandMap selectedVessel={activeVessel} vessels={vessels} />
           </div>
 
           <div className="grid grid-cols-4 gap-2 shrink-0">
@@ -281,16 +295,16 @@ export default function CommandModePage() {
         <div className="w-72 shrink-0 border-l border-sky-500/10 flex flex-col overflow-hidden">
           <div className="px-3 py-2 border-b border-sky-500/10 flex items-center gap-2">
             <Ship className="w-3 h-3 text-sky-400/50" />
-            <span className="text-[10px] font-mono text-sky-400/50 truncate">{selectedVessel.name}</span>
+            <span className="text-[10px] font-mono text-sky-400/50 truncate">{activeVessel.name}</span>
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: "Status", value: statusLabels[selectedVessel.status] },
-                { label: "Speed", value: `${selectedVessel.currentSpeed} kn` },
-                { label: "Heading", value: `${selectedVessel.heading}°` },
-                { label: "ETA", value: selectedVessel.etaDelta === 0 ? "On time" : selectedVessel.etaDelta > 0 ? `+${selectedVessel.etaDelta}h` : `${selectedVessel.etaDelta}h` },
+                { label: "Status", value: statusLabels[activeVessel.status] },
+                { label: "Speed", value: `${activeVessel.currentSpeed} kn` },
+                { label: "Heading", value: `${activeVessel.heading}°` },
+                { label: "ETA", value: activeVessel.etaDelta === 0 ? "On time" : activeVessel.etaDelta > 0 ? `+${activeVessel.etaDelta}h` : `${activeVessel.etaDelta}h` },
               ].map(item => (
                 <div key={item.label} className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
                   <p className="text-[9px] text-sky-400/30">{item.label}</p>
@@ -304,22 +318,22 @@ export default function CommandModePage() {
                 <Navigation className="w-3 h-3 text-sky-400/40" />
                 <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Route</p>
               </div>
-              <p className="text-[10px] text-sky-200">{selectedVessel.lastPort} → {selectedVessel.nextPort}</p>
+              <p className="text-[10px] text-sky-200">{activeVessel.lastPort} → {activeVessel.nextPort}</p>
               <div className="mt-2 h-1 bg-sky-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-sky-400 rounded-full" style={{ width: `${selectedVessel.routeProgress}%` }} />
+                <div className="h-full bg-sky-400 rounded-full" style={{ width: `${activeVessel.routeProgress}%` }} />
               </div>
-              <p className="text-[9px] text-sky-400/30 mt-1">{selectedVessel.routeProgress}% complete</p>
+              <p className="text-[9px] text-sky-400/30 mt-1">{activeVessel.routeProgress}% complete</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
                 <p className="text-[9px] text-sky-400/30">TCE</p>
-                <p className="text-[10px] font-mono text-emerald-400">{selectedVessel.tce > 0 ? `$${selectedVessel.tce.toLocaleString()}` : "—"}</p>
+                <p className="text-[10px] font-mono text-emerald-400">{activeVessel.tce > 0 ? `$${activeVessel.tce.toLocaleString()}` : "—"}</p>
               </div>
               <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
                 <p className="text-[9px] text-sky-400/30">Readiness</p>
-                <p className={cn("text-[10px] font-mono", selectedVessel.readinessScore >= 80 ? "text-emerald-400" : selectedVessel.readinessScore >= 60 ? "text-amber-400" : "text-red-400")}>
-                  {selectedVessel.readinessScore}/100
+                <p className={cn("text-[10px] font-mono", activeVessel.readinessScore >= 80 ? "text-emerald-400" : activeVessel.readinessScore >= 60 ? "text-amber-400" : "text-red-400")}>
+                  {activeVessel.readinessScore}/100
                 </p>
               </div>
             </div>
@@ -348,7 +362,7 @@ export default function CommandModePage() {
               </div>
             )}
 
-            <Link href={`/vessel/${selectedVessel.id}`}>
+            <Link href={`/vessel/${activeVessel.id}`}>
               <button className="w-full text-[10px] text-sky-400 border border-sky-500/20 rounded-lg py-1.5 hover:bg-sky-500/5 transition-colors">
                 Full Detail <ChevronRight className="w-3 h-3 inline" />
               </button>
@@ -356,7 +370,7 @@ export default function CommandModePage() {
           </div>
 
           <div className="border-t border-sky-500/10 shrink-0">
-            <AlertStream />
+            <AlertStream fleetExceptions={fleetExceptions} />
           </div>
         </div>
       </div>

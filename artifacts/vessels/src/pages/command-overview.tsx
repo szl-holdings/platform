@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { vesselsDomainMockData } from "@/data/mock-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -10,8 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
-
-const { vessels, fleetExceptions, maintenanceItems, voyageEconomics, performanceMetrics } = vesselsDomainMockData;
+import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
@@ -52,14 +50,23 @@ function StatCard({ label, value, sub, accent, icon: Icon, trend, pulse }: {
   );
 }
 
-function ExecutiveView() {
+type ViewProps = {
+  vessels: ReturnType<typeof useVessels>["vessels"];
+  fleetExceptions: ReturnType<typeof useFleetExceptions>["fleetExceptions"];
+  voyageEconomics: ReturnType<typeof useVoyages>["voyageEconomics"];
+  maintenanceItems: ReturnType<typeof useMaintenance>["maintenanceItems"];
+};
+
+function ExecutiveView({ vessels, fleetExceptions, voyageEconomics }: ViewProps) {
   const activeVoyages = vessels.filter(v => ["at_sea", "loading", "exception_active"].includes(v.status)).length;
   const totalRevenue = voyageEconomics.filter(v => v.status === "active").reduce((a, v) => a + v.estimatedRevenue, 0);
   const totalMargin = voyageEconomics.filter(v => v.status === "active").reduce((a, v) => a + v.marginEstimate, 0);
-  const avgMarginPct = totalMargin / totalRevenue * 100;
+  const avgMarginPct = totalRevenue > 0 ? totalMargin / totalRevenue * 100 : 0;
   const criticalExc = fleetExceptions.filter(e => e.severity === "critical" && e.status === "active").length;
-  const fleetUtil = vessels.filter(v => v.status !== "maintenance").reduce((a, v) => a + v.utilization, 0) / vessels.filter(v => v.status !== "maintenance").length;
-  const avgTCE = vessels.filter(v => v.utilization > 0).reduce((a, v) => a + v.tce, 0) / vessels.filter(v => v.utilization > 0).length;
+  const activeVessels = vessels.filter(v => v.status !== "maintenance");
+  const fleetUtil = activeVessels.length > 0 ? activeVessels.reduce((a, v) => a + v.utilization, 0) / activeVessels.length : 0;
+  const utilizingVessels = vessels.filter(v => v.utilization > 0);
+  const avgTCE = utilizingVessels.length > 0 ? utilizingVessels.reduce((a, v) => a + v.tce, 0) / utilizingVessels.length : 0;
 
   return (
     <div className="space-y-6">
@@ -118,7 +125,7 @@ function ExecutiveView() {
   );
 }
 
-function OperationsView() {
+function OperationsView({ vessels, fleetExceptions, maintenanceItems }: ViewProps) {
   const activeExceptions = fleetExceptions.filter(e => e.status === "active");
   const maintenanceWatch = maintenanceItems.filter(m => ["overdue", "in_progress", "due_soon"].includes(m.status));
   const delayedVessels = vessels.filter(v => ["delayed", "exception_active", "anchored"].includes(v.status));
@@ -179,7 +186,7 @@ function OperationsView() {
   );
 }
 
-function CommercialView() {
+function CommercialView({ voyageEconomics }: ViewProps) {
   const activeVoyages = voyageEconomics.filter(v => v.status === "active");
   const underperforming = activeVoyages.filter(v => v.performanceVsBudget < -5);
   const overperforming = activeVoyages.filter(v => v.performanceVsBudget > 5);
@@ -237,9 +244,16 @@ type TabId = "exec" | "ops" | "commercial";
 
 export default function CommandOverviewPage() {
   const { user } = useAuth();
+  const { vessels, isLive: vesselsLive } = useVessels();
+  const { fleetExceptions } = useFleetExceptions();
+  const { voyageEconomics } = useVoyages();
+  const { maintenanceItems } = useMaintenance();
+
   const [activeTab, setActiveTab] = useState<TabId>(
     user.role === "exec" ? "exec" : user.role === "commercial" || user.role === "charterer" || user.role === "finance" ? "commercial" : "ops"
   );
+
+  const viewProps: ViewProps = { vessels, fleetExceptions, voyageEconomics, maintenanceItems };
 
   const totalVessels = vessels.length;
   const atSea = vessels.filter(v => v.status === "at_sea").length;
@@ -248,7 +262,8 @@ export default function CommandOverviewPage() {
   const maintenanceCount = vessels.filter(v => v.status === "maintenance").length;
   const criticalExceptions = fleetExceptions.filter(e => e.severity === "critical" && e.status === "active").length;
   const weatherAffected = vessels.filter(v => v.status === "exception_active" || (v.status === "delayed" && v.etaDelta > 12)).length;
-  const fleetUtil = Math.round(vessels.filter(v => v.status !== "maintenance").reduce((a, v) => a + v.utilization, 0) / vessels.filter(v => v.status !== "maintenance").length);
+  const activeVessels = vessels.filter(v => v.status !== "maintenance");
+  const fleetUtil = activeVessels.length > 0 ? Math.round(activeVessels.reduce((a, v) => a + v.utilization, 0) / activeVessels.length) : 0;
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "exec", label: "Executive" },
@@ -319,9 +334,9 @@ export default function CommandOverviewPage() {
         </div>
       </div>
 
-      {activeTab === "exec" && <ExecutiveView />}
-      {activeTab === "ops" && <OperationsView />}
-      {activeTab === "commercial" && <CommercialView />}
+      {activeTab === "exec" && <ExecutiveView {...viewProps} />}
+      {activeTab === "ops" && <OperationsView {...viewProps} />}
+      {activeTab === "commercial" && <CommercialView {...viewProps} />}
 
       <div className="mt-6">
         <CommandModeSurface

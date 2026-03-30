@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { vesselsDomainMockData } from "@/data/mock-data";
-import { BarChart3, TrendingUp, TrendingDown, Clock, Ship, Activity, Minus } from "lucide-react";
+import { usePerformanceMetrics } from "@/hooks/use-vessels-data";
+import { BarChart3, TrendingUp, TrendingDown, Clock, Ship, Activity, Minus, RefreshCw } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-
-const { performanceMetrics, corridors, vessels } = vesselsDomainMockData;
 
 function SparkBar({ values, color }: { values: number[]; color: string }) {
   const max = Math.max(...values, 1);
@@ -28,6 +29,17 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
 }
 
 export default function PerformanceAnalyticsPage() {
+  const { performanceMetrics, isLoading } = usePerformanceMetrics();
+  const { data: liveCorridors = [] } = useQuery({
+    queryKey: ["vessels-corridors"],
+    queryFn: () => api.corridors.list(),
+    refetchInterval: 120_000,
+  });
+  const mockCorridors = vesselsDomainMockData.corridors;
+  const corridors = liveCorridors.length > 0
+    ? liveCorridors
+    : mockCorridors.map((c, i) => ({ ...c, id: String(i + 1) }));
+
   const [view, setView] = useState<"utilization" | "ontime" | "tce" | "routes">("utilization");
 
   const sortedByUtil = [...performanceMetrics].sort((a, b) => b.utilization - a.utilization);
@@ -35,9 +47,11 @@ export default function PerformanceAnalyticsPage() {
   const sortedByTCE = [...performanceMetrics].sort((a, b) => b.tce - a.tce);
   const sortedByDelay = [...performanceMetrics].sort((a, b) => b.avgDelayHours - a.avgDelayHours);
 
-  const fleetOnTime = performanceMetrics.filter(m => m.utilization > 0).reduce((a, m) => a + m.onTimeArrivalRate, 0) / performanceMetrics.filter(m => m.utilization > 0).length;
-  const fleetUtil = performanceMetrics.filter(m => m.utilization > 0).reduce((a, m) => a + m.utilization, 0) / performanceMetrics.filter(m => m.utilization > 0).length;
-  const fleetTCE = performanceMetrics.filter(m => m.tce > 0).reduce((a, m) => a + m.tce, 0) / performanceMetrics.filter(m => m.tce > 0).length;
+  const activeMetrics = performanceMetrics.filter(m => m.utilization > 0);
+  const fleetOnTime = activeMetrics.length > 0 ? activeMetrics.reduce((a, m) => a + m.onTimeArrivalRate, 0) / activeMetrics.length : 0;
+  const fleetUtil = activeMetrics.length > 0 ? activeMetrics.reduce((a, m) => a + m.utilization, 0) / activeMetrics.length : 0;
+  const tceMetrics = performanceMetrics.filter(m => m.tce > 0);
+  const fleetTCE = tceMetrics.length > 0 ? tceMetrics.reduce((a, m) => a + m.tce, 0) / tceMetrics.length : 0;
   const totalDelayHours = performanceMetrics.reduce((a, m) => a + m.avgDelayHours, 0);
 
   const corridorWeatherRisk: Record<string, string> = { low: "text-emerald-400", moderate: "text-amber-400", high: "text-orange-400", severe: "text-red-400" };

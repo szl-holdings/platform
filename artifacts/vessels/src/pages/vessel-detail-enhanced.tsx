@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
 import { vesselsDomainMockData } from "@/data/mock-data";
+import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
   ArrowLeft, Ship, MapPin, Navigation, Clock, Wrench, AlertTriangle,
@@ -9,7 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 
-const { vessels, voyageEconomics, fleetExceptions, maintenanceItems, eventLogs, shipmentRecords } = vesselsDomainMockData;
+const { eventLogs, shipmentRecords } = vesselsDomainMockData;
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dotColor: "#22c55e" },
@@ -61,6 +62,10 @@ function HistoryTimeline({ vesselId }: { vesselId: number }) {
 }
 
 export default function VesselDetailEnhancedPage() {
+  const { vessels } = useVessels();
+  const { fleetExceptions } = useFleetExceptions();
+  const { voyageEconomics } = useVoyages();
+  const { maintenanceItems } = useMaintenance();
   const [matchShort, paramsShort] = useRoute("/vessel/:id");
   const [matchLong, paramsLong] = useRoute("/vessels/:id");
   const params = paramsShort ?? paramsLong;

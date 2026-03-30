@@ -1,15 +1,14 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
-import { vesselsDomainMockData, type VesselProfile } from "@/data/mock-data";
+import { type VesselProfile } from "@/data/mock-data";
+import { useVessels, useFleetExceptions } from "@/hooks/use-vessels-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
   X, Ship, MapPin, Radio, Navigation, Clock, Filter, ChevronRight,
   AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown, Layers, Play, Pause
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-
-const { vessels, fleetExceptions } = vesselsDomainMockData;
 
 const statusColors: Record<string, string> = {
   at_sea: "#22c55e",
@@ -33,8 +32,8 @@ const statusLabels: Record<string, string> = {
   exception_active: "Exception",
 };
 
-function VesselSidePanel({ vessel, onClose }: { vessel: VesselProfile; onClose: () => void }) {
-  const exceptions = fleetExceptions.filter(e => e.vesselId === vessel.id && e.status === "active");
+function VesselSidePanel({ vessel, onClose, exceptions }: { vessel: VesselProfile; onClose: () => void; exceptions: ReturnType<typeof useFleetExceptions>["fleetExceptions"] }) {
+  const vesselExceptions = exceptions.filter(e => e.vesselId === vessel.id && e.status === "active");
   const sc = statusColors[vessel.status] || "#666";
   const scLabel = statusLabels[vessel.status] || vessel.status;
 
@@ -62,9 +61,9 @@ function VesselSidePanel({ vessel, onClose }: { vessel: VesselProfile; onClose: 
             {scLabel}
           </span>
           <span className="text-[10px] text-sky-400/40 font-mono">{vessel.type}</span>
-          {exceptions.length > 0 && (
+          {vesselExceptions.length > 0 && (
             <Badge variant="outline" className="text-[9px] text-red-400 border-red-500/20 bg-red-500/10">
-              {exceptions.length} exception{exceptions.length > 1 ? "s" : ""}
+              {vesselExceptions.length} exception{vesselExceptions.length > 1 ? "s" : ""}
             </Badge>
           )}
         </div>
@@ -121,10 +120,10 @@ function VesselSidePanel({ vessel, onClose }: { vessel: VesselProfile; onClose: 
           </div>
         </div>
 
-        {exceptions.length > 0 && (
+        {vesselExceptions.length > 0 && (
           <div className="space-y-2">
             <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Active Exceptions</p>
-            {exceptions.map(exc => (
+            {vesselExceptions.map(exc => (
               <div key={exc.id} className="bg-red-500/5 border border-red-500/10 rounded-lg p-2.5">
                 <p className="text-[10px] font-medium text-red-300">{exc.title}</p>
                 <p className="text-[9px] text-sky-400/50 mt-0.5">{exc.description.slice(0, 80)}...</p>
@@ -493,6 +492,8 @@ function MapboxFleetMap({
 }
 
 export default function FleetMapPage() {
+  const { vessels, isLive } = useVessels();
+  const { fleetExceptions } = useFleetExceptions();
   const [selectedVessel, setSelectedVessel] = useState<VesselProfile | null>(null);
   const [filters, setFilters] = useState<FilterState>({ fleet: "all", status: "all", type: "all" });
   const [showFilters, setShowFilters] = useState(false);
@@ -504,7 +505,7 @@ export default function FleetMapPage() {
       if (filters.type !== "all" && v.type !== filters.type) return false;
       return true;
     });
-  }, [filters]);
+  }, [filters, vessels]);
 
   const statuses = ["all", ...Array.from(new Set(vessels.map(v => v.status)))];
   const types = ["all", ...Array.from(new Set(vessels.map(v => v.type)))];
@@ -586,7 +587,7 @@ export default function FleetMapPage() {
         />
 
         {selectedVessel && (
-          <VesselSidePanel vessel={selectedVessel} onClose={() => setSelectedVessel(null)} />
+          <VesselSidePanel vessel={selectedVessel} onClose={() => setSelectedVessel(null)} exceptions={fleetExceptions} />
         )}
       </div>
 
