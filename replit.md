@@ -54,7 +54,14 @@ The platform features 13 applications sharing authentication and design.
 - **Alloy Platform Core — Orchestration Engine:** Canonical shared data model (`alloy_owners`, `alloy_signals`, `alloy_workflows`, `alloy_workflow_runs`, `alloy_approvals`, `alloy_actions`, `alloy_artifacts`, `alloy_audit_log`), ingestion layer, normalization pipeline, and workflow orchestration engine.
 
 ### Database Schema
-Over 90 tables across 20+ schema files, covering authentication, billing, various application-specific data (Vessels, Firestorm, Lyte, Alloy Platform, Dreamscape, Readiness, Stephen/Holdings), Alloy Chat, and Collaboration.
+Over 95 tables across 20+ schema files, covering authentication, billing, various application-specific data (Vessels, Firestorm, Lyte, Alloy Platform, Dreamscape, Readiness, Stephen/Holdings), Alloy Chat, Collaboration, and MSP (5 tables: msp_clients, msp_technicians, msp_tickets, msp_devices, msp_contracts).
+
+### MSP / Rosie — Real Data & System Metrics
+- **DB Schema:** `lib/db/src/schema/msp.ts` — 5 tables seeded with 12 clients, 7 technicians, 32 tickets, 163 devices, 9 contracts.
+- **API Routes:** `artifacts/api-server/src/routes/msp.ts` — full CRUD for /msp/dashboard, /msp/clients, /msp/tickets (GET/POST/PATCH), /msp/devices, /msp/contracts, /msp/technicians, /msp/revenue.
+- **Live System Metrics:** `artifacts/api-server/src/routes/msp-live.ts` — `/api/msp/live/system-metrics` reports real CPU, memory, uptime, load averages, and process info from the API server using Node.js `os` module. Polled every 30s by NOC and RMM Console pages.
+- **Revenue Endpoint:** Returns `summary`, `monthly` (6-month trend), `byClient` (churn risk + tier), and `forecast` (6-month projection) — all computed from real DB data.
+- **Frontend pages:** All MSP pages fully wired to real API with React Query, loading skeletons, and refresh buttons. AI triage runs automatically on ticket creation.
 
 ## External Dependencies
 - **Database:** PostgreSQL

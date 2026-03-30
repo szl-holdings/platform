@@ -1,10 +1,39 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, TrendingUp, DollarSign, Shield, Search, Filter, CheckCircle, ArrowUp } from "lucide-react";
+import { FileText, Calendar, AlertTriangle, CheckCircle2, Clock, DollarSign, Shield, Search, Filter, RefreshCw } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-import { contracts as mockContracts, type Contract } from "@/data/mock-data";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
 
-const typeLabels: Record<Contract["type"], string> = {
+const API_BASE = "/api";
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+interface Contract {
+  id: number;
+  name: string;
+  clientName: string;
+  type: "managed-services" | "break-fix" | "project" | "security" | "cloud";
+  status: "active" | "expiring" | "expired" | "pending-renewal";
+  value: number;
+  mrr: number;
+  startDate: string;
+  endDate: string;
+  slaTarget: number;
+  slaActual: number;
+  renewalProbability: number;
+  notes: string;
+}
+
+interface ContractsResponse {
+  contracts: Contract[];
+  total: number;
+}
+
+const typeLabels: Record<string, string> = {
   "managed-services": "Managed Services",
   "break-fix": "Break/Fix",
   project: "Project",
@@ -34,9 +63,9 @@ function SLAGauge({ target, actual }: { target: number; actual: number }) {
 }
 
 function ContractCard({ contract, index }: { contract: Contract; index: number }) {
-  const status = statusConfig[contract.status];
+  const status = statusConfig[contract.status] || statusConfig.active;
   const StatusIcon = status.icon;
-  const daysUntilEnd = Math.ceil((new Date(contract.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const daysUntilEnd = contract.endDate ? Math.ceil((new Date(contract.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
 
   return (
     <motion.div
@@ -53,9 +82,9 @@ function ContractCard({ contract, index }: { contract: Contract; index: number }
               <StatusIcon className="w-3 h-3" /> {contract.status}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground">{contract.client}</p>
+          <p className="text-xs text-muted-foreground">{contract.clientName}</p>
         </div>
-        <span className="px-2 py-1 rounded-lg bg-muted text-xs font-medium text-muted-foreground">{typeLabels[contract.type]}</span>
+        <span className="px-2 py-1 rounded-lg bg-muted text-xs font-medium text-muted-foreground">{typeLabels[contract.type] || contract.type}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
@@ -81,6 +110,13 @@ function ContractCard({ contract, index }: { contract: Contract; index: number }
         </div>
       </div>
 
+      {contract.mrr > 0 && (
+        <div className="mb-3">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">MRR</p>
+          <p className="text-sm font-semibold text-emerald-400">${contract.mrr.toLocaleString()}/mo</p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between pt-3 border-t border-border/30">
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {contract.startDate} — {contract.endDate}</span>
@@ -94,7 +130,7 @@ function ContractCard({ contract, index }: { contract: Contract; index: number }
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground mt-3 italic">{contract.notes}</p>
+      {contract.notes && <p className="text-xs text-muted-foreground mt-3 italic">{contract.notes}</p>}
     </motion.div>
   );
 }
@@ -103,36 +139,56 @@ export default function ContractsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const filtered = mockContracts
-    .filter(c => c.client.toLowerCase().includes(search.toLowerCase()) || c.name.toLowerCase().includes(search.toLowerCase()))
-    .filter(c => statusFilter === "all" || c.status === statusFilter);
+  const { data, isLoading, refetch } = useQuery<ContractsResponse>({
+    queryKey: ["msp-contracts", statusFilter],
+    queryFn: () => apiFetch<ContractsResponse>(`/msp/contracts${statusFilter !== "all" ? `?status=${statusFilter}` : ""}`),
+    staleTime: 60_000,
+  });
 
-  const totalValue = mockContracts.filter(c => c.status !== "expired").reduce((s, c) => s + c.value, 0);
-  const expiringCount = mockContracts.filter(c => c.status === "expiring").length;
-  const avgCompliance = Math.round(mockContracts.filter(c => c.status !== "expired").reduce((s, c) => s + c.slaActual, 0) / mockContracts.filter(c => c.status !== "expired").length * 10) / 10;
+  const allContracts = data?.contracts ?? [];
+  const filtered = allContracts.filter(c =>
+    (c.clientName || "").toLowerCase().includes(search.toLowerCase()) ||
+    (c.name || "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalValue = allContracts.filter(c => c.status !== "expired").reduce((s, c) => s + (c.value || 0), 0);
+  const expiringCount = allContracts.filter(c => c.status === "expiring").length;
+  const activeContracts = allContracts.filter(c => c.status !== "expired");
+  const avgCompliance = activeContracts.length > 0
+    ? Math.round(activeContracts.reduce((s, c) => s + (c.slaActual || 0), 0) / activeContracts.length * 10) / 10
+    : 0;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Contracts & SLAs</h1>
-        <p className="text-sm text-muted-foreground mt-1">MSAs, SLA attainment, renewal timelines, and contract value by tier</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Contracts & SLAs</h1>
+          <p className="text-sm text-muted-foreground mt-1">MSAs, SLA attainment, renewal timelines, and contract value by tier</p>
+        </div>
+        <button onClick={() => refetch()} className="p-2 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors">
+          <RefreshCw className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Active Contracts", value: mockContracts.filter(c => c.status === "active").length.toString(), color: "text-emerald-400", icon: FileText },
-          { label: "Total Contract Value", value: `$${(totalValue / 1000).toFixed(0)}K`, color: "text-primary", icon: DollarSign },
-          { label: "Expiring Soon", value: expiringCount.toString(), color: "text-amber-400", icon: Clock },
-          { label: "Avg SLA Compliance", value: `${avgCompliance}%`, color: avgCompliance >= 97 ? "text-emerald-400" : "text-amber-400", icon: Shield },
-        ].map((stat, i) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
-              <stat.icon className={cn("w-4 h-4", stat.color)} />
-            </div>
-            <p className={cn("text-3xl font-display font-bold mt-2", stat.color)}>{stat.value}</p>
-          </motion.div>
-        ))}
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)
+        ) : (
+          [
+            { label: "Active Contracts", value: allContracts.filter(c => c.status === "active").length.toString(), color: "text-emerald-400", icon: FileText },
+            { label: "Total Contract Value", value: `$${(totalValue / 1000).toFixed(0)}K`, color: "text-primary", icon: DollarSign },
+            { label: "Expiring Soon", value: expiringCount.toString(), color: "text-amber-400", icon: Clock },
+            { label: "Avg SLA Compliance", value: `${avgCompliance}%`, color: avgCompliance >= 97 ? "text-emerald-400" : "text-amber-400", icon: Shield },
+          ].map((stat, i) => (
+            <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
+                <stat.icon className={cn("w-4 h-4", stat.color)} />
+              </div>
+              <p className={cn("text-3xl font-display font-bold mt-2", stat.color)}>{stat.value}</p>
+            </motion.div>
+          ))
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -150,11 +206,19 @@ export default function ContractsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {filtered.map((contract, i) => (
-          <ContractCard key={contract.id} contract={contract} index={i} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 rounded-xl" />)}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">No contracts found</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {filtered.map((contract, i) => (
+            <ContractCard key={contract.id} contract={contract} index={i} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

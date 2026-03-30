@@ -37,6 +37,7 @@ import terraRouter from "./terra";
 import terraDistressRouter from "./terra-distress";
 import terraBrokerRouter from "./terra-broker";
 import mspLiveRouter from "./msp-live";
+import mspRouter from "./msp";
 import terraLiveRouter from "./terra-live";
 import agentTrainingRouter from "./agent-training";
 import commentsRouter from "./comments";
@@ -137,8 +138,10 @@ router.use(terraBrokerRouter);
 
 router.use("/msp", readLimiter);
 router.use(mspLiveRouter);
+router.use(mspRouter);
 router.use("/rosie", readLimiter);
 router.use(mspLiveRouter);
+router.use(mspRouter);
 
 router.use("/terra", readLimiter);
 router.use(terraLiveRouter);

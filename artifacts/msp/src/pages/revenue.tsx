@@ -1,181 +1,217 @@
 import { motion } from "framer-motion";
-import { DollarSign, TrendingUp, TrendingDown, Users, BarChart3, PieChart, ArrowUpRight, ArrowDownRight, CreditCard, ArrowUp, ArrowDown } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, Target, Users, Award, RefreshCw, BarChart3 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-import { clients, revenueData } from "@/data/mock-data";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, Legend } from "recharts";
+import { useQuery } from "@tanstack/react-query";
+import { ExportButton } from "@workspace/shared-ui/data-export";
+import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
-interface TooltipPayloadEntry {
-  name: string;
-  value: number;
-  color: string;
+const API_BASE = "/api";
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { credentials: "include" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: TooltipPayloadEntry[];
-  label?: string;
+interface RevenueData {
+  summary: {
+    mrr: number;
+    arr: number;
+    growth: number;
+    churn: number;
+    avgContractValue: number;
+    totalClients: number;
+    activeClients: number;
+    ltv: number;
+    nrr: number;
+    grossMargin: number;
+  };
+  monthly: {
+    month: string;
+    mrr: number;
+    newBusiness: number;
+    churned: number;
+    expansion: number;
+  }[];
+  byClient: {
+    clientName: string;
+    mrr: number;
+    tier: string;
+    churnRisk: "low" | "medium" | "high";
+    contractValue: number;
+    daysToRenewal: number;
+  }[];
+  forecast: {
+    month: string;
+    projected: number;
+    optimistic: number;
+    conservative: number;
+  }[];
 }
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-  if (!active || !payload) return null;
-  return (
-    <div className="glass-card rounded-lg p-3 shadow-xl border border-border/50">
-      <p className="text-xs font-semibold text-foreground mb-1">{label}</p>
-      {payload.map((entry) => (
-        <p key={entry.name} className="text-xs" style={{ color: entry.color }}>
-          {entry.name}: ${(entry.value / 1000).toFixed(1)}K
-        </p>
-      ))}
-    </div>
-  );
+const churnRiskColors: Record<string, string> = {
+  low: "text-emerald-400 bg-emerald-500/10",
+  medium: "text-amber-400 bg-amber-500/10",
+  high: "text-red-400 bg-red-500/10",
 };
 
-const clientMetrics: Record<string, { profitMargin: number; utilization: number }> = {
-  c1: { profitMargin: 42, utilization: 88 },
-  c2: { profitMargin: 35, utilization: 79 },
-  c3: { profitMargin: 44, utilization: 72 },
-  c4: { profitMargin: 31, utilization: 92 },
-  c5: { profitMargin: 37, utilization: 81 },
-  c6: { profitMargin: 48, utilization: 68 },
-  c7: { profitMargin: 40, utilization: 74 },
-  c8: { profitMargin: 28, utilization: 65 },
-  c9: { profitMargin: 45, utilization: 76 },
-  c10: { profitMargin: 0, utilization: 0 },
+const tierColors: Record<string, string> = {
+  platinum: "text-violet-400 bg-violet-500/10",
+  gold: "text-amber-400 bg-amber-500/10",
+  silver: "text-zinc-400 bg-zinc-500/10",
+  bronze: "text-orange-400 bg-orange-500/10",
 };
-
-function ClientRevenueRow({ client, index }: { client: typeof clients[0]; index: number }) {
-  const metrics = clientMetrics[client.id] || { profitMargin: 0, utilization: 0 };
-  const profitMargin = metrics.profitMargin;
-  const utilization = metrics.utilization;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.05 }}
-      className="grid grid-cols-6 gap-4 items-center px-5 py-3 border-b border-border/30 hover:bg-muted/20 transition-colors"
-    >
-      <div className="col-span-2 text-sm font-medium text-foreground">{client.name}</div>
-      <div className="text-sm font-semibold text-foreground">${client.mrr.toLocaleString()}</div>
-      <div className="flex items-center gap-2">
-        <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
-          <div className={cn("h-full rounded-full", utilization >= 80 ? "bg-emerald-400" : utilization >= 60 ? "bg-amber-400" : "bg-red-400")} style={{ width: `${utilization}%` }} />
-        </div>
-        <span className="text-xs text-muted-foreground">{utilization}%</span>
-      </div>
-      <div className={cn("text-sm font-semibold", profitMargin >= 35 ? "text-emerald-400" : profitMargin >= 20 ? "text-amber-400" : "text-red-400")}>
-        {profitMargin}%
-      </div>
-      <div className="text-sm font-mono text-muted-foreground">{client.deviceCount} devices</div>
-    </motion.div>
-  );
-}
 
 export default function RevenuePage() {
-  const totalMRR = clients.reduce((s, c) => s + c.mrr, 0);
-  const totalARR = totalMRR * 12;
-  const prevMRR = revenueData[revenueData.length - 2]?.mrr || 0;
-  const currentMRR = revenueData[revenueData.length - 1]?.mrr || 0;
-  const mrrGrowth = prevMRR > 0 ? ((currentMRR - prevMRR) / prevMRR * 100).toFixed(1) : "0";
-  const avgProfit = Math.round(revenueData.reduce((s, d) => s + d.profit, 0) / revenueData.length);
-  const profitMargin = Math.round(avgProfit / (revenueData.reduce((s, d) => s + d.mrr, 0) / revenueData.length) * 100);
+  const { data, isLoading, refetch } = useQuery<RevenueData>({
+    queryKey: ["msp-revenue"],
+    queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
+    staleTime: 120_000,
+  });
 
-  const sortedClients = [...clients].filter(c => c.mrr > 0).sort((a, b) => b.mrr - a.mrr);
+  const summary = data?.summary;
+  const monthly = data?.monthly ?? [];
+  const byClient = data?.byClient ?? [];
+  const forecast = data?.forecast ?? [];
+
+  const exportData = byClient.map(c => ({
+    Client: c.clientName,
+    MRR: c.mrr,
+    Tier: c.tier,
+    "Churn Risk": c.churnRisk,
+    "Contract Value": c.contractValue,
+    "Days to Renewal": c.daysToRenewal,
+  }));
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Revenue & Billing</h1>
-        <p className="text-sm text-muted-foreground mt-1">Per-client MRR, gross margin, and profitability trends across service tiers</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Revenue Analytics</h1>
+          <p className="text-sm text-muted-foreground mt-1">MRR, ARR, client revenue breakdown, churn risk analysis, and 6-month forecast</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <ExportButton
+            data={exportData}
+            options={{ filename: "msp-revenue", title: "MSP Revenue Analytics", accentColor: "#8b5cf6" }}
+          />
+          <button onClick={() => refetch()} className="p-2 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Monthly Revenue", value: `$${(totalMRR / 1000).toFixed(1)}K`, change: `+${mrrGrowth}%`, positive: true, icon: DollarSign, color: "text-primary" },
-          { label: "Annual Run Rate", value: `$${(totalARR / 1000000).toFixed(2)}M`, change: "+14.2% YoY", positive: true, icon: TrendingUp, color: "text-emerald-400" },
-          { label: "Profit Margin", value: `${profitMargin}%`, change: "+2.1%", positive: true, icon: BarChart3, color: "text-violet-400" },
-          { label: "Active Clients", value: clients.filter(c => c.mrr > 0).length.toString(), change: "+1 this quarter", positive: true, icon: Users, color: "text-cyan-400" },
-        ].map((stat, i) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
-              <stat.icon className={cn("w-4 h-4", stat.color)} />
-            </div>
-            <p className={cn("text-3xl font-display font-bold mt-2", stat.color)}>{stat.value}</p>
-            <p className={cn("text-xs mt-1 flex items-center gap-1", stat.positive ? "text-emerald-400" : "text-red-400")}>
-              {stat.positive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-              {stat.change}
-            </p>
-          </motion.div>
-        ))}
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)
+        ) : summary ? (
+          [
+            { label: "MRR", value: `$${(summary.mrr / 1000).toFixed(1)}K`, sub: `ARR: $${(summary.arr / 1000).toFixed(0)}K`, color: "text-primary", icon: DollarSign },
+            { label: "MoM Growth", value: `${summary.growth >= 0 ? "+" : ""}${summary.growth}%`, sub: `NRR: ${summary.nrr}%`, color: summary.growth >= 0 ? "text-emerald-400" : "text-red-400", icon: summary.growth >= 0 ? TrendingUp : TrendingDown },
+            { label: "Avg Contract", value: `$${(summary.avgContractValue / 1000).toFixed(1)}K`, sub: `${summary.activeClients}/${summary.totalClients} clients active`, color: "text-violet-400", icon: Target },
+            { label: "Gross Margin", value: `${summary.grossMargin}%`, sub: `LTV: $${(summary.ltv / 1000).toFixed(0)}K`, color: "text-amber-400", icon: Award },
+          ].map((stat, i) => (
+            <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-xl p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</p>
+                <stat.icon className={cn("w-4 h-4", stat.color)} />
+              </div>
+              <p className={cn("text-2xl font-display font-bold mt-2", stat.color)}>{stat.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{stat.sub}</p>
+            </motion.div>
+          ))
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="glass-card rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-foreground mb-4">Revenue vs Expenses (6 Months)</h2>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="colorMrr" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(250, 90%, 65%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(250, 90%, 65%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(160, 70%, 45%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(160, 70%, 45%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" />
-                <XAxis dataKey="month" stroke="hsl(220, 10%, 50%)" fontSize={12} />
-                <YAxis stroke="hsl(220, 10%, 50%)" fontSize={12} tickFormatter={(v) => `$${v / 1000}K`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="mrr" name="Revenue" stroke="hsl(250, 90%, 65%)" fill="url(#colorMrr)" strokeWidth={2} />
-                <Area type="monotone" dataKey="profit" name="Profit" stroke="hsl(160, 70%, 45%)" fill="url(#colorProfit)" strokeWidth={2} />
-                <Area type="monotone" dataKey="expenses" name="Expenses" stroke="hsl(0, 72%, 51%)" fill="none" strokeWidth={1.5} strokeDasharray="4 4" />
-              </AreaChart>
+          <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-primary" /> Monthly Recurring Revenue
+          </h2>
+          {isLoading ? (
+            <Skeleton className="h-48 w-full" />
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={monthly} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#888" }} />
+                <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 10, fill: "#888" }} />
+                <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, ""]} contentStyle={{ background: "rgba(0,0,0,0.8)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 11 }} />
+                <Bar dataKey="mrr" name="MRR" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="newBusiness" name="New" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="churned" name="Churned" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
-          </div>
+          )}
         </div>
 
         <div className="glass-card rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-foreground mb-4">MRR by Client</h2>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sortedClients} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" />
-                <XAxis type="number" stroke="hsl(220, 10%, 50%)" fontSize={12} tickFormatter={(v) => `$${v / 1000}K`} />
-                <YAxis type="category" dataKey="name" stroke="hsl(220, 10%, 50%)" fontSize={11} width={140} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="mrr" name="MRR" radius={[0, 4, 4, 0]}>
-                  {sortedClients.map((_, idx) => (
-                    <Cell key={idx} fill={`hsl(${250 + idx * 15}, 70%, ${55 + idx * 3}%)`} />
-                  ))}
-                </Bar>
-              </BarChart>
+          <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-400" /> Revenue Forecast (6 months)
+          </h2>
+          {isLoading ? (
+            <Skeleton className="h-48 w-full" />
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={forecast} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#888" }} />
+                <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 10, fill: "#888" }} />
+                <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, ""]} contentStyle={{ background: "rgba(0,0,0,0.8)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 11 }} />
+                <Line dataKey="projected" name="Projected" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                <Line dataKey="optimistic" name="Optimistic" stroke="#22c55e" strokeWidth={1.5} strokeDasharray="5 5" dot={false} />
+                <Line dataKey="conservative" name="Conservative" stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="5 5" dot={false} />
+              </LineChart>
             </ResponsiveContainer>
-          </div>
+          )}
         </div>
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Client Profitability</h2>
-           <div className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-amber-400" />
-            <span className="text-xs text-muted-foreground">Analysis</span>
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <Users className="w-4 h-4 text-violet-400" /> Revenue by Client
+          </h2>
+          <span className="text-xs text-muted-foreground">{byClient.length} clients</span>
+        </div>
+        {isLoading ? (
+          <div className="p-4 space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
+        ) : (
+          <div className="divide-y divide-border/30">
+            {byClient.map((client, i) => {
+              const pct = summary ? Math.round((client.mrr / summary.mrr) * 100) : 0;
+              return (
+                <div key={i} className="px-5 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                    {client.clientName.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{client.clientName}</span>
+                      <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-medium", tierColors[client.tier] || "text-muted-foreground bg-muted")}>{client.tier}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{pct}% of MRR</span>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-semibold">${client.mrr.toLocaleString()}/mo</p>
+                    <p className="text-[10px] text-muted-foreground">Contract: ${client.contractValue.toLocaleString()}</p>
+                  </div>
+                  <div className="shrink-0">
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", churnRiskColors[client.churnRisk])}>
+                      {client.churnRisk} risk
+                    </span>
+                    <p className="text-[10px] text-muted-foreground text-center mt-0.5">{client.daysToRenewal}d renewal</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-        <div className="grid grid-cols-6 gap-4 px-5 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wider border-b border-border/30">
-          <div className="col-span-2">Client</div>
-          <div>MRR</div>
-          <div>Utilization</div>
-          <div>Margin</div>
-          <div>Devices</div>
-        </div>
-        {sortedClients.map((client, i) => (
-          <ClientRevenueRow key={client.id} client={client} index={i} />
-        ))}
+        )}
       </div>
     </div>
   );

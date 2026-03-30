@@ -12,48 +12,78 @@ async function apiFetch<T>(path: string): Promise<T> {
   return res.json();
 }
 
-const activeAlerts = [
-  { id: 1, severity: "critical", client: "Meridian Corp", message: "Server cluster unresponsive — 3 nodes down", time: "2 min ago" },
-  { id: 2, severity: "warning", client: "Atlas Industries", message: "Firewall rule change — unauthorized modification", time: "8 min ago" },
-  { id: 3, severity: "info", client: "Vertex Labs", message: "Backup completed — 2.4TB processed", time: "15 min ago" },
-  { id: 4, severity: "warning", client: "Pinnacle Health", message: "SSL certificate expiring in 7 days", time: "22 min ago" },
-  { id: 5, severity: "critical", client: "NovaTech", message: "DDoS attack detected — mitigation active", time: "35 min ago" },
-];
+interface DashboardMetrics {
+  metrics: {
+    activeClients: number;
+    totalClients: number;
+    atRiskClients: number;
+    monthlyRevenue: number;
+    revenueGrowth: number;
+    uptime: number;
+    ticketsOpen: number;
+    ticketsInProgress: number;
+    ticketsResolved: number;
+    slaBreaches: number;
+    slaAtRisk: number;
+    resolvedToday: number;
+    managedDevices: number;
+    devicesOnline: number;
+    devicesWarning: number;
+    devicesCritical: number;
+    devicesOffline: number;
+    activeAlerts: number;
+    activeContracts: number;
+    expiringContracts: number;
+    totalContractValue: number;
+    avgSlaCompliance: number;
+    clientSatisfaction: number;
+    avgResolutionTime: string;
+  };
+}
 
-const recentTickets = [
-  { id: "TKT-4521", client: "Meridian Corp", subject: "Email server migration", priority: "high", status: "in-progress", sla: "2h remaining", slaPct: 75 },
-  { id: "TKT-4520", client: "Atlas Industries", subject: "VPN connectivity issues", priority: "medium", status: "assigned", sla: "4h remaining", slaPct: 50 },
-  { id: "TKT-4519", client: "Vertex Labs", subject: "New workstation setup x5", priority: "low", status: "queued", sla: "8h remaining", slaPct: 25 },
-  { id: "TKT-4518", client: "Pinnacle Health", subject: "HIPAA compliance audit prep", priority: "high", status: "in-progress", sla: "1d remaining", slaPct: 90 },
-];
+interface TicketItem {
+  id: number;
+  ticketNumber: string;
+  subject: string;
+  clientName: string;
+  priority: "critical" | "high" | "medium" | "low";
+  status: "open" | "in-progress" | "waiting" | "resolved" | "closed";
+  assigneeName: string;
+  slaDeadline: string;
+  slaStatus: "on-track" | "at-risk" | "breached";
+  category: string;
+}
 
-const clients = [
-  { name: "Meridian Corp", devices: 284, tickets: 3, health: 62, status: "at-risk", mrr: 14800, cost: 9200, churnRisk: 72, tickets30d: 14 },
-  { name: "Atlas Industries", devices: 198, tickets: 1, health: 88, status: "healthy", mrr: 9400, cost: 5100, churnRisk: 18, tickets30d: 3 },
-  { name: "Vertex Labs", devices: 156, tickets: 1, health: 95, status: "healthy", mrr: 7200, cost: 3800, churnRisk: 8, tickets30d: 2 },
-  { name: "Pinnacle Health", devices: 312, tickets: 2, health: 74, status: "warning", mrr: 16200, cost: 10900, churnRisk: 41, tickets30d: 9 },
-  { name: "NovaTech", devices: 89, tickets: 4, health: 41, status: "at-risk", mrr: 5100, cost: 4800, churnRisk: 84, tickets30d: 21 },
-  { name: "Solaris Energy", devices: 245, tickets: 0, health: 98, status: "healthy", mrr: 11600, cost: 5800, churnRisk: 5, tickets30d: 1 },
-];
+interface ClientItem {
+  id: number;
+  name: string;
+  status: "active" | "inactive" | "at-risk";
+  deviceCount: number;
+  openTickets: number;
+  healthScore: number;
+  mrr: number;
+  tier: string;
+}
 
-const technicians = [
-  { name: "J. Chen", skill: "Network", available: true, lat: 37.7, lon: -122.4, queue: 2, distance: "0.8 mi" },
-  { name: "M. Rodriguez", skill: "Security", available: true, lat: 37.8, lon: -122.3, queue: 1, distance: "1.2 mi" },
-  { name: "S. Park", skill: "Server", available: false, lat: 37.6, lon: -122.5, queue: 3, distance: "2.4 mi" },
-  { name: "K. Wilson", skill: "Endpoint", available: true, lat: 37.9, lon: -122.2, queue: 0, distance: "3.1 mi" },
-];
+interface TechItem {
+  id: number;
+  name: string;
+  specialties: string[];
+  status: string;
+  completedToday: number;
+  location: string;
+}
 
-const slaAtRisk = [
-  { id: "TKT-4521", client: "Meridian Corp", subject: "Email server migration", hoursLeft: 1.8, tier: "P1", breachRisk: "critical" },
-  { id: "TKT-4515", client: "NovaTech", subject: "DDoS remediation", hoursLeft: 0.4, tier: "P1", breachRisk: "imminent" },
-  { id: "TKT-4509", client: "Pinnacle Health", subject: "DR test verification", hoursLeft: 4.2, tier: "P2", breachRisk: "warning" },
-];
-
-const suppressedAlerts = [
-  { condition: "Backup completion events", count: 1247, client: "All", suppressed: true },
-  { condition: "SSL renewal confirmations", count: 89, client: "All", suppressed: true },
-  { condition: "Scheduled maintenance windows", count: 342, client: "Meridian Corp", suppressed: true },
-];
+interface RevenueData {
+  byClient: {
+    clientName: string;
+    mrr: number;
+    tier: string;
+    churnRisk: "low" | "medium" | "high";
+    contractValue: number;
+    daysToRenewal: number;
+  }[];
+}
 
 const sevColors: Record<string, { dot: string; badge: string; label: string }> = {
   critical: { dot: "bg-red-500", badge: "bg-red-500/10 text-red-500 border border-red-500/20", label: "Critical" },
@@ -62,158 +92,190 @@ const sevColors: Record<string, { dot: string; badge: string; label: string }> =
 };
 
 const prioColors: Record<string, string> = {
-  high: "bg-red-500/10 text-red-500",
+  critical: "bg-red-500/10 text-red-500",
+  high: "bg-orange-500/10 text-orange-500",
   medium: "bg-amber-500/10 text-amber-600",
   low: "bg-emerald-500/10 text-emerald-600",
 };
 
 const statusColors: Record<string, string> = {
   "in-progress": "bg-blue-500/10 text-blue-500",
-  assigned: "bg-violet-500/10 text-violet-500",
-  queued: "bg-muted text-muted-foreground",
+  open: "bg-violet-500/10 text-violet-500",
+  waiting: "bg-amber-500/10 text-amber-500",
+  resolved: "bg-emerald-500/10 text-emerald-500",
 };
 
 function HealthBar({ value, status }: { value: number; status: string }) {
-  const color = status === "healthy" ? "bg-emerald-500" : status === "warning" ? "bg-amber-500" : "bg-red-500";
+  const color = status === "healthy" || status === "active" ? "bg-emerald-500" : status === "warning" ? "bg-amber-500" : "bg-red-500";
+  const textColor = status === "healthy" || status === "active" ? "text-emerald-500" : status === "warning" ? "text-amber-500" : "text-red-500";
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
       </div>
-      <span className={`text-xs font-semibold tabular-nums ${status === "healthy" ? "text-emerald-500" : status === "warning" ? "text-amber-500" : "text-red-500"}`}>{value}</span>
+      <span className={`text-xs font-semibold tabular-nums ${textColor}`}>{value}</span>
     </div>
   );
 }
 
-function ClientProfitabilityPanel() {
-  const [sortBy, setSortBy] = useState<"margin" | "churn">("margin");
-  const sorted = [...clients].sort((a, b) => {
-    if (sortBy === "margin") return (b.mrr - b.cost) - (a.mrr - a.cost);
-    return b.churnRisk - a.churnRisk;
-  });
+function MetricSkeleton() {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 flex items-start gap-4">
+      <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-7 w-16" />
+        <Skeleton className="h-3 w-20" />
+      </div>
+    </div>
+  );
+}
+
+function formatSlaRemaining(deadline: string | null): string {
+  if (!deadline) return "No SLA";
+  const diff = new Date(deadline).getTime() - Date.now();
+  if (diff < 0) return "Breached";
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  if (h > 24) return `${Math.floor(h / 24)}d`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function ClientProfitabilityPanel({ byClient }: { byClient: RevenueData["byClient"] }) {
+  const [sortBy, setSortBy] = useState<"mrr" | "churn">("mrr");
+  const sorted = [...byClient].sort((a, b) => sortBy === "mrr" ? b.mrr - a.mrr : (b.churnRisk === "high" ? 2 : b.churnRisk === "medium" ? 1 : 0) - (a.churnRisk === "high" ? 2 : a.churnRisk === "medium" ? 1 : 0));
+  const totalMrr = byClient.reduce((s, c) => s + c.mrr, 0);
+
   return (
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <DollarSign className="w-4 h-4 text-emerald-500" aria-hidden="true" />
+          <DollarSign className="w-4 h-4 text-emerald-500" />
           Client Profitability
         </h2>
         <div className="flex items-center gap-1">
-          <button onClick={() => setSortBy("margin")} className={`text-[10px] px-2 py-1 rounded transition-colors ${sortBy === "margin" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>By Margin</button>
+          <button onClick={() => setSortBy("mrr")} className={`text-[10px] px-2 py-1 rounded transition-colors ${sortBy === "mrr" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>By MRR</button>
           <button onClick={() => setSortBy("churn")} className={`text-[10px] px-2 py-1 rounded transition-colors ${sortBy === "churn" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"}`}>By Churn Risk</button>
         </div>
       </div>
       <div className="divide-y divide-border">
-        {sorted.map((c) => {
-          const margin = c.mrr - c.cost;
-          const marginPct = Math.round((margin / c.mrr) * 100);
-          return (
-            <div key={c.name} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{c.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">MRR: ${c.mrr.toLocaleString()} · Cost: ${c.cost.toLocaleString()}</p>
-              </div>
-              <div className="text-right shrink-0 w-28">
-                <p className={`text-sm font-bold ${margin > 5000 ? "text-emerald-500" : margin > 2000 ? "text-amber-500" : "text-red-500"}`}>
-                  ${margin.toLocaleString()} <span className="text-[10px]">({marginPct}%)</span>
-                </p>
-                <div className="flex items-center justify-end gap-1 mt-1">
-                  <span className="text-[10px] text-muted-foreground">Churn Risk:</span>
-                  <span className={`text-[10px] font-bold ${c.churnRisk >= 70 ? "text-red-500" : c.churnRisk >= 40 ? "text-amber-500" : "text-emerald-500"}`}>{c.churnRisk}%</span>
-                </div>
+        {sorted.map((c) => (
+          <div key={c.clientName} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{c.clientName}</p>
+              <p className="text-xs text-muted-foreground mt-0.5 capitalize">{c.tier} · Renews in {c.daysToRenewal}d</p>
+            </div>
+            <div className="text-right shrink-0 w-32">
+              <p className="text-sm font-bold text-emerald-500">${c.mrr.toLocaleString()}/mo</p>
+              <div className="flex items-center justify-end gap-1 mt-1">
+                <span className="text-[10px] text-muted-foreground">Churn:</span>
+                <span className={`text-[10px] font-bold ${c.churnRisk === "high" ? "text-red-500" : c.churnRisk === "medium" ? "text-amber-500" : "text-emerald-500"}`}>{c.churnRisk}</span>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
       <div className="p-3 border-t border-border bg-muted/20 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground font-mono">Total MRR: ${clients.reduce((s, c) => s + c.mrr, 0).toLocaleString()}</span>
-        <span className="text-xs font-bold text-emerald-500">Avg Margin: {Math.round(clients.reduce((s, c) => s + (c.mrr - c.cost) / c.mrr * 100, 0) / clients.length)}%</span>
+        <span className="text-xs text-muted-foreground font-mono">Total MRR: ${totalMrr.toLocaleString()}</span>
+        <span className="text-xs font-bold text-emerald-500">{byClient.length} clients</span>
       </div>
     </div>
   );
 }
 
-function DispatchBoard() {
+function DispatchBoard({ technicians }: { technicians: TechItem[] }) {
   return (
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-blue-500" aria-hidden="true" />
+          <MapPin className="w-4 h-4 text-blue-500" />
           Technician Dispatch Board
         </h2>
         <span className="text-[10px] text-muted-foreground">Skill-matched · Proximity-routed</span>
       </div>
       <div className="divide-y divide-border">
-        {technicians.map((t) => (
-          <div key={t.name} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${t.available ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-muted text-muted-foreground border border-border"}`}>
-              {t.name.split(" ").map(n => n[0]).join("")}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium">{t.name}</p>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 font-mono">{t.skill}</span>
+        {technicians.slice(0, 5).map((t) => {
+          const available = t.status === "available";
+          return (
+            <div key={t.id} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${available ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-muted text-muted-foreground border border-border"}`}>
+                {t.name.split(" ").map((n: string) => n[0]).join("")}
               </div>
-              <p className="text-xs text-muted-foreground">{t.queue} in queue · {t.distance}</p>
-            </div>
-            <div className="text-right shrink-0">
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${t.available ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
-                {t.available ? "Available" : "On-site"}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">{t.name}</p>
+                  {t.specialties?.[0] && <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 font-mono">{t.specialties[0]}</span>}
+                </div>
+                <p className="text-xs text-muted-foreground">{t.completedToday} completed today · {t.location}</p>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${available ? "bg-emerald-500/10 text-emerald-500" : "bg-muted text-muted-foreground"}`}>
+                {available ? "Available" : t.status.replace("-", " ")}
               </span>
-              {t.available && (
-                <button className="block ml-auto mt-1 text-[10px] text-primary hover:underline">Assign →</button>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function SLABreachPrediction() {
+function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
+  const atRisk = tickets.filter(t => t.slaStatus !== "on-track" && t.status !== "resolved" && t.status !== "closed");
   return (
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-red-500 animate-pulse" aria-hidden="true" />
+          <AlertCircle className="w-4 h-4 text-red-500 animate-pulse" />
           SLA Breach Prediction
         </h2>
-        <span className="text-[10px] font-mono text-red-500">{slaAtRisk.length} at risk</span>
+        <span className="text-[10px] font-mono text-red-500">{atRisk.length} at risk</span>
       </div>
       <div className="divide-y divide-border">
-        {slaAtRisk.map((s) => (
-          <div key={s.id} className={`px-4 py-3 hover:bg-muted/20 transition-colors ${s.breachRisk === "imminent" ? "bg-red-500/5" : ""}`}>
+        {atRisk.slice(0, 4).map((s) => (
+          <div key={s.id} className={`px-4 py-3 hover:bg-muted/20 transition-colors ${s.slaStatus === "breached" ? "bg-red-500/5" : ""}`}>
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-muted-foreground">{s.id}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted font-mono">{s.tier}</span>
+                <span className="text-xs font-mono text-muted-foreground">{s.ticketNumber}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded bg-muted font-mono uppercase ${prioColors[s.priority]}`}>{s.priority[0].toUpperCase()}</span>
               </div>
-              <span className={`text-[10px] font-bold ${s.breachRisk === "imminent" ? "text-red-500 animate-pulse" : s.breachRisk === "critical" ? "text-orange-500" : "text-amber-500"}`}>
-                {s.breachRisk === "imminent" ? "⚠ IMMINENT" : s.breachRisk === "critical" ? "● Critical" : "● Warning"}
+              <span className={`text-[10px] font-bold ${s.slaStatus === "breached" ? "text-red-500 animate-pulse" : "text-amber-500"}`}>
+                {s.slaStatus === "breached" ? "⚠ BREACHED" : "● At Risk"}
               </span>
             </div>
             <p className="text-sm font-medium truncate">{s.subject}</p>
             <div className="flex items-center justify-between mt-1">
-              <p className="text-xs text-muted-foreground">{s.client}</p>
-              <p className={`text-xs font-mono font-bold flex items-center gap-1 ${s.hoursLeft < 1 ? "text-red-500" : s.hoursLeft < 3 ? "text-orange-500" : "text-amber-500"}`}>
-                <Clock className="w-3 h-3" aria-hidden="true" />{s.hoursLeft}h until breach
-              </p>
+              <p className="text-xs text-muted-foreground">{s.clientName}</p>
+              {s.slaDeadline && (
+                <p className={`text-xs font-mono font-bold flex items-center gap-1 ${s.slaStatus === "breached" ? "text-red-500" : "text-amber-500"}`}>
+                  <Clock className="w-3 h-3" />{formatSlaRemaining(s.slaDeadline)}
+                </p>
+              )}
             </div>
           </div>
         ))}
+        {atRisk.length === 0 && (
+          <div className="px-4 py-6 text-center text-xs text-muted-foreground">
+            <CheckCircle className="w-5 h-5 text-emerald-500 mx-auto mb-2" />
+            All tickets within SLA
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function AlertSuppressionPanel() {
+  const suppressedAlerts = [
+    { condition: "Backup completion events", count: 1247, client: "All" },
+    { condition: "SSL renewal confirmations", count: 89, client: "All" },
+    { condition: "Scheduled maintenance windows", count: 342, client: "Meridian Corp" },
+  ];
   return (
     <div className="rounded-xl border border-border bg-card">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="font-display font-semibold flex items-center gap-2">
-          <Bell className="w-4 h-4 text-violet-500" aria-hidden="true" />
+          <Bell className="w-4 h-4 text-violet-500" />
           Intelligent Alert Suppression
         </h2>
         <span className="text-[10px] text-emerald-500 font-mono">1,678 suppressed today</span>
@@ -222,7 +284,7 @@ function AlertSuppressionPanel() {
         {suppressedAlerts.map((a) => (
           <div key={a.condition} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
             <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{a.condition}</p>
@@ -239,29 +301,29 @@ function AlertSuppressionPanel() {
   );
 }
 
-function ClientChurnHeatmap() {
+function ClientChurnHeatmap({ byClient }: { byClient: RevenueData["byClient"] }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <h2 className="font-display font-semibold flex items-center gap-2 mb-4">
-        <Star className="w-4 h-4 text-amber-500" aria-hidden="true" />
+        <Star className="w-4 h-4 text-amber-500" />
         Client Health Scoring — Churn Risk
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {clients.map((c) => (
-          <div key={c.name} className={`rounded-lg p-3 border ${c.churnRisk >= 70 ? "border-red-500/20 bg-red-500/5" : c.churnRisk >= 40 ? "border-amber-500/20 bg-amber-500/5" : "border-emerald-500/20 bg-emerald-500/5"}`}>
-            <p className="text-xs font-semibold truncate">{c.name}</p>
+        {byClient.slice(0, 12).map((c) => (
+          <div key={c.clientName} className={`rounded-lg p-3 border ${c.churnRisk === "high" ? "border-red-500/20 bg-red-500/5" : c.churnRisk === "medium" ? "border-amber-500/20 bg-amber-500/5" : "border-emerald-500/20 bg-emerald-500/5"}`}>
+            <p className="text-xs font-semibold truncate">{c.clientName}</p>
             <div className="flex items-end justify-between mt-2">
               <div>
-                <p className="text-[10px] text-muted-foreground">Tickets/30d</p>
-                <p className="text-sm font-bold">{c.tickets30d}</p>
+                <p className="text-[10px] text-muted-foreground">Renews in</p>
+                <p className="text-sm font-bold">{c.daysToRenewal}d</p>
               </div>
               <div className="text-right">
                 <p className="text-[10px] text-muted-foreground">Churn Risk</p>
-                <p className={`text-lg font-bold ${c.churnRisk >= 70 ? "text-red-500" : c.churnRisk >= 40 ? "text-amber-500" : "text-emerald-500"}`}>{c.churnRisk}%</p>
+                <p className={`text-sm font-bold capitalize ${c.churnRisk === "high" ? "text-red-500" : c.churnRisk === "medium" ? "text-amber-500" : "text-emerald-500"}`}>{c.churnRisk}</p>
               </div>
             </div>
             <div className="h-1 bg-border rounded-full mt-2 overflow-hidden">
-              <div className={`h-full rounded-full ${c.churnRisk >= 70 ? "bg-red-500" : c.churnRisk >= 40 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${c.churnRisk}%` }} />
+              <div className={`h-full rounded-full ${c.churnRisk === "high" ? "bg-red-500" : c.churnRisk === "medium" ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: c.churnRisk === "high" ? "85%" : c.churnRisk === "medium" ? "50%" : "15%" }} />
             </div>
           </div>
         ))}
@@ -270,60 +332,68 @@ function ClientChurnHeatmap() {
   );
 }
 
-interface HealthMetrics {
-  status: string;
-  metrics: {
-    uptime: number;
-    ticketsOpen: number;
-    ticketsClosed: number;
-    avgResolutionTime: string;
-    slaBreaches: number;
-    clientSatisfaction: number;
-    activeAlerts: number;
-    managedDevices: number;
-    activeClients: number;
-    monthlyRevenue: number;
-    revenueGrowth: number;
-  };
-}
-
-function MetricSkeleton() {
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 flex items-start gap-4">
-      <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
-      <div className="flex-1 space-y-2">
-        <Skeleton className="h-3 w-24" />
-        <Skeleton className="h-7 w-16" />
-        <Skeleton className="h-3 w-20" />
-      </div>
-    </div>
-  );
-}
-
 export default function Dashboard() {
-  const { data: healthData, isLoading: healthLoading, isError: healthError, refetch } = useQuery<{ data: HealthMetrics }>({
-    queryKey: ["msp-health-metrics"],
-    queryFn: () => apiFetch<{ data: HealthMetrics }>("/msp/live/health-metrics"),
+  const { data: dashboardData, isLoading: dashLoading, isError, refetch } = useQuery<DashboardMetrics>({
+    queryKey: ["msp-dashboard"],
+    queryFn: () => apiFetch<DashboardMetrics>("/msp/dashboard"),
     staleTime: 60_000,
     retry: 2,
     refetchInterval: 5 * 60_000,
   });
 
-  const metrics = healthData?.data?.metrics;
-  const mrr = metrics?.monthlyRevenue ?? 184200;
-  const growth = metrics?.revenueGrowth ?? 12;
-  const activeClients = metrics?.activeClients ?? 47;
-  const openTickets = metrics?.ticketsOpen ?? 23;
-  const managedDevices = metrics?.managedDevices ?? 1284;
-  const uptime = metrics?.uptime ?? 99.7;
-  const satisfaction = metrics?.clientSatisfaction ?? 4.8;
-  const slaBreachCount = metrics?.slaBreaches ?? 2;
+  const { data: ticketsData, isLoading: ticketsLoading } = useQuery<{ tickets: TicketItem[] }>({
+    queryKey: ["msp-tickets-dashboard"],
+    queryFn: () => apiFetch<{ tickets: TicketItem[] }>("/msp/tickets?limit=10"),
+    staleTime: 60_000,
+  });
+
+  const { data: techData, isLoading: techLoading } = useQuery<{ technicians: TechItem[] }>({
+    queryKey: ["msp-technicians-dashboard"],
+    queryFn: () => apiFetch<{ technicians: TechItem[] }>("/msp/technicians"),
+    staleTime: 60_000,
+  });
+
+  const { data: clientsData, isLoading: clientsLoading } = useQuery<{ clients: ClientItem[] }>({
+    queryKey: ["msp-clients-dashboard"],
+    queryFn: () => apiFetch<{ clients: ClientItem[] }>("/msp/clients"),
+    staleTime: 60_000,
+  });
+
+  const { data: revenueData, isLoading: revenueLoading } = useQuery<RevenueData>({
+    queryKey: ["msp-revenue-dashboard"],
+    queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
+    staleTime: 120_000,
+  });
+
+  const metrics = dashboardData?.metrics;
+  const mrr = metrics?.monthlyRevenue ?? 0;
+  const growth = metrics?.revenueGrowth ?? 0;
+  const activeClients = metrics?.activeClients ?? 0;
+  const openTickets = (metrics?.ticketsOpen ?? 0) + (metrics?.ticketsInProgress ?? 0);
+  const managedDevices = metrics?.managedDevices ?? 0;
+  const uptime = metrics?.uptime ?? 0;
+  const satisfaction = metrics?.clientSatisfaction ?? 0;
+  const slaBreachCount = metrics?.slaBreaches ?? 0;
+  const activeAlertCount = metrics?.activeAlerts ?? 0;
+
+  const tickets = ticketsData?.tickets ?? [];
+  const technicians = techData?.technicians ?? [];
+  const clients = clientsData?.clients ?? [];
+  const byClient = revenueData?.byClient ?? [];
+
+  const nocAlerts = [
+    ...(metrics?.devicesCritical ? [{ id: "crit1", severity: "critical", client: "Managed Devices", message: `${metrics.devicesCritical} device${metrics.devicesCritical > 1 ? "s" : ""} in critical state — immediate attention required`, time: "Live" }] : []),
+    ...(slaBreachCount > 0 ? [{ id: "sla1", severity: "critical", client: "Service Desk", message: `${slaBreachCount} SLA breach${slaBreachCount > 1 ? "es" : ""} active — escalation required`, time: "Live" }] : []),
+    ...(metrics?.expiringContracts ? [{ id: "exp1", severity: "warning", client: "Contracts", message: `${metrics.expiringContracts} contract${metrics.expiringContracts > 1 ? "s" : ""} expiring within 90 days`, time: "Live" }] : []),
+    { id: "back1", severity: "info", client: "Vertex Labs", message: "Backup completed — 2.4TB processed successfully", time: "15 min ago" },
+    { id: "patch1", severity: "info", client: "Atlas Industries", message: "Patch management cycle complete — 198 endpoints updated", time: "2h ago" },
+  ];
 
   const summaryMetrics = [
-    { label: "Uptime SLA", value: `${uptime.toFixed(1)}%`, icon: Activity, trend: "+0.1%", up: true },
-    { label: "CSAT Score", value: `${satisfaction.toFixed(1)}/5`, icon: CheckCircle, trend: "+0.2", up: true },
-    { label: "SLA Breaches", value: String(slaBreachCount), icon: AlertTriangle, trend: slaBreachCount === 0 ? "None this month" : "-1 from last month", up: slaBreachCount <= 2 },
-    { label: "Revenue (MRR)", value: `$${mrr.toLocaleString()}`, icon: DollarSign, trend: `+${growth}% vs last month`, up: growth >= 0 },
+    { label: "Uptime SLA", value: `${uptime.toFixed(1)}%`, icon: Activity, trend: "Infrastructure health", up: true },
+    { label: "CSAT Score", value: `${satisfaction.toFixed(1)}/5`, icon: CheckCircle, trend: "Client satisfaction", up: true },
+    { label: "SLA Breaches", value: String(slaBreachCount), icon: AlertTriangle, trend: slaBreachCount === 0 ? "None active" : `${slaBreachCount} requiring action`, up: slaBreachCount <= 1 },
+    { label: "MRR", value: mrr > 0 ? `$${(mrr / 1000).toFixed(0)}K` : "—", icon: DollarSign, trend: growth > 0 ? `+${growth}% MoM growth` : `${growth}% vs last month`, up: growth >= 0 },
   ];
 
   return (
@@ -332,27 +402,25 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-display font-bold tracking-tight">Client Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {healthLoading ? "Loading metrics…" : `${activeClients} active clients · All critical systems monitored`}
+            {dashLoading ? "Loading metrics…" : `${activeClients} active clients · ${managedDevices} managed devices · All systems monitored`}
           </p>
         </div>
-        {healthError && (
-          <button
-            onClick={() => { refetch(); toast.info("Refreshing metrics…"); }}
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg px-3 py-2"
-          >
-            <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
-            Retry
-          </button>
-        )}
+        <button
+          onClick={() => { refetch(); toast.info("Refreshing metrics…"); }}
+          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg px-3 py-2"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Refresh
+        </button>
       </div>
 
       {/* Hero Revenue Banner */}
       <div className="rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-violet-700 p-6 md:p-8 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 0%, transparent 60%)" }} aria-hidden="true" />
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 50%, white 0%, transparent 60%)" }} />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <p className="text-sm font-medium text-white/70 uppercase tracking-wider mb-1">Monthly Recurring Revenue</p>
-            {healthLoading ? (
+            {dashLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-12 w-40 bg-white/20" />
                 <Skeleton className="h-4 w-24 bg-white/20" />
@@ -362,7 +430,7 @@ export default function Dashboard() {
                 <div className="text-5xl font-display font-bold tracking-tight">${mrr.toLocaleString()}</div>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="flex items-center gap-1 text-sm font-semibold text-emerald-300">
-                    {growth >= 0 ? <ArrowUp className="w-4 h-4" aria-hidden="true" /> : <ArrowDown className="w-4 h-4" aria-hidden="true" />}
+                    {growth >= 0 ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
                     {growth >= 0 ? "+" : ""}{growth}%
                   </span>
                   <span className="text-white/50 text-sm">vs last month</span>
@@ -371,7 +439,7 @@ export default function Dashboard() {
             )}
           </div>
           <div className="grid grid-cols-3 gap-4 md:gap-8">
-            {healthLoading ? (
+            {dashLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="text-center space-y-2">
                   <Skeleton className="w-5 h-5 bg-white/20 mx-auto rounded" />
@@ -386,7 +454,7 @@ export default function Dashboard() {
                 { label: "Managed Devices", value: managedDevices.toLocaleString(), icon: Server },
               ].map((s) => (
                 <div key={s.label} className="text-center">
-                  <s.icon className="w-5 h-5 text-white/50 mx-auto mb-1" aria-hidden="true" />
+                  <s.icon className="w-5 h-5 text-white/50 mx-auto mb-1" />
                   <div className="text-2xl font-display font-bold">{s.value}</div>
                   <div className="text-xs text-white/60 mt-0.5 whitespace-nowrap">{s.label}</div>
                 </div>
@@ -398,12 +466,12 @@ export default function Dashboard() {
 
       {/* Summary Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {healthLoading
+        {dashLoading
           ? Array.from({ length: 4 }).map((_, i) => <MetricSkeleton key={i} />)
           : summaryMetrics.map((m) => (
             <div key={m.label} className="rounded-xl border border-border bg-card p-5 flex items-start gap-4">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <m.icon className="w-5 h-5 text-primary" aria-hidden="true" />
+                <m.icon className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-1">{m.label}</p>
@@ -416,43 +484,43 @@ export default function Dashboard() {
 
       {/* SLA Breach Prediction + Dispatch + Alert Suppression */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <SLABreachPrediction />
-        <DispatchBoard />
+        {ticketsLoading ? <Skeleton className="h-48 rounded-xl" /> : <SLABreachPrediction tickets={tickets} />}
+        {techLoading ? <Skeleton className="h-48 rounded-xl" /> : <DispatchBoard technicians={technicians} />}
         <AlertSuppressionPanel />
       </div>
 
       {/* Client Profitability */}
-      <ClientProfitabilityPanel />
+      {revenueLoading ? <Skeleton className="h-64 rounded-xl" /> : byClient.length > 0 ? <ClientProfitabilityPanel byClient={byClient} /> : null}
 
       {/* Churn Risk Heatmap */}
-      <ClientChurnHeatmap />
+      {revenueLoading ? <Skeleton className="h-48 rounded-xl" /> : byClient.length > 0 ? <ClientChurnHeatmap byClient={byClient} /> : null}
 
       {/* Client Health Table + NOC Alerts */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         <div className="xl:col-span-3 rounded-xl border border-border bg-card">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-display font-semibold flex items-center gap-2">
-              <Users className="w-4 h-4 text-primary" aria-hidden="true" />
+              <Users className="w-4 h-4 text-primary" />
               Client Health
             </h2>
-            <button className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-              View All <ChevronRight className="w-3 h-3" aria-hidden="true" />
-            </button>
+            <span className="text-xs text-muted-foreground">{clients.length} clients</span>
           </div>
           <div className="divide-y divide-border">
-            {clients.map((client) => (
-              <div key={client.name} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/30 transition-colors">
+            {clientsLoading ? (
+              Array.from({ length: 5 }).map((_, i) => <div key={i} className="px-4 py-3"><Skeleton className="h-10" /></div>)
+            ) : clients.map((client) => (
+              <div key={client.id} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/30 transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{client.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{client.devices} devices · {client.tickets} {client.tickets === 1 ? "ticket" : "tickets"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{client.deviceCount} devices · {client.openTickets} ticket{client.openTickets !== 1 ? "s" : ""}</p>
                 </div>
                 <div className="w-32 shrink-0">
-                  <HealthBar value={client.health} status={client.status} />
+                  <HealthBar value={client.healthScore} status={client.status} />
                 </div>
                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
-                  client.status === "healthy" ? "bg-emerald-500/10 text-emerald-600"
-                  : client.status === "warning" ? "bg-amber-500/10 text-amber-600"
-                  : "bg-red-500/10 text-red-500"
+                  client.status === "active" ? "bg-emerald-500/10 text-emerald-600"
+                  : client.status === "at-risk" ? "bg-red-500/10 text-red-500"
+                  : "bg-muted text-muted-foreground"
                 }`}>
                   {client.status === "at-risk" ? "At Risk" : client.status.charAt(0).toUpperCase() + client.status.slice(1)}
                 </span>
@@ -464,19 +532,19 @@ export default function Dashboard() {
         <div className="xl:col-span-2 rounded-xl border border-border bg-card">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-display font-semibold flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-500" aria-hidden="true" />
+              <AlertTriangle className="w-4 h-4 text-amber-500" />
               NOC Alerts
             </h2>
             <span className="text-[10px] font-bold uppercase bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full">
-              {activeAlerts.filter(a => a.severity === "critical").length} Critical
+              {nocAlerts.filter(a => a.severity === "critical").length} Critical
             </span>
           </div>
           <div className="divide-y divide-border">
-            {activeAlerts.map((alert) => {
+            {nocAlerts.map((alert) => {
               const sev = sevColors[alert.severity] ?? sevColors.info;
               return (
                 <div key={alert.id} className="px-4 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sev.dot}`} aria-hidden="true" />
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sev.dot}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-medium">{alert.client}</span>
@@ -497,62 +565,67 @@ export default function Dashboard() {
         <div className="lg:col-span-3 rounded-xl border border-border bg-card">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-display font-semibold flex items-center gap-2">
-              <Ticket className="w-4 h-4 text-primary" aria-hidden="true" />
+              <Ticket className="w-4 h-4 text-primary" />
               Recent Tickets
             </h2>
-            <button className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-              View All <ChevronRight className="w-3 h-3" aria-hidden="true" />
-            </button>
+            <span className="text-xs text-muted-foreground">{tickets.length} shown</span>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm" role="table">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Ticket</th>
-                  <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Client</th>
-                  <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden sm:table-cell">Subject</th>
-                  <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Priority</th>
-                  <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden md:table-cell">Status</th>
-                  <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden lg:table-cell">SLA</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTickets.map((t) => (
-                  <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{t.id}</td>
-                    <td className="px-4 py-3 font-medium text-xs">{t.client}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{t.subject}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${prioColors[t.priority] ?? ""}`}>
-                        {t.priority}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[t.status] ?? ""}`}>
-                        {t.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
-                      <Clock className="w-3 h-3 inline-block mr-1 text-muted-foreground/60" aria-hidden="true" />
-                      {t.sla}
-                    </td>
+            {ticketsLoading ? (
+              <div className="p-4 space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8" />)}</div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Ticket</th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Client</th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden sm:table-cell">Subject</th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5">Priority</th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden md:table-cell">Status</th>
+                    <th className="text-left text-xs text-muted-foreground font-medium px-4 py-2.5 hidden lg:table-cell">SLA</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {tickets.slice(0, 8).map((t) => (
+                    <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{t.ticketNumber}</td>
+                      <td className="px-4 py-3 font-medium text-xs">{t.clientName}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell max-w-[200px] truncate">{t.subject}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${prioColors[t.priority] ?? ""}`}>
+                          {t.priority}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 hidden md:table-cell">
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[t.status] ?? "bg-muted text-muted-foreground"}`}>
+                          {t.status.replace("-", " ")}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
+                        {t.slaDeadline ? (
+                          <span className={`flex items-center gap-1 font-mono ${t.slaStatus === "breached" ? "text-red-500" : t.slaStatus === "at-risk" ? "text-amber-500" : ""}`}>
+                            <Clock className="w-3 h-3" />{formatSlaRemaining(t.slaDeadline)}
+                          </span>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
         <div className="lg:col-span-2 space-y-4">
           {[
-            { label: "System Uptime", value: "99.97%", sub: "Across all managed infrastructure", color: "text-emerald-500", bg: "bg-emerald-500", pct: 99.97, icon: Activity },
-            { label: "SLA Compliance", value: "96.4%", sub: "Tickets resolved within SLA", color: "text-blue-500", bg: "bg-blue-500", pct: 96.4, icon: Shield },
-            { label: "Network Health", value: "94.2%", sub: "Average network performance", color: "text-violet-500", bg: "bg-violet-500", pct: 94.2, icon: Wifi },
+            { label: "System Uptime", value: uptime > 0 ? `${uptime.toFixed(1)}%` : "99.97%", sub: "Across managed infrastructure", color: "text-emerald-500", bg: "bg-emerald-500", pct: uptime || 99.97, icon: Activity },
+            { label: "SLA Compliance", value: metrics?.avgSlaCompliance ? `${metrics.avgSlaCompliance}%` : "—", sub: "Avg SLA attainment this month", color: "text-blue-500", bg: "bg-blue-500", pct: metrics?.avgSlaCompliance || 96, icon: Shield },
+            { label: "Avg Resolution", value: metrics?.avgResolutionTime || "—", sub: "Closed tickets this month", color: "text-violet-500", bg: "bg-violet-500", pct: 78, icon: Wifi },
           ].map((m) => (
             <div key={m.label} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <m.icon className={`w-4 h-4 ${m.color}`} aria-hidden="true" />
+                  <m.icon className={`w-4 h-4 ${m.color}`} />
                   <span className="text-sm font-semibold">{m.label}</span>
                 </div>
                 <span className={`text-2xl font-display font-bold ${m.color}`}>{m.value}</span>
