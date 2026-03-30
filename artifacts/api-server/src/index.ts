@@ -10,6 +10,7 @@ import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
+import { seedPlatformData } from "./lib/seed-platform";
 
 failFastOnInvalidConfig();
 
@@ -41,6 +42,10 @@ ensureAlloyTables()
     process.exit(1);
   });
 startScheduledJobs();
+
+seedPlatformData().catch(err => {
+  logger.warn({ err }, "[seed-platform] Seed failed (non-fatal)");
+});
 
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");

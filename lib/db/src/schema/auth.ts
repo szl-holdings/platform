@@ -9,6 +9,20 @@ export const usersTable = pgTable("users", {
   displayName: text("display_name").notNull(),
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
+  platformRole: text("platform_role", { enum: [
+    "anonymous_visitor",
+    "founder_admin",
+    "platform_admin",
+    "operator",
+    "analyst",
+    "executive_viewer",
+    "ops_manager",
+    "sales_delivery_user",
+    "maritime_ops_user",
+    "service_coordinator",
+    "pilot_customer_user",
+  ] }),
+  team: text("team"),
   isActive: boolean("is_active").notNull().default(true),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -69,6 +83,70 @@ export type Role = typeof rolesTable.$inferSelect;
 export const insertSessionSchema = createInsertSchema(sessionsTable).omit({ id: true, createdAt: true });
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type Session = typeof sessionsTable.$inferSelect;
+
+export type PlatformRole =
+  | "anonymous_visitor"
+  | "founder_admin"
+  | "platform_admin"
+  | "operator"
+  | "analyst"
+  | "executive_viewer"
+  | "ops_manager"
+  | "sales_delivery_user"
+  | "maritime_ops_user"
+  | "service_coordinator"
+  | "pilot_customer_user";
+
+export const PLATFORM_ROLES: PlatformRole[] = [
+  "anonymous_visitor",
+  "founder_admin",
+  "platform_admin",
+  "operator",
+  "analyst",
+  "executive_viewer",
+  "ops_manager",
+  "sales_delivery_user",
+  "maritime_ops_user",
+  "service_coordinator",
+  "pilot_customer_user",
+];
+
+export const PLATFORM_ROLE_HIERARCHY: Record<PlatformRole, number> = {
+  anonymous_visitor: 0,
+  pilot_customer_user: 1,
+  executive_viewer: 2,
+  analyst: 3,
+  service_coordinator: 4,
+  sales_delivery_user: 4,
+  maritime_ops_user: 4,
+  operator: 5,
+  ops_manager: 6,
+  platform_admin: 8,
+  founder_admin: 10,
+};
+
+export const PLATFORM_READ_ONLY_ROLES: PlatformRole[] = ["executive_viewer", "pilot_customer_user"];
+export const PLATFORM_WRITE_ROLES: PlatformRole[] = ["operator", "ops_manager", "service_coordinator", "sales_delivery_user", "maritime_ops_user", "platform_admin", "founder_admin"];
+export const PLATFORM_ADMIN_ROLES: PlatformRole[] = ["platform_admin", "founder_admin"];
+
+export function hasPlatformRole(userRole: PlatformRole, requiredRole: PlatformRole): boolean {
+  return PLATFORM_ROLE_HIERARCHY[userRole] >= PLATFORM_ROLE_HIERARCHY[requiredRole];
+}
+
+export function isPlatformAdmin(userRole: PlatformRole | undefined): boolean {
+  if (!userRole) return false;
+  return PLATFORM_ADMIN_ROLES.includes(userRole);
+}
+
+export function canWritePlatform(userRole: PlatformRole | undefined): boolean {
+  if (!userRole) return false;
+  return PLATFORM_WRITE_ROLES.includes(userRole);
+}
+
+export function isReadOnlyPlatformUser(userRole: PlatformRole | undefined): boolean {
+  if (!userRole) return false;
+  return PLATFORM_READ_ONLY_ROLES.includes(userRole);
+}
 
 export type RoleName =
   | "super_admin"

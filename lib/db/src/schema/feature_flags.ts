@@ -10,6 +10,10 @@ export const featureFlagsTable = pgTable("feature_flags", {
   isEnabled: boolean("is_enabled").notNull().default(false),
   rolloutPercentage: integer("rollout_percentage").notNull().default(0),
   conditions: jsonb("conditions"),
+  scope: text("scope", { enum: ["global", "org", "user", "role", "product"] }).notNull().default("global"),
+  targetingJson: jsonb("targeting_json"),
+  product: text("product"),
+  requiredPlatformRole: text("required_platform_role"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

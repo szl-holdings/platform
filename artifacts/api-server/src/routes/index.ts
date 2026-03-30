@@ -41,6 +41,8 @@ import agentOsRouter from "./agent-os";
 import cmsRouter from "./cms";
 import doctrineRouter from "./doctrine";
 import alloyRouter from "./alloy";
+import lytePlatformRouter from "./lyte-platform";
+import vesselsPlatformRouter from "./vessels-platform";
 
 const router: IRouter = Router();
 
@@ -140,5 +142,11 @@ router.use(doctrineRouter);
 
 router.use("/alloy", readLimiter);
 router.use(alloyRouter);
+
+router.use("/lyte/platform", readLimiter);
+router.use(lytePlatformRouter);
+
+router.use("/vessels/platform", readLimiter);
+router.use(vesselsPlatformRouter);
 
 export default router;
