@@ -1,4 +1,4 @@
-import { colors, typography, effects } from "./tokens";
+import { colors, effects, motion } from "./tokens";
 
 export interface BrandTheme {
   name: string;
@@ -8,8 +8,9 @@ export interface BrandTheme {
     primaryLight: string;
     primaryDark: string;
     primaryMuted: string;
-    accent: string;
-    accentLight: string;
+    primarySubtle: string;
+    secondary: string;
+    secondaryLight: string;
     surface: string;
     surfaceHover: string;
   };
@@ -34,49 +35,20 @@ export const szlHoldingsTheme: BrandTheme = {
   name: "SZL Holdings",
   slug: "szl-holdings",
   colors: {
-    primary: "hsl(250 90% 65%)",
-    primaryLight: "hsl(250 90% 75%)",
-    primaryDark: "hsl(250 90% 55%)",
-    primaryMuted: "hsla(250 90% 65% / 0.15)",
-    accent: "hsl(280 80% 65%)",
-    accentLight: "hsl(280 80% 75%)",
-    surface: "hsla(250 30% 15% / 0.4)",
-    surfaceHover: "hsla(250 30% 18% / 0.5)",
+    primary: colors.laneAccents.szl.primary,
+    primaryLight: "hsl(220 16% 74%)",
+    primaryDark: "hsl(220 16% 50%)",
+    primaryMuted: colors.laneAccents.szl.muted,
+    primarySubtle: "hsla(220 16% 62% / 0.05)",
+    secondary: colors.laneAccents.szl.secondary,
+    secondaryLight: "hsl(220 12% 60%)",
+    surface: "hsl(220 10% 10%)",
+    surfaceHover: "hsl(220 10% 13%)",
   },
   gradient: {
-    primary: "linear-gradient(135deg, hsl(250 90% 65%), hsl(280 80% 65%))",
-    subtle: "linear-gradient(135deg, hsla(250 90% 65% / 0.1), hsla(280 80% 65% / 0.1))",
-    text: "linear-gradient(135deg, hsl(250 90% 75%), hsl(280 80% 75%))",
-  },
-  typography: {
-    displayWeight: "800",
-    headingWeight: "700",
-    bodyWeight: "400",
-  },
-  motion: {
-    duration: "0.3s",
-    easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-    stagger: 0.06,
-  },
-};
-
-export const vesselsTheme: BrandTheme = {
-  name: "Vessels Maritime Intelligence",
-  slug: "vessels",
-  colors: {
-    primary: "hsl(200 85% 50%)",
-    primaryLight: "hsl(200 85% 65%)",
-    primaryDark: "hsl(200 85% 40%)",
-    primaryMuted: "hsla(200 85% 50% / 0.15)",
-    accent: "hsl(170 70% 50%)",
-    accentLight: "hsl(170 70% 65%)",
-    surface: "hsla(210 40% 12% / 0.5)",
-    surfaceHover: "hsla(210 40% 15% / 0.6)",
-  },
-  gradient: {
-    primary: "linear-gradient(135deg, hsl(200 85% 50%), hsl(170 70% 50%))",
-    subtle: "linear-gradient(135deg, hsla(200 85% 50% / 0.1), hsla(170 70% 50% / 0.1))",
-    text: "linear-gradient(135deg, hsl(200 85% 65%), hsl(170 70% 65%))",
+    primary: "linear-gradient(135deg, hsl(220 16% 62%), hsl(220 12% 48%))",
+    subtle: "linear-gradient(135deg, hsla(220 16% 62% / 0.08), hsla(220 12% 48% / 0.08))",
+    text: "linear-gradient(135deg, hsl(220 16% 78%), hsl(220 12% 64%))",
   },
   typography: {
     displayWeight: "700",
@@ -84,29 +56,30 @@ export const vesselsTheme: BrandTheme = {
     bodyWeight: "400",
   },
   motion: {
-    duration: "0.35s",
-    easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+    duration: "0.22s",
+    easing: motion.easing.snappy,
     stagger: 0.05,
   },
 };
 
-export const incaTheme: BrandTheme = {
-  name: "INCA AI Research",
-  slug: "inca",
+export const vesselsTheme: BrandTheme = {
+  name: "Vessels Maritime Intelligence",
+  slug: "vessels",
   colors: {
-    primary: "hsl(160 80% 45%)",
-    primaryLight: "hsl(160 80% 60%)",
-    primaryDark: "hsl(160 80% 35%)",
-    primaryMuted: "hsla(160 80% 45% / 0.15)",
-    accent: "hsl(190 90% 55%)",
-    accentLight: "hsl(190 90% 70%)",
-    surface: "hsla(170 30% 10% / 0.5)",
-    surfaceHover: "hsla(170 30% 13% / 0.6)",
+    primary: colors.laneAccents.vessels.primary,
+    primaryLight: "hsl(208 72% 56%)",
+    primaryDark: "hsl(208 72% 34%)",
+    primaryMuted: colors.laneAccents.vessels.muted,
+    primarySubtle: "hsla(208 72% 44% / 0.05)",
+    secondary: colors.laneAccents.vessels.secondary,
+    secondaryLight: "hsl(196 60% 64%)",
+    surface: "hsl(212 12% 9%)",
+    surfaceHover: "hsl(212 12% 12%)",
   },
   gradient: {
-    primary: "linear-gradient(135deg, hsl(160 80% 45%), hsl(190 90% 55%))",
-    subtle: "linear-gradient(135deg, hsla(160 80% 45% / 0.1), hsla(190 90% 55% / 0.1))",
-    text: "linear-gradient(135deg, hsl(160 80% 60%), hsl(190 90% 70%))",
+    primary: "linear-gradient(135deg, hsl(208 72% 44%), hsl(196 60% 52%))",
+    subtle: "linear-gradient(135deg, hsla(208 72% 44% / 0.08), hsla(196 60% 52% / 0.08))",
+    text: "linear-gradient(135deg, hsl(208 72% 60%), hsl(196 60% 68%))",
   },
   typography: {
     displayWeight: "700",
@@ -115,7 +88,38 @@ export const incaTheme: BrandTheme = {
   },
   motion: {
     duration: "0.25s",
-    easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+    easing: motion.easing.default,
+    stagger: 0.05,
+  },
+};
+
+export const incaTheme: BrandTheme = {
+  name: "INCA AI Research",
+  slug: "inca",
+  colors: {
+    primary: colors.laneAccents.inca.primary,
+    primaryLight: "hsl(172 56% 54%)",
+    primaryDark: "hsl(172 56% 32%)",
+    primaryMuted: colors.laneAccents.inca.muted,
+    primarySubtle: "hsla(172 56% 42% / 0.05)",
+    secondary: colors.laneAccents.inca.secondary,
+    secondaryLight: "hsl(186 64% 60%)",
+    surface: "hsl(176 10% 8%)",
+    surfaceHover: "hsl(176 10% 11%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(172 56% 42%), hsl(186 64% 48%))",
+    subtle: "linear-gradient(135deg, hsla(172 56% 42% / 0.08), hsla(186 64% 48% / 0.08))",
+    text: "linear-gradient(135deg, hsl(172 56% 58%), hsl(186 64% 64%))",
+  },
+  typography: {
+    displayWeight: "700",
+    headingWeight: "600",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.20s",
+    easing: motion.easing.snappy,
     stagger: 0.04,
   },
 };
@@ -124,29 +128,247 @@ export const carlotaJoTheme: BrandTheme = {
   name: "Carlota Jo Advisory",
   slug: "carlota-jo",
   colors: {
-    primary: "hsl(340 65% 55%)",
-    primaryLight: "hsl(340 65% 70%)",
-    primaryDark: "hsl(340 65% 45%)",
-    primaryMuted: "hsla(340 65% 55% / 0.15)",
-    accent: "hsl(30 80% 60%)",
-    accentLight: "hsl(30 80% 75%)",
-    surface: "hsla(340 20% 12% / 0.5)",
-    surfaceHover: "hsla(340 20% 15% / 0.6)",
+    primary: colors.laneAccents.carlotaJo.primary,
+    primaryLight: "hsl(24 54% 64%)",
+    primaryDark: "hsl(24 54% 40%)",
+    primaryMuted: colors.laneAccents.carlotaJo.muted,
+    primarySubtle: "hsla(24 54% 52% / 0.05)",
+    secondary: colors.laneAccents.carlotaJo.secondary,
+    secondaryLight: "hsl(10 48% 60%)",
+    surface: "hsl(18 8% 9%)",
+    surfaceHover: "hsl(18 8% 12%)",
   },
   gradient: {
-    primary: "linear-gradient(135deg, hsl(340 65% 55%), hsl(30 80% 60%))",
-    subtle: "linear-gradient(135deg, hsla(340 65% 55% / 0.1), hsla(30 80% 60% / 0.1))",
-    text: "linear-gradient(135deg, hsl(340 65% 70%), hsl(30 80% 75%))",
+    primary: "linear-gradient(135deg, hsl(24 54% 52%), hsl(10 48% 48%))",
+    subtle: "linear-gradient(135deg, hsla(24 54% 52% / 0.08), hsla(10 48% 48% / 0.08))",
+    text: "linear-gradient(135deg, hsl(24 54% 68%), hsl(10 48% 64%))",
   },
   typography: {
     displayWeight: "600",
     headingWeight: "500",
-    bodyWeight: "300",
+    bodyWeight: "400",
   },
   motion: {
-    duration: "0.4s",
-    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-    stagger: 0.08,
+    duration: "0.28s",
+    easing: motion.easing.smooth,
+    stagger: 0.07,
+  },
+};
+
+export const stephenTheme: BrandTheme = {
+  name: "Stephen Lutar",
+  slug: "stephen",
+  colors: {
+    primary: colors.laneAccents.stephen.primary,
+    primaryLight: "hsl(264 56% 72%)",
+    primaryDark: "hsl(264 56% 48%)",
+    primaryMuted: colors.laneAccents.stephen.muted,
+    primarySubtle: "hsla(264 56% 60% / 0.05)",
+    secondary: colors.laneAccents.stephen.secondary,
+    secondaryLight: "hsl(280 44% 68%)",
+    surface: "hsl(260 8% 9%)",
+    surfaceHover: "hsl(260 8% 12%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(264 56% 60%), hsl(280 44% 56%))",
+    subtle: "linear-gradient(135deg, hsla(264 56% 60% / 0.08), hsla(280 44% 56% / 0.08))",
+    text: "linear-gradient(135deg, hsl(264 56% 76%), hsl(280 44% 72%))",
+  },
+  typography: {
+    displayWeight: "600",
+    headingWeight: "500",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.25s",
+    easing: motion.easing.smooth,
+    stagger: 0.06,
+  },
+};
+
+export const firestormTheme: BrandTheme = {
+  name: "Firestorm Security",
+  slug: "firestorm",
+  colors: {
+    primary: colors.laneAccents.firestorm.primary,
+    primaryLight: "hsl(36 84% 64%)",
+    primaryDark: "hsl(36 84% 40%)",
+    primaryMuted: colors.laneAccents.firestorm.muted,
+    primarySubtle: "hsla(36 84% 52% / 0.05)",
+    secondary: colors.laneAccents.firestorm.secondary,
+    secondaryLight: "hsl(22 76% 60%)",
+    surface: "hsl(24 8% 8%)",
+    surfaceHover: "hsl(24 8% 11%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(36 84% 52%), hsl(22 76% 48%))",
+    subtle: "linear-gradient(135deg, hsla(36 84% 52% / 0.08), hsla(22 76% 48% / 0.08))",
+    text: "linear-gradient(135deg, hsl(36 84% 68%), hsl(22 76% 64%))",
+  },
+  typography: {
+    displayWeight: "700",
+    headingWeight: "600",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.18s",
+    easing: motion.easing.snappy,
+    stagger: 0.04,
+  },
+};
+
+export const dreamscapeTheme: BrandTheme = {
+  name: "Dreamscape Creative",
+  slug: "dreamscape",
+  colors: {
+    primary: colors.laneAccents.dreamscape.primary,
+    primaryLight: "hsl(280 52% 70%)",
+    primaryDark: "hsl(280 52% 46%)",
+    primaryMuted: colors.laneAccents.dreamscape.muted,
+    primarySubtle: "hsla(280 52% 58% / 0.05)",
+    secondary: colors.laneAccents.dreamscape.secondary,
+    secondaryLight: "hsl(300 40% 64%)",
+    surface: "hsl(276 8% 9%)",
+    surfaceHover: "hsl(276 8% 12%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(280 52% 58%), hsl(300 40% 52%))",
+    subtle: "linear-gradient(135deg, hsla(280 52% 58% / 0.08), hsla(300 40% 52% / 0.08))",
+    text: "linear-gradient(135deg, hsl(280 52% 74%), hsl(300 40% 68%))",
+  },
+  typography: {
+    displayWeight: "600",
+    headingWeight: "500",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.28s",
+    easing: motion.easing.smooth,
+    stagger: 0.06,
+  },
+};
+
+export const terraTheme: BrandTheme = {
+  name: "Terra Real Estate",
+  slug: "terra",
+  colors: {
+    primary: colors.laneAccents.terra.primary,
+    primaryLight: "hsl(26 48% 56%)",
+    primaryDark: "hsl(26 48% 34%)",
+    primaryMuted: colors.laneAccents.terra.muted,
+    primarySubtle: "hsla(26 48% 44% / 0.05)",
+    secondary: colors.laneAccents.terra.secondary,
+    secondaryLight: "hsl(14 40% 52%)",
+    surface: "hsl(20 7% 8%)",
+    surfaceHover: "hsl(20 7% 11%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(26 48% 44%), hsl(14 40% 40%))",
+    subtle: "linear-gradient(135deg, hsla(26 48% 44% / 0.08), hsla(14 40% 40% / 0.08))",
+    text: "linear-gradient(135deg, hsl(26 48% 60%), hsl(14 40% 56%))",
+  },
+  typography: {
+    displayWeight: "700",
+    headingWeight: "600",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.25s",
+    easing: motion.easing.default,
+    stagger: 0.05,
+  },
+};
+
+export const lyteTheme: BrandTheme = {
+  name: "Lyte Command Center",
+  slug: "lyte",
+  colors: {
+    primary: colors.laneAccents.lyte.primary,
+    primaryLight: "hsl(192 80% 58%)",
+    primaryDark: "hsl(192 80% 36%)",
+    primaryMuted: colors.laneAccents.lyte.muted,
+    primarySubtle: "hsla(192 80% 46% / 0.05)",
+    secondary: colors.laneAccents.lyte.secondary,
+    secondaryLight: "hsl(180 60% 56%)",
+    surface: "hsl(186 8% 8%)",
+    surfaceHover: "hsl(186 8% 11%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(192 80% 46%), hsl(180 60% 44%))",
+    subtle: "linear-gradient(135deg, hsla(192 80% 46% / 0.08), hsla(180 60% 44% / 0.08))",
+    text: "linear-gradient(135deg, hsl(192 80% 62%), hsl(180 60% 60%))",
+  },
+  typography: {
+    displayWeight: "700",
+    headingWeight: "600",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.20s",
+    easing: motion.easing.snappy,
+    stagger: 0.04,
+  },
+};
+
+export const mspTheme: BrandTheme = {
+  name: "MSP Command Center",
+  slug: "msp",
+  colors: {
+    primary: colors.laneAccents.msp.primary,
+    primaryLight: "hsl(218 72% 64%)",
+    primaryDark: "hsl(218 72% 40%)",
+    primaryMuted: colors.laneAccents.msp.muted,
+    primarySubtle: "hsla(218 72% 52% / 0.05)",
+    secondary: colors.laneAccents.msp.secondary,
+    secondaryLight: "hsl(204 60% 60%)",
+    surface: "hsl(214 10% 9%)",
+    surfaceHover: "hsl(214 10% 12%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(218 72% 52%), hsl(204 60% 48%))",
+    subtle: "linear-gradient(135deg, hsla(218 72% 52% / 0.08), hsla(204 60% 48% / 0.08))",
+    text: "linear-gradient(135deg, hsl(218 72% 68%), hsl(204 60% 64%))",
+  },
+  typography: {
+    displayWeight: "700",
+    headingWeight: "600",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.22s",
+    easing: motion.easing.snappy,
+    stagger: 0.05,
+  },
+};
+
+export const alloyTheme: BrandTheme = {
+  name: "Alloy Command",
+  slug: "alloy",
+  colors: {
+    primary: colors.laneAccents.alloy.primary,
+    primaryLight: "hsl(232 64% 70%)",
+    primaryDark: "hsl(232 64% 46%)",
+    primaryMuted: colors.laneAccents.alloy.muted,
+    primarySubtle: "hsla(232 64% 58% / 0.05)",
+    secondary: colors.laneAccents.alloy.secondary,
+    secondaryLight: "hsl(248 52% 74%)",
+    surface: "hsl(228 8% 9%)",
+    surfaceHover: "hsl(228 8% 12%)",
+  },
+  gradient: {
+    primary: "linear-gradient(135deg, hsl(232 64% 58%), hsl(248 52% 62%))",
+    subtle: "linear-gradient(135deg, hsla(232 64% 58% / 0.08), hsla(248 52% 62% / 0.08))",
+    text: "linear-gradient(135deg, hsl(232 64% 74%), hsl(248 52% 78%))",
+  },
+  typography: {
+    displayWeight: "700",
+    headingWeight: "600",
+    bodyWeight: "400",
+  },
+  motion: {
+    duration: "0.22s",
+    easing: motion.easing.snappy,
+    stagger: 0.05,
   },
 };
 
@@ -155,6 +377,13 @@ export const brandThemes = {
   vessels: vesselsTheme,
   inca: incaTheme,
   "carlota-jo": carlotaJoTheme,
+  stephen: stephenTheme,
+  firestorm: firestormTheme,
+  dreamscape: dreamscapeTheme,
+  terra: terraTheme,
+  lyte: lyteTheme,
+  msp: mspTheme,
+  alloy: alloyTheme,
 } as const;
 
 export type BrandSlug = keyof typeof brandThemes;
@@ -165,7 +394,7 @@ export function getBrandTheme(slug: BrandSlug): BrandTheme {
 
 export function getBrandGradientCSS(theme: BrandTheme): Record<string, string> {
   return {
-    background: theme.gradient.primary,
+    background: theme.gradient.text,
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     backgroundClip: "text",
@@ -175,8 +404,13 @@ export function getBrandGradientCSS(theme: BrandTheme): Record<string, string> {
 export function getBrandSurface(theme: BrandTheme): Record<string, string> {
   return {
     background: theme.colors.surface,
-    backdropFilter: effects.glassmorphism.backdropFilter,
     border: `1px solid ${theme.colors.primaryMuted}`,
     borderRadius: effects.borderRadius.lg,
+  };
+}
+
+export function getBrandAccentCSS(theme: BrandTheme): Record<string, string> {
+  return {
+    color: theme.colors.primary,
   };
 }
