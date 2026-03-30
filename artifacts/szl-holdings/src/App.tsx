@@ -151,6 +151,12 @@ function App() {
             <Route path="/investor">
               <Suspense fallback={<PageLoader />}><InvestorStory /></Suspense>
             </Route>
+            <Route path="/insights">
+              <Suspense fallback={<PageLoader />}><InsightsPage /></Suspense>
+            </Route>
+            <Route path="/insights/:slug">
+              <Suspense fallback={<PageLoader />}><InsightsArticlePage /></Suspense>
+            </Route>
             <Route path="/kpis">
               <RequireAuth><Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense></RequireAuth>
             </Route>

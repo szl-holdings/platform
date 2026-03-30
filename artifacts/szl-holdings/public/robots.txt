@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+Disallow: /app/
+Disallow: /admin
+Disallow: /kpis
+
 Sitemap: https://szlholdings.com/sitemap.xml

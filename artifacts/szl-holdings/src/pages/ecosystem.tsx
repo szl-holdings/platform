@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const brands = [
   {
@@ -71,9 +71,11 @@ const internal = [
 ];
 
 export default function EcosystemPage() {
-  useEffect(() => {
-    document.title = "Ecosystem — SZL Holdings";
-  }, []);
+  usePageMeta({
+    title: "Ecosystem — SZL Holdings",
+    description: "The full SZL Holdings ecosystem: Alloy, Beacon, Lyte, Vessels, Firestorm, INCA, Rosie, Carlota Jo, and Dreamscape. One operating philosophy. Multiple sovereign platforms.",
+    canonical: "https://szlholdings.com/ecosystem",
+  });
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>

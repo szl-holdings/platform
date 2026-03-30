@@ -14,7 +14,7 @@ import {
 } from "@workspace/db";
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
-import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
@@ -29,7 +29,7 @@ router.get("/lyte/workspaces", authMiddleware({ required: false }), async (req, 
   }
 });
 
-router.post("/lyte/workspaces", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/workspaces", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteWorkspacesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -60,7 +60,7 @@ router.get("/lyte/signals", authMiddleware({ required: false }), async (req, res
   }
 });
 
-router.post("/lyte/signals", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/signals", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteSignalsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -69,7 +69,7 @@ router.post("/lyte/signals", authMiddleware({ required: false }), async (req, re
   }
 });
 
-router.patch("/lyte/signals/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/signals/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSignalsTable).set(req.body).where(eq(lyteSignalsTable.id, id)).returning();
@@ -80,7 +80,7 @@ router.patch("/lyte/signals/:id", authMiddleware({ required: false }), async (re
   }
 });
 
-router.delete("/lyte/signals/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/lyte/signals/:id", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteSignalsTable).where(eq(lyteSignalsTable.id, id)).returning();
@@ -102,7 +102,7 @@ router.get("/lyte/command-cards", authMiddleware({ required: false }), async (re
   }
 });
 
-router.post("/lyte/command-cards", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/command-cards", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteCommandCardsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -111,7 +111,7 @@ router.post("/lyte/command-cards", authMiddleware({ required: false }), async (r
   }
 });
 
-router.patch("/lyte/command-cards/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/command-cards/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteCommandCardsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteCommandCardsTable.id, id)).returning();
@@ -122,7 +122,7 @@ router.patch("/lyte/command-cards/:id", authMiddleware({ required: false }), asy
   }
 });
 
-router.delete("/lyte/command-cards/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/lyte/command-cards/:id", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteCommandCardsTable).where(eq(lyteCommandCardsTable.id, id)).returning();
@@ -144,7 +144,7 @@ router.get("/lyte/incidents", authMiddleware({ required: false }), async (req, r
   }
 });
 
-router.post("/lyte/incidents", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/incidents", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteIncidentsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -153,7 +153,7 @@ router.post("/lyte/incidents", authMiddleware({ required: false }), async (req, 
   }
 });
 
-router.patch("/lyte/incidents/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/incidents/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteIncidentsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteIncidentsTable.id, id)).returning();
@@ -164,7 +164,7 @@ router.patch("/lyte/incidents/:id", authMiddleware({ required: false }), async (
   }
 });
 
-router.delete("/lyte/incidents/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/lyte/incidents/:id", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteIncidentsTable).where(eq(lyteIncidentsTable.id, id)).returning();
@@ -186,7 +186,7 @@ router.get("/lyte/playbooks", authMiddleware({ required: false }), async (req, r
   }
 });
 
-router.post("/lyte/playbooks", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/playbooks", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lytePlaybooksTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -206,7 +206,7 @@ router.get("/lyte/playbooks/:id", authMiddleware({ required: false }), async (re
   }
 });
 
-router.patch("/lyte/playbooks/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/playbooks/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lytePlaybooksTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lytePlaybooksTable.id, id)).returning();
@@ -217,7 +217,7 @@ router.patch("/lyte/playbooks/:id", authMiddleware({ required: false }), async (
   }
 });
 
-router.delete("/lyte/playbooks/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/lyte/playbooks/:id", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lytePlaybooksTable).where(eq(lytePlaybooksTable.id, id)).returning();
@@ -239,7 +239,7 @@ router.get("/lyte/recommendations", authMiddleware({ required: false }), async (
   }
 });
 
-router.post("/lyte/recommendations", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/recommendations", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteRecommendationsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -248,7 +248,7 @@ router.post("/lyte/recommendations", authMiddleware({ required: false }), async 
   }
 });
 
-router.patch("/lyte/recommendations/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/recommendations/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteRecommendationsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteRecommendationsTable.id, id)).returning();
@@ -259,7 +259,7 @@ router.patch("/lyte/recommendations/:id", authMiddleware({ required: false }), a
   }
 });
 
-router.delete("/lyte/recommendations/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/lyte/recommendations/:id", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteRecommendationsTable).where(eq(lyteRecommendationsTable.id, id)).returning();
@@ -316,14 +316,14 @@ router.get("/lyte/actions", authMiddleware({ required: false }), async (req, res
   } catch (err) { handleRouteError(res, err, "Failed to list actions"); }
 });
 
-router.post("/lyte/actions", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/actions", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteActionsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create action"); }
 });
 
-router.patch("/lyte/actions/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/actions/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const current = await db.select().from(lyteActionsTable).where(eq(lyteActionsTable.id, id)).limit(1);
@@ -357,14 +357,14 @@ router.get("/lyte/views", authMiddleware({ required: false }), async (req, res) 
   } catch (err) { handleRouteError(res, err, "Failed to list views"); }
 });
 
-router.post("/lyte/views", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/views", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteSavedViewsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create view"); }
 });
 
-router.patch("/lyte/views/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/views/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSavedViewsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteSavedViewsTable.id, id)).returning();
@@ -373,7 +373,7 @@ router.patch("/lyte/views/:id", authMiddleware({ required: false }), async (req,
   } catch (err) { handleRouteError(res, err, "Failed to update view"); }
 });
 
-router.delete("/lyte/views/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/lyte/views/:id", authMiddleware(), requireRole("ops", "admin", "super_admin"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.delete(lyteSavedViewsTable).where(eq(lyteSavedViewsTable.id, id)).returning();
@@ -393,14 +393,14 @@ router.get("/lyte/readiness", authMiddleware({ required: false }), async (req, r
   } catch (err) { handleRouteError(res, err, "Failed to list readiness items"); }
 });
 
-router.post("/lyte/readiness", authMiddleware({ required: false }), async (req, res) => {
+router.post("/lyte/readiness", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteReadinessItemsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create readiness item"); }
 });
 
-router.patch("/lyte/readiness/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/lyte/readiness/:id", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteReadinessItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(lyteReadinessItemsTable.id, id)).returning();

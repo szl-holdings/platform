@@ -188,3 +188,114 @@ export const ROLE_HIERARCHY: Record<RoleName, RoleName[]> = {
 export const ROLE_ALIASES: Record<string, RoleName> = {
   public: "viewer",
 };
+
+/**
+ * Canonical payload roles (from task spec).
+ * These are the authoritative role identifiers used in new features and external interfaces.
+ */
+export type CanonicalRole =
+  | "anonymous_visitor"
+  | "founder_admin"
+  | "platform_admin"
+  | "operator"
+  | "analyst"
+  | "executive_viewer"
+  | "ops_manager"
+  | "sales_delivery_user"
+  | "maritime_ops_user"
+  | "real_estate_ops_user"
+  | "service_coordinator"
+  | "pilot_customer_user";
+
+/**
+ * Mapping from legacy RoleName values to canonical payload roles.
+ * Multiple legacy roles may map to the same canonical role.
+ * Use toCanonicalRole() to resolve a user's effective canonical role.
+ */
+export const LEGACY_TO_CANONICAL: Record<RoleName, CanonicalRole> = {
+  super_admin:    "founder_admin",
+  admin:          "platform_admin",
+  exec:           "executive_viewer",
+  ops:            "ops_manager",
+  operator:       "operator",
+  analyst:        "analyst",
+  compliance:     "analyst",
+  maintenance:    "ops_manager",
+  editor:         "platform_admin",
+  member:         "operator",
+  seller:         "sales_delivery_user",
+  client:         "pilot_customer_user",
+  client_viewer:  "executive_viewer",
+  creative_user:  "service_coordinator",
+  authenticated:  "operator",
+  viewer:         "anonymous_visitor",
+};
+
+/**
+ * Mapping from canonical role back to the closest legacy RoleName.
+ * Used when creating new users via the canonical interface.
+ */
+export const CANONICAL_TO_LEGACY: Record<CanonicalRole, RoleName> = {
+  anonymous_visitor:      "viewer",
+  founder_admin:          "super_admin",
+  platform_admin:         "admin",
+  operator:               "operator",
+  analyst:                "analyst",
+  executive_viewer:       "exec",
+  ops_manager:            "ops",
+  sales_delivery_user:    "seller",
+  maritime_ops_user:      "ops",
+  real_estate_ops_user:   "ops",
+  service_coordinator:    "creative_user",
+  pilot_customer_user:    "client",
+};
+
+/**
+ * Returns the highest-privilege canonical role for a set of legacy role names.
+ */
+export function toCanonicalRole(roles: RoleName[]): CanonicalRole {
+  const canonicalPriority: CanonicalRole[] = [
+    "founder_admin",
+    "platform_admin",
+    "ops_manager",
+    "operator",
+    "analyst",
+    "executive_viewer",
+    "sales_delivery_user",
+    "maritime_ops_user",
+    "real_estate_ops_user",
+    "service_coordinator",
+    "pilot_customer_user",
+    "anonymous_visitor",
+  ];
+  const mapped = roles.map((r) => LEGACY_TO_CANONICAL[r] ?? "anonymous_visitor");
+  for (const canonical of canonicalPriority) {
+    if (mapped.includes(canonical)) return canonical;
+  }
+  return "anonymous_visitor";
+}
+
+/**
+ * Returns true if the given role set has the executive_viewer canonical role
+ * and NOT a higher-privilege canonical role. Used to enforce read-only access.
+ */
+export function isExclusivelyExecutiveViewer(roles: RoleName[]): boolean {
+  const canonical = toCanonicalRole(roles);
+  return canonical === "executive_viewer";
+}
+
+/**
+ * Read-only canonical roles — these roles cannot perform write operations.
+ */
+export const READ_ONLY_CANONICAL_ROLES = new Set<CanonicalRole>([
+  "executive_viewer",
+  "anonymous_visitor",
+]);
+
+/**
+ * Returns true if the set of legacy roles maps to a read-only canonical role.
+ */
+export function isReadOnlyRole(roles: RoleName[]): boolean {
+  const canonical = toCanonicalRole(roles);
+  return READ_ONLY_CANONICAL_ROLES.has(canonical);
+}

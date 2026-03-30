@@ -7,8 +7,9 @@ import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { PrivateAppGuard } from "@workspace/shared-ui";
 import { TerraLayout } from "@/components/terra-layout";
-import { Building2, Activity, Flame, Home, UserCheck, Users } from "lucide-react";
+import { Building2, Activity, Flame, Home, UserCheck } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
@@ -82,6 +83,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(terraCommands);
 
   return (
+    <PrivateAppGuard appName="Terra" accentColor="#a07848">
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#a07848">
@@ -118,6 +120,7 @@ function App() {
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>
+    </PrivateAppGuard>
   );
 }
 

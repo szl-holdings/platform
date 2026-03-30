@@ -8,6 +8,7 @@ import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { PrivateAppGuard } from "@workspace/shared-ui";
 import { Zap, Inbox, CheckSquare, Users, AlertOctagon } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -74,6 +75,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(lyteCommands);
 
   return (
+    <PrivateAppGuard appName="Lyte" accentColor="#f59e0b">
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor="#f59e0b">
@@ -110,6 +112,7 @@ function App() {
       </WouterRouter>
       <AgentCopilot config={beaconConfig} />
     </QueryClientProvider>
+    </PrivateAppGuard>
   );
 }
 

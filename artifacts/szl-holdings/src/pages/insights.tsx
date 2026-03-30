@@ -5,6 +5,7 @@ import { ArrowRight, Clock, Calendar, Tag, Rss, ChevronRight } from "lucide-reac
 import { insights, CATEGORIES, getInsightsByCategory } from "@/data/insights";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const CATEGORY_COLORS: Record<string, string> = {
   "Annual Letter": "text-amber-600 bg-amber-50 border-amber-200",
@@ -17,6 +18,12 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function InsightsPage() {
+  usePageMeta({
+    title: "Insights — SZL Holdings",
+    description: "Analysis, perspectives, and annual letters from SZL Holdings — covering AI/ML, cybersecurity, maritime intelligence, real estate, operations, and creative tech.",
+    canonical: "https://szlholdings.com/insights",
+  });
+
   const [activeCategory, setActiveCategory] = useState("All");
   const [, navigate] = useLocation();
 

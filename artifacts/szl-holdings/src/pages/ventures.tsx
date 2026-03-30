@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const VENTURES = [
   {
@@ -40,9 +40,11 @@ const VENTURES = [
 ];
 
 export default function VenturesPage() {
-  useEffect(() => {
-    document.title = "Ventures | SZL Holdings";
-  }, []);
+  usePageMeta({
+    title: "Ventures — SZL Holdings",
+    description: "SZL Holdings portfolio: sovereign platforms built for operational complexity — Alloy, Lyte, Vessels, Firestorm, INCA, Rosie, Dreamscape, and Carlota Jo.",
+    canonical: "https://szlholdings.com/ventures",
+  });
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>

@@ -6,58 +6,73 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://szlholdings.com/corporate</loc>
+    <loc>https://szlholdings.com/ecosystem</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://szlholdings.com/spectrum</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
+    <loc>https://szlholdings.com/ventures</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://szlholdings.com/changelog</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://szlholdings.com/roadmap</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://szlholdings.com/portfolio</loc>
+    <loc>https://szlholdings.com/alloy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://szlholdings.com/newsroom</loc>
+    <loc>https://szlholdings.com/lyte</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://szlholdings.com/vessels</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://szlholdings.com/terra</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://szlholdings.com/carlota-jo</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://szlholdings.com/founder</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://szlholdings.com/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://szlholdings.com/insights</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://szlholdings.com/thesis</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://szlholdings.com/ir</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://szlholdings.com/ecosystem</loc>
+    <loc>https://szlholdings.com/investor</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://szlholdings.com/ma-tracker</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://szlholdings.com/trust</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://szlholdings.com/observability</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://szlholdings.com/legal/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://szlholdings.com/legal/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

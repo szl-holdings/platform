@@ -1,9 +1,9 @@
-import { useEffect } from "react";
 import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const OPERATING_THESIS = [
   {
@@ -79,13 +79,11 @@ const SELECTED_WORK = [
 ];
 
 export default function FounderPage() {
-  useEffect(() => {
-    document.title = "Stephen Lutar | Founder and Operator";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute("content", "Stephen Lutar is the founder behind SZL Holdings, building systems that connect observability, execution, workflow design, and command-centered thinking.");
-    }
-  }, []);
+  usePageMeta({
+    title: "Stephen Lutar — Founder and Operator | SZL Holdings",
+    description: "Stephen Lutar is the founder behind SZL Holdings, building systems that connect observability, execution, workflow design, and command-centered thinking.",
+    canonical: "https://szlholdings.com/founder",
+  });
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>

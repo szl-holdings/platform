@@ -13,6 +13,7 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
+import { PrivateAppGuard } from "@workspace/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
@@ -451,7 +452,11 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/routes") || location.startsWith("/command-workflows");
 
   if (isDashboard) {
-    return <DashboardShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+    return (
+      <PrivateAppGuard appName="Vessels" accentColor="#0ea5e9">
+        <DashboardShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+      </PrivateAppGuard>
+    );
   }
 
   return (

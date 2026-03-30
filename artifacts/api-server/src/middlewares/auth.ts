@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { db, usersTable, sessionsTable, userRolesTable, rolesTable } from "@workspace/db";
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@workspace/db";
-import { ROLE_HIERARCHY } from "@workspace/db";
+import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@workspace/db";
 
 export interface AuthenticatedUser {
   id: number;
@@ -112,6 +112,30 @@ export function requireAnyAuth() {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+    next();
+  };
+}
+
+/**
+ * Middleware that blocks write operations for read-only canonical roles
+ * (executive_viewer, anonymous_visitor). Must be used after authMiddleware().
+ *
+ * Usage: router.post("/resource", authMiddleware(), denyIfReadOnly(), handler)
+ */
+export function denyIfReadOnly() {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+    if (isReadOnlyRole(req.user.roles)) {
+      const canonical = toCanonicalRole(req.user.roles);
+      res.status(403).json({
+        error: "Read-only access — write operations are not permitted for your role",
+        canonicalRole: canonical,
+      });
       return;
     }
     next();

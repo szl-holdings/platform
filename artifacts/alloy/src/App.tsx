@@ -6,6 +6,7 @@ import { AlloyLayout } from "@/components/alloy-layout";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
+import { PrivateAppGuard } from "@workspace/shared-ui";
 import { Zap, Activity, GitBranch, Network, Shield } from "lucide-react";
 
 const queryClient = new QueryClient({
@@ -64,6 +65,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(alloyCommands);
 
   return (
+    <PrivateAppGuard appName="Alloy" accentColor="#00d4ff">
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={alloyShortcuts} appName="Alloy" accentColor="#00d4ff">
@@ -99,6 +101,7 @@ function App() {
         />
       </WouterRouter>
     </QueryClientProvider>
+    </PrivateAppGuard>
   );
 }
 
