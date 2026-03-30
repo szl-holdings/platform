@@ -1937,8 +1937,9 @@ function ChatInterface() {
               {activePanel === "advisories" && <AdvisoryPanel />}
               {activePanel === "events" && <CrossAppEventStream />}
               {activePanel === "comparison" && <ComparisonPanel onComparisonResult={result => {
+                const compId = "comp-" + Date.now();
                 setChatMessages(prev => [...prev, {
-                  id: `comp-${Date.now()}`,
+                  id: compId,
                   role: "assistant",
                   content: "",
                   timestamp: new Date(),
@@ -2158,9 +2159,10 @@ function ChatInterface() {
         {activePanel === "comparison" && (
           <div className="flex-1 overflow-hidden overflow-y-auto">
             <ComparisonPanel onComparisonResult={(result) => {
+              const cmpId = "cmp-" + Date.now();
               setChatMessages(prev => [...prev, {
-                id: `cmp-${Date.now()}`, role: "assistant",
-                content: `Model comparison complete`,
+                id: cmpId, role: "assistant",
+                content: "Model comparison complete",
                 timestamp: new Date(),
                 type: "comparison",
                 comparisonData: result,

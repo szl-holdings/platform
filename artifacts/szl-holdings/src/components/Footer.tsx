@@ -1,45 +1,34 @@
 import { Link } from "wouter";
 
-const ecosystemLinks = [
-  { label: "SZL Holdings", href: "/" },
-  { label: "Alloy", href: "/alloy/" },
-  { label: "Lyte", href: "/lyte-command-center/" },
-  { label: "Vessels", href: "/vessels/" },
-  { label: "Carlota Jo", href: "/carlota-jo/" },
-  { label: "INCA", href: "/inca/" },
-  { label: "Firestorm", href: "/firestorm/" },
-  { label: "Stephen Site", href: "/stephen/" },
+const nav = [
+  { label: "Ecosystem", href: "/ecosystem", external: false },
+  { label: "Alloy", href: "/alloy/", external: true },
+  { label: "Lyte", href: "/lyte-command-center/", external: true },
+  { label: "Vessels", href: "/vessels/", external: true },
+  { label: "Carlota Jo", href: "/carlota-jo/", external: true },
+  { label: "Founder", href: "/founder", external: false },
+  { label: "Contact", href: "/contact", external: false },
 ];
 
-const companyLinks = [
-  { label: "Ventures", href: "/ventures" },
-  { label: "Strategic thesis", href: "/#thesis" },
-  { label: "Latest developments", href: "/updates" },
-  { label: "Contact", href: "/contact" },
-];
-
-const legalLinks = [
+const legal = [
   { label: "Privacy", href: "/legal/privacy" },
   { label: "Terms", href: "/legal/terms" },
 ];
 
-const founderLinks = [
-  { label: "Stephen Lutar", href: "/stephen/" },
-  { label: "Insights", href: "/insights" },
-];
-
 export function Footer() {
   return (
-    <footer style={{
-      background: "hsl(210,12%,5%)",
-      borderTop: "1px solid hsla(0,0%,100%,0.05)",
-      paddingTop: "clamp(3rem,6vw,5rem)",
-      paddingBottom: "clamp(2rem,4vw,3rem)",
-    }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-          <div className="lg:col-span-2">
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "1rem" }}>
+    <footer
+      style={{
+        background: "hsl(210,12%,4%)",
+        borderTop: "1px solid hsla(0,0%,100%,0.05)",
+        padding: "3.5rem 0 2rem",
+        fontFamily: "'Inter', system-ui, sans-serif",
+      }}
+    >
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-8 mb-10">
+          <div>
+            <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.625rem", textDecoration: "none", marginBottom: "0.875rem" }}>
               <div style={{
                 width: "28px",
                 height: "28px",
@@ -50,116 +39,61 @@ export function Footer() {
                 alignItems: "center",
                 justifyContent: "center",
               }}>
-                <span style={{ color: "hsl(38,12%,94%)", fontWeight: "700", fontSize: "11px", fontFamily: "system-ui" }}>S</span>
+                <span style={{ color: "hsl(38,12%,94%)", fontWeight: "700", fontSize: "9px", letterSpacing: "-0.02em" }}>SZL</span>
               </div>
-              <span style={{ fontWeight: "600", fontSize: "14px", color: "hsl(38,12%,94%)", letterSpacing: "-0.01em" }}>SZL Holdings</span>
-            </div>
-            <p style={{
-              fontSize: "13.5px",
-              color: "hsl(210,5%,52%)",
-              lineHeight: "1.65",
-              maxWidth: "22rem",
-              marginBottom: "0.75rem",
-            }}>
-              Strategic technology portfolio. Building at the intersection of maritime intelligence, AI, advisory, and enterprise operations.
+              <span style={{ color: "hsl(38,12%,88%)", fontWeight: "600", fontSize: "13px", letterSpacing: "-0.01em" }}>SZL Holdings</span>
+            </Link>
+            <p style={{ fontSize: "12px", lineHeight: "1.6", color: "hsl(210,5%,44%)", maxWidth: "22rem" }}>
+              Premium command systems across observability, operations, and specialized platforms.
             </p>
-            <p style={{ fontSize: "12px", color: "hsl(210,5%,40%)" }}>Washington, D.C. · London · Singapore</p>
           </div>
 
-          <div>
-            <h4 style={{
-              fontSize: "11px",
-              fontWeight: "600",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "hsl(210,5%,36%)",
-              marginBottom: "1.125rem",
-            }}>Ecosystem</h4>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-              {ecosystemLinks.map((l) => (
-                <li key={l.label}>
+          <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem 1.5rem" }}>
+            {nav.map((item) => {
+              if (item.external) {
+                return (
                   <a
-                    href={l.href}
-                    style={{
-                      fontSize: "13.5px",
-                      color: "hsl(210,5%,50%)",
-                      textDecoration: "none",
-                      transition: "color 0.18s ease",
-                    }}
+                    key={item.label}
+                    href={item.href}
+                    style={{ color: "hsl(210,5%,50%)", fontSize: "12.5px", textDecoration: "none", transition: "color 0.16s ease" }}
                     onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"}
                     onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,50%)"}
                   >
-                    {l.label}
+                    {item.label}
                   </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{
-              fontSize: "11px",
-              fontWeight: "600",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "hsl(210,5%,36%)",
-              marginBottom: "1.125rem",
-            }}>Company</h4>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem", marginBottom: "1.5rem" }}>
-              {companyLinks.map((l) => (
-                <li key={l.label}>
-                  <a
-                    href={l.href}
-                    style={{
-                      fontSize: "13.5px",
-                      color: "hsl(210,5%,50%)",
-                      textDecoration: "none",
-                      transition: "color 0.18s ease",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"}
-                    onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,50%)"}
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            {founderLinks.map((l) => (
-              <a
-                key={l.label}
-                href={l.href}
-                style={{
-                  display: "block",
-                  fontSize: "13.5px",
-                  color: "hsl(210,5%,50%)",
-                  textDecoration: "none",
-                  transition: "color 0.18s ease",
-                  marginBottom: "0.625rem",
-                }}
-                onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"}
-                onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,50%)"}
-              >
-                {l.label}
-              </a>
-            ))}
-          </div>
+                );
+              }
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  style={{ color: "hsl(210,5%,50%)", fontSize: "12.5px", textDecoration: "none", transition: "color 0.16s ease" }}
+                  onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"}
+                  onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,50%)"}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.5rem",
-          paddingTop: "1.5rem",
-          borderTop: "1px solid hsla(0,0%,100%,0.05)",
-          alignItems: "flex-start",
-        }} className="sm:flex-row sm:justify-between sm:items-center">
-          <p style={{ fontSize: "12px", color: "hsl(210,5%,34%)" }}>
-            &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
+        <div style={{ height: "1px", background: "hsla(0,0%,100%,0.05)", marginBottom: "1.5rem" }} />
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <p style={{ fontSize: "11.5px", color: "hsl(210,5%,38%)" }}>
+            © {new Date().getFullYear()} SZL Holdings. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
-            {legalLinks.map((l) => (
-              <Link key={l.label} href={l.href} className="text-neutral-400 text-[12px] hover:text-neutral-600 transition-colors">
-                {l.label}
+          <div style={{ display: "flex", gap: "1.25rem" }}>
+            {legal.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                style={{ color: "hsl(210,5%,38%)", fontSize: "11.5px", textDecoration: "none", transition: "color 0.16s ease" }}
+                onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,58%)"}
+                onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,38%)"}
+              >
+                {item.label}
               </Link>
             ))}
           </div>

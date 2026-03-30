@@ -60,8 +60,8 @@ export function AlloyLanding() {
         </div>
         <div className="flex items-center gap-4">
           <a href="/" className="text-xs text-white/50 hover:text-white transition-colors">SZL Holdings</a>
-          <a href="/alloy/chat" className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium hover:bg-cyan-500/15 transition-colors">
-            Open Alloy <ArrowRight className="w-3.5 h-3.5" />
+          <a href="/szl-holdings/" className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium hover:bg-cyan-500/15 transition-colors">
+            View Ecosystem <ArrowRight className="w-3.5 h-3.5" />
           </a>
         </div>
       </header>
@@ -94,8 +94,8 @@ export function AlloyLanding() {
             </p>
 
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <a href="/alloy/chat" className="flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500 text-[#050914] font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
-                Open Alloy Command <ArrowRight className="w-4 h-4" />
+              <a href="/szl-holdings/" className="flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500 text-[#050914] font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
+                Explore the Ecosystem <ArrowRight className="w-4 h-4" />
               </a>
               <button
                 onClick={() => document.getElementById("architecture")?.scrollIntoView({ behavior: "smooth" })}
@@ -213,8 +213,8 @@ export function AlloyLanding() {
             <h2 className="text-2xl font-bold text-white mb-3">Explore the full command system.</h2>
             <p className="text-white/40 text-sm mb-8">Access Alloy's multi-agent command center, knowledge base, and real-time feeds.</p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <a href="/alloy/chat" className="flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500 text-[#050914] font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
-                Open Alloy Command <ArrowRight className="w-4 h-4" />
+              <a href="/szl-holdings/" className="flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-500 text-[#050914] font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
+                Explore the Ecosystem <ArrowRight className="w-4 h-4" />
               </a>
               <a href="/" className="flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 text-white/70 text-sm font-medium hover:bg-white/5 transition-colors">
                 SZL Holdings <ArrowRight className="w-4 h-4" />

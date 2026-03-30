@@ -1,31 +1,39 @@
 import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 const platforms = [
-  { name: "Vessels", category: "OBSERVE · Maritime", status: "live", color: "hsl(208,65%,48%)" },
-  { name: "Rosie", category: "OBSERVE · Incident Command", status: "live", color: "hsl(0,70%,55%)" },
-  { name: "Beacon", category: "OBSERVE · Business Telemetry", status: "live", color: "hsl(200,70%,45%)" },
-  { name: "INCA", category: "UNDERSTAND · AI Research", status: "live", color: "hsl(246,45%,60%)" },
-  { name: "Nimbus", category: "UNDERSTAND · Prediction", status: "live", color: "hsl(280,55%,55%)" },
-  { name: "AlloyScape", category: "EXECUTE · Automations", status: "live", color: "hsl(218,50%,62%)" },
+  { name: "SZL Holdings", role: "Ecosystem", color: "hsl(210,10%,60%)" },
+  { name: "Alloy", role: "Intelligence Layer", color: "hsl(214,80%,65%)" },
+  { name: "Lyte", role: "Business Observability", color: "hsl(190,90%,55%)" },
+  { name: "Vessels", role: "Maritime Command", color: "hsl(205,85%,55%)" },
+  { name: "Carlota Jo", role: "High-Trust Service", color: "hsl(38,45%,65%)" },
 ];
 
 const nodePositions = [
-  { x: 20, y: 30 }, { x: 50, y: 15 }, { x: 80, y: 32 },
-  { x: 15, y: 65 }, { x: 50, y: 80 }, { x: 82, y: 68 },
+  { x: 50, y: 18 },
+  { x: 22, y: 42 }, { x: 78, y: 42 },
+  { x: 12, y: 72 }, { x: 50, y: 72 }, { x: 88, y: 72 },
 ];
 
 const connections = [
-  [0, 1], [1, 2], [0, 3], [1, 4], [2, 5], [3, 4], [4, 5], [1, 3],
+  [0, 1], [0, 2], [1, 3], [1, 4], [2, 4], [2, 5],
 ];
 
-function EcosystemMap() {
-  const colors = ["hsl(208,65%,48%)", "hsl(0,70%,55%)", "hsl(200,70%,45%)", "hsl(246,45%,60%)", "hsl(280,55%,55%)", "hsl(218,50%,62%)"];
+const nodeColors = [
+  "hsl(210,10%,60%)",
+  "hsl(214,80%,65%)",
+  "hsl(190,90%,55%)",
+  "hsl(38,45%,65%)",
+  "hsl(205,85%,55%)",
+  "hsl(38,45%,65%)",
+];
 
+function EcosystemDiagram() {
   return (
-    <div className="relative w-full" style={{ aspectRatio: "16/7", maxWidth: "480px" }}>
+    <div className="relative w-full" style={{ aspectRatio: "16/9", maxWidth: "440px" }}>
       <svg
-        viewBox="0 0 100 60"
+        viewBox="0 0 100 65"
         className="absolute inset-0 w-full h-full"
         style={{ overflow: "visible" }}
         aria-hidden="true"
@@ -37,17 +45,23 @@ function EcosystemMap() {
             y1={nodePositions[a].y}
             x2={nodePositions[b].x}
             y2={nodePositions[b].y}
-            stroke="hsla(0,0%,100%,0.06)"
-            strokeWidth="0.4"
+            stroke="hsla(214,50%,60%,0.15)"
+            strokeWidth="0.5"
             initial={{ opacity: 0, pathLength: 0 }}
             animate={{ opacity: 1, pathLength: 1 }}
-            transition={{ duration: 1.2, delay: 0.8 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1.2, delay: 0.6 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
           />
         ))}
         {nodePositions.map((pos, i) => (
-          <m.g key={i} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.6 + i * 0.1, ease: [0.22, 1, 0.36, 1] }} style={{ transformOrigin: `${pos.x}% ${pos.y}%` }}>
-            <circle cx={pos.x} cy={pos.y} r="2.8" fill={`${colors[i]}22`} stroke={`${colors[i]}55`} strokeWidth="0.5" />
-            <circle cx={pos.x} cy={pos.y} r="1.1" fill={colors[i]} opacity="0.85" />
+          <m.g
+            key={i}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transformOrigin: `${pos.x}% ${pos.y}%` }}
+          >
+            <circle cx={pos.x} cy={pos.y} r={i === 0 ? 4.5 : 3.2} fill={`${nodeColors[i]}15`} stroke={`${nodeColors[i]}40`} strokeWidth="0.5" />
+            <circle cx={pos.x} cy={pos.y} r={i === 0 ? 1.8 : 1.2} fill={nodeColors[i]} opacity="0.9" />
           </m.g>
         ))}
       </svg>
@@ -65,14 +79,13 @@ export function Hero() {
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
         style={{
-          background: "radial-gradient(ellipse at 65% 40%, hsla(210,50%,30%,0.05) 0%, transparent 60%), radial-gradient(ellipse at 30% 70%, hsla(32,40%,30%,0.03) 0%, transparent 55%)",
+          background: "radial-gradient(ellipse at 60% 35%, hsla(210,40%,25%,0.06) 0%, transparent 60%), radial-gradient(ellipse at 25% 75%, hsla(32,30%,20%,0.04) 0%, transparent 55%)",
         }}
       />
-
       <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, hsla(0,0%,100%,0.05), transparent)" }} aria-hidden="true" />
 
       <div className="relative z-10 max-w-[1280px] mx-auto px-6 lg:px-10 py-20 lg:py-32">
-        <div className="grid lg:grid-cols-[1fr,440px] gap-16 lg:gap-24 items-center">
+        <div className="grid lg:grid-cols-[1fr,420px] gap-16 lg:gap-24 items-center">
           <div>
             <m.div
               initial={{ opacity: 0, y: 10 }}
@@ -94,8 +107,8 @@ export function Hero() {
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
               }}>
-                <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "hsl(152,50%,42%)", display: "inline-block" }} />
-                Strategic Technology Portfolio
+                <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "hsl(210,10%,60%)", display: "inline-block" }} />
+                Premium Command Systems
               </span>
             </m.div>
 
@@ -104,24 +117,15 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.72, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                fontSize: "clamp(2.5rem, 5vw, 3.875rem)",
+                fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)",
                 fontWeight: "700",
                 letterSpacing: "-0.027em",
-                lineHeight: "1.05",
+                lineHeight: "1.06",
                 color: "hsl(38,12%,94%)",
                 marginBottom: "1.5rem",
               }}
             >
-              One holding company.
-              <br />
-              <span style={{
-                background: "linear-gradient(135deg, hsl(210,10%,72%), hsl(32,40%,66%))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>
-                Eight frontier platforms.
-              </span>
+              Building premium command systems across observability, operations, and specialized platforms.
             </m.h1>
 
             <m.p
@@ -132,21 +136,35 @@ export function Hero() {
                 color: "hsl(210,5%,60%)",
                 fontSize: "1.0625rem",
                 lineHeight: "1.65",
-                maxWidth: "28rem",
+                maxWidth: "30rem",
+                marginBottom: "1rem",
+              }}
+            >
+              SZL Holdings is the ecosystem behind Alloy, Lyte, Vessels, and high-trust operating brands designed to turn visibility into action and execution into advantage.
+            </m.p>
+
+            <m.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                color: "hsl(210,5%,44%)",
+                fontSize: "0.875rem",
+                letterSpacing: "0.02em",
                 marginBottom: "2.5rem",
               }}
             >
-              SZL Holdings builds and operates technology companies at the intersection of maritime intelligence, AI, and enterprise operations. Each platform commands its vertical. All of them compound.
+              One ecosystem. One operating philosophy. Multiple command surfaces.
             </m.p>
 
             <m.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.48, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col sm:flex-row items-start gap-3"
             >
-              <a
-                href="#portfolio"
+              <Link
+                href="/ecosystem"
                 className="group flex items-center gap-2"
                 style={{
                   padding: "0.625rem 1.375rem",
@@ -172,11 +190,11 @@ export function Hero() {
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
               >
-                Explore the ecosystem
+                Explore the Ecosystem
                 <ArrowRight size={14} strokeWidth={2.5} />
-              </a>
-              <a
-                href="#contact"
+              </Link>
+              <Link
+                href="/founder"
                 style={{
                   padding: "0.625rem 1.375rem",
                   borderRadius: "6px",
@@ -202,8 +220,8 @@ export function Hero() {
                   (e.currentTarget as HTMLElement).style.background = "transparent";
                 }}
               >
-                Start a conversation
-              </a>
+                Meet the Founder
+              </Link>
             </m.div>
           </div>
 
@@ -221,16 +239,17 @@ export function Hero() {
               boxShadow: "0 8px 32px hsla(0,0%,0%,0.38)",
             }}>
               <div className="flex items-center justify-between mb-5">
-                <span style={{ fontSize: "11px", fontWeight: "500", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,46%)" }}>Ecosystem Map</span>
-                <span style={{ fontSize: "11px", color: "hsl(152,50%,42%)", fontWeight: "500", letterSpacing: "0.04em" }}>8 platforms live</span>
+                <span style={{ fontSize: "11px", fontWeight: "500", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,46%)" }}>Ecosystem</span>
+                <span style={{ fontSize: "11px", color: "hsl(210,5%,40%)", fontWeight: "500", letterSpacing: "0.04em" }}>One engine. Two flagships.</span>
               </div>
-              <EcosystemMap />
+              <EcosystemDiagram />
               <div style={{ height: "1px", background: "hsla(0,0%,100%,0.05)", margin: "1.25rem 0" }} />
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              <div className="space-y-2">
                 {platforms.map((p) => (
-                  <div key={p.name} className="flex items-center gap-2">
+                  <div key={p.name} className="flex items-center gap-2.5">
                     <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: "12px", fontWeight: "500", color: "hsl(210,5%,68%)", letterSpacing: "-0.003em" }}>{p.name}</span>
+                    <span style={{ fontSize: "11px", fontWeight: "600", color: "hsl(210,5%,70%)", letterSpacing: "-0.003em" }}>{p.name}</span>
+                    <span style={{ fontSize: "11px", color: "hsl(210,5%,40%)", letterSpacing: "-0.003em", marginLeft: "auto" }}>{p.role}</span>
                   </div>
                 ))}
               </div>

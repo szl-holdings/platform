@@ -2,11 +2,8 @@ import { useEffect } from "react";
 import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { SiteNav } from "@/components/SiteNav";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SectionHeader } from "@/components/SectionHeader";
-import { CaseStudyBlock } from "@/components/CaseStudyBlock";
-import { analytics, initScrollDepthTracking } from "@/lib/analytics";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 
 const OPERATING_THESIS = [
   {
@@ -33,245 +30,257 @@ const FOCUS_AREAS = [
     desc: "Designing systems that surface risk, latency, and workflow friction before they hit execution — not after.",
   },
   {
-    title: "Maritime Intelligence",
-    desc: "Multi-source signal fusion for fleet operations, sanctions compliance, and voyage economics at institutional scale.",
+    title: "Workflow Design",
+    desc: "Building structured operational workflows that route action, reduce latency, and close ownership gaps.",
   },
   {
-    title: "Operational Service Design",
-    desc: "High-trust, high-discretion operational support for principals and organizations with complex environments.",
+    title: "Command Systems",
+    desc: "Creating command-centered product surfaces that turn signal into accountable action.",
   },
   {
-    title: "AI Infrastructure & Governance",
-    desc: "Orchestration layers that make AI systems deployable, explainable, and auditable in regulated contexts.",
+    title: "Product Architecture",
+    desc: "Designing the system architecture behind platforms that operate at institutional scale.",
   },
   {
-    title: "Venture Portfolio Operations",
-    desc: "Building and operating multiple platforms under one holding structure with shared intelligence and shared standards.",
+    title: "Execution Models",
+    desc: "High-trust operational support for principals with complex, high-stakes environments.",
   },
   {
-    title: "Enterprise Systems Architecture",
-    desc: "Designing the operational backbone that enterprise organizations actually run on — not the surface layer they show.",
+    title: "Signal-to-Action Thinking",
+    desc: "Designing the full pipeline — from raw signal to owner-identified, value-quantified, action-routed output.",
   },
 ];
 
 const SELECTED_WORK = [
   {
-    title: "Approval Latency Detection",
+    title: "Approval Latency Detection — Lyte",
     problem: "A logistics operator had approval queues stalling at 48–72 hours — invisible to leadership.",
-    solution: "Built a severity-ranked observability layer that compressed 240 operational signals into a prioritized queue with explainable root cause context.",
+    solution: "Built a severity-ranked observability layer compressing 240 operational signals into a prioritized queue with explainable root cause context.",
     result: "Approval cycle reduced from 48 hours to 11 hours. Revenue leakage recovered: $340K/quarter.",
+    platform: "Lyte",
+    accent: "hsl(190,90%,55%)",
   },
   {
-    title: "Pre-Designation Dark Vessel Detection",
+    title: "Pre-Designation Dark Vessel Detection — Vessels",
     problem: "A commodity trader needed to identify sanctions exposure before regulatory designation — not after.",
     solution: "Implemented behavioral fingerprinting across 52K vessels to detect AIS anomalies and pattern laundering 30+ days before formal designation.",
     result: "Client avoided $12M in exposure on two contracts. Became the foundation for the Vessels platform.",
+    platform: "Vessels",
+    accent: "hsl(205,85%,55%)",
   },
   {
-    title: "Security Posture Transformation",
-    problem: "A Fortune 500 CISO needed board-level visibility into security posture improvement — not CVE counts.",
-    solution: "Replaced annual penetration testing with continuous adversarial simulation, delivering quarterly posture scores with full executive context.",
-    result: "Security score improved 26 points over 6 months. Board approved expanded security infrastructure investment.",
+    title: "Workflow Orchestration Engine — Alloy",
+    problem: "Manual, inconsistent workflow routing was creating ownership gaps across a multi-team operation.",
+    solution: "Designed a 6-layer orchestration engine handling signal ingestion, normalization, reasoning, routing, outputs, and governance with human approval gates at every critical step.",
+    result: "Operational decisions accelerated by 3.4x. Zero routing failures across 2,400 workflow executions.",
+    platform: "Alloy",
+    accent: "hsl(214,80%,65%)",
   },
 ];
 
 export default function FounderPage() {
   useEffect(() => {
-    document.title = "Stephen Lutar — Founder · SZL Holdings";
-    analytics.founderPageView();
-    const cleanup = initScrollDepthTracking("founder");
-    return cleanup;
+    document.title = "Stephen Lutar | Founder and Operator";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) {
+      meta.setAttribute("content", "Stephen Lutar is the founder behind SZL Holdings, building systems that connect observability, execution, workflow design, and command-centered thinking.");
+    }
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      <SiteNav />
+    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+      <Navbar />
 
       <main className="pt-24">
-        <section className="bg-white border-b border-szl-border py-20">
-          <div className="max-w-6xl mx-auto px-6">
-            <m.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-4">Founder</p>
-              <h1 className="font-[var(--font-display)] text-4xl sm:text-5xl font-extrabold text-szl-text leading-tight mb-4">
-                Builder. Operator. Systems thinker.
-              </h1>
-              <p className="text-szl-accent text-base font-semibold mb-6">
-                Stephen Lutar — Founder, SZL Holdings
-              </p>
-              <p className="text-szl-text-secondary text-base leading-relaxed mb-6 max-w-2xl">
-                Stephen founded SZL Holdings with a specific conviction: the most defensible enterprise software positions are not won by building better features — they are won by understanding the operational reality of an industry deeply enough to build the systems it actually needs.
-              </p>
-              <p className="text-szl-text-secondary text-base leading-relaxed mb-8 max-w-2xl">
-                Alloy, Lyte, Vessels, and Carlota Jo are the result. Each platform was designed around operational problems Stephen has personally encountered — not market research, not feature prioritization frameworks. Real problems, built into real systems, producing real outcomes.
-              </p>
-
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/contact?type=general"
-                  className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-szl-primary text-white text-sm font-semibold hover:bg-szl-primary-light transition-colors shadow-sm"
-                >
-                  Start a Conversation
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-                <Link
-                  href="/contact?type=recruiter"
-                  className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-szl-border text-szl-text-secondary text-sm font-semibold hover:text-szl-text hover:border-szl-border-hover hover:bg-szl-bg-secondary transition-all"
-                >
-                  Roles & Engagements
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </Link>
-              </div>
-            </m.div>
-          </div>
-        </section>
-
-        <section className="py-20 lg:py-28 bg-szl-bg-secondary border-b border-szl-border">
-          <div className="max-w-6xl mx-auto px-6">
-            <SectionHeader
-              eyebrow="Operating Thesis"
-              title="How Stephen builds."
-            />
-            <div className="grid sm:grid-cols-2 gap-4">
-              {OPERATING_THESIS.map((item, i) => (
-                <m.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.07 }}
-                  className="rounded-2xl border border-szl-border bg-white p-6"
-                >
-                  <h3 className="font-[var(--font-display)] text-base font-bold text-szl-text mb-2">{item.title}</h3>
-                  <p className="text-sm text-szl-text-secondary leading-relaxed">{item.body}</p>
-                </m.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 lg:py-28 bg-white border-b border-szl-border">
-          <div className="max-w-6xl mx-auto px-6">
-            <SectionHeader
-              eyebrow="Areas of Focus"
-              title="The work that matters."
-              subtitle="Six domains where Stephen has built systems, not just advised on them."
-            />
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
-              {FOCUS_AREAS.map((area, i) => (
-                <m.div
-                  key={area.title}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.06 }}
-                  className="rounded-2xl border border-szl-border bg-white p-5 hover:border-szl-border-hover hover:shadow-sm transition-all"
-                >
-                  <div className="w-7 h-7 rounded-lg bg-szl-primary flex items-center justify-center mb-3">
-                    <span className="text-white text-[10px] font-bold font-[var(--font-display)]">{String(i + 1).padStart(2, "0")}</span>
-                  </div>
-                  <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-1.5">{area.title}</h3>
-                  <p className="text-xs text-szl-text-secondary leading-relaxed">{area.desc}</p>
-                </m.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 lg:py-28 bg-szl-bg-secondary border-b border-szl-border">
-          <div className="max-w-6xl mx-auto px-6">
-            <SectionHeader
-              eyebrow="Selected Work"
-              title="Operational outcomes, not slides."
-              subtitle="Real problems. Built solutions. Measurable results."
-            />
-            <CaseStudyBlock studies={SELECTED_WORK} accentColor="#2563eb" />
-          </div>
-        </section>
-
-        <section className="py-20 lg:py-28 bg-white border-b border-szl-border">
-          <div className="max-w-6xl mx-auto px-6">
-            <SectionHeader
-              eyebrow="Why This Work Matters"
-              title="The ecosystem is the proof."
-            />
-            <div className="grid lg:grid-cols-2 gap-12 mt-10">
-              <m.div
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="rounded-2xl border border-szl-border bg-szl-bg-secondary p-8 sm:p-10"
-              >
-                <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-6">The thesis</p>
-                <blockquote className="font-[var(--font-display)] text-lg sm:text-xl text-szl-text leading-relaxed mb-6">
-                  "The next generation of enterprise software will not be built on better dashboards. It will be built on command systems — platforms that see what is happening, understand why it matters, and surface what to do next. That is not a design principle. It is an engineering constraint. And it is the only thing SZL builds."
-                </blockquote>
-                <p className="text-szl-text-secondary text-sm font-semibold">
-                  — Stephen Lutar, Founder, SZL Holdings
-                </p>
-              </m.div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { value: "5+", label: "Years Operating", note: "Across enterprise verticals" },
-                  { value: "4", label: "Platforms Live", note: "Alloy · Lyte · Vessels · Carlota Jo" },
-                  { value: "34 days", label: "Maritime Lead Time", note: "Before sanctions designation" },
-                  { value: "100%", label: "Client Retention", note: "Carlota Jo pilot cohort" },
-                ].map((stat) => (
-                  <m.div
-                    key={stat.label}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="rounded-2xl border border-szl-border bg-white p-5 text-center"
-                  >
-                    <p className="font-[var(--font-display)] font-bold text-2xl text-szl-text mb-0.5">{stat.value}</p>
-                    <p className="text-xs font-semibold text-szl-text-secondary">{stat.label}</p>
-                    <p className="text-[10px] text-szl-text-muted mt-0.5">{stat.note}</p>
-                  </m.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-szl-bg-secondary border-b border-szl-border">
-          <div className="max-w-3xl mx-auto px-6 text-center">
+        <section style={{ padding: "4rem 0 3rem" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
             <m.div
               initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-3">Connect</p>
-              <h2 className="font-[var(--font-display)] text-2xl sm:text-3xl font-bold text-szl-text mb-4">
-                The right conversation starts here.
-              </h2>
-              <p className="text-szl-text-secondary text-sm leading-relaxed mb-8 max-w-lg mx-auto">
-                Strategic discussions, executive roles, advisory engagements, and consulting inquiries. Not every conversation leads somewhere — but the right ones do.
+              <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
+                Founder
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link
-                  href="/contact?type=recruiter"
-                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-szl-border text-szl-text-secondary text-sm font-semibold hover:text-szl-text hover:border-szl-border-hover hover:bg-white transition-all"
+              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: "700", letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: "1.08", marginBottom: "1.25rem" }}>
+                Builder. Operator. Systems thinker.
+              </h1>
+              <p style={{ fontSize: "1rem", lineHeight: "1.7", color: "hsl(210,5%,58%)", maxWidth: "36rem" }}>
+                Stephen Lutar builds command-centered systems that connect visibility, workflow discipline, and execution across products, operations, and modern business environments.
+              </p>
+            </m.div>
+          </div>
+        </section>
+
+        <section style={{ padding: "2rem 0 4rem", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.25rem" }}>
+              Operating Thesis
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {OPERATING_THESIS.map((t, i) => (
+                <m.div
+                  key={t.title}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.48, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    padding: "1.375rem 1.5rem",
+                    borderRadius: "0.75rem",
+                    background: "hsla(0,0%,100%,0.025)",
+                    border: "1px solid hsla(0,0%,100%,0.06)",
+                  }}
                 >
-                  Roles & Engagements <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  <p style={{ fontSize: "13.5px", fontWeight: "600", color: "hsl(38,12%,88%)", marginBottom: "0.5rem", letterSpacing: "-0.005em" }}>{t.title}</p>
+                  <p style={{ fontSize: "12.5px", lineHeight: "1.65", color: "hsl(210,5%,55%)" }}>{t.body}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)", background: "hsl(210,12%,6%)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.25rem" }}>
+              Areas of Focus
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {FOCUS_AREAS.map((f, i) => (
+                <m.div
+                  key={f.title}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    padding: "1.125rem 1.25rem",
+                    borderRadius: "0.75rem",
+                    background: "hsla(0,0%,100%,0.02)",
+                    border: "1px solid hsla(0,0%,100%,0.06)",
+                  }}
+                >
+                  <p style={{ fontSize: "13px", fontWeight: "600", color: "hsl(38,12%,85%)", marginBottom: "0.35rem", letterSpacing: "-0.005em" }}>{f.title}</p>
+                  <p style={{ fontSize: "12px", lineHeight: "1.6", color: "hsl(210,5%,52%)" }}>{f.desc}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.25rem" }}>
+              Selected Work
+            </p>
+            <div className="space-y-4">
+              {SELECTED_WORK.map((w, i) => (
+                <m.div
+                  key={w.title}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    padding: "1.5rem",
+                    borderRadius: "0.875rem",
+                    background: "hsla(0,0%,100%,0.025)",
+                    border: "1px solid hsla(0,0%,100%,0.06)",
+                    borderLeft: `3px solid ${w.accent}60`,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
+                    <span style={{ fontSize: "10px", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", color: w.accent }}>
+                      {w.platform}
+                    </span>
+                    <p style={{ fontSize: "14px", fontWeight: "700", color: "hsl(38,12%,90%)", letterSpacing: "-0.008em" }}>{w.title}</p>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {[
+                      { label: "Problem", text: w.problem },
+                      { label: "System Built", text: w.solution },
+                      { label: "Outcome", text: w.result },
+                    ].map((item) => (
+                      <div key={item.label}>
+                        <p style={{ fontSize: "10px", fontWeight: "600", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,40%)", marginBottom: "0.375rem" }}>
+                          {item.label}
+                        </p>
+                        <p style={{ fontSize: "12.5px", lineHeight: "1.58", color: "hsl(210,5%,55%)" }}>{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)", background: "hsl(210,12%,6%)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
+              Why This Work Matters
+            </p>
+            <div className="max-w-[640px]">
+              <p style={{ fontSize: "1.0625rem", lineHeight: "1.72", color: "hsl(210,5%,58%)", marginBottom: "2rem" }}>
+                Most organizations run on invisible systems — processes that nobody designed, workflows that nobody owns, signals that nobody reads until the damage is already compounding. The systems built here are designed to make those invisible things visible, and to route action before slippage becomes crisis.
+              </p>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <Link
+                  href="/contact"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "0.625rem 1.25rem",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "hsl(210,12%,6%)",
+                    background: "hsl(210,8%,84%)",
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,84%)";
+                  }}
+                >
+                  Start a Conversation
+                  <ArrowRight size={13} strokeWidth={2.5} />
                 </Link>
                 <Link
-                  href="/contact?type=general"
-                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-szl-primary text-white text-sm font-semibold hover:bg-szl-primary-light transition-colors shadow-sm"
+                  href="/"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "0.625rem 1.25rem",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "hsl(210,5%,55%)",
+                    background: "transparent",
+                    border: "1px solid hsla(0,0%,100%,0.08)",
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,55%)";
+                  }}
                 >
-                  Start a Conversation <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  View the Ecosystem
                 </Link>
               </div>
-            </m.div>
+            </div>
           </div>
         </section>
       </main>
-
-      <SiteFooter />
+      <Footer />
     </div>
   );
 }

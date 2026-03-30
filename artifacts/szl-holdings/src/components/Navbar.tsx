@@ -1,17 +1,15 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 const navLinks = [
-  { label: "Ventures", href: "/ventures" },
-  { label: "Trust", href: "/trust" },
-  { label: "Investor", href: "/investor" },
-  { label: "Roadmap", href: "/roadmap" },
-  { label: "About", href: "/about" },
-  { label: "Updates", href: "/updates" },
-  { label: "Ecosystem Map", href: "/ecosystem" },
-  { label: "KPI Dashboard", href: "/kpis" },
+  { label: "Ecosystem", href: "/ecosystem" },
+  { label: "Alloy", href: "/alloy", external: "/alloy/" },
+  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
+  { label: "Vessels", href: "/vessels", external: "/vessels/" },
+  { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/" },
+  { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -56,7 +54,7 @@ export function Navbar() {
               fontSize: "11px",
               letterSpacing: "-0.02em",
               fontFamily: "system-ui",
-            }}>S</span>
+            }}>SZL</span>
           </div>
           <span style={{
             color: "hsl(38,12%,94%)",
@@ -68,63 +66,65 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{
-                color: location === link.href ? "hsl(38,12%,94%)" : "hsl(210,5%,58%)",
-                fontSize: "13px",
-                fontWeight: "500",
-                padding: "0.375rem 0.875rem",
-                borderRadius: "6px",
-                textDecoration: "none",
-                transition: "color 0.18s ease, background 0.18s ease",
-                letterSpacing: "-0.003em",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)";
-                (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = location === link.href ? "hsl(38,12%,94%)" : "hsl(210,5%,58%)";
-                (e.currentTarget as HTMLElement).style.background = "transparent";
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <Link
-            href="/ventures"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              marginLeft: "0.5rem",
-              padding: "0.4375rem 1.125rem",
-              borderRadius: "6px",
-              fontSize: "13px",
-              fontWeight: "600",
-              textDecoration: "none",
-              letterSpacing: "-0.005em",
-              color: "hsl(210,12%,6%)",
-              background: "hsl(210,8%,84%)",
-              border: "1px solid transparent",
-              transition: "all 0.18s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px hsla(0,0%,0%,0.20)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,84%)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "none";
-            }}
-          >
-            Explore the portfolio
-            <ChevronRight size={13} />
-          </Link>
+        <div className="hidden md:flex items-center gap-0.5">
+          {navLinks.map((link) => {
+            const isActive = location === link.href;
+            const isExternal = !!link.external;
+            if (isExternal) {
+              return (
+                <a
+                  key={link.href}
+                  href={link.external}
+                  style={{
+                    color: "hsl(210,5%,58%)",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    padding: "0.375rem 0.875rem",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    transition: "color 0.18s ease, background 0.18s ease",
+                    letterSpacing: "-0.003em",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)";
+                    (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,58%)";
+                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                  }}
+                >
+                  {link.label}
+                </a>
+              );
+            }
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  color: isActive ? "hsl(38,12%,94%)" : "hsl(210,5%,58%)",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  padding: "0.375rem 0.875rem",
+                  borderRadius: "6px",
+                  textDecoration: "none",
+                  transition: "color 0.18s ease, background 0.18s ease",
+                  letterSpacing: "-0.003em",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)";
+                  (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = isActive ? "hsl(38,12%,94%)" : "hsl(210,5%,58%)";
+                  (e.currentTarget as HTMLElement).style.background = "transparent";
+                }}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
 
         <button
@@ -154,52 +154,45 @@ export function Navbar() {
             }}
           >
             <div className="px-6 py-6 flex flex-col gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  style={{
-                    color: "hsl(210,5%,62%)",
-                    fontSize: "15px",
-                    fontWeight: "500",
-                    padding: "0.625rem 0.75rem",
-                    borderRadius: "6px",
-                    textDecoration: "none",
-                    transition: "color 0.18s ease, background 0.18s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)";
-                    (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,62%)";
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <Link
-                href="/ventures"
-                onClick={() => setMobileOpen(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: "0.75rem",
-                  padding: "0.75rem 1.25rem",
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  textDecoration: "none",
-                  color: "hsl(210,12%,6%)",
-                  background: "hsl(210,8%,84%)",
-                  transition: "all 0.18s ease",
-                }}
-              >
-                Explore the portfolio
-              </Link>
+              {navLinks.map((link) => {
+                if (link.external) {
+                  return (
+                    <a
+                      key={link.href}
+                      href={link.external}
+                      style={{
+                        color: "hsl(210,5%,62%)",
+                        fontSize: "15px",
+                        fontWeight: "500",
+                        padding: "0.625rem 0.75rem",
+                        borderRadius: "6px",
+                        textDecoration: "none",
+                        transition: "color 0.18s ease, background 0.18s ease",
+                      }}
+                    >
+                      {link.label}
+                    </a>
+                  );
+                }
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    style={{
+                      color: "hsl(210,5%,62%)",
+                      fontSize: "15px",
+                      fontWeight: "500",
+                      padding: "0.625rem 0.75rem",
+                      borderRadius: "6px",
+                      textDecoration: "none",
+                      transition: "color 0.18s ease, background 0.18s ease",
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
             </div>
           </m.div>
         )}
