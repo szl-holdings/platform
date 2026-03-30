@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { authLimiter, readLimiter, writeLimiter } from "../middlewares/rate-limiters";
+import { adminGuard } from "../middlewares/admin-guard";
 import healthRouter from "./health";
 import projectsRouter from "./projects";
 import servicesRouter from "./services";
@@ -39,6 +40,7 @@ import commentsRouter from "./comments";
 import agentOsRouter from "./agent-os";
 import cmsRouter from "./cms";
 import doctrineRouter from "./doctrine";
+import alloyRouter from "./alloy";
 
 const router: IRouter = Router();
 
@@ -77,6 +79,7 @@ router.use(firestormRouter);
 router.use(lyteRouter);
 router.use(dreamscapeRouter);
 router.use(readinessRouter);
+router.use("/admin", adminGuard);
 router.use(adminRouter);
 router.use(intelligenceRouter);
 router.use(incaRouter);
@@ -124,8 +127,6 @@ router.use(readinessRouter);
 
 router.use("/dreamscape", readLimiter);
 router.use(dreamscapeRouter);
-router.use("/nimbus", readLimiter);
-router.use(dreamscapeRouter);
 
 router.use(agentTrainingRouter);
 router.use("/comments", writeLimiter);
@@ -136,5 +137,8 @@ router.use("/cms", readLimiter);
 router.use(cmsRouter);
 router.use("/doctrine", readLimiter);
 router.use(doctrineRouter);
+
+router.use("/alloy", readLimiter);
+router.use(alloyRouter);
 
 export default router;

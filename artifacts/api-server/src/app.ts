@@ -114,7 +114,12 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({
+  limit: "10mb",
+  verify: (req: Request, _res, buf) => {
+    (req as Request & { rawBody?: Buffer }).rawBody = buf;
+  },
+}));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(authMiddleware);
 

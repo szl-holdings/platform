@@ -35,3 +35,4 @@ export * from "./carlota_client";
 export * from "./audit_logs";
 export * from "./entities";
 export * from "./platform_events";
+export * from "./alloy";

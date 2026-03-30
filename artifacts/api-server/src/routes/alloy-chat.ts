@@ -12,6 +12,13 @@ import { anthropic } from "@workspace/integrations-anthropic-ai";
 
 const alloyChatRouter: IRouter = Router();
 
+function internalAdminFetch(url: string, options: RequestInit = {}): Promise<globalThis.Response> {
+  const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
+  const headers: Record<string, string> = {};
+  if (internalToken) headers["x-internal-token"] = internalToken;
+  return globalThis.fetch(url, { ...options, headers: { ...headers, ...(options.headers as Record<string, string> | undefined) } });
+}
+
 const aiLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -112,10 +119,10 @@ async function buildSystemPrompt(req: Request): Promise<string> {
     if (devDomain) {
       const baseUrl = `https://${devDomain}`;
       const [overviewRes, healthRes, connectorsRes, flagsRes] = await Promise.allSettled([
-        fetch(`${baseUrl}/api/admin/overview`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
-        fetch(`${baseUrl}/api/admin/system-health`, { signal: AbortSignal.timeout(5000) }).then(r => r.ok ? r.json() : null),
-        fetch(`${baseUrl}/api/admin/connectors`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
-        fetch(`${baseUrl}/api/admin/feature-flags`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
+        internalAdminFetch(`${baseUrl}/api/admin/overview`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
+        internalAdminFetch(`${baseUrl}/api/admin/system-health`, { signal: AbortSignal.timeout(5000) }).then(r => r.ok ? r.json() : null),
+        internalAdminFetch(`${baseUrl}/api/admin/connectors`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
+        internalAdminFetch(`${baseUrl}/api/admin/feature-flags`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
       ]);
 
       const overview = overviewRes.status === "fulfilled" ? overviewRes.value as AdminOverview : null;
@@ -391,8 +398,8 @@ alloyChatRouter.get("/alloy-chat/suggested-prompts", async (_req: Request, res: 
     if (!devDomain) { res.json({ prompts: defaultPrompts }); return; }
 
     const [healthRes, connectorsRes] = await Promise.allSettled([
-      fetch(`https://${devDomain}/api/admin/system-health`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
-      fetch(`https://${devDomain}/api/admin/connectors`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
+      internalAdminFetch(`https://${devDomain}/api/admin/system-health`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
+      internalAdminFetch(`https://${devDomain}/api/admin/connectors`, { signal: AbortSignal.timeout(3000) }).then(r => r.ok ? r.json() : null),
     ]);
 
     const health = healthRes.status === "fulfilled" ? healthRes.value as AdminHealth : null;
@@ -596,8 +603,8 @@ alloyChatRouter.post("/alloy-chat/advisory/generate", aiLimit, authMiddleware({ 
     const baseUrl = devDomain ? `https://${devDomain}` : `http://localhost:${process.env.PORT || 8080}`;
 
     const [healthRes, connectorRes] = await Promise.allSettled([
-      fetch(`${baseUrl}/api/admin/system-health`, { signal: AbortSignal.timeout(5000) }).then(r => r.json()),
-      fetch(`${baseUrl}/api/admin/connectors`, { signal: AbortSignal.timeout(3000) }).then(r => r.json()),
+      internalAdminFetch(`${baseUrl}/api/admin/system-health`, { signal: AbortSignal.timeout(5000) }).then(r => r.json()),
+      internalAdminFetch(`${baseUrl}/api/admin/connectors`, { signal: AbortSignal.timeout(3000) }).then(r => r.json()),
     ]);
 
     const health = healthRes.status === "fulfilled" ? healthRes.value : null;

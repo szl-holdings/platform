@@ -56,6 +56,10 @@ export function validateStartupConfig(): ValidationResult {
     warnings.push("CORS_ORIGINS not set in production — cross-origin requests may be blocked");
   }
 
+  if (!process.env.ALLOY_INTERNAL_TOKEN) {
+    warnings.push("ALLOY_INTERNAL_TOKEN not set — AlloyChat admin context will be degraded (401 on internal admin fetches)");
+  }
+
   const valid = errors.length === 0;
 
   if (!valid) {

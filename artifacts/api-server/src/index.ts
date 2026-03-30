@@ -7,6 +7,7 @@ import { jobQueue } from "./lib/job-queue";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
 import { agentScheduler } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
+import { ensureAlloyTables } from "./lib/alloy-migrations";
 
 failFastOnInvalidConfig();
 
@@ -28,12 +29,15 @@ const server = http.createServer(app);
 
 initWebSocket(server);
 startDomainNotificationGenerators();
-knowledgeStore.loadFromDb().then(() => {
-  agentScheduler.start();
-}).catch(err => {
-  logger.error({ err }, "Failed to initialize knowledge store from DB, starting scheduler anyway");
-  agentScheduler.start();
-});
+ensureAlloyTables()
+  .then(() => knowledgeStore.loadFromDb())
+  .then(() => {
+    agentScheduler.start();
+  })
+  .catch(err => {
+    logger.fatal({ err }, "Alloy schema bootstrap failed — cannot guarantee data integrity, shutting down");
+    process.exit(1);
+  });
 
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");

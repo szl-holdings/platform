@@ -152,6 +152,49 @@ AI-powered domain agents are implemented for each application, with specialized 
 - **Domain Notification Generators (`artifacts/api-server/src/lib/domain-notifications.ts`):** Periodic background generators produce realistic domain-specific notifications for 7 apps: Firestorm (threat alerts, SLA breaches, MITRE ATT&CK, compliance drift), Vessels (dark vessel alerts, route deviations, port congestion), MSP (SLA breaches, device offline, contract renewals, NOC escalations), Lyte (P1 incidents, SLO burn rate, anomalies, on-call escalations), Terra (lease expiry, vacancy spikes, market updates, investment alerts), INCA (model drift, training completion, GPU warnings, model registry), Dreamscape (campaign milestones, content approvals, brand voice deviations, social publishing). Notifications publish via WebSocket to all connected clients every ~45s with per-domain jitter. Started in `index.ts` after WebSocket init.
 - **Graceful Fallback:** When unauthenticated, `useNotificationCenter` suppresses the 401 error and shows an empty notifications panel. WS notifications still flow to all connected clients regardless of auth state.
 
+### Alloy Platform Core — Orchestration Engine (Task #123)
+The canonical shared data model and orchestration engine powering all platform apps.
+
+#### Canonical Data Model (`lib/db/src/schema/alloy.ts`)
+7 new Drizzle tables: `alloy_owners`, `alloy_signals`, `alloy_workflows`, `alloy_workflow_runs`, `alloy_approvals`, `alloy_actions`, `alloy_artifacts`, plus `alloy_audit_log`. Full relations defined. Schema auto-migrated on server startup via `ensureAlloyTables()`.
+
+#### Alloy Ingestion Layer (`/api/alloy/signals/*`)
+- `POST /alloy/signals/webhook` — public webhook receiver (dedup via sha256 key)
+- `POST /alloy/signals/batch` — batch import up to 100 signals (requires ops/analyst role)
+- `POST /alloy/signals/manual` — admin manual input (requires ops/operator)
+- `POST /alloy/signals/demo` — test/demo seeder (requires ops)
+
+#### Alloy Normalization Pipeline (`src/lib/alloy-normalization.ts`)
+Keyword-based severity classification, domain category assignment, confidence scoring, tag enrichment, and rules engine output (score, valueAtRisk, workflowType, priority, escalationRequired, anomalyFlag).
+
+#### Alloy Workflow Orchestration Engine (`src/lib/alloy-orchestration.ts`)
+- `processSignalIntoWorkflow()` — auto-routes signals to typed workflows
+- `startWorkflowRun()` / `completeWorkflowRun()` — run history tracking
+- `requestApproval()` / `reviewApproval()` — approval gate management
+- `generateArtifact()` — output artifact creation (summary, alert, proposal, brief, etc.)
+- `writeAuditLog()` — immutable audit trail on all state changes
+- Extends existing job queue with ALLOY job types
+
+#### Alloy API Routes (`/api/alloy/*`)
+- Signals: GET list/detail, POST webhook/batch/manual/demo
+- Workflows: GET list/detail, POST create/run, GET history
+- Approvals: GET list (ops+), POST review decision
+- Artifacts: GET list, POST create
+- Audit: GET log (super_admin/compliance)
+- Actions: GET list
+- Owners: GET list, POST create
+- Status: GET (public health check)
+
+#### Auth Hardening
+- `adminGuard` middleware (`src/middlewares/admin-guard.ts`): Protects all `/admin/*` routes. Allows internal server-to-server calls (localhost). External requests require valid Bearer token + admin role (super_admin/ops/exec).
+- All Alloy routes use `authMiddleware()` + `requireRole()` for least-privilege enforcement.
+
+#### Environment Discipline (`src/lib/env-config.ts`)
+Centralized `ENV_CONFIG` object: environment detection, Alloy feature flags (`FEATURE_ALLOY_ORCHESTRATION`, `FEATURE_ALLOY_GOVERNANCE`, `FEATURE_ALLOY_WEBHOOKS`, `FEATURE_AUDIT_LOGGING`), and auth config.
+
+#### Nimbus Absorption
+Nimbus (`/nimbus` routes) removed as public-facing entity. Predictive intelligence capabilities remain in Dreamscape/Alloy. `/nimbus` API alias removed from route index.
+
 ### Infrastructure Hardening (Task #58)
 - **Graceful Shutdown:** SIGTERM/SIGINT handlers drain HTTP connections, flush job queue, and close DB pool within 10s
 - **Response Compression:** `compression` middleware (gzip) on all responses ≥1KB
