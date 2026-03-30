@@ -3,6 +3,8 @@ import { Activity, Target, ShieldAlert, BellRing, TrendingUp, ArrowUpRight } fro
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from "framer-motion";
 
+const IS_DEMO = import.meta.env.VITE_DEMO_MODE !== "false";
+
 const mockProgram = { name: "SZL Security Readiness Program", overallScore: 78.4, targetScore: 90, status: "active" };
 const mockDimensions = [
   { id: 1, name: "Identify", category: "NIST CSF", currentScore: 82, targetScore: 85, assessorName: "J. Chen", lastAssessedAt: "2026-03-01" },
@@ -75,16 +77,35 @@ function DimensionBar({ name, score, target, index }: { name: string; score: num
 }
 
 export default function ReadinessDashboard() {
-  const activeProgram = mockProgram;
-  const criticalRisks = mockRisks.filter(r => r.severity === 'critical' && r.status !== 'resolved');
-  const unreadAlerts = mockAlerts.filter(a => !a.isRead);
-  const sortedDimensions = [...mockDimensions].sort((a, b) => b.currentScore - a.currentScore);
-  const overallScore = useAnimatedCounter(activeProgram.overallScore, 1400, 1);
+  const criticalRisks = IS_DEMO ? mockRisks.filter(r => r.severity === 'critical' && r.status !== 'resolved') : [];
+  const unreadAlerts = IS_DEMO ? mockAlerts.filter(a => !a.isRead) : [];
+  const sortedDimensions = IS_DEMO ? [...mockDimensions].sort((a, b) => b.currentScore - a.currentScore) : [];
+  const overallScore = useAnimatedCounter(IS_DEMO ? mockProgram.overallScore : 0, 1400, 1);
 
   const chartData = sortedDimensions.map(d => ({ name: d.name.slice(0, 8), score: d.currentScore, target: d.targetScore }));
 
+  if (!IS_DEMO) {
+    return (
+      <div className="space-y-6">
+        <header>
+          <h1 className="font-display text-lg font-bold text-orange-50">Readiness Posture</h1>
+          <p className="text-orange-400/50 text-xs mt-0.5">NIST CSF · ISO 27001 · CMMC frameworks</p>
+        </header>
+        <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-10 flex flex-col items-center justify-center text-center gap-3">
+          <Target className="w-8 h-8 text-orange-400/40" />
+          <p className="text-orange-50/70 text-sm font-medium">No readiness program configured</p>
+          <p className="text-orange-400/40 text-xs max-w-sm">Connect your compliance data source or enable simulation mode to view readiness scores and dimension performance.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-orange-500/10 border border-orange-500/20 text-orange-400/80">
+        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
+        Simulation Data — All scores and metrics shown are illustrative. No real compliance assessments are represented.
+      </div>
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h1 className="font-display text-lg font-bold text-orange-50">Readiness Posture</h1>
@@ -93,7 +114,7 @@ export default function ReadinessDashboard() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
           <div className="bg-orange-500/10 border border-orange-500/20 px-4 py-2 rounded-xl text-orange-50 font-medium flex items-center gap-2 text-xs">
             <Activity className="w-3.5 h-3.5 text-orange-400" />
-            <span>{activeProgram.name}</span>
+            <span>{mockProgram.name}</span>
           </div>
         </motion.div>
       </header>
@@ -109,9 +130,9 @@ export default function ReadinessDashboard() {
             <Target className="w-3.5 h-3.5" /> Overall Readiness Score
           </div>
           <div className="text-7xl font-display font-bold text-orange-50 my-4">{overallScore}</div>
-          <p className="text-xs text-orange-400/50">out of {activeProgram.targetScore} target</p>
+          <p className="text-xs text-orange-400/50">out of {mockProgram.targetScore} target</p>
           <div className="w-full grid grid-cols-2 gap-4 mt-6 pt-5 border-t border-orange-500/10">
-            <div><div className="text-xs text-orange-400/40 mb-1">Target</div><div className="text-xl font-bold text-orange-50">{activeProgram.targetScore}</div></div>
+            <div><div className="text-xs text-orange-400/40 mb-1">Target</div><div className="text-xl font-bold text-orange-50">{mockProgram.targetScore}</div></div>
             <div><div className="text-xs text-orange-400/40 mb-1">Status</div><div className="text-xs font-bold flex items-center gap-1 bg-emerald-500/10 text-emerald-400 w-max px-2.5 py-1 rounded-lg"><ArrowUpRight className="w-3.5 h-3.5" /> On Track</div></div>
           </div>
         </motion.div>

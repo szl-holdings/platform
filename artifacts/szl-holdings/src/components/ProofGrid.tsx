@@ -1,11 +1,10 @@
-import { useRef, useEffect, useState } from "react";
-import { m, useInView } from "framer-motion";
+import { m } from "framer-motion";
 
-const KPI_METRICS = [
-  { numericValue: 340, prefix: "$", suffix: "K", label: "Revenue recovered / quarter", sublabel: "Approval latency detection", accent: "hsl(192,80%,48%)", accentRgb: "6,182,212" },
-  { numericValue: 34, prefix: "", suffix: " days", label: "Dark vessel pre-detection lead", sublabel: "Before formal designation", accent: "hsl(210,78%,44%)", accentRgb: "34,104,175" },
-  { numericValue: 3.4, prefix: "", suffix: "×", label: "Decision velocity gain", sublabel: "Workflow orchestration", accent: "hsl(222,68%,58%)", accentRgb: "86,122,214" },
-  { numericValue: 40, prefix: "", suffix: "%", label: "Lower infrastructure overhead", sublabel: "Shared ecosystem architecture", accent: "hsl(38,55%,58%)", accentRgb: "191,152,82" },
+const PROOF_ITEMS = [
+  { label: "Approval latency detection", sublabel: "Lyte · Business observability", accent: "hsl(192,80%,48%)", accentRgb: "6,182,212" },
+  { label: "Dark vessel pre-detection", sublabel: "Vessels · Before formal designation", accent: "hsl(210,78%,44%)", accentRgb: "34,104,175" },
+  { label: "Decision velocity", sublabel: "Alloy · Workflow orchestration", accent: "hsl(222,68%,58%)", accentRgb: "86,122,214" },
+  { label: "Shared infrastructure advantage", sublabel: "Ecosystem · Architecture leverage", accent: "hsl(38,55%,58%)", accentRgb: "191,152,82" },
 ];
 
 const proofs = [
@@ -21,7 +20,7 @@ const proofs = [
   {
     platform: "Vessels",
     view: "Fleet Command",
-    desc: "10 vessels tracked. Route visibility, voyage economics, and exceptions in one operational layer.",
+    desc: "Route visibility, voyage economics, and exceptions in one operational layer.",
     accent: "hsl(210, 78%, 44%)",
     accentRgb: "34, 104, 175",
     href: "/vessels/",
@@ -46,90 +45,6 @@ const proofs = [
     status: "Live",
   },
 ];
-
-function CountUpKPI({ numericValue, prefix, suffix, label, sublabel, accent, accentRgb }: (typeof KPI_METRICS)[0]) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-  const [display, setDisplay] = useState(0);
-  const isDecimal = numericValue % 1 !== 0;
-
-  useEffect(() => {
-    if (!inView) return;
-    const start = Date.now();
-    const duration = 1400;
-    const tick = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const val = eased * numericValue;
-      setDisplay(isDecimal ? Math.round(val * 10) / 10 : Math.floor(val));
-      if (progress < 1) requestAnimationFrame(tick);
-      else setDisplay(numericValue);
-    };
-    requestAnimationFrame(tick);
-  }, [inView, numericValue, isDecimal]);
-
-  return (
-    <m.div
-      ref={ref}
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        padding: "1.375rem 1.5rem",
-        borderRadius: "4px",
-        background: `rgba(${accentRgb}, 0.04)`,
-        border: `1px solid rgba(${accentRgb}, 0.12)`,
-        borderTop: `1px solid rgba(${accentRgb}, 0.22)`,
-        transition: "all 0.22s ease",
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.background = `rgba(${accentRgb}, 0.07)`;
-        el.style.borderColor = `rgba(${accentRgb}, 0.24)`;
-        el.style.boxShadow = `0 0 18px rgba(${accentRgb}, 0.09)`;
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.background = `rgba(${accentRgb}, 0.04)`;
-        el.style.borderColor = `rgba(${accentRgb}, 0.12)`;
-        el.style.boxShadow = "none";
-      }}
-    >
-      <div style={{
-        fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
-        fontWeight: "700",
-        letterSpacing: "-0.03em",
-        color: accent,
-        fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
-        lineHeight: "1.1",
-        marginBottom: "0.375rem",
-      }}>
-        {prefix}{isDecimal ? display.toFixed(1) : display}{suffix}
-      </div>
-      <p style={{
-        fontSize: "12.5px",
-        fontWeight: "600",
-        color: "hsl(38,12%,82%)",
-        marginBottom: "0.2rem",
-        letterSpacing: "-0.005em",
-        fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
-      }}>
-        {label}
-      </p>
-      <p style={{
-        fontSize: "11px",
-        color: "hsl(210,5%,44%)",
-        fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
-        letterSpacing: "0.04em",
-        textTransform: "uppercase",
-      }}>
-        {sublabel}
-      </p>
-    </m.div>
-  );
-}
 
 export function ProofGrid() {
   return (
@@ -172,15 +87,48 @@ export function ProofGrid() {
         </m.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {KPI_METRICS.map((kpi, i) => (
+          {PROOF_ITEMS.map((item, i) => (
             <m.div
-              key={kpi.label}
+              key={item.label}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                padding: "1.375rem 1.5rem",
+                borderRadius: "4px",
+                background: `rgba(${item.accentRgb}, 0.04)`,
+                border: `1px solid rgba(${item.accentRgb}, 0.12)`,
+                borderTop: `1px solid rgba(${item.accentRgb}, 0.22)`,
+              }}
             >
-              <CountUpKPI key={kpi.label} {...kpi} />
+              <div style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: item.accent,
+                boxShadow: `0 0 6px ${item.accent}70`,
+                marginBottom: "0.875rem",
+              }} />
+              <p style={{
+                fontSize: "12.5px",
+                fontWeight: "600",
+                color: "hsl(38,12%,82%)",
+                marginBottom: "0.2rem",
+                letterSpacing: "-0.005em",
+                fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+              }}>
+                {item.label}
+              </p>
+              <p style={{
+                fontSize: "11px",
+                color: "hsl(210,5%,44%)",
+                fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}>
+                {item.sublabel}
+              </p>
             </m.div>
           ))}
         </div>

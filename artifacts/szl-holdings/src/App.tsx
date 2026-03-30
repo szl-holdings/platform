@@ -5,7 +5,7 @@ import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
 
-const HomePage = lazy(() => import("@/pages/home"));
+const HomePage = lazy(() => import("@/pages/landing"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
 const VenturesPage = lazy(() => import("@/pages/ventures"));
 const FounderPage = lazy(() => import("@/pages/founder"));

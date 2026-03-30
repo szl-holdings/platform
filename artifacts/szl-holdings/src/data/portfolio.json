@@ -89,9 +89,9 @@
     "color": "#6366f1",
     "cta": "View Alloy",
     "metrics": [
-      { "label": "Prediction Models", "value": "12,400+" },
-      { "label": "ARR (Embedded)", "value": "$5.1M" },
-      { "label": "Automations / Day", "value": "48K+" },
+      { "label": "Prediction Models", "value": "Growing" },
+      { "label": "Embedded Revenue", "value": "Active" },
+      { "label": "Automations / Day", "value": "High Volume" },
       { "label": "Connectors Active", "value": "35+" }
     ],
     "marketContext": "AI-powered execution and predictive analytics market expected to reach $14.8B by 2028 (MarketsandMarkets)"
@@ -126,9 +126,9 @@
     "icon": "Zap",
     "color": "#f59e0b",
     "metrics": [
-      { "label": "Models in Production", "value": "640+" },
-      { "label": "Inference Requests/Day", "value": "18M+" },
-      { "label": "GPU Hours Orchestrated", "value": "1.2M+" },
+      { "label": "Models Tracked", "value": "Growing" },
+      { "label": "Inference Volume", "value": "High" },
+      { "label": "Orchestration", "value": "Active" },
       { "label": "Addressable Market", "value": "$1.8T" }
     ],
     "marketContext": "Global AI market projected to reach $1.81T by 2030 (Grand View Research)"
@@ -145,9 +145,9 @@
     "icon": "AlertTriangle",
     "color": "#ef4444",
     "metrics": [
-      { "label": "Active Clients", "value": "47" },
-      { "label": "SLA Compliance", "value": "99.2%" },
-      { "label": "Incidents Resolved/Mo", "value": "1,200+" },
+      { "label": "Active Clients", "value": "Growing" },
+      { "label": "SLA Compliance", "value": "High" },
+      { "label": "Incidents Resolved", "value": "Ongoing" },
       { "label": "Addressable Market", "value": "$23B" }
     ],
     "marketContext": "Managed security services market projected at $23B by 2027 (MarketsandMarkets)"
@@ -164,9 +164,9 @@
     "icon": "Shield",
     "color": "#10b981",
     "metrics": [
-      { "label": "Controls Tracked", "value": "840+" },
-      { "label": "Risk Items Resolved", "value": "2,100+" },
-      { "label": "Compliance Score Avg", "value": "91%" },
+      { "label": "Controls Tracked", "value": "Structured" },
+      { "label": "Risk Items Resolved", "value": "Active" },
+      { "label": "Compliance Posture", "value": "Improving" },
       { "label": "Addressable Market", "value": "$54B" }
     ],
     "marketContext": "GRC market projected at $54B by 2027 (Grand View Research)"
@@ -183,9 +183,9 @@
     "icon": "BarChart3",
     "color": "#0ea5e9",
     "metrics": [
-      { "label": "Markets Monitored", "value": "340+" },
-      { "label": "KPI Signals/Day", "value": "12,000+" },
-      { "label": "Data Sources Integrated", "value": "8" },
+      { "label": "Markets Monitored", "value": "Multi-sector" },
+      { "label": "KPI Signals", "value": "Continuous" },
+      { "label": "Data Sources", "value": "8 Active" },
       { "label": "Addressable Market", "value": "$29B" }
     ],
     "marketContext": "Business intelligence and analytics market projected at $29B by 2027 (Mordor Intelligence)"
@@ -195,7 +195,7 @@
     "name": "INCA",
     "doctrineRole": "UNDERSTAND",
     "tagline": "AI Research Command Center",
-    "description": "AI-native research platform transforming unstructured enterprise data into strategic intelligence — combining experiment tracking, model registry, LLM evaluation, and automated reporting for high-stakes decision environments. $14M Series A closed February 2026.",
+    "description": "AI-native research platform transforming unstructured enterprise data into strategic intelligence — combining experiment tracking, model registry, LLM evaluation, and automated reporting for high-stakes decision environments.",
     "status": "In Development",
     "category": "AI/ML",
     "link": "#",
@@ -203,8 +203,8 @@
     "color": "#10b981",
     "metrics": [
       { "label": "Status", "value": "Private Alpha" },
-      { "label": "Series A", "value": "$14M · Feb 2026" },
-      { "label": "Pilot Clients", "value": "12" },
+      { "label": "Funding", "value": "Backed" },
+      { "label": "Pilot Clients", "value": "Active" },
       { "label": "Addressable Market", "value": "$340B" }
     ],
     "marketContext": "Management consulting and AI evaluation market combined exceeds $340B globally (Statista, 2024)"

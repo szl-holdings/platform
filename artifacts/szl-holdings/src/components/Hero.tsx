@@ -226,7 +226,7 @@ export function Hero() {
                 fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
               }}
             >
-              Structured ventures for modern systems, services, and execution.
+              Building premium command systems across observability, operations, and specialized platforms
             </m.h1>
 
             <m.p
@@ -238,27 +238,10 @@ export function Hero() {
                 fontSize: "1.0625rem",
                 lineHeight: "1.68",
                 maxWidth: "30rem",
-                marginBottom: "1rem",
-              }}
-            >
-              SZL Holdings is the parent behind Alloy, Lyte, Vessels, and Carlota Jo — each venture built around a clear operating model, purpose-structured and designed to compound.
-            </m.p>
-
-            <m.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                color: "hsl(210,5%,40%)",
-                fontSize: "0.8125rem",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                fontWeight: "600",
-                fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
                 marginBottom: "2.5rem",
               }}
             >
-              One holding structure. One operating philosophy. Four distinct brands.
+              SZL Holdings is the ecosystem behind Alloy, Lyte, Vessels, Terra, and high-trust operating brands designed to turn visibility into action and execution into advantage.
             </m.p>
 
             <m.div
@@ -295,7 +278,7 @@ export function Hero() {
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
               >
-                Explore the portfolio
+                Explore the Ecosystem
                 <ArrowRight size={14} strokeWidth={2.5} />
               </Link>
               <Link

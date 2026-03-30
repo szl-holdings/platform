@@ -9,6 +9,8 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 
 type ActivityItem = { type: string; title: string; severity: string; timestamp: string };
 
+const IS_DEMO = import.meta.env.VITE_DEMO_MODE !== "false";
+
 const fallbackData = {
   activeIncidents: 7,
   openAlerts: 34,
@@ -373,10 +375,14 @@ export default function SOCDashboard() {
     queryKey: ["soc-dashboard"],
     queryFn: api.socDashboard.get as () => Promise<SOCData>,
     refetchInterval: 30000,
+    enabled: !IS_DEMO,
   });
 
-  const data: SOCData = useMemo(() => {
-    if (apiData && typeof apiData.activeIncidents === "number") return apiData;
+  const data: SOCData | null = useMemo(() => {
+    if (!IS_DEMO) {
+      if (apiData && typeof apiData.activeIncidents === "number") return apiData;
+      return null;
+    }
     return fallbackData;
   }, [apiData]);
 
@@ -384,8 +390,41 @@ export default function SOCDashboard() {
     (98 * 0.25) + (94 * 0.25) + (87 * 0.25) + (99 * 0.25)
   );
 
+  const safeData = data as SOCData;
+
+  if (!IS_DEMO) {
+    return (
+      <div className="p-5 space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-lg font-bold flex items-center gap-2">
+              <Flame className="w-4.5 h-4.5 text-red-400" />
+              Security Operations Center
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Threat detection, triage, and coordinated response</p>
+          </div>
+        </div>
+        {safeData ? (
+          <div className="text-xs text-muted-foreground">Live SOC data loaded from connected source.</div>
+        ) : (
+          <div className="bg-card border border-border rounded-xl p-10 flex flex-col items-center justify-center text-center gap-3">
+            <Shield className="w-8 h-8 text-muted-foreground/40" />
+            <p className="text-sm font-medium text-foreground/70">No SOC data connected</p>
+            <p className="text-xs text-muted-foreground max-w-sm">Connect your SIEM or data source, or enable simulation mode to view SOC operations and metrics.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="p-5 space-y-5 max-w-[1600px]">
+      {IS_DEMO && (
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400/80">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+          Simulation Environment — All incidents, alerts, and metrics shown are illustrative training data. No real threats are represented.
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-lg font-bold flex items-center gap-2">
@@ -408,14 +447,14 @@ export default function SOCDashboard() {
 
       {/* Threat Posture Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className={`bg-card border rounded-xl p-5 flex items-center gap-4 ${data.activeIncidents > 0 ? "border-red-500/30 ring-1 ring-red-500/10" : "border-border"}`}>
+        <div className={`bg-card border rounded-xl p-5 flex items-center gap-4 ${safeData.activeIncidents > 0 ? "border-red-500/30 ring-1 ring-red-500/10" : "border-border"}`}>
           <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0 animate-pulse">
             <AlertTriangle className="w-6 h-6 text-red-400" />
           </div>
           <div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Active Incidents</p>
-            <p className="text-4xl font-bold font-display mt-0.5 text-red-400"><AnimatedCounter value={data.activeIncidents} /></p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{data.totalIncidents} this quarter</p>
+            <p className="text-4xl font-bold font-display mt-0.5 text-red-400"><AnimatedCounter value={safeData.activeIncidents} /></p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{safeData.totalIncidents} this quarter</p>
           </div>
         </div>
 
@@ -425,8 +464,8 @@ export default function SOCDashboard() {
           </div>
           <div>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Open Alerts</p>
-            <p className="text-4xl font-bold font-display mt-0.5 text-amber-400"><AnimatedCounter value={data.openAlerts} /></p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{data.totalAlerts.toLocaleString()} processed</p>
+            <p className="text-4xl font-bold font-display mt-0.5 text-amber-400"><AnimatedCounter value={safeData.openAlerts} /></p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{safeData.totalAlerts.toLocaleString()} processed</p>
           </div>
         </div>
 
@@ -490,11 +529,11 @@ export default function SOCDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-0">
-              {(data.recentActivity || [] as ActivityItem[]).map((item: ActivityItem, i: number) => (
+              {(safeData.recentActivity || [] as ActivityItem[]).map((item: ActivityItem, i: number) => (
                 <div key={i} className="flex gap-3 group">
                   <div className="flex flex-col items-center">
                     <div className={`w-2 h-2 rounded-full shrink-0 mt-2 ${severityDot[item.severity] || "bg-gray-400"}`} />
-                    {i < (data.recentActivity?.length || 0) - 1 && <div className="w-px flex-1 bg-border/50 my-1" />}
+                    {i < (safeData.recentActivity?.length || 0) - 1 && <div className="w-px flex-1 bg-border/50 my-1" />}
                   </div>
                   <div className="pb-3.5 flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
@@ -547,8 +586,8 @@ export default function SOCDashboard() {
             </div>
             <div className="space-y-2.5 border-t border-border pt-3">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Alert Distribution</p>
-              {Object.entries(data.alertsBySeverity || {}).map(([sev, count]) => {
-                const total = Object.values(data.alertsBySeverity || {}).reduce((a, b) => a + (b as number), 0);
+              {Object.entries(safeData.alertsBySeverity || {}).map(([sev, count]) => {
+                const total = Object.values(safeData.alertsBySeverity || {}).reduce((a, b) => a + (b as number), 0);
                 const pct = Math.round(((count as number) / total) * 100);
                 const color = sev === "critical" ? "bg-red-400" : sev === "high" ? "bg-orange-400" : sev === "medium" ? "bg-amber-400" : "bg-blue-400";
                 const textColor = sev === "critical" ? "text-red-400" : sev === "high" ? "text-orange-400" : sev === "medium" ? "text-amber-400" : "text-blue-400";
