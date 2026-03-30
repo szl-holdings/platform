@@ -1,94 +1,122 @@
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+
+const featuredInsight = {
+  label: "Latest Perspective",
+  title: "Why 73% of Digital Transformations Fail — and What the Other 27% Do Differently",
+  category: "Technology & Operations",
+};
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-950 via-navy-900 to-navy-950" />
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gold-400/3 rounded-full blur-3xl" />
-      </div>
+    <section className="relative min-h-screen flex items-end pb-24 lg:pb-32 overflow-hidden bg-navy-950">
+      <div className="absolute inset-0 border-b border-cream-200/5" />
 
-      <div className="absolute inset-0" style={{
-        backgroundImage: `linear-gradient(to right, rgba(212,168,83,0.03) 1px, transparent 1px),
-                          linear-gradient(to bottom, rgba(212,168,83,0.03) 1px, transparent 1px)`,
-        backgroundSize: "80px 80px",
-      }} />
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-end">
+          <div className="lg:col-span-7">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="text-[11px] font-medium tracking-[0.35em] uppercase text-gold-400 mb-8"
+            >
+              Carlota Jo Advisory
+            </motion.p>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-12 text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.15 }}
+              className="font-serif text-5xl md:text-6xl lg:text-[4.5rem] font-light text-cream-50 leading-[1.1] mb-8"
+            >
+              Strategy for
+              <br />
+              <span className="italic">consequential</span>
+              <br />
+              decisions
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-base md:text-lg text-cream-200/50 font-light max-w-lg leading-relaxed mb-10"
+            >
+              We advise boards, leadership teams, and investors on their most
+              critical strategic challenges — from portfolio transformation to
+              market entry, M&A, and enterprise-wide change.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.45 }}
+              className="flex flex-col sm:flex-row items-start gap-5"
+            >
+              <button
+                onClick={() =>
+                  document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="px-8 py-3.5 bg-gold-500 text-navy-950 text-xs font-medium tracking-[0.15em] uppercase hover:bg-gold-400 transition-colors duration-300"
+              >
+                Start a Conversation
+              </button>
+              <button
+                onClick={() =>
+                  document.querySelector("#perspectives")?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="px-8 py-3.5 text-xs font-medium tracking-[0.15em] uppercase text-cream-200/60 border border-cream-200/12 hover:border-cream-200/25 hover:text-cream-50 transition-all duration-300"
+              >
+                Explore Our Thinking
+              </button>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="lg:col-span-5"
+          >
+            <div className="border border-cream-200/8 p-8 lg:p-10 hover:border-cream-200/15 transition-colors duration-500 group cursor-pointer"
+              onClick={() =>
+                document.querySelector("#perspectives")?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
+              <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-gold-400/70 mb-5">
+                {featuredInsight.label}
+              </p>
+              <p className="text-[11px] tracking-wider uppercase text-cream-300/40 mb-3">
+                {featuredInsight.category}
+              </p>
+              <h3 className="font-serif text-xl md:text-2xl font-light text-cream-50 leading-snug mb-6 group-hover:text-gold-300 transition-colors duration-300">
+                {featuredInsight.title}
+              </h3>
+              <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.15em] uppercase text-gold-400/60 group-hover:text-gold-400 transition-colors">
+                Read the perspective
+                <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-300" />
+              </span>
+            </div>
+          </motion.div>
+        </div>
+
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 1 }}
+          className="mt-20 pt-8 border-t border-cream-200/5 flex flex-wrap items-center gap-x-10 gap-y-3"
         >
-          <p className="text-[11px] font-medium tracking-[0.4em] uppercase text-gold-400/70 mb-10">
-            Strategic Advisory &bull; Portfolio Optimization &bull; Enterprise Transformation
+          <p className="text-[10px] tracking-[0.25em] uppercase text-cream-300/25">
+            Trusted by leadership teams at
           </p>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-          className="font-serif text-5xl md:text-7xl lg:text-[5.5rem] font-light text-cream-50 leading-[1.08] mb-8"
-        >
-          Counsel for
-          <br />
-          <span className="italic text-gold-400">Consequential</span>
-          <br />
-          Decisions
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="text-base md:text-lg text-cream-200/45 font-light max-w-2xl mx-auto leading-relaxed mb-6"
-        >
-          Trusted by boards and leadership teams at Fortune 500 companies,
-          sovereign wealth funds, and private equity portfolios.
-        </motion.p>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-          className="text-sm text-cream-300/30 font-light max-w-xl mx-auto leading-relaxed mb-14"
-        >
-          Rigorous strategy. Proprietary frameworks. Measurable outcomes.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-5"
-        >
-          <a
-            href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/book`}
-            className="px-10 py-4 bg-gold-500/90 text-navy-950 text-xs font-medium tracking-[0.2em] uppercase hover:bg-gold-400 transition-all duration-300"
-          >
-            Request a Consultation
-          </a>
-          <button
-            onClick={() =>
-              document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })
-            }
-            className="px-10 py-4 border border-cream-200/15 text-cream-200/60 text-xs font-medium tracking-[0.2em] uppercase hover:border-gold-500/40 hover:text-gold-400 transition-all duration-300"
-          >
-            Explore Capabilities
-          </button>
+          {["Fortune 500 Industrials", "Global Private Equity", "Sovereign Wealth Funds", "NYSE-Listed Healthcare"].map((name) => (
+            <span key={name} className="text-[11px] tracking-wider text-cream-300/20 font-light">
+              {name}
+            </span>
+          ))}
         </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 1 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2"
-      >
-        <div className="w-px h-16 bg-gradient-to-b from-transparent via-gold-500/30 to-transparent" />
-      </motion.div>
     </section>
   );
 }

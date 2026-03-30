@@ -6,10 +6,9 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
   { label: "Capabilities", href: "#services" },
   { label: "Engagements", href: "#case-studies" },
-  { label: "Perspectives", href: "#testimonials" },
-  { label: "Models", href: "#pricing" },
+  { label: "Perspectives", href: "#perspectives" },
   { label: "Advisory Intel", href: "/advisory", isRoute: true },
-  { label: "Inquire", href: "#contact" },
+  { label: "Contact", href: "#contact" },
 ];
 
 export default function Header() {
@@ -37,7 +36,7 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-navy-950/95 backdrop-blur-md border-b border-gold-500/8"
+          ? "bg-navy-950/95 backdrop-blur-md border-b border-cream-200/5"
           : "bg-transparent"
       }`}
     >
@@ -61,7 +60,7 @@ export default function Header() {
                 <a
                   key={link.href}
                   href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}`}
-                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-gold-400 transition-colors duration-300"
+                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-cream-50 transition-colors duration-300"
                 >
                   {link.label}
                 </a>
@@ -69,18 +68,20 @@ export default function Header() {
                 <button
                   key={link.href}
                   onClick={() => handleNav(link.href)}
-                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-gold-400 transition-colors duration-300"
+                  className="text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/50 hover:text-cream-50 transition-colors duration-300"
                 >
                   {link.label}
                 </button>
               )
             )}
-            <a
-              href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/book`}
-              className="ml-4 px-7 py-2.5 text-[11px] font-medium tracking-[0.2em] uppercase border border-gold-500/30 text-gold-400/80 hover:bg-gold-500/5 hover:border-gold-500/50 transition-all duration-300"
+            <button
+              onClick={() =>
+                document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="ml-4 px-7 py-2.5 text-[11px] font-medium tracking-[0.15em] uppercase border border-cream-200/12 text-cream-200/60 hover:border-gold-500/30 hover:text-gold-400 transition-all duration-300"
             >
-              Request Access
-            </a>
+              Start a Conversation
+            </button>
           </nav>
 
           <button
@@ -99,7 +100,7 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-navy-950/98 backdrop-blur-xl border-b border-gold-500/8"
+            className="lg:hidden bg-navy-950/98 backdrop-blur-xl border-b border-cream-200/5"
           >
             <div className="px-6 py-8 flex flex-col gap-6">
               {navLinks.map((link) =>
@@ -108,7 +109,7 @@ export default function Header() {
                     key={link.href}
                     href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}${link.href}`}
                     onClick={() => setMobileOpen(false)}
-                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-gold-400 transition-colors"
+                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-cream-50 transition-colors"
                   >
                     {link.label}
                   </a>
@@ -116,18 +117,21 @@ export default function Header() {
                   <button
                     key={link.href}
                     onClick={() => handleNav(link.href)}
-                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-gold-400 transition-colors"
+                    className="text-left text-[11px] font-light tracking-[0.2em] uppercase text-cream-200/60 hover:text-cream-50 transition-colors"
                   >
                     {link.label}
                   </button>
                 )
               )}
-              <a
-                href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/book`}
-                className="mt-2 px-6 py-3.5 text-[11px] font-medium tracking-[0.2em] uppercase border border-gold-500/30 text-gold-400/80 hover:bg-gold-500/5 transition-all text-center"
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="mt-2 px-6 py-3.5 text-[11px] font-medium tracking-[0.15em] uppercase border border-cream-200/12 text-cream-200/60 hover:text-gold-400 transition-all text-center"
               >
-                Request Access
-              </a>
+                Start a Conversation
+              </button>
             </div>
           </motion.div>
         )}

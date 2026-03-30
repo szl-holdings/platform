@@ -5,23 +5,23 @@
   --font-serif: 'Cormorant Garamond', 'Georgia', serif;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 
-  --color-navy-950: #090d18;
-  --color-navy-900: #0e1426;
-  --color-navy-800: #18203c;
-  --color-navy-700: #232e52;
-  --color-navy-600: #313d68;
-  --color-navy-500: #475582;
+  --color-navy-950: #0a0c14;
+  --color-navy-900: #0f1320;
+  --color-navy-800: #161c30;
+  --color-navy-700: #1e2740;
+  --color-navy-600: #2a3555;
+  --color-navy-500: #3d4a6a;
 
-  --color-gold-400: #d4a853;
-  --color-gold-500: #c49a3c;
-  --color-gold-600: #b08a30;
-  --color-gold-300: #e0be78;
-  --color-gold-200: #ebd5a0;
+  --color-gold-400: #c9a54e;
+  --color-gold-500: #b8943f;
+  --color-gold-600: #a68334;
+  --color-gold-300: #d9ba6e;
+  --color-gold-200: #e5cf96;
 
   --color-cream-50: #faf8f4;
-  --color-cream-100: #f5f0e8;
-  --color-cream-200: #ebe3d4;
-  --color-cream-300: #ddd2be;
+  --color-cream-100: #f3efe6;
+  --color-cream-200: #e5dfd2;
+  --color-cream-300: #d4ccbb;
 }
 
 * {
@@ -49,7 +49,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -58,7 +58,6 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-navy-700);
-  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
