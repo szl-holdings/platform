@@ -213,4 +213,137 @@ export function buildBookingAckEmail(name: string, appointmentType: string, sche
   `);
 }
 
+export function buildVerifyEmailTemplate(name: string, verifyUrl: string): string {
+  return szlBrand(`
+    <h2>Verify Your Email Address</h2>
+    <p>Hello ${name},</p>
+    <p>Thanks for registering with SZL Holdings. Please verify your email address to activate your account and gain access to the full SZL ecosystem.</p>
+    <div class="highlight">
+      <p class="label">What happens next</p>
+      <p>Click the button below to confirm your email. This link expires in <strong>24 hours</strong>.</p>
+    </div>
+    <a class="cta" href="${verifyUrl}">Verify Email Address</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">If you didn't create this account, you can safely ignore this email. If you're having trouble clicking the button, copy and paste this URL into your browser: <span style="word-break:break-all;">${verifyUrl}</span></p>
+  `);
+}
+
+export function buildPasswordResetEmail(name: string, resetUrl: string): string {
+  return szlBrand(`
+    <h2>Reset Your Password</h2>
+    <p>Hello ${name},</p>
+    <p>We received a request to reset the password for your SZL Holdings account. If you made this request, click the button below.</p>
+    <div class="highlight">
+      <p class="label">Security Notice</p>
+      <p>This link expires in <strong>1 hour</strong>. If you didn't request a password reset, please contact us immediately at <strong>security@szlholdings.com</strong>.</p>
+    </div>
+    <a class="cta" href="${resetUrl}">Reset Password</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">If you're having trouble clicking the button, copy and paste this URL into your browser: <span style="word-break:break-all;">${resetUrl}</span></p>
+  `);
+}
+
+export function buildDemoConfirmationEmail(name: string, company: string, scheduledAt: string, calendarUrl?: string): string {
+  return szlBrand(`
+    <h2>Demo Confirmed — SZL Holdings</h2>
+    <p>Hello ${name},</p>
+    <p>Your product demonstration has been scheduled. We're looking forward to walking you through the full SZL ecosystem and understanding how we can serve <strong>${company}</strong>.</p>
+    <div class="highlight">
+      <p class="label">Session Details</p>
+      <p><strong>Date &amp; Time:</strong> ${scheduledAt}</p>
+      <p><strong>Format:</strong> Private video walkthrough with Q&amp;A</p>
+      <p><strong>Duration:</strong> 45–60 minutes</p>
+    </div>
+    <p>Our team will send dial-in details 30 minutes before the session. If you need to reschedule, reply to this email.</p>
+    ${calendarUrl ? `<a class="cta" href="${calendarUrl}">Add to Calendar</a>` : `<a class="cta" href="https://szlholdings.com">Visit SZL Holdings</a>`}
+  `);
+}
+
+export function buildAccessRequestConfirmationEmail(name: string, productName: string, requestId: string): string {
+  return szlBrand(`
+    <h2>Access Request Received</h2>
+    <p>Hello ${name},</p>
+    <p>Your request for access to <strong>${productName}</strong> has been received and is under review by our team.</p>
+    <div class="highlight">
+      <p class="label">Request Reference</p>
+      <p><strong>#${requestId}</strong></p>
+    </div>
+    <p>Access requests are typically reviewed within <strong>2–3 business days</strong>. You will receive an email notification once a decision has been made. For enterprise or priority access, please contact us directly.</p>
+    <div class="highlight">
+      <p>Enterprise inquiries: <strong>enterprise@szlholdings.com</strong></p>
+    </div>
+    <a class="cta" href="https://szlholdings.com/corporate">Learn More About SZL</a>
+  `);
+}
+
+export function buildClientPortalInviteEmail(name: string, company: string, inviteUrl: string, expiresAt: string): string {
+  return szlBrand(`
+    <h2>You're Invited to the SZL Client Portal</h2>
+    <p>Hello ${name},</p>
+    <p>You have been granted access to the SZL Holdings client portal on behalf of <strong>${company}</strong>. This secure portal gives you direct visibility into project status, reporting, and communications.</p>
+    <div class="highlight">
+      <p class="label">Invitation Details</p>
+      <p><strong>Organization:</strong> ${company}</p>
+      <p><strong>Access Expires:</strong> ${expiresAt}</p>
+    </div>
+    <p>Click below to set up your credentials and access the portal. This invitation link can only be used once.</p>
+    <a class="cta" href="${inviteUrl}">Accept Invitation</a>
+    <p style="margin-top:20px;font-size:12px;color:#9ca3af;">If you did not expect this invitation, please contact us at <strong>security@szlholdings.com</strong>. Do not share this link with others.</p>
+  `);
+}
+
+export function buildBillingNotificationEmail(params: {
+  name: string;
+  eventType: "invoice_paid" | "invoice_due" | "payment_failed" | "subscription_renewed" | "subscription_cancelled" | "trial_ending";
+  amount?: string;
+  currency?: string;
+  invoiceUrl?: string;
+  dueDate?: string;
+  renewalDate?: string;
+  trialEndDate?: string;
+}): string {
+  const { name, eventType, amount, currency = "USD", invoiceUrl, dueDate, renewalDate, trialEndDate } = params;
+
+  const eventMessages: Record<typeof eventType, { title: string; body: string }> = {
+    invoice_paid: {
+      title: "Payment Received",
+      body: `Your payment of <strong>${amount} ${currency}</strong> has been successfully processed. Your services remain active and uninterrupted.`,
+    },
+    invoice_due: {
+      title: "Invoice Due Soon",
+      body: `An invoice of <strong>${amount} ${currency}</strong> is due on <strong>${dueDate}</strong>. Please ensure your payment method is up to date to avoid any service interruption.`,
+    },
+    payment_failed: {
+      title: "Payment Failed — Action Required",
+      body: `We were unable to process your payment of <strong>${amount} ${currency}</strong>. Please update your payment method immediately to avoid service interruption.`,
+    },
+    subscription_renewed: {
+      title: "Subscription Renewed",
+      body: `Your SZL Holdings subscription has been successfully renewed. Your next billing date is <strong>${renewalDate}</strong>.`,
+    },
+    subscription_cancelled: {
+      title: "Subscription Cancelled",
+      body: `Your subscription has been cancelled. You will continue to have access until your current billing period ends. We're sorry to see you go — contact us if there's anything we can improve.`,
+    },
+    trial_ending: {
+      title: "Your Trial is Ending Soon",
+      body: `Your free trial ends on <strong>${trialEndDate}</strong>. To continue accessing SZL Holdings services without interruption, please upgrade your plan before that date.`,
+    },
+  };
+
+  const { title, body } = eventMessages[eventType];
+
+  return szlBrand(`
+    <h2>${title}</h2>
+    <p>Hello ${name},</p>
+    <p>${body}</p>
+    ${invoiceUrl ? `
+    <div class="highlight">
+      <p class="label">Invoice</p>
+      <p>View and download your invoice for your records.</p>
+    </div>
+    <a class="cta" href="${invoiceUrl}">View Invoice</a>
+    ` : `<a class="cta" href="https://szlholdings.com/billing">Manage Billing</a>`}
+    <p style="margin-top:16px;font-size:12px;color:#9ca3af;">Questions about your billing? Contact <strong>billing@szlholdings.com</strong></p>
+  `);
+}
+
 export { INTERNAL_EMAIL };

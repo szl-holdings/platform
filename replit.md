@@ -41,6 +41,38 @@ A premium design system via `@workspace/shared-ui` ensures consistent aesthetics
 
 **Bug fixed in `lib/shared-ui/src/tokens.ts`:** Added missing `_legacy.glassmorphism`, `_legacyGlass`, and `status` token objects that `components.ts` was referencing (caused Firestorm crash).
 
+### Admin Panel CMS (Sprint 3)
+The admin panel now includes full CRUD for all 16 CMS tables via 4 new pages:
+- **`/cms`** — Full CRUD for all CMS tables (sites, ventures, articles, testimonials, etc.) with list/create/edit/delete modal dialogs
+- **`/media`** — Media asset browser with upload (file type/size validation), preview, and delete
+- **`/site-settings`** — Per-brand site settings management (branding, contact, social, feature flags, analytics)
+- **`/analytics-overview`** — Plausible analytics event tracking overview for all 12 event types
+
+New API routes added to `artifacts/api-server/src/routes/cms.ts`:
+- `GET /cms/site-settings` — list all site settings (with optional `?site_id=` filter)
+- `POST /cms/site-settings` — upsert a site setting (create or update)
+- `DELETE /cms/site-settings/:id` — delete a site setting
+
+### Analytics (Plausible) — Sprint 3
+`@workspace/analytics` is now wired into all 10 frontend apps via `configurePlausible()` in `main.tsx`:
+- Domain defaults are set per-app (e.g. `szlholdings.com`, `alloyscape.io`, etc.)
+- Overrideable via `VITE_PLAUSIBLE_DOMAIN` environment variable
+- Debug mode enabled in development; localhost tracking disabled
+- 12 analytics events: `page_view`, `cta_click`, `form_submit`, `demo_request`, `access_request`, `private_inquiry_submit`, `sign_in`, `sign_up`, `dashboard_view`, `article_view`, `checkout_started`, `checkout_completed`
+
+### Email Templates (Resend) — Sprint 3
+`artifacts/api-server/src/lib/email.ts` now exports 10 full HTML email templates:
+1. `buildInquiryAckEmail` — contact form acknowledgment
+2. `buildLeadNotificationEmail` — internal lead notification
+3. `buildWelcomeEmail` — new user welcome
+4. `buildBookingAckEmail` — booking/meeting confirmation
+5. `buildVerifyEmailTemplate` — email address verification
+6. `buildPasswordResetEmail` — password reset with 1-hour expiry
+7. `buildDemoConfirmationEmail` — demo session scheduling confirmation
+8. `buildAccessRequestConfirmationEmail` — product access request acknowledgment
+9. `buildClientPortalInviteEmail` — client portal invite with one-time link
+10. `buildBillingNotificationEmail` — billing events (invoice paid/due, payment failed, renewal, cancellation, trial ending)
+
 ### Platform Architecture & Features
 DreamStack comprises 13 applications sharing a PostgreSQL database, authentication, and design system.
 - **Authentication & RBAC:** Middleware manages Bearer token sessions and Replit Auth, with an 11-role RBAC system.

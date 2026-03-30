@@ -65,6 +65,10 @@ const AgentTrainingPage = lazy(() => import("@/pages/agent-training"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ConnectorHealth = lazy(() => import("@/pages/connector-health"));
 const AgentOSPage = lazy(() => import("@/pages/agent-os"));
+const CMSPage = lazy(() => import("@/pages/cms"));
+const MediaPage = lazy(() => import("@/pages/media"));
+const SiteSettingsPage = lazy(() => import("@/pages/site-settings"));
+const AnalyticsOverviewPage = lazy(() => import("@/pages/analytics-overview"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -98,6 +102,15 @@ const NAV_SECTIONS: NavSection[] = [
       { path: "/integration-health", label: "Integration Health", icon: <Activity className="w-4 h-4" />, badge: "health" },
       { path: "/apps", label: "App Registry", icon: <Layers className="w-4 h-4" /> },
       { path: "/connectors", label: "Connectors", icon: <Plug className="w-4 h-4" /> },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      { path: "/cms", label: "CMS Content", icon: <Layers className="w-4 h-4" /> },
+      { path: "/media", label: "Media Assets", icon: <FolderOpen className="w-4 h-4" /> },
+      { path: "/site-settings", label: "Site Settings", icon: <Globe className="w-4 h-4" /> },
+      { path: "/analytics-overview", label: "Analytics", icon: <Activity className="w-4 h-4" /> },
     ],
   },
   {
@@ -317,6 +330,10 @@ function AppRouter() {
         <Route path="/developer" component={DeveloperPortal} />
         <Route path="/agent-training" component={AgentTrainingPage} />
         <Route path="/agent-os" component={AgentOSPage} />
+        <Route path="/cms" component={CMSPage} />
+        <Route path="/media" component={MediaPage} />
+        <Route path="/site-settings" component={SiteSettingsPage} />
+        <Route path="/analytics-overview" component={AnalyticsOverviewPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

@@ -584,12 +584,38 @@ router.patch("/cms/lead-status/:id", authMiddleware(), async (req, res) => {
 
 // ─── Site Settings ────────────────────────────────────────────────────────────
 
+router.get("/cms/site-settings", async (req, res) => {
+  try {
+    const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
+    let query = db.select().from(siteSettingsTable).$dynamic();
+    if (siteId) query = query.where(eq(siteSettingsTable.siteId, siteId));
+    const rows = await query.orderBy(asc(siteSettingsTable.key));
+    sendSuccess(res, rows);
+  } catch (err) { handleRouteError(res, err, "Failed to list site settings"); }
+});
+
 router.get("/cms/site-settings/:siteId", async (req, res) => {
   try {
     const siteId = parseIdParam(req.params.siteId);
     const rows = await db.select().from(siteSettingsTable).where(eq(siteSettingsTable.siteId, siteId));
     sendSuccess(res, rows);
   } catch (err) { handleRouteError(res, err, "Failed to get site settings"); }
+});
+
+router.post("/cms/site-settings", authMiddleware(), async (req, res) => {
+  try {
+    const { siteId, key, valueJson } = req.body;
+    const [existing] = await db.select().from(siteSettingsTable)
+      .where(and(eq(siteSettingsTable.siteId, siteId), eq(siteSettingsTable.key, key)));
+    if (existing) {
+      const [row] = await db.update(siteSettingsTable).set({ valueJson, updatedAt: new Date() })
+        .where(eq(siteSettingsTable.id, existing.id)).returning();
+      sendSuccess(res, row);
+    } else {
+      const [row] = await db.insert(siteSettingsTable).values({ siteId, key, valueJson }).returning();
+      sendSuccess(res, row, 201);
+    }
+  } catch (err) { handleRouteError(res, err, "Failed to set site setting"); }
 });
 
 router.put("/cms/site-settings", authMiddleware(), async (req, res) => {
@@ -608,17 +634,23 @@ router.put("/cms/site-settings", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to set site setting"); }
 });
 
+router.delete("/cms/site-settings/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    await db.delete(siteSettingsTable).where(eq(siteSettingsTable.id, id));
+    sendSuccess(res, { deleted: true });
+  } catch (err) { handleRouteError(res, err, "Failed to delete site setting"); }
+});
+
 // ─── Media Assets ─────────────────────────────────────────────────────────────
 
 router.get("/cms/media-assets", async (req, res) => {
   try {
-    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const siteId = req.query.site_id ? parseInt(req.query.site_id as string) : undefined;
     let query = db.select().from(mediaAssetsTable).$dynamic();
     if (siteId) query = query.where(eq(mediaAssetsTable.siteId, siteId));
-    const rows = await query.orderBy(desc(mediaAssetsTable.createdAt)).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(mediaAssetsTable);
-    sendSuccess(res, { data: rows, meta: { page, limit, total: count } });
+    const rows = await query.orderBy(desc(mediaAssetsTable.createdAt)).limit(200);
+    sendSuccess(res, rows);
   } catch (err) { handleRouteError(res, err, "Failed to list media assets"); }
 });
 

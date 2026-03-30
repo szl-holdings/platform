@@ -242,6 +242,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -399,6 +402,9 @@ importers:
 
   artifacts/carlota-jo:
     dependencies:
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -581,6 +587,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
@@ -780,6 +789,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
@@ -861,6 +873,9 @@ importers:
 
   artifacts/inca:
     dependencies:
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -1049,6 +1064,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
@@ -1368,6 +1386,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -1733,6 +1754,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
@@ -1814,6 +1838,9 @@ importers:
 
   artifacts/szl-holdings:
     dependencies:
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -1911,6 +1938,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -2074,6 +2104,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/analytics':
+        specifier: workspace:*
+        version: link:../../lib/analytics
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
