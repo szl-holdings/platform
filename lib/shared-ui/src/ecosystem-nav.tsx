@@ -151,15 +151,17 @@ const LEVEL_DOT: Record<EcosystemNotification["level"], string> = {
 };
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
   useEffect(() => {
     function handleMouseDown(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
-        handler();
+        handlerRef.current();
       }
     }
     document.addEventListener("mousedown", handleMouseDown);
     return () => document.removeEventListener("mousedown", handleMouseDown);
-  }, [ref, handler]);
+  }, [ref]);
 }
 
 function AppGridIcon({ app, isCurrent }: { app: EcosystemApp; isCurrent: boolean }) {
@@ -837,16 +839,19 @@ function getDomainSearchResults(q: string): SearchResult[] {
   return results;
 }
 
+const EMPTY_NOTIFICATIONS: EcosystemNotification[] = [];
+
 export function EcosystemNav({
   currentAppId,
   currentAppName,
   accentColor = "#a855f7",
-  notifications = [],
+  notifications: notificationsProp,
   onNotificationRead,
   onSearch,
   userName = "Admin",
   userRole = "Operator",
 }: EcosystemNavProps) {
+  const notifications = notificationsProp ?? EMPTY_NOTIFICATIONS;
   const [showAppSwitcher, setShowAppSwitcher] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
