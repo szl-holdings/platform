@@ -38,7 +38,7 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all applications, offering SSE streaming, markdown rendering, and suggested questions.
 - **Observability:** Structured logging via pino and system health monitoring (DB, storage, auth, connectors).
 - **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` manages access based on entitlements and usage limits.
-- **Admin Panel (`admin-panel`, route: `/admin/`):** System administration — health monitoring, app registry, connectors, user roles, audit logs, webhooks, feature flags, billing, and environment readiness.
+- **Admin Panel (`admin-panel`, route: `/admin/`):** System administration — health monitoring, app registry, connectors, user roles, audit logs, webhooks, feature flags, billing, environment readiness, and Developer Portal (7-page API documentation: Getting Started, API Explorer, API Keys, Webhooks, Rate Limits, SDK Guide, Plugins).
 
 #### Application Portfolio
 - **Project List (`project-list`, route: `/`):** Main portfolio with hero section, project showcase, spectrum analytics (`/spectrum`), and social links.
@@ -87,6 +87,15 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 `scripts/post-merge.sh` runs `pnpm install --frozen-lockfile` then `yes '' | pnpm --filter db push || true` to handle interactive drizzle-kit prompts automatically.
 
 - `lib/observability`: Intelligent Observability framework with metric collectors, 6-pillar interfaces, domain configs for all 9 apps, React provider/hooks, and ObservabilityPanel component.
+
+### Consolidated Content (from GitHub repos)
+- **`social-content/`**: 24 banners (LinkedIn/X/Instagram/YouTube + 8-week campaign), 16 hero screenshots, 7 PDF guides (marketing playbook, carousels, profile kit), content calendar, hackajob profile, Lyte logos
+- **`infra/`**: Azure Bicep IaC — 9 modules (containerapp, frontdoor, postgres, redis, keyvault, vnet, storage, alerting, staticwebapp) + main.bicep + parameters.json
+- **`docs/reports/`**: Platform smoke test and stress test reports
+- **`exports/`**: Lyte logo SVG
+
+### Applications Count
+15 apps total: Project List, Stephen Site, SZL Holdings, Vessels, Firestorm, Lyte Command Center, INCA, Readiness Report, Terra, Dreamscape, Carlota Jo, Admin Panel, MSP Command Center, API Server, Mockup Sandbox
 
 ## External Dependencies
 - **Database:** PostgreSQL

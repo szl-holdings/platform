@@ -26,6 +26,7 @@ import InfrastructurePage from "@/pages/infrastructure";
 import PlatformHealthPage from "@/pages/platform-health";
 import LoadTestDashboardPage from "@/pages/load-test-dashboard";
 import WorkflowAutomation from "@/pages/workflow-automation";
+import DeveloperPortal from "@/pages/developer-portal";
 import NotFound from "@/pages/not-found";
 import { api } from "@/lib/api";
 import {
@@ -94,6 +95,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/platform-health", label: "Health Reports", icon: <FileText className="w-4 h-4" /> },
   { path: "/load-tests", label: "Load Tests", icon: <Gauge className="w-4 h-4" /> },
   { path: "/workflows", label: "Workflows", icon: <Activity className="w-4 h-4" />, section: "Automation" },
+  { path: "/developer", label: "Developer Portal", icon: <Globe className="w-4 h-4" />, section: "Developer" },
 ];
 
 function HealthBadge() {
@@ -235,6 +237,7 @@ function AppRouter() {
       <Route path="/platform-health" component={PlatformHealthPage} />
       <Route path="/load-tests" component={LoadTestDashboardPage} />
       <Route path="/workflows" component={WorkflowAutomation} />
+      <Route path="/developer" component={DeveloperPortal} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -152,6 +152,17 @@
   }
 }
 
+.dev-portal-scope .text-text-secondary { color: hsl(var(--muted-foreground)); }
+.dev-portal-scope .text-text-muted { color: hsl(215 12% 45%); }
+.dev-portal-scope .text-accent { color: hsl(var(--primary)); }
+.dev-portal-scope .text-info { color: hsl(200 90% 55%); }
+.dev-portal-scope .text-success { color: hsl(160 70% 45%); }
+.dev-portal-scope .text-warning { color: hsl(35 95% 55%); }
+.dev-portal-scope .text-error { color: hsl(0 72% 55%); }
+.dev-portal-scope .bg-surface { background-color: hsl(var(--card)); }
+.dev-portal-scope .bg-surface-alt { background-color: hsl(var(--muted)); }
+.dev-portal-scope .border-border-bright { border-color: hsl(220 15% 20%); }
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
