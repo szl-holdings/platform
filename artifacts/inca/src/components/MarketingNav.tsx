@@ -6,7 +6,7 @@ const navLinks = [
   { label: "Platform", href: "/platform" },
   { label: "Capabilities", href: "/capabilities" },
   { label: "Security", href: "/security" },
-  { label: "Insights", href: "/insights-hub" },
+  { label: "Insights", href: "/insights" },
   { label: "Request Access", href: "/request-access" },
 ];
 

@@ -4,7 +4,7 @@ import { Link } from "wouter";
 const productLinks = [
   { label: "Platform", href: "/platform" },
   { label: "Security", href: "/security" },
-  { label: "Insights", href: "/insights-hub" },
+  { label: "Insights", href: "/insights" },
   { label: "Request Access", href: "/request-access" },
 ];
 

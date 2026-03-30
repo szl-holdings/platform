@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { lazy, Suspense, useEffect } from "react";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { IncaAgentIndicator } from "@workspace/shared-ui/inca-agent-indicator";
@@ -56,7 +56,7 @@ function App() {
               <Suspense fallback={<PageLoader />}><UpdatesPage /></Suspense>
             </Route>
             <Route path="/portfolio">
-              <Suspense fallback={<PageLoader />}><PortfolioPage /></Suspense>
+              <Redirect to="/ventures" />
             </Route>
             <Route path="/founder">
               <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>

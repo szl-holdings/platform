@@ -6,7 +6,7 @@ import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { label: "Ecosystem", href: "/portfolio" },
+  { label: "Ventures", href: "/ventures" },
   { label: "Alloy", href: "/ventures/alloy", external: "/alloy/" },
   { label: "Lyte", href: "/ventures/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/ventures/vessels", external: "/vessels/" },

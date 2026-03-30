@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, Link, useLocation, Redirect } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -87,7 +87,7 @@ const researchNavItems = [
 ];
 
 const secondaryNavItems = [
-  { path: "/insights", label: "Insights", icon: Lightbulb },
+  { path: "/dashboard/insights", label: "Insights", icon: Lightbulb },
   { path: "/observability", label: "Observability", icon: Activity },
   { path: "/predictions", label: "Predictions", icon: TrendingUp },
   { path: "/alerts", label: "Alerts", icon: BellRing },
@@ -302,7 +302,7 @@ function DashboardRouter() {
         <Route path="/projects/:id" component={ProjectDetail} />
         <Route path="/experiments" component={Experiments} />
         <Route path="/models" component={Models} />
-        <Route path="/insights" component={Insights} />
+        <Route path="/dashboard/insights" component={Insights} />
         <Route path="/observability" component={ObservabilityPage} />
         <Route path="/predictions" component={Predictions} />
         <Route path="/alerts" component={AlertsManagement} />
@@ -394,7 +394,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/chasqui") || location.startsWith("/dual-mind") ||
     location.startsWith("/willaq-umu") || location.startsWith("/projects") ||
     location.startsWith("/experiments") || location.startsWith("/models") ||
-    location.startsWith("/insights") || location.startsWith("/observability") ||
+    location.startsWith("/observability") ||
     location.startsWith("/predictions") || location.startsWith("/alerts") ||
     location.startsWith("/ensemble") || location.startsWith("/drift") ||
     location.startsWith("/anomalies") || location.startsWith("/correlation-alerts") ||
@@ -415,7 +415,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         <Route path="/platform" component={IncaPlatformPage} />
         <Route path="/capabilities" component={IncaCapabilitiesPage} />
         <Route path="/security" component={IncaSecurityPage} />
-        <Route path="/insights-hub" component={IncaInsightsPage} />
+        <Route path="/insights" component={IncaInsightsPage} />
+        <Route path="/insights-hub">
+          <Redirect to="/insights" />
+        </Route>
         <Route path="/request-access" component={RequestAccessPage} />
         <Route path="/sign-in" component={SignInPage} />
         <Route path="/legal/privacy" component={LegalPrivacyPage} />

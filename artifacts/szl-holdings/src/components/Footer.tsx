@@ -12,7 +12,7 @@ const ecosystemLinks = [
 ];
 
 const companyLinks = [
-  { label: "Portfolio", href: "/ventures" },
+  { label: "Ventures", href: "/ventures" },
   { label: "Strategic thesis", href: "/#thesis" },
   { label: "Latest developments", href: "/updates" },
   { label: "Contact", href: "/contact" },
