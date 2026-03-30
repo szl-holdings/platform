@@ -50,6 +50,7 @@ import vesselsPlatformRouter from "./vessels-platform";
 import capitalReadinessRouter from "./capital-readiness";
 import certificationReadinessRouter from "./certification-readiness";
 import ownershipControlRouter from "./ownership-control";
+import coreRouter from "./core";
 import lyteExtendedRouter from "./lyte-extended";
 import vesselsExtendedRouter from "./vessels-extended";
 import terraCrmRouter from "./terra-crm";
@@ -182,5 +183,8 @@ router.use("/terra", writeLimiter);
 router.use(terraCrmRouter);
 router.use("/beacon", writeLimiter);
 router.use(terraCrmRouter);
+
+router.use("/core", readLimiter);
+router.use(coreRouter);
 
 export default router;

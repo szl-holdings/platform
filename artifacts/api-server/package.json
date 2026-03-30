@@ -8,7 +8,8 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "seed:terra": "tsx src/scripts/seed-terra-distress.ts"
+    "seed:terra": "tsx src/scripts/seed-terra-distress.ts",
+    "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts"
   },
   "dependencies": {
     "@types/multer": "^2.1.0",

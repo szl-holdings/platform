@@ -40,6 +40,9 @@ The platform features 13 applications sharing authentication and design.
 - **Service Adapters:** `lib/services` provides a pattern for integrating 27 third-party services with environment variable detection and mock fallbacks.
 - **Stripe Billing:** Full integration for checkout, subscriptions, and webhooks.
 - **Intelligence Layer:** Over 40 REST endpoints provide cross-platform intelligence, including government data feeds with TTL caching and AI-powered endpoints (chat, summarize, sentiment, image-gen, threat-briefing).
+- **Core Command Center:** Unified cross-platform dashboard at `/core` in szl-holdings. Shows live summary cards (distress properties, high-opportunity, open vulns, Nimbus recs, workflow runs), doctrine hierarchy grid, recent recommendations, and platform service health. Four tabs: Overview, Recommendations, Audit, Services.
+- **Core API Endpoints:** `/api/core/health` (real DB latency + uptime), `/api/core/metrics` (aggregate counts across Beacon/Firestorm/AlloyScape/Nimbus/platform), `/api/core/recommendations` POST+GET (Nimbus recommendation engine accepting any entity type, returning score/confidence/reasoning/recommended_action).
+- **Recommendations Table:** `recommendations` DB table stores cross-platform Nimbus recommendations with entity type, score (0–100), confidence (0–1), reasoning, recommended action, and platform source attribution.
 - **Live AI Models:** AI inference primarily uses GPT-5.2 (OpenAI via Replit proxy) and Claude Sonnet 4.6 (Anthropic via Replit proxy).
 - **Nimbus AI Evolution:** Production intelligence layer with core modules for inference telemetry, a unified AI gateway, real-time provider health monitoring, an enhanced model registry, multi-agent orchestration, and composable multi-step AI pipelines.
 - **Domain AI Agents:** 10 specialized advisory-only agents (e.g., Helmsman, Sentinel, INCA) with specialized system prompts and tool definitions, accessible via a unified API.

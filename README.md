@@ -4,28 +4,48 @@
 
 ## The Architecture
 
-The SZL platform is organised into four functional layers. This is not a product portfolio arranged for presentation — it is a working architecture where each layer has a defined contract with the adjacent ones.
+The SZL platform follows a doctrine hierarchy where each platform has a named role. This is not a product portfolio arranged for presentation — it is a working architecture where each layer has a defined contract with the adjacent ones.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ADVISE                                                     │
-│  Carlota Jo Consulting — Brand, Strategy, Advisory          │
-├─────────────────────────────────────────────────────────────┤
-│  EXECUTE                                                    │
-│  AlloyScape — Execution Fabric & Agent Coordination         │
-├─────────────────────────────────────────────────────────────┤
-│  UNDERSTAND                                                 │
-│  INCA — AI Research Command     Nimbus — Predictive Intel   │
-├─────────────────────────────────────────────────────────────┤
-│  OBSERVE                                                    │
-│  Vessels · Maritime    Rosie · Security    Beacon · Ops     │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  ADVISE                                                             │
+│  Carlota Jo Consulting — Brand, Strategy, Advisory                  │
+├─────────────────────────────────────────────────────────────────────┤
+│  EXECUTE                                                            │
+│  AlloyScape — Execution Fabric, Audit, Automation                   │
+├─────────────────────────────────────────────────────────────────────┤
+│  DECIDE                                                             │
+│  Nimbus — Score, Recommend, Explain (cross-platform AI engine)      │
+├─────────────────────────────────────────────────────────────────────┤
+│  INTERPRET                                                          │
+│  Lyte — Route signals, govern models, orchestrate remediation       │
+│  INCA — AI Research, experiment tracking, model registry            │
+├─────────────────────────────────────────────────────────────────────┤
+│  OBSERVE                                                            │
+│  Beacon · Business Telemetry    Rosie · Incident Command            │
+│  Vessels · Maritime Intelligence    Firestorm · Security Simulation │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Observe** — Acquire and structure operational signals across domains.
-**Understand** — Reason across those signals: patterns, anomalies, predictions, confidence.
-**Execute** — Route intelligence into confirmed, traceable human action.
-**Advise** — Translate platform intelligence into strategic decisions, with expert accountability.
+**Observe** (Beacon, Rosie, Vessels, Firestorm) — Acquire and structure operational signals across domains. Detect anomalies, vulnerabilities, incidents, and opportunities.
+**Interpret** (Lyte, INCA) — Reason across signals: route incidents, govern models, correlate patterns.
+**Decide** (Nimbus) — Score any entity type, generate explainable recommendations with confidence scores and rationale.
+**Execute** (AlloyScape) — Route intelligence into confirmed, traceable human action with full audit trail.
+**Advise** (Carlota Jo) — Translate platform intelligence into strategic decisions, with expert accountability.
+
+### Naming Standard
+
+| Platform | Role | Doctrine Label |
+|---|---|---|
+| Beacon (Terra) | Business Telemetry | OBSERVE |
+| Rosie (MSP) | Threat & Incident Command | OBSERVE / COMMAND |
+| Vessels | Maritime Intelligence | TRACK |
+| Firestorm | Security Simulation | SECURE |
+| Lyte | AIOps Command Center | INTERPRET / ROUTE |
+| INCA | AI Research Command | RESEARCH |
+| Nimbus (Dreamscape) | Predictive Intelligence | DECIDE / SCORE |
+| AlloyScape (Alloy) | Execution Fabric | EXECUTE / AUDIT |
+| Carlota Jo | Brand & Strategy Advisory | ADVISE |
 
 ---
 
@@ -64,6 +84,59 @@ Brand strategy, content architecture, and operational transformation advisory. D
 
 **Stephen Lutar — Career** — Founder identity
 Not a portfolio site. A platform architect's narrative: the thesis, the tech, the track record, and the strategic intent behind the ecosystem.
+
+---
+
+## Core Command Center
+
+The SZL Holdings portal includes a unified **Core Command Center** at `/core` — a cross-platform intelligence dashboard that aggregates live telemetry from all platform layers.
+
+**Summary Cards:**
+- Distress Properties — total count from Beacon (NYC + NY)
+- High Opportunity — count of properties with opportunity score ≥ 80
+- Converted Deals — closed won deals
+- Open Vulnerabilities — active Firestorm findings
+- Nimbus Recommendations — all-time scored recommendations
+- Workflow Runs — AlloyScape jobs in the last 30 days
+
+**Tabs:**
+- **Overview** — platform doctrine grid, recent Nimbus recommendations, quick links to all platform products
+- **Recommendations** — browse and generate new Nimbus recommendations for any entity type
+- **Audit** — cross-platform audit event log with source attribution
+- **Services** — real-time health status for all platform APIs (DB latency, uptime)
+
+---
+
+## Platform APIs
+
+The centralised API server (`/api-server`) exposes the following core endpoints in addition to product-specific routes:
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/core/health` | GET | Real service health: DB latency, connectivity, uptime, timestamp |
+| `/api/core/metrics` | GET | Aggregate telemetry across Beacon, Firestorm, AlloyScape, Nimbus |
+| `/api/core/recommendations` | POST | Generate a scored Nimbus recommendation for any entity type |
+| `/api/core/recommendations` | GET | List stored recommendations (filterable by entity type and platform) |
+
+**Recommendation Request Schema:**
+```json
+{
+  "entityType": "distress_property | lead | deal | vulnerability | incident | asset | vessel | signal | workflow | general",
+  "entityId": "optional-entity-id",
+  "platform": "beacon | rosie | firestorm | vessels | nimbus | alloy | inca | general",
+  "context": { "arbitrary": "metadata" }
+}
+```
+
+**Recommendation Response:**
+```json
+{
+  "score": 87,
+  "confidence": 0.82,
+  "reasoning": "Explanation of why this recommendation was made",
+  "recommended_action": "Specific actionable next step"
+}
+```
 
 ---
 

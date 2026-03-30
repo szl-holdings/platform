@@ -19,6 +19,7 @@ const TerraPlatformPage = lazy(() => import("@/pages/terra-platform"));
 const TerraListingsPage = lazy(() => import("@/pages/terra-listings"));
 const OwnershipOsPage = lazy(() => import("@/pages/ownership-os"));
 const InvestorRelationsPage = lazy(() => import("@/pages/investor-relations"));
+const CoreCommandPage = lazy(() => import("@/pages/core-command"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -173,6 +174,9 @@ function App() {
             </Route>
             <Route path="/ir">
               <Redirect to="/investor-relations" />
+            </Route>
+            <Route path="/core">
+              <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
             </Route>
             <Route>
               <Redirect to="/" />

@@ -48,3 +48,4 @@ export * from "./lyte_product";
 export * from "./vessels_intelligence";
 export * from "./platform_ops";
 export * from "./msp";
+export * from "./recommendations";
