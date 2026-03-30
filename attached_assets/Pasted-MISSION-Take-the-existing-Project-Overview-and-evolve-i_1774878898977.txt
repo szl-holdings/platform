@@ -1,0 +1,320 @@
+MISSION
+Take the existing “Project Overview” and evolve it into a world-class, premium, multi-lane digital operating system for the SZL ecosystem. This should no longer behave like a static overview page. It must become a flagship command center and launch surface for all ventures, websites, and applications.
+
+PRIMARY OBJECTIVE
+Create a polished, production-grade platform that feels like a blend of:
+- Linear-level clarity, speed, and structured project visibility
+- Vercel-level design quality, system consistency, and premium front-end craft
+- Stripe-level trust, conversion quality, and commercial readiness
+- Supabase-level secure auth, permissions, realtime data, and modern backend architecture
+- Plausible-level clean analytics and business insight visibility
+- Mapbox-grade geo and realtime visualization where relevant
+- Resend-grade email workflow quality
+
+DO NOT produce a generic template.
+DO NOT produce placeholder-feeling startup UI.
+DO produce a premium, elegant, highly intentional product with serious enterprise-grade structure.
+
+==================================================
+GLOBAL BUILD DIRECTIVE
+==================================================
+
+1) RE-ARCHITECT THE APP
+Refactor the project into a modular monorepo-style structure inside Replit if needed.
+
+Target structure:
+- /apps/overview
+- /apps/brand-sites
+- /apps/client-portal
+- /apps/admin
+- /packages/ui
+- /packages/config
+- /packages/analytics
+- /packages/email
+- /packages/maps
+- /packages/types
+- /supabase
+- /content
+
+Use TypeScript everywhere practical.
+
+2) CORE STACK
+Standardize on:
+- Next.js
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Framer Motion for restrained premium motion
+- Supabase for database/auth/storage/realtime
+- Stripe for payments/subscriptions if monetization exists
+- Plausible for analytics
+- Resend for transactional email
+- Mapbox only where geo/location/fleet/logistics views are needed
+
+3) DESIGN SYSTEM
+Create a reusable design system inspired by top-tier SaaS product craft.
+Implement:
+- design tokens
+- spacing scale
+- typography scale
+- elevation/surface system
+- semantic color tokens
+- component library
+- section templates
+- dark mode support
+- premium microinteractions
+- consistent icon system
+
+The visual language must feel:
+- premium
+- modern
+- minimal
+- confident
+- elegant
+- fast
+- not noisy
+
+4) OVERVIEW APP EVOLUTION
+Transform the current Project Overview into a live command center.
+
+Required sections:
+- flagship hero with ecosystem positioning
+- venture/app cards with live status badges
+- KPI strip
+- roadmap/timeline section
+- latest updates/activity feed
+- quick links into each lane
+- “what is live / what is in build / what is next”
+- trust/proof strip
+- CTA footer
+
+Each venture card must support:
+- title
+- description
+- stage
+- status badge
+- category
+- KPI summary
+- call to action
+- admin edit metadata
+
+5) LANE MODEL
+Create the platform so each business/app/site can live as its own lane.
+
+Each lane should support:
+- landing page
+- about / value proposition
+- services or product modules
+- proof / case studies / metrics
+- contact or conversion CTA
+- optional gated client portal
+- analytics hooks
+- SEO metadata
+- social preview metadata
+
+6) ADMIN + CMS-LIKE CONTROL
+Implement a simple admin layer for editing content without redeploying.
+Use JSON, MDX, Supabase tables, or a hybrid model.
+
+Admin should manage:
+- hero copy
+- cards
+- venture metadata
+- KPIs
+- roadmap items
+- testimonials
+- FAQs
+- service lists
+- CTAs
+- contact settings
+
+7) AUTH + SECURITY
+Implement authentication with Supabase.
+Support:
+- email/password
+- magic link
+- protected admin routes
+- role-based access
+- secure session handling
+
+MANDATORY:
+- enable RLS on all user-facing data tables
+- define policies for public, authenticated, admin
+- separate public content from protected records
+- never expose secrets client-side
+- use environment variables correctly
+
+8) ANALYTICS + OBSERVABILITY
+Instrument the product with business-relevant analytics.
+
+Track:
+- page views
+- lane visits
+- CTA clicks
+- inquiry submissions
+- waitlist joins
+- contact conversions
+- pricing interactions
+- scroll depth on key pages
+- onboarding funnel steps
+- dashboard usage events
+
+Create an internal executive analytics view with:
+- top pages
+- conversion rate by lane
+- source/referrer performance
+- engagement by section
+- funnel drop-offs
+- recent events
+
+9) EMAIL WORKFLOWS
+Implement Resend-based transactional email flows.
+
+Required templates:
+- welcome
+- verify email
+- password reset
+- inquiry received
+- internal lead notification
+- booking/proposal acknowledgment
+
+Templates must be:
+- branded
+- responsive
+- plain-text compatible
+- stored as reusable components/templates
+
+10) SEO + PERFORMANCE
+Every page must be production-grade for discovery and speed.
+
+Implement:
+- metadata
+- Open Graph
+- Twitter cards
+- sitemap
+- robots.txt
+- canonical tags
+- semantic headings
+- optimized images
+- lazy loading where appropriate
+- strong Lighthouse targets
+- mobile-first performance
+
+11) MAPS / GEO (IF APPLICABLE TO ANY LANE)
+Where a lane involves assets, fleet, logistics, or geospatial intelligence, add Mapbox-powered views:
+- interactive map
+- asset markers
+- detail drawer
+- route visualization
+- geofence-ready structure
+- realtime update-ready architecture
+
+12) PAYMENTS / COMMERCE (IF APPLICABLE)
+Where any lane sells retainers, subscriptions, consultations, or services:
+- add Stripe-ready architecture
+- pricing page
+- checkout hooks
+- subscription state
+- customer portal support
+- webhook handling
+- billing status in dashboard
+
+13) CONTENT QUALITY
+Replace generic placeholder copy with premium, executive-level positioning.
+Voice should be:
+- sharp
+- elegant
+- strategic
+- high-trust
+- premium
+- credible
+- not overhyped
+- not cheesy
+
+14) UX REQUIREMENTS
+All interfaces must feel:
+- fast
+- crisp
+- intuitive
+- premium
+- low-friction
+- executive-friendly
+
+Include:
+- skeleton loaders
+- empty states
+- success states
+- graceful errors
+- polished mobile breakpoints
+- accessible contrast and keyboard-friendly navigation
+
+15) DELIVERABLES REQUIRED
+Produce:
+- the refactored codebase
+- reusable UI system
+- seeded content model
+- admin editing path
+- analytics hooks
+- email templates
+- auth flow
+- deployment-ready environment variable guide
+- README with setup and production notes
+
+16) FINAL STANDARD
+The finished system must feel investor-ready, enterprise-ready, and brand-defining.
+It should look like a serious premium technology company built it.
+Every lane should feel cohesive under one master system while still having its own identity.
+
+==================================================
+PHASED EXECUTION ORDER
+==================================================
+
+PHASE 1
+- audit current codebase
+- extract reusable components
+- establish tokens/layout system
+- refactor routing and folder structure
+
+PHASE 2
+- rebuild overview app as command center
+- create venture card model
+- build roadmap/KPI/activity modules
+
+PHASE 3
+- wire Supabase auth/database/storage
+- create admin model
+- add RLS and role handling
+
+PHASE 4
+- add analytics instrumentation
+- add email workflows
+- add Stripe hooks if any paid flows exist
+
+PHASE 5
+- add maps/geospatial modules where relevant
+- tighten performance/SEO/accessibility
+- finalize polish and motion
+
+PHASE 6
+- produce README
+- document env vars
+- ensure production readiness
+- remove placeholder/demo debt
+
+NON-NEGOTIABLES
+- no low-effort template feeling
+- no sloppy visual inconsistency
+- no unsecured public data tables
+- no fake dashboards with dead widgets
+- no lorem ipsum
+- no “coming soon” emptiness unless styled intentionally with roadmap value
+- no clutter
+
+SUCCESS CRITERIA
+- overview becomes a true command center
+- all lanes are scalable and premium
+- design quality is elite
+- backend/security are real
+- analytics are real
+- email workflows are real
+- platform is commercially and operationally ready
