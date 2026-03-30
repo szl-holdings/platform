@@ -28,3 +28,8 @@ export * from "./alloy_chat";
 export * from "./agent_training";
 export * from "./comments";
 export * from "./agent_os";
+export * from "./cms";
+export * from "./vessels_product";
+export * from "./inca_product";
+export * from "./carlota_client";
+export * from "./audit_logs";

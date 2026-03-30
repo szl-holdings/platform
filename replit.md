@@ -16,7 +16,7 @@ Do not make changes to the file `Y`.
 The platform is built as a pnpm monorepo using Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
-- **Database:** PostgreSQL with Drizzle ORM (90+ tables).
+- **Database:** PostgreSQL with Drizzle ORM (120+ tables). Includes full CMS schema (sites, pages, sections, ventures, services, features, use_cases, roadmap_items, updates, testimonials, faqs, ctas, articles, case_studies, downloads, navigation_items, site_settings, media_assets, forms, contact_submissions, lead_status, redirects), product tables (fleets, vessels_assets, journeys, vessel_events, vessel_alerts, vessel_reports, signals, findings, investigations, investigation_items, inca_alerts, inca_reports), Carlota Jo client portal tables (client_accounts, client_documents, client_updates, client_messages), and organization_memberships with a 7-role CMS model (public, authenticated, member, client, editor, admin, super_admin).
 - **Authentication:** Real Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC. Fallback to DevAuthProvider in local dev (when REPL_ID is absent).
 - **API Codegen:** Orval from OpenAPI specification.
 - **Bundling:** esbuild (CJS) and Vite.

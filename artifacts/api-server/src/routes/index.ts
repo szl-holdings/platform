@@ -36,6 +36,7 @@ import terraLiveRouter from "./terra-live";
 import agentTrainingRouter from "./agent-training";
 import commentsRouter from "./comments";
 import agentOsRouter from "./agent-os";
+import cmsRouter from "./cms";
 
 const router: IRouter = Router();
 
@@ -103,5 +104,7 @@ router.use("/comments", writeLimiter);
 router.use(commentsRouter);
 router.use("/agent-os", readLimiter);
 router.use(agentOsRouter);
+router.use("/cms", readLimiter);
+router.use(cmsRouter);
 
 export default router;
