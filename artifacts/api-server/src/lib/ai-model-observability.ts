@@ -1,4 +1,5 @@
-import { getAllAgentIds, getModelConfig, checkFreshness } from "./model-registry";
+import { getAllAgentIds, getModelConfig, checkFreshness, getModelCard, type ModelCard } from "./model-registry";
+import { inferenceTelemetry } from "./inference-telemetry";
 
 export interface AiModelEntry {
   id: string;
@@ -43,45 +44,42 @@ const categoryMap: Record<string, AiModelEntry["category"]> = {
   stephen: "analysis",
 };
 
-const descriptions: Record<string, string> = {
-  inca: "Deep research and knowledge synthesis engine",
-  vessels: "Maritime data analysis and vessel behavior prediction",
-  firestorm: "Vulnerability assessment and penetration test analysis",
-  dreamscape: "Generative design and creative asset production",
-  lyte: "Observability intelligence and SRE recommendation engine",
-  "szl-holdings": "Portfolio concierge and investment analysis",
-  "carlota-jo": "Strategic consulting and engagement analysis",
-  "readiness-report": "Lyte Readiness and risk assessment engine",
-  msp: "Managed services performance and compliance engine",
-  terra: "Real estate market intelligence and property analysis",
-  admin: "Platform administration and control decision support",
-  stephen: "Personal brand and portfolio command agent",
-};
+function buildMetricsFromTelemetry(agentId: string): AiModelEntry["inferenceMetrics"] {
+  const records = inferenceTelemetry.getRecords({ agentId, windowMs: 3600000 });
+  const successes = records.filter(r => r.success);
+  const latencies = successes.map(r => r.latencyMs).sort((a, b) => a - b);
+  const failures = records.filter(r => !r.success).length;
 
-function generateSyntheticMetrics(agentId: string): AiModelEntry["inferenceMetrics"] {
-  const seed = agentId.split("").reduce((s, c) => s + c.charCodeAt(0), 0);
-  const baseLatency = 120 + (seed % 180);
+  if (records.length === 0) {
+    return { avgLatencyMs: 0, p95LatencyMs: 0, p99LatencyMs: 0, requestsPerMinute: 0, errorRate: 0, tokenCostPer1k: null };
+  }
+
+  const windowMinutes = 60;
   return {
-    avgLatencyMs: baseLatency,
-    p95LatencyMs: Math.round(baseLatency * 1.8),
-    p99LatencyMs: Math.round(baseLatency * 2.5),
-    requestsPerMinute: 2 + (seed % 12),
-    errorRate: parseFloat((0.001 + (seed % 5) * 0.001).toFixed(4)),
-    tokenCostPer1k: 0.005,
+    avgLatencyMs: latencies.length > 0 ? Math.round(latencies.reduce((s, l) => s + l, 0) / latencies.length) : 0,
+    p95LatencyMs: latencies.length > 0 ? latencies[Math.ceil(latencies.length * 0.95) - 1]! : 0,
+    p99LatencyMs: latencies.length > 0 ? latencies[Math.ceil(latencies.length * 0.99) - 1]! : 0,
+    requestsPerMinute: parseFloat((records.length / windowMinutes).toFixed(2)),
+    errorRate: parseFloat((failures / records.length).toFixed(4)),
+    tokenCostPer1k: records.reduce((s, r) => s + r.estimatedCostUsd, 0) / Math.max(records.reduce((s, r) => s + r.totalTokens, 0) / 1000, 1),
   };
 }
 
-function generateAccuracyMetrics(agentId: string): AiModelEntry["accuracyMetrics"] {
-  const seed = agentId.split("").reduce((s, c) => s + c.charCodeAt(0), 0);
-  const current = 0.88 + (seed % 10) * 0.01;
-  const baseline = 0.85 + (seed % 8) * 0.01;
-  const drift = parseFloat(Math.abs(current - baseline).toFixed(3));
+function buildAccuracyFromTelemetry(agentId: string): AiModelEntry["accuracyMetrics"] {
+  const recent = inferenceTelemetry.getRecords({ agentId, windowMs: 3600000 });
+  const older = inferenceTelemetry.getRecords({ agentId, windowMs: 86400000 });
+
+  const recentSuccessRate = recent.length > 0 ? recent.filter(r => r.success).length / recent.length : null;
+  const olderSuccessRate = older.length > 0 ? older.filter(r => r.success).length / older.length : null;
+
+  const drift = recentSuccessRate !== null && olderSuccessRate !== null ? Math.abs(recentSuccessRate - olderSuccessRate) : 0;
+
   return {
-    current: parseFloat(current.toFixed(3)),
-    baseline: parseFloat(baseline.toFixed(3)),
-    drift,
-    driftStatus: drift > 0.05 ? "critical" : drift > 0.02 ? "warning" : "stable",
-    lastEvaluated: new Date(Date.now() - (seed % 7) * 86400000).toISOString(),
+    current: recentSuccessRate !== null ? parseFloat(recentSuccessRate.toFixed(3)) : null,
+    baseline: olderSuccessRate !== null ? parseFloat(olderSuccessRate.toFixed(3)) : null,
+    drift: parseFloat(drift.toFixed(3)),
+    driftStatus: drift > 0.1 ? "critical" : drift > 0.05 ? "warning" : "stable",
+    lastEvaluated: recent.length > 0 ? new Date(recent[0]!.timestamp).toISOString() : null,
   };
 }
 
@@ -89,20 +87,20 @@ export function getAiModels(): AiModelEntry[] {
   const agentIds = getAllAgentIds();
 
   return agentIds.map((agentId) => {
-    const config = getModelConfig(agentId);
+    const card = getModelCard(agentId);
     return {
-      id: `model-${agentId}`,
-      name: `${agentId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} Agent`,
-      provider: config.model.includes("gpt") ? "OpenAI" : config.model.includes("claude") ? "Anthropic" : "Replit Proxy",
-      model: config.model,
-      version: "1.0.0",
+      id: card.id,
+      name: card.name,
+      provider: card.provider,
+      model: card.model,
+      version: card.version,
       category: categoryMap[agentId] || "analysis",
-      status: "active",
-      deployedAt: new Date(Date.now() - 7 * 86400000).toISOString(),
-      inferenceMetrics: generateSyntheticMetrics(agentId),
-      accuracyMetrics: generateAccuracyMetrics(agentId),
-      tags: [config.category, agentId],
-      description: descriptions[agentId] || `AI agent for ${agentId}`,
+      status: card.lifecycle,
+      deployedAt: card.lastDeployed,
+      inferenceMetrics: buildMetricsFromTelemetry(agentId),
+      accuracyMetrics: buildAccuracyFromTelemetry(agentId),
+      tags: [card.category, agentId, ...card.capabilities.slice(0, 3)],
+      description: card.purpose,
     };
   });
 }
@@ -118,6 +116,7 @@ export function getModelObservabilitySummary(): {
   avgErrorRate: number;
   driftAlerts: number;
   freshness: ReturnType<typeof checkFreshness>;
+  telemetrySummary: ReturnType<typeof inferenceTelemetry.getSummary>;
 } {
   const models = getAiModels();
   const active = models.filter((m) => m.status === "active");
@@ -132,5 +131,6 @@ export function getModelObservabilitySummary(): {
     avgErrorRate: parseFloat(avgError.toFixed(4)),
     driftAlerts,
     freshness: checkFreshness(),
+    telemetrySummary: inferenceTelemetry.getSummary(),
   };
 }

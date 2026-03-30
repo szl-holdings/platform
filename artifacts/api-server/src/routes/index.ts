@@ -47,6 +47,7 @@ import lytePlatformRouter from "./lyte-platform";
 import vesselsPlatformRouter from "./vessels-platform";
 import capitalReadinessRouter from "./capital-readiness";
 import certificationReadinessRouter from "./certification-readiness";
+import nimbusRouter from "./nimbus";
 
 const router: IRouter = Router();
 
@@ -161,5 +162,8 @@ router.use(capitalReadinessRouter);
 
 router.use("/certification", writeLimiter);
 router.use(certificationReadinessRouter);
+
+router.use("/nimbus", readLimiter);
+router.use(nimbusRouter);
 
 export default router;
