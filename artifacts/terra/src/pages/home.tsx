@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Building2, TrendingUp, Shield, BarChart3, ArrowRight, Zap, Globe, Lock, Users, Cloud, AlertTriangle, DollarSign, Calculator } from "lucide-react";
+import { Building2, TrendingUp, Shield, BarChart3, ArrowRight, Zap, Globe, Lock, Users, Cloud, AlertTriangle, DollarSign, Calculator, Flame, Gavel, FileText, Bell, CheckCircle, Star } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 
@@ -311,6 +311,211 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-display font-bold text-terra-text mb-2 group-hover:text-terra-primary transition-colors">{feature.title}</h3>
                 <p className="text-sm text-terra-text-secondary leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 px-6 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-red-500/5 rounded-full blur-[150px]" />
+          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-orange-500/5 rounded-full blur-[100px]" />
+        </div>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-semibold tracking-wide uppercase mb-5">
+              <Flame className="w-3.5 h-3.5" /> Distress Intelligence Engine · NYC + NY State
+            </span>
+            <h2 className="text-4xl sm:text-5xl font-display font-extrabold text-terra-text mb-5">
+              Find Deals Before the <span className="bg-gradient-to-r from-red-400 via-orange-400 to-amber-400 bg-clip-text text-transparent">Market Does</span>
+            </h2>
+            <p className="text-terra-text-secondary text-lg max-w-2xl mx-auto leading-relaxed">
+              Real-time NYC foreclosure tracking, distress alerts, and AI-powered investor opportunity scoring — across all 5 boroughs and NY State counties.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {[
+              { icon: Flame, label: "Pre-Foreclosure Tracking", description: "Monitor lis pendens filings from Kings, Queens, NY, Bronx, and Richmond county court systems in real time.", color: "from-amber-500 to-orange-500" },
+              { icon: Gavel, label: "Auction Intelligence", description: "NYC auction calendar with 30-day advance notice, property details, debt-to-value analysis, and action windows.", color: "from-purple-500 to-violet-500" },
+              { icon: Bell, label: "Distress Alert System", description: "Configurable alerts for new liens, approaching auctions, price drops, and expired listings in any zip code.", color: "from-red-500 to-rose-500" },
+              { icon: FileText, label: "Tax Lien Discovery", description: "NYC Dept of Finance tax lien database cross-referenced with property ownership and estimated equity.", color: "from-orange-500 to-amber-500" },
+              { icon: Star, label: "Opportunity Scoring", description: "0-100 opportunity score for every distressed property based on distress type, equity, location demand, and time in distress.", color: "from-terra-emerald to-green-400" },
+              { icon: Zap, label: "Deal Conversion", description: "One-click convert distressed properties to CRM leads, active deals, or outreach workflows via AlloyScape.", color: "from-terra-primary to-terra-accent" },
+            ].map((item, i) => (
+              <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                className="group p-5 rounded-xl border border-terra-border bg-terra-surface/50 hover:border-terra-border-hover hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${item.color} mb-3 shadow-lg`}>
+                  <item.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-display font-bold text-terra-text text-sm mb-1.5 group-hover:text-orange-400 transition-colors">{item.label}</h3>
+                <p className="text-xs text-terra-text-secondary leading-relaxed">{item.description}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-terra-surface border border-terra-border rounded-2xl p-6 mb-10">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6">
+              {[
+                { label: "Active Distress Properties", value: "50+", sub: "NYC & NY State" },
+                { label: "Auction Imminent (30 days)", value: "8", sub: "Across all 5 boroughs" },
+                { label: "Avg Opportunity Score", value: "74", sub: "Out of 100" },
+                { label: "Total Distress Value", value: "$240M+", sub: "Combined estimated value" },
+              ].map(stat => (
+                <div key={stat.label} className="text-center">
+                  <p className="text-3xl font-display font-extrabold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">{stat.value}</p>
+                  <p className="text-xs font-semibold text-terra-text mt-1">{stat.label}</p>
+                  <p className="text-[10px] text-terra-text-muted mt-0.5">{stat.sub}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-center gap-4">
+              <Link href="/distress-engine">
+                <span className="group inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold text-base shadow-xl shadow-red-500/30 hover:shadow-2xl hover:shadow-red-500/40 hover:scale-105 active:scale-[0.98] transition-all duration-300 cursor-pointer">
+                  <Flame className="w-5 h-5" />
+                  Explore Opportunities <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Link>
+            </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-terra-surface/50 border border-terra-border/50 rounded-xl p-4">
+            <p className="text-[10px] text-terra-text-muted text-center uppercase tracking-wider font-semibold mb-3">Command Loop — Updated</p>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {["DETECT", "INTERPRET", "DECIDE", "EXECUTE", "VERIFY", "DISCOVER"].map((step, i) => (
+                <div key={step} className="flex items-center gap-2">
+                  <span className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${step === "DISCOVER" ? "bg-gradient-to-r from-red-500/20 to-orange-500/20 border-orange-400/30 text-orange-400" : "bg-terra-primary/10 border-terra-primary/20 text-terra-primary"}`}>
+                    {step}
+                  </span>
+                  {i < 5 && <ArrowRight className="w-3 h-3 text-terra-text-muted flex-shrink-0" />}
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-terra-text-muted text-center mt-3">DISCOVER = new deals, distressed assets, opportunities · Powered by Distress Intelligence Engine</p>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="py-20 px-6 bg-terra-surface">
+        <div className="max-w-6xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+            <span className="text-terra-primary font-semibold text-xs tracking-widest uppercase mb-3 block">Business Model</span>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-terra-text mb-4">
+              Choose Your <span className="bg-gradient-to-r from-terra-primary to-terra-accent bg-clip-text text-transparent">Operating Mode</span>
+            </h2>
+            <p className="text-terra-text-secondary text-sm max-w-xl mx-auto">From basic CRM to elite distress intelligence — every tier is purpose-built for how you work deals.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                tier: "Free",
+                price: "$0",
+                sub: "Forever",
+                gradient: "from-slate-500 to-slate-600",
+                color: "border-slate-500/20",
+                badge: null,
+                features: [
+                  "Basic CRM (up to 50 contacts)",
+                  "Limited listings view",
+                  "Portfolio overview (3 properties)",
+                  "Public market data",
+                  "Basic alerts",
+                ],
+                cta: "Get Started",
+              },
+              {
+                tier: "Pro",
+                subtitle: "Agents",
+                price: "$149",
+                sub: "/mo",
+                gradient: "from-terra-primary to-terra-accent",
+                color: "border-terra-primary/30",
+                badge: null,
+                features: [
+                  "Full deal pipeline",
+                  "Transaction management",
+                  "Workflow automations",
+                  "Unlimited CRM contacts",
+                  "Market intelligence",
+                  "Analytics dashboard",
+                ],
+                cta: "Start Free Trial",
+              },
+              {
+                tier: "Broker",
+                price: "$399",
+                sub: "/mo",
+                gradient: "from-terra-violet to-purple-500",
+                color: "border-terra-violet/30",
+                badge: "Popular",
+                features: [
+                  "Everything in Pro",
+                  "Team analytics & routing",
+                  "Agent oversight & reporting",
+                  "Multi-user workspace",
+                  "Portfolio performance tools",
+                  "Climate risk overlay",
+                  "Investor relations module",
+                ],
+                cta: "Start Free Trial",
+              },
+              {
+                tier: "Investor",
+                subtitle: "Elite",
+                price: "$799",
+                sub: "/mo",
+                gradient: "from-red-500 to-orange-500",
+                color: "border-red-500/30",
+                badge: "Distress Engine",
+                features: [
+                  "Everything in Broker",
+                  "Distress Intelligence Engine",
+                  "NYC foreclosure tracking",
+                  "Opportunity alerts (real-time)",
+                  "AI opportunity scoring",
+                  "Early signals & indicators",
+                  "Advanced analytics suite",
+                  "Cross-ecosystem integrations",
+                ],
+                cta: "Start Free Trial",
+              },
+            ].map((plan, i) => (
+              <motion.div key={plan.tier} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className={`relative rounded-2xl border ${plan.color} bg-terra-bg-secondary flex flex-col overflow-hidden ${plan.badge === "Distress Engine" ? "ring-1 ring-red-500/30" : ""}`}>
+                {plan.badge && (
+                  <div className={`text-center py-1.5 text-[10px] font-bold uppercase tracking-wider text-white bg-gradient-to-r ${plan.gradient}`}>
+                    {plan.badge}
+                  </div>
+                )}
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="mb-4">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mb-3 shadow-lg`}>
+                      {plan.tier === "Free" && <Building2 className="w-5 h-5 text-white" />}
+                      {plan.tier === "Pro" && <TrendingUp className="w-5 h-5 text-white" />}
+                      {plan.tier === "Broker" && <Users className="w-5 h-5 text-white" />}
+                      {plan.tier === "Investor" && <Flame className="w-5 h-5 text-white" />}
+                    </div>
+                    <h3 className="font-display font-bold text-terra-text text-lg">{plan.tier}</h3>
+                    {plan.subtitle && <p className="text-xs text-terra-text-muted">{plan.subtitle}</p>}
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-3xl font-display font-extrabold text-terra-text">{plan.price}</span>
+                      <span className="text-xs text-terra-text-muted">{plan.sub}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2 flex-1 mb-5">
+                    {plan.features.map(f => (
+                      <div key={f} className="flex items-start gap-2">
+                        <CheckCircle className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${plan.tier === "Investor" ? "text-orange-400" : "text-terra-primary"}`} />
+                        <span className="text-xs text-terra-text-secondary">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button className={`w-full py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r ${plan.gradient} text-white hover:opacity-90 transition-opacity`}>
+                    {plan.cta}
+                  </button>
+                </div>
               </motion.div>
             ))}
           </div>

@@ -10,7 +10,7 @@ import { Sidebar } from "@/components/sidebar";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
-import { Building2, Activity, Users, Brain, Zap, FileText, ClipboardList, Home, UserCheck, ArrowLeftRight } from "lucide-react";
+import { Building2, Activity, Users, Brain, Zap, FileText, ClipboardList, Home, UserCheck, ArrowLeftRight, Flame } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 2 } },
@@ -26,6 +26,18 @@ const DocumentsPage = lazy(() => import("@/pages/documents"));
 const TeamPage = lazy(() => import("@/pages/team"));
 const PredictionsPage = lazy(() => import("@/pages/predictions"));
 const AutomationsPage = lazy(() => import("@/pages/automations"));
+const MarketPage = lazy(() => import("@/pages/market"));
+const PipelinePage = lazy(() => import("@/pages/pipeline"));
+const PropertyDetailPage = lazy(() => import("@/pages/property-detail"));
+const AnalyticsPage = lazy(() => import("@/pages/analytics"));
+const AlertsPage = lazy(() => import("@/pages/alerts-page"));
+const InvestmentAnalysis = lazy(() => import("@/pages/investment-analysis"));
+const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const PortfolioPerformance = lazy(() => import("@/pages/portfolio-performance"));
+const ClimateRisk = lazy(() => import("@/pages/climate-risk"));
+const IRModule = lazy(() => import("@/pages/ir-module"));
+const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
+const DistressEnginePage = lazy(() => import("@/pages/distress-engine"));
 
 function PageLoader() {
   return (
@@ -49,6 +61,19 @@ function AppRouter() {
         <Route path="/team" component={TeamPage} />
         <Route path="/predictions" component={PredictionsPage} />
         <Route path="/automations" component={AutomationsPage} />
+        <Route path="/dashboard" component={DashboardPage} />
+        <Route path="/market" component={MarketPage} />
+        <Route path="/pipeline" component={PipelinePage} />
+        <Route path="/property/:id" component={PropertyDetailPage} />
+        <Route path="/analytics" component={AnalyticsPage} />
+        <Route path="/alerts" component={AlertsPage} />
+        <Route path="/investment-analysis" component={InvestmentAnalysis} />
+        <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/portfolio-performance" component={PortfolioPerformance} />
+        <Route path="/climate-risk" component={ClimateRisk} />
+        <Route path="/ir-module" component={IRModule} />
+        <Route path="/agent-insights" component={AgentInsightsPage} />
+        <Route path="/distress-engine" component={DistressEnginePage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-terra-text-secondary">Page not found</p>
@@ -65,6 +90,7 @@ function navigate(path: string) {
 
 const terraCommands: CommandItem[] = [
   { id: "nav-dashboard", label: "Command Center", icon: "🏢", group: "Navigation", keywords: ["home", "overview", "dashboard"], action: () => navigate("/") },
+  { id: "nav-distress", label: "Distress Engine", icon: "🔥", group: "Deal Discovery", keywords: ["foreclosure", "auction", "reo", "lien", "distress", "nyc"], action: () => navigate("/distress-engine") },
   { id: "nav-listings", label: "Listings + Inventory", icon: "🏠", group: "Navigation", action: () => navigate("/listings") },
   { id: "nav-leads", label: "Leads + CRM", icon: "👤", group: "Navigation", action: () => navigate("/leads") },
   { id: "nav-deals", label: "Deal Pipeline", icon: "🔄", group: "Navigation", action: () => navigate("/deals") },

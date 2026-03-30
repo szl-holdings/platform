@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Building2, LayoutDashboard, AlertTriangle, Home, ChevronLeft, ChevronRight, Users, Brain, Zap, FileText, ClipboardList, DollarSign, Activity, List, UserCheck, ArrowLeftRight } from "lucide-react";
+import { Building2, LayoutDashboard, AlertTriangle, Home, ChevronLeft, ChevronRight, Users, Brain, Zap, FileText, ClipboardList, DollarSign, Activity, List, UserCheck, ArrowLeftRight, Flame, Handshake } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { useState } from "react";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -19,11 +19,17 @@ const navSections: { title: string; items: NavItem[] }[] = [
     ],
   },
   {
+    title: "Deal Discovery",
+    items: [
+      { path: "/distress-engine", label: "Distress Engine", icon: Flame, badge: "NEW" },
+      { path: "/deals", label: "Deal Pipeline", icon: Activity },
+    ],
+  },
+  {
     title: "Pipeline",
     items: [
       { path: "/listings", label: "Listings", icon: Home },
       { path: "/leads", label: "Leads + CRM", icon: UserCheck },
-      { path: "/deals", label: "Deal Pipeline", icon: Activity },
       { path: "/offers", label: "Offers + Negotiation", icon: ArrowLeftRight },
     ],
   },
@@ -81,24 +87,29 @@ export function Sidebar() {
             <div className="space-y-0.5">
               {section.items.map(({ path, label, icon: Icon, badge }) => {
                 const isActive = path === "/" ? location === "/" : location.startsWith(path);
+                const isDistress = path === "/distress-engine";
                 return (
                   <Link key={path} href={path}>
                     <div className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
                       collapsed && "justify-center px-2",
                       isActive
-                        ? "bg-terra-primary/10 text-terra-primary"
+                        ? isDistress
+                          ? "bg-gradient-to-r from-red-500/15 to-orange-500/10 text-orange-400"
+                          : "bg-terra-primary/10 text-terra-primary"
+                        : isDistress
+                        ? "text-orange-400/70 hover:text-orange-400 hover:bg-red-500/5"
                         : "text-terra-text-secondary hover:text-terra-text hover:bg-terra-surface"
                     )}>
                       {isActive && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-terra-primary rounded-r-full" />
+                        <div className={cn("absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full", isDistress ? "bg-orange-400" : "bg-terra-primary")} />
                       )}
                       <Icon className={cn("w-4 h-4 flex-shrink-0", isActive && "scale-110")} />
                       {!collapsed && (
                         <span className="ml-0.5 flex-1">{label}</span>
                       )}
                       {!collapsed && badge && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 flex-shrink-0">{badge}</span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r from-red-500 to-orange-500 text-white">{badge}</span>
                       )}
                     </div>
                   </Link>

@@ -31,6 +31,7 @@ import aiSafetyRouter from "./ai-safety";
 import domainAgentsRouter from "./domain-agents/index";
 import govDataRouter from "./gov-data";
 import terraRouter from "./terra";
+import terraDistressRouter from "./terra-distress";
 import mspLiveRouter from "./msp-live";
 import terraLiveRouter from "./terra-live";
 import agentTrainingRouter from "./agent-training";
@@ -100,6 +101,11 @@ router.use("/terra", readLimiter);
 router.use(terraRouter);
 router.use("/beacon", readLimiter);
 router.use(terraRouter);
+
+router.use("/terra", readLimiter);
+router.use(terraDistressRouter);
+router.use("/beacon", readLimiter);
+router.use(terraDistressRouter);
 
 router.use("/msp", readLimiter);
 router.use(mspLiveRouter);
