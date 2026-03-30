@@ -48,6 +48,19 @@ import {
   firestormLeadsTable,
   firestormAnalyticsTable,
   lyteWorkspacesTable,
+  alloyWorkflowsTable,
+  alloySignalsTable,
+  alloyWorkflowRunsTable,
+  alloyArtifactsTable,
+  lyteActionsTable,
+  lyteSavedViewsTable,
+  lyteReadinessItemsTable,
+  lyteSignalTimelineTable,
+  voyagesTable,
+  fleetExceptionsTable,
+  corridorsTable,
+  vesselMaintenanceTable,
+  portsTable,
   lyteSignalsTable,
   lyteCommandCardsTable,
   lyteIncidentsTable,
@@ -782,6 +795,139 @@ async function seed() {
     { name: "Thomas Wright", email: "t.wright@enterprisecorp.com", company: "EnterpriseCorp", subject: "Partnership Proposal", message: "We'd like to explore a strategic partnership around your Vessels and Firestorm platforms.", status: "replied" },
   ]);
   console.log("  ✓ Holdings inquiries");
+
+  const featureFlagsNew = await db.insert(featureFlagsTable).values([
+    { key: "lyte_readiness_enabled", name: "Lyte Readiness", description: "Enable Lyte Readiness tracking module", isEnabled: true, rolloutPercentage: 100 },
+    { key: "lyte_value_at_risk_enabled", name: "Lyte Value at Risk", description: "Enable value-at-risk scoring on Lyte signals", isEnabled: true, rolloutPercentage: 100 },
+    { key: "vessels_command_mode_enabled", name: "Vessels Command Mode", description: "Enable command mode for vessels dashboard", isEnabled: true, rolloutPercentage: 100 },
+    { key: "alloy_admin_enabled", name: "Alloy Admin", description: "Enable Alloy admin panel and workflow controls", isEnabled: true, rolloutPercentage: 100 },
+    { key: "pilot_customer_portal_enabled", name: "Pilot Customer Portal", description: "Enable pilot customer portal access", isEnabled: false, rolloutPercentage: 0 },
+    { key: "alloy_signal_ingestion_enabled", name: "Alloy Signal Ingestion", description: "Enable external signal ingestion API", isEnabled: true, rolloutPercentage: 100 },
+    { key: "vessels_exception_command_enabled", name: "Vessels Exception Command", description: "Enable exception resolution commands for vessels", isEnabled: true, rolloutPercentage: 100 },
+    { key: "lyte_saved_views_enabled", name: "Lyte Saved Views", description: "Enable saved views for Lyte signal and action feeds", isEnabled: true, rolloutPercentage: 100 },
+  ]).returning().catch(() => []);
+  console.log(`  ✓ ${featureFlagsNew.length} product feature flags`);
+
+  const alloyWorkflows = await db.insert(alloyWorkflowsTable).values([
+    { orgId: org.id, name: "Signal Triage & Normalization", description: "Normalize incoming signals, assign severity, route to owner", trigger: "signal", outputType: "action", requiresApproval: false, isActive: true, steps: [{ step: 1, name: "normalize" }, { step: 2, name: "assign_severity" }, { step: 3, name: "route" }], createdBy: users[0].id },
+    { orgId: org.id, name: "Executive Digest Generation", description: "Generate daily digest for executive briefing", trigger: "schedule", outputType: "report", requiresApproval: true, approverRole: "exec", isActive: true, steps: [{ step: 1, name: "aggregate" }, { step: 2, name: "narrate" }, { step: 3, name: "format" }], createdBy: users[0].id },
+    { orgId: org.id, name: "Fleet Exception Escalation", description: "Automatically escalate unresolved maritime exceptions after 2h", trigger: "schedule", outputType: "notification", requiresApproval: false, isActive: true, steps: [{ step: 1, name: "scan_exceptions" }, { step: 2, name: "escalate" }, { step: 3, name: "notify" }], createdBy: users[0].id },
+    { orgId: org.id, name: "Readiness Score Recompute", description: "Recompute readiness scores across all dimensions", trigger: "schedule", outputType: "artifact", requiresApproval: false, isActive: true, steps: [{ step: 1, name: "fetch_items" }, { step: 2, name: "score" }, { step: 3, name: "report" }], createdBy: users[0].id },
+    { orgId: org.id, name: "Artifact Approval Routing", description: "Route generated artifacts to designated approvers", trigger: "api", outputType: "artifact", requiresApproval: true, approverRole: "exec", isActive: true, steps: [{ step: 1, name: "generate" }, { step: 2, name: "route" }], createdBy: users[0].id },
+    { orgId: org.id, name: "Stale Action Sweep", description: "Identify and escalate actions open for more than 48h", trigger: "schedule", outputType: "action", requiresApproval: false, isActive: true, steps: [{ step: 1, name: "scan" }, { step: 2, name: "escalate" }], createdBy: users[0].id },
+  ]).returning();
+  console.log(`  ✓ ${alloyWorkflows.length} Alloy workflows`);
+
+  const alloySignals = await db.insert(alloySignalsTable).values([
+    { orgId: org.id, source: "Stripe", sourceType: "connector", severity: "high", title: "Revenue dip detected — 3 consecutive days below target", status: "new", normalizedScore: "82", valueAtRisk: "42000" },
+    { orgId: org.id, source: "GitHub Actions", sourceType: "connector", severity: "critical", title: "CI/CD pipeline failure — main branch blocked", status: "new", normalizedScore: "94", valueAtRisk: "18000" },
+    { orgId: org.id, source: "Monitoring", sourceType: "monitoring", severity: "medium", title: "API response latency elevated — p95 at 1.8s", status: "acknowledged", normalizedScore: "61" },
+    { orgId: org.id, source: "MarineTraffic", sourceType: "connector", severity: "high", title: "Vessel deviation detected — MV Pacific Meridian off route", status: "new", normalizedScore: "78", valueAtRisk: "285000" },
+    { orgId: org.id, source: "Scheduler", sourceType: "scheduled", severity: "info", title: "Weekly readiness digest generated", status: "processed", normalizedScore: "20" },
+  ]).returning();
+  console.log(`  ✓ ${alloySignals.length} Alloy signals`);
+
+  const alloyRuns = await db.insert(alloyWorkflowRunsTable).values([
+    { workflowId: alloyWorkflows[0].id, signalId: alloySignals[0].id, triggeredBy: users[0].id, state: "completed", input: { signalId: alloySignals[0].id }, output: { severity: "high", owner: "ops_lead", action: "created" }, durationMs: 842, startedAt: new Date(Date.now() - 3600000), completedAt: new Date(Date.now() - 3599000) },
+    { workflowId: alloyWorkflows[1].id, triggeredBy: users[0].id, state: "waiting_approval", input: { period: "2026-W13" }, durationMs: null, startedAt: new Date(Date.now() - 1800000) },
+    { workflowId: alloyWorkflows[2].id, triggeredBy: null, state: "completed", input: { scanAt: new Date().toISOString() }, output: { escalated: 2, notified: 3 }, durationMs: 1240, startedAt: new Date(Date.now() - 7200000), completedAt: new Date(Date.now() - 7199000) },
+    { workflowId: alloyWorkflows[0].id, signalId: alloySignals[1].id, triggeredBy: users[1].id, state: "running", input: { signalId: alloySignals[1].id }, startedAt: new Date() },
+    { workflowId: alloyWorkflows[4].id, triggeredBy: users[0].id, state: "failed", errorMessage: "Approver role not found", durationMs: 120, startedAt: new Date(Date.now() - 600000), completedAt: new Date(Date.now() - 599000) },
+  ]).returning();
+  console.log(`  ✓ ${alloyRuns.length} Alloy workflow runs`);
+
+  await db.insert(alloyArtifactsTable).values([
+    { workflowRunId: alloyRuns[0].id, workflowId: alloyWorkflows[0].id, orgId: org.id, title: "Signal Triage Report — Stripe Revenue Signal", artifactType: "report", content: { severity: "high", recommendedActions: ["Investigate Stripe webhook queue", "Check ARR dashboard"], owner: "Alex Rivera" }, status: "published", approvalStatus: "not_required" },
+    { workflowRunId: alloyRuns[1].id, workflowId: alloyWorkflows[1].id, orgId: org.id, title: "Executive Digest — Week 13 2026", artifactType: "summary", content: { headline: "Fleet performance below target, CI/CD incident resolved", signals: 12, incidents: 3, readinessScore: 78 }, status: "pending_review", approvalStatus: "pending" },
+    { workflowRunId: alloyRuns[2].id, workflowId: alloyWorkflows[2].id, orgId: org.id, title: "Exception Escalation Report — Maritime Fleet", artifactType: "alert", content: { escalated: 2, vessels: ["Mediterranean Dawn", "Arctic Falcon"] }, status: "published", approvalStatus: "not_required" },
+  ]);
+  console.log("  ✓ Alloy artifacts");
+
+  const [lyteWs] = await db.select().from(lyteWorkspacesTable).limit(1);
+  if (lyteWs) {
+    const lyteActions = await db.insert(lyteActionsTable).values([
+      { workspaceId: lyteWs.id, title: "Investigate Stripe webhook queue delay", description: "Webhook queue showing 15-min delay. Investigate and restore normal latency.", category: "investigate", priority: "high", status: "in_progress", assignee: "Alex Rivera" },
+      { workspaceId: lyteWs.id, title: "Remediate CI/CD pipeline failure on main branch", description: "Rollback failing deployment, restore green build status.", category: "remediate", priority: "critical", status: "open", assignee: "Jordan Chen" },
+      { workspaceId: lyteWs.id, title: "Review API rate limiting thresholds", description: "p95 latency elevated, consider scaling or caching adjustment.", category: "review", priority: "medium", status: "open", assignee: "Alex Rivera" },
+      { workspaceId: lyteWs.id, title: "Notify maritime ops of deviation alert", description: "Send executive notification for Pacific Meridian route deviation.", category: "notify", priority: "high", status: "resolved", assignee: "Morgan Blake", resolvedAt: new Date(Date.now() - 3600000) },
+      { workspaceId: lyteWs.id, title: "Document CI/CD post-mortem", description: "Write incident post-mortem for main branch failure and publish to Notion.", category: "document", priority: "low", status: "open" },
+    ]).returning();
+    console.log(`  ✓ ${lyteActions.length} Lyte actions`);
+
+    await db.insert(lyteSavedViewsTable).values([
+      { workspaceId: lyteWs.id, userId: users[0].id, name: "Critical Unresolved", viewType: "signals", filters: { severity: "critical", status: ["new", "acknowledged"] }, sortBy: "receivedAt", sortOrder: "desc", isDefault: false, isShared: true },
+      { workspaceId: lyteWs.id, userId: users[0].id, name: "My Actions", viewType: "actions", filters: { assignee: "Alex Rivera", status: ["open", "in_progress"] }, sortBy: "priority", sortOrder: "desc", isDefault: true, isShared: false },
+      { workspaceId: lyteWs.id, userId: users[1].id, name: "Operations Overview", viewType: "dashboard", filters: {}, isDefault: false, isShared: true },
+    ]).returning();
+    console.log("  ✓ Lyte saved views");
+
+    await db.insert(lyteReadinessItemsTable).values([
+      { workspaceId: lyteWs.id, title: "Incident response playbook reviewed", category: "operational", status: "complete", weight: "2", score: "100", owner: "Alex Rivera", completedAt: new Date(Date.now() - 7 * 24 * 3600000) },
+      { workspaceId: lyteWs.id, title: "All critical signals have owners assigned", category: "operational", status: "in_progress", weight: "2", score: "70", owner: "Alex Rivera" },
+      { workspaceId: lyteWs.id, title: "MFA enabled for all team members", category: "security", status: "complete", weight: "3", score: "100", owner: "Jordan Chen", completedAt: new Date(Date.now() - 14 * 24 * 3600000) },
+      { workspaceId: lyteWs.id, title: "SOC2 evidence collection started", category: "compliance", status: "in_progress", weight: "3", score: "45", owner: "Jordan Chen" },
+      { workspaceId: lyteWs.id, title: "Q1 financial reporting complete", category: "financial", status: "complete", weight: "2", score: "100", owner: "Morgan Blake", completedAt: new Date(Date.now() - 3 * 24 * 3600000) },
+      { workspaceId: lyteWs.id, title: "API documentation up to date", category: "technical", status: "not_started", weight: "1", owner: "Jordan Chen" },
+      { workspaceId: lyteWs.id, title: "On-call rotation defined for all services", category: "people", status: "in_progress", weight: "2", score: "60", owner: "Alex Rivera" },
+    ]).returning();
+    console.log("  ✓ Lyte readiness items");
+  }
+
+  const ports = await db.insert(portsTable).values([
+    { name: "Port of Yokohama", locode: "JPYOK", country: "Japan", region: "Asia-Pacific", lat: "35.450", lon: "139.650", portType: "commercial", status: "open", avgCongestionDays: "1.2", weeklyTeu: 78000, capacityUtilization: "82" },
+    { name: "Port Hedland", locode: "AUPHE", country: "Australia", region: "Asia-Pacific", lat: "-20.310", lon: "118.580", portType: "industrial", status: "open", avgCongestionDays: "0.8", weeklyTeu: 24000, capacityUtilization: "91" },
+    { name: "Port of Rotterdam", locode: "NLRTM", country: "Netherlands", region: "Atlantic", lat: "51.900", lon: "4.400", portType: "commercial", status: "open", avgCongestionDays: "0.8", weeklyTeu: 58000, capacityUtilization: "71" },
+    { name: "Ras Tanura", locode: "SARAT", country: "Saudi Arabia", region: "Middle East", lat: "26.640", lon: "50.160", portType: "industrial", status: "open", avgCongestionDays: "0.3", weeklyTeu: 8000, capacityUtilization: "88" },
+    { name: "Port of Fujairah", locode: "AEFJR", country: "UAE", region: "Middle East", lat: "25.118", lon: "56.340", portType: "commercial", status: "open", avgCongestionDays: "1.1", weeklyTeu: 14000, capacityUtilization: "79" },
+    { name: "Port of Hamburg", locode: "DEHAM", country: "Germany", region: "Atlantic", lat: "53.550", lon: "9.990", portType: "commercial", status: "open", avgCongestionDays: "0.9", weeklyTeu: 44000, capacityUtilization: "74" },
+    { name: "Port of Murmansk", locode: "RUMRM", country: "Russia", region: "Arctic", lat: "68.980", lon: "33.090", portType: "industrial", status: "open", avgCongestionDays: "2.1", weeklyTeu: 6000, capacityUtilization: "66" },
+    { name: "Ningbo-Zhoushan", locode: "CNNBO", country: "China", region: "Asia-Pacific", lat: "29.869", lon: "121.578", portType: "commercial", status: "open", avgCongestionDays: "2.4", weeklyTeu: 112000, capacityUtilization: "89" },
+  ]).returning();
+  console.log(`  ✓ ${ports.length} ports`);
+
+  const dbVessels = await db.select().from(vesselsTable).limit(10);
+  if (dbVessels.length > 0) {
+    const v1 = dbVessels[0];
+    const v2 = dbVessels[1] ?? v1;
+    const v3 = dbVessels[2] ?? v1;
+    const v4 = dbVessels[3] ?? v1;
+
+    const voyages = await db.insert(voyagesTable).values([
+      { orgId: org.id, vesselId: v1.id, voyageRef: "VOY-001", originLabel: "Port Hedland", destinationLabel: "Yokohama", originPortId: ports[1].id, destinationPortId: ports[0].id, cargoType: "Iron Ore", cargoQuantity: "72000", cargoUnit: "MT", charterType: "time_charter", estimatedRevenue: "4320000", operatingCost: "2100000", fuelCost: "980000", portCost: "420000", delayCost: "0", marginEstimate: "2220000", marginPct: "51.4", tce: "28500", fuelConsumptionTotal: "412", delayHours: 0, routeProgress: 78, status: "active", scheduledDeparture: new Date("2026-03-28"), scheduledArrival: new Date("2026-04-02"), estimatedArrival: new Date("2026-04-02") },
+      { orgId: org.id, vesselId: v2.id, voyageRef: "VOY-002", originLabel: "New York", destinationLabel: "Hamburg", originPortId: null, destinationPortId: ports[5].id, cargoType: "General Cargo", charterType: "voyage_charter", estimatedRevenue: "7800000", operatingCost: "4200000", fuelCost: "1640000", portCost: "870000", delayCost: "180000", marginEstimate: "3600000", marginPct: "46.2", tce: "45200", delayHours: 6, routeProgress: 100, status: "active", scheduledDeparture: new Date("2026-03-18"), scheduledArrival: new Date("2026-04-05"), estimatedArrival: new Date("2026-04-05") },
+      { orgId: org.id, vesselId: v3.id, voyageRef: "VOY-003", originLabel: "Ras Tanura", destinationLabel: "Fujairah", originPortId: ports[3].id, destinationPortId: ports[4].id, cargoType: "Crude Oil", charterType: "spot", estimatedRevenue: "12400000", operatingCost: "5100000", fuelCost: "1220000", portCost: "580000", delayCost: "0", marginEstimate: "7300000", marginPct: "58.9", tce: "52000", delayHours: 0, routeProgress: 91, status: "active" },
+      { orgId: org.id, vesselId: v4.id, voyageRef: "VOY-008", originLabel: "Narvik", destinationLabel: "Murmansk", originPortId: null, destinationPortId: ports[6].id, cargoType: "Nickel Ore", charterType: "time_charter", estimatedRevenue: "2900000", operatingCost: "2100000", delayCost: "420000", marginEstimate: "800000", marginPct: "27.6", tce: "22400", delayHours: 22, routeProgress: 31, status: "active" },
+    ]).returning();
+    console.log(`  ✓ ${voyages.length} voyages`);
+
+    const exceptions = await db.insert(fleetExceptionsTable).values([
+      { orgId: org.id, vesselId: v1.id, exceptionRef: "EXC-001", exceptionType: "security_alert", severity: "critical", title: "Unidentified Dark Vessel Approach — Persian Gulf", description: "AIS-dark vessel approached within 800m with no transponder. Security protocol activated.", whyItMatters: "Area has active threat intelligence. Vessel approach profile matches documented STS transfer signatures.", recommendedResponse: "Maintain heightened watch. Await Coast Guard update.", businessConsequence: "Potential cargo seizure risk. P&I implications.", owner: "Capt. Al-Rashid", ownerFunction: "Operations", estimatedImpactUsd: "12400000", status: "active", detectedAt: new Date(Date.now() - 7200000) },
+      { orgId: org.id, vesselId: v2.id, exceptionRef: "EXC-002", exceptionType: "weather_disruption", severity: "high", title: "Severe Weather Forcing Speed Reduction — Mediterranean", description: "Force 8 conditions in Ionian Sea forcing speed reduction to 9.1 knots. ETA 31 hours behind.", whyItMatters: "Charter party terms require 14-day advance notice for delay claims.", recommendedResponse: "Issue charterer notification within 6 hours.", businessConsequence: "Port slot cancellation fee estimated $82K.", owner: "T. Kowalski", ownerFunction: "Commercial", estimatedImpactUsd: "620000", status: "active", detectedAt: new Date(Date.now() - 21600000) },
+      { orgId: org.id, vesselId: v3.id, exceptionRef: "EXC-003", exceptionType: "maintenance_risk", severity: "high", title: "Rudder Hydraulic System Degradation — Actionable", description: "Port rudder actuator hydraulic pressure drop 15%. Predictive model indicates failure probability 84% within 13 days.", whyItMatters: "Main rudder failure at sea requires emergency tow.", recommendedResponse: "Schedule port call maintenance at Hamburg.", businessConsequence: "Potential off-hire period 4–7 days. Revenue exposure $316K.", owner: "V. Petrov", ownerFunction: "Technical", estimatedImpactUsd: "316000", status: "acknowledged", acknowledgedAt: new Date(Date.now() - 3600000), detectedAt: new Date(Date.now() - 86400000) },
+      { orgId: org.id, vesselId: v4.id, exceptionRef: "EXC-004", exceptionType: "delay_risk", severity: "high", title: "Ice Condition Delay — Arctic Route Speed Reduction", description: "Unexpected ice field expansion forcing 6.2 knot transit. ETA now 22 hours behind.", whyItMatters: "Murmansk port slot held for 12-hour window. Missing slot means 48-hour delay in loading.", recommendedResponse: "Contact Murmansk port authority for slot re-allocation.", businessConsequence: "$420K delay cost. Receiver storage costs accruing.", owner: "B. Ivanova", ownerFunction: "Operations", estimatedImpactUsd: "420000", status: "active", detectedAt: new Date(Date.now() - 10800000) },
+      { orgId: org.id, vesselId: v1.id, exceptionRef: "EXC-005", exceptionType: "port_congestion", severity: "watch", title: "Yokohama Anchorage Congestion — Pre-arrival Monitor", description: "Yokohama anchorage showing 12 bulk carriers waiting. Average current wait 18 hours.", whyItMatters: "Cargo receiver operating on just-in-time schedule.", recommendedResponse: "Issue early arrival notice. Request priority anchorage via agent.", businessConsequence: "If anchorage wait exceeds 24h, demurrage clock starts at $28,500/day.", owner: "Y. Tanaka", ownerFunction: "Commercial", estimatedImpactUsd: "71250", status: "active", detectedAt: new Date(Date.now() - 3600000) },
+    ]).returning();
+    console.log(`  ✓ ${exceptions.length} fleet exceptions`);
+
+    await db.insert(vesselMaintenanceTable).values([
+      { vesselId: v1.id, component: "Main Engine Turbocharger", maintenanceType: "scheduled", description: "Routine turbocharger inspection and cleaning per class schedule", status: "scheduled", priority: "medium", dueDate: new Date(Date.now() + 30 * 24 * 3600000), estimatedCost: "42000", riskOfServiceIssue: "15", impactsVoyageAvailability: false, assetHealth: "88", technician: "T. Nakamura" },
+      { vesselId: v2.id, component: "Port Rudder Hydraulic System", maintenanceType: "corrective", description: "Hydraulic pressure drop 15% — seal replacement required", status: "in_progress", priority: "high", dueDate: new Date(Date.now() + 13 * 24 * 3600000), estimatedCost: "128000", riskOfServiceIssue: "84", impactsVoyageAvailability: true, assetHealth: "61", technician: "V. Petrov" },
+      { vesselId: v3.id, component: "Ballast Water Treatment System", maintenanceType: "preventive", description: "UV lamp replacement and filter cleaning", status: "due_soon", priority: "medium", dueDate: new Date(Date.now() + 7 * 24 * 3600000), estimatedCost: "18500", riskOfServiceIssue: "25", impactsVoyageAvailability: false, assetHealth: "74", technician: "R. Okafor" },
+      { vesselId: v4.id, component: "Ice Class Propeller Shaft Seal", maintenanceType: "corrective", description: "Seal showing signs of wear in ice conditions. Replacement recommended.", status: "overdue", priority: "critical", dueDate: new Date(Date.now() - 3 * 24 * 3600000), estimatedCost: "65000", riskOfServiceIssue: "91", impactsVoyageAvailability: true, assetHealth: "42", technician: "B. Ivanova" },
+      { vesselId: v1.id, component: "Cargo Hold Hatch Covers", maintenanceType: "preventive", description: "Hatch cover rubber seal inspection and replacement", status: "scheduled", priority: "low", dueDate: new Date(Date.now() + 60 * 24 * 3600000), estimatedCost: "9200", riskOfServiceIssue: "8", impactsVoyageAvailability: false, assetHealth: "93", technician: "T. Nakamura" },
+    ]);
+    console.log("  ✓ vessel maintenance items");
+  }
+
+  await db.insert(corridorsTable).values([
+    { name: "Iron Ore Pacific Highway", origin: "Port Hedland", destination: "Yokohama / Ningbo", region: "Asia-Pacific", commodity: "Iron Ore", vesselCount: 8, delayRate: "12", avgTransitDays: "14", weeklyVolume: "2.1M MT", profitabilityIndex: "92", weatherRisk: "low", portCongestionRisk: "moderate", trend: "stable", activeAlerts: 1 },
+    { name: "Atlantic Containerized Cargo Lane", origin: "US East Coast", destination: "Northern Europe", region: "Atlantic", commodity: "General Cargo / Containers", vesselCount: 24, delayRate: "18", avgTransitDays: "14", weeklyVolume: "380K TEU", profitabilityIndex: "78", weatherRisk: "moderate", portCongestionRisk: "low", trend: "up", activeAlerts: 2 },
+    { name: "Persian Gulf Crude Export Route", origin: "Ras Tanura / Fujairah", destination: "East Asia", region: "Middle East", commodity: "Crude Oil", vesselCount: 31, delayRate: "6", avgTransitDays: "20", weeklyVolume: "15M BPD", profitabilityIndex: "96", weatherRisk: "low", portCongestionRisk: "low", trend: "stable", activeAlerts: 3 },
+    { name: "Arctic Nickel Corridor", origin: "Narvik / Murmansk", destination: "North Sea / Baltic", region: "Arctic", commodity: "Nickel Ore / Metals", vesselCount: 6, delayRate: "34", avgTransitDays: "8", weeklyVolume: "420K MT", profitabilityIndex: "54", weatherRisk: "severe", portCongestionRisk: "moderate", trend: "down", activeAlerts: 4 },
+    { name: "Mediterranean Consumer Goods Lane", origin: "Piraeus / Istanbul", destination: "Western Mediterranean Ports", region: "Mediterranean", commodity: "Consumer Goods / Retail", vesselCount: 18, delayRate: "22", avgTransitDays: "5", weeklyVolume: "210K TEU", profitabilityIndex: "71", weatherRisk: "moderate", portCongestionRisk: "moderate", trend: "down", activeAlerts: 2 },
+    { name: "Red Sea — Cape of Good Hope Reroute", origin: "Asia", destination: "Europe", region: "Indian Ocean", commodity: "Mixed Containerized", vesselCount: 47, delayRate: "28", avgTransitDays: "32", weeklyVolume: "620K TEU", profitabilityIndex: "62", weatherRisk: "moderate", portCongestionRisk: "high", trend: "down", activeAlerts: 7 },
+  ]);
+  console.log("  ✓ corridors");
 
   console.log("\n✅ Seed complete!");
 }

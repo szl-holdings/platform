@@ -18,7 +18,7 @@ import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../mi
 
 const router: IRouter = Router();
 
-router.get("/lyte/workspaces", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/workspaces", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(lyteWorkspacesTable).orderBy(desc(lyteWorkspacesTable.createdAt)).limit(limit).offset(offset);
@@ -38,7 +38,7 @@ router.post("/lyte/workspaces", authMiddleware(), denyIfReadOnly(), async (req, 
   }
 });
 
-router.get("/lyte/workspaces/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/workspaces/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.select().from(lyteWorkspacesTable).where(eq(lyteWorkspacesTable.id, id));
@@ -49,7 +49,7 @@ router.get("/lyte/workspaces/:id", authMiddleware({ required: false }), async (r
   }
 });
 
-router.get("/lyte/signals", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/signals", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.receivedAt)).limit(limit).offset(offset);
@@ -91,7 +91,7 @@ router.delete("/lyte/signals/:id", authMiddleware(), requireRole("ops", "admin",
   }
 });
 
-router.get("/lyte/command-cards", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/command-cards", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(lyteCommandCardsTable).orderBy(desc(lyteCommandCardsTable.createdAt)).limit(limit).offset(offset);
@@ -133,7 +133,7 @@ router.delete("/lyte/command-cards/:id", authMiddleware(), requireRole("ops", "a
   }
 });
 
-router.get("/lyte/incidents", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/incidents", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(lyteIncidentsTable).orderBy(desc(lyteIncidentsTable.createdAt)).limit(limit).offset(offset);
@@ -175,7 +175,7 @@ router.delete("/lyte/incidents/:id", authMiddleware(), requireRole("ops", "admin
   }
 });
 
-router.get("/lyte/playbooks", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/playbooks", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(lytePlaybooksTable).orderBy(desc(lytePlaybooksTable.createdAt)).limit(limit).offset(offset);
@@ -195,7 +195,7 @@ router.post("/lyte/playbooks", authMiddleware(), denyIfReadOnly(), async (req, r
   }
 });
 
-router.get("/lyte/playbooks/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/playbooks/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.select().from(lytePlaybooksTable).where(eq(lytePlaybooksTable.id, id));
@@ -228,7 +228,7 @@ router.delete("/lyte/playbooks/:id", authMiddleware(), requireRole("ops", "admin
   }
 });
 
-router.get("/lyte/recommendations", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/recommendations", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(lyteRecommendationsTable).orderBy(desc(lyteRecommendationsTable.createdAt)).limit(limit).offset(offset);
@@ -270,7 +270,7 @@ router.delete("/lyte/recommendations/:id", authMiddleware(), requireRole("ops", 
   }
 });
 
-router.get("/lyte/executive-summary", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/lyte/executive-summary", authMiddleware(), async (_req, res) => {
   try {
     const signals = await db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.receivedAt));
     const incidents = await db.select().from(lyteIncidentsTable).orderBy(desc(lyteIncidentsTable.createdAt));
@@ -297,7 +297,7 @@ router.get("/lyte/executive-summary", authMiddleware({ required: false }), async
   }
 });
 
-router.get("/lyte/actions", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/actions", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const role = req.query.role as string | undefined;
@@ -348,7 +348,7 @@ router.patch("/lyte/actions/:id", authMiddleware(), denyIfReadOnly(), async (req
   } catch (err) { handleRouteError(res, err, "Failed to update action"); }
 });
 
-router.get("/lyte/views", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/views", authMiddleware(), async (req, res) => {
   try {
     const role = req.query.role as string | undefined;
     const rows = await db.select().from(lyteSavedViewsTable).orderBy(desc(lyteSavedViewsTable.createdAt));
@@ -382,7 +382,7 @@ router.delete("/lyte/views/:id", authMiddleware(), requireRole("ops", "admin", "
   } catch (err) { handleRouteError(res, err, "Failed to delete view"); }
 });
 
-router.get("/lyte/readiness", authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/readiness", authMiddleware(), async (req, res) => {
   try {
     const rows = await db.select().from(lyteReadinessItemsTable).orderBy(desc(lyteReadinessItemsTable.createdAt));
     const total = rows.length;
@@ -485,7 +485,7 @@ function parseRssToNews(xml: string, source: string, maxItems = 8): any[] {
   return items;
 }
 
-router.get("/lyte/live/tech-news", lyteLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/lyte/live/tech-news", lyteLiveLimit, authMiddleware(), async (_req, res) => {
   try {
     const news = await getCached("lyte-tech-news", 600000, async () => {
       const [tcXml, vrXml] = await Promise.allSettled([
@@ -510,7 +510,7 @@ router.get("/lyte/live/tech-news", lyteLiveLimit, authMiddleware({ required: fal
   } catch (err) { handleRouteError(res, err, "Failed to fetch tech news"); }
 });
 
-router.get("/lyte/live/bls-employment", lyteLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/lyte/live/bls-employment", lyteLiveLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getCached("lyte-bls", 86400000, async () => {
       try {
@@ -562,7 +562,7 @@ router.get("/lyte/live/bls-employment", lyteLiveLimit, authMiddleware({ required
   } catch (err) { handleRouteError(res, err, "Failed to fetch BLS employment data"); }
 });
 
-router.get("/lyte/live/github-trending", lyteLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/lyte/live/github-trending", lyteLiveLimit, authMiddleware(), async (req, res) => {
   try {
     const language = (req.query.language as string) || "TypeScript";
     const data = await getCached(`lyte-github-${language}`, 3600000, async () => {

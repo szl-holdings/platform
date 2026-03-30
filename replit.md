@@ -122,8 +122,39 @@ DreamStack comprises 13 applications sharing a PostgreSQL database, authenticati
 - **Agent Training Studio (Admin Panel):** A dedicated studio allows per-agent training with Q&A pairs, behavioral customization, and performance monitoring.
 - **AlloyChat (Admin Panel):** A production multi-model AI operations assistant routes queries to Claude or GPT-5.2 based on task, providing SSE streaming and conversation history persistence.
 - **Observability:** Structured logging via pino and a system health endpoint monitor DB, storage, auth, connectors, and app routes. The `@workspace/observability` framework offers 8-pillar domain-native observability (Performance, Business, User Experience, Predictive Health, Operational Awareness, Strategic Insight, Security Posture, Innovation Velocity) across all applications.
-- **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` controls access based on entitlements and usage limits.
+- **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` controls access based on entitlements and usage limits. Feature flag middleware (`requireFeatureFlag`) in `artifacts/api-server/src/middleware/feature-flags.ts` gates routes by flag key with per-org override support.
 - **Admin Panel:** Centralized administration for health monitoring, app registry, connectors, user roles, audit logs, webhooks, feature flags, billing, and a Developer Portal.
+
+### SZL Productization Layer (Task #126)
+Converts SZL from premium concept to real governed software with canonical schemas, platform APIs, and frontend connections.
+
+**Canonical DB Schemas:**
+- `lib/db/src/schema/alloy_platform.ts` — `platform_signals`, `platform_workflows`, `platform_workflow_runs`, `platform_artifacts`, `platform_approvals`, `platform_audit_log` (all `alloy*Table` exports)
+- `lib/db/src/schema/szl_canonical.ts` — `szlProductsTable` (slug/productType/parentSlug), `szlModulesTable`, `szlCapabilitiesTable`, `szlRoadmapTable`, `szlEnvironmentsTable`, `szlHealthChecksTable`
+- `lib/db/src/schema/lyte_product.ts` — `lyteSignalCommentsTable`, `lyteSignalTimelineTable` (unique Lyte tables; other Lyte tables in HEAD's `lyte.ts`)
+- `lib/db/src/schema/vessels_intelligence.ts` — `fleetExceptionsTable`, `vesselMaintenanceTable` (unique Vessels tables; other maritime tables in HEAD's `maritime.ts`)
+- `lib/db/src/schema/feature_flags.ts` — `featureFlagsTable`, `featureFlagOverridesTable`
+
+**Alloy Platform Core API** (`artifacts/api-server/src/routes/alloy.ts`):
+- Signal ingestion (`POST /alloy/signals/ingest`)
+- Workflow CRUD with state machine: `queued→running→waiting_approval→completed/failed/canceled`
+- Workflow runs, artifacts, approvals (approve/reject), audit log, dashboard summary
+- Admin endpoints: flag management, seed trigger, system stats
+
+**Lyte Extended API** (`artifacts/api-server/src/routes/lyte-extended.ts`):
+- Executive dashboard, signal state transitions (acknowledge/assign/escalate/resolve/override)
+- Actions with state machine, readiness items, saved views, signal comments/timeline
+
+**Vessels Extended API** (`artifacts/api-server/src/routes/vessels-extended.ts`):
+- Fleet dashboard, map payload, vessel detail, voyage listing
+- Exception queue with state transitions (acknowledge/investigate/mitigate/resolve/dismiss)
+
+**Frontend:**
+- Alloy `ConsolePage` (`artifacts/alloy/src/pages/ConsolePage.tsx`) — 6-tab admin console (Signals, Workflows, Artifacts, Flags, Audit, Dashboard)
+- Lyte `ReadinessPage` (`artifacts/lyte-command-center/src/pages/ReadinessPage.tsx`) — readiness gate management
+- Lyte routes: `/readiness`, `/readiness-module`, `/action-queue`
+
+**Seed Data:** `artifacts/api-server/src/lib/seed-platform.ts` seeds products, feature flags, Alloy workflows/signals/artifacts/runs, Lyte signals/actions/readiness, Vessels fleets/vessels/ports/corridors/voyages/exceptions.
 
 #### Application Portfolio (13 apps — Task #76 consolidation, visual identities from Task #87)
 - **Alloy (NEW):** Unified AI Command Center at `/alloy/`. Bloomberg Terminal-meets-ChatGPT flagship interface. Features: Agent Switcher (10 domain agents), cross-ecosystem chat with SSE streaming, Knowledge Base (RAG), Real-Time Feeds sidebar, Voice input/output, Model Arena (multi-model comparison), Advisory feed, and image generation. Port 25500. Dark theme with cyan (`hsl(195,100%,50%)`) accent.
@@ -264,17 +295,57 @@ Nimbus (`/nimbus` routes) removed as public-facing entity. Predictive intelligen
 - **Live Route Stubs:** Created `readiness-live`, `firestorm-live`, `inca-live`, `vessels-live`, `lyte-live`, `dreamscape-live`, `carlota-live` route files that were imported in `routes/index.ts` but missing from the filesystem.
 - **Project List:** Serves as primary landing page at `/` with app directory, category filters, search, and links to all apps.
 
+### SZL Platform Layer (Task #126 — Governed Software System)
+SZL has been converted from a premium concept into a real governed software system with canonical data models, backend workflow logic, platform APIs, feature flag gating, and admin controls.
+
+**New canonical DB tables (`lib/db/src/schema/`):**
+- `alloy_workflows` — workflow definitions with trigger, steps, output type, approval requirements
+- `alloy_signals` — ingested signals with severity, source type, status, value-at-risk
+- `alloy_workflow_runs` — run lifecycle (queued→running→waiting_approval→completed/failed/canceled) with state history, duration, output
+- `alloy_artifacts` — generated artifacts with approval status (pending/approved/rejected), content, review notes
+- `alloy_audit_log` — immutable audit trail of all platform actions (userId, action, resourceType, before/after snapshots)
+- `feature_flags` — feature flag registry with `isEnabled`, `rolloutPercentage`, `conditions` JSONB
+- `ports` — maritime port directory with lat/lng, country, zone
+- `voyages` — voyage records linking vessel → origin/destination ports, ETA drift, economics
+- `vessel_exceptions` — exception queue with type, severity, status (open/acknowledged/escalated/resolved)
+- `vessel_corridors` — corridor route definitions with risk score, traffic density, revenue potential
+- `lyte_readiness_items` — readiness tracking linked to workspaces with owner, due date, completion status
+- `lyte_actions` — assignable action items with type, assignee, signal/workspace linkage
+- `lyte_saved_views` — saved filter/view configurations per workspace
+
+**New API routes (`artifacts/api-server/src/routes/`):**
+- `alloy.ts` — `/alloy/*`: dashboard, workflow CRUD + run trigger, signal ingestion + batch, workflow runs, artifacts (approve/reject), audit log, feature flag admin (CRUD + toggle), workflow state machine
+- `vessels-extended.ts` — `/vessels/*`: fleet summary, map payload, vessel detail, voyage economics, exception state transitions (acknowledge/escalate/resolve), corridor analytics, maintenance-readiness. Write routes gated by `vessels_command_mode_enabled` feature flag.
+- `lyte-extended.ts` — `/lyte/*`: signal state transitions (acknowledge/assign/escalate/resolve/override), signal timeline, comments, action CRUD, saved views, readiness CRUD. Readiness routes gated by `lyte_readiness_enabled` feature flag.
+- `admin-users.ts` — `/admin/users`, `/admin/system-health`: user list (Drizzle users table) and system health check
+
+**Feature Flag Middleware:**
+- `artifacts/api-server/src/middlewares/feature-flag.ts` — `requireFeatureFlag(key)` middleware with 30s cache. Returns 403 if flag is disabled or not found. Applied to 4 lyte readiness routes and 5 vessels write routes.
+
+**Seeded feature flags:** `lyte_readiness_enabled`, `lyte_value_at_risk_enabled`, `vessels_command_mode_enabled`, `alloy_admin_enabled`, `pilot_customer_portal_enabled`
+
+**Alloy Control Plane (ConsolePage):**
+- 6-tab admin console: Workflows (trigger/expand runs), Signals (severity/status feed), Artifacts (approve/reject inline), Feature Flags (live toggle), Audit Log (last 100 events), Users (role/status table)
+- API client (`artifacts/alloy/src/lib/api.ts`) uses `unwrapList()` helper to handle paginated `{ data, meta }` responses
+- Console accessible at `/alloy/console` with "Console" nav button in the desktop header
+- PAGE_META and ROUTE_MAP both registered for the "console" page in App.tsx
+
+**Frontend connections:**
+- Vessels `corridor-routes.tsx` — fetches from `/vessels/corridors` with `getNum()` string→number adapters (delayRate, profitabilityIndex, avgTransitDays), Live badge, loading skeletons, mock fallback when DB is empty
+- Vessels `maintenance-readiness.tsx` — fetches from `/vessels/assets` + `/vessels/maintenance`, `daysToDue()` adapter, dynamic readiness scores, "Coming Due 30 days" panel, mock fallback
+
 ### Database Schema
 90+ tables across 20+ schema files in `lib/db/src/schema/`:
 - **Auth:** users, sessions, roles, user_roles, organizations, org_members
 - **Billing:** billing_plans, subscriptions, invoices, entitlements, usage_events
-- **Vessels:** vessels, fleets, positions, routes, alerts, cargo, simulations, weather, alert_rules
+- **Vessels:** vessels, fleets, positions, routes, alerts, cargo, simulations, weather, alert_rules, ports, voyages, vessel_exceptions, vessel_corridors
 - **Firestorm:** scenarios, assessments, simulation_runs, findings, risk_scores, incidents, compliance_controls, alerts, campaigns, leads, analytics
-- **Lyte:** workspaces, signals, command_cards, incidents, playbooks, recommendations
+- **Lyte:** workspaces, signals, command_cards, incidents, playbooks, recommendations, lyte_readiness_items, lyte_actions, lyte_saved_views
+- **Alloy Platform:** alloy_workflows, alloy_signals, alloy_workflow_runs, alloy_artifacts, alloy_audit_log, feature_flags
 - **Dreamscape:** campaigns, scripts, storyboards, voice_assets, campaign_assets, reviews
 - **Readiness:** programs, dimensions, score_history, milestones, risks, alerts
 - **Stephen/Holdings:** content_blocks, case studies, booking_requests, site_contacts, testimonials, portfolio_items
-- **Alloy:** conversations, messages (added for Alloy flagship)
+- **Alloy Chat:** conversations, messages
 - **Collaboration:** comments (entityType, entityId, authorId, authorName, authorInitials, content, mentions jsonb, parentId, isDeleted boolean)
 
 ### Technical Implementations & Feature Specifications

@@ -1,678 +1,572 @@
-import crypto from "crypto";
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter } from "express";
 import {
   db,
-  platformSignalsTable,
-  workflowsTable,
-  workflowRunsTable,
-  approvalsTable,
-  actionsTable,
-  artifactsTable,
-  eventLogTable,
+  alloyWorkflowsTable,
+  alloySignalsTable,
+  alloyWorkflowRunsTable,
+  alloyArtifactsTable,
+  alloyApprovalsTable,
+  alloyAuditLogTable,
   featureFlagsTable,
-  type InsertWorkflowRun,
-  type InsertArtifact,
-  type InsertEventLog,
-  type InsertApproval,
-  type InsertAction,
+  insertAlloyWorkflowSchema,
+  insertAlloySignalSchema,
 } from "@workspace/db";
 import { eq, desc, and, sql, inArray, gte, lte } from "drizzle-orm";
-import { authMiddleware, requireRole } from "../middlewares/auth";
-import { platformAuth, logPlatformEvent } from "../middlewares/platform-auth";
 import {
   sendSuccess,
-  sendError,
   sendCreated,
-  sendNoContent,
   sendNotFound,
+  sendBadRequest,
+  sendError,
+  sendNoContent,
   handleRouteError,
+  parsePagination,
 } from "../lib/api-response";
+import { authMiddleware, requireRole, parseIdParam, type AuthenticatedUser } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 const router: IRouter = Router();
 
+function getUserOrgIds(user?: AuthenticatedUser): number[] {
+  if (!user) return [];
+  return user.orgs.map(o => o.orgId);
+}
 
-// ─── Health / Status ──────────────────────────────────────────────────────────
+function isGlobalAdmin(user?: AuthenticatedUser): boolean {
+  if (!user) return false;
+  return user.roles.includes("super_admin") || user.roles.includes("admin");
+}
 
-router.get("/alloy/status", authMiddleware(), async (req: Request, res: Response) => {
+async function writeAudit(params: {
+  orgId?: number | null;
+  userId?: number | null;
+  action: string;
+  resourceType: string;
+  resourceId?: string;
+  before?: unknown;
+  after?: unknown;
+  correlationId?: string;
+}) {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const [signalCount] = await db.select({ count: sql<number>`count(*)` }).from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId), eq(platformSignalsTable.product, "alloy")));
-    const [workflowCount] = await db.select({ count: sql<number>`count(*)` }).from(workflowsTable).where(and(eq(workflowsTable.orgId, orgId), eq(workflowsTable.product, "alloy")));
-    const [artifactCount] = await db.select({ count: sql<number>`count(*)` }).from(artifactsTable).where(and(eq(artifactsTable.orgId, orgId), eq(artifactsTable.product, "alloy")));
-    const [pendingApprovals] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(approvalsTable)
-      .where(and(eq(approvalsTable.orgId, orgId), eq(approvalsTable.status, "pending")));
-
-    sendSuccess(res, {
-      engine: "alloy",
-      version: "2.0.0 (Canonical)",
-      status: "operational",
-      orgId,
-      stats: {
-        signals: Number(signalCount?.count ?? 0),
-        workflows: Number(workflowCount?.count ?? 0),
-        artifacts: Number(artifactCount?.count ?? 0),
-        pendingApprovals: Number(pendingApprovals?.count ?? 0),
-      },
+    await db.insert(alloyAuditLogTable).values({
+      orgId: params.orgId ?? null,
+      userId: params.userId ?? null,
+      action: params.action,
+      resourceType: params.resourceType,
+      resourceId: params.resourceId ?? null,
+      before: params.before as Record<string, unknown> ?? null,
+      after: params.after as Record<string, unknown> ?? null,
+      correlationId: params.correlationId ?? null,
     });
-  } catch (err) { handleRouteError(res, err, "Failed to get Alloy status"); }
-});
+  } catch (err) {
+    logger.warn({ err }, "Failed to write audit log");
+  }
+}
 
-// ─── Signal Ingestion ─────────────────────────────────────────────────────────
+function transitionRunState(
+  current: string,
+  next: string,
+): { valid: boolean; message?: string } {
+  const allowed: Record<string, string[]> = {
+    queued: ["running", "canceled"],
+    running: ["waiting_approval", "completed", "failed", "canceled"],
+    waiting_approval: ["completed", "failed", "canceled"],
+    completed: [],
+    failed: ["queued"],
+    canceled: [],
+  };
+  if (!allowed[current]?.includes(next)) {
+    return { valid: false, message: `Cannot transition from ${current} to ${next}` };
+  }
+  return { valid: true };
+}
 
-router.post("/alloy/signals/ingest", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/alloy/ingest/signal", authMiddleware(), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const { source, externalId, title, body, signalType, severity, payload, valueAtRisk, product = "alloy" } = req.body;
-
-    if (!title) { sendError(res, "title is required", 400); return; }
-
-    const [signal] = await db.insert(platformSignalsTable).values({
-      orgId,
-      product,
-      source: source || "manual",
-      sourceType: "ingest",
-      externalId: externalId || `manual-${Date.now()}`,
-      title,
-      body: body || null,
-      severity: severity || "medium",
+    const payload = req.body;
+    if (!payload.source || !payload.sourceType || !payload.title) {
+      sendBadRequest(res, "source, sourceType, and title are required");
+      return;
+    }
+    const userOrgIds = getUserOrgIds(req.user);
+    const resolvedOrgId = isGlobalAdmin(req.user) ? (payload.orgId ?? userOrgIds[0] ?? null) : (userOrgIds[0] ?? null);
+    const data = insertAlloySignalSchema.parse({
+      source: payload.source,
+      sourceType: payload.sourceType,
+      severity: payload.severity ?? "info",
+      title: payload.title,
+      body: payload.body ?? null,
       status: "new",
-      metadata: payload || {},
-      valueAtRisk: valueAtRisk ? String(valueAtRisk) : null,
-      detectedAt: new Date(),
-    }).returning();
-
-    logPlatformEvent(orgId, user.id, user.displayName, "signal.ingested", "signal", String(signal.id), "alloy");
-
+      orgId: resolvedOrgId,
+      workflowId: payload.workflowId ?? null,
+      normalizedScore: payload.normalizedScore ?? null,
+      valueAtRisk: payload.valueAtRisk ?? null,
+      metadata: payload.metadata ?? {},
+    });
+    const [signal] = await db.insert(alloySignalsTable).values(data).returning();
+    await writeAudit({
+      orgId: signal.orgId,
+      userId: req.user?.id,
+      action: "ingest_signal",
+      resourceType: "alloy_signal",
+      resourceId: String(signal.id),
+      after: signal,
+      correlationId: res.getHeader("X-Correlation-ID") as string,
+    });
     sendCreated(res, signal);
   } catch (err) {
     handleRouteError(res, err, "Failed to ingest signal");
   }
 });
 
-router.post("/alloy/signals/batch", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req: Request, res: Response) => {
+router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const signals = req.body;
-
-    if (!Array.isArray(signals)) {
-      sendError(res, 400, "Body must be an array of signals");
+    const { signals } = req.body as { signals: unknown[] };
+    if (!Array.isArray(signals) || signals.length === 0) {
+      sendBadRequest(res, "signals array is required and must be non-empty");
       return;
     }
-    if (signals.length === 0 || signals.length > 100) {
-      sendError(res, "Batch must contain 1–100 signals", 400);
+    if (signals.length > 100) {
+      sendBadRequest(res, "Batch size limited to 100 signals");
       return;
     }
-
-    const inserted = await db.insert(platformSignalsTable).values(
-      signals.map(s => ({
-        orgId,
-        product: s.product || "alloy",
-        source: s.source || "batch",
-        sourceType: "ingest" as const,
-        externalId: s.externalId || `batch-${crypto.randomUUID()}`,
-        title: s.title || "Untitled Signal",
-        severity: s.severity || "medium",
-        status: "new" as const,
-        metadata: s.payload || {},
-        valueAtRisk: s.valueAtRisk ? String(s.valueAtRisk) : null,
-        detectedAt: new Date(),
-      }))
-    ).returning();
-
-    logPlatformEvent(orgId, user.id, user.displayName, "signal.batch_ingested", "signal", `batch:${inserted.length}`, "alloy");
-
-    sendCreated(res, inserted);
+    const parsed = signals.map((s: unknown) => insertAlloySignalSchema.parse(s));
+    const inserted = await db.insert(alloySignalsTable).values(parsed).returning();
+    sendCreated(res, { count: inserted.length, signals: inserted });
   } catch (err) {
     handleRouteError(res, err, "Failed to batch ingest signals");
   }
 });
 
-// ─── Canonical Ingest Endpoints ───────────────────────────────────────────────
-// These are the task-specified canonical paths, using the platform schema
-
-router.post(
-  "/alloy/ingest/signal",
-  authMiddleware(),
-  async (req: Request, res: Response) => {
-    try {
-      const user = req.user!;
-      const orgId = resolveOrgId(req, user);
-      const { source, title, body, severity, valueAtRisk, product = "alloy", metadata } = req.body as {
-        source?: string;
-        title: string;
-        body?: string;
-        severity?: "info" | "low" | "medium" | "high" | "critical";
-        valueAtRisk?: number;
-        product?: string;
-        metadata?: Record<string, unknown>;
-      };
-
-      if (!title) { sendError(res, "title is required", 400); return; }
-
-      const [signal] = await db.insert(platformSignalsTable).values({
-        orgId,
-        product,
-        source: source ?? "api",
-        sourceType: "ingest",
-        externalId: `ingest-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
-        title,
-        body: body ?? null,
-        severity: severity ?? "medium",
-        status: "new",
-        metadata: metadata ?? {},
-        valueAtRisk: valueAtRisk != null ? String(valueAtRisk) : null,
-        detectedAt: new Date(),
-      }).returning();
-
-      logPlatformEvent(orgId, user.id, user.displayName, "signal.ingested", "signal", String(signal.id), "alloy");
-
-      sendCreated(res, { signal });
-    } catch (err) { handleRouteError(res, err, "Signal ingestion failed"); }
-  },
-);
-
-router.post(
-  "/alloy/ingest/batch",
-  authMiddleware(),
-  requireRole("super_admin", "ops", "analyst"),
-  async (req: Request, res: Response) => {
-    try {
-      const user = req.user!;
-      const orgId = resolveOrgId(req, user);
-      const { signals: rawSignals, product = "alloy" } = req.body as {
-        signals: Array<{ source?: string; title: string; body?: string; severity?: string; valueAtRisk?: number; metadata?: Record<string, unknown> }>;
-        product?: string;
-      };
-
-      if (!Array.isArray(rawSignals) || rawSignals.length === 0) {
-        sendError(res, "signals array is required and must not be empty", 400);
-        return;
-      }
-      if (rawSignals.length > 100) {
-        sendError(res, "Batch size cannot exceed 100 signals", 400);
-        return;
-      }
-
-      const inserted = await db.insert(platformSignalsTable).values(
-        rawSignals.map(s => ({
-          orgId,
-          product,
-          source: s.source ?? "batch",
-          sourceType: "ingest" as const,
-          externalId: `batch-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
-          title: s.title,
-          body: s.body ?? null,
-          severity: (s.severity as "info" | "low" | "medium" | "high" | "critical") ?? "medium",
-          status: "new" as const,
-          metadata: s.metadata ?? {},
-          valueAtRisk: s.valueAtRisk != null ? String(s.valueAtRisk) : null,
-          detectedAt: new Date(),
-        }))
-      ).returning();
-
-      logPlatformEvent(orgId, user.id, user.displayName, "signal.batch_ingested", "signal", `batch:${inserted.length}`, "alloy");
-
-      sendSuccess(res, { results: inserted, total: rawSignals.length, ingested: inserted.length });
-    } catch (err) { handleRouteError(res, err, "Batch ingestion failed"); }
-  },
-);
-
-// ─── Workflow Management ──────────────────────────────────────────────────────
-
-router.get("/alloy/workflows", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/signals", authMiddleware(), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const results = await db.select().from(workflowsTable).where(
-      and(
-        eq(workflowsTable.orgId, orgId),
-        eq(workflowsTable.product, "alloy")
-      )
-    ).orderBy(desc(workflowsTable.updatedAt));
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const orgIds = getUserOrgIds(req.user);
+    const orgFilter = !isGlobalAdmin(req.user) && orgIds.length > 0 ? inArray(alloySignalsTable.orgId, orgIds) : undefined;
+    const baseQuery = orgFilter ? db.select().from(alloySignalsTable).where(orgFilter) : db.select().from(alloySignalsTable);
+    const rows = await baseQuery.orderBy(desc(alloySignalsTable.receivedAt)).limit(limit).offset(offset);
+    const countQuery = orgFilter ? db.select({ count: sql<number>`count(*)::int` }).from(alloySignalsTable).where(orgFilter) : db.select({ count: sql<number>`count(*)::int` }).from(alloySignalsTable);
+    const [{ count }] = await countQuery;
+    sendSuccess(res, rows, 200, { page, limit, total: count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list signals");
+  }
+});
 
-    sendSuccess(res, results);
+router.get("/alloy/workflows", authMiddleware(), async (req, res) => {
+  try {
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const orgIds = getUserOrgIds(req.user);
+    const orgFilter = !isGlobalAdmin(req.user) && orgIds.length > 0 ? inArray(alloyWorkflowsTable.orgId, orgIds) : undefined;
+    const baseQuery = orgFilter ? db.select().from(alloyWorkflowsTable).where(orgFilter) : db.select().from(alloyWorkflowsTable);
+    const rows = await baseQuery.orderBy(desc(alloyWorkflowsTable.createdAt)).limit(limit).offset(offset);
+    const countQuery = orgFilter ? db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowsTable).where(orgFilter) : db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowsTable);
+    const [{ count }] = await countQuery;
+    sendSuccess(res, rows, 200, { page, limit, total: count });
   } catch (err) {
     handleRouteError(res, err, "Failed to list workflows");
   }
 });
 
-router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req: Request, res: Response) => {
+router.get("/alloy/workflows/:id", authMiddleware(), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const [workflow] = await db.insert(workflowsTable).values({
-      ...req.body,
-      orgId,
-      product: "alloy",
-      status: "active",
-    }).returning();
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    if (!row) { sendNotFound(res, "Workflow"); return; }
+    if (!isGlobalAdmin(req.user) && row.orgId != null && !getUserOrgIds(req.user).includes(row.orgId)) { sendNotFound(res, "Workflow"); return; }
+    sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get workflow");
+  }
+});
 
-    logPlatformEvent(orgId, user.id, user.displayName, "workflow.created", "workflow", String(workflow.id), "alloy");
-    sendCreated(res, workflow);
+router.post("/alloy/workflows", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req, res) => {
+  try {
+    const data = insertAlloyWorkflowSchema.parse(req.body);
+    const userOrgIds = getUserOrgIds(req.user);
+    const resolvedOrgId = isGlobalAdmin(req.user) ? (data.orgId ?? userOrgIds[0] ?? null) : (userOrgIds[0] ?? null);
+    const [row] = await db.insert(alloyWorkflowsTable).values({ ...data, orgId: resolvedOrgId, createdBy: req.user?.id ?? null }).returning();
+    await writeAudit({
+      orgId: row.orgId,
+      userId: req.user?.id,
+      action: "create_workflow",
+      resourceType: "alloy_workflow",
+      resourceId: String(row.id),
+      after: row,
+    });
+    sendCreated(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to create workflow");
   }
 });
 
-router.get("/alloy/workflows/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-    const [workflow] = await db.select().from(workflowsTable).where(and(eq(workflowsTable.id, id), eq(workflowsTable.orgId, orgId)));
+    const id = parseIdParam(req.params.id);
+    const [before] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    if (!before) { sendNotFound(res, "Workflow"); return; }
+    if (!isGlobalAdmin(req.user) && before.orgId != null && !getUserOrgIds(req.user).includes(before.orgId)) { sendNotFound(res, "Workflow"); return; }
+    const allowed = ["name", "description", "trigger", "triggerConfig", "steps", "outputType", "requiresApproval", "approverRole", "isActive"];
+    const patch = Object.fromEntries(Object.entries(req.body).filter(([k]) => allowed.includes(k)));
+    const [row] = await db.update(alloyWorkflowsTable).set({ ...patch, updatedAt: new Date() }).where(eq(alloyWorkflowsTable.id, id)).returning();
+    await writeAudit({ orgId: row.orgId, userId: req.user?.id, action: "update_workflow", resourceType: "alloy_workflow", resourceId: String(id), before, after: row });
+    sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update workflow");
+  }
+});
+
+router.delete("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [existing] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    if (!existing) { sendNotFound(res, "Workflow"); return; }
+    if (!isGlobalAdmin(req.user) && existing.orgId != null && !getUserOrgIds(req.user).includes(existing.orgId)) { sendNotFound(res, "Workflow"); return; }
+    await db.delete(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
+    sendNoContent(res);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete workflow");
+  }
+});
+
+router.post("/alloy/workflows/:id/run", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [workflow] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, id));
     if (!workflow) { sendNotFound(res, "Workflow"); return; }
-    sendSuccess(res, workflow);
-  } catch (err) { handleRouteError(res, err, "Failed to get workflow"); }
-});
+    if (!isGlobalAdmin(req.user) && workflow.orgId != null && !getUserOrgIds(req.user).includes(workflow.orgId)) { sendNotFound(res, "Workflow"); return; }
+    if (!workflow.isActive) { sendBadRequest(res, "Workflow is not active"); return; }
 
-router.patch("/alloy/workflows/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req: Request, res: Response) => {
-  try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-    const [workflow] = await db.update(workflowsTable).set({
-      ...req.body,
-      updatedAt: new Date(),
-    }).where(and(eq(workflowsTable.id, id), eq(workflowsTable.orgId, orgId))).returning();
-
-    if (!workflow) { sendNotFound(res, "Workflow"); return; }
-    logPlatformEvent(orgId, user.id, user.displayName, "workflow.updated", "workflow", String(workflow.id), "alloy");
-    sendSuccess(res, workflow);
-  } catch (err) { handleRouteError(res, err, "Failed to update workflow"); }
-});
-
-// ─── Workflow Runs ────────────────────────────────────────────────────────────
-
-router.get("/alloy/runs", authMiddleware(), async (req: Request, res: Response) => {
-  try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const limit = Math.min(parseInt(req.query.limit as string || "50", 10), 200);
-    const status = req.query.status as string | undefined;
-
-    const conditions: ReturnType<typeof eq>[] = [eq(workflowRunsTable.orgId, orgId)];
-    if (status) conditions.push(eq(workflowRunsTable.status, status as typeof workflowRunsTable.$inferSelect["status"]));
-
-    const results = await db.select().from(workflowRunsTable)
-      .where(and(...conditions))
-      .orderBy(desc(workflowRunsTable.createdAt))
-      .limit(limit);
-
-    sendSuccess(res, results);
-  } catch (err) { handleRouteError(res, err, "Failed to list runs"); }
-});
-
-router.get("/alloy/runs/:id", authMiddleware(), async (req: Request, res: Response) => {
-  try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) { sendError(res, "Invalid run ID", 400); return; }
-
-    const [run] = await db.select().from(workflowRunsTable).where(and(eq(workflowRunsTable.id, id), eq(workflowRunsTable.orgId, orgId)));
-    if (!run) { sendNotFound(res, "Run"); return; }
-    sendSuccess(res, run);
-  } catch (err) { handleRouteError(res, err, "Failed to get run"); }
-});
-
-router.post("/alloy/runs", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req: Request, res: Response) => {
-  try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const [run] = await db.insert(workflowRunsTable).values({
-      ...req.body,
-      orgId,
-      status: "running",
-      triggeredBy: user.id,
-      startedAt: new Date(),
+    const [run] = await db.insert(alloyWorkflowRunsTable).values({
+      workflowId: id,
+      signalId: req.body.signalId ?? null,
+      triggeredBy: req.user?.id ?? null,
+      state: "queued",
+      input: req.body.input ?? {},
+      stateHistory: [{ state: "queued", at: new Date().toISOString(), by: req.user?.displayName ?? "system" }],
     }).returning();
 
-    logPlatformEvent(orgId, user.id, user.displayName, "workflow_run.started", "workflow_run", String(run.id), "alloy");
+    await db.update(alloyWorkflowsTable).set({ runCount: (workflow.runCount || 0) + 1, lastRunAt: new Date(), updatedAt: new Date() }).where(eq(alloyWorkflowsTable.id, id));
+
+    setTimeout(async () => {
+      try {
+        const requiresApproval = workflow.requiresApproval;
+        const nextState = requiresApproval ? "waiting_approval" : "completed";
+        const now = new Date();
+        await db.update(alloyWorkflowRunsTable).set({
+          state: "running",
+          startedAt: now,
+          stateHistory: [
+            { state: "queued", at: run.queuedAt, by: "system" },
+            { state: "running", at: now.toISOString(), by: "system" },
+          ],
+        }).where(eq(alloyWorkflowRunsTable.id, run.id));
+
+        const artifactContent = {
+          summary: `Workflow "${workflow.name}" executed successfully`,
+          workflowId: id,
+          runId: run.id,
+          inputs: run.input,
+          executedAt: now.toISOString(),
+        };
+        const [artifact] = await db.insert(alloyArtifactsTable).values({
+          workflowRunId: run.id,
+          workflowId: id,
+          orgId: workflow.orgId ?? null,
+          title: `${workflow.name} — Output`,
+          artifactType: "report",
+          content: artifactContent,
+          status: requiresApproval ? "pending_review" : "published",
+          approvalStatus: requiresApproval ? "pending" : "not_required",
+        }).returning();
+
+        if (requiresApproval) {
+          await db.insert(alloyApprovalsTable).values({
+            workflowRunId: run.id,
+            artifactId: artifact.id,
+            requestedFrom: workflow.approverRole ?? "admin",
+            status: "pending",
+            expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+          });
+        }
+
+        const completedAt = new Date();
+        await db.update(alloyWorkflowRunsTable).set({
+          state: nextState,
+          completedAt: requiresApproval ? undefined : completedAt,
+          durationMs: completedAt.getTime() - now.getTime() + 500,
+          output: artifactContent,
+          stateHistory: [
+            { state: "queued", at: run.queuedAt, by: "system" },
+            { state: "running", at: now.toISOString(), by: "system" },
+            { state: nextState, at: completedAt.toISOString(), by: "system" },
+          ],
+        }).where(eq(alloyWorkflowRunsTable.id, run.id));
+      } catch (err) {
+        logger.error({ err, runId: run.id }, "Failed to execute workflow run");
+        await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Execution error" }).where(eq(alloyWorkflowRunsTable.id, run.id));
+      }
+    }, 1500);
+
     sendCreated(res, run);
-  } catch (err) { handleRouteError(res, err, "Failed to start run"); }
+  } catch (err) {
+    handleRouteError(res, err, "Failed to trigger workflow");
+  }
 });
 
-router.patch("/alloy/runs/:id", authMiddleware(), requireRole("super_admin", "ops", "analyst"), async (req: Request, res: Response) => {
+router.get("/alloy/runs", authMiddleware(), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-    const { status, output, errorMessage } = req.body;
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const rows = await db.select().from(alloyWorkflowRunsTable).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable);
+    sendSuccess(res, rows, 200, { page, limit, total: count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list runs");
+  }
+});
 
-    const updateData: Record<string, unknown> = { status, output, errorMessage, updatedAt: new Date() };
-    if (status === "completed" || status === "failed") {
-      updateData.completedAt = new Date();
-    }
+router.get("/alloy/runs/:id", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
+    if (!row) { sendNotFound(res, "Run"); return; }
+    sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get run");
+  }
+});
 
-    const [run] = await db.update(workflowRunsTable).set(updateData)
-      .where(and(eq(workflowRunsTable.id, id), eq(workflowRunsTable.orgId, orgId)))
-      .returning();
+router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [run] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
     if (!run) { sendNotFound(res, "Run"); return; }
-
-    logPlatformEvent(orgId, user.id, user.displayName, `workflow_run.${status}`, "workflow_run", String(run.id), "alloy");
-    sendSuccess(res, run);
-  } catch (err) { handleRouteError(res, err, "Failed to update run"); }
-});
-
-router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin", "ops"), async (req: Request, res: Response) => {
-  try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) { sendError(res, "Invalid run ID", 400); return; }
-
-    const [existing] = await db.select().from(workflowRunsTable).where(and(eq(workflowRunsTable.id, id), eq(workflowRunsTable.orgId, orgId)));
-    if (!existing) { sendNotFound(res, "Run"); return; }
-
-    if (!["failed", "cancelled"].includes(existing.status)) {
-      sendError(res, `Run cannot be retried from status '${existing.status}'`, 409);
+    if (!["failed", "canceled"].includes(run.state)) {
+      sendBadRequest(res, "Only failed or canceled runs can be retried");
       return;
     }
-
-    if (existing.retryCount >= existing.maxRetries) {
-      sendError(res, `Run has reached max retries (${existing.maxRetries})`, 409);
+    if ((run.retryCount ?? 0) >= (run.maxRetries ?? 3)) {
+      sendBadRequest(res, "Max retries reached");
       return;
     }
-
-    const [updated] = await db.update(workflowRunsTable).set({
-      status: "retrying",
-      retryCount: existing.retryCount + 1,
+    const [updated] = await db.update(alloyWorkflowRunsTable).set({
+      state: "queued",
+      retryCount: (run.retryCount ?? 0) + 1,
       errorMessage: null,
-      startedAt: new Date(),
+      startedAt: null,
       completedAt: null,
-    }).where(eq(workflowRunsTable.id, id)).returning();
-
-    logPlatformEvent(orgId, user.id, user.displayName, "workflow_run.retried", "workflow_run", String(id), "alloy");
-    sendSuccess(res, { run: updated, retryCount: updated.retryCount });
-  } catch (err) { handleRouteError(res, err, "Failed to retry run"); }
+    }).where(eq(alloyWorkflowRunsTable.id, id)).returning();
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to retry run");
+  }
 });
 
-router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin", "ops"), async (req: Request, res: Response) => {
+router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) { sendError(res, "Invalid run ID", 400); return; }
-
-    const [existing] = await db.select().from(workflowRunsTable).where(and(eq(workflowRunsTable.id, id), eq(workflowRunsTable.orgId, orgId)));
-    if (!existing) { sendNotFound(res, "Run"); return; }
-
-    if (!["queued", "running", "retrying"].includes(existing.status)) {
-      sendError(res, `Run cannot be cancelled from status '${existing.status}'`, 409);
-      return;
-    }
-
-    const [updated] = await db.update(workflowRunsTable).set({
-      status: "cancelled",
-      completedAt: new Date(),
-    }).where(eq(workflowRunsTable.id, id)).returning();
-
-    logPlatformEvent(orgId, user.id, user.displayName, "workflow_run.cancelled", "workflow_run", String(id), "alloy");
-    sendSuccess(res, { run: updated, cancelled: true });
-  } catch (err) { handleRouteError(res, err, "Failed to cancel run"); }
+    const id = parseIdParam(req.params.id);
+    const [run] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
+    if (!run) { sendNotFound(res, "Run"); return; }
+    const check = transitionRunState(run.state, "canceled");
+    if (!check.valid) { sendBadRequest(res, check.message ?? "Cannot cancel run in current state"); return; }
+    const [updated] = await db.update(alloyWorkflowRunsTable).set({ state: "canceled" }).where(eq(alloyWorkflowRunsTable.id, id)).returning();
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to cancel run");
+  }
 });
 
-// ─── Artifacts & Approvals ────────────────────────────────────────────────────
-
-router.get("/alloy/artifacts", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/artifacts", authMiddleware(), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const results = await db.select().from(artifactsTable).where(and(eq(artifactsTable.orgId, orgId), eq(artifactsTable.product, "alloy"))).orderBy(desc(artifactsTable.createdAt));
-    sendSuccess(res, results);
-  } catch (err) { handleRouteError(res, err, "Failed to list artifacts"); }
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const orgIds = getUserOrgIds(req.user);
+    const orgFilter = !isGlobalAdmin(req.user) && orgIds.length > 0 ? inArray(alloyArtifactsTable.orgId, orgIds) : undefined;
+    const baseQuery = orgFilter ? db.select().from(alloyArtifactsTable).where(orgFilter) : db.select().from(alloyArtifactsTable);
+    const rows = await baseQuery.orderBy(desc(alloyArtifactsTable.createdAt)).limit(limit).offset(offset);
+    const countQuery = orgFilter ? db.select({ count: sql<number>`count(*)::int` }).from(alloyArtifactsTable).where(orgFilter) : db.select({ count: sql<number>`count(*)::int` }).from(alloyArtifactsTable);
+    const [{ count }] = await countQuery;
+    sendSuccess(res, rows, 200, { page, limit, total: count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list artifacts");
+  }
 });
 
-router.get("/alloy/artifacts/:id", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/artifacts/:id", authMiddleware(), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) { sendError(res, "Invalid artifact ID", 400); return; }
+    const id = parseIdParam(req.params.id);
+    const [row] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
+    if (!row) { sendNotFound(res, "Artifact"); return; }
+    if (!isGlobalAdmin(req.user) && row.orgId != null && !getUserOrgIds(req.user).includes(row.orgId)) { sendNotFound(res, "Artifact"); return; }
+    sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get artifact");
+  }
+});
 
-    const [artifact] = await db.select().from(artifactsTable).where(and(eq(artifactsTable.id, id), eq(artifactsTable.orgId, orgId)));
+router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [artifact] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
     if (!artifact) { sendNotFound(res, "Artifact"); return; }
-    sendSuccess(res, artifact);
-  } catch (err) { handleRouteError(res, err, "Failed to get artifact"); }
-});
-
-router.post("/alloy/artifacts/:id/approve", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req: Request, res: Response) => {
-  try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-
-    const [artifact] = await db.select().from(artifactsTable).where(and(eq(artifactsTable.id, id), eq(artifactsTable.orgId, orgId)));
-    if (!artifact) { sendNotFound(res, "Artifact"); return; }
-
-    if (artifact.status !== "pending") {
-      sendError(res, `Artifact status is already '${artifact.status}'`, 409);
-      return;
-    }
-
-    const [updated] = await db.update(artifactsTable).set({
+    if (!isGlobalAdmin(req.user) && artifact.orgId != null && !getUserOrgIds(req.user).includes(artifact.orgId)) { sendNotFound(res, "Artifact"); return; }
+    const [updated] = await db.update(alloyArtifactsTable).set({
       status: "approved",
-      approvedBy: user.id,
-      approvedAt: new Date(),
+      approvalStatus: "approved",
+      reviewedBy: req.user?.id ?? null,
+      reviewedAt: new Date(),
+      reviewNotes: req.body.notes ?? null,
       updatedAt: new Date(),
-    }).where(and(eq(artifactsTable.id, id), eq(artifactsTable.orgId, orgId))).returning();
-
-    if (!updated) { sendNotFound(res, "Artifact"); return; }
-
-    logAlloyEvent(orgId, user.id, user.displayName, "artifact.approved", "artifact", String(id));
+    }).where(eq(alloyArtifactsTable.id, id)).returning();
+    if (updated.workflowRunId) {
+      await db.update(alloyApprovalsTable).set({
+        status: "approved",
+        decision: req.body.notes ?? "Approved",
+        decisionBy: req.user?.id ?? null,
+        decisionAt: new Date(),
+      }).where(eq(alloyApprovalsTable.workflowRunId, updated.workflowRunId));
+      await db.update(alloyWorkflowRunsTable).set({ state: "completed", completedAt: new Date() }).where(eq(alloyWorkflowRunsTable.id, updated.workflowRunId));
+    }
+    await writeAudit({ userId: req.user?.id, action: "approve_artifact", resourceType: "alloy_artifact", resourceId: String(id) });
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to approve artifact");
   }
 });
 
-router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req: Request, res: Response) => {
+router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const id = parseInt(req.params.id, 10);
-
-    const [artifact] = await db.select().from(artifactsTable).where(and(eq(artifactsTable.id, id), eq(artifactsTable.orgId, orgId)));
+    const id = parseIdParam(req.params.id);
+    const [artifact] = await db.select().from(alloyArtifactsTable).where(eq(alloyArtifactsTable.id, id));
     if (!artifact) { sendNotFound(res, "Artifact"); return; }
-
-    if (artifact.status !== "pending") {
-      sendError(res, `Artifact status is already '${artifact.status}'`, 409);
-      return;
-    }
-
-    const { reason } = req.body as { reason?: string };
-    const [updated] = await db.update(artifactsTable).set({
+    if (!isGlobalAdmin(req.user) && artifact.orgId != null && !getUserOrgIds(req.user).includes(artifact.orgId)) { sendNotFound(res, "Artifact"); return; }
+    const [updated] = await db.update(alloyArtifactsTable).set({
       status: "rejected",
-      rejectedAt: new Date(),
+      approvalStatus: "rejected",
+      reviewedBy: req.user?.id ?? null,
+      reviewedAt: new Date(),
+      reviewNotes: req.body.reason ?? null,
       updatedAt: new Date(),
-      metadata: { ...((artifact.metadata as Record<string, unknown>) ?? {}), rejectionReason: reason ?? null },
-    }).where(and(eq(artifactsTable.id, id), eq(artifactsTable.orgId, orgId))).returning();
-
-    if (!updated) { sendNotFound(res, "Artifact"); return; }
-    logAlloyEvent(orgId, user.id, user.displayName, "artifact.rejected", "artifact", String(id));
+    }).where(eq(alloyArtifactsTable.id, id)).returning();
+    if (updated.workflowRunId) {
+      await db.update(alloyApprovalsTable).set({
+        status: "rejected",
+        decision: req.body.reason ?? "Rejected",
+        decisionBy: req.user?.id ?? null,
+        decisionAt: new Date(),
+      }).where(eq(alloyApprovalsTable.workflowRunId, updated.workflowRunId));
+      await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Artifact rejected by reviewer" }).where(eq(alloyWorkflowRunsTable.id, updated.workflowRunId));
+    }
+    await writeAudit({ userId: req.user?.id, action: "reject_artifact", resourceType: "alloy_artifact", resourceId: String(id) });
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to reject artifact");
   }
 });
 
-// ─── Admin: Feature Flags ─────────────────────────────────────────────────────
-
-router.get("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "ops"), async (req: Request, res: Response) => {
+router.get("/alloy/approvals", authMiddleware(), async (req, res) => {
   try {
-    const flags = await db.select().from(featureFlagsTable).where(
-      sql`${featureFlagsTable.product} = 'alloy' OR ${featureFlagsTable.scope} = 'global'`
-    ).orderBy(featureFlagsTable.key);
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const rows = await db.select().from(alloyApprovalsTable).orderBy(desc(alloyApprovalsTable.createdAt)).limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(alloyApprovalsTable);
+    sendSuccess(res, rows, 200, { page, limit, total: count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list approvals");
+  }
+});
 
+router.get("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "ops"), async (_req, res) => {
+  try {
+    const flags = await db.select().from(featureFlagsTable).orderBy(featureFlagsTable.key);
     sendSuccess(res, flags);
   } catch (err) {
     handleRouteError(res, err, "Failed to list feature flags");
   }
 });
 
-router.post("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "ops"), async (req: Request, res: Response) => {
+router.post("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
   try {
-    const user = req.user!;
-    const { key, name, description, isEnabled, rolloutPercentage } = req.body as {
-      key?: string;
-      name?: string;
-      description?: string;
-      isEnabled?: boolean;
-      rolloutPercentage?: number;
-    };
-
-    if (!key || !name) { sendError(res, "key and name are required", 400); return; }
-
-    const [existing] = await db.select({ id: featureFlagsTable.id }).from(featureFlagsTable).where(eq(featureFlagsTable.key, key)).limit(1);
-    if (existing) { sendError(res, `Feature flag '${key}' already exists`, 409); return; }
-
-    const [flag] = await db.insert(featureFlagsTable).values({
-      key,
-      name,
-      description: description ?? null,
-      isEnabled: isEnabled ?? false,
-      rolloutPercentage: rolloutPercentage ?? 0,
-    }).returning();
-
-    logAlloyEvent(0, user.id, user.displayName, "feature_flag.created", "feature_flag", key);
-    sendCreated(res, flag);
-  } catch (err) { handleRouteError(res, err, "Failed to create feature flag"); }
+    const { key, name, description, isEnabled, rolloutPercentage, conditions } = req.body;
+    if (!key || !name) { sendBadRequest(res, "key and name are required"); return; }
+    const [existing] = await db.select().from(featureFlagsTable).where(eq(featureFlagsTable.key, key));
+    if (existing) {
+      const [updated] = await db.update(featureFlagsTable).set({
+        name,
+        description: description ?? existing.description,
+        isEnabled: isEnabled ?? existing.isEnabled,
+        rolloutPercentage: rolloutPercentage ?? existing.rolloutPercentage,
+        conditions: conditions ?? existing.conditions,
+        updatedAt: new Date(),
+      }).where(eq(featureFlagsTable.key, key)).returning();
+      await writeAudit({ userId: req.user?.id, action: "update_feature_flag", resourceType: "feature_flag", resourceId: key, before: existing, after: updated });
+      sendSuccess(res, updated);
+    } else {
+      const [created] = await db.insert(featureFlagsTable).values({ key, name, description, isEnabled: isEnabled ?? false, rolloutPercentage: rolloutPercentage ?? 0, conditions }).returning();
+      await writeAudit({ userId: req.user?.id, action: "create_feature_flag", resourceType: "feature_flag", resourceId: key, after: created });
+      sendCreated(res, created);
+    }
+  } catch (err) {
+    handleRouteError(res, err, "Failed to upsert feature flag");
+  }
 });
 
-router.patch("/alloy/admin/flags/:key", authMiddleware(), requireRole("super_admin", "ops"), async (req: Request, res: Response) => {
+router.patch("/alloy/admin/flags/:key", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
   try {
-    const user = req.user!;
     const key = req.params.key;
-    const [flag] = await db.update(featureFlagsTable).set({
-      ...req.body,
-      updatedAt: new Date(),
-    }).where(eq(featureFlagsTable.key, key)).returning();
-
-    if (!flag) { sendNotFound(res, "Feature flag"); return; }
-    logAlloyEvent(0, user.id, user.displayName, "feature_flag.updated", "feature_flag", key);
-    sendSuccess(res, flag);
+    const [existing] = await db.select().from(featureFlagsTable).where(eq(featureFlagsTable.key, key));
+    if (!existing) { sendNotFound(res, "Feature flag"); return; }
+    const [updated] = await db.update(featureFlagsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(featureFlagsTable.key, key)).returning();
+    await writeAudit({ userId: req.user?.id, action: "update_feature_flag", resourceType: "feature_flag", resourceId: key, before: existing, after: updated });
+    sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to update feature flag");
   }
 });
 
-// ─── Audit Log ────────────────────────────────────────────────────────────────
-
-router.get("/alloy/audit", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req: Request, res: Response) => {
+router.get("/alloy/audit", authMiddleware(), requireRole("super_admin", "ops", "compliance"), async (req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-    const limit = Math.min(parseInt(req.query.limit as string || "100", 10), 500);
-    const eventType = req.query.eventType as string | undefined;
-    const actorId = req.query.actorId ? parseInt(req.query.actorId as string, 10) : undefined;
-    const fromDate = req.query.fromDate ? new Date(req.query.fromDate as string) : undefined;
-    const toDate = req.query.toDate ? new Date(req.query.toDate as string) : undefined;
-
-    const conditions: ReturnType<typeof eq>[] = [
-      eq(eventLogTable.orgId, orgId),
-      eq(eventLogTable.product, "alloy"),
-    ];
-    if (eventType) conditions.push(eq(eventLogTable.eventType, eventType));
-    if (actorId && !isNaN(actorId)) conditions.push(eq(eventLogTable.actorId, actorId));
-    if (fromDate && !isNaN(fromDate.getTime())) conditions.push(gte(eventLogTable.createdAt, fromDate));
-    if (toDate && !isNaN(toDate.getTime())) conditions.push(lte(eventLogTable.createdAt, toDate));
-
-    const entries = await db.select().from(eventLogTable).where(
-      and(...conditions)
-    ).orderBy(desc(eventLogTable.createdAt)).limit(limit);
-
-    sendSuccess(res, entries);
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const orgIds = getUserOrgIds(req.user);
+    const orgFilter = !isGlobalAdmin(req.user) && orgIds.length > 0 ? inArray(alloyAuditLogTable.orgId, orgIds) : undefined;
+    const baseQuery = orgFilter ? db.select().from(alloyAuditLogTable).where(orgFilter) : db.select().from(alloyAuditLogTable);
+    const rows = await baseQuery.orderBy(desc(alloyAuditLogTable.createdAt)).limit(limit).offset(offset);
+    const countQuery = orgFilter ? db.select({ count: sql<number>`count(*)::int` }).from(alloyAuditLogTable).where(orgFilter) : db.select({ count: sql<number>`count(*)::int` }).from(alloyAuditLogTable);
+    const [{ count }] = await countQuery;
+    sendSuccess(res, rows, 200, { page, limit, total: count });
   } catch (err) {
-    handleRouteError(res, err, "Failed to get audit log");
+    handleRouteError(res, err, "Failed to list audit log");
   }
 });
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-
-router.get("/alloy/dashboard", authMiddleware(), async (req: Request, res: Response) => {
+router.get("/alloy/dashboard", authMiddleware(), async (_req, res) => {
   try {
-    const user = req.user!;
-    const orgId = resolveOrgId(req, user);
-
-    const [signals, workflows, runs, artifacts, approvals] = await Promise.all([
-      db.select().from(platformSignalsTable).where(and(eq(platformSignalsTable.orgId, orgId), eq(platformSignalsTable.product, "alloy"))).orderBy(desc(platformSignalsTable.detectedAt)).limit(20),
-      db.select().from(workflowsTable).where(and(eq(workflowsTable.orgId, orgId), eq(workflowsTable.product, "alloy"))),
-      db.select().from(workflowRunsTable).where(eq(workflowRunsTable.orgId, orgId)).orderBy(desc(workflowRunsTable.createdAt)).limit(10),
-      db.select().from(artifactsTable).where(and(eq(artifactsTable.orgId, orgId), eq(artifactsTable.product, "alloy"))).orderBy(desc(artifactsTable.createdAt)).limit(10),
-      db.select().from(approvalsTable).where(and(eq(approvalsTable.orgId, orgId), eq(approvalsTable.status, "pending"))),
+    const [
+      workflowCount,
+      runCount,
+      artifactCount,
+      pendingApprovalCount,
+      recentRuns,
+      recentArtifacts,
+    ] = await Promise.all([
+      db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowsTable).then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable).then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` }).from(alloyArtifactsTable).then(r => r[0]?.count ?? 0),
+      db.select({ count: sql<number>`count(*)::int` }).from(alloyApprovalsTable).where(eq(alloyApprovalsTable.status, "pending")).then(r => r[0]?.count ?? 0),
+      db.select().from(alloyWorkflowRunsTable).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(10),
+      db.select().from(alloyArtifactsTable).orderBy(desc(alloyArtifactsTable.createdAt)).limit(5),
     ]);
-
-    const criticalSignals = signals.filter(s => s.severity === "critical" && s.status === "new");
-    const highSignals = signals.filter(s => s.severity === "high" && s.status === "new");
-    const activeWorkflows = workflows.filter(w => w.status === "active");
-    const runningRuns = runs.filter(r => r.status === "running");
-
-    const totalValueAtRisk = signals
-      .filter(s => s.valueAtRisk && s.status !== "resolved")
-      .reduce((sum, s) => sum + parseFloat(s.valueAtRisk ?? "0"), 0);
-
     sendSuccess(res, {
       summary: {
-        totalSignals: signals.length,
-        criticalSignals: criticalSignals.length,
-        highSignals: highSignals.length,
-        activeWorkflows: activeWorkflows.length,
-        runningWorkflowRuns: runningRuns.length,
-        pendingApprovals: approvals.length,
-        pendingArtifacts: artifacts.filter(a => a.status === "pending").length,
-        totalValueAtRisk: Math.round(totalValueAtRisk),
+        totalWorkflows: workflowCount,
+        totalRuns: runCount,
+        totalArtifacts: artifactCount,
+        pendingApprovals: pendingApprovalCount,
       },
-      recentSignals: signals.slice(0, 5),
-      activeWorkflows: activeWorkflows.slice(0, 5),
-      recentRuns: runs.slice(0, 5),
-      pendingArtifacts: artifacts.filter(a => a.status === "pending").slice(0, 5),
-      pendingApprovals: approvals.slice(0, 5),
+      recentRuns,
+      recentArtifacts,
+      fetchedAt: new Date().toISOString(),
     });
   } catch (err) {
-    handleRouteError(res, err, "Failed to build alloy dashboard");
+    handleRouteError(res, err, "Failed to build Alloy dashboard");
   }
 });
-
-// ─── Org Membership (caller's view) ──────────────────────────────────────────
-
-router.get("/alloy/org/memberships", authMiddleware(), async (req: Request, res: Response) => {
-  try {
-    const user = req.user!;
-    sendSuccess(res, {
-      userId: user.id,
-      orgs: user.orgs,
-    });
-  } catch (err) { handleRouteError(res, err, "Failed to get org memberships"); }
-});
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function resolveOrgId(req: Request, user: NonNullable<Request["user"]>): number {
-  const qOrgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : undefined;
-  if (qOrgId && !isNaN(qOrgId)) return qOrgId;
-  if (user.orgs.length > 0) return user.orgs[0]!.orgId;
-  return 1;
-}
-
-function logAlloyEvent(orgId: number, userId: number | null, userName: string, eventType: string, targetType: string, targetId: string) {
-  try {
-    db.insert(eventLogTable).values({
-      orgId: orgId > 0 ? orgId : null,
-      actorId: userId,
-      actorName: userName,
-      eventType,
-      entityType: targetType,
-      entityId: targetId,
-      product: "alloy",
-    }).execute().catch(err => logger.error({ err }, "Failed to log alloy event async"));
-  } catch (err) {
-    logger.error({ err }, "Failed to log alloy event");
-  }
-}
 
 export default router;

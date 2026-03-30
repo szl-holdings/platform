@@ -27,6 +27,7 @@ const WorkflowOrchestration = lazy(() => import("@/pages/workflow-orchestration"
 const ConnectorMesh = lazy(() => import("@/pages/connector-mesh"));
 const GovernanceAudit = lazy(() => import("@/pages/governance-audit"));
 const AutomationAnalytics = lazy(() => import("@/pages/automation-analytics"));
+const ConsolePage = lazy(() => import("@/pages/ConsolePage"));
 
 function Router() {
   return (
@@ -37,6 +38,7 @@ function Router() {
         <Route path="/connectors" component={ConnectorMesh} />
         <Route path="/governance" component={GovernanceAudit} />
         <Route path="/analytics" component={AutomationAnalytics} />
+        <Route path="/console" component={ConsolePage} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -51,6 +53,7 @@ const alloyCommands: CommandItem[] = [
   { id: "nav-connectors", label: "Connector Mesh", icon: "🔌", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/connectors"); } },
   { id: "nav-governance", label: "Governance & Audit", icon: "🛡️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/governance"); } },
   { id: "nav-analytics", label: "Automation Analytics", icon: "📊", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/analytics"); } },
+  { id: "nav-console", label: "Platform Console", icon: "🖥️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/console"); } },
 ];
 
 const alloyShortcuts: KeyboardShortcut[] = [
@@ -58,6 +61,7 @@ const alloyShortcuts: KeyboardShortcut[] = [
   { key: "C", description: "Connector Mesh", category: "Navigation" },
   { key: "G", description: "Governance & Audit", category: "Navigation" },
   { key: "A", description: "Automation Analytics", category: "Navigation" },
+  { key: "P", description: "Platform Console", category: "Navigation" },
 ];
 
 function App() {

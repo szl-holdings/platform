@@ -36,6 +36,7 @@ const InterventionWorkspace = lazy(() => import("@/pages/intervention-workspace"
 const ActionQueue = lazy(() => import("@/pages/action-queue"));
 const ReadinessModule = lazy(() => import("@/pages/readiness-module"));
 const AdminJobsPage = lazy(() => import("@/pages/admin/jobs"));
+const ReadinessPage = lazy(() => import("@/pages/readiness"));
 
 function Router() {
   return (
@@ -47,7 +48,8 @@ function Router() {
         <Route path="/ownership" component={OwnershipMap} />
         <Route path="/escalation" component={EscalationCenter} />
         <Route path="/intervention" component={InterventionWorkspace} />
-        <Route path="/readiness" component={ReadinessModule} />
+        <Route path="/readiness" component={ReadinessPage} />
+        <Route path="/readiness-module" component={ReadinessModule} />
         <Route path="/admin/jobs" component={AdminJobsPage} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
@@ -63,6 +65,7 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-ownership", label: "Ownership Map", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ownership"); } },
   { id: "nav-escalation", label: "Escalation Center", icon: "🚨", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/escalation"); } },
   { id: "nav-intervention", label: "Intervention Workspace", icon: "🔧", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/intervention"); } },
+  { id: "nav-readiness", label: "Readiness", icon: "📋", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/readiness"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [

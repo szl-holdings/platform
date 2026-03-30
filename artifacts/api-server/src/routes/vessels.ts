@@ -27,7 +27,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-router.get("/vessels/fleets", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/fleets", authMiddleware(), async (_req, res) => {
   try {
     const fleets = await db.select().from(vesselsFleetsTable).orderBy(desc(vesselsFleetsTable.createdAt));
     sendSuccess(res, fleets);
@@ -36,7 +36,7 @@ router.get("/vessels/fleets", authMiddleware({ required: false }), async (_req, 
   }
 });
 
-router.get("/vessels/fleets/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/fleets/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [fleet] = await db.select().from(vesselsFleetsTable).where(eq(vesselsFleetsTable.id, id));
@@ -80,7 +80,7 @@ router.delete("/vessels/fleets/:id", authMiddleware(), requireRole("ops", "exec"
   }
 });
 
-router.get("/vessels", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels", authMiddleware(), async (_req, res) => {
   try {
     const vessels = await db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt));
     sendSuccess(res, vessels);
@@ -89,7 +89,7 @@ router.get("/vessels", authMiddleware({ required: false }), async (_req, res) =>
   }
 });
 
-router.get("/vessels/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [vessel] = await db.select().from(vesselsTable).where(eq(vesselsTable.id, id));
@@ -133,7 +133,7 @@ router.delete("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admi
   }
 });
 
-router.get("/vessels/:id/positions", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/:id/positions", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const positions = await db.select().from(vesselsPositionsTable).where(eq(vesselsPositionsTable.vesselId, id)).orderBy(desc(vesselsPositionsTable.recordedAt));
@@ -143,7 +143,7 @@ router.get("/vessels/:id/positions", authMiddleware({ required: false }), async 
   }
 });
 
-router.get("/vessels/:id/cargo", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/:id/cargo", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const cargo = await db.select().from(vesselsCargoTable).where(eq(vesselsCargoTable.vesselId, id)).orderBy(desc(vesselsCargoTable.createdAt));
@@ -153,7 +153,7 @@ router.get("/vessels/:id/cargo", authMiddleware({ required: false }), async (req
   }
 });
 
-router.get("/vessels/routes/all", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/routes/all", authMiddleware(), async (_req, res) => {
   try {
     const routes = await db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.createdAt));
     sendSuccess(res, routes);
@@ -162,7 +162,7 @@ router.get("/vessels/routes/all", authMiddleware({ required: false }), async (_r
   }
 });
 
-router.get("/vessels/:id/routes", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/:id/routes", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const routes = await db.select().from(vesselsRoutesTable).where(eq(vesselsRoutesTable.vesselId, id)).orderBy(desc(vesselsRoutesTable.createdAt));
@@ -205,7 +205,7 @@ router.delete("/vessels/routes/:id", authMiddleware(), requireRole("ops", "exec"
   }
 });
 
-router.get("/vessels/alert-rules/all", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/alert-rules/all", authMiddleware(), async (_req, res) => {
   try {
     const rules = await db.select().from(vesselsAlertRulesTable).orderBy(desc(vesselsAlertRulesTable.createdAt));
     sendSuccess(res, rules);
@@ -247,7 +247,7 @@ router.delete("/vessels/alert-rules/:id", authMiddleware(), requireRole("ops", "
   }
 });
 
-router.get("/vessels/alerts/all", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/alerts/all", authMiddleware(), async (_req, res) => {
   try {
     const alerts = await db.select().from(vesselsAlertsTable).orderBy(desc(vesselsAlertsTable.triggeredAt));
     sendSuccess(res, alerts);
@@ -256,7 +256,7 @@ router.get("/vessels/alerts/all", authMiddleware({ required: false }), async (_r
   }
 });
 
-router.get("/vessels/weather/snapshots", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/weather/snapshots", authMiddleware(), async (req, res) => {
   try {
     const routeId = req.query.routeId ? parseInt(req.query.routeId as string, 10) : undefined;
     const query = routeId
@@ -269,7 +269,7 @@ router.get("/vessels/weather/snapshots", authMiddleware({ required: false }), as
   }
 });
 
-router.get("/vessels/simulations/all", authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/simulations/all", authMiddleware(), async (_req, res) => {
   try {
     const simulations = await db.select().from(vesselsSimulationsTable).orderBy(desc(vesselsSimulationsTable.createdAt));
     sendSuccess(res, simulations);
@@ -315,7 +315,7 @@ router.post("/vessels/simulations", authMiddleware(), requireRole("ops", "exec",
   }
 });
 
-router.get("/vessels/simulations/:id", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/simulations/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [simulation] = await db.select().from(vesselsSimulationsTable).where(eq(vesselsSimulationsTable.id, id));
@@ -390,7 +390,7 @@ const DEMO_GEOPOLITICAL_MARITIME = [
   { id: "GEO-005", region: "Strait of Hormuz", event: "IRGC Harasses UK-flagged Vessel", severity: "high", timestamp: new Date(Date.now() - 36000000).toISOString(), impactedRoutes: ["Strait of Hormuz"], shippingImpact: "Insurance surcharges increase 15%", source: "UKHO Maritime Security" },
 ];
 
-router.get("/vessels/live/chokepoints", vesselsLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/live/chokepoints", vesselsLiveLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getVesCached("vessels-chokepoints", 3600000, async () => {
       try {
@@ -426,7 +426,7 @@ router.get("/vessels/live/chokepoints", vesselsLiveLimit, authMiddleware({ requi
   } catch (err) { handleRouteError(res, err, "Failed to fetch chokepoint data"); }
 });
 
-router.get("/vessels/live/geopolitical-events", vesselsLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/live/geopolitical-events", vesselsLiveLimit, authMiddleware(), async (_req, res) => {
   try {
     const data = await getVesCached("vessels-geopolitical", 600000, async () => {
       try {
@@ -464,7 +464,7 @@ router.get("/vessels/live/geopolitical-events", vesselsLiveLimit, authMiddleware
   } catch (err) { handleRouteError(res, err, "Failed to fetch geopolitical events"); }
 });
 
-router.get("/vessels/live/port-congestion", vesselsLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/vessels/live/port-congestion", vesselsLiveLimit, authMiddleware(), async (_req, res) => {
   try {
     sendSuccess(res, {
       source: "Port Congestion Intelligence — MarineTraffic + AIS Analytics",
@@ -477,7 +477,7 @@ router.get("/vessels/live/port-congestion", vesselsLiveLimit, authMiddleware({ r
   } catch (err) { handleRouteError(res, err, "Failed to fetch port congestion data"); }
 });
 
-router.get("/vessels/live/weather-marine", vesselsLiveLimit, authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/live/weather-marine", vesselsLiveLimit, authMiddleware(), async (req, res) => {
   try {
     const lat = parseFloat(req.query.lat as string) || 24.5;
     const lon = parseFloat(req.query.lon as string) || 56.3;
@@ -522,7 +522,7 @@ router.get("/vessels/live/weather-marine", vesselsLiveLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to fetch marine weather"); }
 });
 
-router.get("/vessels/events", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/events", authMiddleware(), async (req, res) => {
   try {
     const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
     const status = req.query.status as string | undefined;
@@ -536,7 +536,7 @@ router.get("/vessels/events", authMiddleware({ required: false }), async (req, r
   } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
 });
 
-router.get("/vessels/:id/events", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/:id/events", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const events = await db.select().from(vesselsEventsTable).where(eq(vesselsEventsTable.vesselId, id)).orderBy(desc(vesselsEventsTable.occurredAt));
@@ -544,7 +544,7 @@ router.get("/vessels/:id/events", authMiddleware({ required: false }), async (re
   } catch (err) { handleRouteError(res, err, "Failed to list vessel events"); }
 });
 
-router.post("/vessels/events", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/events", authMiddleware(), async (req, res) => {
   try {
     const data = insertVesselsExceptionEventSchema.parse(req.body);
     const [event] = await db.insert(vesselsEventsTable).values(data).returning();
@@ -552,7 +552,7 @@ router.post("/vessels/events", authMiddleware({ required: false }), async (req, 
   } catch (err) { handleRouteError(res, err, "Failed to create vessel event"); }
 });
 
-router.patch("/vessels/events/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/vessels/events/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { status, assignedTo, ...rest } = req.body;
@@ -567,7 +567,7 @@ router.patch("/vessels/events/:id", authMiddleware({ required: false }), async (
   } catch (err) { handleRouteError(res, err, "Failed to update vessel event"); }
 });
 
-router.get("/vessels/command-workflows", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/command-workflows", authMiddleware(), async (req, res) => {
   try {
     const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
     const status = req.query.status as string | undefined;
@@ -581,7 +581,7 @@ router.get("/vessels/command-workflows", authMiddleware({ required: false }), as
   } catch (err) { handleRouteError(res, err, "Failed to list command workflows"); }
 });
 
-router.post("/vessels/command-workflows", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/command-workflows", authMiddleware(), async (req, res) => {
   try {
     const data = insertVesselCommandWorkflowSchema.parse(req.body);
     const [workflow] = await db.insert(vesselsCommandWorkflowsTable).values(data).returning();
@@ -589,7 +589,7 @@ router.post("/vessels/command-workflows", authMiddleware({ required: false }), a
   } catch (err) { handleRouteError(res, err, "Failed to create command workflow"); }
 });
 
-router.patch("/vessels/command-workflows/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/vessels/command-workflows/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const { status, assignedTo, notes, ...rest } = req.body;

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Search, Clock, X, Users, Zap, Activity } from "lucide-react";
+import { Search, Clock, X, Users, Zap, Activity, RefreshCw, CheckCircle2, ArrowUp } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { api, type LyteSignal } from "@/lib/api";
 import {
   signals,
   narrativeInsights,
@@ -11,6 +13,36 @@ import {
   type SignalSeverity,
   type SignalType,
 } from "@/lib/business-data";
+
+function lyteSignalToDisplay(s: LyteSignal): BusinessSignal {
+  const meta = (s.metadata ?? {}) as Record<string, unknown>;
+  const sev = (["critical", "high", "medium", "low", "stable"].includes(s.severity) ? s.severity : "medium") as SignalSeverity;
+  const validTypes: SignalType[] = ["approval_latency", "stalled_workflow", "ownership_gap", "forecast_drift", "handoff_failure", "pipeline_hygiene", "revenue_leakage"];
+  const type = validTypes.includes(s.sourceType as SignalType) ? (s.sourceType as SignalType) : "revenue_leakage";
+  return {
+    id: `live-${s.id}`,
+    type,
+    severity: sev,
+    title: s.title,
+    summary: (s.body ?? (meta.summary as string)) ?? s.title,
+    whyItMatters: (meta.whyItMatters as string) ?? s.body ?? "Signal received from live data feed.",
+    valueAtRisk: typeof meta.valueAtRisk === "number" ? meta.valueAtRisk : 0,
+    affectedFunction: (meta.affectedFunction as string) ?? s.source,
+    anomaly: meta.anomaly as string | undefined,
+    detectedAt: s.receivedAt ?? s.createdAt,
+    status: s.status === "acknowledged" ? "acknowledged" : s.status === "resolved" ? "resolved" : "active",
+    linkedSignals: [],
+    relatedEntities: [],
+    riskCategories: [],
+    owner: (meta.owner as string) ?? "Unassigned",
+    ownerTeam: (meta.team as string) ?? s.source,
+    doctrineLayer: "ACT",
+    doctrineLayers: ["ACT"],
+    recommendedAction: (meta.recommendedAction as string) ?? "Review and investigate this signal.",
+    _backendId: s.id,
+    _backendStatus: s.status,
+  } as BusinessSignal & { _backendId: number; _backendStatus: string };
+}
 
 function formatCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -27,8 +59,23 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function SignalDetail({ signal, onClose }: { signal: BusinessSignal; onClose: () => void }) {
+function SignalDetail({ signal, onClose, onAcknowledge, onResolve, onEscalate }: {
+  signal: BusinessSignal & { _backendId?: number; _backendStatus?: string };
+  onClose: () => void;
+  onAcknowledge?: (id: number) => Promise<void>;
+  onResolve?: (id: number) => Promise<void>;
+  onEscalate?: (id: number) => Promise<void>;
+}) {
   const c = severityColors[signal.severity];
+  const [transitioning, setTransitioning] = useState<string | null>(null);
+  const hasBackend = !!signal._backendId;
+  const backendStatus = signal._backendStatus;
+
+  const handleAction = async (action: "acknowledge" | "resolve" | "escalate", fn?: (id: number) => Promise<void>) => {
+    if (!signal._backendId || !fn) return;
+    setTransitioning(action);
+    try { await fn(signal._backendId); } finally { setTransitioning(null); }
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end" onClick={onClose}>
       <div
@@ -132,6 +179,46 @@ function SignalDetail({ signal, onClose }: { signal: BusinessSignal; onClose: ()
               </div>
             </div>
           )}
+
+          {hasBackend && (
+            <div className="pt-2 border-t border-white/5">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                <Activity className="w-3 h-3" />
+                Signal Actions
+                <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono ml-1">LIVE</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {backendStatus !== "acknowledged" && backendStatus !== "resolved" && (
+                  <button
+                    disabled={!!transitioning}
+                    onClick={() => handleAction("acknowledge", onAcknowledge)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20 transition-all disabled:opacity-50"
+                  >
+                    {transitioning === "acknowledge" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                    Acknowledge
+                  </button>
+                )}
+                {backendStatus !== "resolved" && (
+                  <button
+                    disabled={!!transitioning}
+                    onClick={() => handleAction("resolve", onResolve)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all disabled:opacity-50"
+                  >
+                    {transitioning === "resolve" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                    Resolve
+                  </button>
+                )}
+                <button
+                  disabled={!!transitioning}
+                  onClick={() => handleAction("escalate", onEscalate)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-50"
+                >
+                  {transitioning === "escalate" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <ArrowUp className="w-3 h-3" />}
+                  Escalate
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -150,10 +237,33 @@ export default function SignalsFeed() {
   const [severityFilter, setSeverityFilter] = useState<SignalSeverity | "all">("all");
   const [typeFilter, setTypeFilter] = useState<SignalType | "all">("all");
   const [showNarrative, setShowNarrative] = useState(true);
+  const queryClient = useQueryClient();
 
-  const selectedSignal = selectedId ? signals.find(s => s.id === selectedId) || null : null;
+  const { data: liveSignals = [] } = useQuery({
+    queryKey: ["lyte-signals-feed"],
+    queryFn: () => api.signals.list(),
+    refetchInterval: 30_000,
+  });
 
-  const filtered = signals
+  const acknowledgeMutation = useMutation({
+    mutationFn: (id: number) => api.signals.acknowledge(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
+  });
+  const resolveMutation = useMutation({
+    mutationFn: (id: number) => api.signals.resolve(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
+  });
+  const escalateMutation = useMutation({
+    mutationFn: (id: number) => api.signals.escalate(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["lyte-signals-feed"] }),
+  });
+
+  const liveDisplaySignals = liveSignals.map(lyteSignalToDisplay);
+  const allSignals = [...liveDisplaySignals, ...signals];
+
+  const selectedSignal = selectedId ? allSignals.find(s => s.id === selectedId) || null : null;
+
+  const filtered = allSignals
     .filter(s => severityFilter === "all" || s.severity === severityFilter)
     .filter(s => typeFilter === "all" || s.type === typeFilter)
     .filter(s =>
@@ -164,9 +274,9 @@ export default function SignalsFeed() {
     )
     .sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
 
-  const critCount = signals.filter(s => s.severity === "critical" && s.status === "active").length;
-  const highCount = signals.filter(s => s.severity === "high" && s.status === "active").length;
-  const totalVaR = signals.filter(s => s.status === "active").reduce((sum, s) => sum + s.valueAtRisk, 0);
+  const critCount = allSignals.filter(s => s.severity === "critical" && s.status === "active").length;
+  const highCount = allSignals.filter(s => s.severity === "high" && s.status === "active").length;
+  const totalVaR = allSignals.filter(s => s.status === "active").reduce((sum, s) => sum + s.valueAtRisk, 0);
 
   return (
     <div className="flex gap-4 h-[calc(100vh-160px)] max-w-[1400px]">
@@ -305,7 +415,13 @@ export default function SignalsFeed() {
       )}
 
       {selectedSignal && (
-        <SignalDetail signal={selectedSignal} onClose={() => setSelectedId(null)} />
+        <SignalDetail
+          signal={selectedSignal as BusinessSignal & { _backendId?: number; _backendStatus?: string }}
+          onClose={() => setSelectedId(null)}
+          onAcknowledge={async (id) => { await acknowledgeMutation.mutateAsync(id); }}
+          onResolve={async (id) => { await resolveMutation.mutateAsync(id); }}
+          onEscalate={async (id) => { await escalateMutation.mutateAsync(id); }}
+        />
       )}
     </div>
   );

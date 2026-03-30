@@ -14,6 +14,7 @@ import {
   Bell,
   WifiOff,
   Brain,
+  Shield,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@workspace/shared-ui/utils";
@@ -59,6 +60,7 @@ const PRIMARY_NAV = [
   { href: "/insights", label: "Narrative Intelligence", icon: Zap },
   { href: "/agent-insights", label: "Agent Insights", icon: Brain },
   { href: "/action-center", label: "Action Center", icon: AlertTriangle },
+  { href: "/readiness", label: "Lyte Readiness", icon: Shield },
 ];
 
 const ANALYTICS_NAV = [

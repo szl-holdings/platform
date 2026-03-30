@@ -50,6 +50,8 @@ import capitalReadinessRouter from "./capital-readiness";
 import certificationReadinessRouter from "./certification-readiness";
 import nimbusRouter from "./nimbus";
 import ownershipControlRouter from "./ownership-control";
+import lyteExtendedRouter from "./lyte-extended";
+import vesselsExtendedRouter from "./vessels-extended";
 
 const router: IRouter = Router();
 
@@ -86,6 +88,10 @@ router.use(featureFlagsRouter);
 router.use(filesRouter);
 
 router.use(stephenRouter);
+router.use("/lyte", readLimiter);
+router.use(lyteExtendedRouter);
+router.use("/vessels", readLimiter);
+router.use(vesselsExtendedRouter);
 router.use("/lyte/platform", readLimiter);
 router.use(lytePlatformRouter);
 router.use("/vessels/platform", readLimiter);
