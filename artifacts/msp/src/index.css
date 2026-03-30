@@ -84,14 +84,27 @@
   --sidebar-ring: 214 88% 52%;
 }
 
+/* MSP semantic tokens */
+:root {
+  --msp-blue: hsl(214 88% 52%);
+  --msp-blue-dim: hsla(214 88% 52% / 0.08);
+  --msp-blue-border: hsla(214 88% 52% / 0.18);
+}
+
 @layer base {
   * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
+  }
+  ::selection {
+    background: hsla(214 88% 52% / 0.18);
+    color: hsl(215 18% 91%);
   }
 }
 
@@ -101,6 +114,41 @@ html { color-scheme: dark; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: hsl(218 16% 18%); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(218 16% 26%); }
+
+/* ─── MSP command surfaces ─── */
+.noc-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-top: 1px solid hsla(214 88% 52% / 0.15);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.18s ease;
+}
+.noc-panel:hover {
+  border-top-color: hsla(214 88% 52% / 0.28);
+}
+
+.client-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-left: 2px solid hsla(214 88% 52% / 0.35);
+  border-radius: var(--radius-lg);
+  transition: border-left-color 0.18s ease, background 0.18s ease;
+}
+.client-card:hover {
+  border-left-color: hsla(214 88% 52% / 0.65);
+  background: hsl(219 18% 8%);
+}
+
+/* NOC device status */
+.device-online { border-left: 2px solid hsl(160 65% 42%); }
+.device-warning { border-left: 2px solid hsl(35 85% 52%); }
+.device-offline { border-left: 2px solid hsl(0 72% 51%); }
+
+/* Ticket status badges */
+.badge-open { background: hsla(214 88% 52% / 0.12); color: hsl(214 88% 62%); border: 1px solid hsla(214 88% 52% / 0.25); }
+.badge-critical { background: hsla(0 72% 51% / 0.12); color: hsl(0 72% 62%); border: 1px solid hsla(0 72% 51% / 0.25); }
+.badge-warning { background: hsla(35 85% 52% / 0.12); color: hsl(35 85% 62%); border: 1px solid hsla(35 85% 52% / 0.25); }
+.badge-resolved { background: hsla(160 65% 42% / 0.12); color: hsl(160 65% 55%); border: 1px solid hsla(160 65% 42% / 0.25); }
 
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(8px); }
@@ -126,12 +174,17 @@ html { color-scheme: dark; }
   from { opacity: 0; transform: translateX(-6px); }
   to { opacity: 1; transform: translateX(0); }
 }
+@keyframes noc-ping {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
 
 .animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
 .animate-fade-in { animation: fade-in 0.3s ease-out both; }
 .animate-scale-in { animation: scale-in 0.3s ease-out both; }
 .animate-slide-in-right { animation: slide-in-right 0.25s ease-out both; }
 .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+.animate-noc-ping { animation: noc-ping 2s ease-in-out infinite; }
 
 .skeleton {
   background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
@@ -140,14 +193,17 @@ html { color-scheme: dark; }
   border-radius: 0.25rem;
 }
 
-/* NOC device status */
-.device-online { border-left: 2px solid hsl(160 65% 42%); }
-.device-warning { border-left: 2px solid hsl(35 85% 52%); }
-.device-offline { border-left: 2px solid hsl(0 72% 51%); }
-
 .stagger-1 { animation-delay: 0.04s; }
 .stagger-2 { animation-delay: 0.08s; }
 .stagger-3 { animation-delay: 0.12s; }
 .stagger-4 { animation-delay: 0.16s; }
 .stagger-5 { animation-delay: 0.20s; }
 .stagger-6 { animation-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

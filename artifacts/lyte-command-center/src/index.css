@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme inline {
@@ -29,34 +29,40 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
 }
 
 :root {
-  /* Operations command — dark graphite with operational cyan */
-  --background: 216 20% 4%;
-  --foreground: 205 16% 90%;
+  /* Lyte — signal cyan / intelligent blue. Alive, consequence-driven, executive-usable */
+  --background: 218 22% 4%;
+  --foreground: 208 18% 91%;
 
-  --card: 215 18% 7%;
-  --card-foreground: 205 16% 90%;
+  --card: 217 20% 6%;
+  --card-foreground: 208 18% 91%;
 
-  --popover: 215 18% 9%;
-  --popover-foreground: 205 16% 90%;
+  --popover: 217 20% 8%;
+  --popover-foreground: 208 18% 91%;
 
-  /* Operational cyan — clear, signal-oriented */
-  --primary: 188 90% 44%;
-  --primary-foreground: 216 20% 4%;
+  /* Signal cyan — precise, operational, alive */
+  --primary: 192 85% 46%;
+  --primary-foreground: 218 22% 4%;
 
-  --secondary: 214 16% 11%;
-  --secondary-foreground: 205 14% 70%;
+  --secondary: 216 18% 10%;
+  --secondary-foreground: 208 14% 70%;
 
-  --muted: 214 16% 9%;
-  --muted-foreground: 212 10% 48%;
+  --muted: 216 18% 8%;
+  --muted-foreground: 214 10% 48%;
 
-  --accent: 188 90% 44%;
-  --accent-foreground: 205 16% 90%;
+  --accent: 192 85% 46%;
+  --accent-foreground: 208 18% 91%;
 
   --destructive: 0 84% 60%;
-  --destructive-foreground: 205 40% 98%;
+  --destructive-foreground: 208 40% 98%;
 
   --warning: 36 90% 50%;
   --warning-foreground: 36 96% 12%;
@@ -64,17 +70,26 @@
   --success: 142 68% 42%;
   --success-foreground: 144 80% 10%;
 
-  --border: 214 16% 11%;
-  --input: 214 16% 13%;
-  --ring: 188 90% 44%;
+  --border: 216 18% 10%;
+  --input: 216 18% 12%;
+  --ring: 192 85% 46%;
 
   --radius: 0.5rem;
+
+  /* Lyte semantic tokens */
+  --lyte-signal: hsl(192 85% 46%);
+  --lyte-signal-dim: hsla(192 85% 46% / 0.08);
+  --lyte-signal-border: hsla(192 85% 46% / 0.18);
+  --lyte-signal-glow: hsla(192 85% 46% / 0.05);
+  --lyte-teal: hsl(180 60% 44%);
 }
 
 @layer base {
   * { @apply border-border outline-ring/50; }
   body {
-    @apply bg-background text-foreground antialiased font-sans selection:bg-primary/25 selection:text-primary-foreground min-h-screen;
+    @apply bg-background text-foreground antialiased font-sans selection:bg-primary/20 selection:text-primary-foreground min-h-screen;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight font-semibold;
@@ -82,14 +97,45 @@
 }
 
 @layer utilities {
+  /* Signal panel — Lyte's core command surface */
+  .signal-panel {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-top: 1px solid hsla(192 85% 46% / 0.15);
+    border-radius: var(--radius);
+    transition: border-color 0.18s ease;
+  }
+  .signal-panel:hover {
+    border-top-color: hsla(192 85% 46% / 0.28);
+  }
+
   /* SLO panel glass */
   .slo-panel {
     background: hsl(var(--card) / 0.7);
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border));
-    border-top: 1px solid hsl(188 90% 44% / 0.15);
+    border-top: 1px solid hsla(192 85% 46% / 0.15);
     border-radius: var(--radius);
   }
+
+  /* KPI tile */
+  .kpi-tile {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-left: 2px solid hsla(192 85% 46% / 0.35);
+    border-radius: var(--radius);
+    transition: border-left-color 0.18s ease, background 0.18s ease;
+  }
+  .kpi-tile:hover {
+    border-left-color: hsla(192 85% 46% / 0.65);
+    background: hsl(217 20% 7%);
+  }
+
+  /* Severity signal cards */
+  .severity-critical { border-left: 2px solid hsl(0 72% 51%); }
+  .severity-high { border-left: 2px solid hsl(30 88% 52%); }
+  .severity-medium { border-left: 2px solid hsl(45 85% 52%); }
+  .severity-low { border-left: 2px solid hsl(160 65% 42%); }
 
   /* Topology node */
   .topology-node {
@@ -99,19 +145,53 @@
     transition: border-color 0.15s ease;
   }
   .topology-node:hover {
-    border-color: hsl(188 90% 44% / 0.4);
+    border-color: hsla(192 85% 46% / 0.4);
+  }
+
+  /* Insight rail — narrative intelligence signature element */
+  .insight-rail {
+    background: hsl(var(--card));
+    border-left: 2px solid hsla(192 85% 46% / 0.4);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    transition: border-left-color 0.18s ease;
+  }
+  .insight-rail:hover {
+    border-left-color: hsla(192 85% 46% / 0.7);
   }
 
   .text-gradient-primary {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-teal-400;
+    background: linear-gradient(135deg, hsl(192 85% 55%), hsl(180 60% 52%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+
+  /* Status badge system */
+  .badge-critical { background: hsla(0 72% 51% / 0.12); color: hsl(0 72% 62%); border: 1px solid hsla(0 72% 51% / 0.25); }
+  .badge-high { background: hsla(30 88% 52% / 0.12); color: hsl(30 88% 62%); border: 1px solid hsla(30 88% 52% / 0.25); }
+  .badge-medium { background: hsla(45 85% 52% / 0.12); color: hsl(45 85% 62%); border: 1px solid hsla(45 85% 52% / 0.25); }
+  .badge-low { background: hsla(160 65% 42% / 0.12); color: hsl(160 65% 55%); border: 1px solid hsla(160 65% 42% / 0.25); }
+  .badge-stable { background: hsla(192 85% 46% / 0.1); color: hsl(192 85% 58%); border: 1px solid hsla(192 85% 46% / 0.22); }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: hsl(214 16% 18%); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: hsl(214 16% 26%); }
+  ::-webkit-scrollbar-thumb { background: hsl(216 18% 16%); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(216 18% 24%); }
 }
 
+/* ─── Signal surfacing motion — Lyte signature ─── */
+@keyframes signal-surface {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes severity-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 hsla(0 72% 51% / 0.3); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 4px hsla(0 72% 51% / 0); }
+}
+@keyframes insight-reveal {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -132,11 +212,19 @@
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.4); opacity: 0.6; }
 }
+@keyframes kpi-drift {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
 
 .animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
 .animate-fade-in { animation: fade-in 0.3s ease-out both; }
 .animate-scale-in { animation: scale-in 0.3s ease-out both; }
 .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+.animate-signal-surface { animation: signal-surface 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-insight-reveal { animation: insight-reveal 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-severity-pulse { animation: severity-pulse 2.5s ease-in-out infinite; }
+.animate-kpi-drift { animation: kpi-drift 4s ease-in-out infinite; }
 
 .skeleton {
   background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
@@ -151,3 +239,11 @@
 .stagger-4 { animation-delay: 0.16s; }
 .stagger-5 { animation-delay: 0.20s; }
 .stagger-6 { animation-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

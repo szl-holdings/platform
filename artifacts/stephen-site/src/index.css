@@ -67,62 +67,62 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* High-contrast neutral dark — signature amber accent */
+/* Stephen Lutar — monochrome with subtle silver. Sharp, credible, operator-led */
 :root, .dark {
   --button-outline: rgba(255,255,255, .08);
   --badge-outline: rgba(255,255,255, .04);
-
   --opaque-button-border-intensity: 9;
-
   --elevate-1: rgba(255,255,255, .03);
   --elevate-2: rgba(255,255,255, .07);
 
-  --background: 0 0% 5%;
-  --foreground: 0 0% 97%;
+  /* Near-true black with refined warm gray cast */
+  --background: 0 0% 4%;
+  --foreground: 0 0% 96%;
   
-  --border: 0 0% 11%;
+  --border: 0 0% 10%;
   
-  --card: 0 0% 7%;
-  --card-foreground: 0 0% 97%;
-  --card-border: 0 0% 11%;
+  --card: 0 0% 6%;
+  --card-foreground: 0 0% 96%;
+  --card-border: 0 0% 10%;
 
-  --sidebar: 0 0% 5%;
-  --sidebar-foreground: 0 0% 97%;
-  --sidebar-border: 0 0% 11%;
-  --sidebar-primary: 38 80% 52%;
-  --sidebar-primary-foreground: 0 0% 5%;
-  --sidebar-accent: 0 0% 11%;
-  --sidebar-accent-foreground: 0 0% 97%;
-  --sidebar-ring: 38 80% 52%;
+  --sidebar: 0 0% 4%;
+  --sidebar-foreground: 0 0% 96%;
+  --sidebar-border: 0 0% 10%;
+  /* Warm silver signature */
+  --sidebar-primary: 38 45% 56%;
+  --sidebar-primary-foreground: 0 0% 4%;
+  --sidebar-accent: 0 0% 10%;
+  --sidebar-accent-foreground: 0 0% 96%;
+  --sidebar-ring: 38 45% 56%;
 
-  --popover: 0 0% 7%;
-  --popover-foreground: 0 0% 97%;
-  --popover-border: 0 0% 11%;
+  --popover: 0 0% 6%;
+  --popover-foreground: 0 0% 96%;
+  --popover-border: 0 0% 10%;
 
-  /* Amber / warm signature */
-  --primary: 38 80% 52%;
-  --primary-foreground: 0 0% 5%;
+  /* Warm silver / subtle amber — operator authority */
+  --primary: 38 45% 56%;
+  --primary-foreground: 0 0% 4%;
 
-  --secondary: 0 0% 10%;
-  --secondary-foreground: 0 0% 97%;
+  --secondary: 0 0% 9%;
+  --secondary-foreground: 0 0% 96%;
 
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 55%;
+  --muted: 0 0% 9%;
+  --muted-foreground: 0 0% 52%;
 
-  --accent: 38 80% 52%;
-  --accent-foreground: 0 0% 5%;
+  --accent: 38 45% 56%;
+  --accent-foreground: 0 0% 4%;
 
   --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 97%;
+  --destructive-foreground: 0 0% 96%;
 
-  --input: 0 0% 13%;
-  --ring: 38 80% 52%;
+  --input: 0 0% 12%;
+  --ring: 38 45% 56%;
   
-  --chart-1: 38 80% 52%;
-  --chart-2: 0 0% 35%;
-  --chart-3: 0 0% 97%;
-  --chart-4: 0 0% 20%;
-  --chart-5: 38 80% 35%;
+  --chart-1: 38 45% 56%;
+  --chart-2: 0 0% 32%;
+  --chart-3: 0 0% 96%;
+  --chart-4: 0 0% 18%;
+  --chart-5: 38 45% 38%;
 
   --radius: 0.375rem;
   
@@ -156,13 +156,22 @@ html {
   * {
     @apply border-border;
   }
-
   body {
     @apply font-sans antialiased bg-background text-foreground relative;
+    -webkit-font-smoothing: antialiased;
   }
   
-  h1, h2, h3, h4, h5, h6 {
+  /* Serif for display headings only — sharp, credible */
+  h1 {
     @apply font-serif;
+  }
+  h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold;
+  }
+
+  ::selection {
+    background: hsla(38 45% 56% / 0.18);
+    color: hsl(0 0% 96%);
   }
 }
 
@@ -197,16 +206,110 @@ html {
   .active-elevate-2:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-2); }
 
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after { inset: -1px; }
-  
-  .glass-panel {
-    @apply bg-white/4 backdrop-blur-xl border border-white/8;
+  .border.active-elevate:not(.no-active-interaction-elevate)::after { inset: -1px; }
+
+  /* ─── Stephen Lutar work surface cards ─── */
+  .stephen-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  
-  .amber-text {
-    @apply text-primary;
+  .stephen-card:hover {
+    border-color: hsl(0 0% 16%);
+    box-shadow: 0 4px 20px rgba(0,0,0, 0.4);
+  }
+
+  /* Selected work strip */
+  .work-strip {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-left: 2px solid hsla(38 45% 56% / 0.35);
+    border-radius: var(--radius-lg);
+    transition: border-left-color 0.2s ease;
+  }
+  .work-strip:hover {
+    border-left-color: hsla(38 45% 56% / 0.7);
+  }
+
+  /* Focus area tile */
+  .focus-tile {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .focus-tile:hover {
+    background: hsl(0 0% 8%);
+    border-color: hsl(0 0% 14%);
+  }
+
+  /* Ecosystem tie-back badge */
+  .ecosystem-badge {
+    background: hsla(38 45% 56% / 0.08);
+    border: 1px solid hsla(38 45% 56% / 0.2);
+    color: hsl(38 45% 64%);
+    border-radius: var(--radius);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Status badges */
+  .badge-active { background: hsla(0 0% 96% / 0.06); color: hsl(0 0% 80%); border: 1px solid hsla(0 0% 100% / 0.1); }
+  .badge-silver { background: hsla(38 45% 56% / 0.1); color: hsl(38 45% 65%); border: 1px solid hsla(38 45% 56% / 0.22); }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(0 0% 14%); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(0 0% 22%); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in-up { animation: fade-in-up 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-fade-in { animation: fade-in 0.4s ease-out both; }
+.animate-scale-in { animation: scale-in 0.4s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.35s ease-out both; }
+
+.skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 0.25rem;
+}
+
+.stagger-1 { animation-delay: 0.07s; }
+.stagger-2 { animation-delay: 0.14s; }
+.stagger-3 { animation-delay: 0.21s; }
+.stagger-4 { animation-delay: 0.28s; }
+.stagger-5 { animation-delay: 0.35s; }
+.stagger-6 { animation-delay: 0.42s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

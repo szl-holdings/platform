@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -49,60 +49,140 @@
 }
 
 :root {
-  /* Deep oceanic graphite — naval command palette */
-  --background: 215 28% 4%;
+  /* Vessels — deep ocean blue / storm-teal / marine steel */
+  --background: 216 30% 4%;
   --foreground: 205 18% 92%;
-  --border: 213 22% 12%;
-  --input: 213 22% 13%;
-  --ring: 200 85% 48%;
-  --card: 214 25% 7%;
+  --border: 214 24% 11%;
+  --input: 214 24% 13%;
+  --ring: 202 80% 48%;
+  --card: 215 26% 6%;
   --card-foreground: 205 18% 92%;
-  --popover: 214 25% 9%;
+  --popover: 215 26% 8%;
   --popover-foreground: 205 18% 92%;
-  /* Oceanic steel-blue accent — precise, naval */
-  --primary: 200 85% 48%;
-  --primary-foreground: 215 28% 4%;
-  --secondary: 213 22% 12%;
+
+  /* Deep ocean / storm-teal accent — maritime command */
+  --primary: 202 80% 48%;
+  --primary-foreground: 216 30% 4%;
+  --secondary: 214 24% 11%;
   --secondary-foreground: 205 15% 75%;
-  --muted: 213 22% 10%;
+  --muted: 214 24% 9%;
   --muted-foreground: 210 12% 48%;
-  --accent: 213 22% 12%;
+  --accent: 188 58% 44%;
   --accent-foreground: 205 18% 92%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  --chart-1: 200 85% 48%;
-  --chart-2: 160 65% 42%;
+
+  --chart-1: 202 80% 48%;
+  --chart-2: 188 58% 44%;
   --chart-3: 35 85% 52%;
-  --chart-4: 280 65% 55%;
+  --chart-4: 160 60% 42%;
   --chart-5: 340 70% 52%;
-  --sidebar: 215 30% 3%;
-  --sidebar-foreground: 205 15% 72%;
-  --sidebar-border: 213 22% 11%;
-  --sidebar-primary: 200 85% 48%;
-  --sidebar-primary-foreground: 215 28% 4%;
-  --sidebar-accent: 213 22% 10%;
+
+  --sidebar: 216 32% 3%;
+  --sidebar-foreground: 205 15% 70%;
+  --sidebar-border: 214 24% 10%;
+  --sidebar-primary: 202 80% 48%;
+  --sidebar-primary-foreground: 216 30% 4%;
+  --sidebar-accent: 214 24% 9%;
   --sidebar-accent-foreground: 205 18% 92%;
-  --sidebar-ring: 200 85% 48%;
+  --sidebar-ring: 202 80% 48%;
+
+  /* Vessels semantic tokens */
+  --vessels-ocean: hsl(202 80% 48%);
+  --vessels-ocean-dim: hsla(202 80% 48% / 0.08);
+  --vessels-ocean-border: hsla(202 80% 48% / 0.16);
+  --vessels-teal: hsl(188 58% 44%);
+  --vessels-teal-dim: hsla(188 58% 44% / 0.08);
+  --vessels-marine: hsl(215 26% 16%);
 }
 
 @layer base {
   * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
+  ::selection {
+    background: hsla(202 80% 48% / 0.22);
+    color: hsl(205 18% 92%);
+  }
 }
 
-/* Refined scrollbars */
+/* ─── Refined scrollbars ─── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(213 22% 18%); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(213 22% 26%); }
+::-webkit-scrollbar-thumb { background: hsl(214 24% 16%); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(214 24% 24%); }
 
-/* Purposeful animations — no theatre */
+/* ─── Vessel command surfaces ─── */
+.vessel-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-top: 1px solid hsla(202 80% 48% / 0.15);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.18s ease;
+}
+.vessel-panel:hover {
+  border-top-color: hsla(202 80% 48% / 0.28);
+  border-color: hsla(202 80% 48% / 0.16);
+}
+
+/* KPI stat panel */
+.stat-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-top: 1px solid hsla(202 80% 48% / 0.18);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.15s ease;
+}
+.stat-panel:hover {
+  border-color: hsla(202 80% 48% / 0.28);
+}
+
+/* KPI accent rule */
+.kpi-accent-rule {
+  border-top: 2px solid hsla(202 80% 48% / 0.4);
+}
+
+/* Vessel detail card — elite level */
+.vessel-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-left: 2px solid hsla(202 80% 48% / 0.35);
+  border-radius: var(--radius-lg);
+  transition: border-left-color 0.18s ease, background 0.18s ease;
+}
+.vessel-card:hover {
+  border-left-color: hsla(202 80% 48% / 0.65);
+  background: hsl(215 26% 7%);
+}
+
+/* Exception / alert severity bands */
+.exception-critical { border-left: 2px solid hsl(0 72% 51%); }
+.exception-high { border-left: 2px solid hsl(30 88% 52%); }
+.exception-medium { border-left: 2px solid hsl(45 85% 52%); }
+.exception-low { border-left: 2px solid hsl(160 65% 42%); }
+
+/* Route indicator */
+.route-active {
+  stroke: hsl(202 80% 48%);
+  stroke-width: 2;
+  stroke-dasharray: 8 4;
+  animation: route-dash 2s linear infinite;
+}
+
+/* Status badges */
+.badge-underway { background: hsla(202 80% 48% / 0.12); color: hsl(202 80% 60%); border: 1px solid hsla(202 80% 48% / 0.25); }
+.badge-anchored { background: hsla(45 85% 52% / 0.12); color: hsl(45 85% 62%); border: 1px solid hsla(45 85% 52% / 0.25); }
+.badge-moored { background: hsla(160 65% 42% / 0.12); color: hsl(160 65% 55%); border: 1px solid hsla(160 65% 42% / 0.25); }
+.badge-exception { background: hsla(0 72% 51% / 0.12); color: hsl(0 72% 62%); border: 1px solid hsla(0 72% 51% / 0.25); }
+
+/* ─── Maritime motion — purposeful, operational ─── */
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -135,7 +215,16 @@
   50% { transform: translateY(-3px); }
 }
 @keyframes route-dash {
-  to { stroke-dashoffset: -20; }
+  to { stroke-dashoffset: -12; }
+}
+@keyframes vessel-ping {
+  0% { transform: scale(1); opacity: 1; }
+  75% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes panel-reveal {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
@@ -144,29 +233,14 @@
 .animate-slide-in-right { animation: slide-in-right 0.25s ease-out both; }
 .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
 .animate-wave-float { animation: wave-float 4s ease-in-out infinite; }
+.animate-vessel-ping { animation: vessel-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.animate-panel-reveal { animation: panel-reveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 .skeleton {
   background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
   border-radius: 0.25rem;
-}
-
-/* KPI panel accent rule */
-.kpi-accent-rule {
-  border-top: 2px solid hsl(var(--primary) / 0.4);
-}
-
-/* Stat highlight */
-.stat-panel {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-top: 1px solid hsl(var(--primary) / 0.18);
-  border-radius: var(--radius-lg);
-  transition: border-color 0.15s ease;
-}
-.stat-panel:hover {
-  border-color: hsl(var(--primary) / 0.28);
 }
 
 .stagger-1 { animation-delay: 0.04s; }
@@ -177,3 +251,11 @@
 .stagger-6 { animation-delay: 0.24s; }
 .stagger-7 { animation-delay: 0.28s; }
 .stagger-8 { animation-delay: 0.32s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

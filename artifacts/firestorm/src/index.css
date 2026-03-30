@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -49,57 +49,124 @@
 }
 
 :root {
-  /* Operational dark — SOC-grade command environment */
-  --background: 218 18% 4%;
+  /* Firestorm — operational security command. Amber-orange, tactical, composed */
+  --background: 220 20% 4%;
   --foreground: 210 15% 91%;
-  --border: 216 16% 11%;
-  --input: 216 16% 13%;
-  --ring: 30 92% 52%;
-  --card: 217 18% 7%;
+  --border: 218 18% 10%;
+  --input: 218 18% 12%;
+  --ring: 32 88% 52%;
+  --card: 219 20% 6%;
   --card-foreground: 210 15% 91%;
-  --popover: 217 18% 9%;
+  --popover: 219 20% 8%;
   --popover-foreground: 210 15% 91%;
-  /* Operational amber — calm, confident security */
-  --primary: 30 92% 52%;
-  --primary-foreground: 218 18% 4%;
-  --secondary: 216 16% 11%;
+
+  /* Operational amber — calm, confident, not alarmist */
+  --primary: 32 88% 52%;
+  --primary-foreground: 220 20% 4%;
+  --secondary: 218 18% 10%;
   --secondary-foreground: 210 14% 72%;
-  --muted: 216 16% 9%;
-  --muted-foreground: 214 10% 48%;
-  --accent: 216 16% 11%;
+  --muted: 218 18% 8%;
+  --muted-foreground: 216 10% 48%;
+  --accent: 218 18% 10%;
   --accent-foreground: 210 15% 91%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  --chart-1: 30 92% 52%;
+
+  --chart-1: 32 88% 52%;
   --chart-2: 0 72% 51%;
-  --chart-3: 45 88% 52%;
+  --chart-3: 45 85% 52%;
   --chart-4: 160 65% 42%;
   --chart-5: 280 65% 55%;
-  --sidebar: 218 20% 3%;
-  --sidebar-foreground: 210 14% 70%;
-  --sidebar-border: 216 16% 10%;
-  --sidebar-primary: 30 92% 52%;
-  --sidebar-primary-foreground: 218 18% 4%;
-  --sidebar-accent: 216 16% 9%;
+
+  --sidebar: 220 22% 3%;
+  --sidebar-foreground: 210 14% 68%;
+  --sidebar-border: 218 18% 9%;
+  --sidebar-primary: 32 88% 52%;
+  --sidebar-primary-foreground: 220 20% 4%;
+  --sidebar-accent: 218 18% 8%;
   --sidebar-accent-foreground: 210 15% 91%;
-  --sidebar-ring: 30 92% 52%;
+  --sidebar-ring: 32 88% 52%;
+
+  /* Firestorm semantic tokens */
+  --fs-amber: hsl(32 88% 52%);
+  --fs-amber-dim: hsla(32 88% 52% / 0.08);
+  --fs-amber-border: hsla(32 88% 52% / 0.18);
+  --fs-red: hsl(0 72% 51%);
+  --fs-red-dim: hsla(0 72% 51% / 0.08);
 }
 
 @layer base {
   * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
+  ::selection {
+    background: hsla(32 88% 52% / 0.18);
+    color: hsl(210 15% 91%);
+  }
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(216 16% 18%); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(216 16% 26%); }
+::-webkit-scrollbar-thumb { background: hsl(218 18% 16%); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(218 18% 24%); }
+
+/* ─── SOC command surfaces ─── */
+.soc-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-top: 1px solid hsla(32 88% 52% / 0.15);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.18s ease;
+}
+.soc-panel:hover {
+  border-top-color: hsla(32 88% 52% / 0.28);
+}
+
+/* Incident severity bands — tactical, readable */
+.severity-critical { border-left: 2px solid hsl(0 72% 51%); }
+.severity-high { border-left: 2px solid hsl(32 88% 52%); }
+.severity-medium { border-left: 2px solid hsl(45 85% 52%); }
+.severity-low { border-left: 2px solid hsl(160 65% 42%); }
+.severity-info { border-left: 2px solid hsl(210 70% 52%); }
+
+/* Threat card */
+.threat-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.threat-card:hover {
+  border-color: hsla(32 88% 52% / 0.25);
+  background: hsl(219 20% 7%);
+}
+
+/* Incident row */
+.incident-row {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  transition: border-color 0.15s ease;
+}
+.incident-row:hover {
+  border-color: hsla(32 88% 52% / 0.2);
+}
+
+/* Status badges */
+.badge-critical { background: hsla(0 72% 51% / 0.12); color: hsl(0 72% 62%); border: 1px solid hsla(0 72% 51% / 0.25); }
+.badge-high { background: hsla(32 88% 52% / 0.12); color: hsl(32 88% 62%); border: 1px solid hsla(32 88% 52% / 0.25); }
+.badge-medium { background: hsla(45 85% 52% / 0.12); color: hsl(45 85% 62%); border: 1px solid hsla(45 85% 52% / 0.25); }
+.badge-low { background: hsla(160 65% 42% / 0.12); color: hsl(160 65% 55%); border: 1px solid hsla(160 65% 42% / 0.25); }
+.badge-info { background: hsla(210 70% 52% / 0.12); color: hsl(210 70% 65%); border: 1px solid hsla(210 70% 52% / 0.25); }
+.badge-resolved { background: hsla(160 65% 42% / 0.1); color: hsl(160 65% 50%); border: 1px solid hsla(160 65% 42% / 0.2); }
+.badge-open { background: hsla(32 88% 52% / 0.1); color: hsl(32 88% 58%); border: 1px solid hsla(32 88% 52% / 0.2); }
 
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(8px); }
@@ -130,17 +197,21 @@
 }
 @keyframes threat-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.65; }
+  50% { opacity: 0.6; }
 }
 @keyframes glow-border {
-  0%, 100% { border-color: hsl(var(--primary) / 0.18); }
-  50% { border-color: hsl(var(--primary) / 0.4); }
+  0%, 100% { border-color: hsla(32 88% 52% / 0.18); }
+  50% { border-color: hsla(32 88% 52% / 0.4); }
+}
+@keyframes tactical-scan {
+  0% { background-position: 0 -200%; }
+  100% { background-position: 0 200%; }
 }
 
-.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
-.animate-fade-in { animation: fade-in 0.3s ease-out both; }
-.animate-scale-in { animation: scale-in 0.3s ease-out both; }
-.animate-slide-in-right { animation: slide-in-right 0.25s ease-out both; }
+.animate-fade-in-up { animation: fade-in-up 0.22s ease-out both; }
+.animate-fade-in { animation: fade-in 0.2s ease-out both; }
+.animate-scale-in { animation: scale-in 0.22s ease-out both; }
+.animate-slide-in-right { animation: slide-in-right 0.2s ease-out both; }
 .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
 .animate-threat-pulse { animation: threat-pulse 1.8s ease-in-out infinite; }
 .animate-glow-border { animation: glow-border 2.5s ease-in-out infinite; }
@@ -152,12 +223,6 @@
   border-radius: 0.25rem;
 }
 
-/* Incident severity panel */
-.severity-critical { border-left: 2px solid hsl(0 72% 51%); }
-.severity-high { border-left: 2px solid hsl(30 92% 52%); }
-.severity-medium { border-left: 2px solid hsl(45 88% 52%); }
-.severity-low { border-left: 2px solid hsl(160 65% 42%); }
-
 .stagger-1 { animation-delay: 0.04s; }
 .stagger-2 { animation-delay: 0.08s; }
 .stagger-3 { animation-delay: 0.12s; }
@@ -166,3 +231,11 @@
 .stagger-6 { animation-delay: 0.24s; }
 .stagger-7 { animation-delay: 0.28s; }
 .stagger-8 { animation-delay: 0.32s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme inline {
@@ -37,49 +37,111 @@
 }
 
 :root {
-  /* Black/charcoal/slate intelligence base */
-  --background: 220 18% 4%;
-  --foreground: 210 16% 90%;
-  --border: 218 16% 11%;
-  --input: 218 16% 13%;
-  --ring: 225 70% 55%;
-  --card: 219 18% 7%;
-  --card-foreground: 210 16% 90%;
-  --popover: 219 18% 9%;
-  --popover-foreground: 210 16% 90%;
-  /* Sharp intelligence accent — steel indigo-blue */
-  --primary: 225 70% 55%;
+  /* INCA — technical research intelligence. Deep violet-indigo, structured command */
+  --background: 222 20% 4%;
+  --foreground: 212 16% 90%;
+  --border: 220 18% 10%;
+  --input: 220 18% 12%;
+  --ring: 248 58% 58%;
+  --card: 221 20% 6%;
+  --card-foreground: 212 16% 90%;
+  --popover: 221 20% 8%;
+  --popover-foreground: 212 16% 90%;
+
+  /* Steel indigo — precision intelligence accent */
+  --primary: 248 58% 58%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 218 16% 11%;
-  --secondary-foreground: 210 14% 70%;
-  --muted: 218 16% 9%;
-  --muted-foreground: 215 10% 48%;
-  --accent: 185 60% 44%;
-  --accent-foreground: 220 18% 4%;
+  --secondary: 220 18% 10%;
+  --secondary-foreground: 212 14% 70%;
+  --muted: 220 18% 8%;
+  --muted-foreground: 218 10% 48%;
+
+  /* Teal secondary for analysis contrast */
+  --accent: 188 55% 44%;
+  --accent-foreground: 222 20% 4%;
+
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  --chart-1: 225 70% 55%;
-  --chart-2: 185 60% 44%;
+  --chart-1: 248 58% 58%;
+  --chart-2: 188 55% 44%;
   --chart-3: 145 60% 42%;
   --chart-4: 35 85% 52%;
   --chart-5: 340 70% 52%;
+
+  /* INCA semantic tokens */
+  --inca-indigo: hsl(248 58% 58%);
+  --inca-indigo-dim: hsla(248 58% 58% / 0.08);
+  --inca-indigo-border: hsla(248 58% 58% / 0.18);
+  --inca-teal: hsl(188 55% 44%);
+  --inca-teal-dim: hsla(188 55% 44% / 0.08);
 }
 
 @layer base {
   * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', system-ui, sans-serif;
     @apply tracking-tight font-semibold;
   }
+  ::selection {
+    background: hsla(248 58% 58% / 0.2);
+    color: hsl(212 16% 90%);
+  }
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(218 16% 18%); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(218 16% 26%); }
+::-webkit-scrollbar-thumb { background: hsl(220 18% 16%); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(220 18% 24%); }
+
+/* ─── INCA research command surfaces ─── */
+
+/* Primary evidence card — intelligence data surface */
+.evidence-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-left: 2px solid hsla(248 58% 58% / 0.4);
+  border-radius: var(--radius-lg);
+  transition: border-left-color 0.18s ease, background 0.18s ease;
+}
+.evidence-card:hover {
+  border-left-color: hsla(248 58% 58% / 0.7);
+  background: hsl(221 20% 7%);
+}
+
+/* Research panel */
+.research-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-top: 1px solid hsla(248 58% 58% / 0.15);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.18s ease;
+}
+.research-panel:hover {
+  border-top-color: hsla(248 58% 58% / 0.28);
+}
+
+/* Model card */
+.model-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.model-card:hover {
+  border-color: hsla(248 58% 58% / 0.28);
+  background: hsl(221 20% 7%);
+}
+
+/* Experiment status badges */
+.badge-running { background: hsla(248 58% 58% / 0.12); color: hsl(248 58% 70%); border: 1px solid hsla(248 58% 58% / 0.25); }
+.badge-complete { background: hsla(145 60% 42% / 0.12); color: hsl(145 60% 55%); border: 1px solid hsla(145 60% 42% / 0.25); }
+.badge-queued { background: hsla(35 85% 52% / 0.12); color: hsl(35 85% 62%); border: 1px solid hsla(35 85% 52% / 0.25); }
+.badge-failed { background: hsla(0 72% 51% / 0.12); color: hsl(0 72% 62%); border: 1px solid hsla(0 72% 51% / 0.25); }
 
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(8px); }
@@ -98,19 +160,25 @@
   100% { background-position: 200% 0; }
 }
 @keyframes neural-pulse {
-  0%, 100% { opacity: 0.5; }
+  0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
 }
 @keyframes pulse-dot {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.4); opacity: 0.6; }
 }
+@keyframes analysis-scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10%, 90% { opacity: 0.4; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
 
-.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
-.animate-fade-in { animation: fade-in 0.3s ease-out both; }
-.animate-scale-in { animation: scale-in 0.3s ease-out both; }
+.animate-fade-in-up { animation: fade-in-up 0.28s ease-out both; }
+.animate-fade-in { animation: fade-in 0.25s ease-out both; }
+.animate-scale-in { animation: scale-in 0.28s ease-out both; }
 .animate-neural-pulse { animation: neural-pulse 3s ease-in-out infinite; }
 .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+.animate-analysis-scan { animation: analysis-scan 3s ease-in-out infinite; }
 
 .skeleton {
   background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
@@ -119,21 +187,17 @@
   border-radius: 0.25rem;
 }
 
-/* Intelligence evidence card */
-.evidence-card {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-left: 2px solid hsl(var(--primary) / 0.5);
-  border-radius: var(--radius-lg);
-  transition: border-color 0.15s ease;
-}
-.evidence-card:hover {
-  border-left-color: hsl(var(--primary) / 0.8);
-}
-
 .stagger-1 { animation-delay: 0.04s; }
 .stagger-2 { animation-delay: 0.08s; }
 .stagger-3 { animation-delay: 0.12s; }
 .stagger-4 { animation-delay: 0.16s; }
 .stagger-5 { animation-delay: 0.20s; }
 .stagger-6 { animation-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

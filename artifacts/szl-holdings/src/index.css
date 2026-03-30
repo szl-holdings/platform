@@ -73,6 +73,103 @@ body {
   background: hsla(32, 40%, 58%, 0.30);
 }
 
+/* ─── SZL ecosystem card surfaces ─── */
+.szl-card {
+  background: var(--color-szl-surface);
+  border: 1px solid var(--color-szl-border);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.szl-card:hover {
+  border-color: var(--color-szl-border-hover);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Platform card — large asymmetric accent */
+.platform-card {
+  background: var(--color-szl-surface);
+  border: 1px solid var(--color-szl-border);
+  border-top: 1px solid rgba(201, 169, 110, 0.18);
+  transition: border-color 0.25s ease;
+}
+.platform-card:hover {
+  border-color: var(--color-szl-border-hover);
+  border-top-color: rgba(201, 169, 110, 0.32);
+}
+
+/* Accent rule — horizontal gold divider */
+.szl-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.2) 30%, rgba(201, 169, 110, 0.2) 70%, transparent);
+}
+
+/* Ecosystem section label */
+.szl-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-szl-accent);
+  opacity: 0.8;
+}
+
+/* Ecosystem node — for ecosystem map visual */
+.ecosystem-node {
+  background: var(--color-szl-surface);
+  border: 1px solid var(--color-szl-border);
+  transition: border-color 0.2s ease;
+}
+.ecosystem-node:hover {
+  border-color: rgba(201, 169, 110, 0.3);
+}
+
+/* Badge system */
+.szl-badge {
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  color: var(--color-szl-accent-light);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.125rem;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes ecosystem-drift {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+@keyframes constellation-link {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.6; }
+}
+
+.animate-fade-in-up { animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in { animation: fade-in 0.45s ease-out both; }
+.animate-scale-in { animation: scale-in 0.45s ease-out both; }
+.animate-ecosystem-drift { animation: ecosystem-drift 6s ease-in-out infinite; }
+.animate-constellation-link { animation: constellation-link 4s ease-in-out infinite; }
+
+.stagger-1 { animation-delay: 0.06s; }
+.stagger-2 { animation-delay: 0.12s; }
+.stagger-3 { animation-delay: 0.18s; }
+.stagger-4 { animation-delay: 0.24s; }
+.stagger-5 { animation-delay: 0.30s; }
+.stagger-6 { animation-delay: 0.36s; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

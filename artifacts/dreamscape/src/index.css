@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme inline {
@@ -30,43 +30,56 @@
 }
 
 :root {
-  /* Deep studio dark — creative purple accent, premium not playful */
+  /* Dreamscape — deep creative studio. Premium violet-purple, not neon, not playful */
   --background: 252 22% 5%;
   --foreground: 250 14% 91%;
 
-  --primary: 262 75% 58%;
+  /* Studio violet — precise, intentional, creative command */
+  --primary: 262 62% 56%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 252 18% 11%;
+  --secondary: 252 18% 10%;
   --secondary-foreground: 250 14% 70%;
 
   --muted: 252 18% 9%;
-  --muted-foreground: 250 10% 48%;
+  --muted-foreground: 250 10% 50%;
 
-  --accent: 262 75% 58%;
+  /* Softer complement — teal-violet echo */
+  --accent: 270 50% 60%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 252 18% 12%;
-  --ring: 262 75% 58%;
+  --border: 252 18% 11%;
+  --ring: 262 62% 56%;
 
   --card: 252 20% 7%;
   --card-foreground: 250 14% 91%;
+
+  /* Dreamscape semantic tokens */
+  --ds-violet: hsl(262 62% 56%);
+  --ds-violet-dim: hsla(262 62% 56% / 0.08);
+  --ds-violet-border: hsla(262 62% 56% / 0.18);
+  --ds-violet-glow: hsla(262 62% 56% / 0.05);
+  --ds-iris: hsl(248 55% 60%);
 }
 
 @layer base {
+  * { box-sizing: border-box; }
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 300;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', system-ui, sans-serif;
     @apply font-semibold tracking-tight;
   }
   ::selection {
-    background: hsla(262, 75%, 58%, 0.25);
-    color: hsl(250, 14%, 91%);
+    background: hsla(262 62% 56% / 0.22);
+    color: hsl(250 14% 91%);
   }
 }
 
@@ -76,16 +89,30 @@
   ::-webkit-scrollbar-thumb { background: hsl(252 18% 18%); border-radius: 2px; }
   ::-webkit-scrollbar-thumb:hover { background: hsl(252 18% 26%); }
 
-  /* Studio card — dark surface with subtle purple edge */
+  /* Studio card — dark surface with refined violet edge */
   .studio-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
+    border-top: 1px solid hsla(262 62% 56% / 0.14);
     border-radius: var(--radius-lg);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.18s ease;
   }
   .studio-card:hover {
-    border-color: hsl(262 75% 58% / 0.25);
-    box-shadow: 0 0 0 1px hsl(262 75% 58% / 0.08);
+    border-color: hsla(262 62% 56% / 0.2);
+    border-top-color: hsla(262 62% 56% / 0.28);
+  }
+
+  /* Project card with accent rule */
+  .project-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-left: 2px solid hsla(262 62% 56% / 0.35);
+    border-radius: var(--radius-lg);
+    transition: border-left-color 0.18s ease, background 0.18s ease;
+  }
+  .project-card:hover {
+    border-left-color: hsla(262 62% 56% / 0.65);
+    background: hsl(252 20% 8%);
   }
 
   /* Asset thumbnail */
@@ -93,7 +120,28 @@
     background: hsl(252 18% 9%);
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius-md);
+    transition: border-color 0.15s ease;
   }
+  .asset-thumb:hover {
+    border-color: hsla(262 62% 56% / 0.22);
+  }
+
+  /* Generation status */
+  .gen-panel {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    transition: border-color 0.15s ease;
+  }
+  .gen-panel:hover {
+    border-color: hsla(262 62% 56% / 0.22);
+  }
+
+  /* Status badges */
+  .badge-generating { background: hsla(262 62% 56% / 0.12); color: hsl(262 62% 70%); border: 1px solid hsla(262 62% 56% / 0.25); }
+  .badge-complete { background: hsla(145 60% 42% / 0.12); color: hsl(145 60% 55%); border: 1px solid hsla(145 60% 42% / 0.25); }
+  .badge-queued { background: hsla(250 10% 50% / 0.1); color: hsl(250 10% 65%); border: 1px solid hsla(0 0% 100% / 0.08); }
+  .badge-failed { background: hsla(0 84% 60% / 0.12); color: hsl(0 84% 68%); border: 1px solid hsla(0 84% 60% / 0.25); }
 }
 
 @keyframes fade-in-up {
@@ -112,10 +160,25 @@
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+@keyframes studio-breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes generation-pulse {
+  0%, 100% { border-color: hsla(262 62% 56% / 0.2); }
+  50% { border-color: hsla(262 62% 56% / 0.5); }
+}
+@keyframes creative-drift {
+  0%, 100% { transform: translateY(0); opacity: 0.8; }
+  50% { transform: translateY(-2px); opacity: 1; }
+}
 
 .animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
 .animate-fade-in { animation: fade-in 0.3s ease-out both; }
 .animate-scale-in { animation: scale-in 0.3s ease-out both; }
+.animate-studio-breathe { animation: studio-breathe 4s ease-in-out infinite; }
+.animate-generation-pulse { animation: generation-pulse 2s ease-in-out infinite; }
+.animate-creative-drift { animation: creative-drift 5s ease-in-out infinite; }
 
 .skeleton {
   background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
@@ -130,3 +193,11 @@
 .stagger-4 { animation-delay: 0.16s; }
 .stagger-5 { animation-delay: 0.20s; }
 .stagger-6 { animation-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

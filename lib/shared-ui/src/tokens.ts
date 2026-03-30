@@ -243,6 +243,35 @@ export const colors = {
     internal: { color: "hsl(246 45% 50%)", bg: "hsla(246 45% 50% / 0.10)", border: "hsla(246 45% 50% / 0.24)" },
     privateDemo: { color: "hsl(32 38% 52%)", bg: "hsla(32 38% 52% / 0.10)", border: "hsla(32 38% 52% / 0.24)" },
   },
+
+  // Legacy glass aliases used by components.ts
+  _legacyGlass: {
+    glass: "hsla(220 15% 18% / 0.06)",
+    glassHover: "hsla(220 15% 18% / 0.12)",
+    glassBorder: "hsla(0 0% 100% / 0.07)",
+    glassBorderHover: "hsla(0 0% 100% / 0.11)",
+  },
+
+  // Status aliases (maps to semantic) — used by components.ts
+  status: {
+    success: "hsl(152 55% 42%)",
+    successLight: "hsl(152 55% 55%)",
+    successMuted: "hsla(152 55% 42% / 0.12)",
+    warning: "hsl(38 85% 52%)",
+    warningLight: "hsl(38 85% 65%)",
+    warningMuted: "hsla(38 85% 52% / 0.12)",
+    error: "hsl(4 72% 50%)",
+    errorLight: "hsl(4 72% 62%)",
+    errorMuted: "hsla(4 72% 50% / 0.12)",
+    info: "hsl(210 70% 52%)",
+    infoLight: "hsl(210 70% 65%)",
+    infoMuted: "hsla(210 70% 52% / 0.12)",
+    neutral: "hsl(220 8% 52%)",
+    // Also expose critical alias
+    critical: "hsl(4 72% 50%)",
+    criticalLight: "hsl(4 72% 62%)",
+    criticalMuted: "hsla(4 72% 50% / 0.12)",
+  },
 } as const;
 
 export const typography = {
@@ -463,6 +492,18 @@ export const effects = {
       background: "hsla(210 15% 18% / 0.12)",
       backdropFilter: "blur(24px)",
       border: "1px solid hsla(0 0% 100% / 0.10)",
+    },
+  },
+  _legacy: {
+    glassmorphism: {
+      background: "hsla(220 15% 18% / 0.06)",
+      backdropFilter: "blur(16px)",
+      border: "1px solid hsla(0 0% 100% / 0.07)",
+    },
+    glassmorphismStrong: {
+      background: "hsla(220 15% 18% / 0.12)",
+      backdropFilter: "blur(20px)",
+      border: "1px solid hsla(0 0% 100% / 0.11)",
     },
   },
 } as const;
