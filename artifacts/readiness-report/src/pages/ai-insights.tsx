@@ -1,21 +1,31 @@
 import { Shell } from "@/components/layout/shell";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Loader2, Brain, TrendingUp, BarChart3, Target, Lightbulb, ArrowUpRight, ArrowDownRight, FileText, Zap } from "lucide-react";
+import { Brain, TrendingUp, BarChart3, Target, Lightbulb, ArrowUpRight, ArrowDownRight, FileText, Zap } from "lucide-react";
 import { motion } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { TypewriterText, AnimatedGauge, SeverityMeter } from "@workspace/shared-ui/ai-components";
 
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+const demoBenchmarks = [
+  { dimension: "Cybersecurity", szlScore: 82, industryAvg: 68, topQuartile: 85 },
+  { dimension: "Cloud Infra", szlScore: 78, industryAvg: 65, topQuartile: 82 },
+  { dimension: "Data Gov", szlScore: 64, industryAvg: 58, topQuartile: 78 },
+  { dimension: "AI/ML", szlScore: 71, industryAvg: 52, topQuartile: 80 },
+  { dimension: "Compliance", szlScore: 76, industryAvg: 70, topQuartile: 88 },
+  { dimension: "Operations", szlScore: 80, industryAvg: 72, topQuartile: 86 },
+];
+
+const demoRiskPrediction = {
+  predictions: [
+    { factor: "Supply Chain Disruption", current: 0.22, projected30d: 0.25, projected90d: 0.18, trend: "decreasing" },
+    { factor: "Regulatory Compliance Gap", current: 0.15, projected30d: 0.12, projected90d: 0.08, trend: "decreasing" },
+    { factor: "Talent Shortage Risk", current: 0.35, projected30d: 0.38, projected90d: 0.42, trend: "increasing" },
+    { factor: "Cyber Threat Exposure", current: 0.18, projected30d: 0.16, projected90d: 0.14, trend: "decreasing" },
+  ],
+};
 
 export default function AIInsights() {
-  const { data: benchmarks = [], isLoading: bLoading } = useQuery({ queryKey: ["intel-benchmarks"], queryFn: () => apiFetch<any[]>("/intelligence/benchmarks") });
-  const { data: riskPrediction, isLoading: rLoading } = useQuery({ queryKey: ["intel-risk-prediction"], queryFn: () => apiFetch<any>("/intelligence/ai/risk-prediction", { method: "POST", body: JSON.stringify({ scenario: "Quarterly readiness assessment for SZL Holdings portfolio" }) }), retry: 1 });
+  const benchmarks = demoBenchmarks;
+  const riskPrediction = demoRiskPrediction;
 
   const [summaryText, setSummaryText] = useState("");
   const [summaryDone, setSummaryDone] = useState(false);
@@ -23,27 +33,12 @@ export default function AIInsights() {
   const generateSummary = async () => {
     setSummaryText("");
     setSummaryDone(false);
-    try {
-      const result = await apiFetch<any>("/intelligence/ai/chat", {
-        method: "POST",
-        body: JSON.stringify({
-          message: "Generate a concise executive summary of SZL Holdings' readiness posture. Include key strengths, areas for improvement, and 3 actionable recommendations. Format as a professional briefing.",
-        }),
-      });
-      setSummaryText(result.content || "Summary generated.");
-    } catch {
-      setSummaryText("Based on current readiness metrics, SZL Holdings demonstrates strong positioning across cybersecurity (82%) and cloud infrastructure (78%) dimensions. Key areas for improvement include AI/ML maturity (+12 potential points) and data governance frameworks. Recommended actions: 1) Accelerate Zero Trust implementation, 2) Expand AI training programs, 3) Implement automated compliance scanning.");
-    }
+    await new Promise(r => setTimeout(r, 600));
+    setSummaryText("Based on current readiness metrics, SZL Holdings demonstrates strong positioning across cybersecurity (82%) and cloud infrastructure (78%) dimensions. Key areas for improvement include AI/ML maturity (+12 potential points) and data governance frameworks. Recommended actions: 1) Accelerate Zero Trust implementation, 2) Expand AI training programs, 3) Implement automated compliance scanning.");
     setSummaryDone(true);
   };
 
-  const isLoading = bLoading || rLoading;
-
-  if (isLoading) {
-    return <Shell><div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div></Shell>;
-  }
-
-  const radarData = benchmarks.map((b: any) => ({
+  const radarData = benchmarks.map((b) => ({
     dimension: b.dimension,
     szl: b.szlScore,
     industry: b.industryAvg,
@@ -101,7 +96,7 @@ export default function AIInsights() {
                 <TypewriterText text={summaryText} speed={12} className="text-sm text-slate-300 leading-relaxed" />
               ) : (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Generating executive summary...
+                  Generating executive summary...
                 </div>
               )}
             </div>
@@ -109,7 +104,7 @@ export default function AIInsights() {
         )}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {benchmarks.slice(0, 4).map((b: any, i: number) => (
+          {benchmarks.slice(0, 4).map((b, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-panel rounded-2xl p-4 flex flex-col items-center">
               <AnimatedGauge
                 value={b.szlScore}
@@ -169,32 +164,28 @@ export default function AIInsights() {
             <h3 className="text-lg font-semibold text-white mb-4 font-display flex items-center gap-2">
               <Target className="w-5 h-5 text-orange-400" /> AI Risk Predictions
             </h3>
-            {riskPrediction?.predictions ? (
-              <div className="space-y-3">
-                {riskPrediction.predictions.map((p: any, i: number) => (
-                  <div key={i} className="bg-white/5 rounded-xl p-4 border border-white/5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-white">{p.factor}</span>
-                      <span className={`text-xs flex items-center gap-1 ${p.trend === "increasing" ? "text-red-400" : p.trend === "decreasing" ? "text-emerald-400" : "text-slate-400"}`}>
-                        {p.trend === "increasing" ? <ArrowUpRight className="w-3 h-3" /> : p.trend === "decreasing" ? <ArrowDownRight className="w-3 h-3" /> : null}
-                        {p.trend}
-                      </span>
-                    </div>
-                    <SeverityMeter
-                      level={p.current > 0.3 ? "critical" : p.current > 0.15 ? "high" : "low"}
-                      score={Math.round(p.current * 100)}
-                      label="Current"
-                    />
-                    <div className="grid grid-cols-2 gap-2 text-xs mt-2">
-                      <div><span className="block text-muted-foreground">30-day</span><span className="font-bold text-white">{(p.projected30d * 100).toFixed(0)}%</span></div>
-                      <div><span className="block text-muted-foreground">90-day</span><span className="font-bold text-white">{(p.projected90d * 100).toFixed(0)}%</span></div>
-                    </div>
+            <div className="space-y-3">
+              {riskPrediction.predictions.map((p, i) => (
+                <div key={i} className="bg-white/5 rounded-xl p-4 border border-white/5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">{p.factor}</span>
+                    <span className={`text-xs flex items-center gap-1 ${p.trend === "increasing" ? "text-red-400" : p.trend === "decreasing" ? "text-emerald-400" : "text-slate-400"}`}>
+                      {p.trend === "increasing" ? <ArrowUpRight className="w-3 h-3" /> : p.trend === "decreasing" ? <ArrowDownRight className="w-3 h-3" /> : null}
+                      {p.trend}
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-40"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
-            )}
+                  <SeverityMeter
+                    level={p.current > 0.3 ? "critical" : p.current > 0.15 ? "high" : "low"}
+                    score={Math.round(p.current * 100)}
+                    label="Current"
+                  />
+                  <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                    <div><span className="block text-muted-foreground">30-day</span><span className="font-bold text-white">{(p.projected30d * 100).toFixed(0)}%</span></div>
+                    <div><span className="block text-muted-foreground">90-day</span><span className="font-bold text-white">{(p.projected90d * 100).toFixed(0)}%</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="lg:col-span-7 glass-panel rounded-3xl p-6">

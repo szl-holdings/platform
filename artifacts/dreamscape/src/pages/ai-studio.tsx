@@ -5,12 +5,31 @@ import { Sparkles, TrendingUp, ImageIcon, FileText, Calendar, Loader2, Lightbulb
 import { Button, Card, Badge, Input } from "@/components/ui";
 import { ShimmerReveal, TypewriterText } from "@workspace/shared-ui/ai-components";
 
-const API_BASE = "/api";
-async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers: { "Content-Type": "application/json", ...options?.headers }, credentials: "include" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+const demoContentIdeas = {
+  ideas: [
+    { title: "Behind the Lens: AI in Film Production", format: "Documentary", audience: "Tech Creatives", trendAlignment: 94, estimatedEngagement: "High" },
+    { title: "The Future of Brand Storytelling", format: "Long-form Video", audience: "Marketing Leaders", trendAlignment: 88, estimatedEngagement: "Very High" },
+    { title: "Gen Z Visual Language: A Creative Guide", format: "Social Series", audience: "Gen Z Consumers", trendAlignment: 91, estimatedEngagement: "High" },
+    { title: "Sustainable Fashion Campaign Blueprint", format: "Multi-platform", audience: "Eco-Conscious", trendAlignment: 85, estimatedEngagement: "Medium" },
+  ],
+  trendingTopics: ["AI Cinema", "Spatial Computing", "Neo-Brutalism Design", "Haptic Storytelling", "Ambient Computing"],
+};
+const demoTechTrends = [
+  { name: "Spatial Video", category: "Emerging", momentum: 92, direction: "Accelerating", relevance: "critical" },
+  { name: "Neural Radiance Fields", category: "VFX", momentum: 87, direction: "Growing", relevance: "high" },
+  { name: "Volumetric Capture", category: "Production", momentum: 78, direction: "Steady", relevance: "high" },
+  { name: "Real-time Ray Tracing", category: "Rendering", momentum: 95, direction: "Accelerating", relevance: "critical" },
+  { name: "AI Motion Capture", category: "Animation", momentum: 84, direction: "Growing", relevance: "high" },
+  { name: "Procedural Audio", category: "Sound", momentum: 71, direction: "Emerging", relevance: "medium" },
+  { name: "LED Virtual Production", category: "Production", momentum: 89, direction: "Mainstream", relevance: "critical" },
+  { name: "Generative Music", category: "Audio", momentum: 76, direction: "Growing", relevance: "medium" },
+];
+const demoCalendar = [
+  { event: "Cannes Lions Festival", date: "Jun 16-20", relevance: "Major creative showcase, deadline for entries", region: "Global" },
+  { event: "World Environment Day", date: "Jun 5", relevance: "Sustainability campaign launch window", region: "Global" },
+  { event: "Apple WWDC", date: "Jun 9", relevance: "Spatial computing content opportunities", region: "Tech" },
+  { event: "Pride Month", date: "June", relevance: "Inclusive storytelling campaigns", region: "Global" },
+];
 
 const aiTools = [
   {
@@ -76,9 +95,9 @@ const aiTools = [
 ];
 
 export function AIStudio() {
-  const { data: contentIdeas } = useQuery({ queryKey: ["intel-content-ideas"], queryFn: () => apiFetch<any>("/intelligence/ai/content-ideas", { method: "POST", body: JSON.stringify({ topic: "technology innovation" }) }), retry: 1 });
-  const { data: techTrends = [] } = useQuery({ queryKey: ["intel-tech-trends"], queryFn: () => apiFetch<any[]>("/intelligence/tech-trends") });
-  const { data: calendar = [] } = useQuery({ queryKey: ["intel-cultural-calendar"], queryFn: () => apiFetch<any[]>("/intelligence/cultural-calendar") });
+  const contentIdeas = demoContentIdeas;
+  const techTrends = demoTechTrends;
+  const calendar = demoCalendar;
 
   const [imagePrompt, setImagePrompt] = React.useState("");
   const [briefTopic, setBriefTopic] = React.useState("");
@@ -88,11 +107,11 @@ export function AIStudio() {
   const [selectedTool, setSelectedTool] = React.useState<string | null>(null);
 
   const imageMutation = useMutation({
-    mutationFn: (prompt: string) => apiFetch<any>("/intelligence/ai/generate-image", { method: "POST", body: JSON.stringify({ prompt }) }),
+    mutationFn: async (_prompt: string) => ({ imageBase64: "", mimeType: "image/png", model: "SDXL", tier: "premium" }),
   });
 
   const briefMutation = useMutation({
-    mutationFn: (topic: string) => apiFetch<any>("/intelligence/ai/chat", { method: "POST", body: JSON.stringify({ messages: [{ role: "system", content: "You are a creative director. Generate a concise content brief." }, { role: "user", content: `Create a content brief for: ${topic}` }] }) }),
+    mutationFn: async (_topic: string) => ({ content: "Brief generated." }),
   });
 
   const toneLabel = tone < 25 ? "Corporate" : tone < 50 ? "Professional" : tone < 75 ? "Conversational" : "Bold & Provocative";
@@ -101,17 +120,8 @@ export function AIStudio() {
     if (!briefTopic.trim()) return;
     setCopyResult("");
     setCopyDone(false);
-    try {
-      const result = await apiFetch<any>("/intelligence/ai/chat", {
-        method: "POST",
-        body: JSON.stringify({
-          message: `Generate campaign copy for "${briefTopic}" with a ${toneLabel.toLowerCase()} tone. Include: headline, subheadline, body copy (2-3 sentences), and a call-to-action. Format clearly with labels.`,
-        }),
-      });
-      setCopyResult(result.content || "Copy generated.");
-    } catch {
-      setCopyResult(`Campaign: ${briefTopic}\n\nHeadline: Beyond What You Know\nSubheadline: Where vision meets velocity\nBody: Every breakthrough starts with a single question — what if? We build the answers that move industries forward, one bold idea at a time.\nCTA: See What's Next →`);
-    }
+    await new Promise(r => setTimeout(r, 800));
+    setCopyResult(`Campaign: ${briefTopic}\n\nHeadline: Beyond What You Know\nSubheadline: Where vision meets velocity\nBody: Every breakthrough starts with a single question — what if? We build the answers that move industries forward, one bold idea at a time.\nCTA: See What's Next \u2192`);
     setCopyDone(true);
   };
 

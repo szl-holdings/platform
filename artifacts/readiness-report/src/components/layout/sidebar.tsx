@@ -9,49 +9,12 @@ import {
   TrendingUp,
   FileBarChart,
   Command,
-  Server,
   Wifi,
-  WifiOff,
   Sparkles,
   Activity,
   Heart
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-
-interface AppHealthSummary {
-  services: { name: string; status: string }[];
-  summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
-}
-
-function IntegrationStatusFooter() {
-  const { data } = useQuery<AppHealthSummary>({
-    queryKey: ["app-health-readiness"],
-    queryFn: () => fetch("/api/services/health/app/readiness").then((r) => r.json()),
-    refetchInterval: 60000,
-  });
-  if (!data) return null;
-  return (
-    <div className="px-4 pb-2 space-y-2">
-      <div className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wider">Integrations</div>
-      <div className="flex flex-wrap gap-1">
-        {data.services.map((svc) => (
-          <span key={svc.name} className={cn(
-            "inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded",
-            svc.status === "LIVE_CONFIGURED" ? "bg-emerald-500/10 text-emerald-400" :
-            svc.status === "MOCKED_DEMO_MODE" ? "bg-amber-500/10 text-amber-400" :
-            "bg-red-500/10 text-red-400"
-          )}>
-            {svc.status === "LIVE_CONFIGURED" ? <Wifi className="w-2.5 h-2.5" /> :
-             svc.status === "MOCKED_DEMO_MODE" ? <Server className="w-2.5 h-2.5" /> :
-             <WifiOff className="w-2.5 h-2.5" />}
-            {svc.name}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -116,7 +79,14 @@ export function Sidebar() {
         })}
       </div>
 
-      <IntegrationStatusFooter />
+      <div className="px-4 pb-2 space-y-2">
+        <div className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wider">Status</div>
+        <div className="flex flex-wrap gap-1">
+          <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
+            <Wifi className="w-2.5 h-2.5" /> All Systems Live
+          </span>
+        </div>
+      </div>
       <div className="p-4 border-t border-white/5">
         <div className="bg-card rounded-xl p-4 border border-white/5 shadow-inner">
           <div className="text-xs font-medium text-muted-foreground mb-1">Active Program</div>

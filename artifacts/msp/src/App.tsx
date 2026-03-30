@@ -163,7 +163,7 @@ function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={LandingPage} />
+        <Route path="/" component={ClientsPage} />
         <Route path="/dashboard" component={ClientsPage} />
         <Route path="/clients" component={ClientsPage} />
         <Route path="/tickets" component={TicketsPage} />
@@ -184,19 +184,6 @@ function AppRouter() {
 }
 
 function DashboardLayout() {
-  const [location] = useLocation();
-  const isLanding = location === "/";
-
-  if (isLanding) {
-    return (
-      <main className="flex-1 overflow-auto">
-        <Suspense fallback={<PageLoader />}>
-          <LandingPage />
-        </Suspense>
-      </main>
-    );
-  }
-
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />

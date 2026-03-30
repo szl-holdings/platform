@@ -29,7 +29,7 @@ function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={HomePage} />
+        <Route path="/" component={DashboardPage} />
         <Route path="/dashboard" component={DashboardPage} />
         <Route path="/market" component={MarketPage} />
         <Route path="/pipeline" component={PipelinePage} />
