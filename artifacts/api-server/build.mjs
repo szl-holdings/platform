@@ -3,16 +3,81 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm } from "node:fs/promises";
+import { rm, readFile, readdir } from "node:fs/promises";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = path.resolve(artifactDir, "../..");
+
+async function buildWorkspacePackageMap() {
+  const libDir = path.join(workspaceRoot, "lib");
+  const packageMap = {};
+  try {
+    const entries = await readdir(libDir, { withFileTypes: true });
+    await Promise.all(entries.map(async (entry) => {
+      if (!entry.isDirectory()) return;
+      const packageDir = path.join(libDir, entry.name);
+      const pkgPath = path.join(packageDir, "package.json");
+      try {
+        const pkgContent = await readFile(pkgPath, "utf8");
+        const pkg = JSON.parse(pkgContent);
+        if (!pkg.name) return;
+        packageMap[pkg.name] = { dir: packageDir, exports: pkg.exports ?? {} };
+      } catch {
+        // skip packages without package.json
+      }
+    }));
+  } catch {
+    // lib dir not found
+  }
+  return packageMap;
+}
+
+function resolveExportPath(exports, subpath) {
+  const key = subpath === "" ? "." : `./${subpath}`;
+  const entry = exports[key];
+  if (!entry) return null;
+  if (typeof entry === "string") return entry;
+  return entry.import ?? entry.default ?? null;
+}
+
+function workspacePlugin(packageMap) {
+  return {
+    name: "workspace-resolver",
+    setup(build) {
+      build.onResolve({ filter: /^@workspace\// }, (args) => {
+        const importPath = args.path;
+        let pkgName = null;
+        let subpath = "";
+        for (const name of Object.keys(packageMap)) {
+          if (importPath === name) {
+            pkgName = name;
+            subpath = "";
+            break;
+          }
+          if (importPath.startsWith(name + "/")) {
+            pkgName = name;
+            subpath = importPath.slice(name.length + 1);
+            break;
+          }
+        }
+        if (!pkgName) return null;
+        const pkg = packageMap[pkgName];
+        const relFile = resolveExportPath(pkg.exports, subpath);
+        if (!relFile) return null;
+        return { path: path.join(pkg.dir, relFile) };
+      });
+    },
+  };
+}
 
 async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
+
+  const workspacePackageMap = await buildWorkspacePackageMap();
 
   await esbuild({
     entryPoints: [path.resolve(artifactDir, "src/index.ts")],
@@ -22,6 +87,7 @@ async function buildAll() {
     outdir: distDir,
     outExtension: { ".js": ".mjs" },
     logLevel: "info",
+    nodePaths: [path.join(artifactDir, "node_modules")],
     // Some packages may not be bundleable, so we externalize them, we can add more here as needed.
     // Some of the packages below may not be imported or installed, but we're adding them in case they are in the future.
     // Examples of unbundleable packages:
@@ -102,6 +168,7 @@ async function buildAll() {
     ],
     sourcemap: "linked",
     plugins: [
+      workspacePlugin(workspacePackageMap),
       // pino relies on workers to handle logging, instead of externalizing it we use a plugin to handle it
       esbuildPluginPino({ transports: ["pino-pretty"] })
     ],

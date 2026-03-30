@@ -66,6 +66,17 @@ export const api = {
     create: (data: any) => apiFetch<any>("/firestorm/assets", { method: "POST", body: JSON.stringify(data) }),
     update: (id: number, data: any) => apiFetch<any>(`/firestorm/assets/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   },
+  vulnerabilities: {
+    list: (params?: { severity?: string; status?: string; asset?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.severity) q.set("severity", params.severity);
+      if (params?.status) q.set("status", params.status);
+      if (params?.asset) q.set("asset", params.asset);
+      return apiFetch<any[]>(`/firestorm/vulnerabilities${q.toString() ? `?${q}` : ""}`);
+    },
+    get: (id: number) => apiFetch<any>(`/firestorm/vulnerabilities/${id}`),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/vulnerabilities/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  },
   workflowActions: {
     list: (entityType?: string, entityId?: number) => {
       const q = new URLSearchParams();
@@ -98,6 +109,20 @@ export const api = {
     certAdvisories: (certId?: string) =>
       apiFetch<any>(`/firestorm/live/cert-advisories${certId ? `?cert=${certId}` : ""}`),
     feedStatus: () => apiFetch<any>("/firestorm/live/feed-status"),
+  },
+  hardeningControls: {
+    list: (params?: { category?: string; status?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.category) q.set("category", params.category);
+      if (params?.status) q.set("status", params.status);
+      return apiFetch<any[]>(`/firestorm/hardening-controls${q.toString() ? `?${q}` : ""}`);
+    },
+    get: (id: number) => apiFetch<any>(`/firestorm/hardening-controls/${id}`),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/hardening-controls/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    summary: () => apiFetch<any>("/firestorm/hardening-summary"),
+  },
+  reportsList: {
+    list: () => apiFetch<any[]>("/firestorm/reports"),
   },
   ingest: {
     webhook: (payload: any) => apiFetch<any>("/firestorm/ingest/webhook", { method: "POST", body: JSON.stringify(payload) }),

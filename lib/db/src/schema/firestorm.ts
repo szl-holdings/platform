@@ -64,6 +64,9 @@ export const firestormFindingsTable = pgTable("firestorm_findings", {
   recommendation: text("recommendation"),
   cvssScore: numeric("cvss_score", { precision: 4, scale: 2 }),
   evidence: jsonb("evidence"),
+  remediationOwner: text("remediation_owner"),
+  dueDate: timestamp("due_date"),
+  auditTrail: jsonb("audit_trail").$type<Array<{ action: string; user: string; at: string }>>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -99,6 +102,28 @@ export const firestormIncidentsTable = pgTable("firestorm_incidents", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const firestormHardeningControlsTable = pgTable("firestorm_hardening_controls", {
+  id: serial("id").primaryKey(),
+  controlId: text("control_id").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category", { enum: ["mfa_credential", "application_hardening", "config_hardening", "dependency_supply_chain", "vulnerability_assessment"] }).notNull(),
+  status: text("status", { enum: ["implemented", "partial", "not_implemented"] }).notNull().default("not_implemented"),
+  priority: text("priority", { enum: ["critical", "high", "medium", "low"] }).notNull().default("high"),
+  owner: text("owner"),
+  linkedAssets: jsonb("linked_assets").$type<string[]>().default([]),
+  recommendedAction: text("recommended_action"),
+  dueDate: timestamp("due_date"),
+  auditTrail: jsonb("audit_trail").$type<Array<{ action: string; user: string; at: string }>>().default([]),
+  lastReviewedAt: timestamp("last_reviewed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFirestormHardeningControlSchema = createInsertSchema(firestormHardeningControlsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormHardeningControl = z.infer<typeof insertFirestormHardeningControlSchema>;
+export type FirestormHardeningControl = typeof firestormHardeningControlsTable.$inferSelect;
+
 export const firestormComplianceControlsTable = pgTable("firestorm_compliance_controls", {
   id: serial("id").primaryKey(),
   framework: text("framework", { enum: ["nist_csf", "fedramp", "fisma"] }).notNull(),
@@ -108,6 +133,9 @@ export const firestormComplianceControlsTable = pgTable("firestorm_compliance_co
   description: text("description"),
   status: text("status", { enum: ["implemented", "partial", "not_implemented", "not_applicable"] }).notNull().default("not_implemented"),
   evidenceNotes: text("evidence_notes"),
+  owner: text("owner"),
+  dueDate: timestamp("due_date"),
+  auditTrail: jsonb("audit_trail").default([]),
   lastAssessedAt: timestamp("last_assessed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

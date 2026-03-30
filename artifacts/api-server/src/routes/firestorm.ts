@@ -11,6 +11,8 @@ import {
   firestormAlertsTable,
   firestormAssetsTable,
   firestormWorkflowActionsTable,
+  firestormHardeningControlsTable,
+  firestormComplianceControlsTable,
   insertFirestormScenarioSchema,
   insertFirestormAssessmentSchema,
   insertFirestormSimulationRunSchema,
@@ -148,10 +150,18 @@ router.post("/firestorm/simulations", authMiddleware({ required: false }), async
     const data = insertFirestormSimulationRunSchema.parse(req.body);
     const [run] = await db.insert(firestormSimulationRunsTable).values({
       ...data,
-      status: "running",
-      mode: "controlled",
-      startedAt: new Date(),
+      status: "pending",
+      mode: data.mode ?? "controlled",
     }).returning();
+
+    await db.insert(firestormWorkflowActionsTable).values({
+      entityType: "simulation",
+      entityId: run.id,
+      actionType: "escalate",
+      status: "pending",
+      notes: `Auto-triggered: simulation run created — scenario=${run.scenarioId ?? "unknown"}, mode=${run.mode}`,
+      triggeredBy: "simulation-create-hook",
+    });
 
     sendCreated(res, run);
   } catch (err) {
@@ -196,8 +206,26 @@ router.get("/firestorm/findings/:id", authMiddleware({ required: false }), async
 
 router.post("/firestorm/findings", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const data = insertFirestormFindingSchema.parse(req.body);
-    const [finding] = await db.insert(firestormFindingsTable).values(data).returning();
+    const body = { ...req.body };
+    if (typeof body.dueDate === "string") body.dueDate = new Date(body.dueDate);
+    const data = insertFirestormFindingSchema.parse(body);
+    const confirmedOrOpen = data.status === "confirmed" || data.status === "open";
+    if ((data.severity === "critical" || data.severity === "high") && confirmedOrOpen) {
+      if (!data.remediationOwner) {
+        res.status(422).json({ error: "Remediation owner is required when creating a critical/high finding in confirmed or open status." });
+        return;
+      }
+      if (!data.dueDate) {
+        res.status(422).json({ error: "Due date is required when creating a critical/high finding in confirmed or open status." });
+        return;
+      }
+      if (!data.recommendation) {
+        res.status(422).json({ error: "Recommended action is required when creating a critical/high finding in confirmed or open status." });
+        return;
+      }
+    }
+    const initAuditEntry = { action: "Finding created", user: "Operator", at: new Date().toISOString() };
+    const [finding] = await db.insert(firestormFindingsTable).values({ ...data, auditTrail: [initAuditEntry] }).returning();
     sendCreated(res, finding);
   } catch (err) {
     handleRouteError(res, err, "Failed to create finding");
@@ -236,6 +264,71 @@ router.post("/firestorm/risk-scores", authMiddleware({ required: false }), async
     sendCreated(res, score);
   } catch (err) {
     handleRouteError(res, err, "Failed to create risk score");
+  }
+});
+
+router.get("/firestorm/reports", authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const assessments = await db.select().from(firestormAssessmentsTable).orderBy(desc(firestormAssessmentsTable.createdAt));
+    const reports = await Promise.all(assessments.map(async (assessment) => {
+      const findings = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.assessmentId, assessment.id));
+      const bySeverity: Record<string, typeof findings> = { critical: [], high: [], medium: [], low: [], informational: [] };
+      for (const f of findings) { (bySeverity[f.severity] ?? (bySeverity[f.severity] = [])).push(f); }
+      return {
+        id: assessment.id,
+        name: assessment.name,
+        assessmentType: assessment.assessmentType,
+        status: assessment.status,
+        createdAt: assessment.createdAt,
+        totalFindings: findings.length,
+        criticalCount: bySeverity.critical.length,
+        highCount: bySeverity.high.length,
+        mediumCount: bySeverity.medium.length,
+        lowCount: bySeverity.low.length,
+        openCount: findings.filter(f => f.status === "open" || f.status === "confirmed").length,
+        mitigatedCount: findings.filter(f => f.status === "mitigated").length,
+        findingsBySeverity: {
+          critical: bySeverity.critical.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset, remediationOwner: f.remediationOwner, dueDate: f.dueDate })),
+          high: bySeverity.high.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset, remediationOwner: f.remediationOwner, dueDate: f.dueDate })),
+          medium: bySeverity.medium.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset, remediationOwner: f.remediationOwner, dueDate: f.dueDate })),
+          low: bySeverity.low.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset, remediationOwner: f.remediationOwner, dueDate: f.dueDate })),
+        },
+      };
+    }));
+    sendSuccess(res, reports);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list reports");
+  }
+});
+
+router.get("/firestorm/reports/export-summary", authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const findings = await db.select().from(firestormFindingsTable).orderBy(desc(firestormFindingsTable.createdAt));
+    const bySeverity: Record<string, typeof findings> = { critical: [], high: [], medium: [], low: [] };
+    for (const f of findings) { if (bySeverity[f.severity]) bySeverity[f.severity].push(f); }
+    const criticalUnowned = bySeverity.critical.filter(f => !f.remediationOwner);
+    const highUnowned = bySeverity.high.filter(f => !f.remediationOwner);
+    const overdue = findings.filter(f => f.dueDate && new Date(f.dueDate) < new Date() && f.status !== "mitigated" && f.status !== "accepted");
+    sendSuccess(res, {
+      exportedAt: new Date().toISOString(),
+      totalFindings: findings.length,
+      criticalCount: bySeverity.critical.length,
+      highCount: bySeverity.high.length,
+      mediumCount: bySeverity.medium.length,
+      lowCount: bySeverity.low.length,
+      unownedCritical: criticalUnowned.length,
+      unownedHigh: highUnowned.length,
+      overdueCount: overdue.length,
+      findingsBySeverity: {
+        critical: bySeverity.critical.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset, remediationOwner: f.remediationOwner, dueDate: f.dueDate, recommendation: f.recommendation, auditTrail: f.auditTrail })),
+        high: bySeverity.high.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset, remediationOwner: f.remediationOwner, dueDate: f.dueDate, recommendation: f.recommendation, auditTrail: f.auditTrail })),
+        medium: bySeverity.medium.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset, remediationOwner: f.remediationOwner, dueDate: f.dueDate })),
+        low: bySeverity.low.map(f => ({ id: f.id, title: f.title, status: f.status, affectedAsset: f.affectedAsset })),
+      },
+      overdueFindings: overdue.map(f => ({ id: f.id, title: f.title, severity: f.severity, dueDate: f.dueDate, remediationOwner: f.remediationOwner })),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to generate export summary");
   }
 });
 
@@ -309,8 +402,38 @@ router.put("/firestorm/incidents/:id", authMiddleware({ required: false }), asyn
   try {
     const id = parseIdParam(req.params.id);
     const data = insertFirestormIncidentSchema.partial().parse(req.body);
+
+    const [current] = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, id));
+    if (!current) { sendNotFound(res, "Incident"); return; }
+
+    const effectiveStatus = data.status ?? current.status;
+    const effectiveSeverity = data.severity ?? current.severity;
+    const effectiveAnalyst = data.assignedAnalyst ?? current.assignedAnalyst;
+    const activeStatuses = ["triage", "investigation", "containment", "remediation"];
+
+    if ((effectiveSeverity === "critical" || effectiveSeverity === "high") && activeStatuses.includes(effectiveStatus)) {
+      if (!effectiveAnalyst) {
+        res.status(422).json({ error: "Assigned analyst is required for critical/high severity incidents in active status." });
+        return;
+      }
+    }
+
+    const prevStatus = current.status;
     const [incident] = await db.update(firestormIncidentsTable).set({ ...data, updatedAt: new Date() }).where(eq(firestormIncidentsTable.id, id)).returning();
     if (!incident) { sendNotFound(res, "Incident"); return; }
+
+    if (data.status && data.status !== prevStatus && (incident.severity === "critical" || incident.severity === "high")) {
+      await db.insert(firestormWorkflowActionsTable).values({
+        entityType: "incident",
+        entityId: id,
+        actionType: data.status === "containment" || data.status === "remediation" ? "route_to_response" : "escalate",
+        assignedTo: incident.assignedAnalyst ?? undefined,
+        status: "pending",
+        notes: `Auto-triggered: incident status changed to ${data.status} — severity=${incident.severity}`,
+        triggeredBy: "incident-status-hook",
+      });
+    }
+
     sendSuccess(res, incident);
   } catch (err) {
     handleRouteError(res, err, "Failed to update incident");
@@ -328,23 +451,234 @@ router.delete("/firestorm/incidents/:id", authMiddleware({ required: false }), a
   }
 });
 
+router.get("/firestorm/vulnerabilities", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const severityFilter = req.query.severity as string | undefined;
+    const statusFilter = req.query.status as string | undefined;
+    const assetFilter = req.query.asset as string | undefined;
+    const findings = await db.select().from(firestormFindingsTable).orderBy(desc(firestormFindingsTable.createdAt));
+    const filtered = findings.filter(f => {
+      if (severityFilter && f.severity !== severityFilter) return false;
+      if (statusFilter && f.status !== statusFilter) return false;
+      if (assetFilter && f.affectedAsset !== assetFilter) return false;
+      return true;
+    });
+    const enriched = filtered.map(f => ({
+      ...f,
+      recommendedAction: f.recommendation ?? null,
+      auditTrail: Array.isArray(f.auditTrail) ? f.auditTrail : [],
+    }));
+    sendSuccess(res, enriched);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list vulnerabilities");
+  }
+});
+
+router.get("/firestorm/vulnerabilities/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [finding] = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.id, id));
+    if (!finding) { sendNotFound(res, "Vulnerability"); return; }
+    sendSuccess(res, {
+      ...finding,
+      recommendedAction: finding.recommendation ?? null,
+      auditTrail: Array.isArray(finding.auditTrail) ? finding.auditTrail : [],
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get vulnerability");
+  }
+});
+
+router.put("/firestorm/vulnerabilities/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const { status, remediationOwner, dueDate, recommendedAction, recommendation } = req.body as {
+      status?: string;
+      remediationOwner?: string;
+      dueDate?: string;
+      recommendedAction?: string;
+      recommendation?: string;
+    };
+    const [current] = await db.select().from(firestormFindingsTable).where(eq(firestormFindingsTable.id, id));
+    if (!current) { sendNotFound(res, "Vulnerability"); return; }
+
+    const effectiveStatus = status ?? current.status;
+    const effectiveOwner = remediationOwner ?? current.remediationOwner;
+    const effectiveDueDate = dueDate !== undefined ? (dueDate ? new Date(dueDate) : null) : current.dueDate;
+
+    const effectiveRecommendation = recommendedAction ?? recommendation ?? current.recommendation;
+    if ((effectiveStatus === "confirmed" || effectiveStatus === "open") && (current.severity === "critical" || current.severity === "high")) {
+      if (!effectiveOwner) {
+        res.status(422).json({ error: "Remediation owner is required for critical/high severity findings when status is confirmed or open." });
+        return;
+      }
+      if (!effectiveDueDate) {
+        res.status(422).json({ error: "Due date is required for critical/high severity findings when status is confirmed or open." });
+        return;
+      }
+      if (!effectiveRecommendation) {
+        res.status(422).json({ error: "Recommended action is required for critical/high severity findings when status is confirmed or open." });
+        return;
+      }
+    }
+
+    const updates: Partial<typeof firestormFindingsTable.$inferInsert> & { updatedAt: Date } = { updatedAt: new Date() };
+    if (status !== undefined) updates.status = effectiveStatus as typeof current.status;
+    if (remediationOwner !== undefined) updates.remediationOwner = remediationOwner;
+    if (dueDate !== undefined) updates.dueDate = effectiveDueDate;
+    const incomingRec = recommendedAction ?? recommendation;
+    if (incomingRec !== undefined) updates.recommendation = incomingRec;
+
+    const existingTrail = Array.isArray(current.auditTrail) ? current.auditTrail : [];
+    const changedFields = Object.keys(updates).filter(k => k !== "updatedAt");
+    const newEntry = { action: `Updated: ${changedFields.join(", ")}`, user: "Operator", at: new Date().toISOString() };
+    updates.auditTrail = [...existingTrail, newEntry];
+
+    const [finding] = await db.update(firestormFindingsTable).set(updates).where(eq(firestormFindingsTable.id, id)).returning();
+
+    if (status === "confirmed" && current.status !== "confirmed") {
+      await db.insert(firestormWorkflowActionsTable).values({
+        entityType: "finding",
+        entityId: id,
+        actionType: "assign_owner",
+        assignedTo: effectiveOwner ?? undefined,
+        status: "pending",
+        notes: `Auto-triggered: finding confirmed — severity=${finding.severity}, asset=${finding.affectedAsset ?? "unknown"}`,
+        triggeredBy: "vulnerability-confirm-hook",
+      });
+    }
+
+    sendSuccess(res, {
+      ...finding,
+      recommendedAction: finding.recommendation ?? null,
+      auditTrail: Array.isArray(finding.auditTrail) ? finding.auditTrail : [],
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update vulnerability");
+  }
+});
+
+async function ensureComplianceControlsSeeded(): Promise<void> {
+  const existing = await db.select({ id: firestormComplianceControlsTable.id }).from(firestormComplianceControlsTable).limit(1);
+  if (existing.length > 0) return;
+  const rows = DEMO_COMPLIANCE_CONTROLS.map(c => ({
+    framework: "nist_csf" as const,
+    category: c.category,
+    controlId: c.controlId,
+    controlName: c.controlId,
+    description: c.evidence ?? null,
+    status: (c.status === "compliant" ? "implemented" : c.status === "partial" ? "partial" : "not_implemented") as "implemented" | "partial" | "not_implemented",
+    evidenceNotes: c.owner ? `Owner: ${c.owner}` : null,
+    owner: c.owner ?? null,
+  }));
+  await db.insert(firestormComplianceControlsTable).values(rows);
+}
+
+const VALID_COMPLIANCE_FRAMEWORKS = ["nist_csf", "fedramp", "fisma"] as const;
+type ComplianceFramework = typeof VALID_COMPLIANCE_FRAMEWORKS[number];
+
 router.get("/firestorm/compliance", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const framework = (req.query.framework as string | undefined) ?? "nist_csf";
-    const controls = DEMO_COMPLIANCE_CONTROLS.map((c, i) => ({
-      id: i + 1,
-      controlId: c.controlId,
-      controlName: c.controlId,
-      category: c.category,
-      framework: "nist_csf",
-      status: c.status === "compliant" ? "implemented" : c.status === "partial" ? "partial" : "not_implemented",
-      description: c.evidence,
-      evidenceNotes: c.owner ? `Owner: ${c.owner}` : undefined,
-    }));
-    const filtered = framework === "nist_csf" ? controls : [];
-    sendSuccess(res, filtered);
+    await ensureComplianceControlsSeeded();
+    const rawFramework = req.query.framework as string | undefined;
+    const framework: ComplianceFramework = VALID_COMPLIANCE_FRAMEWORKS.includes(rawFramework as ComplianceFramework)
+      ? (rawFramework as ComplianceFramework)
+      : "nist_csf";
+    const controls = await db.select().from(firestormComplianceControlsTable).where(eq(firestormComplianceControlsTable.framework, framework)).orderBy(firestormComplianceControlsTable.category);
+    sendSuccess(res, controls);
   } catch (err) {
     handleRouteError(res, err, "Failed to list compliance controls");
+  }
+});
+
+router.put("/firestorm/compliance/:controlId", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    await ensureComplianceControlsSeeded();
+    const { controlId } = req.params;
+    const { status, owner, dueDate, notes } = req.body as { status?: string; owner?: string; dueDate?: string; notes?: string };
+    const [existing] = await db.select().from(firestormComplianceControlsTable).where(eq(firestormComplianceControlsTable.controlId, controlId));
+    if (!existing) { sendNotFound(res, "Compliance Control"); return; }
+
+    const effectiveStatus = status ?? existing.status;
+    const effectiveOwner = owner ?? existing.owner;
+    if ((effectiveStatus === "not_implemented" || effectiveStatus === "partial") && !effectiveOwner) {
+      res.status(422).json({ error: "Owner assignment is required for non-compliant compliance controls to enable gap routing." });
+      return;
+    }
+
+    const prevAudit = Array.isArray(existing.auditTrail) ? existing.auditTrail as object[] : [];
+    const auditEntry = { at: new Date().toISOString(), action: `Updated: ${[status && "status", owner && "owner", dueDate && "dueDate"].filter(Boolean).join(", ")}` };
+    const updates: Partial<typeof firestormComplianceControlsTable.$inferInsert> & { updatedAt: Date } = { updatedAt: new Date(), auditTrail: [...prevAudit, auditEntry] };
+    if (status) updates.status = effectiveStatus as typeof existing.status;
+    if (owner !== undefined) updates.owner = owner;
+    if (dueDate !== undefined) updates.dueDate = dueDate ? new Date(dueDate) : null;
+    if (notes !== undefined) updates.evidenceNotes = notes;
+
+    const [updated] = await db.update(firestormComplianceControlsTable).set(updates).where(eq(firestormComplianceControlsTable.controlId, controlId)).returning();
+
+    await db.insert(firestormWorkflowActionsTable).values({
+      entityType: "asset",
+      entityId: updated.id,
+      actionType: effectiveStatus === "not_implemented" ? "escalate" : "remediate",
+      assignedTo: effectiveOwner ?? undefined,
+      status: "pending",
+      notes: `Compliance gap routing: controlId=${controlId}, status=${effectiveStatus}, owner=${effectiveOwner ?? "unassigned"} — ${notes ?? ""}`,
+      triggeredBy: "compliance-gap-hook",
+    });
+
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update compliance control");
+  }
+});
+
+router.get("/firestorm/vulnerability-inventory", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const severityFilter = req.query.severity as string | undefined;
+    const statusFilter = req.query.status as string | undefined;
+    const assetFilter = req.query.asset as string | undefined;
+    const findings = await db.select().from(firestormFindingsTable).orderBy(desc(firestormFindingsTable.createdAt));
+    const filtered = findings.filter(f => {
+      if (severityFilter && f.severity !== severityFilter) return false;
+      if (statusFilter && f.status !== statusFilter) return false;
+      if (assetFilter && f.affectedAsset !== assetFilter) return false;
+      return true;
+    });
+    const stats = {
+      total: filtered.length,
+      critical: filtered.filter(f => f.severity === "critical").length,
+      high: filtered.filter(f => f.severity === "high").length,
+      medium: filtered.filter(f => f.severity === "medium").length,
+      low: filtered.filter(f => f.severity === "low").length,
+      open: filtered.filter(f => f.status === "open").length,
+      confirmed: filtered.filter(f => f.status === "confirmed").length,
+      mitigated: filtered.filter(f => f.status === "mitigated").length,
+      unowned: filtered.filter(f => !f.remediationOwner && (f.severity === "critical" || f.severity === "high")).length,
+      overdue: filtered.filter(f => f.dueDate && new Date(f.dueDate) < new Date() && f.status !== "mitigated" && f.status !== "accepted").length,
+    };
+    sendSuccess(res, {
+      schema: "firestorm_findings",
+      description: "Platform-wide vulnerability inventory. firestorm_findings is the canonical vulnerability store; assessment_id links findings to the originating assessment but is not required for platform-level tracking queries.",
+      stats,
+      vulnerabilities: filtered.map(f => ({
+        id: f.id,
+        title: f.title,
+        severity: f.severity,
+        status: f.status,
+        affectedAsset: f.affectedAsset,
+        cvssScore: f.cvssScore,
+        cveId: f.cveId,
+        remediationOwner: f.remediationOwner,
+        dueDate: f.dueDate,
+        recommendation: f.recommendation,
+        auditTrail: Array.isArray(f.auditTrail) ? f.auditTrail : [],
+        assessmentId: f.assessmentId,
+        createdAt: f.createdAt,
+        updatedAt: f.updatedAt,
+      })),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list vulnerability inventory");
   }
 });
 
@@ -866,6 +1200,102 @@ router.patch("/firestorm/workflow-actions/:id", authMiddleware({ required: false
     sendSuccess(res, action);
   } catch (err) {
     handleRouteError(res, err, "Failed to update workflow action");
+  }
+});
+
+router.get("/firestorm/hardening-controls", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const categoryFilter = req.query.category as string | undefined;
+    const statusFilter = req.query.status as string | undefined;
+    const controls = await db.select().from(firestormHardeningControlsTable).orderBy(firestormHardeningControlsTable.controlId);
+    const filtered = controls.filter(c => {
+      if (categoryFilter && c.category !== categoryFilter) return false;
+      if (statusFilter && c.status !== statusFilter) return false;
+      return true;
+    });
+    sendSuccess(res, filtered);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list hardening controls");
+  }
+});
+
+router.get("/firestorm/hardening-controls/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [control] = await db.select().from(firestormHardeningControlsTable).where(eq(firestormHardeningControlsTable.id, id));
+    if (!control) { sendNotFound(res, "Hardening control"); return; }
+    sendSuccess(res, control);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get hardening control");
+  }
+});
+
+router.put("/firestorm/hardening-controls/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const { status, owner, recommendedAction, dueDate, notes } = req.body as {
+      status?: string;
+      owner?: string;
+      recommendedAction?: string;
+      dueDate?: string;
+      notes?: string;
+    };
+    const [current] = await db.select().from(firestormHardeningControlsTable).where(eq(firestormHardeningControlsTable.id, id));
+    if (!current) { sendNotFound(res, "Hardening control"); return; }
+
+    const updates: Partial<typeof firestormHardeningControlsTable.$inferInsert> & { updatedAt: Date } = { updatedAt: new Date() };
+    if (status !== undefined) updates.status = status as typeof current.status;
+    if (owner !== undefined) updates.owner = owner;
+    if (recommendedAction !== undefined) updates.recommendedAction = recommendedAction;
+    if (dueDate !== undefined) updates.dueDate = dueDate ? new Date(dueDate) : null;
+
+    const existingTrail = Array.isArray(current.auditTrail) ? current.auditTrail : [];
+    const changedFields = Object.keys(updates).filter(k => k !== "updatedAt");
+    const auditEntry = { action: notes ?? `Updated: ${changedFields.join(", ")}`, user: "Operator", at: new Date().toISOString() };
+    updates.auditTrail = [...existingTrail, auditEntry];
+    updates.lastReviewedAt = new Date();
+
+    const [control] = await db.update(firestormHardeningControlsTable).set(updates).where(eq(firestormHardeningControlsTable.id, id)).returning();
+
+    if (status === "implemented" && current.status !== "implemented") {
+      await db.insert(firestormWorkflowActionsTable).values({
+        entityType: "asset",
+        entityId: id,
+        actionType: "remediate",
+        assignedTo: owner ?? current.owner ?? undefined,
+        status: "completed",
+        notes: `Hardening control ${current.controlId} marked implemented: ${current.name}`,
+        triggeredBy: "hardening-control-update",
+      });
+    }
+
+    sendSuccess(res, control);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update hardening control");
+  }
+});
+
+router.get("/firestorm/hardening-summary", authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const controls = await db.select().from(firestormHardeningControlsTable);
+    const implemented = controls.filter(c => c.status === "implemented").length;
+    const partial = controls.filter(c => c.status === "partial").length;
+    const notImplemented = controls.filter(c => c.status === "not_implemented").length;
+    const criticalGaps = controls.filter(c => c.priority === "critical" && c.status === "not_implemented").length;
+    const totalScore = controls.length > 0 ? Math.round((implemented * 1 + partial * 0.5) / controls.length * 100) : 0;
+
+    const byCategory = ["mfa_credential", "application_hardening", "config_hardening", "dependency_supply_chain", "vulnerability_assessment"].map(cat => {
+      const catControls = controls.filter(c => c.category === cat);
+      const catImplemented = catControls.filter(c => c.status === "implemented").length;
+      const catPartial = catControls.filter(c => c.status === "partial").length;
+      const catScore = catControls.length > 0 ? Math.round((catImplemented * 1 + catPartial * 0.5) / catControls.length * 100) : 0;
+      const catGaps = catControls.filter(c => c.priority === "critical" && c.status === "not_implemented").length;
+      return { category: cat, total: catControls.length, implemented: catImplemented, partial: catPartial, notImplemented: catControls.length - catImplemented - catPartial, score: catScore, criticalGaps: catGaps };
+    });
+
+    sendSuccess(res, { total: controls.length, implemented, partial, notImplemented, criticalGaps, overallScore: totalScore, byCategory });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get hardening summary");
   }
 });
 
