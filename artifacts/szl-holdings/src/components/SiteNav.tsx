@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ChevronRight } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { label: "Portfolio", href: "/portfolio" },
+  { label: "Ecosystem", href: "/portfolio" },
+  { label: "Alloy", href: "/ventures/alloy", external: "/alloy/" },
+  { label: "Lyte", href: "/ventures/lyte", external: "/lyte-command-center/" },
+  { label: "Vessels", href: "/ventures/vessels", external: "/vessels/" },
+  { label: "Carlota Jo", href: "/ventures/carlota-jo", external: "/carlota-jo/" },
   { label: "Founder", href: "/founder" },
-  { label: "Insights", href: "/insights" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function SiteNav() {
@@ -44,7 +48,7 @@ export function SiteNav() {
       role="navigation"
       aria-label="Main navigation"
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link
           href="/"
           className="flex items-center gap-2.5"
@@ -58,7 +62,7 @@ export function SiteNav() {
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -74,19 +78,11 @@ export function SiteNav() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/contact"
-            onClick={() => handleNavClick("Contact", "/contact")}
-            className="group inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-szl-primary text-white text-sm font-semibold hover:bg-szl-primary-light transition-colors"
-          >
-            Get in Touch
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
         </div>
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden text-szl-text-secondary hover:text-szl-text p-1.5"
+          className="lg:hidden text-szl-text-secondary hover:text-szl-text p-1.5"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
         >
@@ -100,7 +96,7 @@ export function SiteNav() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white/97 backdrop-blur-xl border-b border-szl-border overflow-hidden"
+            className="lg:hidden bg-white/97 backdrop-blur-xl border-b border-szl-border overflow-hidden"
           >
             <div className="px-6 py-6 flex flex-col gap-4">
               {NAV_LINKS.map((link) => (
@@ -113,13 +109,6 @@ export function SiteNav() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/contact"
-                onClick={() => handleNavClick("Contact", "/contact")}
-                className="mt-1 px-4 py-3 rounded-xl bg-szl-primary text-white text-sm font-semibold text-center"
-              >
-                Get in Touch
-              </Link>
             </div>
           </m.div>
         )}

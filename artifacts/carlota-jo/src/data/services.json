@@ -1,38 +1,58 @@
 [
   {
-    "id": "advisory-support",
-    "title": "Advisory support",
-    "icon": "Compass",
-    "summary": "High-trust guidance designed around each client's goals, pace, and operating needs.",
-    "description": "Thoughtful counsel shaped around each client's specific situation. We work at a measured pace, with strong attention to the nuances that define each engagement.",
-    "capabilities": [
-      "Tailored guidance around client goals",
-      "Structured support for evolving priorities",
-      "Calm, considered advisory at each stage"
-    ]
-  },
-  {
-    "id": "coordination-oversight",
-    "title": "Coordination and oversight",
-    "icon": "BarChart3",
-    "summary": "Structured support that helps keep priorities aligned, details managed, and execution moving with less friction.",
-    "description": "We provide the behind-the-scenes coordination that helps complex priorities stay organized and forward-moving, without unnecessary noise or friction.",
-    "capabilities": [
-      "Priority alignment and oversight",
-      "Detail management and follow-through",
-      "Structured execution support"
-    ]
-  },
-  {
-    "id": "private-client-experience",
-    "title": "Private client experience",
+    "id": "residence-management",
+    "title": "Residence Management",
     "icon": "Shield",
-    "summary": "A discreet and highly considered service model for clients who value responsiveness, clarity, and professionalism.",
-    "description": "A service model built around discretion, trust, and a consistently high standard of communication and responsiveness.",
+    "summary": "The operational backbone of a complex life.",
+    "description": "Full-spectrum estate and residence management — from vendor relationships and household infrastructure to property logistics and cross-residence coordination. We handle the operational layer so principals can focus entirely on what matters.",
     "capabilities": [
-      "Discreet and confidential service approach",
-      "Responsive communication at every stage",
-      "Premium professionalism throughout"
+      "Single point of contact across all residence operations",
+      "Vetted vendor network across 40+ service categories",
+      "Cross-residence coordination for multi-property principals",
+      "Property activation and transition management",
+      "Secure digital briefing system for principal preferences"
+    ]
+  },
+  {
+    "id": "household-operations",
+    "title": "Household Staff Coordination",
+    "icon": "Compass",
+    "summary": "The right people. In the right place. At the right time.",
+    "description": "Vetting, onboarding, scheduling, and day-to-day management of household staff across one or multiple residences. We maintain the operational standards that define a high-touch environment — without the principal managing the infrastructure.",
+    "capabilities": [
+      "Household staff vetting and onboarding",
+      "Schedule management and coverage planning",
+      "Staff performance and accountability oversight",
+      "Multi-residence staff coordination and deployment",
+      "NDA-standard confidentiality across all placements"
+    ]
+  },
+  {
+    "id": "travel-architecture",
+    "title": "Bespoke Travel Architecture",
+    "icon": "TrendingUp",
+    "summary": "Travel designed around your standard, not a template.",
+    "description": "End-to-end travel design for principals with complex schedules, security requirements, and non-negotiable standards of experience. From private aviation coordination to ground logistics, accommodation, and itinerary construction.",
+    "capabilities": [
+      "Private aviation planning and coordination",
+      "Ground transportation and logistics management",
+      "Accommodation selection and preparation",
+      "Security and protocol integration",
+      "Complex multi-destination itinerary architecture"
+    ]
+  },
+  {
+    "id": "discreet-projects",
+    "title": "Discreet Project Execution",
+    "icon": "Handshake",
+    "summary": "High-stakes projects managed without noise.",
+    "description": "Sensitive, time-critical projects that require discretion, precision, and a trusted operator who can coordinate complex moving parts without visibility into the principal's life. From estate activations to time-sensitive personal logistics.",
+    "capabilities": [
+      "Confidential project management and coordination",
+      "Time-critical logistics with no margin for error",
+      "Multi-vendor orchestration under NDA",
+      "Estate activation and transition execution",
+      "24/7 escalation protocol for urgent needs"
     ]
   }
 ]

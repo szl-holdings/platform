@@ -94,8 +94,8 @@ const alerts = await client.maritime.getAlerts();`,
             name: "AI / ML",
             icon: Zap,
             color: "text-tag-ai",
-            code: `// Alloy intelligence layer
-const workflows = await client.ai.getAlloyWorkflows();
+            code: `// Alloy signal queue
+const signals = await client.alloy.getSignals();
 
 // INCA intelligence
 const campaigns = await client.ai.getIncaCampaigns();`,

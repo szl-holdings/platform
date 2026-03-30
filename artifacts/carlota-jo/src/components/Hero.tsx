@@ -18,28 +18,38 @@ export default function Hero() {
               transition={{ duration: 0.8 }}
               className="text-[11px] font-medium tracking-[0.35em] uppercase text-[#c8a96a]/80 mb-8"
             >
-              Carlota Jo Consulting
+              Carlota Jo Consulting · SZL Holdings
             </motion.p>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.15 }}
-              className="text-5xl md:text-6xl lg:text-[4.5rem] font-light text-[#f5f0e8] leading-[1.08] mb-8"
-              style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
+              className="font-serif text-5xl md:text-6xl lg:text-[4.5rem] font-light text-ink-900 leading-[1.08] mb-6"
             >
-              Bespoke advisory for clients who value
+              Discreet operational
               <br />
-              <span className="italic">discretion and precision.</span>
+              and residence support
+              <br />
+              for <span className="italic">high-touch environments.</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-base md:text-lg text-[#f5f0e8]/70 font-light max-w-lg leading-relaxed mb-10"
+              className="text-base md:text-lg text-ink-600 font-light max-w-md leading-relaxed mb-3"
             >
-              Carlota Jo Consulting provides thoughtful, tailored support for clients seeking trusted guidance, calm execution, and a higher standard of private service.
+              Quietly structured. Precisely executed.
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.38 }}
+              className="text-sm text-ink-500 font-light max-w-sm leading-relaxed mb-14"
+            >
+              A premium service brand under SZL Holdings. Every engagement is operated with absolute discretion, a single point of contact, and a standard of execution built for demanding principals.
             </motion.p>
 
             <motion.div
@@ -52,14 +62,14 @@ export default function Hero() {
                 onClick={() => document.querySelector("#inquire")?.scrollIntoView({ behavior: "smooth" })}
                 className="group flex items-center gap-2.5 px-7 py-3.5 text-[13px] font-medium tracking-[0.08em] text-[#07090d] bg-[#c8a96a] hover:bg-[#d4b87a] transition-colors duration-300"
               >
-                Inquire privately
-                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                Start a Conversation
+                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button
                 onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}
-                className="px-7 py-3.5 text-[13px] font-medium tracking-[0.08em] text-[#f5f0e8]/60 border border-[#f5f0e8]/15 hover:border-[#f5f0e8]/30 hover:text-[#f5f0e8]/90 transition-all duration-300"
+                className="px-8 py-3.5 text-xs font-medium tracking-[0.15em] uppercase text-ink-500 border border-stone-300 hover:border-ink-500 hover:text-ink-900 transition-all duration-300"
               >
-                Review services
+                Explore the Model
               </button>
             </motion.div>
           </div>
@@ -71,47 +81,41 @@ export default function Hero() {
             className="lg:col-span-5 lg:pt-12"
           >
             <div
-              className="border border-[#f5f0e8]/10 p-8 lg:p-10 hover:border-[#f5f0e8]/18 transition-colors duration-500 group cursor-pointer"
-              onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}
+              className="border border-stone-200 bg-stone-100/60 p-8 lg:p-10"
             >
-              <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-[#c8a96a]/70 mb-4">
-                Private support
+              <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-warm-gold mb-6">
+                What we do
               </p>
-              <p className="text-[11px] tracking-wider uppercase text-[#f5f0e8]/35 mb-3">
-                Advisory services
+              <p className="text-[11px] tracking-wider uppercase text-stone-400 mb-3">
+                High-Trust Operational Support
               </p>
-              <h3
-                className="text-xl md:text-2xl font-light text-[#f5f0e8] leading-snug mb-6 group-hover:text-[#c8a96a]/90 transition-colors duration-300"
-                style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
-              >
-                High-trust guidance designed around each client's goals, pace, and operating needs.
+              <h3 className="font-serif text-xl md:text-2xl font-light text-ink-900 leading-snug mb-8">
+                Residence management, household operations, estate coordination, and discreet project execution — delivered through one trusted operator.
               </h3>
-              <span className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.15em] uppercase text-[#c8a96a]/60 group-hover:text-[#c8a96a] transition-colors">
-                Review services
-                <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform duration-300" />
-              </span>
+              <div className="space-y-2">
+                {["Estate & Residence Management", "Household Staff Coordination", "Bespoke Travel Architecture", "Vendor Relationship Management", "Discreet Project Execution"].map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-[11px] text-stone-500 font-light">
+                    <span className="text-warm-gold">—</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="mt-px grid grid-cols-3 gap-px bg-stone-200">
+              {[
+                { value: "100%", label: "Client retention" },
+                { value: "8", label: "Pilot clients" },
+                { value: " < 2hr", label: "Response SLA" },
+              ].map((stat) => (
+                <div key={stat.label} className="bg-stone-50 px-4 py-5 text-center">
+                  <p className="font-serif text-2xl font-light text-ink-900 mb-1">{stat.value}</p>
+                  <p className="text-[9px] tracking-wider uppercase text-stone-400">{stat.label}</p>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 1 }}
-          className="mt-20 pt-8 border-t border-[#f5f0e8]/5 flex flex-wrap items-center gap-x-10 gap-y-3"
-        >
-          <p className="text-[10px] tracking-[0.25em] uppercase text-[#f5f0e8]/25">
-            Built on
-          </p>
-          {["Tailored service approach", "Discreet client experience", "Structured high-touch support", "Thoughtful execution"].map((name) => (
-            <span key={name} className="text-[11px] tracking-wider text-[#f5f0e8]/22 font-light">
-              {name}
-            </span>
-          ))}
-        </motion.div>
       </div>
     </section>
   );

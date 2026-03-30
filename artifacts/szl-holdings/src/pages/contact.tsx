@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { m } from "framer-motion";
 import { useSearch } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
@@ -6,26 +6,36 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { InquiryForm, type InquiryType } from "@/components/InquiryForm";
 import { initScrollDepthTracking } from "@/lib/analytics";
 
-const AUDIENCE_CARDS = [
+const CONTACT_PATHS = [
   {
-    type: "investor" as InquiryType,
-    headline: "For Investors",
-    body: "Investment thesis, portfolio briefings, and strategic discussions about the SZL ecosystem.",
+    type: "client" as InquiryType,
+    audience: "Product / Platform",
+    headline: "Demo a platform or request a pilot",
+    body: "Product demonstrations, pilot programs, and enterprise deployment conversations for Alloy, Lyte, and Vessels.",
   },
   {
     type: "client" as InquiryType,
-    headline: "For Clients",
-    body: "Product demonstrations, pilot programs, and enterprise deployment conversations.",
+    audience: "Service",
+    headline: "Carlota Jo — operational and residence support",
+    body: "Discreet, high-trust operational support for principals and organizations with complex environments.",
   },
   {
     type: "partner" as InquiryType,
-    headline: "For Partners",
-    body: "Integration opportunities, co-development proposals, and strategic alliance inquiries.",
+    audience: "Strategic Partnership",
+    headline: "Integration and co-development opportunities",
+    body: "Integration opportunities, co-development proposals, and strategic alliance inquiries across the ecosystem.",
   },
   {
     type: "recruiter" as InquiryType,
-    headline: "For Recruiters",
-    body: "Executive search, advisory engagements, and specialist talent conversations.",
+    audience: "Founder / Recruiting",
+    headline: "Executive search, advisory, and strategic roles",
+    body: "Conversations about executive roles, advisory engagements, and strategic recruiting aligned to the ecosystem.",
+  },
+  {
+    type: "general" as InquiryType,
+    audience: "Ecosystem / General",
+    headline: "General inquiries about SZL Holdings",
+    body: "Everything else — including press, research, and general ecosystem questions.",
   },
 ];
 
@@ -59,12 +69,10 @@ export default function ContactPage() {
             >
               <p className="text-xs font-bold uppercase tracking-widest text-szl-text-muted mb-3">Contact</p>
               <h1 className="font-[var(--font-display)] text-4xl sm:text-5xl font-extrabold text-szl-text leading-tight mb-4">
-                The right conversation
-                <br />
-                <span className="text-szl-accent">starts here.</span>
+                Start the right conversation.
               </h1>
               <p className="text-szl-text-secondary text-base max-w-xl leading-relaxed">
-                Different audiences, different contexts, different conversations. Tell us who you are and what you're looking for — we'll route it to the right person.
+                Five paths. Different audiences, different contexts, different conversations. Choose what applies to you.
               </p>
             </m.div>
           </div>
@@ -74,16 +82,18 @@ export default function ContactPage() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-start">
               <div>
-                <div className="grid sm:grid-cols-2 gap-3 mb-10">
-                  {AUDIENCE_CARDS.map((card) => (
+                <div className="space-y-3 mb-10">
+                  {CONTACT_PATHS.map((path, i) => (
                     <m.div
-                      key={card.type}
+                      key={path.audience}
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: i * 0.06 }}
                       className="rounded-2xl border border-szl-border bg-szl-bg-secondary p-5"
                     >
-                      <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-1">{card.headline}</h3>
-                      <p className="text-xs text-szl-text-secondary leading-relaxed">{card.body}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-szl-text-muted mb-1">{path.audience}</p>
+                      <h3 className="font-[var(--font-display)] text-sm font-bold text-szl-text mb-1">{path.headline}</h3>
+                      <p className="text-xs text-szl-text-secondary leading-relaxed">{path.body}</p>
                     </m.div>
                   ))}
                 </div>

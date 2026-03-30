@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, CheckCircle, AlertCircle, Lock } from "lucide-react";
+import testimonialsData from "../data/testimonials.json";
 
 interface FormData {
   name: string;
@@ -22,6 +23,7 @@ export default function ContactForm() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const featuredTestimonial = testimonialsData[0];
 
   const validate = (): boolean => {
     const newErrors: Partial<FormData> = {};
@@ -92,7 +94,7 @@ export default function ContactForm() {
               transition={{ duration: 0.7 }}
             >
               <p className="text-[11px] font-medium tracking-[0.35em] uppercase text-warm-gold mb-6">
-                Begin a Conversation
+                Start a Conversation
               </p>
               <h2 className="font-serif text-4xl md:text-5xl font-light text-ink-900 leading-tight mb-6">
                 Inquire
@@ -100,7 +102,7 @@ export default function ContactForm() {
                 <span className="italic">privately.</span>
               </h2>
               <p className="text-sm text-ink-600 font-light leading-relaxed mb-12 max-w-sm">
-                Tell us a bit about your needs, priorities, or the type of support you are exploring. We will follow up with discretion and care.
+                Tell us about your household environment. All inquiries are handled with absolute discretion and responded to within 24 hours.
               </p>
             </motion.div>
 
@@ -111,19 +113,33 @@ export default function ContactForm() {
               transition={{ duration: 0.6, delay: 0.15 }}
               className="border-t border-stone-200 pt-8 mb-12"
             >
-              <ul className="space-y-4">
-                {[
-                  "Tailored service approach",
-                  "Discreet client experience",
-                  "Structured, high-touch support",
-                  "Confidential communications",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-ink-500 font-light">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-warm-gold shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <p className="font-serif text-base text-ink-600 leading-relaxed italic mb-5">
+                "{featuredTestimonial.quote.slice(0, 150)}..."
+              </p>
+              <div>
+                <p className="text-xs font-medium text-ink-900 tracking-wide">{featuredTestimonial.name}</p>
+                <p className="text-[11px] text-ink-500 mt-0.5 font-light">{featuredTestimonial.title}, {featuredTestimonial.company}</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="grid grid-cols-2 gap-px bg-stone-200"
+            >
+              {[
+                { metric: "100%", label: "Client retention" },
+                { metric: "8", label: "Pilot clients" },
+                { metric: "< 2hr", label: "Response SLA" },
+                { metric: "NDA", label: "On request" },
+              ].map((item) => (
+                <div key={item.label} className="bg-taupe-50 p-5">
+                  <p className="font-serif text-2xl font-light text-warm-gold mb-1">{item.metric}</p>
+                  <p className="text-[10px] tracking-wider uppercase text-stone-400 font-light">{item.label}</p>
+                </div>
+              ))}
             </motion.div>
           </div>
 
@@ -198,7 +214,7 @@ export default function ContactForm() {
 
               <div>
                 <label className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-1.5 block font-medium">
-                  Type of support
+                  Service Area
                 </label>
                 <select
                   value={form.service}
@@ -206,10 +222,11 @@ export default function ContactForm() {
                   className={`${inputClass("service")} appearance-none cursor-pointer bg-transparent`}
                 >
                   <option value="">Select a service area</option>
-                  <option value="advisory-support">Advisory support</option>
-                  <option value="coordination-oversight">Coordination and oversight</option>
-                  <option value="private-client-experience">Private client experience</option>
-                  <option value="other">Other</option>
+                  <option value="residence-management">Residence Management</option>
+                  <option value="household-operations">Household Staff Coordination</option>
+                  <option value="travel-architecture">Bespoke Travel Architecture</option>
+                  <option value="discreet-projects">Discreet Project Execution</option>
+                  <option value="general">General Inquiry</option>
                 </select>
               </div>
 

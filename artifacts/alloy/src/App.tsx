@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Router as WouterRouter, Route, Switch, useLocation } from "wouter";
+import { AlloyLanding } from "./LandingPage";
 import {
   MessageSquare, Send, Bot, User, Sparkles, Image as ImageIcon, BookOpen,
   Bell, GitCompare, Download, Copy, Check, Trash2, Plus, Search, RefreshCw,
@@ -2071,6 +2072,9 @@ function AlloyRouter() {
       <AlloyNav currentPage={currentPage} onNavigate={navigate} />
 
       <Switch>
+        <Route path="/">
+          <main className="flex-1 overflow-y-auto"><AlloyLanding /></main>
+        </Route>
         <Route path="/command">
           <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 49px)" }}>
             <ChatInterface />

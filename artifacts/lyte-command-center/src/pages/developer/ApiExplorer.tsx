@@ -35,8 +35,8 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/api/vessels/fleet", summary: "Fleet overview and positions", tag: "Maritime", auth: true },
   { method: "GET", path: "/api/vessels/voyages", summary: "Active voyage tracking", tag: "Maritime", auth: true },
 
-  { method: "GET", path: "/api/alloy/health", summary: "Alloy intelligence layer health", tag: "AI", auth: false },
-  { method: "GET", path: "/api/alloy/workflows", summary: "Active Alloy workflow states", tag: "AI", auth: true },
+  { method: "GET", path: "/api/alloy/health", summary: "Alloy orchestration layer health", tag: "AI", auth: false },
+  { method: "GET", path: "/api/alloy/signals", summary: "Active signal queue from Alloy engine", tag: "AI", auth: true },
   { method: "GET", path: "/api/inca/health", summary: "INCA intelligence health", tag: "AI", auth: false },
   { method: "GET", path: "/api/inca/campaigns", summary: "Intelligence campaigns", tag: "AI", auth: false },
 

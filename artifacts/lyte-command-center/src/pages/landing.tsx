@@ -1,6 +1,77 @@
 import { Link } from "wouter";
-import { ArrowRight, CheckCircle2, AlertTriangle, TrendingUp, Users, Clock, BarChart3, DollarSign, Zap, Target, Activity } from "lucide-react";
+import { ArrowRight, Clock, AlertTriangle, TrendingUp, Users, BarChart3, DollarSign, Zap, Target, Activity, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const HOW_LYTE_WORKS = [
+  {
+    step: "01",
+    label: "Ingest",
+    color: "border-red-500/20 bg-red-500/5",
+    accent: "text-red-400",
+    desc: "Lyte connects to your operational data sources — CRM, ERP, project management, finance systems — and continuously monitors for signal anomalies across approval chains, workflow queues, and ownership records.",
+  },
+  {
+    step: "02",
+    label: "Detect",
+    color: "border-orange-500/20 bg-orange-500/5",
+    accent: "text-orange-400",
+    desc: "The signal engine surfaces anomalies with severity scoring, affected function, owner attribution, and value-at-risk estimation. Every signal carries context — not just a data point.",
+  },
+  {
+    step: "03",
+    label: "Narrate",
+    color: "border-violet-500/20 bg-violet-500/5",
+    accent: "text-violet-400",
+    desc: "Correlated signals become Narrative Intelligence — human-readable paragraphs explaining what is happening, why it matters, and the business consequence. No decoding required.",
+  },
+  {
+    step: "04",
+    label: "Action",
+    color: "border-cyan-500/20 bg-cyan-500/5",
+    accent: "text-cyan-400",
+    desc: "Each insight surfaces a prioritized action with owner, urgency, estimated value protected, and dependency chain. Your next move is always clear.",
+  },
+  {
+    step: "05",
+    label: "Approve",
+    color: "border-emerald-500/20 bg-emerald-500/5",
+    accent: "text-emerald-400",
+    desc: "High-stakes actions route through human approval gates. Lyte keeps humans in the loop on consequential decisions while automating the routine.",
+  },
+];
+
+const ROLE_CARDS = [
+  {
+    role: "Executive",
+    headline: "Board-grade operating intelligence",
+    description: "Value at risk by function. Forecast drift trends. Top actions required. Coverage ratios. Signal summaries in plain language — no dashboards to decode.",
+    color: "border-cyan-500/30 bg-cyan-500/5",
+    labelColor: "text-cyan-400",
+  },
+  {
+    role: "Operations",
+    headline: "Execution at a glance",
+    description: "Every stalled workflow. Every unassigned item. Every approval bottleneck. Prioritized action queue by urgency, owner, and value. Signal filters by function.",
+    color: "border-violet-500/30 bg-violet-500/5",
+    labelColor: "text-violet-400",
+  },
+  {
+    role: "Delivery & Sales",
+    headline: "Pipeline and delivery in one view",
+    description: "Deal stage health. Implementation handoff status. SOW signing age. Renewal calendar. All surfaced through the lens of what's moving and what's stuck.",
+    color: "border-amber-500/30 bg-amber-500/5",
+    labelColor: "text-amber-400",
+  },
+];
+
+const USE_CASES = [
+  { label: "Approval Latency", icon: Clock, desc: "Detect when deals stall in legal, finance, or executive sign-off queues — before close dates slip." },
+  { label: "Stalled Workflows", icon: AlertTriangle, desc: "Surface implementation projects, SOWs, and onboarding queues with no movement and no owner." },
+  { label: "Forecast Drift", icon: TrendingUp, desc: "Track when committed pipeline reclassifies — before your board call reveals a miss." },
+  { label: "Handoff Failures", icon: Users, desc: "Catch the moment sales-to-CS, CS-to-delivery, or SE handoffs break — before SLAs are breached." },
+  { label: "Pipeline Hygiene", icon: BarChart3, desc: "Identify ghost opportunities that inflate reported pipeline and corrupt forecast models." },
+  { label: "Revenue Leakage", icon: DollarSign, desc: "Surface exposed revenue across approval delays, ownership gaps, and unmanaged exceptions." },
+];
 
 const SIGNALS_PREVIEW = [
   { severity: "critical", type: "Approval Latency", title: "Enterprise deal approvals averaging 14.2 days — 340% above target", var: "$2.1M", func: "Enterprise Sales" },
@@ -15,77 +86,6 @@ const severityColors: Record<string, string> = {
   medium: "text-amber-400 border-amber-500/20 bg-amber-500/5",
 };
 
-const FEATURES = [
-  {
-    icon: Activity,
-    color: "text-red-400",
-    title: "Business Signal Feed",
-    body: "Real-time signals across approval latency, stalled workflows, ownership gaps, forecast drift, handoff failures, and revenue leakage — not CloudWatch alerts.",
-  },
-  {
-    icon: Zap,
-    color: "text-cyan-400",
-    title: "Narrative Intelligence Rail",
-    body: "Raw signals become human-readable operating intelligence. Not a dashboard dump — decision-ready insight with business language and context.",
-  },
-  {
-    icon: Target,
-    color: "text-violet-400",
-    title: "Action Center",
-    body: "A prioritized queue with owner, urgency, estimated value protected, and dependency chains. Triaged for your role — executive, operations, or delivery.",
-  },
-  {
-    icon: Clock,
-    color: "text-orange-400",
-    title: "Workflow Latency Visualization",
-    body: "Stage-by-stage dwell time across every critical workflow. See exactly where approval chains stall, queues congest, and handoffs break.",
-  },
-  {
-    icon: Users,
-    color: "text-amber-400",
-    title: "Ownership Map",
-    body: "Every area of your business mapped by owner status: clear, ambiguous, or missing. No more high-value items drifting without accountability.",
-  },
-  {
-    icon: DollarSign,
-    color: "text-emerald-400",
-    title: "Value at Risk Panel",
-    body: "Business value exposed across every signal, workflow, team, and stage — with trend over time. Know your exposure before it becomes loss.",
-  },
-];
-
-const USE_CASES = [
-  { label: "Approval Latency", icon: Clock, desc: "Detect when deals stall in legal, finance, or executive sign-off queues — before close dates slip." },
-  { label: "Stalled Workflows", icon: AlertTriangle, desc: "Surface implementation projects, SOWs, and onboarding queues with no movement and no owner." },
-  { label: "Forecast Drift", desc: "Track when committed pipeline reclassifies — before your board call reveals a miss.", icon: TrendingUp },
-  { label: "Handoff Failures", icon: Users, desc: "Catch the moment sales-to-CS, CS-to-delivery, or SE handoffs break — before SLAs are breached." },
-  { label: "Pipeline Hygiene", icon: BarChart3, desc: "Identify ghost opportunities that inflate reported pipeline and corrupt forecast models." },
-];
-
-const ROLES = [
-  {
-    role: "Executive",
-    headline: "Board-grade operating intelligence",
-    description: "Value at risk by function. Forecast drift trends. Top 3 actions required. Coverage ratios. Signal summaries in plain language — no dashboards to decode.",
-    color: "border-cyan-500/30 bg-cyan-500/5",
-    labelColor: "text-cyan-400",
-  },
-  {
-    role: "Operations",
-    headline: "Operational execution at a glance",
-    description: "Every stalled workflow. Every unassigned item. Every approval bottleneck. Prioritized action queue by urgency, owner, and value. Signal filters by function.",
-    color: "border-violet-500/30 bg-violet-500/5",
-    labelColor: "text-violet-400",
-  },
-  {
-    role: "Delivery & Sales",
-    headline: "Pipeline and delivery in one view",
-    description: "Deal stage health. SE queue depth. Implementation handoff status. SOW signing age. Renewal calendar. All surfaced through the lens of what's moving and what's stuck.",
-    color: "border-amber-500/30 bg-amber-500/5",
-    labelColor: "text-amber-400",
-  },
-];
-
 export default function LandingPage() {
   return (
     <div className="max-w-[1100px] space-y-20 pb-20">
@@ -98,28 +98,31 @@ export default function LandingPage() {
         <div className="relative text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-[11px] text-cyan-400 font-mono mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            Business Observability Command Center
+            Business Observability · Powered by Alloy
           </div>
 
           <h1 className="font-display font-bold text-[52px] leading-[1.05] tracking-tight text-white mb-6">
-            See what's{" "}
-            <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">stalling your business</span>
-            <br />before it costs you
+            See{" "}
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              risk, latency, ownership gaps,
+            </span>
+            <br />
+            and workflow friction before they hit execution.
           </h1>
 
           <p className="text-lg text-slate-400 leading-relaxed mb-8 max-w-2xl mx-auto">
-            Lyte surfaces approval bottlenecks, stalled workflows, ownership gaps, forecast drift, and revenue leakage — giving you operating intelligence you can act on today.
+            Lyte is the business observability platform that converts operational signals into prioritized, explainable decisions. Not another alerting tool — a command surface built for the real work.
           </p>
 
           <div className="flex items-center justify-center gap-3">
             <Link href="/dashboard">
               <button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500 text-slate-900 font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
-                Open Command Center <ArrowRight className="w-4 h-4" />
+                View Command Mode <ArrowRight className="w-4 h-4" />
               </button>
             </Link>
             <Link href="/use-cases">
               <button className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition-colors">
-                See Use Cases
+                View Use Cases
               </button>
             </Link>
           </div>
@@ -145,40 +148,25 @@ export default function LandingPage() {
 
       <section>
         <div className="text-center mb-10">
-          <h2 className="font-display font-bold text-3xl text-white mb-3">Signals → Insights → Actions</h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-sm">Not another alerting tool. A command surface that translates operational reality into what you need to do next.</p>
+          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">What Lyte Does</p>
+          <h2 className="font-display font-bold text-3xl text-white mb-3">One surface. Complete operational picture.</h2>
+          <p className="text-slate-400 max-w-xl mx-auto text-sm">Lyte surfaces the signals that matter, translates them into intelligence, and routes the right actions to the right people — before problems reach execution.</p>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
           {[
-            { step: "01", label: "Signals", color: "border-red-500/20 bg-red-500/5", accent: "text-red-400", desc: "Lyte detects anomalies across approval chains, workflow queues, ownership records, forecast data, and pipeline health. Every signal carries severity, affected function, owner, and value at risk." },
-            { step: "02", label: "Insights", color: "border-violet-500/20 bg-violet-500/5", accent: "text-violet-400", desc: "Correlated signals become Narrative Intelligence — human-readable paragraphs explaining what's happening, why it matters, and the business consequence. No decoding required." },
-            { step: "03", label: "Actions", color: "border-cyan-500/20 bg-cyan-500/5", accent: "text-cyan-400", desc: "Each insight surfaces a prioritized action with owner, urgency, estimated value protected, and dependency chain. Your next move is always clear." },
-          ].map(card => (
-            <div key={card.step} className={cn("rounded-xl p-5 border", card.color)}>
-              <div className={cn("font-mono text-[10px] mb-3 uppercase tracking-widest", card.accent)}>{card.step} / {card.label}</div>
-              <p className="text-sm text-slate-300 leading-relaxed">{card.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <div className="text-center mb-10">
-          <h2 className="font-display font-bold text-3xl text-white mb-3">What Lyte surfaces</h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-sm">Six signal types, five use case experiences, three role views — built around how business operations actually break.</p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {FEATURES.map(f => {
-            const Icon = f.icon;
+            { step: "01", label: "Signals", color: "border-red-500/20 bg-red-500/5", accent: "text-red-400", icon: Activity, desc: "Lyte detects anomalies across approval chains, workflow queues, ownership records, forecast data, and pipeline health. Every signal carries severity, affected function, owner, and value at risk." },
+            { step: "02", label: "Intelligence", color: "border-violet-500/20 bg-violet-500/5", accent: "text-violet-400", icon: Eye, desc: "Correlated signals become Narrative Intelligence — human-readable paragraphs explaining what's happening, why it matters, and the business consequence. No decoding required." },
+            { step: "03", label: "Actions", color: "border-cyan-500/20 bg-cyan-500/5", accent: "text-cyan-400", icon: Zap, desc: "Each insight surfaces a prioritized action with owner, urgency, estimated value protected, and dependency chain. Your next move is always clear." },
+          ].map(card => {
+            const Icon = card.icon;
             return (
-              <div key={f.title} className="rounded-xl p-5 border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-3 bg-white/5")}>
-                  <Icon className={cn("w-4 h-4", f.color)} />
+              <div key={card.step} className={cn("rounded-xl p-5 border", card.color)}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Icon className={cn("w-4 h-4", card.accent)} />
+                  <div className={cn("font-mono text-[10px] uppercase tracking-widest", card.accent)}>{card.step} / {card.label}</div>
                 </div>
-                <h3 className="font-display font-semibold text-sm text-white mb-2">{f.title}</h3>
-                <p className="text-[12px] text-slate-400 leading-relaxed">{f.body}</p>
+                <p className="text-sm text-slate-300 leading-relaxed">{card.desc}</p>
               </div>
             );
           })}
@@ -187,16 +175,52 @@ export default function LandingPage() {
 
       <section>
         <div className="text-center mb-10">
-          <h2 className="font-display font-bold text-3xl text-white mb-3">Five use case experiences</h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-sm">Each scenario has its own signal feed, narrative, workflow visualization, and action queue.</p>
+          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">How Lyte Works</p>
+          <h2 className="font-display font-bold text-3xl text-white mb-3">Five-step sequence from signal to action.</h2>
+          <p className="text-slate-400 max-w-xl mx-auto text-sm">Every step has a clear function. Nothing is black-box. Every output is explainable.</p>
         </div>
 
-        <div className="grid grid-cols-5 gap-3">
+        <div className="space-y-3">
+          {HOW_LYTE_WORKS.map((step) => (
+            <div key={step.step} className={cn("rounded-xl p-5 border flex items-start gap-5", step.color)}>
+              <div className={cn("font-mono text-[10px] uppercase tracking-widest shrink-0 pt-0.5 w-16", step.accent)}>{step.step} / {step.label}</div>
+              <p className="text-sm text-slate-300 leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <div className="text-center mb-10">
+          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">Role-Based Command</p>
+          <h2 className="font-display font-bold text-3xl text-white mb-3">One platform. Three command surfaces.</h2>
+          <p className="text-slate-400 max-w-xl mx-auto text-sm">KPIs, insights, and actions that change based on who's looking — executive, operations, or delivery.</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          {ROLE_CARDS.map(r => (
+            <div key={r.role} className={cn("rounded-xl p-5 border", r.color)}>
+              <div className={cn("text-[10px] font-mono uppercase tracking-widest mb-3", r.labelColor)}>{r.role}</div>
+              <h3 className="font-display font-semibold text-base text-white mb-2">{r.headline}</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">{r.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <div className="text-center mb-10">
+          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">Use Cases</p>
+          <h2 className="font-display font-bold text-3xl text-white mb-3">Six signal categories that matter.</h2>
+          <p className="text-slate-400 max-w-xl mx-auto text-sm">Each signal type has its own feed, narrative, workflow visualization, and action queue.</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
           {USE_CASES.map(u => {
             const Icon = u.icon;
             return (
               <Link key={u.label} href="/use-cases">
-                <div className="rounded-xl p-4 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all cursor-pointer h-full">
+                <div className="rounded-xl p-5 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all cursor-pointer h-full">
                   <Icon className="w-5 h-5 text-cyan-400 mb-3" />
                   <h3 className="font-display font-semibold text-[13px] text-white mb-1.5">{u.label}</h3>
                   <p className="text-[11px] text-slate-500 leading-relaxed">{u.desc}</p>
@@ -207,30 +231,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section>
-        <div className="text-center mb-10">
-          <h2 className="font-display font-bold text-3xl text-white mb-3">Built for three distinct roles</h2>
-          <p className="text-slate-400 max-w-xl mx-auto text-sm">One platform. Three views. KPIs, insights, and actions that change based on who's looking.</p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {ROLES.map(r => (
-            <div key={r.role} className={cn("rounded-xl p-5 border", r.color)}>
-              <div className={cn("text-[10px] font-mono uppercase tracking-widest mb-3", r.labelColor)}>{r.role}</div>
-              <h3 className="font-display font-semibold text-base text-white mb-2">{r.headline}</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">{r.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <section className="rounded-2xl border border-white/5 bg-white/[0.02] p-10 text-center">
-        <div className="text-[11px] text-slate-500 uppercase tracking-widest mb-4">The moat</div>
-        <h2 className="font-display font-bold text-3xl text-white mb-4">Explainability is the product</h2>
-        <p className="text-slate-400 max-w-2xl mx-auto mb-6 leading-relaxed">
-          Lyte doesn't just show you what's wrong. It shows you what's wrong, why it matters, what's at stake, who owns it, and what to do. Every signal carries context. Every insight tells a story. Every action has a clear owner and value case.
+        <div className="text-[11px] text-slate-500 uppercase tracking-widest mb-4">Why It Matters</div>
+        <h2 className="font-display font-bold text-3xl text-white mb-4">Explainability is the product.</h2>
+        <p className="text-slate-400 max-w-2xl mx-auto mb-8 leading-relaxed">
+          Lyte does not just show you what's wrong. It shows you what's wrong, why it matters, what's at stake, who owns it, and what to do. Every signal carries context. Every insight tells a story. Every action has a clear owner and value case.
         </p>
-        <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
+        <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
           {[
             { label: "Signal", desc: "What happened" },
             { label: "Context", desc: "Why it matters" },
@@ -243,22 +250,23 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+        <p className="text-[11px] text-slate-600 uppercase tracking-widest">Powered by Alloy · SZL Holdings</p>
       </section>
 
       <section className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 p-10 text-center">
-        <h2 className="font-display font-bold text-3xl text-white mb-3">See Lyte in action</h2>
+        <h2 className="font-display font-bold text-3xl text-white mb-3">Request a Demo</h2>
         <p className="text-slate-400 max-w-xl mx-auto mb-6 text-sm">
-          Explore the full demo with real business signals, narrative intelligence, and a complete use case walkthrough.
+          Explore the full platform with real business signals, narrative intelligence, and a complete use case walkthrough.
         </p>
         <div className="flex items-center justify-center gap-3">
           <Link href="/dashboard">
             <button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500 text-slate-900 font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
-              Open Demo <ArrowRight className="w-4 h-4" />
+              Open Command Center <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
           <Link href="/use-cases">
             <button className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition-colors">
-              Browse Use Cases
+              View Use Cases
             </button>
           </Link>
         </div>

@@ -4,37 +4,30 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           <div className="md:col-span-4">
-            <div className="mb-5">
-              <h3
-                className="text-[18px] font-light text-[#f5f0e8] leading-none"
-                style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
-              >
-                Carlota Jo
-              </h3>
-              <p className="text-[9px] tracking-[0.3em] uppercase text-[#c8a96a]/45 font-medium mt-1">
-                Consulting
-              </p>
-            </div>
-            <p className="text-[13px] text-[#f5f0e8]/28 leading-relaxed max-w-xs font-light">
-              Discreet. Tailored. Trusted.
+            <h3 className="font-serif text-2xl font-light text-ink-900 mb-1.5">
+              Carlota Jo
+            </h3>
+            <p className="text-[10px] tracking-[0.3em] uppercase text-warm-gold font-medium mb-5">
+              Premium Operational Services · SZL Holdings
+            </p>
+            <p className="text-sm text-ink-500 leading-relaxed max-w-xs font-light">
+              Discreet operational and residence support for high-touch environments. Quietly structured. Precisely executed.
             </p>
           </div>
 
-          <div className="md:col-span-2">
-            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#f5f0e8]/28 mb-4">
-              Practice
+          <div className="md:col-span-3">
+            <h4 className="text-[10px] font-medium tracking-[0.2em] uppercase text-stone-400 mb-5">
+              Services
             </h4>
             <ul className="space-y-2.5">
               {[
-                "Board & Governance",
-                "Capital Strategy",
-                "Transformation",
-                "M&A Advisory",
-                "Stakeholder Engagement",
-                "Growth Strategy",
+                "Residence Management",
+                "Household Staff Coordination",
+                "Bespoke Travel Architecture",
+                "Discreet Project Execution",
               ].map((s) => (
                 <li key={s}>
-                  <span className="text-[13px] text-[#f5f0e8]/22 hover:text-[#f5f0e8]/55 transition-colors cursor-default font-light">
+                  <span className="text-sm text-ink-500 font-light">
                     {s}
                   </span>
                 </li>
@@ -43,26 +36,25 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#f5f0e8]/28 mb-4">
-              Firm
+            <h4 className="text-[10px] font-medium tracking-[0.2em] uppercase text-stone-400 mb-5">
+              SZL Ecosystem
             </h4>
-            <ul className="space-y-2.5 text-[13px] text-[#f5f0e8]/22 font-light">
-              {["About", "Approach", "Enquiries", "Confidentiality"].map((item) => (
-                <li key={item}>
-                  <span className="hover:text-[#f5f0e8]/55 transition-colors cursor-default">{item}</span>
-                </li>
-              ))}
+            <ul className="space-y-3 text-sm text-ink-500 font-light">
+              <li><a href="/" className="hover:text-ink-900 transition-colors">SZL Holdings</a></li>
+              <li><a href="/alloy/" className="hover:text-ink-900 transition-colors">Alloy</a></li>
+              <li><a href="/lyte-command-center/" className="hover:text-ink-900 transition-colors">Lyte</a></li>
+              <li><a href="/vessels/" className="hover:text-ink-900 transition-colors">Vessels</a></li>
             </ul>
           </div>
 
-          <div className="md:col-span-4">
-            <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase text-[#f5f0e8]/28 mb-4">
+          <div className="md:col-span-3">
+            <h4 className="text-[10px] font-medium tracking-[0.2em] uppercase text-stone-400 mb-5">
               Contact
             </h4>
-            <ul className="space-y-2.5 text-[13px] text-[#f5f0e8]/22 font-light">
-              <li>inquiries@carlotajo.com</li>
-              <li className="leading-relaxed">
-                London &nbsp;·&nbsp; New York
+            <ul className="space-y-3 text-sm text-ink-500 font-light">
+              <li className="hover:text-ink-900 transition-colors">inquiries@carlotajo.com</li>
+              <li className="leading-relaxed text-stone-400">
+                Washington, D.C. · London · Singapore
               </li>
             </ul>
           </div>
@@ -72,13 +64,9 @@ export default function Footer() {
           <p className="text-[11px] text-[#f5f0e8]/15 tracking-wider">
             &copy; {new Date().getFullYear()} Carlota Jo Consulting. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
-            {["Privacy Policy", "Terms of Engagement", "NDA Request"].map((item) => (
-              <span key={item} className="text-[11px] text-[#f5f0e8]/15 tracking-wider hover:text-[#f5f0e8]/32 transition-colors cursor-pointer">
-                {item}
-              </span>
-            ))}
-          </div>
+          <p className="text-[11px] text-stone-400 tracking-wider font-light">
+            A service brand of SZL Holdings
+          </p>
         </div>
       </div>
     </footer>
