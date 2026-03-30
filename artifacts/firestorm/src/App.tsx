@@ -97,14 +97,14 @@ function Sidebar() {
 
   return (
     <aside className="w-56 bg-[#09080f]/95 border-r border-orange-500/10 flex flex-col h-screen sticky top-0">
-      <div className="px-4 py-4 border-b border-orange-500/10">
+      <div className="px-4 py-4 border-b border-primary/10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
-            <Flame className="w-4 h-4 text-orange-400" />
+          <div className="w-8 h-8 rounded-md bg-primary/8 border border-primary/14 flex items-center justify-center shrink-0">
+            <Flame className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h1 className="font-display text-sm font-bold text-orange-50">Firestorm</h1>
-            <p className="text-[10px] text-orange-400/50">Cyber Command</p>
+            <h1 className="font-display text-sm font-semibold text-foreground tracking-tight">Firestorm</h1>
+            <p className="text-[10px] text-primary/40 font-mono uppercase tracking-wider">Security Command</p>
           </div>
         </div>
       </div>
@@ -192,11 +192,11 @@ function Sidebar() {
         </div>
       </nav>
 
-      <div className="px-4 py-3 border-t border-orange-500/10 space-y-2">
+      <div className="px-4 py-3 border-t border-primary/8 space-y-2">
         <UserButton showName className="w-full" />
-        <div className="flex items-center gap-2 text-[10px] text-orange-400/30">
+        <div className="flex items-center gap-2 text-[10px] text-primary/25">
           <Flame className="w-3 h-3" />
-          <span>SZL Holdings Platform</span>
+          <span className="font-mono">SZL Holdings · SOC</span>
         </div>
       </div>
     </aside>
@@ -300,8 +300,8 @@ function App() {
             <WelcomeOverlay
               appId="firestorm"
               appName="Firestorm"
-              subtitle="Security Simulation Platform"
-              description="Military-grade cybersecurity simulation for red team/blue team exercises, continuous security validation, and real-time threat detection across your entire environment."
+              subtitle="Operational Security Command"
+              description="SOC-grade incident management, threat intelligence, and compliance operations — calm, confident security at enterprise scale."
               accentColor="#ef4444"
               icon={Flame}
               features={[

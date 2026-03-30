@@ -184,13 +184,13 @@ function Sidebar() {
     >
       <Link href="/">
         <div className="px-3 py-4 border-b border-sky-500/10 flex items-center gap-2.5 overflow-hidden cursor-pointer hover:bg-sky-500/5 transition-colors">
-          <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-md bg-sky-500/8 border border-sky-500/12 flex items-center justify-center shrink-0">
             <Ship className="w-4 h-4 text-sky-400 animate-wave-float" />
           </div>
           {expanded && (
             <div className="flex-1 min-w-0 overflow-hidden">
-              <h1 className="font-display text-sm font-bold text-sky-50 truncate">Vessels</h1>
-              <p className="text-[10px] text-sky-400/50 truncate">Maritime Command</p>
+              <h1 className="font-display text-sm font-semibold text-sky-50 truncate tracking-tight">Vessels</h1>
+              <p className="text-[10px] text-sky-400/40 truncate font-mono uppercase tracking-wider">Maritime Command</p>
             </div>
           )}
         </div>
@@ -364,12 +364,12 @@ function AppShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: b
   }
 
   return (
-    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#3b82f6">
+    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#0ea5e9">
       <div className="flex flex-col h-screen bg-[#060e1a]">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-sky-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
           Skip to main content
         </a>
-        <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#3b82f6" />
+        <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#0ea5e9" />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-auto min-w-0">
@@ -386,7 +386,7 @@ function AppShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: b
         onClose={() => setCmdOpen(false)}
         commands={vesselsCommands}
         appName="Vessels"
-        accentColor="#3b82f6"
+        accentColor="#0ea5e9"
       />
       <IncaAgentIndicator agentName="Maritime Analyst" systemType="inti" currentTask="Scanning AIS transponder anomalies across fleet" confidence={0.91} />
     </PowerUserProvider>
@@ -406,7 +406,7 @@ function App() {
             appName="Vessels"
             subtitle="Maritime Intelligence Platform"
             description="Real-time maritime operations with AIS tracking, sanctions screening, dark vessel detection, and port congestion forecasting across global shipping lanes."
-            accentColor="#3b82f6"
+            accentColor="#0ea5e9"
             icon={Ship}
             features={[
               { icon: Globe, title: "Fleet Tracking", description: "Live AIS positions for vessels worldwide with behavioral AI scoring" },

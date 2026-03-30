@@ -107,9 +107,9 @@ function App() {
         <WelcomeOverlay
           appId="lyte"
           appName="Lyte"
-          subtitle="Business Operations Command Center"
-          description="Detect signals, manage incidents, and automate response across your entire business infrastructure — with AI-driven anomaly detection and runbook automation."
-          accentColor="#f59e0b"
+          subtitle="Operations Command Center"
+          description="See the system, understand the signal, reduce uncertainty. Lyte surfaces incidents, tracks SLOs, and runs playbooks across your entire operations stack."
+          accentColor="#06b6d4"
           icon={Zap}
           features={[
             { icon: Activity, title: "Signal Detection", description: "Correlate signals across infra, product, and revenue" },

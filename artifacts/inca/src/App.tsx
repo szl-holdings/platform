@@ -93,16 +93,15 @@ function Sidebar() {
   const [moreExpanded, setMoreExpanded] = useState(false);
 
   return (
-    <aside className="w-56 bg-[#0d0a1a]/80 border-r border-violet-500/10 flex flex-col h-screen sticky top-0 backdrop-blur-sm">
-      <div className="px-4 py-4 border-b border-violet-500/10">
+    <aside className="w-56 bg-[#080c14]/95 border-r border-white/6 flex flex-col h-screen sticky top-0">
+      <div className="px-4 py-4 border-b border-white/6">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-amber-400/12 flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.15), rgba(16,185,129,0.1))" }}>
+          <div className="w-8 h-8 rounded-md bg-primary/8 border border-primary/14 flex items-center justify-center shrink-0">
             <Brain className="w-4 h-4 text-primary animate-neural-pulse" />
           </div>
           <div>
-            <h1 className="font-display text-sm font-bold text-foreground tracking-tight">INCA</h1>
-            <p className="text-[10px] text-amber-400/70 font-mono uppercase tracking-[0.1em]">Agentic Cortex</p>
+            <h1 className="font-display text-sm font-semibold text-foreground tracking-tight">INCA</h1>
+            <p className="text-[10px] text-primary/40 font-mono uppercase tracking-wider">Intelligence Platform</p>
           </div>
         </div>
       </div>
@@ -110,7 +109,7 @@ function Sidebar() {
       {/* Cortex section */}
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         <div className="px-3 py-1 mb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/50">Intelligence Cortex</span>
+          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-primary/40">Command</span>
         </div>
         {cortexNavItems.map(({ path, label, icon: Icon }) => {
           const isActive = path === "/" ? location === "/" : location.startsWith(path);
@@ -133,7 +132,7 @@ function Sidebar() {
         })}
 
         <div className="px-3 pt-3 pb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/40">Research Lab</span>
+          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/40">Analysis</span>
         </div>
         <button
           onClick={() => setResearchExpanded(!researchExpanded)}
@@ -194,11 +193,11 @@ function Sidebar() {
         </div>
       </nav>
 
-      <div className="px-4 py-3 border-t border-violet-500/10 space-y-2">
+      <div className="px-4 py-3 border-t border-white/6 space-y-2">
         <UserButton showName className="w-full" />
-        <div className="flex items-center gap-2 text-[10px] text-amber-400/30">
+        <div className="flex items-center gap-2 text-[10px] text-primary/25">
           <Brain className="w-3 h-3" />
-          <span className="font-mono">SZL Holdings · Quipu Engine</span>
+          <span className="font-mono">SZL Holdings · INCA</span>
         </div>
       </div>
     </aside>
@@ -283,12 +282,12 @@ function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
   }
 
   return (
-    <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#f59e0b">
+    <PowerUserProvider shortcuts={incaShortcuts} appName="INCA" accentColor="#3b6af8">
       <div className="flex flex-col h-screen bg-background">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
           Skip to main content
         </a>
-        <EcosystemNav currentAppId="inca" currentAppName="INCA — Agentic Intelligence Cortex" accentColor="#f59e0b" />
+        <EcosystemNav currentAppId="inca" currentAppName="INCA Intelligence Platform" accentColor="#3b6af8" />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
           <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
@@ -301,14 +300,14 @@ function IncaAppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         onClose={() => setCmdOpen(false)}
         commands={incaCommands}
         appName="INCA"
-        accentColor="#f59e0b"
+        accentColor="#3b6af8"
       />
       <WelcomeOverlay
         appId="inca"
         appName="INCA"
-        subtitle="AI Research Command Center"
-        description="Track experiments, manage model versions, and optimize GPU costs across your entire ML research pipeline — from hypothesis to production deployment."
-        accentColor="#8b5cf6"
+        subtitle="Secure Intelligence Platform"
+        description="Turn signals into visibility. INCA surfaces evidence, tracks risk state, and runs analytical workflows across your intelligence pipeline — from collection to insight."
+        accentColor="#3b6af8"
         icon={Brain}
         features={[
           { icon: FlaskConical, title: "Experiments", description: "Parallel experiment tracking with hyperparameter importance analysis" },

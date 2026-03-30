@@ -104,13 +104,13 @@ function Sidebar() {
   return (
     <aside className={cn("bg-card border-r border-border flex flex-col h-screen sticky top-0 transition-all duration-300", collapsed ? "w-16" : "w-64")}>
       <div className={cn("p-4 border-b border-border flex items-center", collapsed ? "justify-center" : "gap-3")}>
-        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-md bg-primary/8 border border-primary/14 flex items-center justify-center shrink-0">
           <Hexagon className="w-5 h-5 text-primary" />
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <h1 className="font-display text-base font-bold text-foreground truncate">MSP Command</h1>
-            <p className="text-[10px] text-muted-foreground">Center</p>
+            <h1 className="font-display text-sm font-semibold text-foreground truncate tracking-tight">Evolve MSP</h1>
+            <p className="text-[10px] text-primary/35 font-mono uppercase tracking-wider">Managed Services</p>
           </div>
         )}
       </div>
@@ -240,9 +240,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={basePath}>
-        <PowerUserProvider shortcuts={mspShortcuts} appName="Evolve MSP" accentColor="#06b6d4">
+        <PowerUserProvider shortcuts={mspShortcuts} appName="Evolve MSP" accentColor="#3b82f6">
           <div className="flex flex-col h-screen">
-            <EcosystemNav currentAppId="msp" currentAppName="Evolve MSP Command Center" accentColor="#06b6d4" />
+            <EcosystemNav currentAppId="msp" currentAppName="Evolve MSP Command Center" accentColor="#3b82f6" />
             <div className="flex-1 overflow-hidden">
               <DashboardLayout />
             </div>
@@ -252,16 +252,16 @@ function App() {
             onClose={() => setCmdOpen(false)}
             commands={mspCommands}
             appName="Evolve MSP"
-            accentColor="#06b6d4"
+            accentColor="#3b82f6"
           />
           <IncaAgentIndicator agentName="IT Sentinel" systemType="mama-quilla" currentTask="Monitoring endpoint health across managed clients" confidence={0.88} />
         </PowerUserProvider>
         <WelcomeOverlay
           appId="msp"
           appName="Evolve MSP"
-          subtitle="Managed Services Platform"
-          description="A complete managed service provider platform for client IT management, NOC operations, and SLA compliance — with AI-powered ticket routing and churn risk prediction."
-          accentColor="#06b6d4"
+          subtitle="Enterprise MSP Command Center"
+          description="Unified managed services operations — client health, NOC monitoring, service desk, device inventory, and revenue analytics in one enterprise-grade platform."
+          accentColor="#3b82f6"
           icon={Monitor}
           features={[
             { icon: Building2, title: "Client Management", description: "Health scoring and churn risk for every account" },

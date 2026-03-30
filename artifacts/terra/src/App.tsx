@@ -92,12 +92,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#10b981">
+        <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#5e9a32">
           <div className="flex flex-col h-screen bg-terra-bg">
             <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:text-sm focus:font-medium">
               Skip to main content
             </a>
-            <EcosystemNav currentAppId="terra" currentAppName="Terra Real Estate Intelligence" accentColor="#10b981" />
+            <EcosystemNav currentAppId="terra" currentAppName="Terra Real Estate Intelligence" accentColor="#5e9a32" />
             <div className="flex flex-1 overflow-hidden">
               <Sidebar />
               <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
@@ -110,7 +110,7 @@ function App() {
             onClose={() => setCmdOpen(false)}
             commands={terraCommands}
             appName="Terra"
-            accentColor="#10b981"
+            accentColor="#5e9a32"
           />
           <IncaAgentIndicator 
             agentName="Deal Scout" 
@@ -122,9 +122,9 @@ function App() {
         <WelcomeOverlay
           appId="terra"
           appName="Terra"
-          subtitle="Real Estate Intelligence"
-          description="Unified portfolio analytics with property-level performance tracking, market trend analysis, AI-powered valuations, and occupancy intelligence across all asset classes."
-          accentColor="#10b981"
+          subtitle="Real Estate Intelligence Platform"
+          description="Portfolio analytics, deal pipeline, and market intelligence — purpose-built for investment-grade property operations and asset management."
+          accentColor="#5e9a32"
           icon={Building2}
           features={[
             { icon: Building2, title: "Portfolio Dashboard", description: "Consolidated view of value, occupancy, and cap rates" },

@@ -91,9 +91,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={dreamscapeShortcuts} appName="Dreamscape" accentColor="#ec4899">
+        <PowerUserProvider shortcuts={dreamscapeShortcuts} appName="Dreamscape" accentColor="#7c3aed">
           <div className="flex flex-col h-screen">
-            <EcosystemNav currentAppId="dreamscape" currentAppName="Dreamscape Creative Engine" accentColor="#ec4899" />
+            <EcosystemNav currentAppId="dreamscape" currentAppName="Dreamscape Creative Engine" accentColor="#7c3aed" />
             <div className="flex-1 overflow-hidden">
               <Layout>
                 <Router />
@@ -105,7 +105,7 @@ function App() {
             onClose={() => setCmdOpen(false)}
             commands={dreamscapeCommands}
             appName="Dreamscape"
-            accentColor="#ec4899"
+            accentColor="#7c3aed"
           />
           <IncaAgentIndicator 
             agentName="Creative Director" 
@@ -118,8 +118,8 @@ function App() {
           appId="dreamscape"
           appName="Dreamscape"
           subtitle="Creative Engine"
-          description="A full-stack content creation platform for brand films, social campaigns, and product launches — with AI tools, an asset library, and a shared content calendar."
-          accentColor="#ec4899"
+          description="Studio-grade content operations — campaign workspace, asset management, content calendar, and AI creative tools built for serious creative teams."
+          accentColor="#7c3aed"
           icon={Palette}
           features={[
             { icon: Sparkles, title: "AI Studio", description: "Generate copy, visuals, and scripts with AI assistance" },

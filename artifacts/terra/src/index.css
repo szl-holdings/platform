@@ -1,28 +1,103 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
-@theme inline {
-  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Source Serif 4', Georgia, serif;
+@custom-variant dark (&:is(.dark *));
 
-  --color-terra-bg: #0e1209;
-  --color-terra-bg-secondary: #131a0c;
-  --color-terra-bg-tertiary: #1b2411;
-  --color-terra-surface: rgba(26, 36, 16, 0.85);
-  --color-terra-surface-hover: rgba(35, 48, 20, 0.9);
-  --color-terra-border: rgba(100, 140, 60, 0.14);
-  --color-terra-border-hover: rgba(100, 140, 60, 0.28);
-  --color-terra-text: #e8ecd8;
-  --color-terra-text-secondary: #9aab7e;
-  --color-terra-text-muted: #566545;
-  --color-terra-primary: #6ca33a;
-  --color-terra-primary-light: #85c44a;
-  --color-terra-accent: #c8a84b;
-  --color-terra-emerald: #3da874;
-  --color-terra-amber: #c9924a;
-  --color-terra-rose: #c45a4a;
-  --color-terra-slate: #7a8c72;
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+
+  /* Terra earth palette — analytical, professional property intelligence */
+  --color-terra-bg: #0b1009;
+  --color-terra-bg-secondary: #111910;
+  --color-terra-bg-tertiary: #172015;
+  --color-terra-surface: rgba(22, 32, 14, 0.9);
+  --color-terra-surface-hover: rgba(30, 44, 18, 0.95);
+  --color-terra-border: rgba(88, 128, 48, 0.12);
+  --color-terra-border-hover: rgba(88, 128, 48, 0.24);
+  --color-terra-text: #e6ead6;
+  --color-terra-text-secondary: #92a478;
+  --color-terra-text-muted: #4e6042;
+  --color-terra-primary: #5e9a32;
+  --color-terra-primary-light: #74b844;
+  --color-terra-accent: #b89840;
+  --color-terra-emerald: #339466;
+  --color-terra-amber: #b8883c;
+  --color-terra-rose: #b85240;
+  --color-terra-slate: #6e8264;
+}
+
+:root {
+  --background: 90 30% 4%;
+  --foreground: 80 30% 88%;
+  --card: 90 22% 7%;
+  --card-foreground: 80 30% 88%;
+  --popover: 90 22% 7%;
+  --popover-foreground: 80 30% 88%;
+  --primary: 100 52% 40%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 90 18% 12%;
+  --secondary-foreground: 80 20% 75%;
+  --muted: 90 14% 14%;
+  --muted-foreground: 90 16% 45%;
+  --accent: 42 52% 49%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 8 58% 49%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 100 30% 12%;
+  --input: 100 30% 14%;
+  --ring: 100 52% 40%;
+  --chart-1: 100 52% 40%;
+  --chart-2: 160 40% 40%;
+  --chart-3: 42 52% 49%;
+  --chart-4: 8 58% 49%;
+  --chart-5: 90 20% 50%;
+  --sidebar: 90 26% 5%;
+  --sidebar-foreground: 80 30% 88%;
+  --sidebar-border: 100 30% 12%;
+  --sidebar-primary: 100 52% 40%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 90 18% 10%;
+  --sidebar-accent-foreground: 80 20% 75%;
+  --sidebar-ring: 100 52% 40%;
 }
 
 @keyframes shimmer {
@@ -32,12 +107,17 @@
 
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
+  50% { opacity: 0.7; }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 * {
@@ -51,7 +131,7 @@ html {
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: 'Inter', system-ui, sans-serif;
   background: var(--color-terra-bg);
   color: var(--color-terra-text);
   overflow-x: hidden;
@@ -59,33 +139,55 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 ::selection {
-  background: rgba(108, 163, 58, 0.25);
-  color: #e8ecd8;
+  background: rgba(94, 154, 50, 0.22);
+  color: #e6ead6;
 }
 
-::-webkit-scrollbar {
-  width: 5px;
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--color-terra-bg); }
+::-webkit-scrollbar-thumb { background: rgba(88, 128, 48, 0.18); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(88, 128, 48, 0.34); }
+
+/* Deal pipeline card */
+.deal-card {
+  background: var(--color-terra-surface);
+  border: 1px solid var(--color-terra-border);
+  border-radius: 6px;
+  transition: border-color 0.15s ease;
+}
+.deal-card:hover {
+  border-color: var(--color-terra-border-hover);
 }
 
-::-webkit-scrollbar-track {
-  background: var(--color-terra-bg);
+/* KPI stat */
+.terra-stat {
+  background: var(--color-terra-bg-secondary);
+  border: 1px solid var(--color-terra-border);
+  border-top: 1px solid rgba(94, 154, 50, 0.16);
+  border-radius: 6px;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(100, 140, 60, 0.2);
-  border-radius: 3px;
-}
+.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
+.animate-fade-in { animation: fade-in 0.3s ease-out both; }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 140, 60, 0.4);
-}
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.20s; }
+.stagger-6 { animation-delay: 0.24s; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

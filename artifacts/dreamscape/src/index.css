@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-display: 'Outfit', sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -21,79 +22,111 @@
   --color-ring: hsl(var(--ring));
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
 }
 
 :root {
-  /* Light-leaning creative studio palette */
-  --background: 250 30% 98%;
-  --foreground: 250 20% 12%;
+  /* Deep studio dark — creative purple accent, premium not playful */
+  --background: 252 22% 5%;
+  --foreground: 250 14% 91%;
 
-  --primary: 262 83% 58%;
+  --primary: 262 75% 58%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 250 15% 94%;
-  --secondary-foreground: 250 15% 30%;
+  --secondary: 252 18% 11%;
+  --secondary-foreground: 250 14% 70%;
 
-  --muted: 250 15% 94%;
-  --muted-foreground: 250 10% 50%;
+  --muted: 252 18% 9%;
+  --muted-foreground: 250 10% 48%;
 
-  --accent: 262 83% 58%;
+  --accent: 262 75% 58%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 250 15% 88%;
-  --ring: 262 83% 58%;
+  --border: 252 18% 12%;
+  --ring: 262 75% 58%;
 
-  --card: 0 0% 100%;
-  --card-foreground: 250 20% 12%;
+  --card: 252 20% 7%;
+  --card-foreground: 250 14% 91%;
 }
 
 @layer base {
   body {
     @apply bg-background text-foreground antialiased font-sans;
-    background-image:
-      radial-gradient(ellipse at 0% 0%, hsla(262, 83%, 58%, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 100% 100%, hsla(330, 80%, 65%, 0.04) 0%, transparent 50%);
-    background-attachment: fixed;
   }
-
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
+    font-family: 'DM Sans', system-ui, sans-serif;
     @apply font-semibold tracking-tight;
   }
-
   ::selection {
-    background: hsla(262, 83%, 58%, 0.2);
-    color: hsl(250, 20%, 12%);
+    background: hsla(262, 75%, 58%, 0.25);
+    color: hsl(250, 14%, 91%);
   }
 }
 
 @layer utilities {
-  ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(252 18% 18%); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(252 18% 26%); }
+
+  /* Studio card — dark surface with subtle purple edge */
+  .studio-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: hsla(250, 15%, 70%, 0.5);
-    border-radius: 100px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsla(250, 15%, 55%, 0.6);
+  .studio-card:hover {
+    border-color: hsl(262 75% 58% / 0.25);
+    box-shadow: 0 0 0 1px hsl(262 75% 58% / 0.08);
   }
 
-  .glass-panel {
-    @apply bg-white/70 backdrop-blur-xl border border-white/80 shadow-lg;
-    box-shadow:
-      0 0 0 1px hsla(250, 15%, 88%, 0.8),
-      0 4px 24px hsla(250, 20%, 12%, 0.06);
-  }
-
-  .creative-card {
-    @apply bg-white border border-border/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow;
+  /* Asset thumbnail */
+  .asset-thumb {
+    background: hsl(252 18% 9%);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-md);
   }
 }
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-up { animation: fade-in-up 0.35s ease-out both; }
+.animate-fade-in { animation: fade-in 0.3s ease-out both; }
+.animate-scale-in { animation: scale-in 0.3s ease-out both; }
+
+.skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted-foreground) / 0.06) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 0.25rem;
+}
+
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.20s; }
+.stagger-6 { animation-delay: 0.24s; }
