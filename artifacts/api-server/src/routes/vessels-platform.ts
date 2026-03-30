@@ -9,10 +9,12 @@ import {
   readinessItemsTable,
   platformSignalsTable,
   eventLogTable,
+  workflowsTable,
+  workflowRunsTable,
 } from "@workspace/db";
 import { eq, and, desc, sql, or } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
-import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 
 const router: IRouter = Router();
 const VESSELS_PRODUCT = "vessels";
@@ -27,6 +29,29 @@ function logVesselsEvent(orgId: number, actorId: number | null, actorName: strin
     entityType,
     entityId,
   }).catch(() => {});
+}
+
+async function triggerAlloyWorkflow(orgId: number, product: string, entityType: string, entityId: number, triggerData: Record<string, unknown>) {
+  try {
+    const [workflow] = await db.select().from(workflowsTable).where(
+      and(
+        eq(workflowsTable.orgId, orgId),
+        eq(workflowsTable.status, "active"),
+        eq(workflowsTable.product, "alloy"),
+      )
+    ).limit(1);
+
+    if (workflow) {
+      await db.insert(workflowRunsTable).values({
+        orgId,
+        workflowId: workflow.id,
+        status: "queued",
+        input: { product, entityType, entityId, ...triggerData },
+        startedAt: new Date(),
+      });
+    }
+  } catch {
+  }
 }
 
 function buildFleetSummary(vessels: any[]) {
@@ -277,7 +302,7 @@ router.get("/vessels/platform/fleet", authMiddleware({ required: false }), async
     const vessels = await db.select().from(maritimeVesselsTable).where(
       and(
         eq(maritimeVesselsTable.orgId, orgId),
-        status ? eq(maritimeVesselsTable.status, status as any) : undefined,
+        status ? eq(maritimeVesselsTable.status, status as typeof maritimeVesselsTable.status._.data) : undefined,
       )
     ).orderBy(maritimeVesselsTable.name);
 
@@ -348,40 +373,46 @@ router.get("/vessels/platform/vessels/:id", authMiddleware({ required: false }),
   }
 });
 
-router.post("/vessels/platform/vessels", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/platform/vessels", authMiddleware(), async (req, res) => {
   try {
     const body = req.body as Record<string, unknown>;
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
+
+    const vesselType = (typeof body.vesselType === "string" ? body.vesselType : "container") as "container" | "bulk_carrier" | "tanker" | "ro_ro" | "general_cargo" | "lng" | "lpg" | "cruise" | "offshore" | "other";
+    const vesselStatus = (typeof body.status === "string" ? body.status : "active") as "active" | "inactive" | "under_maintenance" | "decommissioned" | "at_sea" | "in_port" | "anchored";
 
     const [vessel] = await db.insert(maritimeVesselsTable).values({
       orgId,
       name: body.name as string,
-      imo: body.imo as string || null,
-      mmsi: body.mmsi as string || null,
-      callSign: body.callSign as string || null,
-      flag: body.flag as string || null,
-      vesselType: (body.vesselType as any) || "container",
+      imo: typeof body.imo === "string" ? body.imo : null,
+      mmsi: typeof body.mmsi === "string" ? body.mmsi : null,
+      callSign: typeof body.callSign === "string" ? body.callSign : null,
+      flag: typeof body.flag === "string" ? body.flag : null,
+      vesselType,
       yearBuilt: typeof body.yearBuilt === "number" ? body.yearBuilt : null,
       grossTonnage: body.grossTonnage ? String(body.grossTonnage) : null,
-      status: (body.status as any) || "active",
+      status: vesselStatus,
       latitude: body.latitude ? String(body.latitude) : null,
       longitude: body.longitude ? String(body.longitude) : null,
-      metadata: (body.metadata as any) || null,
+      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
     }).returning();
 
-    logVesselsEvent(orgId, req.user?.id ?? null, req.user?.displayName ?? "system", "vessel.created", "maritime_vessel", String(vessel.id));
+    logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "vessel.created", "maritime_vessel", String(vessel.id));
     sendCreated(res, vessel);
   } catch (err) {
     handleRouteError(res, err, "Failed to create vessel");
   }
 });
 
-router.patch("/vessels/platform/vessels/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/vessels/platform/vessels/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const [vessel] = await db.update(maritimeVesselsTable).set({ ...req.body, updatedAt: new Date() }).where(
+    const { orgId: _drop, ...safeBody } = req.body as Record<string, unknown>;
+    const [vessel] = await db.update(maritimeVesselsTable).set({ ...safeBody, updatedAt: new Date() } as Partial<typeof maritimeVesselsTable.$inferInsert>).where(
       and(eq(maritimeVesselsTable.id, id), eq(maritimeVesselsTable.orgId, orgId))
     ).returning();
 
@@ -403,7 +434,7 @@ router.get("/vessels/platform/voyages", authMiddleware({ required: false }), asy
       and(
         eq(voyagesTable.orgId, orgId),
         vesselId ? eq(voyagesTable.vesselId, vesselId) : undefined,
-        status ? eq(voyagesTable.status, status as any) : undefined,
+        status ? eq(voyagesTable.status, status as typeof voyagesTable.status._.data) : undefined,
       )
     ).orderBy(desc(voyagesTable.createdAt)).limit(limit);
 
@@ -446,22 +477,25 @@ router.get("/vessels/platform/voyages/:id", authMiddleware({ required: false }),
   }
 });
 
-router.post("/vessels/platform/voyages", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/platform/voyages", authMiddleware(), async (req, res) => {
   try {
     const body = req.body as Record<string, unknown>;
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
+
+    const voyageStatus = (typeof body.status === "string" ? body.status : "planned") as "planned" | "active" | "in_progress" | "completed" | "cancelled" | "delayed";
 
     const [voyage] = await db.insert(voyagesTable).values({
       orgId,
       vesselId: body.vesselId as number,
-      voyageNumber: body.voyageNumber as string || null,
+      voyageNumber: typeof body.voyageNumber === "string" ? body.voyageNumber : null,
       originPortId: typeof body.originPortId === "number" ? body.originPortId : null,
       destinationPortId: typeof body.destinationPortId === "number" ? body.destinationPortId : null,
-      cargoType: body.cargoType as string || null,
-      cargoDescription: body.cargoDescription as string || null,
+      cargoType: typeof body.cargoType === "string" ? body.cargoType : null,
+      cargoDescription: typeof body.cargoDescription === "string" ? body.cargoDescription : null,
       cargoTonnage: body.cargoTonnage ? String(body.cargoTonnage) : null,
       cargoValueUsd: body.cargoValueUsd ? String(body.cargoValueUsd) : null,
-      status: (body.status as any) || "planned",
+      status: voyageStatus,
       scheduledDepartureAt: body.scheduledDepartureAt ? new Date(body.scheduledDepartureAt as string) : null,
       scheduledArrivalAt: body.scheduledArrivalAt ? new Date(body.scheduledArrivalAt as string) : null,
       estimatedArrivalAt: body.estimatedArrivalAt ? new Date(body.estimatedArrivalAt as string) : null,
@@ -469,22 +503,24 @@ router.post("/vessels/platform/voyages", authMiddleware({ required: false }), as
       revenueUsd: body.revenueUsd ? String(body.revenueUsd) : null,
       charterRatePerDay: body.charterRatePerDay ? String(body.charterRatePerDay) : null,
       corridorId: typeof body.corridorId === "number" ? body.corridorId : null,
-      metadata: (body.metadata as any) || null,
+      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
     }).returning();
 
-    logVesselsEvent(orgId, req.user?.id ?? null, req.user?.displayName ?? "system", "voyage.created", "voyage", String(voyage.id));
+    logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "voyage.created", "voyage", String(voyage.id));
     sendCreated(res, voyage);
   } catch (err) {
     handleRouteError(res, err, "Failed to create voyage");
   }
 });
 
-router.patch("/vessels/platform/voyages/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/vessels/platform/voyages/:id", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const [voyage] = await db.update(voyagesTable).set({ ...req.body, updatedAt: new Date() }).where(
+    const { orgId: _drop, ...safeBody } = req.body as Record<string, unknown>;
+    const [voyage] = await db.update(voyagesTable).set({ ...safeBody, updatedAt: new Date() } as Partial<typeof maritimeVesselsTable.$inferInsert>).where(
       and(eq(voyagesTable.id, id), eq(voyagesTable.orgId, orgId))
     ).returning();
 
@@ -500,13 +536,15 @@ router.get("/vessels/platform/exceptions", authMiddleware({ required: false }), 
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     const status = req.query.status as string | undefined;
     const severity = req.query.severity as string | undefined;
+    const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
     const limit = Math.min(parseInt(req.query.limit as string || "50", 10), 200);
 
     const exceptions = await db.select().from(maritimeExceptionsTable).where(
       and(
         eq(maritimeExceptionsTable.orgId, orgId),
-        status ? eq(maritimeExceptionsTable.status, status as any) : undefined,
-        severity ? eq(maritimeExceptionsTable.severity, severity as any) : undefined,
+        status ? eq(maritimeExceptionsTable.status, status as typeof maritimeExceptionsTable.status._.data) : undefined,
+        severity ? eq(maritimeExceptionsTable.severity, severity as typeof maritimeExceptionsTable.severity._.data) : undefined,
+        vesselId ? eq(maritimeExceptionsTable.vesselId, vesselId) : undefined,
       )
     ).orderBy(desc(maritimeExceptionsTable.detectedAt)).limit(limit);
 
@@ -523,10 +561,28 @@ router.get("/vessels/platform/exceptions", authMiddleware({ required: false }), 
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware({ required: false }), async (req, res) => {
+router.get("/vessels/platform/exceptions/:id", authMiddleware({ required: false }), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+
+    const [exc] = await db.select().from(maritimeExceptionsTable).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId)));
+    if (!exc) { sendNotFound(res, "Exception"); return; }
+
+    const vessel = exc.vesselId ? (await db.select({ id: maritimeVesselsTable.id, name: maritimeVesselsTable.name, vesselType: maritimeVesselsTable.vesselType, flag: maritimeVesselsTable.flag }).from(maritimeVesselsTable).where(eq(maritimeVesselsTable.id, exc.vesselId)).limit(1))[0] : null;
+    const voyage = exc.voyageId ? (await db.select().from(voyagesTable).where(eq(voyagesTable.id, exc.voyageId)).limit(1))[0] : null;
+
+    sendSuccess(res, { ...exc, vessel: vessel ?? null, voyage: voyage ?? null });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get exception");
+  }
+});
+
+router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware(), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "acknowledged",
@@ -535,19 +591,21 @@ router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware({ req
     }).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId))).returning();
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
-    logVesselsEvent(orgId, req.user?.id ?? null, req.user?.displayName ?? "system", "exception.acknowledged", "maritime_exception", String(id));
+    logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.acknowledged", "maritime_exception", String(id));
     sendSuccess(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to acknowledge exception");
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/assign", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/assign", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
+
     const { assignedTo } = req.body as { assignedTo: number };
-    if (!assignedTo) { sendBadRequest(res, "assignedTo required"); return; }
+    if (!assignedTo || typeof assignedTo !== "number") { sendBadRequest(res, "assignedTo (number) required"); return; }
 
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "assigned",
@@ -556,79 +614,146 @@ router.post("/vessels/platform/exceptions/:id/assign", authMiddleware({ required
     }).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId))).returning();
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
-    logVesselsEvent(orgId, req.user?.id ?? null, req.user?.displayName ?? "system", "exception.assigned", "maritime_exception", String(id));
+    logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.assigned", "maritime_exception", String(id));
     sendSuccess(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to assign exception");
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/escalate", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/escalate", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
+    const reason = typeof req.body?.reason === "string" ? req.body.reason : null;
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "escalated",
       severity: "critical",
       updatedAt: new Date(),
-      metadata: { escalatedAt: new Date().toISOString(), escalatedBy: req.user?.displayName ?? "system" } as any,
+      metadata: { escalatedAt: new Date().toISOString(), escalatedBy: req.user.displayName ?? "system", reason },
     }).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId))).returning();
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
-    logVesselsEvent(orgId, req.user?.id ?? null, req.user?.displayName ?? "system", "exception.escalated", "maritime_exception", String(id));
+    logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.escalated", "maritime_exception", String(id));
+    await triggerAlloyWorkflow(orgId, VESSELS_PRODUCT, "maritime_exception", id, {
+      action: "escalate",
+      exceptionId: id,
+      severity: "critical",
+      vesselId: exc.vesselId,
+      voyageId: exc.voyageId,
+      exceptionType: exc.exceptionType,
+      title: exc.title,
+    });
     sendSuccess(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to escalate exception");
   }
 });
 
-router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
+    const resolution = typeof req.body?.resolution === "string" ? req.body.resolution : null;
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "resolved",
       resolvedAt: new Date(),
       updatedAt: new Date(),
-      metadata: { resolution: req.body.resolution, resolvedBy: req.user?.displayName ?? "system" } as any,
+      metadata: { resolution, resolvedBy: req.user.displayName ?? "system" },
     }).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId))).returning();
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
-    logVesselsEvent(orgId, req.user?.id ?? null, req.user?.displayName ?? "system", "exception.resolved", "maritime_exception", String(id));
+    logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.resolved", "maritime_exception", String(id));
     sendSuccess(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to resolve exception");
   }
 });
 
-router.post("/vessels/platform/exceptions", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/platform/exceptions", authMiddleware(), async (req, res) => {
   try {
     const body = req.body as Record<string, unknown>;
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
+
+    const exceptionType = (typeof body.exceptionType === "string" ? body.exceptionType : "other") as "eta_delay" | "cargo_damage" | "weather_deviation" | "mechanical_failure" | "crew_incident" | "port_delay" | "route_deviation" | "fuel_overconsumption" | "regulatory_violation" | "security_incident" | "other";
+    const severity = (typeof body.severity === "string" ? body.severity : "medium") as "low" | "medium" | "high" | "critical";
 
     const [exc] = await db.insert(maritimeExceptionsTable).values({
       orgId,
       vesselId: typeof body.vesselId === "number" ? body.vesselId : null,
       voyageId: typeof body.voyageId === "number" ? body.voyageId : null,
       signalId: typeof body.signalId === "number" ? body.signalId : null,
-      exceptionType: (body.exceptionType as any) || "other",
-      severity: (body.severity as any) || "medium",
+      exceptionType,
+      severity,
       title: body.title as string,
-      description: body.description as string || null,
+      description: typeof body.description === "string" ? body.description : null,
       status: "new",
       valueAtRiskUsd: body.valueAtRiskUsd ? String(body.valueAtRiskUsd) : null,
       etaImpactHours: body.etaImpactHours ? String(body.etaImpactHours) : null,
       costImpactUsd: body.costImpactUsd ? String(body.costImpactUsd) : null,
       detectedAt: new Date(),
-      metadata: (body.metadata as any) || null,
+      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
     }).returning();
 
-    logVesselsEvent(orgId, req.user?.id ?? null, req.user?.displayName ?? "system", "exception.created", "maritime_exception", String(exc.id));
+    logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.created", "maritime_exception", String(exc.id));
     sendCreated(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to create exception");
+  }
+});
+
+router.get("/vessels/platform/routes", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+    const vesselId = req.query.vesselId ? parseInt(req.query.vesselId as string, 10) : undefined;
+    const status = req.query.status as string | undefined;
+
+    const voyages = await db.select().from(voyagesTable).where(
+      and(
+        eq(voyagesTable.orgId, orgId),
+        vesselId ? eq(voyagesTable.vesselId, vesselId) : undefined,
+        status ? eq(voyagesTable.status, status as typeof voyagesTable.status._.data) : undefined,
+      )
+    ).orderBy(desc(voyagesTable.createdAt)).limit(100);
+
+    const enriched = voyages.map(v => ({
+      ...v,
+      etaDriftHours: calculateEtaDrift(v),
+      economics: computeVoyageEconomics(v),
+    }));
+
+    sendSuccess(res, { routes: enriched, total: enriched.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list routes");
+  }
+});
+
+router.get("/vessels/platform/routes/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
+
+    const [voyage] = await db.select().from(voyagesTable).where(and(eq(voyagesTable.id, id), eq(voyagesTable.orgId, orgId)));
+    if (!voyage) { sendNotFound(res, "Route"); return; }
+
+    const vesselRows = voyage.vesselId ? await db.select().from(maritimeVesselsTable).where(eq(maritimeVesselsTable.id, voyage.vesselId)).limit(1) : [];
+    const vessel = vesselRows[0] ?? null;
+    const routeDeviation = vessel ? detectRouteDeviation(vessel, voyage) : null;
+
+    sendSuccess(res, {
+      ...voyage,
+      etaDriftHours: calculateEtaDrift(voyage),
+      economics: computeVoyageEconomics(voyage),
+      routeDeviation,
+      vessel: vessel ?? null,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get route");
   }
 });
 
@@ -684,21 +809,25 @@ router.get("/vessels/platform/readiness", authMiddleware({ required: false }), a
   }
 });
 
-router.post("/vessels/platform/readiness", authMiddleware({ required: false }), async (req, res) => {
+router.post("/vessels/platform/readiness", authMiddleware(), async (req, res) => {
   try {
     const body = req.body as Record<string, unknown>;
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
+
+    const category = (typeof body.category === "string" ? body.category : "maritime") as typeof readinessItemsTable.category._.data;
+    const priority = (typeof body.priority === "string" ? body.priority : "medium") as typeof readinessItemsTable.priority._.data;
 
     const [item] = await db.insert(readinessItemsTable).values({
       orgId,
       product: VESSELS_PRODUCT,
-      category: (body.category as any) || "maritime",
+      category,
       title: body.title as string,
-      description: body.description as string || null,
+      description: typeof body.description === "string" ? body.description : null,
       status: "not_started",
-      priority: (body.priority as any) || "medium",
-      ownerId: req.user?.id ?? null,
-      notes: body.notes as string || null,
+      priority,
+      ownerId: req.user.id ?? null,
+      notes: typeof body.notes === "string" ? body.notes : null,
     }).returning();
 
     sendCreated(res, item);

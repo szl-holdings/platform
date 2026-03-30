@@ -85,6 +85,10 @@ router.use(featureFlagsRouter);
 router.use(filesRouter);
 
 router.use(stephenRouter);
+router.use("/lyte/platform", readLimiter);
+router.use(lytePlatformRouter);
+router.use("/vessels/platform", readLimiter);
+router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
 router.use(firestormRouter);
 router.use(lyteRouter);
@@ -154,12 +158,6 @@ router.use(doctrineRouter);
 
 router.use("/alloy", readLimiter);
 router.use(alloyRouter);
-
-router.use("/lyte/platform", readLimiter);
-router.use(lytePlatformRouter);
-
-router.use("/vessels/platform", readLimiter);
-router.use(vesselsPlatformRouter);
 
 router.use("/capital", writeLimiter);
 router.use(capitalReadinessRouter);
