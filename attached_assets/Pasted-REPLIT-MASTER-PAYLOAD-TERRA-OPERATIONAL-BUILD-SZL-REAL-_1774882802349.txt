@@ -1,0 +1,694 @@
+REPLIT MASTER PAYLOAD — TERRA OPERATIONAL BUILD + SZL REAL ESTATE VERTICAL
+
+MISSION
+Create Terra as a real, operational, premium real-estate command platform for brokers, agents, teams, and investor/operators.
+Do not build Terra as a Zillow clone, a generic IDX site, or a thin CRM.
+Build Terra as the real-estate vertical expression of the SZL command architecture:
+- Beacon observes
+- Lyte routes
+- Nimbus reasons
+- AlloyScape executes
+
+IMPORTANT CONTEXT
+The currently visible public archived GitHub repo does not list Terra and does not show matches for:
+- terra
+- realtor
+- broker
+So assume Terra is either missing, incomplete, or not wired into the current monorepo.
+Add it cleanly and operationally.
+
+==================================================
+SECTION 1 — ADD TERRA TO THE MONOREPO
+==================================================
+
+CREATE:
+artifacts/terra/
+
+REGISTER TERRA AS:
+- app name: Terra
+- route: /terra/
+- status: Production-ready
+- lane: Vertical Intelligence / Real Estate
+- purpose: Real Estate Intelligence + Deal Execution Platform
+
+UPDATE:
+- root workspace config
+- package.json workspaces if needed
+- build pipeline
+- deploy matrix
+- API route registry
+- apps showcase
+- corporate SZL site ecosystem map
+- flagship README / platform docs
+
+ADD TERRA TO:
+- app catalog
+- navigation
+- platform ecosystem map
+- documentation
+- screenshots
+- demo scripts
+
+==================================================
+SECTION 2 — TERRA POSITIONING
+==================================================
+
+DEFINE TERRA AS:
+
+Terra is a real-estate intelligence and execution platform for brokers, agents, teams, and property operators.
+It combines pipeline observability, transaction orchestration, predictive deal intelligence, and workflow automation in one premium command surface.
+
+PRIMARY ONE-LINER
+Terra turns real-estate deal flow into a visible, predictable, and executable operating system.
+
+SECONDARY POSITIONING
+Not:
+- a listings portal only
+- a basic CRM
+- a generic brokerage dashboard
+
+Instead:
+- deal observability
+- transaction command
+- pricing/risk intelligence
+- execution + compliance workflow control
+
+==================================================
+SECTION 3 — PRODUCT DOCTRINE
+==================================================
+
+TERRA MUST PROVE THE SAME SZL THESIS IN A REAL-ESTATE CONTEXT:
+
+CLARITY
+See listings, leads, deals, approvals, closings, tasks, bottlenecks, and value at risk.
+
+CONTROL
+Know who owns each step, what is blocked, what requires approval, and what must happen next.
+
+EXECUTION
+Move deals through workflows, automate steps, track documents, and audit outcomes.
+
+INTELLIGENCE
+Predict close likelihood, pricing confidence, timing risk, and likely stall points.
+
+==================================================
+SECTION 4 — CORE PRODUCT MODULES
+==================================================
+
+BUILD TERRA WITH THESE PRIMARY MODULES:
+
+1. EXECUTIVE OVERVIEW
+2. LISTINGS + INVENTORY
+3. LEADS + CONTACTS
+4. DEAL PIPELINE
+5. OFFERS + NEGOTIATION
+6. TRANSACTION WORKFLOW
+7. DOCUMENTS + COMPLIANCE
+8. TEAM PERFORMANCE
+9. PREDICTIONS + PRICING
+10. AUTOMATIONS + AUDIT
+
+==================================================
+SECTION 5 — EXECUTIVE OVERVIEW
+==================================================
+
+CREATE A PREMIUM OVERVIEW PAGE SHOWING:
+
+TOP KPI STRIP
+- active listings
+- active buyers
+- active deals
+- pending offers
+- under contract
+- closings this month
+- pipeline value
+- commission at risk
+- average days to close
+- stalled deals
+- aging approvals
+
+PANELS
+- deals needing action now
+- listings with risk signals
+- top agents by pipeline value
+- deals likely to stall
+- closings at risk this week
+- pricing deviation alerts
+- document/compliance blockers
+- recommendations summary
+
+THIS PAGE MUST FEEL:
+like a command center for a modern brokerage
+
+==================================================
+SECTION 6 — LISTINGS + INVENTORY
+==================================================
+
+BUILD A LISTINGS MODULE WITH:
+
+LIST VIEW
+- address
+- city/state
+- listing type
+- status
+- list price
+- price changes
+- days on market
+- assigned agent
+- lead activity
+- showing activity
+- watch/risk status
+
+DETAIL VIEW
+- media gallery
+- property facts
+- listing timeline
+- notes
+- interested buyer activity
+- offer history
+- document checklist
+- related tasks
+- risk flags
+- recommended actions
+
+ADD FILTERS
+- city
+- zip
+- price band
+- status
+- days on market
+- assigned agent
+- risk level
+- stale listing status
+
+==================================================
+SECTION 7 — LEADS + CONTACTS
+==================================================
+
+BUILD A CRM-QUALITY LEADS MODULE WITH:
+
+LEAD LIST
+- new
+- engaged
+- nurtured
+- hot
+- inactive
+- converted
+
+LEAD DETAIL
+- contact profile
+- source
+- property interests
+- engagement timeline
+- messages
+- tasks
+- next action
+- assigned owner
+- score/confidence
+- likely conversion path
+
+REQUIRED FEATURES
+- lead-source tracking
+- team assignment
+- activity history
+- reminders
+- follow-up sequences
+- conversion scoring
+- broker/team visibility
+
+DO NOT MAKE THIS A BASIC ADDRESS BOOK.
+MAKE IT FEEL LIKE A REAL OPERATING SURFACE.
+
+==================================================
+SECTION 8 — DEAL PIPELINE
+==================================================
+
+THIS IS THE HEART OF TERRA.
+
+CREATE STAGES:
+- lead
+- qualified
+- showing
+- offer drafted
+- offer submitted
+- negotiation
+- accepted
+- attorney review
+- inspection
+- financing
+- appraisal
+- under contract
+- clear to close
+- closed
+- lost / stalled
+
+DISPLAY EACH DEAL WITH:
+- property
+- client/buyer/seller
+- stage
+- probability to close
+- estimated close date
+- estimated commission
+- assigned owner
+- bottleneck flag
+- approval state
+- missing documents
+- risk score
+- next action
+
+PIPELINE VIEWS
+- board/kanban
+- table
+- timeline
+- agent view
+- team view
+- brokerage view
+
+==================================================
+SECTION 9 — OFFERS + NEGOTIATION
+==================================================
+
+BUILD AN OFFERS MODULE WITH:
+
+- incoming offers
+- outgoing offers
+- offer comparison
+- expiration timers
+- contingencies
+- financing type
+- cash vs financed indicators
+- escalation clauses
+- counteroffer tracking
+- approval routing
+- negotiation notes
+- broker review workflow
+
+ADD OFFER COMPARISON SURFACE
+Show:
+- price
+- terms
+- contingencies
+- timeline
+- financing strength
+- estimated close confidence
+- recommendation summary
+
+==================================================
+SECTION 10 — TRANSACTION WORKFLOW
+==================================================
+
+BUILD TRANSACTION COMMAND CAPABILITIES:
+
+WORKFLOW STEPS
+- accepted offer
+- document collection
+- attorney review
+- inspections
+- lender coordination
+- appraisal
+- title / legal
+- final walkthrough
+- closing prep
+- close
+- payout / commission reconciliation
+
+SHOW:
+- owner of each step
+- due dates
+- blockers
+- dependencies
+- current status
+- escalation rules
+- linked documents
+- linked messages
+- audit history
+
+THIS MUST FEEL:
+like Lyte + AlloyScape translated into brokerage operations
+
+==================================================
+SECTION 11 — DOCUMENTS + COMPLIANCE
+==================================================
+
+BUILD:
+- document checklist by transaction type
+- missing-document detection
+- status by file
+- upload history
+- versioning
+- signer status
+- approval status
+- compliance review queue
+- brokerage-required forms section
+- pre-close readiness status
+
+CREATE READINESS SCORING
+- green: complete
+- yellow: missing low-risk items
+- red: blocked / cannot close
+
+ADD COMPLIANCE VIEWS FOR:
+- agent
+- team lead
+- transaction coordinator
+- broker/auditor
+
+==================================================
+SECTION 12 — TEAM PERFORMANCE
+==================================================
+
+BUILD REPORTING INSPIRED BY BEST-IN-CLASS TEAM OS / BROKER WORKFLOW TOOLS,
+BUT MAKE IT SHARPER AND MORE OPERATIONAL.
+
+SHOW:
+- deal volume by agent
+- pipeline value by agent/team
+- conversion rate
+- days-to-close
+- follow-up responsiveness
+- stalled deal count
+- commission forecast
+- listings aging risk
+- lead-source effectiveness
+- workload distribution
+- coaching opportunities
+
+MAKE THIS A TRUE MANAGEMENT SURFACE,
+NOT JUST A REAR-VIEW REPORT.
+
+==================================================
+SECTION 13 — NIMBUS-POWERED INTELLIGENCE
+==================================================
+
+BUILD TERRA INTELLIGENCE VIEWS:
+
+1. CLOSE LIKELIHOOD
+- probability score
+- rationale
+- assumptions
+- risk indicators
+- next best action
+
+2. PRICING CONFIDENCE
+- list price confidence band
+- risk of overpricing / underpricing
+- market-positioning summary
+- recommendation notes
+
+3. STALL RISK
+- likely bottleneck stage
+- expected delay window
+- impacted owner/team
+- recovery recommendation
+
+4. DEAL HEALTH
+- composite health score
+- timeline confidence
+- missing dependency alerts
+- urgency indicator
+
+MANDATE:
+Every AI or predictive output must show:
+- confidence
+- rationale
+- assumptions
+- recommended next action
+
+NO VAGUE AI LANGUAGE.
+NO MAGIC BOX.
+
+==================================================
+SECTION 14 — ALLOYSCAPE-POWERED AUTOMATION
+==================================================
+
+BUILD REAL EXECUTION AUTOMATIONS:
+
+- create task templates when deal enters new stage
+- trigger reminders on aging approvals
+- alert when document checklist incomplete
+- notify owner on stalled deal
+- escalate to broker when close date risk exceeds threshold
+- sync activity logs across modules
+- create closing checklist automatically
+- surface transaction exceptions in one queue
+
+BUILD THESE VIEWS:
+- automation catalog
+- run history
+- failed automations
+- retry queue
+- override panel
+- audit trail
+
+==================================================
+SECTION 15 — BEACON / LYTE / NIMBUS / ALLOYSCAPE MAPPING
+==================================================
+
+ENFORCE THIS COMMAND LOOP INSIDE TERRA:
+
+BEACON IN TERRA
+- pipeline observability
+- listing health
+- deal health
+- commission risk
+- bottlenecks
+
+LYTE IN TERRA
+- ownership
+- approvals
+- action queues
+- escalations
+- intervention workspace
+
+NIMBUS IN TERRA
+- close likelihood
+- pricing confidence
+- stall prediction
+- risk forecasting
+
+ALLOYSCAPE IN TERRA
+- workflow automations
+- retries
+- execution history
+- auditability
+
+DISPLAY THE COMMAND LOOP:
+DETECT → INTERPRET → DECIDE → EXECUTE → VERIFY
+
+==================================================
+SECTION 16 — API + DATA MODEL
+==================================================
+
+CREATE OR EXTEND API ROUTES FOR:
+
+/api/terra/listings
+/api/terra/listings/:id
+/api/terra/leads
+/api/terra/leads/:id
+/api/terra/deals
+/api/terra/deals/:id
+/api/terra/offers
+/api/terra/offers/:id
+/api/terra/transactions
+/api/terra/transactions/:id
+/api/terra/documents
+/api/terra/reports
+/api/terra/predictions
+/api/terra/automations
+/api/terra/audit
+
+DEFINE CORE ENTITIES:
+- listing
+- property
+- lead
+- contact
+- buyer
+- seller
+- deal
+- offer
+- transaction
+- document
+- compliance_item
+- task
+- agent
+- team
+- broker
+- recommendation
+- automation_run
+- risk_signal
+
+==================================================
+SECTION 17 — SEEDED DEMO DATA
+==================================================
+
+CREATE REALISTIC DEMO DATA FOR:
+- 30+ listings
+- 100+ leads
+- 25+ deals across stages
+- multiple teams/agents
+- 10+ pending offers
+- stalled inspections
+- delayed financing
+- incomplete document sets
+- agent leaderboard
+- price-change history
+- recommendation history
+- automation failures + recoveries
+
+INCLUDE REALISTIC REAL-ESTATE SCENARIOS:
+- listing stale after 31 days
+- buyer financing delay
+- accepted offer missing attorney docs
+- under-contract deal likely to miss close
+- multiple offers with different terms
+- broker approval required over threshold
+- agent overloaded with too many active deals
+
+==================================================
+SECTION 18 — UI / DESIGN SYSTEM
+==================================================
+
+TERRA MUST USE THE SZL SHARED DESIGN LANGUAGE.
+
+DESIGN CHARACTER
+- premium
+- dark-mode first
+- elegant
+- dense but legible
+- broker-grade professionalism
+- modern luxury, not cheesy realtor style
+
+GLOBAL COMPONENTS
+- ExecutiveSummaryStrip
+- ListingCard
+- DealHealthCard
+- OfferComparisonTable
+- RiskBadge
+- ConfidenceBadge
+- ApprovalChip
+- WorkflowTraceView
+- ActionQueue
+- AuditPanel
+- PropertyDrawer
+- AgentPerformanceGrid
+- RecommendationPanel
+
+==================================================
+SECTION 19 — DIFFERENTIATION STRATEGY
+==================================================
+
+DO NOT COPY THE MARKET.
+TAKE THE BEST IDEAS AND SURPASS THEM.
+
+INSPIRED BY MARKET STRENGTHS:
+- team accountability and lead/reporting visibility
+- transaction automation and compliance rigor
+- CRM + website/lead-gen integration
+- document collaboration and task templates
+
+BUT TERRA MUST WIN BY:
+- stronger command loop
+- stronger observability
+- clearer ownership
+- more explainable intelligence
+- tighter execution visibility
+- more premium operator experience
+
+==================================================
+SECTION 20 — WEBSITE / LANDING PAGE
+==================================================
+
+CREATE A TERRA LANDING PAGE OR ROUTE WITH:
+
+HERO
+Terra
+Real Estate Intelligence + Deal Execution
+
+SUBHEAD
+A command platform for brokers, agents, and teams that makes pipeline health, transaction risk, and next-best action visible in real time.
+
+SECTIONS
+- why brokerages lose momentum
+- Terra command loop
+- listings + deals + closings in one system
+- intelligence that explains itself
+- workflow automation with auditability
+- management reporting
+- premium CTA
+
+CTA BUTTONS
+- Explore Terra
+- View Deal Pipeline
+- See Command Demo
+
+==================================================
+SECTION 21 — SCREENSHOTS + DEMO ASSETS
+==================================================
+
+GENERATE SCREENSHOTS FOR:
+- executive overview
+- listings dashboard
+- deal pipeline
+- offer comparison
+- transaction workflow
+- compliance readiness
+- team performance
+- predictions panel
+- automation run history
+
+STORE IN:
+assets/screenshots/terra/
+
+==================================================
+SECTION 22 — DOCS
+==================================================
+
+CREATE:
+docs/terra.md
+docs/terra-demo-script.md
+
+docs/terra.md MUST EXPLAIN:
+- what Terra is
+- who it is for
+- how it uses the SZL core
+- key workflows
+- data model
+- differentiation
+
+docs/terra-demo-script.md MUST WALK THROUGH:
+1. stale listing detected
+2. buyer engagement tracked
+3. offer submitted
+4. close-likelihood risk flagged
+5. action routed
+6. automation triggered
+7. deal recovered
+8. close readiness improved
+
+==================================================
+SECTION 23 — FINAL EXECUTION STANDARD
+==================================================
+
+TERRA IS SUCCESSFUL ONLY IF:
+- it feels fully integrated into SZL
+- it clearly uses the command loop
+- it is operational, not conceptual
+- it has realistic demo data
+- it has API routes and stateful views
+- it is visually premium
+- it feels stronger than a basic CRM or transaction manager
+- it can be shown to brokers, teams, and investors without embarrassment
+
+FINAL FEELING
+Terra should look like:
+the real-estate command layer of a serious platform company
+
+NOT:
+a side project
+NOT:
+a broker template
+NOT:
+a fake AI shell
+
+TARGET REACTION
+“This looks like a brokerage operating system, not just another proptech app.”
