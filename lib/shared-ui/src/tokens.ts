@@ -494,18 +494,6 @@ export const effects = {
       border: "1px solid hsla(0 0% 100% / 0.10)",
     },
   },
-  _legacy: {
-    glassmorphism: {
-      background: "hsla(220 15% 18% / 0.06)",
-      backdropFilter: "blur(16px)",
-      border: "1px solid hsla(0 0% 100% / 0.07)",
-    },
-    glassmorphismStrong: {
-      background: "hsla(220 15% 18% / 0.12)",
-      backdropFilter: "blur(20px)",
-      border: "1px solid hsla(0 0% 100% / 0.11)",
-    },
-  },
 } as const;
 
 export const motion = {

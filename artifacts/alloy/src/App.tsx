@@ -1797,6 +1797,7 @@ function ChatInterface() {
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
             </div>
+          </div>
           <div className="flex-1 overflow-y-auto py-1">
             {loadingConversations ? (
               <div className="px-3 py-2 text-xs text-muted-foreground">Loading...</div>

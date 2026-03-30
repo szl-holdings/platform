@@ -39,7 +39,7 @@ export function EmptyState({
       )}
     >
       {illustration ? (
-        <div className={cn("mb-4", compact ? "mb-3")}>
+        <div className={cn("mb-4", compact ? "mb-3" : "")}>
           {illustration}
         </div>
       ) : Icon ? (
