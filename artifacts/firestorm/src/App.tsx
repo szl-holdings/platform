@@ -12,6 +12,7 @@ import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
+const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
 const ThreatIntelFeed = lazy(() => import("@/pages/threat-intel-feed"));
@@ -272,6 +273,56 @@ const firestormShortcuts: KeyboardShortcut[] = [
   { key: "R", description: "Go to Reports", category: "Navigation" },
 ];
 
+function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const [location] = useLocation();
+  const isDashboard = location.startsWith("/dashboard") || location.startsWith("/soc") ||
+    location.startsWith("/threat") || location.startsWith("/incidents") ||
+    location.startsWith("/findings") || location.startsWith("/mitre") ||
+    location.startsWith("/compliance") || location.startsWith("/alerts") ||
+    location.startsWith("/risk") || location.startsWith("/reports") ||
+    location.startsWith("/observability") || location.startsWith("/sentinel") ||
+    location.startsWith("/watchlists") || location.startsWith("/forensics") ||
+    location.startsWith("/xdr") || location.startsWith("/identity") ||
+    location.startsWith("/executive") || location.startsWith("/cr/") ||
+    location.startsWith("/sacsayhuaman") || location.startsWith("/adversary") ||
+    location.startsWith("/agent-insights") || location.startsWith("/asset-inventory");
+
+  if (!isDashboard && location === "/") {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#0a0608]"><div className="w-6 h-6 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" /></div>}>
+        <MarketingHomePage />
+      </Suspense>
+    );
+  }
+
+  return (
+    <PowerUserProvider shortcuts={firestormShortcuts} appName="Firestorm" accentColor="#ef4444">
+      <div className="flex flex-col h-screen bg-background">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+          Skip to main content
+        </a>
+        <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Cyber Command" accentColor="#ef4444" />
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
+          <div className="flex-1 flex flex-col overflow-auto">
+            <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+              <AppRouter />
+            </main>
+          </div>
+        </div>
+        <Toaster />
+        <CommandPalette
+          open={cmdOpen}
+          onClose={() => setCmdOpen(false)}
+          commands={firestormCommands}
+          appName="Firestorm"
+          accentColor="#ef4444"
+        />
+      </div>
+    </PowerUserProvider>
+  );
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(firestormCommands);
 
@@ -279,30 +330,7 @@ function App() {
     <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={firestormShortcuts} appName="Firestorm" accentColor="#ef4444">
-          <div className="flex flex-col h-screen bg-background">
-            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
-              Skip to main content
-            </a>
-            <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Cyber Command" accentColor="#ef4444" />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <div className="flex-1 flex flex-col overflow-auto">
-                <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-                  <AppRouter />
-                </main>
-              </div>
-            </div>
-            <Toaster />
-            <CommandPalette
-              open={cmdOpen}
-              onClose={() => setCmdOpen(false)}
-              commands={firestormCommands}
-              appName="Firestorm"
-              accentColor="#ef4444"
-            />
-          </div>
-        </PowerUserProvider>
+        <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </WouterRouter>
       <AgentCopilot config={sentinelConfig} />
     </QueryClientProvider>

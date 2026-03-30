@@ -16,7 +16,7 @@ const platforms = [
   },
   {
     name: "Vessels",
-    label: "Maritime Command Platform",
+    label: "Maritime Intelligence Platform",
     copy: "Turn fleet visibility, voyage performance, and operational exceptions into command.",
     cta: "Explore Vessels",
     href: "/vessels/",
@@ -27,7 +27,67 @@ const platforms = [
     status: "Live",
   },
   {
-    name: "Carlota Jo Consulting",
+    name: "Firestorm",
+    label: "Cyber Defense Command",
+    copy: "Unified XDR, identity threat detection, adversary emulation, and SOC automation.",
+    cta: "Explore Firestorm",
+    href: "/firestorm/",
+    accent: "hsl(0,80%,55%)",
+    accentRgb: "220,60,60",
+    accentBg: "hsla(0,80%,55%,0.05)",
+    accentBorder: "hsla(0,80%,55%,0.12)",
+    status: "Live",
+  },
+  {
+    name: "INCA",
+    label: "Agentic Intelligence Cortex",
+    copy: "Structured visibility, explainable AI triage, and auditable decision workflows.",
+    cta: "Explore INCA",
+    href: "/inca/",
+    accent: "hsl(265,80%,60%)",
+    accentRgb: "139,92,246",
+    accentBg: "hsla(265,80%,60%,0.05)",
+    accentBorder: "hsla(265,80%,60%,0.12)",
+    status: "Live",
+  },
+  {
+    name: "Nimbus",
+    label: "Predictive Intelligence Platform",
+    copy: "ML-driven forecasting, scenario planning, and decision intelligence for leadership teams.",
+    cta: "Explore Nimbus",
+    href: "/dreamscape/",
+    accent: "hsl(270,70%,55%)",
+    accentRgb: "155,100,230",
+    accentBg: "hsla(270,70%,55%,0.05)",
+    accentBorder: "hsla(270,70%,55%,0.12)",
+    status: "Live",
+  },
+  {
+    name: "Terra",
+    label: "Business Telemetry Dashboard",
+    copy: "Real-time business metrics, KPI tracking, and operational health monitoring.",
+    cta: "Explore Terra",
+    href: "/terra/",
+    accent: "hsl(160,70%,45%)",
+    accentRgb: "34,168,120",
+    accentBg: "hsla(160,70%,45%,0.05)",
+    accentBorder: "hsla(160,70%,45%,0.12)",
+    status: "Live",
+  },
+  {
+    name: "Rosie",
+    label: "Threat & Incident Command",
+    copy: "MSP operations dashboard with SLA prediction, dispatch, and client management.",
+    cta: "Explore Rosie",
+    href: "/msp/",
+    accent: "hsl(215,80%,55%)",
+    accentRgb: "55,120,210",
+    accentBg: "hsla(215,80%,55%,0.05)",
+    accentBorder: "hsla(215,80%,55%,0.12)",
+    status: "Live",
+  },
+  {
+    name: "Carlota Jo",
     label: "Private Advisory & Residential Support",
     copy: "A refined advisory brand for high-trust private client operations.",
     cta: "Explore Carlota Jo",
@@ -36,7 +96,7 @@ const platforms = [
     accentRgb: "191,152,82",
     accentBg: "hsla(38,55%,58%,0.05)",
     accentBorder: "hsla(38,55%,58%,0.12)",
-    status: "Pilot Ready",
+    status: "Live",
   },
 ];
 
@@ -77,11 +137,11 @@ export function FeaturedPlatforms() {
             lineHeight: "1.06",
             fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
           }}>
-            Two flagships. One service brand.
+            Eight platforms. One architecture.
           </h2>
         </m.div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {platforms.map((p, i) => (
             <m.div
               key={p.name}

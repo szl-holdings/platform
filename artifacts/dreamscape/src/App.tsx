@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AlloyIntelligenceLayout } from "@/components/alloy-intelligence-layout";
@@ -23,6 +23,7 @@ function PageLoader() {
   );
 }
 
+const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
 const PredictiveIntelligence = lazy(() => import("@/pages/predictive-intelligence"));
 const RiskScenario = lazy(() => import("@/pages/risk-scenario"));
 const ModelExplainability = lazy(() => import("@/pages/model-explainability"));
@@ -61,29 +62,48 @@ const alloyPredictiveShortcuts: KeyboardShortcut[] = [
   { key: "F", description: "Forecasting Center", category: "Navigation" },
 ];
 
+function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const [location] = useLocation();
+  const isDashboard = location !== "/" || location.startsWith("/risk") ||
+    location.startsWith("/explainability") || location.startsWith("/opportunities") ||
+    location.startsWith("/forecasting") || location.startsWith("/dashboard");
+
+  if (location === "/") {
+    return (
+      <Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#08060e]"><div className="w-6 h-6 border-2 border-purple-500/40 border-t-purple-400 rounded-full animate-spin" /></div>}>
+        <MarketingHomePage />
+      </Suspense>
+    );
+  }
+
+  return (
+    <PowerUserProvider shortcuts={alloyPredictiveShortcuts} appName="Alloy Predictive Intelligence" accentColor="#8b5cf6">
+      <div className="flex flex-col h-screen bg-[#080c14]">
+        <EcosystemNav currentAppId="alloy" currentAppName="Alloy — Predictive Intelligence" accentColor="#8b5cf6" />
+        <div className="flex-1 overflow-hidden">
+          <AlloyIntelligenceLayout>
+            <Router />
+          </AlloyIntelligenceLayout>
+        </div>
+      </div>
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        commands={alloyPredictiveCommands}
+        appName="Alloy Predictive Intelligence"
+        accentColor="#8b5cf6"
+      />
+    </PowerUserProvider>
+  );
+}
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(alloyPredictiveCommands);
 
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={alloyPredictiveShortcuts} appName="Alloy Predictive Intelligence" accentColor="#8b5cf6">
-          <div className="flex flex-col h-screen bg-[#080c14]">
-            <EcosystemNav currentAppId="alloy" currentAppName="Alloy — Predictive Intelligence" accentColor="#8b5cf6" />
-            <div className="flex-1 overflow-hidden">
-              <AlloyIntelligenceLayout>
-                <Router />
-              </AlloyIntelligenceLayout>
-            </div>
-          </div>
-          <CommandPalette
-            open={cmdOpen}
-            onClose={() => setCmdOpen(false)}
-            commands={alloyPredictiveCommands}
-            appName="Alloy Predictive Intelligence"
-            accentColor="#8b5cf6"
-          />
-        </PowerUserProvider>
+        <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </WouterRouter>
       <AgentCopilot config={alloyPredictiveConfig} />
     </QueryClientProvider>
