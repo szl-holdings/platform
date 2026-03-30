@@ -1,0 +1,335 @@
+FINAL MASTER PAYLOAD — SZL ECOSYSTEM
+
+MISSION  
+Build a premium, production-grade ecosystem:
+
+- SZL Holdings (portfolio HQ)  
+- Vessels (maritime platform)  
+- INCA (intelligence platform)  
+- Terra (real estate broker platform)  
+- Carlota Jo (luxury advisory)  
+- Stephen Site (authority)  
+- Admin  
+
+Must be:
+- real (no fake data)
+- premium (not generic)
+- secure (RLS)
+- CMS-driven
+- scalable
+
+--------------------------------
+RULES
+--------------------------------
+- No placeholder text  
+- No fake dashboards  
+- No empty pages  
+- No generic templates  
+- No exposed protected data  
+- One shared design system  
+- Carlota Jo = public brand (NOT Rosa)  
+- Prefer clean, restrained, premium  
+
+--------------------------------
+STACK
+--------------------------------
+Next.js + TypeScript + Tailwind + shadcn/ui + Framer Motion  
+Supabase (auth + DB + RLS)  
+Resend (email)  
+Plausible (analytics)  
+Stripe (later)  
+Mapbox (Vessels + Terra)  
+
+--------------------------------
+APPS
+--------------------------------
+/apps/szl-holdings  
+/apps/vessels  
+/apps/inca  
+/apps/terra  
+/apps/carlota-jo  
+/apps/stephen-site  
+/apps/admin  
+
+--------------------------------
+PHASE 0 — AUDIT (DO FIRST)
+--------------------------------
+Return ONLY:
+1. What exists  
+2. What’s partial  
+3. What’s missing  
+4. What’s broken  
+5. What needs secrets  
+6. MVP build order  
+
+DO NOT BUILD BEFORE THIS.
+
+--------------------------------
+PHASE 1 — MVP
+--------------------------------
+Build ONLY:
+- SZL homepage  
+- Vessels homepage  
+- Terra homepage  
+- Carlota homepage  
+- Stephen homepage  
+- shared design system  
+
+DO NOT:
+- build dashboards yet  
+- build billing  
+- fake data  
+- expose unfinished routes  
+
+--------------------------------
+DESIGN SYSTEM
+--------------------------------
+Build:
+- Header / Footer  
+- Hero  
+- CTA  
+- Feature grid  
+- Cards  
+- KPI strip  
+- Timeline  
+- Form  
+- Article card  
+- Dashboard shell (basic)  
+- Sidebar  
+- Table  
+- Alert  
+- Loading / Empty / Error  
+
+Style:
+- minimal  
+- premium  
+- strong spacing  
+- subtle motion  
+- one accent per brand  
+
+--------------------------------
+HOMEPAGES
+--------------------------------
+
+SZL:
+- ecosystem hero  
+- ventures  
+- roadmap  
+- updates  
+- CTA  
+
+Vessels:
+- command center feel  
+- product/map visual  
+- capabilities  
+- demo CTA  
+
+Terra:
+- premium real estate platform  
+- listings showcase  
+- broker tools positioning  
+- future map/search  
+- NOT Zillow clone  
+
+Carlota:
+- luxury + discreet  
+- services  
+- inquiry flow  
+
+Stephen:
+- authority  
+- work  
+- frameworks  
+- writing  
+- contact  
+
+--------------------------------
+CORE COPY
+--------------------------------
+
+SZL:
+Structured ventures for modern systems, services, and execution  
+
+Vessels:
+Maritime visibility, built for command  
+
+INCA:
+Intelligence with structure  
+
+Terra:
+Real estate intelligence and brokerage tools, built for clarity and execution  
+
+Carlota:
+Bespoke advisory for clients who value discretion and precision  
+
+Stephen:
+Systems, visibility, and execution for modern operations  
+
+--------------------------------
+CTAS
+--------------------------------
+
+SZL:
+Explore the portfolio  
+
+Vessels:
+Request a private demo  
+
+INCA:
+Request access  
+
+Terra:
+Explore listings  
+
+Carlota:
+Inquire privately  
+
+Stephen:
+Start a conversation  
+
+--------------------------------
+CMS
+--------------------------------
+Tables:
+- sites
+- pages
+- sections
+- ventures
+- services
+- features
+- roadmap
+- updates
+- ctas
+- articles
+- media
+- forms
+
+Must support:
+- draft/publish
+- SEO
+- ordering
+- admin editing
+
+--------------------------------
+PRODUCT DATA (LATER)
+--------------------------------
+
+Core:
+- organizations
+- users
+- memberships
+
+Vessels:
+- fleets
+- vessels
+
+INCA:
+- signals
+- findings
+
+Terra:
+- properties
+- listings
+- agents
+- brokerages
+- transactions
+- inquiries
+
+Carlota:
+- client_accounts
+- documents
+
+--------------------------------
+AUTH
+--------------------------------
+Roles:
+- public
+- authenticated
+- member
+- client
+- admin
+
+Rules:
+- RLS ON
+- default deny
+- org-based access
+- client isolation
+- no secrets client-side
+
+--------------------------------
+ANALYTICS
+--------------------------------
+Track:
+- page_view
+- cta_click
+- form_submit
+- inquiry_submit
+- listing_view
+- sign_in
+
+--------------------------------
+EMAIL
+--------------------------------
+- inquiry confirmation
+- demo request
+- listing inquiry
+- internal notification
+
+--------------------------------
+MAPS
+--------------------------------
+Vessels:
+- vessel tracking
+
+Terra:
+- property map
+- filters
+
+--------------------------------
+ENV VARS
+--------------------------------
+SUPABASE  
+STRIPE  
+RESEND  
+PLAUSIBLE  
+MAPBOX  
+APP URLS  
+
+(secrets in Replit Deployments)
+
+--------------------------------
+BUILD ORDER
+--------------------------------
+1. Audit  
+2. Design system  
+3. Homepages  
+4. CMS  
+5. Admin  
+6. Product shells  
+7. RLS  
+8. Forms + email + analytics  
+9. Billing  
+10. Maps  
+11. QA  
+
+--------------------------------
+DONE WHEN
+--------------------------------
+- polished UI  
+- mobile works  
+- no placeholder copy  
+- permissions enforced  
+- states handled  
+- analytics wired  
+- SEO set  
+- admin editable  
+
+--------------------------------
+FINAL RULE
+--------------------------------
+clean > complex  
+premium > flashy  
+real > fake  
+maintainable > clever  
+
+If unsure, choose the more credible option.
