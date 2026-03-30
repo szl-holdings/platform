@@ -3,7 +3,7 @@ import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { gatewayInfer, getGatewayStatus, isValidStrategy, isValidProvider } from "../lib/ai-gateway";
 import type { RoutingStrategy } from "../lib/ai-gateway";
-import { inferenceTelemetry } from "../lib/inference-telemetry";
+import { inferenceTelemetry, estimateCost } from "../lib/inference-telemetry";
 import type { InferenceProvider } from "../lib/inference-telemetry";
 import { providerHealth } from "../lib/provider-health";
 import { getRegistrySummary, getAllModelCards, getModelCard, getAllAgentIds } from "../lib/model-registry";
@@ -307,12 +307,15 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
       if (!Array.isArray(parsed) || parsed.length === 0) {
         throw new Error("Response is not a non-empty JSON array");
       }
-      const REQUIRED_FIELDS = ["id", "title", "score", "reasoning", "recommended_action"] as const;
+      const REQUIRED_FIELDS = ["id", "title", "score", "confidence", "severity", "reasoning", "recommended_action", "domain", "timeframe"] as const;
       for (const rec of parsed) {
         if (typeof rec !== "object" || rec === null) throw new Error("Recommendation item is not an object");
         for (const field of REQUIRED_FIELDS) {
           if (!(field in rec)) throw new Error(`Missing required field: ${field}`);
         }
+        const r = rec as Record<string, unknown>;
+        if (typeof r.score !== "number" || r.score < 0 || r.score > 100) throw new Error("score must be a number 0-100");
+        if (typeof r.confidence !== "number" || r.confidence < 0 || r.confidence > 1) throw new Error("confidence must be a number 0-1");
       }
       recommendations = parsed;
     } catch (parseErr) {
@@ -327,8 +330,7 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
       return;
     }
 
-    const telemetryRecord = inferenceTelemetry.getRecords({ limit: 1 })[0];
-    const estimatedCost = telemetryRecord?.estimatedCostUsd ?? 0;
+    const estimatedCostUsd = estimateCost(response.model, response.usage.promptTokens, response.usage.completionTokens);
 
     sendSuccess(res, {
       recommendations,
@@ -337,7 +339,7 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
         provider: response.provider,
         latencyMs: response.routing.totalLatencyMs,
         telemetryId: response.telemetryId,
-        estimatedCostUsd: estimatedCost,
+        estimatedCostUsd,
         domain: domain ?? "general",
         depth: depth ?? "standard",
         generatedAt: new Date().toISOString(),

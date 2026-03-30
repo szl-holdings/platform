@@ -70,7 +70,7 @@ const COST_PER_1K_TOKENS: Record<string, { input: number; output: number }> = {
   "claude-3-haiku-20240307": { input: 0.00025, output: 0.00125 },
 };
 
-function estimateCost(model: string, promptTokens: number, completionTokens: number): number {
+export function estimateCost(model: string, promptTokens: number, completionTokens: number): number {
   const rates = COST_PER_1K_TOKENS[model];
   if (!rates) return 0;
   return (promptTokens / 1000) * rates.input + (completionTokens / 1000) * rates.output;
