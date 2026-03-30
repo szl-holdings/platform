@@ -1,0 +1,801 @@
+REPLIT MASTER PAYLOAD — SZL PLATFORM EVOLUTION (ALL APPS + WEBSITES + PRODUCTION HARDENING)
+
+TARGET
+Use the EXISTING Git-connected repo as the base.
+Do not rebuild blindly.
+First inspect the current repo structure, preserve what is good, remove what is dead, and evolve the platform into a production-grade monorepo.
+
+MISSION
+Transform the existing SZL ecosystem into one coherent platform company with:
+- Terra = brokerage operating system + NYC / New York State distress intelligence
+- Firestorm = enterprise cyber defense validation platform
+- Core = Beacon / Lyte / Nimbus / AlloyScape command architecture
+- Website = unified public-facing SZL platform site
+- Shared services = auth, audit, ingestion, AI recommendations, telemetry, workflow engine
+- Production posture = modular architecture, RBAC, audit logging, ingestion pipelines, deployable services
+
+PRIMARY STRATEGY
+Do not optimize for “more apps.”
+Optimize for:
+- one doctrine
+- one architecture
+- one design language
+- one telemetry model
+- one command loop
+
+MASTER DOCTRINE
+CLARITY → CONTROL → EXECUTION → OUTCOME → DISCOVERY
+
+MASTER COMMAND LOOP
+DETECT → INTERPRET → DECIDE → EXECUTE → VERIFY → DISCOVER
+
+MAP THE CORE
+- Beacon = Detect
+- Lyte = Interpret / route ownership
+- Nimbus = Decide / score / explain
+- AlloyScape = Execute / automate / audit
+- Discovery = Terra distress engine + Firestorm security findings
+
+==================================================
+PHASE 1 — INSPECT AND EVOLVE THE EXISTING REPO
+==================================================
+
+1. Inspect the current repo tree, workspace files, package manifests, apps, services, and deployment files.
+2. Identify:
+   - duplicated backends
+   - dead routes
+   - abandoned experiments
+   - broken imports
+   - inconsistent naming
+   - apps that are incomplete but valuable
+3. Preserve and refactor, not rewrite, unless a file is clearly obsolete.
+4. Standardize the repo into this structure if not already present:
+
+/apps
+  /terra
+  /firestorm
+  /core-ui
+  /website
+
+/services
+  /api
+  /ingestion
+  /auth
+  /audit
+  /ai
+  /workflow
+
+/packages
+  /types
+  /design-system
+  /utils
+  /telemetry
+
+/infra
+  /docker
+  /env
+  /migrations
+
+5. If current app code exists elsewhere, migrate it into this structure cleanly and update imports.
+
+==================================================
+PHASE 2 — BACKEND CONSOLIDATION
+==================================================
+
+Create or consolidate a single API service at:
+
+/services/api
+
+Use:
+- Node.js
+- Express
+- PostgreSQL
+- modular routes
+- centralized error handling
+- structured logging
+- auth middleware
+- role middleware
+
+Required route groups:
+
+/api/auth/*
+/api/terra/*
+/api/firestorm/*
+/api/core/*
+/api/audit/*
+/api/ingestion/*
+/api/workflow/*
+
+Minimum endpoints:
+
+AUTH
+POST /api/auth/register
+POST /api/auth/login
+GET /api/auth/me
+
+TERRA
+GET /api/terra/leads
+POST /api/terra/leads
+GET /api/terra/deals
+GET /api/terra/deals/:id
+GET /api/terra/distress
+GET /api/terra/distress/:id
+POST /api/terra/distress/search
+POST /api/terra/convert/distress-to-lead
+POST /api/terra/convert/lead-to-deal
+
+FIRESTORM
+GET /api/firestorm/assets
+GET /api/firestorm/vulnerabilities
+GET /api/firestorm/incidents
+POST /api/firestorm/simulations
+GET /api/firestorm/compliance
+GET /api/firestorm/reports
+
+CORE
+GET /api/core/health
+GET /api/core/metrics
+POST /api/core/recommendations
+GET /api/core/summary
+
+AUDIT
+GET /api/audit/logs
+
+INGESTION
+POST /api/ingestion/upload
+POST /api/ingestion/run
+GET /api/ingestion/jobs
+
+WORKFLOW
+POST /api/workflow/run
+GET /api/workflow/runs
+POST /api/workflow/retry/:id
+
+==================================================
+PHASE 3 — AUTH, RBAC, AND ENTERPRISE SECURITY BASELINE
+==================================================
+
+Create:
+/services/auth
+
+Implement:
+- bcrypt password hashing
+- JWT authentication
+- auth middleware
+- role middleware
+- token validation
+- refresh-ready session structure
+
+Roles:
+- admin
+- broker
+- agent
+- investor
+- security_analyst
+- executive
+
+Middleware:
+- requireAuth
+- requireRole
+
+Apply protection to all non-public endpoints.
+
+Add baseline security controls:
+- input validation
+- request size limits
+- rate limiting
+- safe error responses
+- CORS control
+- server-side logging
+- no secrets in source
+- environment-variable driven config
+
+==================================================
+PHASE 4 — DATABASE AND MIGRATIONS
+==================================================
+
+Use PostgreSQL.
+
+Create or migrate tables for:
+
+users
+- id
+- email
+- password_hash
+- role
+- created_at
+
+leads
+- id
+- name
+- type
+- source
+- owner
+- score
+- created_at
+
+deals
+- id
+- property
+- stage
+- owner
+- probability
+- risk
+- created_at
+
+distress_properties
+- id
+- address
+- borough
+- county
+- state
+- zip
+- property_type
+- distress_type
+- distress_stage
+- source
+- filing_date
+- score
+- created_at
+
+vulnerabilities
+- id
+- asset
+- severity
+- status
+- created_at
+
+incidents
+- id
+- type
+- severity
+- status
+- created_at
+
+assets
+- id
+- name
+- type
+- owner
+- exposure_level
+- risk_score
+- created_at
+
+recommendations
+- id
+- source_type
+- source_id
+- score
+- confidence
+- reasoning
+- recommended_action
+- created_at
+
+audit_logs
+- id
+- user_id
+- action
+- entity
+- entity_id
+- metadata
+- timestamp
+
+ingestion_jobs
+- id
+- source
+- status
+- records_processed
+- started_at
+- completed_at
+
+workflow_runs
+- id
+- workflow_type
+- status
+- source_entity
+- source_id
+- retries
+- created_at
+- completed_at
+
+==================================================
+PHASE 5 — TERRA: BROKERAGE OPERATING SYSTEM + NY DISTRESS ENGINE
+==================================================
+
+Evolve Terra into the real-estate vertical on top of the SZL core.
+
+Core Terra modules:
+- Leads
+- CRM
+- Deal pipeline
+- Distress engine
+- Investor mode
+- Opportunity scoring
+- Broker overview
+
+A. Leads / CRM
+Fields:
+- name
+- type (buyer, seller, investor)
+- source
+- owner
+- score
+- next action
+
+Views:
+- lead list
+- lead detail
+- owner assignment
+- follow-up timeline
+- notes
+
+B. Deal Pipeline
+Stages:
+- lead
+- qualified
+- showing
+- offer
+- negotiation
+- accepted
+- inspection
+- financing
+- under contract
+- clear to close
+- closed
+- lost
+
+Each deal card shows:
+- property
+- owner
+- probability
+- risk
+- next action
+- stage age
+
+C. Distress Engine
+Create:
+- Distress dashboard
+- Property detail
+- Search + filters
+- Investor mode
+- Saved opportunities
+
+Filters:
+- borough
+- county
+- zip
+- distress type
+- distress stage
+- filing date
+- opportunity score
+
+Views:
+- table view
+- detail view
+- future-ready map placeholder with clustering support
+- investor queue
+
+Actions:
+- save opportunity
+- convert distress property to lead
+- assign to investor
+- create deal from lead
+
+==================================================
+PHASE 6 — NYC / NEW YORK STATE REAL DATA INGESTION
+==================================================
+
+Create:
+/services/ingestion
+
+Build a real ingestion framework.
+
+A. CSV Upload Ingestion
+POST /api/ingestion/upload
+- parse CSV
+- normalize headers
+- validate rows
+- normalize address
+- map borough/county
+- infer NY when applicable
+- classify distress type
+- dedupe by address + filing date + type
+- upsert into distress_properties
+
+B. Scheduled Ingestion
+- node-cron based scheduler
+- support every 6h or 12h job runs
+- record job metadata in ingestion_jobs
+
+C. Source Adapters
+Design adapters for:
+- NYC public property / record exports
+- New York State public datasets
+- county exports
+- manual file imports
+
+D. Normalization Rules
+- address casing normalization
+- borough aliases normalized
+- county normalization
+- dedupe strategy
+- source provenance retained
+
+Do not fake live scraping.
+Build clean ingestion interfaces, upload flows, and adapters so real sources can be connected safely and legally.
+
+==================================================
+PHASE 7 — TERRA OPPORTUNITY SCORING
+==================================================
+
+Use the AI service to score distress properties.
+
+Input signals:
+- distress type
+- distress stage
+- filing recency
+- borough / county
+- duplicate filing history
+- property metadata if available
+- nearby demand / market metadata placeholders
+
+Output:
+- score
+- confidence
+- reasoning
+- recommended_action
+
+Example:
+“High opportunity due to recent pre-foreclosure filing in high-demand borough with limited competing activity. Assign investor review within 24 hours.”
+
+==================================================
+PHASE 8 — FIRESTORM: DEFENSIVE CYBER COMMAND PLATFORM
+==================================================
+
+Evolve Firestorm into a defensive, enterprise-ready security platform.
+
+Allowed scope:
+- authorized internal simulation records
+- vulnerability visibility
+- incident tracking
+- asset inventory
+- compliance views
+- detection visibility
+- response workflow hooks
+
+Do NOT add:
+- exploit tooling
+- unauthorized targeting
+- offensive automation
+- real-world attack features
+
+Required Firestorm views:
+A. Asset Inventory
+- asset
+- owner
+- exposure
+- risk score
+
+B. Vulnerability Dashboard
+- asset
+- severity
+- status
+- remediation owner
+- filter by severity/status
+
+C. Incident Monitor
+- type
+- severity
+- status
+- assigned owner
+- timeline
+
+D. Simulation Panel
+- scenario
+- status
+- outcome
+- gaps found
+
+E. Compliance Dashboard
+- control framework view
+- gap summary
+- progress view
+
+==================================================
+PHASE 9 — FIRESTORM RESPONSE + PURPLE TEAM LOGIC
+==================================================
+
+Create response-aware workflows:
+- assign vulnerability owner
+- escalate critical findings
+- track incident states
+- route internal simulation results
+- attach recommendations to findings
+
+Use workflow engine to:
+- open workflow runs
+- retry failed jobs
+- assign owners
+- log every response action
+
+==================================================
+PHASE 10 — CORE AI / NIMBUS RECOMMENDATION ENGINE
+==================================================
+
+Create:
+/services/ai
+
+Purpose:
+Provide explainable recommendations across Terra and Firestorm.
+
+Endpoint:
+POST /api/core/recommendations
+
+Inputs:
+- distress property
+- deal
+- lead
+- vulnerability
+- incident
+- asset
+
+Outputs:
+{
+  score: number,
+  confidence: number,
+  reasoning: string,
+  recommended_action: string
+}
+
+Rules:
+- no vague AI language
+- every recommendation must include rationale
+- every recommendation must include confidence
+- every recommendation must include next action
+
+==================================================
+PHASE 11 — AUDIT + OBSERVABILITY
+==================================================
+
+Create:
+/services/audit
+/packages/telemetry
+
+Audit everything important:
+- register/login
+- failed login
+- record mutation
+- admin action
+- ingestion upload
+- ingestion run
+- workflow execution
+- simulation trigger
+- API mutation
+
+Store in:
+audit_logs
+
+Expose:
+GET /api/audit/logs
+
+Add structured telemetry:
+- request timing
+- error logs
+- health checks
+- service logs
+- standardized event shape
+
+==================================================
+PHASE 12 — WORKFLOW / ALLOYSCAPE LAYER
+==================================================
+
+Create:
+/services/workflow
+
+Use it as the execution engine for both Terra and Firestorm.
+
+Terra workflows:
+- distress property to lead
+- lead to deal
+- assign investor
+- follow-up queue
+- broker escalation
+
+Firestorm workflows:
+- critical vulnerability escalation
+- incident assignment
+- internal simulation follow-up
+- compliance remediation task routing
+
+Expose:
+- run workflow
+- list workflow runs
+- retry failed run
+
+==================================================
+PHASE 13 — SHARED DESIGN SYSTEM
+==================================================
+
+Create:
+/packages/design-system
+
+Shared components:
+- PageShell
+- TopBar
+- SideNav
+- Card
+- StatStrip
+- DataTable
+- Badge
+- FilterBar
+- SearchInput
+- EmptyState
+- LoadingState
+- Drawer
+- RecommendationPanel
+
+Visual style:
+- dark mode default
+- premium
+- clean
+- high contrast
+- restrained
+- consistent spacing and typography
+
+Apply to:
+- Terra
+- Firestorm
+- Core UI
+- Website
+
+==================================================
+PHASE 14 — CORE UI / BEACON LAYER
+==================================================
+
+In /apps/core-ui build the SZL Command Center.
+
+Show:
+- high-opportunity Terra properties
+- open Firestorm vulnerabilities
+- open incidents
+- recommendation feed
+- recent workflow runs
+- recent audit events
+
+Quick links:
+- Terra
+- Firestorm
+- Website
+
+This becomes the unified command dashboard.
+
+==================================================
+PHASE 15 — WEBSITE / PUBLIC PLATFORM
+==================================================
+
+In /apps/website build the public SZL site.
+
+Sections:
+- Hero
+- Terra
+- Firestorm
+- Command architecture
+- CTA
+
+Copy direction:
+Headline:
+SZL — Command Systems for Real Operations
+
+Terra:
+Find, score, and move on distressed real-estate opportunities across NYC and New York State.
+
+Firestorm:
+Validate and improve enterprise defense posture with defensive visibility, authorized simulations, and actionable remediation.
+
+CTAs:
+- Explore Terra
+- Explore Firestorm
+- Request Access
+
+==================================================
+PHASE 16 — ENVIRONMENT, INFRA, AND DEPLOYMENT READINESS
+==================================================
+
+Create:
+- .env.example
+- centralized config
+- docker-ready local setup
+- migration scripts
+- health endpoints
+
+.env.example:
+DATABASE_URL=postgres://szl:szl@localhost:5432/szl
+JWT_SECRET=change_this_now
+PORT=4000
+
+Prepare for deployment:
+- API container
+- Postgres container
+- frontend build pipelines
+- environment-based config
+
+==================================================
+PHASE 17 — CLEANUP AND REPO QUALITY
+==================================================
+
+Do the following:
+- remove dead files
+- remove duplicate service logic
+- remove broken imports
+- standardize naming
+- standardize API responses
+- standardize folder casing
+- fix path inconsistencies
+- isolate legacy experiments away from production app paths
+- update README to reflect the real architecture
+
+==================================================
+PHASE 18 — WHAT TO ADD THAT IS CURRENTLY OUT OF SCOPE BUT HIGH VALUE
+==================================================
+
+If the repo does not already have these, add them now:
+
+1. README overhaul
+- explain platform structure
+- explain apps
+- explain services
+- explain how to run locally
+
+2. Health / status endpoints
+- /api/core/health
+- service health summaries
+
+3. Minimal metrics endpoint
+- request counts
+- ingestion job counts
+- workflow run counts
+
+4. Pagination + sorting for all major list endpoints
+
+5. Standard error handler
+- no raw stack traces in responses
+
+6. Seed data for:
+- multiple distress properties across NYC boroughs
+- multiple vulnerabilities
+- multiple incidents
+- multiple recommendations
+
+==================================================
+PHASE 19 — WHAT “BEST IN CLASS” MEANS HERE
+==================================================
+
+Terra should feel like:
+- the operator’s command surface for distress opportunity discovery and conversion
+
+Firestorm should feel like:
+- the defender’s command surface for vulnerability and incident visibility
+
+Core should feel like:
+- the executive / operator command layer that proves SZL is one architecture
+
+==================================================
+PHASE 20 — FINAL GOAL
+==================================================
+
+Transform the repo from:
+a promising but uneven project collection
+
+into:
+a deployable, extensible platform foundation with clear operational value
+
+END STATE:
+- Terra works as a real NYC / NYS distress intelligence product
+- Firestorm works as a defensive cyber operations product
+- Core UI ties them together
+- Website presents the platform cleanly
+- API is secured
+- RBAC exists
+- audit logging exists
+- ingestion is real
+- repo is structured for scale
