@@ -181,6 +181,9 @@ export function Layout({ children }: { children: ReactNode }) {
             <Zap className="w-3 h-3" />
             <span>SZL Holdings</span>
           </div>
+          <a href="/alloy/" className="flex items-center gap-1.5 px-2 py-1 rounded-lg w-full transition-colors hover:bg-cyan-500/5" title="Alloy Intelligence Layer">
+            <span className="text-[10px] text-cyan-400/40 font-medium">⬡ Powered by Alloy</span>
+          </a>
         </div>
       </aside>
 

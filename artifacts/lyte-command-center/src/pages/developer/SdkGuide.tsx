@@ -94,8 +94,8 @@ const alerts = await client.maritime.getAlerts();`,
             name: "AI / ML",
             icon: Zap,
             color: "text-tag-ai",
-            code: `// Nimbus predictions
-const predictions = await client.ai.getNimbusPredictions();
+            code: `// Alloy intelligence layer
+const workflows = await client.ai.getAlloyWorkflows();
 
 // INCA intelligence
 const campaigns = await client.ai.getIncaCampaigns();`,
@@ -107,8 +107,8 @@ const campaigns = await client.ai.getIncaCampaigns();`,
             code: `// Zeus topology
 const topology = await client.infrastructure.getZeusTopology();
 
-// AlloyScape workflows
-const workflows = await client.infrastructure.getAlloyscapeWorkflows();`,
+// Alloy workflow templates
+const templates = await client.infrastructure.getAlloyWorkflowTemplates();`,
           },
           {
             name: "Developer",

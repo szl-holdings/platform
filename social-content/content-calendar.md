@@ -87,7 +87,7 @@ Think of it as the command center where every data point from every platform con
 Here's what makes INCA different from yet another dashboard:
 
 1. Live experiment tracking with real-time accuracy metrics
-2. Cross-platform intelligence — it doesn't just monitor INCA, it connects insights across Nimbus (predictions), Beacon (analytics), and Zeus (orchestration)
+2. Cross-platform intelligence — it doesn't just monitor INCA, it connects insights across Alloy (orchestration), Beacon (analytics), and Zeus (infrastructure)
 3. Model performance benchmarking that actually tells you when something is degrading before your users notice
 
 Building an intelligence platform taught me something unexpected: the hardest part isn't the algorithms. It's designing the information architecture so that the right insight reaches the right person at the right moment.
@@ -221,52 +221,53 @@ Week 4 of 8.
 
 ---
 
-## Week 5: The Prediction Engine — Nimbus + Beacon
+## Week 5: The Intelligence Backbone — Alloy + Beacon
 
-**Theme**: Showcase the predictive intelligence platforms.
+**Theme**: Showcase Alloy — the intelligence, orchestration, and workflow backbone of the ecosystem — and Beacon, the cross-platform analytics companion.
 
-**Banner**: `banners/week5-prediction-linkedin.png` (LinkedIn) / `banners/week5-prediction-square.png` (X)
+**Banner**: `banners/week5-intelligence-linkedin.png` (LinkedIn) / `banners/week5-intelligence-square.png` (X)
 
 ### LinkedIn Post
 
-What if you could see the future? Not perfectly — but well enough to act before everyone else?
+What if every signal from every platform in your ecosystem could be understood, orchestrated, and acted on — without manual triage?
 
-That's the question behind Nimbus and Beacon, the predictive intelligence layer of SZL Holdings.
+That's the problem Alloy solves.
 
-NIMBUS — The Forecaster
-Nimbus is a predictive AI platform that analyses patterns, builds forecasting models, and generates predictions across multiple domains. It takes the intelligence gathered by INCA and the monitoring data from Lyte, and asks: "What happens next?"
+ALLOY — The Intelligence Layer
+Alloy is the orchestration and workflow backbone of the SZL ecosystem. It's not a chatbot. It's the intelligence engine that receives operational signals from Lyte and Vessels, reasons over them, and produces structured, explainable outputs — from incident briefs to approval-ready documents.
+
+Every high-stakes action passes through human approval. Every output includes a confidence score. Every decision is logged.
+
+I built Alloy on one principle: automation should accelerate work, not replace accountability.
 
 BEACON — The Signal
-Beacon is the analytics and alerting companion. Where Nimbus predicts, Beacon surfaces. It connects to every other platform in the ecosystem — Zeus, INCA, DreamEra — and creates cross-platform intelligence reports that highlight trends, anomalies, and opportunities.
+Beacon is the analytics and alerting companion. It connects cross-platform intelligence, surfaces trends across the ecosystem, and ensures the right signals reach the right operators at the right time.
 
-Together, they form a prediction engine that gets smarter as the ecosystem grows. Every new platform adds new data. Every new data point improves the predictions.
+The insight that changed how I think about AI orchestration: the hardest problem isn't reasoning — it's governance. Making sure humans are in the loop where they should be, and out of the loop where they shouldn't be.
 
-The insight that changed how I think about AI: prediction isn't about being right. It's about being useful. A prediction that's 70% accurate but arrives 3 hours early is infinitely more valuable than a 99% accurate post-mortem.
-
-Build for speed of insight, not perfection of analysis.
+Alloy is how I solved that.
 
 Week 6: The Advisory Arm. Consulting meets technology.
 
-#BuildInPublic #PredictiveAI #AI #DataScience #SZLHoldings #TechFounder #Innovation #MachineLearning
+#BuildInPublic #AIOrchestration #AI #DataScience #SZLHoldings #TechFounder #Innovation #MachineLearning
 
 ### X / Twitter Post
 
-Prediction isn't about being right. It's about being early.
+Automation should accelerate work, not replace accountability.
 
-NIMBUS — Forecasts what happens next
-BEACON — Surfaces signals across platforms
+ALLOY — Intelligence, orchestration & workflow backbone for the SZL ecosystem.
 
-A 70% accurate prediction that arrives 3 hours early beats a 99% accurate post-mortem.
+Every output has a confidence score. Every high-stakes action requires human approval. Every decision is logged.
 
-Build for speed of insight.
+That's how you build AI that earns trust.
 
 Week 5 of 8.
 
-#BuildInPublic #PredictiveAI #SZLHoldings
+#BuildInPublic #AIOrchestration #SZLHoldings
 
 ### Hackajob Update
-- Add Nimbus and Beacon as featured projects
-- Update skills: "Predictive Analytics, Forecasting, AI/ML"
+- Add Alloy as the primary intelligence platform: "AI orchestration and workflow backbone powering the SZL ecosystem"
+- Update skills: "AI Orchestration, Workflow Automation, Human-in-the-Loop AI, Predictive Analytics"
 
 ---
 
@@ -389,19 +390,19 @@ A technology holding company with a portfolio of interconnected platforms.
 
 THE ECOSYSTEM:
 - INCA — AI research intelligence & experiment tracking
-- Lyte — Intelligent observability & system monitoring
+- Lyte — Intelligent observability & system monitoring (Powered by Alloy)
 - Rosie — Threat detection & security operations
 - Aegis — Defensive perimeter & compliance
 - Firestorm — Incident response simulation & training
-- Nimbus — Predictive AI & forecasting
+- Alloy — Intelligence, orchestration & workflow backbone
 - Beacon — Cross-platform analytics & alerting
 - Zeus — Platform orchestration & management
 - DreamEra — Creative AI & concept generation
 - Dreamscape — Immersive digital experiences
-- AlloyScape — Unified interface & integration layer
+- Vessels — Maritime intelligence platform (Powered by Alloy)
 - Carlota Jo — Strategic consulting & advisory
 
-Every platform connects. Intelligence flows from INCA. Lyte watches everything. The security stack protects it all. Nimbus predicts. Beacon alerts. Zeus orchestrates. And Carlota Jo ensures it all serves real business outcomes.
+Every platform connects. Intelligence flows from INCA. Lyte watches everything. The security stack protects it all. Alloy orchestrates intelligence into structured action. Beacon alerts. Zeus manages infrastructure. And Carlota Jo ensures it all serves real business outcomes.
 
 This isn't a collection of side projects. It's a thesis: one engineer can build a comprehensive, production-grade technology ecosystem if they think in systems, build in layers, and treat every platform as part of something larger.
 
@@ -427,10 +428,9 @@ One engineer. One ecosystem:
 - INCA (AI research)
 - Lyte (observability)
 - Rosie + Aegis + Firestorm (security)
-- Nimbus + Beacon (predictions)
+- Alloy + Beacon (intelligence & analytics)
 - Zeus (orchestration)
 - DreamEra + Dreamscape (creative)
-- AlloyScape (integration)
 - Carlota Jo (consulting)
 
 All interconnected. All production-grade.

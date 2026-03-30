@@ -67,7 +67,7 @@ Clean 1280x720 captures of every portfolio app's hero/landing section. Saved as 
 | `rosie-hero.jpg` | Rosie — AI-powered security monitoring |
 | `aegis-hero.jpg` | Aegis — enterprise security fortress |
 | `firestorm-hero.jpg` | Firestorm — incident response simulation |
-| `nimbus-hero.jpg` | Nimbus — predictive AI intelligence |
+| `alloy-hero.jpg` | Alloy — intelligence orchestration & workflow backbone |
 | `beacon-hero.jpg` | Beacon — decision analytics hub |
 | `carlota-jo-hero.jpg` | Carlota Jo — strategic consulting |
 | `dreamera-hero.jpg` | DreamEra — neural storytelling platform |
@@ -75,7 +75,7 @@ Clean 1280x720 captures of every portfolio app's hero/landing section. Saved as 
 | `career-stephen-lutar.jpg` | Stephen Lutar — founder profile & career site |
 | `apps-showcase-hero.jpg` | Apps Showcase — full platform catalog |
 | `zeus-hero.jpg` | Zeus — modular core architecture |
-| `alloyscape-hero.jpg` | AlloyScape — infrastructure operations |
+| `vessels-hero.jpg` | Vessels — maritime intelligence platform |
 | `lutar-hero.jpg` | Lutar — personal command center |
 
 ## Banners
@@ -92,7 +92,7 @@ AI-generated banner images for each week of the campaign. Two sizes per week:
 | 2 | The Brain | `week2-brain-linkedin.png` | `week2-brain-square.png` |
 | 3 | The Eyes | `week3-eyes-linkedin.png` | `week3-eyes-square.png` |
 | 4 | The Shield | `week4-shield-linkedin.png` | `week4-shield-square.png` |
-| 5 | Prediction Engine | `week5-prediction-linkedin.png` | `week5-prediction-square.png` |
+| 5 | Intelligence Backbone | `week5-intelligence-linkedin.png` | `week5-intelligence-square.png` |
 | 6 | The Advisory Arm | `week6-advisory-linkedin.png` | `week6-advisory-square.png` |
 | 7 | The Creative Side | `week7-creative-linkedin.png` | `week7-creative-square.png` |
 | 8 | The Full Reveal | `week8-reveal-linkedin.png` | `week8-reveal-square.png` |
@@ -165,7 +165,7 @@ node social-content/generate-playbook.js       # Marketing playbook PDF
 | 2 | The Brain | INCA |
 | 3 | The Eyes | Lyte |
 | 4 | The Shield | Rosie, Aegis, Firestorm |
-| 5 | Prediction Engine | Nimbus, Beacon |
+| 5 | Intelligence Backbone | Alloy, Beacon |
 | 6 | The Advisory Arm | Carlota Jo |
 | 7 | The Creative Side | DreamEra, Dreamscape |
 | 8 | The Full Reveal | Stephen Lutar + full portfolio |

@@ -264,6 +264,11 @@ function Sidebar() {
         )}
         <UserButton showName={expanded} className="w-full" />
         <RoleSelector expanded={expanded} />
+        {expanded && (
+          <a href="/alloy/" className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg w-full transition-colors hover:bg-sky-500/5" title="Alloy Intelligence Layer">
+            <span className="text-[10px] text-sky-400/50 font-medium">⬡ Powered by Alloy</span>
+          </a>
+        )}
       </div>
     </aside>
   );

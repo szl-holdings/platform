@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { Router as WouterRouter, Route, Switch, useLocation } from "wouter";
 import {
   MessageSquare, Send, Bot, User, Sparkles, Image as ImageIcon, BookOpen,
   Bell, GitCompare, Download, Copy, Check, Trash2, Plus, Search, RefreshCw,
@@ -6,9 +7,17 @@ import {
   FileText, Brain, Cpu, Mic, MicOff, Volume2, VolumeX, Activity,
   Shield, Ship, Palette, BarChart2, Building, Network, ChevronRight,
   ChevronLeft, Globe, Radio, SlidersHorizontal, Layers, ExternalLink,
-  AlertTriangle, Info, AlertCircle, Eye, EyeOff, Lock,
+  AlertTriangle, Info, AlertCircle, Eye, EyeOff, Lock, Home,
+  Workflow, Users, Package, Shield as ShieldIcon, Menu,
 } from "lucide-react";
 import { cn } from "./lib/utils";
+import OverviewPage from "./pages/OverviewPage";
+import ArchitecturePage from "./pages/ArchitecturePage";
+import WorkflowsPage from "./pages/WorkflowsPage";
+import AgentsPage from "./pages/AgentsPage";
+import OutputsPage from "./pages/OutputsPage";
+import GovernancePage from "./pages/GovernancePage";
+import UseCasesPage from "./pages/UseCasesPage";
 
 const BASE_PATH = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/alloy";
 const API_BASE = "/api";
@@ -98,6 +107,128 @@ type ModelProvider = "auto" | "openai" | "anthropic";
 type ImageProvider = "huggingface" | "openai";
 type ChatMode = "normal" | "image";
 type ActivePanel = "chat" | "kb" | "advisories" | "comparison" | "voice";
+type AppPage = "overview" | "architecture" | "workflows" | "use-cases" | "agents" | "outputs" | "governance" | "chat";
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
+const NAV_ITEMS: { id: AppPage; label: string; icon: React.ReactNode; group: "public" | "tool" }[] = [
+  { id: "overview", label: "Overview", icon: <Home className="w-3.5 h-3.5" />, group: "public" },
+  { id: "architecture", label: "Architecture", icon: <Layers className="w-3.5 h-3.5" />, group: "public" },
+  { id: "workflows", label: "Workflows", icon: <Workflow className="w-3.5 h-3.5" />, group: "public" },
+  { id: "agents", label: "Agents", icon: <Users className="w-3.5 h-3.5" />, group: "public" },
+  { id: "outputs", label: "Outputs", icon: <Package className="w-3.5 h-3.5" />, group: "public" },
+  { id: "governance", label: "Governance", icon: <ShieldIcon className="w-3.5 h-3.5" />, group: "public" },
+  { id: "use-cases", label: "Use Cases", icon: <BarChart2 className="w-3.5 h-3.5" />, group: "public" },
+  { id: "chat", label: "Command Interface", icon: <MessageSquare className="w-3.5 h-3.5" />, group: "tool" },
+];
+
+function AlloyNav({ currentPage, onNavigate }: { currentPage: AppPage; onNavigate: (page: AppPage) => void }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop Nav */}
+      <nav
+        className="hidden md:flex items-center justify-between border-b px-6 py-3 shrink-0"
+        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(12px)" }}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 mr-8">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #00d4ff40, #6366f140)", border: "1px solid rgba(0,212,255,0.4)" }}
+          >
+            <Layers className="w-3.5 h-3.5" style={{ color: "#00d4ff" }} />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-white leading-none">Alloy</div>
+            <div className="text-[10px] leading-none mt-0.5" style={{ color: "#00d4ff80" }}>Intelligence Layer</div>
+          </div>
+        </div>
+
+        {/* Nav Items */}
+        <div className="flex items-center gap-0.5 flex-1">
+          {NAV_ITEMS.filter(n => n.group === "public").map(item => (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{
+                background: currentPage === item.id ? "rgba(0,212,255,0.1)" : "transparent",
+                color: currentPage === item.id ? "#00d4ff" : "rgba(255,255,255,0.5)",
+                border: currentPage === item.id ? "1px solid rgba(0,212,255,0.2)" : "1px solid transparent",
+              }}
+              onMouseEnter={e => {
+                if (currentPage !== item.id) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.8)";
+              }}
+              onMouseLeave={e => {
+                if (currentPage !== item.id) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)";
+              }}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Command Interface CTA */}
+        <button
+          onClick={() => onNavigate("chat")}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border ml-4"
+          style={{
+            background: currentPage === "chat" ? "rgba(0,212,255,0.1)" : "transparent",
+            borderColor: "rgba(0,212,255,0.3)",
+            color: currentPage === "chat" ? "#00d4ff" : "rgba(0,212,255,0.7)",
+          }}
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          Command Interface
+        </button>
+      </nav>
+
+      {/* Mobile Nav */}
+      <nav
+        className="md:hidden flex items-center justify-between border-b px-4 py-3 shrink-0"
+        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(12px)" }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.3)" }}>
+            <Layers className="w-3 h-3" style={{ color: "#00d4ff" }} />
+          </div>
+          <span className="text-sm font-bold text-white">Alloy</span>
+        </div>
+        <button onClick={() => setMobileOpen(o => !o)} className="p-2 rounded-lg" style={{ color: "rgba(255,255,255,0.6)" }}>
+          <Menu className="w-4 h-4" />
+        </button>
+      </nav>
+
+      {/* Mobile Menu */}
+      {mobileOpen && (
+        <div
+          className="md:hidden border-b px-4 py-3 flex flex-col gap-1 shrink-0"
+          style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.85)" }}
+        >
+          {NAV_ITEMS.map(item => (
+            <button
+              key={item.id}
+              onClick={() => { onNavigate(item.id); setMobileOpen(false); }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-left transition-all"
+              style={{
+                background: currentPage === item.id ? "rgba(0,212,255,0.1)" : "transparent",
+                color: currentPage === item.id ? "#00d4ff" : "rgba(255,255,255,0.6)",
+                borderLeft: currentPage === item.id ? "2px solid #00d4ff" : "2px solid transparent",
+              }}
+            >
+              {item.icon}
+              {item.label}
+              {item.group === "tool" && <span className="ml-auto text-[10px] opacity-50">Tool</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
 
 // ─── Agent definitions ────────────────────────────────────────────────────────
 
@@ -353,8 +484,6 @@ function SeverityBadge({ severity }: { severity: string }) {
   );
 }
 
-// ─── ModelBadge ───────────────────────────────────────────────────────────────
-
 function ModelBadge({ provider, model }: { provider?: string; model?: string }) {
   if (!provider) return null;
   const isAnthropic = provider === "anthropic";
@@ -368,8 +497,6 @@ function ModelBadge({ provider, model }: { provider?: string; model?: string }) 
   );
 }
 
-// ─── AgentBadge ───────────────────────────────────────────────────────────────
-
 function AgentBadge({ agentId }: { agentId?: string }) {
   if (!agentId || agentId === "auto") return null;
   const agent = AGENT_MAP[agentId];
@@ -380,8 +507,6 @@ function AgentBadge({ agentId }: { agentId?: string }) {
     </span>
   );
 }
-
-// ─── ComparisonMessage ────────────────────────────────────────────────────────
 
 function ComparisonMessage({ data, onRate }: { data: ComparisonResult; onRate: (id: string, provider: string, rating: "up" | "down") => void }) {
   const providers = Object.keys(data.results);
@@ -412,8 +537,6 @@ function ComparisonMessage({ data, onRate }: { data: ComparisonResult; onRate: (
     </div>
   );
 }
-
-// ─── ImageMessage ──────────────────────────────────────────────────────────────
 
 function ImageMessage({ data, onDownload, onCopy }: {
   data: NonNullable<ChatMessage["imageData"]>;
@@ -470,12 +593,10 @@ function RealtimeFeedsSidebar({ isCollapsed, onToggle }: { isCollapsed: boolean;
         vessels.slice(0, 3).forEach((v: unknown, i: number) => {
           const vessel = v as { name?: string; status?: string; speed?: number; destination?: string };
           items.push({
-            id: `vessel-${i}`,
-            type: "vessel",
+            id: `vessel-${i}`, type: "vessel",
             title: vessel.name || `Vessel ${i + 1}`,
             detail: `${vessel.status || "Unknown"} · ${vessel.speed || 0}kn → ${vessel.destination || "N/A"}`,
-            severity: "low",
-            timestamp: new Date().toISOString(),
+            severity: "low", timestamp: new Date().toISOString(),
           });
         });
       }
@@ -486,8 +607,7 @@ function RealtimeFeedsSidebar({ isCollapsed, onToggle }: { isCollapsed: boolean;
         threats.slice(0, 3).forEach((t: unknown, i: number) => {
           const threat = t as { name?: string; severity?: string; type?: string };
           items.push({
-            id: `threat-${i}`,
-            type: "threat",
+            id: `threat-${i}`, type: "threat",
             title: threat.name || `Threat ${i + 1}`,
             detail: `${threat.type || "Unknown"} · ${threat.severity || "medium"}`,
             severity: (threat.severity as FeedItem["severity"]) || "medium",
@@ -506,8 +626,7 @@ function RealtimeFeedsSidebar({ isCollapsed, onToggle }: { isCollapsed: boolean;
         degraded.slice(0, 2).forEach((s: unknown, i: number) => {
           const svc = s as { name?: string; status?: string };
           items.push({
-            id: `health-${i}`,
-            type: "health",
+            id: `health-${i}`, type: "health",
             title: svc.name || `Service ${i + 1}`,
             detail: svc.status || "degraded",
             severity: svc.status === "down" ? "critical" : "medium",
@@ -537,6 +656,7 @@ function RealtimeFeedsSidebar({ isCollapsed, onToggle }: { isCollapsed: boolean;
       const interval = setInterval(loadFeeds, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isCollapsed, loadFeeds]);
 
   const feedIcons: Record<FeedItem["type"], React.ReactNode> = {
@@ -675,37 +795,13 @@ function VoicePanel({ onTranscribed }: { onTranscribed: (text: string) => void }
         const res = await fetch(`${API_BASE}/agent-training/transcribe`, { method: "POST", body: formData });
         if (res.ok) {
           const data = await res.json() as { text?: string };
-          if (data.text) {
-            setTranscript(data.text);
-            onTranscribed(data.text);
-          }
+          if (data.text) { setTranscript(data.text); onTranscribed(data.text); }
         }
       } catch {}
       setIsTranscribing(false);
     } else {
       await startRecording();
     }
-  };
-
-  const speakText = async (text: string) => {
-    if (!voiceOutputEnabled) return;
-    try {
-      setIsSpeaking(true);
-      const res = await fetch(`${API_BASE}/agent-training/tts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.slice(0, 800), voice: selectedVoice }),
-      });
-      if (!res.ok) return;
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      if (audioRef.current) { audioRef.current.pause(); URL.revokeObjectURL(audioRef.current.src); }
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); };
-      audio.onerror = () => setIsSpeaking(false);
-      await audio.play();
-    } catch { setIsSpeaking(false); }
   };
 
   const voices = [
@@ -739,12 +835,6 @@ function VoicePanel({ onTranscribed }: { onTranscribed: (text: string) => void }
         >
           {isTranscribing ? "Transcribing..." : isRecording ? "Stop Recording" : "Start Recording"}
         </button>
-        {isRecording && (
-          <p className="text-xs text-red-400 mt-2 flex items-center justify-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            Recording active — speak clearly
-          </p>
-        )}
       </div>
 
       {transcript && (
@@ -1107,9 +1197,9 @@ function ComparisonPanel({ onComparisonResult }: { onComparisonResult: (result: 
   );
 }
 
-// ─── Main App ─────────────────────────────────────────────────────────────────
+// ─── ChatInterface ─────────────────────────────────────────────────────────────
 
-export default function AlloyApp() {
+function ChatInterface() {
   const [selectedAgent, setSelectedAgent] = useState<string>("auto");
   const [showAgentPicker, setShowAgentPicker] = useState(false);
   const [activePanel, setActivePanel] = useState<ActivePanel>("chat");
@@ -1142,17 +1232,13 @@ export default function AlloyApp() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  useEffect(() => {
-    loadConversations();
-  }, []);
+  useEffect(() => { loadConversationsData(); }, []);
 
   useEffect(() => {
-    if (activeConversationId !== null) {
-      loadMessages(activeConversationId);
-    }
+    if (activeConversationId !== null) { loadMessages(activeConversationId); }
   }, [activeConversationId]);
 
-  const loadConversations = async () => {
+  const loadConversationsData = async () => {
     try {
       setLoadingConversations(true);
       const res = await fetch(`${API_BASE}/alloy-chat/conversations`);
@@ -1219,10 +1305,7 @@ export default function AlloyApp() {
 
   const sendMessageViaAgent = useCallback(async (content: string, conversationId: number) => {
     const agent = AGENT_MAP[selectedAgent];
-    if (!agent || selectedAgent === "auto" || !agent.agentType) {
-      return null;
-    }
-
+    if (!agent || selectedAgent === "auto" || !agent.agentType) return null;
     try {
       const res = await fetch(`${API_BASE}/domain-agents/${agent.agentType}/chat?stream=1`, {
         method: "POST",
@@ -1230,13 +1313,11 @@ export default function AlloyApp() {
         body: JSON.stringify({ message: content, conversationId: String(conversationId), stream: true }),
         signal: abortRef.current?.signal,
       });
-
       if (!res.ok) return null;
       if (!res.headers.get("content-type")?.includes("text/event-stream")) {
         const data = await res.json() as { data?: { reply?: string } };
         return data.data?.reply || null;
       }
-
       return res;
     } catch {
       return null;
@@ -1299,7 +1380,6 @@ export default function AlloyApp() {
     try {
       const agent = AGENT_MAP[selectedAgent];
       const isAgentMode = selectedAgent !== "auto" && agent?.agentType;
-
       let response: Response;
 
       if (isAgentMode) {
@@ -1368,7 +1448,7 @@ export default function AlloyApp() {
             }
             if (data.done) {
               setChatMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, isStreaming: false } : m));
-              loadConversations();
+              loadConversationsData();
             }
           } catch {}
         }
@@ -1431,455 +1511,603 @@ export default function AlloyApp() {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
-      {/* Top bar */}
-      <header className="shrink-0 border-b border-white/5 bg-black/30 backdrop-blur-sm px-4 py-2.5 flex items-center gap-3 z-20">
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 min-w-[200px]">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center alloy-glow">
-            <Layers className="w-3.5 h-3.5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold text-foreground leading-none tracking-tight">Alloy</h1>
-            <p className="text-[10px] text-primary/70 leading-none mt-0.5">Unified AI Command</p>
-          </div>
-        </div>
-
-        {/* Agent switcher */}
-        <div className="relative">
-          <button
-            onClick={() => setShowAgentPicker(s => !s)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-sm"
-          >
-            <span className="text-base leading-none">{currentAgent.icon}</span>
-            <div className="text-left">
-              <div className="text-xs font-medium text-foreground leading-none">{currentAgent.name}</div>
-              <div className="text-[10px] text-muted-foreground leading-none mt-0.5">{currentAgent.domain}</div>
+    <div className="flex flex-1 overflow-hidden">
+      {/* Conversation Sidebar */}
+      {showConvSidebar && (
+        <div className="w-56 shrink-0 border-r border-white/5 flex flex-col bg-black/20">
+          <div className="px-3 py-2.5 border-b border-white/5 flex items-center justify-between">
+            <span className="text-xs font-semibold text-foreground">Conversations</span>
+            <div className="flex gap-1">
+              <button onClick={createNewConversation} className="p-1 rounded hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors" title="New conversation">
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => setShowConvSidebar(false)} className="p-1 rounded hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors">
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <ChevronDown className="w-3 h-3 text-muted-foreground ml-1" />
-          </button>
-
-          {showAgentPicker && (
-            <div className="absolute left-0 top-full mt-1 w-80 rounded-xl border border-white/10 bg-popover shadow-2xl shadow-black/50 z-50 overflow-hidden">
-              <div className="px-3 py-2 border-b border-white/5">
-                <p className="text-xs font-semibold text-foreground">Select Agent</p>
-                <p className="text-[10px] text-muted-foreground">Choose a specialist or let Alloy auto-route</p>
-              </div>
-              <div className="p-2 grid grid-cols-1 gap-1 max-h-80 overflow-y-auto">
-                {AGENTS.map(agent => (
-                  <button
-                    key={agent.id}
-                    onClick={() => { setSelectedAgent(agent.id); setShowAgentPicker(false); }}
-                    className={cn(
-                      "flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-left transition-all",
-                      selectedAgent === agent.id ? "bg-white/8 border border-white/12" : "hover:bg-white/4 border border-transparent"
-                    )}
-                  >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: `${agent.accent}15` }}>
-                      <span style={{ filter: selectedAgent === agent.id ? "none" : "grayscale(30%)" }}>{agent.icon}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-foreground">{agent.name}</span>
-                        {selectedAgent === agent.id && <Check className="w-3 h-3 text-primary" />}
-                      </div>
-                      <span className="text-[10px] text-muted-foreground block truncate">{agent.description}</span>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground/60 shrink-0">{agent.domain}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1" />
-
-        {/* Panel tabs */}
-        <div className="flex gap-0.5 bg-white/3 rounded-lg p-0.5 border border-white/5">
-          {([
-            { id: "chat" as ActivePanel, icon: <MessageSquare className="w-3 h-3" />, label: "Chat" },
-            { id: "kb" as ActivePanel, icon: <BookOpen className="w-3 h-3" />, label: "KB" },
-            { id: "advisories" as ActivePanel, icon: <Bell className="w-3 h-3" />, label: "Advisory" },
-            { id: "comparison" as ActivePanel, icon: <GitCompare className="w-3 h-3" />, label: "Arena" },
-            { id: "voice" as ActivePanel, icon: <Mic className="w-3 h-3" />, label: "Voice" },
-          ] as const).map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActivePanel(tab.id)}
-              className={cn(
-                "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] transition-all",
-                activePanel === tab.id ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-white/3"
-              )}
-            >
-              {tab.icon}
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Right side controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowRightPanel(s => !s)}
-            className={cn("p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors", showRightPanel && "text-primary")}
-            title="Toggle feeds panel"
-          >
-            <Radio className="w-3.5 h-3.5" />
-          </button>
-          <a
-            href="/admin/"
-            className="text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 border border-white/8 px-2 py-1 rounded"
-          >
-            Admin <ExternalLink className="w-2.5 h-2.5" />
-          </a>
-          <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Live
           </div>
-        </div>
-      </header>
-
-      {/* Main content area */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-
-        {/* ── Chat Panel ── */}
-        {activePanel === "chat" && (
-          <>
-            {/* Conversation sidebar */}
-            {showConvSidebar && (
-              <div className="w-52 shrink-0 border-r border-white/5 flex flex-col bg-sidebar">
-                <div className="px-3 py-2.5 border-b border-white/5 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-foreground">Conversations</span>
-                  <button
-                    onClick={() => createNewConversation()}
-                    className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto py-1 px-1.5">
-                  {loadingConversations ? (
-                    <div className="flex items-center justify-center py-6"><RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" /></div>
-                  ) : conversations.length === 0 ? (
-                    <p className="text-[11px] text-muted-foreground text-center py-6 px-2">No conversations yet</p>
-                  ) : (
-                    conversations.map(convo => (
-                      <div
-                        key={convo.id}
-                        className={cn(
-                          "group flex items-center gap-1.5 px-2 py-1.5 rounded-md cursor-pointer transition-colors mb-0.5",
-                          activeConversationId === convo.id ? "bg-primary/10 text-primary" : "hover:bg-white/4 text-muted-foreground hover:text-foreground"
-                        )}
-                        onClick={() => setActiveConversationId(convo.id)}
-                      >
-                        <MessageSquare className="w-3 h-3 shrink-0" />
-                        <span className="text-[11px] truncate flex-1">{convo.title}</span>
-                        <button
-                          onClick={e => { e.stopPropagation(); deleteConversation(convo.id); }}
-                          className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center hover:text-red-400 transition-all"
-                        >
-                          <Trash2 className="w-2.5 h-2.5" />
-                        </button>
-                      </div>
-                    ))
+          <div className="flex-1 overflow-y-auto py-1">
+            {loadingConversations ? (
+              <div className="px-3 py-2 text-xs text-muted-foreground">Loading...</div>
+            ) : conversations.length === 0 ? (
+              <div className="px-3 py-4 text-xs text-muted-foreground text-center">No conversations yet.<br />Start chatting to create one.</div>
+            ) : (
+              conversations.map(conv => (
+                <div
+                  key={conv.id}
+                  className={cn("group flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors",
+                    activeConversationId === conv.id ? "bg-white/6 border-l-2 border-primary" : "hover:bg-white/3 border-l-2 border-transparent"
                   )}
-                </div>
-                <div className="px-3 py-2 border-t border-white/5">
+                  onClick={() => setActiveConversationId(conv.id)}
+                >
+                  <MessageSquare className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+                  <span className="flex-1 text-xs truncate text-foreground/80">{conv.title}</span>
                   <button
-                    onClick={() => setShowConvSidebar(false)}
-                    className="text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                    onClick={e => { e.stopPropagation(); deleteConversation(conv.id); }}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-400 text-muted-foreground transition-all shrink-0"
                   >
-                    <ChevronLeft className="w-3 h-3" /> Collapse
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
-              </div>
+              ))
+            )}
+          </div>
+          <div className="px-3 py-2 border-t border-white/5">
+            <button onClick={createNewConversation} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-white/10 text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
+              <Plus className="w-3 h-3" /> New Chat
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Chat area */}
+        <div className="flex flex-col flex-1 overflow-hidden">
+          {/* Chat header */}
+          <div className="shrink-0 border-b border-white/5 bg-black/30 backdrop-blur-sm px-4 py-2.5 flex items-center gap-3 z-10">
+            {!showConvSidebar && (
+              <button onClick={() => setShowConvSidebar(true)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors" title="Show conversations">
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             )}
 
-            {/* Chat area */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-              {/* Chat toolbar */}
-              <div className="shrink-0 border-b border-white/5 px-3 py-2 flex items-center gap-2 bg-black/10">
-                {!showConvSidebar && (
-                  <button onClick={() => setShowConvSidebar(true)} className="p-1 rounded hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors">
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-                <div className="flex-1 text-xs text-muted-foreground">
-                  {chatMode === "image"
-                    ? "Image generation mode — describe what to generate"
-                    : selectedAgent !== "auto"
-                    ? `Talking to ${currentAgent.name} · ${currentAgent.domain}`
-                    : "Alloy auto-routing — cross-ecosystem intelligence"}
-                  {useKnowledgeBase && <span className="ml-2 text-primary">· KB active</span>}
+            {/* Agent switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setShowAgentPicker(s => !s)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-sm"
+              >
+                <span className="text-base leading-none">{currentAgent.icon}</span>
+                <div className="text-left">
+                  <div className="text-xs font-medium text-foreground leading-none">{currentAgent.name}</div>
+                  <div className="text-[10px] text-muted-foreground leading-none mt-0.5">{currentAgent.domain}</div>
                 </div>
-                <div className="flex items-center gap-1.5 bg-black/20 rounded-lg p-0.5 border border-white/5">
-                  <button onClick={() => setChatMode("normal")} className={cn("flex items-center gap-1 px-2 py-1 rounded-md text-[11px] transition-all", chatMode === "normal" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground")}>
-                    <MessageSquare className="w-3 h-3" /> Chat
-                  </button>
-                  <button onClick={() => setChatMode("image")} className={cn("flex items-center gap-1 px-2 py-1 rounded-md text-[11px] transition-all", chatMode === "image" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground")}>
-                    <ImageIcon className="w-3 h-3" /> Image
-                  </button>
-                </div>
-                {chatMode === "image" && (
-                  <div className="flex items-center gap-1.5">
-                    <select value={imageProvider} onChange={e => setImageProvider(e.target.value as ImageProvider)} className="text-[11px] bg-card border border-white/10 rounded-md px-2 py-1 text-foreground">
-                      <option value="huggingface">HuggingFace SDXL</option>
-                      <option value="openai">OpenAI gpt-image-1</option>
-                    </select>
-                    <select value={imageSize} onChange={e => setImageSize(e.target.value)} className="text-[11px] bg-card border border-white/10 rounded-md px-2 py-1 text-foreground">
-                      <option value="256x256">256×256</option>
-                      <option value="512x512">512×512</option>
-                      <option value="1024x1024">1024×1024</option>
-                    </select>
-                  </div>
-                )}
-                {chatMode === "normal" && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowProviderMenu(s => !s)}
-                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 text-[11px] text-foreground transition-colors"
-                    >
-                      {selectedModel.icon}<span>{selectedModel.label}</span><ChevronDown className="w-3 h-3 text-muted-foreground" />
-                    </button>
-                    {showProviderMenu && (
-                      <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-white/10 bg-popover shadow-xl z-50">
-                        {MODEL_OPTIONS.map(opt => (
-                          <button key={opt.value} onClick={() => { setSelectedProvider(opt.value); setShowProviderMenu(false); }}
-                            className={cn("w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/5 transition-colors first:rounded-t-lg last:rounded-b-lg text-[11px]", selectedProvider === opt.value && "text-primary")}>
-                            <span>{opt.icon}</span>
-                            <span>{opt.label}</span>
-                            {selectedProvider === opt.value && <Check className="w-3 h-3 ml-auto" />}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                <ChevronDown className="w-3 h-3 text-muted-foreground ml-1" />
+              </button>
 
+              {showAgentPicker && (
+                <div className="absolute left-0 top-full mt-1 w-80 rounded-xl border border-white/10 bg-popover shadow-2xl shadow-black/50 z-50 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-white/5">
+                    <p className="text-xs font-semibold text-foreground">Select Agent</p>
+                    <p className="text-[10px] text-muted-foreground">Choose a specialist or let Alloy auto-route</p>
+                  </div>
+                  <div className="p-2 grid grid-cols-1 gap-1 max-h-80 overflow-y-auto">
+                    {AGENTS.map(agent => (
+                      <button
+                        key={agent.id}
+                        onClick={() => { setSelectedAgent(agent.id); setShowAgentPicker(false); }}
+                        className={cn(
+                          "flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-left transition-all",
+                          selectedAgent === agent.id ? "bg-white/8 border border-white/12" : "hover:bg-white/4 border border-transparent"
+                        )}
+                      >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: `${agent.accent}15` }}>
+                          <span style={{ filter: selectedAgent === agent.id ? "none" : "grayscale(30%)" }}>{agent.icon}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-foreground">{agent.name}</span>
+                            {selectedAgent === agent.id && <Check className="w-3 h-3 text-primary" />}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground block truncate">{agent.description}</span>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground/60 shrink-0">{agent.domain}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1" />
+
+            {/* Panel tabs */}
+            <div className="flex gap-0.5 bg-white/3 rounded-lg p-0.5 border border-white/5">
+              {([
+                { id: "chat" as ActivePanel, icon: <MessageSquare className="w-3 h-3" />, label: "Chat" },
+                { id: "kb" as ActivePanel, icon: <BookOpen className="w-3 h-3" />, label: "KB" },
+                { id: "advisories" as ActivePanel, icon: <Bell className="w-3 h-3" />, label: "Advisory" },
+                { id: "comparison" as ActivePanel, icon: <GitCompare className="w-3 h-3" />, label: "Arena" },
+                { id: "voice" as ActivePanel, icon: <Mic className="w-3 h-3" />, label: "Voice" },
+              ] as const).map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActivePanel(tab.id)}
+                  className={cn(
+                    "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] transition-all",
+                    activePanel === tab.id ? "bg-primary/15 text-primary font-medium" : "text-muted-foreground hover:text-foreground hover:bg-white/3"
+                  )}
+                >
+                  {tab.icon}
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowRightPanel(s => !s)}
+                className={cn("p-1.5 rounded-md text-muted-foreground hover:text-foreground transition-colors", showRightPanel && "text-primary")}
+                title="Toggle feeds panel"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Panel content */}
+          {activePanel !== "chat" ? (
+            <div className="flex-1 overflow-hidden">
+              {activePanel === "kb" && <KnowledgeBasePanel useKB={useKnowledgeBase} onToggleUseKB={() => setUseKnowledgeBase(v => !v)} />}
+              {activePanel === "advisories" && <AdvisoryPanel />}
+              {activePanel === "comparison" && <ComparisonPanel onComparisonResult={result => {
+                setChatMessages(prev => [...prev, {
+                  id: `comp-${Date.now()}`,
+                  role: "assistant",
+                  content: "",
+                  timestamp: new Date(),
+                  type: "comparison",
+                  comparisonData: result,
+                }]);
+                setActivePanel("chat");
+              }} />}
+              {activePanel === "voice" && <VoicePanel onTranscribed={text => { setInput(text); setActivePanel("chat"); }} />}
+            </div>
+          ) : (
+            <>
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-                {chatMessages.length === 0 && (
-                  <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center mb-4 border border-cyan-500/20">
-                      <span className="text-3xl">{currentAgent.icon}</span>
+              <div className="flex-1 overflow-y-auto px-4 py-4">
+                {chatMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center max-w-lg mx-auto">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center mb-4 alloy-glow">
+                      <Layers className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-base font-bold text-foreground mb-1">
-                      {selectedAgent === "auto" ? "Alloy — Unified AI Command" : currentAgent.name}
-                    </h2>
-                    <p className="text-xs text-muted-foreground max-w-sm mb-1">
-                      {selectedAgent === "auto"
-                        ? "Ask questions that span the entire SZL ecosystem. Alloy auto-routes to the right specialist."
-                        : currentAgent.description}
+                    <h3 className="text-base font-semibold text-foreground mb-1.5">Alloy Command Interface</h3>
+                    <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
+                      Cross-ecosystem AI with access to Vessels, Firestorm, Lyte, and all SZL platforms. Switch agents for domain-specific intelligence.
                     </p>
-                    <p className="text-[10px] text-muted-foreground/60 mb-6">
-                      {selectedAgent === "auto" ? "Or pick a specific agent above for domain-focused expertise." : `Specialist in ${currentAgent.domain}`}
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 w-full max-w-lg">
-                      {(selectedAgent === "auto" ? CROSS_ECOSYSTEM_PROMPTS : [
-                        `What's the latest from ${currentAgent.domain}?`,
-                        `Give me a status report`,
-                        `What should I focus on today?`,
-                        `Show me key metrics and insights`,
-                      ]).slice(0, 6).map(prompt => (
+                    <div className="grid grid-cols-1 gap-2 w-full">
+                      {CROSS_ECOSYSTEM_PROMPTS.slice(0, 4).map(prompt => (
                         <button
                           key={prompt}
-                          onClick={() => sendMessage(prompt)}
-                          className="px-3 py-2.5 rounded-lg text-[11px] text-left bg-white/4 hover:bg-white/7 border border-white/8 hover:border-primary/30 text-muted-foreground hover:text-foreground transition-all"
+                          onClick={() => { setInput(prompt); inputRef.current?.focus(); }}
+                          className="text-left px-3 py-2.5 rounded-lg border border-white/8 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs text-muted-foreground hover:text-foreground"
                         >
                           {prompt}
                         </button>
                       ))}
                     </div>
                   </div>
-                )}
-
-                {chatMessages.map(msg => (
-                  <div key={msg.id} className={cn("flex gap-2.5", msg.role === "user" && "justify-end")}>
-                    {msg.role !== "user" && (
-                      <div className={cn("w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5",
-                        msg.role === "assistant" ? "bg-primary/10 border border-primary/20 text-sm" : "bg-white/5 text-muted-foreground"
-                      )}>
-                        {msg.role === "assistant" ? (
-                          <span className="text-sm">{msg.agentId && msg.agentId !== "auto" ? (AGENT_MAP[msg.agentId]?.icon || "⚡") : "⚡"}</span>
-                        ) : (
-                          <Activity className="w-3 h-3" />
+                ) : (
+                  <div className="space-y-4 max-w-4xl mx-auto">
+                    {chatMessages.map(msg => (
+                      <div key={msg.id} className={cn("flex gap-3", msg.role === "user" ? "justify-end" : "justify-start")}>
+                        {msg.role !== "user" && (
+                          <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                            msg.role === "system" ? "bg-yellow-500/20 border border-yellow-500/30" : "bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 alloy-glow"
+                          )}>
+                            {msg.role === "system" ? <AlertCircle className="w-3 h-3 text-yellow-400" /> : <Bot className="w-3 h-3 text-primary" />}
+                          </div>
                         )}
-                      </div>
-                    )}
-
-                    <div className={cn("max-w-[75%] space-y-1",
-                      msg.role === "user" ? "items-end" : "items-start"
-                    )}>
-                      <div className={cn("rounded-lg px-3 py-2",
-                        msg.role === "user"
-                          ? "bg-primary/15 border border-primary/20 text-foreground"
-                          : msg.role === "system"
-                          ? "bg-white/3 border border-white/8 text-muted-foreground text-xs italic"
-                          : "bg-card border border-white/8"
-                      )}>
-                        {msg.type === "image" && msg.imageData ? (
-                          <ImageMessage data={msg.imageData} onDownload={() => downloadImage(msg.imageData!)} onCopy={() => copyImageBase64(msg.imageData!)} />
-                        ) : msg.type === "comparison" && msg.comparisonData ? (
-                          <ComparisonMessage data={msg.comparisonData} onRate={rateComparison} />
-                        ) : (
-                          <div className={cn(msg.isStreaming && "streaming-cursor")}>
-                            {msg.role === "user" ? (
-                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                            ) : (
-                              <MarkdownContent content={msg.content} />
-                            )}
+                        <div className={cn("max-w-[85%] rounded-xl px-3.5 py-2.5",
+                          msg.role === "user" ? "bg-primary/15 border border-primary/20 text-foreground" :
+                          msg.role === "system" ? "bg-yellow-500/10 border border-yellow-500/20 text-yellow-200" :
+                          "bg-card border border-white/8 text-foreground"
+                        )}>
+                          {msg.type === "image" && msg.imageData ? (
+                            <ImageMessage data={msg.imageData} onDownload={() => downloadImage(msg.imageData!)} onCopy={() => copyImageBase64(msg.imageData!)} />
+                          ) : msg.type === "comparison" && msg.comparisonData ? (
+                            <ComparisonMessage data={msg.comparisonData} onRate={rateComparison} />
+                          ) : (
+                            <>
+                              {msg.isStreaming && msg.content === "" ? (
+                                <div className="flex gap-1 py-1">
+                                  {[0, 1, 2].map(i => <span key={i} className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />)}
+                                </div>
+                              ) : (
+                                <MarkdownContent content={msg.content} />
+                              )}
+                              {msg.isStreaming && msg.content !== "" && (
+                                <span className="inline-block w-0.5 h-3.5 bg-primary/70 ml-0.5 animate-pulse" />
+                              )}
+                            </>
+                          )}
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span className="text-[9px] text-muted-foreground/50">
+                              {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                            {msg.role === "assistant" && <ModelBadge provider={msg.provider} model={msg.model} />}
+                            {msg.agentId && <AgentBadge agentId={msg.agentId} />}
+                          </div>
+                        </div>
+                        {msg.role === "user" && (
+                          <div className="w-6 h-6 rounded-full bg-white/10 border border-white/15 flex items-center justify-center shrink-0 mt-0.5">
+                            <User className="w-3 h-3 text-muted-foreground" />
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {msg.provider && <ModelBadge provider={msg.provider} model={msg.model} />}
-                        {msg.agentId && msg.agentId !== "auto" && <AgentBadge agentId={msg.agentId} />}
-                        <button
-                          onClick={() => navigator.clipboard.writeText(msg.content).catch(() => {})}
-                          className="p-0.5 text-muted-foreground hover:text-foreground transition-colors opacity-50 hover:opacity-100"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {msg.role === "user" && (
-                      <div className="w-6 h-6 rounded-md bg-muted/50 flex items-center justify-center shrink-0 mt-0.5">
-                        <User className="w-3 h-3 text-muted-foreground" />
-                      </div>
-                    )}
+                    ))}
+                    <div ref={messagesEndRef} />
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
+                )}
               </div>
 
               {/* Input area */}
-              <div className="shrink-0 border-t border-white/5 p-3 bg-black/10">
-                <div className="flex items-end gap-2 bg-card border border-white/10 rounded-xl px-3 py-2 focus-within:border-primary/40 transition-colors">
-                  <textarea
-                    ref={inputRef}
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={
-                      chatMode === "image"
-                        ? "Describe the image to generate..."
-                        : selectedAgent !== "auto"
-                        ? `Ask ${currentAgent.name}...`
-                        : "Ask Alloy anything — it spans all domains..."
-                    }
-                    rows={1}
-                    disabled={isStreaming || isTyping}
-                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none resize-none leading-relaxed disabled:opacity-50 min-h-[24px] max-h-32"
-                    style={{ overflow: "hidden" }}
-                    onInput={e => {
-                      const t = e.target as HTMLTextAreaElement;
-                      t.style.height = "auto";
-                      t.style.height = `${Math.min(t.scrollHeight, 128)}px`;
-                      t.style.overflow = t.scrollHeight > 128 ? "auto" : "hidden";
-                    }}
-                  />
-                  <div className="flex items-center gap-1.5 shrink-0">
+              <div className="shrink-0 border-t border-white/5 px-4 py-3 bg-black/20">
+                {chatMode === "image" && (
+                  <div className="mb-2 flex items-center gap-3 flex-wrap">
+                    <span className="text-[10px] text-muted-foreground font-medium">Image Provider:</span>
+                    {(["huggingface", "openai"] as const).map(p => (
+                      <button key={p} onClick={() => setImageProvider(p)} className={cn("text-[10px] px-2 py-0.5 rounded border transition-colors",
+                        imageProvider === p ? "bg-primary/10 border-primary/40 text-primary" : "border-white/10 text-muted-foreground hover:text-foreground"
+                      )}>
+                        {p === "openai" ? "OpenAI DALL-E" : "HuggingFace"}
+                      </button>
+                    ))}
+                    <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground cursor-pointer">
+                      <input type="checkbox" checked={enhancePrompts} onChange={e => setEnhancePrompts(e.target.checked)} className="w-3 h-3" />
+                      Enhance prompt
+                    </label>
+                  </div>
+                )}
+
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1 relative">
+                    <textarea
+                      ref={inputRef}
+                      value={input}
+                      onChange={e => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder={
+                        chatMode === "image" ? "Describe the image you want to generate..." :
+                        `Message ${currentAgent.name}...`
+                      }
+                      rows={1}
+                      className="w-full text-sm bg-card border border-white/10 rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40 resize-none overflow-hidden transition-colors"
+                      style={{ minHeight: "44px", maxHeight: "120px" }}
+                      onInput={e => {
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = "auto";
+                        target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex gap-1.5 shrink-0">
+                    {/* Mode toggle */}
                     <button
-                      onClick={() => setActivePanel("voice")}
-                      className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-                      title="Voice input"
+                      onClick={() => setChatMode(m => m === "normal" ? "image" : "normal")}
+                      className={cn("p-2.5 rounded-xl border transition-all",
+                        chatMode === "image" ? "bg-purple-500/15 border-purple-500/40 text-purple-400" : "border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20"
+                      )}
+                      title="Toggle image mode"
                     >
-                      <Mic className="w-4 h-4" />
+                      <ImageIcon className="w-4 h-4" />
                     </button>
-                    {(isStreaming || isTyping) ? (
-                      <button onClick={stopStreaming} className="p-1.5 rounded-md bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 transition-colors">
+
+                    {/* Provider selector */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowProviderMenu(s => !s)}
+                        className="flex items-center gap-1 p-2.5 rounded-xl border border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20 transition-all text-xs"
+                        title="Select model"
+                      >
+                        {selectedModel.icon}
+                      </button>
+                      {showProviderMenu && (
+                        <div className="absolute bottom-full mb-2 right-0 bg-popover border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden min-w-[140px]">
+                          {MODEL_OPTIONS.map(opt => (
+                            <button
+                              key={opt.value}
+                              onClick={() => { setSelectedProvider(opt.value); setShowProviderMenu(false); }}
+                              className={cn("flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-white/5 transition-colors",
+                                selectedProvider === opt.value ? "text-primary" : "text-foreground"
+                              )}
+                            >
+                              {opt.icon} {opt.label}
+                              {selectedProvider === opt.value && <Check className="w-3 h-3 ml-auto" />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Send / Stop */}
+                    {isStreaming ? (
+                      <button onClick={stopStreaming} className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/40 text-red-400 hover:bg-red-500/20 transition-all" title="Stop">
                         <X className="w-4 h-4" />
                       </button>
                     ) : (
                       <button
                         onClick={() => sendMessage(input)}
-                        disabled={!input.trim()}
-                        className="p-1.5 rounded-md bg-primary/15 border border-primary/30 text-primary hover:bg-primary/25 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        disabled={!input.trim() || isTyping}
+                        className="p-2.5 rounded-xl bg-primary/15 border border-primary/40 text-primary hover:bg-primary/20 transition-all disabled:opacity-40"
+                        title="Send"
                       >
                         <Send className="w-4 h-4" />
                       </button>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center justify-between mt-1.5 px-1">
-                  <p className="text-[10px] text-muted-foreground/60">
-                    Enter to send · Shift+Enter for newline
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setUseKnowledgeBase(v => !v)}
-                      className={cn("flex items-center gap-1 text-[10px] transition-colors", useKnowledgeBase ? "text-primary" : "text-muted-foreground hover:text-foreground")}
-                    >
-                      <BookOpen className="w-3 h-3" />
-                      {useKnowledgeBase ? "KB On" : "KB"}
-                    </button>
-                  </div>
+
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-[10px] text-muted-foreground/50">Press Enter to send · Shift+Enter for new line</p>
+                  {useKnowledgeBase && <span className="text-[10px] text-primary/70 flex items-center gap-1"><BookOpen className="w-2.5 h-2.5" /> KB active</span>}
                 </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
 
-        {/* ── Knowledge Base Panel ── */}
-        {activePanel === "kb" && (
-          <div className="flex-1 overflow-hidden">
-            <KnowledgeBasePanel useKB={useKnowledgeBase} onToggleUseKB={() => setUseKnowledgeBase(v => !v)} />
-          </div>
-        )}
-
-        {/* ── Advisories Panel ── */}
-        {activePanel === "advisories" && (
-          <div className="flex-1 overflow-hidden">
-            <AdvisoryPanel />
-          </div>
-        )}
-
-        {/* ── Comparison Panel ── */}
-        {activePanel === "comparison" && (
-          <div className="flex-1 overflow-hidden overflow-y-auto">
-            <ComparisonPanel onComparisonResult={(result) => {
-              setChatMessages(prev => [...prev, {
-                id: `cmp-${Date.now()}`, role: "assistant",
-                content: `Model comparison complete`,
-                timestamp: new Date(),
-                type: "comparison",
-                comparisonData: result,
-              }]);
-              setActivePanel("chat");
-            }} />
-          </div>
-        )}
-
-        {/* ── Voice Panel ── */}
-        {activePanel === "voice" && (
-          <div className="flex-1 overflow-hidden overflow-y-auto max-w-sm mx-auto">
-            <VoicePanel onTranscribed={(text) => {
-              setInput(text);
-              setActivePanel("chat");
-              setTimeout(() => inputRef.current?.focus(), 100);
-            }} />
-          </div>
-        )}
-
-        {/* Right panel: Real-time feeds */}
+        {/* Right feeds panel */}
         {showRightPanel && (
-          <RealtimeFeedsSidebar
-            isCollapsed={rightFeedsCollapsed}
-            onToggle={() => setRightFeedsCollapsed(v => !v)}
-          />
+          <RealtimeFeedsSidebar isCollapsed={rightFeedsCollapsed} onToggle={() => setRightFeedsCollapsed(c => !c)} />
         )}
       </div>
-
-      {/* Click outside to close menus */}
-      {(showAgentPicker || showProviderMenu) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => { setShowAgentPicker(false); setShowProviderMenu(false); }}
-        />
-      )}
     </div>
+  );
+}
+
+// ─── SEO Metadata per page ────────────────────────────────────────────────────
+
+const PAGE_META: Record<AppPage, { title: string; description: string; jsonLd: Record<string, unknown> }> = {
+  overview: {
+    title: "Alloy — Ecosystem Intelligence Layer | SZL",
+    description: "Alloy is the intelligence, orchestration, and workflow backbone powering the SZL ecosystem. AI orchestration layer for Lyte, Vessels, and future SZL products.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Alloy",
+      "applicationCategory": "BusinessApplication",
+      "description": "Alloy is the intelligence, orchestration, and workflow backbone powering the SZL ecosystem.",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0" },
+      "brand": { "@type": "Organization", "name": "SZL Holdings" },
+    },
+  },
+  architecture: {
+    title: "Alloy Architecture — Six-Layer Intelligence System",
+    description: "Explore Alloy's six-layer system: Input, Normalisation, Reasoning, Orchestration, Output, and Governance layers with product integration mappings.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "name": "Alloy Architecture",
+      "headline": "Six-Layer Intelligence System",
+      "description": "Alloy's architecture: Input, Normalisation, Reasoning, Orchestration, Output, and Governance layers.",
+      "author": { "@type": "Organization", "name": "SZL Holdings" },
+    },
+  },
+  workflows: {
+    title: "Alloy Workflows — Operational Workflow Patterns",
+    description: "Real workflow patterns powering the SZL ecosystem: Signal to Insight, Document to Output, Exception to Action, and multi-step agentic orchestration.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Alloy Workflow Patterns",
+      "description": "Operational workflow patterns for the SZL ecosystem.",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Signal to Insight" },
+        { "@type": "ListItem", "position": 2, "name": "Document to Output" },
+        { "@type": "ListItem", "position": 3, "name": "Exception to Action" },
+        { "@type": "ListItem", "position": 4, "name": "Multi-step Agentic Orchestration" },
+      ],
+    },
+  },
+  "use-cases": {
+    title: "Alloy Use Cases — Practical Ecosystem Applications",
+    description: "Concrete use cases for Alloy across Lyte observability, maritime intelligence, document generation, workflow routing, and exception handling.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Alloy Use Cases",
+      "description": "Practical use cases for Alloy across the SZL ecosystem.",
+    },
+  },
+  agents: {
+    title: "Alloy Agents — Modular Agent Workflow Gallery",
+    description: "Alloy's modular agent library: Intake, Monitoring, Routing, Summary, Document, Exception, Readiness, Approval, Research, and Workflow Coordinator agents.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Alloy Agent Library",
+      "description": "Modular agent library powering the Alloy intelligence layer.",
+    },
+  },
+  outputs: {
+    title: "Alloy Outputs — What Alloy Produces",
+    description: "Structured outputs from Alloy: summaries, alerts, action queues, documents, proposals, operational digests, and approval-ready packages.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Alloy Output Types",
+      "description": "Structured, explainable outputs produced by the Alloy intelligence layer.",
+    },
+  },
+  governance: {
+    title: "Alloy Governance — Human-in-the-Loop Controls",
+    description: "Alloy governance layer: human approval flows, confidence signals, audit trails, explainable outputs, escalation logic, and role-based control patterns.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "name": "Alloy Governance Framework",
+      "headline": "Human-in-the-Loop Controls for AI Orchestration",
+      "description": "Governance controls ensuring explainability, auditability, and human oversight in Alloy workflows.",
+    },
+  },
+  chat: {
+    title: "Alloy Command Interface — AI Operations Console",
+    description: "Alloy's cross-ecosystem AI command interface. Access specialist agents for Vessels, Lyte, Firestorm, and all SZL platforms.",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Alloy Command Interface",
+      "description": "Cross-ecosystem AI command interface for the SZL platform.",
+      "applicationCategory": "BusinessApplication",
+    },
+  },
+};
+
+// ─── SEO + JSON-LD injector ────────────────────────────────────────────────────
+
+function usePageMeta(page: AppPage) {
+  useEffect(() => {
+    const meta = PAGE_META[page];
+    document.title = meta.title;
+
+    let descEl = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!descEl) {
+      descEl = document.createElement("meta");
+      descEl.name = "description";
+      document.head.appendChild(descEl);
+    }
+    descEl.content = meta.description;
+
+    // JSON-LD structured data
+    const existing = document.getElementById("alloy-jsonld");
+    if (existing) existing.remove();
+    const script = document.createElement("script");
+    script.id = "alloy-jsonld";
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(meta.jsonLd);
+    document.head.appendChild(script);
+  }, [page]);
+}
+
+// ─── Analytics ─────────────────────────────────────────────────────────────────
+
+type GtagFn = (...args: unknown[]) => void;
+function gtagEvent(name: string, params: Record<string, unknown>) {
+  if (typeof window !== "undefined") {
+    const w = window as unknown as Record<string, unknown>;
+    if (typeof w["gtag"] === "function") {
+      (w["gtag"] as GtagFn)("event", name, params);
+    }
+  }
+}
+
+function useAnalytics(page: AppPage) {
+  useEffect(() => {
+    gtagEvent("page_view", {
+      page_title: PAGE_META[page]?.title ?? page,
+      page_location: window.location.href,
+      page_path: `${BASE_PATH}/${page === "overview" ? "" : page}`,
+    });
+  }, [page]);
+}
+
+// Exported helper so page components can fire interaction events
+export function trackEvent(action: string, params: Record<string, unknown> = {}) {
+  gtagEvent(action, { app: "alloy", ...params });
+}
+
+// ─── URL ↔ AppPage mapping ────────────────────────────────────────────────────
+
+const ROUTE_MAP: Record<string, AppPage> = {
+  "/": "overview",
+  "/architecture": "architecture",
+  "/workflows": "workflows",
+  "/agents": "agents",
+  "/outputs": "outputs",
+  "/governance": "governance",
+  "/use-cases": "use-cases",
+  "/command": "chat",
+};
+
+const PAGE_ROUTE: Record<AppPage, string> = {
+  overview: "/",
+  architecture: "/architecture",
+  workflows: "/workflows",
+  agents: "/agents",
+  outputs: "/outputs",
+  governance: "/governance",
+  "use-cases": "/use-cases",
+  chat: "/command",
+};
+
+// ─── AlloyRouter — URL-driven page rendering ───────────────────────────────────
+
+function AlloyRouter() {
+  const [location, setLocation] = useLocation();
+
+  const currentPage = useMemo<AppPage>(() => {
+    return ROUTE_MAP[location] ?? "overview";
+  }, [location]);
+
+  usePageMeta(currentPage);
+  useAnalytics(currentPage);
+
+  const navigate = useCallback((page: AppPage | string) => {
+    const route = PAGE_ROUTE[page as AppPage] ?? "/";
+    setLocation(route);
+    window.scrollTo(0, 0);
+  }, [setLocation]);
+
+  return (
+    <div
+      className="flex flex-col min-h-screen text-foreground overflow-hidden"
+      style={{ background: "hsl(224, 25%, 4%)" }}
+    >
+      <AlloyNav currentPage={currentPage} onNavigate={navigate} />
+
+      <Switch>
+        <Route path="/command">
+          <div className="flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 49px)" }}>
+            <ChatInterface />
+          </div>
+        </Route>
+        <Route path="/architecture">
+          <main className="flex-1 overflow-y-auto"><ArchitecturePage onNavigate={navigate} /></main>
+        </Route>
+        <Route path="/workflows">
+          <main className="flex-1 overflow-y-auto"><WorkflowsPage onNavigate={navigate} /></main>
+        </Route>
+        <Route path="/agents">
+          <main className="flex-1 overflow-y-auto"><AgentsPage /></main>
+        </Route>
+        <Route path="/outputs">
+          <main className="flex-1 overflow-y-auto"><OutputsPage /></main>
+        </Route>
+        <Route path="/governance">
+          <main className="flex-1 overflow-y-auto"><GovernancePage onNavigate={navigate} /></main>
+        </Route>
+        <Route path="/use-cases">
+          <main className="flex-1 overflow-y-auto"><UseCasesPage /></main>
+        </Route>
+        <Route>
+          <main className="flex-1 overflow-y-auto"><OverviewPage onNavigate={navigate} /></main>
+        </Route>
+      </Switch>
+    </div>
+  );
+}
+
+// ─── Main App ─────────────────────────────────────────────────────────────────
+
+export default function AlloyApp() {
+  return (
+    <WouterRouter base={import.meta.env.BASE_URL?.replace(/\/$/, "") || "/alloy"}>
+      <AlloyRouter />
+    </WouterRouter>
   );
 }

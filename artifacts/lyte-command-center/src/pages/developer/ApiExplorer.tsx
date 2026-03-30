@@ -35,15 +35,15 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/api/vessels/fleet", summary: "Fleet overview and positions", tag: "Maritime", auth: true },
   { method: "GET", path: "/api/vessels/voyages", summary: "Active voyage tracking", tag: "Maritime", auth: true },
 
-  { method: "GET", path: "/api/nimbus/health", summary: "Nimbus predictive AI health", tag: "AI", auth: false },
-  { method: "GET", path: "/api/nimbus/predictions", summary: "AI model predictions", tag: "AI", auth: true },
+  { method: "GET", path: "/api/alloy/health", summary: "Alloy intelligence layer health", tag: "AI", auth: false },
+  { method: "GET", path: "/api/alloy/workflows", summary: "Active Alloy workflow states", tag: "AI", auth: true },
   { method: "GET", path: "/api/inca/health", summary: "INCA intelligence health", tag: "AI", auth: false },
   { method: "GET", path: "/api/inca/campaigns", summary: "Intelligence campaigns", tag: "AI", auth: false },
 
   { method: "GET", path: "/api/zeus/health", summary: "Zeus infrastructure health", tag: "Infrastructure", auth: false },
   { method: "GET", path: "/api/zeus/topology", summary: "Service topology map", tag: "Infrastructure", auth: true },
-  { method: "GET", path: "/api/alloyscape/health", summary: "AlloyScape platform health", tag: "Infrastructure", auth: false },
-  { method: "GET", path: "/api/alloyscape/workflow-templates", summary: "Infrastructure workflow templates", tag: "Infrastructure", auth: true },
+  { method: "GET", path: "/api/alloy/agents", summary: "Alloy agent registry and status", tag: "Infrastructure", auth: false },
+  { method: "GET", path: "/api/alloy/workflow-templates", summary: "Alloy workflow pattern templates", tag: "Infrastructure", auth: true },
 
   { method: "GET", path: "/api/developer/api-keys", summary: "List your API keys", tag: "Developer", auth: true },
   { method: "POST", path: "/api/developer/api-keys", summary: "Create a new API key", tag: "Developer", auth: true, body: '{\n  "name": "My App",\n  "scopes": ["security", "analytics"],\n  "permissions": "read"\n}' },

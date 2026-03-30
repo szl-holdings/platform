@@ -432,11 +432,11 @@ OUTLINE:
   - INCA (AI research intelligence)
   - Lyte (observability)
   - Rosie, Aegis, Firestorm (security stack)
-  - Nimbus, Beacon (predictions)
+  - Alloy, Beacon (predictions)
   - Zeus (orchestration)
   - DreamEra, Dreamscape (creative)
   - Carlota Jo (consulting)
-  - AlloyScape (integration layer)
+  - Alloy (integration layer)
 - Show the Apps Showcase page
 
 [4:00-5:30] THE ARCHITECTURE
@@ -475,7 +475,7 @@ The technology industry has a silo problem. Companies build individual tools tha
 
 SZL Holdings was built on a different thesis: what if every platform in your technology stack was designed to talk to every other platform?
 
-When your security system (Rosie) detects an anomaly and immediately cross-references it with your observability platform (Lyte) and your predictive engine (Nimbus), you don't just detect threats — you predict and prevent them.
+When your security system (Rosie) detects an anomaly and immediately cross-references it with your observability platform (Lyte) and your intelligence layer (Alloy), you don't just detect threats — you predict and prevent them.
 
 That's compound intelligence. And it only works when the platforms are designed together, not bolted together after the fact.
 
@@ -488,12 +488,12 @@ The SZL Holdings ecosystem currently includes:
 - **Rosie** — Threat detection and security operations
 - **Aegis** — Defensive perimeter and compliance
 - **Firestorm** — Incident response simulation and training
-- **Nimbus** — Predictive AI and forecasting
+- **Alloy** — Intelligence orchestration and workflow execution
 - **Beacon** — Cross-platform analytics and alerting
 - **Zeus** — Platform orchestration and management
 - **DreamEra** — Creative AI and concept generation
 - **Dreamscape** — Immersive digital experiences
-- **AlloyScape** — Unified interface and integration layer
+- **Alloy** — Unified interface and integration layer
 - **Carlota Jo** — Strategic consulting and advisory
 
 Every platform is live. Every platform connects to the others. And every platform was built by one person.
@@ -521,7 +521,7 @@ Over the next 7 weeks, I'll be diving deep into each platform:
 - **Week 2**: The Brain — INCA Intelligence Platform
 - **Week 3**: The Eyes — Lyte Observability
 - **Week 4**: The Shield — Rosie + Aegis + Firestorm
-- **Week 5**: The Prediction Engine — Nimbus + Beacon
+- **Week 5**: The Prediction Engine — Alloy + Beacon
 - **Week 6**: The Advisory Arm — Carlota Jo Consulting
 - **Week 7**: The Creative Side — DreamEra + Dreamscape
 - **Week 8**: The Full Reveal — The Complete Portfolio
@@ -590,7 +590,7 @@ Stephen
         { title: 'Slide 1: Title', content: '"5 Reasons I Built an Entire Tech Ecosystem Alone"\nStephen Lutar | SZL Holdings\nUse SZL Holdings banner background' },
         { title: 'Slide 2: The Problem', content: '"Most tech companies build silos."\nSeparate teams. Separate tools. Zero integration.\nIcon: disconnected puzzle pieces' },
         { title: 'Slide 3: The Vision', content: '"What if every platform talked to every other platform?"\nAI + Security + Observability + Predictions = Ecosystem\nIcon: interconnected nodes' },
-        { title: 'Slide 4: The Scale', content: '"12+ production-grade platforms."\nOne founder. One architecture. One vision.\nList: INCA, Lyte, Rosie, Aegis, Nimbus, Beacon, Zeus, DreamEra...' },
+        { title: 'Slide 4: The Scale', content: '"12+ production-grade platforms."\nOne founder. One architecture. One vision.\nList: INCA, Lyte, Rosie, Aegis, Alloy, Beacon, Zeus, DreamEra...' },
         { title: 'Slide 5: The Lesson', content: '"The hardest skill isn\'t coding."\nIt\'s knowing what to build next.\nSystems thinking > individual features' },
         { title: 'Slide 6: CTA', content: '"Follow along for the next 8 weeks."\nI\'m pulling back the curtain on every platform.\nWeek 2: The Brain (INCA Intelligence)\n#BuildInPublic #SZLHoldings' },
       ],
@@ -618,7 +618,7 @@ Think of it as the command center where every data point from every platform con
 Here's what makes INCA different from yet another dashboard:
 
 1. Live experiment tracking with real-time accuracy metrics
-2. Cross-platform intelligence — it doesn't just monitor INCA, it connects insights across Nimbus (predictions), Beacon (analytics), and Zeus (orchestration)
+2. Cross-platform intelligence — it doesn't just monitor INCA, it connects insights across Alloy (orchestration), Beacon (analytics), and Zeus (orchestration)
 3. Model performance benchmarking that actually tells you when something is degrading before your users notice
 
 Building an intelligence platform taught me something unexpected: the hardest part isn't the algorithms. It's designing the information architecture so that the right insight reaches the right person at the right moment.
@@ -674,7 +674,7 @@ What tools do you use to make sense of your data?`,
       { slide: 2, design: 'INCA dashboard screenshot (inca-dashboard.jpg) with thin cyan border' },
       { slide: 3, design: 'Dark background. Gold heading: "WHAT INCA DOES". Three items with icons: "Live Experiment Tracking", "Model Benchmarking", "Cross-Platform Intelligence"' },
       { slide: 4, design: 'Dark background. Large quote: "The hardest part of AI isn\'t algorithms." Second line: "It\'s information architecture."' },
-      { slide: 5, design: 'Dark background. Diagram showing INCA at center with arrows to other platforms (Nimbus, Beacon, Zeus, Lyte)' },
+      { slide: 5, design: 'Dark background. Diagram showing INCA at center with arrows to other platforms (Alloy, Beacon, Zeus, Lyte)' },
       { slide: 6, design: 'Dark background. Cyan heading: "SIGNAL vs NOISE". Body: "Most teams have 47 dashboards and zero clarity. INCA was built to fix that."' },
       { slide: 7, design: 'Dark background. CTA: "Week 3: The Eyes — Lyte Observability." Follow prompt with arrow.' },
     ],
@@ -776,7 +776,7 @@ Every experiment in the SZL ecosystem — model training runs, A/B tests, parame
 INCA doesn't just tell you how your models are performing right now. It tells you when they're getting worse. Degradation detection with early warning means you know about problems hours before your users do.
 
 **3. Cross-Platform Intelligence**
-This is what makes INCA special. It doesn't just aggregate data from one source. It connects insights across every platform in the ecosystem: Nimbus (predictions), Beacon (analytics), Lyte (observability), Zeus (orchestration).
+This is what makes INCA special. It doesn't just aggregate data from one source. It connects insights across every platform in the ecosystem: Alloy (orchestration), Beacon (analytics), Lyte (observability), Zeus (orchestration).
 
 When INCA detects a pattern in your prediction accuracy, it cross-references it with your observability data to find the root cause. That's compound intelligence.
 
@@ -1022,7 +1022,7 @@ Lyte was built to be the fire prediction system for the entire SZL ecosystem.
 
 ## What Lyte Does
 
-**Real-Time System Health Visualization**: Every platform in the SZL ecosystem — INCA, Rosie, Aegis, Nimbus, Beacon, Zeus, and more — reports its health status to Lyte continuously. Not in batch. Continuously.
+**Real-Time System Health Visualization**: Every platform in the SZL ecosystem — INCA, Rosie, Aegis, Alloy, Beacon, Zeus, and more — reports its health status to Lyte continuously. Not in batch. Continuously.
 
 **Anomaly Detection**: Lyte learns what "normal" looks like for each platform. When something deviates from normal — even slightly — it flags it. This catches problems that threshold-based monitoring would miss entirely.
 
@@ -1158,7 +1158,7 @@ Week 4 of 8.
       'LAYER 3: FIRESTORM (Response)\n\nThe war room.\n\n- Incident response simulation\n- Scenario training\n- Response coordination\n\nPractice for every eventuality BEFORE it happens.\n\n(4/7)',
       'Why three platforms instead of one?\n\nBecause detection, defense, and response are fundamentally different disciplines.\n\nDifferent tools. Different UIs. Different mental models.\n\n(5/7)',
       'The lesson:\n\nThe best security architecture mirrors how security teams actually THINK and WORK.\n\nNot how software engineers think they should work.\n\nDesign for the user\'s mental model.\n\n(6/7)',
-      'Next week: Prediction.\n\nNimbus + Beacon — the platforms that see the future.\n\nWeek 4 of 8. The shield is up. Now let\'s predict.\n\n#BuildInPublic #Cybersecurity #SZLHoldings\n\n(7/7)',
+      'Next week: Prediction.\n\nAlloy + Beacon — the platforms that see the future.\n\nWeek 4 of 8. The shield is up. Now let\'s predict.\n\n#BuildInPublic #Cybersecurity #SZLHoldings\n\n(7/7)',
     ],
     facebookPost: `Security week! 🛡️
 
@@ -1336,7 +1336,7 @@ Meet the SZL security stack:
 
 The architectural lesson: design security systems for how security teams actually think — not how engineers think they should think.
 
-**Next week**: The Prediction Engine. Nimbus + Beacon. This is where it gets really interesting — we're talking about predicting the future (well, 70% of it anyway).
+**Next week**: The Prediction Engine. Alloy + Beacon. This is where it gets really interesting — we're talking about predicting the future (well, 70% of it anyway).
 
 Have a good week,
 Stephen
@@ -1357,7 +1357,7 @@ Stephen
         { title: 'Slide 4: Layer 2 - AEGIS', content: '"Layer 2: DEFENSE (Aegis)"\n- Access controls\n- Vulnerability assessment\n- Compliance monitoring\n- The fortress that locks the doors\nIcon: shield' },
         { title: 'Slide 5: Layer 3 - FIRESTORM', content: '"Layer 3: RESPONSE (Firestorm)"\n- Incident response simulation\n- Scenario training\n- Response coordination\n- Practice before it happens\nIcon: war room' },
         { title: 'Slide 6: Why Three?', content: '"Detection, defense, and response are different disciplines."\nDifferent tools. Different UIs. Different mental models.\nSecurity mirrors how teams THINK.' },
-        { title: 'Slide 7: CTA', content: '"Next week: Prediction"\nNimbus + Beacon — seeing the future\n#BuildInPublic #Cybersecurity #SZLHoldings' },
+        { title: 'Slide 7: CTA', content: '"Next week: Prediction"\nAlloy + Beacon — seeing the future\n#BuildInPublic #Cybersecurity #SZLHoldings' },
       ],
     },
     proTips: [
@@ -1369,19 +1369,19 @@ Stephen
     ],
   },
   {
-    num: 5, title: 'The Prediction Engine', subtitle: 'Nimbus + Beacon',
+    num: 5, title: 'The Prediction Engine', subtitle: 'Alloy + Beacon',
     theme: 'Showcase the predictive intelligence platforms.',
     bannerLinkedin: 'week5-prediction-linkedin.png', bannerSquare: 'week5-prediction-square.png',
-    screenshots: ['nimbus-hero.jpg', 'beacon-hero.jpg'],
+    screenshots: ['alloy-hero.jpg', 'beacon-hero.jpg'],
     linkedinPost: `What if you could see the future? Not perfectly — but well enough to act before everyone else?
 
-That's the question behind Nimbus and Beacon, the predictive intelligence layer of SZL Holdings.
+That's the question behind Alloy and Beacon, the intelligence and analytics layer of SZL Holdings.
 
-NIMBUS — The Forecaster
-Nimbus is a predictive AI platform that analyses patterns, builds forecasting models, and generates predictions across multiple domains. It takes the intelligence gathered by INCA and the monitoring data from Lyte, and asks: "What happens next?"
+ALLOY — The Orchestrator
+Alloy is the intelligence orchestration platform that routes structured workflows across the ecosystem. It takes intelligence from INCA and monitoring data from Lyte, and turns fragmented inputs into structured, explainable execution.
 
 BEACON — The Signal
-Beacon is the analytics and alerting companion. Where Nimbus predicts, Beacon surfaces. It connects to every other platform in the ecosystem — Zeus, INCA, DreamEra — and creates cross-platform intelligence reports that highlight trends, anomalies, and opportunities.
+Beacon is the analytics and alerting companion. Where Alloy executes, Beacon surfaces. It connects to every other platform in the ecosystem — Zeus, INCA, DreamEra — and creates cross-platform intelligence reports that highlight trends, anomalies, and opportunities.
 
 Together, they form a prediction engine that gets smarter as the ecosystem grows. Every new platform adds new data. Every new data point improves the predictions.
 
@@ -1395,7 +1395,7 @@ Week 6: The Advisory Arm. Consulting meets technology.
     linkedinFollowUp: `The compound effect is real — every new platform in the ecosystem makes the predictions better. More data, better models, smarter alerts.\n\nDo you build for accuracy or speed of insight?`,
     xPost: `Prediction isn't about being right. It's about being early.
 
-NIMBUS — Forecasts what happens next
+ALLOY — Orchestrates what happens next
 BEACON — Surfaces signals across platforms
 
 A 70% accurate prediction that arrives 3 hours early beats a 99% accurate post-mortem.
@@ -1406,9 +1406,9 @@ Week 5 of 8.
 
 #BuildInPublic #PredictiveAI #SZLHoldings`,
     xThread: [
-      '🧵 What if you could see the future?\n\nNot perfectly. But well enough to act before everyone else?\n\nThat\'s the question behind Nimbus and Beacon.\n\n(1/6)',
-      'NIMBUS is the forecaster.\n\nIt takes data from INCA (intelligence) and Lyte (observability) and asks one question:\n\n"What happens next?"\n\nPattern analysis → Forecasting models → Predictions.\n\n(2/6)',
-      'BEACON is the signal.\n\nWhere Nimbus predicts, Beacon surfaces.\n\nCross-platform intelligence reports that highlight:\n- Trends\n- Anomalies\n- Opportunities\n\nAcross every platform in the ecosystem.\n\n(3/6)',
+      '🧵 What if you could see the future?\n\nNot perfectly. But well enough to act before everyone else?\n\nThat\'s the question behind Alloy and Beacon.\n\n(1/6)',
+      'ALLOY is the orchestrator.\n\nIt takes data from INCA (intelligence) and Lyte (observability) and routes it into structured, explainable workflows.\n\nInput → Normalise → Reason → Execute.\n\n(2/6)',
+      'BEACON is the signal.\n\nWhere Alloy executes, Beacon surfaces.\n\nCross-platform intelligence reports that highlight:\n- Trends\n- Anomalies\n- Opportunities\n\nAcross every platform in the ecosystem.\n\n(3/6)',
       'Together they create a compound effect:\n\nMore platforms = more data\nMore data = better predictions\nBetter predictions = smarter platforms\n\nThe ecosystem feeds itself.\n\n(4/6)',
       'The insight that changed my thinking:\n\nPrediction isn\'t about being RIGHT.\nIt\'s about being USEFUL.\n\n70% accurate + 3 hours early\n> 99% accurate + after the fact\n\nSpeed of insight > perfection of analysis.\n\n(5/6)',
       'Next week: The Advisory Arm.\n\nCarlota Jo Consulting — where technology meets strategy.\n\nWeek 5 of 8.\n\n#BuildInPublic #PredictiveAI #SZLHoldings\n\n(6/6)',
@@ -1417,9 +1417,9 @@ Week 5 of 8.
 
 Not perfectly — but well enough to make better decisions than everyone around you?
 
-That's what Nimbus and Beacon do in the SZL ecosystem.
+That's what Alloy and Beacon do in the SZL ecosystem.
 
-NIMBUS builds forecasting models and makes predictions. It takes all the data from INCA (the AI brain) and Lyte (the observability eyes) and asks: "What happens next?"
+ALLOY orchestrates intelligence workflows and routes structured execution. It takes all the data from INCA (the AI brain) and Lyte (the observability eyes) and turns it into accountable, explainable actions.
 
 BEACON surfaces the signals. It creates cross-platform intelligence reports that highlight trends you'd otherwise miss.
 
@@ -1434,15 +1434,15 @@ Speed of insight beats perfection of analysis. Every time.
 Do you agree? Or do you think accuracy should always come first?`,
     facebookCarousel: [
       { slide: 1, text: '"THE PREDICTION ENGINE" Dark banner with crystal ball / telescope graphic' },
-      { slide: 2, text: 'Nimbus — The Forecaster. "What happens next?" Pattern analysis and prediction.' },
+      { slide: 2, text: 'Alloy — The Orchestrator. "What happens next?" Pattern analysis and prediction.' },
       { slide: 3, text: 'Beacon — The Signal. Cross-platform intelligence reports that surface trends.' },
       { slide: 4, text: '"70% accurate + 3 hours early > 99% accurate + after the fact"' },
       { slide: 5, text: '"The ecosystem feeds itself. More platforms = better predictions." Follow prompt.' },
     ],
     instagramCarousel: [
-      { slide: 1, design: 'Dark background. Cyan text: "WHAT IF YOU COULD SEE THE FUTURE?" Subtitle: "Nimbus + Beacon | Week 5 of 8"' },
-      { slide: 2, design: 'Dark background. "NIMBUS — THE FORECASTER" with telescope icon. "Analyses patterns. Builds models. Predicts what happens next."' },
-      { slide: 3, design: 'Nimbus screenshot (nimbus-hero.jpg) with cyan border.' },
+      { slide: 1, design: 'Dark background. Cyan text: "WHAT IF YOU COULD SEE THE FUTURE?" Subtitle: "Alloy + Beacon | Week 5 of 8"' },
+      { slide: 2, design: 'Dark background. "ALLOY — THE ORCHESTRATOR" with network icon. "Routes intelligence. Executes workflows. Delivers structured, explainable outputs."' },
+      { slide: 3, design: 'Alloy screenshot (alloy-hero.jpg) with cyan border.' },
       { slide: 4, design: 'Dark background. "BEACON — THE SIGNAL" with signal/radar icon. "Surfaces trends, anomalies, and opportunities across all platforms."' },
       { slide: 5, design: 'Beacon screenshot (beacon-hero.jpg) with cyan border.' },
       { slide: 6, design: 'Dark background. Large text: "70% ACCURATE + 3 HOURS EARLY" vs "99% ACCURATE + AFTER THE FACT" with greater-than symbol.' },
@@ -1453,7 +1453,7 @@ Do you agree? Or do you think accuracy should always come first?`,
 
 Not perfectly — but well enough to act before everyone else?
 
-NIMBUS forecasts what happens next.
+ALLOY orchestrates what happens next.
 BEACON surfaces the signals you'd miss.
 
 Together, they form a prediction engine that gets smarter as the ecosystem grows.
@@ -1467,13 +1467,13 @@ Week 5 of 8.
 #BuildInPublic #PredictiveAI #AI #DataScience #SZLHoldings #MachineLearning #TechFounder #Forecasting #Analytics #Intelligence #StartupLife #Innovation`,
     instagramStories: [
       { frame: 1, text: 'Story: "PREDICTION WEEK" with dramatic reveal. "What if you could see the future?"' },
-      { frame: 2, text: 'Story: Nimbus screenshot with "Forecasts what happens next" overlay.' },
+      { frame: 2, text: 'Story: Alloy screenshot with "Forecasts what happens next" overlay.' },
       { frame: 3, text: 'Story: Slider sticker: "How important is SPEED vs ACCURACY in predictions?" with slider from "Speed" to "Accuracy"' },
     ],
     instagramReelsScript: `REELS SCRIPT (30 seconds):
 
 [0:00-0:05] Text on screen: "What if you could predict the future?"
-[0:05-0:12] Nimbus demo. "Nimbus builds forecasting models."
+[0:05-0:12] Alloy demo. "Alloy orchestrates cross-platform workflows."
 [0:12-0:20] Beacon demo. "Beacon surfaces the signals you'd miss."
 [0:20-0:25] Key insight text: "70% accurate + early > 99% accurate + late"
 [0:25-0:30] CTA: "Week 5 of 8 — Follow for more"
@@ -1484,7 +1484,7 @@ Audio: Ethereal/futuristic track.`,
 TITLE: "70% Accurate and Early Beats 99% Accurate and Late"
 
 [0:00-0:10] Hook with bold statement about prediction vs accuracy.
-[0:10-0:25] Nimbus walkthrough — forecasting models.
+[0:10-0:25] Alloy walkthrough — forecasting models.
 [0:25-0:40] Beacon walkthrough — signal surfacing.
 [0:40-0:55] The compound effect — ecosystem feeds itself.
 [0:55-0:60] CTA.
@@ -1494,7 +1494,7 @@ THUMBNAIL: Crystal ball graphic with text "PREDICT THE FUTURE (sort of)"`,
     mediumArticle: `MEDIUM ARTICLE — Week 5
 
 TITLE: "When 70% Accurate and Early Beats 99% Accurate and Late"
-SUBTITLE: "How Nimbus and Beacon turned prediction into the SZL ecosystem's superpower"
+SUBTITLE: "How Alloy and Beacon turned prediction into the SZL ecosystem's superpower"
 TAGS: Artificial Intelligence, Predictive Analytics, Data Science, Machine Learning, Technology
 
 ---
@@ -1503,7 +1503,7 @@ What if you could see the future?
 
 Not perfectly — but well enough to act before everyone else?
 
-That's the question I kept asking while building Nimbus and Beacon, the predictive intelligence layer of SZL Holdings.
+That's the question I kept asking while building Alloy and Beacon, the intelligence and analytics layer of SZL Holdings.
 
 ## The Prediction Paradox
 
@@ -1515,15 +1515,15 @@ A prediction that's 70% accurate but arrives 3 hours before an event is infinite
 
 Build for speed of insight, not perfection of analysis.
 
-## Nimbus: The Forecaster
+## Alloy: The Orchestrator
 
-Nimbus takes the intelligence gathered by INCA (the brain), the monitoring data from Lyte (the eyes), and the security signals from the defense stack — and asks one question: "What happens next?"
+Alloy takes the intelligence gathered by INCA (the brain), the monitoring data from Lyte (the eyes), and security signals from the defense stack — and routes structured, explainable workflows across the ecosystem.
 
 It builds forecasting models across multiple domains, identifies patterns that humans would miss, and generates predictions that the rest of the ecosystem can act on.
 
 ## Beacon: The Signal
 
-Where Nimbus predicts, Beacon surfaces. It's the analytics and alerting companion that connects to every platform in the ecosystem and creates cross-platform intelligence reports.
+Where Alloy executes, Beacon surfaces. It's the analytics and alerting companion that connects to every platform in the ecosystem and creates cross-platform intelligence reports.
 
 Beacon highlights trends, anomalies, and opportunities. It's the translation layer between raw predictions and actionable insights.
 
@@ -1555,7 +1555,7 @@ This week's insight changed how I think about AI:
 
 A 70% accurate prediction that arrives 3 hours before something happens is infinitely more valuable than a 99% accurate post-mortem.
 
-**Nimbus** is the forecaster — it takes data from across the ecosystem and asks "What happens next?"
+**Alloy** is the orchestrator — it takes data from across the ecosystem and turns it into structured, explainable execution.
 
 **Beacon** is the signal — it surfaces trends, anomalies, and opportunities in cross-platform intelligence reports.
 
@@ -1567,7 +1567,7 @@ This is probably the most conceptually exciting layer of the SZL ecosystem. Pred
 
 Stephen`,
     hackajobUpdate: [
-      'Add Nimbus and Beacon as featured projects',
+      'Add Alloy and Beacon as featured projects',
       'Update skills: "Predictive Analytics, Forecasting, AI/ML"',
     ],
     carousel: {
@@ -1575,7 +1575,7 @@ Stephen`,
       slides: [
         { title: 'Slide 1: Title', content: '"Speed of Insight > Perfection of Analysis"\nWhy 70% Accurate & Early Beats 99% Accurate & Late\nStephen Lutar | SZL Holdings' },
         { title: 'Slide 2: The Question', content: '"What if you could see the future?"\nNot perfectly. But well enough to act FIRST.\nIcon: crystal ball / telescope' },
-        { title: 'Slide 3: Nimbus', content: '"NIMBUS — The Forecaster"\n- Pattern analysis across domains\n- Forecasting models\n- Connects INCA intelligence + Lyte monitoring\n- Asks: "What happens next?"' },
+        { title: 'Slide 3: Alloy', content: '"ALLOY — The Orchestrator"\n- Pattern analysis across domains\n- Forecasting models\n- Connects INCA intelligence + Lyte monitoring\n- Asks: "What happens next?"' },
         { title: 'Slide 4: Beacon', content: '"BEACON — The Signal"\n- Cross-platform analytics\n- Trend detection\n- Anomaly highlighting\n- Intelligence reports across the entire ecosystem' },
         { title: 'Slide 5: Compound Effect', content: '"The prediction engine gets smarter as the ecosystem grows."\nMore platforms = more data\nMore data = better predictions\nIcon: upward growth spiral' },
         { title: 'Slide 6: The Insight', content: '"70% accurate + 3 hours early"\n> "99% accurate + after the fact"\n\nBuild for speed of insight, not perfection of analysis.' },
@@ -1584,7 +1584,7 @@ Stephen`,
     },
     proTips: [
       'The "70% accurate + early vs 99% accurate + late" is a highly quotable insight — make it the hook of your follow-up comment.',
-      'Cross-reference previous weeks: "INCA gathers intelligence, Lyte observes, and now Nimbus predicts — the ecosystem is taking shape."',
+      'Cross-reference previous weeks: "INCA gathers intelligence, Lyte observes, and now Alloy orchestrates — the ecosystem is taking shape."',
       'Predictive AI content attracts data science audiences — use relevant hashtags to reach them.',
     ],
   },
@@ -2051,15 +2051,15 @@ THE ECOSYSTEM:
 - Rosie — Threat detection & security operations
 - Aegis — Defensive perimeter & compliance
 - Firestorm — Incident response simulation & training
-- Nimbus — Predictive AI & forecasting
+- Alloy — Intelligence Orchestration & forecasting
 - Beacon — Cross-platform analytics & alerting
 - Zeus — Platform orchestration & management
 - DreamEra — Creative AI & concept generation
 - Dreamscape — Immersive digital experiences
-- AlloyScape — Unified interface & integration layer
+- Alloy — Unified interface & integration layer
 - Carlota Jo — Strategic consulting & advisory
 
-Every platform connects. Intelligence flows from INCA. Lyte watches everything. The security stack protects it all. Nimbus predicts. Beacon alerts. Zeus orchestrates. And Carlota Jo ensures it all serves real business outcomes.
+Every platform connects. Intelligence flows from INCA. Lyte watches everything. The security stack protects it all. Alloy orchestrates. Beacon alerts. Zeus orchestrates. And Carlota Jo ensures it all serves real business outcomes.
 
 This isn't a collection of side projects. It's a thesis: one engineer can build a comprehensive, production-grade technology ecosystem if they think in systems, build in layers, and treat every platform as part of something larger.
 
@@ -2083,10 +2083,10 @@ One engineer. One ecosystem:
 - INCA (AI research)
 - Lyte (observability)
 - Rosie + Aegis + Firestorm (security)
-- Nimbus + Beacon (predictions)
+- Alloy + Beacon (predictions)
 - Zeus (orchestration)
 - DreamEra + Dreamscape (creative)
-- AlloyScape (integration)
+- Alloy (integration)
 - Carlota Jo (consulting)
 
 All interconnected. All production-grade.
@@ -2100,9 +2100,9 @@ Just getting started.
       '🧵 8 weeks ago I said I built an entire technology ecosystem. Alone.\n\nToday: the full reveal.\n\nEvery platform. Every connection. The complete picture.\n\n(1/8)',
       'THE BRAIN: INCA\nAI research intelligence. Experiment tracking. Model benchmarking.\nThe central nervous system of everything.\n\nTHE EYES: Lyte\nIntelligent observability. System understanding.\nEyes that never blink.\n\n(2/8)',
       'THE SHIELD:\nRosie — Detection & triage\nAegis — Defense & compliance\nFirestorm — Response simulation\n\nThree platforms. One security stack.\nDetect. Defend. Respond.\n\n(3/8)',
-      'THE PREDICTION ENGINE:\nNimbus — Forecasting what happens next\nBeacon — Surfacing signals across platforms\n\nSpeed of insight > perfection of analysis.\n\n(4/8)',
+      'THE PREDICTION ENGINE:\nAlloy — Orchestrating cross-platform execution\nBeacon — Surfacing signals across platforms\n\nSpeed of insight > perfection of analysis.\n\n(4/8)',
       'THE ADVISORY ARM: Carlota Jo\nStrategic consulting where tech meets business.\n\nTHE CREATIVE SIDE:\nDreamEra — Creative AI & storytelling\nDreamscape — Immersive experiences\n\nCompetitive advantage disguised as art.\n\n(5/8)',
-      'THE ORCHESTRATION:\nZeus — Platform management\nAlloyScape — Integration layer\n\nEvery platform connects. Intelligence flows.\nThe ecosystem is alive.\n\n(6/8)',
+      'THE ORCHESTRATION:\nZeus — Platform management\nAlloy — Integration layer\n\nEvery platform connects. Intelligence flows.\nThe ecosystem is alive.\n\n(6/8)',
       'Three lessons from this journey:\n\n1. Architecture matters more than any individual feature\n2. The connections CREATE more value than the platforms\n3. Building in public is the best decision I\'ve ever made\n\n(7/8)',
       'I\'m Stephen Lutar.\n\nBuilder. Founder. System architect.\n\nAnd I\'m just getting started.\n\nIf any of this resonated — let\'s connect.\n\n#BuildInPublic #TechFounder #SZLHoldings\n\n(8/8)',
     ],
@@ -2116,12 +2116,12 @@ THE SZL HOLDINGS ECOSYSTEM:
 🛡️ Rosie — Threat detection
 🏰 Aegis — Defensive perimeter
 🔥 Firestorm — Incident response
-🔮 Nimbus — Predictive AI
+🔮 Alloy — Intelligence Orchestration
 📡 Beacon — Cross-platform analytics
 ⚡ Zeus — Platform orchestration
 🎨 DreamEra — Creative AI
 🌌 Dreamscape — Immersive experiences
-🔗 AlloyScape — Integration layer
+🔗 Alloy — Integration layer
 💼 Carlota Jo — Strategic consulting
 
 Every single platform connects to the others. Intelligence flows. Data moves. The ecosystem is alive.
@@ -2140,7 +2140,7 @@ If any of this resonated — let's connect! 🤝`,
       { slide: 1, text: '"ONE ENGINEER. ONE ECOSYSTEM. THE FULL REVEAL." Grand finale banner with all platform logos.' },
       { slide: 2, text: 'THE BRAIN & EYES: INCA (AI) + Lyte (Observability). Screenshots and descriptions.' },
       { slide: 3, text: 'THE SHIELD: Rosie + Aegis + Firestorm. Three-layer security stack.' },
-      { slide: 4, text: 'THE PREDICTION ENGINE: Nimbus + Beacon. See the future.' },
+      { slide: 4, text: 'THE PREDICTION ENGINE: Alloy + Beacon. See the future.' },
       { slide: 5, text: 'THE ADVISORY & CREATIVE: Carlota Jo + DreamEra + Dreamscape.' },
       { slide: 6, text: '"Architecture > Features. Connections > Platforms. Building in public = best decision ever."' },
       { slide: 7, text: '"I\'m Stephen Lutar. Builder. Founder. System architect. Just getting started." Connect CTA.' },
@@ -2149,9 +2149,9 @@ If any of this resonated — let's connect! 🤝`,
       { slide: 1, design: 'Dark background, cinematic feel. Large white text: "8 WEEKS AGO, I SAID I BUILT AN ENTIRE ECOSYSTEM." Cyan text: "TODAY: THE FULL REVEAL." SZL logo.' },
       { slide: 2, design: 'Dark background. "THE BRAIN: INCA" with screenshot thumbnail. "THE EYES: LYTE" with screenshot thumbnail. Both in a grid layout.' },
       { slide: 3, design: 'Dark background. "THE SHIELD" with Rosie, Aegis, Firestorm screenshots in a row. "Detect. Defend. Respond."' },
-      { slide: 4, design: 'Dark background. "THE PREDICTION ENGINE" Nimbus + Beacon thumbnails. "Speed of insight > Perfection of analysis."' },
+      { slide: 4, design: 'Dark background. "THE PREDICTION ENGINE" Alloy + Beacon thumbnails. "Speed of insight > Perfection of analysis."' },
       { slide: 5, design: 'Dark background. "THE ADVISORY ARM" Carlota Jo + "THE CREATIVE SIDE" DreamEra + Dreamscape thumbnails.' },
-      { slide: 6, design: 'Dark background. "THE ORCHESTRATION" Zeus + AlloyScape. "Every platform connects."' },
+      { slide: 6, design: 'Dark background. "THE ORCHESTRATION" Zeus + Alloy. "Every platform connects."' },
       { slide: 7, design: 'Dark background. Three numbered lessons in white and cyan text. 1. Architecture > features. 2. Connections > platforms. 3. Build in public.' },
       { slide: 8, design: 'Dark background. "THE THESIS" One engineer can build a comprehensive ecosystem — by thinking in systems, building in layers, and treating every platform as part of something larger.' },
       { slide: 9, design: 'Dark background. Photo/avatar. "I\'m Stephen Lutar. Builder. Founder. System Architect." "Just getting started." Connect CTA. All social handles.' },
@@ -2165,10 +2165,10 @@ THE ECOSYSTEM:
 🧠 INCA — AI research intelligence
 👁️ Lyte — Observability
 🛡️ Rosie + Aegis + Firestorm — Security
-🔮 Nimbus + Beacon — Predictions
+🔮 Alloy + Beacon — Predictions
 ⚡ Zeus — Orchestration
 🎨 DreamEra + Dreamscape — Creative
-🔗 AlloyScape — Integration
+🔗 Alloy — Integration
 💼 Carlota Jo — Consulting
 
 Every platform connects. Intelligence flows. The ecosystem is alive.
@@ -2221,10 +2221,10 @@ OUTLINE:
   - INCA (2 min)
   - Lyte (1 min)
   - Security stack (2 min)
-  - Nimbus + Beacon (1.5 min)
+  - Alloy + Beacon (1.5 min)
   - Carlota Jo (1 min)
   - DreamEra + Dreamscape (1.5 min)
-  - Zeus + AlloyScape (1 min)
+  - Zeus + Alloy (1 min)
 [10:00-12:00] How it all connects — architecture overview.
 [12:00-14:00] Three lessons learned. Personal reflections.
 [14:00-15:00] What's next. Subscribe CTA.
@@ -2246,7 +2246,7 @@ Over eight weeks, I've pulled back the curtain on every platform in the SZL Hold
 - **Week 2: The Brain** — INCA, the AI research intelligence platform.
 - **Week 3: The Eyes** — Lyte, the intelligent observability platform.
 - **Week 4: The Shield** — Rosie, Aegis, and Firestorm — the three-layer security stack.
-- **Week 5: The Prediction Engine** — Nimbus and Beacon, seeing the future.
+- **Week 5: The Prediction Engine** — Alloy and Beacon, seeing the future.
 - **Week 6: The Advisory Arm** — Carlota Jo Consulting, bridging tech and strategy.
 - **Week 7: The Creative Side** — DreamEra and Dreamscape, where art meets technology.
 
@@ -2263,15 +2263,15 @@ The SZL Holdings ecosystem currently comprises:
 | Rosie | Threat detection & security operations |
 | Aegis | Defensive perimeter & compliance |
 | Firestorm | Incident response simulation & training |
-| Nimbus | Predictive AI & forecasting |
+| Alloy | Intelligence orchestration & workflow execution |
 | Beacon | Cross-platform analytics & alerting |
 | Zeus | Platform orchestration & management |
 | DreamEra | Creative AI & concept generation |
 | Dreamscape | Immersive digital experiences |
-| AlloyScape | Unified interface & integration layer |
+| Alloy | Unified interface & integration layer |
 | Carlota Jo | Strategic consulting & advisory |
 
-Every platform connects. Intelligence flows from INCA. Lyte watches everything. The security stack protects it all. Nimbus predicts. Beacon alerts. Zeus orchestrates. And Carlota Jo ensures it all serves real business outcomes.
+Every platform connects. Intelligence flows from INCA. Lyte watches everything. The security stack protects it all. Alloy orchestrates. Beacon alerts. Zeus orchestrates. And Carlota Jo ensures it all serves real business outcomes.
 
 ## Three Lessons
 
@@ -2281,7 +2281,7 @@ The most important work in the SZL ecosystem wasn't building any single platform
 
 ### 2. The connections between platforms create more value than the platforms themselves
 
-INCA alone is a good AI research tool. INCA connected to Lyte, feeding Nimbus, protected by Rosie, and informed by Carlota Jo client insights — that's an intelligence engine.
+INCA alone is a good AI research tool. INCA connected to Lyte, feeding Alloy, protected by Rosie, and informed by Carlota Jo client insights — that's an intelligence engine.
 
 The magic is in the connections, not the components.
 
@@ -2314,13 +2314,13 @@ SUBJECT LINE: "The grand finale: everything comes together"
 
 This is it. The final week.
 
-Over eight weeks, I've shared every platform in the SZL Holdings ecosystem. The brain (INCA). The eyes (Lyte). The shield (Rosie + Aegis + Firestorm). The prediction engine (Nimbus + Beacon). The advisory arm (Carlota Jo). The creative side (DreamEra + Dreamscape).
+Over eight weeks, I've shared every platform in the SZL Holdings ecosystem. The brain (INCA). The eyes (Lyte). The shield (Rosie + Aegis + Firestorm). The prediction engine (Alloy + Beacon). The advisory arm (Carlota Jo). The creative side (DreamEra + Dreamscape).
 
 Today, the full picture.
 
 **12 platforms. All interconnected. All production-grade. All built by one person.**
 
-The connections are what matter. INCA's intelligence feeds Nimbus's predictions. Lyte watches everything and reports to Beacon. The security stack protects it all. Zeus orchestrates. And Carlota Jo ensures everything serves real business outcomes.
+The connections are what matter. INCA's intelligence feeds Alloy's execution. Lyte watches everything and reports to Beacon. The security stack protects it all. Zeus orchestrates. And Carlota Jo ensures everything serves real business outcomes.
 
 **Three lessons from this journey:**
 
@@ -2355,7 +2355,7 @@ Stephen
         { title: 'Slide 2: The Brain', content: '"INCA — AI Research Intelligence"\nExperiment tracking. Model benchmarking. Cross-platform insights.\nThe central nervous system.' },
         { title: 'Slide 3: The Eyes', content: '"Lyte — Intelligent Observability"\nNot monitoring. Understanding.\nThe eyes that never blink.' },
         { title: 'Slide 4: The Shield', content: '"Rosie + Aegis + Firestorm"\nDetection. Defense. Response.\nThree layers. One security stack.' },
-        { title: 'Slide 5: The Prediction Engine', content: '"Nimbus + Beacon"\nForecast what\'s next. Surface the signal.\n70% early > 99% late.' },
+        { title: 'Slide 5: The Prediction Engine', content: '"Alloy + Beacon"\nForecast what\'s next. Surface the signal.\n70% early > 99% late.' },
         { title: 'Slide 6: The Advisory Arm', content: '"Carlota Jo Consulting"\nWhere vision meets precision.\nTech without strategy is expensive tooling.' },
         { title: 'Slide 7: The Creative Side', content: '"DreamEra + Dreamscape"\nCreative AI. Immersive experiences.\nCompetitive advantage disguised as art.' },
         { title: 'Slide 8: The Thesis', content: '"One engineer can build a comprehensive ecosystem."\nThink in systems. Build in layers.\nTreat every platform as part of something larger.\nArchitecture > individual features.' },
@@ -2566,7 +2566,7 @@ const screenshotFiles = [
   ['rosie-hero.jpg', 'Rosie Cybersecurity'],
   ['aegis-hero.jpg', 'Aegis Security'],
   ['firestorm-hero.jpg', 'Firestorm Security Lab'],
-  ['nimbus-hero.jpg', 'Nimbus Predictive AI'],
+  ['alloy-hero.jpg', 'Alloy Intelligence Layer'],
   ['beacon-hero.jpg', 'Beacon Analytics'],
   ['carlota-jo-hero.jpg', 'Carlota Jo Consulting'],
   ['dreamera-hero.jpg', 'DreamEra Creative'],
@@ -2574,7 +2574,7 @@ const screenshotFiles = [
   ['apps-showcase-hero.jpg', 'Full Platform Catalog'],
   ['career-stephen-lutar.jpg', 'Personal Profile'],
   ['zeus-hero.jpg', 'Zeus Architecture'],
-  ['alloyscape-hero.jpg', 'AlloyScape Infrastructure'],
+  ['alloy-hero.jpg', 'Alloy Infrastructure'],
   ['lutar-hero.jpg', 'Lutar Command Center'],
   ['lyte-logo.png', 'Lyte logo for branding'],
 ];
@@ -2655,7 +2655,7 @@ WEEKS.forEach((week) => {
     2: 'Quote tweet posts about AI research, intelligence platforms, or knowledge management — add "INCA does this at scale. Week 2 of the journey." Reply to AI/ML threads highlighting INCA\'s research intelligence capabilities. Target: 5 quote tweets, 10 replies.',
     3: 'Quote tweet posts about observability, monitoring, or DevOps — add "Built Lyte for exactly this problem." Reply to SRE/DevOps threads highlighting Lyte\'s intelligent observability. Target: 5 quote tweets, 10 replies.',
     4: 'Quote tweet cybersecurity news, breach reports, or zero-trust discussions — add "This is why Rosie + Aegis + Firestorm exist." Reply to infosec threads with your security-first philosophy. Target: 5 quote tweets, 10 replies.',
-    5: 'Quote tweet posts about predictive analytics, forecasting, or data-driven decisions — add "Nimbus + Beacon do this at scale." Reply to data science and analytics threads highlighting predictive intelligence. Target: 5 quote tweets, 10 replies.',
+    5: 'Quote tweet posts about predictive analytics, forecasting, or data-driven decisions — add "Alloy + Beacon do this at scale." Reply to data science and analytics threads highlighting predictive intelligence. Target: 5 quote tweets, 10 replies.',
     6: 'Quote tweet posts about consulting, digital transformation, or strategy — add "Carlota Jo bridges the gap between technology and strategy." Reply to founder/advisor threads. Target: 5 quote tweets, 10 replies.',
     7: 'Quote tweet posts about creative technology, design systems, or generative AI — add "DreamEra + Dreamscape: where technology meets imagination." Reply to creative tech threads. Target: 5 quote tweets, 10 replies.',
     8: 'Quote tweet posts about solo founders, bootstrapping, or ambitious tech ventures — add "12 platforms. 8 weeks. One founder. The full SZL Holdings ecosystem." Reply to startup/founder threads with the full portfolio reveal. Target: 10 quote tweets, 15 replies.',
@@ -3354,7 +3354,7 @@ const allScreenshots = [
   ['rosie-hero.jpg', 'Rosie security monitoring'],
   ['aegis-hero.jpg', 'Aegis security fortress'],
   ['firestorm-hero.jpg', 'Firestorm incident response'],
-  ['nimbus-hero.jpg', 'Nimbus predictive AI'],
+  ['alloy-hero.jpg', 'Alloy intelligence layer'],
   ['beacon-hero.jpg', 'Beacon analytics'],
   ['carlota-jo-hero.jpg', 'Carlota Jo consulting'],
   ['dreamera-hero.jpg', 'DreamEra creative platform'],
@@ -3362,7 +3362,7 @@ const allScreenshots = [
   ['career-stephen-lutar.jpg', 'Stephen Lutar profile'],
   ['apps-showcase-hero.jpg', 'Full platform catalog'],
   ['zeus-hero.jpg', 'Zeus architecture'],
-  ['alloyscape-hero.jpg', 'AlloyScape infrastructure'],
+  ['alloy-hero.jpg', 'Alloy infrastructure'],
   ['lutar-hero.jpg', 'Lutar command center'],
 ];
 allScreenshots.forEach(([file, desc]) => writeBullet(`${file} — ${desc}`));

@@ -321,7 +321,7 @@ writeCopyBox('EXTENDED DESCRIPTION',
 
 Every platform is production-grade. Every one was designed, engineered, and deployed by one person. And every one connects to the others in ways that make the whole greater than the sum of its parts.
 
-The ecosystem includes: INCA (AI research intelligence), Lyte (observability), ROSIE + Aegis + Firestorm (cybersecurity stack), Nimbus + Beacon (predictive analytics), Vessels (maritime intelligence), DreamEra + Dreamscape (creative tech), Zeus (orchestration), and Carlota Jo (strategic consulting).
+The ecosystem includes: INCA (AI research intelligence), Lyte (observability), ROSIE + Aegis + Firestorm (cybersecurity stack), Alloy + Beacon (predictive analytics), Vessels (maritime intelligence), DreamEra + Dreamscape (creative tech), Zeus (orchestration), and Carlota Jo (strategic consulting).
 
 Follow along as I build in public and reveal the architecture behind the entire system.`);
 
@@ -371,13 +371,13 @@ THE ECOSYSTEM:
 \u2022 ROSIE — AI-powered threat detection & security operations
 \u2022 Aegis — Enterprise defensive security & compliance
 \u2022 Firestorm — Incident response simulation & training
-\u2022 Nimbus — Predictive AI & confidence-scored forecasting
+\u2022 Alloy — Intelligence Orchestration & confidence-scored forecasting
 \u2022 Beacon — Cross-platform analytics & decision intelligence
 \u2022 Vessels — Maritime intelligence & vessel tracking
 \u2022 Zeus — Platform orchestration & modular architecture
 \u2022 DreamEra — Creative AI & neural storytelling
 \u2022 Dreamscape — Immersive creative experiences
-\u2022 AlloyScape — Infrastructure operations & integration
+\u2022 Alloy — Infrastructure operations & integration
 \u2022 Carlota Jo — Strategic consulting & advisory
 
 MY CORE BELIEFS:
@@ -459,7 +459,7 @@ writeCopyBox('CATEGORY', 'Science, Technology & Engineering');
 writeSubheading('Story Highlights Suggestions');
 writeBullet('"Ecosystem" — Screenshots of all platforms with brief descriptions');
 writeBullet('"Security" — ROSIE, Aegis, Firestorm screenshots and features');
-writeBullet('"AI/ML" — INCA, Nimbus, Beacon screenshots');
+writeBullet('"AI/ML" — INCA, Alloy, Beacon screenshots');
 writeBullet('"Maritime" — Vessels intelligence platform');
 writeBullet('"Creative" — DreamEra and Dreamscape visuals');
 writeBullet('"Build Log" — Behind-the-scenes of building the ecosystem');
@@ -602,11 +602,11 @@ The SZL ecosystem currently includes 15+ production-grade platforms:
 \u2022 INCA — AI research intelligence
 \u2022 Lyte — Intelligent observability
 \u2022 ROSIE, Aegis, Firestorm — Three-layer cybersecurity stack
-\u2022 Nimbus & Beacon — Predictive intelligence & analytics
+\u2022 Alloy & Beacon — Intelligence orchestration & analytics
 \u2022 Vessels — Maritime intelligence
 \u2022 DreamEra & Dreamscape — Creative AI platforms
 \u2022 Zeus — Platform orchestration
-\u2022 AlloyScape — Infrastructure operations
+\u2022 Alloy — Infrastructure operations
 \u2022 Carlota Jo — Strategic consulting
 
 Every platform connects to the others. Intelligence flows between them. The whole is greater than the sum of its parts.
@@ -675,7 +675,7 @@ writeCopyBox('TWEET 2 OF 5',
 \u2022 INCA — AI research intelligence
 \u2022 Lyte — Intelligent observability
 \u2022 ROSIE + Aegis + Firestorm — Cybersecurity stack
-\u2022 Nimbus + Beacon — Predictive analytics
+\u2022 Alloy + Beacon — Predictive analytics
 \u2022 Vessels — Maritime intelligence
 \u2022 DreamEra + Dreamscape — Creative AI
 \u2022 Zeus — Orchestration
@@ -721,7 +721,7 @@ THE ECOSYSTEM:
 \u2022 INCA — AI research intelligence & experiment tracking
 \u2022 Lyte — Intelligent observability & system monitoring
 \u2022 ROSIE + Aegis + Firestorm — Three-layer cybersecurity stack
-\u2022 Nimbus + Beacon — Predictive analytics & forecasting
+\u2022 Alloy + Beacon — Predictive analytics & forecasting
 \u2022 Vessels — Maritime intelligence & vessel tracking
 \u2022 DreamEra + Dreamscape — Creative AI & immersive experiences
 \u2022 Zeus — Platform orchestration
@@ -750,7 +750,7 @@ Introducing SZL Holdings \u2014 a technology holding company I\u2019ve been quie
 The portfolio spans:
 \u2726 AI research intelligence (INCA)
 \u2726 Cybersecurity operations (ROSIE, Aegis, Firestorm)
-\u2726 Predictive analytics (Nimbus, Beacon)
+\u2726 Predictive analytics (Alloy, Beacon)
 \u2726 Maritime intelligence (Vessels)
 \u2726 Creative AI (DreamEra, Dreamscape)
 \u2726 Strategic consulting (Carlota Jo)
@@ -806,7 +806,7 @@ THE THESIS
 
 Isolated tools create data silos. Connected platforms create intelligence.
 
-When your AI research platform (INCA) feeds insights to your predictive engine (Nimbus), and your observability platform (Lyte) informs your security stack (ROSIE, Aegis, Firestorm), you get something that no individual tool can deliver: compound intelligence.
+When your AI research platform (INCA) feeds insights to your intelligence layer (Alloy), and your observability platform (Lyte) informs your security stack (ROSIE, Aegis, Firestorm), you get something that no individual tool can deliver: compound intelligence.
 
 Every new platform makes every existing platform smarter. Every data point improves every prediction. The whole isn't just greater than the sum of its parts — it's a fundamentally different thing.
 
@@ -819,13 +819,13 @@ Here's what I built:
 \u2022 ROSIE — AI-powered threat detection & security operations
 \u2022 Aegis — Enterprise defensive security & compliance
 \u2022 Firestorm — Incident response simulation & training
-\u2022 Nimbus — Predictive AI & forecasting
+\u2022 Alloy — Intelligence Orchestration & forecasting
 \u2022 Beacon — Cross-platform analytics & alerting
 \u2022 Vessels — Maritime intelligence & vessel tracking
 \u2022 Zeus — Platform orchestration & architecture
 \u2022 DreamEra — Creative AI & neural storytelling
 \u2022 Dreamscape — Immersive creative experiences
-\u2022 AlloyScape — Infrastructure operations
+\u2022 Alloy — Infrastructure operations
 \u2022 Carlota Jo — Strategic consulting & advisory
 
 Over the coming weeks, I'll be publishing deep-dives into each platform — the architecture decisions, the mistakes, and the lessons learned.
@@ -896,7 +896,7 @@ currentY += 10;
 const carousels = [
   { file: 'carousel-1-ecosystem-overview.pdf', title: 'The SZL Ecosystem — One Engineer, 15+ Platforms', desc: 'Overview of the complete SZL Holdings portfolio, the interconnection model, and the thesis behind building an ecosystem.' },
   { file: 'carousel-2-cybersecurity-stack.pdf', title: 'Why One Security Tool Isn\'t Enough', desc: 'The three-layer cybersecurity defense model: ROSIE (detection), Aegis (defense), Firestorm (response).' },
-  { file: 'carousel-3-ai-analytics.pdf', title: 'From Data Drowning to Predictive Intelligence', desc: 'How INCA, Nimbus, and Beacon work together as the AI and analytics brain of the ecosystem.' },
+  { file: 'carousel-3-ai-analytics.pdf', title: 'From Data Drowning to Predictive Intelligence', desc: 'How INCA, Alloy, and Beacon work together as the AI and analytics brain of the ecosystem.' },
   { file: 'carousel-4-maritime-intelligence.pdf', title: 'Maritime Intelligence — Vessels Platform', desc: 'How Vessels brings AI-powered intelligence to maritime operations, vessel tracking, and route analysis.' },
   { file: 'carousel-5-creative-tech.pdf', title: 'Creative Tech as Competitive Advantage', desc: 'DreamEra and Dreamscape — why creative AI platforms are the secret weapon of the SZL ecosystem.' },
 ];

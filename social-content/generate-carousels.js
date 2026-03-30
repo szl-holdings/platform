@@ -171,7 +171,7 @@ const carousel1 = [
     'INCA — AI Research Intelligence',
     'Lyte — Intelligent Observability',
     'ROSIE + Aegis + Firestorm — Cybersecurity Stack',
-    'Nimbus + Beacon — Predictive Analytics',
+    'Alloy + Beacon — Intelligence & Analytics',
     'Vessels — Maritime Intelligence',
     'DreamEra + Dreamscape — Creative AI',
     'Zeus — Platform Orchestration',
@@ -179,7 +179,7 @@ const carousel1 = [
   ], n, t, COLORS.gold) },
   { render: (doc, n, t) => drawContentSlide(doc, 'The Interconnection Model', [
     'Intelligence flows between every platform',
-    'INCA feeds research to Nimbus for predictions',
+    'INCA feeds research to Alloy for structured execution',
     'Lyte observability informs the security stack',
     'Beacon aggregates signals across the entire ecosystem',
     'Every new platform makes every existing one smarter',
@@ -219,7 +219,7 @@ const carousel2 = [
 ];
 
 const carousel3 = [
-  { render: (doc, n, t) => drawTitleSlide(doc, 'From Data Drowning to Predictive Intelligence', 'How INCA, Nimbus, and Beacon transform\nraw data into actionable foresight.', n, t) },
+  { render: (doc, n, t) => drawTitleSlide(doc, 'From Data Drowning to Predictive Intelligence', 'How INCA, Alloy, and Beacon transform\nraw data into actionable foresight.', n, t) },
   { render: (doc, n, t) => drawContentSlide(doc, 'The Data Problem', [
     'Most teams are drowning in data and starving for insight',
     '47 dashboards and zero understanding',
@@ -233,17 +233,17 @@ const carousel3 = [
     'The central nervous system of the ecosystem',
     'Surfaces signal from noise',
   ], n, t, COLORS.green) },
-  { render: (doc, n, t) => drawContentSlide(doc, 'Nimbus — The Forecaster', [
-    'Predictive AI with confidence-scored forecasting',
-    'Takes INCA intelligence + Lyte monitoring data',
-    'Asks one question: "What happens next?"',
-    'Pattern analysis across multiple domains',
+  { render: (doc, n, t) => drawContentSlide(doc, 'Alloy — The Orchestrator', [
+    'Intelligence orchestration with explainable execution',
+    'Takes INCA research + Lyte monitoring data',
+    'Routes structured output across the ecosystem',
+    'Pattern analysis and workflow automation',
   ], n, t, '#9966ff') },
   { render: (doc, n, t) => drawContentSlide(doc, 'Beacon — The Signal', [
     'Cross-platform analytics and alerting',
     'Trend detection and anomaly highlighting',
     'Intelligence reports across the entire ecosystem',
-    'Where Nimbus predicts, Beacon surfaces',
+    'Where Alloy executes, Beacon surfaces outcomes',
   ], n, t, COLORS.cyan) },
   { render: (doc, n, t) => drawQuoteSlide(doc, 'A 70% accurate prediction that arrives 3 hours early is infinitely more valuable than a 99% accurate post-mortem.', null, n, t) },
   { render: (doc, n, t) => drawCTASlide(doc, 'Speed of Insight > Perfection of Analysis', 'The AI stack gets smarter as the ecosystem grows.\nMore platforms = more data = better predictions.\nCompound intelligence in action.', '#BuildInPublic #AI #SZLHoldings', n, t) },
@@ -266,7 +266,7 @@ const carousel4 = [
     'Integration with the broader SZL ecosystem',
   ], n, t, COLORS.cyan) },
   { render: (doc, n, t) => drawContentSlide(doc, 'The Ecosystem Advantage', [
-    'Vessels connects to Nimbus for predictive route forecasting',
+    'Vessels connects to Alloy for predictive route intelligence',
     'Lyte provides observability across maritime operations',
     'INCA aggregates maritime intelligence research',
     'Beacon surfaces cross-domain maritime signals',

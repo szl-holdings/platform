@@ -47,7 +47,7 @@ TypeScript, React, Node.js, Python, PostgreSQL, System Architecture, Full-Stack 
 
 **Description**:
 ```
-SZL Holdings is a technology holding company with a portfolio of 12+ interconnected production-grade platforms. The ecosystem spans AI research (INCA), intelligent observability (Lyte), cybersecurity operations (Rosie, Aegis, Firestorm), predictive intelligence (Nimbus, Beacon), platform orchestration (Zeus), creative technology (DreamEra, Dreamscape), and strategic consulting (Carlota Jo).
+SZL Holdings is a technology holding company with a portfolio of 12+ interconnected production-grade platforms. The ecosystem spans AI research (INCA), intelligent observability (Lyte), cybersecurity operations (Rosie, Aegis, Firestorm), AI orchestration & workflow backbone (Alloy), cross-platform analytics (Beacon), platform orchestration (Zeus), maritime intelligence (Vessels), creative technology (DreamEra, Dreamscape), and strategic consulting (Carlota Jo).
 
 Key achievements:
 - Designed and built the complete ecosystem architecture from scratch
