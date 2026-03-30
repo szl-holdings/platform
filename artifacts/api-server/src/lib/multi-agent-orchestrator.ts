@@ -202,6 +202,7 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
   const completedSteps = steps.filter(s => s.status === "completed" && s.result);
   let synthesis = "";
   let synthesisTokens = 0;
+  let synthesisCostUsd = 0;
 
   if (completedSteps.length > 0) {
     const analysesText = completedSteps
@@ -225,13 +226,14 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
 
       synthesis = synthResponse.content;
       synthesisTokens = synthResponse.usage.totalTokens;
+      synthesisCostUsd = synthResponse.estimatedCostUsd;
     } catch {
       synthesis = completedSteps.map(s => `**${s.domain}**: ${s.result?.slice(0, 200)}`).join("\n\n");
     }
   }
 
   const totalTokens = steps.reduce((sum, s) => sum + (s.gatewayResponse?.usage.totalTokens ?? 0), 0) + planResponse.usage.totalTokens + synthesisTokens;
-  const totalCostUsd = steps.reduce((sum, s) => sum + (s.gatewayResponse?.estimatedCostUsd ?? 0), 0) + planResponse.estimatedCostUsd;
+  const totalCostUsd = steps.reduce((sum, s) => sum + (s.gatewayResponse?.estimatedCostUsd ?? 0), 0) + planResponse.estimatedCostUsd + synthesisCostUsd;
   const status = completedSteps.length === steps.length ? "completed" : completedSteps.length > 0 ? "partial" : "failed";
   const confidence = completedSteps.length / Math.max(steps.length, 1);
 
