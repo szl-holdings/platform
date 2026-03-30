@@ -150,7 +150,7 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
       confidence: 0.3,
       totalDurationMs: Date.now() - startTime,
       totalTokens: planResponse.usage.totalTokens,
-      totalCostUsd: 0,
+      totalCostUsd: planResponse.estimatedCostUsd,
       status: "failed",
     };
   }
@@ -231,6 +231,7 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
   }
 
   const totalTokens = steps.reduce((sum, s) => sum + (s.gatewayResponse?.usage.totalTokens ?? 0), 0) + planResponse.usage.totalTokens + synthesisTokens;
+  const totalCostUsd = steps.reduce((sum, s) => sum + (s.gatewayResponse?.estimatedCostUsd ?? 0), 0) + planResponse.estimatedCostUsd;
   const status = completedSteps.length === steps.length ? "completed" : completedSteps.length > 0 ? "partial" : "failed";
   const confidence = completedSteps.length / Math.max(steps.length, 1);
 
@@ -243,7 +244,7 @@ export async function orchestrate(request: OrchestrationRequest): Promise<Orches
     confidence: parseFloat(confidence.toFixed(2)),
     totalDurationMs: Date.now() - startTime,
     totalTokens,
-    totalCostUsd: 0,
+    totalCostUsd,
     status,
   };
 

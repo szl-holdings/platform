@@ -3,7 +3,7 @@ import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { gatewayInfer, getGatewayStatus, isValidStrategy, isValidProvider } from "../lib/ai-gateway";
 import type { RoutingStrategy } from "../lib/ai-gateway";
-import { inferenceTelemetry, estimateCost } from "../lib/inference-telemetry";
+import { inferenceTelemetry } from "../lib/inference-telemetry";
 import type { InferenceProvider } from "../lib/inference-telemetry";
 import { providerHealth } from "../lib/provider-health";
 import { getRegistrySummary, getAllModelCards, getModelCard, getAllAgentIds } from "../lib/model-registry";
@@ -330,8 +330,6 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
       return;
     }
 
-    const estimatedCostUsd = estimateCost(response.model, response.usage.promptTokens, response.usage.completionTokens);
-
     sendSuccess(res, {
       recommendations,
       metadata: {
@@ -339,7 +337,8 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
         provider: response.provider,
         latencyMs: response.routing.totalLatencyMs,
         telemetryId: response.telemetryId,
-        estimatedCostUsd,
+        estimatedCostUsd: response.estimatedCostUsd,
+        confidence: response.confidence,
         domain: domain ?? "general",
         depth: depth ?? "standard",
         generatedAt: new Date().toISOString(),

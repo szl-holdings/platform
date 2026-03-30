@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { inferenceTelemetry, type InferenceProvider } from "./inference-telemetry";
+import { inferenceTelemetry, estimateCost, type InferenceProvider } from "./inference-telemetry";
 import { providerHealth } from "./provider-health";
 import { services } from "@workspace/services";
 import type { ChatMessage, ChatCompletionResult } from "@workspace/services";
@@ -26,6 +26,8 @@ export interface GatewayResponse {
   model: string;
   provider: InferenceProvider;
   usage: { promptTokens: number; completionTokens: number; totalTokens: number };
+  estimatedCostUsd: number;
+  confidence: number | null;
   routing: {
     strategy: RoutingStrategy;
     selectedProvider: InferenceProvider;
@@ -238,6 +240,9 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
 
         providerHealth.recordSuccess(actualProvider, latencyMs);
 
+        const totalTokens = result.usage.promptTokens + result.usage.completionTokens;
+        const costUsd = estimateCost(result.model, result.usage.promptTokens, result.usage.completionTokens);
+
         return {
           content: result.content,
           model: result.model,
@@ -245,8 +250,10 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
           usage: {
             promptTokens: result.usage.promptTokens,
             completionTokens: result.usage.completionTokens,
-            totalTokens: result.usage.promptTokens + result.usage.completionTokens,
+            totalTokens,
           },
+          estimatedCostUsd: costUsd,
+          confidence: null,
           routing: {
             strategy,
             selectedProvider: candidate.provider,
