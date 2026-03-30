@@ -118,7 +118,7 @@ export function Hero() {
               transition={{ duration: 0.65, delay: 0.35 }}
               style={{ color: "hsl(210,5%,58%)", fontSize: "1.0625rem", lineHeight: "1.68", maxWidth: "30rem", marginBottom: "2.5rem" }}
             >
-              The holding company behind Alloy, Lyte, Vessels, Firestorm, INCA, Nimbus, Terra, and a portfolio of high-trust operating brands.
+              Command systems for observability, defense, and enterprise operations.
             </m.p>
 
             <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }} className="flex flex-col sm:flex-row items-start gap-4">

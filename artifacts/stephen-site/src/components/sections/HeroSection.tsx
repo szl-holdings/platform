@@ -88,7 +88,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.42 }}
             className="text-sm sm:text-base text-foreground/35 max-w-xl mb-10 sm:mb-12 leading-relaxed font-light"
           >
-            Founder of SZL Holdings — building command systems across observability, maritime intelligence, cybersecurity, and high-trust services. Purpose-built. Designed to compound.
+            Founder of SZL Holdings. Building command systems that compound.
           </motion.p>
 
           <motion.div
