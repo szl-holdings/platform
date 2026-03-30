@@ -16,12 +16,39 @@ export interface RequestTelemetry {
   correlationId?: string;
 }
 
+export interface BusinessEvent {
+  type: string;
+  domain?: string;
+  count?: number;
+  durationMs?: number;
+  success?: boolean;
+  severity?: string;
+  metadata?: Record<string, unknown>;
+  timestamp: number;
+}
+
+export interface AlertRecord {
+  id: string;
+  type: string;
+  message: string;
+  severity: "warning" | "critical";
+  triggeredAt: number;
+  resolvedAt?: number;
+  resolved: boolean;
+  metadata?: Record<string, unknown>;
+}
+
 const WINDOW_SIZE = 300_000;
+
+const MAX_BUSINESS_EVENTS = 1000;
+const MAX_ALERTS = 50;
 
 export class ServerTelemetryCollector {
   private requests: RequestTelemetry[] = [];
   private errorCounts = new Map<string, number>();
   private startTime = Date.now();
+  private businessEvents: BusinessEvent[] = [];
+  private activeAlerts: AlertRecord[] = [];
 
   recordRequest(data: RequestTelemetry) {
     this.requests.push(data);
@@ -91,6 +118,74 @@ export class ServerTelemetryCollector {
     return (Date.now() - this.startTime) / 1000;
   }
 
+  recordBusinessEvent(event: Omit<BusinessEvent, "timestamp">) {
+    this.businessEvents.push({ ...event, timestamp: Date.now() });
+    if (this.businessEvents.length > MAX_BUSINESS_EVENTS) {
+      this.businessEvents.splice(0, this.businessEvents.length - MAX_BUSINESS_EVENTS);
+    }
+  }
+
+  getBusinessEventCounts(windowMs = WINDOW_SIZE): Record<string, number> {
+    const cutoff = Date.now() - windowMs;
+    const counts: Record<string, number> = {};
+    for (const event of this.businessEvents) {
+      if (event.timestamp >= cutoff) {
+        counts[event.type] = (counts[event.type] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }
+
+  getBusinessEventsByDomain(windowMs = WINDOW_SIZE): Record<string, number> {
+    const cutoff = Date.now() - windowMs;
+    const counts: Record<string, number> = {};
+    for (const event of this.businessEvents) {
+      if (event.timestamp >= cutoff && event.domain) {
+        counts[event.domain] = (counts[event.domain] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }
+
+  getJobFailureCount(windowMs = WINDOW_SIZE): number {
+    const cutoff = Date.now() - windowMs;
+    return this.businessEvents.filter(
+      (e) => e.timestamp >= cutoff && e.type === "job_failed"
+    ).length;
+  }
+
+  getWorkflowCompletionCount(windowMs = WINDOW_SIZE): number {
+    const cutoff = Date.now() - windowMs;
+    return this.businessEvents.filter(
+      (e) => e.timestamp >= cutoff && e.type === "workflow_completed"
+    ).length;
+  }
+
+  raiseAlert(alert: Omit<AlertRecord, "id" | "triggeredAt" | "resolved">) {
+    const id = `alert_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    this.activeAlerts.unshift({ ...alert, id, triggeredAt: Date.now(), resolved: false });
+    if (this.activeAlerts.length > MAX_ALERTS) {
+      this.activeAlerts.length = MAX_ALERTS;
+    }
+    return id;
+  }
+
+  resolveAlert(id: string) {
+    const alert = this.activeAlerts.find((a) => a.id === id);
+    if (alert) {
+      alert.resolved = true;
+      alert.resolvedAt = Date.now();
+    }
+  }
+
+  getActiveAlerts(): AlertRecord[] {
+    return this.activeAlerts.filter((a) => !a.resolved);
+  }
+
+  getAllAlerts(): AlertRecord[] {
+    return [...this.activeAlerts];
+  }
+
   getSnapshot() {
     this.pruneOldEntries();
     return {
@@ -104,6 +199,11 @@ export class ServerTelemetryCollector {
       throughputPerHour: this.getThroughput(),
       uptimeSeconds: this.getUptimeSeconds(),
       windowMs: WINDOW_SIZE,
+      businessEvents: this.getBusinessEventCounts(),
+      eventsByDomain: this.getBusinessEventsByDomain(),
+      jobFailures: this.getJobFailureCount(),
+      workflowCompletions: this.getWorkflowCompletionCount(),
+      activeAlerts: this.getActiveAlerts().length,
     };
   }
 }

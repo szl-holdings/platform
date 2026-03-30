@@ -7,8 +7,12 @@ import {
   usersTable, rolesTable, userRolesTable, auditEventsTable, featureFlagsTable, webhookEventsTable,
 } from "@workspace/db";
 import { desc, sql, ilike, or, eq } from "drizzle-orm";
+import { authMiddleware, requireRole } from "../middlewares/auth";
 
 const adminRouter: IRouter = Router();
+
+adminRouter.use(authMiddleware());
+adminRouter.use(requireRole("admin"));
 
 const SZL_APPS = [
   { id: "project-list", name: "Project List", description: "Portfolio project management", status: "active", url: "/" },

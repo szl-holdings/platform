@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
-import { ReactNode } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell } from "lucide-react";
+import { ReactNode, useState } from "react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X } from "lucide-react";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -21,10 +21,21 @@ const NAV = [
 
 export function AlloyLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-full overflow-hidden">
-      <aside className="w-56 border-r flex flex-col shrink-0" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-10 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside className={cn(
+        "border-r flex flex-col shrink-0 z-20 transition-transform duration-200",
+        "fixed md:relative inset-y-0 left-0 w-56",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+      )} style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
         <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg shadow-lg" style={{ background: "linear-gradient(135deg, #00d4ff, #0090cc)", boxShadow: "0 0 12px rgba(0,212,255,0.3)" }}>
@@ -65,7 +76,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           {NAV.map((item) => {
             const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
             return (
-              <Link key={item.href} href={item.href} className={cn(
+              <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
                 "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
                 isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
               )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
@@ -82,7 +93,8 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <Zap className="w-3 h-3" />
             <span>SZL Business OS</span>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 flex-wrap">
+            <a href="/terra/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#0ea5e9", background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.2)" }}>BEACON</a>
             <a href="/lyte-command-center/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>LYTE</a>
             <a href="/vessels/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#38bdf8", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>VESSELS</a>
           </div>
@@ -90,21 +102,29 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-12 border-b flex items-center justify-between px-6 shrink-0" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,12,20,0.8)", backdropFilter: "blur(8px)" }}>
+        <header className="h-12 border-b flex items-center justify-between px-4 md:px-6 shrink-0" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,12,20,0.8)", backdropFilter: "blur(8px)" }}>
           <div className="flex items-center gap-3 text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#00d4ff" }} />
-            <span style={{ color: "#00d4ff" }}>14 Active Runs</span>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span style={{ color: "#10b981" }}>8 Completed</span>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span style={{ color: "#ef4444" }}>2 Failed</span>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors mr-2"
+              style={{ color: "rgba(255,255,255,0.5)" }}
+              aria-label="Toggle sidebar"
+            >
+              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#00d4ff" }} />
+            <span className="hidden sm:block" style={{ color: "#00d4ff" }}>14 Active Runs</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <span style={{ color: "#10b981" }}>8 Done</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <span className="hidden sm:block" style={{ color: "#ef4444" }}>2 Failed</span>
           </div>
           <div className="flex items-center gap-3">
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               <Bell className="w-4 h-4" />
             </button>
-            <div className="h-5 w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-            <div className="flex items-center gap-2">
+            <div className="h-5 w-px hidden sm:block" style={{ background: "rgba(255,255,255,0.08)" }} />
+            <div className="hidden sm:flex items-center gap-2">
               <div className="text-right">
                 <div className="text-xs font-medium text-white">Exec User</div>
                 <div className="text-[10px]" style={{ color: "rgba(0,212,255,0.7)" }}>SZL Holdings</div>
@@ -113,7 +133,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6" style={{ background: "#080c14" }}>
+        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: "#080c14" }}>
           {children}
         </main>
       </div>

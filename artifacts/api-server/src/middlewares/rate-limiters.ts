@@ -1,6 +1,18 @@
 import rateLimit from "express-rate-limit";
+import type { Request, Response, NextFunction } from "express";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+export function cacheControl(maxAgeSeconds: number) {
+  return (_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader("Cache-Control", `public, max-age=${maxAgeSeconds}, s-maxage=${maxAgeSeconds}`);
+    next();
+  };
+}
+
+export const SHORT_CACHE = cacheControl(30);
+export const MEDIUM_CACHE = cacheControl(300);
+export const LONG_CACHE = cacheControl(3600);
 
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

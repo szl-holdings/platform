@@ -3,6 +3,7 @@ import { knowledgeStore, createKnowledgeEntry, persistAgentRun, type KnowledgeDo
 import { agentEventBus, type AgentEventType } from "./event-bus";
 import { services } from "@workspace/services";
 import type { ChatMessage } from "@workspace/services";
+import { serverTelemetry } from "@workspace/observability";
 
 export interface AgentSchedule {
   agentId: string;
@@ -414,6 +415,15 @@ class AgentScheduler {
 
       logger.info({ runId, agentId, domain: schedule.domain, findings: totalFindings, durationMs: record.durationMs }, "Agent run completed");
 
+      serverTelemetry.recordBusinessEvent({
+        type: "workflow_completed",
+        domain: schedule.domain,
+        durationMs: record.durationMs,
+        success: true,
+        count: totalFindings,
+        metadata: { agentId, runId, findingsCount: totalFindings },
+      });
+
       persistAgentRun(record).catch(() => {});
     } catch (err) {
       record.status = "failed";
@@ -431,6 +441,14 @@ class AgentScheduler {
       }).catch(() => {});
 
       logger.error({ err, runId, agentId }, "Agent run failed");
+
+      serverTelemetry.recordBusinessEvent({
+        type: "workflow_failed",
+        domain: schedule.domain,
+        durationMs: record.durationMs,
+        success: false,
+        metadata: { agentId, runId, error: record.error },
+      });
 
       persistAgentRun(record).catch(() => {});
     }

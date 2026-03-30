@@ -26,6 +26,8 @@ import {
   Server,
   Wrench,
   Brain,
+  Menu,
+  X,
 } from "lucide-react";
 
 const LandingPage = lazy(() => import("@/pages/landing"));
@@ -97,7 +99,7 @@ function PageLoader() {
   );
 }
 
-function Sidebar() {
+function Sidebar({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -125,7 +127,7 @@ function Sidebar() {
               {section.items.map(({ path, label, icon: Icon }) => {
                 const isActive = location === path;
                 return (
-                  <Link key={path} href={path} aria-current={isActive ? "page" : undefined}>
+                  <Link key={path} href={path} aria-current={isActive ? "page" : undefined} onClick={onClose}>
                     <div className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer relative overflow-hidden",
                       collapsed && "justify-center",
@@ -198,15 +200,40 @@ function AppRouter() {
 }
 
 function DashboardLayout() {
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background overflow-hidden">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
         Skip to main content
       </a>
-      <Sidebar />
-      <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
-        <AppRouter />
-      </main>
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+      <div className={cn(
+        "fixed inset-y-0 left-0 z-40 md:relative md:translate-x-0 transition-transform duration-200",
+        mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
+        <Sidebar onClose={() => setMobileSidebarOpen(false)} />
+      </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="h-10 md:hidden border-b border-border bg-background flex items-center px-3 shrink-0">
+          <button
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+            aria-label="Toggle sidebar"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+          <span className="ml-2 text-sm font-semibold text-foreground">Rosie</span>
+        </div>
+        <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+          <AppRouter />
+        </main>
+      </div>
     </div>
   );
 }

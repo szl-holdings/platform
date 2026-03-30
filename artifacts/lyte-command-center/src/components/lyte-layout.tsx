@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
-import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, Bell, ChevronRight, Zap } from "lucide-react";
+import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, Bell, ChevronRight, Zap, Menu, X } from "lucide-react";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -21,10 +21,21 @@ const NAV = [
 
 export function LyteLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-full overflow-hidden">
-      <aside className="w-56 border-r flex flex-col shrink-0 relative z-20" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-10 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside className={cn(
+        "border-r flex flex-col shrink-0 relative z-20 transition-transform duration-200",
+        "fixed md:relative inset-y-0 left-0 w-56",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+      )} style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
         <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg shadow-lg" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", boxShadow: "0 0 12px rgba(245,158,11,0.3)" }}>
@@ -92,15 +103,23 @@ export function LyteLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-12 border-b flex items-center justify-between px-6 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,12,20,0.8)", backdropFilter: "blur(8px)" }}>
+      <div className="flex-1 flex flex-col min-w-0 md:ml-0 ml-0">
+        <header className="h-12 border-b flex items-center justify-between px-4 md:px-6 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,12,20,0.8)", backdropFilter: "blur(8px)" }}>
           <div className="flex items-center gap-3 text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#ef4444" }} />
-            <span style={{ color: "#ef4444" }}>5 Urgent</span>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span style={{ color: "#f97316" }}>12 Pending Approvals</span>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span style={{ color: "#f59e0b" }}>8 Ownership Gaps</span>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors mr-2"
+              style={{ color: "rgba(255,255,255,0.5)" }}
+              aria-label="Toggle sidebar"
+            >
+              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#ef4444" }} />
+            <span className="hidden sm:block" style={{ color: "#ef4444" }}>5 Urgent</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <span style={{ color: "#f97316" }}>12 Pending</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <span className="hidden sm:block" style={{ color: "#f59e0b" }}>8 Gaps</span>
           </div>
           <div className="flex items-center gap-3">
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>

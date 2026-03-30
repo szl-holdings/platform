@@ -3,7 +3,7 @@ import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
 import {
   LayoutDashboard, Activity, TrendingDown, Radar, GitBranch,
-  Bell, ChevronRight, Zap, Eye
+  Bell, ChevronRight, Zap, Eye, Menu, X
 } from "lucide-react";
 
 const COMMAND_LOOP = [
@@ -24,10 +24,21 @@ const NAV = [
 
 export function BeaconLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex h-full overflow-hidden">
-      <aside className="w-56 border-r flex flex-col shrink-0 relative z-20" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-10 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside className={cn(
+        "border-r flex flex-col shrink-0 z-20 transition-transform duration-200",
+        "fixed md:relative inset-y-0 left-0 w-56",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+      )} style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
         <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg shadow-lg" style={{ background: "linear-gradient(135deg, #0ea5e9, #3b82f6)", boxShadow: "0 0 12px rgba(14,165,233,0.3)" }}>
@@ -42,7 +53,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
 
         <div className="px-3 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
           <div className="text-[9px] uppercase tracking-widest mb-2 font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>Command Loop</div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap">
             {COMMAND_LOOP.map((p, i) => (
               <div key={p.phase} className="flex items-center gap-1">
                 {p.link ? (
@@ -74,7 +85,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
           {NAV.map((item) => {
             const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
             return (
-              <Link key={item.href} href={item.href} className={cn(
+              <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
                 "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
                 isActive ? "text-sky-400" : "text-slate-400 hover:text-white hover:bg-white/5"
               )} style={{ background: isActive ? "rgba(14,165,233,0.08)" : undefined }}>
@@ -94,7 +105,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             <Zap className="w-3 h-3" />
             <span>SZL Business OS</span>
           </div>
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-2 flex-wrap">
             <a href="/lyte-command-center/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>LYTE</a>
             <a href="/alloy/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#6366f1", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>ALLOY</a>
           </div>
@@ -102,22 +113,30 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-12 border-b flex items-center justify-between px-6 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,12,20,0.8)", backdropFilter: "blur(8px)" }}>
+        <header className="h-12 border-b flex items-center justify-between px-4 md:px-6 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,12,20,0.8)", backdropFilter: "blur(8px)" }}>
           <div className="flex items-center gap-3 text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#ef4444" }} />
-            <span style={{ color: "#ef4444" }}>2 Critical</span>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors mr-2"
+              style={{ color: "rgba(255,255,255,0.5)" }}
+              aria-label="Toggle sidebar"
+            >
+              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#ef4444" }} />
+            <span className="hidden sm:block" style={{ color: "#ef4444" }}>2 Critical</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
             <span style={{ color: "#f97316" }}>3 High</span>
-            <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span style={{ color: "#f59e0b" }}>$4.02M value at risk</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+            <span className="hidden sm:block" style={{ color: "#f59e0b" }}>$4.02M at risk</span>
           </div>
           <div className="flex items-center gap-3">
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               <Bell className="w-4 h-4" />
               <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
             </button>
-            <div className="h-5 w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-            <div className="flex items-center gap-2">
+            <div className="h-5 w-px hidden sm:block" style={{ background: "rgba(255,255,255,0.08)" }} />
+            <div className="hidden sm:flex items-center gap-2">
               <div className="text-right">
                 <div className="text-xs font-medium text-white">Exec User</div>
                 <div className="text-[10px]" style={{ color: "rgba(14,165,233,0.7)" }}>SZL Holdings</div>
@@ -126,7 +145,7 @@ export function BeaconLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6" style={{ background: "#080c14" }}>
+        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: "#080c14" }}>
           {children}
         </main>
       </div>

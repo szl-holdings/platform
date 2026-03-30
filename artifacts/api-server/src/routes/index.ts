@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { authLimiter, readLimiter, writeLimiter } from "../middlewares/rate-limiters";
+import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
 import { adminGuard } from "../middlewares/admin-guard";
 import healthRouter from "./health";
 import projectsRouter from "./projects";

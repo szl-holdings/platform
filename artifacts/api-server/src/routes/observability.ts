@@ -3,7 +3,7 @@ import { services } from "@workspace/services";
 import { MetricCollector, serverTelemetry, clientTelemetry } from "@workspace/observability";
 import type { WebVitalsReport } from "@workspace/observability";
 import { ALL_CONFIGS, getConfigBySlug } from "@workspace/observability/configs";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
@@ -61,6 +61,8 @@ router.get("/observability/:appSlug", authMiddleware({ required: false }), (req,
     return;
   }
 
+  res.setHeader("Cache-Control", "public, max-age=10, s-maxage=10");
+
   const snapshot = collector.getSnapshot();
   const isAuthenticated = !!req.user || process.env.NODE_ENV !== "production";
 
@@ -109,6 +111,7 @@ router.get("/observability/:appSlug", authMiddleware({ required: false }), (req,
 });
 
 router.get("/observability", authMiddleware({ required: false }), (req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=15, s-maxage=15");
   const isAuthenticated = !!req.user || process.env.NODE_ENV !== "production";
 
   const allApps = ALL_CONFIGS.map((config) => {
@@ -183,7 +186,46 @@ router.post("/observability/vitals", (req, res) => {
   };
 
   clientTelemetry.recordVitals(report);
+
+  serverTelemetry.recordBusinessEvent({
+    type: "web_vitals_received",
+    domain: body.appSlug,
+    metadata: { pathname: report.pathname, lcp: report.lcp, cls: report.cls },
+  });
+
   res.status(204).end();
+});
+
+router.get("/observability/alerts", authMiddleware({ required: false }), (req, res) => {
+  const includeResolved = req.query["includeResolved"] === "true";
+  const alerts = includeResolved
+    ? serverTelemetry.getAllAlerts()
+    : serverTelemetry.getActiveAlerts();
+  res.setHeader("Cache-Control", "no-store");
+  res.json({
+    timestamp: new Date().toISOString(),
+    activeCount: serverTelemetry.getActiveAlerts().length,
+    alerts,
+  });
+});
+
+router.post("/observability/alerts/:id/resolve", authMiddleware(), requireRole("ops"), (req, res) => {
+  const { id } = req.params;
+  serverTelemetry.resolveAlert(id);
+  res.json({ success: true, id });
+});
+
+router.get("/observability/business-events", authMiddleware({ required: false }), (req, res) => {
+  const snapshot = serverTelemetry.getSnapshot();
+  res.setHeader("Cache-Control", "no-store");
+  res.json({
+    timestamp: new Date().toISOString(),
+    windowMs: 300_000,
+    eventCounts: snapshot.businessEvents,
+    eventsByDomain: snapshot.eventsByDomain,
+    jobFailures: snapshot.jobFailures,
+    workflowCompletions: snapshot.workflowCompletions,
+  });
 });
 
 export default router;

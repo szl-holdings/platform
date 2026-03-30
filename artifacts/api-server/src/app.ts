@@ -181,6 +181,74 @@ app.get("/api/health/ready", async (_req: Request, res: Response) => {
   });
 });
 
+app.get("/api/health/detailed", async (_req: Request, res: Response) => {
+  const checks: Record<string, { status: string; latencyMs?: number; details?: string }> = {};
+
+  const dbUrl = process.env.DATABASE_URL;
+  if (dbUrl) {
+    const start = Date.now();
+    try {
+      const { db } = await import("@workspace/db");
+      const { sql } = await import("drizzle-orm");
+      await Promise.race([
+        db.execute(sql`SELECT 1`),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
+      ]);
+      checks["database"] = { status: "connected", latencyMs: Date.now() - start };
+    } catch {
+      checks["database"] = { status: "unreachable", latencyMs: Date.now() - start };
+    }
+  } else {
+    checks["database"] = { status: "not_configured" };
+  }
+
+  try {
+    const { jobQueue } = await import("./lib/job-queue.js");
+    const stats = jobQueue.getStats();
+    const queueDepth = stats.pending + stats.running;
+    checks["job_queue"] = {
+      status: queueDepth > 50 ? "backpressure" : "ok",
+      details: `pending=${stats.pending} running=${stats.running} completed=${stats.completed} failed=${stats.failed}`,
+    };
+  } catch {
+    checks["job_queue"] = { status: "unavailable" };
+  }
+
+  try {
+    const { serverTelemetry } = await import("@workspace/observability");
+    const snapshot = serverTelemetry.getSnapshot();
+    checks["telemetry"] = {
+      status: snapshot.errorRate > 10 ? "elevated_errors" : "ok",
+      details: `p95=${snapshot.p95Latency.toFixed(0)}ms error_rate=${snapshot.errorRate.toFixed(1)}% active_alerts=${snapshot.activeAlerts}`,
+    };
+  } catch {
+    checks["telemetry"] = { status: "unavailable" };
+  }
+
+  const allStatuses = Object.values(checks).map((c) => c.status);
+  const overallStatus =
+    allStatuses.some((s) => s === "unreachable" || s === "unavailable") ? "degraded" :
+    allStatuses.some((s) => s === "backpressure" || s === "elevated_errors") ? "warning" :
+    "healthy";
+
+  res.status(overallStatus === "degraded" ? 503 : 200).json({
+    status: overallStatus,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version ?? "0.0.0",
+    environment: process.env.NODE_ENV ?? "development",
+    checks,
+    memory: (() => {
+      const m = process.memoryUsage();
+      return {
+        heapUsedMb: Math.round(m.heapUsed / 1024 / 1024),
+        heapTotalMb: Math.round(m.heapTotal / 1024 / 1024),
+        rssMb: Math.round(m.rss / 1024 / 1024),
+      };
+    })(),
+  });
+});
+
 try {
   const specPath = join(__dirname, "../../../lib/api-spec/openapi.yaml");
   const specContent = readFileSync(specPath, "utf-8");

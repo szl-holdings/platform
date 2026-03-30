@@ -37,6 +37,8 @@ tags:
     description: Creative project management
   - name: readiness
     description: Readiness assessments and compliance
+  - name: observability
+    description: Platform telemetry, web vitals, alerts, and health monitoring
 paths:
   /healthz:
     get:
@@ -51,6 +53,177 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /health/live:
+    get:
+      operationId: livenessCheck
+      tags: [health]
+      summary: Liveness probe
+      description: Returns ok if the server process is alive
+      responses:
+        "200":
+          description: Server is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /health/ready:
+    get:
+      operationId: readinessCheck
+      tags: [health]
+      summary: Readiness probe
+      description: Returns ready if all critical dependencies are connected
+      responses:
+        "200":
+          description: Server is ready
+        "503":
+          description: Server is not ready (degraded)
+  /health/detailed:
+    get:
+      operationId: detailedHealthCheck
+      tags: [health]
+      summary: Detailed health status
+      description: Returns structured health status with all dependency checks including database, job queue, and telemetry
+      responses:
+        "200":
+          description: Healthy or warning
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailedHealthStatus"
+        "503":
+          description: Degraded — one or more dependencies unreachable
+  /observability:
+    get:
+      operationId: listObservabilityApps
+      tags: [observability]
+      summary: List all app observability snapshots
+      description: Returns telemetry snapshots for all registered apps. Results are cached for 15 seconds.
+      security:
+        - {}
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Array of app telemetry snapshots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    appSlug:
+                      type: string
+                    appName:
+                      type: string
+                    status:
+                      type: string
+                      enum: [healthy, warning, degraded, unknown]
+  /observability/{appSlug}:
+    get:
+      operationId: getAppObservability
+      tags: [observability]
+      summary: Get observability snapshot for a specific app
+      description: Returns full telemetry snapshot for the specified app. Results are cached for 10 seconds.
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: appSlug
+          required: true
+          schema:
+            type: string
+          description: App identifier slug (e.g. "rosie", "terra", "alloy")
+      responses:
+        "200":
+          description: Telemetry snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+        "404":
+          description: App not found
+  /observability/alerts:
+    get:
+      operationId: getActiveAlerts
+      tags: [observability]
+      summary: Get all active system alerts
+      description: Returns all currently active (unresolved) alerts from the platform alert engine.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of active alerts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AlertRecord"
+                  count:
+                    type: integer
+                  timestamp:
+                    type: string
+                    format: date-time
+        "401":
+          description: Unauthorized
+  /observability/business-events:
+    get:
+      operationId: getBusinessEvents
+      tags: [observability]
+      summary: Get business event counts and domain breakdown
+      description: Returns aggregated business event counts across all domains and job failure/success rates.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Business event telemetry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessEventCounts"
+        "401":
+          description: Unauthorized
+  /observability/vitals:
+    post:
+      operationId: recordWebVitals
+      tags: [observability]
+      summary: Record web vital metrics
+      description: Accepts Core Web Vitals measurements (LCP, FID, CLS, FCP, TTFB) from frontend apps.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                appSlug:
+                  type: string
+                name:
+                  type: string
+                  description: Metric name (LCP, FID, CLS, FCP, TTFB)
+                value:
+                  type: number
+                rating:
+                  type: string
+                  enum: [good, needs-improvement, poor]
+                id:
+                  type: string
+              required:
+                - appSlug
+                - name
+                - value
+      responses:
+        "200":
+          description: Vital recorded
+        "400":
+          description: Invalid metric data
   /projects:
     get:
       operationId: listProjects
@@ -1231,6 +1404,12 @@ paths:
                 items:
                   $ref: "#/components/schemas/ReadinessAssessment"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Bearer token for authenticated endpoints (roles: admin, user)"
   schemas:
     HealthStatus:
       type: object
@@ -2434,3 +2613,101 @@ components:
         - name
         - category
         - status
+    DetailedHealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, warning, degraded]
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+        version:
+          type: string
+        environment:
+          type: string
+        checks:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+              latencyMs:
+                type: number
+                nullable: true
+              details:
+                type: string
+                nullable: true
+        memory:
+          type: object
+          properties:
+            heapUsedMb:
+              type: number
+            heapTotalMb:
+              type: number
+            rssMb:
+              type: number
+      required:
+        - status
+        - timestamp
+        - uptime
+        - checks
+    AlertRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+          enum: [warning, critical]
+        triggeredAt:
+          type: integer
+        resolvedAt:
+          type: integer
+          nullable: true
+        resolved:
+          type: boolean
+        metadata:
+          type: object
+          nullable: true
+      required:
+        - id
+        - type
+        - message
+        - severity
+        - triggeredAt
+        - resolved
+    BusinessEventCounts:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        windowMs:
+          type: integer
+        eventCounts:
+          type: object
+          additionalProperties:
+            type: integer
+        eventsByDomain:
+          type: object
+          additionalProperties:
+            type: integer
+        jobFailures:
+          type: integer
+        workflowCompletions:
+          type: integer
+      required:
+        - timestamp
+        - windowMs
+        - eventCounts
+        - eventsByDomain
+        - jobFailures
+        - workflowCompletions

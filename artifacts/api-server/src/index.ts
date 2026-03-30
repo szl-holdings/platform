@@ -3,7 +3,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { failFastOnInvalidConfig } from "./lib/startup-validation";
 import { initWebSocket } from "./lib/websocket";
-import { jobQueue } from "./lib/job-queue";
+import { jobQueue, startScheduledJobs } from "./lib/job-queue";
 import { startDomainNotificationGenerators, stopDomainNotificationGenerators } from "./lib/domain-notifications";
 import { agentScheduler } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
@@ -40,6 +40,7 @@ ensureAlloyTables()
     logger.fatal({ err }, "Alloy schema bootstrap failed — cannot guarantee data integrity, shutting down");
     process.exit(1);
   });
+startScheduledJobs();
 
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
