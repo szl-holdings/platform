@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "Ventures", href: "#portfolio" },
-  { label: "Roadmap", href: "#milestones" },
-  { label: "About", href: "#thesis" },
+  { label: "Ecosystem", href: "#portfolio" },
+  { label: "Lyte", href: "/lyte-command-center/" },
+  { label: "Vessels", href: "/vessels/" },
+  { label: "Carlota Jo", href: "/carlota-jo/" },
+  { label: "Founder", href: "/stephen/" },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -14,55 +16,114 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 32);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
     <m.nav
-      initial={{ opacity: 0, y: -8 }}
+      initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-350 ${
         scrolled
-          ? "bg-white/95 backdrop-blur-md border-b border-neutral-100 shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
+          ? "bg-[hsla(210,12%,5%,0.94)] backdrop-blur-xl border-b border-[hsla(0,0%,100%,0.06)] shadow-[0_1px_24px_hsla(0,0%,0%,0.36)]"
           : "bg-transparent"
       }`}
+      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
-      <div className="max-w-6xl mx-auto px-6 h-[60px] flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2.5 group">
-          <div className="w-7 h-7 rounded bg-[hsl(215,45%,30%)] flex items-center justify-center transition-colors group-hover:bg-[hsl(215,45%,36%)]">
-            <span className="text-white font-bold text-[11px] tracking-tight" style={{ fontFamily: "system-ui" }}>S</span>
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-10 h-[60px] flex items-center justify-between">
+        <a href="/" className="flex items-center gap-3 group" aria-label="SZL Holdings">
+          <div className="w-7 h-7 rounded-[6px] flex items-center justify-center relative overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, hsl(210, 12%, 24%), hsl(210, 10%, 18%))",
+              border: "1px solid hsla(0,0%,100%,0.10)",
+            }}
+          >
+            <span style={{
+              color: "hsl(38,12%,94%)",
+              fontWeight: "700",
+              fontSize: "11px",
+              letterSpacing: "-0.02em",
+              fontFamily: "system-ui",
+            }}>S</span>
           </div>
-          <span className="font-semibold text-[14px] text-neutral-900 tracking-tight">
+          <span style={{
+            color: "hsl(38,12%,94%)",
+            fontWeight: "600",
+            fontSize: "14px",
+            letterSpacing: "-0.01em",
+          }}>
             SZL Holdings
           </span>
         </a>
 
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
             <a
               key={link.href + link.label}
               href={link.href}
-              className="text-neutral-500 text-[13px] font-medium hover:text-neutral-900 transition-colors duration-200"
+              style={{
+                color: "hsl(210,5%,58%)",
+                fontSize: "13px",
+                fontWeight: "500",
+                padding: "0.375rem 0.875rem",
+                borderRadius: "6px",
+                textDecoration: "none",
+                transition: "color 0.18s ease, background 0.18s ease",
+                letterSpacing: "-0.003em",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)";
+                (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,58%)";
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+              }}
             >
               {link.label}
             </a>
           ))}
           <a
             href="#contact"
-            className="flex items-center gap-1.5 px-4 py-2 rounded text-[13px] font-semibold text-white bg-[hsl(215,45%,32%)] hover:bg-[hsl(215,45%,38%)] transition-colors duration-200"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginLeft: "0.5rem",
+              padding: "0.4375rem 1.125rem",
+              borderRadius: "6px",
+              fontSize: "13px",
+              fontWeight: "600",
+              textDecoration: "none",
+              letterSpacing: "-0.005em",
+              color: "hsl(210,12%,6%)",
+              background: "hsl(210,8%,84%)",
+              border: "1px solid transparent",
+              transition: "all 0.18s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px hsla(0,0%,0%,0.20)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,84%)";
+              (e.currentTarget as HTMLElement).style.boxShadow = "none";
+            }}
           >
-            Explore the portfolio
-            <ChevronRight size={13} />
+            Get in touch
           </a>
         </div>
 
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden text-neutral-600 hover:text-neutral-900 transition-colors"
+          className="md:hidden p-2 rounded-md transition-colors duration-200"
+          style={{ color: "hsl(210,5%,58%)" }}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)"}
+          onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,58%)"}
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -75,15 +136,36 @@ export function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="md:hidden bg-white/97 backdrop-blur-md border-b border-neutral-100 overflow-hidden"
+            style={{
+              background: "hsla(210,12%,6%,0.98)",
+              backdropFilter: "blur(20px)",
+              borderBottom: "1px solid hsla(0,0%,100%,0.06)",
+              overflow: "hidden",
+            }}
           >
-            <div className="px-6 py-5 flex flex-col gap-4">
+            <div className="px-6 py-6 flex flex-col gap-1">
               {navLinks.map((link) => (
                 <a
                   key={link.href + link.label}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="text-neutral-600 text-[15px] font-medium hover:text-neutral-900 transition-colors"
+                  style={{
+                    color: "hsl(210,5%,62%)",
+                    fontSize: "15px",
+                    fontWeight: "500",
+                    padding: "0.625rem 0.75rem",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    transition: "color 0.18s ease, background 0.18s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,94%)";
+                    (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,62%)";
+                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                  }}
                 >
                   {link.label}
                 </a>
@@ -91,9 +173,22 @@ export function Navbar() {
               <a
                 href="#contact"
                 onClick={() => setMobileOpen(false)}
-                className="mt-1 px-5 py-3 rounded text-[13px] font-semibold text-white text-center bg-[hsl(215,45%,32%)] hover:bg-[hsl(215,45%,38%)] transition-colors"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: "0.75rem",
+                  padding: "0.75rem 1.25rem",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                  color: "hsl(210,12%,6%)",
+                  background: "hsl(210,8%,84%)",
+                  transition: "all 0.18s ease",
+                }}
               >
-                Explore the portfolio
+                Get in touch
               </a>
             </div>
           </m.div>

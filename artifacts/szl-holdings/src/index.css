@@ -1,30 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-display: 'Instrument Serif', 'Georgia', serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  --color-szl-bg: #0e100f;
-  --color-szl-bg-secondary: #131614;
-  --color-szl-bg-tertiary: #1a1d1b;
-  --color-szl-surface: #161918;
-  --color-szl-surface-hover: #1e2220;
-  --color-szl-border: rgba(255, 255, 255, 0.06);
-  --color-szl-border-hover: rgba(255, 255, 255, 0.12);
-  --color-szl-text: #f0ede8;
-  --color-szl-text-secondary: #a8a49d;
-  --color-szl-text-muted: #5a5752;
-  --color-szl-primary: #f0ede8;
-  --color-szl-primary-light: #ffffff;
-  --color-szl-accent: #c9a96e;
-  --color-szl-accent-light: #dcc08a;
-  --color-szl-accent-dim: rgba(201, 169, 110, 0.12);
-  --color-szl-graphite: #1e2220;
-  --color-szl-stone: #2a2d2b;
+  --color-szl-bg: hsl(210, 12%, 5%);
+  --color-szl-bg-secondary: hsl(210, 12%, 7%);
+  --color-szl-bg-tertiary: hsl(210, 10%, 10%);
+  --color-szl-surface: hsla(210, 10%, 12%, 0.50);
+  --color-szl-surface-hover: hsla(210, 10%, 15%, 0.65);
+  --color-szl-border: hsla(0, 0%, 100%, 0.06);
+  --color-szl-border-hover: hsla(0, 0%, 100%, 0.10);
+  --color-szl-text: hsl(38, 12%, 94%);
+  --color-szl-text-secondary: hsl(210, 6%, 68%);
+  --color-szl-text-muted: hsl(210, 5%, 46%);
+
+  --color-szl-platinum: hsl(210, 8%, 82%);
+  --color-szl-silver: hsl(210, 6%, 72%);
+  --color-szl-accent: hsl(32, 40%, 58%);
+  --color-szl-accent-light: hsl(32, 40%, 70%);
+  --color-szl-accent-muted: hsla(32, 40%, 58%, 0.12);
+
+  --color-szl-graphite: hsl(210, 8%, 16%);
+  --color-szl-smoke: hsl(210, 6%, 24%);
+  --color-szl-charcoal: hsl(210, 12%, 10%);
+
+  --color-szl-vessels: hsl(208, 65%, 38%);
+  --color-szl-lyte: hsl(192, 70%, 46%);
+  --color-szl-alloy: hsl(218, 50%, 58%);
+  --color-szl-carlota: hsl(32, 38%, 52%);
+  --color-szl-inca: hsl(246, 45%, 50%);
 }
 
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -44,8 +52,8 @@ body {
 }
 
 ::selection {
-  background: rgba(201, 169, 110, 0.2);
-  color: #f0ede8;
+  background: hsla(32, 40%, 58%, 0.22);
+  color: hsl(38, 12%, 94%);
 }
 
 ::-webkit-scrollbar {
@@ -53,16 +61,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0e100f;
+  background: hsl(210, 12%, 5%);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: hsla(0, 0%, 100%, 0.10);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(201, 169, 110, 0.3);
+  background: hsla(32, 40%, 58%, 0.30);
 }
 
 @media (prefers-reduced-motion: reduce) {

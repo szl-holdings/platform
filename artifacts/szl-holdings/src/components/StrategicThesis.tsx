@@ -1,149 +1,154 @@
 import { m } from "framer-motion";
-import { CheckCircle } from "lucide-react";
-
-const milestones = [
-  "Portfolio foundation established",
-  "Core ventures defined",
-  "Product and advisory lanes activated",
-  "Unified ecosystem experience in development",
-  "Next-stage operational and commercial scaling ahead",
-];
-
-const developments = [
-  "Advancing core product architecture",
-  "Standardizing the shared design system",
-  "Expanding premium client and partner pathways",
-  "Strengthening observability, analytics, and commercial readiness",
-];
 
 const capabilities = [
-  "Premium digital product direction",
-  "Secure platform architecture",
-  "Advisory-grade service design",
-  "Ecosystem-wide brand consistency",
-  "Commercial and operational readiness",
+  {
+    market: "Maritime & Logistics",
+    description: "Real-time fleet intelligence across global shipping lanes, port operations, and cargo tracking.",
+    accent: "hsl(208,65%,48%)",
+  },
+  {
+    market: "Business Intelligence",
+    description: "Enterprise observability platforms for operational risk, accountability, and workforce intelligence.",
+    accent: "hsl(192,70%,46%)",
+  },
+  {
+    market: "Strategic Advisory",
+    description: "Principal-led advisory on governance, capital allocation, and operational transformation.",
+    accent: "hsl(32,38%,58%)",
+  },
+  {
+    market: "Cyber & Security",
+    description: "Adversarial simulation, red-team exercises, and cyber readiness assessment at enterprise scale.",
+    accent: "hsl(28,78%,56%)",
+  },
 ];
 
 export function StrategicThesis() {
   return (
-    <>
-      <section className="py-24 lg:py-32 bg-szl-bg-secondary border-t border-szl-border">
-        <div className="max-w-6xl mx-auto px-6">
+    <section style={{
+      background: "hsl(210,12%,5%)",
+      paddingTop: "clamp(5rem,9vw,8rem)",
+      paddingBottom: "clamp(5rem,9vw,8rem)",
+    }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           <m.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center mb-20"
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">Strategic Thesis</p>
-            <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight mb-6">
-              Why this portfolio exists.
-            </h2>
-            <p className="text-szl-text-secondary text-base leading-relaxed">
-              The most valuable organizations are not built on noise. They are built on structure, visibility, trust, and execution. SZL Holdings exists to develop ventures and service models that reflect that standard, whether through platforms, advisory work, or operating frameworks designed for real-world use.
+            <span style={{
+              display: "block",
+              fontSize: "11px",
+              fontWeight: "500",
+              letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              color: "hsl(210,5%,46%)",
+              marginBottom: "1rem",
+            }}>Ecosystem Logic</span>
+            <h2 style={{
+              fontSize: "clamp(1.75rem,3.5vw,2.5rem)",
+              fontWeight: "700",
+              letterSpacing: "-0.022em",
+              lineHeight: "1.12",
+              color: "hsl(38,12%,94%)",
+              marginBottom: "1.5rem",
+            }}>Why this ecosystem exists</h2>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,58%)", lineHeight: "1.65", marginBottom: "1.25rem" }}>
+              The most defensible technology companies aren't built on a single product. They're built on ecosystems where data compounds across verticals, and every platform makes the others stronger.
             </p>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,58%)", lineHeight: "1.65", marginBottom: "2.5rem" }}>
+              SZL Holdings was founded on this conviction. We build and operate platforms across maritime intelligence, AI research, strategic advisory, and enterprise security — not as separate bets, but as an integrated system.
+            </p>
+            <blockquote style={{
+              borderLeft: "2px solid hsla(210,10%,72%,0.25)",
+              paddingLeft: "1.25rem",
+            }}>
+              <p style={{
+                fontSize: "1rem",
+                color: "hsl(210,5%,68%)",
+                lineHeight: "1.65",
+                fontStyle: "italic",
+                fontWeight: "300",
+                marginBottom: "0.75rem",
+              }}>
+                "Vertical integration of AI across critical infrastructure creates defensible, compounding value that horizontal platforms cannot replicate."
+              </p>
+              <footer style={{
+                fontSize: "11px",
+                color: "hsl(210,5%,42%)",
+                fontWeight: "500",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}>
+                SZL Holdings — Investment Thesis
+              </footer>
+            </blockquote>
           </m.div>
 
-          <div className="grid md:grid-cols-2 gap-12">
-            <m.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-5">Built in phases.</p>
-              <h3 className="font-[var(--font-display)] text-xl font-bold text-szl-text mb-6">Positioned for longevity.</h3>
-              <ul className="space-y-3">
-                {milestones.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-szl-text-secondary">
-                    <CheckCircle size={16} className="text-emerald-500 mt-0.5 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </m.div>
-
-            <m.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-5">Current priorities.</p>
-              <h3 className="font-[var(--font-display)] text-xl font-bold text-szl-text mb-6">Across the ecosystem.</h3>
-              <ul className="space-y-3">
-                {developments.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-szl-text-secondary">
-                    <span className="w-1.5 h-1.5 rounded-full bg-szl-accent mt-2 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </m.div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 lg:py-32 bg-white border-t border-szl-border">
-        <div className="max-w-6xl mx-auto px-6">
           <m.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.62, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="text-szl-text-muted text-xs font-semibold uppercase tracking-widest mb-4">Capabilities</p>
-            <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-szl-text leading-tight">
-              A portfolio grounded in execution.
-            </h2>
-          </m.div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {capabilities.map((cap, i) => (
-              <m.div
-                key={i}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.07 }}
-                className="p-5 rounded-xl border border-szl-border bg-szl-bg-secondary"
-              >
-                <p className="text-szl-text text-sm font-medium leading-snug">{cap}</p>
-              </m.div>
-            ))}
-          </div>
-        </div>
-      </section>
+            <span style={{
+              display: "block",
+              fontSize: "11px",
+              fontWeight: "500",
+              letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              color: "hsl(210,5%,46%)",
+              marginBottom: "1.5rem",
+            }}>Market Verticals</span>
 
-      <section className="py-24 lg:py-32 bg-szl-text border-t border-szl-text">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <m.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="font-[var(--font-display)] text-3xl sm:text-4xl font-bold text-white leading-tight mb-6">
-              Explore what is being built.
-            </h2>
-            <p className="text-white/60 text-base max-w-2xl mx-auto mb-10 leading-relaxed">
-              SZL Holdings is shaping a connected portfolio of platforms, services, and operating systems. Review the ventures, follow the roadmap, or start a strategic conversation.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a
-                href="#portfolio"
-                className="px-7 py-3.5 rounded-lg bg-white text-szl-text font-semibold text-sm hover:bg-white/90 transition-colors"
-              >
-                Explore the portfolio
-              </a>
-              <a
-                href="#contact"
-                className="px-7 py-3.5 rounded-lg border border-white/20 text-white font-semibold text-sm hover:border-white/40 hover:bg-white/5 transition-all"
-              >
-                Start a strategic conversation
-              </a>
+            <div>
+              {capabilities.map((cap, i) => (
+                <m.div
+                  key={cap.market}
+                  initial={{ opacity: 0, x: 14 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                  style={{
+                    display: "flex",
+                    gap: "1.125rem",
+                    padding: "1.25rem 0",
+                    borderBottom: i < capabilities.length - 1 ? "1px solid hsla(0,0%,100%,0.05)" : "none",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <div style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "6px",
+                    background: `${cap.accent}14`,
+                    border: `1px solid ${cap.accent}28`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    marginTop: "2px",
+                  }}>
+                    <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: cap.accent }} />
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: "0.9375rem",
+                      fontWeight: "600",
+                      letterSpacing: "-0.005em",
+                      color: "hsl(38,12%,88%)",
+                      marginBottom: "0.375rem",
+                    }}>{cap.market}</h3>
+                    <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,56%)", lineHeight: "1.58" }}>{cap.description}</p>
+                  </div>
+                </m.div>
+              ))}
             </div>
           </m.div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

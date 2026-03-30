@@ -4,59 +4,117 @@ const developments = [
   {
     date: "March 2026",
     tag: "Platform",
-    title: "Vessels intelligence layer expanded",
-    body: "Advanced anomaly detection and route deviation alerting rolled out to all fleet operator clients.",
+    tagColor: "hsl(192,70%,46%)",
+    tagBg: "hsla(192,70%,46%,0.10)",
+    tagBorder: "hsla(192,70%,46%,0.20)",
+    title: "Lyte observability layer expanded",
+    body: "Advanced workflow friction analysis and KPI drift detection rolled out to all enterprise clients. Signal card architecture now surfaces consequence framing automatically.",
   },
   {
     date: "February 2026",
-    tag: "Advisory",
-    title: "Carlota Jo Q1 engagements underway",
-    body: "Principal advisory practice at capacity with governance and capital allocation mandates across three industry verticals.",
+    tag: "Maritime",
+    tagColor: "hsl(208,65%,52%)",
+    tagBg: "hsla(208,65%,48%,0.10)",
+    tagBorder: "hsla(208,65%,48%,0.20)",
+    title: "Vessels intelligence layer expanded",
+    body: "Advanced anomaly detection and route deviation alerting rolled out to all fleet operator clients. Route intelligence now covers 94% of major global shipping lanes.",
   },
   {
     date: "January 2026",
-    tag: "Infrastructure",
-    title: "Shared data infrastructure upgrade",
-    body: "Ecosystem-wide infrastructure improvement reduces operational overhead and strengthens cross-platform data availability.",
+    tag: "Advisory",
+    tagColor: "hsl(32,38%,62%)",
+    tagBg: "hsla(32,38%,58%,0.10)",
+    tagBorder: "hsla(32,38%,58%,0.20)",
+    title: "Carlota Jo Q1 mandates underway",
+    body: "Principal advisory practice at capacity with governance and capital allocation mandates across three industry verticals. New structured intake process launched.",
   },
 ];
 
 export function LatestDevelopments() {
   return (
-    <section id="developments" className="py-20 lg:py-28 bg-neutral-50 border-b border-neutral-100">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="developments" style={{
+      background: "hsl(210,12%,7%)",
+      paddingTop: "clamp(5rem,9vw,8rem)",
+      paddingBottom: "clamp(5rem,9vw,8rem)",
+      borderTop: "1px solid hsla(0,0%,100%,0.04)",
+    }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
         <m.div
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-10"
+          transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+          style={{ marginBottom: "clamp(2.5rem,5vw,4rem)" }}
         >
-          <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-neutral-400 mb-3">Updates</p>
-          <h2 className="text-[1.875rem] sm:text-[2.25rem] font-bold tracking-tight text-neutral-900 leading-[1.15]">
-            Latest developments
-          </h2>
+          <span style={{
+            display: "block",
+            fontSize: "11px",
+            fontWeight: "500",
+            letterSpacing: "0.10em",
+            textTransform: "uppercase",
+            color: "hsl(210,5%,46%)",
+            marginBottom: "1rem",
+          }}>Updates</span>
+          <h2 style={{
+            fontSize: "clamp(1.75rem,3.5vw,2.5rem)",
+            fontWeight: "700",
+            letterSpacing: "-0.022em",
+            lineHeight: "1.12",
+            color: "hsl(38,12%,94%)",
+          }}>Latest from the ecosystem</h2>
         </m.div>
 
-        <div className="space-y-0 divide-y divide-neutral-100">
+        <div>
           {developments.map((d, i) => (
             <m.div
               key={i}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              className="py-6 grid sm:grid-cols-[160px,1fr] gap-4 sm:gap-8"
+              transition={{ duration: 0.52, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 1fr",
+                gap: "clamp(1rem,4vw,3rem)",
+                alignItems: "flex-start",
+                padding: "1.75rem 0",
+                borderBottom: i < developments.length - 1 ? "1px solid hsla(0,0%,100%,0.05)" : "none",
+              }}
             >
-              <div>
-                <p className="text-[11px] text-neutral-400 font-medium mb-1">{d.date}</p>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.1em] px-2 py-0.5 rounded-full border border-neutral-200 text-neutral-500 bg-white">
-                  {d.tag}
-                </span>
+              <div style={{ minWidth: "120px" }}>
+                <p style={{
+                  fontSize: "12px",
+                  color: "hsl(210,5%,42%)",
+                  fontWeight: "500",
+                  marginBottom: "0.5rem",
+                  letterSpacing: "0.02em",
+                }}>{d.date}</p>
+                <span style={{
+                  display: "inline-flex",
+                  fontSize: "10px",
+                  fontWeight: "600",
+                  letterSpacing: "0.05em",
+                  padding: "2px 8px",
+                  borderRadius: "4px",
+                  color: d.tagColor,
+                  background: d.tagBg,
+                  border: `1px solid ${d.tagBorder}`,
+                }}>{d.tag}</span>
               </div>
               <div>
-                <h3 className="text-[15px] font-semibold text-neutral-900 tracking-tight mb-1.5">{d.title}</h3>
-                <p className="text-neutral-500 text-[13.5px] leading-relaxed">{d.body}</p>
+                <h3 style={{
+                  fontSize: "1rem",
+                  fontWeight: "600",
+                  letterSpacing: "-0.008em",
+                  color: "hsl(38,12%,92%)",
+                  marginBottom: "0.5rem",
+                }}>{d.title}</h3>
+                <p style={{
+                  fontSize: "0.875rem",
+                  color: "hsl(210,5%,56%)",
+                  lineHeight: "1.62",
+                  maxWidth: "42rem",
+                }}>{d.body}</p>
               </div>
             </m.div>
           ))}

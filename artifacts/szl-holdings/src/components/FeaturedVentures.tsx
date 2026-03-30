@@ -3,103 +3,237 @@ import { ArrowUpRight } from "lucide-react";
 
 const featured = [
   {
-    name: "Vessels",
-    category: "Maritime Intelligence",
-    description:
-      "Fleet command and real-time maritime intelligence. Tracks vessel positions, route adherence, and anomalous behaviour across global shipping lanes.",
-    capabilities: ["Fleet tracking", "Route monitoring", "Anomaly detection", "Operational reporting"],
-    href: "/vessels/",
-    accent: "hsl(205,70%,38%)",
-    status: "Operational",
+    name: "Lyte",
+    category: "Business Observability",
+    description: "Enterprise-grade platform for operational observability, risk detection, and accountability. Signal cards surface anomalies with action ownership and consequence framing.",
+    capabilities: ["KPI drift detection", "Workflow friction analysis", "Role-based insight rail", "Executive dashboards"],
+    href: "/lyte-command-center/",
+    accent: "hsl(192,70%,46%)",
+    accentMuted: "hsla(192,70%,46%,0.08)",
+    status: "Live",
+    weight: "primary",
   },
   {
-    name: "INCA",
-    category: "Intelligence Platform",
-    description:
-      "Enterprise AI research and intelligence operations platform. Provides structured visibility, triage workflows, and explainable AI for security and enterprise teams.",
-    capabilities: ["Signal visibility", "AI triage", "Audit trails", "Response workflows"],
-    href: "/inca/",
-    accent: "hsl(245,50%,45%)",
-    status: "Operational",
+    name: "Vessels",
+    category: "Maritime Intelligence",
+    description: "Fleet command and real-time maritime intelligence. Route adherence, anomalous behaviour detection, and comprehensive fleet visibility across global shipping lanes.",
+    capabilities: ["Fleet tracking", "Route intelligence", "Anomaly detection", "Operational reporting"],
+    href: "/vessels/",
+    accent: "hsl(208,65%,48%)",
+    accentMuted: "hsla(208,65%,48%,0.08)",
+    status: "Live",
+    weight: "primary",
   },
   {
     name: "Carlota Jo",
     category: "Strategic Advisory",
-    description:
-      "Founder-led principal advisory practice for boards, leadership teams, and investors navigating consequential decisions.",
+    description: "Founder-led principal advisory for boards, leadership teams, and investors navigating consequential decisions. Quiet precision at the highest level.",
     capabilities: ["Board advisory", "Capital strategy", "Operational transformation", "Executive counsel"],
     href: "/carlota-jo/",
-    accent: "hsl(32,40%,48%)",
-    status: "Operational",
-  },
-  {
-    name: "Stephen Lutar",
-    category: "Principal & Founder",
-    description:
-      "Systems thinker, enterprise architect, and operator. Building the infrastructure behind the SZL ecosystem.",
-    capabilities: ["Business observability", "Systems architecture", "AI strategy", "Execution leadership"],
-    href: "/stephen/",
-    accent: "hsl(220,35%,50%)",
-    status: "Active",
+    accent: "hsl(32,38%,58%)",
+    accentMuted: "hsla(32,38%,58%,0.08)",
+    status: "Live",
+    weight: "secondary",
   },
 ];
 
+const statusStyle: Record<string, { color: string; bg: string; border: string }> = {
+  Live: { color: "hsl(152,50%,46%)", bg: "hsla(152,50%,42%,0.10)", border: "hsla(152,50%,42%,0.20)" },
+  Pilot: { color: "hsl(210,60%,62%)", bg: "hsla(210,60%,58%,0.10)", border: "hsla(210,60%,58%,0.20)" },
+  "In Build": { color: "hsl(42,80%,54%)", bg: "hsla(42,80%,50%,0.10)", border: "hsla(42,80%,50%,0.20)" },
+};
+
 export function FeaturedVentures() {
   return (
-    <section id="ventures" className="py-20 lg:py-28 bg-white border-b border-neutral-100">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="portfolio" className="relative" style={{
+      background: "hsl(210,12%,5%)",
+      paddingTop: "clamp(5rem,9vw,8rem)",
+      paddingBottom: "clamp(5rem,9vw,8rem)",
+    }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
         <m.div
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-12"
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ marginBottom: "clamp(2.5rem,5vw,4rem)" }}
         >
-          <p className="text-[11px] font-medium tracking-[0.12em] uppercase text-neutral-400 mb-3">Key Platforms</p>
-          <h2 className="text-[1.875rem] sm:text-[2.25rem] font-bold tracking-tight text-neutral-900 leading-[1.15]">
-            Featured ventures
+          <span style={{
+            display: "block",
+            fontSize: "11px",
+            fontWeight: "500",
+            letterSpacing: "0.10em",
+            textTransform: "uppercase",
+            color: "hsl(210,5%,46%)",
+            marginBottom: "1rem",
+          }}>Featured Platforms</span>
+          <h2 style={{
+            fontSize: "clamp(1.75rem,3.5vw,2.5rem)",
+            fontWeight: "700",
+            letterSpacing: "-0.022em",
+            lineHeight: "1.12",
+            color: "hsl(38,12%,94%)",
+            marginBottom: "0.875rem",
+          }}>
+            The flagship platforms
           </h2>
+          <p style={{
+            fontSize: "1.0625rem",
+            color: "hsl(210,5%,58%)",
+            lineHeight: "1.65",
+            maxWidth: "36rem",
+          }}>
+            Lyte and Vessels lead the portfolio as full command surfaces. Carlota Jo operates as a precision advisory practice.
+          </p>
         </m.div>
 
-        <div className="grid lg:grid-cols-2 gap-4">
-          {featured.map((v, i) => (
+        <div className="grid lg:grid-cols-2 gap-4 lg:gap-5 mb-4 lg:mb-5">
+          {featured.filter(f => f.weight === "primary").map((v, i) => (
             <m.a
               key={v.name}
               href={v.href}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.58, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
               whileHover={{ y: -3 }}
-              className="group flex flex-col p-6 rounded-xl border border-neutral-100 bg-white hover:border-neutral-200 hover:shadow-[0_6px_24px_rgba(0,0,0,0.07)] transition-all duration-250 cursor-pointer"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                padding: "clamp(1.5rem,3vw,2.25rem)",
+                borderRadius: "1rem",
+                background: "hsla(210,12%,10%,0.55)",
+                border: "1px solid hsla(0,0%,100%,0.07)",
+                boxShadow: "0 4px 20px hsla(0,0%,0%,0.28), 0 1px 3px hsla(0,0%,0%,0.18)",
+                textDecoration: "none",
+                transition: "all 0.22s ease",
+                cursor: "pointer",
+                position: "relative",
+                overflow: "hidden",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = "hsla(210,12%,12%,0.65)";
+                el.style.borderColor = "hsla(0,0%,100%,0.10)";
+                el.style.boxShadow = `0 12px 40px hsla(0,0%,0%,0.38), 0 0 0 1px ${v.accent}18`;
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = "hsla(210,12%,10%,0.55)";
+                el.style.borderColor = "hsla(0,0%,100%,0.07)";
+                el.style.boxShadow = "0 4px 20px hsla(0,0%,0%,0.28), 0 1px 3px hsla(0,0%,0%,0.18)";
+              }}
             >
-              <div className="flex items-start justify-between mb-5">
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, transparent, ${v.accent}40, transparent)` }} aria-hidden="true" />
+
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.25rem" }}>
                 <div>
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: v.accent }}
-                    />
-                    <span className="text-[11px] font-medium tracking-[0.08em] uppercase text-neutral-400">{v.category}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "0.5rem" }}>
+                    <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: v.accent, boxShadow: `0 0 8px ${v.accent}55` }} />
+                    <span style={{ fontSize: "11px", fontWeight: "500", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,46%)" }}>{v.category}</span>
                   </div>
-                  <h3 className="text-[1.25rem] font-bold text-neutral-900 tracking-tight">{v.name}</h3>
+                  <h3 style={{ fontSize: "1.375rem", fontWeight: "700", letterSpacing: "-0.018em", color: "hsl(38,12%,94%)" }}>{v.name}</h3>
                 </div>
-                <ArrowUpRight
-                  size={16}
-                  className="text-neutral-300 group-hover:text-neutral-600 transition-colors duration-200 mt-1 shrink-0"
-                />
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{
+                    padding: "3px 9px",
+                    borderRadius: "4px",
+                    fontSize: "11px",
+                    fontWeight: "600",
+                    letterSpacing: "0.04em",
+                    color: statusStyle[v.status]?.color,
+                    background: statusStyle[v.status]?.bg,
+                    border: `1px solid ${statusStyle[v.status]?.border}`,
+                  }}>{v.status}</span>
+                  <ArrowUpRight size={16} color="hsl(210,5%,36%)" />
+                </div>
               </div>
-              <p className="text-neutral-500 text-[13.5px] leading-relaxed mb-5 flex-1">{v.description}</p>
-              <div className="flex flex-wrap gap-2">
+
+              <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,60%)", lineHeight: "1.62", marginBottom: "1.5rem", flex: 1 }}>{v.description}</p>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                 {v.capabilities.map((cap) => (
-                  <span
-                    key={cap}
-                    className="text-[11px] px-2.5 py-1 rounded-full border border-neutral-100 text-neutral-500 bg-neutral-50"
-                  >
-                    {cap}
-                  </span>
+                  <span key={cap} style={{
+                    fontSize: "11.5px",
+                    fontWeight: "500",
+                    padding: "3px 10px",
+                    borderRadius: "4px",
+                    background: "hsla(0,0%,100%,0.04)",
+                    border: "1px solid hsla(0,0%,100%,0.06)",
+                    color: "hsl(210,5%,56%)",
+                    letterSpacing: "-0.003em",
+                  }}>{cap}</span>
                 ))}
               </div>
+            </m.a>
+          ))}
+        </div>
+
+        <div>
+          {featured.filter(f => f.weight === "secondary").map((v, i) => (
+            <m.a
+              key={v.name}
+              href={v.href}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.55, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -2 }}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 1fr auto",
+                alignItems: "center",
+                gap: "clamp(1rem,3vw,2rem)",
+                padding: "clamp(1.25rem,2.5vw,1.75rem) clamp(1.25rem,3vw,2rem)",
+                borderRadius: "0.875rem",
+                background: "hsla(210,12%,10%,0.40)",
+                border: "1px solid hsla(0,0%,100%,0.06)",
+                textDecoration: "none",
+                transition: "all 0.20s ease",
+                cursor: "pointer",
+                overflow: "hidden",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = "hsla(210,12%,12%,0.55)";
+                el.style.borderColor = "hsla(0,0%,100%,0.09)";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.background = "hsla(210,12%,10%,0.40)";
+                el.style.borderColor = "hsla(0,0%,100%,0.06)";
+              }}
+            >
+              <div style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "10px",
+                background: v.accentMuted,
+                border: `1px solid ${v.accent}28`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}>
+                <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: v.accent }} />
+              </div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "0.25rem" }}>
+                  <span style={{ fontSize: "10px", fontWeight: "500", letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(210,5%,44%)" }}>{v.category}</span>
+                  <span style={{
+                    padding: "2px 7px",
+                    borderRadius: "4px",
+                    fontSize: "10px",
+                    fontWeight: "600",
+                    color: statusStyle[v.status]?.color,
+                    background: statusStyle[v.status]?.bg,
+                    border: `1px solid ${statusStyle[v.status]?.border}`,
+                  }}>{v.status}</span>
+                </div>
+                <h3 style={{ fontSize: "1.0625rem", fontWeight: "600", letterSpacing: "-0.008em", color: "hsl(38,12%,94%)", marginBottom: "0.25rem" }}>{v.name}</h3>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,56%)", lineHeight: "1.55" }}>{v.description}</p>
+              </div>
+              <ArrowUpRight size={18} color="hsl(210,5%,36%)" style={{ flexShrink: 0 }} />
             </m.a>
           ))}
         </div>
