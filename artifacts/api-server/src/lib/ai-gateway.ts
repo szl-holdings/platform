@@ -44,39 +44,50 @@ interface ProviderCandidate {
   reason: string;
 }
 
-type AdapterProvider = "replit-proxy" | "openai" | "anthropic";
+type TargetableProvider = "replit-proxy" | "openai" | "anthropic" | "gemini" | "huggingface";
 
 const PROVIDER_MODELS: Record<string, { provider: InferenceProvider; model: string }[]> = {
   reasoning: [
     { provider: "replit-proxy", model: "gpt-5.2" },
     { provider: "anthropic", model: "claude-sonnet-4-20250514" },
+    { provider: "gemini", model: "gemini-2.0-flash" },
+    { provider: "openai", model: "gpt-5.2" },
   ],
   analysis: [
     { provider: "anthropic", model: "claude-sonnet-4-20250514" },
+    { provider: "gemini", model: "gemini-2.0-flash" },
     { provider: "replit-proxy", model: "gpt-4o-mini" },
+    { provider: "openai", model: "gpt-4o" },
   ],
   generation: [
     { provider: "replit-proxy", model: "gpt-5.2" },
     { provider: "anthropic", model: "claude-sonnet-4-20250514" },
+    { provider: "gemini", model: "gemini-2.0-flash" },
+    { provider: "huggingface", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
   ],
   fast: [
     { provider: "replit-proxy", model: "gpt-4o-mini" },
+    { provider: "gemini", model: "gemini-2.0-flash" },
     { provider: "anthropic", model: "claude-3-haiku-20240307" },
+    { provider: "huggingface", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
   ],
   default: [
     { provider: "replit-proxy", model: "gpt-5.2" },
     { provider: "anthropic", model: "claude-sonnet-4-20250514" },
+    { provider: "gemini", model: "gemini-2.0-flash" },
+    { provider: "openai", model: "gpt-5.2" },
+    { provider: "huggingface", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
   ],
 };
 
-const ADAPTER_PROVIDER_MAP: Record<string, AdapterProvider> = {
-  "replit-proxy": "replit-proxy",
-  "openai": "openai",
-  "anthropic": "anthropic",
-};
+function isTargetableProvider(provider: InferenceProvider): provider is TargetableProvider {
+  return provider !== "mock";
+}
 
-function isAdapterProvider(provider: InferenceProvider): provider is AdapterProvider {
-  return provider in ADAPTER_PROVIDER_MAP;
+function isProviderAvailable(provider: InferenceProvider): boolean {
+  if (provider === "mock") return false;
+  if (!isTargetableProvider(provider)) return false;
+  return services.ai.isProviderConfigured(provider);
 }
 
 function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
@@ -87,22 +98,26 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
 
   if (strategy === "preferred" && request.preferredProvider) {
     const preferred = request.preferredProvider;
-    const preferredEntry = modelList.find(e => e.provider === preferred);
-    const model = request.model ?? preferredEntry?.model ?? modelList[0]?.model ?? "gpt-5.2";
-    const health = providerHealth.getStatus(preferred);
+    if (isProviderAvailable(preferred)) {
+      const preferredEntry = modelList.find(e => e.provider === preferred);
+      const model = request.model ?? preferredEntry?.model ?? modelList[0]?.model ?? "gpt-5.2";
+      const health = providerHealth.getStatus(preferred);
 
-    if (health.status !== "down") {
-      candidates.push({
-        provider: preferred,
-        model,
-        score: 200,
-        reason: `preferred: provider=${preferred}, health=${health.status}`,
-      });
+      if (health.status !== "down") {
+        candidates.push({
+          provider: preferred,
+          model,
+          score: 200,
+          reason: `preferred: provider=${preferred}, health=${health.status}`,
+        });
+      }
     }
   }
 
   for (const { provider, model } of modelList) {
     if (candidates.some(c => c.provider === provider)) continue;
+    if (!isProviderAvailable(provider)) continue;
+
     const health = providerHealth.getStatus(provider);
     if (health.status === "down") continue;
 
@@ -112,7 +127,7 @@ function selectCandidates(request: GatewayRequest): ProviderCandidate[] {
       const avgLatency = inferenceTelemetry.getProviderLatencyForModel(provider, model);
       score -= Math.min(avgLatency / 10, 80);
     } else if (strategy === "cheapest") {
-      if (model.includes("mini") || model.includes("haiku")) score += 40;
+      if (model.includes("mini") || model.includes("haiku") || model.includes("flash") || model.includes("Mixtral")) score += 40;
     }
 
     if (health.status === "degraded") score -= 30;
@@ -150,9 +165,11 @@ async function executeProviderInference(
   maxTokens: number,
   timeoutMs: number,
 ): Promise<ChatCompletionResult> {
-  const inferencePromise = isAdapterProvider(provider)
-    ? services.ai.chatCompletionForProvider(ADAPTER_PROVIDER_MAP[provider]!, messages, { model, maxTokens })
-    : services.ai.chatCompletion(messages, { model, maxTokens });
+  if (!isTargetableProvider(provider)) {
+    throw new Error(`Provider "${provider}" cannot be targeted for inference`);
+  }
+
+  const inferencePromise = services.ai.chatCompletionForProvider(provider, messages, { model, maxTokens });
 
   const result = await Promise.race([
     inferencePromise,
@@ -195,8 +212,18 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
 
         const latencyMs = Date.now() - attemptStart;
 
+        if (result.provider !== candidate.provider) {
+          logger.warn({
+            expected: candidate.provider,
+            actual: result.provider,
+            model: result.model,
+          }, "Provider mismatch — recording against actual provider");
+        }
+
+        const actualProvider = result.provider as InferenceProvider;
+
         const telemetryRecord = inferenceTelemetry.record({
-          provider: result.provider as InferenceProvider,
+          provider: actualProvider,
           model: result.model,
           agentId,
           domain,
@@ -209,12 +236,12 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
           cached: false,
         });
 
-        providerHealth.recordSuccess(candidate.provider, latencyMs);
+        providerHealth.recordSuccess(actualProvider, latencyMs);
 
         return {
           content: result.content,
           model: result.model,
-          provider: result.provider as InferenceProvider,
+          provider: actualProvider,
           usage: {
             promptTokens: result.usage.promptTokens,
             completionTokens: result.usage.completionTokens,
@@ -265,18 +292,19 @@ export async function gatewayInfer(request: GatewayRequest): Promise<GatewayResp
 }
 
 export function getGatewayStatus(): {
-  availableProviders: Array<{ provider: InferenceProvider; status: string; avgLatencyMs: number }>;
+  availableProviders: Array<{ provider: InferenceProvider; status: string; configured: boolean; avgLatencyMs: number }>;
   defaultStrategy: RoutingStrategy;
   supportedStrategies: RoutingStrategy[];
   taskTypes: string[];
 } {
-  const providers: InferenceProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
+  const providers: TargetableProvider[] = ["replit-proxy", "openai", "anthropic", "gemini", "huggingface"];
   const availableProviders = providers.map(p => {
     const health = providerHealth.getStatus(p);
     const stats = inferenceTelemetry.getProviderStats(300000).find(s => s.provider === p);
     return {
-      provider: p,
+      provider: p as InferenceProvider,
       status: health.status,
+      configured: services.ai.isProviderConfigured(p),
       avgLatencyMs: stats?.avgLatencyMs ?? 0,
     };
   });

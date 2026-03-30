@@ -227,7 +227,9 @@ class ProviderHealthMonitor {
         headers,
         signal: controller.signal,
       });
-      return resp.status < 500;
+      if (resp.status >= 500) return false;
+      if (resp.status === 401 || resp.status === 403) return false;
+      return true;
     } finally {
       clearTimeout(timer);
     }

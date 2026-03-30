@@ -11,6 +11,7 @@ import { orchestrate, getOrchestratorCapabilities } from "../lib/multi-agent-orc
 import type { OrchestrationDepth } from "../lib/multi-agent-orchestrator";
 import { executePipeline, listPipelines, getPipelineConfig } from "../lib/intelligence-pipelines";
 import type { ChatMessage } from "@workspace/services";
+import type { Request, Response } from "express";
 
 const VALID_DEPTHS = new Set<OrchestrationDepth>(["shallow", "standard", "deep"]);
 
@@ -251,7 +252,7 @@ nimbusRouter.post("/nimbus/pipelines/:pipelineId/execute", authMiddleware(), asy
   } catch (err) { handleRouteError(res, err, "Pipeline execution failed"); }
 });
 
-nimbusRouter.post("/nimbus/recommendations", authMiddleware(), async (req, res) => {
+async function handleRecommendations(req: Request, res: Response): Promise<void> {
   try {
     const { context, domain, depth } = req.body as {
       context?: string;
@@ -331,6 +332,9 @@ Generate 3-5 recommendations, prioritized by score. Return ONLY the JSON array.`
       },
     });
   } catch (err) { handleRouteError(res, err, "Recommendation generation failed"); }
-});
+}
+
+nimbusRouter.post("/nimbus/recommendations", authMiddleware(), handleRecommendations);
+nimbusRouter.post("/core/recommendations", authMiddleware(), handleRecommendations);
 
 export default nimbusRouter;

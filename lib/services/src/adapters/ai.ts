@@ -8,7 +8,7 @@ export interface ChatMessage {
 export interface ChatCompletionResult {
   content: string;
   model: string;
-  provider: "openai" | "anthropic" | "replit-proxy" | "mock";
+  provider: "openai" | "anthropic" | "replit-proxy" | "gemini" | "huggingface" | "mock";
   usage: { promptTokens: number; completionTokens: number };
 }
 
@@ -39,6 +39,14 @@ export class AIAdapter extends ServiceAdapter {
 
   private get openaiKey(): string | undefined {
     return process.env["OPENAI_API_KEY"];
+  }
+
+  private get geminiKey(): string | undefined {
+    return process.env["GEMINI_API_KEY"];
+  }
+
+  private get huggingfaceKey(): string | undefined {
+    return process.env["HUGGINGFACE_API_KEY"];
   }
 
   private get hasReplitProxy(): boolean {
@@ -94,11 +102,11 @@ export class AIAdapter extends ServiceAdapter {
   }
 
   async chatCompletionForProvider(
-    provider: "replit-proxy" | "openai" | "anthropic",
+    provider: "replit-proxy" | "openai" | "anthropic" | "gemini" | "huggingface",
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
   ): Promise<ChatCompletionResult> {
-    if (!this.isLive) {
+    if (!this.isLive && provider !== "gemini" && provider !== "huggingface") {
       return this.mockChatCompletion(messages);
     }
 
@@ -111,8 +119,23 @@ export class AIAdapter extends ServiceAdapter {
     if (provider === "anthropic" && this.anthropicKey) {
       return this.anthropicCompletion(messages, options);
     }
+    if (provider === "gemini" && this.geminiKey) {
+      return this.geminiCompletion(messages, options);
+    }
+    if (provider === "huggingface" && this.huggingfaceKey) {
+      return this.huggingfaceCompletion(messages, options);
+    }
 
     throw new Error(`Provider "${provider}" is not configured or unavailable`);
+  }
+
+  isProviderConfigured(provider: "replit-proxy" | "openai" | "anthropic" | "gemini" | "huggingface"): boolean {
+    if (provider === "replit-proxy") return this.hasReplitProxy;
+    if (provider === "openai") return !!this.openaiKey;
+    if (provider === "anthropic") return !!this.anthropicKey;
+    if (provider === "gemini") return !!this.geminiKey;
+    if (provider === "huggingface") return !!this.huggingfaceKey;
+    return false;
   }
 
   async chatCompletion(
@@ -271,6 +294,98 @@ export class AIAdapter extends ServiceAdapter {
       usage: {
         promptTokens: data.usage?.input_tokens ?? 0,
         completionTokens: data.usage?.output_tokens ?? 0,
+      },
+    };
+  }
+
+  private async geminiCompletion(
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): Promise<ChatCompletionResult> {
+    const model = options?.model ?? "gemini-2.0-flash";
+    const systemMessage = messages.find((m) => m.role === "system");
+    const nonSystemMessages = messages.filter((m) => m.role !== "system");
+
+    const contents = nonSystemMessages.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const body: Record<string, unknown> = {
+      contents,
+      generationConfig: { maxOutputTokens: options?.maxTokens ?? 1024 },
+    };
+    if (systemMessage) {
+      body["systemInstruction"] = { parts: [{ text: systemMessage.content }] };
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as {
+      candidates?: Array<{ content: { parts: Array<{ text: string }> } }>;
+      usageMetadata?: { promptTokenCount: number; candidatesTokenCount: number };
+    };
+
+    return {
+      content: data.candidates?.[0]?.content?.parts?.[0]?.text ?? "",
+      model,
+      provider: "gemini",
+      usage: {
+        promptTokens: data.usageMetadata?.promptTokenCount ?? 0,
+        completionTokens: data.usageMetadata?.candidatesTokenCount ?? 0,
+      },
+    };
+  }
+
+  private async huggingfaceCompletion(
+    messages: ChatMessage[],
+    options?: { model?: string; maxTokens?: number },
+  ): Promise<ChatCompletionResult> {
+    const model = options?.model ?? "mistralai/Mixtral-8x7B-Instruct-v0.1";
+
+    const response = await fetch(
+      `https://api-inference.huggingface.co/models/${model}/v1/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.huggingfaceKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          max_tokens: options?.maxTokens ?? 1024,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`HuggingFace API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as {
+      choices: Array<{ message: { content: string } }>;
+      usage?: { prompt_tokens: number; completion_tokens: number };
+    };
+
+    return {
+      content: data.choices[0]?.message?.content ?? "",
+      model,
+      provider: "huggingface",
+      usage: {
+        promptTokens: data.usage?.prompt_tokens ?? 0,
+        completionTokens: data.usage?.completion_tokens ?? 0,
       },
     };
   }
