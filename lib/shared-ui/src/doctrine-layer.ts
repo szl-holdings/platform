@@ -54,32 +54,11 @@ export const DOCTRINE_LAYER_DESCRIPTIONS: Record<DoctrineLayer, string> = {
 
 export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
   {
-    appId: "lyte",
-    appName: "Lyte",
-    layers: ["DECIDE", "EXECUTE"],
-    description: "Workflow routing, approvals, ownership, and escalation command center.",
-    primaryRole: "Decision + Execution Engine",
-  },
-  {
-    appId: "vessels",
-    appName: "Vessels",
-    layers: ["OBSERVE"],
-    description: "Maritime movement tracking, watchlists, anomaly detection, and geospatial alerting.",
-    primaryRole: "Maritime Observation Layer",
-  },
-  {
-    appId: "firestorm",
-    appName: "Firestorm",
-    layers: ["UNDERSTAND"],
-    description: "Security simulation, blast radius analysis, resilience scoring, and penetration testing.",
-    primaryRole: "Security Understanding Layer",
-  },
-  {
-    appId: "inca",
-    appName: "INCA",
-    layers: ["UNDERSTAND", "DECIDE"],
-    description: "Intelligence fusion, entity graph construction, and narrative assessment.",
-    primaryRole: "Intelligence Understanding + Decision Layer",
+    appId: "szl-holdings",
+    appName: "SZL Holdings",
+    layers: ["OBSERVE", "UNDERSTAND", "DECIDE", "EXECUTE"],
+    description: "Parent intelligence architecture — the unified operating model across all layers.",
+    primaryRole: "Parent Intelligence Architecture",
   },
   {
     appId: "alloy",
@@ -90,10 +69,24 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
     primaryRole: "Execution + Automation Engine",
   },
   {
+    appId: "lyte",
+    appName: "Lyte",
+    layers: ["OBSERVE", "DECIDE", "EXECUTE"],
+    description: "Business observability, workflow routing, approvals, ownership, and escalation command center.",
+    primaryRole: "Business Observability + Decision Engine",
+  },
+  {
+    appId: "vessels",
+    appName: "Vessels",
+    layers: ["OBSERVE"],
+    description: "Maritime movement tracking, watchlists, anomaly detection, and geospatial alerting.",
+    primaryRole: "Maritime Observation Layer",
+  },
+  {
     appId: "carlota-jo",
     appName: "Carlota Jo",
     layers: ["EXECUTE", "TRUST"],
-    description: "Premium client delivery, luxury advisory, and engagement excellence.",
+    description: "Premium client delivery, bespoke advisory, and engagement excellence.",
     primaryRole: "Execution + Trust Layer",
   },
   {
@@ -102,48 +95,6 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
     layers: ["SIGNAL", "TRUST"],
     description: "Founder identity, thought leadership, and personal brand intelligence.",
     primaryRole: "Signal + Trust Layer",
-  },
-  {
-    appId: "szl-holdings",
-    appName: "SZL Holdings",
-    layers: ["OBSERVE", "UNDERSTAND", "DECIDE", "EXECUTE"],
-    description: "Parent intelligence architecture — the unified operating model across all layers.",
-    primaryRole: "Parent Intelligence Architecture",
-  },
-  {
-    appId: "msp",
-    appName: "Evolve MSP",
-    layers: ["OBSERVE", "EXECUTE"],
-    description: "Managed services performance monitoring and service delivery orchestration.",
-    primaryRole: "Managed Services Intelligence Layer",
-  },
-  {
-    appId: "terra",
-    appName: "Terra",
-    layers: ["OBSERVE", "UNDERSTAND"],
-    description: "Real estate market intelligence, portfolio analysis, and deal insight.",
-    primaryRole: "Real Estate Intelligence Layer",
-  },
-  {
-    appId: "dreamscape",
-    appName: "Dreamscape",
-    layers: ["EXECUTE"],
-    description: "Creative asset generation, campaign production, and content execution.",
-    primaryRole: "Creative Execution Layer",
-  },
-  {
-    appId: "readiness-report",
-    appName: "Readiness",
-    layers: ["OBSERVE", "UNDERSTAND"],
-    description: "Organizational readiness assessment, risk scoring, and gap analysis.",
-    primaryRole: "Readiness Observation + Analysis Layer",
-  },
-  {
-    appId: "admin",
-    appName: "Admin Panel",
-    layers: ["EXECUTE"],
-    description: "Control plane administration, user management, and system configuration.",
-    primaryRole: "Administration + Control Layer",
   },
 ];
 

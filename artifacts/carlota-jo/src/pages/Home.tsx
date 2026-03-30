@@ -1,7 +1,8 @@
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
 import ApproachSection from "@/components/ApproachSection";
-import ContactForm from "@/components/ContactForm";
+import Testimonials from "@/components/Testimonials";
+import InquiryForm from "@/components/InquiryForm";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -10,7 +11,8 @@ export default function Home() {
       <Hero />
       <Services />
       <ApproachSection />
-      <ContactForm />
+      <Testimonials />
+      <InquiryForm />
       <Footer />
     </div>
   );

@@ -89,10 +89,10 @@ export default function Services() {
                 </ul>
 
                 <button
-                  onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}
+                  onClick={() => document.querySelector("#inquire")?.scrollIntoView({ behavior: "smooth" })}
                   className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.12em] uppercase text-warm-gold/70 hover:text-warm-gold transition-colors"
                 >
-                  Start a Conversation
+                  Inquire privately
                   <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform duration-300" />
                 </button>
               </motion.div>

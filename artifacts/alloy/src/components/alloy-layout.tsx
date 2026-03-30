@@ -4,11 +4,11 @@ import { ReactNode } from "react";
 import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell } from "lucide-react";
 
 const COMMAND_LOOP = [
-  { phase: "DETECT", color: "#0ea5e9", active: false, link: "/terra/" },
+  { phase: "DETECT", color: "#0ea5e9", active: false },
   { phase: "INTERPRET", color: "#f59e0b", active: false, link: "/lyte-command-center/" },
-  { phase: "DECIDE", color: "#8b5cf6", active: false, link: "/dreamscape/" },
+  { phase: "DECIDE", color: "#8b5cf6", active: false },
   { phase: "EXECUTE", color: "#00d4ff", active: true },
-  { phase: "VERIFY", color: "#10b981", active: false, link: "/terra/" },
+  { phase: "VERIFY", color: "#10b981", active: false },
 ];
 
 const NAV = [
@@ -83,9 +83,8 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <span>SZL Business OS</span>
           </div>
           <div className="flex gap-1">
-            <a href="/terra/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#0ea5e9", background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.2)" }}>BEACON</a>
             <a href="/lyte-command-center/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>LYTE</a>
-            <a href="/alloy/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#6366f1", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>ALLOY</a>
+            <a href="/vessels/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#38bdf8", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>VESSELS</a>
           </div>
         </div>
       </aside>

@@ -110,7 +110,7 @@ export default function CaseStudies() {
           className="mt-12 text-center"
         >
           <button
-            onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() => document.querySelector("#inquire")?.scrollIntoView({ behavior: "smooth" })}
             className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.15em] uppercase text-warm-gold hover:text-warm-gold-light transition-colors"
           >
             Discuss a similar engagement

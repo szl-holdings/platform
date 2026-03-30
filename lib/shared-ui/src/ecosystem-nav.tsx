@@ -49,7 +49,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     path: "/",
     accent: "#94a3b8",
     icon: "◆",
-    description: "Premium Command Systems Ecosystem",
+    description: "Structured Ventures Ecosystem",
   },
   {
     id: "alloy",
@@ -88,45 +88,13 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     description: "Discreet Operational & Residence Support",
   },
   {
-    id: "career",
-    name: "Founder",
-    subtitle: "Stephen Lutar",
+    id: "stephen-site",
+    name: "Stephen Lutar",
+    subtitle: "Founder",
     path: "/stephen/",
     accent: "#94a3b8",
     icon: "○",
-    description: "Builder. Operator. Systems Thinker.",
-  },
-  {
-    id: "readiness-report",
-    name: "Lyte Readiness",
-    subtitle: "Lyte Module",
-    path: "/readiness-report/",
-    accent: "#84cc16",
-    icon: "📊",
-  },
-  {
-    id: "stephen-site",
-    name: "Stephen Lutar",
-    subtitle: "Personal Site",
-    path: "/stephen/",
-    accent: "#64748b",
-    icon: "👤",
-  },
-  {
-    id: "admin",
-    name: "Admin Panel",
-    subtitle: "Control Plane",
-    path: "/admin/",
-    accent: "#f97316",
-    icon: "⚙️",
-  },
-  {
-    id: "alloy",
-    name: "Alloy",
-    subtitle: "Unified AI Command",
-    path: "/alloy/",
-    accent: "#00d4ff",
-    icon: "⚡",
+    description: "Systems, Visibility, and Execution",
   },
 ];
 
@@ -968,13 +936,10 @@ function getDomainSearchResults(q: string): SearchResult[] {
   const results: SearchResult[] = [];
   const searchableContent = [
     { keywords: ["fleet", "vessel", "ship", "port", "maritime", "route", "anchor"], app: "Vessels", icon: "🚢", accent: "#3b82f6", href: "/vessels/", items: ["Fleet Dashboard", "Port Analytics", "Route Planning", "Risk Scoring", "Dark Vessel Detection"] },
-    { keywords: ["threat", "security", "soc", "incident", "mitre", "cve", "vulnerability", "firewall"], app: "Firestorm", icon: "🔥", accent: "#ef4444", href: "/firestorm/", items: ["SOC Dashboard", "Threat Intelligence", "Incident Response", "MITRE ATT&CK", "Risk Scoring"] },
-    { keywords: ["model", "experiment", "ml", "ai", "neural", "prediction", "benchmark", "gpu"], app: "INCA", icon: "🧠", accent: "#8b5cf6", href: "/inca/", items: ["Experiments", "Model Registry", "Predictions", "Neural Explorer", "GPU Monitoring"] },
-    { keywords: ["property", "real estate", "market", "valuation", "portfolio", "listing"], app: "Terra", icon: "🏢", accent: "#10b981", href: "/terra/", items: ["Property Intelligence", "Market Trends", "Portfolio", "Valuations"] },
-    { keywords: ["signal", "incident", "playbook", "ops", "topology", "slo", "oncall", "anomaly"], app: "Lyte", icon: "⚡", accent: "#f59e0b", href: "/lyte-command-center/", items: ["Signals", "Incidents", "Playbooks", "AI Ops", "SLO Tracking"] },
-    { keywords: ["campaign", "creative", "content", "brand", "calendar", "studio", "voice", "social"], app: "Dreamscape", icon: "🎨", accent: "#ec4899", href: "/dreamscape/", items: ["Campaigns", "AI Studio", "Content Calendar", "Brand Voice", "Social Assets"] },
-    { keywords: ["client", "ticket", "device", "contract", "noc", "billing", "technician", "rmm"], app: "Evolve MSP", icon: "💻", accent: "#06b6d4", href: "/msp/", items: ["Client Management", "Service Desk", "Device Inventory", "NOC Operations"] },
-    { keywords: ["brand", "consulting", "strategy", "sentiment", "competitive", "positioning"], app: "Carlota Jo", icon: "✨", accent: "#f472b6", href: "/carlota-jo/", items: ["Brand Strategy", "Sentiment Analysis", "Competitive Intel"] },
+    { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#f59e0b", href: "/lyte-command-center/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
+    { keywords: ["alloy", "automation", "connector", "workflow", "orchestration", "execution", "run"], app: "Alloy", icon: "⬡", accent: "#60a5fa", href: "/alloy/", items: ["Execution Runs", "Workflow Orchestration", "Connector Mesh", "Governance", "Automation Analytics"] },
+    { keywords: ["brand", "consulting", "advisory", "discreet", "residence", "estate", "private"], app: "Carlota Jo", icon: "◈", accent: "#d4b896", href: "/carlota-jo/", items: ["Services", "Approach", "Private Inquiry"] },
+    { keywords: ["founder", "stephen", "lutar", "systems", "visibility", "writing", "frameworks"], app: "Stephen Lutar", icon: "○", accent: "#94a3b8", href: "/stephen/", items: ["Work", "Frameworks", "Writing", "Contact"] },
   ];
 
   for (const domain of searchableContent) {

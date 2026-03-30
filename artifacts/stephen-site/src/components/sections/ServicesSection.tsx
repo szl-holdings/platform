@@ -30,7 +30,7 @@ const capabilities = [
 
 export function ServicesSection() {
   return (
-    <section id="capabilities" className="py-24 lg:py-32 bg-[#0a0e14] border-t border-white/5">
+    <section id="frameworks" className="py-24 lg:py-32 bg-[#0a0e14] border-t border-white/5">
       <div className="max-w-6xl mx-auto px-6 lg:px-12">
         <div className="grid lg:grid-cols-12 gap-12 mb-14">
           <motion.div

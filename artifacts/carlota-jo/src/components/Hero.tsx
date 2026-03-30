@@ -27,11 +27,11 @@ export default function Hero() {
               transition={{ duration: 0.9, delay: 0.15 }}
               className="font-serif text-5xl md:text-6xl lg:text-[4.5rem] font-light text-ink-900 leading-[1.08] mb-6"
             >
-              Discreet operational
+              Bespoke advisory
               <br />
-              and residence support
+              for clients who value
               <br />
-              for <span className="italic">high-touch environments.</span>
+              <span className="italic">discretion and precision.</span>
             </motion.h1>
 
             <motion.p
@@ -62,7 +62,7 @@ export default function Hero() {
                 onClick={() => document.querySelector("#inquire")?.scrollIntoView({ behavior: "smooth" })}
                 className="group flex items-center gap-2.5 px-7 py-3.5 text-[13px] font-medium tracking-[0.08em] text-[#07090d] bg-[#c8a96a] hover:bg-[#d4b87a] transition-colors duration-300"
               >
-                Start a Conversation
+                Inquire privately
                 <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button

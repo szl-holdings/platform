@@ -43,7 +43,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.35 }}
             className="text-lg sm:text-xl text-foreground/55 max-w-2xl mb-4 leading-relaxed font-light"
           >
-            Platform architect. Systems thinker. Founder.
+            Systems, visibility, and execution for modern operations.
           </motion.p>
 
           <motion.p
@@ -52,7 +52,7 @@ export function HeroSection() {
             transition={{ duration: 0.7, delay: 0.42 }}
             className="text-base text-foreground/35 max-w-xl mb-12 leading-relaxed font-light"
           >
-            Founder of SZL Holdings — building the infrastructure for Business Observability. Four platform layers: Observe, Understand, Execute, Advise. Built to compound across verticals.
+            Founder of SZL Holdings — building structured ventures across observability, maritime command, and high-trust services. Built to operate with clarity and compound over time.
           </motion.p>
 
           <motion.div
@@ -62,17 +62,17 @@ export function HeroSection() {
             className="flex flex-wrap items-center gap-5"
           >
             <a
-              href="#case-studies"
+              href="#contact"
               className="group inline-flex items-center gap-2.5 px-8 py-3.5 bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors duration-200"
             >
-              View Selected Work
+              Start a conversation
               <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
             </a>
             <a
-              href="/"
+              href="#case-studies"
               className="group inline-flex items-center gap-2 text-sm font-medium text-foreground/50 hover:text-primary transition-colors duration-200"
             >
-              Explore the Ecosystem
+              View selected work
               <ArrowRight size={13} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
             </a>
           </motion.div>

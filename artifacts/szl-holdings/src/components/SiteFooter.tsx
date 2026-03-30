@@ -4,11 +4,6 @@ const PLATFORMS_LINKS = [
   { label: "Alloy", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
-  { label: "Rosie", href: "/msp/" },
-  { label: "Beacon", href: "/terra/" },
-  { label: "INCA", href: "/inca/" },
-  { label: "Aegis", href: "/readiness-report/" },
-  { label: "Firestorm", href: "/firestorm/" },
 ];
 
 const SERVICES_LINKS = [
@@ -116,7 +111,7 @@ export function SiteFooter() {
               &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}>
-              ONE ECOSYSTEM · ONE OPERATING PHILOSOPHY · MULTIPLE COMMAND SURFACES
+              Structured ventures for modern systems, services, and execution.
             </p>
           </div>
         </div>

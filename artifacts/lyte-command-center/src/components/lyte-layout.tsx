@@ -4,11 +4,11 @@ import { ReactNode, useState } from "react";
 import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, Bell, ChevronRight, Zap } from "lucide-react";
 
 const COMMAND_LOOP = [
-  { phase: "DETECT", color: "#0ea5e9", active: false, link: "/terra/" },
+  { phase: "DETECT", color: "#0ea5e9", active: false },
   { phase: "INTERPRET", color: "#f59e0b", active: true },
-  { phase: "DECIDE", color: "#8b5cf6", active: false, link: "/dreamscape/" },
+  { phase: "DECIDE", color: "#8b5cf6", active: false },
   { phase: "EXECUTE", color: "#00d4ff", active: false, link: "/alloy/" },
-  { phase: "VERIFY", color: "#10b981", active: false, link: "/terra/" },
+  { phase: "VERIFY", color: "#10b981", active: false },
 ];
 
 const NAV = [
@@ -83,8 +83,11 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             <span>SZL Business OS</span>
           </div>
           <div className="flex gap-1 mt-2">
-            <a href="/terra/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#0ea5e9", background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.2)" }}>BEACON</a>
-            <a href="/alloy/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#6366f1", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>ALLOY</a>
+            <a href="/alloy/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.2)" }}>ALLOY</a>
+            <a href="/vessels/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#38bdf8", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>VESSELS</a>
+          </div>
+          <div className="mt-2 text-[8px] leading-tight" style={{ color: "rgba(255,255,255,0.18)" }}>
+            Beacon/Terra · Internal R&D · Pending Lyte absorption
           </div>
         </div>
       </aside>

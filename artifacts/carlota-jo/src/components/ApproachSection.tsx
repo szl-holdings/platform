@@ -101,7 +101,7 @@ export default function ApproachSection() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
-                onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => document.querySelector("#inquire")?.scrollIntoView({ behavior: "smooth" })}
                 className="px-8 py-3.5 font-serif text-sm tracking-wider text-navy-950 bg-gold-400 hover:bg-gold-300 transition-colors"
               >
                 Inquire privately

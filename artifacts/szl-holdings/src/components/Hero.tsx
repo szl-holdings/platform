@@ -226,7 +226,7 @@ export function Hero() {
                 fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
               }}
             >
-              Building premium command systems across observability, operations, and specialized platforms.
+              Structured ventures for modern systems, services, and execution.
             </m.h1>
 
             <m.p
@@ -241,7 +241,7 @@ export function Hero() {
                 marginBottom: "1rem",
               }}
             >
-              SZL Holdings is the ecosystem behind Alloy, Lyte, Vessels, and high-trust operating brands designed to turn visibility into action and execution into advantage.
+              SZL Holdings is the parent behind Alloy, Lyte, Vessels, and Carlota Jo — each venture built around a clear operating model, purpose-structured and designed to compound.
             </m.p>
 
             <m.p
@@ -258,7 +258,7 @@ export function Hero() {
                 marginBottom: "2.5rem",
               }}
             >
-              One ecosystem. One operating philosophy. Multiple command surfaces.
+              One holding structure. One operating philosophy. Six distinct brands.
             </m.p>
 
             <m.div
@@ -295,7 +295,7 @@ export function Hero() {
                   (e.currentTarget as HTMLElement).style.boxShadow = "none";
                 }}
               >
-                Explore the Ecosystem
+                Explore the portfolio
                 <ArrowRight size={14} strokeWidth={2.5} />
               </Link>
               <Link
