@@ -83,6 +83,14 @@ DreamStack is a pnpm monorepo containing 14 interconnected applications built wi
 - **Dependency Catalog:** recharts, react-hook-form, framer-motion, lucide-react normalized via pnpm catalog
 - **Vite Build:** `manualChunks` splits vendor code into recharts/d3, framer-motion, radix-ui, tanstack, lucide-react, and react chunks; `cssCodeSplit` enabled
 
+### Domain Agent System
+AI-powered domain agents for each application, merged from GitHub repos. Located at `artifacts/api-server/src/routes/domain-agents/`. Each agent has a specialized system prompt, tool definitions, and connects to the app's existing API routes for data retrieval. Supports both synchronous and streaming chat. Agent types: inca, vessels, szl-holdings, carlota-jo, firestorm, lyte, dreamscape, readiness-report, msp, terra, admin, stephen.
+
+### Model Registry & AI Observability
+- `artifacts/api-server/src/lib/model-registry.ts`: Centralized model config for all domain agents with env-var overrides and bi-weekly review tracking
+- `artifacts/api-server/src/lib/ai-model-observability.ts`: AI model performance metrics, accuracy drift detection, and observability summary
+- Intelligence API routes: `/api/intelligence/ai-models`, `/api/intelligence/ai-models/summary`, `/api/intelligence/model-registry`
+
 ### Shared Libraries
 - `lib/shared-ui`: Design system (56 UI components), AgentCopilot, copilot configs, AI components, premium components, IntelligencePhilosophy, `ErrorBoundary`, `useRealtimeChannel`, `useFeatureFlag` hooks
 - `lib/db`: Drizzle ORM schemas, connection pool (min/max/idle timeout/statement timeout), slow-query logging in dev (includes `conversations` + `messages` tables for AlloyChat)

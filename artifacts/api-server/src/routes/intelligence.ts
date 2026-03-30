@@ -4,6 +4,8 @@ import rateLimit from "express-rate-limit";
 import { services } from "@workspace/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { getAiModels, getAiModelById, getModelObservabilitySummary } from "../lib/ai-model-observability";
+import { getRegistrySummary } from "../lib/model-registry";
 
 const router: IRouter = Router();
 
@@ -888,6 +890,35 @@ router.get("/intelligence/daily-digest", intelRateLimit, authMiddleware({ requir
     };
     sendSuccess(res, digest);
   } catch (err) { handleRouteError(res, err, "Failed to generate daily digest"); }
+});
+
+router.get("/intelligence/ai-models", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const models = getAiModels();
+    sendSuccess(res, models);
+  } catch (err) { handleRouteError(res, err, "Failed to fetch AI models"); }
+});
+
+router.get("/intelligence/ai-models/summary", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const summary = getModelObservabilitySummary();
+    sendSuccess(res, summary);
+  } catch (err) { handleRouteError(res, err, "Failed to fetch AI model summary"); }
+});
+
+router.get("/intelligence/ai-models/:modelId", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const model = getAiModelById(req.params.modelId as string);
+    if (!model) { sendError(res, "Model not found", 404); return; }
+    sendSuccess(res, model);
+  } catch (err) { handleRouteError(res, err, "Failed to fetch AI model"); }
+});
+
+router.get("/intelligence/model-registry", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const registry = getRegistrySummary();
+    sendSuccess(res, registry);
+  } catch (err) { handleRouteError(res, err, "Failed to fetch model registry"); }
 });
 
 router.get("/intelligence/data-flow", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {

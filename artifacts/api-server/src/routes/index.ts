@@ -27,6 +27,7 @@ import alloyChatRouter from "./alloy-chat";
 import jobsRouter from "./jobs";
 import nueroMeshRouter from "./nuro-mesh";
 import aiSafetyRouter from "./ai-safety";
+import domainAgentsRouter from "./domain-agents/index";
 
 const router: IRouter = Router();
 
@@ -78,5 +79,7 @@ router.use("/nuro-mesh", readLimiter);
 router.use(nueroMeshRouter);
 router.use("/ai-safety", readLimiter);
 router.use(aiSafetyRouter);
+router.use("/domain-agents", readLimiter);
+router.use(domainAgentsRouter);
 
 export default router;
