@@ -23,6 +23,8 @@ const CorrelationAnalysis = lazy(() => import("@/pages/correlation-analysis"));
 const ModelRegistry = lazy(() => import("@/pages/model-registry"));
 const NeuralExplorer = lazy(() => import("@/pages/neural-explorer"));
 const Benchmarking = lazy(() => import("@/pages/benchmarking"));
+const GPUMonitoring = lazy(() => import("@/pages/gpu-monitoring"));
+const LLMEvaluation = lazy(() => import("@/pages/llm-evaluation"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -47,6 +49,8 @@ const navItems = [
   { path: "/registry", label: "Model Registry", icon: Database },
   { path: "/neural-explorer", label: "Neural Explorer", icon: Brain },
   { path: "/benchmarking", label: "Benchmarking", icon: Trophy },
+  { path: "/gpu-monitoring", label: "GPU Cluster Monitor", icon: Cpu },
+  { path: "/llm-eval", label: "LLM Evaluation", icon: FlaskConical },
 ];
 
 function PageLoader() {
@@ -136,6 +140,8 @@ function AppRouter() {
         <Route path="/registry" component={ModelRegistry} />
         <Route path="/neural-explorer" component={NeuralExplorer} />
         <Route path="/benchmarking" component={Benchmarking} />
+        <Route path="/gpu-monitoring" component={GPUMonitoring} />
+        <Route path="/llm-eval" component={LLMEvaluation} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground font-mono">404 — Page not found</p>

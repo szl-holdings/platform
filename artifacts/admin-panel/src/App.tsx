@@ -57,6 +57,7 @@ const WorkflowAutomation = lazy(() => import("@/pages/workflow-automation"));
 const DeveloperPortal = lazy(() => import("@/pages/developer-portal"));
 const NuroMesh = lazy(() => import("@/pages/nuro-mesh"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+const ConnectorHealth = lazy(() => import("@/pages/connector-health"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +82,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: "/health", label: "System Health", icon: <HeartPulse className="w-4 h-4" /> },
   { path: "/apps", label: "App Registry", icon: <Layers className="w-4 h-4" /> },
   { path: "/connectors", label: "Connectors", icon: <Plug className="w-4 h-4" /> },
+  { path: "/connector-health", label: "Connector Health", icon: <Activity className="w-4 h-4" /> },
   { path: "/integration-health", label: "Integration Health", icon: <HeartPulse className="w-4 h-4" />, badge: "health" },
   { path: "/integration-activity", label: "Activity Feed", icon: <Activity className="w-4 h-4" /> },
   { path: "/users", label: "Users & Roles", icon: <Users className="w-4 h-4" />, section: "Management" },
@@ -233,6 +235,7 @@ function AppRouter() {
         <Route path="/health" component={SystemHealthPage} />
         <Route path="/apps" component={AppsPage} />
         <Route path="/connectors" component={ConnectorsPage} />
+        <Route path="/connector-health" component={ConnectorHealth} />
         <Route path="/integration-health" component={IntegrationHealthPage} />
         <Route path="/integration-activity" component={IntegrationActivityPage} />
         <Route path="/users" component={UsersPage} />

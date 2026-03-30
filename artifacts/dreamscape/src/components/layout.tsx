@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff, Sparkles, Activity, Calendar, Image, BookOpen, Wand2, Palette } from "lucide-react";
+import { LayoutDashboard, Film, Video, Mic, FolderOpen, Search, Bell, Settings, Server, Wifi, WifiOff, Sparkles, Activity, Calendar, Image, BookOpen, Wand2, Palette, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "./ui";
 
@@ -78,6 +78,10 @@ const navItems = [
   { name: "Content Library", href: "/content-guides", icon: BookOpen },
   { name: "Generator Tools", href: "/generators", icon: Wand2 },
   { name: "Aurora Gallery", href: "/aurora", icon: Palette },
+  { name: "Brand Voice Engine", href: "/brand-voice", icon: Mic },
+  { name: "Voice Studio", href: "/voice-studio", icon: Search },
+  { name: "Motion Graphics", href: "/motion-graphics", icon: Film },
+  { name: "Collab Workspace", href: "/collab", icon: Users },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

@@ -9,6 +9,12 @@ const BookingFollowUp = lazy(() => import("@/pages/BookingFollowUp"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const AdvisoryIntel = lazy(() => import("@/pages/AdvisoryIntel"));
+const AIAdvisory = lazy(() => import("@/pages/ai-advisory"));
+const EngagementWorkflow = lazy(() => import("@/pages/engagement-workflow"));
+const ClientIntel = lazy(() => import("@/pages/client-intel"));
+const ROICalculator = lazy(() => import("@/pages/roi-calculator"));
+const BrandAudit = lazy(() => import("@/pages/brand-audit"));
+const ContentStrategy = lazy(() => import("@/pages/content-strategy"));
 
 function PageLoader() {
   return (
@@ -29,6 +35,12 @@ function Router() {
         <Route path="/booking/follow-up" component={BookingFollowUp} />
         <Route path="/observability" component={ObservabilityPage} />
         <Route path="/advisory" component={AdvisoryIntel} />
+        <Route path="/ai-advisory" component={AIAdvisory} />
+        <Route path="/engagements" component={EngagementWorkflow} />
+        <Route path="/client-intel" component={ClientIntel} />
+        <Route path="/roi-calculator" component={ROICalculator} />
+        <Route path="/brand-audit" component={BrandAudit} />
+        <Route path="/content-strategy" component={ContentStrategy} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

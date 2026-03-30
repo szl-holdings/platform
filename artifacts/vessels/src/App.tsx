@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown } from "lucide-react";
+import { Ship, Anchor, Navigation, AlertTriangle, CloudRain, Activity, LayoutDashboard, Server, Wifi, WifiOff, BarChart3, Cog, ScrollText, Package, ShieldCheck, Leaf, Brain, Globe, User, ChevronDown, EyeOff, ShieldAlert, Shield } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,12 @@ const CO2EmissionsPage = lazy(() => import("@/pages/co2-emissions"));
 const AppliedIntelligencePage = lazy(() => import("@/pages/applied-intelligence"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const PortAnalyticsPage = lazy(() => import("@/pages/port-analytics"));
+const DarkVesselDetection = lazy(() => import("@/pages/dark-vessel-detection"));
+const CommoditiesTracking = lazy(() => import("@/pages/commodities-tracking"));
+const RiskScoringPage = lazy(() => import("@/pages/risk-scoring"));
+const SanctionsScreening = lazy(() => import("@/pages/sanctions-screening"));
+const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
+const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -66,6 +72,22 @@ const navSections: NavSection[] = [
     items: [
       { path: "/synthetics", label: "Synthetics/Compliance", icon: ShieldCheck, roles: ["compliance", "exec"] },
       { path: "/co2-emissions", label: "CO2 & Emissions", icon: Leaf, roles: ["compliance", "exec", "ops"] },
+    ],
+  },
+  {
+    title: "Risk & Compliance",
+    items: [
+      { path: "/dark-vessel-detection", label: "Dark Vessel Detection", icon: EyeOff, roles: ["ops", "compliance", "exec"] },
+      { path: "/sanctions-screening", label: "Sanctions Screening", icon: ShieldAlert, roles: ["compliance", "exec"] },
+      { path: "/risk-scoring", label: "Risk Scoring Engine", icon: Shield, roles: ["ops", "compliance", "exec"] },
+      { path: "/commodities-tracking", label: "Commodities Tracking", icon: Package, roles: ["ops", "exec"] },
+    ],
+  },
+  {
+    title: "Threat Intelligence",
+    items: [
+      { path: "/cyber-threats", label: "Cyber Threat Panel", icon: Shield, roles: ["ops", "exec"] },
+      { path: "/incidents", label: "Incident Reporting", icon: AlertTriangle },
     ],
   },
   {
@@ -292,6 +314,12 @@ function AppRouter() {
         <Route path="/simulations" component={SimulationsPage} />
         <Route path="/alerts" component={AlertCenterPage} />
         <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/dark-vessel-detection" component={DarkVesselDetection} />
+        <Route path="/commodities-tracking" component={CommoditiesTracking} />
+        <Route path="/risk-scoring" component={RiskScoringPage} />
+        <Route path="/sanctions-screening" component={SanctionsScreening} />
+        <Route path="/cyber-threats" component={CyberThreatPanel} />
+        <Route path="/incidents" component={IncidentReporting} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>

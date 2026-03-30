@@ -32,6 +32,8 @@ const TechniciansPage = lazy(() => import("@/pages/technicians"));
 const DispatchPage = lazy(() => import("@/pages/dispatch"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+const RMMConsole = lazy(() => import("@/pages/rmm-console"));
+const MRRDashboard = lazy(() => import("@/pages/mrr-dashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -69,6 +71,8 @@ const navSections: NavSection[] = [
   {
     title: "Intelligence",
     items: [
+      { path: "/rmm", label: "RMM Console", icon: Monitor },
+      { path: "/mrr", label: "MRR Dashboard", icon: DollarSign },
       { path: "/observability", label: "Observability", icon: Activity },
     ],
   },
@@ -170,6 +174,8 @@ function AppRouter() {
         <Route path="/revenue" component={RevenuePage} />
         <Route path="/technicians" component={TechniciansPage} />
         <Route path="/dispatch" component={DispatchPage} />
+        <Route path="/rmm" component={RMMConsole} />
+        <Route path="/mrr" component={MRRDashboard} />
         <Route path="/observability" component={ObservabilityPage} />
         <Route component={NotFound} />
       </Switch>

@@ -18,6 +18,10 @@ const MeridianAnalytics = lazy(() => import("@/pages/meridian-analytics"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const PortfolioObservability = lazy(() => import("@/pages/portfolio-observability"));
+const AnomalyDetection = lazy(() => import("@/pages/anomaly-detection"));
+const SLOTracking = lazy(() => import("@/pages/slo-tracking"));
+const CloudCost = lazy(() => import("@/pages/cloud-cost"));
+const OnCallManagement = lazy(() => import("@/pages/oncall-management"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +57,10 @@ function Router() {
         <Route path="/portfolio-observability" component={PortfolioObservability} />
         <Route path="/topology" component={Topology} />
         <Route path="/meridian-analytics" component={MeridianAnalytics} />
+        <Route path="/anomaly-detection" component={AnomalyDetection} />
+        <Route path="/slo-tracking" component={SLOTracking} />
+        <Route path="/cloud-cost" component={CloudCost} />
+        <Route path="/oncall" component={OnCallManagement} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

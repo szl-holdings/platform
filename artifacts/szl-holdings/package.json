@@ -21,6 +21,7 @@
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
+    "recharts": "catalog:",
     "react-dom": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",

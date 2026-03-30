@@ -15,6 +15,10 @@ const GeneratorTools = lazy(() => import("@/pages/generator-tools").then(m => ({
 const AuroraGallery = lazy(() => import("@/pages/aurora-gallery"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const BrandVoiceEngine = lazy(() => import("@/pages/brand-voice-engine"));
+const VoiceStudio = lazy(() => import("@/pages/voice-studio"));
+const MotionGraphics = lazy(() => import("@/pages/motion-graphics"));
+const CollaborativeWorkspace = lazy(() => import("@/pages/collaborative-workspace"));
 
 const queryClient = new QueryClient();
 
@@ -40,6 +44,10 @@ function Router() {
         <Route path="/content-guides" component={ContentGuides} />
         <Route path="/generators" component={GeneratorTools} />
         <Route path="/aurora" component={AuroraGallery} />
+        <Route path="/brand-voice" component={BrandVoiceEngine} />
+        <Route path="/voice-studio" component={VoiceStudio} />
+        <Route path="/motion-graphics" component={MotionGraphics} />
+        <Route path="/collab" component={CollaborativeWorkspace} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

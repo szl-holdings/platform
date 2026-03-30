@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss } from "lucide-react";
+import { Flame, Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3, ClipboardCheck, Search, Rss, Layers, Users } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,10 @@ const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const SentinelDashboard = lazy(() => import("@/pages/sentinel-dashboard"));
 const Watchlists = lazy(() => import("@/pages/watchlists"));
 const ForensicsTimeline = lazy(() => import("@/pages/forensics-timeline"));
+const XDRConsole = lazy(() => import("@/pages/xdr-console"));
+const ThreatHunting = lazy(() => import("@/pages/threat-hunting"));
+const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
+const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -33,6 +37,10 @@ const navItems = [
   { path: "/incidents", label: "Incidents", icon: Shield },
   { path: "/findings", label: "Findings", icon: Target },
   { path: "/mitre-attack", label: "MITRE ATT&CK", icon: Grid3X3 },
+  { path: "/xdr-console", label: "XDR Console", icon: Layers },
+  { path: "/threat-hunting", label: "Threat Hunting", icon: Search },
+  { path: "/identity-threat", label: "Identity Threats", icon: Users },
+  { path: "/executive-risk", label: "Executive Risk", icon: BarChart3 },
   { path: "/compliance", label: "Compliance", icon: ClipboardCheck },
   { path: "/alerts", label: "Alerts", icon: Bell },
   { path: "/risk-scoring", label: "Risk Scoring", icon: BarChart3 },
@@ -145,6 +153,10 @@ function AppRouter() {
         <Route path="/sentinel" component={SentinelDashboard} />
         <Route path="/watchlists" component={Watchlists} />
         <Route path="/forensics" component={ForensicsTimeline} />
+        <Route path="/xdr-console" component={XDRConsole} />
+        <Route path="/threat-hunting" component={ThreatHunting} />
+        <Route path="/identity-threat" component={IdentityThreat} />
+        <Route path="/executive-risk" component={ExecutiveRisk} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Page not found</p>

@@ -12,6 +12,10 @@ const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const FinancialResearch = lazy(() => import("@/pages/financial-research"));
 const HackajobProfile = lazy(() => import("@/pages/hackajob-profile"));
 const CareerCommand = lazy(() => import("@/pages/career-command"));
+const ThoughtLeadership = lazy(() => import("@/pages/thought-leadership"));
+const Speaking = lazy(() => import("@/pages/speaking"));
+const CaseStudies = lazy(() => import("@/pages/case-studies"));
+const TechStack = lazy(() => import("@/pages/tech-stack"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +57,10 @@ function Router() {
         <Route path="/checkout/success" component={CheckoutSuccess} />
         <Route path="/checkout/cancel" component={CheckoutCancel} />
         <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/thought-leadership" component={ThoughtLeadership} />
+        <Route path="/speaking" component={Speaking} />
+        <Route path="/case-studies" component={CaseStudies} />
+        <Route path="/tech-stack" component={TechStack} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

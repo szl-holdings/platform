@@ -15,7 +15,10 @@ import {
   CreditCard,
   Brain,
   Network,
-  BarChart3
+  BarChart3,
+  DollarSign,
+  Phone,
+  Target
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -97,6 +100,10 @@ const NAV_ITEMS = [
   { href: "/portfolio-observability", label: "Portfolio Health", icon: Activity },
   { href: "/topology", label: "Topology", icon: Network },
   { href: "/meridian-analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/anomaly-detection", label: "AI Anomaly Detection", icon: Brain },
+  { href: "/slo-tracking", label: "SLO / Error Budgets", icon: Target },
+  { href: "/cloud-cost", label: "Cloud Cost Monitor", icon: DollarSign },
+  { href: "/oncall", label: "On-Call Management", icon: Phone },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {

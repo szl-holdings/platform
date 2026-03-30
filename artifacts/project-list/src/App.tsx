@@ -8,6 +8,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const SpectrumAnalytics = lazy(() => import("@/pages/spectrum-analytics"));
+const Metrics = lazy(() => import("@/pages/metrics"));
+const Changelog = lazy(() => import("@/pages/changelog"));
+const Roadmap = lazy(() => import("@/pages/roadmap"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -395,6 +398,21 @@ function App() {
           <Route path="/spectrum">
             <Suspense fallback={<PageLoader />}>
               <SpectrumAnalytics />
+            </Suspense>
+          </Route>
+          <Route path="/metrics">
+            <Suspense fallback={<PageLoader />}>
+              <Metrics />
+            </Suspense>
+          </Route>
+          <Route path="/changelog">
+            <Suspense fallback={<PageLoader />}>
+              <Changelog />
+            </Suspense>
+          </Route>
+          <Route path="/roadmap">
+            <Suspense fallback={<PageLoader />}>
+              <Roadmap />
             </Suspense>
           </Route>
           <Route path="/" component={AppDirectory} />

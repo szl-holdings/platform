@@ -17,6 +17,8 @@ const AIInsights = lazy(() => import("@/pages/ai-insights"));
 const VitalSigns = lazy(() => import("@/pages/vital-signs"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const VendorRisk = lazy(() => import("@/pages/vendor-risk"));
+const RiskRegister = lazy(() => import("@/pages/risk-register"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +51,8 @@ function Router() {
         <Route path="/ai-insights" component={AIInsights} />
         <Route path="/observability" component={ObservabilityPage} />
         <Route path="/vital-signs" component={VitalSigns} />
+        <Route path="/vendor-risk" component={VendorRisk} />
+        <Route path="/risk-register" component={RiskRegister} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

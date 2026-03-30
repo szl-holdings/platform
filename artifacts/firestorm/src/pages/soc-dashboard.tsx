@@ -6,6 +6,8 @@ import { Shield, AlertTriangle, Activity, Clock, Users, Bell, Zap, TrendingUp, C
 import { useState, useEffect, useRef, useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar } from "recharts";
 
+type ActivityItem = { type: string; title: string; severity: string; timestamp: string };
+
 const demoData = {
   activeIncidents: 7,
   openAlerts: 34,
@@ -337,7 +339,7 @@ export default function SOCDashboard() {
                   <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} width={30} />
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1e1e2e', borderColor: '#333', borderRadius: '8px', fontSize: '11px' }}
-                    formatter={(val: any, _: any, props: any) => [`${val} incidents`, props.payload.fullName]}
+                    formatter={(val: number | string, _: string, props: { payload?: { fullName?: string } }) => [`${val} incidents`, props.payload?.fullName ?? ""]}
                   />
                   <Bar dataKey="incidents" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={14} />
                 </BarChart>
@@ -360,7 +362,7 @@ export default function SOCDashboard() {
           </CardHeader>
           <CardContent>
             <div className="relative space-y-0">
-              {(data.recentActivity || []).map((item: any, i: number) => (
+              {(data.recentActivity || [] as ActivityItem[]).map((item: ActivityItem, i: number) => (
                 <div key={i} className="flex gap-3 group">
                   <div className="flex flex-col items-center">
                     <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1.5 ${item.severity === "critical" ? "bg-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse" : item.severity === "high" ? "bg-orange-400" : item.severity === "medium" ? "bg-amber-400" : "bg-blue-400"}`} />
