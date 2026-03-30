@@ -24,6 +24,8 @@ const InvestorRelations = lazy(() => import("@/pages/investor-relations"));
 const SpectrumAnalytics = lazy(() => import("@/pages/spectrum-analytics"));
 const Changelog = lazy(() => import("@/pages/changelog"));
 const Roadmap = lazy(() => import("@/pages/roadmap"));
+const InsightsPage = lazy(() => import("@/pages/insights"));
+const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -191,6 +193,9 @@ function AppDirectory() {
             <div className="flex items-center gap-3">
               <Link href="/corporate" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                 Corporate Site <ArrowUpRight className="w-3 h-3" />
+              </Link>
+              <Link href="/insights" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                Insights <ArrowUpRight className="w-3 h-3" />
               </Link>
               <Link href="/changelog" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                 <GitBranch className="w-3 h-3" /> Changelog
@@ -368,6 +373,12 @@ function App() {
             </Route>
             <Route path="/ir">
               <Suspense fallback={<PageLoader />}><InvestorRelations /></Suspense>
+            </Route>
+            <Route path="/insights/:slug">
+              <Suspense fallback={<PageLoader />}><InsightsArticlePage /></Suspense>
+            </Route>
+            <Route path="/insights">
+              <Suspense fallback={<PageLoader />}><InsightsPage /></Suspense>
             </Route>
             <Route component={AppDirectory} />
           </Switch>

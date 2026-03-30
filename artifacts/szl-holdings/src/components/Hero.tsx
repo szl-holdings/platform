@@ -61,10 +61,11 @@ export function Hero() {
             <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
           </a>
           <a
-            href="#contact"
-            className="px-7 py-3.5 rounded-lg border border-szl-border text-szl-text-secondary font-semibold text-sm hover:text-szl-text hover:border-szl-border-hover hover:bg-szl-bg-secondary transition-all"
+            href="/insights"
+            className="group px-7 py-3.5 rounded-lg border border-szl-border text-szl-text-secondary font-semibold text-sm hover:text-szl-text hover:border-szl-border-hover hover:bg-szl-bg-secondary transition-all flex items-center gap-2"
           >
-            {hero.ctaSecondary}
+            Read Our Insights
+            <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
           </a>
         </m.div>
 

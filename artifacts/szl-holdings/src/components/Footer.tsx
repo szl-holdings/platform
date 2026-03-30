@@ -7,7 +7,7 @@ export function Footer() {
   return (
     <footer className="border-t border-szl-border bg-szl-bg-secondary py-12">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-md bg-szl-primary flex items-center justify-center">
@@ -36,6 +36,22 @@ export function Footer() {
                   </a>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-[var(--font-display)] font-semibold text-szl-text text-xs uppercase tracking-wider mb-4">Insights</h4>
+            <ul className="space-y-2.5">
+              <li>
+                <a href="/insights" className="text-szl-text-secondary text-sm hover:text-szl-text transition-colors">
+                  All Articles
+                </a>
+              </li>
+              <li>
+                <a href="/insights/state-of-the-ecosystem-2026" className="text-szl-text-secondary text-sm hover:text-szl-text transition-colors">
+                  Annual Letter
+                </a>
+              </li>
             </ul>
           </div>
 
