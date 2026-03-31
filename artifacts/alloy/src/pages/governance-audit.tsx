@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch, DataStateBadge } from "@workspace/shared-ui";
-import { Shield, CheckCircle, Clock, FileText, RefreshCw, AlertTriangle, Radio } from "lucide-react";
+import { Shield, CheckCircle, Clock, FileText, RefreshCw, Radio } from "lucide-react";
 import { useState } from "react";
 
 interface WorkflowRun {
@@ -209,7 +209,7 @@ export default function GovernanceAudit() {
           <span className="text-sm font-semibold text-white">Full Audit Trail</span>
           <span className="ml-auto text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{filtered.length} records</span>
         </div>
-        {!isLoading && !isError && filtered.length === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <div className="py-12 text-center">
             <CheckCircle className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(16,185,129,0.2)" }} />
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No audit records found</p>
