@@ -1,134 +1,311 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useLocation, Link } from "wouter";
-import { LayoutDashboard, FileText, MessageSquare, Bell, Settings, LogOut, CheckCircle2, Clock, ArrowRight, Download, Eye } from "lucide-react";
-import { DataStateBadge } from "@workspace/shared-ui";
+import {
+  LayoutDashboard, FileText, MessageSquare, Bell, LogOut,
+  CheckCircle2, Clock, ArrowRight, Download, Eye, Upload, CreditCard, Lock
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { useAuth } from "@workspace/replit-auth-web";
 
 const portalNav = [
   { label: "Overview", href: "/client-portal", icon: LayoutDashboard },
   { label: "Documents", href: "/client-portal/documents", icon: FileText },
   { label: "Updates", href: "/client-portal/updates", icon: Bell },
   { label: "Messages", href: "/client-portal/messages", icon: MessageSquare },
-  { label: "Settings", href: "/client-portal/settings", icon: Settings },
+  { label: "Invoices", href: "/client-portal/settings", icon: CreditCard },
 ];
 
-function PortalShell({ children, currentPath }: { children: React.ReactNode; currentPath: string }) {
-  return (
-    <div className="min-h-screen bg-[#07090d] flex">
-      <aside className="w-52 border-r border-[#f5f0e8]/6 flex flex-col h-screen sticky top-0">
-        <div className="px-5 py-5 border-b border-[#f5f0e8]/6">
-          <div>
-            <h1
-              className="text-[15px] font-light text-[#f5f0e8] leading-none"
-              style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
-            >
-              Carlota Jo
-            </h1>
-            <p className="text-[9px] tracking-[0.25em] uppercase text-[#c8a96a]/50 mt-0.5">Client Portal</p>
+function PortalAuthGuard({ children }: { children: React.ReactNode }) {
+  const { isLoading, isAuthenticated, login } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f9f6f1" }}>
+        <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--color-gold)", borderTopColor: "transparent" }} />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: "#f9f6f1" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-sm w-full text-center"
+        >
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ background: "rgba(154,125,82,0.1)", border: "1px solid rgba(154,125,82,0.2)" }}
+          >
+            <Lock className="w-5 h-5" style={{ color: "var(--color-gold)" }} />
           </div>
-        </div>
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {portalNav.map(({ label, href, icon: Icon }) => {
-            const isActive = currentPath === href;
-            return (
-              <Link key={href} href={href}>
-                <div className={`flex items-center gap-2.5 px-3 py-2 text-[13px] font-light transition-colors cursor-pointer ${
-                  isActive ? "text-[#f5f0e8]/85 bg-[#f5f0e8]/4" : "text-[#f5f0e8]/28 hover:text-[#f5f0e8]/60 hover:bg-[#f5f0e8]/3"
-                }`}>
-                  <Icon className="w-3.5 h-3.5 shrink-0" />
-                  {label}
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="px-3 py-4 border-t border-[#f5f0e8]/6">
-          <Link href="/">
-            <div className="flex items-center gap-2.5 px-3 py-2 text-[12px] font-light text-[#f5f0e8]/20 hover:text-[#f5f0e8]/45 transition-colors cursor-pointer">
-              <LogOut className="w-3.5 h-3.5 shrink-0" />
-              Return to site
+          <p className="text-[10px] font-medium tracking-[0.3em] uppercase mb-3" style={{ color: "var(--color-gold)" }}>
+            Client Portal
+          </p>
+          <h1
+            className="text-2xl font-light mb-3"
+            style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "var(--color-ink-900)" }}
+          >
+            Private access only.
+          </h1>
+          <p className="text-[13px] font-light leading-relaxed mb-8" style={{ color: "var(--color-ink-500)" }}>
+            The Carlota Jo client portal is available exclusively to active clients. Sign in to access your documents, messages, and engagement status.
+          </p>
+          <button
+            onClick={login}
+            className="inline-flex items-center gap-2.5 px-8 py-4 text-[13px] font-medium tracking-[0.08em] transition-colors"
+            style={{ color: "var(--color-cream)", background: "var(--color-gold)" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+          >
+            Sign in
+          </button>
+          <div className="mt-8">
+            <Link href="/">
+              <span className="text-[12px] font-light transition-colors" style={{ color: "var(--color-ink-400)" }}>
+                ← Return to carlotajo.com
+              </span>
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function PortalShell({ children, currentPath }: { children: React.ReactNode; currentPath: string }) {
+  const { logout } = useAuth();
+
+  return (
+    <PortalAuthGuard>
+      <div className="min-h-screen flex" style={{ background: "#0e0c09" }}>
+        <aside className="w-56 border-r flex flex-col h-screen sticky top-0" style={{ borderColor: "rgba(196,170,126,0.08)" }}>
+          <div className="px-5 py-5 border-b" style={{ borderColor: "rgba(196,170,126,0.08)" }}>
+            <div>
+              <h1
+                className="text-[15px] font-light leading-none"
+                style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}
+              >
+                Carlota Jo
+              </h1>
+              <p className="text-[9px] tracking-[0.25em] uppercase mt-0.5" style={{ color: "rgba(200,169,106,0.45)" }}>
+                Client Portal
+              </p>
             </div>
-          </Link>
-        </div>
-      </aside>
-      <main className="flex-1 overflow-auto p-8 max-w-3xl">
-        {children}
-      </main>
-    </div>
+          </div>
+          <nav className="flex-1 px-3 py-4 space-y-0.5">
+            {portalNav.map(({ label, href, icon: Icon }) => {
+              const isActive = currentPath === href;
+              return (
+                <Link key={href} href={href}>
+                  <div className={`flex items-center gap-2.5 px-3 py-2.5 text-[12.5px] font-light transition-colors cursor-pointer rounded-none ${
+                    isActive
+                      ? "text-[#f5f0e8]"
+                      : "hover:text-[rgba(245,240,232,0.65)]"
+                  }`} style={{
+                    color: isActive ? "#f5f0e8" : "rgba(245,240,232,0.3)",
+                    background: isActive ? "rgba(200,169,106,0.07)" : "transparent",
+                    borderLeft: isActive ? "1px solid rgba(200,169,106,0.35)" : "1px solid transparent",
+                  }}>
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    {label}
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="px-3 py-4 border-t" style={{ borderColor: "rgba(196,170,126,0.08)" }}>
+            <button
+              onClick={logout}
+              className="flex items-center gap-2.5 px-3 py-2 text-[12px] font-light transition-colors w-full"
+              style={{ color: "rgba(245,240,232,0.2)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.45)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.2)"; }}
+            >
+              <LogOut className="w-3.5 h-3.5 shrink-0" />
+              Sign out
+            </button>
+          </div>
+        </aside>
+        <main className="flex-1 overflow-auto px-8 py-8 max-w-3xl">
+          {children}
+        </main>
+      </div>
+    </PortalAuthGuard>
   );
 }
 
-const engagementTimeline = [
-  { phase: "Onboarding & Discovery", status: "complete" as const, dates: "Feb 15 – Feb 28, 2026" },
-  { phase: "Phase 1: Market & Competitive Analysis", status: "complete" as const, dates: "Mar 1 – Mar 14, 2026" },
-  { phase: "Phase 2: Strategic Positioning", status: "active" as const, dates: "Mar 15 – Apr 12, 2026" },
-  { phase: "Phase 3: Go-to-Market Architecture", status: "upcoming" as const, dates: "Apr 14 – May 9, 2026" },
-  { phase: "Phase 4: Execution Playbook & Handoff", status: "upcoming" as const, dates: "May 12 – May 30, 2026" },
+const engagementStages = [
+  {
+    phase: "Discovery Call",
+    status: "complete" as const,
+    dates: "Feb 15, 2026",
+    desc: "Initial confidential conversation to understand the household, properties, and priorities.",
+  },
+  {
+    phase: "Needs Assessment",
+    status: "complete" as const,
+    dates: "Feb 22 – Mar 5, 2026",
+    desc: "Rosa visits the property, meets the household team, and conducts a full operational review.",
+  },
+  {
+    phase: "Service Plan",
+    status: "complete" as const,
+    dates: "Mar 8, 2026",
+    desc: "A tailored service plan is prepared, covering scope, protocols, and communication cadence.",
+  },
+  {
+    phase: "Onboarding",
+    status: "active" as const,
+    dates: "Mar 10 – Apr 4, 2026",
+    desc: "Rosa assumes operational oversight. Vendor relationships are confirmed, systems are documented.",
+  },
+  {
+    phase: "Active Management",
+    status: "upcoming" as const,
+    dates: "From Apr 7, 2026",
+    desc: "Ongoing residential management, monthly reporting, and quarterly review sessions.",
+  },
 ];
+
+type FetchStatus = "idle" | "loading" | "success" | "error";
+
+function usePortalData<T>(endpoint: string, fallback: T) {
+  const [data, setData] = useState<T>(fallback);
+  const [status, setStatus] = useState<FetchStatus>("idle");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  const load = useCallback(async () => {
+    setStatus("loading");
+    try {
+      const res = await fetch(endpoint, {
+        credentials: "include",
+        headers: { "Accept": "application/json" },
+      });
+      if (res.status === 401 || res.status === 403) {
+        setIsAuthenticated(false);
+        setStatus("success");
+        return;
+      }
+      setIsAuthenticated(true);
+      if (!res.ok) {
+        setStatus("error");
+        return;
+      }
+      const json = await res.json();
+      const rows = json?.data ?? json;
+      if (Array.isArray(rows)) {
+        setData(rows as T);
+      }
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
+  }, [endpoint]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const isDemo = isAuthenticated === false;
+  return { data, status, isDemo, reload: load };
+}
 
 export function ClientPortalOverview() {
   const [location] = useLocation();
   return (
     <PortalShell currentPath={location}>
       <div className="mb-8">
-        <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-[#c8a96a]/60 mb-2">Client Portal</p>
+        <p className="text-[11px] font-medium tracking-[0.25em] uppercase mb-2" style={{ color: "rgba(200,169,106,0.55)" }}>
+          Client Portal
+        </p>
         <h1
-          className="text-2xl font-light text-[#f5f0e8] mb-2"
-          style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}
+          className="text-2xl font-light mb-1"
+          style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}
         >
-          Good morning, Jane
+          Good morning, Lady Ashworth
         </h1>
-        <p className="text-[#f5f0e8]/35 text-[13px] font-light">Active engagement · Phase 2: Strategic Positioning</p>
-        <div className="mt-2"><DataStateBadge state="demo" label="Demo Portal" /></div>
+        <p className="text-[13px] font-light" style={{ color: "rgba(245,240,232,0.35)" }}>
+          Active engagement · Onboarding phase
+        </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4 mb-8">
+      <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {[
-          { label: "Documents", count: "8", sub: "2 awaiting review" },
-          { label: "Unread updates", count: "3", sub: "Last: 2 days ago" },
-          { label: "Messages", count: "5", sub: "1 unread thread" },
-          { label: "Next session", count: "Apr 3", sub: "2:00 PM London · Video" },
+          { label: "Documents", count: "11", sub: "3 awaiting review" },
+          { label: "Unread updates", count: "2", sub: "Last: 3 days ago" },
+          { label: "New messages", count: "1", sub: "From Rosa, Mar 31" },
+          { label: "Next review", count: "Apr 7", sub: "10:00 AM · London" },
         ].map((kpi) => (
-          <div key={kpi.label} className="border border-[#f5f0e8]/6 p-5 hover:border-[#c8a96a]/15 transition-colors">
-            <p className="text-[11px] text-[#f5f0e8]/25 font-light tracking-wider mb-1">{kpi.label}</p>
-            <p className="text-[22px] font-light text-[#f5f0e8]"
-              style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}>
+          <div
+            key={kpi.label}
+            className="p-5 transition-colors"
+            style={{ border: "1px solid rgba(245,240,232,0.06)" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,169,106,0.15)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,240,232,0.06)"; }}
+          >
+            <p className="text-[11px] font-light tracking-wider mb-1" style={{ color: "rgba(245,240,232,0.25)" }}>
+              {kpi.label}
+            </p>
+            <p
+              className="text-[22px] font-light"
+              style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}
+            >
               {kpi.count}
             </p>
-            <p className="text-[11px] text-[#f5f0e8]/25 font-light mt-0.5">{kpi.sub}</p>
+            <p className="text-[11px] font-light mt-0.5" style={{ color: "rgba(245,240,232,0.25)" }}>
+              {kpi.sub}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="mb-8">
-        <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#c8a96a]/45 mb-4">Engagement Timeline</p>
+        <p className="text-[11px] font-medium tracking-[0.2em] uppercase mb-4" style={{ color: "rgba(200,169,106,0.45)" }}>
+          Engagement Timeline
+        </p>
         <div className="space-y-0">
-          {engagementTimeline.map((phase, i) => (
-            <div key={phase.phase} className="flex items-start gap-3 relative">
+          {engagementStages.map((phase, i) => (
+            <div key={phase.phase} className="flex items-start gap-3">
               <div className="flex flex-col items-center">
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                  phase.status === "complete" ? "bg-[#c8a96a]/20" :
-                  phase.status === "active" ? "bg-[#c8a96a]/30 ring-1 ring-[#c8a96a]/40" :
-                  "bg-[#f5f0e8]/5"
-                }`}>
+                <div className="w-5 h-5 rounded-full flex items-center justify-center mt-0.5" style={{
+                  background: phase.status === "complete" ? "rgba(200,169,106,0.18)" :
+                    phase.status === "active" ? "rgba(200,169,106,0.28)" : "rgba(245,240,232,0.05)",
+                  outline: phase.status === "active" ? "1px solid rgba(200,169,106,0.38)" : undefined,
+                }}>
                   {phase.status === "complete" ? (
-                    <CheckCircle2 className="w-3 h-3 text-[#c8a96a]" />
+                    <CheckCircle2 className="w-3 h-3" style={{ color: "#c8a96a" }} />
                   ) : phase.status === "active" ? (
-                    <ArrowRight className="w-3 h-3 text-[#c8a96a]" />
+                    <ArrowRight className="w-3 h-3" style={{ color: "#c8a96a" }} />
                   ) : (
-                    <Clock className="w-3 h-3 text-[#f5f0e8]/20" />
+                    <Clock className="w-3 h-3" style={{ color: "rgba(245,240,232,0.2)" }} />
                   )}
                 </div>
-                {i < engagementTimeline.length - 1 && (
-                  <div className={`w-px h-8 ${phase.status === "complete" ? "bg-[#c8a96a]/20" : "bg-[#f5f0e8]/6"}`} />
+                {i < engagementStages.length - 1 && (
+                  <div className="w-px h-10" style={{
+                    background: phase.status === "complete" ? "rgba(200,169,106,0.18)" : "rgba(245,240,232,0.05)"
+                  }} />
                 )}
               </div>
-              <div className="pb-4">
-                <p className={`text-[13px] font-light ${
-                  phase.status === "active" ? "text-[#f5f0e8]/85" :
-                  phase.status === "complete" ? "text-[#f5f0e8]/50" :
-                  "text-[#f5f0e8]/25"
-                }`}>{phase.phase}</p>
-                <p className="text-[10px] text-[#f5f0e8]/20 mt-0.5">{phase.dates}</p>
+              <div className="pb-2 pt-0.5">
+                <p className="text-[13px] font-light" style={{
+                  color: phase.status === "active" ? "rgba(245,240,232,0.88)" :
+                    phase.status === "complete" ? "rgba(245,240,232,0.5)" : "rgba(245,240,232,0.22)"
+                }}>
+                  {phase.phase}
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: "rgba(245,240,232,0.18)" }}>
+                  {phase.dates}
+                </p>
+                {phase.status === "active" && (
+                  <p className="text-[11px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.5)" }}>
+                    {phase.desc}
+                  </p>
+                )}
               </div>
             </div>
           ))}
@@ -136,16 +313,18 @@ export function ClientPortalOverview() {
       </div>
 
       <div>
-        <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#c8a96a]/45 mb-4">Your Advisory Team</p>
+        <p className="text-[11px] font-medium tracking-[0.2em] uppercase mb-4" style={{ color: "rgba(200,169,106,0.45)" }}>
+          Your Properties
+        </p>
         <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { name: "Carlota Jo Silveira", role: "Lead Strategist", focus: "Go-to-market, positioning, pricing" },
-            { name: "Ava Tanaka", role: "Research Analyst", focus: "Competitive intelligence, market sizing" },
-          ].map((member) => (
-            <div key={member.name} className="border border-[#f5f0e8]/6 p-4">
-              <p className="text-[13px] font-light text-[#f5f0e8]/75">{member.name}</p>
-              <p className="text-[10px] text-[#c8a96a]/50 mt-0.5">{member.role}</p>
-              <p className="text-[10px] text-[#f5f0e8]/20 mt-1">{member.focus}</p>
+            { name: "Mayfair Residence", location: "London, W1", status: "Primary — Active" },
+            { name: "Oxfordshire Estate", location: "Oxfordshire, UK", status: "Secondary — Seasonal" },
+          ].map((prop) => (
+            <div key={prop.name} className="p-4" style={{ border: "1px solid rgba(245,240,232,0.06)" }}>
+              <p className="text-[13px] font-light" style={{ color: "rgba(245,240,232,0.75)" }}>{prop.name}</p>
+              <p className="text-[10px] mt-0.5" style={{ color: "rgba(200,169,106,0.45)" }}>{prop.location}</p>
+              <p className="text-[10px] mt-1" style={{ color: "rgba(245,240,232,0.2)" }}>{prop.status}</p>
             </div>
           ))}
         </div>
@@ -154,172 +333,481 @@ export function ClientPortalOverview() {
   );
 }
 
-const documents = [
-  { name: "Strategic positioning brief — Phase 2", date: "Mar 28, 2026", status: "Awaiting review", category: "Strategy" },
-  { name: "Competitive landscape analysis (42 pages)", date: "Mar 15, 2026", status: "Reviewed", category: "Research" },
-  { name: "Market sizing model — TAM/SAM/SOM", date: "Mar 12, 2026", status: "Reviewed", category: "Research" },
-  { name: "Pricing framework & tier architecture", date: "Mar 8, 2026", status: "Awaiting review", category: "Strategy" },
-  { name: "Customer interview synthesis (n=14)", date: "Mar 5, 2026", status: "Reviewed", category: "Research" },
-  { name: "Engagement scope and objectives", date: "Mar 1, 2026", status: "Reviewed", category: "Governance" },
-  { name: "Stakeholder mapping & influence grid", date: "Feb 26, 2026", status: "Reviewed", category: "Strategy" },
-  { name: "Onboarding materials & NDA", date: "Feb 22, 2026", status: "Reviewed", category: "Governance" },
+const DEMO_DOCUMENTS = [
+  { id: 1, name: "Service plan & scope agreement", createdAt: "2026-03-08", status: "Signed", category: "Governance", fileSize: "2.1 MB", fileUrl: null },
+  { id: 2, name: "Mayfair Residence — operational assessment", createdAt: "2026-03-05", status: "Reviewed", category: "Operations", fileSize: "4.7 MB", fileUrl: null },
+  { id: 3, name: "Household staff overview & rotas", createdAt: "2026-03-03", status: "Reviewed", category: "Staffing", fileSize: "1.2 MB", fileUrl: null },
+  { id: 4, name: "Vendor register — Mayfair (Q1 2026)", createdAt: "2026-03-14", status: "Awaiting review", category: "Vendors", fileSize: "890 KB", fileUrl: null },
+  { id: 5, name: "Oxfordshire Estate — condition report", createdAt: "2026-03-20", status: "Awaiting review", category: "Operations", fileSize: "6.3 MB", fileUrl: null },
+  { id: 6, name: "Recommended vendor replacements — rationale", createdAt: "2026-03-28", status: "Awaiting review", category: "Vendors", fileSize: "1.8 MB", fileUrl: null },
+  { id: 7, name: "Monthly operations summary — March 2026", createdAt: "2026-03-31", status: "New", category: "Reporting", fileSize: "980 KB", fileUrl: null },
+  { id: 8, name: "NDA & confidentiality agreement", createdAt: "2026-02-20", status: "Signed", category: "Governance", fileSize: "340 KB", fileUrl: null },
+  { id: 9, name: "Onboarding checklist — progress", createdAt: "2026-03-15", status: "Reviewed", category: "Operations", fileSize: "560 KB", fileUrl: null },
+  { id: 10, name: "Security & access protocol — Mayfair", createdAt: "2026-03-10", status: "Reviewed", category: "Staffing", fileSize: "420 KB", fileUrl: null },
+  { id: 11, name: "Emergency contacts & escalation guide", createdAt: "2026-03-08", status: "Reviewed", category: "Governance", fileSize: "280 KB", fileUrl: null },
 ];
+
+type DocRow = { id: number; name?: string; title?: string; createdAt: string; status?: string; category?: string; visibility?: string; fileSize?: string; fileUrl?: string | null };
 
 export function ClientPortalDocuments() {
   const [location] = useLocation();
   const [filter, setFilter] = useState<string>("all");
-  const categories = ["all", ...Array.from(new Set(documents.map(d => d.category)))];
-  const filtered = filter === "all" ? documents : documents.filter(d => d.category === filter);
+  const [uploadHovered, setUploadHovered] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
+
+  const { data: documents, isDemo, reload } = usePortalData<DocRow[]>("/api/portal/documents", DEMO_DOCUMENTS);
+  const typedDocs: DocRow[] = documents;
+  const categories: string[] = ["all", ...Array.from(new Set(typedDocs.map((d: DocRow) => d.category ?? "Other")))];
+  const filtered = filter === "all" ? typedDocs : typedDocs.filter((d: DocRow) => (d.category ?? "Other") === filter);
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+    setUploadSuccess("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("category", "Client Upload");
+      formData.append("visibility", "client");
+      const res = await fetch("/api/portal/documents", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error((json as { message?: string }).message ?? "Upload failed");
+      }
+      setUploadSuccess(`${file.name} uploaded successfully.`);
+      reload();
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed — please try again or email the document to inquiries@carlotajo.com.");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }, [reload]);
 
   return (
     <PortalShell currentPath={location}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-light text-[#f5f0e8]" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}>Documents</h1>
-        <p className="text-[#f5f0e8]/35 text-[13px] font-light mt-1">Shared materials from active engagement</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-light" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}>
+            Document Vault
+          </h1>
+          <p className="text-[13px] font-light mt-1" style={{ color: "rgba(245,240,232,0.35)" }}>
+            Shared materials, reports, and signed agreements
+          </p>
+          {isDemo && (
+            <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.4)" }}>
+              Showing demo documents — your live documents will appear here once Rosa shares them with you.
+            </p>
+          )}
+          {uploadSuccess && (
+            <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(120,200,120,0.7)" }}>{uploadSuccess}</p>
+          )}
+          {uploadError && (
+            <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(220,100,100,0.7)" }}>{uploadError}</p>
+          )}
+        </div>
+        <label
+          className="flex items-center gap-2 px-4 py-2 text-[11px] font-medium tracking-wider uppercase transition-colors cursor-pointer"
+          style={{
+            background: uploadHovered ? "rgba(200,169,106,0.15)" : "rgba(200,169,106,0.08)",
+            border: "1px solid rgba(200,169,106,0.2)",
+            color: uploading ? "rgba(200,169,106,0.5)" : "#c8a96a",
+            pointerEvents: uploading ? "none" : "auto",
+          }}
+          onMouseEnter={() => setUploadHovered(true)}
+          onMouseLeave={() => setUploadHovered(false)}
+        >
+          <Upload className="w-3 h-3" />
+          {uploading ? "Uploading…" : "Upload"}
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+            className="sr-only"
+            onChange={handleFileChange}
+            disabled={uploading || isDemo}
+          />
+        </label>
       </div>
-      <div className="flex gap-2 mb-5">
+
+      <div className="flex gap-2 mb-5 flex-wrap">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setFilter(cat)}
-            className={`text-[10px] tracking-wider uppercase px-3 py-1.5 transition-colors ${
-              filter === cat
-                ? "text-[#c8a96a] bg-[#c8a96a]/10 border border-[#c8a96a]/20"
-                : "text-[#f5f0e8]/25 border border-[#f5f0e8]/6 hover:text-[#f5f0e8]/45"
-            }`}
+            className="text-[10px] tracking-wider uppercase px-3 py-1.5 transition-colors"
+            style={{
+              color: filter === cat ? "#c8a96a" : "rgba(245,240,232,0.25)",
+              background: filter === cat ? "rgba(200,169,106,0.08)" : "transparent",
+              border: filter === cat ? "1px solid rgba(200,169,106,0.2)" : "1px solid rgba(245,240,232,0.06)",
+            }}
           >
             {cat}
           </button>
         ))}
       </div>
-      <div className="space-y-3">
-        {filtered.map((doc) => (
-          <div key={doc.name} className="border border-[#f5f0e8]/6 p-4 flex items-center justify-between hover:border-[#c8a96a]/15 transition-colors group">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[9px] tracking-wider uppercase text-[#c8a96a]/35 border border-[#c8a96a]/10 px-1.5 py-0.5">{doc.category}</span>
+
+      <div className="space-y-2.5">
+        {filtered.map((doc: DocRow) => {
+          const docName = doc.name ?? doc.title ?? "Untitled document";
+          const docDate = doc.createdAt ? new Date(doc.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+          const docStatus = doc.status ?? "Available";
+          const docCategory = doc.category ?? "General";
+          const docSize = doc.fileSize ?? "—";
+          return (
+            <div
+              key={doc.id}
+              className="p-4 flex items-center justify-between transition-colors group"
+              style={{ border: "1px solid rgba(245,240,232,0.06)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,169,106,0.15)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,240,232,0.06)"; }}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[9px] tracking-wider uppercase px-1.5 py-0.5" style={{ color: "rgba(200,169,106,0.4)", border: "1px solid rgba(200,169,106,0.12)" }}>
+                    {docCategory}
+                  </span>
+                  {(docStatus === "New" || docStatus === "Awaiting review") && (
+                    <span className="text-[9px] tracking-wider uppercase px-1.5 py-0.5" style={{ color: "#c8a96a", background: "rgba(200,169,106,0.1)" }}>
+                      {docStatus}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[13px] font-light" style={{ color: "rgba(245,240,232,0.75)" }}>{docName}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: "rgba(245,240,232,0.2)" }}>
+                  {docDate} · {docSize}
+                </p>
               </div>
-              <p className="text-[13px] font-light text-[#f5f0e8]/75">{doc.name}</p>
-              <p className="text-[11px] text-[#f5f0e8]/25 mt-0.5">{doc.date}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className={`text-[10px] font-medium tracking-wider px-2.5 py-1 ${
-                doc.status === "Awaiting review"
-                  ? "text-[#c8a96a] bg-[#c8a96a]/8 border border-[#c8a96a]/15"
-                  : "text-[#f5f0e8]/25 border border-[#f5f0e8]/8"
-              }`}>{doc.status}</span>
-              <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="p-1.5 text-[#f5f0e8]/20 hover:text-[#f5f0e8]/50 transition-colors"><Eye className="w-3.5 h-3.5" /></button>
-                <button className="p-1.5 text-[#f5f0e8]/20 hover:text-[#f5f0e8]/50 transition-colors"><Download className="w-3.5 h-3.5" /></button>
+              <div className="flex items-center gap-3 ml-4">
+                <span
+                  className="text-[10px] font-light tracking-wider px-2.5 py-1"
+                  style={{
+                    color: docStatus === "Awaiting review" || docStatus === "New" ? "#c8a96a" : "rgba(245,240,232,0.25)",
+                    border: docStatus === "Awaiting review" || docStatus === "New" ? "1px solid rgba(200,169,106,0.18)" : "1px solid rgba(245,240,232,0.08)",
+                  }}
+                >
+                  {docStatus}
+                </span>
+                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button className="p-1.5 transition-colors" style={{ color: "rgba(245,240,232,0.2)" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.55)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.2)"; }}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                  </button>
+                  {doc.fileUrl && (
+                    <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="p-1.5 transition-colors" style={{ color: "rgba(245,240,232,0.2)" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.55)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.2)"; }}
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </PortalShell>
   );
 }
 
+const DEMO_UPDATES = [
+  { id: 1, title: "March operations summary delivered", body: "The March summary has been shared in your Document Vault. It covers: vendor performance across Mayfair, progress on the Oxfordshire condition report, and the staff rota adjustments discussed on the 22nd. Please review ahead of our April 7 session.", tag: "Monthly Report", isNew: true, createdAt: "2026-03-31" },
+  { id: 2, title: "Vendor register update — replacement recommendations", body: "Following the operational assessment, I have prepared a list of recommended vendor changes for Mayfair, with rationale and replacement options for each. Three vendors are flagged as priority replacements. Document is in the vault for your review.", tag: "Action Required", isNew: true, createdAt: "2026-03-28" },
+  { id: 3, title: "Oxfordshire condition report complete", body: "The estate condition report has been completed following last week's visit. Overall condition is good. Four maintenance items are flagged for attention before the summer opening, two of which are recommended as urgent. Report now available in Documents.", tag: "Deliverable", isNew: false, createdAt: "2026-03-20" },
+  { id: 4, title: "Vendor register — Mayfair Q1 ready", body: "Full vendor register for the Mayfair residence is now complete. 22 active vendors across 14 categories. 4 vendors flagged for contract review. Register has been uploaded for your records.", tag: "Deliverable", isNew: false, createdAt: "2026-03-14" },
+  { id: 5, title: "Service plan finalised and signed", body: "The service plan has been signed by both parties. Onboarding begins Monday 10 March. First week will focus on Mayfair: household introduction, vendor confirmation, and security protocol walkthrough.", tag: "Milestone", isNew: false, createdAt: "2026-03-08" },
+  { id: 6, title: "Mayfair operational assessment complete", body: "Completed the three-day operational assessment. Spoke with all household staff, reviewed vendor contracts, and walked every system in the property. Key findings will inform the service plan, which will be ready by Thursday.", tag: "Assessment", isNew: false, createdAt: "2026-03-05" },
+  { id: 7, title: "Needs assessment visit confirmed", body: "Assessment visit scheduled for Monday 3 March through Wednesday 5 March. Access arrangements confirmed with your house manager. NDA has been signed and returned.", tag: "Milestone", isNew: false, createdAt: "2026-02-22" },
+  { id: 8, title: "Discovery call completed", body: "It was a pleasure speaking with you. Confirmed understanding of the household scope, the Oxfordshire estate, and your priorities for the engagement. Service plan preparation will begin following the needs assessment visit.", tag: "Milestone", isNew: false, createdAt: "2026-02-15" },
+];
+
+type UpdateRow = { id: number; title?: string; subject?: string; body?: string; content?: string; summary?: string; bodyRichtext?: string; tag?: string; category?: string; isNew?: boolean; isRead?: boolean; createdAt: string };
+
 export function ClientPortalUpdates() {
   const [location] = useLocation();
+  const { data: updates, isDemo } = usePortalData<UpdateRow[]>("/api/portal/updates", DEMO_UPDATES);
+
   return (
     <PortalShell currentPath={location}>
       <div className="mb-8">
-        <h1 className="text-2xl font-light text-[#f5f0e8]" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}>Updates</h1>
-        <p className="text-[#f5f0e8]/35 text-[13px] font-light mt-1">Engagement progress and session notes</p>
+        <h1 className="text-2xl font-light" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}>
+          Updates
+        </h1>
+        <p className="text-[13px] font-light mt-1" style={{ color: "rgba(245,240,232,0.35)" }}>
+          Operational progress, delivery notes, and engagement milestones
+        </p>
+        {isDemo && (
+          <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.4)" }}>
+            Showing demo updates — Rosa will post your actual updates here as the engagement progresses.
+          </p>
+        )}
       </div>
       <div className="space-y-8">
-        {[
-          { date: "March 29, 2026", title: "Phase 2 positioning brief delivered", body: "The strategic positioning brief has been shared in Documents. It covers three positioning options with trade-off analysis. We'd appreciate your feedback ahead of the April 3 session.", tag: "Deliverable" },
-          { date: "March 22, 2026", title: "Pricing framework draft ready", body: "Initial pricing framework with three-tier architecture is available for review. Includes competitive price benchmarking data from 8 comparable platforms.", tag: "Deliverable" },
-          { date: "March 14, 2026", title: "Competitive analysis complete", body: "42-page competitive landscape analysis covering 18 direct competitors and 12 adjacent players. Key insights flagged for discussion. Document shared for review.", tag: "Research" },
-          { date: "March 8, 2026", title: "Session 3 — positioning hypotheses", body: "Explored three positioning angles: technical differentiation, outcome-based, and ecosystem play. Consensus to develop all three for comparison in Phase 2 brief.", tag: "Session Notes" },
-          { date: "March 1, 2026", title: "Phase 1 kickoff complete", body: "Completed stakeholder interviews (n=14), established competitive watchlist, and began market sizing analysis. Research timeline on track.", tag: "Milestone" },
-          { date: "February 22, 2026", title: "Engagement commenced", body: "Onboarding materials received and reviewed. NDA signed. Discovery sessions scheduled for Week 1. Team introductions complete.", tag: "Milestone" },
-        ].map((update) => (
-          <div key={update.date} className="border-l border-[#c8a96a]/20 pl-5">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#c8a96a]/45">{update.date}</p>
-              <span className="text-[9px] tracking-wider uppercase text-[#f5f0e8]/15 border border-[#f5f0e8]/6 px-1.5 py-0.5">{update.tag}</span>
+        {(updates as UpdateRow[]).map((update) => {
+          const title = update.title ?? update.subject ?? "Update";
+          const body = update.body ?? update.bodyRichtext ?? update.summary ?? update.content ?? "";
+          const tag = update.tag ?? update.category ?? "Update";
+          const isNew = update.isNew ?? !(update.isRead);
+          const dateStr = update.createdAt ? new Date(update.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—";
+          return (
+            <div key={update.id} className="pl-5" style={{ borderLeft: "1px solid rgba(200,169,106,0.2)" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-[10px] font-medium tracking-[0.18em] uppercase" style={{ color: "rgba(200,169,106,0.45)" }}>
+                  {dateStr}
+                </p>
+                <span
+                  className="text-[9px] tracking-wider uppercase px-1.5 py-0.5"
+                  style={{
+                    color: isNew ? "#c8a96a" : "rgba(245,240,232,0.15)",
+                    border: isNew ? "1px solid rgba(200,169,106,0.2)" : "1px solid rgba(245,240,232,0.06)"
+                  }}
+                >
+                  {tag}
+                </span>
+              </div>
+              <h3
+                className="text-[15px] font-light mb-1.5"
+                style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "rgba(245,240,232,0.82)" }}
+              >
+                {title}
+              </h3>
+              <p className="text-[13px] font-light leading-relaxed" style={{ color: "rgba(245,240,232,0.38)" }}>
+                {body}
+              </p>
             </div>
-            <h3 className="text-[15px] font-light text-[#f5f0e8]/80 mb-1.5"
-              style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}>
-              {update.title}
-            </h3>
-            <p className="text-[#f5f0e8]/38 text-[13px] font-light leading-relaxed">{update.body}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </PortalShell>
   );
 }
+
+const DEMO_MESSAGES = [
+  { id: 1, senderName: "Rosa Lutar", fromRosa: true, body: "Good morning — the March summary is now in your Documents. I've flagged the Oxfordshire items clearly, and the vendor replacement recommendations are in a separate document so you can review them at your convenience. Looking forward to our April 7 session.", createdAt: "2026-03-31" },
+  { id: 2, senderName: "You", fromRosa: false, body: "Rosa — thank you for the update on the Oxfordshire visit. Are the two urgent maintenance items something you can arrange directly, or do you need my authorisation first? Happy for you to proceed if it's within the agreed threshold.", createdAt: "2026-03-29" },
+  { id: 3, senderName: "Rosa Lutar", fromRosa: true, body: "Both items are within the agreed £5,000 threshold, so I can proceed directly. I'll confirm the specialist and arrange access. I'll include the quotes and confirmation in the March summary so you have a full record.", createdAt: "2026-03-29" },
+  { id: 4, senderName: "Rosa Lutar", fromRosa: true, body: "Just returned from Oxfordshire. The estate is in generally good condition — no surprises from the winter. I've identified four maintenance items for the summer opening, two of which I'd recommend addressing before the end of April. Condition report will be ready by the 25th.", createdAt: "2026-03-22" },
+];
+
+type MessageRow = { id: number; senderName?: string; senderUserId?: number; fromRosa?: boolean; body?: string; content?: string; bodyRichtext?: string; subject?: string; direction?: string; createdAt: string };
 
 export function ClientPortalMessages() {
   const [location] = useLocation();
   const [newMsg, setNewMsg] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sentError, setSentError] = useState("");
+
+  const { data: messages, isDemo, reload: loadMessages } = usePortalData<MessageRow[]>("/api/portal/messages", DEMO_MESSAGES);
+
+  const handleSend = async () => {
+    if (!newMsg.trim() || isDemo) return;
+    setSending(true);
+    setSentError("");
+    try {
+      const res = await fetch("/api/portal/messages", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bodyRichtext: newMsg.trim(), subject: "Client message", direction: "client-to-advisor" }),
+      });
+      if (!res.ok) throw new Error("Send failed");
+      setNewMsg("");
+      loadMessages();
+    } catch {
+      setSentError("Unable to send — please email inquiries@carlotajo.com directly.");
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <PortalShell currentPath={location}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-light text-[#f5f0e8]" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}>Messages</h1>
-        <p className="text-[#f5f0e8]/35 text-[13px] font-light mt-1">Private correspondence with your advisory team</p>
+      <div className="mb-6">
+        <h1 className="text-2xl font-light" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}>
+          Messages
+        </h1>
+        <p className="text-[13px] font-light mt-1" style={{ color: "rgba(245,240,232,0.35)" }}>
+          Private correspondence with Rosa
+        </p>
+        {isDemo && (
+          <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.4)" }}>
+            Showing demo messages — your private correspondence with Rosa will appear here once your engagement begins.
+          </p>
+        )}
       </div>
-      <div className="space-y-4 mb-6">
-        {[
-          { sender: "Carlota Jo", date: "Mar 29", body: "Hi Jane — the positioning brief is in your Documents. I've highlighted the three options we discussed. Looking forward to walking through the trade-offs on April 3. Let me know if you'd like to discuss anything before then." },
-          { sender: "You", date: "Mar 27", body: "Thanks Carlota. Quick question — in the pricing framework, is the enterprise tier based on seat-based or usage-based pricing? Want to align with our sales team before the session." },
-          { sender: "Carlota Jo", date: "Mar 27", body: "Great question. The framework models both — see Section 4.2. Short answer: we're recommending a hybrid (base platform fee + usage tiers) which tested better in our customer interviews. Happy to deep-dive on the 3rd." },
-          { sender: "Ava Tanaka", date: "Mar 22", body: "Jane — I've uploaded the competitive pricing benchmarks. Key finding: 6 of 8 comparable platforms have moved away from pure seat-based models in the last 18 months. Full analysis in the pricing framework doc." },
-          { sender: "You", date: "Mar 15", body: "The competitive analysis is very thorough. Two follow-ups: (1) Can we add Acme Corp to the direct competitor list? They just raised Series C. (2) The market sizing for APAC seems conservative — can we revisit?" },
-        ].map((msg, i) => (
-          <div key={i} className={`p-4 ${msg.sender === "You" ? "bg-[#c8a96a]/5 border border-[#c8a96a]/10" : "bg-[#0c0e14] border border-[#f5f0e8]/6"}`}>
-            <div className="flex items-center gap-2 mb-1.5">
-              <p className={`text-[10px] font-medium ${msg.sender === "You" ? "text-[#f5f0e8]/40" : "text-[#c8a96a]/50"}`}>{msg.sender}</p>
-              <span className="text-[10px] text-[#f5f0e8]/15">·</span>
-              <p className="text-[10px] text-[#f5f0e8]/15">{msg.date}</p>
+      <div className="space-y-3.5 mb-6">
+        {(messages as MessageRow[]).map((msg, i) => {
+          const isFromRosa = msg.fromRosa !== undefined ? msg.fromRosa : !msg.senderUserId;
+          const senderLabel = isFromRosa ? (msg.senderName ?? "Rosa Lutar") : (msg.senderName ?? "You");
+          const dateStr = msg.createdAt ? new Date(msg.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—";
+          const body = msg.body ?? msg.bodyRichtext ?? msg.content ?? "";
+          return (
+            <div
+              key={msg.id ?? i}
+              className="p-4"
+              style={{
+                background: isFromRosa ? "rgba(12,14,20,0.6)" : "rgba(200,169,106,0.05)",
+                border: isFromRosa ? "1px solid rgba(245,240,232,0.06)" : "1px solid rgba(200,169,106,0.1)",
+              }}
+            >
+              <div className="flex items-center gap-2 mb-1.5">
+                <p className="text-[10px] font-medium" style={{ color: isFromRosa ? "rgba(200,169,106,0.55)" : "rgba(245,240,232,0.4)" }}>
+                  {senderLabel}
+                </p>
+                <span style={{ color: "rgba(245,240,232,0.12)" }}>·</span>
+                <p className="text-[10px]" style={{ color: "rgba(245,240,232,0.15)" }}>{dateStr}</p>
+              </div>
+              <p className="text-[13px] font-light leading-relaxed" style={{ color: "rgba(245,240,232,0.65)" }}>
+                {body}
+              </p>
             </div>
-            <p className="text-[13px] font-light text-[#f5f0e8]/65 leading-relaxed">{msg.body}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      <div className="border border-[#f5f0e8]/8">
+      <div style={{ border: "1px solid rgba(245,240,232,0.08)" }}>
         <textarea
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}
-          placeholder="Write a message..."
+          placeholder={isDemo ? "Sign in as a client to send messages to Rosa..." : "Write a message to Rosa..."}
           rows={4}
-          className="w-full bg-transparent px-4 py-3 text-[13px] text-[#f5f0e8] placeholder-[#f5f0e8]/18 font-light focus:outline-none resize-none border-b border-[#f5f0e8]/8"
+          disabled={isDemo}
+          className="w-full bg-transparent px-4 py-3 text-[13px] font-light focus:outline-none resize-none disabled:opacity-50"
+          style={{
+            color: "#f5f0e8",
+            borderBottom: "1px solid rgba(245,240,232,0.08)",
+          }}
         />
-        <div className="px-4 py-2.5 flex justify-end">
-          <button className="px-5 py-2 text-[12px] font-medium text-[#07090d] bg-[#c8a96a] hover:bg-[#d4b87a] transition-colors">
-            Send
-          </button>
+        <div className="px-4 py-2.5 flex items-center justify-between">
+          {sentError && <p className="text-[11px] font-light" style={{ color: "rgba(200,100,100,0.6)" }}>{sentError}</p>}
+          <div className="ml-auto">
+            <button
+              onClick={handleSend}
+              disabled={!newMsg.trim() || sending || isDemo}
+              className="px-5 py-2 text-[12px] font-medium transition-colors disabled:opacity-40"
+              style={{ color: "#0e0c09", background: "#c8a96a" }}
+              onMouseEnter={(e) => { if (!sending && !isDemo) (e.currentTarget as HTMLElement).style.background = "#d4b87a"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "#c8a96a"; }}
+            >
+              {sending ? "Sending…" : "Send"}
+            </button>
+          </div>
         </div>
       </div>
+      <p className="text-[10px] font-light mt-3" style={{ color: "rgba(245,240,232,0.15)" }}>
+        All messages are handled in complete confidence by Rosa personally.
+      </p>
     </PortalShell>
   );
 }
 
 export function ClientPortalSettings() {
   const [location] = useLocation();
+
+  const invoices = [
+    { id: "INV-0012", desc: "Residence Operations — March 2026", issued: "Mar 1, 2026", due: "Mar 31, 2026", amount: "£4,200", status: "Paid" },
+    { id: "INV-0011", desc: "Residence Operations — February 2026", issued: "Feb 1, 2026", due: "Feb 28, 2026", amount: "£4,200", status: "Paid" },
+    { id: "INV-0010", desc: "Onboarding & Needs Assessment", issued: "Mar 8, 2026", due: "Mar 22, 2026", amount: "£1,800", status: "Paid" },
+    { id: "INV-0013", desc: "Special Project — Oxfordshire Condition Report", issued: "Mar 25, 2026", due: "Apr 15, 2026", amount: "£950", status: "Pending" },
+  ];
+
   return (
     <PortalShell currentPath={location}>
       <div className="mb-8">
-        <h1 className="text-2xl font-light text-[#f5f0e8]" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif" }}>Settings</h1>
-        <p className="text-[#f5f0e8]/35 text-[13px] font-light mt-1">Account and notification preferences</p>
+        <h1 className="text-2xl font-light" style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}>
+          Invoices
+        </h1>
+        <p className="text-[13px] font-light mt-1" style={{ color: "rgba(245,240,232,0.35)" }}>
+          Payment history and outstanding invoices
+        </p>
       </div>
-      <div className="space-y-5">
-        {[
-          { label: "Full name", value: "Jane Founder" },
-          { label: "Email", value: "jane@startup.com" },
-          { label: "Company", value: "Acme Ventures, Inc." },
-          { label: "Engagement type", value: "Strategic Advisory — 16-week program" },
-          { label: "Notification preference", value: "Email — new documents, updates, and session reminders" },
-        ].map((field) => (
-          <div key={field.label} className="border border-[#f5f0e8]/6 p-4">
-            <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#f5f0e8]/25 mb-1.5">{field.label}</p>
-            <p className="text-[13px] font-light text-[#f5f0e8]/60">{field.value}</p>
+
+      <div className="mb-8 p-5" style={{ background: "rgba(200,169,106,0.05)", border: "1px solid rgba(200,169,106,0.12)" }}>
+        <p className="text-[11px] font-medium tracking-[0.2em] uppercase mb-3" style={{ color: "rgba(200,169,106,0.5)" }}>
+          Account summary
+        </p>
+        <div className="grid grid-cols-3 gap-6">
+          {[
+            { label: "Monthly retainer", value: "£4,200" },
+            { label: "YTD invoiced", value: "£11,150" },
+            { label: "Outstanding", value: "£950" },
+          ].map((item) => (
+            <div key={item.label}>
+              <p className="text-[10px] font-light mb-1" style={{ color: "rgba(245,240,232,0.25)" }}>{item.label}</p>
+              <p className="text-lg font-light" style={{ fontFamily: "Georgia, serif", color: "#f5f0e8" }}>{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-[11px] font-medium tracking-[0.2em] uppercase mb-3" style={{ color: "rgba(200,169,106,0.45)" }}>
+        Invoice history
+      </p>
+      <div className="space-y-2.5">
+        {invoices.map((inv) => (
+          <div key={inv.id} className="p-4 flex items-center justify-between transition-colors group" style={{ border: "1px solid rgba(245,240,232,0.06)" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(200,169,106,0.12)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,240,232,0.06)"; }}
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px]" style={{ color: "rgba(200,169,106,0.4)" }}>{inv.id}</span>
+              </div>
+              <p className="text-[13px] font-light" style={{ color: "rgba(245,240,232,0.72)" }}>{inv.desc}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: "rgba(245,240,232,0.2)" }}>
+                Issued {inv.issued} · Due {inv.due}
+              </p>
+            </div>
+            <div className="flex items-center gap-4 ml-4">
+              <p className="text-[14px] font-light" style={{ fontFamily: "Georgia, serif", color: "#f5f0e8" }}>
+                {inv.amount}
+              </p>
+              <span
+                className="text-[10px] tracking-wider px-2.5 py-1"
+                style={{
+                  color: inv.status === "Pending" ? "#c8a96a" : "rgba(245,240,232,0.25)",
+                  border: inv.status === "Pending" ? "1px solid rgba(200,169,106,0.2)" : "1px solid rgba(245,240,232,0.08)"
+                }}
+              >
+                {inv.status}
+              </span>
+              <button className="p-1.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(245,240,232,0.3)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.6)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.3)"; }}
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-8 pt-6" style={{ borderTop: "1px solid rgba(245,240,232,0.06)" }}>
+        <p className="text-[11px] font-medium tracking-[0.2em] uppercase mb-4" style={{ color: "rgba(200,169,106,0.45)" }}>
+          Account details
+        </p>
+        <div className="space-y-3">
+          {[
+            { label: "Client", value: "Lady Ashworth" },
+            { label: "Engagement", value: "Residence Operations — Mayfair & Oxfordshire" },
+            { label: "Contact", value: "inquiries@carlotajo.com" },
+            { label: "Billing currency", value: "GBP" },
+          ].map((field) => (
+            <div key={field.label} className="flex items-start justify-between gap-6 py-3" style={{ borderBottom: "1px solid rgba(245,240,232,0.04)" }}>
+              <p className="text-[11px] font-light" style={{ color: "rgba(245,240,232,0.25)" }}>{field.label}</p>
+              <p className="text-[11px] font-light text-right" style={{ color: "rgba(245,240,232,0.6)" }}>{field.value}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </PortalShell>
   );

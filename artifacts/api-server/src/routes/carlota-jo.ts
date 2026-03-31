@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
+import multer from "multer";
 import {
   db,
   carlotaInquiriesTable,
@@ -16,6 +17,8 @@ import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagin
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@workspace/services";
 import { logger } from "../lib/logger";
+
+const portalUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const router: IRouter = Router();
 
@@ -308,6 +311,35 @@ router.get("/portal/documents", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list client documents"); }
 });
 
+router.post("/portal/documents", authMiddleware(), portalUpload.single("file"), async (req, res) => {
+  try {
+    const [account] = await db.select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId }).from(clientAccountsTable)
+      .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
+    if (!account) { sendNotFound(res, "Client account"); return; }
+
+    if (!req.file) {
+      res.status(400).json({ error: "No file attached", message: "Please attach a file to upload." });
+      return;
+    }
+
+    const { category, visibility } = req.body as { category?: string; visibility?: string };
+    const mimeType = req.file.mimetype;
+    const base64 = req.file.buffer.toString("base64");
+    const dataUrl = `data:${mimeType};base64,${base64}`;
+
+    const [doc] = await db.insert(clientDocumentsTable).values({
+      organizationId: account.organizationId,
+      clientAccountId: account.id,
+      title: req.file.originalname,
+      fileUrl: dataUrl,
+      fileType: mimeType,
+      visibility: (visibility === "client" || visibility === "private" || visibility === "internal") ? visibility : "client",
+    }).returning();
+
+    sendSuccess(res, doc, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to upload document"); }
+});
+
 router.get("/portal/updates", authMiddleware(), async (req, res) => {
   try {
     const [account] = await db.select({ id: clientAccountsTable.id }).from(clientAccountsTable)
@@ -337,8 +369,17 @@ router.post("/portal/messages", authMiddleware(), async (req, res) => {
     const [account] = await db.select({ id: clientAccountsTable.id, organizationId: clientAccountsTable.organizationId }).from(clientAccountsTable)
       .where(eq(clientAccountsTable.primaryContactUserId, req.user!.id));
     if (!account) { sendNotFound(res, "Client account"); return; }
+
+    const body = req.body as { bodyRichtext?: string; body?: string; subject?: string };
+    const bodyRichtext = body.bodyRichtext ?? body.body;
+    if (!bodyRichtext?.trim()) {
+      res.status(400).json({ error: "bodyRichtext is required", message: "Message body cannot be empty." });
+      return;
+    }
+
     const [msg] = await db.insert(clientMessagesTable).values({
-      ...req.body,
+      bodyRichtext: bodyRichtext.trim(),
+      subject: body.subject ?? "Client message",
       clientAccountId: account.id,
       organizationId: account.organizationId,
       senderUserId: req.user!.id,

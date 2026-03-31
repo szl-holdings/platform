@@ -11,6 +11,7 @@ const serviceLinks = [
 
 const aboutLinks = [
   { label: "Who We Serve", href: "/who-we-serve" },
+  { label: "How We Work", href: "/engagements" },
   { label: "About Carlota Jo", href: "/founder" },
   { label: "Request Consultation", href: "/contact" },
   { label: "Client Portal", href: "/client-portal" },
@@ -124,7 +125,15 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5 text-[13px] font-light" style={{ color: "var(--color-ink-500)" }}>
               <li>inquiries@carlotajo.com</li>
-              <li className="leading-relaxed">London · New York</li>
+              <li className="leading-relaxed">London · New York, NY</li>
+              <li>
+                <Link href="/contact" className="text-[12px] font-light transition-colors" style={{ color: "var(--color-gold)", opacity: 0.8, textDecoration: "none" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
+                >
+                  Request a consultation →
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

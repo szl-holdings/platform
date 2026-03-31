@@ -6,8 +6,8 @@ import { Link, useLocation } from "wouter";
 const navLinks = [
   { label: "Services", href: "/services" },
   { label: "Who We Serve", href: "/who-we-serve" },
+  { label: "How We Work", href: "/engagements" },
   { label: "About Carlota Jo", href: "/founder" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export default function Header() {

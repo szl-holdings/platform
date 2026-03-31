@@ -33,6 +33,7 @@
     "@workspace/analytics": "workspace:*",
     "@workspace/graphql-client": "workspace:*",
     "@workspace/observability": "workspace:*",
+    "@workspace/replit-auth-web": "workspace:*",
     "@workspace/shared-ui": "workspace:*"
   }
 }

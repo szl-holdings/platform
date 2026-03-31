@@ -29,6 +29,7 @@ const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const AdvisoryIntel = lazy(() => import("@/pages/AdvisoryIntel"));
 const AIAdvisory = lazy(() => import("@/pages/ai-advisory"));
 const EngagementWorkflow = lazy(() => import("@/pages/engagement-workflow"));
+const BookingPage = lazy(() => import("@/pages/booking"));
 const ClientIntel = lazy(() => import("@/pages/client-intel"));
 const ROICalculator = lazy(() => import("@/pages/roi-calculator"));
 const BrandAudit = lazy(() => import("@/pages/brand-audit"));
@@ -74,6 +75,7 @@ function Router() {
         <Route path="/advisory" component={AdvisoryIntel} />
         <Route path="/ai-advisory" component={AIAdvisory} />
         <Route path="/engagements" component={EngagementWorkflow} />
+        <Route path="/booking" component={BookingPage} />
         <Route path="/client-intel" component={ClientIntel} />
         <Route path="/roi-calculator" component={ROICalculator} />
         <Route path="/brand-audit" component={BrandAudit} />

@@ -4,11 +4,13 @@
     "title": "Residence Operations",
     "icon": "Home",
     "summary": "The operational backbone of a well-run private residence.",
-    "description": "",
+    "description": "A principal residence is a living system — one that requires daily attention, seasonal calibration, and a standard of care that most household staff cannot deliver on their own. Rosa manages the full operational layer: daily logistics, maintenance schedules, service standards, and vendor performance. She ensures that everything from the boiler service to the morning household briefing runs precisely as you expect — without requiring your involvement. When something does require your attention, it comes to you as a decision, not a problem.",
     "capabilities": [
-      "Daily household logistics & oversight",
-      "Seasonal transitions & property activation",
-      "Systems maintenance & scheduling"
+      "Daily household logistics, task ownership, and morning briefings",
+      "Preventative maintenance scheduling across all property systems",
+      "Seasonal transitions, deactivations, and property readiness",
+      "Service standards documentation and ongoing quality assurance",
+      "Emergency response coordination and principal escalation protocols"
     ]
   },
   {
@@ -16,11 +18,13 @@
     "title": "Property Coordination",
     "icon": "Building",
     "summary": "Multi-property oversight through one trusted coordinator.",
-    "description": "",
+    "description": "Managing a single residence is demanding. Managing three — across different cities or countries — requires a dedicated coordinator who can hold all of them simultaneously. Rosa maintains a unified operational picture across your full property portfolio, ensuring that each property is ready when you need it, managed appropriately when you don't, and never falling below your standard of care in your absence. She handles the activation sequences, the seasonal closures, the maintenance calendars, and the property-specific vendor relationships — so that the complexity is invisible to you.",
     "capabilities": [
-      "Cross-property operational alignment",
-      "Activation & deactivation management",
-      "Long-distance oversight & reporting"
+      "Cross-property operational alignment and status visibility",
+      "Coordinated activation and deactivation across locations",
+      "Country-specific vendor management and regulatory compliance",
+      "Long-distance oversight with structured reporting cadences",
+      "Principal travel coordination and property readiness sequencing"
     ]
   },
   {
@@ -28,11 +32,13 @@
     "title": "Household Systems",
     "icon": "Settings",
     "summary": "The invisible systems behind a seamlessly run home.",
-    "description": "",
+    "description": "A well-run household runs on documented systems, not memory. Rosa builds and maintains the operational infrastructure behind your household: staff rotas and coverage planning, service protocols, access management, and the escalation pathways that ensure no gap is ever left unaddressed. These systems are owned by the household — not by any single person — which means that staff changes, absences, and transitions happen without operational disruption. You experience the continuity; Rosa manages the architecture behind it.",
     "capabilities": [
-      "Staff scheduling & coverage planning",
-      "Service protocols & documentation",
-      "Security & access coordination"
+      "Household staff scheduling, coverage planning, and gap management",
+      "Service protocol documentation and onboarding for new staff",
+      "Security, access control, and visitor management coordination",
+      "Staff performance oversight and quiet issue resolution",
+      "Operational handbooks and institutional knowledge retention"
     ]
   },
   {
@@ -40,11 +46,13 @@
     "title": "Vendor Management",
     "icon": "Users",
     "summary": "Trusted relationships, managed with precision.",
-    "description": "",
+    "description": "The quality of a household is, in large part, the quality of its vendor relationships. Rosa maintains a vetted network of over forty service categories — from principal contractors and estate lawyers to specialist cleaners and private car services — and manages those relationships with the standard you'd expect of a personal COO. She negotiates on your behalf, monitors quality, holds vendors to account, and ensures that everyone who enters your home understands the confidentiality expectations of the engagement. You are represented as you would represent yourself.",
     "capabilities": [
-      "Vetted provider network — 40+ categories",
-      "Performance oversight & quality control",
-      "Contract negotiation & NDA compliance"
+      "Vetted provider network across 40+ residential service categories",
+      "Performance oversight, quality control, and vendor accountability",
+      "Contract negotiation, scope management, and NDA compliance",
+      "Principal-standard confidentiality protocols for all vendors",
+      "Emergency contractor coordination and alternative sourcing"
     ]
   },
   {
@@ -52,11 +60,13 @@
     "title": "Lifestyle & Admin",
     "icon": "Briefcase",
     "summary": "Discreet support for the administrative layer of a complex life.",
-    "description": "",
+    "description": "For principals with demanding schedules, the administrative layer of residential life can consume hours that should be spent elsewhere. Rosa manages the scheduling, the correspondence, the private travel logistics, the school coordination, and the personal appointments that require a trusted hand — not a PA agency. She works quietly, adapts to your preferences, and handles sensitive matters with the same discretion you'd expect from a senior member of your personal team. This is not concierge service. It is the operational support a UHNW principal actually needs.",
     "capabilities": [
-      "Schedule & calendar coordination",
-      "Private travel logistics",
-      "Confidential correspondence"
+      "Principal schedule coordination and priority management",
+      "Private travel logistics, ground transportation, and itinerary management",
+      "Confidential personal correspondence and response drafting",
+      "School, medical, and lifestyle appointment coordination",
+      "Trusted liaison for family office and private wealth advisors"
     ]
   },
   {
@@ -64,11 +74,13 @@
     "title": "Special Projects",
     "icon": "Compass",
     "summary": "High-stakes transitions managed without noise.",
-    "description": "",
+    "description": "Some situations fall outside the scope of standing operations: the acquisition of a new property and its full activation from scratch, a cross-border relocation of a primary residence, a renovation with multiple specialist contractors operating simultaneously. These are the moments where operational precision matters most — and where the absence of an experienced coordinator is most costly. Rosa has managed complex estate activations, international relocations, and renovation projects on behalf of UHNW families. She brings the same structure and discretion to bespoke projects as she does to ongoing engagements.",
     "capabilities": [
-      "Estate activation & full setup",
-      "Cross-border relocation coordination",
-      "Renovation oversight & liaison"
+      "Estate activation and full household setup from first principles",
+      "Cross-border relocation coordination and regulatory navigation",
+      "Renovation oversight and specialist contractor management",
+      "New property operational assessment and systems design",
+      "Time-sensitive project management with principal-level reporting"
     ]
   }
 ]

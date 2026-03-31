@@ -67,11 +67,14 @@ export default function ServicesPage() {
                       <h2 className="font-serif text-xl font-light mb-2" style={{ color: "var(--color-ink-900)" }}>
                         {service.title}
                       </h2>
-                      <p className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-600)" }}>
+                      <p className="text-[12px] font-light leading-relaxed italic mb-4" style={{ color: "var(--color-gold)", opacity: 0.8 }}>
                         {service.summary}
                       </p>
                     </div>
                     <div className="md:col-span-7 md:pl-8">
+                      <p className="text-[14px] font-light leading-[1.75] mb-6" style={{ color: "var(--color-ink-600)" }}>
+                        {(service as { description?: string }).description}
+                      </p>
                       <p className="text-[10px] font-medium tracking-[0.2em] uppercase mb-4" style={{ color: "var(--color-stone-400)" }}>
                         Scope
                       </p>

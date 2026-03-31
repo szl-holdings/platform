@@ -15,10 +15,11 @@ const trustPillars = [
 ];
 
 const processSteps = [
-  { step: "01", label: "Initial Conversation", desc: "A confidential call to understand your household, your priorities, and the support you're looking for. No obligation." },
-  { step: "02", label: "Scope & Engagement", desc: "We define the scope together — which services, what frequency, and how we'll communicate. A clear engagement agreement follows." },
-  { step: "03", label: "Onboarding", desc: "We take the time to understand your property, your vendors, your household staff, and your preferences before we begin active management." },
-  { step: "04", label: "Ongoing Operations", desc: "Proactive management of everything within scope. Regular updates. Immediate escalation when something requires your attention." },
+  { step: "01", label: "Discovery Call", desc: "A confidential conversation to understand your household, priorities, and what support you're looking for. No obligation." },
+  { step: "02", label: "Needs Assessment", desc: "Rosa visits the property, meets the household team, and forms her own independent view of the operational situation." },
+  { step: "03", label: "Service Plan", desc: "A tailored plan defining scope, protocols, and decision thresholds — prepared with you, not imposed on you." },
+  { step: "04", label: "Onboarding", desc: "Rosa assumes oversight, confirms vendor relationships, documents the standards, and transitions cleanly into the engagement." },
+  { step: "05", label: "Active Management", desc: "Proactive, ongoing management. Monthly summaries. Quarterly reviews. You are informed, not burdened." },
 ];
 
 function RosaBlock() {
@@ -139,24 +140,35 @@ function ProcessStrip() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-14"
+          className="mb-14 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
         >
-          <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>
-            How It Works
-          </p>
-          <h2 className="font-serif text-3xl lg:text-4xl font-light" style={{ color: "var(--color-ink-900)" }}>
-            Four steps to a managed engagement.
-          </h2>
+          <div>
+            <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>
+              How It Works
+            </p>
+            <h2 className="font-serif text-3xl lg:text-4xl font-light" style={{ color: "var(--color-ink-900)" }}>
+              Five stages to a managed engagement.
+            </h2>
+          </div>
+          <Link
+            href="/engagements"
+            className="text-[12px] font-medium tracking-[0.12em] uppercase transition-colors shrink-0"
+            style={{ color: "var(--color-gold)", opacity: 0.8 }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
+          >
+            View the full process →
+          </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6">
           {processSteps.map((step, idx) => (
             <motion.div
               key={step.step}
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              transition={{ duration: 0.5, delay: idx * 0.08 }}
             >
               <div className="mb-5">
                 <span
@@ -166,10 +178,10 @@ function ProcessStrip() {
                   {step.step}
                 </span>
               </div>
-              <h3 className="font-serif text-lg font-light mb-3" style={{ color: "var(--color-ink-900)" }}>
+              <h3 className="font-serif text-base font-light mb-3" style={{ color: "var(--color-ink-900)" }}>
                 {step.label}
               </h3>
-              <p className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
+              <p className="text-[12.5px] font-light leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
                 {step.desc}
               </p>
             </motion.div>
@@ -198,11 +210,11 @@ function InquiryCard() {
               Begin a confidential conversation.
             </h2>
             <p className="text-[14px] font-light leading-relaxed mb-8 max-w-xl" style={{ color: "var(--color-ink-500)" }}>
-              All inquiries are handled with complete discretion. There is no obligation after an initial conversation. Tell us a little about what you're looking for, and we'll respond personally within 24 hours.
+              All enquiries are handled personally by Rosa with complete discretion. There is no obligation after an initial conversation. Tell us a little about your situation, and Rosa will respond personally within two business days.
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <Link
-                href="/contact"
+                href="/booking"
                 className="inline-flex items-center gap-2.5 px-8 py-4 text-[13px] font-medium tracking-[0.08em] transition-colors"
                 style={{ color: "var(--color-cream)", background: "var(--color-gold)" }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
@@ -230,8 +242,8 @@ function InquiryCard() {
             <div className="mt-12 pt-8 border-t" style={{ borderColor: "var(--color-stone-200)" }}>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {[
-                  { label: "Response time", value: "Within 24 hours" },
-                  { label: "Availability", value: "UK, Europe, USA" },
+                  { label: "Response time", value: "Within two business days" },
+                  { label: "Locations", value: "London · New York, NY" },
                   { label: "Contact", value: "inquiries@carlotajo.com" },
                 ].map((item) => (
                   <div key={item.label}>

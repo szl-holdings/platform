@@ -1,144 +1,359 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Briefcase, CheckCircle, Clock, ArrowRight, FileText, Users, DollarSign, Target } from "lucide-react";
-import { usePageMeta } from "@/hooks/usePageMeta";
+import { motion } from "framer-motion";
+import { CheckCircle2, Clock, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Link } from "wouter";
 
-const engagements = [
-  { id: "ENG-001", client: "Apex Capital Partners", type: "Growth Strategy", stage: "Delivery", value: "$240K", started: "Jan 15, 2026", due: "Apr 30, 2026", health: "Green", pm: "C. Martinez", team: 4, completion: 68 },
-  { id: "ENG-002", client: "NovaTech Industries", type: "Market Entry", stage: "Discovery", value: "$85K", started: "Mar 1, 2026", due: "May 15, 2026", health: "Green", pm: "L. Park", team: 2, completion: 22 },
-  { id: "ENG-003", client: "Summit Healthcare", type: "Operational Excellence", stage: "Proposal", value: "$165K", started: "Mar 20, 2026", due: "Jun 30, 2026", health: "Yellow", pm: "C. Martinez", team: 3, completion: 5 },
-  { id: "ENG-004", client: "Pacific Ventures", type: "M&A Due Diligence", stage: "SOW Review", value: "$320K", started: "Mar 28, 2026", due: "Jun 15, 2026", health: "Green", pm: "R. Santos", team: 5, completion: 2 },
+const STAGES = [
+  {
+    number: "01",
+    title: "Discovery Call",
+    duration: "60–90 minutes",
+    description: "A confidential conversation to understand your household, properties, priorities, and the kind of support you are looking for. There is no obligation after this call — it is purely an opportunity for mutual understanding.",
+    whatHappens: [
+      "Rosa listens first. You describe your situation, your residences, and what isn't working.",
+      "She asks targeted questions about your household staff, vendor relationships, and the specific friction you are experiencing.",
+      "You get a clear sense of whether Carlota Jo is the right fit — and Rosa will say so honestly if it is not.",
+      "If there is a fit, Rosa proposes a needs assessment visit.",
+    ],
+    whatYouReceive: "A written summary of the conversation and Rosa's initial thoughts on the scope of support that would be most relevant.",
+  },
+  {
+    number: "02",
+    title: "Needs Assessment",
+    duration: "2–3 days on-site",
+    description: "Before advising on anything, Rosa visits the property. She meets the household team, reviews vendor relationships and contracts, walks every system in the residence, and forms her own view of the operational situation — independent of what she has been told.",
+    whatHappens: [
+      "Rosa spends two to three days at the primary residence, or across multiple properties if relevant.",
+      "She conducts individual conversations with each household staff member.",
+      "She reviews active vendor contracts, maintenance records, and any existing operational documentation.",
+      "She observes rather than advises — the assessment is a fact-finding mission, not an intervention.",
+    ],
+    whatYouReceive: "A written operational assessment covering the household's current state, the gaps she has identified, and her recommendations for the engagement scope.",
+  },
+  {
+    number: "03",
+    title: "Service Plan",
+    duration: "1–2 weeks",
+    description: "Based on the assessment, Rosa prepares a tailored service plan that defines the exact scope of her involvement, the communication protocols, the reporting cadence, and the decision thresholds that will govern the engagement.",
+    whatHappens: [
+      "Rosa drafts the service plan based on the assessment findings and your stated priorities.",
+      "You review the plan together and refine it — scope, escalation thresholds, reporting frequency.",
+      "A formal service agreement is prepared and signed by both parties.",
+      "Vendor introductions and staff briefings are scheduled for the onboarding period.",
+    ],
+    whatYouReceive: "A signed service plan and engagement agreement, a confirmed onboarding schedule, and clarity on exactly what Rosa will own from day one.",
+  },
+  {
+    number: "04",
+    title: "Onboarding",
+    duration: "2–4 weeks",
+    description: "Rosa assumes operational oversight of the engagement scope. She meets every vendor, confirms all service arrangements, documents the standards, and ensures that the household team understands the new protocols before active management begins.",
+    whatHappens: [
+      "Rosa meets individually with every vendor and contractor in scope.",
+      "She confirms or renegotiates service standards with each party.",
+      "She builds or updates the household operational manual.",
+      "She establishes her working relationship with household staff and clarifies reporting lines.",
+    ],
+    whatYouReceive: "A fully documented household, confirmed vendor relationships, and a smooth transition to active management without operational disruption.",
+  },
+  {
+    number: "05",
+    title: "Active Management",
+    duration: "Ongoing",
+    description: "The steady state of the engagement. Rosa manages the operational layer of your residential life on an ongoing basis — proactively, quietly, and to the standard you have defined. Monthly summaries keep you informed. Quarterly reviews keep the engagement calibrated.",
+    whatHappens: [
+      "Rosa manages daily household operations, vendor performance, and maintenance scheduling.",
+      "She escalates to you only when something genuinely requires your decision.",
+      "A monthly written summary covers everything that happened — issues resolved, tasks completed, upcoming items.",
+      "A quarterly review session covers the broader engagement, any scope adjustments, and the next quarter's focus.",
+    ],
+    whatYouReceive: "The experience of a flawlessly run household — without the management burden. Complete operational accountability from one trusted person.",
+  },
 ];
 
-const stages = ["Intake", "Discovery", "Proposal", "SOW Review", "Kickoff", "Delivery", "Review", "Closed"];
+const CURRENT_STAGE = 3;
 
-const healthColor: Record<string, string> = {
-  Green: "text-emerald-400", Yellow: "text-amber-400", Red: "text-red-400",
-};
-
-const stageColor: Record<string, string> = {
-  Intake: "bg-slate-500/20 text-slate-400",
-  Discovery: "bg-sky-500/20 text-sky-400",
-  Proposal: "bg-blue-500/20 text-blue-400",
-  "SOW Review": "bg-purple-500/20 text-purple-400",
-  Kickoff: "bg-amber-500/20 text-amber-400",
-  Delivery: "bg-primary/20 text-primary",
-  Review: "bg-orange-500/20 text-orange-400",
-  Closed: "bg-emerald-500/20 text-emerald-400",
-};
-
-const pipeline = [
-  { stage: "Discovery", count: 1, value: "$85K" },
-  { stage: "Proposal", count: 1, value: "$165K" },
-  { stage: "SOW Review", count: 1, value: "$320K" },
-  { stage: "Delivery", count: 1, value: "$240K" },
-];
-
-export default function EngagementWorkflow() {
-  usePageMeta({
-    title: "Engagement Workflow | Carlota Jo Consulting – Client Project Management",
-    description: "Manage consulting engagements end-to-end with Carlota Jo's workflow platform. Track milestones, deliverables, and client outcomes in real time.",
-    canonical: "https://szlholdings.com/carlota-jo/engagements",
-  });
-  const [selected, setSelected] = useState(engagements[0]);
+export default function EngagementWorkflowPage() {
+  const [expanded, setExpanded] = useState<number | null>(CURRENT_STAGE);
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Briefcase className="w-6 h-6 text-primary" />
-          Engagement Workflow
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">End-to-end engagement tracking from intake questionnaire through SOW to delivery and follow-up</p>
-      </div>
-
-      <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: "Active Engagements", value: engagements.filter(e => e.stage === "Delivery" || e.stage === "Discovery").length, color: "text-primary" },
-          { label: "Pipeline Value", value: `$${(810 / 1000).toFixed(2)}M`, color: "text-emerald-400" },
-          { label: "Avg Completion", value: `${Math.round(engagements.reduce((a, e) => a + e.completion, 0) / engagements.length)}%`, color: "text-sky-400" },
-          { label: "Engagements This Q", value: "4", color: "text-amber-400" },
-        ].map(({ label, value, color }) => (
-          <Card key={label}><CardContent className="p-4"><p className="text-xs text-muted-foreground">{label}</p><p className={`text-2xl font-bold ${color}`}>{value}</p></CardContent></Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader className="pb-2"><CardTitle className="text-sm">Engagement Pipeline</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {stages.map((stage, i) => {
-              const eng = engagements.filter(e => e.stage === stage);
-              return (
-                <div key={stage} className="flex items-center gap-2 shrink-0">
-                  <div className="text-center">
-                    <div className={`px-3 py-2 rounded-lg ${eng.length > 0 ? stageColor[stage] : "bg-muted text-muted-foreground"} min-w-20`}>
-                      <p className="text-[10px] font-semibold">{stage}</p>
-                      <p className="text-sm font-bold">{eng.length}</p>
-                    </div>
-                    {eng.length > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">{eng.map(e => e.value).join(", ")}</p>}
-                  </div>
-                  {i < stages.length - 1 && <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />}
-                </div>
-              );
-            })}
+    <div className="min-h-screen" style={{ background: "var(--color-cream-warm)" }}>
+      <Header />
+      <div className="pt-24">
+        <section className="py-20 lg:py-28" style={{ borderBottom: "1px solid var(--color-stone-200)" }}>
+          <div className="max-w-5xl mx-auto px-6 lg:px-12">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="max-w-2xl"
+            >
+              <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-6" style={{ color: "var(--color-gold)" }}>
+                How We Work
+              </p>
+              <h1 className="font-serif font-light leading-[1.1] mb-6" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--color-ink-900)" }}>
+                Five stages to a managed engagement.
+                <br />
+                <span style={{ fontStyle: "italic" }}>Deliberate at every step.</span>
+              </h1>
+              <p className="text-base font-light leading-relaxed mb-3" style={{ color: "var(--color-ink-600)" }}>
+                Carlota Jo does not begin active management until Rosa understands your household thoroughly. The engagement process is designed to ensure that when she starts, she starts correctly — with full knowledge, confirmed relationships, and documented standards.
+              </p>
+              <p className="text-sm font-light leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
+                Each stage has a defined purpose and a clear deliverable. You will never be left wondering what happens next.
+              </p>
+            </motion.div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-3">
-          {engagements.map((eng) => (
-            <Card key={eng.id} onClick={() => setSelected(eng)} className={`cursor-pointer transition-all hover:border-primary/30 ${selected.id === eng.id ? "border-primary" : ""}`}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm">{eng.client}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${stageColor[eng.stage]}`}>{eng.stage}</span>
-                      <span className={`text-xs ${healthColor[eng.health]}`}>●</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{eng.type} · PM: {eng.pm}</p>
-                    <div className="flex gap-3 text-[10px] text-muted-foreground mt-1.5">
-                      <span>Value: <span className="text-emerald-400 font-semibold">{eng.value}</span></span>
-                      <span>Due: {eng.due}</span>
-                      <span>Team: {eng.team}</span>
-                    </div>
-                    <div className="mt-2">
-                      <div className="flex justify-between text-[10px] mb-0.5"><span className="text-muted-foreground">Progress</span><span>{eng.completion}%</span></div>
-                      <div className="h-1.5 bg-muted rounded-full overflow-hidden"><div className="h-full bg-primary rounded-full" style={{ width: `${eng.completion}%` }} /></div>
-                    </div>
+        <section className="py-16 lg:py-20" style={{ borderBottom: "1px solid var(--color-stone-200)" }}>
+          <div className="max-w-5xl mx-auto px-6 lg:px-12">
+            <div className="hidden lg:flex items-center gap-0 mb-16 overflow-x-auto">
+              {STAGES.map((stage, i) => {
+                const isComplete = i < CURRENT_STAGE;
+                const isCurrent = i === CURRENT_STAGE;
+                return (
+                  <div key={stage.number} className="flex items-center">
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: i * 0.08 }}
+                      onClick={() => setExpanded(expanded === i ? null : i)}
+                      className="flex flex-col items-center gap-2 px-6 py-3 transition-colors"
+                      style={{ minWidth: "130px" }}
+                    >
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-medium transition-all"
+                        style={{
+                          background: isCurrent ? "var(--color-gold)" : isComplete ? "rgba(154,125,82,0.12)" : expanded === i ? "var(--color-stone-200)" : "var(--color-stone-100)",
+                          color: isCurrent ? "var(--color-cream)" : isComplete ? "var(--color-gold)" : "var(--color-ink-500)",
+                          border: isCurrent ? "none" : isComplete ? "1px solid rgba(154,125,82,0.25)" : "1px solid var(--color-stone-200)",
+                        }}
+                      >
+                        {isComplete ? <CheckCircle2 size={14} /> : stage.number}
+                      </div>
+                      <span
+                        className="text-[11px] font-medium text-center leading-tight"
+                        style={{ color: isCurrent ? "var(--color-ink-900)" : isComplete ? "var(--color-gold)" : "var(--color-ink-500)", opacity: isComplete ? 0.7 : 1 }}
+                      >
+                        {stage.title}
+                      </span>
+                      {isCurrent ? (
+                        <span className="text-[8px] tracking-[0.18em] uppercase font-medium text-center px-1.5 py-0.5" style={{ color: "var(--color-cream)", background: "var(--color-gold)", opacity: 0.9 }}>
+                          Current
+                        </span>
+                      ) : (
+                        <span className="text-[9px] tracking-wide text-center" style={{ color: "var(--color-stone-400)" }}>
+                          {stage.duration}
+                        </span>
+                      )}
+                    </motion.button>
+                    {i < STAGES.length - 1 && (
+                      <div className="w-8 h-px flex-shrink-0" style={{ background: i < CURRENT_STAGE ? "rgba(154,125,82,0.25)" : "var(--color-stone-300)" }} />
+                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">{selected.client} — Workflow Detail</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div><p className="text-muted-foreground">Type</p><p className="font-semibold">{selected.type}</p></div>
-              <div><p className="text-muted-foreground">Value</p><p className="font-semibold text-emerald-400">{selected.value}</p></div>
-              <div><p className="text-muted-foreground">Started</p><p className="font-semibold">{selected.started}</p></div>
-              <div><p className="text-muted-foreground">Due Date</p><p className="font-semibold">{selected.due}</p></div>
-              <div><p className="text-muted-foreground">Lead PM</p><p className="font-semibold">{selected.pm}</p></div>
-              <div><p className="text-muted-foreground">Team Size</p><p className="font-semibold">{selected.team} consultants</p></div>
+                );
+              })}
             </div>
-            <div className="pt-2 border-t border-border">
-              <p className="text-xs font-semibold mb-2">Stage Checklist — {selected.stage}</p>
-              {["Kickoff meeting scheduled", "Discovery interviews complete", "Stakeholder map created", "Initial findings draft"].map((item, i) => (
-                <div key={item} className="flex items-center gap-2 py-1">
-                  <CheckCircle className={`w-3.5 h-3.5 ${i < 2 ? "text-emerald-400" : "text-muted-foreground"}`} />
-                  <span className={`text-xs ${i < 2 ? "" : "text-muted-foreground"}`}>{item}</span>
+
+            <div className="space-y-px" style={{ borderTop: "1px solid var(--color-stone-200)" }}>
+              {STAGES.map((stage, i) => {
+                const isComplete = i < CURRENT_STAGE;
+                const isCurrent = i === CURRENT_STAGE;
+                return (
+                <motion.div
+                  key={stage.number}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.05 }}
+                  style={{
+                    borderBottom: "1px solid var(--color-stone-200)",
+                    borderLeft: isCurrent ? "2px solid var(--color-gold)" : "2px solid transparent",
+                    paddingLeft: isCurrent ? "1.5rem" : undefined,
+                  }}
+                >
+                  <button
+                    onClick={() => setExpanded(expanded === i ? null : i)}
+                    className="w-full text-left py-8 grid grid-cols-1 md:grid-cols-12 gap-4 transition-colors"
+                  >
+                    <div className="md:col-span-1">
+                      {isComplete ? (
+                        <CheckCircle2 size={20} style={{ color: "rgba(154,125,82,0.45)", marginTop: "0.25rem" }} />
+                      ) : (
+                        <span
+                          className="font-serif text-2xl font-light"
+                          style={{ color: isCurrent ? "var(--color-gold)" : "var(--color-stone-300)", letterSpacing: "-0.02em" }}
+                        >
+                          {stage.number}
+                        </span>
+                      )}
+                    </div>
+                    <div className="md:col-span-9">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-3">
+                          <h3
+                            className="font-serif text-xl font-light transition-colors"
+                            style={{ color: isCurrent ? "var(--color-ink-900)" : isComplete ? "var(--color-ink-600)" : "var(--color-ink-800)" }}
+                          >
+                            {stage.title}
+                          </h3>
+                          {isCurrent && (
+                            <span className="text-[9px] font-medium tracking-[0.2em] uppercase px-2 py-0.5" style={{ color: "var(--color-cream)", background: "var(--color-gold)" }}>
+                              In progress
+                            </span>
+                          )}
+                          {isComplete && (
+                            <span className="text-[9px] font-light tracking-[0.15em] uppercase" style={{ color: "rgba(154,125,82,0.5)" }}>
+                              Complete
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock size={12} style={{ color: "var(--color-stone-400)" }} />
+                          <span className="text-[11px] font-light" style={{ color: "var(--color-stone-400)" }}>
+                            {stage.duration}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="md:col-span-2 flex items-center justify-end">
+                      {expanded === i ? (
+                        <ChevronUp size={16} style={{ color: "var(--color-gold)" }} />
+                      ) : (
+                        <ChevronDown size={16} style={{ color: "var(--color-stone-400)" }} />
+                      )}
+                    </div>
+                  </button>
+
+                  {expanded === i && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.35 }}
+                      className="pb-10 grid grid-cols-1 md:grid-cols-12 gap-8"
+                    >
+                      <div className="md:col-span-1" />
+                      <div className="md:col-span-11">
+                        <p className="text-[14px] font-light leading-relaxed mb-8" style={{ color: "var(--color-ink-600)" }}>
+                          {stage.description}
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div>
+                            <p className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4" style={{ color: "var(--color-stone-400)" }}>
+                              What happens
+                            </p>
+                            <ul className="space-y-3">
+                              {stage.whatHappens.map((item, j) => (
+                                <li key={j} className="flex items-start gap-3">
+                                  <span style={{ color: "var(--color-gold)", marginTop: "0.15rem", flexShrink: 0 }}>—</span>
+                                  <span className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-600)" }}>
+                                    {item}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4" style={{ color: "var(--color-stone-400)" }}>
+                              What you receive
+                            </p>
+                            <div className="p-5" style={{ background: "var(--color-stone-50)", border: "1px solid var(--color-stone-200)" }}>
+                              <p className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-600)" }}>
+                                {stage.whatYouReceive}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              ); })}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 lg:py-20" style={{ background: "var(--color-stone-50)", borderBottom: "1px solid var(--color-stone-200)" }}>
+          <div className="max-w-5xl mx-auto px-6 lg:px-12">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            >
+              {[
+                { label: "First step", value: "Discovery call", sub: "No obligation. No sales process." },
+                { label: "Typical start", value: "4–6 weeks", sub: "From first conversation to active management." },
+                { label: "Commitment", value: "3-month minimum", sub: "After which, rolling monthly engagement." },
+              ].map((item) => (
+                <div key={item.label}>
+                  <p className="text-[10px] font-medium tracking-[0.25em] uppercase mb-2" style={{ color: "var(--color-stone-400)" }}>
+                    {item.label}
+                  </p>
+                  <p className="font-serif text-xl font-light mb-1" style={{ color: "var(--color-ink-900)" }}>
+                    {item.value}
+                  </p>
+                  <p className="text-[12px] font-light" style={{ color: "var(--color-ink-500)" }}>
+                    {item.sub}
+                  </p>
                 </div>
               ))}
-            </div>
-          </CardContent>
-        </Card>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="py-16 lg:py-20">
+          <div className="max-w-5xl mx-auto px-6 lg:px-12">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="max-w-xl"
+            >
+              <h2 className="font-serif text-2xl font-light mb-4" style={{ color: "var(--color-ink-900)" }}>
+                Begin with a conversation.
+              </h2>
+              <p className="text-sm font-light leading-relaxed mb-8" style={{ color: "var(--color-ink-500)" }}>
+                The discovery call is free, confidential, and carries no obligation. Rosa responds to substantive enquiries personally within two business days.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2.5 px-7 py-3.5 text-[13px] font-medium tracking-[0.08em] transition-colors"
+                  style={{ color: "var(--color-cream)", background: "var(--color-gold)" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
+                >
+                  Request a Consultation
+                </Link>
+                <Link
+                  href="/services"
+                  className="inline-flex items-center px-7 py-3.5 text-[12px] font-medium tracking-[0.12em] uppercase transition-all"
+                  style={{ color: "var(--color-ink-500)", border: "1px solid var(--color-stone-300)" }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "var(--color-ink-500)";
+                    (e.currentTarget as HTMLElement).style.color = "var(--color-ink-900)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "var(--color-stone-300)";
+                    (e.currentTarget as HTMLElement).style.color = "var(--color-ink-500)";
+                  }}
+                >
+                  View Services
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </section>
       </div>
+      <Footer />
     </div>
   );
 }
