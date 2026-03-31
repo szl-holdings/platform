@@ -585,7 +585,7 @@ export default function TrustCenter() {
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "3rem" }}>
               <div>
                 <h3 style={{ fontSize: "1.0625rem", fontWeight: "700", color: "hsl(38,12%,94%)", marginBottom: "0.75rem" }}>Security inquiries</h3>
                 <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,56%)", lineHeight: "1.6", marginBottom: "1rem" }}>

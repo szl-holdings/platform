@@ -568,7 +568,7 @@ function DocumentValidationPanel() {
   );
 }
 
-function RouteForecasePanel() {
+function RouteForecastPanel() {
   const forecasts = [
     { vessel: "MV Atlantic Runner", route: "Singapore → Rotterdam", eta: "Apr 12", delay: "+2.5d", cause: "Suez congestion", impact: "$84K", severity: "high" },
     { vessel: "MV Caspian Star", route: "Houston → Yokohama", eta: "Apr 18", delay: "On time", cause: "—", impact: "—", severity: "low" },
@@ -828,7 +828,7 @@ export default function FleetDashboard() {
           {intelTab === "behavioral" && <BehavioralRiskPanel exceptions={fleetExceptions} />}
           {intelTab === "dark" && <DarkVesselPanel exceptions={fleetExceptions} />}
           {intelTab === "sanctions" && <SanctionsPanel exceptions={fleetExceptions} />}
-          {intelTab === "routes" && <RouteForecasePanel />}
+          {intelTab === "routes" && <RouteForecastPanel />}
           {intelTab === "documents" && <DocumentValidationPanel />}
           {intelTab === "cargo" && <CargoFlowPanel exceptions={fleetExceptions} />}
           {intelTab === "congestion" && <PortCongestionPanel exceptions={fleetExceptions} />}
