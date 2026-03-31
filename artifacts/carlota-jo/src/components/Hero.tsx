@@ -12,9 +12,11 @@ function GoldDust() {
     if (!ctx) return;
     let animFrame: number;
     let time = 0;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const resize = () => {
       canvas.width = canvas.offsetWidth * window.devicePixelRatio;
       canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     };
     resize();
@@ -31,6 +33,7 @@ function GoldDust() {
       });
     }
     const draw = () => {
+      if (document.hidden) { animFrame = requestAnimationFrame(draw); return; }
       time += 0.001;
       const w = canvas.offsetWidth;
       const h = canvas.offsetHeight;
@@ -51,7 +54,7 @@ function GoldDust() {
     draw();
     return () => { cancelAnimationFrame(animFrame); window.removeEventListener("resize", resize); };
   }, []);
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />;
 }
 
 export default function Hero() {
@@ -96,7 +99,7 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-[15px] font-light leading-relaxed mb-10 max-w-md"
-              style={{ color: "rgba(245,240,232,0.45)" }}
+              style={{ color: "rgba(245,240,232,0.65)" }}
             >
               Estate management and residential operations for high-net-worth families — through one trusted operator.
             </motion.p>

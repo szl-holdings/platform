@@ -27,9 +27,11 @@ function OceanCanvas() {
     if (!ctx) return;
     let animFrame: number;
     let time = 0;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const resize = () => {
       canvas.width = canvas.offsetWidth * window.devicePixelRatio;
       canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     };
     resize();
@@ -49,6 +51,7 @@ function OceanCanvas() {
     const h = () => canvas.offsetHeight;
 
     const draw = () => {
+      if (document.hidden) { animFrame = requestAnimationFrame(draw); return; }
       time += 0.004;
       ctx.clearRect(0, 0, w(), h());
 
@@ -109,7 +112,7 @@ function OceanCanvas() {
     draw();
     return () => { cancelAnimationFrame(animFrame); window.removeEventListener("resize", resize); };
   }, []);
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />;
 }
 
 function LiveFleetPanel() {
