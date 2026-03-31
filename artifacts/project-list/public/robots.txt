@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://szlholdings.com/project-list/sitemap.xml

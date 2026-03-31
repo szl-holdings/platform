@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/terra/"
-title = "Beacon — Business Telemetry"
+title = "Terra — Real Estate Intelligence"
 version = "1.0.0"
 id = "artifacts/terra"
 router = "path"

@@ -1,7 +1,7 @@
-# DreamStack Platform
+# SZL Holdings Platform
 
 ## Overview
-DreamStack is a pnpm monorepo consisting of 13 interconnected applications. It shares a common PostgreSQL database, authentication system, and a command-grade design system. The platform is designed for Stephen Lutar, founder of SZL Holdings, and follows a strict brand hierarchy: SZL Holdings, Alloy, Lyte, Vessels, Terra, Carlota Jo, and Stephen Lutar's personal identity. The project aims to provide an advanced ecosystem of command and intelligence platforms with specialized AI capabilities for various business domains, from maritime intelligence to elite real estate brokerage and premium advisory services.
+A pnpm monorepo consisting of 10 live applications + 1 API server + 1 design sandbox. Shares a common PostgreSQL database, authentication system, and command-grade design system. Built for Stephen Lutar, founder of SZL Holdings. Follows a strict brand hierarchy: SZL Holdings, Alloy, Lyte, Vessels, Terra, Firestorm, INCA, Dreamscape, Carlota Jo, MSP/Rosie, and Stephen Lutar's personal identity. The ecosystem provides command and intelligence platforms across maritime, cybersecurity, AI research, real estate, and enterprise operations.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -47,8 +47,8 @@ The platform features 13 applications sharing authentication and design.
 - **Nimbus AI Evolution:** Production intelligence layer with core modules for inference telemetry, a unified AI gateway, real-time provider health monitoring, an enhanced model registry, multi-agent orchestration, and composable multi-step AI pipelines.
 - **Domain AI Agents:** 10 specialized advisory-only agents (e.g., Helmsman, Sentinel, INCA) with specialized system prompts and tool definitions, accessible via a unified API.
 - **AI Copilots:** Domain-specific AI copilots (`AgentCopilot` component) in all applications, featuring SSE streaming, markdown rendering, suggested questions, voice input/output, and mobile optimization.
-- **Agent Training Studio (Admin Panel):** Allows per-agent training with Q&A pairs, behavioral customization, and performance monitoring.
-- **AlloyChat (Admin Panel):** A multi-model AI operations assistant routing queries to Claude or GPT-5.2 based on task, with SSE streaming and conversation history persistence.
+- **Agent Training Studio:** Per-agent training with Q&A pairs, behavioral customization, and performance monitoring.
+- **AlloyChat:** Multi-model AI operations assistant routing queries to Claude or GPT-5.2 based on task, with SSE streaming and conversation history persistence.
 - **Observability:** Structured logging via pino and an 8-pillar domain-native observability framework across all applications, including performance, business, user experience, and security posture.
 - **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` controls access based on entitlements and usage limits, with middleware for API routes.
 - **Admin Panel CMS:** Centralized administration for all 16 CMS tables, media asset management, site settings, and Plausible analytics overview.
