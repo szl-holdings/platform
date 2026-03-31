@@ -1,342 +1,242 @@
-import { motion } from "framer-motion";
-import { AlertTriangle, TrendingUp, Clock, DollarSign, Home, Users, CheckCircle, Zap, Shield, Activity } from "lucide-react";
-import { brokerageSummary, brokerageDeals, riskSignals, agents, automationRuns } from "@/data/brokerage";
-import { RiskBadge, StageBadge, DealHealthCard, formatCurrency, AgentAvatar, StatusIndicator } from "@/components/brokerage-ui";
+import { useState } from "react";
 import { cn } from "@workspace/shared-ui/utils";
 import { Link } from "wouter";
-import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
-import { TerraGraphQLPanel } from "@/components/graphql-data-panel";
+import { DataStateBadge } from "@workspace/shared-ui";
+import {
+  Building2, MapPin, TrendingUp, DollarSign, Users, Activity,
+  ChevronRight, Flame, AlertTriangle, Eye, Clock, Home,
+  ArrowRight, BarChart3, Target, Search, Shield, Zap, Globe
+} from "lucide-react";
+import { brokerageSummary, brokerageDeals, riskSignals, agents, automationRuns } from "@/data/brokerage";
+import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 
-const commandLoopItems = [
-  { label: "DETECT", desc: "Pipeline & listing health", icon: Activity, color: "text-blue-400" },
-  { label: "INTERPRET", desc: "Risk signals & Alloy intel", icon: Shield, color: "text-violet-400" },
-  { label: "DECIDE", desc: "Owner actions & approvals", icon: Users, color: "text-amber-400" },
-  { label: "EXECUTE", desc: "Alloy automations", icon: Zap, color: "text-emerald-400" },
-  { label: "VERIFY", desc: "Compliance & audit trail", icon: CheckCircle, color: "text-terra-primary" },
+const TACTICAL_MODULES = [
+  { id: "distress", label: "Distress Watch", icon: Flame, color: "#f97316", count: 3, href: "/distress-engine", desc: "Pre-foreclosure & auction tracking" },
+  { id: "offmarket", label: "Off-Market Intel", icon: Eye, color: "#8b5cf6", count: 12, href: "/investor-mode", desc: "Ownership analysis & opportunities" },
+  { id: "investor", label: "Investor Mode", icon: TrendingUp, color: "#10b981", count: 0, href: "/investor-mode", desc: "IRR modeling & scenario builder" },
+  { id: "pipeline", label: "Deal Pipeline", icon: Activity, color: "#3b82f6", count: 8, href: "/deals", desc: "Active deals & stage tracking" },
+  { id: "commercial", label: "Commercial Intel", icon: Building2, color: "#a07848", count: 0, href: "/commercial", desc: "Market comps & analysis" },
+  { id: "brokers", label: "Broker Scorecards", icon: Users, color: "#06b6d4", count: 0, href: "/agents", desc: "Performance & conversion rates" },
 ];
 
-export default function DashboardPage() {
+const MARKET_SIGNALS = [
+  { time: "5m ago", text: "New pre-foreclosure filing — 847 Park Ave, Queens (Est. $2.1M)", severity: "high" as const, type: "distress" },
+  { time: "12m ago", text: "Price reduction: 1240 Broadway commercial listing dropped 8% ($4.2M → $3.9M)", severity: "medium" as const, type: "market" },
+  { time: "28m ago", text: "Ownership transfer detected — LLC → individual on 3 Tribeca parcels", severity: "high" as const, type: "ownership" },
+  { time: "45m ago", text: "New listing match: 2BR Chelsea, $890K — matches 3 active buyer profiles", severity: "medium" as const, type: "listing" },
+  { time: "1h ago", text: "Distress cluster alert: 4 new filings in East Harlem zip 10029", severity: "critical" as const, type: "distress" },
+  { time: "2h ago", text: "Broker response SLA warning — 2 inquiries aging past 4h target", severity: "high" as const, type: "ops" },
+];
+
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: "#ef4444",
+  high: "#f97316",
+  medium: "#f59e0b",
+  low: "rgba(255,255,255,0.3)",
+};
+
+const WATCHLIST = [
+  { address: "847 Park Ave, Queens", type: "Pre-Foreclosure", value: "$2.1M", delta: "New filing", deltaColor: "#ef4444" },
+  { address: "1240 Broadway, Manhattan", type: "Commercial", value: "$3.9M", delta: "-8%", deltaColor: "#f97316" },
+  { address: "312 W 23rd St, Chelsea", type: "Residential", value: "$890K", delta: "3 matches", deltaColor: "#10b981" },
+  { address: "45 Warren St, Tribeca", type: "Multi-Family", value: "$4.8M", delta: "LLC transfer", deltaColor: "#8b5cf6" },
+  { address: "1890 Adam C Powell, Harlem", type: "Mixed-Use", value: "$1.6M", delta: "Cluster alert", deltaColor: "#ef4444" },
+];
+
+export default function TerraIntelligence() {
   const activeSignals = riskSignals.filter(s => !s.acknowledged);
   const criticalSignals = activeSignals.filter(s => s.severity === "critical");
-  const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 6);
-  const recentRuns = automationRuns.slice(0, 4);
+  const topDeals = [...brokerageDeals].sort((a, b) => b.price - a.price).slice(0, 5);
+  const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 4);
 
   return (
-    <div className="p-6 space-y-6 overflow-auto">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-terra-text">Portfolio Intelligence</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Property operations, deal pipeline, and asset telemetry — {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {criticalSignals.length > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600/10 border border-red-500/20 text-xs text-red-400 font-semibold animate-pulse">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                {criticalSignals.length} Critical
-              </div>
-            )}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
-              <Clock className="w-3.5 h-3.5" />
-              {activeSignals.length} Active Signals
-            </div>
-          </div>
+    <div className="space-y-4 max-w-[1400px]">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-bold text-white tracking-tight font-display">Portfolio Intelligence</h1>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(200,160,96,0.5)" }}>Property · Market · Pipeline — {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
         </div>
-      </motion.div>
-
-      {/* Command Loop */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }}
-        className="flex gap-2 overflow-x-auto pb-1">
-        {commandLoopItems.map((item, i) => (
-          <div key={item.label} className="flex items-center gap-2 flex-shrink-0">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-terra-surface border border-terra-border">
-              <item.icon className={cn("w-3.5 h-3.5", item.color)} />
-              <div>
-                <p className={cn("text-[10px] font-bold uppercase tracking-wider", item.color)}>{item.label}</p>
-                <p className="text-[10px] text-terra-text-muted hidden sm:block">{item.desc}</p>
-              </div>
+        <div className="flex items-center gap-3">
+          <DataStateBadge state="demo" label="Demo Data" />
+          {criticalSignals.length > 0 && (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-semibold animate-pulse" style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <AlertTriangle className="w-3 h-3" />
+              {criticalSignals.length} Critical
             </div>
-            {i < commandLoopItems.length - 1 && <div className="text-terra-text-muted text-xs flex-shrink-0">→</div>}
-          </div>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
+        <div className="grid grid-cols-3 md:grid-cols-6">
+          {[
+            { label: "Active Listings", value: brokerageSummary.activeListings.toString(), color: "#c8a060" },
+            { label: "Distress Signals", value: "3", color: "#f97316", pulse: true },
+            { label: "Deals in Motion", value: brokerageSummary.activeDeals.toString(), color: "#3b82f6" },
+            { label: "Broker Response", value: "2.4h", color: "#10b981", sub: "avg" },
+            { label: "Portfolio Tracked", value: "$2.4B", color: "#c8a060" },
+            { label: "Market Movement", value: "+2.1%", color: "#10b981", sub: "30d" },
+          ].map((c, i) => (
+            <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+              <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                <span className="text-base font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
+                {c.pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: c.color }} />}
+              </div>
+              <div className="text-[8px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
+              {c.sub && <div className="text-[7px] mt-0.5" style={{ color: "rgba(255,255,255,0.15)" }}>{c.sub}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+        {TACTICAL_MODULES.map((mod) => (
+          <Link key={mod.id} href={mod.href} className="group rounded-xl border p-3 transition-all hover:scale-[1.02] cursor-pointer" style={{
+            borderColor: `${mod.color}15`,
+            background: `linear-gradient(135deg, ${mod.color}04, transparent)`,
+          }}>
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${mod.color}12`, border: `1px solid ${mod.color}20` }}>
+                <mod.icon className="w-3.5 h-3.5" style={{ color: mod.color }} />
+              </div>
+              {mod.count > 0 && <span className="text-[9px] font-bold font-mono" style={{ color: mod.color }}>{mod.count}</span>}
+            </div>
+            <div className="text-[10px] font-semibold text-white/80">{mod.label}</div>
+            <div className="text-[8px] mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{mod.desc}</div>
+          </Link>
         ))}
-      </motion.div>
-
-      {/* KPI Strip */}
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {[
-            { label: "Active Listings", value: brokerageSummary.activeListings, icon: Home, color: "from-blue-500 to-cyan-400" },
-            { label: "Active Buyers", value: brokerageSummary.activeBuyers, icon: Users, color: "from-violet-500 to-purple-400" },
-            { label: "Active Deals", value: brokerageSummary.activeDeals, icon: Activity, color: "from-emerald-500 to-green-400" },
-            { label: "Pending Offers", value: brokerageSummary.pendingOffers, icon: DollarSign, color: "from-amber-500 to-yellow-400" },
-            { label: "Under Contract", value: brokerageSummary.underContract, icon: CheckCircle, color: "from-terra-primary to-terra-accent" },
-            { label: "Closings MTD", value: brokerageSummary.closingsThisMonth, icon: TrendingUp, color: "from-emerald-500 to-teal-400" },
-          ].map((m) => (
-            <motion.div key={m.label} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-terra-border p-4 bg-terra-surface/50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 opacity-5">
-                <div className={cn("w-full h-full rounded-bl-full bg-gradient-to-br", m.color)} />
-              </div>
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br mb-2", m.color)}>
-                <m.icon className="w-4 h-4 text-white" />
-              </div>
-              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
-              <p className="text-2xl font-display font-bold text-terra-text">{m.value}</p>
-            </motion.div>
-          ))}
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {[
-            { label: "Pipeline Value", value: formatCurrency(brokerageSummary.pipelineValue), sub: "Active deals", alert: false },
-            { label: "Commission MTD", value: formatCurrency(brokerageSummary.totalCommissionMTD), sub: "All agents", alert: false },
-            { label: "Commission at Risk", value: formatCurrency(brokerageSummary.commissionAtRisk), sub: "High/critical deals", alert: true },
-            { label: "Avg Days to Close", value: `${brokerageSummary.avgDaysToClose}d`, sub: "Team average", alert: false },
-            { label: "Stalled Deals", value: brokerageSummary.stalledDeals, sub: "Need intervention", alert: brokerageSummary.stalledDeals > 0 },
-          ].map((m) => (
-            <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className={cn("rounded-xl border p-4 bg-terra-surface/50", m.alert ? "border-rose-500/30 bg-rose-500/5" : "border-terra-border")}>
-              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
-              <p className={cn("text-xl font-display font-bold mt-1", m.alert ? "text-rose-400" : "text-terra-text")}>{m.value}</p>
-              {m.sub && <p className="text-[10px] text-terra-text-muted mt-0.5">{m.sub}</p>}
-            </motion.div>
-          ))}
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Risk Signal Panel */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="lg:col-span-2">
-          <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-400" />
-                <h3 className="font-display font-bold text-terra-text">Risk Signals — Beacon</h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400">{activeSignals.length} active</span>
-              </div>
-              <Link href="/deals">
-                <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer transition-colors">View All →</span>
-              </Link>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-3.5 h-3.5" style={{ color: "#c8a060" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(200,160,96,0.6)" }}>Active Watchlist</span>
+              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>({WATCHLIST.length})</span>
             </div>
-            <div className="divide-y divide-terra-border">
-              {activeSignals.slice(0, 5).map((signal) => (
-                <div key={signal.id} className={cn("px-5 py-4 hover:bg-terra-surface-hover transition-colors", signal.severity === "critical" && "bg-red-600/5")}>
-                  <div className="flex items-start gap-3">
-                    <RiskBadge level={signal.severity} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-terra-text">{signal.title}</p>
-                      <p className="text-xs text-terra-text-secondary mt-0.5 line-clamp-1">{signal.description}</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded truncate">→ {signal.actionRequired}</span>
-                      </div>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <span className="text-[10px] text-terra-text-muted">{signal.daysOpen === 0 ? "Today" : `${signal.daysOpen}d`}</span>
-                      <p className="text-[10px] text-terra-text-muted mt-0.5">{signal.assignedTo}</p>
-                    </div>
+            <div className="space-y-0">
+              {WATCHLIST.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 py-2.5 hover:bg-white/[0.02] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(200,160,96,0.08)", border: "1px solid rgba(200,160,96,0.15)" }}>
+                    <Building2 className="w-3.5 h-3.5" style={{ color: "#c8a060" }} />
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Urgent Items */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-amber-500/20 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-400" />
-              <h3 className="font-display font-bold text-terra-text">Action Needed</h3>
-            </div>
-            <div className="p-4 space-y-3">
-              {brokerageDeals.filter(d => d.hasUrgentIssue && !["closed","lost-stalled"].includes(d.stage)).slice(0,4).map(deal => (
-                <div key={deal.id} className="rounded-lg border border-amber-500/20 bg-terra-surface p-3">
-                  <p className="text-xs font-semibold text-terra-text">{deal.address.split(",")[0]}</p>
-                  <p className="text-[10px] text-amber-400 mt-0.5">{deal.urgentIssue}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <StageBadge stage={deal.stage} />
-                    <span className="text-[10px] text-terra-text-muted">{deal.nextActionOwner}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Stalled Deals */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-rose-400" />
-                <h3 className="font-display font-bold text-terra-text">Stalled Deals</h3>
-              </div>
-              <Link href="/deals">
-                <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer">View Pipeline →</span>
-              </Link>
-            </div>
-            <div className="divide-y divide-terra-border">
-              {brokerageDeals.filter(d => d.isStalled).map(deal => (
-                <div key={deal.id} className="px-5 py-4">
-                  <div className="flex items-start gap-3">
-                    <DealHealthCard score={deal.dealHealthScore} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-terra-text">{deal.address.split(",")[0]}</p>
-                      <p className="text-xs text-terra-text-secondary mt-0.5">{deal.stalledReason}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <StageBadge stage={deal.stage} />
-                        <span className="text-[10px] text-terra-text-muted">{deal.daysInStage}d in stage</span>
-                      </div>
-                    </div>
-                    <RiskBadge level={deal.riskLevel} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Automation Runs */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-          <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-terra-primary" />
-                <h3 className="font-display font-bold text-terra-text">Alloy — Recent Runs</h3>
-              </div>
-              <Link href="/automations">
-                <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer">View All →</span>
-              </Link>
-            </div>
-            <div className="divide-y divide-terra-border">
-              {recentRuns.map(run => (
-                <div key={run.id} className="px-5 py-3.5 flex items-start gap-3">
-                  <StatusIndicator status={run.status === "success" ? "success" : run.status === "failed" ? "error" : "warning"} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-terra-text">{run.automationName}</p>
-                    <p className="text-[10px] text-terra-text-muted">{run.affectedEntity}</p>
-                    {run.errorMessage && <p className="text-[10px] text-rose-400 mt-0.5">{run.errorMessage}</p>}
+                    <p className="text-[11px] font-medium text-white/80 truncate">{item.address}</p>
+                    <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{item.type}</span>
                   </div>
-                  <span className="text-[10px] text-terra-text-muted flex-shrink-0">{new Date(run.startedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>
+                  <span className="text-[11px] font-mono font-bold" style={{ color: "#c8a060" }}>{item.value}</span>
+                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{
+                    color: item.deltaColor,
+                    background: `${item.deltaColor}10`,
+                    border: `1px solid ${item.deltaColor}15`,
+                  }}>{item.delta}</span>
                 </div>
               ))}
             </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Agent Leaderboard */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-        <div className="rounded-xl border border-terra-border bg-terra-surface/50 overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-terra-border flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-terra-primary" />
-              <h3 className="font-display font-bold text-terra-text">Agent Leaderboard — MTD</h3>
-            </div>
-            <Link href="/team">
-              <span className="text-xs text-terra-text-muted hover:text-terra-primary cursor-pointer">Full Report →</span>
+            <Link href="/listings" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#c8a060" }}>
+              View all properties <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-terra-border">
-                  {["Agent", "Team", "Listings", "Deals", "Commission MTD", "Conv. Rate", "Avg DTC", "Stalled"].map(h => (
-                    <th key={h} className="text-left py-3 px-4 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {topAgents.map((agent) => (
-                  <tr key={agent.id} className="border-b border-terra-border/50 hover:bg-terra-surface-hover transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <AgentAvatar name={agent.name} avatar={agent.avatar} className="w-7 h-7 text-[10px]" />
-                        <div>
-                          <p className="text-xs font-semibold text-terra-text">{agent.name}</p>
-                          <p className="text-[10px] text-terra-text-muted capitalize">{agent.role}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-xs text-terra-text-secondary">{agent.team}</td>
-                    <td className="py-3 px-4 text-xs text-terra-text">{agent.activeListings}</td>
-                    <td className="py-3 px-4 text-xs text-terra-text">{agent.activeDeals}</td>
-                    <td className="py-3 px-4 text-xs font-semibold text-terra-primary">{formatCurrency(agent.commissionMTD)}</td>
-                    <td className="py-3 px-4 text-xs">
-                      <span className={cn(agent.conversionRate >= 0.40 ? "text-emerald-400" : agent.conversionRate >= 0.30 ? "text-amber-400" : "text-rose-400")}>
-                        {Math.round(agent.conversionRate * 100)}%
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-xs text-terra-text">{agent.avgDaysToClose}d</td>
-                    <td className="py-3 px-4">
-                      {agent.stalledDeals > 0 ? (
-                        <span className="text-xs font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">{agent.stalledDeals}</span>
-                      ) : (
-                        <span className="text-xs text-emerald-400">—</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Activity className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(59,130,246,0.6)" }}>Deal Pipeline — Top Deals</span>
+            </div>
+            <div className="space-y-0">
+              {topDeals.map((deal, i) => (
+                <div key={deal.id} className="flex items-center gap-3 py-2 hover:bg-white/[0.02] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium text-white/80 truncate">{deal.address}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {deal.buyerName && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{deal.buyerName}</span>}
+                    </div>
+                  </div>
+                  <StageBadge stage={deal.stage} />
+                  <RiskBadge risk={deal.risk} />
+                  <span className="text-[11px] font-mono font-bold" style={{ color: "#c8a060" }}>{formatCurrency(deal.price)}</span>
+                </div>
+              ))}
+            </div>
+            <Link href="/deals" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#3b82f6" }}>
+              View full pipeline <ArrowRight className="w-3 h-3" />
+            </Link>
           </div>
         </div>
-      </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="col-span-full">
-        <CommandModeSurface
-          title="Command Mode — Deal Signals"
-          accentColor="#a07848"
-          signals={DEAL_SIGNALS}
-        />
-      </motion.div>
+        <div className="space-y-4">
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-3.5 h-3.5" style={{ color: "#f97316" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(249,115,22,0.6)" }}>Market Signals</span>
+            </div>
+            <div className="space-y-0">
+              {MARKET_SIGNALS.map((sig, i) => (
+                <div key={i} className="flex gap-2.5 py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                  <div className="flex flex-col items-center shrink-0 pt-0.5">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: SEVERITY_COLORS[sig.severity] }} />
+                    {i < MARKET_SIGNALS.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: "rgba(255,255,255,0.05)" }} />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{sig.text}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{sig.time}</span>
+                      <span className="text-[8px] px-1 py-0.5 rounded uppercase" style={{
+                        color: SEVERITY_COLORS[sig.severity],
+                        background: `${SEVERITY_COLORS[sig.severity]}10`,
+                      }}>{sig.severity}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="col-span-full">
-        <TerraGraphQLPanel />
-      </motion.div>
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-3.5 h-3.5" style={{ color: "#06b6d4" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(6,182,212,0.6)" }}>Top Brokers</span>
+            </div>
+            {topAgents.map((agent, i) => (
+              <div key={agent.id} className="flex items-center gap-3 py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                <AgentAvatar agent={agent} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-medium text-white/70">{agent.name}</p>
+                  <p className="text-[8px]" style={{ color: "rgba(255,255,255,0.25)" }}>{agent.activeDeals} deals · {agent.conversionRate}% conv</p>
+                </div>
+                <span className="text-[10px] font-mono font-bold" style={{ color: "#10b981" }}>{formatCurrency(agent.commissionMTD)}</span>
+              </div>
+            ))}
+            <Link href="/agents" className="flex items-center gap-1 mt-2 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#06b6d4" }}>
+              Full scorecards <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="rounded-xl border p-3" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="w-3 h-3" style={{ color: "rgba(255,255,255,0.3)" }} />
+                <span className="text-[9px] uppercase tracking-wider font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>System</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#10b981" }} />
+                <span className="text-[9px] font-mono" style={{ color: "#10b981" }}>Demo</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Occupancy</div>
+                <div className="text-[10px] font-mono font-bold" style={{ color: "#c8a060" }}>81%</div>
+              </div>
+              <div>
+                <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Pipeline</div>
+                <div className="text-[10px] font-mono font-bold" style={{ color: "#3b82f6" }}>{formatCurrency(brokerageSummary.pipelineValue)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-
-const DEAL_SIGNALS: CommandModeSignal[] = [
-  {
-    id: "ts-001",
-    level: "critical",
-    what: "112 Riverside Dr — buyer financing fell through 48h before closing",
-    why: "Lender withdrew pre-approval due to appraisal gap of $85K. Seller has backup offer expiring in 72h. Commission of $42K at risk if deal collapses.",
-    owner: "Sarah Chen",
-    next: "Contact buyer's agent to negotiate price adjustment or bridge financing",
-    valueAtRisk: "$42K commission",
-    category: "Deal Risk",
-  },
-  {
-    id: "ts-002",
-    level: "high",
-    what: "Distress property cluster detected — 4 new pre-foreclosures in Westside corridor",
-    why: "County recorder filings show 4 lis pendens within 0.3mi radius. Area median price down 8% QoQ. Potential acquisition opportunity before auction.",
-    owner: "Marcus Webb",
-    next: "Run Alloy distress valuation model. Contact owners within 48h.",
-    valueAtRisk: "$280K potential",
-    category: "Distress Engine",
-  },
-  {
-    id: "ts-003",
-    level: "high",
-    what: "3 leads uncontacted for 72h+ — auto-routing to backup agent",
-    why: "Agent Jake Morrison has not responded to 3 inbound leads from Zillow syndication. SLA breach triggers automatic reassignment in 24h.",
-    owner: "Jake Morrison",
-    next: "Contact agent. If unresponsive, reassign leads to Sarah Chen.",
-    category: "Lead Routing",
-  },
-  {
-    id: "ts-004",
-    level: "medium",
-    what: "MLS listing 2024-8847 — price reduction recommended based on days on market",
-    why: "Property at 45 DOM vs 28 DOM area median. Alloy pricing model suggests 3-5% reduction would align with comparable sold properties.",
-    owner: "Lisa Park",
-    next: "Present pricing analysis to seller at scheduled review meeting",
-    category: "Pricing",
-  },
-];

@@ -47,8 +47,9 @@ function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={HomePage} />
+        <Route path="/" component={Dashboard} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/home" component={HomePage} />
         <Route path="/distress-engine" component={DistressEngine} />
         <Route path="/deals" component={Deals} />
         <Route path="/listings" component={Listings} />

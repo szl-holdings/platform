@@ -326,9 +326,9 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         <div className="px-2 py-2 border-b border-white/5">
           <div className="flex gap-1">
             {([
-              { id: "security" as Module, label: "Security", icon: Shield },
-              { id: "operations" as Module, label: "Ops", icon: Server },
-              { id: "intelligence" as Module, label: "Intel", icon: BrainIcon },
+              { id: "security" as Module, label: "Defense", icon: Shield },
+              { id: "operations" as Module, label: "Command", icon: Server },
+              { id: "intelligence" as Module, label: "Labs", icon: BrainIcon },
             ] as { id: Module; label: string; icon: typeof Shield }[]).map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -575,7 +575,7 @@ function AppRouter() {
         <Route path="/home" component={AegisMarketingHome} />
         {/* Security Operations */}
         <Route path="/soc" component={SOCDashboard} />
-        <Route path="/" component={AegisMarketingHome} />
+        <Route path="/" component={SOCDashboard} />
         <Route path="/asset-inventory" component={AssetInventoryPage} />
         <Route path="/threat-intel" component={ThreatIntelligence} />
         <Route path="/threat-feed" component={ThreatIntelFeed} />

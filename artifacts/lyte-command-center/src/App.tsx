@@ -53,6 +53,7 @@ const MetricsExplorer = lazy(() => import("@/pages/metrics-explorer"));
 const AlertConfig = lazy(() => import("@/pages/alert-config"));
 const ServiceTopology = lazy(() => import("@/pages/service-topology"));
 const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
+const CommandInboxLegacy = lazy(() => import("@/pages/action-queue"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -76,6 +77,7 @@ function PrivateRouter() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandInbox} />
+        <Route path="/inbox" component={CommandInbox} />
         <Route path="/signals" component={SignalsPage} />
         <Route path="/actions" component={ActionsPage} />
         <Route path="/readiness" component={ReadinessPage} />
@@ -87,6 +89,13 @@ function PrivateRouter() {
         <Route path="/intervention" component={InterventionWorkspace} />
         <Route path="/readiness-module" component={ReadinessModule} />
         <Route path="/prism" component={PrismDashboard} />
+        <Route path="/prism/pulse" component={PrismDashboard} />
+        <Route path="/prism/risk" component={PrismDashboard} />
+        <Route path="/prism/intelligence" component={PrismDashboard} />
+        <Route path="/prism/signals" component={SignalsPage} />
+        <Route path="/prism/motion" component={ActionsPage} />
+        <Route path="/explorer" component={SignalsPage} />
+        <Route path="/workflows" component={EscalationWorkflow} />
         <Route path="/metrics" component={MetricsExplorer} />
         <Route path="/alerts" component={AlertConfig} />
         <Route path="/topology" component={ServiceTopology} />
@@ -147,17 +156,17 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
       <WelcomeOverlay
         appId="lyte"
         appName="Lyte"
-        subtitle="Command & Orchestration"
-        description="Lyte interprets what Beacon sees and routes accountability to the right owner. It is the execution layer for human decisions — approvals, escalations, and interventions."
+        subtitle="Business Observability"
+        description="In the dark, let Lyte guide you. Lyte is the business observability layer that detects operational risk, surfaces ownership gaps, and routes action before business damage occurs."
         accentColor="#f59e0b"
         icon={Zap}
         features={[
-          { icon: Inbox, title: "Command Inbox", description: "Prioritized actions, approvals, exceptions, and stalled workflow assignments" },
-          { icon: Activity, title: "Signals Feed", description: "Live signal feed from all sources with state transitions and detail history" },
-          { icon: CheckSquare, title: "Action Center", description: "Assigned actions with state transitions, role-based views, and optimistic updates" },
-          { icon: Shield, title: "Readiness Module", description: "Operational readiness items with scores, owners, and completion tracking" },
-          { icon: Users, title: "Ownership Map", description: "Who owns each step, missing ownership, broken handoffs, overloaded teams" },
-          { icon: AlertOctagon, title: "Escalation Center", description: "What needs escalation, why, to whom, with Alloy rationale attached" },
+          { icon: Activity, title: "PRISM Framework", description: "Pulse, Risk, Intelligence, Signals, Motion — the spine of business observability" },
+          { icon: Inbox, title: "Priority Action Queue", description: "Highest-priority issues with evidence, confidence scores, and recommended next actions" },
+          { icon: Shield, title: "Risk Detection", description: "Approvals drag, churn risk, ownership gaps, compliance exposure, exception handling" },
+          { icon: Users, title: "Ownership Intelligence", description: "Who owns what, what's unassigned, where handoffs break, who's overloaded" },
+          { icon: CheckSquare, title: "Workflow Motion", description: "Escalations, approvals, routing, and intervention orchestration" },
+          { icon: AlertOctagon, title: "Signal Correlation", description: "Cross-system signal correlation with AI-powered reasoning and evidence chains" },
         ]}
       />
     </PowerUserProvider>

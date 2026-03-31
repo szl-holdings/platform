@@ -1,337 +1,409 @@
-import { APPROVALS, WORKFLOWS, EVENTS, formatCurrency, getSeverityColor, getStateColor, type Severity } from "@workspace/shared-ui/core-observability-data";
 import { cn } from "@workspace/shared-ui/utils";
-import { Inbox, AlertTriangle, Clock, User, ArrowRight, Zap, ExternalLink, TrendingUp, Activity, ChevronRight, RefreshCw } from "lucide-react";
-import { CommandModeSurface, type CommandModeSignal, DataStateBadge } from "@workspace/shared-ui";
+import { DataStateBadge } from "@workspace/shared-ui";
 import { useState, useEffect } from "react";
+import { Link } from "wouter";
+import {
+  Heart, AlertTriangle, Brain, Radio, Workflow,
+  ArrowRight, User, ExternalLink, Clock, ChevronRight,
+  TrendingDown, Shield, Zap, Activity, Eye
+} from "lucide-react";
 
-type ActionPriority = "urgent" | "high" | "medium";
+const PRISM_CARDS = [
+  {
+    key: "Pulse",
+    icon: Heart,
+    color: "#10b981",
+    score: 72,
+    label: "Business Health",
+    trend: "stable",
+    detail: "3 systems nominal · 2 degraded",
+    href: "/prism/pulse",
+  },
+  {
+    key: "Risk",
+    icon: AlertTriangle,
+    color: "#ef4444",
+    score: 5,
+    label: "Active Exposures",
+    trend: "up",
+    detail: "$5.03M total value at risk",
+    href: "/prism/risk",
+  },
+  {
+    key: "Intelligence",
+    icon: Brain,
+    color: "#8b5cf6",
+    score: 4,
+    label: "AI Recommendations",
+    trend: "new",
+    detail: "2 high-confidence · 2 pending review",
+    href: "/prism/intelligence",
+  },
+  {
+    key: "Signals",
+    icon: Radio,
+    color: "#f59e0b",
+    score: 18,
+    label: "Active Signals",
+    trend: "up",
+    detail: "7 anomalies · 6 threshold · 5 events",
+    href: "/prism/signals",
+  },
+  {
+    key: "Motion",
+    icon: Workflow,
+    color: "#0ea5e9",
+    score: 12,
+    label: "In-Flight Actions",
+    trend: "down",
+    detail: "4 escalations · 5 approvals · 3 routing",
+    href: "/prism/motion",
+  },
+];
 
-interface ActionItem {
+interface QueueItem {
   id: string;
-  type: "approval" | "escalation" | "ownership" | "exception";
   title: string;
-  subtitle: string;
-  priority: ActionPriority;
-  impact: number;
-  owner?: string;
-  age_hours?: number;
-  action_label: string;
-  action_href: string;
-  correlation_id: string;
+  reason: string;
+  owner: string | null;
+  risk: number;
+  confidence: number;
+  age_hours: number;
+  type: "approval" | "escalation" | "ownership" | "exception";
+  evidence: string;
+  next_action: string;
   linked_product?: string;
   linked_href?: string;
 }
 
-const ACTIONS: ActionItem[] = [
+const ACTION_QUEUE: QueueItem[] = [
   {
-    id: "act-001",
-    type: "approval",
+    id: "q-001",
     title: "Northgate Contract — Legal Review Stalled",
-    subtitle: "48h past SLA · $840K ARR at risk · Escalation recommended",
-    priority: "urgent",
-    impact: 840000,
+    reason: "48h past SLA. No legal reviewer assigned. Contract lapses Friday without renewal signature.",
     owner: "Jordan Alvarez",
+    risk: 840000,
+    confidence: 94,
     age_hours: 48,
-    action_label: "Escalate Approval",
-    action_href: "/approvals",
-    correlation_id: "gf-2026-q1-001",
-    linked_product: "Beacon detected",
-    linked_href: "/terra/",
+    type: "approval",
+    evidence: "SLA breach detected by Alloy workflow monitor",
+    next_action: "Escalate to VP Legal with 24h deadline",
+    linked_product: "Alloy",
+    linked_href: "/alloy",
   },
   {
-    id: "act-002",
-    type: "escalation",
+    id: "q-002",
     title: "TechCorp Churn Risk — Executive Outreach Required",
-    subtitle: "24h to act · $480K ARR · Alloy predicts 88% churn if no contact",
-    priority: "urgent",
-    impact: 480000,
+    reason: "88% churn probability. Declining usage -34%, 3 unresolved tickets, zero executive contact in 14 days.",
     owner: "Marcus Webb",
+    risk: 480000,
+    confidence: 88,
     age_hours: 24,
-    action_label: "Open Escalation",
-    action_href: "/escalation",
-    correlation_id: "corr-churn-techcorp",
-    linked_product: "Alloy modeled",
-    linked_href: "/alloy/",
+    type: "escalation",
+    evidence: "Alloy churn model v3.2 + usage telemetry",
+    next_action: "Schedule executive call within 24h",
+    linked_product: "Alloy",
+    linked_href: "/alloy",
   },
   {
-    id: "act-003",
-    type: "ownership",
-    title: "Apex Logistics Onboarding — No Owner on Compliance Step",
-    subtitle: "6 days unresolved · Blocking 6 vendor onboardings downstream",
-    priority: "high",
-    impact: 320000,
-    owner: undefined,
+    id: "q-003",
+    title: "Apex Logistics Onboarding — No Compliance Owner",
+    reason: "Compliance review step created without owner. 6 vendor onboardings blocked downstream.",
+    owner: null,
+    risk: 320000,
+    confidence: 97,
     age_hours: 144,
-    action_label: "Assign Owner",
-    action_href: "/ownership",
-    correlation_id: "corr-vendor-apex",
-    linked_product: "Beacon flagged",
+    type: "ownership",
+    evidence: "Workflow graph gap detected automatically",
+    next_action: "Assign compliance owner and unblock pipeline",
+    linked_product: "Terra",
     linked_href: "/terra/",
   },
   {
-    id: "act-004",
-    type: "approval",
+    id: "q-004",
     title: "SEC Filing Q1 — CFO Sign-off Pending",
-    subtitle: "36h pending · Regulatory deadline risk · $2.1M filing impact",
-    priority: "high",
-    impact: 2100000,
+    reason: "Regulatory deadline risk. Two of four approvers have not responded.",
     owner: "Thomas Nguyen",
+    risk: 2100000,
+    confidence: 91,
     age_hours: 36,
-    action_label: "Review Approval",
-    action_href: "/approvals",
-    correlation_id: "corr-sec-filing",
-  },
-  {
-    id: "act-005",
-    type: "exception",
-    title: "AlloyScape Run Failed — Contract Workflow Step 4",
-    subtitle: "No approver assigned · Retry available · Reroute recommended",
-    priority: "high",
-    impact: 840000,
-    action_label: "View in AlloyScape",
-    action_href: "/alloy/",
-    correlation_id: "gf-2026-q1-001",
-    linked_product: "AlloyScape exception",
-    linked_href: "/alloy/",
-  },
-  {
-    id: "act-006",
     type: "approval",
-    title: "Q1 Budget CapEx Authorization — Infrastructure Upgrade",
-    subtitle: "72h aging · $450K authorization · Cross-department sign-off needed",
-    priority: "medium",
-    impact: 450000,
-    owner: "Priya Mehta",
-    age_hours: 72,
-    action_label: "Review Approval",
-    action_href: "/approvals",
-    correlation_id: "corr-q1-budget",
+    evidence: "Approval chain audit — Lyte governance module",
+    next_action: "Send reminder with 48h escalation trigger",
+  },
+  {
+    id: "q-005",
+    title: "Contract Workflow Step 4 Failed — No Approver",
+    reason: "Alloy run failed at step 4. No approver assigned. Retry available.",
+    owner: null,
+    risk: 840000,
+    confidence: 100,
+    age_hours: 6,
+    type: "exception",
+    evidence: "Alloy execution engine — run #GF-2026-Q1-001",
+    next_action: "Assign approver or reroute workflow",
+    linked_product: "Alloy",
+    linked_href: "/alloy",
   },
 ];
 
-const PRIORITY_CONFIG: Record<ActionPriority, { label: string; color: string; bg: string; border: string; ringColor: string }> = {
-  urgent: { label: "URGENT", color: "#ef4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.25)", ringColor: "rgba(239,68,68,0.15)" },
-  high: { label: "HIGH", color: "#f97316", bg: "rgba(249,115,22,0.1)", border: "rgba(249,115,22,0.25)", ringColor: "rgba(249,115,22,0.1)" },
-  medium: { label: "MEDIUM", color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.25)", ringColor: "rgba(245,158,11,0.08)" },
-};
+const SIGNAL_FEED = [
+  { time: "2m ago", type: "anomaly", text: "Unusual approval volume spike — 3x normal for Q1 filing cluster", severity: "high" as const },
+  { time: "8m ago", type: "threshold", text: "Decision latency exceeded 48h SLA on 2 active approvals", severity: "critical" as const },
+  { time: "15m ago", type: "event", text: "Alloy workflow #GF-2026-Q1-001 entered exception state", severity: "high" as const },
+  { time: "22m ago", type: "change", text: "Ownership gap detected: compliance step missing assignee in vendor pipeline", severity: "medium" as const },
+  { time: "34m ago", type: "anomaly", text: "TechCorp engagement score dropped below retention threshold", severity: "high" as const },
+  { time: "1h ago", type: "event", text: "New distress signal forwarded from Terra — Northgate portfolio cluster", severity: "medium" as const },
+];
 
-const TYPE_CONFIG: Record<ActionItem["type"], { icon: React.ReactNode; label: string; color: string }> = {
-  approval: { icon: <Clock className="w-3 h-3" />, label: "Approval", color: "#60a5fa" },
-  escalation: { icon: <AlertTriangle className="w-3 h-3" />, label: "Escalation", color: "#f87171" },
-  ownership: { icon: <User className="w-3 h-3" />, label: "Ownership", color: "#a78bfa" },
-  exception: { icon: <Zap className="w-3 h-3" />, label: "Exception", color: "#fb923c" },
-};
+const CORRELATION_ITEMS = [
+  { entity: "Northgate Group", type: "Account", connections: ["Contract #NG-2026-R1", "Approval Chain #AC-847", "Alloy Run #GF-001"], risk: "$840K" },
+  { entity: "TechCorp Inc.", type: "Account", connections: ["Usage Telemetry", "Support Tickets (3)", "Churn Model v3.2"], risk: "$480K" },
+  { entity: "Q1 Filing Cluster", type: "Process", connections: ["SEC Filing", "CFO Approval", "CapEx Auth", "Board Review"], risk: "$2.55M" },
+];
 
-function AgePill({ hours }: { hours: number }) {
-  const isOverdue = hours >= 48;
-  const isWarning = hours >= 24;
-  return (
-    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{
-      color: isOverdue ? "#ef4444" : isWarning ? "#f97316" : "rgba(255,255,255,0.35)",
-      background: isOverdue ? "rgba(239,68,68,0.08)" : isWarning ? "rgba(249,115,22,0.08)" : "rgba(255,255,255,0.04)",
-      border: `1px solid ${isOverdue ? "rgba(239,68,68,0.2)" : isWarning ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.06)"}`,
-    }}>
-      {hours}h
-    </span>
-  );
+function formatCurrency(n: number) {
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(0)}K`;
+  return `$${n}`;
 }
 
-function LiveTick() {
+const TYPE_COLORS: Record<string, { color: string; label: string }> = {
+  approval: { color: "#60a5fa", label: "Approval" },
+  escalation: { color: "#f87171", label: "Escalation" },
+  ownership: { color: "#a78bfa", label: "Ownership" },
+  exception: { color: "#fb923c", label: "Exception" },
+};
+
+const SEVERITY_COLORS: Record<string, string> = {
+  critical: "#ef4444",
+  high: "#f97316",
+  medium: "#f59e0b",
+  low: "rgba(255,255,255,0.3)",
+};
+
+function LiveDot() {
   const [tick, setTick] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 3000);
     return () => clearInterval(id);
   }, []);
-  return (
-    <span key={tick} className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#ef4444" }} />
-  );
+  return <span key={tick} className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: "#10b981" }} />;
 }
 
-function ActionCard({ action, compact = false }: { action: ActionItem; compact?: boolean }) {
-  const p = PRIORITY_CONFIG[action.priority];
-  const t = TYPE_CONFIG[action.type];
-
+export default function LyteOverview() {
   return (
-    <div className="group rounded-xl border transition-all hover:border-opacity-60" style={{ borderColor: p.border, background: `rgba(255,255,255,0.012)` }}>
-      <div className="p-4">
-        <div className="flex items-start gap-3">
-          {/* Type indicator */}
-          <div className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5" style={{ background: `${t.color}12`, border: `1px solid ${t.color}20`, color: t.color }}>
-            {t.icon}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded" style={{ color: p.color, background: p.bg, border: `1px solid ${p.border}` }}>
-                {p.label}
-              </span>
-              <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{ color: t.color, background: `${t.color}08`, border: `1px solid ${t.color}18` }}>
-                {t.label}
-              </span>
-              {action.age_hours && <AgePill hours={action.age_hours} />}
-            </div>
-            <p className="text-sm font-semibold text-white leading-tight">{action.title}</p>
-            <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{action.subtitle}</p>
-
-            {/* Owner row */}
-            {(action.owner || action.linked_product) && (
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                {action.owner ? (
-                  <span className="flex items-center gap-1 text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>
-                    <User className="w-2.5 h-2.5" /> {action.owner}
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-[10px] text-red-400/70">
-                    <User className="w-2.5 h-2.5" /> No owner assigned
-                  </span>
-                )}
-                {action.linked_product && action.linked_href && (
-                  <a href={action.linked_href} className="flex items-center gap-1 text-[10px] hover:opacity-80 transition-opacity" style={{ color: "rgba(255,255,255,0.25)" }} onClick={e => e.stopPropagation()}>
-                    <ExternalLink className="w-2.5 h-2.5" />{action.linked_product}
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Impact + CTA */}
-          <div className="flex flex-col items-end gap-2 shrink-0">
-            <div className="text-right">
-              <div className="text-sm font-bold" style={{ color: "#f59e0b" }}>{formatCurrency(action.impact)}</div>
-              <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>exposure</div>
-            </div>
-            <a
-              href={action.action_href}
-              className="flex items-center gap-1 text-[10px] font-medium px-2.5 py-1.5 rounded-lg transition-all hover:opacity-80 whitespace-nowrap"
-              style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}
-            >
-              {action.action_label} <ArrowRight className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function CommandInbox() {
-  const urgent = ACTIONS.filter(a => a.priority === "urgent");
-  const high = ACTIONS.filter(a => a.priority === "high");
-  const medium = ACTIONS.filter(a => a.priority === "medium");
-  const totalExposure = ACTIONS.reduce((s, a) => s + a.impact, 0);
-  const agingApprovals = APPROVALS.filter(a => a.age_hours > 24).length;
-
-  return (
-    <div className="max-w-7xl mx-auto space-y-5">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+    <div className="p-4 md:p-6 space-y-4 max-w-[1400px]">
+      <div className="flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Inbox className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#f59e0b" }}>Lyte · Command Inbox</span>
-          </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Command Inbox</h1>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Prioritized actions requiring human decision — approvals, escalations, ownership gaps, and exception interventions.</p>
+          <h1 className="text-lg font-bold text-white tracking-tight">Business Observability</h1>
+          <p className="text-[11px] mt-0.5 italic" style={{ color: "rgba(245,158,11,0.5)" }}>In the dark, let Lyte guide you.</p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3">
           <DataStateBadge state="demo" label="Demo Data" />
-          <div className="flex items-center gap-2">
-            <LiveTick />
-            <span className="text-[9px] font-mono" style={{ color: "rgba(245,158,11,0.5)" }}>live</span>
+          <div className="flex items-center gap-1.5">
+            <LiveDot />
+            <span className="text-[9px] font-mono" style={{ color: "rgba(16,185,129,0.6)" }}>live</span>
           </div>
         </div>
       </div>
 
-      {/* KPI strip */}
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
-        <div className="flex items-stretch">
+        <div className="grid grid-cols-3 md:grid-cols-6">
           {[
-            { label: "Urgent Actions", value: urgent.length.toString(), color: "#ef4444", sub: "act now", pulse: urgent.length > 0 },
-            { label: "High Priority", value: high.length.toString(), color: "#f97316", sub: "require review" },
-            { label: "Aging Approvals", value: agingApprovals.toString(), color: "#f59e0b", sub: ">24h without action" },
-            { label: "Total Exposure", value: formatCurrency(totalExposure), color: "#10b981", sub: "value at stake" },
-            { label: "Active Signals", value: ACTIONS.length.toString(), color: "rgba(255,255,255,0.5)", sub: "in inbox" },
+            { label: "Urgent Exposures", value: "5", color: "#ef4444", pulse: true },
+            { label: "Aged Approvals", value: "3", color: "#f97316", sub: ">24h" },
+            { label: "Ownership Gaps", value: "8", color: "#a78bfa" },
+            { label: "Active Signals", value: "18", color: "#f59e0b" },
+            { label: "Value at Risk", value: "$5.03M", color: "#ef4444" },
+            { label: "Decision Latency", value: "34h", color: "#f97316", sub: "avg" },
           ].map((c, i) => (
-            <div key={c.label} className="flex-1 px-4 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+            <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                <span className="text-lg font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
+                <span className="text-base font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
                 {c.pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: c.color }} />}
               </div>
-              <div className="text-[9px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
-              {c.sub && <div className="text-[8px] mt-0.5" style={{ color: "rgba(255,255,255,0.18)" }}>{c.sub}</div>}
+              <div className="text-[8px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
+              {c.sub && <div className="text-[7px] mt-0.5" style={{ color: "rgba(255,255,255,0.15)" }}>{c.sub}</div>}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Priority groups */}
-      {[
-        { label: "Urgent — Act Now", labelColor: "#ef4444", items: urgent, borderAccent: "rgba(239,68,68,0.12)", dot: "#ef4444" },
-        { label: "High Priority", labelColor: "#f97316", items: high, borderAccent: "rgba(249,115,22,0.08)", dot: "#f97316" },
-        { label: "Medium Priority", labelColor: "#f59e0b", items: medium, borderAccent: "rgba(245,158,11,0.06)", dot: "#f59e0b" },
-      ].filter(g => g.items.length > 0).map(group => (
-        <div key={group.label} className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: group.dot }} />
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: group.labelColor }}>{group.label}</span>
-            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>({group.items.length})</span>
-            <div className="flex-1 h-px" style={{ background: `linear-gradient(to right, ${group.dot}30, transparent)` }} />
-          </div>
-          {group.items.map(action => (
-            <ActionCard key={action.id} action={action} />
-          ))}
-        </div>
-      ))}
+      <div className="grid grid-cols-5 gap-3">
+        {PRISM_CARDS.map((card) => (
+          <Link key={card.key} href={card.href} className="group rounded-xl border p-3 transition-all hover:scale-[1.02] cursor-pointer" style={{
+            borderColor: `${card.color}20`,
+            background: `linear-gradient(135deg, ${card.color}06, transparent)`,
+          }}>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${card.color}15`, border: `1px solid ${card.color}25` }}>
+                <card.icon className="w-3.5 h-3.5" style={{ color: card.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[9px] font-bold uppercase tracking-wider" style={{ color: card.color }}>{card.key}</div>
+              </div>
+              <span className="text-lg font-bold font-mono" style={{ color: card.color }}>{card.score}</span>
+            </div>
+            <div className="text-[10px] font-medium text-white/70">{card.label}</div>
+            <div className="text-[9px] mt-1" style={{ color: "rgba(255,255,255,0.3)" }}>{card.detail}</div>
+            <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="text-[9px] font-medium" style={{ color: card.color }}>Explore</span>
+              <ChevronRight className="w-3 h-3" style={{ color: card.color }} />
+            </div>
+          </Link>
+        ))}
+      </div>
 
-      {/* Command mode surface */}
-      <CommandModeSurface
-        title="Command Mode — Active Signals"
-        accentColor="#f59e0b"
-        signals={COMMAND_SIGNALS}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444" }} />
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#ef4444" }}>Priority Action Queue</span>
+            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>({ACTION_QUEUE.length})</span>
+            <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(239,68,68,0.3), transparent)" }} />
+          </div>
+
+          {ACTION_QUEUE.map((item) => {
+            const tc = TYPE_COLORS[item.type];
+            const isOverdue = item.age_hours >= 48;
+            const isWarning = item.age_hours >= 24;
+            return (
+              <div key={item.id} className="rounded-xl border p-4 transition-all hover:border-opacity-60" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+                <div className="flex items-start gap-3">
+                  <div className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center mt-0.5" style={{ background: `${tc.color}12`, border: `1px solid ${tc.color}20`, color: tc.color }}>
+                    {item.type === "approval" && <Clock className="w-3 h-3" />}
+                    {item.type === "escalation" && <AlertTriangle className="w-3 h-3" />}
+                    {item.type === "ownership" && <User className="w-3 h-3" />}
+                    {item.type === "exception" && <Zap className="w-3 h-3" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{ color: tc.color, background: `${tc.color}10`, border: `1px solid ${tc.color}20` }}>{tc.label}</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{
+                        color: isOverdue ? "#ef4444" : isWarning ? "#f97316" : "rgba(255,255,255,0.35)",
+                        background: isOverdue ? "rgba(239,68,68,0.08)" : isWarning ? "rgba(249,115,22,0.08)" : "rgba(255,255,255,0.04)",
+                        border: `1px solid ${isOverdue ? "rgba(239,68,68,0.2)" : isWarning ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.06)"}`,
+                      }}>{item.age_hours}h</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{
+                        color: item.confidence >= 90 ? "#10b981" : "#f59e0b",
+                        background: item.confidence >= 90 ? "rgba(16,185,129,0.08)" : "rgba(245,158,11,0.08)",
+                        border: `1px solid ${item.confidence >= 90 ? "rgba(16,185,129,0.2)" : "rgba(245,158,11,0.2)"}`,
+                      }}>{item.confidence}% conf</span>
+                    </div>
+                    <p className="text-sm font-semibold text-white leading-tight">{item.title}</p>
+                    <p className="text-[10px] mt-1 leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{item.reason}</p>
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                      {item.owner ? (
+                        <span className="flex items-center gap-1 text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+                          <User className="w-2.5 h-2.5" /> {item.owner}
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[10px] text-red-400/70">
+                          <User className="w-2.5 h-2.5" /> No owner
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1 text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+                        <Eye className="w-2.5 h-2.5" /> {item.evidence}
+                      </span>
+                      {item.linked_product && item.linked_href && (
+                        <a href={item.linked_href} className="flex items-center gap-1 text-[10px] hover:opacity-80 transition-opacity" style={{ color: "rgba(255,255,255,0.25)" }}>
+                          <ExternalLink className="w-2.5 h-2.5" />{item.linked_product}
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 p-2 rounded-lg" style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.08)" }}>
+                      <ArrowRight className="w-3 h-3 shrink-0" style={{ color: "#f59e0b" }} />
+                      <span className="text-[10px] font-medium" style={{ color: "#f59e0b" }}>{item.next_action}</span>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold" style={{ color: "#ef4444" }}>{formatCurrency(item.risk)}</div>
+                    <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.25)" }}>at risk</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Radio className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#f59e0b" }}>Signal Timeline</span>
+            </div>
+            <div className="space-y-0">
+              {SIGNAL_FEED.map((sig, i) => (
+                <div key={i} className="flex gap-3 py-2 group" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                  <div className="flex flex-col items-center shrink-0 pt-0.5">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: SEVERITY_COLORS[sig.severity] }} />
+                    {i < SIGNAL_FEED.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: "rgba(255,255,255,0.05)" }} />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{sig.text}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{sig.time}</span>
+                      <span className="text-[8px] px-1 py-0.5 rounded uppercase tracking-wider font-medium" style={{
+                        color: SEVERITY_COLORS[sig.severity],
+                        background: `${SEVERITY_COLORS[sig.severity]}10`,
+                      }}>{sig.severity}</span>
+                      <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.15)" }}>{sig.type}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Link href="/prism/signals" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#f59e0b" }}>
+              View all signals <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Activity className="w-3.5 h-3.5" style={{ color: "#8b5cf6" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#8b5cf6" }}>Correlations</span>
+            </div>
+            {CORRELATION_ITEMS.map((corr, i) => (
+              <div key={i} className="py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-semibold text-white">{corr.entity}</span>
+                  <span className="text-[9px] font-mono font-bold" style={{ color: "#ef4444" }}>{corr.risk}</span>
+                </div>
+                <span className="text-[8px] px-1 py-0.5 rounded uppercase" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>{corr.type}</span>
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {corr.connections.map((conn, j) => (
+                    <span key={j} className="text-[8px] px-1.5 py-0.5 rounded" style={{ color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>{conn}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-xl border p-3" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="w-3 h-3" style={{ color: "rgba(255,255,255,0.3)" }} />
+                <span className="text-[9px] uppercase tracking-wider font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>System State</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#10b981" }} />
+                <span className="text-[9px] font-mono" style={{ color: "#10b981" }}>Demo</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div>
+                <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Last refresh</div>
+                <div className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>Just now</div>
+              </div>
+              <div>
+                <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Confidence</div>
+                <div className="text-[9px] font-mono" style={{ color: "#10b981" }}>High</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-
-const COMMAND_SIGNALS: CommandModeSignal[] = [
-  {
-    id: "cs-001",
-    level: "critical",
-    what: "Northgate contract approval stalled — 48h past SLA",
-    why: "Legal review has no assigned owner. $840K ARR at risk if contract lapses without renewal signature by Friday.",
-    owner: "Jordan Alvarez",
-    next: "Escalate to VP Legal with 24h deadline",
-    valueAtRisk: "$840K",
-    category: "Approval",
-  },
-  {
-    id: "cs-002",
-    level: "high",
-    what: "TechCorp churn probability at 88% — no executive outreach in 14 days",
-    why: "Alloy model predicts churn based on declining usage, 3 unresolved support tickets, and zero executive contact since renewal discussion.",
-    owner: "Marcus Webb",
-    next: "Schedule executive call within 24h",
-    valueAtRisk: "$480K",
-    category: "Retention",
-  },
-  {
-    id: "cs-003",
-    level: "high",
-    what: "Apex Logistics onboarding compliance step has no owner",
-    why: "6 vendor onboardings blocked downstream. Compliance review step was created without owner assignment — likely a workflow configuration gap.",
-    next: "Assign compliance owner and unblock pipeline",
-    valueAtRisk: "$320K",
-    category: "Ownership",
-  },
-  {
-    id: "cs-004",
-    level: "medium",
-    what: "Q1 CapEx budget authorization aging at 72h",
-    why: "Infrastructure upgrade requires cross-department sign-off. Two of four approvers have not responded.",
-    owner: "Priya Mehta",
-    next: "Send reminder with 48h escalation trigger",
-    valueAtRisk: "$450K",
-    category: "Approval",
-  },
-];
