@@ -5,13 +5,17 @@ import { ArrowRight } from "lucide-react";
 export function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", context: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+    setSubmitting(true);
     try {
       const basePath = import.meta.env.BASE_URL || "/";
       const apiBase = basePath.replace(/\/$/, "") + "/api";
-      await fetch(`${apiBase}/cms/contact-submissions`, {
+      const res = await fetch(`${apiBase}/cms/contact-submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -22,9 +26,13 @@ export function ContactSection() {
           message: form.context,
         }),
       });
+      if (!res.ok) throw new Error("Submission failed");
+      setSubmitted(true);
     } catch {
+      setSubmitError("Something went wrong. Please email me directly at stephen@szlholdings.com");
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitted(true);
   };
 
   return (
@@ -122,12 +130,16 @@ export function ContactSection() {
                     placeholder="Brief context on the challenge or opportunity..."
                   />
                 </div>
+                {submitError && (
+                  <p className="text-[12px] text-red-400/80 font-light">{submitError}</p>
+                )}
                 <button
                   type="submit"
-                  className="group inline-flex items-center gap-2.5 px-8 py-3.5 text-[13px] font-medium tracking-[0.07em] text-white bg-[#4a6fa5] hover:bg-[#5a80b8] transition-colors duration-300"
+                  disabled={submitting}
+                  className="group inline-flex items-center gap-2.5 px-8 py-3.5 text-[13px] font-medium tracking-[0.07em] text-white bg-[#4a6fa5] hover:bg-[#5a80b8] transition-colors duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Send request
-                  <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                  {submitting ? "Sending..." : "Send request"}
+                  {!submitting && <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />}
                 </button>
               </form>
             )}

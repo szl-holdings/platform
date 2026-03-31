@@ -9,7 +9,15 @@ import { useAuth } from "@workspace/replit-auth-web";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5, retry: 1 },
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      retry: (failureCount, error) => {
+        const apiErr = error as { status?: number };
+        if (apiErr?.status === 401 || apiErr?.status === 403) return false;
+        return failureCount < 1;
+      },
+    },
   },
 });
 

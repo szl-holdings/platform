@@ -89,7 +89,17 @@ const IntelInsights = lazy(() => import("@/pages/intel/insights"));
 const IntelAlertsManagement = lazy(() => import("@/pages/intel/alerts-management"));
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 60000,
+      retry: (failureCount, error) => {
+        const status = (error as { status?: number })?.status;
+        if (status === 401 || status === 403) return false;
+        return failureCount < 1;
+      },
+    },
+  },
 });
 
 // ─── Navigation definitions ───────────────────────────────────────────────────

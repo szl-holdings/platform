@@ -6,8 +6,21 @@ import {
   ChevronDown, ChevronRight, Eye, CheckCheck, X as XIcon, ToggleRight, FileText, Users, Flag,
 } from "lucide-react";
 import { cn } from "../lib/utils";
+import { isAuthError } from "@workspace/shared-ui";
 
-const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } });
+function noRetryOn401(failureCount: number, error: unknown): boolean {
+  if (isAuthError(error)) return false;
+  return failureCount < 1;
+}
+
+const qc = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: noRetryOn401,
+      staleTime: 30_000,
+    },
+  },
+});
 
 const stateColors: Record<string, string> = {
   queued: "text-slate-400 bg-slate-500/10 border-slate-500/20",
@@ -276,7 +289,10 @@ function ConsoleInner() {
   const { data: dashboard, isLoading: dashLoading } = useQuery({
     queryKey: ["alloy-dashboard"],
     queryFn: () => alloyApi.dashboard(),
-    refetchInterval: 30_000,
+    refetchInterval: (query) => {
+      if (isAuthError(query.state.error)) return false;
+      return 30_000;
+    },
   });
 
   const { data: workflows = [], isLoading: wfLoading } = useQuery({

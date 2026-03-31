@@ -11,6 +11,20 @@ export interface PaginatedResponse<T> {
   meta: PaginationMeta;
 }
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export function isAuthError(err: unknown): boolean {
+  return err instanceof ApiError && (err.status === 401 || err.status === 403);
+}
+
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -22,7 +36,7 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw new Error((err as { error?: string }).error || `HTTP ${res.status}`);
+    throw new ApiError((err as { error?: string }).error || `HTTP ${res.status}`, res.status);
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;

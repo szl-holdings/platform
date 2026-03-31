@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge } from "@workspace/shared-ui";
+import { apiFetch, isAuthError, DataStateBadge } from "@workspace/shared-ui";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Zap, Terminal, ChevronRight, Play, Filter } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -30,7 +30,14 @@ function useRuns(status?: string) {
       if (resp && typeof resp === "object" && "data" in resp) return resp.data;
       return resp as WorkflowRun[];
     },
-    refetchInterval: 8000,
+    refetchInterval: (query) => {
+      if (isAuthError(query.state.error)) return false;
+      return 8000;
+    },
+    retry: (failureCount, error) => {
+      if (isAuthError(error)) return false;
+      return failureCount < 1;
+    },
   });
 }
 

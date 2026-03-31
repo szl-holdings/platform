@@ -1,9 +1,13 @@
 import { db, lyteSignalsTable } from "@workspace/db";
+import { lt, sql } from "drizzle-orm";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
 
 const POLL_INTERVAL_MS = 60_000;
 const SIGNAL_COOLDOWN_MS = 10 * 60_000;
+const SIGNAL_MAX_AGE_DAYS = 30;
+const SIGNAL_MAX_COUNT = 200;
+let pruneCounter = 0;
 const HEALTH_URL = "http://localhost:" + (process.env.PORT ?? "3000") + "/api/health/detailed";
 
 interface HealthCheck {
@@ -99,8 +103,44 @@ async function createSignal(params: {
   }
 }
 
+async function pruneOldSignals(): Promise<void> {
+  try {
+    const cutoff = new Date(Date.now() - SIGNAL_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+    const { rowCount: aged } = await db
+      .delete(lyteSignalsTable)
+      .where(lt(lyteSignalsTable.receivedAt, cutoff));
+    if (aged && aged > 0) {
+      logger.info({ count: aged, maxAgeDays: SIGNAL_MAX_AGE_DAYS }, "Self-monitor: pruned old signals by age");
+    }
+
+    const [{ cnt }] = await db
+      .select({ cnt: sql<number>`count(*)::int` })
+      .from(lyteSignalsTable);
+    if (cnt > SIGNAL_MAX_COUNT) {
+      const excess = cnt - SIGNAL_MAX_COUNT;
+      const { rowCount: pruned } = await db.execute(sql`
+        DELETE FROM ${lyteSignalsTable}
+        WHERE id IN (
+          SELECT id FROM ${lyteSignalsTable}
+          ORDER BY received_at ASC
+          LIMIT ${excess}
+        )
+      `);
+      if (pruned && pruned > 0) {
+        logger.info({ count: pruned, maxCount: SIGNAL_MAX_COUNT }, "Self-monitor: pruned excess signals by count");
+      }
+    }
+  } catch (err) {
+    logger.warn({ err }, "Self-monitor: signal prune failed (non-fatal)");
+  }
+}
+
 async function runMonitoringCycle(): Promise<void> {
   logger.debug("Self-monitoring: polling /api/health/detailed");
+  pruneCounter++;
+  if (pruneCounter % 10 === 0) {
+    await pruneOldSignals();
+  }
 
   const health = await fetchHealth();
   if (!health) {
