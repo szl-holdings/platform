@@ -29,7 +29,7 @@ A premium, command-grade, SZL-branded design system inspired by Palantir Foundry
 - **Lyte:** Amber, Business Observability Platform using the PRISM framework.
 - **Vessels:** Deep ocean blue, maritime command intelligence.
 - **Terra:** Bronze/stone, real-estate portfolio intelligence.
-- **Carlota Jo:** Warm ivory/brushed gold, UHNW residential advisory platform with a public marketing site and private Client Portal.
+- **Carlota Jo:** Warm ivory/brushed gold, UHNW residential advisory platform with a public marketing site, private Client Portal, and a native mobile app (`artifacts/carlota-jo-mobile`, Expo/React Native, port 8082).
 - **Stephen Lutar:** Near-monochrome, founder identity.
 - **Aegis:** Indigo/violet, Unified Defense & Intelligence Command, consolidating Security Operations (Firestorm), Managed Operations (Rosie/MSP), and Intelligence Engine (INCA).
 

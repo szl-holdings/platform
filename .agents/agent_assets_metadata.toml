@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "nzr-lNpu4x7sxci7NOjEs"
+uri = "file://artifacts/carlota-jo-mobile/assets/images/icon.png"
+type = "image"
+title = "carlota-jo-mobile-icon"
+
+[[generated]]
+id = "92B2Nsj542Hc8KAEUVB3v"
+uri = "file://artifacts/carlota-jo-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "carlota-jo-splash"
