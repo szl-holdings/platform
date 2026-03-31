@@ -1,18 +1,20 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Flame, MapPin, List, Filter, Search, AlertTriangle, Clock, DollarSign,
   ChevronRight, X, Building2, TrendingDown, Gavel, FileText, ShieldAlert,
   Calendar, User, Tag, ArrowRight, Bell, BarChart3, Eye, Zap, Target,
-  CheckCircle, ArrowUpRight, LinkIcon, Layers, Loader2
+  CheckCircle, ArrowUpRight, LinkIcon, Layers, Loader2, RefreshCw, Download
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-import { DataStateBadge } from "@workspace/shared-ui";
-import { distressedProperties, distressAlerts, distressStats, type DistressedProperty, type DistressType, type Borough } from "@/data/distress";
-import { Link } from "wouter";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API_BASE = BASE.replace(/\/[^/]+$/, "/api");
+
+function fetchJson(path: string) {
+  return fetch(`${API_BASE}${path}`).then(r => r.json()).then(d => d.data ?? d);
+}
 
 async function postJson(path: string, body: unknown) {
   const r = await fetch(`${API_BASE}${path}`, {
@@ -21,6 +23,38 @@ async function postJson(path: string, body: unknown) {
     body: JSON.stringify(body),
   });
   return r.json();
+}
+
+export type DistressType = "pre-foreclosure" | "foreclosure" | "auction" | "reo" | "tax-lien" | "expired-listing";
+export type Borough = "Manhattan" | "Brooklyn" | "Queens" | "Bronx" | "Staten Island";
+
+export interface ApiDistressProperty {
+  id: string;
+  address: string;
+  borough: Borough;
+  county: string;
+  zipCode: string | null;
+  propertyType: string;
+  distressType: DistressType;
+  stage: string;
+  estimatedValue: number;
+  debtAmount: number | null;
+  lienAmount: number | null;
+  auctionDate: string | null;
+  filingDate: string;
+  ownerName: string;
+  ownerType: string;
+  opportunityScore: number;
+  confidenceLevel: string;
+  scoreRationale: string;
+  daysInDistress: number;
+  sqft: number | null;
+  yearBuilt: number | null;
+  beds: number | null;
+  baths: number | null;
+  tags: string[];
+  timeline: Array<{ date: string; type: string; description: string }>;
+  connectorSource: string;
 }
 
 const DISTRESS_TYPE_CONFIG: Record<DistressType, { label: string; color: string; bg: string; icon: typeof Flame; pinColor: string }> = {
@@ -61,11 +95,12 @@ function DistressTypePill({ type, compact = false }: { type: DistressType; compa
   );
 }
 
-function PropertyListCard({ property, isSelected, onClick }: { property: DistressedProperty; isSelected: boolean; onClick: () => void }) {
+function PropertyListCard({ property, isSelected, onClick }: { property: ApiDistressProperty; isSelected: boolean; onClick: () => void }) {
   const cfg = DISTRESS_TYPE_CONFIG[property.distressType];
   const isAuctionSoon = property.distressType === "auction" && property.auctionDate;
+  const today = new Date("2026-03-31");
   const auctionDays = isAuctionSoon
-    ? Math.ceil((new Date(property.auctionDate!).getTime() - new Date("2026-03-30").getTime()) / 86400000)
+    ? Math.ceil((new Date(property.auctionDate!).getTime() - today.getTime()) / 86400000)
     : null;
 
   return (
@@ -82,7 +117,7 @@ function PropertyListCard({ property, isSelected, onClick }: { property: Distres
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="flex-1 min-w-0">
           <p className={cn("text-sm font-semibold truncate", isSelected ? "text-terra-primary" : "text-terra-text")}>{property.address}</p>
-          <p className="text-[11px] text-terra-text-muted">{property.borough} · {property.zipCode}</p>
+          <p className="text-[11px] text-terra-text-muted">{property.borough} · {property.zipCode ?? property.county}</p>
         </div>
         <ScoreBadge score={property.opportunityScore} />
       </div>
@@ -100,7 +135,7 @@ function PropertyListCard({ property, isSelected, onClick }: { property: Distres
 }
 
 function MapPlaceholder({ properties, selectedId, onSelectPin }: {
-  properties: DistressedProperty[];
+  properties: ApiDistressProperty[];
   selectedId: string | null;
   onSelectPin: (id: string) => void;
 }) {
@@ -112,10 +147,13 @@ function MapPlaceholder({ properties, selectedId, onSelectPin }: {
     "Staten Island": { x: 22, y: 82 },
   };
 
-  const getPin = (p: DistressedProperty, idx: number) => {
-    const center = boroughCenters[p.borough];
-    const jitter = ((idx * 7919 + 3571) % 100) / 100;
-    const jitter2 = ((idx * 3571 + 7919) % 100) / 100;
+  const displayProps = properties.slice(0, 200);
+
+  const getPin = (p: ApiDistressProperty, idx: number) => {
+    const center = boroughCenters[p.borough] ?? { x: 50, y: 50 };
+    const hash = (p.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0) + idx * 7919) % 10000;
+    const jitter = (hash % 100) / 100;
+    const jitter2 = ((hash * 73) % 100) / 100;
     const x = center.x + (jitter - 0.5) * 18;
     const y = center.y + (jitter2 - 0.5) * 14;
     const cfg = DISTRESS_TYPE_CONFIG[p.distressType];
@@ -141,14 +179,12 @@ function MapPlaceholder({ properties, selectedId, onSelectPin }: {
           <text x="74" y="47" textAnchor="middle" fontSize="3.5" fill="#4e6a9a" fontFamily="monospace">Queens</text>
           <text x="56" y="12" textAnchor="middle" fontSize="3.5" fill="#4e6a9a" fontFamily="monospace">Bronx</text>
           <text x="23" y="86" textAnchor="middle" fontSize="3" fill="#4e6a9a" fontFamily="monospace">S.I.</text>
-          {properties.map((p, i) => {
+          {displayProps.map((p, i) => {
             const { x, y, cfg, isSelected } = getPin(p, i);
             return (
               <g key={p.id} onClick={() => onSelectPin(p.id)} style={{ cursor: "pointer" }}>
                 <circle cx={x} cy={y} r={isSelected ? 3.5 : 2.2} fill={cfg.pinColor} opacity={isSelected ? 1 : 0.85} stroke={isSelected ? "white" : "none"} strokeWidth={0.6} />
-                {isSelected && (
-                  <circle cx={x} cy={y} r={5.5} fill="none" stroke={cfg.pinColor} strokeWidth={0.5} opacity={0.5} />
-                )}
+                {isSelected && <circle cx={x} cy={y} r={5.5} fill="none" stroke={cfg.pinColor} strokeWidth={0.5} opacity={0.5} />}
               </g>
             );
           })}
@@ -162,18 +198,19 @@ function MapPlaceholder({ properties, selectedId, onSelectPin }: {
           </div>
         ))}
       </div>
-      <div className="absolute top-2 right-2 text-[9px] text-slate-500 font-mono">NYC DISTRESS MAP v1.0</div>
+      <div className="absolute top-2 right-2 text-[9px] text-slate-500 font-mono">NYC DISTRESS MAP · {displayProps.length} pins</div>
     </div>
   );
 }
 
-function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property: DistressedProperty; onClose: () => void; onConvertToLead: (p: DistressedProperty) => void }) {
+function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property: ApiDistressProperty; onClose: () => void; onConvertToLead: (p: ApiDistressProperty) => void }) {
   const cfg = DISTRESS_TYPE_CONFIG[property.distressType];
   const equityPercent = property.debtAmount
     ? Math.round(((property.estimatedValue - property.debtAmount) / property.estimatedValue) * 100)
     : null;
+  const today = new Date("2026-03-31");
   const auctionDays = property.auctionDate
-    ? Math.ceil((new Date(property.auctionDate).getTime() - new Date("2026-03-30").getTime()) / 86400000)
+    ? Math.ceil((new Date(property.auctionDate).getTime() - today.getTime()) / 86400000)
     : null;
 
   return (
@@ -213,13 +250,13 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
               <span className="text-[10px] text-terra-text-muted capitalize">{property.confidenceLevel} confidence</span>
             </div>
           </div>
-          {property.debtAmount && (
+          {property.debtAmount != null && (
             <div className="bg-terra-surface rounded-lg p-3 border border-terra-border">
               <p className="text-[10px] text-terra-text-muted uppercase tracking-wider mb-1">Debt Amount</p>
               <p className="text-lg font-bold text-red-400 font-mono">{formatCurrency(property.debtAmount)}</p>
             </div>
           )}
-          {property.lienAmount && (
+          {property.lienAmount != null && (
             <div className="bg-terra-surface rounded-lg p-3 border border-terra-border">
               <p className="text-[10px] text-terra-text-muted uppercase tracking-wider mb-1">Lien Amount</p>
               <p className="text-lg font-bold text-orange-400 font-mono">{formatCurrency(property.lienAmount)}</p>
@@ -237,7 +274,7 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
           </div>
         </div>
 
-        {property.sqft && (
+        {(property.sqft || property.yearBuilt || property.beds) && (
           <div className="flex items-center gap-4 text-xs text-terra-text-muted">
             {property.sqft && <span>{property.sqft.toLocaleString()} sqft</span>}
             {property.yearBuilt && <span>Built {property.yearBuilt}</span>}
@@ -250,9 +287,12 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
           <div className="flex items-center gap-2 mb-2">
             <User className="w-3.5 h-3.5 text-terra-primary" />
             <span className="text-xs font-semibold text-terra-text">Ownership</span>
+            <span className={cn("text-[9px] px-1.5 py-0.5 rounded ml-auto", property.ownerType === "llc" ? "bg-amber-400/10 text-amber-400" : property.ownerType === "corporate" ? "bg-blue-400/10 text-blue-400" : "bg-terra-surface text-terra-text-muted")}>
+              {property.ownerType.toUpperCase()}
+            </span>
           </div>
           <p className="text-sm text-terra-text">{property.ownerName}</p>
-          <p className="text-[11px] text-terra-text-muted mt-0.5 capitalize">{property.ownerType} · Filed {property.filingDate}</p>
+          <p className="text-[11px] text-terra-text-muted mt-0.5">Filed {property.filingDate} · {property.county} County</p>
         </div>
 
         <div className="bg-terra-surface border border-terra-border rounded-lg p-3">
@@ -270,29 +310,31 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
           </div>
         </div>
 
-        <div className="bg-terra-surface border border-terra-border rounded-lg p-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Calendar className="w-3.5 h-3.5 text-terra-text-muted" />
-            <span className="text-xs font-semibold text-terra-text">Distress Timeline</span>
-          </div>
-          <div className="space-y-2">
-            {property.timeline.map((event, i) => (
-              <div key={i} className="flex gap-2">
-                <div className="flex flex-col items-center">
-                  <div className={cn("w-2 h-2 rounded-full flex-shrink-0 mt-0.5", i === property.timeline.length - 1 ? "bg-terra-primary" : "bg-terra-border")} />
-                  {i < property.timeline.length - 1 && <div className="w-0.5 h-full bg-terra-border flex-1 mt-0.5" />}
-                </div>
-                <div className="pb-2 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-semibold text-terra-text">{event.type}</span>
-                    <span className="text-[10px] text-terra-text-muted font-mono">{event.date}</span>
+        {property.timeline.length > 0 && (
+          <div className="bg-terra-surface border border-terra-border rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="w-3.5 h-3.5 text-terra-text-muted" />
+              <span className="text-xs font-semibold text-terra-text">Distress Timeline</span>
+            </div>
+            <div className="space-y-2">
+              {property.timeline.map((event, i) => (
+                <div key={i} className="flex gap-2">
+                  <div className="flex flex-col items-center">
+                    <div className={cn("w-2 h-2 rounded-full flex-shrink-0 mt-0.5", i === property.timeline.length - 1 ? "bg-terra-primary" : "bg-terra-border")} />
+                    {i < property.timeline.length - 1 && <div className="w-0.5 h-full bg-terra-border flex-1 mt-0.5" />}
                   </div>
-                  <p className="text-[11px] text-terra-text-secondary mt-0.5">{event.description}</p>
+                  <div className="pb-2 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-semibold text-terra-text">{event.type}</span>
+                      <span className="text-[10px] text-terra-text-muted font-mono">{event.date}</span>
+                    </div>
+                    <p className="text-[11px] text-terra-text-secondary mt-0.5">{event.description}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {property.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
@@ -314,27 +356,19 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-terra-primary/10 border border-terra-primary/30 text-terra-primary text-xs font-semibold hover:bg-terra-primary/20 transition-colors">
               <LinkIcon className="w-3 h-3" /> Convert to Lead
             </button>
-            <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-terra-emerald/10 border border-terra-emerald/30 text-terra-emerald text-xs font-semibold hover:bg-terra-emerald/20 transition-colors">
-              <Handshake className="w-3 h-3" /> Open Deal
+            <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors">
+              <Eye className="w-3 h-3" /> Add to Watchlist
             </button>
             <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-semibold hover:bg-amber-400/20 transition-colors">
               <Bell className="w-3 h-3" /> Set Alert
             </button>
             <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-terra-surface border border-terra-border text-terra-text-secondary text-xs font-semibold hover:bg-terra-surface-hover transition-colors">
-              <Eye className="w-3 h-3" /> Add to Watchlist
+              <Target className="w-3 h-3" /> Open Deal
             </button>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function Handshake({ className }: { className?: string }) {
-  return (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z" />
-    </svg>
   );
 }
 
@@ -364,7 +398,31 @@ const BOROUGH_FILTERS: Array<{ value: Borough | "all"; label: string }> = [
   { value: "Staten Island", label: "Staten Island" },
 ];
 
+function useDistressProperties(params: { borough?: string; distressType?: string; q?: string; limit: number }) {
+  const searchParams = new URLSearchParams();
+  if (params.borough && params.borough !== "all") searchParams.set("borough", params.borough);
+  if (params.distressType && params.distressType !== "all") searchParams.set("distressType", params.distressType);
+  if (params.q) searchParams.set("q", params.q);
+  searchParams.set("limit", String(params.limit));
+  searchParams.set("sort", "score");
+
+  return useQuery({
+    queryKey: ["terra-distress-properties", params],
+    queryFn: () => fetchJson(`/terra/distress/search?${searchParams}`),
+    staleTime: 30000,
+  });
+}
+
+function useDistressAlerts() {
+  return useQuery({
+    queryKey: ["terra-distress-alerts"],
+    queryFn: () => fetchJson("/terra/distress/alerts?limit=20"),
+    staleTime: 60000,
+  });
+}
+
 export default function DistressEnginePage() {
+  const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"split" | "list" | "map">("split");
   const [distressFilter, setDistressFilter] = useState<DistressType | "all">("all");
@@ -374,38 +432,47 @@ export default function DistressEnginePage() {
   const [showAlerts, setShowAlerts] = useState(false);
   const [conversionState, setConversionState] = useState<{ status: "idle" | "loading" | "success" | "error"; message?: string }>({ status: "idle" });
 
-  async function handleConvertToLead(property: DistressedProperty) {
-    setConversionState({ status: "loading" });
-    try {
-      const res = await postJson("/terra/convert/distress-to-lead", {
-        propertyId: property.id,
-        notes: `Converted from Distress Engine — ${property.distressType} at ${property.address}`,
-      });
-      if (res.error) {
-        setConversionState({ status: "error", message: res.error });
-      } else {
-        setConversionState({ status: "success", message: `Lead created for ${property.address}` });
-        setTimeout(() => setConversionState({ status: "idle" }), 4000);
-      }
-    } catch {
-      setConversionState({ status: "error", message: "Failed to convert — check connection" });
-      setTimeout(() => setConversionState({ status: "idle" }), 4000);
-    }
-  }
+  const { data, isLoading, isError, refetch } = useDistressProperties({
+    borough: boroughFilter,
+    distressType: distressFilter,
+    q: searchQuery || undefined,
+    limit: 500,
+  });
 
-  const filtered = useMemo(() => {
-    let results = [...distressedProperties];
-    if (distressFilter !== "all") results = results.filter(p => p.distressType === distressFilter);
-    if (boroughFilter !== "all") results = results.filter(p => p.borough === boroughFilter);
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      results = results.filter(p =>
-        p.address.toLowerCase().includes(q) ||
-        p.ownerName.toLowerCase().includes(q) ||
-        p.zipCode.includes(q) ||
-        p.tags.some(t => t.includes(q))
-      );
-    }
+  const { data: alertData } = useDistressAlerts();
+  const alerts = alertData?.alerts ?? [];
+
+  const allProperties: ApiDistressProperty[] = (data?.properties ?? []).map((p: any) => ({
+    id: p.externalId ?? String(p.id),
+    address: p.address,
+    borough: p.borough,
+    county: p.county,
+    zipCode: p.zipCode,
+    propertyType: p.propertyType,
+    distressType: p.distressType,
+    stage: p.stage,
+    estimatedValue: Number(p.estimatedValue),
+    debtAmount: p.debtAmount != null ? Number(p.debtAmount) : null,
+    lienAmount: p.lienAmount != null ? Number(p.lienAmount) : null,
+    auctionDate: p.auctionDate,
+    filingDate: p.filingDate,
+    ownerName: p.ownerName,
+    ownerType: p.ownerType,
+    opportunityScore: Number(p.opportunityScore),
+    confidenceLevel: p.confidenceLevel,
+    scoreRationale: p.scoreRationale,
+    daysInDistress: Number(p.daysInDistress),
+    sqft: p.sqft,
+    yearBuilt: p.yearBuilt,
+    beds: p.beds,
+    baths: p.baths,
+    tags: p.tags ?? [],
+    timeline: p.timeline ?? [],
+    connectorSource: p.connectorSource,
+  }));
+
+  const sorted = useMemo(() => {
+    const results = [...allProperties];
     if (sortBy === "newest") results.sort((a, b) => b.filingDate.localeCompare(a.filingDate));
     else if (sortBy === "highest-value") results.sort((a, b) => b.estimatedValue - a.estimatedValue);
     else if (sortBy === "closest-auction") {
@@ -419,13 +486,48 @@ export default function DistressEnginePage() {
       results.sort((a, b) => b.opportunityScore - a.opportunityScore);
     }
     return results;
-  }, [distressFilter, boroughFilter, sortBy, searchQuery]);
+  }, [allProperties, sortBy]);
 
-  const selectedProperty = selectedId ? distressedProperties.find(p => p.id === selectedId) ?? null : null;
+  const selectedProperty = selectedId ? sorted.find(p => p.id === selectedId) ?? null : null;
+
+  const byType = useMemo(() => {
+    const counts: Partial<Record<DistressType, number>> = {};
+    for (const p of sorted) counts[p.distressType] = (counts[p.distressType] ?? 0) + 1;
+    return counts;
+  }, [sorted]);
+
+  const auctionImminent = sorted.filter(p => p.auctionDate && Math.ceil((new Date(p.auctionDate).getTime() - Date.now()) / 86400000) <= 30).length;
+
+  async function handleConvertToLead(property: ApiDistressProperty) {
+    setConversionState({ status: "loading" });
+    try {
+      const res = await postJson("/terra/convert/distress-to-lead", {
+        propertyId: property.id,
+        notes: `Converted from Distress Engine — ${property.distressType} at ${property.address}`,
+      });
+      if (res.error) {
+        setConversionState({ status: "error", message: res.error });
+      } else {
+        setConversionState({ status: "success", message: `Lead created for ${property.address}` });
+        qc.invalidateQueries({ queryKey: ["terra-leads"] });
+        setTimeout(() => setConversionState({ status: "idle" }), 4000);
+      }
+    } catch {
+      setConversionState({ status: "error", message: "Failed to convert — check connection" });
+      setTimeout(() => setConversionState({ status: "idle" }), 4000);
+    }
+  }
+
+  function handleExportCsv() {
+    const params = new URLSearchParams();
+    if (boroughFilter !== "all") params.set("borough", boroughFilter);
+    if (distressFilter !== "all") params.set("distressType", distressFilter);
+    if (searchQuery) params.set("q", searchQuery);
+    window.open(`${API_BASE}/terra/distress/export/csv?${params}`, "_blank");
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Conversion toast notification */}
       {conversionState.status !== "idle" && (
         <div className={cn(
           "fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl border shadow-xl text-sm font-medium transition-all",
@@ -438,7 +540,7 @@ export default function DistressEnginePage() {
           {conversionState.status === "error" && <AlertTriangle className="w-4 h-4" />}
           <span>
             {conversionState.status === "loading" && "Converting to lead..."}
-            {conversionState.status === "success" && (conversionState.message ?? "Lead created successfully")}
+            {conversionState.status === "success" && (conversionState.message ?? "Lead created")}
             {conversionState.status === "error" && (conversionState.message ?? "Conversion failed")}
           </span>
           {conversionState.status !== "loading" && (
@@ -448,6 +550,7 @@ export default function DistressEnginePage() {
           )}
         </div>
       )}
+
       <div className="flex-shrink-0 px-4 pt-4 pb-2 space-y-3 border-b border-terra-border bg-terra-bg-secondary">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -457,33 +560,41 @@ export default function DistressEnginePage() {
               </div>
               <div>
                 <h1 className="text-base font-display font-bold text-terra-text">Distress Intelligence Engine</h1>
-                <p className="text-[10px] text-terra-text-muted">NYC / NY State · {distressStats.totalProperties} properties · {distressStats.auctionImminentCount} auctions imminent</p>
+                <p className="text-[10px] text-terra-text-muted">
+                  {isLoading ? "Loading..." : `${sorted.length} properties · ${auctionImminent} auctions within 30 days`}
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <DataStateBadge state="seeded" label="Seed Data" />
-              <div className="flex items-center gap-1 bg-terra-surface border border-terra-border rounded-lg p-0.5">
-                {[
-                  { mode: "split" as const, icon: Layers },
-                  { mode: "list" as const, icon: List },
-                  { mode: "map" as const, icon: MapPin },
-                ].map(({ mode, icon: Icon }) => (
-                  <button key={mode} onClick={() => setViewMode(mode)}
-                    className={cn("p-1.5 rounded transition-colors", viewMode === mode ? "bg-terra-primary/20 text-terra-primary" : "text-terra-text-muted hover:text-terra-text")}>
-                    <Icon className="w-3.5 h-3.5" />
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center gap-1 bg-terra-surface border border-terra-border rounded-lg p-0.5">
+              {[
+                { mode: "split" as const, icon: Layers },
+                { mode: "list" as const, icon: List },
+                { mode: "map" as const, icon: MapPin },
+              ].map(({ mode, icon: Icon }) => (
+                <button key={mode} onClick={() => setViewMode(mode)}
+                  className={cn("p-1.5 rounded transition-colors", viewMode === mode ? "bg-terra-primary/20 text-terra-primary" : "text-terra-text-muted hover:text-terra-text")}>
+                  <Icon className="w-3.5 h-3.5" />
+                </button>
+              ))}
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button onClick={handleExportCsv}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-terra-border text-terra-text-secondary hover:bg-terra-surface transition-colors">
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </button>
+            <button onClick={() => refetch()} className="p-1.5 rounded-lg border border-terra-border text-terra-text-muted hover:text-terra-text transition-colors">
+              <RefreshCw className={cn("w-3.5 h-3.5", isLoading && "animate-spin")} />
+            </button>
             <button
               onClick={() => setShowAlerts(!showAlerts)}
               className={cn("flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors", showAlerts ? "bg-red-500/10 border-red-500/30 text-red-400" : "border-terra-border text-terra-text-secondary hover:bg-terra-surface")}
             >
               <Bell className="w-3.5 h-3.5" />
               Alerts
-              <span className="w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">{distressAlerts.length}</span>
+              {alerts.length > 0 && (
+                <span className="w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">{alerts.length}</span>
+              )}
             </button>
           </div>
         </div>
@@ -493,7 +604,7 @@ export default function DistressEnginePage() {
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-terra-text-muted" />
             <input
               type="text"
-              placeholder="Search address, owner, zip, tag..."
+              placeholder="Search address, owner, zip..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 bg-terra-surface border border-terra-border rounded-lg text-xs text-terra-text placeholder:text-terra-text-muted focus:outline-none focus:border-terra-primary"
@@ -511,12 +622,13 @@ export default function DistressEnginePage() {
             className="px-2 py-1.5 bg-terra-surface border border-terra-border rounded-lg text-xs text-terra-text focus:outline-none focus:border-terra-primary">
             {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-          <span className="text-[11px] text-terra-text-muted ml-auto">{filtered.length} results</span>
+          {!isLoading && <span className="text-[11px] text-terra-text-muted ml-auto">{sorted.length} results</span>}
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {(Object.entries(distressStats.byType) as [DistressType, number][]).map(([type, count]) => {
+          {(DISTRESS_FILTERS.slice(1) as Array<{ value: DistressType; label: string }>).map(({ value: type }) => {
             const cfg = DISTRESS_TYPE_CONFIG[type];
+            const count = byType[type] ?? 0;
             return (
               <button key={type} onClick={() => setDistressFilter(distressFilter === type ? "all" : type)}
                 className={cn("flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[10px] font-semibold whitespace-nowrap transition-colors flex-shrink-0", distressFilter === type ? cn(cfg.color, cfg.bg) : "border-terra-border text-terra-text-muted hover:bg-terra-surface")}>
@@ -532,7 +644,7 @@ export default function DistressEnginePage() {
         {showAlerts && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             className="flex-shrink-0 border-b border-terra-border bg-terra-surface overflow-hidden">
-            <div className="p-3 space-y-1.5">
+            <div className="p-3 space-y-1.5 max-h-48 overflow-y-auto">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-terra-text flex items-center gap-1.5">
                   <Bell className="w-3.5 h-3.5 text-red-400" /> Active Distress Alerts
@@ -541,17 +653,17 @@ export default function DistressEnginePage() {
                   <X className="w-3.5 h-3.5 text-terra-text-muted" />
                 </button>
               </div>
-              {distressAlerts.map(a => (
+              {alerts.length === 0 ? (
+                <p className="text-xs text-terra-text-muted">No active alerts</p>
+              ) : alerts.map((a: any) => (
                 <div key={a.id} className={cn("flex items-start gap-2 px-3 py-2 rounded-lg border text-xs",
                   a.severity === "critical" ? "bg-red-500/5 border-red-500/20" : a.severity === "high" ? "bg-amber-500/5 border-amber-500/20" : "bg-terra-surface border-terra-border"
                 )}>
                   <AlertTriangle className={cn("w-3.5 h-3.5 mt-0.5 flex-shrink-0", a.severity === "critical" ? "text-red-400" : a.severity === "high" ? "text-amber-400" : "text-terra-text-muted")} />
                   <div className="flex-1 min-w-0">
                     <p className="text-terra-text">{a.message}</p>
-                    <p className="text-terra-text-muted text-[10px] mt-0.5 font-mono">{a.timestamp.split("T")[0]}</p>
+                    <p className="text-terra-text-muted text-[10px] mt-0.5 font-mono">{a.triggeredAt?.slice(0, 10)}</p>
                   </div>
-                  <button onClick={() => { setSelectedId(a.propertyId); setShowAlerts(false); }}
-                    className="text-terra-primary text-[10px] hover:underline whitespace-nowrap">View →</button>
                 </div>
               ))}
             </div>
@@ -560,23 +672,35 @@ export default function DistressEnginePage() {
       </AnimatePresence>
 
       <div className="flex-1 overflow-hidden">
-        {viewMode === "split" && (
+        {isLoading && (
+          <div className="flex items-center justify-center h-full text-terra-text-muted text-sm">
+            <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Loading distress database...
+          </div>
+        )}
+
+        {isError && !isLoading && (
+          <div className="flex flex-col items-center justify-center h-full text-terra-text-muted">
+            <AlertTriangle className="w-8 h-8 mb-2 text-rose-400" />
+            <p className="text-sm">Failed to load distress properties</p>
+            <button onClick={() => refetch()} className="mt-3 px-4 py-2 rounded-lg border border-terra-border text-xs hover:bg-terra-surface transition-colors">Retry</button>
+          </div>
+        )}
+
+        {!isLoading && !isError && viewMode === "split" && (
           <div className="flex h-full">
             <div className="w-72 flex-shrink-0 border-r border-terra-border overflow-y-auto">
-              {filtered.length === 0 ? (
+              {sorted.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-terra-text-muted text-sm">
                   <Search className="w-6 h-6 mb-2" />
                   No properties found
                 </div>
-              ) : (
-                filtered.map(p => (
-                  <PropertyListCard key={p.id} property={p} isSelected={selectedId === p.id} onClick={() => setSelectedId(p.id)} />
-                ))
-              )}
+              ) : sorted.map(p => (
+                <PropertyListCard key={p.id} property={p} isSelected={selectedId === p.id} onClick={() => setSelectedId(p.id)} />
+              ))}
             </div>
             <div className={cn("flex-1 overflow-hidden", selectedProperty ? "grid grid-cols-2" : "")}>
-              <div className={cn("h-full", selectedProperty ? "" : "w-full")}>
-                <MapPlaceholder properties={filtered} selectedId={selectedId} onSelectPin={setSelectedId} />
+              <div className="h-full">
+                <MapPlaceholder properties={sorted} selectedId={selectedId} onSelectPin={setSelectedId} />
               </div>
               {selectedProperty && (
                 <div className="border-l border-terra-border overflow-y-auto bg-terra-bg-secondary">
@@ -587,7 +711,7 @@ export default function DistressEnginePage() {
           </div>
         )}
 
-        {viewMode === "list" && (
+        {!isLoading && !isError && viewMode === "list" && (
           <div className="overflow-auto h-full p-4">
             <div className="rounded-xl border border-terra-border overflow-hidden">
               <table className="w-full text-sm">
@@ -596,31 +720,29 @@ export default function DistressEnginePage() {
                     <th className="text-left px-4 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Address</th>
                     <th className="text-left px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Borough</th>
                     <th className="text-left px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Type</th>
-                    <th className="text-left px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Stage</th>
+                    <th className="text-left px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Owner</th>
                     <th className="text-right px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Est. Value</th>
                     <th className="text-right px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Score</th>
+                    <th className="text-right px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Days</th>
                     <th className="text-right px-3 py-3 text-[10px] font-semibold text-terra-text-muted uppercase tracking-wider">Filed</th>
-                    <th className="px-3 py-3"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((p, i) => (
-                    <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.02 }}
+                  {sorted.map((p, i) => (
+                    <motion.tr key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: Math.min(i * 0.01, 0.3) }}
                       className={cn("border-b border-terra-border/50 hover:bg-terra-surface-hover transition-colors cursor-pointer", selectedId === p.id && "bg-terra-primary/5")}
                       onClick={() => { setSelectedId(p.id); setViewMode("split"); }}>
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-terra-text text-sm">{p.address}</p>
-                        <p className="text-[10px] text-terra-text-muted">{p.zipCode}</p>
+                        <p className="font-semibold text-terra-text text-xs">{p.address}</p>
+                        <p className="text-[10px] text-terra-text-muted">{p.zipCode ?? p.county}</p>
                       </td>
                       <td className="px-3 py-3 text-xs text-terra-text-secondary">{p.borough}</td>
                       <td className="px-3 py-3"><DistressTypePill type={p.distressType} compact /></td>
-                      <td className="px-3 py-3 text-xs text-terra-text-muted capitalize">{p.stage.replace(/-/g, " ")}</td>
-                      <td className="px-3 py-3 text-right font-mono text-sm text-terra-text">{formatCurrency(p.estimatedValue)}</td>
+                      <td className="px-3 py-3 text-xs text-terra-text-muted truncate max-w-[120px]">{p.ownerName}</td>
+                      <td className="px-3 py-3 text-right font-mono text-xs text-terra-text">{formatCurrency(p.estimatedValue)}</td>
                       <td className="px-3 py-3 text-right"><ScoreBadge score={p.opportunityScore} /></td>
+                      <td className="px-3 py-3 text-right text-[10px] text-terra-text-muted">{p.daysInDistress}d</td>
                       <td className="px-3 py-3 text-right text-[10px] text-terra-text-muted font-mono">{p.filingDate}</td>
-                      <td className="px-3 py-3">
-                        <button className="text-xs text-terra-primary hover:underline whitespace-nowrap">View →</button>
-                      </td>
                     </motion.tr>
                   ))}
                 </tbody>
@@ -629,10 +751,10 @@ export default function DistressEnginePage() {
           </div>
         )}
 
-        {viewMode === "map" && (
+        {!isLoading && !isError && viewMode === "map" && (
           <div className="h-full flex">
             <div className="flex-1">
-              <MapPlaceholder properties={filtered} selectedId={selectedId} onSelectPin={id => { setSelectedId(id); }} />
+              <MapPlaceholder properties={sorted} selectedId={selectedId} onSelectPin={id => { setSelectedId(id); }} />
             </div>
             {selectedProperty && (
               <div className="w-80 border-l border-terra-border overflow-y-auto bg-terra-bg-secondary">

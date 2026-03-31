@@ -21,6 +21,7 @@ const NAV_SECTIONS = [
     title: "Operations",
     items: [
       { href: "/distress-engine", label: "Distress Engine", icon: Flame, highlight: true },
+      { href: "/investor-mode", label: "Investor Mode", icon: TrendingUp, highlight: false },
       { href: "/deals", label: "Deal Pipeline", icon: Activity },
       { href: "/listings", label: "Property Listings", icon: Home },
       { href: "/commercial", label: "Commercial Intel", icon: Building2 },

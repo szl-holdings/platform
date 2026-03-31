@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import {
   terraLeadsTable,
   terraDealsTable,
@@ -680,6 +680,406 @@ router.get("/terra/broker/overview", authMiddleware({ required: false }), async 
       generatedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch broker overview"); }
+});
+
+// ─── DISTRESS DASHBOARD ────────────────────────────────────────────────────────
+
+router.get("/terra/distress/dashboard", authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const [
+      summaryResult,
+      byTypeResult,
+      byBoroughResult,
+      byCountyResult,
+      top10Result,
+      scoreDistResult,
+    ] = await Promise.all([
+      pool.query(`
+        SELECT
+          count(*) as total,
+          sum(estimated_value) as total_value,
+          round(avg(estimated_value)) as avg_value,
+          sum(case when opportunity_score >= 70 then 1 else 0 end) as high_opportunity,
+          count(*) filter (where filing_date >= (current_date - interval '30 days')::text) as recent_filings
+        FROM terra_distress_properties
+        WHERE is_active = true
+      `),
+      pool.query(`
+        SELECT
+          distress_type,
+          count(*) as count,
+          round(avg(opportunity_score)) as avg_score,
+          sum(estimated_value) as total_value
+        FROM terra_distress_properties
+        WHERE is_active = true
+        GROUP BY distress_type
+        ORDER BY count(*) DESC
+      `),
+      pool.query(`
+        SELECT
+          borough,
+          count(*) as count,
+          round(avg(opportunity_score)) as avg_score,
+          sum(case when opportunity_score >= 70 then 1 else 0 end) as high_count
+        FROM terra_distress_properties
+        WHERE is_active = true
+        GROUP BY borough
+        ORDER BY count(*) DESC
+      `),
+      pool.query(`
+        SELECT
+          county,
+          count(*) as count,
+          round(avg(opportunity_score)) as avg_score
+        FROM terra_distress_properties
+        WHERE is_active = true
+        GROUP BY county
+        ORDER BY count(*) DESC
+        LIMIT 15
+      `),
+      pool.query(`
+        SELECT
+          id, external_id, address, borough, county, zip_code,
+          distress_type, stage, opportunity_score, estimated_value,
+          owner_name, owner_type, days_in_distress, confidence_level,
+          filing_date, auction_date
+        FROM terra_distress_properties
+        WHERE is_active = true
+        ORDER BY opportunity_score DESC
+        LIMIT 10
+      `),
+      pool.query(`
+        SELECT
+          CASE
+            WHEN opportunity_score >= 85 THEN '85-100'
+            WHEN opportunity_score >= 70 THEN '70-84'
+            WHEN opportunity_score >= 55 THEN '55-69'
+            WHEN opportunity_score >= 40 THEN '40-54'
+            ELSE '0-39'
+          END as bucket,
+          count(*) as count,
+          round(avg(opportunity_score)) as avg_score
+        FROM terra_distress_properties
+        WHERE is_active = true
+        GROUP BY 1
+        ORDER BY min(opportunity_score) DESC
+      `),
+    ]);
+
+    const s = summaryResult.rows[0];
+
+    sendSuccess(res, {
+      summary: {
+        totalDistressedProperties: Number(s.total ?? 0),
+        recentFilings30d: Number(s.recent_filings ?? 0),
+        totalDistressValue: Number(s.total_value ?? 0),
+        avgDistressValue: Math.round(Number(s.avg_value ?? 0)),
+        highOpportunity: Number(s.high_opportunity ?? 0),
+      },
+      byDistressType: byTypeResult.rows.map((t: Record<string, unknown>) => ({
+        type: t.distress_type,
+        count: Number(t.count),
+        avgScore: Number(t.avg_score),
+        totalValue: Number(t.total_value),
+      })),
+      byBorough: byBoroughResult.rows.map((b: Record<string, unknown>) => ({
+        borough: b.borough,
+        count: Number(b.count),
+        avgScore: Number(b.avg_score),
+        highOpportunityCount: Number(b.high_count),
+      })),
+      byCounty: byCountyResult.rows.map((c: Record<string, unknown>) => ({
+        county: c.county,
+        count: Number(c.count),
+        avgScore: Number(c.avg_score),
+      })),
+      top10Properties: top10Result.rows.map((p: Record<string, unknown>) => ({
+        id: p.external_id ?? String(p.id),
+        address: p.address,
+        borough: p.borough,
+        county: p.county,
+        zipCode: p.zip_code,
+        distressType: p.distress_type,
+        stage: p.stage,
+        opportunityScore: Number(p.opportunity_score),
+        estimatedValue: Number(p.estimated_value),
+        ownerName: p.owner_name,
+        ownerType: p.owner_type,
+        daysInDistress: p.days_in_distress,
+        confidenceLevel: p.confidence_level,
+        filingDate: p.filing_date,
+        auctionDate: p.auction_date,
+      })),
+      scoreDistribution: scoreDistResult.rows.map((s: Record<string, unknown>) => ({
+        range: s.bucket,
+        count: Number(s.count),
+        avgScore: Number(s.avg_score),
+      })),
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch distress dashboard"); }
+});
+
+// ─── INVESTOR MODE ─────────────────────────────────────────────────────────────
+
+router.get("/terra/investor/opportunities", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { minScore, borough, type, limit, offset } = req.query;
+    const str = (v: unknown) => typeof v === "string" ? v : undefined;
+    const scoreThreshold = minScore ? Number(minScore) : 70;
+
+    const conditions = [
+      eq(terraDistressPropertiesTable.isActive, true),
+      sql`${terraDistressPropertiesTable.opportunityScore} >= ${scoreThreshold}`,
+    ];
+    if (borough) conditions.push(eq(terraDistressPropertiesTable.borough, str(borough) as any));
+    if (type) conditions.push(eq(terraDistressPropertiesTable.distressType, str(type) as any));
+
+    const lim = Math.min(Number(limit ?? 100), 500);
+    const off = Number(offset ?? 0);
+
+    const [properties, totalCount, avgScore, totalValue] = await Promise.all([
+      db.select()
+        .from(terraDistressPropertiesTable)
+        .where(and(...conditions))
+        .orderBy(sql`${terraDistressPropertiesTable.opportunityScore} desc`)
+        .limit(lim)
+        .offset(off),
+      db.select({ count: sql<number>`count(*)` })
+        .from(terraDistressPropertiesTable)
+        .where(and(...conditions)),
+      db.select({ avg: sql<number>`round(avg(${terraDistressPropertiesTable.opportunityScore}))` })
+        .from(terraDistressPropertiesTable)
+        .where(and(...conditions)),
+      db.select({ total: sql<number>`sum(${terraDistressPropertiesTable.estimatedValue}::numeric)` })
+        .from(terraDistressPropertiesTable)
+        .where(and(...conditions)),
+    ]);
+
+    sendSuccess(res, {
+      summary: {
+        totalCount: Number(totalCount[0]?.count ?? 0),
+        avgScore: Number(avgScore[0]?.avg ?? 0),
+        totalValue: Number(totalValue[0]?.total ?? 0),
+      },
+      properties: properties.map(p => ({
+        id: p.externalId ?? String(p.id),
+        address: p.address,
+        borough: p.borough,
+        county: p.county,
+        zipCode: p.zipCode,
+        propertyType: p.propertyType,
+        distressType: p.distressType,
+        stage: p.stage,
+        opportunityScore: p.opportunityScore,
+        confidenceLevel: p.confidenceLevel,
+        estimatedValue: Number(p.estimatedValue),
+        debtAmount: p.debtAmount ? Number(p.debtAmount) : null,
+        lienAmount: p.lienAmount ? Number(p.lienAmount) : null,
+        equityPercent: p.debtAmount ? Math.round(((Number(p.estimatedValue) - Number(p.debtAmount)) / Number(p.estimatedValue)) * 100) : null,
+        ownerName: p.ownerName,
+        ownerType: p.ownerType,
+        daysInDistress: p.daysInDistress,
+        auctionDate: p.auctionDate,
+        filingDate: p.filingDate,
+        sqft: p.sqft,
+        yearBuilt: p.yearBuilt,
+        scoreRationale: p.scoreRationale,
+        tags: p.tags,
+      })),
+      criteria: { minScore: scoreThreshold, borough: str(borough) ?? "all", type: str(type) ?? "all" },
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch investor opportunities"); }
+});
+
+// ─── DEAL PIPELINE STAGE TRANSITION ───────────────────────────────────────────
+
+router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { stage, notes } = req.body ?? {};
+
+    const VALID_STAGES = ["lead","qualified","showing","offer","negotiation","accepted","inspection","financing","under-contract","clear-to-close","closed","lost"];
+    if (!stage || !VALID_STAGES.includes(stage)) {
+      res.status(400).json({ error: `Invalid stage. Valid: ${VALID_STAGES.join(", ")}` });
+      return;
+    }
+
+    let rows = await db.select().from(terraDealsTable)
+      .where(eq(terraDealsTable.externalId, id))
+      .limit(1);
+
+    if (rows.length === 0) {
+      const numId = parseInt(id, 10);
+      if (!isNaN(numId)) {
+        rows = await db.select().from(terraDealsTable)
+          .where(eq(terraDealsTable.id, numId))
+          .limit(1);
+      }
+    }
+
+    if (rows.length === 0) {
+      res.status(404).json({ error: "Deal not found" });
+      return;
+    }
+
+    const deal = rows[0]!;
+    const prevStage = deal.stage;
+    const STAGE_ORDER = ["lead","qualified","showing","offer","negotiation","accepted","inspection","financing","under-contract","clear-to-close","closed","lost"];
+    const prevIdx = STAGE_ORDER.indexOf(prevStage);
+    const nextIdx = STAGE_ORDER.indexOf(stage);
+
+    if (nextIdx < prevIdx - 1 && stage !== "lost") {
+      res.status(422).json({ error: `Cannot regress from ${prevStage} to ${stage} — stage transitions must be forward`, prevStage, proposedStage: stage });
+      return;
+    }
+
+    const nowStr = new Date().toISOString().slice(0, 10);
+    const newTimeline = [
+      ...((deal.timeline as any[]) ?? []),
+      { date: nowStr, event: `Stage changed: ${prevStage} → ${stage}`, type: "stage_change", ...(notes ? { notes } : {}) },
+    ];
+
+    const probability = stage === "closed" ? 100 : stage === "lost" ? 5 :
+      stage === "clear-to-close" ? 95 : stage === "under-contract" ? 85 :
+      stage === "financing" ? 78 : stage === "inspection" ? 70 :
+      stage === "accepted" ? 65 : stage === "negotiation" ? 55 :
+      stage === "offer" ? 40 : stage === "showing" ? 30 :
+      stage === "qualified" ? 20 : 10;
+
+    await db.update(terraDealsTable)
+      .set({
+        stage: stage as any,
+        stageEnteredAt: new Date(),
+        probability,
+        actualCloseDate: stage === "closed" ? nowStr : deal.actualCloseDate,
+        timeline: newTimeline,
+        updatedAt: new Date(),
+      })
+      .where(eq(terraDealsTable.id, deal.id));
+
+    await auditLog("deal_stage_changed", "terra_deal", deal.externalId ?? String(deal.id), {
+      prevStage, newStage: stage, address: deal.address,
+    }, req.user?.id);
+
+    sendSuccess(res, {
+      dealId: deal.externalId ?? String(deal.id),
+      prevStage,
+      newStage: stage,
+      probability,
+      message: `Deal moved from ${prevStage} to ${stage}`,
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to update deal stage"); }
+});
+
+// ─── LEAD UPDATE ────────────────────────────────────────────────────────────────
+
+router.patch("/terra/crm/leads/:id", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const body = req.body ?? {};
+
+    let rows = await db.select().from(terraLeadsTable)
+      .where(eq(terraLeadsTable.externalId, id))
+      .limit(1);
+
+    if (rows.length === 0) {
+      const numId = parseInt(id, 10);
+      if (!isNaN(numId)) {
+        rows = await db.select().from(terraLeadsTable)
+          .where(eq(terraLeadsTable.id, numId))
+          .limit(1);
+      }
+    }
+
+    if (rows.length === 0) {
+      res.status(404).json({ error: "Lead not found" });
+      return;
+    }
+
+    const lead = rows[0]!;
+    const nowStr = new Date().toISOString().slice(0, 10);
+
+    const updates: Partial<typeof terraLeadsTable.$inferSelect> = { updatedAt: new Date() };
+    if (body.stage) updates.stage = body.stage;
+    if (body.score !== undefined) updates.score = body.score;
+    if (body.nextFollowUp !== undefined) updates.nextFollowUp = body.nextFollowUp;
+    if (body.nextAction !== undefined) updates.nextAction = body.nextAction;
+    if (body.notes !== undefined) updates.notes = body.notes;
+    if (body.lastContact !== undefined) updates.lastContact = body.lastContact;
+
+    if (body.addNote || body.timelineEvent) {
+      const event = body.addNote ?? body.timelineEvent;
+      const prevTimeline = (lead.timeline as any[]) ?? [];
+      updates.timeline = [...prevTimeline, { date: nowStr, event, type: body.timelineType ?? "note" }] as any;
+    }
+
+    await db.update(terraLeadsTable).set(updates).where(eq(terraLeadsTable.id, lead.id));
+
+    sendSuccess(res, { leadId: lead.externalId ?? String(lead.id), updated: Object.keys(updates) });
+  } catch (err) { handleRouteError(res, err, "Failed to update lead"); }
+});
+
+// ─── CSV EXPORT ─────────────────────────────────────────────────────────────────
+
+router.get("/terra/distress/export/csv", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { borough, distressType, minScore, q } = req.query;
+    const str = (v: unknown) => typeof v === "string" ? v : undefined;
+
+    const conditions = [eq(terraDistressPropertiesTable.isActive, true)];
+    if (borough) conditions.push(eq(terraDistressPropertiesTable.borough, str(borough) as any));
+    if (distressType) conditions.push(eq(terraDistressPropertiesTable.distressType, str(distressType) as any));
+    if (minScore) conditions.push(sql`${terraDistressPropertiesTable.opportunityScore} >= ${Number(minScore)}`);
+    if (q) {
+      const qStr = str(q)!;
+      conditions.push(
+        or(
+          ilike(terraDistressPropertiesTable.address, `%${qStr}%`),
+          ilike(terraDistressPropertiesTable.ownerName, `%${qStr}%`)
+        )!
+      );
+    }
+
+    const props = await db.select()
+      .from(terraDistressPropertiesTable)
+      .where(and(...conditions))
+      .orderBy(sql`${terraDistressPropertiesTable.opportunityScore} desc`)
+      .limit(1000);
+
+    const headers = ["ID","Address","Borough","County","Zip","Property Type","Distress Type","Stage","Est. Value","Debt Amount","Lien Amount","Opportunity Score","Confidence","Owner Name","Owner Type","Filing Date","Auction Date","Days in Distress","SQFT","Year Built","Score Rationale","Source","Tags"];
+    const rows = props.map(p => [
+      p.externalId ?? String(p.id),
+      p.address,
+      p.borough,
+      p.county,
+      p.zipCode ?? "",
+      p.propertyType,
+      p.distressType,
+      p.stage,
+      p.estimatedValue,
+      p.debtAmount ?? "",
+      p.lienAmount ?? "",
+      p.opportunityScore,
+      p.confidenceLevel,
+      p.ownerName,
+      p.ownerType,
+      p.filingDate,
+      p.auctionDate ?? "",
+      p.daysInDistress,
+      p.sqft ?? "",
+      p.yearBuilt ?? "",
+      (p.scoreRationale ?? "").replace(/,/g, ";"),
+      p.connectorSource,
+      ((p.tags as string[]) ?? []).join("|"),
+    ]);
+
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="terra-distress-export-${new Date().toISOString().slice(0, 10)}.csv"`);
+    res.send(csv);
+  } catch (err) { handleRouteError(res, err, "Failed to export CSV"); }
 });
 
 export default router;
