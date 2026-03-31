@@ -1,6 +1,8 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
+import { eq, and } from "drizzle-orm";
 import { services } from "@workspace/services";
-import { db, alloySignalsTable, insertAlloySignalSchema } from "@workspace/db";
+import { db, alloySignals, connectorsTable } from "@workspace/db";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import {
   sendSuccess,
@@ -15,30 +17,53 @@ import { deliverWebhookEvent } from "./webhooks";
 
 const router: IRouter = Router();
 
+/**
+ * Checks the x-szl-webhook-secret header against the stored connector config.
+ * Returns true if the secret matches, false otherwise.
+ * Used to authenticate inbound callouts from the Salesforce managed package
+ * without requiring a user session token.
+ */
+async function validateSalesforceWebhookSecret(req: Request): Promise<boolean> {
+  const providedSecret = req.headers["x-szl-webhook-secret"] as string | undefined;
+  if (!providedSecret) return false;
+  try {
+    const [connector] = await db
+      .select()
+      .from(connectorsTable)
+      .where(and(eq(connectorsTable.type, "custom"), eq(connectorsTable.name, "Salesforce")));
+    if (!connector?.config) return false;
+    const config = connector.config as Record<string, unknown>;
+    const storedSecret = typeof config["webhookSecret"] === "string" ? config["webhookSecret"] : null;
+    if (!storedSecret) return false;
+    const provided = Buffer.from(providedSecret, "utf-8");
+    const stored = Buffer.from(storedSecret, "utf-8");
+    if (provided.length !== stored.length) return false;
+    return timingSafeEqual(provided, stored);
+  } catch {
+    return false;
+  }
+}
+
 async function ingestSignalToDB(
   source: string,
-  sourceType: string,
+  sourceType: "webhook" | "batch" | "manual" | "scheduled" | "demo" | "api",
   title: string,
-  body: string,
-  severity: "info" | "warning" | "critical",
-  valueAtRisk: number | null,
+  summary: string,
+  severity: "info" | "low" | "medium" | "high" | "critical",
+  domain: string,
   metadata: Record<string, unknown>,
 ): Promise<void> {
   try {
-    const data = insertAlloySignalSchema.parse({
+    await db.insert(alloySignals).values({
       source,
       sourceType,
       severity,
       title,
-      body,
-      status: "new",
-      orgId: null,
-      workflowId: null,
-      normalizedScore: null,
-      valueAtRisk,
+      summary,
+      domain,
+      status: "raw",
       metadata,
     });
-    await db.insert(alloySignalsTable).values(data);
   } catch (err) {
     logger.warn({ err, source, title }, "integrations: failed to write signal to DB");
   }
@@ -119,7 +144,11 @@ router.get("/integrations/salesforce/query", authMiddleware(), requireRole("ops"
   }
 });
 
-router.post("/integrations/salesforce/sync", authMiddleware(), requireRole("ops", "super_admin", "admin"), async (_req, res) => {
+router.post("/integrations/salesforce/sync", async (req, res, next) => {
+  const secretValid = await validateSalesforceWebhookSecret(req);
+  if (secretValid) { next(); return; }
+  authMiddleware()(req, res, () => requireRole("ops", "super_admin", "admin")(req, res, next));
+}, async (_req, res) => {
   try {
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
@@ -135,12 +164,12 @@ router.post("/integrations/salesforce/sync", authMiddleware(), requireRole("ops"
     for (const signal of signals) {
       await ingestSignalToDB(
         "salesforce",
-        signal.type,
+        "api",
         signal.title,
         signal.description,
-        signal.severity,
-        signal.valueAtRisk,
-        signal.metadata,
+        signal.severity as "info" | "low" | "medium" | "high" | "critical",
+        "salesforce",
+        { ...signal.metadata, valueAtRisk: signal.valueAtRisk },
       );
       signalsIngested++;
     }
@@ -218,6 +247,13 @@ router.post("/integrations/salesforce/webhook", async (req: Request, res: Respon
     const body = req.body as Record<string, unknown>;
     logger.info({ body }, "integrations: Salesforce outbound message received");
 
+    const secretValid = await validateSalesforceWebhookSecret(req);
+    if (!secretValid) {
+      logger.warn("integrations: Salesforce webhook rejected — invalid or missing x-szl-webhook-secret");
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
     const enabled = await isFlagEnabled("salesforce_sync_enabled");
     if (!enabled) {
       res.status(200).send("<Ack/>");
@@ -232,11 +268,11 @@ router.post("/integrations/salesforce/webhook", async (req: Request, res: Respon
 
     await ingestSignalToDB(
       "salesforce_webhook",
-      eventType,
+      "webhook",
       title,
       description,
       "info",
-      null,
+      "salesforce",
       { ...body, receivedAt: new Date().toISOString() },
     );
 
@@ -340,11 +376,11 @@ router.post("/integrations/jira/sync", authMiddleware(), requireRole("ops", "sup
     for (const signal of signals) {
       await ingestSignalToDB(
         "jira",
-        signal.type,
+        "api",
         signal.title,
         signal.description,
-        signal.severity,
-        null,
+        signal.severity as "info" | "low" | "medium" | "high" | "critical",
+        "jira",
         { ...signal.metadata, projectKey: signal.projectKey, sprintName: signal.sprintName, issueKeys: signal.issueKeys },
       );
       signalsIngested++;
@@ -420,11 +456,11 @@ router.post("/integrations/jira/webhook", async (req: Request, res: Response) =>
     if (syncEnabled) {
       await ingestSignalToDB(
         "jira_webhook",
-        webhookEvent,
+        "webhook",
         `Jira ${webhookEvent}: ${issueKey}`,
         issueSummary,
         "info",
-        null,
+        "jira",
         {
           webhookEvent,
           issueKey,
@@ -502,12 +538,12 @@ router.post("/integrations/salesforce/ingest-signals", authMiddleware(), require
     for (const signal of signals) {
       await ingestSignalToDB(
         "salesforce",
-        signal.type,
+        "api",
         signal.title,
         signal.description,
-        signal.severity,
-        signal.valueAtRisk,
-        signal.metadata,
+        signal.severity as "info" | "low" | "medium" | "high" | "critical",
+        "salesforce",
+        { ...signal.metadata, valueAtRisk: signal.valueAtRisk },
       );
       ingested++;
     }
@@ -529,11 +565,11 @@ router.post("/integrations/jira/ingest-signals", authMiddleware(), requireRole("
     for (const signal of signals) {
       await ingestSignalToDB(
         "jira",
-        signal.type,
+        "api",
         signal.title,
         signal.description,
-        signal.severity,
-        null,
+        signal.severity as "info" | "low" | "medium" | "high" | "critical",
+        "jira",
         { ...signal.metadata, projectKey: signal.projectKey },
       );
       ingested++;
@@ -541,6 +577,371 @@ router.post("/integrations/jira/ingest-signals", authMiddleware(), requireRole("
     sendCreated(res, { ingested, signals, timestamp: new Date().toISOString() });
   } catch (err) {
     handleRouteError(res, err, "Jira signal ingestion failed");
+  }
+});
+
+const OAUTH_STATE_SECRET = process.env["OAUTH_STATE_SECRET"];
+if (!OAUTH_STATE_SECRET) {
+  logger.warn("integrations: OAUTH_STATE_SECRET env var not set — OAuth state validation will reject all callbacks. Set this to a random secret in production.");
+}
+const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+const PLATFORM_UI_URL = process.env["PLATFORM_UI_URL"] ?? "https://szlholdings.com";
+const PLATFORM_API_URL = process.env["PLATFORM_API_URL"] ?? "https://api.szlholdings.com";
+const SF_LOGIN_URL = "https://login.salesforce.com";
+const ATLASSIAN_AUTH_URL = "https://auth.atlassian.com";
+
+function generateOAuthState(provider: "salesforce" | "jira"): string {
+  if (!OAUTH_STATE_SECRET) throw new Error("OAUTH_STATE_SECRET env var is required to initiate OAuth flows");
+  const nonce = randomBytes(16).toString("hex");
+  const issuedAt = Date.now();
+  const payload = `${provider}:${nonce}:${issuedAt}`;
+  const sig = createHmac("sha256", OAUTH_STATE_SECRET).update(payload).digest("hex");
+  return Buffer.from(`${payload}:${sig}`).toString("base64url");
+}
+
+function validateOAuthState(state: string | undefined, expectedProvider: "salesforce" | "jira"): boolean {
+  if (!state || !OAUTH_STATE_SECRET) return false;
+  try {
+    const raw = Buffer.from(state, "base64url").toString("utf-8");
+    const parts = raw.split(":");
+    if (parts.length !== 4) return false;
+    const [provider, nonce, issuedAtStr, sig] = parts as [string, string, string, string];
+    if (provider !== expectedProvider) return false;
+    const issuedAt = parseInt(issuedAtStr, 10);
+    if (isNaN(issuedAt) || Date.now() - issuedAt > OAUTH_STATE_TTL_MS) return false;
+    const expectedSig = createHmac("sha256", OAUTH_STATE_SECRET)
+      .update(`${provider}:${nonce}:${issuedAtStr}`)
+      .digest("hex");
+    const sigBuf = Buffer.from(sig, "hex");
+    const expectedBuf = Buffer.from(expectedSig, "hex");
+    if (sigBuf.length !== expectedBuf.length) return false;
+    return timingSafeEqual(sigBuf, expectedBuf);
+  } catch {
+    return false;
+  }
+}
+
+router.get("/integrations/salesforce/oauth/authorize", (_req: Request, res: Response) => {
+  try {
+    const clientId = process.env["SALESFORCE_CLIENT_ID"] ?? "";
+    const redirectUri = `${PLATFORM_API_URL}/api/integrations/salesforce/oauth/callback`;
+    const state = generateOAuthState("salesforce");
+
+    const params = new URLSearchParams({
+      response_type: "code",
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      scope: "api refresh_token offline_access",
+      state,
+      prompt: "consent",
+    });
+
+    res.redirect(`${SF_LOGIN_URL}/services/oauth2/authorize?${params.toString()}`);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to initiate Salesforce OAuth flow");
+  }
+});
+
+router.get("/integrations/salesforce/oauth/callback", async (req: Request, res: Response) => {
+  try {
+    const { code, state, error, error_description } = req.query as Record<string, string>;
+
+    if (error) {
+      logger.warn({ error, error_description }, "integrations: Salesforce OAuth callback — authorization denied");
+      res.redirect(`${PLATFORM_UI_URL}/integrations/salesforce?error=${encodeURIComponent(error_description ?? error)}`);
+      return;
+    }
+
+    if (!validateOAuthState(state, "salesforce")) {
+      logger.warn({ statePresent: !!state }, "integrations: Salesforce OAuth callback — invalid or expired state");
+      res.redirect(`${PLATFORM_UI_URL}/integrations/salesforce?error=invalid_state`);
+      return;
+    }
+
+    if (!code) {
+      sendBadRequest(res, "Missing authorization code in Salesforce OAuth callback");
+      return;
+    }
+
+    logger.info({ codePresent: true }, "integrations: Salesforce OAuth callback received — exchange pending");
+
+    const redirectUri = `${PLATFORM_API_URL}/api/integrations/salesforce/oauth/callback`;
+    const params = new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      client_id: process.env["SALESFORCE_CLIENT_ID"] ?? "",
+      client_secret: process.env["SALESFORCE_CLIENT_SECRET"] ?? "",
+      redirect_uri: redirectUri,
+    });
+
+    const tokenRes = await fetch(`${SF_LOGIN_URL}/services/oauth2/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+    });
+
+    if (!tokenRes.ok) {
+      const body = await tokenRes.text().catch(() => "");
+      logger.error({ status: tokenRes.status, body }, "integrations: Salesforce token exchange failed");
+      res.redirect(`${PLATFORM_UI_URL}/integrations/salesforce?error=token_exchange_failed`);
+      return;
+    }
+
+    const tokenData = await tokenRes.json() as {
+      access_token: string;
+      refresh_token?: string;
+      instance_url: string;
+      id: string;
+    };
+
+    logger.info(
+      { instanceUrl: tokenData.instance_url },
+      "integrations: Salesforce OAuth token exchange successful — persisting connector",
+    );
+
+    const [existing] = await db
+      .select()
+      .from(connectorsTable)
+      .where(and(eq(connectorsTable.type, "custom"), eq(connectorsTable.name, "Salesforce")));
+
+    const existingConfig = existing?.config as Record<string, unknown> | null | undefined;
+    const webhookSecret = (typeof existingConfig?.["webhookSecret"] === "string" && existingConfig["webhookSecret"])
+      ? existingConfig["webhookSecret"]
+      : randomBytes(32).toString("hex");
+
+    const connectorConfig = {
+      provider: "salesforce",
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token ?? null,
+      instanceUrl: tokenData.instance_url,
+      salesforceId: tokenData.id,
+      webhookSecret,
+      connectedAt: new Date().toISOString(),
+    };
+
+    if (existing) {
+      await db
+        .update(connectorsTable)
+        .set({ config: connectorConfig, status: "active", updatedAt: new Date() })
+        .where(eq(connectorsTable.id, existing.id));
+    } else {
+      await db.insert(connectorsTable).values({
+        name: "Salesforce",
+        type: "custom",
+        status: "active",
+        config: connectorConfig,
+        isEnabled: true,
+      });
+    }
+
+    res.redirect(
+      `${PLATFORM_UI_URL}/integrations/salesforce?connected=true&instance=${encodeURIComponent(tokenData.instance_url)}`,
+    );
+  } catch (err) {
+    handleRouteError(res, err, "Salesforce OAuth callback failed");
+  }
+});
+
+router.get("/integrations/jira/oauth/authorize", (_req: Request, res: Response) => {
+  try {
+    const clientId = process.env["JIRA_CLIENT_ID"] ?? "";
+    const redirectUri = `${PLATFORM_API_URL}/api/integrations/jira/oauth/callback`;
+    const state = generateOAuthState("jira");
+
+    const params = new URLSearchParams({
+      audience: "api.atlassian.com",
+      client_id: clientId,
+      scope: "read:jira-work write:jira-work read:jira-user offline_access",
+      redirect_uri: redirectUri,
+      state,
+      response_type: "code",
+      prompt: "consent",
+    });
+
+    res.redirect(`${ATLASSIAN_AUTH_URL}/authorize?${params.toString()}`);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to initiate Jira OAuth flow");
+  }
+});
+
+router.get("/integrations/jira/oauth/callback", async (req: Request, res: Response) => {
+  try {
+    const { code, state, error, error_description } = req.query as Record<string, string>;
+
+    if (error) {
+      logger.warn({ error, error_description }, "integrations: Jira OAuth callback — authorization denied");
+      res.redirect(`${PLATFORM_UI_URL}/integrations/jira?error=${encodeURIComponent(error_description ?? error)}`);
+      return;
+    }
+
+    if (!validateOAuthState(state, "jira")) {
+      logger.warn({ statePresent: !!state }, "integrations: Jira OAuth callback — invalid or expired state");
+      res.redirect(`${PLATFORM_UI_URL}/integrations/jira?error=invalid_state`);
+      return;
+    }
+
+    if (!code) {
+      sendBadRequest(res, "Missing authorization code in Jira OAuth callback");
+      return;
+    }
+
+    logger.info({ codePresent: true }, "integrations: Jira OAuth callback received — exchange pending");
+
+    const tokenRes = await fetch(`${ATLASSIAN_AUTH_URL}/oauth/token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "authorization_code",
+        client_id: process.env["JIRA_CLIENT_ID"] ?? "",
+        client_secret: process.env["JIRA_CLIENT_SECRET"] ?? "",
+        code,
+        redirect_uri: `${PLATFORM_API_URL}/api/integrations/jira/oauth/callback`,
+      }),
+    });
+
+    if (!tokenRes.ok) {
+      const body = await tokenRes.text().catch(() => "");
+      logger.error({ status: tokenRes.status, body }, "integrations: Jira token exchange failed");
+      res.redirect(`${PLATFORM_UI_URL}/integrations/jira?error=token_exchange_failed`);
+      return;
+    }
+
+    const tokenData = await tokenRes.json() as {
+      access_token: string;
+      refresh_token?: string;
+      expires_in: number;
+      scope?: string;
+    };
+
+    logger.info({ expiresIn: tokenData.expires_in }, "integrations: Jira OAuth token exchange successful — persisting connector");
+
+    const connectorConfig = {
+      provider: "jira",
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token ?? null,
+      expiresAt: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+      scope: tokenData.scope ?? null,
+      connectedAt: new Date().toISOString(),
+    };
+
+    const [existing] = await db
+      .select()
+      .from(connectorsTable)
+      .where(and(eq(connectorsTable.type, "custom"), eq(connectorsTable.name, "Jira")));
+
+    if (existing) {
+      await db
+        .update(connectorsTable)
+        .set({ config: connectorConfig, status: "active", updatedAt: new Date() })
+        .where(eq(connectorsTable.id, existing.id));
+    } else {
+      await db.insert(connectorsTable).values({
+        name: "Jira",
+        type: "custom",
+        status: "active",
+        config: connectorConfig,
+        isEnabled: true,
+      });
+    }
+
+    res.redirect(`${PLATFORM_UI_URL}/integrations/jira?connected=true`);
+  } catch (err) {
+    handleRouteError(res, err, "Jira OAuth callback failed");
+  }
+});
+
+router.get("/integrations/atlassian/descriptor", (_req: Request, res: Response) => {
+  const baseUrl = process.env["CONNECT_BASE_URL"] ?? `${PLATFORM_API_URL}/api/atlassian`;
+  res.redirect(`${baseUrl}/atlassian-connect.json`);
+});
+
+router.put("/integrations/atlassian/tenant", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const tenant = req.body as {
+      clientKey?: string;
+      sharedSecret?: string;
+      baseUrl?: string;
+      productType?: string;
+      key?: string;
+      serverVersion?: string;
+      pluginsVersion?: string;
+      description?: string;
+      serviceEntitlementNumber?: string;
+    };
+    if (!tenant.clientKey || !tenant.sharedSecret) {
+      sendBadRequest(res, "clientKey and sharedSecret are required");
+      return;
+    }
+
+    const config = {
+      provider: "atlassian_connect",
+      clientKey: tenant.clientKey,
+      sharedSecret: tenant.sharedSecret,
+      baseUrl: tenant.baseUrl ?? null,
+      productType: tenant.productType ?? null,
+      key: tenant.key ?? null,
+      serverVersion: tenant.serverVersion ?? null,
+      pluginsVersion: tenant.pluginsVersion ?? null,
+      description: tenant.description ?? null,
+      serviceEntitlementNumber: tenant.serviceEntitlementNumber ?? null,
+      installedAt: new Date().toISOString(),
+    };
+
+    const [existing] = await db
+      .select()
+      .from(connectorsTable)
+      .where(and(eq(connectorsTable.type, "custom"), eq(connectorsTable.name, `atlassian:${tenant.clientKey}`)));
+
+    if (existing) {
+      await db
+        .update(connectorsTable)
+        .set({ config, status: "active", updatedAt: new Date() })
+        .where(eq(connectorsTable.id, existing.id));
+    } else {
+      await db.insert(connectorsTable).values({
+        name: `atlassian:${tenant.clientKey}`,
+        type: "custom",
+        status: "active",
+        config,
+        isEnabled: true,
+      });
+    }
+
+    sendSuccess(res, { persisted: true, clientKey: tenant.clientKey });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to persist Atlassian tenant");
+  }
+});
+
+router.get("/integrations/atlassian/tenant/:clientKey", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { clientKey } = req.params;
+    const [connector] = await db
+      .select()
+      .from(connectorsTable)
+      .where(and(eq(connectorsTable.type, "custom"), eq(connectorsTable.name, `atlassian:${clientKey}`)));
+
+    if (!connector?.config) {
+      res.status(404).json({ error: "Tenant not found" });
+      return;
+    }
+
+    sendSuccess(res, connector.config);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to retrieve Atlassian tenant");
+  }
+});
+
+router.delete("/integrations/atlassian/tenant/:clientKey", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { clientKey } = req.params;
+    await db
+      .delete(connectorsTable)
+      .where(and(eq(connectorsTable.type, "custom"), eq(connectorsTable.name, `atlassian:${clientKey}`)));
+
+    sendSuccess(res, { deleted: true, clientKey });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to delete Atlassian tenant");
   }
 });
 

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { label: "Ecosystem", href: "/ecosystem", section: "Company" },
   { label: "Architecture", href: "/architecture", section: "Company" },
+  { label: "Integrations", href: "/integrations", section: "Company" },
   { label: "Alloy", href: "/alloy", section: "Operations" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/", section: "Platforms" },
   { label: "Vessels", href: "/vessels", external: "/vessels/", section: "Platforms" },

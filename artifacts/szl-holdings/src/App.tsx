@@ -27,6 +27,7 @@ const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const PlatformArchitecturePage = lazy(() => import("@/pages/platform-architecture"));
+const IntegrationsMarketplacePage = lazy(() => import("@/pages/integrations-marketplace"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -281,6 +282,15 @@ function App() {
             </Route>
             <Route path="/architecture">
               <Suspense fallback={<PageLoader />}><PlatformArchitecturePage /></Suspense>
+            </Route>
+            <Route path="/integrations">
+              <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
+            </Route>
+            <Route path="/integrations/salesforce">
+              <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
+            </Route>
+            <Route path="/integrations/jira">
+              <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
             </Route>
             <Route>
               <Redirect to="/" />
