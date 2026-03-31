@@ -27,7 +27,7 @@ A premium, command-grade design system inspired by Palantir Foundry/Anduril Latt
 #### Brand Hierarchy & Visuals
 - **SZL Holdings:** Dark-first, platinum/silver/graphite, Space Grotesk.
 - **Alloy:** Cool steel / signal blue, infrastructure engine aesthetic.
-- **Lyte:** Signal cyan, for business observability (AIOps Command).
+- **Lyte:** Amber (#f59e0b), Business Observability Platform — standalone SaaS product using the PRISM framework (7 lenses: Signal, Impact, Anticipation, Topology, Posture, Velocity, Experience). Connects to enterprise tools (Microsoft 365, Slack, Jira, Salesforce, etc.) and provides role-based command views for executives, operators, delivery, and analysts. Marketing site positions Lyte as a competitor to New Relic/Datadog for business processes (not infrastructure). Pricing: Starter $49, Business $149, Enterprise Custom.
 - **Vessels:** Deep ocean blue, maritime command intelligence.
 - **Terra:** Bronze/stone (#a07848), portfolio intelligence for real-estate — distinct from Lyte. Terminology: Portfolio Intelligence, not generic brokerage.
 - **Carlota Jo:** Warm ivory/brushed gold, light luxury, serif fonts.
