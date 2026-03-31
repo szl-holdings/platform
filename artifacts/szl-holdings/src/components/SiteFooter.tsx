@@ -1,19 +1,26 @@
 import { Link } from "wouter";
 
-const PLATFORMS_LINKS = [
+const FLAGSHIP_LINKS = [
   { label: "Alloy", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
 ];
 
-const SERVICES_LINKS = [
+const PLATFORMS_LINKS = [
+  { label: "Firestorm", href: "/firestorm/" },
+  { label: "INCA", href: "/inca/" },
+  { label: "Terra", href: "/terra/" },
+  { label: "Rosie", href: "/msp/" },
+  { label: "Dreamscape", href: "/dreamscape/" },
   { label: "Carlota Jo", href: "/carlota-jo/" },
 ];
 
 const COMPANY_LINKS = [
-  { label: "Founder", href: "/founder" },
-  { label: "Contact", href: "/contact" },
-  { label: "Insights", href: "/insights" },
+  { label: "Ecosystem", href: "/ecosystem", internal: true },
+  { label: "Trust", href: "/trust", internal: true },
+  { label: "Founder", href: "/founder", internal: true },
+  { label: "Contact", href: "/contact", internal: true },
+  { label: "Insights", href: "/insights", internal: true },
 ];
 
 const SOCIAL_LINKS = [
@@ -109,10 +116,10 @@ export function SiteFooter() {
 
           <div>
             <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Platforms
+              Flagships
             </h4>
             <ul className="space-y-2.5">
-              {PLATFORMS_LINKS.map((link) => (
+              {FLAGSHIP_LINKS.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
@@ -129,10 +136,10 @@ export function SiteFooter() {
 
           <div>
             <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Services
+              Platforms
             </h4>
             <ul className="space-y-2.5">
-              {SERVICES_LINKS.map((link) => (
+              {PLATFORMS_LINKS.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}

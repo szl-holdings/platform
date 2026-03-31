@@ -22,22 +22,10 @@
       "path": "./lib/config"
     },
     {
-      "path": "./lib/shared-types"
-    },
-    {
-      "path": "./lib/utils"
-    },
-    {
-      "path": "./lib/notifications"
-    },
-    {
       "path": "./lib/auth"
     },
     {
       "path": "./lib/integrations-openai-ai-server"
-    },
-    {
-      "path": "./lib/integrations-openai-ai-react"
     },
     {
       "path": "./lib/integrations-anthropic-ai"
@@ -59,6 +47,12 @@
     },
     {
       "path": "./lib/ai-engine"
+    },
+    {
+      "path": "./lib/analytics"
+    },
+    {
+      "path": "./lib/observability"
     }
   ]
 }

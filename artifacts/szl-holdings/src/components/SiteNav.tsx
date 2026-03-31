@@ -6,17 +6,19 @@ import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { label: "Ecosystem", href: "/ecosystem" },
-  { label: "Alloy", href: "/alloy", external: "/alloy/" },
-  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
-  { label: "Vessels", href: "/vessels", external: "/vessels/" },
-  { label: "Firestorm", href: "/firestorm", external: "/firestorm/" },
-  { label: "INCA", href: "/inca", external: "/inca/" },
-  { label: "Terra", href: "/terra", external: "/terra/" },
-  { label: "Rosie", href: "/msp", external: "/msp/" },
-  { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/" },
-  { label: "Founder", href: "/founder" },
-  { label: "Contact", href: "/contact" },
+  { label: "Ecosystem", href: "/ecosystem", section: "Company" },
+  { label: "Alloy", href: "/alloy", external: "/alloy/", section: "Flagships" },
+  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/", section: "Flagships" },
+  { label: "Vessels", href: "/vessels", external: "/vessels/", section: "Flagships" },
+  { label: "Firestorm", href: "/firestorm", external: "/firestorm/", section: "Platforms" },
+  { label: "INCA", href: "/inca", external: "/inca/", section: "Platforms" },
+  { label: "Terra", href: "/terra", external: "/terra/", section: "Platforms" },
+  { label: "Rosie", href: "/msp", external: "/msp/", section: "Platforms" },
+  { label: "Dreamscape", href: "/dreamscape", external: "/dreamscape/", section: "Platforms" },
+  { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/", section: "Services" },
+  { label: "Founder", href: "/founder", section: "Company" },
+  { label: "Trust", href: "/trust", section: "Company" },
+  { label: "Contact", href: "/contact", section: "Company" },
 ];
 
 const NAV_LINKS_PRIMARY = [
@@ -24,6 +26,7 @@ const NAV_LINKS_PRIMARY = [
   { label: "Alloy", href: "/alloy", external: "/alloy/" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
+  { label: "Trust", href: "/trust" },
   { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];
@@ -177,40 +180,53 @@ export function SiteNav() {
               borderBottom: "1px solid var(--color-szl-border)",
             }}
           >
-            <div className="px-6 py-6 flex flex-col gap-4">
-              {NAV_LINKS.map((link) => {
-                const mobileStyle = {
-                  fontSize: "0.9375rem",
-                  fontWeight: 500,
-                  color: "var(--color-szl-text-secondary)",
-                  transition: "color 0.2s ease",
-                  textDecoration: "none",
-                };
-                if (link.external) {
-                  return (
-                    <a
-                      key={link.href}
-                      href={link.external}
-                      onClick={() => handleNavClick(link.label, link.href)}
-                      style={mobileStyle}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                    >
-                      {link.label}
-                    </a>
-                  );
-                }
+            <div className="px-6 py-6 flex flex-col gap-5">
+              {(["Flagships", "Platforms", "Services", "Company"] as const).map((section) => {
+                const sectionLinks = NAV_LINKS.filter(l => l.section === section);
+                if (sectionLinks.length === 0) return null;
                 return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => handleNavClick(link.label, link.href)}
-                    style={mobileStyle}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    {link.label}
-                  </Link>
+                  <div key={section}>
+                    <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "0.625rem" }}>
+                      {section}
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      {sectionLinks.map((link) => {
+                        const mobileStyle = {
+                          fontSize: "0.9375rem",
+                          fontWeight: 500 as const,
+                          color: "var(--color-szl-text-secondary)",
+                          transition: "color 0.2s ease",
+                          textDecoration: "none" as const,
+                        };
+                        if (link.external) {
+                          return (
+                            <a
+                              key={link.href}
+                              href={link.external}
+                              onClick={() => handleNavClick(link.label, link.href)}
+                              style={mobileStyle}
+                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                            >
+                              {link.label}
+                            </a>
+                          );
+                        }
+                        return (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => handleNavClick(link.label, link.href)}
+                            style={mobileStyle}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                          >
+                            {link.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })}
             </div>

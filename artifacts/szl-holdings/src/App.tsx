@@ -20,6 +20,9 @@ const TerraListingsPage = lazy(() => import("@/pages/terra-listings"));
 const OwnershipOsPage = lazy(() => import("@/pages/ownership-os"));
 const InvestorRelationsPage = lazy(() => import("@/pages/investor-relations"));
 const CoreCommandPage = lazy(() => import("@/pages/core-command"));
+const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
+const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
+const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,6 +136,21 @@ function App() {
             <Route path="/carlota-jo/services">
               <ExternalRedirect to="/carlota-jo/services" />
             </Route>
+            <Route path="/firestorm">
+              <ExternalRedirect to="/firestorm/" />
+            </Route>
+            <Route path="/inca">
+              <ExternalRedirect to="/inca/" />
+            </Route>
+            <Route path="/msp">
+              <ExternalRedirect to="/msp/" />
+            </Route>
+            <Route path="/dreamscape">
+              <ExternalRedirect to="/dreamscape/" />
+            </Route>
+            <Route path="/stephen">
+              <ExternalRedirect to="/stephen-site/" />
+            </Route>
             <Route path="/founder">
               <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>
             </Route>
@@ -177,6 +195,15 @@ function App() {
             </Route>
             <Route path="/core">
               <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
+            </Route>
+            <Route path="/control-plane">
+              <Suspense fallback={<PageLoader />}><ControlPlanePage /></Suspense>
+            </Route>
+            <Route path="/portfolio-ops">
+              <Suspense fallback={<PageLoader />}><PortfolioOpsPage /></Suspense>
+            </Route>
+            <Route path="/trust">
+              <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
             </Route>
             <Route>
               <Redirect to="/" />
