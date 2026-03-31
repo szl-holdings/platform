@@ -142,10 +142,10 @@ function App() {
               <ExternalRedirect to="/firestorm/" />
             </Route>
             <Route path="/inca">
-              <ExternalRedirect to="/inca/" />
+              <ExternalRedirect to="/firestorm/intel/dashboard" />
             </Route>
             <Route path="/msp">
-              <ExternalRedirect to="/msp/" />
+              <ExternalRedirect to="/firestorm/ops/dashboard" />
             </Route>
             <Route path="/stephen">
               <ExternalRedirect to="/stephen-site/" />

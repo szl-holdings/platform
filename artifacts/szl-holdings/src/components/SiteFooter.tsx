@@ -6,8 +6,6 @@ const PLATFORMS_LINKS = [
   { label: "Aegis", href: "/firestorm/", desc: "Defense & Intelligence" },
   { label: "Alloy", href: "/alloy/", desc: "Execution Fabric" },
   { label: "Terra", href: "/terra/", desc: "Real Estate Intelligence" },
-  { label: "Rosie", href: "/msp/", desc: "Incident Command" },
-  { label: "Dreamscape", href: "/dreamscape/", desc: "Scenario Intelligence" },
 ];
 
 const SERVICES_LINKS = [

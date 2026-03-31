@@ -26,10 +26,10 @@
     "description": "A secure intelligence layer built for visibility, triage, and more structured decision-making across complex operating environments.",
     "status": "In Development",
     "category": "Intelligence",
-    "link": "/inca/",
+    "link": "/firestorm/intel/dashboard",
     "icon": "BarChart3",
     "color": "#10b981",
-    "cta": "View INCA",
+    "cta": "View Aegis Intel",
     "metrics": [
       { "label": "Signal visibility", "value": "Structured" },
       { "label": "Triage workflows", "value": "Organized" },
@@ -141,7 +141,7 @@
     "description": "Evidence-backed incident command platform delivering threat detection, anomaly visibility, and MSP-grade operational intelligence. Rosie integrates government contract intelligence, FedRAMP compliance tracking, and CMMC maturity scoring for defense-aware operators.",
     "status": "Live",
     "category": "Security",
-    "link": "/msp/",
+    "link": "/firestorm/ops/dashboard",
     "icon": "AlertTriangle",
     "color": "#ef4444",
     "metrics": [

@@ -333,7 +333,7 @@ export const ventures: Venture[] = [
     ],
     nextMilestone: "Three new evaluation workflow modules (Q2 2026)",
     path: "/ventures/inca",
-    externalPath: "/inca/",
+    externalPath: "/firestorm/intel/dashboard",
   },
   {
     id: "terra",
@@ -492,7 +492,7 @@ export const ventures: Venture[] = [
     ],
     nextMilestone: "Lyte integration for AIOps signal-to-ticket automation (Q3 2026)",
     path: "/ventures/msp",
-    externalPath: "/msp/",
+    externalPath: "/firestorm/ops/dashboard",
   },
 ];
 

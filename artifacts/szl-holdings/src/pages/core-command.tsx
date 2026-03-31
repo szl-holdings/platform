@@ -65,7 +65,7 @@ const SEVERITY_BG: Record<string, string> = {
 const platformLinks = [
   { name: "Beacon", role: "OBSERVE", subtitle: "Business Telemetry", href: "/terra/", icon: Building, color: "#0ea5e9" },
   { name: "Lyte", role: "INTERPRET", subtitle: "AIOps Command", href: "/lyte-command-center/", icon: Zap, color: "#f59e0b" },
-  { name: "Dreamscape", role: "CREATE", subtitle: "Creative Studio", href: "/dreamscape/", icon: Brain, color: "#ec4899" },
+  { name: "Alloy Creative", role: "CREATE", subtitle: "Creative Workflows", href: "/alloy/creative", icon: Brain, color: "#ec4899" },
   { name: "AlloyScape", role: "EXECUTE", subtitle: "Execution Fabric", href: "/alloy/", icon: Layers, color: "#6366f1" },
   { name: "Aegis", role: "DEFEND", subtitle: "Defense & Intelligence", href: "/firestorm/", icon: Shield, color: "#6366f1" },
   { name: "Vessels", role: "TRACK", subtitle: "Maritime Intelligence", href: "/vessels/", icon: Ship, color: "#3b82f6" },
@@ -468,7 +468,7 @@ export default function CoreCommandCenter() {
                       { label: "Aegis — Defense & Intelligence", href: "/firestorm/", color: "#6366f1", icon: Shield },
                       { label: "Carlota Jo — Consulting", href: "/carlota-jo/", color: "#10b981", icon: Globe },
                       { label: "Vessels — Maritime", href: "/vessels/", color: "#3b82f6", icon: Ship },
-                      { label: "Dreamscape — Creative Studio", href: "/dreamscape/", color: "#ec4899", icon: Eye },
+                      { label: "Alloy — Creative Workflows", href: "/alloy/creative", color: "#ec4899", icon: Eye },
                     ].map((link) => (
                       <a
                         key={link.href}
