@@ -33,6 +33,7 @@ import { WorldBankAdapter } from "./adapters/worldbank.js";
 import { OpenMeteoAdapter } from "./adapters/openmeteo.js";
 import { MITREAdapter } from "./adapters/mitre.js";
 import { GDELTAdapter } from "./adapters/gdelt.js";
+import { MicrosoftGraphAdapter } from "./adapters/microsoft-graph.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -80,6 +81,7 @@ export class ServiceRegistry {
   readonly openmeteo: OpenMeteoAdapter;
   readonly mitre: MITREAdapter;
   readonly gdelt: GDELTAdapter;
+  readonly microsoftGraph: MicrosoftGraphAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -118,6 +120,7 @@ export class ServiceRegistry {
     this.openmeteo = new OpenMeteoAdapter();
     this.mitre = new MITREAdapter();
     this.gdelt = new GDELTAdapter();
+    this.microsoftGraph = new MicrosoftGraphAdapter();
 
     this.adapters = [
       this.ai,
@@ -154,6 +157,7 @@ export class ServiceRegistry {
       this.openmeteo,
       this.mitre,
       this.gdelt,
+      this.microsoftGraph,
     ];
   }
 

@@ -229,8 +229,12 @@ export default function WorkflowOrchestration() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
 
   const isDemo = isError || (!isLoading && (!apiWorkflows || apiWorkflows.length === 0));
+<<<<<<< HEAD
   const demoWorkflows = useMemo(() => generateDemoWorkflows(), []);
   const workflows = isDemo ? demoWorkflows : (apiWorkflows ?? []);
+=======
+  const workflows = isDemo ? generateDemoWorkflows() : (apiWorkflows ?? []);
+>>>>>>> 4fdb0e8 (Task #183: Connect Terra to all NYC/NYS real estate data sources + M365/SharePoint/Office 365 integration)
 
   const filtered = workflows.filter(w => statusFilter === "all" || w.status === statusFilter);
   const active = workflows.filter(w => w.status === "active");

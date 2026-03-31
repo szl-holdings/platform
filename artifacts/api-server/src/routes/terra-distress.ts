@@ -13,6 +13,7 @@ import {
 import { ingestCsvBuffer } from "../lib/terra-csv-ingestion";
 import { jobQueue } from "../lib/job-queue";
 import { NYC_INGESTION_JOB_TYPE } from "../lib/terra-nyc-ingestion";
+import { NYC_EXTENDED_INGESTION_JOB_TYPE, type NycExtendedIngestionJobPayload } from "../lib/terra-nyc-extended-ingestion";
 
 const router: IRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
@@ -261,6 +262,49 @@ router.post(
         estimatedDurationMs: sources.length * 60000,
       });
     } catch (err) { handleRouteError(res, err, "Failed to enqueue NYC data pull"); }
+  }
+);
+
+router.post(
+  "/terra/distress/ingest/nyc-extended",
+  authMiddleware({ required: true }),
+  requireRole("super_admin", "ops"),
+  async (req, res) => {
+    try {
+      const ALL_SOURCES: NycExtendedIngestionJobPayload["sources"] = [
+        "rolling_sales", "tax_lien_sale_list", "hpd_complaints", "dob_violations", "nyc_311", "acris_parties",
+      ];
+      const VALID = new Set(ALL_SOURCES);
+
+      const rawSources = req.body?.sources as string[] | undefined;
+      if (rawSources !== undefined) {
+        const invalid = rawSources.filter(s => !VALID.has(s as NycExtendedIngestionJobPayload["sources"][number]));
+        if (invalid.length > 0) {
+          res.status(400).json({ error: `Unknown source(s): ${invalid.join(", ")}. Valid: ${ALL_SOURCES.join(", ")}` });
+          return;
+        }
+      }
+      const sources = (rawSources as NycExtendedIngestionJobPayload["sources"] | undefined) ?? ALL_SOURCES;
+
+      await auditLog("nyc_extended_pull_triggered", "terra_distress", undefined, { sources }, req.user?.id);
+
+      const job = await jobQueue.enqueue(NYC_EXTENDED_INGESTION_JOB_TYPE, { sources });
+
+      sendSuccess(res, {
+        message: "NYC Extended Open Data ingestion job enqueued",
+        jobId: job.id,
+        sources,
+        estimatedDurationMs: sources.length * 90000,
+        availableSources: {
+          rolling_sales: "NYC DOF Rolling Property Sales (usep-8jbt)",
+          tax_lien_sale_list: "NYC Tax Lien Sale List (9rz4-mjek)",
+          hpd_complaints: "NYC HPD Complaints (uwyv-629c)",
+          dob_violations: "NYC DOB Violations (3h2n-5cm9)",
+          nyc_311: "NYC 311 Property Complaints (erm2-nwe9)",
+          acris_parties: "NYC ACRIS Parties — LLC Ownership Tracing (636b-3b5g)",
+        },
+      });
+    } catch (err) { handleRouteError(res, err, "Failed to enqueue NYC extended data pull"); }
   }
 );
 

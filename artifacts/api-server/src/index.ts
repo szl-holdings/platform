@@ -16,6 +16,8 @@ import { ensureAlloyTables } from "./lib/alloy-migrations";
 import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
+import "./lib/terra-nyc-extended-ingestion";
+import { scheduleNycExtendedIngestionJob } from "./lib/terra-nyc-extended-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
 import { initializeOpenTelemetry } from "@workspace/observability";
 import { seedTerraDemo } from "./lib/terra-seed";
@@ -93,6 +95,7 @@ seedDreamscapeData().catch(err => {
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
   scheduleNycIngestionJob();
+  scheduleNycExtendedIngestionJob();
 });
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;

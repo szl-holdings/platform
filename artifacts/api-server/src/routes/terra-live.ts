@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { getIngestionStats } from "../lib/terra-distress-service";
 
 const router: IRouter = Router();
 
@@ -298,6 +299,82 @@ router.get("/terra/live/fema-nri", terraLiveLimit, authMiddleware({ required: fa
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch FEMA NRI data"); }
+});
+
+router.get("/terra/live/nyc-dashboard", terraLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const stats = await getIngestionStats();
+
+    const boroughMap = stats.byBorough as Record<string, number>;
+    const typeMap = stats.byDistressType as Record<string, number>;
+
+    const totalProperties = stats.totalProperties as number;
+    const lastRun = Array.isArray(stats.recentRuns) && stats.recentRuns.length > 0 ? stats.recentRuns[0] : null;
+
+    const boroughBreakdown = [
+      { borough: "Manhattan", count: boroughMap["Manhattan"] ?? 0, icon: "🏙️" },
+      { borough: "Brooklyn", count: boroughMap["Brooklyn"] ?? 0, icon: "🌉" },
+      { borough: "Queens", count: boroughMap["Queens"] ?? 0, icon: "✈️" },
+      { borough: "Bronx", count: boroughMap["Bronx"] ?? 0, icon: "🏟️" },
+      { borough: "Staten Island", count: boroughMap["Staten Island"] ?? 0, icon: "⛴️" },
+    ].sort((a, b) => b.count - a.count);
+
+    const distressBreakdown = Object.entries(typeMap).map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const recentRunSummary = lastRun ? {
+      runId: (lastRun as any).id,
+      source: (lastRun as any).source,
+      status: (lastRun as any).status,
+      recordsInserted: (lastRun as any).recordsInserted,
+      alertsGenerated: (lastRun as any).alertsGenerated,
+      startedAt: (lastRun as any).startedAt,
+      completedAt: (lastRun as any).completedAt,
+    } : null;
+
+    const newFilings7d = Array.isArray(stats.recentRuns)
+      ? (stats.recentRuns as any[])
+          .filter((r: any) => {
+            if (!r.startedAt) return false;
+            const runDate = new Date(r.startedAt);
+            return Date.now() - runDate.getTime() < 7 * 86400000;
+          })
+          .reduce((sum: number, r: any) => sum + (r.recordsInserted ?? 0), 0)
+      : 0;
+
+    sendSuccess(res, {
+      source: "Terra NYC Intelligence Dashboard — Live Ingestion Stats",
+      connectors: [
+        "NYC ACRIS Real Property Master (bnx9-e6tj)",
+        "NYC ACRIS Legals (8h5j-fqxa)",
+        "NYC ACRIS Parties (636b-3b5g)",
+        "NYC Rolling Property Sales (usep-8jbt)",
+        "NYC Tax Lien Sale List (9rz4-mjek)",
+        "NYC Property Valuation & Assessment (8y4t-faws)",
+        "NYC HPD Violations (wvxf-dwi5)",
+        "NYC HPD Complaints (uwyv-629c)",
+        "NYC DOB Violations (3h2n-5cm9)",
+        "NYC 311 Property Complaints (erm2-nwe9)",
+      ],
+      dashboard: {
+        totalProperties,
+        newFilings7d,
+        boroughBreakdown,
+        distressBreakdown,
+        topOpportunitySignals: [
+          { signal: "Lis Pendens Filings", count: typeMap["pre-foreclosure"] ?? 0, urgency: "high" },
+          { signal: "Active Foreclosures", count: typeMap["foreclosure"] ?? 0, urgency: "critical" },
+          { signal: "Tax Liens", count: typeMap["tax-lien"] ?? 0, urgency: "medium" },
+          { signal: "REO / Bank-Owned", count: typeMap["reo"] ?? 0, urgency: "high" },
+          { signal: "Auction Scheduled", count: typeMap["auction"] ?? 0, urgency: "critical" },
+        ].filter(s => s.count > 0),
+        recentIngestionRun: recentRunSummary,
+        dataFreshness: lastRun ? (lastRun as any).completedAt ?? (lastRun as any).startedAt : null,
+      },
+      liveData: true,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch NYC dashboard stats"); }
 });
 
 export default router;

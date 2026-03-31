@@ -80,9 +80,9 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     doctrineRole: "EXECUTE",
   },
   alloy: {
-    connectors: ["ai", "storage", "monitoring"],
-    description: "Alloy — execution fabric, connectors, automations, DAGs, and predictive intelligence engine across the SZL platform.",
-    liveFeeds: ["HuggingFace Hub — AI Creative Tools (live API)", "Cross-Platform Analytics Benchmarks"],
+    connectors: ["ai", "storage", "monitoring", "microsoft-graph"],
+    description: "Alloy — execution fabric, connectors, automations, DAGs, and predictive intelligence engine across the SZL platform. Microsoft 365 integration surfaces SharePoint workflow attachments and Teams notifications.",
+    liveFeeds: ["HuggingFace Hub — AI Creative Tools (live API)", "Cross-Platform Analytics Benchmarks", "Microsoft SharePoint Document Libraries", "Microsoft Teams Webhook Notifications"],
     doctrineRole: "EXECUTE",
   },
   dreamscape: {
@@ -92,9 +92,9 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     doctrineRole: "EXECUTE",
   },
   aegis: {
-    connectors: ["ai", "notion", "confluence", "google-docs", "slack", "monitoring"],
-    description: "Aegis (formerly Readiness) control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, FedRAMP, and CMMC frameworks.",
-    liveFeeds: ["NIST CSF 2.0 Framework", "FedRAMP Marketplace", "CMMC Maturity Model", "CISA KEV (Patch Compliance)"],
+    connectors: ["ai", "notion", "confluence", "google-docs", "slack", "monitoring", "microsoft-graph"],
+    description: "Aegis (formerly Readiness) control plane — risk register, remediation tracking, governance, and compliance using NIST CSF 2.0, FedRAMP, and CMMC frameworks. Microsoft SharePoint stores compliance evidence files.",
+    liveFeeds: ["NIST CSF 2.0 Framework", "FedRAMP Marketplace", "CMMC Maturity Model", "CISA KEV (Patch Compliance)", "Microsoft SharePoint Compliance Evidence Library"],
     doctrineRole: "DECIDE",
   },
   rosie: {
@@ -116,9 +116,9 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     doctrineRole: "UNDERSTAND",
   },
   "control-plane": {
-    connectors: ["ai", "stripe", "slack", "twilio", "google", "notion", "github", "storage", "monitoring", "posthog", "gmail", "hubspot", "confluence", "figma", "elevenlabs", "weather", "stormglass", "shipping", "google-calendar", "google-docs", "google-drive", "dropbox", "onedrive", "cisa", "arxiv", "abuseipdb", "noaa", "nvd", "bls", "worldbank", "openmeteo", "mitre", "gdelt"],
-    description: "Admin panel monitors all connectors and live feeds across the platform including 10 new government and OSINT data adapters.",
-    liveFeeds: ["All Platform Feeds Aggregated — 35 Connectors"],
+    connectors: ["ai", "stripe", "slack", "twilio", "google", "notion", "github", "storage", "monitoring", "posthog", "gmail", "hubspot", "confluence", "figma", "elevenlabs", "weather", "stormglass", "shipping", "google-calendar", "google-docs", "google-drive", "dropbox", "onedrive", "cisa", "arxiv", "abuseipdb", "noaa", "nvd", "bls", "worldbank", "openmeteo", "mitre", "gdelt", "microsoft-graph"],
+    description: "Admin panel monitors all connectors and live feeds across the platform including government, OSINT, and Microsoft 365 adapters.",
+    liveFeeds: ["All Platform Feeds Aggregated — 36 Connectors", "Microsoft 365 — SharePoint, OneDrive, Outlook, Teams"],
     doctrineRole: "DECIDE",
   },
   "szl-holdings": {
@@ -127,9 +127,9 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
     doctrineRole: "DECIDE",
   },
   "carlota-jo": {
-    connectors: ["ai", "stripe", "google-calendar", "gmail", "hubspot", "storage", "worldbank", "bls"],
-    description: "Luxury advisory booking uses World Bank live GDP indicators, BLS employment data, Harvard Business Review strategic news RSS, and consulting industry trend intelligence.",
-    liveFeeds: ["World Bank Open Data API (live GDP/inflation indicators)", "BLS Employment Statistics", "Harvard Business Review Live RSS", "Consulting Industry Trend Intelligence"],
+    connectors: ["ai", "stripe", "google-calendar", "gmail", "hubspot", "storage", "worldbank", "bls", "microsoft-graph"],
+    description: "Luxury advisory booking uses World Bank live GDP indicators, BLS employment data, Harvard Business Review strategic news RSS, and consulting industry trend intelligence. Outlook Calendar integration provides real booking availability and Outlook Contacts sync with the CRM.",
+    liveFeeds: ["World Bank Open Data API (live GDP/inflation indicators)", "BLS Employment Statistics", "Harvard Business Review Live RSS", "Consulting Industry Trend Intelligence", "Microsoft Outlook Calendar (real availability)", "Microsoft Outlook Contacts (CRM sync)"],
     doctrineRole: "DECIDE",
   },
   "stephen-site": {

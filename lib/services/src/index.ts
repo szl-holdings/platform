@@ -102,6 +102,7 @@ export { WorldBankAdapter } from "./adapters/worldbank.js";
 export { OpenMeteoAdapter } from "./adapters/openmeteo.js";
 export { MITREAdapter } from "./adapters/mitre.js";
 export { GDELTAdapter } from "./adapters/gdelt.js";
+export { MicrosoftGraphAdapter, type GraphFile, type GraphCalendarEvent, type GraphContact, type GraphTeamsNotification, type GraphSharePointSite, type GraphConnectionStatus } from "./adapters/microsoft-graph.js";
 
 export {
   HuggingFaceAdapter,

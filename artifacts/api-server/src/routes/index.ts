@@ -54,6 +54,7 @@ import coreRouter from "./core";
 import lyteExtendedRouter from "./lyte-extended";
 import vesselsExtendedRouter from "./vessels-extended";
 import terraCrmRouter from "./terra-crm";
+import microsoftGraphRouter from "./microsoft-graph";
 
 const router: IRouter = Router();
 
@@ -202,5 +203,8 @@ router.use(terraCrmRouter);
 
 router.use("/core", readLimiter);
 router.use(coreRouter);
+
+router.use("/microsoft", readLimiter);
+router.use(microsoftGraphRouter);
 
 export default router;

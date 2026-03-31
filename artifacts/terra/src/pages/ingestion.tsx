@@ -23,7 +23,8 @@ function useIngestionStats() {
 }
 
 const SOURCE_LABELS: Record<string, { label: string; description: string; color: string }> = {
-  nyc_open_data: { label: "NYC Open Data", description: "ACRIS, foreclosure filings, DOF liens, HPD violations", color: "text-blue-400" },
+  nyc_open_data: { label: "NYC Open Data — Core", description: "ACRIS, foreclosure filings, DOF liens, HPD violations", color: "text-blue-400" },
+  nyc_open_data_extended: { label: "NYC Open Data — Extended", description: "Rolling Sales, Tax Lien Sale List, HPD Complaints, DOB, 311, ACRIS Parties", color: "text-violet-400" },
   csv_upload: { label: "CSV Upload", description: "Manual CSV from county exports, broker sources, custom feeds", color: "text-emerald-400" },
   manual: { label: "Manual Entry", description: "Individually entered distress properties", color: "text-amber-400" },
   seed: { label: "Seed Data", description: "Initial dataset loaded at launch", color: "text-slate-400" },
@@ -52,6 +53,8 @@ export default function IngestionPage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [triggeringNyc, setTriggeringNyc] = useState(false);
   const [nycResult, setNycResult] = useState<any>(null);
+  const [triggeringExtended, setTriggeringExtended] = useState(false);
+  const [extendedResult, setExtendedResult] = useState<any>(null);
   const [expandedRun, setExpandedRun] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -107,6 +110,25 @@ export default function IngestionPage() {
       setNycResult({ error: String(err) });
     } finally {
       setTriggeringNyc(false);
+    }
+  }
+
+  async function triggerExtendedIngestion() {
+    setTriggeringExtended(true);
+    setExtendedResult(null);
+    try {
+      const res = await fetch(`${API}/terra/distress/ingest/nyc-extended`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sources: ["rolling_sales", "tax_lien_sale_list", "hpd_complaints", "dob_violations", "nyc_311", "acris_parties", "map_pluto"] }),
+      });
+      const json = await res.json();
+      setExtendedResult(json.data ?? json);
+      refetch();
+    } catch (err) {
+      setExtendedResult({ error: String(err) });
+    } finally {
+      setTriggeringExtended(false);
     }
   }
 
@@ -279,6 +301,69 @@ export default function IngestionPage() {
           {nycResult && (
             <div className={cn("mt-3 rounded-lg border p-3 text-xs", nycResult.error ? "border-red-500/20 bg-red-500/5 text-red-400" : "border-blue-500/20 bg-blue-500/5 text-blue-300")}>
               {nycResult.error ? nycResult.error : nycResult.message ?? "Job enqueued"}
+            </div>
+          )}
+        </motion.div>
+
+        {/* NYC Extended Sources */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="rounded-xl border border-terra-border bg-terra-surface/50 p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 rounded-lg bg-violet-500/10 border border-violet-500/20">
+              <Database className="w-4 h-4 text-violet-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-display font-bold text-terra-text">NYC Open Data — Extended</h2>
+              <p className="text-[10px] text-terra-text-muted">Rolling sales, tax lien sales, HPD complaints, DOB, 311, ACRIS parties</p>
+            </div>
+          </div>
+
+          <div className="space-y-2 mb-4">
+            {[
+              { key: "usep-8jbt", label: "NYC Rolling Property Sales", desc: "All borough sales transactions" },
+              { key: "9rz4-mjek", label: "Tax Lien Sale List", desc: "Delinquent properties facing sale" },
+              { key: "uwyv-629c", label: "HPD Complaints", desc: "Tenant complaints by building" },
+              { key: "3h2n-5cm9", label: "DOB Violations", desc: "Dept of Buildings stop-work & violations" },
+              { key: "erm2-nwe9", label: "NYC 311 Property", desc: "Building/property service complaints" },
+              { key: "636b-3b5g", label: "ACRIS Parties / LLC Trace", desc: "Grantor/grantee entity ownership" },
+              { key: "64uk-42ks", label: "MapPLUTO Land Use & Zoning", desc: "Parcel data, assessed values, building class, zoning" },
+            ].map(src => (
+              <div key={src.key} className="flex items-center justify-between p-2.5 rounded-lg border border-terra-border bg-terra-surface/50">
+                <div>
+                  <p className="text-xs font-semibold text-terra-text">{src.label}</p>
+                  <p className="text-[9px] text-terra-text-muted font-mono">{src.key} — {src.desc}</p>
+                </div>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded border text-violet-400 bg-violet-400/10 border-violet-400/30">
+                  scheduled
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={triggerExtendedIngestion}
+            disabled={triggeringExtended}
+            className={cn(
+              "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-colors",
+              triggeringExtended
+                ? "bg-violet-500/20 text-violet-400 cursor-not-allowed"
+                : "bg-violet-500/10 border border-violet-500/30 text-violet-400 hover:bg-violet-500/20"
+            )}
+          >
+            {triggeringExtended ? (
+              <><RefreshCw className="w-4 h-4 animate-spin" /> Enqueueing extended job...</>
+            ) : (
+              <><Play className="w-4 h-4" /> Trigger Extended Data Pull</>
+            )}
+          </button>
+
+          {extendedResult && (
+            <div className={cn("mt-3 rounded-lg border p-3 text-xs", extendedResult.error ? "border-red-500/20 bg-red-500/5 text-red-400" : "border-violet-500/20 bg-violet-500/5 text-violet-300")}>
+              {extendedResult.error ? extendedResult.error : extendedResult.message ?? "Extended job enqueued"}
             </div>
           )}
         </motion.div>
