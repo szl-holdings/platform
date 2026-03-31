@@ -133,8 +133,8 @@ const roleViews = [
   },
   {
     role: "Analyst / Engineer",
-    headline: "Full-stack business telemetry",
-    points: ["Topology maps reveal hidden dependencies", "Signal feeds with state transitions and audit trails", "Experience lens correlates internal ops to customer outcomes", "API-first — push custom metrics into any PRISM pillar"],
+    headline: "Full-stack operational observability",
+    points: ["Topology maps reveal hidden dependencies across teams and systems", "Signal feeds with state transitions and full audit trails", "Experience lens correlates internal operations to customer outcomes", "API-first — push custom metrics into any PRISM pillar"],
   },
 ];
 

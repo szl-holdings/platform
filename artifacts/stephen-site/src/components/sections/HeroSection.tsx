@@ -54,7 +54,7 @@ const ecosystemBrands = [
   { name: "Firestorm", desc: "Cyber Defense", color: "hsl(0,80%,55%)" },
   { name: "INCA", desc: "AI Research", color: "hsl(265,80%,60%)" },
   { name: "Alloy", desc: "Execution Fabric", color: "hsl(214,80%,65%)" },
-  { name: "Terra", desc: "Business Telemetry", color: "hsl(160,70%,45%)" },
+  { name: "Terra", desc: "Real Estate Intelligence", color: "hsl(88,42%,44%)" },
   { name: "Rosie", desc: "Incident Command", color: "hsl(215,80%,55%)" },
   { name: "Carlota Jo", desc: "Private Advisory", color: "hsl(38,55%,58%)" },
 ];

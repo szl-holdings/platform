@@ -6,7 +6,7 @@ import { Link } from "wouter";
 const ECOSYSTEM_APPS = [
   { id: "vessels", name: "Vessels", role: "Maritime Intelligence", agent: "Maritime Analyst", icon: Globe, color: "text-cyan-400", bg: "bg-cyan-400/10", borderColor: "border-cyan-400/20" },
   { id: "msp", name: "Rosie", role: "Threat Command", agent: "IT Sentinel", icon: Cpu, color: "text-red-400", bg: "bg-red-400/10", borderColor: "border-red-400/20" },
-  { id: "terra", name: "Beacon", role: "Business Telemetry Intel", agent: "Deal Scout", icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-400/10", borderColor: "border-emerald-400/20" },
+  { id: "terra", name: "Terra", role: "Real Estate Intelligence", agent: "Deal Scout", icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-400/10", borderColor: "border-emerald-400/20" },
   { id: "dreamscape", name: "Alloy Predict", role: "Predictive Intelligence", agent: "Alloy Predictor", icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10", borderColor: "border-violet-400/20" },
   { id: "carlota-jo", name: "Carlota Jo", role: "Advisory Intelligence", agent: "Advisory Agent", icon: Brain, color: "text-pink-400", bg: "bg-pink-400/10", borderColor: "border-pink-400/20" },
   { id: "firestorm", name: "Firestorm", role: "Immune System", agent: "Sacsayhuamán Shield", icon: Shield, color: "text-orange-400", bg: "bg-orange-400/10", borderColor: "border-orange-400/20" },

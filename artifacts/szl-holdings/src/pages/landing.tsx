@@ -3,6 +3,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Hero } from "@/components/Hero";
 import { FeaturedPlatforms } from "@/components/FeaturedPlatforms";
 import { EcosystemLogic } from "@/components/EcosystemLogic";
+import { OperatingDoctrine } from "@/components/OperatingDoctrine";
 import { InvestorThesis } from "@/components/InvestorThesis";
 import { AlloyBackbone } from "@/components/AlloyBackbone";
 import { FounderBlock } from "@/components/FounderBlock";
@@ -18,6 +19,7 @@ export default function HomePage() {
         <Hero />
         <FeaturedPlatforms />
         <EcosystemLogic />
+        <OperatingDoctrine />
         <InvestorThesis />
         <AlloyBackbone />
         <FounderBlock />

@@ -1,6 +1,6 @@
 import { motion as m } from "framer-motion";
-import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, ArrowUpRight, ChevronRight, AlertTriangle, Anchor, Navigation, Activity } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 const navLinks = [
   { label: "Platform", href: "#platform" },
@@ -61,6 +61,147 @@ const useCases = [
     description: "High-level fleet performance dashboards for leadership — without the operational noise.",
   },
 ];
+
+const LIVE_ALERTS = [
+  { id: "ALT-001", severity: "critical", msg: "AIS dark — 72h silence near STS zone", vessel: "MV NORDVIK", time: "2m ago" },
+  { id: "ALT-002", severity: "warn", msg: "Route deviation — 38nm off planned track", vessel: "MT ARKTIKA", time: "14m ago" },
+  { id: "ALT-003", severity: "info", msg: "Port arrival confirmed — Rotterdam T7", vessel: "CV STELLARIS", time: "31m ago" },
+  { id: "ALT-004", severity: "warn", msg: "Speed anomaly — 4.2kts below optimal", vessel: "MV CAPE DAWN", time: "47m ago" },
+];
+
+const FLEET_VESSELS = [
+  { name: "MV NORDVIK", type: "Bulk Carrier", status: "dark", x: 0.18, y: 0.38, heading: 42 },
+  { name: "MT ARKTIKA", type: "Tanker", status: "warn", x: 0.35, y: 0.52, heading: 115 },
+  { name: "CV STELLARIS", type: "Container", status: "ok", x: 0.62, y: 0.41, heading: 270 },
+  { name: "MV CAPE DAWN", type: "Bulk Carrier", status: "warn", x: 0.72, y: 0.62, heading: 195 },
+  { name: "LNG BOREAS", type: "LNG Carrier", status: "ok", x: 0.48, y: 0.29, heading: 88 },
+  { name: "MV SOLANO", type: "Container", status: "ok", x: 0.83, y: 0.44, heading: 310 },
+  { name: "MT PACIFIC ISLE", type: "Tanker", status: "ok", x: 0.26, y: 0.68, heading: 55 },
+  { name: "CV AURORA BAY", type: "Container", status: "ok", x: 0.55, y: 0.58, heading: 222 },
+];
+
+function FleetCommandVisual() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let animFrame: number;
+    let time = 0;
+    const resize = () => {
+      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    const draw = () => {
+      if (document.hidden) { animFrame = requestAnimationFrame(draw); return; }
+      time += 0.01;
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      // Ocean gradient background
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "rgba(4,12,24,0)");
+      grad.addColorStop(1, "rgba(4,12,24,0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      // Grid lines (lat/lon style)
+      ctx.strokeStyle = "rgba(14,165,233,0.05)";
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= 8; i++) {
+        const x = (w / 8) * i;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let i = 0; i <= 5; i++) {
+        const y = (h / 5) * i;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+      // Draw routes
+      const routePairs = [[0,1],[2,5],[3,4],[6,7]];
+      routePairs.forEach(([a, b]) => {
+        const v1 = FLEET_VESSELS[a], v2 = FLEET_VESSELS[b];
+        const x1 = v1.x * w, y1 = v1.y * h, x2 = v2.x * w, y2 = v2.y * h;
+        ctx.beginPath();
+        ctx.setLineDash([4, 8]);
+        ctx.strokeStyle = "rgba(14,165,233,0.12)";
+        ctx.lineWidth = 1;
+        ctx.moveTo(x1, y1);
+        const cx = (x1 + x2) / 2 + (Math.random() * 0 - 0);
+        const cy = (y1 + y2) / 2 - 20;
+        ctx.quadraticCurveTo(cx, cy, x2, y2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+      // Draw vessels
+      FLEET_VESSELS.forEach((v, i) => {
+        const x = v.x * w, y = v.y * h;
+        const pulse = Math.sin(time * 2 + i * 1.2) * 0.5 + 0.5;
+        const color = v.status === "dark" ? "#ef4444" : v.status === "warn" ? "#f59e0b" : "#22d3ee";
+        // Pulse ring
+        ctx.beginPath();
+        ctx.arc(x, y, 7 + pulse * 4, 0, Math.PI * 2);
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = 0.12 + pulse * 0.08;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        // Vessel dot
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        // Heading indicator
+        const radians = (v.heading - 90) * (Math.PI / 180);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(radians) * 10, y + Math.sin(radians) * 10);
+        ctx.strokeStyle = `${color}88`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      });
+      animFrame = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(animFrame); window.removeEventListener("resize", resize); };
+  }, []);
+
+  return (
+    <div className="relative w-full h-full">
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ background: "#040c18" }} />
+      {/* Fleet status overlay */}
+      <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2 pointer-events-none">
+        <div className="bg-[#060e1a]/90 border border-sky-500/15 rounded px-3 py-2 backdrop-blur-sm">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[9px] font-semibold text-emerald-400/80 tracking-widest uppercase">FLEET LIVE</span>
+          </div>
+          <div className="text-[10px] text-sky-400/60 font-mono">{FLEET_VESSELS.length} vessels · {LIVE_ALERTS.filter(a => a.severity === "critical").length} critical</div>
+        </div>
+        <div className="bg-[#060e1a]/90 border border-sky-500/15 rounded px-3 py-2 backdrop-blur-sm">
+          <div className="text-[9px] font-mono text-sky-400/40 mb-0.5">AIS FEED</div>
+          <div className="text-[10px] font-semibold text-sky-300/70">LIVE · {new Date().toUTCString().slice(17, 25)} UTC</div>
+        </div>
+      </div>
+      {/* Alert feed */}
+      <div className="absolute bottom-3 left-3 right-3 space-y-1 pointer-events-none">
+        {LIVE_ALERTS.slice(0, 3).map((a) => (
+          <div key={a.id} className="flex items-center gap-2 bg-[#060e1a]/90 border border-sky-500/10 rounded px-3 py-1.5 backdrop-blur-sm">
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.severity === "critical" ? "bg-red-400 animate-pulse" : a.severity === "warn" ? "bg-amber-400" : "bg-emerald-400"}`} />
+            <span className="text-[9px] font-mono text-sky-400/50 flex-shrink-0">{a.id}</span>
+            <span className="text-[10px] text-sky-300/70 flex-1 truncate">{a.msg}</span>
+            <span className="text-[9px] text-sky-400/35 flex-shrink-0 font-mono">{a.vessel.split(" ")[1]}</span>
+          </div>
+        ))}
+      </div>
+      {/* Legend */}
+      <div className="absolute top-3 right-3 pointer-events-none" style={{ display: "none" }} />
+    </div>
+  );
+}
 
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -176,20 +317,15 @@ export default function VesselsHome() {
             </a>
           </m.div>
 
-          {/* Placeholder for product visual / map hero */}
+          {/* Fleet command visual */}
           <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.6 }}
-            className="mt-16 rounded-xl border border-sky-500/10 bg-[#060e1a] overflow-hidden h-64 sm:h-80 flex items-center justify-center max-w-3xl mx-auto"
+            className="mt-16 rounded-xl border border-sky-500/15 overflow-hidden max-w-3xl mx-auto"
+            style={{ height: "320px" }}
           >
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full border border-sky-500/20 bg-sky-500/5 flex items-center justify-center mx-auto mb-4">
-                <span className="text-sky-400 text-2xl">⚓</span>
-              </div>
-              <p className="text-sky-400/40 text-[13px] font-medium tracking-wide">Fleet command dashboard</p>
-              <p className="text-sky-400/25 text-[12px] mt-1">Real-time vessel positions · Route overlays · Alert feeds</p>
-            </div>
+            <FleetCommandVisual />
           </m.div>
         </div>
       </section>
@@ -285,13 +421,8 @@ export default function VesselsHome() {
                 ))}
               </div>
             </div>
-            <div className="rounded-xl border border-sky-500/10 bg-[#060e1a] h-80 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-12 h-12 rounded-lg border border-sky-500/20 bg-sky-500/5 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-sky-400 text-xl">🗺️</span>
-                </div>
-                <p className="text-sky-400/35 text-[12.5px] font-medium">Fleet map view</p>
-              </div>
+            <div className="rounded-xl border border-sky-500/15 overflow-hidden h-80">
+              <FleetCommandVisual />
             </div>
           </m.div>
         </div>

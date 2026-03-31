@@ -9,7 +9,7 @@ const platforms = [
   { name: "Firestorm", role: "Cyber Defense", icon: Shield, color: "hsl(0,80%,55%)", glow: "0,80%,55%" },
   { name: "INCA", role: "AI Research", icon: Cpu, color: "hsl(265,80%,60%)", glow: "265,80%,60%" },
   { name: "Alloy", role: "Execution Fabric", icon: Layers, color: "hsl(214,80%,65%)", glow: "214,80%,65%" },
-  { name: "Terra", role: "Business Telemetry", icon: BarChart3, color: "hsl(160,70%,45%)", glow: "160,70%,45%" },
+  { name: "Terra", role: "Real Estate Intelligence", icon: BarChart3, color: "hsl(88,42%,44%)", glow: "88,42%,44%" },
   { name: "Rosie", role: "Incident Command", icon: Users, color: "hsl(215,80%,55%)", glow: "215,80%,55%" },
   { name: "Carlota Jo", role: "Private Advisory", icon: Sparkles, color: "hsl(38,55%,58%)", glow: "38,55%,58%" },
 ];

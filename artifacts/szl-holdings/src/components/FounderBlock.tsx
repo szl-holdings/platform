@@ -110,7 +110,7 @@ export function FounderBlock() {
               { Icon: Shield, name: "Firestorm", role: "Cyber Defense Command", color: "hsl(0,80%,55%)" },
               { Icon: Cpu, name: "INCA", role: "AI Research Platform", color: "hsl(265,80%,60%)" },
               { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)" },
-              { Icon: BarChart3, name: "Terra", role: "Business Telemetry", color: "hsl(160,70%,45%)" },
+              { Icon: BarChart3, name: "Terra", role: "Real Estate Intelligence", color: "hsl(88,42%,44%)" },
               { Icon: Users, name: "Rosie", role: "Incident Command", color: "hsl(215,80%,55%)" },
               { Icon: Sparkles, name: "Carlota Jo", role: "Private Advisory", color: "hsl(38,55%,58%)" },
             ].map((p, i) => (

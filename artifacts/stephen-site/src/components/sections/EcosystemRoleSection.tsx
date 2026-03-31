@@ -7,7 +7,7 @@ const platforms = [
   { Icon: Shield, name: "Firestorm", role: "Cyber Defense", color: "hsl(0,80%,55%)", desc: "Unified XDR, identity threat detection, and adversary emulation. SOC automation built for precision response.", href: "/firestorm/" },
   { Icon: Cpu, name: "INCA", role: "AI Research Platform", color: "hsl(265,80%,60%)", desc: "Agentic AI research command. Experiment tracking, model lineage, drift detection, and ensemble operations.", href: "/inca/" },
   { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)", desc: "Cross-platform workflow orchestration. Signals normalized, decisions routed, actions governed.", href: "/alloy/" },
-  { Icon: BarChart3, name: "Terra", role: "Business Telemetry", color: "hsl(160,70%,45%)", desc: "Real-time business metrics and KPI tracking. From raw operational data to structured insight.", href: "/terra/" },
+  { Icon: BarChart3, name: "Terra", role: "Real Estate Intelligence", color: "hsl(88,42%,44%)", desc: "Distress property tracking, deal pipeline intelligence, and NYC market data for serious real estate operators.", href: "/terra/" },
   { Icon: Users, name: "Rosie", role: "Incident Command", color: "hsl(215,80%,55%)", desc: "MSP-grade threat and incident response. SLA prediction, dispatch automation, and client ops management.", href: "/msp/" },
   { Icon: Sparkles, name: "Carlota Jo", role: "Private Advisory", color: "hsl(38,55%,58%)", desc: "High-trust private advisory and residence management for high-net-worth principals.", href: "/carlota-jo/" },
 ];
