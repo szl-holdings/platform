@@ -308,7 +308,8 @@ export function DAGView({ workflowId, steps: propSteps, highlightStepId }: {
   );
 }
 
-export default function DAGPage({ workflowId }: { workflowId: number }) {
+export default function DAGPage({ workflowId: propWorkflowId }: { workflowId?: number } = {}) {
+  const workflowId = propWorkflowId ?? 1;
   const [, navigate] = useLocation();
   const { data, isLoading } = useWorkflow(workflowId);
 

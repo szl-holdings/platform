@@ -36,6 +36,7 @@
     "@workspace/observability": "workspace:*",
     "@workspace/replit-auth-web": "workspace:*",
     "@workspace/shared-ui": "workspace:*",
-    "clsx": "catalog:"
+    "clsx": "catalog:",
+    "date-fns": "^3.6.0"
   }
 }
