@@ -1,157 +1,364 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
-import { Badge } from "@workspace/shared-ui/ui/badge";
-import { TrendingUp, FileText, Calendar, Download, BarChart3, PieChart, Users, Lock } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { useState } from "react";
+import { m } from "framer-motion";
+import { ArrowRight, Download, TrendingUp, Shield, Globe, Layers, BarChart3, CheckCircle, FileText, Users } from "lucide-react";
+import { Link } from "wouter";
+import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
-import { useRole } from "@workspace/shared-ui";
 
-const fundMetrics = [
-  { label: "Fund III Target", value: "$85M", sub: "Final close Q1 2026", color: "text-szl-accent" },
-  { label: "Fund III Called", value: "$61M", sub: "72% deployed to date", color: "text-foreground" },
-  { label: "Portfolio TVPI", value: "2.4x", sub: "Total Value / Paid-In", color: "text-emerald-400" },
-  { label: "DPI", value: "0.6x", sub: "Distributions / Paid-In", color: "text-foreground" },
+const REVENUE_TRACKS = [
+  {
+    label: "Carlota Jo",
+    tag: "Immediate",
+    description: "Premium private advisory services generating immediate, recurring revenue through high-trust, high-margin client engagements. Cash flow positive from day one.",
+    accent: "hsl(38,55%,58%)",
+    colorRgb: "191,152,82",
+    icon: Globe,
+    metrics: ["High-margin service contracts", "Recurring retainer model", "Low capital intensity"],
+  },
+  {
+    label: "Terra",
+    tag: "Wedge",
+    description: "Real estate intelligence platform serving brokers, investors, and operators with distress property data, deal pipeline tools, and market intelligence. NYC as the beachhead.",
+    accent: "hsl(88,42%,44%)",
+    colorRgb: "85,140,48",
+    icon: BarChart3,
+    metrics: ["Subscription SaaS model", "Distress data moat", "Broker + investor segments"],
+  },
+  {
+    label: "Aegis",
+    tag: "Enterprise",
+    description: "Unified defense and intelligence command platform for enterprise security teams, MSPs, and AI operators. High-ACV contracts with strong expansion revenue.",
+    accent: "hsl(232,68%,60%)",
+    colorRgb: "99,102,241",
+    icon: Shield,
+    metrics: ["Enterprise contract model", "Multi-module expansion", "SOC + MSP + AI intelligence"],
+  },
 ];
 
-const fundHistory = [
-  { quarter: "Q1 24", nav: 48, deployed: 32 }, { quarter: "Q2 24", nav: 61, deployed: 44 },
-  { quarter: "Q3 24", nav: 79, deployed: 52 }, { quarter: "Q4 24", nav: 98, deployed: 58 },
-  { quarter: "Q1 25", nav: 118, deployed: 61 }, { quarter: "Q2 25", nav: 134, deployed: 61 },
-  { quarter: "Q3 25", nav: 152, deployed: 61 }, { quarter: "Q4 25", nav: 171, deployed: 61 },
-  { quarter: "Q1 26", nav: 185, deployed: 61 },
+const MARKET_POINTS = [
+  {
+    title: "Business Observability is a $12B+ market",
+    body: "Organizations of every scale suffer from invisible risk — approval latency, ownership gaps, workflow friction that compounds into operational failure. Lyte addresses this from first principles.",
+  },
+  {
+    title: "Maritime intelligence is systematically underserved",
+    body: "Fleet operators, charterers, and commodity traders depend on fragmented data sources with no operational command layer. Vessels is the first purpose-built maritime command platform.",
+  },
+  {
+    title: "Cybersecurity consolidation creates the enterprise MSP opportunity",
+    body: "Enterprises and MSPs are collapsing their security stacks. Aegis provides unified SOC, XDR, managed operations, and AI intelligence — replacing four fragmented vendors with one command surface.",
+  },
+  {
+    title: "Real estate intelligence is data-rich and workflow-poor",
+    body: "Sophisticated operators have access to more data than ever and fewer tools to act on it. Terra converts distress signals, ownership data, and deal intelligence into structured workflow.",
+  },
 ];
 
-const lps = [
-  { name: "Meridian Family Office", commitment: "$12M", type: "Family Office", region: "North America", status: "Active" },
-  { name: "Varuna Capital Partners", commitment: "$18M", type: "Institutional", region: "Europe", status: "Active" },
-  { name: "Axiom Endowment Fund", commitment: "$8M", type: "Endowment", region: "North America", status: "Active" },
-  { name: "Pacific Rim Ventures", commitment: "$15M", type: "Institutional", region: "Asia-Pacific", status: "Active" },
-  { name: "Solaris Family Trust", commitment: "$5M", type: "Family Office", region: "Middle East", status: "Active" },
+const TEAM = [
+  {
+    name: "Stephen Lutar",
+    title: "Founder & Chief Executive",
+    bio: "Builder, operator, and systems architect. Designed and operates the full SZL ecosystem across six platforms. Background in workflow design, command systems, and multi-domain intelligence. Link to full profile below.",
+    href: "/founder",
+  },
 ];
 
-const documents = [
-  { name: "Q1 2026 LP Update", date: "April 15, 2026", type: "Quarterly Report" },
-  { name: "Fund III Annual Report 2025", date: "March 1, 2026", type: "Annual Report" },
-  { name: "Portfolio Company KPIs — Q4 2025", date: "January 20, 2026", type: "KPI Report" },
-  { name: "Fund III Capital Call Notice #8", date: "January 5, 2026", type: "Capital Call" },
-  { name: "Tax Documents — K-1 2025", date: "March 15, 2026", type: "Tax" },
+const DOCUMENTS = [
+  { name: "SZL Holdings One-Pager", type: "Overview", date: "Q1 2026" },
+  { name: "Platform Architecture Brief", type: "Technical", date: "Q1 2026" },
+  { name: "Market Opportunity Summary", type: "Strategic", date: "Q1 2026" },
 ];
 
-const docColor: Record<string, string> = {
-  "Quarterly Report": "text-blue-400 bg-blue-500/10",
-  "Annual Report": "text-violet-400 bg-violet-500/10",
-  "KPI Report": "text-emerald-400 bg-emerald-500/10",
-  "Capital Call": "text-amber-400 bg-amber-500/10",
-  "Tax": "text-orange-400 bg-orange-500/10",
-};
+export default function InvestorRelationsPage() {
+  const [requestSent, setRequestSent] = useState(false);
+  const [requestEmail, setRequestEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [docError, setDocError] = useState("");
 
-export default function InvestorRelations() {
-  const { isInvestor, isAdmin, isLoading } = useRole();
   usePageMeta({
-    title: "Investor Relations | SZL Holdings – Fund Performance & Reports",
-    description: "Investor relations for SZL Holdings: fund performance metrics, LP updates, portfolio company reports, and strategic outlook for institutional investors.",
-    canonical: "https://szlholdings.com/ir",
+    title: "Investor Relations — SZL Holdings",
+    description: "SZL Holdings investor information: market opportunity, revenue model, platform architecture, and team. Request materials or start a conversation.",
+    canonical: "https://szlholdings.com/investor-relations",
   });
 
-  if (!isLoading && !isInvestor && !isAdmin) {
-    return (
-      <div className="min-h-screen bg-szl-bg flex items-center justify-center p-8">
-        <div className="text-center space-y-4 max-w-sm">
-          <div className="w-14 h-14 rounded-full bg-szl-surface border border-szl-border flex items-center justify-center mx-auto">
-            <Lock className="w-6 h-6 text-szl-text-secondary" />
-          </div>
-          <h2 className="text-xl font-bold text-szl-text">Investor Access Required</h2>
-          <p className="text-szl-text-secondary text-sm">This section is restricted to verified limited partners and fund investors. Please contact the team if you need access.</p>
-        </div>
-      </div>
-    );
-  }
+  const handleDocRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!requestEmail.trim()) return;
+    setDocError("");
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/holdings/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "Document Request",
+          email: requestEmail.trim(),
+          subject: "Investor Document Request",
+          message: `Investor document request from ${requestEmail.trim()}`,
+        }),
+      });
+      if (response.status === 201 || response.ok) {
+        setRequestSent(true);
+      } else {
+        setDocError("Request failed. Please try again or email hello@szlholdings.com directly.");
+      }
+    } catch {
+      setDocError("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-szl-bg text-szl-text p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-szl-text flex items-center gap-3">
-            <TrendingUp className="w-7 h-7 text-szl-accent" />
-            Investor Relations
-          </h1>
-          <p className="text-szl-text-secondary mt-2">Fund performance, LP reporting, capital activity, and document vault for SZL Holdings limited partners.</p>
-        </div>
+    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+      <SiteNav />
+      <main className="pt-24">
 
-        <div className="grid grid-cols-4 gap-4">
-          {fundMetrics.map(({ label, value, sub, color }) => (
-            <Card key={label} className="bg-szl-surface border-szl-border">
-              <CardContent className="p-4">
-                <p className="text-xs text-szl-text-secondary">{label}</p>
-                <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                <p className="text-[10px] text-szl-text-secondary mt-0.5">{sub}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <Card className="bg-szl-surface border-szl-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-szl-text">NAV vs. Deployed Capital ($M)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={fundHistory}>
-                  <XAxis dataKey="quarter" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: "#0a0f1e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 11 }} />
-                  <Area type="monotone" dataKey="nav" stroke="#6c63ff" fill="#6c63ff" fillOpacity={0.15} strokeWidth={2} name="NAV ($M)" />
-                  <Area type="monotone" dataKey="deployed" stroke="#10b981" fill="#10b981" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 2" name="Deployed ($M)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-szl-surface border-szl-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-szl-text flex items-center gap-2"><Users className="w-4 h-4 text-szl-accent" /> LP Registry</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {lps.map(lp => (
-                  <div key={lp.name} className="flex items-center justify-between p-2 rounded-lg bg-black/20">
-                    <div>
-                      <p className="text-xs font-medium text-szl-text">{lp.name}</p>
-                      <p className="text-[10px] text-szl-text-secondary">{lp.type} · {lp.region}</p>
-                    </div>
-                    <p className="text-sm font-bold text-szl-accent">{lp.commitment}</p>
-                  </div>
-                ))}
+        <section style={{ padding: "4rem 0 3rem" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
+                Investor Relations
+              </p>
+              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1.25rem" }}>
+                One disciplined company.<br />Three monetization tracks.
+              </h1>
+              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "38rem", marginBottom: "2rem" }}>
+                SZL Holdings is building the command-layer infrastructure for organizations where unreliability is not a recoverable condition. Six platforms. One architecture. Compounding institutional knowledge across every domain we touch.
+              </p>
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <Link
+                  href="/contact"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.625rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none", transition: "all 0.2s ease" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
+                >
+                  Start a Conversation <ArrowRight size={13} strokeWidth={2.5} />
+                </Link>
+                <a
+                  href="mailto:hello@szlholdings.com?subject=Investor Inquiry"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.625rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 500, color: "hsl(210,5%,56%)", border: "1px solid hsla(0,0%,100%,0.09)", textDecoration: "none", background: "transparent", transition: "all 0.2s ease" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.18)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,56%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.09)"; }}
+                >
+                  hello@szlholdings.com
+                </a>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </m.div>
+          </div>
+        </section>
 
-        <Card className="bg-szl-surface border-szl-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-szl-text flex items-center gap-2"><FileText className="w-4 h-4 text-szl-accent" /> Document Vault</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {documents.map(doc => (
-                <div key={doc.name} className="flex items-center justify-between p-3 rounded-lg bg-black/10 hover:bg-black/20 transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={`text-[9px] ${docColor[doc.type]}`}>{doc.type}</Badge>
-                    <div>
-                      <p className="text-sm font-medium text-szl-text">{doc.name}</p>
-                      <p className="text-[10px] text-szl-text-secondary flex items-center gap-1"><Calendar className="w-2.5 h-2.5" /> {doc.date}</p>
+        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.5rem" }}>
+              Revenue Model
+            </p>
+            <div className="grid md:grid-cols-3 gap-4">
+              {REVENUE_TRACKS.map((track, i) => {
+                const Icon = track.icon;
+                return (
+                  <m.div
+                    key={track.label}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    style={{
+                      padding: "1.5rem",
+                      borderRadius: "12px",
+                      background: `rgba(${track.colorRgb}, 0.04)`,
+                      border: `1px solid rgba(${track.colorRgb}, 0.16)`,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                        <div style={{ width: "28px", height: "28px", borderRadius: "7px", display: "flex", alignItems: "center", justifyContent: "center", background: `rgba(${track.colorRgb}, 0.12)`, border: `1px solid rgba(${track.colorRgb}, 0.22)` }}>
+                          <Icon size={13} style={{ color: track.accent }} />
+                        </div>
+                        <span style={{ fontSize: "13px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.008em" }}>{track.label}</span>
+                      </div>
+                      <span style={{ fontSize: "9.5px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 8px", borderRadius: "4px", background: `rgba(${track.colorRgb}, 0.12)`, color: track.accent }}>
+                        {track.tag}
+                      </span>
                     </div>
-                  </div>
-                  <button className="text-xs text-szl-text-secondary group-hover:text-szl-accent transition-colors flex items-center gap-1">
-                    <Download className="w-3.5 h-3.5" />
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
-                  </button>
-                </div>
+                    <p style={{ fontSize: "13px", lineHeight: 1.65, color: "hsl(210,5%,56%)", marginBottom: "1rem" }}>
+                      {track.description}
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                      {track.metrics.map((m) => (
+                        <div key={m} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <CheckCircle size={11} style={{ color: track.accent, flexShrink: 0, opacity: 0.8 }} />
+                          <span style={{ fontSize: "11.5px", color: "hsl(210,5%,52%)" }}>{m}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)", background: "hsl(210,12%,6%)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.5rem" }}>
+              Market Opportunity
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {MARKET_POINTS.map((point, i) => (
+                <m.div
+                  key={point.title}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ padding: "1.375rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}
+                >
+                  <div style={{ width: "4px", height: "20px", borderRadius: "2px", background: "hsl(190,80%,55%)", opacity: 0.5, marginBottom: "0.75rem" }} />
+                  <p style={{ fontSize: "14px", fontWeight: 600, color: "hsl(38,12%,88%)", marginBottom: "0.5rem", letterSpacing: "-0.008em" }}>{point.title}</p>
+                  <p style={{ fontSize: "12.5px", lineHeight: 1.65, color: "hsl(210,5%,55%)" }}>{point.body}</p>
+                </m.div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <div className="grid lg:grid-cols-2 gap-12">
+              <div>
+                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.25rem" }}>
+                  The SZL Thesis
+                </p>
+                <div className="space-y-4" style={{ maxWidth: "520px" }}>
+                  {[
+                    { heading: "Systems over features", body: "Features are copied. Systems — the interconnected logic of how an organization actually works — are not. Every SZL platform is designed around the operational system, not the feature request." },
+                    { heading: "Operators, not advisors", body: "SZL Holdings does not deliver recommendations. It builds systems, operates them, and owns the outcomes. Skin in the game is a design constraint, not a philosophy." },
+                    { heading: "Compounding architecture", body: "Six platforms on one backbone means every platform gets smarter as the others grow. Data from Vessels informs Aegis. Terra patterns inform Alloy's normalization layer. The whole is structurally greater than the sum." },
+                  ].map((item, i) => (
+                    <m.div
+                      key={item.heading}
+                      initial={{ opacity: 0, y: 12 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.45, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ padding: "1.125rem 1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)" }}
+                    >
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,86%)", marginBottom: "0.35rem" }}>{item.heading}</p>
+                      <p style={{ fontSize: "12.5px", lineHeight: 1.6, color: "hsl(210,5%,52%)" }}>{item.body}</p>
+                    </m.div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.25rem" }}>
+                  Team
+                </p>
+                {TEAM.map((person) => (
+                  <m.div
+                    key={person.name}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ padding: "1.5rem", borderRadius: "12px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)", marginBottom: "1rem" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                      <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "hsla(0,0%,100%,0.08)", border: "1px solid hsla(0,0%,100%,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <Users size={16} style={{ color: "hsl(210,5%,52%)" }} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.008em" }}>{person.name}</p>
+                        <p style={{ fontSize: "11px", color: "hsl(210,5%,46%)" }}>{person.title}</p>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "12.5px", lineHeight: 1.65, color: "hsl(210,5%,54%)", marginBottom: "0.875rem" }}>{person.bio}</p>
+                    <Link href={person.href} style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 600, color: "hsl(190,90%,55%)", textDecoration: "none" }}>
+                      Full Profile <ArrowRight size={11} strokeWidth={2.5} />
+                    </Link>
+                  </m.div>
+                ))}
+
+                <div style={{ marginTop: "2rem" }}>
+                  <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1rem" }}>
+                    Request Materials
+                  </p>
+                  {requestSent ? (
+                    <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(142,62%,46%,0.07)", border: "1px solid hsla(142,62%,46%,0.2)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                        <CheckCircle size={16} style={{ color: "hsl(142,62%,46%)" }} />
+                        <p style={{ fontSize: "13px", color: "hsl(142,62%,62%)", fontWeight: 500 }}>Request received. We will follow up within 24 hours.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleDocRequest}>
+                      <div style={{ display: "flex", gap: "0.625rem" }}>
+                        <input
+                          type="email"
+                          value={requestEmail}
+                          onChange={(e) => setRequestEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          required
+                          style={{
+                            flex: 1, padding: "0.625rem 0.875rem", background: "hsla(0,0%,100%,0.04)",
+                            border: "1px solid hsla(0,0%,100%,0.09)", borderRadius: "6px",
+                            color: "hsl(38,12%,88%)", fontSize: "13px", outline: "none",
+                          }}
+                        />
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          style={{ padding: "0.625rem 1rem", background: "hsla(0,0%,100%,0.08)", border: "1px solid hsla(0,0%,100%,0.12)", borderRadius: "6px", color: "hsl(38,12%,84%)", fontSize: "12px", fontWeight: 600, cursor: submitting ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "5px", flexShrink: 0, transition: "all 0.18s" }}
+                        >
+                          <FileText size={12} />
+                          {submitting ? "…" : "Request"}
+                        </button>
+                      </div>
+                      {docError && <p style={{ fontSize: "11.5px", color: "hsl(0,72%,65%)", marginTop: "0.4rem" }}>{docError}</p>}
+                      {!docError && <p style={{ fontSize: "11px", color: "hsl(210,5%,40%)", marginTop: "0.5rem" }}>One-pager, architecture brief, and market summary.</p>}
+                    </form>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section style={{ padding: "3rem 0 5rem", borderTop: "1px solid hsla(0,0%,100%,0.04)", background: "hsl(210,12%,6%)" }}>
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.5rem" }}>
+              Platform Documents
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3 mb-8">
+              {DOCUMENTS.map((doc, i) => (
+                <m.div
+                  key={doc.name}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: i * 0.06 }}
+                  style={{ padding: "1.125rem 1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                >
+                  <div>
+                    <p style={{ fontSize: "12.5px", fontWeight: 600, color: "hsl(38,12%,84%)", marginBottom: "0.25rem" }}>{doc.name}</p>
+                    <p style={{ fontSize: "10.5px", color: "hsl(210,5%,40%)" }}>{doc.type} · {doc.date}</p>
+                  </div>
+                  <span style={{ fontSize: "10px", color: "hsl(210,5%,38%)", display: "flex", alignItems: "center", gap: "3px" }}>
+                    <Download size={12} />
+                    On request
+                  </span>
+                </m.div>
+              ))}
+            </div>
+            <p style={{ fontSize: "12px", color: "hsl(210,5%,38%)", lineHeight: 1.65, maxWidth: "38rem" }}>
+              SZL Holdings is a private operating company. This page describes our business model and platform strategy for qualified investors and strategic partners. Detailed financials are available under NDA. Contact <a href="mailto:hello@szlholdings.com" style={{ color: "hsl(210,5%,52%)" }}>hello@szlholdings.com</a> to begin a conversation.
+            </p>
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
     </div>
   );
 }

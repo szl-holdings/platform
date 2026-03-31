@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { m } from "framer-motion";
 import { ArrowRight, Layers, Shield, Anchor, Cpu, BarChart3, Eye, Users, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 
-const platforms = [
+const PLATFORM_META = [
   { name: "Alloy", role: "Execution Fabric", icon: Layers, color: "hsl(214,80%,65%)", glow: "214,80%,65%" },
   { name: "Lyte", role: "Business Observability", icon: Eye, color: "hsl(190,90%,55%)", glow: "190,90%,55%" },
   { name: "Vessels", role: "Maritime Command", icon: Anchor, color: "hsl(205,85%,55%)", glow: "205,85%,55%" },
@@ -19,6 +19,20 @@ const doctrine = [
   { step: "04", label: "Execute", desc: "Act through structured, auditable workflows." },
   { step: "05", label: "Advise", desc: "Compound institutional knowledge over time." },
 ];
+
+interface EcosystemPlatform {
+  key: string;
+  name: string;
+  role: string;
+  status: string;
+  checkedAt: string;
+}
+
+interface EcosystemHealth {
+  summary: { total: number; online: number; degraded: number };
+  platforms: EcosystemPlatform[];
+  checkedAt: string;
+}
 
 function HeroMesh() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,6 +79,95 @@ function HeroMesh() {
     return () => { cancelAnimationFrame(animFrame); window.removeEventListener("resize", resize); };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.7 }} aria-hidden="true" />;
+}
+
+function EcosystemPanel() {
+  const [health, setHealth] = useState<EcosystemHealth | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/holdings/ecosystem-health")
+      .then((r) => r.json())
+      .then((d) => { setHealth(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const KEY_MAP: Record<string, string> = {
+    "Alloy": "alloy",
+    "Lyte": "lyte",
+    "Vessels": "vessels",
+    "Aegis": "aegis",
+    "Terra": "terra",
+    "Carlota Jo": "carlotaJo",
+  };
+
+  const platforms = PLATFORM_META.map((meta) => {
+    const expectedKey = KEY_MAP[meta.name];
+    const liveData = health?.platforms?.find((p) => p.key === expectedKey);
+    return { ...meta, online: !loading && health ? (liveData?.status === "online") : null, latencyMs: liveData?.latencyMs ?? null };
+  });
+
+  const onlineCount = health?.summary?.online ?? (loading ? null : 0);
+  const total = health?.summary?.total ?? PLATFORM_META.length;
+  const checkedAt = health?.checkedAt;
+
+  const formatCheckedAt = (iso: string) => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    } catch { return ""; }
+  };
+
+  return (
+    <div style={{
+      background: "hsla(210,12%,8%,0.8)", border: "1px solid hsla(0,0%,100%,0.08)",
+      padding: "1.25rem", boxShadow: "0 20px 60px hsla(0,0%,0%,0.5), inset 0 1px 0 hsla(0,0%,100%,0.05)",
+      backdropFilter: "blur(16px)",
+    }}>
+      <div className="flex items-center justify-between mb-3 pb-2.5" style={{ borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
+        <span className="text-[10px] font-semibold tracking-[0.12em] uppercase"
+          style={{ color: "hsl(210,5%,45%)", fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif" }}>
+          Ecosystem
+        </span>
+        <div style={{ textAlign: "right" }}>
+          <span className="text-[10px] font-medium tabular-nums block"
+            style={{ color: loading ? "hsl(210,5%,40%)" : "hsl(142,62%,48%)", fontFamily: "'JetBrains Mono', 'Space Mono', monospace" }}>
+            {loading ? "checking..." : `${onlineCount} / ${total} online`}
+          </span>
+          {checkedAt && (
+            <span style={{ fontSize: "8.5px", color: "hsl(210,5%,32%)", fontFamily: "'JetBrains Mono', 'Space Mono', monospace", display: "block" }}>
+              {formatCheckedAt(checkedAt)}
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="space-y-0.5">
+        {platforms.map((p, i) => {
+          const Icon = p.icon;
+          return (
+            <m.div
+              key={p.name}
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.4 + i * 0.04 }}
+              className="flex items-center gap-2.5 py-1.5 px-2 transition-colors"
+              style={{ cursor: "default" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `hsla(${p.glow},0.06)`; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+            >
+              <Icon size={12} style={{ color: p.color, flexShrink: 0 }} strokeWidth={2} />
+              <span className="text-[11px] font-semibold" style={{ color: "hsl(210,5%,72%)", letterSpacing: "-0.005em" }}>{p.name}</span>
+              <span className="text-[9px] ml-auto" style={{ color: "hsl(210,5%,38%)", fontFamily: "'JetBrains Mono', 'Space Mono', monospace" }}>{p.role}</span>
+              <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{
+                background: p.online === null ? "hsl(210,5%,35%)" : p.online ? p.color : "hsl(0,70%,50%)",
+                boxShadow: p.online ? `0 0 6px hsla(${p.glow},0.5)` : "none",
+              }} />
+            </m.div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export function Hero() {
@@ -157,44 +260,7 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="hidden lg:block lg:col-span-5 self-start mt-2"
           >
-            <div style={{
-              background: "hsla(210,12%,8%,0.8)", border: "1px solid hsla(0,0%,100%,0.08)",
-              padding: "1.25rem", boxShadow: "0 20px 60px hsla(0,0%,0%,0.5), inset 0 1px 0 hsla(0,0%,100%,0.05)",
-              backdropFilter: "blur(16px)",
-            }}>
-              <div className="flex items-center justify-between mb-3 pb-2.5" style={{ borderBottom: "1px solid hsla(0,0%,100%,0.06)" }}>
-                <span className="text-[10px] font-semibold tracking-[0.12em] uppercase"
-                  style={{ color: "hsl(210,5%,45%)", fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif" }}>
-                  Ecosystem
-                </span>
-                <span className="text-[10px] font-medium tabular-nums"
-                  style={{ color: "hsl(142,62%,48%)", fontFamily: "'JetBrains Mono', 'Space Mono', monospace" }}>
-                  6 / 6 online
-                </span>
-              </div>
-              <div className="space-y-0.5">
-                {platforms.map((p, i) => {
-                  const Icon = p.icon;
-                  return (
-                    <m.div
-                      key={p.name}
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.4 + i * 0.04 }}
-                      className="flex items-center gap-2.5 py-1.5 px-2 transition-colors"
-                      style={{ cursor: "default" }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `hsla(${p.glow},0.06)`; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                    >
-                      <Icon size={12} style={{ color: p.color, flexShrink: 0 }} strokeWidth={2} />
-                      <span className="text-[11px] font-semibold" style={{ color: "hsl(210,5%,72%)", letterSpacing: "-0.005em" }}>{p.name}</span>
-                      <span className="text-[9px] ml-auto" style={{ color: "hsl(210,5%,38%)", fontFamily: "'JetBrains Mono', 'Space Mono', monospace" }}>{p.role}</span>
-                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: p.color, boxShadow: `0 0 6px hsla(${p.glow},0.5)` }} />
-                    </m.div>
-                  );
-                })}
-              </div>
-            </div>
+            <EcosystemPanel />
           </m.div>
         </div>
 

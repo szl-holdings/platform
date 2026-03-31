@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { label: "Ecosystem", href: "/ecosystem", section: "Company" },
+  { label: "Architecture", href: "/architecture", section: "Company" },
   { label: "Alloy", href: "/alloy", external: "/alloy/", section: "Flagships" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/", section: "Flagships" },
   { label: "Vessels", href: "/vessels", external: "/vessels/", section: "Flagships" },
@@ -14,6 +15,7 @@ const NAV_LINKS = [
   { label: "Terra", href: "/terra", external: "/terra/", section: "Platforms" },
   { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/", section: "Services" },
   { label: "Founder", href: "/founder", section: "Company" },
+  { label: "Investors", href: "/investor-relations", section: "Company" },
   { label: "Trust", href: "/trust", section: "Company" },
   { label: "Contact", href: "/contact", section: "Company" },
 ];
@@ -23,8 +25,8 @@ const NAV_LINKS_PRIMARY = [
   { label: "Alloy", href: "/alloy", external: "/alloy/" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
+  { label: "Investors", href: "/investor-relations" },
   { label: "Trust", href: "/trust" },
-  { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];
 

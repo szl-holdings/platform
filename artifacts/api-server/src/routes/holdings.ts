@@ -6,8 +6,19 @@ import {
   holdingsMetricsTable,
   holdingsLeadershipTable,
   holdingsInquiriesTable,
+  terraDistressPropertiesTable,
+  terraDealsTable,
+  vesselsTable,
+  vesselsFleetsTable,
+  alloyWorkflowRuns,
+  alloyWorkflows,
+  lyteIncidentsTable,
+  firestormIncidentsTable,
+  firestormFindingsTable,
+  carlotaInquiriesTable,
+  carlotaReservationsTable,
 } from "@workspace/db";
-import { eq, desc, ilike, or, sql } from "drizzle-orm";
+import { eq, desc, ilike, or, sql, count } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
@@ -16,6 +27,168 @@ const router: IRouter = Router();
 
 router.get("/holdings/health", (_req, res) => {
   res.json({ service: "holdings", status: "ok", timestamp: new Date().toISOString() });
+});
+
+let kpiCache: { data: unknown; at: number } | null = null;
+const KPI_TTL = 60_000;
+
+router.get("/holdings/kpis", authMiddleware(), async (_req, res) => {
+  try {
+    if (kpiCache && Date.now() - kpiCache.at < KPI_TTL) {
+      res.json(kpiCache.data);
+      return;
+    }
+    const [
+      [{ terraDistress }],
+      [{ terraDeals }],
+      [{ vessels }],
+      [{ fleets }],
+      [{ workflowRuns }],
+      [{ workflows }],
+      [{ lyteIncidents }],
+      [{ firestormIncidents }],
+      [{ firestormFindings }],
+      [{ carlotaInquiries }],
+    ] = await Promise.all([
+      db.select({ terraDistress: sql<number>`count(*)::int` }).from(terraDistressPropertiesTable),
+      db.select({ terraDeals: sql<number>`count(*)::int` }).from(terraDealsTable),
+      db.select({ vessels: sql<number>`count(*)::int` }).from(vesselsTable),
+      db.select({ fleets: sql<number>`count(*)::int` }).from(vesselsFleetsTable),
+      db.select({ workflowRuns: sql<number>`count(*)::int` }).from(alloyWorkflowRuns),
+      db.select({ workflows: sql<number>`count(*)::int` }).from(alloyWorkflows),
+      db.select({ lyteIncidents: sql<number>`count(*)::int` }).from(lyteIncidentsTable),
+      db.select({ firestormIncidents: sql<number>`count(*)::int` }).from(firestormIncidentsTable),
+      db.select({ firestormFindings: sql<number>`count(*)::int` }).from(firestormFindingsTable),
+      db.select({ carlotaInquiries: sql<number>`count(*)::int` }).from(carlotaInquiriesTable),
+    ]);
+    const payload = {
+      checkedAt: new Date().toISOString(),
+      platforms: {
+        terra: { distressProperties: terraDistress, activeDeals: terraDeals, href: "/terra/" },
+        vessels: { trackedVessels: vessels, fleets: fleets, href: "/vessels/" },
+        alloy: { workflowRuns: workflowRuns, activeWorkflows: workflows, href: "/alloy/" },
+        lyte: { incidents: lyteIncidents, href: "/lyte-command-center/" },
+        aegis: { incidents: firestormIncidents, findings: firestormFindings, href: "/firestorm/" },
+        carlotaJo: { inquiries: carlotaInquiries, href: "/carlota-jo/" },
+      },
+      aggregate: {
+        totalWorkflowRuns: workflowRuns,
+        activeIncidents: lyteIncidents + firestormIncidents,
+        distressProperties: terraDistress,
+        fleetVessels: vessels,
+        activeDeals: terraDeals,
+        securityFindings: firestormFindings,
+      },
+    };
+    kpiCache = { data: payload, at: Date.now() };
+    res.json(payload);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch KPIs");
+  }
+});
+
+let ecosystemHealthCache: { data: unknown; at: number } | null = null;
+const ECOSYSTEM_TTL = 30_000;
+
+type PlatformHealthResult = {
+  key: string; name: string; role: string; status: "online" | "degraded"; latencyMs: number; checkedAt: string;
+};
+
+async function probePlatform(key: string, name: string, role: string, probe: () => Promise<unknown>): Promise<PlatformHealthResult> {
+  const checkedAt = new Date().toISOString();
+  const start = Date.now();
+  try {
+    await probe();
+    return { key, name, role, status: "online", latencyMs: Date.now() - start, checkedAt };
+  } catch {
+    return { key, name, role, status: "degraded", latencyMs: Date.now() - start, checkedAt };
+  }
+}
+
+router.get("/holdings/ecosystem-health", async (_req, res) => {
+  try {
+    if (ecosystemHealthCache && Date.now() - ecosystemHealthCache.at < ECOSYSTEM_TTL) {
+      res.json(ecosystemHealthCache.data);
+      return;
+    }
+    const results = await Promise.all([
+      probePlatform("alloy", "Alloy", "Execution Fabric", () =>
+        db.select({ n: sql<number>`count(*)::int` }).from(alloyWorkflows)
+      ),
+      probePlatform("lyte", "Lyte", "Business Observability", () =>
+        db.select({ n: sql<number>`count(*)::int` }).from(lyteIncidentsTable)
+      ),
+      probePlatform("vessels", "Vessels", "Maritime Command", () =>
+        db.select({ n: sql<number>`count(*)::int` }).from(vesselsTable)
+      ),
+      probePlatform("aegis", "Aegis", "Defense & Intelligence", () =>
+        db.select({ n: sql<number>`count(*)::int` }).from(firestormIncidentsTable)
+      ),
+      probePlatform("terra", "Terra", "Real Estate Intelligence", () =>
+        db.select({ n: sql<number>`count(*)::int` }).from(terraDistressPropertiesTable)
+      ),
+      probePlatform("carlotaJo", "Carlota Jo", "Private Advisory", () =>
+        db.select({ n: sql<number>`count(*)::int` }).from(carlotaInquiriesTable)
+      ),
+    ]);
+    const checkedAt = new Date().toISOString();
+    const onlineCount = results.filter((p) => p.status === "online").length;
+    const payload = {
+      checkedAt,
+      summary: { total: results.length, online: onlineCount, degraded: results.length - onlineCount },
+      platforms: results,
+    };
+    ecosystemHealthCache = { data: payload, at: Date.now() };
+    res.json(payload);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch ecosystem health");
+  }
+});
+
+let publicSummaryCache: { data: unknown; at: number } | null = null;
+const PUBLIC_SUMMARY_TTL = 120_000;
+
+router.get("/holdings/ecosystem-summary", async (_req, res) => {
+  try {
+    if (publicSummaryCache && Date.now() - publicSummaryCache.at < PUBLIC_SUMMARY_TTL) {
+      res.json(publicSummaryCache.data);
+      return;
+    }
+    const [
+      [{ alloyRuns }],
+      [{ lyteInc }],
+      [{ shipCount }],
+      [{ fleetCount }],
+      [{ aegisInc }],
+      [{ aegisFind }],
+      [{ propCount }],
+      [{ dealCount }],
+      [{ cjCount }],
+    ] = await Promise.all([
+      db.select({ alloyRuns: sql<number>`count(*)::int` }).from(alloyWorkflowRuns),
+      db.select({ lyteInc: sql<number>`count(*)::int` }).from(lyteIncidentsTable),
+      db.select({ shipCount: sql<number>`count(*)::int` }).from(vesselsTable),
+      db.select({ fleetCount: sql<number>`count(*)::int` }).from(vesselsFleetsTable),
+      db.select({ aegisInc: sql<number>`count(*)::int` }).from(firestormIncidentsTable),
+      db.select({ aegisFind: sql<number>`count(*)::int` }).from(firestormFindingsTable),
+      db.select({ propCount: sql<number>`count(*)::int` }).from(terraDistressPropertiesTable),
+      db.select({ dealCount: sql<number>`count(*)::int` }).from(terraDealsTable),
+      db.select({ cjCount: sql<number>`count(*)::int` }).from(carlotaInquiriesTable),
+    ]);
+    const payload = {
+      checkedAt: new Date().toISOString(),
+      alloy: { workflowRuns: alloyRuns },
+      lyte: { incidents: lyteInc },
+      vessels: { trackedVessels: shipCount, fleets: fleetCount },
+      aegis: { incidents: aegisInc, findings: aegisFind },
+      terra: { distressProperties: propCount, activeDeals: dealCount },
+      carlotaJo: { inquiries: cjCount },
+    };
+    publicSummaryCache = { data: payload, at: Date.now() };
+    res.json(payload);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch ecosystem summary");
+  }
 });
 
 router.get("/holdings/ventures", async (req, res) => {

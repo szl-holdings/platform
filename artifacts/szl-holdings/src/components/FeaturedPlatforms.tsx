@@ -1,7 +1,36 @@
+import { useEffect, useState } from "react";
 import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-const platforms = [
+interface EcosystemSummary {
+  alloy: { workflowRuns: number };
+  lyte: { incidents: number };
+  vessels: { trackedVessels: number; fleets: number };
+  aegis: { incidents: number; findings: number };
+  terra: { distressProperties: number; activeDeals: number };
+  carlotaJo: { inquiries: number };
+}
+
+const PLATFORM_DEFS = [
+  {
+    name: "Alloy",
+    label: "Workflow & Intelligence Engine",
+    copy: "Normalize signals, orchestrate multi-step workflows, generate artifacts, and govern approvals across the SZL ecosystem.",
+    cta: "Explore Alloy",
+    href: "/alloy/",
+    accent: "hsl(214,80%,65%)",
+    accentRgb: "92,155,228",
+    accentBg: "hsla(214,80%,65%,0.05)",
+    accentBorder: "hsla(214,80%,65%,0.12)",
+    key: "alloy" as const,
+    getMetrics: (d: EcosystemSummary) => [
+      { label: "Workflow Runs", value: d.alloy.workflowRuns.toLocaleString() },
+    ],
+    fallbackMetrics: [
+      { label: "Orchestration", value: "Live" },
+      { label: "Multi-agent", value: "Active" },
+    ],
+  },
   {
     name: "Lyte",
     label: "Business Observability Platform",
@@ -12,7 +41,13 @@ const platforms = [
     accentRgb: "14,188,212",
     accentBg: "hsla(190,90%,50%,0.05)",
     accentBorder: "hsla(190,90%,50%,0.12)",
-    status: "Live",
+    key: "lyte" as const,
+    getMetrics: (d: EcosystemSummary) => [
+      { label: "Active Incidents", value: d.lyte.incidents.toLocaleString() },
+    ],
+    fallbackMetrics: [
+      { label: "Observability", value: "Live" },
+    ],
   },
   {
     name: "Vessels",
@@ -24,31 +59,35 @@ const platforms = [
     accentRgb: "38,155,212",
     accentBg: "hsla(205,85%,55%,0.05)",
     accentBorder: "hsla(205,85%,55%,0.12)",
-    status: "Live",
+    key: "vessels" as const,
+    getMetrics: (d: EcosystemSummary) => [
+      { label: "Tracked Vessels", value: d.vessels.trackedVessels.toLocaleString() },
+      { label: "Fleets", value: d.vessels.fleets.toLocaleString() },
+    ],
+    fallbackMetrics: [
+      { label: "Fleet Tracking", value: "Live" },
+      { label: "Maritime Command", value: "Active" },
+    ],
   },
   {
     name: "Aegis",
     label: "Unified Defense & Intelligence Command",
-    copy: "Security operations, managed services, and AI intelligence in one unified platform. SOC command, XDR, MSP ops, model registry, and agentic cortex.",
+    copy: "Security operations, managed services, and AI intelligence in one unified platform. SOC command, XDR, MSP ops, and agentic cortex.",
     cta: "Enter Aegis",
     href: "/firestorm/",
     accent: "hsl(232,68%,60%)",
     accentRgb: "99,102,241",
     accentBg: "hsla(232,68%,60%,0.05)",
     accentBorder: "hsla(232,68%,60%,0.12)",
-    status: "Live",
-  },
-  {
-    name: "Alloy",
-    label: "Workflow & Intelligence Engine",
-    copy: "Normalize signals, orchestrate multi-step workflows, generate artifacts, and govern approvals across the SZL ecosystem.",
-    cta: "Explore Alloy",
-    href: "/alloy/",
-    accent: "hsl(214,80%,65%)",
-    accentRgb: "92,155,228",
-    accentBg: "hsla(214,80%,65%,0.05)",
-    accentBorder: "hsla(214,80%,65%,0.12)",
-    status: "Live",
+    key: "aegis" as const,
+    getMetrics: (d: EcosystemSummary) => [
+      { label: "Open Findings", value: d.aegis.findings.toLocaleString() },
+      { label: "Incidents", value: d.aegis.incidents.toLocaleString() },
+    ],
+    fallbackMetrics: [
+      { label: "SOC Command", value: "Live" },
+      { label: "XDR", value: "Active" },
+    ],
   },
   {
     name: "Terra",
@@ -60,7 +99,15 @@ const platforms = [
     accentRgb: "85,140,48",
     accentBg: "hsla(88,42%,44%,0.05)",
     accentBorder: "hsla(88,42%,44%,0.12)",
-    status: "Live",
+    key: "terra" as const,
+    getMetrics: (d: EcosystemSummary) => [
+      { label: "Distress Properties", value: d.terra.distressProperties.toLocaleString() },
+      { label: "Active Deals", value: d.terra.activeDeals.toLocaleString() },
+    ],
+    fallbackMetrics: [
+      { label: "Distress Engine", value: "Live" },
+      { label: "Deal Pipeline", value: "Active" },
+    ],
   },
   {
     name: "Carlota Jo",
@@ -72,11 +119,26 @@ const platforms = [
     accentRgb: "191,152,82",
     accentBg: "hsla(38,55%,58%,0.05)",
     accentBorder: "hsla(38,55%,58%,0.12)",
-    status: "Live",
+    key: "carlotaJo" as const,
+    getMetrics: (d: EcosystemSummary) => [
+      { label: "Client Inquiries", value: d.carlotaJo.inquiries.toLocaleString() },
+    ],
+    fallbackMetrics: [
+      { label: "Advisory", value: "Live" },
+    ],
   },
 ];
 
 export function FeaturedPlatforms() {
+  const [summary, setSummary] = useState<EcosystemSummary | null>(null);
+
+  useEffect(() => {
+    fetch("/api/holdings/ecosystem-summary")
+      .then((r) => r.json())
+      .then((d) => setSummary(d))
+      .catch(() => {});
+  }, []);
+
   return (
     <section
       id="platforms"
@@ -117,100 +179,116 @@ export function FeaturedPlatforms() {
           </h2>
         </m.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {platforms.map((p, i) => (
-            <m.div
-              key={p.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <a
-                href={p.href}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  background: p.accentBg,
-                  border: `1px solid ${p.accentBorder}`,
-                  borderRadius: "6px",
-                  padding: "1.75rem",
-                  textDecoration: "none",
-                  transition: "all 0.22s ease",
-                  height: "100%",
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.background = `rgba(${p.accentRgb}, 0.07)`;
-                  el.style.borderColor = `rgba(${p.accentRgb}, 0.26)`;
-                  el.style.boxShadow = `0 0 22px rgba(${p.accentRgb}, 0.09), 0 8px 28px rgba(0,0,0,0.32)`;
-                  el.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.background = p.accentBg;
-                  el.style.borderColor = p.accentBorder;
-                  el.style.boxShadow = "none";
-                  el.style.transform = "translateY(0)";
-                }}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {PLATFORM_DEFS.map((p, i) => {
+            const metrics = summary ? p.getMetrics(summary) : p.fallbackMetrics;
+            return (
+              <m.div
+                key={p.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="flex items-center justify-between mb-5">
-                  <span style={{
-                    fontSize: "10px",
-                    fontWeight: "600",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    color: p.accent,
-                    opacity: 0.85,
-                    fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
-                  }}>
-                    {p.name}
-                  </span>
-                  <span style={{
-                    fontSize: "9.5px",
-                    fontWeight: "600",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    color: "hsl(142,62%,46%)",
-                    background: "hsla(142,62%,46%,0.10)",
-                    border: "1px solid hsla(142,62%,46%,0.18)",
-                    padding: "2px 7px",
-                    borderRadius: "3px",
-                    fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
-                  }}>
-                    {p.status}
-                  </span>
-                </div>
+                <a
+                  href={p.href}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    background: p.accentBg,
+                    border: `1px solid ${p.accentBorder}`,
+                    borderRadius: "6px",
+                    padding: "1.75rem",
+                    textDecoration: "none",
+                    transition: "all 0.22s ease",
+                    height: "100%",
+                  }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.background = `rgba(${p.accentRgb}, 0.07)`;
+                    el.style.borderColor = `rgba(${p.accentRgb}, 0.26)`;
+                    el.style.boxShadow = `0 0 22px rgba(${p.accentRgb}, 0.09), 0 8px 28px rgba(0,0,0,0.32)`;
+                    el.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.background = p.accentBg;
+                    el.style.borderColor = p.accentBorder;
+                    el.style.boxShadow = "none";
+                    el.style.transform = "translateY(0)";
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-5">
+                    <span style={{
+                      fontSize: "10px",
+                      fontWeight: "600",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: p.accent,
+                      opacity: 0.85,
+                      fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+                    }}>
+                      {p.name}
+                    </span>
+                    <span style={{
+                      fontSize: "9.5px",
+                      fontWeight: "600",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "hsl(142,62%,46%)",
+                      background: "hsla(142,62%,46%,0.10)",
+                      border: "1px solid hsla(142,62%,46%,0.18)",
+                      padding: "2px 7px",
+                      borderRadius: "3px",
+                      fontFamily: "'JetBrains Mono', 'Space Mono', monospace",
+                    }}>
+                      Live
+                    </span>
+                  </div>
 
-                <div style={{ flex: 1 }}>
-                  <p style={{
-                    fontSize: "0.875rem",
-                    fontWeight: "600",
-                    color: "hsl(38,12%,86%)",
-                    marginBottom: "0.5rem",
-                    letterSpacing: "-0.012em",
-                    lineHeight: "1.3",
-                    fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
-                  }}>
-                    {p.label}
-                  </p>
-                  <p style={{
-                    fontSize: "12.5px",
-                    lineHeight: "1.6",
-                    color: "hsl(210,5%,52%)",
-                    marginBottom: "1.5rem",
-                  }}>
-                    {p.copy}
-                  </p>
-                </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      fontSize: "0.875rem",
+                      fontWeight: "600",
+                      color: "hsl(38,12%,86%)",
+                      marginBottom: "0.5rem",
+                      letterSpacing: "-0.012em",
+                      lineHeight: "1.3",
+                      fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+                    }}>
+                      {p.label}
+                    </p>
+                    <p style={{
+                      fontSize: "12.5px",
+                      lineHeight: "1.6",
+                      color: "hsl(210,5%,52%)",
+                      marginBottom: "1.25rem",
+                    }}>
+                      {p.copy}
+                    </p>
+                  </div>
 
-                <div className="flex items-center gap-1.5" style={{ color: p.accent, fontSize: "12.5px", fontWeight: "600", letterSpacing: "-0.003em" }}>
-                  {p.cta}
-                  <ArrowRight size={13} strokeWidth={2.5} />
-                </div>
-              </a>
-            </m.div>
-          ))}
+                  {metrics.length > 0 && (
+                    <div style={{ display: "flex", gap: "1.25rem", marginBottom: "1.25rem", paddingTop: "0.875rem", borderTop: "1px solid hsla(0,0%,100%,0.05)" }}>
+                      {metrics.map((m) => (
+                        <div key={m.label}>
+                          <p style={{ fontSize: "1.125rem", fontWeight: 800, color: p.accent, letterSpacing: "-0.04em", lineHeight: 1, fontFamily: "'Space Grotesk', system-ui" }}>
+                            {m.value}
+                          </p>
+                          <p style={{ fontSize: "9.5px", color: "hsl(210,5%,44%)", marginTop: "0.2rem", letterSpacing: "0.02em" }}>{m.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1.5" style={{ color: p.accent, fontSize: "12.5px", fontWeight: "600", letterSpacing: "-0.003em" }}>
+                    {p.cta}
+                    <ArrowRight size={13} strokeWidth={2.5} />
+                  </div>
+                </a>
+              </m.div>
+            );
+          })}
         </div>
       </div>
     </section>

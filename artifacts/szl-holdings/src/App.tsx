@@ -25,6 +25,7 @@ const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
 const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
+const PlatformArchitecturePage = lazy(() => import("@/pages/platform-architecture"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -209,6 +210,9 @@ function App() {
             </Route>
             <Route path="/legal/terms">
               <Suspense fallback={<PageLoader />}><LegalTermsPage /></Suspense>
+            </Route>
+            <Route path="/architecture">
+              <Suspense fallback={<PageLoader />}><PlatformArchitecturePage /></Suspense>
             </Route>
             <Route>
               <Redirect to="/" />
