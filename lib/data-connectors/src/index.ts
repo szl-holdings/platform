@@ -59,6 +59,29 @@ export { ResoMlsAdapter, type MlsListing, type ODataQueryParams, type MlsIncreme
 export { CoStarAdapter, type CoStarProperty, type CoStarMarketStats, type CoStarSaleComp } from "@workspace/services";
 export { CompStakAdapter, type CompStakLeaseComp, type CompStakSaleComp, type CompStakPropertyDetail } from "@workspace/services";
 export {
+  SalesforceAdapter,
+  type SalesforceAccount,
+  type SalesforceContact,
+  type SalesforceOpportunity,
+  type SalesforceLead,
+  type SalesforceCase,
+  type SalesforceTask,
+  type SalesforceSignal,
+  type SalesforceQueryResult,
+  type SalesforceConnectionStatus,
+  type SalesforcePipelineHealth,
+} from "@workspace/services";
+export {
+  JiraAdapter,
+  type JiraProject,
+  type JiraIssue,
+  type JiraSprint,
+  type JiraSprintHealth,
+  type JiraSignal,
+  type JiraWebhookEvent,
+  type JiraConnectionStatus,
+} from "@workspace/services";
+export {
   HuggingFaceAdapter,
   type HFTextGenerationResult,
   type HFSummarizationResult,

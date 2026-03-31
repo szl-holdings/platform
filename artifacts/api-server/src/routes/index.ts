@@ -61,6 +61,7 @@ import dataverseRouter from "./dataverse";
 import microsoftIntegrationsRouter from "./microsoft-integrations";
 import lyteLiveRouter from "./lyte-live";
 import vesselsLiveRouter from "./vessels-live";
+import integrationsRouter from "./integrations";
 
 const router: IRouter = Router();
 
@@ -222,6 +223,7 @@ router.use("/dataverse", dataverseRouter);
 
 router.use("/integrations", readLimiter);
 router.use(microsoftIntegrationsRouter);
+router.use(integrationsRouter);
 
 router.use("/lyte", readLimiter);
 router.use(lyteLiveRouter);

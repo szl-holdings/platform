@@ -107,6 +107,29 @@ export { ResoMlsAdapter, type MlsListing, type ODataQueryParams, type MlsIncreme
 export { CoStarAdapter, type CoStarProperty, type CoStarMarketStats, type CoStarSaleComp } from "./adapters/costar.js";
 export { CompStakAdapter, type CompStakLeaseComp, type CompStakSaleComp, type CompStakPropertyDetail } from "./adapters/compstak.js";
 export { DataverseAdapter, type DataverseAccount, type DataverseContact, type DataverseLead, type DataverseOpportunity, type DataverseActivity, type DataverseConnectionStatus, type DataverseSyncResult, type DataverseLyteSignal } from "./adapters/dataverse.js";
+export {
+  SalesforceAdapter,
+  type SalesforceAccount,
+  type SalesforceContact,
+  type SalesforceOpportunity,
+  type SalesforceLead,
+  type SalesforceCase,
+  type SalesforceTask,
+  type SalesforceSignal,
+  type SalesforceQueryResult,
+  type SalesforceConnectionStatus,
+  type SalesforcePipelineHealth,
+} from "./adapters/salesforce.js";
+export {
+  JiraAdapter,
+  type JiraProject,
+  type JiraIssue,
+  type JiraSprint,
+  type JiraSprintHealth,
+  type JiraSignal,
+  type JiraWebhookEvent,
+  type JiraConnectionStatus,
+} from "./adapters/jira.js";
 
 export {
   Dynamics365Adapter,

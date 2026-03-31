@@ -40,6 +40,8 @@ import { CompStakAdapter } from "./adapters/compstak.js";
 import { DataverseAdapter } from "./adapters/dataverse.js";
 import { Dynamics365Adapter } from "./adapters/dynamics365.js";
 import { SharePointSPFxAdapter } from "./adapters/sharepoint-spfx.js";
+import { SalesforceAdapter } from "./adapters/salesforce.js";
+import { JiraAdapter } from "./adapters/jira.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -94,6 +96,8 @@ export class ServiceRegistry {
   readonly dataverse: DataverseAdapter;
   readonly dynamics365: Dynamics365Adapter;
   readonly sharepointSpfx: SharePointSPFxAdapter;
+  readonly salesforce: SalesforceAdapter;
+  readonly jira: JiraAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -139,6 +143,8 @@ export class ServiceRegistry {
     this.dataverse = new DataverseAdapter();
     this.dynamics365 = new Dynamics365Adapter();
     this.sharepointSpfx = new SharePointSPFxAdapter();
+    this.salesforce = new SalesforceAdapter();
+    this.jira = new JiraAdapter();
 
     this.adapters = [
       this.ai,
@@ -182,6 +188,8 @@ export class ServiceRegistry {
       this.dataverse,
       this.dynamics365,
       this.sharepointSpfx,
+      this.salesforce,
+      this.jira,
     ];
   }
 

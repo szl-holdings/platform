@@ -19,6 +19,8 @@ export const PLATFORM_JOB_TYPES = {
   ARTIFACT_GENERATION: "artifact_generation",
   ROUTE_ECONOMICS_RECOMPUTE: "route_economics_recompute",
   READINESS_SCORE_RECOMPUTE: "readiness_score_recompute",
+  SALESFORCE_OPPORTUNITY_SYNC: "hourly_salesforce_opportunity_sync",
+  JIRA_SPRINT_HEALTH_SCAN: "hourly_jira_sprint_health_scan",
 } as const;
 
 export type PlatformJobType = typeof PLATFORM_JOB_TYPES[keyof typeof PLATFORM_JOB_TYPES];
@@ -37,6 +39,8 @@ const DOMAIN_MAP: Record<string, string> = {
   feature_flag_sync: "platform",
   workflow_retry: "platform",
   artifact_generation: "platform",
+  hourly_salesforce_opportunity_sync: "integrations",
+  hourly_jira_sprint_health_scan: "integrations",
 };
 
 interface JobContext {
@@ -548,6 +552,167 @@ jobQueue.register(PLATFORM_JOB_TYPES.READINESS_SCORE_RECOMPUTE, async (job) => {
   logger.info({ jobId: job.id, correlationId: ctx.correlationId, programId, dimensionId }, "readiness_score_recompute: complete");
 });
 
+jobQueue.register(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, async (job) => {
+  const ctx = buildJobContext(job);
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId }, "hourly_salesforce_opportunity_sync: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let opportunitiesScanned = 0;
+  let signalsGenerated = 0;
+  let signalsIngested = 0;
+  const warnings: string[] = [];
+
+  try {
+    const { isFlagEnabled } = await import("./platform-flags");
+    const enabled = await isFlagEnabled("salesforce_sync_enabled");
+    if (!enabled) {
+      const result = { skipped: true, reason: "salesforce_sync_enabled flag is off" };
+      await completeWorkflowRun(ctx.workflowRunId, result);
+      logger.info({ jobId: job.id }, "hourly_salesforce_opportunity_sync: skipped — flag disabled");
+      return;
+    }
+
+    const { services } = await import("@workspace/services");
+    const adapter = services.salesforce;
+
+    const opportunities = await adapter.queryOpportunities(100);
+    opportunitiesScanned = opportunities.length;
+
+    const signals = await adapter.ingestSignals();
+    signalsGenerated = signals.length;
+
+    const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@workspace/db");
+    for (const signal of signals) {
+      try {
+        const data = insertAlloySignalSchema.parse({
+          source: "salesforce",
+          sourceType: signal.type,
+          severity: signal.severity,
+          title: signal.title,
+          body: signal.description,
+          status: "new",
+          orgId: null,
+          workflowId: null,
+          normalizedScore: null,
+          valueAtRisk: signal.valueAtRisk,
+          metadata: signal.metadata,
+        });
+        await db.insert(alloySignalsTable).values(data);
+        signalsIngested++;
+      } catch (err) {
+        logger.warn({ err, signalId: signal.id }, "hourly_salesforce_opportunity_sync: failed to ingest signal");
+        warnings.push(`Failed to ingest signal: ${signal.id}`);
+      }
+    }
+  } catch (err) {
+    const w = `Salesforce sync error: ${(err as Error).message}`;
+    logger.warn({ err, jobId: job.id }, `hourly_salesforce_opportunity_sync: ${w}`);
+    warnings.push(w);
+  }
+
+  const result = { opportunitiesScanned, signalsGenerated, signalsIngested, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "salesforce_opportunity_sync_completed",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, opportunitiesScanned, signalsIngested }, "hourly_salesforce_opportunity_sync: complete");
+});
+
+jobQueue.register(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, async (job) => {
+  const ctx = buildJobContext(job);
+  const domain = DOMAIN_MAP[job.type]!;
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId }, "hourly_jira_sprint_health_scan: starting");
+  await startWorkflowRun(ctx, domain);
+
+  let sprintsScanned = 0;
+  let issuesScanned = 0;
+  let signalsGenerated = 0;
+  let signalsIngested = 0;
+  const warnings: string[] = [];
+
+  try {
+    const { isFlagEnabled } = await import("./platform-flags");
+    const enabled = await isFlagEnabled("jira_sync_enabled");
+    if (!enabled) {
+      const result = { skipped: true, reason: "jira_sync_enabled flag is off" };
+      await completeWorkflowRun(ctx.workflowRunId, result);
+      logger.info({ jobId: job.id }, "hourly_jira_sprint_health_scan: skipped — flag disabled");
+      return;
+    }
+
+    const { services } = await import("@workspace/services");
+    const adapter = services.jira;
+
+    const sprints = await adapter.getActiveSprints();
+    sprintsScanned = sprints.length;
+
+    const sprintHealthList = await adapter.getSprintHealth();
+
+    const signals = await adapter.ingestSignals();
+    signalsGenerated = signals.length;
+
+    const { db, alloySignalsTable, insertAlloySignalSchema } = await import("@workspace/db");
+    for (const signal of signals) {
+      try {
+        const data = insertAlloySignalSchema.parse({
+          source: "jira",
+          sourceType: signal.type,
+          severity: signal.severity,
+          title: signal.title,
+          body: signal.description,
+          status: "new",
+          orgId: null,
+          workflowId: null,
+          normalizedScore: null,
+          valueAtRisk: null,
+          metadata: { ...signal.metadata, projectKey: signal.projectKey, sprintName: signal.sprintName },
+        });
+        await db.insert(alloySignalsTable).values(data);
+        signalsIngested++;
+      } catch (err) {
+        logger.warn({ err, signalId: signal.id }, "hourly_jira_sprint_health_scan: failed to ingest signal");
+        warnings.push(`Failed to ingest signal: ${signal.id}`);
+      }
+    }
+
+    const criticalSprints = sprintHealthList.filter((h) => h.burndownRisk === "behind");
+    if (criticalSprints.length > 0) {
+      serverTelemetry.raiseAlert({
+        type: "sprint_burndown_critical",
+        message: `${criticalSprints.length} sprint(s) critically behind schedule`,
+        severity: "critical",
+        metadata: { sprintIds: criticalSprints.map((h) => h.sprint.id), correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+      });
+    }
+
+    issuesScanned = sprintHealthList.reduce((s, h) => s + h.sprint.totalIssues, 0);
+  } catch (err) {
+    const w = `Jira scan error: ${(err as Error).message}`;
+    logger.warn({ err, jobId: job.id }, `hourly_jira_sprint_health_scan: ${w}`);
+    warnings.push(w);
+  }
+
+  const result = { sprintsScanned, issuesScanned, signalsGenerated, signalsIngested, warnings };
+
+  serverTelemetry.recordBusinessEvent({
+    type: "jira_sprint_health_scan_completed",
+    domain,
+    success: warnings.length === 0,
+    metadata: { ...result, correlationId: ctx.correlationId, workflowRunId: ctx.workflowRunId },
+  });
+
+  const jobStatus = warnings.length > 0 ? "completed_with_warnings" as const : undefined;
+  await completeWorkflowRun(ctx.workflowRunId, result, warnings.length > 0 ? warnings[0] : undefined, jobStatus);
+  logger.info({ jobId: job.id, correlationId: ctx.correlationId, sprintsScanned, signalsIngested }, "hourly_jira_sprint_health_scan: complete");
+});
+
 let platformScheduledJobsStarted = false;
 
 export function startPlatformScheduledJobs(): void {
@@ -584,6 +749,8 @@ export function startPlatformScheduledJobs(): void {
     try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.STALE_ACTION_SCAN, { staleAfterHours: 72 }, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue stale_action_scan"); }
     try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.VESSEL_ETA_REFRESH, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue vessel_eta_refresh"); }
     try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.ROUTE_PRESSURE_SCAN, {}, { maxRetries: 1 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue route_pressure_scan"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.SALESFORCE_OPPORTUNITY_SYNC, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue hourly_salesforce_opportunity_sync"); }
+    try { await jobQueue.enqueue(PLATFORM_JOB_TYPES.JIRA_SPRINT_HEALTH_SCAN, {}, { maxRetries: 2 }); } catch (e) { logger.warn({ err: e }, "Failed to enqueue hourly_jira_sprint_health_scan"); }
   }, HOUR_MS);
 
   setTimeout(async () => {

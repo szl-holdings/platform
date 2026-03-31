@@ -7,7 +7,7 @@ import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-const validConnectorTypes = ["stripe", "slack", "twilio", "google", "notion", "github", "shopify", "custom"] as const;
+const validConnectorTypes = ["stripe", "slack", "twilio", "google", "notion", "github", "shopify", "salesforce", "jira", "custom"] as const;
 const validStatuses = ["active", "inactive", "error", "pending"] as const;
 
 router.get("/connectors", authMiddleware(), async (_req, res) => {
