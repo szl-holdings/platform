@@ -54,6 +54,10 @@ const typeConfig: Record<string, { label: string; icon: React.ElementType }> = {
   fuel_anomaly: { label: "Fuel Anomaly", icon: Fuel },
   schedule_variance: { label: "Schedule Variance", icon: Radio },
   security_alert: { label: "Security Alert", icon: AlertTriangle },
+  ais_dark: { label: "AIS Dark Event", icon: Radio },
+  sanctions_match: { label: "Sanctions Match", icon: AlertTriangle },
+  overdue_arrival: { label: "Overdue Arrival", icon: Clock },
+  inspection_failure: { label: "Inspection Failure", icon: Wrench },
 };
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -72,7 +76,7 @@ function useExceptions(status?: string, severity?: string) {
       if (severity && severity !== "all") params.set("severity", severity);
       const qs = params.toString();
       const resp = await apiFetch<VesselsException[] | { data: VesselsException[] }>(
-        `/vessels/platform/exceptions${qs ? `?${qs}` : ""}`
+        `/vessels/exceptions${qs ? `?${qs}` : ""}`
       );
       if (resp && typeof resp === "object" && "data" in resp) return resp.data;
       return resp as VesselsException[];
@@ -85,7 +89,7 @@ function useAcknowledgeException() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, notes }: { id: number; notes?: string }) =>
-      apiFetch<VesselsException>(`/vessels/platform/exceptions/${id}/acknowledge`, {
+      apiFetch<VesselsException>(`/vessels/exceptions/${id}/acknowledge`, {
         method: "POST",
         body: JSON.stringify({ notes }),
       }),
@@ -108,7 +112,7 @@ function useEscalateException() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, notes }: { id: number; notes?: string }) =>
-      apiFetch<VesselsException>(`/vessels/platform/exceptions/${id}/escalate`, {
+      apiFetch<VesselsException>(`/vessels/exceptions/${id}/escalate`, {
         method: "POST",
         body: JSON.stringify({ notes }),
       }),
@@ -120,7 +124,7 @@ function useResolveException() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, notes }: { id: number; notes: string }) =>
-      apiFetch<VesselsException>(`/vessels/platform/exceptions/${id}/resolve`, {
+      apiFetch<VesselsException>(`/vessels/exceptions/${id}/resolve`, {
         method: "POST",
         body: JSON.stringify({ notes }),
       }),

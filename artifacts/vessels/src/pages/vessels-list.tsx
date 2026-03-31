@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useVessels } from "@/hooks/use-vessels-data";
+import { useRoster } from "@/hooks/use-vessels-data";
+import { type RosterVessel } from "@/lib/api";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Ship, ChevronRight, AlertTriangle, Search, RefreshCw } from "lucide-react";
+import { Ship, ChevronRight, AlertTriangle, Search, RefreshCw, MapPin, Clock, TrendingUp } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
@@ -10,35 +11,135 @@ const statusConfig: Record<string, { label: string; color: string; dotColor: str
   in_port: { label: "In Port", color: "text-sky-400 bg-sky-500/10 border-sky-500/20", dotColor: "bg-sky-400" },
   anchored: { label: "Anchored", color: "text-amber-400 bg-amber-500/10 border-amber-500/20", dotColor: "bg-amber-400" },
   maintenance: { label: "Maintenance", color: "text-red-400 bg-red-500/10 border-red-500/20", dotColor: "bg-red-400" },
-  under_maintenance: { label: "Maintenance", color: "text-red-400 bg-red-500/10 border-red-500/20", dotColor: "bg-red-400" },
   active: { label: "Active", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dotColor: "bg-emerald-400" },
   inactive: { label: "Inactive", color: "text-sky-400/40 bg-sky-500/5 border-sky-500/10", dotColor: "bg-sky-400/40" },
   delayed: { label: "Delayed", color: "text-orange-400 bg-orange-500/10 border-orange-500/20", dotColor: "bg-orange-400" },
   loading: { label: "Loading", color: "text-violet-400 bg-violet-500/10 border-violet-500/20", dotColor: "bg-violet-400" },
   risk_watch: { label: "Risk Watch", color: "text-amber-400 bg-amber-500/10 border-amber-500/20", dotColor: "bg-amber-400" },
-  exception_active: { label: "Exception Active", color: "text-red-400 bg-red-500/10 border-red-500/20", dotColor: "bg-red-400" },
 };
 
+function RosterRow({ v }: { v: RosterVessel }) {
+  const sc = statusConfig[v.status] ?? { label: v.status, color: "text-sky-400 bg-sky-500/10 border-sky-500/20", dotColor: "bg-sky-400" };
+  const lat = v.latitude ? parseFloat(v.latitude) : null;
+  const lon = v.longitude ? parseFloat(v.longitude) : null;
+  const tce = v.tcePerDay ? parseFloat(v.tcePerDay) : null;
+  const eta = v.eta ? new Date(v.eta) : null;
+
+  return (
+    <Link href={`/vessel/${v.id}`}>
+      <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl px-4 py-3 hover:border-sky-500/20 hover:bg-sky-500/5 cursor-pointer transition-all">
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
+            <Ship className="w-4 h-4 text-sky-400/60" />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-semibold text-sky-100">{v.name}</p>
+              <Badge variant="outline" className={cn("text-[9px] shrink-0", sc.color)}>
+                <span className={cn("w-1 h-1 rounded-full mr-1", sc.dotColor)} />
+                {sc.label}
+              </Badge>
+              {v.activeExceptions > 0 && (
+                <Badge variant="outline" className="text-[9px] text-red-400 bg-red-500/10 border-red-500/20 shrink-0">
+                  <AlertTriangle className="w-2.5 h-2.5 mr-1" />
+                  {v.activeExceptions}
+                </Badge>
+              )}
+            </div>
+            <p className="text-[10px] text-sky-400/40 mt-0.5">
+              {v.vesselType && <span>{v.vesselType.replace(/_/g, " ")} · </span>}
+              {v.imo && <span>IMO {v.imo} · </span>}
+              {v.flag && <span>{v.flag}</span>}
+            </p>
+          </div>
+
+          <div className="hidden md:flex items-center gap-6 shrink-0 text-right">
+            {v.destination && (
+              <div>
+                <p className="text-[9px] text-sky-400/30 flex items-center gap-1 justify-end">
+                  <MapPin className="w-2.5 h-2.5" />
+                  Destination
+                </p>
+                <p className="text-[11px] text-sky-200 font-medium">{v.destination}</p>
+                {eta && (
+                  <p className="text-[9px] text-sky-400/40 flex items-center gap-1 justify-end mt-0.5">
+                    <Clock className="w-2.5 h-2.5" />
+                    ETA {eta.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {lat !== null && lon !== null && (
+              <div>
+                <p className="text-[9px] text-sky-400/30">Position</p>
+                <p className="text-[11px] font-mono text-sky-300">
+                  {lat.toFixed(2)}°, {lon.toFixed(2)}°
+                </p>
+                {v.speed && (
+                  <p className="text-[9px] text-sky-400/40 mt-0.5">{parseFloat(v.speed).toFixed(1)} kn</p>
+                )}
+              </div>
+            )}
+
+            {tce !== null && tce > 0 && (
+              <div>
+                <p className="text-[9px] text-sky-400/30 flex items-center gap-1 justify-end">
+                  <TrendingUp className="w-2.5 h-2.5" />
+                  TCE/day
+                </p>
+                <p className="text-[11px] font-mono text-emerald-400">${Math.round(tce).toLocaleString()}</p>
+                {v.charterType && (
+                  <p className="text-[9px] text-sky-400/40 mt-0.5 capitalize">{v.charterType.replace(/_/g, " ")}</p>
+                )}
+              </div>
+            )}
+
+            {v.mmsi && !v.destination && lat === null && (
+              <div>
+                <p className="text-[9px] text-sky-400/30">MMSI</p>
+                <p className="text-[11px] font-mono text-sky-300">{v.mmsi}</p>
+              </div>
+            )}
+          </div>
+
+          <ChevronRight className="w-4 h-4 text-sky-400/20 shrink-0" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function VesselsListPage() {
-  const { vessels, isLive, isLoading, refetch, isRefetching } = useVessels();
+  const { roster, isLive, isLoading, refetch, isRefetching } = useRoster();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState<"name" | "type" | "flag">("name");
+  const [sortBy, setSortBy] = useState<"name" | "type" | "flag" | "tce">("name");
 
-  const allStatuses = ["all", ...Array.from(new Set(vessels.map(v => v.status)))];
+  const allStatuses = ["all", ...Array.from(new Set(roster.map(v => v.status)))];
 
-  const filtered = vessels
+  const filtered = roster
     .filter(v => {
-      if (search && !v.name.toLowerCase().includes(search.toLowerCase()) &&
-          !(v.type ?? "").toLowerCase().includes(search.toLowerCase()) &&
-          !(v.flag ?? "").toLowerCase().includes(search.toLowerCase()) &&
-          !(v.imo ?? "").toLowerCase().includes(search.toLowerCase())) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        if (!v.name.toLowerCase().includes(q) &&
+            !(v.vesselType ?? "").toLowerCase().includes(q) &&
+            !(v.flag ?? "").toLowerCase().includes(q) &&
+            !(v.imo ?? "").toLowerCase().includes(q) &&
+            !(v.destination ?? "").toLowerCase().includes(q)) return false;
+      }
       if (statusFilter !== "all" && v.status !== statusFilter) return false;
       return true;
     })
     .sort((a, b) => {
-      if (sortBy === "type") return (a.type ?? "").localeCompare(b.type ?? "");
+      if (sortBy === "type") return (a.vesselType ?? "").localeCompare(b.vesselType ?? "");
       if (sortBy === "flag") return (a.flag ?? "").localeCompare(b.flag ?? "");
+      if (sortBy === "tce") {
+        const ta = a.tcePerDay ? parseFloat(a.tcePerDay) : 0;
+        const tb = b.tcePerDay ? parseFloat(b.tcePerDay) : 0;
+        return tb - ta;
+      }
       return a.name.localeCompare(b.name);
     });
 
@@ -48,9 +149,9 @@ export default function VesselsListPage() {
         <div>
           <h1 className="font-display text-xl font-bold text-sky-50">Vessel Roster</h1>
           <p className="text-xs text-sky-400/50 mt-0.5">
-            {vessels.length} vessels · SZL Maritime fleet
-            {!isLive && !isLoading && <span className="ml-2 text-amber-400/60">· demo data</span>}
+            {roster.length} vessels · SZL Maritime fleet
             {isLive && <span className="ml-2 text-emerald-400/60">· live</span>}
+            {!isLive && !isLoading && <span className="ml-2 text-sky-400/40">· loading</span>}
           </p>
         </div>
         <button
@@ -68,8 +169,8 @@ export default function VesselsListPage() {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search vessels..."
-            className="pl-8 pr-3 py-2 bg-[#0a1628]/80 border border-sky-500/10 rounded-lg text-xs text-sky-200 placeholder:text-sky-400/30 focus:outline-none focus:border-sky-500/30 w-48"
+            placeholder="Search vessels, destination..."
+            className="pl-8 pr-3 py-2 bg-[#0a1628]/80 border border-sky-500/10 rounded-lg text-xs text-sky-200 placeholder:text-sky-400/30 focus:outline-none focus:border-sky-500/30 w-56"
           />
         </div>
         <div className="flex items-center gap-1 flex-wrap">
@@ -81,7 +182,7 @@ export default function VesselsListPage() {
         </div>
         <div className="ml-auto flex items-center gap-1">
           <span className="text-[10px] text-sky-400/40 mr-1">Sort:</span>
-          {[{ id: "name", label: "Name" }, { id: "type", label: "Type" }, { id: "flag", label: "Flag" }].map(s => (
+          {[{ id: "name", label: "Name" }, { id: "type", label: "Type" }, { id: "flag", label: "Flag" }, { id: "tce", label: "TCE" }].map(s => (
             <button key={s.id} onClick={() => setSortBy(s.id as typeof sortBy)} className={cn("text-[10px] px-2 py-1.5 rounded-lg border transition-all", sortBy === s.id ? "bg-sky-500/10 border-sky-500/30 text-sky-300" : "border-sky-500/10 text-sky-400/40 hover:text-sky-300")}>
               {s.label}
             </button>
@@ -97,54 +198,7 @@ export default function VesselsListPage() {
       )}
 
       <div className="space-y-2">
-        {filtered.map(v => {
-          const sc = statusConfig[v.status] || { label: v.status, color: "text-sky-400 bg-sky-500/10 border-sky-500/20", dotColor: "bg-sky-400" };
-          return (
-            <Link key={v.id} href={`/vessel/${v.id}`}>
-              <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl px-4 py-3 hover:border-sky-500/20 hover:bg-sky-500/5 cursor-pointer transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
-                    <Ship className="w-4 h-4 text-sky-400/60" />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-sky-100">{v.name}</p>
-                      <Badge variant="outline" className={cn("text-[9px] shrink-0", sc.color)}>
-                        <span className={cn("w-1 h-1 rounded-full mr-1", sc.dotColor)} />
-                        {sc.label}
-                      </Badge>
-                    </div>
-                    <p className="text-[10px] text-sky-400/40 mt-0.5">
-                      {v.type && <span>{v.type.replace(/_/g, " ")} · </span>}
-                      {v.imo && <span>IMO {v.imo} · </span>}
-                      {v.flag && <span>{v.flag}</span>}
-                    </p>
-                  </div>
-
-                  <div className="hidden md:grid grid-cols-2 gap-4 shrink-0 items-center">
-                    {v.lat && v.lon && (
-                      <div className="text-center">
-                        <p className="text-[9px] text-sky-400/30">Position</p>
-                        <p className="text-[11px] font-mono text-sky-300">
-                          {v.lat.toFixed(2)}°, {v.lon.toFixed(2)}°
-                        </p>
-                      </div>
-                    )}
-                    {v.mmsi && (
-                      <div className="text-center">
-                        <p className="text-[9px] text-sky-400/30">MMSI</p>
-                        <p className="text-[11px] font-mono text-sky-300">{v.mmsi}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <ChevronRight className="w-4 h-4 text-sky-400/20 shrink-0" />
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+        {filtered.map(v => <RosterRow key={v.id} v={v} />)}
         {!isLoading && filtered.length === 0 && (
           <div className="text-center py-12 text-sky-400/30 text-xs">
             <AlertTriangle className="w-5 h-5 mx-auto mb-2 opacity-40" />

@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { vesselsDomainMockData } from "@/data/mock-data";
 import { api, type VesselMaintenance } from "@/lib/api";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Wrench, AlertTriangle, Clock, CheckCircle2, TrendingDown, Ship, Calendar, RefreshCw } from "lucide-react";
@@ -172,25 +171,8 @@ export default function MaintenanceReadinessPage() {
   }, [liveVessels]);
 
   const allItems: DisplayItem[] = useMemo(() => {
-    if (liveItems.length > 0) {
-      return liveItems.map(item => adaptMaintenanceItem(item, vesselNameMap.get(item.vesselId) ?? `Vessel ${item.vesselId}`));
-    }
-    return vesselsDomainMockData.maintenanceItems.map((m, i) => ({
-      id: i + 1,
-      vesselId: 0,
-      vesselName: m.vesselName,
-      component: m.component,
-      description: m.description,
-      status: m.status,
-      priority: m.priority,
-      daysToDue: m.daysToDue,
-      riskOfServiceIssue: m.riskOfServiceIssue,
-      estimatedCost: m.estimatedCost,
-      impactsVoyageAvailability: m.impactsVoyageAvailability,
-      assetHealth: m.assetHealth,
-      technician: m.technician,
-    }));
-  }, [liveItems, vesselsDomainMockData, vesselNameMap]);
+    return liveItems.map(item => adaptMaintenanceItem(item, vesselNameMap.get(item.vesselId) ?? `Vessel ${item.vesselId}`));
+  }, [liveItems, vesselNameMap]);
 
   const isLive = liveItems.length > 0;
 

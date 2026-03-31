@@ -1,6 +1,55 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, type VoyageEconomics, type SanctionsScreening, type PortCall, type RosterVessel, type VesselDetail } from "@/lib/api";
 import { vesselsDomainMockData, type VesselProfile } from "@/data/mock-data";
+
+type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert" | "ais_dark" | "sanctions_match" | "overdue_arrival" | "inspection_failure";
+type ExceptionSeverity = "critical" | "high" | "watch" | "normal";
+type ExceptionStatus = "active" | "acknowledged" | "resolved" | "dismissed";
+type MaintenanceType = "scheduled" | "emergency" | "predictive" | "regulatory";
+type MaintenanceStatus = "overdue" | "due_soon" | "scheduled" | "in_progress" | "completed";
+type MaintenancePriority = "critical" | "high" | "medium" | "low";
+type CharterType = "time_charter" | "voyage_charter" | "spot" | "bareboat";
+type VoyageStatus = "planned" | "loading" | "at_sea" | "completed" | "cancelled";
+
+function toExceptionType(val: string | null | undefined): ExceptionType {
+  const valid: ExceptionType[] = ["route_deviation", "delay_risk", "port_congestion", "weather_disruption", "maintenance_risk", "fuel_anomaly", "schedule_variance", "security_alert", "ais_dark", "sanctions_match", "overdue_arrival", "inspection_failure"];
+  return (val && valid.includes(val as ExceptionType)) ? (val as ExceptionType) : "route_deviation";
+}
+
+function toExceptionSeverity(val: string | null | undefined): ExceptionSeverity {
+  const valid: ExceptionSeverity[] = ["critical", "high", "watch", "normal"];
+  return (val && valid.includes(val as ExceptionSeverity)) ? (val as ExceptionSeverity) : "watch";
+}
+
+function toExceptionStatus(val: string | null | undefined): ExceptionStatus {
+  const valid: ExceptionStatus[] = ["active", "acknowledged", "resolved", "dismissed"];
+  return (val && valid.includes(val as ExceptionStatus)) ? (val as ExceptionStatus) : "active";
+}
+
+function toMaintenanceType(val: string | null | undefined): MaintenanceType {
+  const valid: MaintenanceType[] = ["scheduled", "emergency", "predictive", "regulatory"];
+  return (val && valid.includes(val as MaintenanceType)) ? (val as MaintenanceType) : "scheduled";
+}
+
+function toMaintenanceStatus(val: string | null | undefined): MaintenanceStatus {
+  const valid: MaintenanceStatus[] = ["overdue", "due_soon", "scheduled", "in_progress", "completed"];
+  return (val && valid.includes(val as MaintenanceStatus)) ? (val as MaintenanceStatus) : "scheduled";
+}
+
+function toMaintenancePriority(val: string | null | undefined): MaintenancePriority {
+  const valid: MaintenancePriority[] = ["critical", "high", "medium", "low"];
+  return (val && valid.includes(val as MaintenancePriority)) ? (val as MaintenancePriority) : "medium";
+}
+
+function toCharterType(val: string | null | undefined): CharterType {
+  const valid: CharterType[] = ["time_charter", "voyage_charter", "spot", "bareboat"];
+  return (val && valid.includes(val as CharterType)) ? (val as CharterType) : "spot";
+}
+
+function toVoyageStatus(val: string | null | undefined): VoyageStatus {
+  const valid: VoyageStatus[] = ["planned", "loading", "at_sea", "completed", "cancelled"];
+  return (val && valid.includes(val as VoyageStatus)) ? (val as VoyageStatus) : "at_sea";
+}
 
 function mapStatusToProfile(apiStatus: string): VesselProfile["status"] {
   const map: Record<string, VesselProfile["status"]> = {
@@ -14,17 +63,17 @@ function mapStatusToProfile(apiStatus: string): VesselProfile["status"] {
   return map[apiStatus] ?? "at_sea";
 }
 
-function mergeApiVesselWithMock(apiVessel: any, mockFallback: VesselProfile): VesselProfile {
+function mergeApiVesselWithMock(apiVessel: Record<string, unknown>, mockFallback: VesselProfile): VesselProfile {
   return {
     ...mockFallback,
-    id: apiVessel.id,
-    name: apiVessel.name,
-    imo: apiVessel.imo ?? mockFallback.imo,
-    mmsi: apiVessel.mmsi ?? mockFallback.mmsi,
-    flag: apiVessel.flag ?? mockFallback.flag,
-    type: apiVessel.vesselType ?? mockFallback.type,
-    status: mapStatusToProfile(apiVessel.status),
-    yearBuilt: apiVessel.yearBuilt ?? mockFallback.yearBuilt,
+    id: apiVessel["id"] as number,
+    name: apiVessel["name"] as string,
+    imo: (apiVessel["imo"] as string | null) ?? mockFallback.imo,
+    mmsi: (apiVessel["mmsi"] as string | null) ?? mockFallback.mmsi,
+    flag: (apiVessel["flag"] as string | null) ?? mockFallback.flag,
+    type: (apiVessel["vesselType"] as string | null) ?? mockFallback.type,
+    status: mapStatusToProfile(apiVessel["status"] as string),
+    yearBuilt: (apiVessel["yearBuilt"] as number | null) ?? mockFallback.yearBuilt,
   };
 }
 
@@ -39,119 +88,192 @@ export function useVessels() {
   const mockVessels = vesselsDomainMockData.vessels;
 
   const vessels: VesselProfile[] = isLive
-    ? apiVessels.map((v: any, i: number) => mergeApiVesselWithMock(v, mockVessels[i % mockVessels.length]))
+    ? apiVessels.map((v: Record<string, unknown>, i: number) => mergeApiVesselWithMock(v, mockVessels[i % mockVessels.length]))
     : mockVessels;
 
   return { vessels, isLoading, error, isLive, refetch };
 }
 
-export function useFleetExceptions() {
+export function useVesselsDashboard() {
+  return useQuery({
+    queryKey: ["vessels-dashboard"],
+    queryFn: () => api.dashboard(),
+    refetchInterval: 60_000,
+  });
+}
+
+export function useFleetExceptions(params?: { status?: string; severity?: string; type?: string }) {
   const { data: apiExceptions = [], isLoading, error, refetch } = useQuery({
-    queryKey: ["fleet-exceptions"],
-    queryFn: () => api.exceptions.list(),
+    queryKey: ["fleet-exceptions", params],
+    queryFn: () => api.exceptions.list(params),
     refetchInterval: 60_000,
   });
 
   const isLive = apiExceptions.length > 0;
-  const mockExceptions = vesselsDomainMockData.fleetExceptions;
 
-  const fleetExceptions = isLive
-    ? apiExceptions.map((e: any) => ({
-        id: String(e.id),
-        type: (e.exceptionType ?? "route_deviation") as any,
-        severity: (e.severity ?? "watch") as any,
-        vesselId: e.vesselId ?? 0,
-        vesselName: e.owner ?? `Vessel #${e.vesselId ?? 0}`,
-        route: "—",
-        title: e.title,
-        description: e.description,
-        whyItMatters: e.whyItMatters ?? "",
-        recommendedResponse: e.recommendedResponse ?? "",
-        businessConsequence: e.businessConsequence ?? "",
-        owner: e.owner ?? "—",
-        ownerFunction: e.ownerFunction ?? "—",
-        detectedAt: e.detectedAt,
-        acknowledgedAt: e.acknowledgedAt,
-        resolvedAt: e.resolvedAt,
-        status: (e.status ?? "active") as any,
-        estimatedImpactUSD: parseFloat(e.estimatedImpactUsd ?? "0"),
-      }))
-    : mockExceptions;
+  const fleetExceptions = apiExceptions.map((e: Record<string, unknown>) => ({
+    id: String(e["id"]),
+    type: toExceptionType(e["exceptionType"] as string | null | undefined),
+    severity: toExceptionSeverity(e["severity"] as string | null | undefined),
+    vesselId: (e["vesselId"] as number) ?? 0,
+    vesselName: (e["vesselName"] as string) ?? `Vessel #${(e["vesselId"] as number) ?? 0}`,
+    route: "—",
+    title: (e["title"] as string) ?? "",
+    description: (e["description"] as string) ?? "",
+    whyItMatters: (e["whyItMatters"] as string) ?? "",
+    recommendedResponse: (e["recommendedResponse"] as string) ?? "",
+    businessConsequence: (e["businessConsequence"] as string) ?? "",
+    owner: (e["owner"] as string) ?? "—",
+    ownerFunction: (e["ownerFunction"] as string) ?? "—",
+    detectedAt: (e["detectedAt"] as string) ?? "",
+    acknowledgedAt: (e["acknowledgedAt"] as string | null) ?? null,
+    resolvedAt: (e["resolvedAt"] as string | null) ?? null,
+    status: toExceptionStatus(e["status"] as string | null | undefined),
+    estimatedImpactUSD: parseFloat((e["estimatedImpactUsd"] as string) ?? "0"),
+  }));
 
   return { fleetExceptions, isLoading, error, isLive, refetch };
 }
 
+export type VoyageRow = {
+  voyageId: string;
+  vesselId: number;
+  vesselName: string;
+  route: string;
+  origin: string | null;
+  destination: string | null;
+  cargoType: string;
+  estimatedRevenue: number;
+  operatingCost: number;
+  fuelCost: number;
+  portCost: number;
+  delayCost: number;
+  marginEstimate: number;
+  marginPct: number;
+  tce: number;
+  delayHours: number;
+  charterType: CharterType;
+  status: VoyageStatus;
+  distanceNm: number;
+  durationDays: number;
+  voyageRef: string | null;
+};
+
 export function useVoyages() {
+  // Use the new vessel_voyage_economics table which has real seeded data
   const { data: apiVoyages = [], isLoading, error, refetch } = useQuery({
-    queryKey: ["voyages"],
-    queryFn: () => api.voyages.list(),
+    queryKey: ["voyage-economics"],
+    queryFn: () => api.voyageEconomics.list(),
     refetchInterval: 120_000,
   });
 
   const isLive = apiVoyages.length > 0;
-  const mockVoyages = vesselsDomainMockData.voyageEconomics;
 
-  const voyageEconomics = isLive
-    ? apiVoyages.map((v: any, i: number) => {
-        const mock = mockVoyages[i % mockVoyages.length];
-        return {
-          ...mock,
-          voyageId: String(v.id),
-          vesselId: v.vesselId ?? mock.vesselId,
-          vesselName: mock.vesselName,
-          route: v.originLabel && v.destinationLabel ? `${v.originLabel} → ${v.destinationLabel}` : mock.route,
-          origin: v.originLabel ?? mock.origin,
-          destination: v.destinationLabel ?? mock.destination,
-          cargoType: v.cargoType ?? mock.cargoType,
-          estimatedRevenue: parseFloat(v.estimatedRevenue ?? "0") || mock.estimatedRevenue,
-          operatingCost: parseFloat(v.operatingCost ?? "0") || mock.operatingCost,
-          fuelCost: parseFloat(v.fuelCost ?? "0") || mock.fuelCost,
-          portCost: parseFloat(v.portCost ?? "0") || mock.portCost,
-          delayCost: parseFloat(v.delayCost ?? "0") || mock.delayCost,
-          marginEstimate: parseFloat(v.marginEstimate ?? "0") || mock.marginEstimate,
-          marginPct: parseFloat(v.marginPct ?? "0") || mock.marginPct,
-          tce: parseFloat(v.tce ?? "0") || mock.tce,
-          delayHours: v.delayHours ?? mock.delayHours,
-          charterType: (v.charterType ?? mock.charterType) as any,
-          status: (v.status ?? mock.status) as any,
-        };
-      })
-    : mockVoyages;
+  const voyageEconomics: VoyageRow[] = (apiVoyages as VoyageEconomics[]).map((v) => {
+    const grossRevenue = parseFloat(v.grossRevenue ?? "0");
+    const totalCosts = parseFloat(v.totalCostsUsd ?? "0");
+    const netMargin = parseFloat(v.netMarginUsd ?? "0");
+    const marginPct = parseFloat(v.marginPct ?? "0");
+    const tce = parseFloat(v.tcePerDay ?? "0");
+    const delayHours = parseFloat(v.delayHours ?? "0");
+    const delayCost = parseFloat(v.delayCostUsd ?? "0");
+    return {
+      voyageId: String(v.id),
+      vesselId: v.vesselId,
+      vesselName: `Vessel #${v.vesselId}`,
+      route: `${v.originPort} → ${v.destinationPort}`,
+      origin: v.originPort,
+      destination: v.destinationPort,
+      cargoType: v.cargoType ?? "—",
+      estimatedRevenue: grossRevenue,
+      operatingCost: totalCosts,
+      fuelCost: parseFloat(v.fuelCostUsd ?? "0"),
+      portCost: parseFloat(v.portCostsUsd ?? "0"),
+      delayCost: delayCost,
+      marginEstimate: netMargin,
+      marginPct: marginPct,
+      tce: tce,
+      delayHours: delayHours,
+      charterType: toCharterType(v.charterType),
+      status: toVoyageStatus(v.status),
+      distanceNm: parseFloat(v.distanceNm ?? "0"),
+      durationDays: parseFloat(v.durationDays ?? "0"),
+      voyageRef: v.voyageRef,
+    };
+  });
 
   return { voyageEconomics, isLoading, error, isLive, refetch };
 }
 
-export function useMaintenance() {
+export function useVoyageEconomicsAnalytics() {
+  return useQuery({
+    queryKey: ["voyage-economics-analytics"],
+    queryFn: () => api.voyageEconomics.analytics(),
+    refetchInterval: 300_000,
+  });
+}
+
+export function useMaintenance(params?: { status?: string; vesselId?: number }) {
   const { data: apiMaintenance = [], isLoading, error, refetch } = useQuery({
-    queryKey: ["maintenance"],
-    queryFn: () => api.maintenance.list(),
+    queryKey: ["maintenance", params],
+    queryFn: () => api.maintenance.list(params),
     refetchInterval: 120_000,
   });
 
   const isLive = apiMaintenance.length > 0;
-  const mockItems = vesselsDomainMockData.maintenanceItems;
 
-  const maintenanceItems = isLive
-    ? apiMaintenance.map((m: any) => ({
-        id: m.id,
-        vesselId: m.vesselId,
-        vesselName: `Vessel #${m.vesselId}`,
-        component: m.component,
-        type: (m.maintenanceType ?? "scheduled") as any,
-        description: m.description ?? "",
-        dueDate: m.dueDate ?? "",
-        status: (m.status ?? "scheduled") as any,
-        priority: (m.priority ?? "medium") as any,
-        estimatedCost: parseFloat(m.estimatedCost ?? "0"),
-        daysToDue: m.dueDate ? Math.round((new Date(m.dueDate).getTime() - Date.now()) / 86400000) : 999,
-        riskOfServiceIssue: parseFloat(m.riskOfServiceIssue ?? "0"),
-        impactsVoyageAvailability: m.impactsVoyageAvailability ?? false,
-        technician: m.technician ?? "—",
-        assetHealth: parseFloat(m.assetHealth ?? "75"),
-      }))
-    : mockItems;
+  const maintenanceItems = apiMaintenance.map((m: Record<string, unknown>) => ({
+    id: m["id"] as number,
+    vesselId: m["vesselId"] as number,
+    vesselName: (m["vesselName"] as string) ?? `Vessel #${m["vesselId"] as number}`,
+    vesselType: m["vesselType"] as string | null,
+    vesselFlag: m["vesselFlag"] as string | null,
+    component: m["component"] as string,
+    type: toMaintenanceType(m["maintenanceType"] as string | null | undefined),
+    description: (m["description"] as string) ?? "",
+    dueDate: (m["dueDate"] as string) ?? "",
+    status: toMaintenanceStatus(m["status"] as string | null | undefined),
+    priority: toMaintenancePriority(m["priority"] as string | null | undefined),
+    estimatedCost: parseFloat((m["estimatedCost"] as string) ?? "0"),
+    daysToDue: m["dueDate"] ? Math.round((new Date(m["dueDate"] as string).getTime() - Date.now()) / 86400000) : 999,
+    riskOfServiceIssue: parseFloat((m["riskOfServiceIssue"] as string) ?? "0"),
+    impactsVoyageAvailability: (m["impactsVoyageAvailability"] as boolean) ?? false,
+    technician: (m["technician"] as string) ?? "—",
+    assetHealth: parseFloat((m["assetHealth"] as string) ?? "75"),
+    notes: m["notes"] as string | null,
+  }));
 
   return { maintenanceItems, isLoading, error, isLive, refetch };
+}
+
+export function useSanctions(params?: { ofacStatus?: string }) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["sanctions", params],
+    queryFn: () => api.sanctions.list(params),
+    refetchInterval: 300_000,
+  });
+
+  const isLive = (data?.length ?? 0) > 0;
+
+  return { screenings: (data ?? []) as SanctionsScreening[], isLoading, error, isLive, refetch };
+}
+
+export function useSanctionsSummary() {
+  return useQuery({
+    queryKey: ["sanctions-summary"],
+    queryFn: () => api.sanctions.summary(),
+    refetchInterval: 300_000,
+  });
+}
+
+export function usePortCalls(params?: { vesselId?: number }) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["port-calls", params],
+    queryFn: () => api.portCalls.list(params),
+    refetchInterval: 120_000,
+  });
+
+  return { portCalls: (data ?? []) as PortCall[], isLoading, error, refetch };
 }
 
 export function usePerformanceMetrics() {
@@ -177,4 +299,26 @@ export function usePerformanceMetrics() {
   });
 
   return { performanceMetrics, isLoading };
+}
+
+export function useRoster() {
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
+    queryKey: ["vessels-roster"],
+    queryFn: () => api.roster(),
+    refetchInterval: 60_000,
+  });
+
+  const isLive = (data?.length ?? 0) > 0;
+  return { roster: (data ?? []) as RosterVessel[], isLoading, error, isLive, refetch, isRefetching };
+}
+
+export function useVesselDetail(id: number) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["vessel-detail", id],
+    queryFn: () => api.vesselDetail(id),
+    enabled: id > 0,
+    refetchInterval: 60_000,
+  });
+
+  return { detail: (data ?? null) as VesselDetail | null, isLoading, error, refetch };
 }

@@ -31,6 +31,8 @@ export interface FleetException {
   detectedAt: string;
   createdAt: string;
   updatedAt: string;
+  // joined fields
+  vesselName?: string;
 }
 
 export interface Voyage {
@@ -62,6 +64,134 @@ export interface Voyage {
   estimatedArrival?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface VoyageEconomics {
+  id: number;
+  vesselId: number;
+  voyageRef: string;
+  originPort: string;
+  destinationPort: string;
+  cargoType?: string;
+  cargoQuantityMt?: string;
+  cargoValueUsd?: string;
+  charterType: string;
+  charterRatePerDay?: string;
+  grossRevenue?: string;
+  fuelCostUsd?: string;
+  fuelConsumedMt?: string;
+  portCostsUsd?: string;
+  canalFeesUsd?: string;
+  crewCostsUsd?: string;
+  maintenanceCostsUsd?: string;
+  otherCostsUsd?: string;
+  totalCostsUsd?: string;
+  netMarginUsd?: string;
+  marginPct?: string;
+  tcePerDay?: string;
+  distanceNm?: string;
+  durationDays?: string;
+  delayHours?: string;
+  delayCostUsd?: string;
+  status: string;
+  scheduledDepartureAt?: string;
+  actualDepartureAt?: string;
+  scheduledArrivalAt?: string;
+  estimatedArrivalAt?: string;
+  actualArrivalAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VoyageEconomicsAnalytics {
+  revenueByMonth: Array<{
+    month: string;
+    revenue: number;
+    costs: number;
+    margin: number;
+    voyages: number;
+  }>;
+  topRoutes: Array<{
+    route: string;
+    voyages: number;
+    avgMargin: number;
+    totalRevenue: number;
+    avgTce: number;
+  }>;
+  utilizationTrend: Array<{
+    status: string;
+    count: number;
+    avgMarginPct: number;
+  }>;
+}
+
+export interface SanctionsScreening {
+  id: number;
+  vesselId: number;
+  screeningDate: string;
+  ofacStatus: string;
+  euStatus: string;
+  unStatus: string;
+  ukStatus: string;
+  matchedLists?: string[];
+  matchConfidence?: string;
+  flagRegistryValid?: boolean;
+  flagRegistryNotes?: string;
+  pscInspectionDate?: string;
+  pscResult?: string;
+  pscDeficiencies?: number;
+  complianceScore?: string;
+  ownershipOpaque?: boolean;
+  knownOwner?: string;
+  knownManager?: string;
+  flagState?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  // joined
+  vesselName?: string;
+  vesselType?: string;
+  vesselFlag?: string;
+  vesselImo?: string;
+  vesselMmsi?: string;
+}
+
+export interface SanctionsSummary {
+  ofacDistribution: Array<{ status: string; count: number }>;
+  pscDistribution: Array<{ result: string; count: number; avgDeficiencies: number }>;
+  stats: {
+    avgScore: number;
+    minScore: number;
+    maxScore: number;
+    clearCount: number;
+    matchCount: number;
+    opaqueCount: number;
+  };
+}
+
+export interface PortCall {
+  id: number;
+  vesselId: number;
+  portName: string;
+  portLocode?: string;
+  portCountry?: string;
+  arrivalAt?: string;
+  departureAt?: string;
+  durationHours?: string;
+  purpose?: string;
+  cargoLoaded?: string;
+  cargoDischarged?: string;
+  portCostUsd?: string;
+  bunkeredMt?: string;
+  canalTransit?: boolean;
+  canalName?: string;
+  canalFeeUsd?: string;
+  agentName?: string;
+  notes?: string;
+  createdAt: string;
+  // joined
+  vesselName?: string;
+  vesselType?: string;
 }
 
 export interface Corridor {
@@ -96,6 +226,63 @@ export interface VesselMaintenance {
   impactsVoyageAvailability: boolean;
   assetHealth?: string;
   technician?: string;
+  // joined
+  vesselName?: string;
+  vesselType?: string;
+  vesselFlag?: string;
+}
+
+export interface RosterVessel {
+  id: number;
+  name: string;
+  imo: string | null;
+  mmsi: string | null;
+  flag: string | null;
+  vesselType: string | null;
+  status: string;
+  yearBuilt: number | null;
+  grossTonnage: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  heading: string | null;
+  speed: string | null;
+  positionRecordedAt: string | null;
+  destination: string | null;
+  origin: string | null;
+  eta: string | null;
+  cargoType: string | null;
+  charterType: string | null;
+  voyageRef: string | null;
+  tcePerDay: string | null;
+  marginPct: string | null;
+  activeExceptions: number;
+}
+
+export interface VesselDetail {
+  vessel: {
+    id: number;
+    name: string;
+    imo: string | null;
+    mmsi: string | null;
+    flag: string | null;
+    vesselType: string | null;
+    status: string;
+    yearBuilt: number | null;
+    grossTonnage: string | null;
+  };
+  position: {
+    latitude: string;
+    longitude: string;
+    heading: string | null;
+    speed: string | null;
+    recordedAt: string;
+  } | null;
+  activeVoyage: VoyageEconomics | null;
+  voyageHistory: VoyageEconomics[];
+  maintenance: VesselMaintenance[];
+  portCalls: PortCall[];
+  exceptions: FleetException[];
+  sanctions: SanctionsScreening | null;
 }
 
 export interface VesselsDashboard {
@@ -104,9 +291,21 @@ export interface VesselsDashboard {
     activeExceptions: number;
     overdueMaintenanceItems: number;
     activeVoyages: number;
+    utilizationRate: number;
   };
+  statusDistribution: Array<{ status: string; count: number }>;
+  typeDistribution: Array<{ type: string; count: number }>;
+  flagDistribution: Array<{ flag: string; count: number }>;
+  ageBuckets: Record<string, number>;
   recentExceptions: FleetException[];
   fleetSummary: unknown[];
+  economics: {
+    totalRevenue: number;
+    totalCosts: number;
+    totalMargin: number;
+    avgMarginPct: number;
+    completedVoyages: number;
+  };
   fetchedAt: string;
 }
 
@@ -127,6 +326,11 @@ export const api = {
     positions: (id: number) => apiFetch<any[]>(`/vessels/${id}/positions`),
     cargo: (id: number) => apiFetch<any[]>(`/vessels/${id}/cargo`),
     routes: (id: number) => apiFetch<any[]>(`/vessels/${id}/routes`),
+    maintenance: (id: number) => apiFetch<VesselMaintenance[]>(`/vessels/${id}/maintenance`),
+    portCalls: (id: number) => apiFetch<PortCall[]>(`/vessels/${id}/port-calls`),
+    voyages: (id: number) => apiFetch<VoyageEconomics[]>(`/vessels/${id}/voyages`),
+    exceptions: (id: number) => apiFetch<FleetException[]>(`/vessels/${id}/exceptions`),
+    sanctions: (id: number) => apiFetch<SanctionsScreening>(`/vessels/${id}/sanctions`),
   },
   routes: {
     list: () => apiFetch<any[]>("/vessels/routes/all"),
@@ -152,12 +356,15 @@ export const api = {
     create: (data: any) => apiFetch<any>("/vessels/simulations", { method: "POST", body: JSON.stringify(data) }),
   },
   dashboard: () => apiFetch<VesselsDashboard>("/vessels/dashboard"),
+  roster: () => apiFetchList<RosterVessel>("/vessels/roster"),
+  vesselDetail: (id: number) => apiFetch<VesselDetail>(`/vessels/${id}/detail`),
   fleetSummary: () => apiFetch<any>("/vessels/fleet-summary"),
   exceptions: {
-    list: (params?: { status?: string; severity?: string }) => {
+    list: (params?: { status?: string; severity?: string; type?: string }) => {
       const q = new URLSearchParams();
       if (params?.status) q.set("status", params.status);
       if (params?.severity) q.set("severity", params.severity);
+      if (params?.type) q.set("type", params.type);
       const qs = q.toString();
       return apiFetchList<FleetException>(`/vessels/exceptions${qs ? `?${qs}` : ""}`);
     },
@@ -177,6 +384,33 @@ export const api = {
     get: (id: number) => apiFetch<Voyage>(`/vessels/voyages/${id}`),
     create: (data: any) => apiFetch<Voyage>("/vessels/voyages", { method: "POST", body: JSON.stringify(data) }),
     update: (id: number, data: any) => apiFetch<Voyage>(`/vessels/voyages/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  },
+  voyageEconomics: {
+    list: (params?: { status?: string; vesselId?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.status) q.set("status", params.status);
+      if (params?.vesselId) q.set("vesselId", String(params.vesselId));
+      const qs = q.toString();
+      return apiFetchList<VoyageEconomics>(`/vessels/voyage-economics${qs ? `?${qs}` : ""}`);
+    },
+    analytics: () => apiFetch<VoyageEconomicsAnalytics>("/vessels/voyage-economics/analytics"),
+  },
+  sanctions: {
+    list: (params?: { ofacStatus?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.ofacStatus) q.set("ofacStatus", params.ofacStatus);
+      const qs = q.toString();
+      return apiFetchList<SanctionsScreening>(`/vessels/sanctions${qs ? `?${qs}` : ""}`);
+    },
+    summary: () => apiFetch<SanctionsSummary>("/vessels/sanctions/summary"),
+  },
+  portCalls: {
+    list: (params?: { vesselId?: number }) => {
+      const q = new URLSearchParams();
+      if (params?.vesselId) q.set("vesselId", String(params.vesselId));
+      const qs = q.toString();
+      return apiFetchList<PortCall>(`/vessels/port-calls${qs ? `?${qs}` : ""}`);
+    },
   },
   corridors: {
     list: () => apiFetchList<Corridor>("/vessels/corridors"),
@@ -206,4 +440,5 @@ export const api = {
     marineWeather: (lat?: number, lon?: number) =>
       apiFetch<any>(`/vessels/live/weather-marine${lat != null && lon != null ? `?lat=${lat}&lon=${lon}` : ""}`),
   },
+  seed: () => apiFetch<{ message: string }>("/vessels/seed", { method: "POST" }),
 };

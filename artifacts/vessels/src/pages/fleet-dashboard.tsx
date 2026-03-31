@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useRoster, useFleetExceptions, useSanctions } from "@/hooks/use-vessels-data";
+import type { RosterVessel } from "@/lib/api";
 import { dataProvider } from "@/data/data-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Link } from "wouter";
 import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriangle, Eye, EyeOff, Anchor, TrendingUp, Package, BarChart3 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ExportButton } from "@workspace/shared-ui/data-export";
 import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 
@@ -54,8 +56,8 @@ function AnimatedCounter({ value, duration = 1200 }: { value: number; duration?:
   return <>{display}</>;
 }
 
-function FleetMap({ mockVessels, onVesselClick, selectedVesselId }: { mockVessels: any[]; onVesselClick: (v: any) => void; selectedVesselId?: number }) {
-  const [hoveredVessel, setHoveredVessel] = useState<any | null>(null);
+function FleetMap({ vessels, onVesselClick, selectedVesselId }: { vessels: RosterVessel[]; onVesselClick: (v: RosterVessel) => void; selectedVesselId?: number }) {
+  const [hoveredVessel, setHoveredVessel] = useState<RosterVessel | null>(null);
 
   const toMapCoords = (lat: number, lon: number, width: number, height: number) => {
     const x = ((lon + 180) / 360) * width;
@@ -118,8 +120,8 @@ function FleetMap({ mockVessels, onVesselClick, selectedVesselId }: { mockVessel
             </g>
           );
         })}
-        {mockVessels.map((v) => {
-          const { x, y } = toMapCoords(v.lat ?? v.currentLat, v.lon ?? v.currentLon, W, H);
+        {vessels.filter(v => v.latitude && v.longitude).map((v) => {
+          const { x, y } = toMapCoords(parseFloat(v.latitude!), parseFloat(v.longitude!), W, H);
           const color = vesselStatusDotColors[v.status] || "#666";
           const isHovered = hoveredVessel?.id === v.id;
           const isSelected = selectedVesselId === v.id;
@@ -148,8 +150,8 @@ function FleetMap({ mockVessels, onVesselClick, selectedVesselId }: { mockVessel
         })}
       </svg>
 
-      {hoveredVessel && !selectedVesselId && (() => {
-        const { x, y } = toMapCoords(hoveredVessel.lat ?? hoveredVessel.currentLat, hoveredVessel.lon ?? hoveredVessel.currentLon, W, H);
+      {hoveredVessel && !selectedVesselId && hoveredVessel.latitude && hoveredVessel.longitude && (() => {
+        const { x, y } = toMapCoords(parseFloat(hoveredVessel.latitude), parseFloat(hoveredVessel.longitude), W, H);
         const pctX = (x / W) * 100;
         const pctY = (y / H) * 100;
         return (
@@ -161,12 +163,12 @@ function FleetMap({ mockVessels, onVesselClick, selectedVesselId }: { mockVessel
             <div className="flex items-center gap-2 mt-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: vesselStatusDotColors[hoveredVessel.status] }} />
               <span className="text-[10px] text-sky-200/70 capitalize">{hoveredVessel.status?.replace("_", " ")}</span>
-              <span className="text-[10px] text-sky-200/40 ml-auto">{hoveredVessel.currentSpeed > 0 ? `${hoveredVessel.currentSpeed} kn` : "Stationary"}</span>
+              <span className="text-[10px] text-sky-200/40 ml-auto">{hoveredVessel.speed && parseFloat(hoveredVessel.speed) > 0 ? `${parseFloat(hoveredVessel.speed).toFixed(1)} kn` : "Stationary"}</span>
             </div>
-            {hoveredVessel.nextPort && (
+            {hoveredVessel.destination && (
               <div className="flex items-center gap-1 mt-1">
                 <MapPin className="w-2.5 h-2.5 text-sky-400/50" />
-                <p className="text-[10px] text-sky-200/50">Next: {hoveredVessel.nextPort}</p>
+                <p className="text-[10px] text-sky-200/50">Next: {hoveredVessel.destination}</p>
               </div>
             )}
           </div>
@@ -188,7 +190,7 @@ function FleetMap({ mockVessels, onVesselClick, selectedVesselId }: { mockVessel
       </div>
       <div className="absolute bottom-3 right-3 text-[10px] text-sky-400/40 font-mono bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10">
         <Radio className="w-3 h-3 inline mr-1 text-emerald-400" />
-        {mockVessels.length} vessels tracked
+        {vessels.length} vessels tracked
       </div>
     </div>
   );
@@ -199,92 +201,80 @@ function seededValue(id: number, offset: number, range: number) {
   return (hash / 1000) * range;
 }
 
-const darkVesselEvents = [
-  { vessel: "ATLAS PIONEER", gap: "18h 42m", lastSeen: "Strait of Hormuz", confidence: 94, flagState: "Panama", risk: "critical" },
-  { vessel: "SILVER HORIZON", gap: "9h 15m", lastSeen: "Gulf of Oman", confidence: 78, flagState: "Marshall Is.", risk: "high" },
-  { vessel: "NORDIC STAR", gap: "6h 03m", lastSeen: "Red Sea", confidence: 62, flagState: "Liberia", risk: "medium" },
-];
+type ExceptionItem = {
+  id: string;
+  type: string;
+  severity: string;
+  vesselName: string;
+  title: string;
+  description: string;
+  detectedAt: string;
+  estimatedImpactUSD: number;
+};
 
-const sanctionsQueue = [
-  { vessel: "OCEAN FORTUNE", flag: "Iran", confidence: 97, status: "OFAC Match", matched: ["SDN List", "EU Sanctions"], risk: "critical" },
-  { vessel: "PACIFIC EAGLE", flag: "Russia", confidence: 84, status: "Partial Match", matched: ["EU Sanctions"], risk: "high" },
-  { vessel: "GOLD PIONEER", flag: "DPRK", confidence: 91, status: "OFAC Match", matched: ["SDN List", "OFAC DPRK"], risk: "critical" },
-];
-
-const cargoFlowRoutes = [
-  { route: "Persian Gulf → EU", commodity: "Crude Oil", volume: "4.2M bbl/day", trend: "+8%", color: "text-amber-400" },
-  { route: "US Gulf → Asia", commodity: "LNG", volume: "1.8M tons", trend: "+12%", color: "text-sky-400" },
-  { route: "Brazil → China", commodity: "Iron Ore", volume: "2.1M tons", trend: "-3%", color: "text-emerald-400" },
-  { route: "Black Sea → Med", commodity: "Grain", volume: "890K tons", trend: "+5%", color: "text-violet-400" },
-];
-
-const portCongestion = [
-  { port: "Singapore", waitTime: "2.4 days", vessels: 47, trend: "↑ Worsening", color: "text-red-400" },
-  { port: "Rotterdam", waitTime: "1.1 days", vessels: 23, trend: "→ Stable", color: "text-amber-400" },
-  { port: "Shanghai", waitTime: "3.8 days", vessels: 91, trend: "↑ Worsening", color: "text-red-400" },
-  { port: "Houston", waitTime: "0.8 days", vessels: 18, trend: "↓ Improving", color: "text-emerald-400" },
-];
-
-const behavioralRiskVessels = [
-  { name: "TITAN VOYAGER", score: 87, reasons: ["AIS manipulation", "Speed anomaly", "Sanctioned zone transit"], trend: "+14 pts" },
-  { name: "SEA MERCURY", score: 72, reasons: ["Identity switch", "Unusual anchoring pattern"], trend: "+8 pts" },
-  { name: "BLUE ODYSSEY", score: 58, reasons: ["STS transfer proximity", "Flag state change"], trend: "+22 pts" },
-];
-
-function BehavioralRiskPanel() {
+function BehavioralRiskPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
+  const behavioralTypes = ["route_deviation", "speed_anomaly", "fuel_anomaly", "security_alert", "schedule_variance"];
+  const items = exceptions.filter(e => behavioralTypes.includes(e.type)).slice(0, 5);
+  if (items.length === 0) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
+        <p className="text-[11px] text-sky-400/40 font-mono">No active behavioral exceptions</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
         <Shield className="w-3.5 h-3.5 text-red-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Behavioral AI Risk Scoring</span>
-        <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">Windward Model</Badge>
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Behavioral Risk Exceptions</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">{items.length} Active</Badge>
       </div>
       <div className="divide-y divide-sky-500/5">
-        {behavioralRiskVessels.map((v) => {
-          const risk = getRiskBadge(v.score);
-          return (
-            <div key={v.name} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-sky-100">{v.name}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono text-red-400">{v.trend}</span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full border text-[10px] ${risk.color}`}>{v.score}</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {v.reasons.map(r => (
-                  <span key={r} className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400/70 border border-sky-500/10">{r}</span>
-                ))}
-              </div>
+        {items.map((e) => (
+          <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${e.severity === "critical" ? "text-red-400 bg-red-400/10 border-red-400/20" : e.severity === "high" ? "text-orange-400 bg-orange-400/10 border-orange-400/20" : "text-amber-400 bg-amber-400/10 border-amber-400/20"}`}>
+                {e.severity}
+              </span>
             </div>
-          );
-        })}
+            <p className="text-[10px] text-sky-400/60 truncate">{e.title}</p>
+            <p className="text-[9px] text-sky-400/30 font-mono mt-0.5">{e.type.replace(/_/g, " ")} · impact ${e.estimatedImpactUSD.toLocaleString()}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function DarkVesselPanel() {
+function DarkVesselPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
+  const items = exceptions.filter(e => e.type === "ais_dark").slice(0, 5);
+  if (items.length === 0) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
+        <p className="text-[11px] text-sky-400/40 font-mono">No dark vessel events detected</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
         <EyeOff className="w-3.5 h-3.5 text-amber-400" />
         <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Dark Vessel Detection</span>
-        <Badge variant="outline" className="ml-auto text-[9px] bg-amber-500/10 text-amber-400 border-amber-500/20">Satellite Gaps</Badge>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-amber-500/10 text-amber-400 border-amber-500/20">{items.length} AIS Gaps</Badge>
       </div>
       <div className="divide-y divide-sky-500/5">
-        {darkVesselEvents.map((v) => (
-          <div key={v.vessel} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+        {items.map((e) => (
+          <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-sky-100">{v.vessel}</span>
-              <Badge variant="outline" className={`text-[9px] ${v.risk === "critical" ? "bg-red-500/10 text-red-400 border-red-500/20" : v.risk === "high" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
-                {v.risk}
+              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <Badge variant="outline" className={`text-[9px] ${e.severity === "critical" ? "bg-red-500/10 text-red-400 border-red-500/20" : e.severity === "high" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
+                {e.severity}
               </Badge>
             </div>
             <div className="flex items-center gap-4 text-[10px] text-sky-400/60">
-              <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Gap: <span className="text-amber-400 font-mono">{v.gap}</span></span>
-              <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{v.lastSeen}</span>
-              <span className="ml-auto font-mono text-sky-400/40">{v.flagState} · {v.confidence}% conf.</span>
+              <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{e.title}</span>
+              <span className="ml-auto font-mono text-sky-400/40">{new Date(e.detectedAt).toLocaleDateString()}</span>
             </div>
           </div>
         ))}
@@ -293,30 +283,57 @@ function DarkVesselPanel() {
   );
 }
 
-function SanctionsPanel() {
+function SanctionsPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
+  const { screenings, isLoading } = useSanctions({ ofacStatus: "match" });
+  const sanctionExceptions = exceptions.filter(e => e.type === "sanctions_match").slice(0, 3);
+  const items = screenings.slice(0, 5);
+
+  if (isLoading) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
+        <p className="text-[11px] text-sky-400/40 font-mono">Loading sanctions data…</p>
+      </div>
+    );
+  }
+
+  const displayItems = items.length > 0 ? items : sanctionExceptions;
+  if (displayItems.length === 0) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
+        <p className="text-[11px] text-sky-400/40 font-mono">No active sanctions matches</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
         <AlertTriangle className="w-3.5 h-3.5 text-red-400 animate-pulse" />
         <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Sanctions Screening</span>
-        <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">5 AIS Sources</Badge>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">{displayItems.length} Flags</Badge>
       </div>
       <div className="divide-y divide-sky-500/5">
-        {sanctionsQueue.map((v) => (
-          <div key={v.vessel} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+        {items.length > 0 ? items.map((s) => (
+          <div key={s.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-sky-100">{v.vessel}</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${v.risk === "critical" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-orange-500/10 text-orange-400 border-orange-500/20"}`}>{v.status}</span>
+              <span className="text-xs font-semibold text-sky-100">Vessel #{s.vesselId}</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${s.ofacStatus === "match" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-orange-500/10 text-orange-400 border-orange-500/20"}`}>
+                {s.ofacStatus?.toUpperCase()}
+              </span>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] text-sky-400/50 font-mono">Flag: {v.flag}</span>
-              <span className="text-[10px] font-mono text-sky-400/40">Conf: {v.confidence}%</span>
-              <div className="flex gap-1 ml-auto">
-                {v.matched.map(m => (
-                  <span key={m} className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">{m}</span>
-                ))}
-              </div>
+              <span className="text-[10px] text-sky-400/50 font-mono">EU: {s.euStatus}</span>
+              <span className="text-[10px] text-sky-400/50 font-mono">UN: {s.unStatus}</span>
+              <span className="text-[10px] text-sky-400/50 font-mono">PSC: {s.pscResult?.replace(/_/g, " ")}</span>
             </div>
+          </div>
+        )) : sanctionExceptions.map((e) => (
+          <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded border bg-red-500/10 text-red-400 border-red-500/20">{e.severity}</span>
+            </div>
+            <p className="text-[10px] text-sky-400/60 truncate">{e.title}</p>
           </div>
         ))}
       </div>
@@ -324,23 +341,33 @@ function SanctionsPanel() {
   );
 }
 
-function CargoFlowPanel() {
+function CargoFlowPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
+  const portCongestExceptions = exceptions.filter(e => e.type === "port_congestion").slice(0, 4);
+  if (portCongestExceptions.length === 0) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
+        <p className="text-[11px] text-sky-400/40 font-mono">No cargo-related exceptions</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
         <Package className="w-3.5 h-3.5 text-sky-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Cargo Flow Intelligence</span>
-        <Badge variant="outline" className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20">Kpler Analytics</Badge>
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Cargo & Port Exceptions</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20">{portCongestExceptions.length} Active</Badge>
       </div>
-      <div className="p-3 grid grid-cols-2 gap-2">
-        {cargoFlowRoutes.map((r) => (
-          <div key={r.route} className="bg-sky-500/5 rounded-lg p-3 border border-sky-500/10">
+      <div className="divide-y divide-sky-500/5">
+        {portCongestExceptions.map((e) => (
+          <div key={e.id} className="px-4 py-3 hover:bg-sky-500/5 transition-colors">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[9px] font-mono text-sky-400/50 uppercase">{r.commodity}</span>
-              <span className={`text-[10px] font-bold ${r.trend.startsWith("+") ? "text-emerald-400" : "text-red-400"}`}>{r.trend}</span>
+              <span className="text-xs font-semibold text-sky-100">{e.vesselName}</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${e.severity === "critical" ? "bg-red-500/10 text-red-400 border-red-500/20" : e.severity === "high" ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
+                {e.severity}
+              </span>
             </div>
-            <p className="text-[11px] text-sky-200 font-medium mb-1">{r.route}</p>
-            <p className={`text-xs font-bold font-mono ${r.color}`}>{r.volume}</p>
+            <p className="text-[10px] text-sky-400/60 truncate">{e.title}</p>
+            <p className="text-[9px] text-sky-400/30 font-mono mt-0.5">impact ${e.estimatedImpactUSD.toLocaleString()}</p>
           </div>
         ))}
       </div>
@@ -348,26 +375,35 @@ function CargoFlowPanel() {
   );
 }
 
-function PortCongestionPanel() {
+function PortCongestionPanel({ exceptions }: { exceptions: ExceptionItem[] }) {
+  const delayExceptions = exceptions.filter(e => e.type === "delay_risk" || e.type === "port_congestion").slice(0, 5);
+  if (delayExceptions.length === 0) {
+    return (
+      <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl p-6 flex items-center justify-center">
+        <p className="text-[11px] text-sky-400/40 font-mono">No port congestion exceptions</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
         <Anchor className="w-3.5 h-3.5 text-sky-400" />
-        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Port Congestion Forecast</span>
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Port Delay Exceptions</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20">{delayExceptions.length} Active</Badge>
       </div>
       <div className="divide-y divide-sky-500/5">
-        {portCongestion.map((p) => (
-          <div key={p.port} className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors">
+        {delayExceptions.map((e) => (
+          <div key={e.id} className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors">
             <div className="w-6 h-6 rounded bg-sky-500/10 flex items-center justify-center shrink-0">
               <Anchor className="w-3 h-3 text-sky-400/60" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-sky-100">{p.port}</p>
-              <p className="text-[10px] text-sky-400/50">{p.vessels} vessels waiting</p>
+              <p className="text-xs font-semibold text-sky-100">{e.vesselName}</p>
+              <p className="text-[10px] text-sky-400/50 truncate">{e.title}</p>
             </div>
             <div className="text-right">
-              <p className="text-xs font-bold font-mono text-sky-100">{p.waitTime}</p>
-              <p className={`text-[10px] font-mono ${p.color}`}>{p.trend}</p>
+              <p className={`text-[10px] font-mono ${e.severity === "critical" ? "text-red-400" : e.severity === "high" ? "text-orange-400" : "text-amber-400"}`}>{e.severity}</p>
+              <p className="text-[9px] text-sky-400/30">${e.estimatedImpactUSD.toLocaleString()}</p>
             </div>
           </div>
         ))}
@@ -376,7 +412,7 @@ function PortCongestionPanel() {
   );
 }
 
-function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void }) {
+function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () => void }) {
   const vid = vessel.id || 1;
   const riskScore = Math.floor(seededValue(vid, 0, 40) + (vessel.status === "maintenance" ? 50 : vessel.status === "anchored" ? 25 : 10));
   const risk = getRiskBadge(riskScore);
@@ -414,10 +450,10 @@ function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void })
           <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">Position & Navigation</h4>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: "Latitude", value: `${(vessel.lat ?? vessel.currentLat)?.toFixed(4)}°` },
-              { label: "Longitude", value: `${(vessel.lon ?? vessel.currentLon)?.toFixed(4)}°` },
-              { label: "Speed", value: `${vessel.currentSpeed || 0} kn` },
-              { label: "Heading", value: `${vessel.heading || Math.floor(seededValue(vid, 1, 360))}°` },
+              { label: "Latitude", value: vessel.latitude ? `${parseFloat(vessel.latitude).toFixed(4)}°` : "N/A" },
+              { label: "Longitude", value: vessel.longitude ? `${parseFloat(vessel.longitude).toFixed(4)}°` : "N/A" },
+              { label: "Speed", value: vessel.speed ? `${parseFloat(vessel.speed).toFixed(1)} kn` : "Stationary" },
+              { label: "Heading", value: vessel.heading ? `${parseFloat(vessel.heading).toFixed(0)}°` : "N/A" },
             ].map(item => (
               <div key={item.label}>
                 <p className="text-[10px] text-sky-400/40">{item.label}</p>
@@ -441,11 +477,11 @@ function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void })
         <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
           <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">Vessel Details</h4>
           {[
-            { label: "Type", value: vessel.vesselType || vessel.shipClass || "N/A" },
+            { label: "Type", value: vessel.vesselType || "N/A" },
             { label: "Flag", value: vessel.flag || "N/A" },
-            { label: "DWT", value: vessel.deadweight ? `${Number(vessel.deadweight).toLocaleString()} t` : "N/A" },
-            { label: "Year Built", value: vessel.yearBuilt || "N/A" },
-            { label: "Trade Lane", value: vessel.tradeLane || "Unassigned" },
+            { label: "GRT", value: vessel.grossTonnage ? `${Number(vessel.grossTonnage).toLocaleString()} t` : "N/A" },
+            { label: "Year Built", value: vessel.yearBuilt ? String(vessel.yearBuilt) : "N/A" },
+            { label: "Charter", value: vessel.charterType || "Unassigned" },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between">
               <span className="text-[10px] text-sky-400/40 font-mono">{item.label}</span>
@@ -454,25 +490,25 @@ function VesselDrawer({ vessel, onClose }: { vessel: any; onClose: () => void })
           ))}
         </div>
 
-        {vessel.nextPort && (
+        {vessel.destination && (
           <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3">
-            <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider mb-2">Voyage</h4>
+            <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider mb-2">Active Voyage</h4>
             <div className="flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5 text-sky-400" />
               <div>
-                <p className="text-xs text-sky-100">Next: {vessel.nextPort}</p>
-                <p className="text-[10px] text-sky-400/40">ETA: {new Date(Date.now() + (seededValue(vid, 2, 5) + 1) * 86400000).toLocaleDateString()}</p>
+                <p className="text-xs text-sky-100">Destination: {vessel.destination}</p>
+                {vessel.eta && <p className="text-[10px] text-sky-400/40">ETA: {new Date(vessel.eta).toLocaleDateString()}</p>}
               </div>
             </div>
           </div>
         )}
 
         <div className="bg-sky-500/5 rounded-lg border border-sky-500/10 p-3 space-y-2">
-          <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">Performance</h4>
+          <h4 className="text-[10px] font-mono text-sky-400/60 uppercase tracking-wider">Voyage Economics</h4>
           {[
-            { label: "CII Rating", value: vessel.ciiRating || "B" },
-            { label: "Fuel", value: `${(seededValue(vid, 3, 5) + 20).toFixed(1)} t/day` },
-            { label: "Utilization", value: `${Math.floor(seededValue(vid, 4, 20) + 75)}%` },
+            { label: "TCE/day", value: vessel.tcePerDay ? `$${Math.round(parseFloat(vessel.tcePerDay)).toLocaleString()}` : "N/A" },
+            { label: "Cargo", value: vessel.cargoType || "—" },
+            { label: "Voyage Ref", value: vessel.voyageRef || "—" },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between">
               <span className="text-[10px] text-sky-400/40 font-mono">{item.label}</span>
@@ -495,15 +531,20 @@ type IntelTab = "behavioral" | "dark" | "sanctions" | "cargo" | "congestion";
 
 export default function FleetDashboard() {
   const { data: kpis } = useQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
-  const { data: mockVessels = [] } = useQuery({ queryKey: ["mock-vessels"], queryFn: () => dataProvider.getVessels() });
-  const { data: eventLogs = [] } = useQuery({ queryKey: ["dashboard-logs"], queryFn: () => dataProvider.getEventLogs() });
+  const { roster } = useRoster();
+  const { fleetExceptions } = useFleetExceptions({ status: "active" });
+  const { data: liveDashboard } = useQuery({ queryKey: ["vessels-dashboard"], queryFn: () => api.dashboard(), refetchInterval: 60_000 });
 
-  const [selectedVessel, setSelectedVessel] = useState<any | null>(null);
+  const [selectedVessel, setSelectedVessel] = useState<RosterVessel | null>(null);
   const [intelTab, setIntelTab] = useState<IntelTab>("behavioral");
 
-  const recentAlerts = eventLogs.filter((l: any) => l.severity === "Critical" || l.severity === "Warning").slice(0, 5);
+  const darkVesselCount = fleetExceptions.filter(e => e.type === "ais_dark").length;
 
-  const intelTabs: { id: IntelTab; label: string; icon: any }[] = [
+  const recentAlerts = fleetExceptions
+    .filter(e => e.severity === "critical" || e.severity === "high")
+    .slice(0, 5);
+
+  const intelTabs: { id: IntelTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: "behavioral", label: "Behavioral Risk", icon: Shield },
     { id: "dark", label: "Dark Vessels", icon: EyeOff },
     { id: "sanctions", label: "Sanctions", icon: AlertTriangle },
@@ -522,27 +563,31 @@ export default function FleetDashboard() {
                 <span className="font-display text-xs font-bold text-sky-50 uppercase tracking-wider">Fleet Command</span>
                 <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400 ml-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE</span>
                 <ExportButton
-                  data={mockVessels.map((v: any) => ({
+                  data={roster.map(v => ({
                     Name: v.name,
-                    IMO: v.imoNumber || v.imo || "",
-                    Flag: v.flag || "",
-                    Type: v.vesselType || v.type || "",
-                    Status: v.status || "",
-                    "Current Port": v.currentPort || "",
-                    Destination: v.destination || "",
+                    IMO: v.imo ?? "",
+                    Flag: v.flag ?? "",
+                    Type: v.vesselType ?? "",
+                    Status: v.status,
+                    Destination: v.destination ?? "",
+                    ETA: v.eta ?? "",
+                    "Charter Type": v.charterType ?? "",
+                    "TCE/day": v.tcePerDay ? `$${Math.round(parseFloat(v.tcePerDay)).toLocaleString()}` : "",
+                    "Active Exceptions": v.activeExceptions,
                   }))}
                   options={{ filename: "fleet-manifest", title: "Fleet Manifest", accentColor: "#0ea5e9" }}
                 />
               </div>
               <div className="h-4 w-px bg-sky-500/20 mx-1 shrink-0" />
               {[
-                { label: "FLEET", value: kpis.totalVessels, color: "text-sky-200" },
-                { label: "SEA", value: kpis.atSea, color: "text-emerald-400" },
-                { label: "PORT", value: kpis.inPort, color: "text-sky-400" },
-                { label: "ANCHOR", value: kpis.anchored, color: "text-amber-400" },
-                { label: "TCE", value: `$${(kpis.averageTCE / 1000).toFixed(0)}k`, color: "text-emerald-400" },
-                { label: "UTIL", value: `${kpis.averageUtilization}%`, color: "text-sky-200" },
-                { label: "CO2", value: `${(kpis.totalCO2Today / 1000).toFixed(1)}k`, color: "text-amber-400" },
+                { label: "FLEET", value: liveDashboard?.summary?.totalVessels ?? kpis.totalVessels, color: "text-sky-200" },
+                { label: "SEA", value: liveDashboard?.statusDistribution?.find(s => s.status === "at_sea")?.count ?? kpis.atSea, color: "text-emerald-400" },
+                { label: "PORT", value: liveDashboard?.statusDistribution?.find(s => s.status === "in_port")?.count ?? kpis.inPort, color: "text-sky-400" },
+                { label: "ANCHOR", value: liveDashboard?.statusDistribution?.find(s => s.status === "anchored")?.count ?? kpis.anchored, color: "text-amber-400" },
+                { label: "DARK", value: darkVesselCount, color: darkVesselCount > 0 ? "text-red-400" : "text-sky-400/40" },
+                { label: "UTIL", value: `${liveDashboard?.summary?.utilizationRate ?? kpis.averageUtilization}%`, color: "text-sky-200" },
+                { label: "EXCEP", value: liveDashboard?.summary?.activeExceptions ?? kpis.criticalAlerts, color: "text-orange-400" },
+                { label: "MAINT", value: liveDashboard?.summary?.overdueMaintenanceItems ?? 0, color: "text-red-400" },
                 { label: "HEALTH", value: kpis.fleetHealthScore, color: kpis.fleetHealthScore >= 80 ? "text-emerald-400" : "text-amber-400" },
               ].map((kpi, i) => (
                 <div key={kpi.label} className="flex items-center gap-1.5 px-2 py-0.5 shrink-0">
@@ -567,8 +612,8 @@ export default function FleetDashboard() {
           )}
 
           <div className="flex-1 relative overflow-hidden">
-            {mockVessels.length > 0 ? (
-              <FleetMap mockVessels={mockVessels} onVesselClick={setSelectedVessel} selectedVesselId={selectedVessel?.id} />
+            {roster.length > 0 ? (
+              <FleetMap vessels={roster} onVesselClick={setSelectedVessel} selectedVesselId={selectedVessel?.id} />
             ) : (
               <div className="flex items-center justify-center h-full bg-[#060e1a]">
                 <div className="text-center">
@@ -589,17 +634,17 @@ export default function FleetDashboard() {
                   </Link>
                 </div>
                 <div className="max-h-48 overflow-y-auto">
-                  {recentAlerts.map((alert: any) => (
+                  {recentAlerts.map((alert) => (
                     <div key={alert.id} className="px-3 py-2 border-b border-sky-500/5 last:border-0 hover:bg-sky-500/5 transition-colors">
                       <div className="flex items-start gap-2">
-                        <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${alert.severity === "Critical" ? "bg-red-400 animate-pulse" : "bg-amber-400"}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${alert.severity === "critical" ? "bg-red-400 animate-pulse" : "bg-amber-400"}`} />
                         <div className="min-w-0">
-                          <p className="text-[11px] text-sky-100 leading-tight truncate">{alert.message}</p>
+                          <p className="text-[11px] text-sky-100 leading-tight truncate">{alert.title ?? alert.description}</p>
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-[9px] text-sky-400/40">{alert.vesselName}</span>
                             <span className="text-[9px] text-sky-400/30 flex items-center gap-0.5">
                               <Clock className="w-2 h-2" />
-                              {new Date(alert.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              {new Date(alert.detectedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </span>
                           </div>
                         </div>
@@ -635,14 +680,14 @@ export default function FleetDashboard() {
               {tab.label}
             </button>
           ))}
-          <span className="ml-auto text-[9px] font-mono text-sky-400/30 pr-2">Maritime Intelligence · Mock Data</span>
+          <span className="ml-auto text-[9px] font-mono text-sky-400/30 pr-2">Maritime Intelligence · DB-backed</span>
         </div>
         <div className="p-3 overflow-auto h-[210px]">
-          {intelTab === "behavioral" && <BehavioralRiskPanel />}
-          {intelTab === "dark" && <DarkVesselPanel />}
-          {intelTab === "sanctions" && <SanctionsPanel />}
-          {intelTab === "cargo" && <CargoFlowPanel />}
-          {intelTab === "congestion" && <PortCongestionPanel />}
+          {intelTab === "behavioral" && <BehavioralRiskPanel exceptions={fleetExceptions} />}
+          {intelTab === "dark" && <DarkVesselPanel exceptions={fleetExceptions} />}
+          {intelTab === "sanctions" && <SanctionsPanel exceptions={fleetExceptions} />}
+          {intelTab === "cargo" && <CargoFlowPanel exceptions={fleetExceptions} />}
+          {intelTab === "congestion" && <PortCongestionPanel exceptions={fleetExceptions} />}
         </div>
       </div>
     </div>
