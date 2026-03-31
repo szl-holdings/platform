@@ -62,6 +62,7 @@ import microsoftIntegrationsRouter from "./microsoft-integrations";
 import lyteLiveRouter from "./lyte-live";
 import vesselsLiveRouter from "./vessels-live";
 import integrationsRouter from "./integrations";
+import configRouter from "./config";
 
 const router: IRouter = Router();
 
@@ -230,5 +231,7 @@ router.use(lyteLiveRouter);
 
 router.use("/vessels", readLimiter);
 router.use(vesselsLiveRouter);
+
+router.use(configRouter);
 
 export default router;

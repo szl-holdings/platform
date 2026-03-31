@@ -14,7 +14,8 @@ const NAV_SECTIONS = [
     items: [
       { href: "/", label: "Portfolio Overview", icon: LayoutDashboard },
       { href: "/broker-overview", label: "Broker Dashboard", icon: BarChart3 },
-      { href: "/market", label: "Market Intelligence", icon: Globe, highlight: false },
+      { href: "/property-map", label: "Property Map", icon: Globe, highlight: false },
+      { href: "/market", label: "Market Intelligence", icon: BarChart3, highlight: false },
     ],
   },
   {

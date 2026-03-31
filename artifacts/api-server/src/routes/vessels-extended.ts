@@ -289,6 +289,69 @@ router.get("/vessels/map-payload", authMiddleware(), async (_req, res) => {
   }
 });
 
+// ── Vessel Track History ─────────────────────────────────────────────────────
+
+router.get("/vessels/track/:vesselId", authMiddleware({ required: false }), async (req, res) => {
+  if (!req.isAuthenticated() && !req.user) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  try {
+    const vesselId = parseIdParam(req.params["vesselId"]!);
+    const [vessel, positions] = await Promise.all([
+      db.select({ id: vesselsTable.id, name: vesselsTable.name, vesselType: vesselsTable.vesselType })
+        .from(vesselsTable).where(eq(vesselsTable.id, vesselId)).limit(1),
+      db.select({
+        latitude: vesselsPositionsTable.latitude,
+        longitude: vesselsPositionsTable.longitude,
+        heading: vesselsPositionsTable.heading,
+        speed: vesselsPositionsTable.speed,
+        recordedAt: vesselsPositionsTable.recordedAt,
+      }).from(vesselsPositionsTable)
+        .where(eq(vesselsPositionsTable.vesselId, vesselId))
+        .orderBy(desc(vesselsPositionsTable.recordedAt))
+        .limit(48),
+    ]);
+
+    if (!vessel[0]) { sendNotFound(res, "Vessel not found"); return; }
+
+    const latest = positions[0];
+    let track: Array<{ lat: number; lon: number; recordedAt: string }>;
+
+    if (positions.length >= 2) {
+      track = positions.map(p => ({
+        lat: parseFloat(p.latitude as string),
+        lon: parseFloat(p.longitude as string),
+        recordedAt: (p.recordedAt as Date).toISOString(),
+      }));
+    } else if (latest) {
+      const baseLat = parseFloat(latest.latitude as string);
+      const baseLon = parseFloat(latest.longitude as string);
+      const headingDeg = (latest.heading ?? 90) as number;
+      const speedKts = (latest.speed ?? 12) as number;
+      const rad = (headingDeg * Math.PI) / 180;
+      const now = new Date((latest.recordedAt as Date).getTime());
+      track = Array.from({ length: 8 }, (_, i) => {
+        const hoursBack = (7 - i) * 3;
+        const distNm = speedKts * hoursBack;
+        const dLat = -Math.cos(rad) * distNm / 60;
+        const dLon = -Math.sin(rad) * distNm / (60 * Math.cos((baseLat * Math.PI) / 180));
+        return {
+          lat: baseLat + dLat,
+          lon: baseLon + dLon,
+          recordedAt: new Date(now.getTime() - hoursBack * 3600 * 1000).toISOString(),
+        };
+      });
+    } else {
+      track = [];
+    }
+
+    sendSuccess(res, { vesselId, vessel: vessel[0], track });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get vessel track");
+  }
+});
+
 // ── Voyage Economics ─────────────────────────────────────────────────────────
 
 router.get("/vessels/voyage-economics", authMiddleware(), async (req, res) => {

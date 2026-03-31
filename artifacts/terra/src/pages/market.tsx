@@ -1,6 +1,7 @@
+import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, MapPin, DollarSign, Clock, BarChart3, RefreshCw, AlertCircle } from "lucide-react";
-import { marketData } from "@/data/portfolio";
+import { TrendingUp, TrendingDown, MapPin, DollarSign, Clock, BarChart3, RefreshCw, AlertCircle, Map } from "lucide-react";
+import { marketData, properties } from "@/data/portfolio";
 import { cn } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from "recharts";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,10 @@ import { api } from "@/lib/api";
 import { LiveDataBadge } from "@/lib/live-badge";
 import { toast } from "sonner";
 import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
+import { useMapboxToken } from "@/hooks/use-mapbox-token";
+import { Link } from "wouter";
+
+const PropertyMap = lazy(() => import("@/components/property-map"));
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {
@@ -75,6 +80,7 @@ function TableRowSkeleton() {
 }
 
 export default function MarketPage() {
+  const { token } = useMapboxToken();
   const { data: liveData, isLoading, isError, refetch, isFetching } = useQuery<{ data: MarketIntelligence }>({
     queryKey: ["terra-market-intelligence"],
     queryFn: () => apiFetch<{ data: MarketIntelligence }>("/terra/market-intelligence"),
@@ -345,6 +351,34 @@ export default function MarketPage() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="rounded-xl border border-terra-border bg-terra-surface/50 backdrop-blur-sm overflow-hidden">
+        <div className="flex items-center justify-between p-5 border-b border-terra-border">
+          <div className="flex items-center gap-2">
+            <Map className="w-4 h-4 text-terra-primary" aria-hidden="true" />
+            <h3 className="font-display font-bold text-terra-text">Portfolio Map</h3>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-terra-primary/10 text-terra-primary font-mono">{properties.length} assets</span>
+          </div>
+          <Link href="/property-map" className="text-xs text-terra-text-secondary hover:text-terra-text transition-colors flex items-center gap-1">
+            Full map view <MapPin className="w-3 h-3 inline" />
+          </Link>
+        </div>
+        <div className="h-[360px] relative">
+          {token ? (
+            <Suspense fallback={
+              <div className="absolute inset-0 flex items-center justify-center bg-[#08101e]">
+                <div className="w-6 h-6 border-2 border-terra-primary/30 border-t-terra-primary rounded-full animate-spin" />
+              </div>
+            }>
+              <PropertyMap properties={properties} token={token} height="360px" showPanel={false} />
+            </Suspense>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#08101e]">
+              <p className="text-xs text-terra-text-muted">Map token loading…</p>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>

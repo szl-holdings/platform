@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { cn } from "@workspace/shared-ui/utils";
 import { Link } from "wouter";
 import { DataStateBadge } from "@workspace/shared-ui";
 import {
   Building2, MapPin, TrendingUp, DollarSign, Users, Activity,
   ChevronRight, Flame, AlertTriangle, Eye, Clock, Home,
-  ArrowRight, BarChart3, Target, Search, Shield, Zap, Globe
+  ArrowRight, BarChart3, Target, Search, Shield, Zap, Globe, Map
 } from "lucide-react";
 import { brokerageSummary, brokerageDeals, riskSignals, agents, automationRuns } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
+import { properties } from "@/data/portfolio";
+import { useMapboxToken } from "@/hooks/use-mapbox-token";
+
+const PropertyMap = lazy(() => import("@/components/property-map"));
 
 const TACTICAL_MODULES = [
   { id: "distress", label: "Distress Watch", icon: Flame, color: "#f97316", count: 3, href: "/distress-engine", desc: "Pre-foreclosure & auction tracking" },
@@ -17,6 +21,7 @@ const TACTICAL_MODULES = [
   { id: "pipeline", label: "Deal Pipeline", icon: Activity, color: "#3b82f6", count: 8, href: "/deals", desc: "Active deals & stage tracking" },
   { id: "commercial", label: "Commercial Intel", icon: Building2, color: "#a07848", count: 0, href: "/commercial", desc: "Market comps & analysis" },
   { id: "brokers", label: "Broker Scorecards", icon: Users, color: "#06b6d4", count: 0, href: "/agents", desc: "Performance & conversion rates" },
+  { id: "property-map", label: "Property Map", icon: Globe, color: "#10b981", count: 8, href: "/property-map", desc: "Geographic portfolio view · Mapbox" },
 ];
 
 const MARKET_SIGNALS = [
@@ -48,6 +53,8 @@ export default function TerraIntelligence() {
   const criticalSignals = activeSignals.filter(s => s.severity === "critical");
   const topDeals = [...brokerageDeals].sort((a, b) => b.price - a.price).slice(0, 5);
   const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 4);
+  const { token: mapToken } = useMapboxToken();
+  const [showMap, setShowMap] = useState(false);
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -236,6 +243,67 @@ export default function TerraIntelligence() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(200,160,96,0.1)", background: "rgba(255,255,255,0.012)" }}>
+        <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: "rgba(200,160,96,0.08)" }}>
+          <div className="flex items-center gap-2">
+            <Map className="w-3.5 h-3.5" style={{ color: "#c8a060" }} />
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(200,160,96,0.6)" }}>Portfolio Map</span>
+            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>— {properties.length} properties · Mapbox GL</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowMap(s => !s)}
+              className="text-[9px] px-2.5 py-1 rounded-lg border transition-all"
+              style={{
+                color: showMap ? "#c8a060" : "rgba(255,255,255,0.35)",
+                borderColor: showMap ? "rgba(200,160,96,0.3)" : "rgba(255,255,255,0.08)",
+                background: showMap ? "rgba(200,160,96,0.06)" : "transparent",
+              }}
+            >
+              {showMap ? "Hide Map" : "Show Map"}
+            </button>
+            <Link href="/property-map" className="text-[9px] px-2.5 py-1 rounded-lg border transition-all hover:bg-white/5" style={{ color: "#c8a060", borderColor: "rgba(200,160,96,0.2)" }}>
+              Full Map →
+            </Link>
+          </div>
+        </div>
+        {showMap && (
+          <div style={{ height: 300 }}>
+            {mapToken ? (
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-full">
+                  <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(200,160,96,0.2)", borderTopColor: "#c8a060" }} />
+                </div>
+              }>
+                <PropertyMap properties={properties} token={mapToken} height="300px" showPanel={false} />
+              </Suspense>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center space-y-1">
+                  <Globe className="w-6 h-6 mx-auto" style={{ color: "rgba(200,160,96,0.3)" }} />
+                  <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>Map loading…</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {!showMap && (
+          <div className="px-4 py-2.5 flex items-center gap-4">
+            {[
+              { label: "Performing", color: "#10b981", count: properties.filter(p => p.status === "performing").length },
+              { label: "Watch", color: "#f59e0b", count: properties.filter(p => p.status === "watch").length },
+              { label: "Critical", color: "#ef4444", count: properties.filter(p => p.status === "critical").length },
+            ].map(s => (
+              <div key={s.label} className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>{s.count} {s.label}</span>
+              </div>
+            ))}
+            <span className="ml-auto text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>Click "Show Map" to view geographic distribution</span>
+          </div>
+        )}
       </div>
     </div>
   );

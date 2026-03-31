@@ -1301,9 +1301,15 @@ importers:
 
   artifacts/terra:
     dependencies:
+      '@types/mapbox-gl':
+        specifier: ^3.5.0
+        version: 3.5.0
       '@workspace/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
+      mapbox-gl:
+        specifier: ^3.20.0
+        version: 3.20.0
     devDependencies:
       '@replit/vite-plugin-cartographer':
         specifier: 'catalog:'

@@ -1,7 +1,13 @@
+import { lazy, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { TrendingUp, DollarSign, BarChart3, Target, Building2, Percent } from "lucide-react";
+import { TrendingUp, DollarSign, BarChart3, Target, Building2, Percent, Map } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from "recharts";
+import { Link } from "wouter";
+import { properties } from "@/data/portfolio";
+import { useMapboxToken } from "@/hooks/use-mapbox-token";
+
+const PropertyMap = lazy(() => import("@/components/property-map"));
 
 const portfolio = [
   { property: "One Market Plaza", type: "Office", acquisition: "$124M", currentValue: "$156M", irr: 18.4, cashOnCash: 7.2, equityMultiple: 2.1, noi: "$8.4M", status: "Performing" },
@@ -24,7 +30,8 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function PortfolioPerformance() {
-  const totalValue = 128; // $528M total
+  const { token } = useMapboxToken();
+  const totalValue = 128;
   const avgIRR = portfolio.reduce((a, p) => a + p.irr, 0) / portfolio.length;
 
   return (
@@ -61,6 +68,35 @@ export default function PortfolioPerformance() {
               <Bar dataKey="distributions" name="Distributions" fill="#22c55e" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-0 flex flex-row items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Map className="w-4 h-4 text-primary" />
+            Portfolio Geographic Distribution
+          </CardTitle>
+          <Link href="/property-map" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Full map →
+          </Link>
+        </CardHeader>
+        <CardContent className="p-0 mt-3">
+          <div className="h-[300px] relative">
+            {token ? (
+              <Suspense fallback={
+                <div className="absolute inset-0 flex items-center justify-center bg-[#08101e]">
+                  <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              }>
+                <PropertyMap properties={properties} token={token} height="300px" showPanel={false} />
+              </Suspense>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#08101e]">
+                <p className="text-xs text-muted-foreground">Loading map…</p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

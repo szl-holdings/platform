@@ -36,6 +36,8 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
-    "@workspace/graphql-client": "workspace:*"
+    "@types/mapbox-gl": "^3.5.0",
+    "@workspace/graphql-client": "workspace:*",
+    "mapbox-gl": "^3.20.0"
   }
 }

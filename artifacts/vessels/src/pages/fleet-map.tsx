@@ -1,8 +1,11 @@
 import "mapbox-gl/dist/mapbox-gl.css";
+import type MapboxGL from "mapbox-gl";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
 import { type VesselProfile } from "@/data/mock-data";
 import { useVessels, useFleetExceptions } from "@/hooks/use-vessels-data";
+import { useMapboxToken } from "@/hooks/use-mapbox-token";
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
   X, Ship, MapPin, Radio, Navigation, Clock, Filter, ChevronRight,
@@ -148,50 +151,105 @@ type FilterState = {
   type: string;
 };
 
-const ROUTE_LINES = [
-  { fromLat: -20.3, fromLon: 118.6, toLat: 35.4, toLon: 139.6, vesselId: 1 },
-  { fromLat: 40.7, fromLon: -74.0, toLat: 53.5, toLon: 10.0, vesselId: 2 },
-  { fromLat: 26.5, fromLon: 50.2, toLat: 25.2, toLon: 56.3, vesselId: 3 },
-  { fromLat: 53.5, fromLon: 8.6, toLat: 59.9, toLon: 10.7, vesselId: 4 },
-  { fromLat: -32.9, fromLon: 151.7, toLat: -27.5, toLon: 153.0, vesselId: 5 },
-  { fromLat: 44.4, fromLon: 22.8, toLat: 44.4, toLon: 8.9, vesselId: 7 },
-  { fromLat: 68.4, fromLon: 17.4, toLat: 68.9, toLon: 33.1, vesselId: 8 },
-  { fromLat: 26.5, fromLon: 50.2, toLat: 29.9, toLon: 121.6, vesselId: 9 },
-  { fromLat: -4.8, fromLon: 11.9, toLat: -33.9, toLon: 18.4, vesselId: 10 },
+interface VesselRoute {
+  vesselId: number;
+  waypoints: [number, number][];
+}
+
+const VESSEL_ROUTES: VesselRoute[] = [
+  { vesselId: 1, waypoints: [[118.6, -20.3], [128.5, 15.2], [135.8, 30.1], [139.6, 35.4]] },
+  { vesselId: 2, waypoints: [[-74.0, 40.7], [-40.5, 47.2], [-15.0, 50.8], [10.0, 53.5]] },
+  { vesselId: 3, waypoints: [[50.2, 26.5], [52.5, 25.8], [55.1, 25.0], [56.3, 25.2]] },
+  { vesselId: 4, waypoints: [[8.6, 53.5], [9.1, 57.2], [9.8, 59.0], [10.7, 59.9]] },
+  { vesselId: 5, waypoints: [[151.7, -32.9], [152.0, -30.1], [152.5, -28.5], [153.0, -27.5]] },
+  { vesselId: 7, waypoints: [[22.8, 35.9], [18.0, 38.5], [14.0, 40.8], [8.9, 44.4]] },
+  { vesselId: 8, waypoints: [[17.4, 68.4], [22.0, 68.7], [28.5, 68.5], [33.1, 68.9]] },
+  { vesselId: 9, waypoints: [[50.6, 26.2], [68.0, 22.0], [90.0, 18.5], [121.6, 29.9]] },
+  { vesselId: 10, waypoints: [[12.2, -6.0], [11.5, -12.5], [12.0, -20.1], [18.4, -33.9]] },
 ];
+
+interface AisApiResponse {
+  vessels: AisVessel[];
+  source: string;
+  count: number;
+}
+
+interface AisVessel {
+  mmsi: string;
+  name: string;
+  type: string;
+  lat: number;
+  lon: number;
+  speed: number;
+  course: number;
+  heading: number;
+  destination: string;
+  status: string;
+  navStatus: number;
+  flag: string;
+}
+
+function navStatusColor(navStatus: number): string {
+  if (navStatus === 0) return "#22c55e";
+  if (navStatus === 1) return "#f59e0b";
+  if (navStatus === 5) return "#0ea5e9";
+  return "#64748b";
+}
+
+interface TrackPoint { lat: number; lon: number; recordedAt: string; }
+interface TrackHistoryResponse { data: { vesselId: number; track: TrackPoint[] } }
 
 function MapboxFleetMap({
   filteredVessels,
   selectedVessel,
   onVesselSelect,
+  token,
+  aisVessels,
+  showAis,
 }: {
   filteredVessels: VesselProfile[];
   selectedVessel: VesselProfile | null;
   onVesselSelect: (v: VesselProfile | null) => void;
+  token: string | null;
+  aisVessels: AisVessel[];
+  showAis: boolean;
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const markersRef = useRef<Map<number, any>>(new Map());
-  const popupRef = useRef<any>(null);
+  const mapRef = useRef<MapboxGL.Map | null>(null);
+  const markersRef = useRef<Map<number, MapboxGL.Marker>>(new Map());
+  const aisMarkersRef = useRef<Map<string, MapboxGL.Marker>>(new Map());
+  const popupRef = useRef<MapboxGL.Popup | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || (typeof window !== "undefined" ? (window as any).__MAPBOX_TOKEN__ : null);
+  const { data: trackData } = useQuery<TrackHistoryResponse>({
+    queryKey: ["vessel-track", selectedVessel?.id],
+    queryFn: async (): Promise<TrackHistoryResponse> => {
+      const res = await fetch(`/api/vessels/track/${selectedVessel!.id}`, { credentials: "include" });
+      if (!res.ok) return { data: { vesselId: selectedVessel!.id, track: [] } };
+      return res.json() as Promise<TrackHistoryResponse>;
+    },
+    enabled: !!selectedVessel,
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
+  });
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    let mapboxgl: any;
+    let mapboxgl: typeof MapboxGL;
+    let destroyed = false;
 
     import("mapbox-gl").then((module) => {
+      if (destroyed) return;
       mapboxgl = module.default;
 
-      if (MAPBOX_TOKEN) {
-        mapboxgl.accessToken = MAPBOX_TOKEN;
+      if (token) {
+        mapboxgl.accessToken = token;
       }
 
       const map = new mapboxgl.Map({
         container: mapContainerRef.current!,
-        style: MAPBOX_TOKEN
+        style: token
           ? "mapbox://styles/mapbox/dark-v11"
           : {
               version: 8,
@@ -206,14 +264,15 @@ function MapboxFleetMap({
             },
         center: [20, 20],
         zoom: 1.8,
-        projection: "mercator" as any,
+        projection: { name: "mercator" } as MapboxGL.ProjectionSpecification,
         antialias: true,
       });
 
       mapRef.current = map;
 
       map.on("load", () => {
-        if (!MAPBOX_TOKEN) {
+        if (destroyed) return;
+        if (!token) {
           map.addSource("ocean-tiles", {
             type: "raster",
             tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
@@ -232,18 +291,17 @@ function MapboxFleetMap({
           type: "geojson",
           data: {
             type: "FeatureCollection",
-            features: ROUTE_LINES.map((r) => ({
+            features: VESSEL_ROUTES.map((r) => ({
               type: "Feature",
               properties: { vesselId: r.vesselId },
-              geometry: {
-                type: "LineString",
-                coordinates: [
-                  [r.fromLon, r.fromLat],
-                  [r.toLon, r.toLat],
-                ],
-              },
+              geometry: { type: "LineString", coordinates: r.waypoints },
             })),
           },
+        });
+
+        map.addSource("selected-route", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
         });
 
         map.addLayer({
@@ -253,36 +311,61 @@ function MapboxFleetMap({
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": "#38bdf8",
-            "line-width": 1.2,
-            "line-opacity": 0.25,
+            "line-width": 1.0,
+            "line-opacity": 0.18,
             "line-dasharray": [4, 4],
           },
         });
 
-        setMapLoaded(true);
+        map.addLayer({
+          id: "route-selected-halo",
+          type: "line",
+          source: "selected-route",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#38bdf8", "line-width": 6, "line-opacity": 0.12 },
+        });
+
+        map.addLayer({
+          id: "route-selected",
+          type: "line",
+          source: "selected-route",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#38bdf8", "line-width": 2.5, "line-opacity": 0.8 },
+        });
+
+        map.addLayer({
+          id: "route-waypoints",
+          type: "circle",
+          source: "selected-route",
+          paint: {
+            "circle-color": "#38bdf8",
+            "circle-radius": 3.5,
+            "circle-opacity": 0.7,
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "rgba(255,255,255,0.4)",
+          },
+        });
+
+        if (!destroyed) setMapLoaded(true);
       });
 
-      map.on("error", (e: any) => {
+      map.on("error", (e: { error?: { message?: string }; type: string }) => {
         if (e?.error?.message?.includes("access token")) {
-          setMapError("no-token");
+          if (!destroyed) setMapError("no-token");
         }
       });
-
-      return () => {
-        map.remove();
-        mapRef.current = null;
-      };
     }).catch(() => {
-      setMapError("load-failed");
+      if (!destroyed) setMapError("load-failed");
     });
 
     return () => {
+      destroyed = true;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return;
@@ -410,25 +493,118 @@ function MapboxFleetMap({
     if (!mapLoaded || !mapRef.current) return;
     const map = mapRef.current;
 
-    const visibleVesselIds = new Set(filteredVessels.map(v => v.vesselId || v.id));
-    const routeFeatures = ROUTE_LINES
+    const routeFeatures = VESSEL_ROUTES
       .filter(r => filteredVessels.some(v => v.id === r.vesselId))
       .map(r => ({
         type: "Feature" as const,
         properties: { vesselId: r.vesselId },
-        geometry: {
-          type: "LineString" as const,
-          coordinates: [[r.fromLon, r.fromLat], [r.toLon, r.toLat]],
-        },
+        geometry: { type: "LineString" as const, coordinates: r.waypoints },
       }));
 
     try {
-      const source = map.getSource("routes") as any;
-      if (source) {
-        source.setData({ type: "FeatureCollection", features: routeFeatures });
-      }
+      (map.getSource("routes") as MapboxGL.GeoJSONSource | undefined)?.setData({
+        type: "FeatureCollection",
+        features: routeFeatures,
+      });
     } catch {}
   }, [mapLoaded, filteredVessels]);
+
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+    const map = mapRef.current;
+
+    let waypoints: [number, number][] = [];
+    if (selectedVessel) {
+      const apiTrack = trackData?.data?.track ?? [];
+      if (apiTrack.length >= 2) {
+        waypoints = apiTrack.map(pt => [pt.lon, pt.lat]);
+      } else {
+        const fallback = VESSEL_ROUTES.find(r => r.vesselId === selectedVessel.id);
+        waypoints = fallback?.waypoints ?? [];
+      }
+    }
+
+    const lineFeature = waypoints.length >= 2
+      ? [{ type: "Feature" as const, properties: {}, geometry: { type: "LineString" as const, coordinates: waypoints } }]
+      : [];
+    const waypointFeatures = waypoints.map(wp => ({
+      type: "Feature" as const,
+      properties: {},
+      geometry: { type: "Point" as const, coordinates: wp },
+    }));
+
+    try {
+      (map.getSource("selected-route") as MapboxGL.GeoJSONSource | undefined)?.setData({
+        type: "FeatureCollection",
+        features: [...lineFeature, ...waypointFeatures],
+      });
+    } catch {}
+  }, [mapLoaded, selectedVessel, trackData]);
+
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+
+    import("mapbox-gl").then((module) => {
+      const mapboxgl = module.default;
+      const map = mapRef.current;
+      if (!map) return;
+
+      aisMarkersRef.current.forEach(m => m.remove());
+      aisMarkersRef.current.clear();
+
+      if (!showAis) return;
+
+      aisVessels.forEach((v) => {
+        if (!v.lat || !v.lon || isNaN(v.lat) || isNaN(v.lon)) return;
+
+        const color = navStatusColor(v.navStatus);
+        const el = document.createElement("div");
+        el.style.cssText = `
+          width: 7px;
+          height: 7px;
+          background-color: ${color};
+          border-radius: 50%;
+          border: 1px solid ${color}60;
+          cursor: pointer;
+          opacity: 0.7;
+          box-shadow: 0 0 4px ${color}60;
+        `;
+
+        const popup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          offset: 10,
+          className: "vessel-popup",
+          maxWidth: "240px",
+        }).setHTML(`
+          <div style="background:#0a1628;border:1px solid rgba(56,189,248,0.15);border-radius:8px;padding:8px;font-family:monospace;">
+            <div style="color:#e0f2fe;font-size:10px;font-weight:700;margin-bottom:4px;">${v.name}</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+              <span style="width:5px;height:5px;border-radius:50%;background:${color};display:inline-block;"></span>
+              <span style="color:${color};font-size:9px;">${v.status}</span>
+              <span style="color:rgba(56,189,248,0.3);font-size:8px;margin-left:auto;">${v.type || "Unknown"}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:8px;">
+              <div style="color:rgba(56,189,248,0.4);">Speed</div><div style="color:#e0f2fe;">${v.speed} kn</div>
+              <div style="color:rgba(56,189,248,0.4);">Dest</div><div style="color:#e0f2fe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${v.destination || "—"}</div>
+              <div style="color:rgba(56,189,248,0.4);">MMSI</div><div style="color:#e0f2fe;">${v.mmsi}</div>
+              <div style="color:rgba(56,189,248,0.4);">Flag</div><div style="color:#e0f2fe;">${v.flag || "—"}</div>
+            </div>
+            <div style="margin-top:4px;font-size:8px;color:rgba(56,189,248,0.25);">Live AIS · Digitraffic</div>
+          </div>
+        `);
+
+        el.addEventListener("mouseenter", () => popup.setLngLat([v.lon, v.lat]).addTo(map));
+        el.addEventListener("mouseleave", () => popup.remove());
+
+        const marker = new mapboxgl.Marker({ element: el })
+          .setLngLat([v.lon, v.lat])
+          .addTo(map);
+
+        aisMarkersRef.current.set(v.mmsi, marker);
+      });
+    });
+  }, [mapLoaded, aisVessels, showAis]);
 
   if (mapError === "load-failed") {
     return (
@@ -478,7 +654,7 @@ function MapboxFleetMap({
           </div>
         </div>
       )}
-      {!MAPBOX_TOKEN && mapLoaded && (
+      {!token && mapLoaded && (
         <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-1.5 z-10">
           <p className="text-[10px] text-amber-400">Add MAPBOX_ACCESS_TOKEN to enable full map tiles</p>
         </div>
@@ -486,6 +662,7 @@ function MapboxFleetMap({
       <div className="absolute bottom-3 right-3 text-[10px] text-sky-400/40 font-mono bg-[#0a1628]/80 backdrop-blur rounded-lg px-3 py-2 border border-sky-500/10 z-10">
         <Radio className="w-3 h-3 inline mr-1 text-emerald-400 animate-pulse" />
         {filteredVessels.length} vessels · AIS live
+        {showAis && aisVessels.length > 0 && ` · ${aisVessels.length} live AIS`}
       </div>
     </div>
   );
@@ -494,10 +671,28 @@ function MapboxFleetMap({
 export default function FleetMapPage() {
   const { vessels, isLive } = useVessels();
   const { fleetExceptions } = useFleetExceptions();
+  const { token, isLoading: tokenLoading } = useMapboxToken();
   const [selectedVessel, setSelectedVessel] = useState<VesselProfile | null>(null);
   const [filters, setFilters] = useState<FilterState>({ fleet: "all", status: "all", type: "all" });
   const [showFilters, setShowFilters] = useState(false);
   const [playbackActive, setPlaybackActive] = useState(false);
+  const [showAis, setShowAis] = useState(true);
+
+  const { data: aisData } = useQuery<AisApiResponse>({
+    queryKey: ["vessels-live-ais"],
+    queryFn: async (): Promise<AisApiResponse> => {
+      const res = await fetch("/api/vessels/live/ais", { credentials: "include" });
+      if (!res.ok) return { vessels: [], source: "unavailable", count: 0 };
+      const json = await res.json() as { data?: Partial<AisApiResponse> };
+      const d = json.data ?? {};
+      return { vessels: d.vessels ?? [], source: d.source ?? "unknown", count: d.count ?? 0 };
+    },
+    refetchInterval: 5 * 60 * 1000,
+    staleTime: 4 * 60 * 1000,
+    retry: 1,
+  });
+
+  const aisVessels: AisVessel[] = aisData?.vessels ?? [];
 
   const filteredVessels = useMemo(() => {
     return vessels.filter(v => {
@@ -513,6 +708,14 @@ export default function FleetMapPage() {
   const handleVesselSelect = useCallback((v: VesselProfile | null) => {
     setSelectedVessel(v);
   }, []);
+
+  if (tokenLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-[#060e1a]">
+        <div className="w-8 h-8 border-2 border-sky-500/30 border-t-sky-400 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-[#060e1a]">
@@ -531,6 +734,19 @@ export default function FleetMapPage() {
               </span>
             ))}
           </div>
+
+          <button
+            onClick={() => setShowAis(s => !s)}
+            title="Toggle live AIS overlay"
+            className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[10px] transition-all",
+              showAis ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "border-sky-500/10 text-sky-400/40 hover:text-sky-300"
+            )}
+          >
+            <Radio className="w-3 h-3" />
+            Live AIS
+            {showAis && aisVessels.length > 0 && <span className="ml-1 text-[9px] font-mono">{aisVessels.length}</span>}
+          </button>
 
           <button
             onClick={() => setPlaybackActive(p => !p)}
@@ -584,6 +800,9 @@ export default function FleetMapPage() {
           filteredVessels={filteredVessels}
           selectedVessel={selectedVessel}
           onVesselSelect={handleVesselSelect}
+          token={token}
+          aisVessels={aisVessels}
+          showAis={showAis}
         />
 
         {selectedVessel && (
