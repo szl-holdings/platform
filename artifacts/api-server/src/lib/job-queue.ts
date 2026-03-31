@@ -164,6 +164,39 @@ jobQueue.register(JOB_TYPES.INVESTOR_PACKET_GENERATE, async (job) => {
   logger.info({ jobId: job.id, packetId }, "Investor packet generate job complete");
 });
 
+jobQueue.register(JOB_TYPES.HOURLY_MLS_LISTING_SYNC, async (job) => {
+  logger.info({ jobId: job.id }, "Hourly MLS listing sync started");
+  try {
+    const { runMlsListingSync } = await import("./terra-enterprise-ingestion");
+    const result = await runMlsListingSync();
+    serverTelemetry.recordBusinessEvent({
+      type: "mls_listing_sync_completed",
+      count: result.upserted,
+      metadata: { fetched: result.fetched, upserted: result.upserted, errors: result.errors, demoMode: result.demoMode },
+    });
+    logger.info({ jobId: job.id, ...result }, "Hourly MLS listing sync completed");
+  } catch (err) {
+    logger.error({ jobId: job.id, err }, "Hourly MLS listing sync failed");
+    throw err;
+  }
+});
+
+jobQueue.register(JOB_TYPES.DAILY_COMMERCIAL_DATA_REFRESH, async (job) => {
+  logger.info({ jobId: job.id }, "Daily commercial data refresh started");
+  try {
+    const { runCommercialDataRefresh } = await import("./terra-enterprise-ingestion");
+    const result = await runCommercialDataRefresh();
+    serverTelemetry.recordBusinessEvent({
+      type: "commercial_data_refresh_completed",
+      metadata: { costar: result.costar, compstak: result.compstak },
+    });
+    logger.info({ jobId: job.id, ...result }, "Daily commercial data refresh completed");
+  } catch (err) {
+    logger.error({ jobId: job.id, err }, "Daily commercial data refresh failed");
+    throw err;
+  }
+});
+
 let scheduledJobsStarted = false;
 
 export function startScheduledJobs() {
@@ -261,5 +294,50 @@ export function startScheduledJobs() {
     }, DAY_MS);
   }, msUntilCapDigest);
 
-  logger.info("Scheduled jobs initialized: health scan (5m), alert check (15m), daily digest (24h), cert digest (7:30 UTC), capital digest (8:15 UTC)");
+  setInterval(async () => {
+    try {
+      await jobQueue.enqueue(JOB_TYPES.HOURLY_MLS_LISTING_SYNC, {}, { maxRetries: 2 });
+    } catch (err) {
+      logger.warn({ err }, "Failed to enqueue MLS listing sync");
+    }
+  }, HOUR_MS);
+
+  setTimeout(async () => {
+    try {
+      await jobQueue.enqueue(JOB_TYPES.HOURLY_MLS_LISTING_SYNC, {}, { maxRetries: 2 });
+    } catch (err) {
+      logger.warn({ err }, "Failed to enqueue initial MLS listing sync");
+    }
+  }, 60_000);
+
+  const now4 = new Date();
+  const nextCommercialRefresh = new Date(now4);
+  nextCommercialRefresh.setUTCHours(3, 0, 0, 0);
+  if (nextCommercialRefresh <= now4) nextCommercialRefresh.setUTCDate(nextCommercialRefresh.getUTCDate() + 1);
+  const msUntilCommercialRefresh = nextCommercialRefresh.getTime() - now4.getTime();
+
+  setTimeout(async () => {
+    try {
+      await jobQueue.enqueue(JOB_TYPES.DAILY_COMMERCIAL_DATA_REFRESH, {}, { maxRetries: 2 });
+    } catch (err) {
+      logger.warn({ err }, "Failed to enqueue commercial data refresh");
+    }
+    setInterval(async () => {
+      try {
+        await jobQueue.enqueue(JOB_TYPES.DAILY_COMMERCIAL_DATA_REFRESH, {}, { maxRetries: 2 });
+      } catch (err) {
+        logger.warn({ err }, "Failed to enqueue commercial data refresh");
+      }
+    }, DAY_MS);
+  }, msUntilCommercialRefresh);
+
+  setTimeout(async () => {
+    try {
+      await jobQueue.enqueue(JOB_TYPES.DAILY_COMMERCIAL_DATA_REFRESH, {}, { maxRetries: 1 });
+    } catch (err) {
+      logger.warn({ err }, "Failed to enqueue initial commercial data refresh");
+    }
+  }, 90_000);
+
+  logger.info("Scheduled jobs initialized: health scan (5m), alert check (15m), daily digest (24h), cert digest (7:30 UTC), capital digest (8:15 UTC), MLS sync (1h), commercial refresh (daily 3 UTC)");
 }

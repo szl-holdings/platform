@@ -34,6 +34,9 @@ import { OpenMeteoAdapter } from "./adapters/openmeteo.js";
 import { MITREAdapter } from "./adapters/mitre.js";
 import { GDELTAdapter } from "./adapters/gdelt.js";
 import { MicrosoftGraphAdapter } from "./adapters/microsoft-graph.js";
+import { ResoMlsAdapter } from "./adapters/reso-mls.js";
+import { CoStarAdapter } from "./adapters/costar.js";
+import { CompStakAdapter } from "./adapters/compstak.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -82,6 +85,9 @@ export class ServiceRegistry {
   readonly mitre: MITREAdapter;
   readonly gdelt: GDELTAdapter;
   readonly microsoftGraph: MicrosoftGraphAdapter;
+  readonly resoMls: ResoMlsAdapter;
+  readonly costar: CoStarAdapter;
+  readonly compstak: CompStakAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -121,6 +127,9 @@ export class ServiceRegistry {
     this.mitre = new MITREAdapter();
     this.gdelt = new GDELTAdapter();
     this.microsoftGraph = new MicrosoftGraphAdapter();
+    this.resoMls = new ResoMlsAdapter();
+    this.costar = new CoStarAdapter();
+    this.compstak = new CompStakAdapter();
 
     this.adapters = [
       this.ai,
@@ -158,6 +167,9 @@ export class ServiceRegistry {
       this.mitre,
       this.gdelt,
       this.microsoftGraph,
+      this.resoMls,
+      this.costar,
+      this.compstak,
     ];
   }
 

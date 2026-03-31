@@ -399,3 +399,160 @@ export type TerraDeal = typeof terraDealsTable.$inferSelect;
 export const insertTerraSavedOpportunitySchema = createInsertSchema(terraSavedOpportunitiesTable).omit({ id: true, savedAt: true });
 export type InsertTerraSavedOpportunity = z.infer<typeof insertTerraSavedOpportunitySchema>;
 export type TerraSavedOpportunity = typeof terraSavedOpportunitiesTable.$inferSelect;
+
+export const terraMlsListingsTable = pgTable("terra_mls_listings", {
+  id: serial("id").primaryKey(),
+  listingKey: text("listing_key").notNull().unique(),
+  listingId: text("listing_id"),
+  mlsName: text("mls_name").notNull(),
+  standardStatus: text("standard_status", {
+    enum: ["Active", "Pending", "Closed", "Expired", "Withdrawn", "Coming Soon"],
+  }).notNull().default("Active"),
+  listPrice: numeric("list_price", { precision: 16, scale: 2 }).notNull(),
+  originalListPrice: numeric("original_list_price", { precision: 16, scale: 2 }),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  stateOrProvince: text("state_or_province").notNull(),
+  postalCode: text("postal_code"),
+  county: text("county"),
+  latitude: numeric("latitude", { precision: 10, scale: 7 }),
+  longitude: numeric("longitude", { precision: 10, scale: 7 }),
+  propertyType: text("property_type").notNull().default("Residential"),
+  propertySubType: text("property_sub_type"),
+  bedroomsTotal: integer("bedrooms_total"),
+  bathroomsTotalInteger: integer("bathrooms_total_integer"),
+  livingArea: integer("living_area"),
+  lotSizeSquareFeet: integer("lot_size_square_feet"),
+  yearBuilt: integer("year_built"),
+  daysOnMarket: integer("days_on_market").notNull().default(0),
+  modificationTimestamp: text("modification_timestamp").notNull(),
+  listingContractDate: text("listing_contract_date"),
+  media: jsonb("media").$type<Array<{ mediaUrl: string; mediaType: string; order: number }>>().notNull().default([]),
+  listAgentFullName: text("list_agent_full_name"),
+  listOfficeName: text("list_office_name"),
+  publicRemarks: text("public_remarks"),
+  hasDistressCrossRef: boolean("has_distress_cross_ref").notNull().default(false),
+  distressPropertyId: integer("distress_property_id").references(() => terraDistressPropertiesTable.id, { onDelete: "set null" }),
+  rawData: jsonb("raw_data"),
+  isActive: boolean("is_active").notNull().default(true),
+  ingestSource: text("ingest_source", { enum: ["mls_sync", "manual", "demo"] }).notNull().default("demo"),
+  lastSyncedAt: timestamp("last_synced_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_mls_status_idx").on(t.standardStatus),
+  index("terra_mls_postal_idx").on(t.postalCode),
+  index("terra_mls_mls_name_idx").on(t.mlsName),
+  index("terra_mls_property_type_idx").on(t.propertyType),
+  index("terra_mls_price_idx").on(t.listPrice),
+  index("terra_mls_active_idx").on(t.isActive),
+  index("terra_mls_modification_idx").on(t.modificationTimestamp),
+  index("terra_mls_distress_idx").on(t.distressPropertyId),
+]);
+
+export const terraCommercialPropertiesTable = pgTable("terra_commercial_properties", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  source: text("source", { enum: ["costar", "compstak", "manual", "demo"] }).notNull(),
+  propertyName: text("property_name"),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  zipCode: text("zip_code"),
+  county: text("county"),
+  latitude: numeric("latitude", { precision: 10, scale: 7 }),
+  longitude: numeric("longitude", { precision: 10, scale: 7 }),
+  propertyType: text("property_type", {
+    enum: ["Office", "Retail", "Industrial", "Multifamily", "Hotel", "Land", "Mixed-Use", "Other"],
+  }).notNull(),
+  buildingClass: text("building_class", { enum: ["Class A", "Class B", "Class C"] }),
+  rentableArea: integer("rentable_area"),
+  yearBuilt: integer("year_built"),
+  stories: integer("stories"),
+  units: integer("units"),
+  parkingSpaces: integer("parking_spaces"),
+  occupancyRate: numeric("occupancy_rate", { precision: 5, scale: 2 }),
+  marketVacancyRate: numeric("market_vacancy_rate", { precision: 5, scale: 2 }),
+  askingRentPerSqft: numeric("asking_rent_per_sqft", { precision: 8, scale: 2 }),
+  effectiveRentPerSqft: numeric("effective_rent_per_sqft", { precision: 8, scale: 2 }),
+  capRate: numeric("cap_rate", { precision: 5, scale: 2 }),
+  lastSalePrice: numeric("last_sale_price", { precision: 16, scale: 2 }),
+  lastSaleDate: text("last_sale_date"),
+  tenants: jsonb("tenants").$type<Array<{
+    tenantName: string;
+    leaseExpiration: string;
+    leasedSqft: number;
+    floorOccupied: string;
+  }>>().notNull().default([]),
+  submarketName: text("submarket_name"),
+  ownerName: text("owner_name"),
+  ownerType: text("owner_type"),
+  rawData: jsonb("raw_data"),
+  isActive: boolean("is_active").notNull().default(true),
+  lastSyncedAt: timestamp("last_synced_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_comm_type_idx").on(t.propertyType),
+  index("terra_comm_source_idx").on(t.source),
+  index("terra_comm_zip_idx").on(t.zipCode),
+  index("terra_comm_class_idx").on(t.buildingClass),
+  index("terra_comm_active_idx").on(t.isActive),
+  index("terra_comm_submarket_idx").on(t.submarketName),
+]);
+
+export const terraCommercialCompsTable = pgTable("terra_commercial_comps", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  source: text("source", { enum: ["costar", "compstak", "manual", "demo"] }).notNull(),
+  compType: text("comp_type", { enum: ["lease", "sale"] }).notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  zipCode: text("zip_code"),
+  propertyType: text("property_type").notNull(),
+  tenantName: text("tenant_name"),
+  tenantIndustry: text("tenant_industry"),
+  transactionType: text("transaction_type"),
+  leasedSqft: integer("leased_sqft"),
+  rentableArea: integer("rentable_area"),
+  startingRentPerSqft: numeric("starting_rent_per_sqft", { precision: 8, scale: 2 }),
+  effectiveRentPerSqft: numeric("effective_rent_per_sqft", { precision: 8, scale: 2 }),
+  salePrice: numeric("sale_price", { precision: 16, scale: 2 }),
+  pricePerSqft: numeric("price_per_sqft", { precision: 8, scale: 2 }),
+  capRate: numeric("cap_rate", { precision: 5, scale: 2 }),
+  freeRentMonths: integer("free_rent_months"),
+  tenantImprovementAllowance: numeric("tenant_improvement_allowance", { precision: 8, scale: 2 }),
+  leaseTermMonths: integer("lease_term_months"),
+  transactionDate: text("transaction_date").notNull(),
+  leaseExpirationDate: text("lease_expiration_date"),
+  floorOccupied: text("floor_occupied"),
+  buildingClass: text("building_class"),
+  landlordName: text("landlord_name"),
+  buyerName: text("buyer_name"),
+  sellerName: text("seller_name"),
+  buyerType: text("buyer_type"),
+  financeType: text("finance_type"),
+  submarketName: text("submarket_name"),
+  rawData: jsonb("raw_data"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_comps_type_idx").on(t.compType),
+  index("terra_comps_source_idx").on(t.source),
+  index("terra_comps_prop_type_idx").on(t.propertyType),
+  index("terra_comps_date_idx").on(t.transactionDate),
+  index("terra_comps_zip_idx").on(t.zipCode),
+]);
+
+export const insertTerraMlsListingSchema = createInsertSchema(terraMlsListingsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraMlsListing = z.infer<typeof insertTerraMlsListingSchema>;
+export type TerraMlsListing = typeof terraMlsListingsTable.$inferSelect;
+
+export const insertTerraCommercialPropertySchema = createInsertSchema(terraCommercialPropertiesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraCommercialProperty = z.infer<typeof insertTerraCommercialPropertySchema>;
+export type TerraCommercialProperty = typeof terraCommercialPropertiesTable.$inferSelect;
+
+export const insertTerraCommercialCompSchema = createInsertSchema(terraCommercialCompsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraCommercialComp = z.infer<typeof insertTerraCommercialCompSchema>;
+export type TerraCommercialComp = typeof terraCommercialCompsTable.$inferSelect;

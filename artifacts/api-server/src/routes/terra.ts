@@ -3,6 +3,15 @@ import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { geocodeAddress, reverseGeocode, getGeocodingProviderStatus } from "../lib/geocoding";
+import {
+  getMlsListings,
+  getCommercialProperties,
+  getCommercialComps,
+  runMlsListingSync,
+  runCommercialDataRefresh,
+  getEnterpriseFeatureFlags,
+} from "../lib/terra-enterprise-ingestion";
+import { services } from "@workspace/services";
 
 const router: IRouter = Router();
 
@@ -223,6 +232,110 @@ router.get("/terra/reverse-geocode", authMiddleware({ required: false }), async 
 
 router.get("/terra/geocoding-status", async (_req: Request, res: Response) => {
   sendSuccess(res, getGeocodingProviderStatus());
+});
+
+router.get("/terra/mls/listings", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const status = req.query.status as string | undefined;
+    const postalCode = req.query.postalCode as string | undefined;
+    const propertyType = req.query.propertyType as string | undefined;
+    const mlsName = req.query.mlsName as string | undefined;
+    const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 500);
+    const offset = parseInt(String(req.query.offset ?? "0"), 10);
+
+    const listings = await getMlsListings({ status, postalCode, propertyType, mlsName, limit, offset });
+
+    sendSuccess(res, {
+      source: "RESO Web API — MLS Listing Feed",
+      connectorStatus: services.resoMls.status,
+      demoMode: services.resoMls.isDemoMode,
+      count: listings.length,
+      listings,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch MLS listings");
+  }
+});
+
+router.get("/terra/commercial/properties", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const propertyType = req.query.propertyType as string | undefined;
+    const zipCode = req.query.zipCode as string | undefined;
+    const source = req.query.source as string | undefined;
+    const buildingClass = req.query.buildingClass as string | undefined;
+    const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 500);
+    const offset = parseInt(String(req.query.offset ?? "0"), 10);
+
+    const properties = await getCommercialProperties({ propertyType, zipCode, source, buildingClass, limit, offset });
+
+    sendSuccess(res, {
+      source: "CoStar Commercial Property Intelligence",
+      connectorStatus: services.costar.status,
+      demoMode: services.costar.isDemoMode,
+      count: properties.length,
+      properties,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch commercial properties");
+  }
+});
+
+router.get("/terra/commercial/comps", terraRateLimit, authMiddleware({ required: false }), async (req: Request, res: Response) => {
+  try {
+    const compType = req.query.compType as "lease" | "sale" | undefined;
+    const propertyType = req.query.propertyType as string | undefined;
+    const source = req.query.source as string | undefined;
+    const limit = Math.min(parseInt(String(req.query.limit ?? "100"), 10), 500);
+    const offset = parseInt(String(req.query.offset ?? "0"), 10);
+
+    const comps = await getCommercialComps({ compType, propertyType, source, limit, offset });
+
+    sendSuccess(res, {
+      source: "CompStak + CoStar Commercial Transaction Comps",
+      connectorStatuses: {
+        costar: services.costar.status,
+        compstak: services.compstak.status,
+      },
+      demoMode: services.compstak.isDemoMode && services.costar.isDemoMode,
+      count: comps.length,
+      comps,
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch commercial comps");
+  }
+});
+
+router.get("/terra/enterprise/flags", authMiddleware({ required: false }), async (_req: Request, res: Response) => {
+  sendSuccess(res, {
+    flags: getEnterpriseFeatureFlags(),
+    connectors: {
+      mls: services.resoMls.getHealthReport(),
+      costar: services.costar.getHealthReport(),
+      compstak: services.compstak.getHealthReport(),
+    },
+    fetchedAt: new Date().toISOString(),
+  });
+});
+
+router.post("/terra/enterprise/sync/mls", authMiddleware({ required: true }), async (_req: Request, res: Response) => {
+  try {
+    const result = await runMlsListingSync();
+    sendSuccess(res, { message: "MLS sync completed", ...result });
+  } catch (err) {
+    handleRouteError(res, err, "MLS sync failed");
+  }
+});
+
+router.post("/terra/enterprise/sync/commercial", authMiddleware({ required: true }), async (_req: Request, res: Response) => {
+  try {
+    const result = await runCommercialDataRefresh();
+    sendSuccess(res, { message: "Commercial data refresh completed", ...result });
+  } catch (err) {
+    handleRouteError(res, err, "Commercial data refresh failed");
+  }
 });
 
 export default router;

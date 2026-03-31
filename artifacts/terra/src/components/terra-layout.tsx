@@ -23,6 +23,7 @@ const NAV_SECTIONS = [
       { href: "/distress-engine", label: "Distress Engine", icon: Flame, highlight: true },
       { href: "/deals", label: "Deal Pipeline", icon: Activity },
       { href: "/listings", label: "Property Listings", icon: Home },
+      { href: "/commercial", label: "Commercial Intel", icon: Building2 },
       { href: "/offers", label: "Offer Management", icon: ArrowLeftRight },
       { href: "/inquiries", label: "Inquiry Routing", icon: Inbox },
     ],

@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { Home, Search, Filter, MapPin, Clock, TrendingDown, Eye, ChevronDown, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Home, Search, Filter, MapPin, Clock, TrendingDown, Eye, ChevronDown, X, Building2, ArrowRight, Radio } from "lucide-react";
 import { listings, type Listing } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar, PropertyDrawer } from "@/components/brokerage-ui";
 import { cn } from "@workspace/shared-ui/utils";
+import { useLocation } from "wouter";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE = BASE.replace(/\/[^/]+$/, "/api");
 
 type SortKey = "dom" | "price" | "showings" | "offerCount" | "riskScore";
 
@@ -137,11 +141,24 @@ function ListingCard({ listing }: { listing: Listing }) {
 }
 
 export default function ListingsPage() {
+  const [, navigate] = useLocation();
   const [view, setView] = useState<"table" | "grid">("grid");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("dom");
+  const [mlsCount, setMlsCount] = useState<number | null>(null);
+  const [mlsDemoMode, setMlsDemoMode] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/terra/mls/listings?limit=1`, { headers: { Accept: "application/json" } })
+      .then(r => r.json())
+      .then(d => {
+        if (d.count != null) setMlsCount(d.count);
+        if (d.demoMode != null) setMlsDemoMode(d.demoMode);
+      })
+      .catch(() => {});
+  }, []);
 
   const filtered = listings
     .filter(l => {
@@ -181,6 +198,34 @@ export default function ListingsPage() {
           </div>
         </div>
       </motion.div>
+
+      {mlsCount !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between px-4 py-3 rounded-xl border border-terra-primary/30 bg-terra-primary/5 cursor-pointer hover:border-terra-primary/50 transition-colors"
+          onClick={() => navigate("/commercial")}
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 rounded-lg bg-terra-primary/15">
+              <Radio className="w-4 h-4 text-terra-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-terra-text">
+                MLS Live Feed Active
+                {mlsDemoMode && <span className="ml-2 text-[10px] font-bold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/30">DEMO</span>}
+              </p>
+              <p className="text-xs text-terra-text-muted">
+                {mlsCount} MLS listings synced via RESO Web API · CoStar & CompStak commercial intel available
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-terra-primary">Commercial Intelligence</span>
+            <ArrowRight className="w-4 h-4 text-terra-primary" />
+          </div>
+        </motion.div>
+      )}
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

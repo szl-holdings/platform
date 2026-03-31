@@ -55,6 +55,9 @@ export { WorldBankAdapter } from "@workspace/services";
 export { OpenMeteoAdapter } from "@workspace/services";
 export { MITREAdapter } from "@workspace/services";
 export { GDELTAdapter } from "@workspace/services";
+export { ResoMlsAdapter, type MlsListing, type ODataQueryParams, type MlsIncrementalSyncResult } from "@workspace/services";
+export { CoStarAdapter, type CoStarProperty, type CoStarMarketStats, type CoStarSaleComp } from "@workspace/services";
+export { CompStakAdapter, type CompStakLeaseComp, type CompStakSaleComp, type CompStakPropertyDetail } from "@workspace/services";
 export {
   HuggingFaceAdapter,
   type HFTextGenerationResult,

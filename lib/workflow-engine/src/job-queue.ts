@@ -205,4 +205,6 @@ export const JOB_TYPES = {
   DAILY_CAPITAL_READINESS_DIGEST: "daily_capital_readiness_digest",
   LENDER_PACKET_GENERATE: "lender_packet_generate_job",
   INVESTOR_PACKET_GENERATE: "investor_packet_generate_job",
+  HOURLY_MLS_LISTING_SYNC: "hourly_mls_listing_sync",
+  DAILY_COMMERCIAL_DATA_REFRESH: "daily_commercial_data_refresh",
 } as const;
