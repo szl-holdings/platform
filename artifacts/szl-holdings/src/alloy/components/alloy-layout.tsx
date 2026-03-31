@@ -62,7 +62,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
                 <Zap className="w-4 h-4 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-sm tracking-wide text-white leading-none">ALLOYSCAPE</span>
+                <span className="font-bold text-sm tracking-wide text-white leading-none">ALLOY</span>
                 <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#00d4ff" }}>Execution Fabric</span>
               </div>
             </div>
@@ -176,7 +176,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <span>SZL Business OS</span>
           </div>
           <div className="flex gap-1 flex-wrap">
-            <a href="/terra/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#0ea5e9", background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.2)" }}>BEACON</a>
+            <a href="/terra/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#4d7c0f", background: "rgba(77,124,15,0.1)", border: "1px solid rgba(77,124,15,0.2)" }}>TERRA</a>
             <a href="/lyte-command-center/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>LYTE</a>
             <a href="/vessels/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#38bdf8", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>VESSELS</a>
           </div>

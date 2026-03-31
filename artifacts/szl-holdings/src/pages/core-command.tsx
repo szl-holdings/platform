@@ -12,7 +12,14 @@ import { cn } from "@/lib/utils";
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 interface CoreMetrics {
-  beacon: {
+  terra: {
+    total_distress_properties: number;
+    high_opportunity_properties: number;
+    total_leads: number;
+    total_deals: number;
+    converted_deals: number;
+  };
+  beacon?: {
     total_distress_properties: number;
     high_opportunity_properties: number;
     total_leads: number;
@@ -63,10 +70,10 @@ const SEVERITY_BG: Record<string, string> = {
 };
 
 const platformLinks = [
-  { name: "Beacon", role: "OBSERVE", subtitle: "Business Telemetry", href: "/terra/", icon: Building, color: "#0ea5e9" },
-  { name: "Lyte", role: "INTERPRET", subtitle: "AIOps Command", href: "/lyte-command-center/", icon: Zap, color: "#f59e0b" },
+  { name: "Terra", role: "OBSERVE", subtitle: "Property Intelligence", href: "/terra/", icon: Building, color: "#4d7c0f" },
+  { name: "Lyte", role: "INTERPRET", subtitle: "Business Observability", href: "/lyte-command-center/", icon: Zap, color: "#f59e0b" },
   { name: "Alloy Creative", role: "CREATE", subtitle: "Creative Workflows", href: "/alloy/creative", icon: Brain, color: "#ec4899" },
-  { name: "AlloyScape", role: "EXECUTE", subtitle: "Execution Fabric", href: "/alloy/", icon: Layers, color: "#6366f1" },
+  { name: "Alloy", role: "EXECUTE", subtitle: "Execution Fabric", href: "/alloy/", icon: Layers, color: "#6366f1" },
   { name: "Aegis", role: "DEFEND", subtitle: "Defense & Intelligence", href: "/firestorm/", icon: Shield, color: "#6366f1" },
   { name: "Vessels", role: "TRACK", subtitle: "Maritime Intelligence", href: "/vessels/", icon: Ship, color: "#3b82f6" },
   { name: "Carlota Jo", role: "CONSULT", subtitle: "Brand Strategy", href: "/carlota-jo/", icon: Globe, color: "#10b981" },
@@ -169,7 +176,8 @@ export default function CoreCommandCenter() {
   const auditEvents = (auditData?.data ?? auditData?.items ?? []) as Record<string, unknown>[];
 
   const openVulns = metrics?.firestorm?.open_vulnerabilities ?? 0;
-  const highOpp = metrics?.beacon?.high_opportunity_properties ?? 0;
+  const t = metrics?.terra ?? metrics?.beacon;
+  const highOpp = t?.high_opportunity_properties ?? 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -265,8 +273,8 @@ export default function CoreCommandCenter() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <SummaryCard
                   label="Distress Properties"
-                  value={metrics?.beacon?.total_distress_properties ?? "—"}
-                  sub="Beacon — NYC + NY"
+                  value={t?.total_distress_properties ?? "—"}
+                  sub="Terra — NYC + NY"
                   icon={Building}
                   color="#0ea5e9"
                   loading={metricsLoading}
@@ -281,7 +289,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="Converted Deals"
-                  value={metrics?.beacon?.converted_deals ?? "—"}
+                  value={t?.converted_deals ?? "—"}
                   sub="Closed Won"
                   icon={CheckCircle2}
                   color="#22c55e"
@@ -290,7 +298,7 @@ export default function CoreCommandCenter() {
                 <SummaryCard
                   label="Open Vulnerabilities"
                   value={openVulns}
-                  sub="Firestorm — Active"
+                  sub="Aegis — Active"
                   icon={Shield}
                   color="#ef4444"
                   loading={metricsLoading}
@@ -368,13 +376,13 @@ export default function CoreCommandCenter() {
                     {[
                       {
                         label: "Total Leads",
-                        value: metrics?.beacon?.total_leads ?? "—",
+                        value: t?.total_leads ?? "—",
                         icon: TrendingUp,
                         color: "#0ea5e9",
                       },
                       {
                         label: "Total Deals",
-                        value: metrics?.beacon?.total_deals ?? "—",
+                        value: t?.total_deals ?? "—",
                         icon: BarChart3,
                         color: "#10b981",
                       },
@@ -464,7 +472,7 @@ export default function CoreCommandCenter() {
                   </h2>
                   <div className="space-y-1">
                     {[
-                      { label: "Beacon — Distress Search", href: "/terra/", color: "#0ea5e9", icon: Building },
+                      { label: "Terra — Property Intelligence", href: "/terra/", color: "#4d7c0f", icon: Building },
                       { label: "Aegis — Defense & Intelligence", href: "/firestorm/", color: "#6366f1", icon: Shield },
                       { label: "Carlota Jo — Consulting", href: "/carlota-jo/", color: "#10b981", icon: Globe },
                       { label: "Vessels — Maritime", href: "/vessels/", color: "#3b82f6", icon: Ship },

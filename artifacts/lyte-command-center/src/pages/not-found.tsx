@@ -19,7 +19,7 @@ export default function NotFound() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Command Center
+          Back to Lyte
         </a>
       </div>
     </div>

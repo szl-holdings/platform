@@ -1,10 +1,11 @@
 const ecosystemNodes = [
-  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "lyte", "alloy", "beacon", "carlota"] },
-  { id: "alloy", name: "Alloy · ENGINE", type: "engine", x: 50, y: 15, connections: ["szl", "lyte", "vessels", "beacon"] },
-  { id: "lyte", name: "Lyte · EXECUTE", type: "subsidiary", x: 82, y: 30, connections: ["szl", "alloy", "vessels"] },
-  { id: "vessels", name: "Vessels · OBSERVE", type: "subsidiary", x: 18, y: 30, connections: ["szl", "alloy", "lyte"] },
-  { id: "beacon", name: "Beacon · OBSERVE", type: "subsidiary", x: 25, y: 75, connections: ["szl", "alloy"] },
-  { id: "carlota", name: "Carlota Jo · ADVISORY", type: "subsidiary", x: 75, y: 75, connections: ["szl"] },
+  { id: "szl", name: "SZL Holdings", type: "holding", x: 50, y: 50, connections: ["vessels", "lyte", "alloy", "terra", "aegis", "carlota"] },
+  { id: "alloy", name: "Alloy · ENGINE", type: "engine", x: 50, y: 15, connections: ["szl", "lyte", "vessels", "terra"] },
+  { id: "lyte", name: "Lyte · OBSERVE", type: "subsidiary", x: 82, y: 30, connections: ["szl", "alloy", "vessels"] },
+  { id: "vessels", name: "Vessels · TRACK", type: "subsidiary", x: 18, y: 30, connections: ["szl", "alloy", "lyte"] },
+  { id: "terra", name: "Terra · INTELLIGENCE", type: "subsidiary", x: 15, y: 75, connections: ["szl", "alloy"] },
+  { id: "aegis", name: "Aegis · DEFEND", type: "subsidiary", x: 50, y: 85, connections: ["szl", "alloy"] },
+  { id: "carlota", name: "Carlota Jo · ADVISORY", type: "subsidiary", x: 85, y: 75, connections: ["szl"] },
 ];
 
 export function NexusMap() {

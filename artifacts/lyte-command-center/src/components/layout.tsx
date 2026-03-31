@@ -193,7 +193,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <DemoModeBanner />
         <header className="h-12 border-b border-white/5 bg-background/50 backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-20">
           <h1 className="font-display font-semibold text-base text-white/90 capitalize tracking-wide">
-            {ALL_NAV.find(i => i.href === location || (i.href !== "/" && location.startsWith(i.href)))?.label || "Command Center"}
+            {ALL_NAV.find(i => i.href === location || (i.href !== "/" && location.startsWith(i.href)))?.label || "Lyte"}
           </h1>
 
           <div className="flex items-center gap-3">

@@ -15,7 +15,7 @@ const trafficData = [
 const appUsage = [
   { name: "Lyte", sessions: 2120, avgDuration: "11m 15s", bounce: "12%" },
   { name: "Firestorm", sessions: 1840, avgDuration: "8m 42s", bounce: "18%" },
-  { name: "Beacon", sessions: 1340, avgDuration: "7m 22s", bounce: "22%" },
+  { name: "Terra", sessions: 1340, avgDuration: "7m 22s", bounce: "22%" },
   { name: "Rosie", sessions: 890, avgDuration: "12m 07s", bounce: "11%" },
   { name: "INCA", sessions: 980, avgDuration: "14m 33s", bounce: "9%" },
   { name: "Vessels", sessions: 760, avgDuration: "9m 18s", bounce: "16%" },
