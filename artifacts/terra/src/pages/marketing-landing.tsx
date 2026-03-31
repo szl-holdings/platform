@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame, BarChart3, Users, Search, FileText, Shield, Target, Eye, Layers, CheckCircle, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame,
+  BarChart3, Users, Search, FileText, Shield, Target, Layers,
+  CheckCircle, Loader2, Menu, X, ChevronDown,
+} from "lucide-react";
 
 const accent = "#5e9a32";
 const accentLight = "#74b844";
 const BG = "#0b1009";
-const SURFACE = "rgba(255,255,255,0.025)";
-const BORDER = "rgba(255,255,255,0.06)";
 
 const modules = [
   {
@@ -47,55 +49,64 @@ const buyers = [
   { role: "Lenders & Capital", desc: "Underwrite with confidence. Cross-reference ownership, distress signals, market comps, and borrower history in a single intelligence view." },
 ];
 
-const navLinks = [
-  { label: "Platform", href: "#platform" },
-  { label: "Capabilities", href: "#capabilities" },
-  { label: "Markets", href: "#markets" },
-  { label: "Pricing", href: "#pricing" },
-];
-
 const plans = [
   {
-    id: "terra-starter",
-    name: "Starter",
-    monthlyPlanId: "terra-starter-monthly",
-    annualPlanId: "terra-starter-annual",
-    monthlyDisplay: "$149",
-    annualDisplay: "$1,490",
+    id: "terra-starter", name: "Starter",
+    monthlyPlanId: "terra-starter-monthly", annualPlanId: "terra-starter-annual",
+    monthlyDisplay: "$149", annualDisplay: "$1,490",
     features: ["Distress feed (NYC, 5 boroughs)", "Ownership lookup — 50 queries/mo", "Deal pipeline — up to 10 active deals", "Market snapshot (read-only)", "Email support"],
   },
   {
-    id: "terra-pro",
-    name: "Pro",
-    monthlyPlanId: "terra-pro-monthly",
-    annualPlanId: "terra-pro-annual",
-    monthlyDisplay: "$349",
-    annualDisplay: "$3,490",
-    highlighted: true,
+    id: "terra-pro", name: "Pro",
+    monthlyPlanId: "terra-pro-monthly", annualPlanId: "terra-pro-annual",
+    monthlyDisplay: "$349", annualDisplay: "$3,490", highlighted: true,
     features: ["Everything in Starter", "Unlimited ownership lookups", "Unlimited deal pipeline", "Investment analysis & IRR modeling", "Broker operations CRM", "API access (10k calls/mo)", "Priority support"],
   },
   {
-    id: "terra-enterprise",
-    name: "Enterprise",
-    monthlyPlanId: "terra-enterprise-monthly",
-    annualPlanId: "terra-enterprise-annual",
-    monthlyDisplay: "Custom",
-    annualDisplay: "Custom",
-    isCustom: true,
+    id: "terra-enterprise", name: "Enterprise",
+    monthlyPlanId: "terra-enterprise-monthly", annualPlanId: "terra-enterprise-annual",
+    monthlyDisplay: "Custom", annualDisplay: "Custom", isCustom: true,
     features: ["Everything in Pro", "Multi-seat / team access", "Custom data integrations", "Dedicated account manager", "SLA & uptime guarantee", "Private deal flow network", "Custom reporting & exports"],
   },
 ];
+
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+function Section({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const { ref, visible } = useInView();
+  return (
+    <div ref={ref} className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"} ${className}`}>
+      {children}
+    </div>
+  );
+}
 
 export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
   const [annual, setAnnual] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", h, { passive: true });
+    return () => window.removeEventListener("scroll", h);
+  }, []);
 
   const handleSubscribe = async (plan: typeof plans[number]) => {
-    if (plan.isCustom) {
-      onSignIn?.();
-      return;
-    }
+    if (plan.isCustom) { onSignIn?.(); return; }
     const planKey = annual ? plan.annualPlanId : plan.monthlyPlanId;
     setCheckoutLoading(plan.id);
     setCheckoutError(null);
@@ -110,74 +121,81 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
       });
       const data = await res.json();
       const url = data?.data?.url ?? data?.url;
-      if (url) {
-        window.location.href = url;
-      } else {
-        setCheckoutError(data?.error ?? data?.message ?? "Could not start checkout. Please try again.");
-      }
-    } catch {
-      setCheckoutError("Network error. Please try again.");
-    } finally {
-      setCheckoutLoading(null);
-    }
+      if (url) { window.location.href = url; }
+      else { setCheckoutError(data?.error ?? data?.message ?? "Could not start checkout."); }
+    } catch { setCheckoutError("Network error. Please try again."); }
+    finally { setCheckoutLoading(null); }
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: "#e6ead6", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen text-[#e6ead6]" style={{ background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      {/* Nav */}
-      <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-        background: "rgba(11,16,9,0.92)", backdropFilter: "blur(16px)",
-        borderBottom: `1px solid ${BORDER}`, height: "56px",
-        display: "flex", alignItems: "center",
-      }}>
-        <div style={{ maxWidth: "1120px", margin: "0 auto", padding: "0 1.5rem", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{ width: "26px", height: "26px", borderRadius: "6px", background: `${accent}1a`, border: `1px solid ${accent}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-300 ${scrolled ? "bg-[#0b1009]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20" : "bg-transparent"}`}>
+        <div className="max-w-[1120px] mx-auto px-6 w-full flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-[26px] h-[26px] rounded-md flex items-center justify-center" style={{ background: `${accent}1a`, border: `1px solid ${accent}40` }}>
               <Building2 size={13} style={{ color: accentLight }} />
             </div>
-            <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em" }}>Terra</span>
-            <span style={{ fontSize: "10px", fontFamily: "monospace", color: "rgba(255,255,255,0.2)", marginLeft: "4px" }}>by SZL Holdings</span>
+            <span className="font-bold text-[15px] tracking-tight text-white">Terra</span>
+            <span className="text-[10px] font-mono text-white/15 ml-1">by SZL Holdings</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-            {navLinks.map(l => (
-              <a key={l.label} href={l.href} style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", textDecoration: "none", letterSpacing: "0.04em", fontWeight: 500 }}>{l.label}</a>
+          <div className="hidden md:flex items-center gap-6">
+            {[{ label: "Platform", href: "#platform" }, { label: "Capabilities", href: "#capabilities" }, { label: "Markets", href: "#markets" }, { label: "Pricing", href: "#pricing" }].map(l => (
+              <a key={l.label} href={l.href} className="text-xs text-white/35 hover:text-white/65 transition-colors tracking-wider font-medium">{l.label}</a>
             ))}
-            <button onClick={onSignIn} style={{ fontSize: "12px", fontWeight: 600, color: "#0b1009", background: accentLight, border: "none", borderRadius: "6px", padding: "6px 16px", cursor: "pointer" }}>Sign in</button>
+            <button onClick={onSignIn} className="text-xs font-semibold text-[#0b1009] rounded-md px-4 py-1.5 transition-colors" style={{ background: accentLight }}>Sign in</button>
           </div>
+          <button className="md:hidden p-2 text-white/50" onClick={() => setMobileNav(!mobileNav)}>
+            {mobileNav ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </nav>
 
-      {/* Hero — editorial, left-aligned */}
-      <section style={{ padding: "120px 1.5rem 60px", maxWidth: "1120px", margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "60px", alignItems: "start" }}>
+      {mobileNav && (
+        <div className="fixed inset-0 z-40 bg-[#0b1009]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-6 md:hidden">
+          {[{ label: "Platform", href: "#platform" }, { label: "Capabilities", href: "#capabilities" }, { label: "Markets", href: "#markets" }, { label: "Pricing", href: "#pricing" }].map(l => (
+            <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/60 hover:text-white transition-colors">{l.label}</a>
+          ))}
+          <button onClick={() => { onSignIn?.(); setMobileNav(false); }} className="mt-4 text-sm font-semibold text-[#0b1009] rounded-md px-6 py-2.5" style={{ background: accentLight }}>Sign in</button>
+        </div>
+      )}
+
+      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 max-w-[1120px] mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12 lg:gap-16 items-start">
           <div>
-            <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: accentLight, marginBottom: "20px", fontFamily: "monospace" }}>NYC Real Estate Intelligence</p>
-            <h1 style={{ fontSize: "clamp(34px, 5vw, 48px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", color: "#f0f4e8", marginBottom: "24px" }}>
+            <p className="text-[10px] font-bold tracking-[0.12em] uppercase mb-5 font-mono" style={{ color: accentLight }}>NYC Real Estate Intelligence</p>
+            <h1 className="text-4xl sm:text-5xl lg:text-[48px] font-extrabold leading-[1.1] tracking-tight text-[#f0f4e8] mb-6">
               The distress intelligence platform<br />
               <span style={{ color: accentLight }}>built for NYC real estate.</span>
             </h1>
-            <p style={{ fontSize: "16px", lineHeight: 1.7, color: "rgba(255,255,255,0.45)", maxWidth: "520px", marginBottom: "36px" }}>
+            <p className="text-base sm:text-[16px] leading-relaxed text-white/40 max-w-[520px] mb-8">
               Terra surfaces distressed properties, tracks ownership structures, manages deal pipelines,
               and delivers market intelligence — all from one operating surface built for brokers,
               investors, and portfolio teams who move fast.
             </p>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <button onClick={onSignIn} style={{ fontSize: "13px", fontWeight: 600, background: accentLight, color: "#0b1009", border: "none", borderRadius: "6px", padding: "10px 24px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+            <div className="flex flex-wrap gap-3">
+              <button onClick={onSignIn} className="text-[13px] font-semibold text-[#0b1009] rounded-md px-6 py-2.5 flex items-center gap-1.5 transition-colors" style={{ background: accentLight }}>
                 Sign in to Platform <ArrowRight size={14} />
               </button>
-              <button style={{ fontSize: "13px", fontWeight: 500, background: "transparent", color: "rgba(255,255,255,0.5)", border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "10px 24px", cursor: "pointer" }}>
+              <button className="text-[13px] font-medium bg-transparent text-white/45 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-6 py-2.5 transition-colors">
                 Request a Demo
               </button>
             </div>
+
+            <div className="flex flex-wrap gap-x-10 gap-y-4 mt-12 pt-6 border-t border-white/[0.06]">
+              {[{ v: "1,025+", l: "Distressed Properties" }, { v: "$4.8B", l: "Pipeline Value" }, { v: "5", l: "NYC Boroughs" }, { v: "6", l: "Intelligence Modules" }].map(s => (
+                <div key={s.l}>
+                  <span className="text-lg font-extrabold font-mono text-[#f0f4e8]">{s.v}</span>
+                  <p className="text-[10px] text-white/25 uppercase tracking-wider mt-0.5">{s.l}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Right: Market snapshot */}
-          <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "20px", marginTop: "16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>NYC Distress Snapshot</span>
-              <span style={{ fontSize: "9px", fontFamily: "monospace", color: "rgba(255,255,255,0.2)" }}>Live</span>
+          <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-5 mt-0 lg:mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-[9px] font-bold tracking-wider uppercase text-white/25">NYC Distress Snapshot</span>
+              <span className="text-[9px] font-mono text-white/15">Live</span>
             </div>
             {[
               { label: "Pre-Foreclosure", count: "340+", color: "#f59e0b" },
@@ -186,231 +204,217 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
               { label: "Auction Imminent", count: "95", color: "#a855f7" },
               { label: "REO / Bank-Owned", count: "120+", color: "#3b82f6" },
             ].map(d => (
-              <div key={d.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 0", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: d.color }} />
-                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>{d.label}</span>
+              <div key={d.label} className="flex items-center justify-between py-[7px] border-t border-white/[0.03]">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: d.color }} />
+                  <span className="text-[11px] text-white/45">{d.label}</span>
                 </div>
-                <span style={{ fontSize: "12px", fontWeight: 700, fontFamily: "monospace", color: d.color }}>{d.count}</span>
+                <span className="text-xs font-bold font-mono" style={{ color: d.color }}>{d.count}</span>
               </div>
             ))}
-            <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)" }}>Pipeline Value</span>
-                <span style={{ fontSize: "13px", fontWeight: 800, fontFamily: "monospace", color: "#c8a060" }}>$4.8B</span>
-              </div>
+            <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex justify-between items-center">
+              <span className="text-[10px] text-white/20">Pipeline Value</span>
+              <span className="text-[13px] font-extrabold font-mono text-[#c8a060]">$4.8B</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Property Intelligence Thesis */}
-      <section style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <div style={{ maxWidth: "680px" }}>
-          <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "16px" }}>The Thesis</p>
-          <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f0f4e8", marginBottom: "24px" }}>
-            Why property intelligence?
+      <Section>
+        <section id="platform" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <div className="max-w-[680px]">
+            <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-4">The Thesis</p>
+            <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-6">
+              Why property intelligence?
+            </h2>
+            <p className="text-[15px] leading-[1.8] text-white/40 mb-5">
+              NYC real estate moves on information asymmetry. The brokers and investors who win are the ones
+              who see <span className="text-white/75">distress signals first</span>,
+              understand <span className="text-white/75">ownership structures fastest</span>,
+              and execute <span className="text-white/75">deals with the most context</span>.
+            </p>
+            <p className="text-[15px] leading-[1.8] text-white/40">
+              Terra doesn't replace your CRM or your spreadsheets. It replaces the 14 browser tabs,
+              3 paid data services, and 2 hours of morning research that currently stand between you
+              and your first actionable lead of the day.
+            </p>
+          </div>
+        </section>
+      </Section>
+
+      <Section>
+        <section id="capabilities" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Platform Capabilities</p>
+          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-12">
+            Six modules. One operating surface.
           </h2>
-          <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)", marginBottom: "20px" }}>
-            NYC real estate moves on information asymmetry. The brokers and investors who win are the ones
-            who see <span style={{ color: "rgba(255,255,255,0.8)" }}>distress signals first</span>,
-            understand <span style={{ color: "rgba(255,255,255,0.8)" }}>ownership structures fastest</span>,
-            and execute <span style={{ color: "rgba(255,255,255,0.8)" }}>deals with the most context</span>.
-          </p>
-          <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)" }}>
-            Terra doesn't replace your CRM or your spreadsheets. It replaces the 14 browser tabs,
-            3 paid data services, and 2 hours of morning research that currently stand between you
-            and your first actionable lead of the day.
-          </p>
-        </div>
-      </section>
 
-      {/* Capabilities */}
-      <section id="capabilities" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>Platform Capabilities</p>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f0f4e8", marginBottom: "48px" }}>
-          Six modules. One operating surface.
-        </h2>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden" }}>
-          {modules.map(mod => (
-            <div key={mod.title} style={{ background: BG, padding: "28px 24px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-                <mod.icon size={16} style={{ color: mod.color }} />
-                <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#f0f4e8" }}>{mod.title}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/[0.06] rounded-xl overflow-hidden">
+            {modules.map(mod => (
+              <div key={mod.title} className="p-6 sm:p-7" style={{ background: BG }}>
+                <div className="flex items-center gap-2.5 mb-3">
+                  <mod.icon size={16} style={{ color: mod.color }} />
+                  <h3 className="text-[15px] font-bold text-[#f0f4e8]">{mod.title}</h3>
+                </div>
+                <p className="text-[12.5px] leading-relaxed text-white/35 mb-3.5">{mod.desc}</p>
+                <div className="flex flex-wrap gap-1">
+                  {mod.metrics.map(m => (
+                    <span key={m} className="text-[9px] font-semibold px-2 py-0.5 rounded" style={{ background: `${mod.color}10`, color: `${mod.color}aa`, border: `1px solid ${mod.color}15` }}>{m}</span>
+                  ))}
+                </div>
               </div>
-              <p style={{ fontSize: "12.5px", lineHeight: 1.7, color: "rgba(255,255,255,0.4)", marginBottom: "14px" }}>{mod.desc}</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                {mod.metrics.map(m => (
-                  <span key={m} style={{ fontSize: "9px", fontWeight: 600, background: `${mod.color}10`, color: `${mod.color}aa`, padding: "2px 8px", borderRadius: "3px", border: `1px solid ${mod.color}15` }}>{m}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Who It's For */}
-      <section id="markets" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>Who It's For</p>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f0f4e8", marginBottom: "48px" }}>
-          Built for the people who close deals.
-        </h2>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "24px" }}>
-          {buyers.map(b => (
-            <div key={b.role} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "24px" }}>
-              <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#f0f4e8", marginBottom: "8px" }}>{b.role}</h3>
-              <p style={{ fontSize: "12.5px", lineHeight: 1.7, color: "rgba(255,255,255,0.4)" }}>{b.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>Pricing</p>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f0f4e8", marginBottom: "12px" }}>
-          Simple, transparent plans.
-        </h2>
-        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)", marginBottom: "32px" }}>
-          Start free for 14 days. No credit card required.
-        </p>
-
-        {/* Billing toggle */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "40px" }}>
-          <span style={{ fontSize: "13px", color: annual ? "rgba(255,255,255,0.35)" : accentLight, fontWeight: 500 }}>Monthly</span>
-          <button
-            onClick={() => setAnnual(!annual)}
-            style={{
-              width: "40px", height: "22px", borderRadius: "11px", border: "none", cursor: "pointer",
-              background: annual ? accentLight : "rgba(255,255,255,0.1)",
-              position: "relative", transition: "background 0.2s",
-            }}
-          >
-            <span style={{
-              position: "absolute", top: "3px", left: annual ? "21px" : "3px",
-              width: "16px", height: "16px", borderRadius: "50%", background: "#fff",
-              transition: "left 0.2s",
-            }} />
-          </button>
-          <span style={{ fontSize: "13px", color: annual ? accentLight : "rgba(255,255,255,0.35)", fontWeight: 500 }}>
-            Annual <span style={{ fontSize: "10px", background: `${accentLight}20`, color: accentLight, padding: "2px 6px", borderRadius: "3px", marginLeft: "4px" }}>Save 15%</span>
-          </span>
-        </div>
-
-        {checkoutError && (
-          <div style={{ marginBottom: "24px", padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "8px", fontSize: "13px", color: "#f87171" }}>
-            {checkoutError}
+            ))}
           </div>
-        )}
+        </section>
+      </Section>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden" }}>
-          {plans.map(plan => (
-            <div key={plan.id} style={{ background: plan.highlighted ? "rgba(94,154,50,0.06)" : BG, padding: "28px 24px", position: "relative" }}>
-              {plan.highlighted && (
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, ${accent}, ${accentLight})` }} />
-              )}
-              {plan.highlighted && (
-                <div style={{ position: "absolute", top: "14px", right: "16px", fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accentLight }}>Most Popular</div>
-              )}
-              <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "8px" }}>Terra</p>
-              <h3 style={{ fontSize: "20px", fontWeight: 700, color: "#f0f4e8", marginBottom: "16px" }}>{plan.name}</h3>
-              <div style={{ marginBottom: "24px" }}>
-                <span style={{ fontSize: "32px", fontWeight: 800, color: "#f0f4e8", fontFamily: "monospace" }}>
-                  {annual ? plan.annualDisplay : plan.monthlyDisplay}
-                </span>
-                {!plan.isCustom && (
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.3)", marginLeft: "6px" }}>/{annual ? "yr" : "mo"}</span>
-                )}
+      <Section>
+        <section id="markets" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Who It's For</p>
+          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-12">
+            Built for the people who close deals.
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {buyers.map(b => (
+              <div key={b.role} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6">
+                <h3 className="text-sm font-bold text-[#f0f4e8] mb-2">{b.role}</h3>
+                <p className="text-[12.5px] leading-relaxed text-white/35">{b.desc}</p>
               </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                {plan.features.map(f => (
-                  <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "12px", color: "rgba(255,255,255,0.45)" }}>
-                    <CheckCircle size={12} style={{ color: accentLight, marginTop: "1px", flexShrink: 0 }} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={() => handleSubscribe(plan)}
-                disabled={checkoutLoading === plan.id}
-                style={{
-                  width: "100%", padding: "10px 0", borderRadius: "6px",
-                  border: plan.highlighted ? "none" : `1px solid ${BORDER}`,
-                  cursor: checkoutLoading === plan.id ? "not-allowed" : "pointer",
-                  background: plan.highlighted ? accentLight : "transparent",
-                  color: plan.highlighted ? "#0b1009" : "rgba(255,255,255,0.5)",
-                  fontSize: "13px", fontWeight: 600,
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-                  opacity: checkoutLoading === plan.id ? 0.7 : 1,
-                  transition: "opacity 0.15s",
-                } as React.CSSProperties}
-              >
-                {checkoutLoading === plan.id ? (
-                  <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Processing…</>
-                ) : plan.isCustom ? (
-                  <>Contact Sales <ArrowRight size={12} /></>
-                ) : (
-                  <>Get started <ArrowRight size={12} /></>
-                )}
-              </button>
+            ))}
+          </div>
+        </section>
+      </Section>
+
+      <Section>
+        <section id="pricing" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Pricing</p>
+          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-3">
+            Simple, transparent plans.
+          </h2>
+          <p className="text-sm text-white/35 mb-8">
+            Start free for 14 days. No credit card required.
+          </p>
+
+          <div className="flex items-center gap-3 mb-10">
+            <span className={`text-[13px] font-medium ${annual ? "text-white/30" : "text-white/70"}`}>Monthly</span>
+            <button
+              onClick={() => setAnnual(!annual)}
+              className="w-10 h-[22px] rounded-full relative transition-colors"
+              style={{ background: annual ? accentLight : "rgba(255,255,255,0.1)" }}
+            >
+              <span className="absolute top-[3px] w-4 h-4 rounded-full bg-white transition-all" style={{ left: annual ? "21px" : "3px" }} />
+            </button>
+            <span className={`text-[13px] font-medium ${annual ? "text-white/70" : "text-white/30"}`}>
+              Annual <span className="text-[10px] px-1.5 py-0.5 rounded ml-1" style={{ background: `${accentLight}20`, color: accentLight }}>Save 15%</span>
+            </span>
+          </div>
+
+          {checkoutError && (
+            <div className="mb-6 px-4 py-3 bg-red-500/[0.1] border border-red-500/30 rounded-lg text-[13px] text-red-400">
+              {checkoutError}
             </div>
-          ))}
-        </div>
-        <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", marginTop: "16px", textAlign: "center" }}>
-          All plans include a 14-day free trial. Cancel anytime. Prices in USD.
-        </p>
-      </section>
+          )}
 
-      {/* Trust */}
-      <section style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
-          {[
-            { icon: MapPin, title: "NYC-native data", desc: "Every data source is mapped to the five boroughs. DOB, HPD, ACRIS, court filings, auction records — continuously ingested and cross-referenced." },
-            { icon: Shield, title: "Enterprise-grade security", desc: "SOC 2 architecture. Role-based access. Audit trails. Your deal data is encrypted at rest and in transit with tenant isolation." },
-            { icon: Layers, title: "Part of the SZL ecosystem", desc: "Terra runs on the same unified architecture as Aegis, Lyte, and Vessels. Shared auth, shared orchestration via Alloy, shared intelligence layer." },
-          ].map(t => (
-            <div key={t.title} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "24px" }}>
-              <t.icon size={18} style={{ color: "rgba(255,255,255,0.2)", marginBottom: "12px" }} />
-              <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#f0f4e8", marginBottom: "8px" }}>{t.title}</h3>
-              <p style={{ fontSize: "12px", lineHeight: 1.7, color: "rgba(255,255,255,0.4)" }}>{t.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/[0.06] rounded-xl overflow-hidden">
+            {plans.map(plan => (
+              <div key={plan.id} className="p-6 sm:p-7 relative" style={{ background: plan.highlighted ? "rgba(94,154,50,0.06)" : BG }}>
+                {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: `linear-gradient(90deg, ${accent}, ${accentLight})` }} />}
+                {plan.highlighted && <div className="absolute top-3.5 right-4 text-[9px] font-bold tracking-wider uppercase" style={{ color: accentLight }}>Most Popular</div>}
+                <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-2">Terra</p>
+                <h3 className="text-xl font-bold text-[#f0f4e8] mb-4">{plan.name}</h3>
+                <div className="mb-6">
+                  <span className="text-[32px] font-extrabold text-[#f0f4e8] font-mono">
+                    {annual ? plan.annualDisplay : plan.monthlyDisplay}
+                  </span>
+                  {!plan.isCustom && <span className="text-xs text-white/25 ml-1.5">/{annual ? "yr" : "mo"}</span>}
+                </div>
+                <ul className="flex flex-col gap-2 mb-7">
+                  {plan.features.map(f => (
+                    <li key={f} className="flex items-start gap-2 text-xs text-white/40">
+                      <CheckCircle size={12} style={{ color: accentLight }} className="mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handleSubscribe(plan)}
+                  disabled={checkoutLoading === plan.id}
+                  className="w-full py-2.5 rounded-md text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all"
+                  style={{
+                    background: plan.highlighted ? accentLight : "transparent",
+                    color: plan.highlighted ? "#0b1009" : "rgba(255,255,255,0.5)",
+                    border: plan.highlighted ? "none" : "1px solid rgba(255,255,255,0.06)",
+                    opacity: checkoutLoading === plan.id ? 0.7 : 1,
+                    cursor: checkoutLoading === plan.id ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {checkoutLoading === plan.id ? (
+                    <><Loader2 size={13} className="animate-spin" /> Processing...</>
+                  ) : plan.isCustom ? (
+                    <>Contact Sales <ArrowRight size={12} /></>
+                  ) : (
+                    <>Get started <ArrowRight size={12} /></>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-white/15 mt-4 text-center">
+            All plans include a 14-day free trial. Cancel anytime. Prices in USD.
+          </p>
+        </section>
+      </Section>
 
-      {/* CTA */}
-      <section style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto", textAlign: "center" }}>
-        <h2 style={{ fontSize: "28px", fontWeight: 700, color: "#f0f4e8", marginBottom: "12px" }}>
-          See what you've been missing.
-        </h2>
-        <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "32px", maxWidth: "480px", margin: "0 auto 32px" }}>
-          Start with the distress feed. Within minutes, you'll wonder how you operated without it.
-        </p>
-        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
-          <button onClick={onSignIn} style={{ fontSize: "14px", fontWeight: 600, background: accentLight, color: "#0b1009", border: "none", borderRadius: "6px", padding: "12px 28px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
-            Sign in to Platform <ArrowRight size={14} />
-          </button>
-          <button style={{ fontSize: "14px", fontWeight: 500, background: "transparent", color: "rgba(255,255,255,0.5)", border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "12px 28px", cursor: "pointer" }}>
-            Schedule a Demo
-          </button>
-        </div>
-      </section>
+      <Section>
+        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: MapPin, title: "NYC-native data", desc: "Every data source mapped to the five boroughs. DOB, HPD, ACRIS, court filings, auction records — continuously ingested and cross-referenced." },
+              { icon: Shield, title: "Enterprise-grade security", desc: "SOC 2 architecture. Role-based access. Audit trails. Your deal data encrypted at rest and in transit with tenant isolation." },
+              { icon: Layers, title: "Part of the SZL ecosystem", desc: "Terra runs on the same unified architecture as Aegis, Lyte, and Vessels. Shared auth, shared orchestration via Alloy, shared intelligence layer." },
+            ].map(t => (
+              <div key={t.title} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6">
+                <t.icon size={18} className="text-white/15 mb-3.5" />
+                <h3 className="text-sm font-bold text-[#f0f4e8] mb-2">{t.title}</h3>
+                <p className="text-xs leading-relaxed text-white/35">{t.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Section>
 
-      {/* Footer */}
-      <footer style={{ borderTop: `1px solid ${BORDER}`, padding: "40px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <Section>
+        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto text-center">
+          <h2 className="text-2xl sm:text-[28px] font-bold text-[#f0f4e8] mb-3">
+            See what you've been missing.
+          </h2>
+          <p className="text-[15px] text-white/35 max-w-[480px] mx-auto mb-8">
+            Start with the distress feed. Within minutes, you'll wonder how you operated without it.
+          </p>
+          <div className="flex justify-center flex-wrap gap-3">
+            <button onClick={onSignIn} className="text-sm font-semibold text-[#0b1009] rounded-md px-7 py-3 flex items-center gap-1.5 transition-colors" style={{ background: accentLight }}>
+              Start Free Trial <ArrowRight size={14} />
+            </button>
+            <button className="text-sm font-medium bg-transparent text-white/45 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-7 py-3 transition-colors">
+              Request a Demo
+            </button>
+          </div>
+        </section>
+      </Section>
+
+      <footer className="border-t border-white/[0.06] py-10 px-6 max-w-[1120px] mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="flex items-center gap-2">
             <Building2 size={12} style={{ color: accentLight }} />
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>Terra</span>
-            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.15)", fontFamily: "monospace" }}>by SZL Holdings</span>
+            <span className="text-xs font-semibold text-white/35">Terra</span>
+            <span className="text-[10px] text-white/10 font-mono">by SZL Holdings</span>
           </div>
-          <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.15)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+          <p className="text-[10px] text-white/10">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
         </div>
       </footer>
 
-      <div style={{ height: "40px" }} />
+      <div className="h-10" />
     </div>
   );
 }

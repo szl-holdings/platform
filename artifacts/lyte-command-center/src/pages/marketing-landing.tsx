@@ -1,16 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
-  ArrowRight, Activity, Eye, TrendingUp, Radio, Gauge, Monitor,
+  ArrowRight, Activity, Eye, TrendingUp, Radio, Gauge,
   Network, Target, Users, Shield, GitBranch, Zap, CheckCircle,
   Mail, Calendar, MessageSquare, FileText, Database, Cloud,
   Briefcase, HeartPulse, Factory, CreditCard, CheckSquare,
+  Menu, X, ChevronDown, Monitor,
 } from "lucide-react";
 
 const AMBER = "#f59e0b";
-const AMBER_DIM = "rgba(245,158,11,0.08)";
-const BG = "#080c14";
-const SURFACE = "rgba(255,255,255,0.025)";
-const BORDER = "rgba(255,255,255,0.06)";
 
 const prism = [
   { key: "P", name: "Pulse", color: "#10b981", icon: Activity, meaning: "Business health, operating heartbeat, trend status, exposure rhythm", detail: "Pulse monitors the continuous rhythm of your operations — revenue velocity, delivery cadence, customer health, operational tempo. Not infrastructure uptime. Business uptime." },
@@ -47,80 +44,116 @@ const connectorsList = [
   { name: "SAP", icon: Factory }, { name: "NetSuite", icon: Monitor },
 ];
 
-const navLinks = [
-  { label: "PRISM", href: "#prism" },
-  { label: "Pillars", href: "#pillars" },
-  { label: "Use Cases", href: "#use-cases" },
-  { label: "Connectors", href: "#connectors" },
-];
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+function Section({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const { ref, visible } = useInView();
+  return (
+    <div ref={ref} className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"} ${className}`}>
+      {children}
+    </div>
+  );
+}
 
 export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
   const [expandedPrism, setExpandedPrism] = useState<number | null>(null);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", h, { passive: true });
+    return () => window.removeEventListener("scroll", h);
+  }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: "#e2e8f0", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-[#080c14] text-slate-300" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      {/* Nav */}
-      <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-        background: "rgba(8,12,20,0.92)", backdropFilter: "blur(16px)",
-        borderBottom: `1px solid ${BORDER}`, height: "56px",
-        display: "flex", alignItems: "center",
-      }}>
-        <div style={{ maxWidth: "1120px", margin: "0 auto", padding: "0 1.5rem", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{ width: "26px", height: "26px", borderRadius: "6px", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Zap size={13} style={{ color: AMBER }} />
+      <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-300 ${scrolled ? "bg-[#080c14]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20" : "bg-transparent"}`}>
+        <div className="max-w-[1120px] mx-auto px-6 w-full flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-[26px] h-[26px] rounded-md flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)" }}>
+              <Zap size={13} className="text-amber-400" />
             </div>
-            <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em" }}>Lyte</span>
+            <span className="font-bold text-[15px] tracking-tight text-white">Lyte</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-            {navLinks.map(l => (
-              <a key={l.label} href={l.href} style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", textDecoration: "none", letterSpacing: "0.04em", fontWeight: 500 }}>{l.label}</a>
+          <div className="hidden md:flex items-center gap-6">
+            {[{ label: "PRISM", href: "#prism" }, { label: "Pillars", href: "#pillars" }, { label: "Use Cases", href: "#use-cases" }, { label: "Connectors", href: "#connectors" }].map(l => (
+              <a key={l.label} href={l.href} className="text-xs text-white/40 hover:text-white/70 transition-colors tracking-wider font-medium">{l.label}</a>
             ))}
-            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>SZL Holdings</span>
-            <button onClick={onSignIn} style={{ fontSize: "12px", fontWeight: 600, color: "#080c14", background: AMBER, border: "none", borderRadius: "6px", padding: "6px 16px", cursor: "pointer" }}>Sign in</button>
+            <span className="text-[11px] text-white/20 font-mono">SZL Holdings</span>
+            <button onClick={onSignIn} className="text-xs font-semibold text-[#080c14] bg-amber-400 hover:bg-amber-300 rounded-md px-4 py-1.5 transition-colors">Sign in</button>
           </div>
+          <button className="md:hidden p-2 text-white/50" onClick={() => setMobileNav(!mobileNav)}>
+            {mobileNav ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </nav>
 
-      {/* Hero — Editorial, not centered template */}
-      <section style={{ paddingTop: "120px", paddingBottom: "80px", maxWidth: "1120px", margin: "0 auto", padding: "120px 1.5rem 80px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: "80px", alignItems: "start" }}>
+      {mobileNav && (
+        <div className="fixed inset-0 z-40 bg-[#080c14]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-6 md:hidden">
+          {[{ label: "PRISM", href: "#prism" }, { label: "Pillars", href: "#pillars" }, { label: "Use Cases", href: "#use-cases" }, { label: "Connectors", href: "#connectors" }].map(l => (
+            <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/60 hover:text-white transition-colors">{l.label}</a>
+          ))}
+          <button onClick={() => { onSignIn?.(); setMobileNav(false); }} className="mt-4 text-sm font-semibold text-[#080c14] bg-amber-400 rounded-md px-6 py-2.5">Sign in</button>
+        </div>
+      )}
+
+      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 max-w-[1120px] mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12 lg:gap-20 items-start">
           <div>
-            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: AMBER, marginBottom: "20px", fontFamily: "monospace" }}>Business Observability Platform</p>
-            <h1 style={{ fontSize: "clamp(36px, 5vw, 52px)", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.03em", color: "#f8fafc", marginBottom: "24px" }}>
+            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-amber-400 mb-5 font-mono">Business Observability Platform</p>
+            <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-extrabold leading-[1.08] tracking-tight text-slate-50 mb-6">
               In the dark,<br />
-              <span style={{ color: AMBER }}>let Lyte guide you.</span>
+              <span className="text-amber-400">let Lyte guide you.</span>
             </h1>
-            <p style={{ fontSize: "17px", lineHeight: 1.7, color: "rgba(255,255,255,0.5)", maxWidth: "520px", marginBottom: "36px" }}>
+            <p className="text-base sm:text-[17px] leading-relaxed text-white/45 max-w-[520px] mb-8">
               Your business generates thousands of signals every day across dozens of tools.
               Most go unseen until the damage compounds. Lyte turns operational noise into
               prioritized human action — so executives see risk, operators see friction,
               and decisions happen before it's too late.
             </p>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <button onClick={onSignIn} style={{ fontSize: "13px", fontWeight: 600, background: AMBER, color: "#080c14", border: "none", borderRadius: "6px", padding: "10px 24px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+            <div className="flex flex-wrap gap-3">
+              <button onClick={onSignIn} className="text-[13px] font-semibold bg-amber-400 hover:bg-amber-300 text-[#080c14] rounded-md px-6 py-2.5 flex items-center gap-1.5 transition-colors">
                 Start Free Trial <ArrowRight size={14} />
               </button>
-              <button style={{ fontSize: "13px", fontWeight: 500, background: "transparent", color: "rgba(255,255,255,0.6)", border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "10px 24px", cursor: "pointer" }}>
+              <button className="text-[13px] font-medium bg-transparent text-white/55 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-6 py-2.5 transition-colors">
                 Request a Demo
               </button>
             </div>
+
+            <div className="flex flex-wrap gap-x-10 gap-y-4 mt-12 pt-6 border-t border-white/[0.06]">
+              {[{ v: "40+", l: "Connectors" }, { v: "5", l: "PRISM Lenses" }, { v: "7", l: "Pillars" }, { v: "< 5 min", l: "First Signal" }].map(s => (
+                <div key={s.l}>
+                  <span className="text-lg font-extrabold font-mono text-slate-50">{s.v}</span>
+                  <p className="text-[10px] text-white/25 uppercase tracking-wider mt-0.5">{s.l}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Right: PRISM mini preview */}
-          <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "20px", marginTop: "16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)" }}>PRISM Analysis</span>
-              <span style={{ fontSize: "9px", fontFamily: "monospace", color: "rgba(255,255,255,0.2)" }}>Live</span>
+          <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-5 mt-0 lg:mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-[9px] font-bold tracking-wider uppercase text-white/25">PRISM Analysis</span>
+              <span className="text-[9px] font-mono text-white/15">Live</span>
             </div>
             {prism.map((p) => (
-              <div key={p.key} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
-                <span style={{ fontSize: "11px", fontWeight: 800, fontFamily: "monospace", color: p.color, width: "14px" }}>{p.key}</span>
-                <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", flex: 1 }}>{p.name}</span>
-                <div style={{ width: "60px", height: "4px", borderRadius: "2px", background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
-                  <div style={{ width: `${60 + Math.random() * 30}%`, height: "100%", background: p.color, borderRadius: "2px", opacity: 0.7 }} />
+              <div key={p.key} className="flex items-center gap-2.5 py-2 border-t border-white/[0.03]">
+                <span className="text-[11px] font-extrabold font-mono w-3.5" style={{ color: p.color }}>{p.key}</span>
+                <span className="text-xs text-white/65 flex-1">{p.name}</span>
+                <div className="w-[60px] h-1 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${60 + Math.random() * 30}%`, background: p.color, opacity: 0.7 }} />
                 </div>
               </div>
             ))}
@@ -128,197 +161,197 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         </div>
       </section>
 
-      {/* What is Business Observability? */}
-      <section style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <div style={{ maxWidth: "680px" }}>
-          <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "16px" }}>Defining the Category</p>
-          <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f8fafc", marginBottom: "24px" }}>
-            What is business observability?
+      <Section>
+        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <div className="max-w-[680px]">
+            <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-4">Defining the Category</p>
+            <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-6">
+              What is business observability?
+            </h2>
+            <p className="text-[15px] leading-[1.8] text-white/40 mb-5">
+              Infrastructure observability tells you when a server is down. Business observability tells you
+              when a <span className="text-white/75">revenue pipeline is stalling</span>,
+              an <span className="text-white/75">approval is aging past its SLA</span>,
+              a <span className="text-white/75">team handoff is creating customer risk</span>,
+              or a <span className="text-white/75">process owner has gone silent</span>.
+            </p>
+            <p className="text-[15px] leading-[1.8] text-white/40 mb-8">
+              Most operational damage doesn't happen because of a crash. It happens because signals go unseen
+              across disconnected tools — Jira, Salesforce, Slack, ServiceNow, email — until the cost
+              compounds past recovery.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+              {[
+                { label: "Infrastructure Observability", items: ["Server uptime", "API latency", "Error rates", "Memory usage"], note: "Datadog, New Relic, Splunk", highlight: false },
+                { label: "Business Observability", items: ["Revenue velocity", "Approval aging", "Ownership gaps", "Decision latency"], note: "Lyte", highlight: true },
+              ].map(col => (
+                <div key={col.label} className="bg-white/[0.025] border border-white/[0.06] rounded-lg p-5">
+                  <p className={`text-[10px] font-bold tracking-wider uppercase mb-3 ${col.highlight ? "text-amber-400" : "text-white/25"}`}>{col.label}</p>
+                  {col.items.map(item => (
+                    <p key={item} className="text-xs text-white/45 py-1 border-b border-white/[0.03]">{item}</p>
+                  ))}
+                  <p className="text-[10px] text-white/15 mt-2 font-mono">{col.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Section>
+
+      <Section>
+        <section id="prism" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">The Analytical Framework</p>
+          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-2">PRISM</h2>
+          <p className="text-[15px] text-white/35 mb-10 max-w-[560px]">
+            Five analytical lenses that decompose operational complexity into structured, actionable intelligence.
+            Every signal in Lyte passes through PRISM before it reaches a human.
+          </p>
+
+          <div className="flex flex-col gap-0.5">
+            {prism.map((p, i) => (
+              <button
+                key={p.key}
+                onClick={() => setExpandedPrism(expandedPrism === i ? null : i)}
+                className={`text-left w-full rounded-lg px-5 py-4 border transition-all duration-200 ${expandedPrism === i ? "bg-white/[0.035]" : "bg-white/[0.025] hover:bg-white/[0.03]"}`}
+                style={{ borderColor: expandedPrism === i ? `${p.color}30` : "rgba(255,255,255,0.06)" }}
+              >
+                <div className="flex items-center gap-3 sm:gap-3.5">
+                  <span className="text-lg font-extrabold font-mono w-6" style={{ color: p.color }}>{p.key}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-slate-50">{p.name}</span>
+                    <span className="hidden sm:inline text-xs text-white/30 ml-3">{p.meaning}</span>
+                  </div>
+                  <p.icon size={16} style={{ color: p.color }} className="opacity-50 shrink-0" />
+                  <ChevronDown size={14} className={`text-white/20 transition-transform shrink-0 ${expandedPrism === i ? "rotate-180" : ""}`} />
+                </div>
+                {expandedPrism === i && (
+                  <p className="text-[13px] leading-relaxed text-white/45 mt-3 ml-9 max-w-[600px]">
+                    {p.detail}
+                  </p>
+                )}
+              </button>
+            ))}
+          </div>
+        </section>
+      </Section>
+
+      <Section>
+        <section id="pillars" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">The Doctrine</p>
+          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-2">
+            The 7 Pillars of Business Observability
           </h2>
-          <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)", marginBottom: "20px" }}>
-            Infrastructure observability tells you when a server is down. Business observability tells you
-            when a <span style={{ color: "rgba(255,255,255,0.8)" }}>revenue pipeline is stalling</span>,
-            an <span style={{ color: "rgba(255,255,255,0.8)" }}>approval is aging past its SLA</span>,
-            a <span style={{ color: "rgba(255,255,255,0.8)" }}>team handoff is creating customer risk</span>,
-            or a <span style={{ color: "rgba(255,255,255,0.8)" }}>process owner has gone silent</span>.
+          <p className="text-[15px] text-white/35 mb-12 max-w-[560px]">
+            Every capability in Lyte maps to one of seven foundational pillars. Together, they form a
+            complete doctrine for making operations visible, accountable, and continuously improving.
           </p>
-          <p style={{ fontSize: "15px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)", marginBottom: "20px" }}>
-            Most operational damage doesn't happen because of a crash. It happens because signals go unseen
-            across disconnected tools — Jira, Salesforce, Slack, ServiceNow, email — until the cost
-            compounds past recovery. Lyte connects those signals into a single observable surface
-            so executives and operators can act before the damage is done.
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "32px" }}>
-            {[
-              { label: "Infrastructure Observability", items: ["Server uptime", "API latency", "Error rates", "Memory usage"], note: "Datadog, New Relic, Splunk" },
-              { label: "Business Observability", items: ["Revenue velocity", "Approval aging", "Ownership gaps", "Decision latency"], note: "Lyte" },
-            ].map(col => (
-              <div key={col.label} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: "8px", padding: "20px" }}>
-                <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: col.label.includes("Business") ? AMBER : "rgba(255,255,255,0.3)", marginBottom: "12px" }}>{col.label}</p>
-                {col.items.map(item => (
-                  <p key={item} style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)", padding: "4px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{item}</p>
-                ))}
-                <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", marginTop: "8px", fontFamily: "monospace" }}>{col.note}</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06] rounded-xl overflow-hidden">
+            {pillars.map((p, i) => (
+              <div key={p.name} className="bg-[#080c14] p-6 sm:p-7">
+                <div className="flex items-baseline gap-2.5 mb-2.5">
+                  <span className="text-2xl font-extrabold text-amber-400/15 font-mono">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="text-[15px] font-bold text-slate-50">{p.name}</h3>
+                </div>
+                <p className="text-[12.5px] leading-relaxed text-white/35">{p.desc}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </Section>
 
-      {/* PRISM */}
-      <section id="prism" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>The Analytical Framework</p>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f8fafc", marginBottom: "8px" }}>
-          PRISM
-        </h2>
-        <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "40px", maxWidth: "560px" }}>
-          Five analytical lenses that decompose operational complexity into structured, actionable intelligence.
-          Every signal in Lyte passes through PRISM before it reaches a human.
-        </p>
+      <Section>
+        <section id="use-cases" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">How It Works</p>
+          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-12">
+            Real workflows. Real outcomes.
+          </h2>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-          {prism.map((p, i) => (
-            <div
-              key={p.key}
-              onClick={() => setExpandedPrism(expandedPrism === i ? null : i)}
-              style={{
-                background: expandedPrism === i ? "rgba(255,255,255,0.035)" : SURFACE,
-                border: `1px solid ${expandedPrism === i ? `${p.color}30` : BORDER}`,
-                borderRadius: "8px", padding: "16px 20px", cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                <span style={{ fontSize: "18px", fontWeight: 800, fontFamily: "monospace", color: p.color, width: "24px" }}>{p.key}</span>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "#f8fafc" }}>{p.name}</span>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", marginLeft: "12px" }}>{p.meaning}</span>
+          <div className="flex flex-col gap-6">
+            {useCases.map((uc) => (
+              <div key={uc.title} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6 sm:p-7">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                  <h3 className="text-base font-bold text-slate-50 max-w-[500px]">{uc.title}</h3>
+                  <span className="text-[10px] font-mono text-amber-400 bg-amber-400/[0.08] px-2.5 py-1 rounded whitespace-nowrap self-start">{uc.lens}</span>
                 </div>
-                <p.icon size={16} style={{ color: p.color, opacity: 0.6 }} />
+                <p className="text-[13px] leading-[1.8] text-white/40">{uc.scenario}</p>
               </div>
-              {expandedPrism === i && (
-                <p style={{ fontSize: "13px", lineHeight: 1.7, color: "rgba(255,255,255,0.5)", marginTop: "12px", marginLeft: "38px", maxWidth: "600px" }}>
-                  {p.detail}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 7 Pillars */}
-      <section id="pillars" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>The Doctrine</p>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f8fafc", marginBottom: "8px" }}>
-          The 7 Pillars of Business Observability
-        </h2>
-        <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "48px", maxWidth: "560px" }}>
-          Every capability in Lyte maps to one of seven foundational pillars. Together, they form a
-          complete doctrine for making operations visible, accountable, and continuously improving.
-        </p>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden" }}>
-          {pillars.map((p, i) => (
-            <div key={p.name} style={{ background: BG, padding: "28px 24px" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginBottom: "10px" }}>
-                <span style={{ fontSize: "24px", fontWeight: 800, color: "rgba(245,158,11,0.15)", fontFamily: "monospace" }}>{String(i + 1).padStart(2, "0")}</span>
-                <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#f8fafc" }}>{p.name}</h3>
-              </div>
-              <p style={{ fontSize: "12.5px", lineHeight: 1.7, color: "rgba(255,255,255,0.4)" }}>{p.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Use Cases */}
-      <section id="use-cases" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>How It Works</p>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f8fafc", marginBottom: "48px" }}>
-          Real workflows. Real outcomes.
-        </h2>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          {useCases.map((uc) => (
-            <div key={uc.title} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "28px 28px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#f8fafc", maxWidth: "500px" }}>{uc.title}</h3>
-                <span style={{ fontSize: "10px", fontFamily: "monospace", color: AMBER, background: AMBER_DIM, padding: "3px 10px", borderRadius: "4px", whiteSpace: "nowrap" }}>{uc.lens}</span>
-              </div>
-              <p style={{ fontSize: "13px", lineHeight: 1.8, color: "rgba(255,255,255,0.45)" }}>{uc.scenario}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Connectors */}
-      <section id="connectors" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>Integrations</p>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f8fafc", marginBottom: "8px" }}>
-          Connect every tool your teams use.
-        </h2>
-        <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "40px", maxWidth: "560px" }}>
-          40+ connectors across productivity, engineering, CRM, support, finance, HR, and data platforms.
-          Lyte ingests signals from the tools you already use — no code, no agents, no infrastructure changes.
-        </p>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "1px", background: BORDER, borderRadius: "8px", overflow: "hidden" }}>
-          {connectorsList.map(c => (
-            <div key={c.name} style={{ background: BG, padding: "16px 14px", display: "flex", alignItems: "center", gap: "8px" }}>
-              <c.icon size={14} style={{ color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", fontWeight: 500 }}>{c.name}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Trust / Credibility */}
-      <section style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px" }}>
-          {[
-            { icon: Shield, title: "Enterprise-grade security", desc: "SOC 2 Type II architecture. End-to-end encryption. Role-based access. Audit trails on every action. Your data never leaves your tenant." },
-            { icon: Network, title: "One unified architecture", desc: "Lyte runs on the same monorepo infrastructure as every SZL Holdings platform. Shared auth, shared data layer, shared orchestration via Alloy." },
-            { icon: CheckCircle, title: "Built by operators", desc: "Lyte was built by a founder who ran operations across cybersecurity, real estate, maritime, and enterprise consulting. Not a toy. Not a science project." },
-          ].map(t => (
-            <div key={t.title} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: "10px", padding: "24px" }}>
-              <t.icon size={18} style={{ color: "rgba(255,255,255,0.2)", marginBottom: "14px" }} />
-              <h3 style={{ fontSize: "14px", fontWeight: 700, color: "#f8fafc", marginBottom: "8px" }}>{t.title}</h3>
-              <p style={{ fontSize: "12px", lineHeight: 1.7, color: "rgba(255,255,255,0.4)" }}>{t.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto", textAlign: "center" }}>
-        <h2 style={{ fontSize: "28px", fontWeight: 700, color: "#f8fafc", marginBottom: "12px" }}>
-          Stop flying blind.
-        </h2>
-        <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "32px", maxWidth: "480px", margin: "0 auto 32px" }}>
-          Connect your first tool in under 5 minutes. See what you've been missing.
-        </p>
-        <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
-          <button onClick={onSignIn} style={{ fontSize: "14px", fontWeight: 600, background: AMBER, color: "#080c14", border: "none", borderRadius: "6px", padding: "12px 28px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
-            Start Free Trial <ArrowRight size={14} />
-          </button>
-          <button style={{ fontSize: "14px", fontWeight: 500, background: "transparent", color: "rgba(255,255,255,0.6)", border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "12px 28px", cursor: "pointer" }}>
-            Schedule a Demo
-          </button>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer style={{ borderTop: `1px solid ${BORDER}`, padding: "40px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Zap size={12} style={{ color: AMBER }} />
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>Lyte</span>
-            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.15)", fontFamily: "monospace" }}>by SZL Holdings</span>
+            ))}
           </div>
-          <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.15)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+        </section>
+      </Section>
+
+      <Section>
+        <section id="connectors" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Integrations</p>
+          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-2">
+            Connect every tool your teams use.
+          </h2>
+          <p className="text-[15px] text-white/35 mb-10 max-w-[560px]">
+            40+ connectors across productivity, engineering, CRM, support, finance, HR, and data platforms.
+            No code, no agents, no infrastructure changes.
+          </p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-white/[0.06] rounded-lg overflow-hidden">
+            {connectorsList.map(c => (
+              <div key={c.name} className="bg-[#080c14] py-4 px-3.5 flex items-center gap-2">
+                <c.icon size={14} className="text-white/20 shrink-0" />
+                <span className="text-[11px] text-white/50 font-medium">{c.name}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Section>
+
+      <Section>
+        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Shield, title: "Enterprise-grade security", desc: "SOC 2 Type II architecture. End-to-end encryption. Role-based access. Audit trails on every action. Your data never leaves your tenant." },
+              { icon: Network, title: "One unified architecture", desc: "Lyte runs on the same infrastructure as every SZL Holdings platform. Shared auth, shared data layer, shared orchestration via Alloy." },
+              { icon: CheckCircle, title: "Built by operators", desc: "Built by a founder who ran operations across cybersecurity, real estate, maritime, and enterprise consulting. Not a toy. Not a science project." },
+            ].map(t => (
+              <div key={t.title} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6">
+                <t.icon size={18} className="text-white/15 mb-3.5" />
+                <h3 className="text-sm font-bold text-slate-50 mb-2">{t.title}</h3>
+                <p className="text-xs leading-relaxed text-white/35">{t.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Section>
+
+      <Section>
+        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto text-center">
+          <h2 className="text-2xl sm:text-[28px] font-bold text-slate-50 mb-3">
+            Stop flying blind.
+          </h2>
+          <p className="text-[15px] text-white/35 max-w-[480px] mx-auto mb-8">
+            Connect your first tool in under 5 minutes. See what you've been missing.
+          </p>
+          <div className="flex justify-center flex-wrap gap-3">
+            <button onClick={onSignIn} className="text-sm font-semibold bg-amber-400 hover:bg-amber-300 text-[#080c14] rounded-md px-7 py-3 flex items-center gap-1.5 transition-colors">
+              Start Free Trial <ArrowRight size={14} />
+            </button>
+            <button className="text-sm font-medium bg-transparent text-white/55 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-7 py-3 transition-colors">
+              Schedule a Demo
+            </button>
+          </div>
+        </section>
+      </Section>
+
+      <footer className="border-t border-white/[0.06] py-10 px-6 max-w-[1120px] mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Zap size={12} className="text-amber-400" />
+            <span className="text-xs font-semibold text-white/35">Lyte</span>
+            <span className="text-[10px] text-white/10 font-mono">by SZL Holdings</span>
+          </div>
+          <p className="text-[10px] text-white/10">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
         </div>
       </footer>
 
-      <div style={{ height: "40px" }} />
+      <div className="h-10" />
     </div>
   );
 }
