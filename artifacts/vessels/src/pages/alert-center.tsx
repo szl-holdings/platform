@@ -38,6 +38,35 @@ interface AlertRuleData {
   isActive?: boolean;
 }
 
+const DEMO_ALERTS: FleetAlert[] = [
+  { id: 1, title: "AIS Signal Lost — PACIFIC ENDEAVOR", message: "Vessel transponder went dark in South China Sea corridor. Last position 14.2°N 115.8°E. Gap duration exceeds 4h threshold.", severity: "critical", status: "active", vesselId: 1, triggeredAt: new Date(Date.now() - 45 * 60000).toISOString() },
+  { id: 2, title: "Speed Limit Violation — NORDIC CARRIER", message: "Vessel exceeding 14kt speed limit in Rotterdam port approach zone. Current speed 17.2kt. Regulatory fine risk.", severity: "high", status: "active", vesselId: 2, triggeredAt: new Date(Date.now() - 2 * 3600000).toISOString() },
+  { id: 3, title: "Weather Alert — Typhoon Yagi", message: "Category 3 typhoon track intersects planned route for 3 vessels in Western Pacific. Recommend immediate rerouting.", severity: "critical", status: "active", vesselId: 3, triggeredAt: new Date(Date.now() - 3 * 3600000).toISOString() },
+  { id: 4, title: "Geofence Breach — ATLAS FORTUNE", message: "Vessel entered sanctioned zone near Iran territorial waters. OFAC compliance review triggered automatically.", severity: "critical", status: "acknowledged", vesselId: 4, triggeredAt: new Date(Date.now() - 5 * 3600000).toISOString() },
+  { id: 5, title: "Port Congestion — Singapore Strait", message: "Average anchorage wait time increased to 4.2 days. 12 vessels in queue. Recommend Tanjung Pelepas diversion.", severity: "high", status: "active", vesselId: 5, triggeredAt: new Date(Date.now() - 8 * 3600000).toISOString() },
+  { id: 6, title: "Fuel Consumption Anomaly — EMERALD COAST", message: "Daily fuel burn 18% above baseline for current speed/draft profile. Possible hull fouling or propulsion degradation.", severity: "medium", status: "active", vesselId: 6, triggeredAt: new Date(Date.now() - 12 * 3600000).toISOString() },
+  { id: 7, title: "ETA Variance — CORAL VOYAGER", message: "Vessel now 32h behind schedule on Houston-Rotterdam leg. Charter penalty clause activates at 48h delay.", severity: "high", status: "active", vesselId: 7, triggeredAt: new Date(Date.now() - 14 * 3600000).toISOString() },
+  { id: 8, title: "Maintenance Overdue — Main Engine #2", message: "PACIFIC ENDEAVOR main engine cylinder 2 inspection overdue by 420 running hours. Class survey deadline in 18 days.", severity: "medium", status: "acknowledged", vesselId: 1, triggeredAt: new Date(Date.now() - 24 * 3600000).toISOString() },
+  { id: 9, title: "Cargo Temperature Excursion", message: "Reefer container bay 4 temperature rose to -14°C (threshold: -18°C). Compressor unit 4B showing degraded performance.", severity: "high", status: "resolved", vesselId: 8, triggeredAt: new Date(Date.now() - 36 * 3600000).toISOString() },
+  { id: 10, title: "Crew Certificate Expiry", message: "STCW certificates for 3 crew members on NORDIC CARRIER expire within 30 days. Port state control detention risk.", severity: "low", status: "active", vesselId: 2, triggeredAt: new Date(Date.now() - 48 * 3600000).toISOString() },
+];
+
+const DEMO_ALERT_RULES: AlertRuleData[] = [
+  { id: 1, name: "AIS Gap Detection", description: "Alert when AIS signal lost for >2 hours", ruleType: "geofence", severity: "critical", isActive: true },
+  { id: 2, name: "Speed Zone Compliance", description: "Port approach and ECA speed limits", ruleType: "speed", severity: "high", isActive: true },
+  { id: 3, name: "Severe Weather Intersection", description: "Route-weather conflict detection", ruleType: "weather", severity: "critical", isActive: true },
+  { id: 4, name: "Sanctions Zone Proximity", description: "OFAC/EU sanctions geofence alerts", ruleType: "geofence", severity: "critical", isActive: true },
+  { id: 5, name: "Fuel Anomaly Detection", description: "Deviation >15% from baseline consumption", ruleType: "cargo", severity: "medium", isActive: true },
+  { id: 6, name: "Schedule Variance", description: "ETA deviation exceeding charter tolerance", ruleType: "schedule", severity: "high", isActive: true },
+];
+
+const DEMO_VESSELS: FleetVessel[] = [
+  { id: 1, name: "PACIFIC ENDEAVOR" }, { id: 2, name: "NORDIC CARRIER" },
+  { id: 3, name: "ATLAS FORTUNE" }, { id: 4, name: "EMERALD COAST" },
+  { id: 5, name: "CORAL VOYAGER" }, { id: 6, name: "IRON MERIDIAN" },
+  { id: 7, name: "CASPIAN SPIRIT" }, { id: 8, name: "JADE PIONEER" },
+];
+
 const severityColors: Record<string, string> = {
   low: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -106,12 +135,18 @@ function AlertSkeleton() {
 
 export default function AlertCenterPage() {
   const qc = useQueryClient();
-  const { data: alertsRaw = [], isLoading: loadingAlerts } = useQuery({ queryKey: ["alerts"], queryFn: api.alerts.list });
-  const { data: alertRulesRaw = [] } = useQuery({ queryKey: ["alertRules"], queryFn: api.alertRules.list });
-  const { data: vesselsRaw = [] } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
-  const alerts = alertsRaw as FleetAlert[];
-  const alertRules = alertRulesRaw as AlertRuleData[];
-  const vessels = vesselsRaw as FleetVessel[];
+  const { data: alertsRaw = [], isLoading: loadingAlerts, isError: alertsError } = useQuery({ queryKey: ["alerts"], queryFn: api.alerts.list });
+  const { data: alertRulesRaw = [], isLoading: loadingRules, isError: rulesError } = useQuery({ queryKey: ["alertRules"], queryFn: api.alertRules.list });
+  const { data: vesselsRaw = [], isLoading: loadingVessels, isError: vesselsError } = useQuery({ queryKey: ["vessels"], queryFn: api.vessels.list });
+
+  const useDemoAlerts = alertsError || (!loadingAlerts && (alertsRaw as FleetAlert[]).length === 0);
+  const useDemoRules = rulesError || (!loadingRules && (alertRulesRaw as AlertRuleData[]).length === 0);
+  const useDemoVessels = vesselsError || (!loadingVessels && (vesselsRaw as FleetVessel[]).length === 0);
+  const isDemo = useDemoAlerts || useDemoRules;
+
+  const alerts = useDemoAlerts ? DEMO_ALERTS : (alertsRaw as FleetAlert[]);
+  const alertRules = useDemoRules ? DEMO_ALERT_RULES : (alertRulesRaw as AlertRuleData[]);
+  const vessels = useDemoVessels ? DEMO_VESSELS : (vesselsRaw as FleetVessel[]);
   const [ruleOpen, setRuleOpen] = useState(false);
   const [ruleForm, setRuleForm] = useState({ name: "", ruleType: "speed", severity: "medium" });
 
@@ -165,6 +200,12 @@ export default function AlertCenterPage() {
           <DoctrineLayerBadge appId="vessels" variant="compact" />
         </div>
         <p className="text-sm text-muted-foreground mt-1">Active alert stream, rule configuration, and escalation thresholds across fleet operations</p>
+        {isDemo && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-sky-400/60 bg-sky-500/5 border border-sky-500/10 px-3 py-1.5 rounded-lg w-fit">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+            Simulation data — connect live AIS & fleet API for production alerts
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
