@@ -60,6 +60,48 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
   const accent = "#5e9a32";
   const accentLight = "#74b844";
   const accentGold = "#b89840";
+=======
+    icon: Activity,
+    title: "Listings Intelligence",
+    desc: "Continuous monitoring of every active listing — days on market, inquiry volume, showing velocity, and competitive positioning in real time.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Pipeline Command",
+    desc: "Deal flow visibility from first contact to close. See what's moving, what's stalling, and where broker intervention drives the most value.",
+  },
+  {
+    icon: AlertCircle,
+    title: "Distress Signal Detection",
+    desc: "Early warning on at-risk transactions — financing contingencies, inspection issues, negotiation stalls, and market exposure drift.",
+  },
+  {
+    icon: BarChart3,
+    title: "Brokerage Telemetry",
+    desc: "Team performance metrics across agents — response times, deal conversion, showing-to-offer ratios, and revenue contribution.",
+  },
+  {
+    icon: Database,
+    title: "Market Data Aggregation",
+    desc: "Normalized ingestion from MLS, CoStar, county records, and CRM — structured for commercial brokerage workflows, not generic analytics.",
+  },
+  {
+    icon: Zap,
+    title: "Inquiry Routing",
+    desc: "Smart assignment of inbound buyer and tenant inquiries to the right agent based on availability, expertise, and portfolio fit.",
+  },
+];
+
+const whoItsFor = [
+  { role: "Brokers & Partners", desc: "Full book visibility. See which listings are stalling, which deals need attention, and where agent capacity is under-utilized — in one command view." },
+  { role: "Brokerage Operators", desc: "Real-time pipeline health across every transaction. Identify friction points, track inquiry-to-close ratios, and measure team execution quality." },
+  { role: "CRE Investors", desc: "Structured market intelligence for acquisition targeting, distress identification, and portfolio performance analysis — with context that raw listings data lacks." },
+];
+
+export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
+  const accent = "#a07848";
+  const accentLight = "#c8a96a";
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
 
   return (
     <div style={{ minHeight: "100vh", background: "#0b1009", color: "#e6ead6", fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif" }}>
@@ -76,6 +118,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: `${accent}1a`, border: `1px solid ${accent}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Building2 size={14} style={{ color: accentLight }} />
             </div>
+<<<<<<< HEAD
             <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em", color: "#e6ead6" }}>Terra</span>
             <span style={{ fontSize: "10px", fontFamily: "monospace", color: "#4e6042", marginLeft: "4px" }}>by SZL Holdings</span>
           </div>
@@ -91,6 +134,10 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 {link.label}
               </a>
             ))}
+=======
+            <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em", color: "#e2e8f0" }}>Terra</span>
+            <span style={{ fontSize: "10px", fontFamily: "monospace", color: "#475569", marginLeft: "4px" }}>by SZL Holdings</span>
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <a href="/" style={{ fontSize: "13px", color: "#4e6042", textDecoration: "none" }}
@@ -132,6 +179,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             padding: "4px 12px 4px 8px", borderRadius: "4px",
             background: `${accent}0f`, border: `1px solid ${accent}28`,
           }}>
+<<<<<<< HEAD
             <MapPin size={11} style={{ color: accentLight }} />
             <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: accentLight }}>NYC Real Estate Intelligence</span>
           </div>
@@ -141,6 +189,17 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           </h1>
           <p style={{ fontSize: "1.0625rem", lineHeight: 1.72, color: "#4e6042", maxWidth: "36rem", margin: "0 auto 2.5rem" }}>
             Terra surfaces distressed properties, tracks the deal pipeline, delivers market intelligence, and manages broker workflow — all from one command surface built for operators who move fast.
+=======
+            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: accentLight, display: "inline-block", boxShadow: `0 0 6px ${accentLight}99` }} />
+            <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: accentLight }}>Real Estate Intelligence</span>
+          </div>
+
+          <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.75rem)", fontWeight: 700, letterSpacing: "-0.032em", lineHeight: 1.05, color: "#f1f5f9", marginBottom: "1.25rem" }}>
+            Real estate intelligence<br />for brokers who need<br />to see everything.
+          </h1>
+          <p style={{ fontSize: "1.0625rem", lineHeight: 1.72, color: "#64748b", maxWidth: "36rem", margin: "0 auto 2.5rem" }}>
+            Terra is the real estate intelligence layer for commercial brokers and investors. It observes listing health, deal pipeline, agent activity, and distress signals — turning fragmented market data into structured operational command.
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
           </p>
 
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -175,6 +234,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
       {/* Stats */}
       <section style={{ borderTop: `1px solid ${accent}10`, borderBottom: `1px solid ${accent}10`, padding: "2.5rem 0", background: `${accent}07` }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
+<<<<<<< HEAD
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "2rem" }} className="terra-stats-grid">
             {stats.map((stat) => (
               <div key={stat.label} style={{ textAlign: "center" }}>
@@ -218,6 +278,33 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                   >
                     <p style={{ fontSize: "18px", fontWeight: 700, fontFamily: "monospace", color: dt.color, marginBottom: "2px" }}>{dt.count}</p>
                     <p style={{ fontSize: "11.5px", color: "#92a478" }}>{dt.label}</p>
+=======
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "start" }} className="terra-grid">
+            <div>
+              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: accentLight, marginBottom: "0.75rem" }}>What Terra Observes</p>
+              <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "1.25rem" }}>
+                Every listing, deal, and market signal in one view.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "#64748b", marginBottom: "1rem" }}>
+                Terra is the intelligence layer that makes your brokerage legible. Not just listings — the full operational reality: inquiry routing, agent capacity, deal pipeline health, and distress signals across your book.
+              </p>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "#64748b" }}>
+                Powered by Alloy, Terra normalizes signals from property data feeds, CRM systems, and market indices — applying commercial real estate logic to surface what matters before it becomes urgent.
+              </p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {[
+                { label: "Listing pipeline health", desc: "Days on market, inquiry velocity, price reduction patterns, and stall events across your full active portfolio" },
+                { label: "Deal distress signals", desc: "Early detection when transactions are at risk — financing contingencies, title issues, negotiation stalls" },
+                { label: "Agent capacity & activity", desc: "Showing activity, response times, deal load, and performance against targets across your team" },
+                { label: "Market data integrations", desc: "Custom connectors to MLS feeds, CoStar, LoopNet, and CRM systems — normalized for commercial brokerage workflows" },
+              ].map((item) => (
+                <div key={item.label} style={{ display: "flex", gap: "12px", padding: "14px 16px", borderRadius: "6px", background: `${accent}0a`, border: `1px solid ${accent}18` }}>
+                  <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: accentLight, flexShrink: 0, marginTop: "6px" }} />
+                  <div>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#cbd5e1", marginBottom: "2px" }}>{item.label}</p>
+                    <p style={{ fontSize: "12px", lineHeight: 1.55, color: "#475569" }}>{item.desc}</p>
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
                   </div>
                 ))}
               </div>
@@ -432,8 +519,13 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem", display: "flex", alignItems: "center", gap: "16px" }}>
           <div style={{ width: "4px", height: "32px", borderRadius: "2px", background: "#00d4ff", flexShrink: 0 }} />
           <div>
+<<<<<<< HEAD
             <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#00d4ff", marginBottom: "3px" }}>Powered by Alloy</p>
             <p style={{ fontSize: "13px", color: "#4e6042" }}>Terra runs on the Alloy orchestration engine — every distress signal, deal workflow, and market data point is acquired, normalized, and acted upon by the same intelligence layer powering the entire SZL ecosystem.</p>
+=======
+            <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#5c9be4", marginBottom: "3px" }}>Powered by Alloy</p>
+            <p style={{ fontSize: "13px", color: "#475569" }}>Terra runs on the Alloy orchestration engine — every signal is acquired, normalized, and reasoned upon by the same intelligence layer powering the entire SZL ecosystem.</p>
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
           </div>
           <a
             href="/alloy/"
@@ -449,11 +541,19 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
       {/* CTA */}
       <section style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "5rem 0" }}>
         <div style={{ maxWidth: "600px", margin: "0 auto", padding: "0 1.5rem", textAlign: "center" }}>
+<<<<<<< HEAD
           <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 700, letterSpacing: "-0.022em", color: "#f0f4e6", marginBottom: "1rem" }}>
             Access Terra
           </h2>
           <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "#4e6042", marginBottom: "2rem" }}>
             Sign in to access the Terra real estate intelligence platform, or request a demonstration for your brokerage.
+=======
+          <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 700, letterSpacing: "-0.022em", color: "#f1f5f9", marginBottom: "1rem" }}>
+            Access Terra
+          </h2>
+          <p style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "#64748b", marginBottom: "2rem" }}>
+            Sign in to access the Terra real estate intelligence platform, or request a demonstration for your organization.
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
           </p>
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
             <button
@@ -485,6 +585,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* Footer */}
+<<<<<<< HEAD
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "3rem 1.5rem" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "3rem", marginBottom: "2.5rem" }} className="terra-footer-grid">
@@ -539,6 +640,12 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <p style={{ fontSize: "11px", color: "#2e3d26", fontFamily: "monospace" }}>inquiries@szlholdings.com</p>
           </div>
         </div>
+=======
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "2rem 1.5rem", textAlign: "center" }}>
+        <p style={{ fontSize: "12px", color: "#334155", fontFamily: "monospace" }}>
+          © {new Date().getFullYear()} Terra · SZL Holdings · inquiries@szlholdings.com
+        </p>
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
       </footer>
 
       <style>{`
@@ -546,6 +653,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           .terra-nav-links { display: flex !important; }
         }
         @media (max-width: 768px) {
+<<<<<<< HEAD
           .terra-stats-grid, .terra-caps-grid, .terra-roles-grid { grid-template-columns: 1fr 1fr !important; }
           .terra-two-col { grid-template-columns: 1fr !important; gap: 2rem !important; }
           .terra-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 2rem !important; }
@@ -553,6 +661,9 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         @media (max-width: 480px) {
           .terra-stats-grid, .terra-caps-grid, .terra-roles-grid { grid-template-columns: 1fr !important; }
           .terra-footer-grid { grid-template-columns: 1fr !important; }
+=======
+          .terra-grid, .caps-grid, .who-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+>>>>>>> 25a1a6a (fix: full ecosystem audit — memory leak, brand identities, nav, MSP data, layout)
         }
       `}</style>
     </div>

@@ -19,6 +19,7 @@ import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import { seedPlatformData } from "./lib/seed-platform";
 import { initializeOpenTelemetry } from "@workspace/observability";
 import { seedTerraDemo } from "./lib/terra-seed";
+import { seedMspData } from "./lib/seed-msp";
 
 failFastOnInvalidConfig();
 
@@ -78,6 +79,10 @@ seedPlatformData().catch(err => {
 
 seedTerraDemo().catch(err => {
   logger.warn({ err }, "[terra-seed] Terra demo seed failed (non-fatal)");
+});
+
+seedMspData().catch(err => {
+  logger.warn({ err }, "[msp-seed] MSP demo seed failed (non-fatal)");
 });
 
 server.listen(port, "0.0.0.0", () => {

@@ -10,7 +10,20 @@ const NAV_LINKS = [
   { label: "Alloy", href: "/alloy", external: "/alloy/" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
+  { label: "Firestorm", href: "/firestorm", external: "/firestorm/" },
+  { label: "INCA", href: "/inca", external: "/inca/" },
+  { label: "Terra", href: "/terra", external: "/terra/" },
+  { label: "Rosie", href: "/msp", external: "/msp/" },
   { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/" },
+  { label: "Founder", href: "/founder" },
+  { label: "Contact", href: "/contact" },
+];
+
+const NAV_LINKS_PRIMARY = [
+  { label: "Ecosystem", href: "/ecosystem" },
+  { label: "Alloy", href: "/alloy", external: "/alloy/" },
+  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
+  { label: "Vessels", href: "/vessels", external: "/vessels/" },
   { label: "Founder", href: "/founder" },
   { label: "Contact", href: "/contact" },
 ];
@@ -81,8 +94,8 @@ export function SiteNav() {
           </span>
         </Link>
 
-        <div className="hidden lg:flex items-center gap-6">
-          {NAV_LINKS.map((link) => {
+        <div className="hidden lg:flex items-center gap-5">
+          {NAV_LINKS_PRIMARY.map((link) => {
             const isActive = location === link.href;
             const isExternal = !!link.external;
             const commonStyle = {

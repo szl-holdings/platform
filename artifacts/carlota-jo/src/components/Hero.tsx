@@ -59,15 +59,15 @@ function GoldDust() {
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden" style={{ background: "#1a1714" }}>
+    <section className="relative overflow-hidden" style={{ background: "#1a1714", minHeight: "min(92vh, 820px)" }}>
       <GoldDust />
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(196,170,126,0.15), transparent)" }} />
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 75% 30%, rgba(196,170,126,0.04) 0%, transparent 70%)" }} />
-        <div className="absolute bottom-0 left-0 right-0 h-32" style={{ background: "linear-gradient(to top, #f9f7f3, #f9f7f300 100%)" }} />
+        <div className="absolute bottom-0 left-0 right-0 h-32" style={{ background: "linear-gradient(to top, #1a1714, transparent)" }} />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 pt-32 sm:pt-36 lg:pt-40 pb-16 sm:pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 pt-36 sm:pt-40 lg:pt-44 pb-16 sm:pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           <div className="lg:col-span-7">
             <motion.div

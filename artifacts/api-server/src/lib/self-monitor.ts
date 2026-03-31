@@ -3,6 +3,7 @@ import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
 
 const POLL_INTERVAL_MS = 60_000;
+const SIGNAL_COOLDOWN_MS = 10 * 60_000;
 const HEALTH_URL = "http://localhost:" + (process.env.PORT ?? "3000") + "/api/health/detailed";
 
 interface HealthCheck {
@@ -23,6 +24,18 @@ interface HealthDetailedResponse {
 }
 
 let monitorInterval: ReturnType<typeof setInterval> | null = null;
+
+const lastSignalAt = new Map<string, number>();
+
+function shouldEmitSignal(key: string): boolean {
+  const now = Date.now();
+  const last = lastSignalAt.get(key) ?? 0;
+  if (now - last >= SIGNAL_COOLDOWN_MS) {
+    lastSignalAt.set(key, now);
+    return true;
+  }
+  return false;
+}
 
 async function fetchHealth(): Promise<HealthDetailedResponse | null> {
   try {
@@ -91,52 +104,65 @@ async function runMonitoringCycle(): Promise<void> {
 
   const health = await fetchHealth();
   if (!health) {
-    await createSignal({
-      severity: "critical",
-      title: "API health endpoint unreachable — self-monitoring loop interrupted",
-      body: "The Lyte self-monitoring loop could not reach /api/health/detailed. The API server may be overloaded or experiencing a startup issue.",
-      metadata: {
-        affectedFunction: "API Infrastructure",
-        owner: "Platform Team",
-        ownerTeam: "SRE",
-        recommendedAction: "Check API server logs. Verify process is running. Restart if unresponsive for > 2 minutes.",
-        sourceData: "Lyte self-monitoring — health endpoint",
-      },
-    });
+    if (shouldEmitSignal("health-unreachable")) {
+      await createSignal({
+        severity: "critical",
+        title: "API health endpoint unreachable — self-monitoring loop interrupted",
+        body: "The Lyte self-monitoring loop could not reach /api/health/detailed. The API server may be overloaded or experiencing a startup issue.",
+        metadata: {
+          affectedFunction: "API Infrastructure",
+          owner: "Platform Team",
+          ownerTeam: "SRE",
+          recommendedAction: "Check API server logs. Verify process is running. Restart if unresponsive for > 2 minutes.",
+          sourceData: "Lyte self-monitoring — health endpoint",
+        },
+      });
+    }
     return;
   }
+
+  lastSignalAt.delete("health-unreachable");
 
   const { memory, checks, uptime, status: overallStatus } = health;
 
   const dbCheck = checks["database"];
   if (dbCheck?.status === "unreachable" || dbCheck?.status === "unavailable") {
-    await createSignal({
-      severity: "critical",
-      title: "Database connection unreachable — all SZL apps impacted",
-      body: `The SZL API Server cannot connect to the PostgreSQL database. Status: ${dbCheck.status}. Latency: ${dbCheck.latencyMs ?? "N/A"}ms. All platform features are degraded.`,
-      metadata: {
-        affectedFunction: "Database Infrastructure",
-        owner: "Platform Team",
-        ownerTeam: "SRE",
-        recommendedAction: "Check DATABASE_URL configuration. Verify PostgreSQL service is running. Check connection pool status.",
-        anomaly: `Database status changed to ${dbCheck.status}`,
-        sourceData: "/api/health/detailed — database check",
-      },
-    });
-  } else if (dbCheck?.latencyMs != null && dbCheck.latencyMs > 500) {
-    await createSignal({
-      severity: "high",
-      title: `Database query latency elevated — ${dbCheck.latencyMs}ms (threshold: 500ms)`,
-      body: `API Server health check detected database query latency of ${dbCheck.latencyMs}ms, exceeding the 500ms warning threshold. This may indicate index degradation or lock contention.`,
-      metadata: {
-        affectedFunction: "Database Infrastructure",
-        owner: "Platform Team",
-        ownerTeam: "SRE",
-        recommendedAction: "Run EXPLAIN ANALYZE on recent slow queries. Check pg_stat_activity for long-running transactions. Consider VACUUM ANALYZE.",
-        anomaly: `DB latency: ${dbCheck.latencyMs}ms (baseline: < 50ms)`,
-        sourceData: "/api/health/detailed — database check",
-      },
-    });
+    if (shouldEmitSignal("db-unreachable")) {
+      await createSignal({
+        severity: "critical",
+        title: "Database connection unreachable — all SZL apps impacted",
+        body: `The SZL API Server cannot connect to the PostgreSQL database. Status: ${dbCheck.status}. Latency: ${dbCheck.latencyMs ?? "N/A"}ms. All platform features are degraded.`,
+        metadata: {
+          affectedFunction: "Database Infrastructure",
+          owner: "Platform Team",
+          ownerTeam: "SRE",
+          recommendedAction: "Check DATABASE_URL configuration. Verify PostgreSQL service is running. Check connection pool status.",
+          anomaly: `Database status changed to ${dbCheck.status}`,
+          sourceData: "/api/health/detailed — database check",
+        },
+      });
+    }
+  } else {
+    lastSignalAt.delete("db-unreachable");
+    if (dbCheck?.latencyMs != null && dbCheck.latencyMs > 500) {
+      if (shouldEmitSignal("db-latency")) {
+        await createSignal({
+          severity: "high",
+          title: `Database query latency elevated — ${dbCheck.latencyMs}ms (threshold: 500ms)`,
+          body: `API Server health check detected database query latency of ${dbCheck.latencyMs}ms, exceeding the 500ms warning threshold. This may indicate index degradation or lock contention.`,
+          metadata: {
+            affectedFunction: "Database Infrastructure",
+            owner: "Platform Team",
+            ownerTeam: "SRE",
+            recommendedAction: "Run EXPLAIN ANALYZE on recent slow queries. Check pg_stat_activity for long-running transactions. Consider VACUUM ANALYZE.",
+            anomaly: `DB latency: ${dbCheck.latencyMs}ms (baseline: < 50ms)`,
+            sourceData: "/api/health/detailed — database check",
+          },
+        });
+      }
+    } else {
+      lastSignalAt.delete("db-latency");
+    }
   }
 
   const telemetryCheck = checks["telemetry"];
@@ -148,90 +174,113 @@ async function runMonitoringCycle(): Promise<void> {
     const errorRate = errorRateMatch ? parseFloat(errorRateMatch[1]) : null;
 
     if (p95 != null && p95 > 500) {
-      await createSignal({
-        severity: p95 > 1000 ? "critical" : "high",
-        title: `API p95 latency exceeded threshold — ${p95}ms (threshold: 500ms)`,
-        body: `API Server telemetry reports p95 response latency of ${p95}ms. The warning threshold is 500ms. Users may be experiencing degraded performance across all SZL applications.`,
-        metadata: {
-          affectedFunction: "API Infrastructure",
-          owner: "Platform Team",
-          ownerTeam: "SRE",
-          recommendedAction: "Profile slow endpoints. Check for N+1 query patterns. Review recent deployments for performance regressions.",
-          anomaly: `p95 latency: ${p95}ms — ${p95 > 1000 ? "critical" : "elevated"}`,
-          sourceData: "/api/health/detailed — telemetry check",
-          latencyP95Ms: p95,
-          errorRate,
-        },
-      });
+      if (shouldEmitSignal("api-latency")) {
+        await createSignal({
+          severity: p95 > 1000 ? "critical" : "high",
+          title: `API p95 latency exceeded threshold — ${p95}ms (threshold: 500ms)`,
+          body: `API Server telemetry reports p95 response latency of ${p95}ms. The warning threshold is 500ms. Users may be experiencing degraded performance across all SZL applications.`,
+          metadata: {
+            affectedFunction: "API Infrastructure",
+            owner: "Platform Team",
+            ownerTeam: "SRE",
+            recommendedAction: "Profile slow endpoints. Check for N+1 query patterns. Review recent deployments for performance regressions.",
+            anomaly: `p95 latency: ${p95}ms — ${p95 > 1000 ? "critical" : "elevated"}`,
+            sourceData: "/api/health/detailed — telemetry check",
+            latencyP95Ms: p95,
+            errorRate,
+          },
+        });
+      }
     } else if (errorRate != null && errorRate > 5) {
-      await createSignal({
-        severity: errorRate > 15 ? "critical" : "high",
-        title: `API error rate elevated — ${errorRate.toFixed(1)}% (threshold: 5%)`,
-        body: `API Server error rate has reached ${errorRate.toFixed(1)}%, exceeding the 5% alert threshold. Structured error logs should be reviewed immediately.`,
-        metadata: {
-          affectedFunction: "API Infrastructure",
-          owner: "Platform Team",
-          ownerTeam: "SRE",
-          recommendedAction: "Review API error logs for common stack traces. Check for schema or breaking changes in recent deployments.",
-          anomaly: `Error rate: ${errorRate.toFixed(1)}% (baseline: < 2%)`,
-          sourceData: "/api/health/detailed — telemetry check",
-          errorRate,
-        },
-      });
+      if (shouldEmitSignal("api-error-rate")) {
+        await createSignal({
+          severity: errorRate > 15 ? "critical" : "high",
+          title: `API error rate elevated — ${errorRate.toFixed(1)}% (threshold: 5%)`,
+          body: `API Server error rate has reached ${errorRate.toFixed(1)}%, exceeding the 5% alert threshold. Structured error logs should be reviewed immediately.`,
+          metadata: {
+            affectedFunction: "API Infrastructure",
+            owner: "Platform Team",
+            ownerTeam: "SRE",
+            recommendedAction: "Review API error logs for common stack traces. Check for schema or breaking changes in recent deployments.",
+            anomaly: `Error rate: ${errorRate.toFixed(1)}% (baseline: < 2%)`,
+            sourceData: "/api/health/detailed — telemetry check",
+            errorRate,
+          },
+        });
+      }
+    } else {
+      lastSignalAt.delete("api-latency");
+      lastSignalAt.delete("api-error-rate");
     }
+  } else {
+    lastSignalAt.delete("api-latency");
+    lastSignalAt.delete("api-error-rate");
   }
 
   const jobQueueCheck = checks["job_queue"];
   if (jobQueueCheck?.status === "backpressure") {
     const details = jobQueueCheck.details ?? "";
-    await createSignal({
-      severity: "high",
-      title: "Job queue backpressure detected — background processing degraded",
-      body: `The API Server job queue is experiencing backpressure. Queue details: ${details}. Background tasks including report generation and notifications may be delayed.`,
-      metadata: {
-        affectedFunction: "Background Processing",
-        owner: "Platform Team",
-        ownerTeam: "SRE",
-        recommendedAction: "Identify stuck or long-running jobs. Check for worker thread deadlocks. Consider scaling up worker concurrency.",
-        anomaly: `Queue backpressure: ${details}`,
-        sourceData: "/api/health/detailed — job queue check",
-      },
-    });
+    if (shouldEmitSignal("job-queue-backpressure")) {
+      await createSignal({
+        severity: "high",
+        title: "Job queue backpressure detected — background processing degraded",
+        body: `The API Server job queue is experiencing backpressure. Queue details: ${details}. Background tasks including report generation and notifications may be delayed.`,
+        metadata: {
+          affectedFunction: "Background Processing",
+          owner: "Platform Team",
+          ownerTeam: "SRE",
+          recommendedAction: "Identify stuck or long-running jobs. Check for worker thread deadlocks. Consider scaling up worker concurrency.",
+          anomaly: `Queue backpressure: ${details}`,
+          sourceData: "/api/health/detailed — job queue check",
+        },
+      });
+    }
+  } else {
+    lastSignalAt.delete("job-queue-backpressure");
   }
 
   if (memory) {
     const heapPct = (memory.heapUsedMb / memory.heapTotalMb) * 100;
     if (heapPct > 90) {
-      await createSignal({
-        severity: "critical",
-        title: `API Server heap memory critical — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
-        body: `Node.js heap memory is at ${heapPct.toFixed(0)}% capacity (${memory.heapUsedMb}MB used of ${memory.heapTotalMb}MB total). GC pressure is causing latency spikes. OOM crash risk is elevated.`,
-        metadata: {
-          affectedFunction: "API Infrastructure",
-          owner: "Platform Team",
-          ownerTeam: "SRE",
-          recommendedAction: "Immediate: identify and kill memory-leaking processes. Schedule rolling restart. Investigate large request caches or WebSocket accumulation.",
-          anomaly: `Heap at ${heapPct.toFixed(0)}% — OOM risk`,
-          sourceData: "process.memoryUsage() — API Server",
-          heapUsedMb: memory.heapUsedMb,
-          heapTotalMb: memory.heapTotalMb,
-        },
-      });
-    } else if (heapPct > 75) {
-      await createSignal({
-        severity: "medium",
-        title: `API Server heap memory elevated — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
-        body: `Node.js heap utilization is at ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB). No immediate action required, but trend monitoring recommended to prevent GC pressure.`,
-        metadata: {
-          affectedFunction: "API Infrastructure",
-          owner: "Platform Team",
-          ownerTeam: "SRE",
-          recommendedAction: "Monitor heap trend over next 30 minutes. If crossing 85%, plan a non-disruptive restart.",
-          sourceData: "process.memoryUsage() — API Server",
-          heapUsedMb: memory.heapUsedMb,
-          heapTotalMb: memory.heapTotalMb,
-        },
-      });
+      if (shouldEmitSignal("heap-critical")) {
+        await createSignal({
+          severity: "critical",
+          title: `API Server heap memory critical — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
+          body: `Node.js heap memory is at ${heapPct.toFixed(0)}% capacity (${memory.heapUsedMb}MB used of ${memory.heapTotalMb}MB total). GC pressure is causing latency spikes. OOM crash risk is elevated.`,
+          metadata: {
+            affectedFunction: "API Infrastructure",
+            owner: "Platform Team",
+            ownerTeam: "SRE",
+            recommendedAction: "Immediate: identify and kill memory-leaking processes. Schedule rolling restart. Investigate large request caches or WebSocket accumulation.",
+            anomaly: `Heap at ${heapPct.toFixed(0)}% — OOM risk`,
+            sourceData: "process.memoryUsage() — API Server",
+            heapUsedMb: memory.heapUsedMb,
+            heapTotalMb: memory.heapTotalMb,
+          },
+        });
+      }
+    } else {
+      lastSignalAt.delete("heap-critical");
+      if (heapPct > 75) {
+        if (shouldEmitSignal("heap-elevated")) {
+          await createSignal({
+            severity: "medium",
+            title: `API Server heap memory elevated — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
+            body: `Node.js heap utilization is at ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB). No immediate action required, but trend monitoring recommended to prevent GC pressure.`,
+            metadata: {
+              affectedFunction: "API Infrastructure",
+              owner: "Platform Team",
+              ownerTeam: "SRE",
+              recommendedAction: "Monitor heap trend over next 30 minutes. If crossing 85%, plan a non-disruptive restart.",
+              sourceData: "process.memoryUsage() — API Server",
+              heapUsedMb: memory.heapUsedMb,
+              heapTotalMb: memory.heapTotalMb,
+            },
+          });
+        }
+      } else {
+        lastSignalAt.delete("heap-elevated");
+      }
     }
   }
 
@@ -270,6 +319,7 @@ export function stopSelfMonitoring(): void {
   if (monitorInterval) {
     clearInterval(monitorInterval);
     monitorInterval = null;
+    lastSignalAt.clear();
     logger.info("Self-monitoring stopped");
   }
 }

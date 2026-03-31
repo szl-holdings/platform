@@ -122,18 +122,18 @@ export default function DreamscapeMarketingHome() {
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/20 bg-purple-500/5 mb-8">
             <Zap className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-[11px] font-semibold text-purple-400/80 tracking-[0.1em] uppercase">Predictive Intelligence Platform</span>
+            <span className="text-[11px] font-semibold text-purple-400/80 tracking-[0.1em] uppercase">Scenario Intelligence · Alloy Module</span>
           </m.div>
 
           <m.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6">
-            See what's coming.{" "}
+            Model every scenario.{" "}
             <span className="bg-gradient-to-r from-purple-300 via-indigo-400 to-blue-400 bg-clip-text text-transparent">
-              Act before it arrives.
+              Decide with confidence.
             </span>
           </m.h1>
 
           <m.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            ML forecasting and scenario planning for leadership teams.
+            Dreamscape is Alloy's scenario intelligence module — multi-horizon forecasting, Monte Carlo simulation, and decision modeling for leadership teams running complex operations.
           </m.p>
 
           <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -212,11 +212,11 @@ export default function DreamscapeMarketingHome() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <m.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
-              Stop reacting.{" "}
-              <span className="bg-gradient-to-r from-purple-300 to-indigo-400 bg-clip-text text-transparent">Start predicting.</span>
+              Stop guessing.{" "}
+              <span className="bg-gradient-to-r from-purple-300 to-indigo-400 bg-clip-text text-transparent">Start modeling.</span>
             </h2>
             <p className="text-gray-500 text-[15px] mb-10 max-w-xl mx-auto leading-relaxed">
-              Dreamscape is available to qualified teams. Schedule a walkthrough to see how predictive intelligence changes the way you lead.
+              Dreamscape is Alloy's scenario intelligence module. Available to qualified teams — schedule a walkthrough to see how structured scenario planning changes how your leadership team decides.
             </p>
             <Link href="/demo">
               <button className="px-10 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all text-[15px] shadow-lg shadow-purple-500/20">
