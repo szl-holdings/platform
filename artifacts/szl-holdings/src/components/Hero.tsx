@@ -6,7 +6,7 @@ import { Link } from "wouter";
 const platforms = [
   { name: "Lyte", role: "Business Observability", icon: Eye, color: "hsl(190,90%,55%)", glow: "190,90%,55%" },
   { name: "Vessels", role: "Maritime Command", icon: Anchor, color: "hsl(205,85%,55%)", glow: "205,85%,55%" },
-  { name: "Firestorm", role: "Cyber Defense", icon: Shield, color: "hsl(0,80%,55%)", glow: "0,80%,55%" },
+  { name: "Aegis", role: "Defense & Intelligence", icon: Shield, color: "hsl(232,68%,60%)", glow: "232,68%,60%" },
   { name: "INCA", role: "AI Research", icon: Cpu, color: "hsl(265,80%,60%)", glow: "265,80%,60%" },
   { name: "Alloy", role: "Execution Fabric", icon: Layers, color: "hsl(214,80%,65%)", glow: "214,80%,65%" },
   { name: "Terra", role: "Real Estate Intelligence", icon: BarChart3, color: "hsl(88,42%,44%)", glow: "88,42%,44%" },
@@ -106,7 +106,7 @@ export function Hero() {
               className="text-[15px] sm:text-base leading-relaxed max-w-lg mb-7"
               style={{ color: "hsl(210,10%,55%)" }}
             >
-              Eight platforms. One architecture. Command systems for observability, defense, and enterprise operations — built to compound.
+              Ten platforms. One architecture. Command systems for observability, defense, and enterprise operations — built to compound.
             </m.p>
 
             <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }} className="flex flex-col sm:flex-row items-start gap-3 mb-8">
@@ -136,7 +136,7 @@ export function Hero() {
               className="flex flex-wrap gap-8 sm:gap-10"
             >
               {[
-                { value: "8", label: "Platforms Live" },
+                { value: "10", label: "Platforms Live" },
                 { value: "1", label: "Unified Arch." },
                 { value: "5+", label: "Years Operating" },
               ].map((stat) => (

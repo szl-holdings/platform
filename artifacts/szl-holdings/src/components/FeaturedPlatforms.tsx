@@ -113,7 +113,7 @@ export function FeaturedPlatforms() {
             lineHeight: "1.06",
             fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
           }}>
-            Eight platforms. One architecture.
+            Ten platforms. One architecture.
           </h2>
         </m.div>
 

@@ -18,7 +18,7 @@ export function About() {
             I build enterprise infrastructure, AI platforms, and domain-specific intelligence systems. My focus is on the category of software where the problem is genuinely hard — where domain depth, auditability, and decision-support quality matter more than feature count.
           </p>
           <p>
-            I founded SZL Holdings in 2023 as a strategic holding structure for a portfolio of domain-specific platforms. The portfolio spans maritime intelligence (Vessels), real estate intelligence (Terra), business observability (Beacon), cyber defense (Firestorm), AI research operations (INCA), strategic advisory (Carlota Jo), and platform orchestration (Lyte Command Center) — all powered by the Alloy execution fabric.
+            I founded SZL Holdings in 2023 as a strategic holding structure for a portfolio of domain-specific platforms. The portfolio spans maritime intelligence (Vessels), real estate intelligence (Terra), business observability (Lyte), unified defense and intelligence (Aegis), AI research operations (INCA), managed operations (Rosie), strategic advisory (Carlota Jo), and platform orchestration (Alloy) — ten platforms under one compounding architecture.
           </p>
           <p>
             My background is in enterprise software architecture, product design, and the infrastructure layer that sits between raw data and operational decisions. I'm particularly focused on the intersection of AI and accountability — building platforms where intelligence outputs are explainable, traceable, and defensible.

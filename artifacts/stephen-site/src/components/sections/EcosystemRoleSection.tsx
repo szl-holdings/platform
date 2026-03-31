@@ -2,13 +2,13 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Layers, Shield, Anchor, Cpu, BarChart3, Eye, Users, Sparkles } from "lucide-react";
 
 const platforms = [
+  { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)", desc: "Cross-platform workflow orchestration. Signals normalized, decisions routed, actions governed.", href: "/alloy/" },
   { Icon: Eye, name: "Lyte", role: "Business Observability", color: "hsl(190,90%,55%)", desc: "Command-layer business visibility. Risk, latency, ownership gaps — surfaced before they hit execution.", href: "/lyte-command-center/" },
   { Icon: Anchor, name: "Vessels", role: "Maritime Intelligence", color: "hsl(205,85%,55%)", desc: "Real-time fleet command for shipping operators. Voyage economics, route visibility, and AIS-grade signal processing.", href: "/vessels/" },
-  { Icon: Shield, name: "Firestorm", role: "Cyber Defense", color: "hsl(0,80%,55%)", desc: "Unified XDR, identity threat detection, and adversary emulation. SOC automation built for precision response.", href: "/firestorm/" },
-  { Icon: Cpu, name: "INCA", role: "AI Research Platform", color: "hsl(265,80%,60%)", desc: "Agentic AI research command. Experiment tracking, model lineage, drift detection, and ensemble operations.", href: "/inca/" },
-  { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)", desc: "Cross-platform workflow orchestration. Signals normalized, decisions routed, actions governed.", href: "/alloy/" },
-  { Icon: BarChart3, name: "Terra", role: "Real Estate Intelligence", color: "hsl(88,42%,44%)", desc: "Distress property tracking, deal pipeline intelligence, and NYC market data for serious real estate operators.", href: "/terra/" },
-  { Icon: Users, name: "Rosie", role: "Incident Command", color: "hsl(215,80%,55%)", desc: "MSP-grade threat and incident response. SLA prediction, dispatch automation, and client ops management.", href: "/msp/" },
+  { Icon: Shield, name: "Aegis", role: "Defense & Intelligence", color: "hsl(232,68%,60%)", desc: "Unified defense command — SOC, XDR, adversary emulation, managed operations, and AI intelligence in one platform.", href: "/firestorm/" },
+  { Icon: Cpu, name: "INCA", role: "AI Research Platform", color: "hsl(265,80%,60%)", desc: "Agentic AI research command. Experiment tracking, model lineage, drift detection, and ensemble operations.", href: "/firestorm/intel/dashboard" },
+  { Icon: BarChart3, name: "Terra", role: "Real Estate Intelligence", color: "hsl(140,56%,40%)", desc: "Distress property tracking, deal pipeline intelligence, and NYC market data for serious real estate operators.", href: "/terra/" },
+  { Icon: Users, name: "Rosie", role: "Incident Command", color: "hsl(356,70%,52%)", desc: "MSP-grade threat and incident response. SLA prediction, dispatch automation, and client ops management.", href: "/firestorm/ops/dashboard" },
   { Icon: Sparkles, name: "Carlota Jo", role: "Private Advisory", color: "hsl(38,55%,58%)", desc: "High-trust private advisory and residence management for high-net-worth principals.", href: "/carlota-jo/" },
 ];
 
@@ -29,7 +29,7 @@ export function EcosystemRoleSection() {
           <div className="grid lg:grid-cols-12 gap-8">
             <div className="lg:col-span-7">
               <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight mb-5">
-                Eight platforms. One operator.
+                Eight products. One operator.
               </h2>
               <p className="text-white/45 text-base font-light leading-relaxed">
                 Every platform in the SZL Holdings portfolio is founder-built, founder-operated, and connected by a single shared architecture. Here's the current roster — what each does and why it exists.
@@ -39,7 +39,7 @@ export function EcosystemRoleSection() {
               <div className="flex items-center gap-4 flex-wrap">
                 <div>
                   <p className="text-2xl font-semibold text-[#7ba3d4] leading-none">8</p>
-                  <p className="text-[9px] text-white/25 uppercase tracking-[0.2em] mt-1">Platforms live</p>
+                  <p className="text-[9px] text-white/25 uppercase tracking-[0.2em] mt-1">Products live</p>
                 </div>
                 <div className="w-px h-8 bg-white/8 hidden sm:block" />
                 <div>

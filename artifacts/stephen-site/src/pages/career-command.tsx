@@ -22,10 +22,12 @@ const skillRadar = [
 
 const projectDeepDives = [
   { name: "Vessels Maritime Intelligence", tech: ["React", "TypeScript", "Real-time Data", "SVG Maps"], impact: "Monitoring 200+ vessels across global shipping lanes", status: "Live" },
-  { name: "Firestorm Security Operations", tech: ["SOC Dashboard", "MITRE ATT&CK", "Threat Intel"], impact: "Enterprise-grade security operations center", status: "Live" },
-  { name: "INCA AI Research Platform", tech: ["Neural Networks", "Model Benchmarking", "GPU Clusters"], impact: "Training and evaluating custom AI models", status: "Live" },
+  { name: "Aegis Defense & Intelligence", tech: ["SOC Dashboard", "MITRE ATT&CK", "Threat Intel", "MSP Ops"], impact: "Unified defense command with SOC, XDR, and managed operations", status: "Live" },
+  { name: "INCA AI Research Platform", tech: ["Neural Networks", "Model Benchmarking", "GPU Clusters", "Agentic Cortex"], impact: "Training, evaluating, and deploying custom AI models", status: "Live" },
   { name: "Alloy Workflow Engine", tech: ["Signal Normalization", "Workflow Orchestration", "Artifact Generation"], impact: "Governs cross-platform signal routing, workflows, and approvals", status: "Live" },
   { name: "Lyte Command Center", tech: ["Infrastructure", "AIOps", "Observability"], impact: "Full-stack infrastructure intelligence platform", status: "Live" },
+  { name: "Terra Real Estate Intelligence", tech: ["Deal Pipeline", "Distress Engine", "Market Data", "CRM"], impact: "Full-stack real estate command across NYC's five boroughs", status: "Live" },
+  { name: "Carlota Jo Consulting", tech: ["Client Portal", "Document Management", "Advisory Ops"], impact: "White-glove estate management for high-net-worth families", status: "Live" },
 ];
 
 export default function CareerCommand() {

@@ -6,7 +6,7 @@ const highlights = [
   { icon: Eye, label: "Observability Architecture", desc: "Designed the cross-platform signal layer that powers business visibility across all SZL ventures.", color: "hsl(190,90%,55%)" },
   { icon: Layers, label: "Compound Infrastructure", desc: "Built the shared auth, design system, and observability stack that reduces marginal cost per new platform.", color: "hsl(214,80%,65%)" },
   { icon: Anchor, label: "Maritime Intelligence", desc: "Developed Vessels — a real-time fleet command platform tracking voyage economics and operational exceptions.", color: "hsl(205,85%,55%)" },
-  { icon: Shield, label: "Cyber Defense Systems", desc: "Shipped Firestorm — a unified XDR and SOC automation platform for enterprise threat response.", color: "hsl(0,80%,55%)" },
+  { icon: Shield, label: "Cyber Defense Systems", desc: "Shipped Aegis — a unified defense and intelligence command platform for enterprise threat response.", color: "hsl(232,68%,60%)" },
 ];
 
 export function FounderBlock() {
@@ -107,7 +107,7 @@ export function FounderBlock() {
             {[
               { Icon: Eye, name: "Lyte", role: "Business Observability", color: "hsl(190,90%,55%)" },
               { Icon: Anchor, name: "Vessels", role: "Maritime Intelligence", color: "hsl(205,85%,55%)" },
-              { Icon: Shield, name: "Firestorm", role: "Cyber Defense Command", color: "hsl(0,80%,55%)" },
+              { Icon: Shield, name: "Aegis", role: "Defense & Intelligence", color: "hsl(232,68%,60%)" },
               { Icon: Cpu, name: "INCA", role: "AI Research Platform", color: "hsl(265,80%,60%)" },
               { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)" },
               { Icon: BarChart3, name: "Terra", role: "Real Estate Intelligence", color: "hsl(88,42%,44%)" },

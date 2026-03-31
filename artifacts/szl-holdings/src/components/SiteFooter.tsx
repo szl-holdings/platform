@@ -66,7 +66,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.875rem", lineHeight: 1.65, maxWidth: "17rem", marginBottom: "0.75rem" }}>
-              Premium command systems across observability, maritime, cybersecurity, AI, and high-trust operations. Seven platforms. One compounding architecture.
+              Premium command systems across observability, maritime, cybersecurity, AI, and high-trust operations. Ten platforms. One compounding architecture.
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
               Washington, D.C. · London · Singapore

@@ -230,7 +230,7 @@ export function EcosystemLogic() {
                 { entity: "Alloy", role: "Intelligence backbone. Powers every platform.", accent: "hsl(214,80%,65%)", accentRgb: "92,155,228" },
                 { entity: "Lyte", role: "Business observability. Surfaces risk before it hits execution.", accent: "hsl(190,90%,55%)", accentRgb: "14,201,224" },
                 { entity: "Vessels", role: "Maritime command. Fleet intelligence in one layer.", accent: "hsl(205,85%,55%)", accentRgb: "38,164,218" },
-                { entity: "Firestorm", role: "Cyber defense. XDR, threat detection, SOC automation.", accent: "hsl(0,80%,55%)", accentRgb: "220,60,60" },
+                { entity: "Aegis", role: "Unified defense. SOC, XDR, threat detection, managed ops.", accent: "hsl(232,68%,60%)", accentRgb: "92,102,204" },
                 { entity: "INCA", role: "AI research. Structured intelligence and decision workflows.", accent: "hsl(265,80%,60%)", accentRgb: "139,92,246" },
                 { entity: "Terra", role: "Business telemetry. Real-time KPI and health monitoring.", accent: "hsl(160,70%,45%)", accentRgb: "34,168,120" },
                 { entity: "Rosie", role: "Incident command. MSP operations and SLA management.", accent: "hsl(215,80%,55%)", accentRgb: "55,120,210" },

@@ -21,14 +21,14 @@ const frameworks = [
     tag: "Execution",
     title: "Precision over throughput in high-stakes domains",
     text: "In maritime, cybersecurity, and AI operations, the cost of a wrong decision vastly exceeds the cost of a slow one. Systems in these domains should be built for correctness, auditability, and clear decision authority.",
-    metric: "Applied across: Vessels, Firestorm, INCA",
+    metric: "Applied across: Vessels, Aegis, INCA",
   },
   {
     number: "04",
     tag: "Systems Design",
     title: "Command-centered product architecture",
     text: "The best tools don't just display information — they surface the right decision at the right moment, to the right person, with the right context. That's the command metaphor: observation to action, with governance at every step.",
-    metric: "Across all 8 platforms",
+    metric: "Across all 10 platforms",
   },
 ];
 
