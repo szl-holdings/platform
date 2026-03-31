@@ -1,80 +1,74 @@
 # SZL Holdings — Platform Architecture
 
-**Version:** 1.0 · **Last updated:** March 2026
+**Version:** 2.0 · **Last updated:** March 2026
 
 ---
 
 ## Overview
 
-The SZL platform is built around a four-layer Business Observability architecture. Each layer has a defined function, a defined product set, and a defined interface contract with the adjacent layers. The architecture is not incidental — it is the thesis.
+The SZL platform is built around a layered Business Observability architecture. Five platforms share one data layer, one execution fabric, and one AI engine. Each platform owns a domain vertical. The compounding value comes from shared infrastructure — not from portfolio diversity alone.
 
 ---
 
-## The Four-Layer Model
+## The Architecture Model
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  LAYER 4 · ADVISE                                           │
-│  Carlota Jo Consulting                                      │
-│  Principal advisory grounded in platform intelligence       │
-├─────────────────────────────────────────────────────────────┤
-│  LAYER 3 · EXECUTE                                          │
-│  AlloyScape — Execution Fabric                              │
-│  Agent coordination · Human-confirmed workflow routing      │
-│  Governance layer for the agent network                     │
-├─────────────────────────────────────────────────────────────┤
-│  LAYER 2 · UNDERSTAND                                       │
-│  INCA — AI Research Command     Nimbus — Predictive Intel   │
-│  Model management · Reasoning   Scenarios · Drift · Signals │
-│  Agent evaluation · Explainability                          │
-├─────────────────────────────────────────────────────────────┤
-│  LAYER 1 · OBSERVE                                          │
-│  Vessels            Rosie              Beacon               │
-│  Maritime Intel     Threat & Incident  Business Telemetry   │
-│  Fleet · Route      SOC · MITRE        KPI · SLO · Anomaly  │
-│  Economics · AIS    Compliance         Workflow · Portfolio  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  ADVISE                                                             │
+│  Carlota Jo — Private Advisory & Strategy Consulting                │
+│  Principal advisory grounded in platform intelligence               │
+├─────────────────────────────────────────────────────────────────────┤
+│  EXECUTE                                                            │
+│  Alloy — Execution Fabric                                           │
+│  Workflow engine · Audit trail · Agent coordination                 │
+│  Human-in-the-loop gates for consequential actions                  │
+├─────────────────────────────────────────────────────────────────────┤
+│  OBSERVE · DECIDE · ACT                                             │
+│  Lyte              Aegis              Terra           Vessels       │
+│  Business          Defense &          Real Estate     Maritime      │
+│  Observability     Intelligence       Intelligence    Intelligence  │
+│  PRISM Framework   Defense/Cmd/Labs   NYC Distress    Fleet & AIS   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Product-to-Doctrine Mapping
+## Platform-to-Doctrine Mapping
 
-| Product | Layer | Vertical | Primary User | Thesis One-Liner |
+| Platform | Layer | Vertical | Primary User | Thesis |
 |---|---|---|---|---|
-| Vessels | Observe | Maritime & Logistics | Fleet Exec, Ops, Commercial | Real-time fleet and voyage intelligence for operators who cannot afford to be wrong. |
-| Rosie | Observe | Cyber & Security | SOC Analyst, CISO, Compliance | SOC-grade threat and incident command, designed to work at the speed of an actual incident. |
-| Beacon | Observe | Business Operations | Ops Lead, CFO, PMO | Operational telemetry that connects infrastructure signals to business outcomes. |
-| INCA | Understand | AI Research | ML Engineer, Research Lead | The intelligence layer where models are evaluated, agents are governed, and AI outputs become traceable decisions. |
-| Nimbus | Understand | Predictive Analytics | Data Scientist, Strategy Lead | Forward signal analysis and scenario reasoning for teams that need to see around corners. |
-| AlloyScape | Execute | Platform / Cross-Domain | Platform Architect, Operations | The execution fabric that turns intelligence into confirmed, accountable action. |
-| Carlota Jo | Advise | Brand & Strategy | Founder, CMO, Executive | Advisory at the intersection of brand, operations, and platform intelligence. |
-| Stephen Site | Identity | Founder / Career | Investors, Partners | A founder identity platform that reflects platform architecture, not a CV. |
+| Lyte | Observe / Interpret | Business Operations | Ops Lead, CFO, PMO | Business observability — making every operational surface visible, contextual, and actionable via PRISM |
+| Aegis | Observe / Respond | Cybersecurity & Defense | SOC Analyst, CISO, MSP | Unified defense and intelligence — three workspaces (Defense/Command/Labs) sharing one context |
+| Terra | Observe / Underwrite | NYC Real Estate | Broker, Investor, Portfolio | Property intelligence — distress signals, ownership structures, deal pipeline management |
+| Vessels | Track / Analyze | Maritime & Logistics | Fleet Exec, Ops, Commercial | Maritime intelligence — fleet positions, voyage economics, route risk, compliance |
+| Carlota Jo | Advise | Brand & Strategy | Founder, CMO, Executive | Private advisory at the intersection of brand, operations, and platform intelligence |
 
 ---
 
 ## Intelligence Stack
 
-The intelligence stack describes how raw signal becomes actionable output across the platform.
+How raw signal becomes actionable output:
 
 ```
 Raw Signal
     │
     ▼
-[OBSERVE LAYER] — Domain-specific ingestion and structuring
-    │   Vessels: AIS telemetry, voyage data, port calls
-    │   Rosie:   Security events, threat feeds, CVE data
-    │   Beacon:  Operational metrics, KPIs, SLO data
+[OBSERVE] — Domain-specific ingestion and structuring
+    │   Lyte:    Operational metrics, approval queues, workflow signals
+    │   Aegis:   Security events, threat feeds, CVE data, MITRE ATT&CK
+    │   Terra:   Distress filings, ownership records, market data
+    │   Vessels: AIS telemetry, voyage data, port calls, sanctions lists
     │
     ▼
-[UNDERSTAND LAYER] — Pattern recognition, reasoning, explainability
-    │   INCA:   Model evaluation, agent coordination, confidence scoring
-    │   Nimbus: Anomaly detection, drift analysis, scenario modelling
+[ANALYZE] — Pattern recognition, scoring, explainability
+    │   PRISM (Lyte):      Pulse/Risk/Intelligence/Signals/Motion decomposition
+    │   INCA (Aegis Labs): Model evaluation, experiment tracking, confidence scoring
+    │   Dreamscape:        Entity scoring engine, anomaly detection
     │
     ▼
-[EXECUTE LAYER] — Workflow routing and human-confirmed action
-    │   AlloyScape: Agent network governance, approval workflows
-    │               Human-in-the-loop gates for consequential actions
+[EXECUTE] — Workflow routing and human-confirmed action
+    │   Alloy:  Agent network governance, approval workflows
+    │           Human-in-the-loop gates for consequential actions
     │
     ▼
 Confirmed Action + Audit Trail
@@ -84,51 +78,52 @@ Confirmed Action + Audit Trail
 
 ## Entity Model
 
-The SZL entity model defines the core objects that appear across the platform. Sharing a model across products is what makes cross-domain traceability possible.
+Core objects shared across the platform:
 
 | Entity | Description | Appears In |
 |---|---|---|
-| Signal | A raw or normalised data point indicating a state change or anomaly | All Observe layer products |
-| Finding | A validated signal with attribution and severity classification | Rosie, Vessels, Beacon |
-| Incident | An active operational event requiring triage and response | Rosie, Vessels, Beacon |
-| Recommendation | An AI-generated advisory with reasoning and confidence score | AlloyScape, INCA, agent network |
-| Action | A human-confirmed response to a finding or recommendation | AlloyScape |
-| Actor | A person, role, or agent responsible for an action or decision | All products |
-| Audit Event | An immutable record of any actor action or system state change | All products |
-| Model | A versioned AI model with tracked provenance and evaluation history | INCA |
-| Experiment | A structured test of a model hypothesis with measurable outcome | INCA |
+| Signal | A raw or normalised data point indicating a state change or anomaly | All platforms |
+| Finding | A validated signal with attribution and severity classification | Aegis, Vessels, Terra |
+| Incident | An active operational event requiring triage and response | Aegis, Lyte |
+| Recommendation | An AI-generated advisory with reasoning and confidence score | Alloy, INCA |
+| Action | A human-confirmed response to a finding or recommendation | Alloy |
+| Actor | A person, role, or agent responsible for an action or decision | All platforms |
+| Audit Event | An immutable record of any actor action or system state change | All platforms |
 
 ---
 
 ## Agent Network
 
-The SZL agent network is coordinated through AlloyScape. Agents are advisory by design — they surface intelligence and recommendations but do not execute consequential actions without explicit human confirmation.
+Coordinated through Alloy. Agents are advisory by design — they surface intelligence and recommendations but do not execute consequential actions without explicit human confirmation.
 
-| Agent | Domain | Product | Function |
+| Agent | Domain | Platform | Function |
 |---|---|---|---|
 | Helmsman | Maritime | Vessels | Fleet intelligence, route risk, weather analysis |
-| Sentinel | Security | Rosie / Firestorm | Threat analysis, incident response, vulnerability triage |
-| Beacon | Operations | Lyte / Beacon | Signal correlation, incident triage, SLO analysis |
-| Muse | Creative | Dreamscape / Carlota Jo | Content strategy, campaign ideation |
-| Compass | Readiness | AlloyScape | Gap analysis, maturity assessment, improvement roadmaps |
+| Sentinel | Security | Aegis | Threat analysis, incident response, vulnerability triage |
+| Compass | Readiness | Alloy | Gap analysis, maturity assessment, improvement roadmaps |
 | Navigator | Portfolio | SZL Holdings | Ecosystem navigation, portfolio overview |
-| Stephen AI | Identity | Stephen Site | Founder narrative, expertise positioning |
 
 ---
 
 ## Shared Infrastructure
 
-All SZL products are built on a shared technical foundation:
+**Design System:** `@workspace/shared-ui` — TypeScript component library covering UI primitives, navigation, command palette, keyboard shortcuts, and agent indicators.
 
-**Design System:** `@workspace/shared-ui` — A TypeScript component library covering UI primitives, navigation patterns, command palette, keyboard shortcuts, agent indicators, and welcome overlays. Every product that imports from this library shares its design language automatically.
+**Database:** PostgreSQL with Drizzle ORM. Single shared database with per-domain schema organization (vessels_*, alloy_*, etc.).
 
-**Event Schema:** A common event format for platform-wide audit logging. All products emit events in the same schema. This is the prerequisite for cross-domain traceability.
+**Authentication:** OpenID Connect (PKCE) with session cookies. Role-based access control: `founder_admin`, `admin`, `operator`, `analyst`, `viewer`, `client`.
 
-**Authentication:** Shared session management and role-based access control infrastructure. Role models are product-specific but the enforcement layer is shared.
+**API Layer:** Centralized Express API server handling all platform backends, AI inference routing, integration connectors, and health reporting.
 
-**API Layer:** Centralised API server handling AI inference routing, integration connectors, data persistence, and health reporting across all products.
+**Real-time:** WebSocket with HMAC-signed tickets (5-minute TTL), per-channel role ACL, and automatic reconnection with exponential backoff.
 
-**Intelligence Layer:** AlloyScape coordinates agent routing, context passing, and approval workflows across the agent network. Model versions, prediction provenance, and recommendation chains are tracked through INCA.
+**Execution Fabric:** Alloy coordinates workflow execution, agent routing, and approval workflows with full audit trail.
+
+**PDF Generation:** Server-side pdfkit with 8 branded document templates across all platforms.
+
+**Email:** Multi-provider (Resend → SendGrid → SMTP) with branded HTML templates per platform.
+
+**Payments:** Stripe (Checkout, Subscriptions, Invoicing, Customer Portal) with per-platform pricing tiers.
 
 ---
 
@@ -136,62 +131,35 @@ All SZL products are built on a shared technical foundation:
 
 | Layer | Technologies |
 |---|---|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Framer Motion |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS v4, Recharts, Framer Motion |
+| Mobile | Expo / React Native, expo-auth-session |
 | Routing | Wouter (client-side), path-based monorepo routing |
 | State | TanStack Query, React Context |
-| UI Library | Custom shared-ui (workspace library), Radix UI primitives |
-| Backend | Node.js, Express, TypeScript |
-| AI / LLM | OpenAI (GPT series), Anthropic (Claude series) — routed via Replit AI proxy |
-| Database | PostgreSQL (via Replit managed DB) |
-| Charts | Recharts |
+| UI | Custom shared-ui, Radix UI primitives |
+| Backend | Node.js, Express, TypeScript, esbuild |
+| Database | PostgreSQL, Drizzle ORM |
+| Real-time | WebSocket (ws library) |
+| AI / LLM | OpenAI, Anthropic, Google Gemini |
+| Maps | Mapbox GL JS |
+| Payments | Stripe |
+| PDF | pdfkit |
+| Email | Resend, SendGrid, nodemailer |
 | Monorepo | pnpm workspaces |
+| IaC | Azure Bicep |
 
 ---
 
 ## Design Principles
 
-**Explicit over implicit.** Platform state — data freshness, demo mode, model version, agent confidence — is always visible. Users are never left to assume what they are looking at.
+**Explicit over implicit.** Platform state — data freshness, demo mode, model version, agent confidence — is always visible. Users never assume what they are looking at.
 
-**Advisory before autonomous.** AI outputs are presented as recommendations with reasoning. Execution requires human confirmation. This is architectural, not just policy.
+**Advisory before autonomous.** AI outputs are presented as recommendations with reasoning. Execution requires human confirmation. This is architectural, not policy.
 
-**Traceability as a feature.** Every significant event — signal, finding, recommendation, action — is logged with attribution and context. The audit trail is not a compliance artefact; it is an operational tool.
+**Traceability as a feature.** Every significant event is logged with attribution and context. The audit trail is an operational tool, not a compliance artifact.
 
-**Shared infrastructure, domain-specific surfaces.** The four-layer architecture is shared. The domain expertise — maritime terminology, security taxonomy, AI research workflow — is built into each product's Observe layer. The compounding value of shared infrastructure is the platform's structural advantage.
+**Shared infrastructure, domain-specific surfaces.** The architecture is shared. Domain expertise — maritime terminology, security taxonomy, real estate distress signals — is built into each platform's surface layer.
 
-**Premium restraint in design.** The SZL design system favours density with clarity, subdued palettes with deliberate accent use, and information hierarchy over decoration. Every UI decision should make the user faster and more confident, not more impressed.
-
----
-
-## Ecosystem Map
-
-```
-                    ┌─────────────────┐
-                    │   SZL Holdings  │
-                    │  Portfolio Site  │
-                    └────────┬────────┘
-                             │
-          ┌──────────────────┼──────────────────┐
-          │                  │                  │
-   ┌──────▼──────┐   ┌───────▼──────┐   ┌──────▼──────┐
-   │   OBSERVE   │   │  UNDERSTAND  │   │   EXECUTE   │
-   │─────────────│   │──────────────│   │─────────────│
-   │ Vessels     │   │ INCA         │   │ AlloyScape  │
-   │ Rosie       │   │ Nimbus       │   │             │
-   │ Beacon      │   │              │   │             │
-   └──────┬──────┘   └───────┬──────┘   └──────┬──────┘
-          │                  │                  │
-          └──────────────────┼──────────────────┘
-                             │
-                    ┌────────▼────────┐
-                    │     ADVISE      │
-                    │─────────────────│
-                    │ Carlota Jo      │
-                    └─────────────────┘
-
-Supporting:
-  Stephen Site — Founder identity and platform narrative
-  Firestorm    — Security simulation and adversarial readiness (Observe/Security)
-```
+**Premium restraint in design.** Dark, immersive aesthetic. Density with clarity, subdued palettes with deliberate accent use, information hierarchy over decoration. Every UI decision makes the user faster and more confident.
 
 ---
 
@@ -199,4 +167,5 @@ Supporting:
 
 | Version | Date | Summary |
 |---|---|---|
+| 2.0 | March 2026 | Updated for current platform naming (Aegis, PRISM, etc.), WebSocket, Stripe, Mapbox, PDF, mobile |
 | 1.0 | March 2026 | Initial architecture documentation |

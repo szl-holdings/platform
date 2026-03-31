@@ -1,6 +1,6 @@
 # SZL Holdings — Trust Center
 
-**Version:** 1.0 · **Last updated:** March 2026
+**Version:** 2.0 · **Last updated:** March 2026
 
 ---
 
@@ -16,17 +16,14 @@ This is not a compliance checklist. It is a record of how we build and why we bu
 
 The SZL platform is organised into four functional layers:
 
-**1 · Observe** — Real-time data acquisition and signal ingestion across operational domains.  
-Products: Vessels (maritime telemetry), Rosie (threat and incident signals), Beacon (business and operational telemetry).
+**Observe · Decide · Act** — Real-time data acquisition, signal structuring, and domain-specific intelligence across five verticals.  
+Platforms: Lyte (business observability), Aegis (defense & intelligence), Terra (real estate intelligence), Vessels (maritime intelligence).
 
-**2 · Understand** — Pattern recognition, model evaluation, and explainable intelligence synthesis.  
-Products: INCA (AI research command), Nimbus (predictive modelling and anomaly detection).
+**Execute** — Workflow orchestration, action routing, and human-in-the-loop approval gates.  
+System: Alloy (execution fabric and agent coordination layer).
 
-**3 · Execute** — Workflow orchestration, action routing, and human-in-the-loop approval gates.  
-Products: AlloyScape (execution fabric and agent coordination layer).
-
-**4 · Advise** — Principal-led advisory translating platform intelligence into strategic decisions.  
-Products: Carlota Jo Consulting (operational and brand transformation).
+**Advise** — Principal-led advisory translating platform intelligence into strategic decisions.  
+Platform: Carlota Jo Consulting (private advisory and brand strategy).
 
 These layers are not separate silos. They share a common entity model, a unified event schema, and a consistent design system. Signals observed at the infrastructure level inform decisions at the executive level. The architecture is explicit about this — cross-layer traceability is a design goal, not an afterthought.
 
@@ -73,7 +70,7 @@ SZL platforms use AI to surface intelligence, generate recommendations, and acce
 
 **Explainability first.** Every AI-generated recommendation includes reasoning. Where a confidence score exists, it is shown alongside the output. Agents do not issue summary verdicts without traceable evidence.
 
-**Advisory, not autonomous.** AI agents in the SZL ecosystem — Helmsman (maritime), Sentinel (security), Beacon (operations) — are advisory agents. They analyse, recommend, and synthesise. They do not execute changes, modify configurations, or trigger production actions without explicit human confirmation.
+**Advisory, not autonomous.** AI agents in the SZL ecosystem — Helmsman (maritime), Sentinel (security), Compass (readiness) — are advisory agents. They analyse, recommend, and synthesise. They do not execute changes, modify configurations, or trigger production actions without explicit human confirmation.
 
 **Human-in-the-loop for destructive operations.** Any action that is irreversible, affects live systems, or touches sensitive data requires a human approval step. This is enforced at the workflow level, not just the UI level.
 
@@ -111,7 +108,7 @@ SZL Holdings maintains documented incident response procedures for each platform
 
 **Communication.** Material incidents affecting customer-facing services are communicated proactively. Post-incident reviews are conducted within five business days of resolution.
 
-**Practice.** Firestorm, SZL's security simulation platform, is used for regular adversarial readiness exercises. Red-team scenarios, MITRE ATT&CK simulations, and tabletop exercises are part of the operating rhythm.
+**Practice.** Aegis, SZL's defense and intelligence platform, is used for regular adversarial readiness exercises. Red-team scenarios, MITRE ATT&CK simulations, and tabletop exercises are part of the operating rhythm.
 
 ---
 
@@ -127,7 +124,7 @@ SZL Holdings maintains documented incident response procedures for each platform
 - Data at rest is encrypted using AES-256 equivalent standards.
 - API endpoints are authenticated. Unauthenticated endpoints expose only public information.
 - Dependency vulnerability scanning is automated. Critical vulnerabilities trigger immediate review.
-- Penetration testing scenarios are executed using Firestorm's adversary emulation capabilities.
+- Penetration testing scenarios are executed using Aegis adversary emulation capabilities.
 
 **Third-party services:**
 - All third-party integrations are reviewed before onboarding. API credentials are scoped to the minimum permissions required.

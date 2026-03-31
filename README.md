@@ -1,396 +1,382 @@
 # SZL Holdings — Platform Ecosystem
 
-**Business Observability at enterprise scale.** SZL Holdings builds and operates technology platforms that connect operational signal to strategic decision — across maritime logistics, security operations, AI research, and enterprise management.
+**Five platforms. One architecture. Built to compound.**
 
-## The Architecture
+SZL Holdings designs and operates enterprise command systems that connect operational signal to strategic decision — across business observability, maritime intelligence, cybersecurity, real estate, and private advisory. Every platform shares one data layer, one execution fabric, and one AI engine.
 
-The SZL platform follows a doctrine hierarchy where each platform has a named role. This is not a product portfolio arranged for presentation — it is a working architecture where each layer has a defined contract with the adjacent ones.
+Founded and operated by [Stephen Lutar](https://linkedin.com/in/stephen-l-279315240).
+
+![SZL Holdings](docs/screenshots/szl-holdings-home.jpg)
+
+---
+
+## Platform Hierarchy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  ADVISE                                                             │
-│  Carlota Jo Consulting — Brand, Strategy, Advisory                  │
+│  Carlota Jo — Private Advisory & Strategy Consulting                │
 ├─────────────────────────────────────────────────────────────────────┤
 │  EXECUTE                                                            │
-│  AlloyScape — Execution Fabric, Audit, Automation                   │
+│  Alloy — Execution Fabric, Workflow Engine, Audit Trail             │
 ├─────────────────────────────────────────────────────────────────────┤
-│  DECIDE                                                             │
-│  Nimbus — Score, Recommend, Explain (cross-platform AI engine)      │
-├─────────────────────────────────────────────────────────────────────┤
-│  INTERPRET                                                          │
-│  Lyte — Route signals, govern models, orchestrate remediation       │
-│  INCA — AI Research, experiment tracking, model registry            │
-├─────────────────────────────────────────────────────────────────────┤
-│  OBSERVE                                                            │
-│  Beacon · Business Telemetry    Rosie · Incident Command            │
-│  Vessels · Maritime Intelligence    Firestorm · Security Simulation │
+│  OBSERVE · DECIDE · ACT                                             │
+│  Lyte — Business Observability (PRISM Framework)                    │
+│  Aegis — Unified Defense & Intelligence (Defense/Command/Labs)      │
+│  Terra — NYC Real Estate Intelligence                               │
+│  Vessels — Maritime Intelligence & Fleet Operations                 │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Observe** (Beacon, Rosie, Vessels, Firestorm) — Acquire and structure operational signals across domains. Detect anomalies, vulnerabilities, incidents, and opportunities.
-**Interpret** (Lyte, INCA) — Reason across signals: route incidents, govern models, correlate patterns.
-**Decide** (Nimbus) — Score any entity type, generate explainable recommendations with confidence scores and rationale.
-**Execute** (AlloyScape) — Route intelligence into confirmed, traceable human action with full audit trail.
-**Advise** (Carlota Jo) — Translate platform intelligence into strategic decisions, with expert accountability.
+### The Five Platforms
 
-### Naming Standard
+| Platform | Domain | Doctrine Role |
+|----------|--------|---------------|
+| **Lyte** | Business Observability | OBSERVE · INTERPRET · ROUTE |
+| **Vessels** | Maritime Intelligence | TRACK · ANALYZE · COMMAND |
+| **Aegis** | Unified Defense & Intelligence | DETECT · RESPOND · RESEARCH |
+| **Terra** | NYC Real Estate Intelligence | DISCOVER · UNDERWRITE · CLOSE |
+| **Carlota Jo** | Private Advisory & Strategy | ADVISE · POSITION · GROW |
 
-| Platform | Role | Doctrine Label |
-|---|---|---|
-| Beacon (Terra) | Business Telemetry | OBSERVE |
-| Rosie (MSP) | Threat & Incident Command | OBSERVE / COMMAND |
-| Vessels | Maritime Intelligence | TRACK |
-| Firestorm | Security Simulation | SECURE |
-| Lyte | AIOps Command Center | INTERPRET / ROUTE |
-| INCA | AI Research Command | RESEARCH |
-| Nimbus (Dreamscape) | Predictive Intelligence | DECIDE / SCORE |
-| AlloyScape (Alloy) | Execution Fabric | EXECUTE / AUDIT |
-| Carlota Jo | Brand & Strategy Advisory | ADVISE |
+### Internal Systems
+
+| System | Role |
+|--------|------|
+| **Alloy** | Execution Fabric — workflow engine, audit trail, automation |
+| **INCA** | AI Research — model registry, experiment tracking (Aegis module) |
+| **Rosie** | Managed Security Operations (Aegis module) |
 
 ---
 
-## Products
+## Screenshots
 
-### Observe Layer
-
-**Vessels** — Maritime intelligence for fleet operations
-Real-time AIS telemetry, voyage economics, route intelligence, maintenance readiness, dark vessel detection, and sanctions screening. Built for fleet executives, operations teams, and commercial directors who need fleet-wide visibility without information overload.
-
-**Rosie (MSP)** — Threat and incident command
-SOC-grade incident management, threat intelligence, MITRE ATT&CK coverage, forensics timeline, XDR console, and compliance readiness. Designed for security teams where the cost of a slow response is quantifiably high.
-
-**Beacon (Terra)** — Business telemetry
-KPI monitoring, SLO tracking, anomaly detection, workflow latency analysis, and portfolio signal aggregation. Connects infrastructure behaviour to business outcomes for operators and executives.
-
-### Understand Layer
-
-**INCA** — AI research command
-Agent orchestration, model registry, experiment management, ensemble evaluation, LLM assessment, GPU monitoring, and explainability tooling. The internal intelligence layer where SZL's AI outputs become traceable, versioned, and accountable.
-
-**Nimbus (Dreamscape)** — Predictive intelligence
-Scenario construction, drift monitoring, confidence visualisation, and anomaly correlation. Forward signal analysis for teams that need structured reasoning about what comes next.
-
-### Execute Layer
-
-**AlloyScape (Alloy)** — Execution fabric
-The agent coordination layer for the SZL platform. Routes signals through the agent network (Helmsman, Sentinel, Beacon, and others), enforces human-in-the-loop governance, and maintains the audit trail for every confirmed action. Advisory agents recommend; AlloyScape governs what happens next.
-
-### Advise Layer
-
-**Carlota Jo Consulting** — Principal advisory
-Brand strategy, content architecture, and operational transformation advisory. Distinct from typical consulting: the advisory capability is informed by the same observability infrastructure that powers the platform products.
-
-### Identity
-
-**Stephen Lutar — Career** — Founder identity
-Not a portfolio site. A platform architect's narrative: the thesis, the tech, the track record, and the strategic intent behind the ecosystem.
-
----
-
-## Core Command Center
-
-The SZL Holdings portal includes a unified **Core Command Center** at `/core` — a cross-platform intelligence dashboard that aggregates live telemetry from all platform layers.
-
-**Summary Cards:**
-- Distress Properties — total count from Beacon (NYC + NY)
-- High Opportunity — count of properties with opportunity score ≥ 80
-- Converted Deals — closed won deals
-- Open Vulnerabilities — active Firestorm findings
-- Nimbus Recommendations — all-time scored recommendations
-- Workflow Runs — AlloyScape jobs in the last 30 days
-
-**Tabs:**
-- **Overview** — platform doctrine grid, recent Nimbus recommendations, quick links to all platform products
-- **Recommendations** — browse and generate new Nimbus recommendations for any entity type
-- **Audit** — cross-platform audit event log with source attribution
-- **Services** — real-time health status for all platform APIs (DB latency, uptime)
-
----
-
-## Platform APIs
-
-The centralised API server (`/api-server`) exposes the following core endpoints in addition to product-specific routes:
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/core/health` | GET | Real service health: DB latency, connectivity, uptime, timestamp |
-| `/api/core/metrics` | GET | Aggregate telemetry across Beacon, Firestorm, AlloyScape, Nimbus |
-| `/api/core/recommendations` | POST | Generate a scored Nimbus recommendation for any entity type |
-| `/api/core/recommendations` | GET | List stored recommendations (filterable by entity type and platform) |
-
-**Recommendation Request Schema:**
-```json
-{
-  "entityType": "distress_property | lead | deal | vulnerability | incident | asset | vessel | signal | workflow | general",
-  "entityId": "optional-entity-id",
-  "platform": "beacon | rosie | firestorm | vessels | nimbus | alloy | inca | general",
-  "context": { "arbitrary": "metadata" }
-}
-```
-
-**Recommendation Response:**
-```json
-{
-  "score": 87,
-  "confidence": 0.82,
-  "reasoning": "Explanation of why this recommendation was made",
-  "recommended_action": "Specific actionable next step"
-}
-```
-
----
-
-## Key Capabilities
-
-| Capability | Description |
+| Lyte — Business Observability | Aegis — SOC Dashboard |
 |---|---|
-| Shared design system | Every product shares `@workspace/shared-ui` — a TypeScript component library with unified navigation, command palette, agent indicators, and interaction model |
-| Agent network | Coordinated advisory agents (Helmsman, Sentinel, Beacon, Muse, Compass) operating under AlloyScape governance |
-| Human-in-the-loop | Advisory agents cannot execute consequential actions without explicit human confirmation — enforced at the workflow level |
-| Audit trail | Immutable, attributed event log across all products. Every signal, finding, recommendation, and action is traceable |
-| Role-based access | Product-specific RBAC (exec, ops, compliance, maintenance) with shared enforcement infrastructure |
-| Explainability | AI outputs include reasoning and confidence signals. No black-box scoring |
-| Demo / live transparency | Platform state (demo mode, live data, stale cache) is always explicitly labelled |
+| ![Lyte](docs/screenshots/lyte-marketing.jpg) | ![Aegis SOC](docs/screenshots/aegis-soc-dashboard.jpg) |
 
----
-
-## Technology Stack
-
-| Category | Technology |
+| Terra — Real Estate Intelligence | Vessels — Maritime Intelligence |
 |---|---|
-| Frontend | React 18, TypeScript, Vite |
-| Styling | Tailwind CSS, Framer Motion |
-| Routing | Wouter (client-side, path-based monorepo routing) |
-| State management | TanStack Query, React Context |
-| UI components | Custom `@workspace/shared-ui` (Radix UI primitives) |
-| Backend | Node.js, Express, TypeScript |
-| AI inference | OpenAI (GPT series), Anthropic (Claude series) |
-| Database | PostgreSQL (Drizzle ORM) |
-| Charts | Recharts |
-| Monorepo | pnpm workspaces |
+| ![Terra](docs/screenshots/terra-marketing.jpg) | ![Vessels](docs/screenshots/vessels-dashboard.jpg) |
+
+| Aegis — Marketing | Stephen Lutar — Founder Site |
+|---|---|
+| ![Aegis Marketing](docs/screenshots/aegis-marketing.jpg) | ![Stephen](docs/screenshots/stephen-site.jpg) |
 
 ---
 
-## Repository Structure
+## Architecture
+
+This is a **pnpm monorepo** with a shared TypeScript foundation. Every frontend artifact is a Vite + React SPA. The API server is a single Express process serving all platform backends. PostgreSQL (Drizzle ORM) is the persistence layer. WebSocket provides real-time push to all clients.
 
 ```
 /
-├── artifacts/
-│   ├── alloy/               # AlloyScape — Execution Fabric
-│   ├── carlota-jo/          # Carlota Jo Consulting
-│   ├── dreamscape/          # Nimbus — Predictive Intelligence
-│   ├── firestorm/           # Firestorm Security Simulation
-│   ├── inca/                # INCA AI Research Command
-│   ├── lyte-command-center/ # Lyte / Beacon — Business Telemetry
-│   ├── msp/                 # Rosie — Threat & Incident Command
-│   ├── stephen-site/        # Career — Founder Identity
-│   ├── szl-holdings/        # SZL Holdings — Portfolio Site
-│   ├── terra/               # Beacon / Terra — Business Intelligence
-│   ├── vessels/             # Vessels Maritime Intelligence
-│   └── api-server/          # Centralised API and integration layer
-├── lib/
-│   ├── shared-ui/           # Shared design system and components
-│   ├── db/                  # Drizzle ORM schema and database client
-│   ├── services/            # Stripe, email, and third-party adapters
-│   ├── auth/                # Authentication service (Replit OIDC)
-│   └── analytics/           # Telemetry and event tracking
-├── docs/
-│   ├── architecture.md      # Four-layer model, entity graph, agent network
-│   ├── trust-center.md      # Platform trust, security, AI governance
-│   └── investor-narrative.md# Strategic narrative and investment thesis
-└── README.md
+├── artifacts/              # Deployable applications
+│   ├── api-server/         # Express API — all platform backends
+│   ├── lyte-command-center/# Lyte — Business Observability
+│   ├── firestorm/          # Aegis — Defense & Intelligence
+│   ├── terra/              # Terra — Real Estate Intelligence
+│   ├── vessels/            # Vessels — Maritime Intelligence
+│   ├── carlota-jo/         # Carlota Jo — Advisory web app
+│   ├── carlota-jo-mobile/  # Carlota Jo — Expo/React Native client app
+│   ├── szl-holdings/       # SZL Holdings — corporate site
+│   └── stephen-site/       # Stephen Lutar — founder authority site
+├── lib/                    # Shared libraries
+│   ├── db/                 # Drizzle schema, migrations, seed
+│   ├── shared-ui/          # Cross-app React components
+│   ├── auth/               # OIDC authentication
+│   ├── config/             # Shared configuration
+│   ├── services/           # Business logic services
+│   ├── workflow-engine/    # Alloy execution fabric
+│   ├── ai-engine/          # AI/ML integration layer
+│   ├── analytics/          # Event tracking
+│   ├── audit/              # Compliance audit trail
+│   ├── data-connectors/    # External data source adapters
+│   ├── observability/      # APM, logging, metrics
+│   ├── api-client-react/   # Generated React Query hooks
+│   ├── api-zod/            # Zod schema validation
+│   ├── api-spec/           # OpenAPI specification
+│   └── graphql-client/     # GraphQL client
+├── packages/               # Marketplace packages
+│   ├── salesforce-appexchange/ # Salesforce AppExchange package
+│   └── atlassian-connect/  # Jira Marketplace Connect app
+├── infra/                  # Azure Bicep IaC templates
+├── scripts/                # Seed data, post-merge hooks
+├── docs/                   # Architecture, trust, deployment docs
+└── social-content/         # Brand assets, social media content
 ```
 
+### Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, Vite, TypeScript, Tailwind CSS v4, Recharts |
+| Backend | Express, TypeScript, esbuild |
+| Database | PostgreSQL, Drizzle ORM |
+| Auth | OpenID Connect (PKCE), session cookies |
+| Real-time | WebSocket (HMAC-signed tickets, per-channel ACL) |
+| AI | OpenAI, Anthropic, Google Gemini (via integration proxies) |
+| Payments | Stripe (Checkout, Subscriptions, Invoicing, Customer Portal) |
+| Maps | Mapbox GL JS (Terra property maps, Vessels fleet tracking) |
+| Mobile | Expo / React Native (Carlota Jo client app) |
+| PDF | pdfkit (server-side document generation, 8 templates) |
+| Email | Resend / SendGrid / SMTP (multi-provider with fallback) |
+| Notifications | Slack webhooks, Microsoft Teams webhooks, WebSocket push |
+| Infra | Azure Bicep (App Service, PostgreSQL, Key Vault, Redis, CDN) |
+| Marketplace | Salesforce AppExchange, Jira Marketplace (Connect app) |
+
 ---
 
-## Documentation
-
-- [Architecture](docs/architecture.md) — Four-layer model, entity graph, agent network, technology stack
-- [Trust Center](docs/trust-center.md) — Access control, AI governance, deployment discipline, incident readiness
-- [Investor Narrative](docs/investor-narrative.md) — Strategic thesis, category definition, expansion logic, defensibility
-
----
-
-## Local Setup
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 20+
 - pnpm 9+
-- PostgreSQL (provided by Replit managed database)
+- PostgreSQL 15+
 
-### Installation
+### Setup
 
 ```bash
-# Install all workspace dependencies
+# Install dependencies
 pnpm install
 
-# Push database schema to development database
-pnpm --filter @workspace/db run push
+# Copy environment template
+cp .env.example .env
+# Edit .env with your database URL and secrets
+
+# Push database schema
+pnpm --filter db push
 
 # Seed demo data (optional)
-pnpm --filter @workspace/scripts run seed
-```
+pnpm --filter scripts run seed
 
-### Starting Services
-
-Each artifact runs as a separate Vite dev server and reads `PORT` from the environment. In Replit, workflows manage this automatically. To start individually:
-
-```bash
 # Start the API server
 pnpm --filter @workspace/api-server run dev
 
-# Start a specific frontend artifact (e.g. SZL Holdings)
-pnpm --filter szl-holdings run dev
-
-# Start all services simultaneously (via Replit workflow manager)
-# Each artifact is registered as a separate workflow
+# Start any frontend app
+pnpm --filter @workspace/lyte-command-center run dev
+pnpm --filter @workspace/firestorm run dev
+pnpm --filter @workspace/terra run dev
+pnpm --filter @workspace/vessels run dev
+pnpm --filter @workspace/szl-holdings run dev
+pnpm --filter @workspace/stephen-site run dev
+pnpm --filter @workspace/carlota-jo run dev
 ```
 
 ### Build
 
 ```bash
-# Build a specific artifact
-pnpm --filter szl-holdings run build
-
 # Build all artifacts
-pnpm -r run build
+pnpm -r build
+
+# Build specific app
+pnpm --filter @workspace/lyte-command-center build
+pnpm --filter @workspace/api-server build
 ```
+
+---
+
+## App Inventory
+
+### Lyte — Business Observability
+
+*"In the dark, let Lyte guide you."*
+
+The flagship platform. Lyte defines the category of **Business Observability** — the discipline of making every operational surface visible, contextual, and actionable. Built on the **PRISM** analytical framework:
+
+- **P**ulse — Business health, operating heartbeat, trend status
+- **R**isk — Approvals, churn, delays, ownership gaps, regulatory exposure
+- **I**ntelligence — Modeled reasoning, evidence, confidence, likely outcomes
+- **S**ignals — Anomalies, changes, event spikes, workflow drift
+- **M**otion — Escalations, routing, approvals, interventions, execution
+
+PRISM color system: Pulse (#10b981), Risk (#ef4444), Intelligence (#8b5cf6), Signals (#f59e0b), Motion (#0ea5e9).
+
+40+ connector integrations. 7 Pillars of Business Observability doctrine.
+
+### Aegis — Unified Defense & Intelligence
+
+*"One platform. Three workspaces. One shared intelligence layer."*
+
+Enterprise cybersecurity and managed services command console. Three workspaces sharing one data context:
+
+- **Defense** (red) — SOC operations, incident response, MITRE ATT&CK, threat intel
+- **Command** (blue) — Managed operations, SLA management, client oversight
+- **Labs** (violet) — AI research, model training, neural exploration
+
+Includes INCA (AI Research) and Rosie (Managed Security) as integrated modules.
+
+### Terra — NYC Real Estate Intelligence
+
+*"The distress intelligence platform built for NYC real estate."*
+
+Property intelligence for brokers, investors, and portfolio teams. Surfaces distressed properties, tracks ownership structures, manages deal pipelines, and delivers market intelligence — all from one operating surface.
+
+Six modules: Distress Intelligence, Ownership Intelligence, Deal Pipeline, Market Intelligence, Broker Operations, Investment Analysis.
+
+### Vessels — Maritime Intelligence
+
+*"Fleet operations. Decided faster."*
+
+Maritime command platform for fleet operators. Real-time AIS telemetry, voyage economics, route intelligence, maintenance readiness, dark vessel detection, sanctions screening, and Mapbox-powered fleet tracking.
+
+### Carlota Jo — Private Advisory & Strategy
+
+Luxury consulting platform for brand strategy, advisory, and client engagement. Web app + native mobile client (Expo/React Native) with OIDC authentication, booking flows, document vault, and Stripe-powered billing.
+
+### SZL Holdings — Corporate Site
+
+The parent company site. Ecosystem overview, investor relations, trust center, compliance documentation, and contact. Presents the unified platform hierarchy.
+
+### Stephen Lutar — Founder Authority Site
+
+Professional portfolio and founder positioning site. Work showcase, thesis writing, career command, case studies, and contact.
+
+---
+
+## Authentication
+
+All apps use **OpenID Connect** with PKCE flow. The API server validates sessions via cookie or Bearer token. WebSocket connections use HMAC-signed tickets with 5-minute TTL and per-channel role-based access control.
+
+Roles: `founder_admin`, `admin`, `operator`, `analyst`, `viewer`, `client`.
+
+Mobile (Expo) uses `expo-auth-session` for native OIDC with SecureStore token persistence.
+
+---
+
+## Payments & Billing
+
+Stripe powers all commercial flows:
+
+- **Carlota Jo**: Session bookings via Stripe Checkout
+- **Terra**: Starter/Pro subscription tiers with annual discount
+- **Aegis**: Enterprise quotes via Stripe Invoicing or Checkout
+- **Lyte**: Self-serve and enterprise pricing
+- **Vessels**: Enterprise sales model (contact-driven)
+
+Webhook signature verification uses raw request body for HMAC integrity. CSRF exemptions are configured for payment initiation endpoints (Stripe handles security on the payment side).
+
+---
+
+## Email & Notifications
+
+Multi-channel notification pipeline:
+
+- **Email**: Resend (primary), SendGrid (fallback), SMTP (tertiary)
+- **Slack**: Webhook or Bot Token delivery for warning+ severity
+- **Microsoft Teams**: Webhook delivery for warning+ severity
+- **WebSocket**: Real-time push to connected clients
+- **In-app**: Toast notifications via WebSocket channel subscriptions
+
+Contact form submissions (Stephen Site, Carlota Jo) send dual emails: confirmation to the submitter, notification to the admin inbox.
+
+---
+
+## PDF Document Generation
+
+Server-side PDF generation via pdfkit with 8 branded templates:
+
+| Template | Context |
+|----------|---------|
+| `stephen-resume` | Stephen Lutar professional resume |
+| `szl-investor-letter` | Investor communications |
+| `szl-compliance-summary` | Compliance documentation |
+| `szl-portfolio-report` | Portfolio performance report |
+| `terra-property-report` | Property analysis with distress scoring |
+| `aegis-assessment-report` | Security assessment |
+| `firestorm-incident-summary` | Incident post-mortem |
+| `carlota-engagement-summary` | Client engagement summary |
+
+---
+
+## Deployment
+
+### Replit (Primary — Development & Staging)
+
+The live workspace runs on Replit with automatic HTTPS, PostgreSQL, and environment secret management. Each artifact binds to a unique port via the `PORT` environment variable.
+
+### Azure (Production — Enterprise)
+
+Full Azure Bicep IaC in `/infra/`:
+- App Service (Node.js 20 LTS)
+- Azure Database for PostgreSQL Flexible Server
+- Azure Key Vault (secrets management)
+- Azure Redis Cache (session store)
+- Azure CDN (static asset delivery)
+- Application Insights (APM)
+
+See [docs/deployment.md](docs/deployment.md) for full deployment guide.
+
+---
+
+## Marketplace Integrations
+
+### Salesforce AppExchange (`packages/salesforce-appexchange/`)
+
+Custom objects, Apex callouts, and webhook listeners for bidirectional sync between Salesforce and the SZL platform. Webhook authentication uses HMAC-signed secrets.
+
+### Jira Marketplace (`packages/atlassian-connect/`)
+
+Atlassian Connect app with JWT-verified lifecycle hooks, issue panel integration, and persistent tenant storage. Syncs Jira issues as platform signals.
+
+---
+
+## Security & Trust
+
+- CSRF protection (double-submit cookie pattern) on all mutation endpoints
+- GraphQL depth limiting (max 10 levels)
+- WebSocket connection limits (max 500 concurrent)
+- HMAC-signed WebSocket tickets with TTL
+- Role-based access control on all API routes
+- Per-tenant Power BI embed token scoping with RLS
+- Constant-time comparison for webhook secret validation
+- No secrets in client bundles — all sensitive config server-side only
+
+See [docs/trust-center.md](docs/trust-center.md) for the full security posture.
 
 ---
 
 ## Environment Variables
 
-All environment variables are managed through Replit Secrets. Do **not** commit secrets to version control.
+See [`.env.example`](.env.example) for the complete list. Key categories:
 
-### Required (Production)
-
-| Variable | Description | Example |
-|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/db` |
-| `SESSION_SECRET` | Random secret for session signing (min 32 chars) | `openssl rand -hex 32` |
-| `STRIPE_SECRET_KEY` | Stripe secret key for payments | `sk_live_...` |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret for event verification | `whsec_...` |
-| `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key (via Replit AI Integration proxy) | Set via Replit Integrations |
-| `AI_INTEGRATIONS_ANTHROPIC_API_KEY` | Anthropic API key (via Replit AI Integration proxy) | Set via Replit Integrations |
-
-### Optional
-
-| Variable | Description | Default |
-|---|---|---|
-| `PORT` | Port for each service to bind on | Assigned by Replit per artifact |
-| `NODE_ENV` | Environment mode | `development` |
-| `CORS_ORIGINS` | Comma-separated allowed CORS origins | Open in development |
-| `LOG_LEVEL` | Pino log level (`trace`, `debug`, `info`, `warn`, `error`) | `info` |
-| `RESEND_API_KEY` | Resend API key for transactional email | Required for contact forms |
-| `SMTP_HOST` | SMTP host for email delivery (alternative to Resend) | — |
-| `SMTP_PORT` | SMTP port | `587` |
-| `SMTP_USER` | SMTP username | — |
-| `SMTP_PASS` | SMTP password | — |
-| `SZL_INTERNAL_EMAIL` | Internal routing address for contact form submissions | — |
-| `ISSUER_URL` | OIDC issuer URL for Replit Auth | Auto-detected on Replit |
-| `VITE_APP_URL` | Base URL for frontend apps (used in email links) | — |
-| `VITE_ADMIN_PIN` | PIN for the SZL Holdings admin panel UI gate (client-side only — not a substitute for server-side auth) | Defaults to `szl2026` — **must be changed in production** |
-
-### Stripe Pricing (Carlota Jo Checkout)
-
-| Variable | Description |
-|---|---|
-| `STRIPE_PRICE_STRATEGY_SESSION` | Stripe Price ID for Strategy Session tier |
-| `STRIPE_PRICE_PORTFOLIO_REVIEW` | Stripe Price ID for Portfolio Review tier |
-| `STRIPE_PRICE_ADVISORY_RETAINER` | Stripe Price ID for Advisory Retainer tier |
+| Category | Required | Notes |
+|----------|----------|-------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `SESSION_SECRET` | Yes | Cookie signing key |
+| `STRIPE_*` | No | Payments run in mock mode without keys |
+| `RESEND_API_KEY` | No | Email delivery disabled without key |
+| `MAPBOX_ACCESS_TOKEN` | No | Maps fall back to styled SVG without token |
+| `OPENAI_API_KEY` | No | AI features disabled without key |
+| `SLACK_WEBHOOK_URL` | No | Slack notifications disabled without URL |
+| `ALLOY_INTERNAL_TOKEN` | Recommended | Server-to-server auth for WebSocket, self-monitor |
 
 ---
 
-## Stripe Webhooks
+## Repository Policy
 
-The API server handles the following Stripe webhook events at `POST /api/billing/webhooks`:
+This repository is the **public code mirror** of the live SZL Holdings platform workspace. The source of truth is the live Replit workspace. This mirror is updated periodically to reflect the current state of the platform.
 
-| Event | Description | Handler action |
-|---|---|---|
-| `checkout.session.completed` | Payment or subscription checkout completed | Creates or links subscription record, logs payment confirmation |
-| `customer.subscription.created` | New subscription activated | Inserts subscription into DB with active status |
-| `customer.subscription.updated` | Subscription modified (plan change, renewal) | Updates status, `current_period_start`, and `current_period_end` |
-| `customer.subscription.deleted` | Subscription cancelled | Sets subscription status to `canceled` |
-| `invoice.paid` | Invoice payment succeeded (Stripe's event name for successful invoice payment, also called `invoice.payment_succeeded` in older docs) | Inserts invoice record with `paid` status and amount |
-| `invoice.payment_failed` | Payment attempt failed | Marks linked subscription as `past_due` |
-| `payment_intent.succeeded` | One-time payment completed | Logged to audit trail; no DB write required |
-
-**Webhook configuration:**
-1. In the Stripe Dashboard, create a webhook endpoint pointing to `https://your-domain.com/api/billing/webhooks`
-2. Select all seven events listed above
-3. Copy the signing secret and set `STRIPE_WEBHOOK_SECRET` in Replit Secrets
-4. The endpoint validates every event signature before processing — unsigned events are rejected with 400
+**Predecessor**: This repo succeeds the archived `stephenlutar2-hash/szl-holdings-platform` repository (if archived). All lineage traces back to the original repository.
 
 ---
 
-## Deployment Checklist
+## Documentation
 
-Run through this checklist before promoting any release to production.
-
-### Secrets & Configuration
-
-- [ ] `DATABASE_URL` is set to the production database connection string
-- [ ] `SESSION_SECRET` is a cryptographically random value (minimum 32 characters)
-- [ ] `STRIPE_SECRET_KEY` is the live key (`sk_live_...`), not test key
-- [ ] `STRIPE_WEBHOOK_SECRET` is copied from the production Stripe webhook endpoint
-- [ ] All `STRIPE_PRICE_*` variables are set to live Stripe Price IDs
-- [ ] `AI_INTEGRATIONS_OPENAI_API_KEY` is set (via Replit AI Integrations)
-- [ ] `AI_INTEGRATIONS_ANTHROPIC_API_KEY` is set (via Replit AI Integrations)
-- [ ] `CORS_ORIGINS` is set to the production domain(s) — do not leave open
-- [ ] `RESEND_API_KEY` or SMTP credentials are configured for transactional email
-- [ ] `SZL_INTERNAL_EMAIL` is set to the correct internal routing address
-- [ ] `NODE_ENV=production` is set
-
-### Auth & Access
-
-- [ ] Replit Auth redirect URIs include the production domain
-- [ ] `VITE_ADMIN_PIN` is set to a strong value (not the default `szl2026`)
-- [ ] All protected API endpoints return 401 without a valid session token
-- [ ] Org-scoped endpoints deny requests from mismatched org IDs
-- [ ] Client portal endpoints deny access from non-matching clients
-
-### Build & Start Commands
-
-- [ ] All artifacts build without TypeScript errors: `pnpm -r run build`
-- [ ] API server builds successfully: `pnpm --filter @workspace/api-server run build`
-- [ ] Database schema is up to date: `pnpm --filter @workspace/db run push`
-- [ ] All workflows are registered and start correctly in the Replit workflow manager
-
-### Stripe Webhooks
-
-- [ ] Webhook endpoint is registered in the Stripe Dashboard for production
-- [ ] Webhook signing secret matches `STRIPE_WEBHOOK_SECRET`
-- [ ] All seven event types from the Stripe Webhooks section are selected in the Stripe Dashboard
-- [ ] Test a webhook delivery from the Stripe Dashboard and confirm 200 response
-
-### Frontend
-
-- [ ] All public pages load without console errors at production URL
-- [ ] SEO meta tags (title, description, OG) are present on all public pages
-- [ ] No placeholder text, "Lorem ipsum", or "Coming soon" labels visible to users
-- [ ] All forms validate inline and show loading states on submit
-- [ ] Mobile layout verified at 375px, 768px, and 1024px breakpoints
-- [ ] All navigation links resolve to real pages (no 404s)
-
-### Security
-
-- [ ] No API keys or secrets are present in frontend JavaScript bundles
-- [ ] HTTPS is enforced on the production domain
-- [ ] Content-Security-Policy headers are active (enabled by Helmet in production)
-- [ ] HSTS headers are set (`max-age=31536000; includeSubDomains; preload`)
-- [ ] Rate limiting is active on all API endpoints
+| Document | Description |
+|----------|-------------|
+| [Architecture](docs/architecture.md) | System architecture, data flow, service boundaries |
+| [Trust Center](docs/trust-center.md) | Security posture, compliance, AI governance |
+| [Deployment](docs/deployment.md) | Deployment strategies, Azure IaC, CI/CD |
+| [Integrations](docs/integrations.md) | Third-party integrations, secrets map, connectors |
+| [Product Matrix](docs/product-matrix.md) | Platform inventory, naming, lane ownership |
+| [GitHub Mirror Policy](docs/github-mirror-policy.md) | Mirror update policy, branch strategy |
+| [Investor Narrative](docs/investor-narrative.md) | Company thesis, market positioning |
 
 ---
 
-## Strategic Thesis
+## License
 
-The enterprises that will win the next decade are not the ones with the most data. They are the ones that can reason across their data, connect operational signal to strategic decision, and act with confidence — faster than their competitors, and with more accountability than their regulators require.
+Proprietary. All rights reserved. SZL Holdings.
 
-SZL Holdings is building the platform infrastructure for that outcome. Not as a single product, but as a layered ecosystem where every product makes the others stronger, every data signal compounds across domains, and every AI recommendation is traceable, explainable, and confirmed by a human who understood it.
-
-The category is Business Observability. The architecture is explicit. The compounding has started.
-
----
-
-*SZL Holdings · Built for operators who cannot afford to be wrong.*
+**Contact**: [contact@stephenl.dev](mailto:contact@stephenl.dev) · [LinkedIn](https://linkedin.com/in/stephen-l-279315240)
