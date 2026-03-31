@@ -206,9 +206,11 @@ export default function AegisHomePage() {
               Enter SOC Command <ArrowRight size={14} />
             </button>
           </Link>
-          <button style={{ fontSize: "14px", fontWeight: 500, background: "transparent", color: "rgba(255,255,255,0.5)", border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "12px 28px", cursor: "pointer" }}>
-            Schedule a Demo
-          </button>
+          <Link href="/demo">
+            <button style={{ fontSize: "14px", fontWeight: 500, background: "transparent", color: "rgba(255,255,255,0.5)", border: `1px solid ${BORDER}`, borderRadius: "6px", padding: "12px 28px", cursor: "pointer" }}>
+              Schedule a Demo
+            </button>
+          </Link>
         </div>
       </section>
 

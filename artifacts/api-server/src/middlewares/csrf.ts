@@ -19,6 +19,12 @@ const EXEMPT_PATHS = new Set([
   "/api/auth/logout",
   "/api/auth/callback",
   "/api/webhooks",
+  "/api/billing/webhooks",
+  "/api/stripe/checkout",
+  "/api/billing/checkout",
+  "/api/billing/terra/subscribe",
+  "/api/billing/firestorm/enterprise-quote",
+  "/api/billing/customer-portal",
 ]);
 
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];

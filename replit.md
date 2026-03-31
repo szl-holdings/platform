@@ -68,7 +68,7 @@ Aegis (artifact slug `firestorm`, path `/firestorm/`) unifies Security Operation
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth
-- **Payment Processing:** Stripe
+- **Payment Processing:** Stripe (infrastructure built; requires manual secret configuration — see Stripe Setup below)
 - **AI/NLP:** HuggingFace Inference API, Replit's OpenAI proxy, OpenAI, Anthropic
 - **Communication:** Slack, Twilio, Resend
 - **Productivity/Collaboration:** Google APIs, Notion, Confluence, HubSpot, Dropbox, OneDrive
@@ -78,3 +78,45 @@ Aegis (artifact slug `firestorm`, path `/firestorm/`) unifies Security Operation
 - **Maritime Data:** Digitraffic AIS, BarentsWatch AIS, Open-Meteo Marine Weather API
 - **Threat Intelligence (keyless):** Shodan InternetDB, GreyNoise Community API, MalwareBazaar, URLhaus
 - **Other:** GitHub Public API, AbuseIPDB, Figma
+
+## Stripe Setup (Required to activate payments)
+
+The Stripe payment infrastructure is fully built but requires API keys to go live. Currently runs in mock mode.
+
+### Step 1: Set secrets in Replit Secrets tab
+
+Add these two secrets:
+- `STRIPE_SECRET_KEY` — Your Stripe secret key (`sk_test_...` for test, `sk_live_...` for production). Found in Stripe Dashboard → Developers → API keys.
+- `STRIPE_WEBHOOK_SECRET` — Your Stripe webhook signing secret (`whsec_...`). Create a webhook endpoint in Stripe Dashboard → Developers → Webhooks, pointing to `https://[your-domain]/api/billing/webhooks`, then copy the signing secret.
+
+### Step 2: Create products in Stripe, then set price ID env vars
+
+After creating products in your Stripe dashboard, set these environment variables (Secrets tab or env vars):
+
+| Env Var | Purpose |
+|---|---|
+| `STRIPE_PRICE_STRATEGY_SESSION` | Carlota Jo — Executive Strategy Session ($4,500) |
+| `STRIPE_PRICE_PORTFOLIO_REVIEW` | Carlota Jo — Strategic Engagement ($45,000) |
+| `STRIPE_PRICE_ADVISORY_RETAINER` | Carlota Jo — Senior Advisory Retainer ($18,000/mo) |
+| `STRIPE_PRICE_TERRA_STARTER_MONTHLY` | Terra Starter plan (monthly) |
+| `STRIPE_PRICE_TERRA_STARTER_ANNUAL` | Terra Starter plan (annual) |
+| `STRIPE_PRICE_TERRA_PRO_MONTHLY` | Terra Pro plan (monthly) |
+| `STRIPE_PRICE_TERRA_PRO_ANNUAL` | Terra Pro plan (annual) |
+| `STRIPE_PRICE_TERRA_ENTERPRISE_MONTHLY` | Terra Enterprise plan (monthly) |
+| `STRIPE_PRICE_TERRA_ENTERPRISE_ANNUAL` | Terra Enterprise plan (annual) |
+| `STRIPE_PRICE_FIRESTORM_ENTERPRISE` | Aegis/Firestorm Enterprise subscription |
+
+### Step 3: Verify connection
+
+After setting secrets and restarting the API server, check: `GET /api/billing/stripe-config` — should show `stripeConnected: true`.
+
+### What works once configured
+- Carlota Jo booking flow → real Stripe Checkout sessions (one-time payment)
+- Terra subscribe → real Stripe subscription checkout
+- Firestorm enterprise quote → creates Stripe customer + sends invoice
+- Lyte Commerce page → shows real Stripe product catalog with checkout buttons
+- Webhooks → `POST /api/billing/webhooks` processes live Stripe events and updates DB
+- Customer portal → `POST /api/billing/customer-portal` lets subscribers manage billing
+
+### Note on Replit Stripe Integration
+The Replit Stripe OAuth integration (connector) was dismissed. This project uses direct API keys via `STRIPE_SECRET_KEY` instead. The `lib/services/src/adapters/stripe.ts` adapter handles all Stripe API calls and automatically switches from mock to live mode when `STRIPE_SECRET_KEY` is set.

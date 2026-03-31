@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, billingPlansTable, subscriptionsTable, invoicesTable, organizationsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, or } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@workspace/services";
@@ -187,10 +187,55 @@ router.get("/billing/stripe-invoices", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/billing/stripe-config", async (_req, res) => {
+  try {
+    const stripeMode = process.env.STRIPE_SECRET_KEY
+      ? process.env.STRIPE_SECRET_KEY.startsWith("sk_live_")
+        ? "live"
+        : "test"
+      : "mock";
+
+    const priceVars = [
+      { key: "STRIPE_PRICE_STRATEGY_SESSION",       label: "Carlota Jo — Strategy Session" },
+      { key: "STRIPE_PRICE_PORTFOLIO_REVIEW",        label: "Carlota Jo — Portfolio Review" },
+      { key: "STRIPE_PRICE_ADVISORY_RETAINER",       label: "Carlota Jo — Advisory Retainer" },
+      { key: "STRIPE_PRICE_TERRA_STARTER_MONTHLY",   label: "Terra — Starter (Monthly)" },
+      { key: "STRIPE_PRICE_TERRA_STARTER_ANNUAL",    label: "Terra — Starter (Annual)" },
+      { key: "STRIPE_PRICE_TERRA_PRO_MONTHLY",       label: "Terra — Pro (Monthly)" },
+      { key: "STRIPE_PRICE_TERRA_PRO_ANNUAL",        label: "Terra — Pro (Annual)" },
+      { key: "STRIPE_PRICE_TERRA_ENTERPRISE_MONTHLY",label: "Terra — Enterprise (Monthly)" },
+      { key: "STRIPE_PRICE_TERRA_ENTERPRISE_ANNUAL", label: "Terra — Enterprise (Annual)" },
+      { key: "STRIPE_PRICE_FIRESTORM_ENTERPRISE",    label: "Aegis/Firestorm — Enterprise" },
+    ];
+
+    const prices = priceVars.map(({ key, label }) => ({
+      envVar: key,
+      label,
+      configured: !!process.env[key],
+    }));
+
+    const configured = prices.filter((p) => p.configured).length;
+
+    sendSuccess(res, {
+      stripeConnected: !!process.env.STRIPE_SECRET_KEY,
+      stripeMode,
+      webhookSecretConfigured: !!process.env.STRIPE_WEBHOOK_SECRET,
+      priceIdsConfigured: configured,
+      priceIdsTotal: prices.length,
+      prices,
+      instructions: stripeMode === "mock"
+        ? "Set STRIPE_SECRET_KEY secret to activate live payment processing. Then create products in Stripe and set each STRIPE_PRICE_* env var to the corresponding Stripe price ID."
+        : `Stripe is connected in ${stripeMode} mode. ${configured}/${prices.length} price IDs are configured.`,
+    });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get Stripe config");
+  }
+});
+
 router.post("/billing/webhooks", async (req: Request, res: Response) => {
   try {
     const signature = req.headers["stripe-signature"] as string | undefined;
-    const rawBody = JSON.stringify(req.body);
+    const rawBody = (req as Request & { rawBody?: Buffer }).rawBody?.toString("utf8") ?? JSON.stringify(req.body);
     const { verified, event } = await services.stripe.verifyWebhookPayload(rawBody, signature);
 
     if (!verified || !event) {
@@ -414,7 +459,7 @@ router.get("/billing/terra/plans", (_req, res) => {
   sendSuccess(res, plans);
 });
 
-router.post("/billing/terra/subscribe", authMiddleware(), async (req: Request, res: Response) => {
+router.post("/billing/terra/subscribe", authMiddleware({ required: false }), async (req: Request, res: Response) => {
   try {
     const { planId, email, successUrl, cancelUrl } = req.body as {
       planId?: string; email?: string; successUrl?: string; cancelUrl?: string;
@@ -509,9 +554,10 @@ router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: fa
       },
     );
 
-    if (successUrl && cancelUrl) {
+    if (services.stripe.isLive) {
       const enterprisePriceId = process.env.STRIPE_PRICE_FIRESTORM_ENTERPRISE;
-      if (enterprisePriceId) {
+
+      if (enterprisePriceId && successUrl && cancelUrl) {
         const session = await services.stripe.createCheckoutSession({
           priceId: enterprisePriceId,
           mode: "subscription",
@@ -528,6 +574,35 @@ router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: fa
         });
         return;
       }
+
+      const baseAmount = seats ? Math.max(seats, 10) * 990_00 : 990_00;
+      const lineItems = [
+        {
+          description: `Firestorm Enterprise — ${seats ?? 1} seat${(seats ?? 1) !== 1 ? "s" : ""}`,
+          amount: baseAmount,
+          currency: "usd",
+        },
+        ...(addOns ?? []).map(addon => ({
+          description: `Add-on: ${addon}`,
+          amount: 50_00,
+          currency: "usd",
+        })),
+      ];
+
+      const invoice = await services.stripe.createInvoice(customer.id, lineItems, {
+        notes: notes ?? `Enterprise inquiry from ${companyName}. Add-ons requested: ${(addOns ?? []).join(", ") || "none"}.`,
+        metadata: { product: "firestorm", companyName, requestType: "enterprise-quote" },
+      });
+
+      sendSuccess(res, {
+        status: "invoiced",
+        customerId: customer.id,
+        invoiceId: invoice.id,
+        invoiceStatus: invoice.status,
+        hostedInvoiceUrl: invoice.hostedInvoiceUrl,
+        message: "Enterprise invoice sent to your email. A Firestorm specialist will follow up within 1 business day.",
+      });
+      return;
     }
 
     sendSuccess(res, {
@@ -537,6 +612,59 @@ router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: fa
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to create enterprise quote");
+  }
+});
+
+router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "superadmin"), async (_req: Request, res: Response) => {
+  try {
+    if (!services.stripe.isLive) {
+      sendBadRequest(res, "Stripe must be connected (STRIPE_SECRET_KEY set) to sync plans");
+      return;
+    }
+
+    const products = await services.stripe.listProducts();
+    const upserted: Array<{ slug: string; name: string; stripePriceId: string | null; action: "created" | "updated" | "skipped" }> = [];
+
+    for (const product of products) {
+      if (!product.active) continue;
+
+      const primaryPrice = product.prices.find(p => p.interval === "month") ?? product.prices[0];
+      if (!primaryPrice) {
+        upserted.push({ slug: product.id, name: product.name, stripePriceId: null, action: "skipped" });
+        continue;
+      }
+
+      const slug = product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const priceMonthly = String((primaryPrice.amount / 100).toFixed(2));
+
+      const [existing] = await db.select().from(billingPlansTable).where(
+        or(eq(billingPlansTable.slug, slug), eq(billingPlansTable.stripePriceId, primaryPrice.id))
+      );
+
+      if (existing) {
+        await db.update(billingPlansTable).set({
+          name: product.name,
+          stripePriceId: primaryPrice.id,
+          priceMonthly,
+          isActive: true,
+        }).where(eq(billingPlansTable.id, existing.id));
+        upserted.push({ slug, name: product.name, stripePriceId: primaryPrice.id, action: "updated" });
+      } else {
+        await db.insert(billingPlansTable).values({
+          name: product.name,
+          slug,
+          description: product.description ?? null,
+          stripePriceId: primaryPrice.id,
+          priceMonthly,
+          isActive: true,
+        });
+        upserted.push({ slug, name: product.name, stripePriceId: primaryPrice.id, action: "created" });
+      }
+    }
+
+    sendSuccess(res, { synced: upserted.length, plans: upserted });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to sync billing plans from Stripe");
   }
 });
 

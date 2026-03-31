@@ -1,4 +1,5 @@
-import { ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame, BarChart3, Users, Search, FileText, Shield, Target, Eye, Layers, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame, BarChart3, Users, Search, FileText, Shield, Target, Eye, Layers, CheckCircle, Loader2 } from "lucide-react";
 
 const accent = "#5e9a32";
 const accentLight = "#74b844";
@@ -50,9 +51,77 @@ const navLinks = [
   { label: "Platform", href: "#platform" },
   { label: "Capabilities", href: "#capabilities" },
   { label: "Markets", href: "#markets" },
+  { label: "Pricing", href: "#pricing" },
+];
+
+const plans = [
+  {
+    id: "terra-starter",
+    name: "Starter",
+    monthlyPlanId: "terra-starter-monthly",
+    annualPlanId: "terra-starter-annual",
+    monthlyDisplay: "$149",
+    annualDisplay: "$1,490",
+    features: ["Distress feed (NYC, 5 boroughs)", "Ownership lookup — 50 queries/mo", "Deal pipeline — up to 10 active deals", "Market snapshot (read-only)", "Email support"],
+  },
+  {
+    id: "terra-pro",
+    name: "Pro",
+    monthlyPlanId: "terra-pro-monthly",
+    annualPlanId: "terra-pro-annual",
+    monthlyDisplay: "$349",
+    annualDisplay: "$3,490",
+    highlighted: true,
+    features: ["Everything in Starter", "Unlimited ownership lookups", "Unlimited deal pipeline", "Investment analysis & IRR modeling", "Broker operations CRM", "API access (10k calls/mo)", "Priority support"],
+  },
+  {
+    id: "terra-enterprise",
+    name: "Enterprise",
+    monthlyPlanId: "terra-enterprise-monthly",
+    annualPlanId: "terra-enterprise-annual",
+    monthlyDisplay: "Custom",
+    annualDisplay: "Custom",
+    isCustom: true,
+    features: ["Everything in Pro", "Multi-seat / team access", "Custom data integrations", "Dedicated account manager", "SLA & uptime guarantee", "Private deal flow network", "Custom reporting & exports"],
+  },
 ];
 
 export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
+  const [annual, setAnnual] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const handleSubscribe = async (plan: typeof plans[number]) => {
+    if (plan.isCustom) {
+      onSignIn?.();
+      return;
+    }
+    const planKey = annual ? plan.annualPlanId : plan.monthlyPlanId;
+    setCheckoutLoading(plan.id);
+    setCheckoutError(null);
+    try {
+      const baseUrl = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+      const successUrl = window.location.origin + baseUrl + "/?subscribe=success";
+      const cancelUrl = window.location.origin + baseUrl + "/?subscribe=cancel";
+      const res = await fetch("/api/billing/terra/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: planKey, successUrl, cancelUrl }),
+      });
+      const data = await res.json();
+      const url = data?.data?.url ?? data?.url;
+      if (url) {
+        window.location.href = url;
+      } else {
+        setCheckoutError(data?.error ?? data?.message ?? "Could not start checkout. Please try again.");
+      }
+    } catch {
+      setCheckoutError("Network error. Please try again.");
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: BG, color: "#e6ead6", fontFamily: "'Inter', system-ui, sans-serif" }}>
 
@@ -196,6 +265,102 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" style={{ borderTop: `1px solid ${BORDER}`, padding: "80px 1.5rem", maxWidth: "1120px", margin: "0 auto" }}>
+        <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "12px" }}>Pricing</p>
+        <h2 style={{ fontSize: "32px", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: "#f0f4e8", marginBottom: "12px" }}>
+          Simple, transparent plans.
+        </h2>
+        <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)", marginBottom: "32px" }}>
+          Start free for 14 days. No credit card required.
+        </p>
+
+        {/* Billing toggle */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "40px" }}>
+          <span style={{ fontSize: "13px", color: annual ? "rgba(255,255,255,0.35)" : accentLight, fontWeight: 500 }}>Monthly</span>
+          <button
+            onClick={() => setAnnual(!annual)}
+            style={{
+              width: "40px", height: "22px", borderRadius: "11px", border: "none", cursor: "pointer",
+              background: annual ? accentLight : "rgba(255,255,255,0.1)",
+              position: "relative", transition: "background 0.2s",
+            }}
+          >
+            <span style={{
+              position: "absolute", top: "3px", left: annual ? "21px" : "3px",
+              width: "16px", height: "16px", borderRadius: "50%", background: "#fff",
+              transition: "left 0.2s",
+            }} />
+          </button>
+          <span style={{ fontSize: "13px", color: annual ? accentLight : "rgba(255,255,255,0.35)", fontWeight: 500 }}>
+            Annual <span style={{ fontSize: "10px", background: `${accentLight}20`, color: accentLight, padding: "2px 6px", borderRadius: "3px", marginLeft: "4px" }}>Save 15%</span>
+          </span>
+        </div>
+
+        {checkoutError && (
+          <div style={{ marginBottom: "24px", padding: "12px 16px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "8px", fontSize: "13px", color: "#f87171" }}>
+            {checkoutError}
+          </div>
+        )}
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1px", background: BORDER, borderRadius: "10px", overflow: "hidden" }}>
+          {plans.map(plan => (
+            <div key={plan.id} style={{ background: plan.highlighted ? "rgba(94,154,50,0.06)" : BG, padding: "28px 24px", position: "relative" }}>
+              {plan.highlighted && (
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: `linear-gradient(90deg, ${accent}, ${accentLight})` }} />
+              )}
+              {plan.highlighted && (
+                <div style={{ position: "absolute", top: "14px", right: "16px", fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: accentLight }}>Most Popular</div>
+              )}
+              <p style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: "8px" }}>Terra</p>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, color: "#f0f4e8", marginBottom: "16px" }}>{plan.name}</h3>
+              <div style={{ marginBottom: "24px" }}>
+                <span style={{ fontSize: "32px", fontWeight: 800, color: "#f0f4e8", fontFamily: "monospace" }}>
+                  {annual ? plan.annualDisplay : plan.monthlyDisplay}
+                </span>
+                {!plan.isCustom && (
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.3)", marginLeft: "6px" }}>/{annual ? "yr" : "mo"}</span>
+                )}
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                {plan.features.map(f => (
+                  <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "12px", color: "rgba(255,255,255,0.45)" }}>
+                    <CheckCircle size={12} style={{ color: accentLight, marginTop: "1px", flexShrink: 0 }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handleSubscribe(plan)}
+                disabled={checkoutLoading === plan.id}
+                style={{
+                  width: "100%", padding: "10px 0", borderRadius: "6px",
+                  border: plan.highlighted ? "none" : `1px solid ${BORDER}`,
+                  cursor: checkoutLoading === plan.id ? "not-allowed" : "pointer",
+                  background: plan.highlighted ? accentLight : "transparent",
+                  color: plan.highlighted ? "#0b1009" : "rgba(255,255,255,0.5)",
+                  fontSize: "13px", fontWeight: 600,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                  opacity: checkoutLoading === plan.id ? 0.7 : 1,
+                  transition: "opacity 0.15s",
+                } as React.CSSProperties}
+              >
+                {checkoutLoading === plan.id ? (
+                  <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Processing…</>
+                ) : plan.isCustom ? (
+                  <>Contact Sales <ArrowRight size={12} /></>
+                ) : (
+                  <>Get started <ArrowRight size={12} /></>
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", marginTop: "16px", textAlign: "center" }}>
+          All plans include a 14-day free trial. Cancel anytime. Prices in USD.
+        </p>
       </section>
 
       {/* Trust */}
