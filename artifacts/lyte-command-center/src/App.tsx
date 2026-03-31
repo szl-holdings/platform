@@ -9,7 +9,7 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import { useAuth } from "@workspace/replit-auth-web";
-import { Zap, Inbox, CheckSquare, Users, AlertOctagon, Activity, Shield } from "lucide-react";
+import { Zap, Inbox, CheckSquare, Users, AlertOctagon, Activity, Shield, BarChart3, Network, Bell } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +48,11 @@ const SignalsPage = lazy(() => import("@/pages/signals-page"));
 const ActionsPage = lazy(() => import("@/pages/actions-page"));
 const ReadinessPage = lazy(() => import("@/pages/readiness-page"));
 const LyteMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
+const PrismDashboard = lazy(() => import("@/pages/prism-dashboard"));
+const MetricsExplorer = lazy(() => import("@/pages/metrics-explorer"));
+const AlertConfig = lazy(() => import("@/pages/alert-config"));
+const ServiceTopology = lazy(() => import("@/pages/service-topology"));
+const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -78,8 +83,13 @@ function PrivateRouter() {
         <Route path="/approvals" component={ApprovalsCenter} />
         <Route path="/ownership" component={OwnershipMap} />
         <Route path="/escalation" component={EscalationCenter} />
+        <Route path="/escalation-workflow" component={EscalationWorkflow} />
         <Route path="/intervention" component={InterventionWorkspace} />
         <Route path="/readiness-module" component={ReadinessModule} />
+        <Route path="/prism" component={PrismDashboard} />
+        <Route path="/metrics" component={MetricsExplorer} />
+        <Route path="/alerts" component={AlertConfig} />
+        <Route path="/topology" component={ServiceTopology} />
         <Route path="/admin/jobs">{() => <AdminRoute component={AdminJobsPage} />}</Route>
         <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>
         <Route path="/admin/flags">{() => <AdminRoute component={AdminFlagsPage} />}</Route>

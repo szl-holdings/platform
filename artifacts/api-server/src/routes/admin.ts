@@ -7,6 +7,7 @@ import {
   usersTable, rolesTable, userRolesTable, auditEventsTable, featureFlagsTable, webhookEventsTable,
   platformJobRunsTable, artifactApprovalsTable,
 } from "@workspace/db";
+import { seedLyteObservability } from "../lib/lyte-observability-seed";
 import { desc, sql, ilike, or, eq, and, inArray } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { serverTelemetry } from "@workspace/observability";
@@ -772,25 +773,33 @@ adminRouter.get("/admin/environment", (_req, res) => {
   });
 });
 
-adminRouter.post("/admin/seed", (_req, res) => {
-  res.json({
-    success: true,
-    seededAt: new Date().toISOString(),
-    tables: [
-      { name: "projects", rows: 8 },
-      { name: "users", rows: 4 },
-      { name: "audit_log", rows: 50 },
-      { name: "feature_flags", rows: 7 },
-    ],
-  });
+adminRouter.post("/admin/seed", async (_req, res) => {
+  try {
+    const results = await seedLyteObservability();
+    res.json({
+      success: true,
+      seededAt: new Date().toISOString(),
+      tables: Object.entries(results).map(([name, rows]) => ({ name, rows })),
+    });
+  } catch (err: any) {
+    console.error("[admin/seed] Error:", err);
+    res.status(500).json({ success: false, error: err?.message ?? "Seed failed" });
+  }
 });
 
-adminRouter.post("/admin/seed/reset", (_req, res) => {
-  res.json({
-    success: true,
-    resetAt: new Date().toISOString(),
-    message: "All demo data has been reset to defaults",
-  });
+adminRouter.post("/admin/seed/reset", async (_req, res) => {
+  try {
+    const results = await seedLyteObservability();
+    res.json({
+      success: true,
+      resetAt: new Date().toISOString(),
+      message: "All observability data re-seeded",
+      tables: Object.entries(results).map(([name, rows]) => ({ name, rows })),
+    });
+  } catch (err: any) {
+    console.error("[admin/seed/reset] Error:", err);
+    res.status(500).json({ success: false, error: err?.message ?? "Reset failed" });
+  }
 });
 
 interface IntegrationActivity {

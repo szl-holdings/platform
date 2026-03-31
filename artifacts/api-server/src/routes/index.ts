@@ -55,6 +55,7 @@ import lyteExtendedRouter from "./lyte-extended";
 import vesselsExtendedRouter from "./vessels-extended";
 import terraCrmRouter from "./terra-crm";
 import microsoftGraphRouter from "./microsoft-graph";
+import lyteObservabilityRouter from "./lyte-observability";
 
 const router: IRouter = Router();
 
@@ -113,6 +114,7 @@ router.use(filesRouter);
 router.use(stephenRouter);
 router.use("/lyte", readLimiter);
 router.use("/lyte", lyteExtendedRouter);
+router.use(lyteObservabilityRouter);
 router.use("/vessels", readLimiter);
 router.use(vesselsExtendedRouter);
 router.use("/lyte/platform", readLimiter);

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
-import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, ChevronRight, Zap, Menu, X, Package, ListTodo, Activity, Radio, Shield, Settings, Flag, FileText, Database, Play, ChevronDown, Bell } from "lucide-react";
+import { Inbox, CheckSquare, Users, AlertOctagon, Wrench, ChevronRight, Zap, Menu, X, Package, ListTodo, Activity, Radio, Shield, Settings, Flag, FileText, Database, Play, ChevronDown, Bell, BarChart3, Network, BellRing } from "lucide-react";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -11,17 +11,29 @@ const COMMAND_LOOP = [
   { phase: "VERIFY", color: "#10b981", active: false },
 ];
 
-const NAV = [
-  { href: "/", label: "Command Inbox", icon: Inbox },
-  { href: "/signals", label: "Signals Feed", icon: Radio },
-  { href: "/actions", label: "Action Center", icon: Zap },
-  { href: "/readiness", label: "Readiness", icon: Shield },
-  { href: "/action-queue", label: "Action Queue", icon: ListTodo },
-  { href: "/approvals", label: "Approvals Center", icon: CheckSquare },
-  { href: "/ownership", label: "Ownership Map", icon: Users },
-  { href: "/escalation", label: "Escalation Center", icon: AlertOctagon },
-  { href: "/intervention", label: "Intervention Workspace", icon: Wrench },
-  { href: "/readiness-module", label: "Readiness Module", icon: Package },
+const NAV_GROUPS = [
+  {
+    label: "Observability",
+    items: [
+      { href: "/", label: "Command Inbox", icon: Inbox },
+      { href: "/prism", label: "PRISM Dashboard", icon: BarChart3 },
+      { href: "/signals", label: "Signal Feed", icon: Radio },
+      { href: "/metrics", label: "Metrics Explorer", icon: Activity },
+      { href: "/topology", label: "Service Topology", icon: Network },
+      { href: "/alerts", label: "Alert Config", icon: BellRing },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { href: "/actions", label: "Action Center", icon: Zap },
+      { href: "/ownership", label: "Ownership Map", icon: Users },
+      { href: "/escalation-workflow", label: "Escalation Workflow", icon: AlertOctagon },
+      { href: "/approvals", label: "Approvals Center", icon: CheckSquare },
+      { href: "/readiness", label: "Readiness", icon: Shield },
+      { href: "/intervention", label: "Intervention", icon: Wrench },
+    ],
+  },
 ];
 
 const ADMIN_NAV = [
@@ -133,19 +145,24 @@ export function LyteLayout({ children }: { children: ReactNode }) {
 
         <div className="flex-1 min-h-0 flex flex-col">
           <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
-            {NAV.map((item) => {
-              const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
-              return (
-                <Link key={item.href} href={item.href} className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive ? "text-amber-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-                )} style={{ background: isActive ? "rgba(245,158,11,0.08)" : undefined }}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#f59e0b" }} />}
-                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-amber-400" : "text-slate-500 group-hover:text-slate-300")} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+            {NAV_GROUPS.map((group, gi) => (
+              <div key={group.label} className={gi > 0 ? "mt-3 pt-3 border-t" : ""} style={gi > 0 ? { borderColor: "rgba(255,255,255,0.05)" } : {}}>
+                <div className="px-3 pb-1.5 text-[9px] font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.2)" }}>{group.label}</div>
+                {group.items.map((item) => {
+                  const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
+                  return (
+                    <Link key={item.href} href={item.href} className={cn(
+                      "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                      isActive ? "text-amber-400" : "text-slate-400 hover:text-white hover:bg-white/5"
+                    )} style={{ background: isActive ? "rgba(245,158,11,0.08)" : undefined }}>
+                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#f59e0b" }} />}
+                      <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-amber-400" : "text-slate-500 group-hover:text-slate-300")} />
+                      <span className="text-[11px]">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
 
             <AdminNavSection location={location} />
           </nav>

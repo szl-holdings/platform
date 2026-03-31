@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, real, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -176,3 +176,117 @@ export type LytePlaybook = typeof lytePlaybooksTable.$inferSelect;
 export const insertLyteRecommendationSchema = createInsertSchema(lyteRecommendationsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertLyteRecommendation = z.infer<typeof insertLyteRecommendationSchema>;
 export type LyteRecommendation = typeof lyteRecommendationsTable.$inferSelect;
+
+export const lytePrismScoresTable = pgTable("lyte_prism_scores", {
+  id: serial("id").primaryKey(),
+  lens: text("lens", { enum: ["financial_health", "operational_risk", "growth_velocity", "customer_sentiment", "compliance_drift", "talent_stability", "market_position"] }).notNull(),
+  score: integer("score").notNull(),
+  previousScore: integer("previous_score"),
+  trend: text("trend", { enum: ["up", "down", "flat"] }).notNull().default("flat"),
+  trendDelta: real("trend_delta"),
+  topSignals: jsonb("top_signals"),
+  summary: text("summary"),
+  scoredAt: timestamp("scored_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("lyte_prism_scores_lens_idx").on(table.lens),
+  index("lyte_prism_scores_scored_at_idx").on(table.scoredAt),
+]);
+
+export const lyteMetricsTable = pgTable("lyte_metrics", {
+  id: serial("id").primaryKey(),
+  service: text("service").notNull(),
+  metricName: text("metric_name").notNull(),
+  metricType: text("metric_type", { enum: ["latency", "error_rate", "throughput", "queue_depth", "cpu", "memory", "availability", "revenue", "churn_rate", "nps"] }).notNull(),
+  value: real("value").notNull(),
+  unit: text("unit").notNull().default("ms"),
+  tags: jsonb("tags"),
+  anomaly: boolean("anomaly").notNull().default(false),
+  anomalyScore: real("anomaly_score"),
+  recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("lyte_metrics_service_idx").on(table.service),
+  index("lyte_metrics_name_idx").on(table.metricName),
+  index("lyte_metrics_recorded_at_idx").on(table.recordedAt),
+]);
+
+export const lyteAlertsTable = pgTable("lyte_alerts", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  alertType: text("alert_type", { enum: ["threshold", "anomaly", "composite"] }).notNull().default("threshold"),
+  service: text("service").notNull(),
+  metricName: text("metric_name").notNull(),
+  condition: text("condition", { enum: ["gt", "lt", "gte", "lte", "eq", "anomaly"] }).notNull(),
+  threshold: real("threshold"),
+  severity: text("severity", { enum: ["critical", "high", "medium", "low"] }).notNull().default("medium"),
+  status: text("status", { enum: ["active", "firing", "resolved", "silenced", "draft"] }).notNull().default("active"),
+  notificationChannels: jsonb("notification_channels"),
+  firingCount: integer("firing_count").notNull().default(0),
+  lastFiredAt: timestamp("last_fired_at"),
+  lastResolvedAt: timestamp("last_resolved_at"),
+  compositeQuery: jsonb("composite_query"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("lyte_alerts_service_idx").on(table.service),
+  index("lyte_alerts_status_idx").on(table.status),
+]);
+
+export const lyteAlertEventsTable = pgTable("lyte_alert_events", {
+  id: serial("id").primaryKey(),
+  alertId: integer("alert_id").references(() => lyteAlertsTable.id, { onDelete: "cascade" }),
+  eventType: text("event_type", { enum: ["fired", "resolved", "silenced", "acknowledged"] }).notNull(),
+  triggerValue: real("trigger_value"),
+  message: text("message"),
+  metadata: jsonb("metadata"),
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("lyte_alert_events_alert_idx").on(table.alertId),
+  index("lyte_alert_events_occurred_at_idx").on(table.occurredAt),
+]);
+
+export const lyteEscalationsTable = pgTable("lyte_escalations", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  signalId: integer("signal_id").references(() => lyteSignalsTable.id, { onDelete: "set null" }),
+  alertId: integer("alert_id").references(() => lyteAlertsTable.id, { onDelete: "set null" }),
+  severity: text("severity", { enum: ["critical", "high", "medium", "low"] }).notNull().default("high"),
+  status: text("status", { enum: ["open", "in_progress", "escalated", "resolved", "closed"] }).notNull().default("open"),
+  stage: integer("stage").notNull().default(1),
+  maxStage: integer("max_stage").notNull().default(3),
+  owner: text("owner"),
+  assignedTo: text("assigned_to"),
+  escalationPath: jsonb("escalation_path"),
+  slaDeadlineAt: timestamp("sla_deadline_at"),
+  resolvedAt: timestamp("resolved_at"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("lyte_escalations_status_idx").on(table.status),
+  index("lyte_escalations_severity_idx").on(table.severity),
+]);
+
+export const insertLytePrismScoreSchema = createInsertSchema(lytePrismScoresTable).omit({ id: true, createdAt: true });
+export type InsertLytePrismScore = z.infer<typeof insertLytePrismScoreSchema>;
+export type LytePrismScore = typeof lytePrismScoresTable.$inferSelect;
+
+export const insertLyteMetricSchema = createInsertSchema(lyteMetricsTable).omit({ id: true, createdAt: true });
+export type InsertLyteMetric = z.infer<typeof insertLyteMetricSchema>;
+export type LyteMetric = typeof lyteMetricsTable.$inferSelect;
+
+export const insertLyteAlertSchema = createInsertSchema(lyteAlertsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLyteAlert = z.infer<typeof insertLyteAlertSchema>;
+export type LyteAlert = typeof lyteAlertsTable.$inferSelect;
+
+export const insertLyteAlertEventSchema = createInsertSchema(lyteAlertEventsTable).omit({ id: true, createdAt: true });
+export type InsertLyteAlertEvent = z.infer<typeof insertLyteAlertEventSchema>;
+export type LyteAlertEvent = typeof lyteAlertEventsTable.$inferSelect;
+
+export const insertLyteEscalationSchema = createInsertSchema(lyteEscalationsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLyteEscalation = z.infer<typeof insertLyteEscalationSchema>;
+export type LyteEscalation = typeof lyteEscalationsTable.$inferSelect;
