@@ -384,3 +384,22 @@ export type LeadStatus = typeof leadStatusTable.$inferSelect;
 export const insertRedirectSchema = createInsertSchema(redirectsTable).omit({ id: true, createdAt: true });
 export type InsertRedirect = z.infer<typeof insertRedirectSchema>;
 export type Redirect = typeof redirectsTable.$inferSelect;
+
+export const cmsPostsTable = pgTable("cms_posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content"),
+  excerpt: text("excerpt"),
+  contentType: text("content_type", { enum: ["blog", "case-study", "investor-letter", "update"] }).notNull(),
+  status: text("status", { enum: ["draft", "published"] }).notNull().default("draft"),
+  featuredImage: text("featured_image"),
+  metaDescription: text("meta_description"),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCmsPostSchema = createInsertSchema(cmsPostsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertCmsPost = z.infer<typeof insertCmsPostSchema>;
+export type CmsPost = typeof cmsPostsTable.$inferSelect;

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { m } from "framer-motion";
-import { ArrowRight, Download, TrendingUp, Shield, Globe, Layers, BarChart3, CheckCircle, FileText, Users, Loader2 } from "lucide-react";
+import { ArrowRight, Download, TrendingUp, Shield, Globe, Layers, BarChart3, CheckCircle, FileText, Users, Loader2, BookOpen, Zap } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -20,6 +20,25 @@ async function downloadPDF(template: string, data: Record<string, unknown>, file
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE = `${BASE}/api`;
+
+interface CmsPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  contentType: string;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
 const REVENUE_TRACKS = [
@@ -118,6 +137,20 @@ export default function InvestorRelationsPage() {
       setDownloadingPortfolio(false);
     }
   };
+
+  const [investorLetters, setInvestorLetters] = useState<CmsPost[]>([]);
+  const [platformUpdates, setPlatformUpdates] = useState<CmsPost[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/cms/posts?content_type=investor-letter`)
+      .then(r => r.ok ? r.json() : null)
+      .then(json => { if (json?.data) setInvestorLetters(json.data); })
+      .catch(() => {});
+    fetch(`${API_BASE}/cms/posts?content_type=update`)
+      .then(r => r.ok ? r.json() : null)
+      .then(json => { if (json?.data) setPlatformUpdates(json.data.slice(0, 4)); })
+      .catch(() => {});
+  }, []);
 
   usePageMeta({
     title: "Investor Relations — SZL Holdings",
@@ -368,6 +401,80 @@ export default function InvestorRelationsPage() {
             </div>
           </div>
         </section>
+
+        {investorLetters.length > 0 && (
+          <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)", background: "hsl(210,12%,6%)" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
+                <BookOpen size={13} style={{ color: "hsl(210,5%,42%)" }} />
+                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)" }}>
+                  Quarterly Letters
+                </p>
+              </div>
+              <div className="space-y-2">
+                {investorLetters.map((letter, i) => (
+                  <m.div
+                    key={letter.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.06 }}
+                    style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
+                        <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,86%)" }}>{letter.title}</p>
+                      </div>
+                      {letter.excerpt && (
+                        <p style={{ fontSize: "12px", color: "hsl(210,5%,52%)", lineHeight: 1.6 }}>{letter.excerpt}</p>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.5rem", flexShrink: 0 }}>
+                      <span style={{ fontSize: "10.5px", color: "hsl(210,5%,40%)" }}>{formatDate(letter.publishedAt)}</span>
+                      <span style={{ fontSize: "10px", color: "hsl(210,5%,38%)", display: "flex", alignItems: "center", gap: "3px" }}>
+                        <FileText size={11} /> Investor Update
+                      </span>
+                    </div>
+                  </m.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {platformUpdates.length > 0 && (
+          <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.5rem" }}>
+                <Zap size={13} style={{ color: "hsl(210,5%,42%)" }} />
+                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)" }}>
+                  Platform Updates
+                </p>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {platformUpdates.map((update, i) => (
+                  <m.div
+                    key={update.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.06 }}
+                    style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.05)" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginBottom: "0.5rem" }}>
+                      <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "hsl(190,80%,55%)", opacity: 0.7, flexShrink: 0 }} />
+                      <span style={{ fontSize: "10px", color: "hsl(210,5%,40%)" }}>{formatDate(update.publishedAt)}</span>
+                    </div>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(38,12%,86%)", marginBottom: "0.375rem", lineHeight: 1.4 }}>{update.title}</p>
+                    {update.excerpt && (
+                      <p style={{ fontSize: "12px", color: "hsl(210,5%,52%)", lineHeight: 1.6 }}>{update.excerpt}</p>
+                    )}
+                  </m.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section style={{ padding: "3rem 0 5rem", borderTop: "1px solid hsla(0,0%,100%,0.04)", background: "hsl(210,12%,6%)" }}>
           <div className="max-w-[1280px] mx-auto px-6 lg:px-10">

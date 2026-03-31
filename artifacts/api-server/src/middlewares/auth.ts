@@ -109,9 +109,15 @@ export function authMiddleware(options: { required?: boolean } = {}) {
 
       let user: AuthenticatedUser | null = null;
 
+      const SESSION_COOKIE = "sid";
+      let token: string | undefined;
       const authHeader = req.headers.authorization;
       if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.slice(7);
+        token = authHeader.slice(7);
+      } else if (req.cookies?.[SESSION_COOKIE]) {
+        token = req.cookies[SESSION_COOKIE] as string;
+      }
+      if (token) {
         user = await resolveUserFromToken(token);
       }
 

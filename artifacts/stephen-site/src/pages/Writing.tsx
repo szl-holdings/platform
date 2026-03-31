@@ -1,8 +1,36 @@
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Link } from "wouter";
 
-const posts = [
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE = `${BASE}/api`;
+
+interface CmsPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  contentType: string;
+  status: string;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+const CONTENT_TYPE_LABEL: Record<string, string> = {
+  "blog": "Essay",
+  "case-study": "Case Study",
+  "investor-letter": "Investor Letter",
+  "update": "Update",
+};
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+
+const STATIC_POSTS = [
   {
     slug: "vertical-command-systems",
     tag: "Strategy",
@@ -41,6 +69,34 @@ const posts = [
 ];
 
 export function Writing() {
+  const [posts, setPosts] = useState<Array<{ slug: string; tag: string; title: string; excerpt: string; date: string }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`${API_BASE}/cms/posts?content_type=blog&content_type=case-study`, { signal: controller.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        const apiPosts: CmsPost[] = json?.data ?? [];
+        if (apiPosts.length > 0) {
+          setPosts(apiPosts.map(p => ({
+            slug: p.slug,
+            tag: CONTENT_TYPE_LABEL[p.contentType] ?? "Essay",
+            title: p.title,
+            excerpt: p.excerpt ?? "",
+            date: formatDate(p.publishedAt),
+          })));
+        } else {
+          setPosts(STATIC_POSTS);
+        }
+      })
+      .catch(() => setPosts(STATIC_POSTS))
+      .finally(() => setLoading(false));
+    return () => controller.abort();
+  }, []);
+
+  const displayPosts = loading ? STATIC_POSTS : posts;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -54,7 +110,7 @@ export function Writing() {
         </div>
 
         <div className="space-y-px">
-          {posts.map((post) => (
+          {displayPosts.map((post) => (
             <Link key={post.slug} href={`/writing/${post.slug}`}>
               <div className="group border-t border-white/5 py-7 cursor-pointer px-1 -mx-1">
                 <div className="flex items-center gap-3 mb-2">

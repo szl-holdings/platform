@@ -1,9 +1,44 @@
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Link, useRoute } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
-const posts: Record<string, { title: string; date: string; tag: string; content: string[] }> = {
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE = `${BASE}/api`;
+
+interface CmsPost {
+  id: number;
+  title: string;
+  slug: string;
+  content: string | null;
+  excerpt: string | null;
+  contentType: string;
+  status: string;
+  metaDescription: string | null;
+  publishedAt: string | null;
+}
+
+const CONTENT_TYPE_LABEL: Record<string, string> = {
+  "blog": "Essay",
+  "case-study": "Case Study",
+  "investor-letter": "Investor Letter",
+  "update": "Update",
+};
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+
+function renderMarkdown(content: string): string[][] {
+  const paragraphs = content.split(/\n{2,}/).filter(p => p.trim());
+  return paragraphs.map(p => [p.replace(/\n/g, " ").trim()]);
+}
+
+const STATIC_POSTS: Record<string, { title: string; date: string; tag: string; content: string[] }> = {
   "vertical-command-systems": {
     title: "The case for vertical command systems",
     date: "March 2026",
@@ -71,12 +106,107 @@ const posts: Record<string, { title: string; date: string; tag: string; content:
   },
 };
 
+function MarkdownContent({ content }: { content: string }) {
+  const paragraphs = content.split(/\n{2,}/).filter(p => p.trim());
+  return (
+    <div className="space-y-6">
+      {paragraphs.map((para, i) => {
+        const trimmed = para.trim();
+        if (trimmed.startsWith("## ")) {
+          return <h2 key={i} className="text-xl font-bold text-foreground mt-8 mb-2">{trimmed.slice(3)}</h2>;
+        }
+        if (trimmed.startsWith("### ")) {
+          return <h3 key={i} className="text-base font-semibold text-foreground mt-6 mb-1">{trimmed.slice(4)}</h3>;
+        }
+        if (trimmed.startsWith("**") && trimmed.endsWith("**")) {
+          return <p key={i} className="text-[15px] font-semibold text-foreground/90 leading-[1.8]">{trimmed.slice(2, -2)}</p>;
+        }
+        return (
+          <p key={i} className="text-[15px] text-muted-foreground/80 leading-[1.8]">
+            {trimmed.replace(/\n/g, " ")}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+interface PostState {
+  title: string;
+  date: string;
+  tag: string;
+  content: string | string[];
+  metaDescription: string;
+}
+
 export function WritingDetail() {
   const [match, params] = useRoute("/writing/:slug");
   const slug = params?.slug || "";
-  const post = posts[slug];
+  const [post, setPost] = useState<PostState | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!post) {
+  usePageMeta({
+    title: post ? `${post.title} — Stephen Lutar` : "Stephen Lutar",
+    description: post?.metaDescription || (post && typeof post.content === "string" ? post.content.slice(0, 160) : undefined),
+    canonical: slug ? `${window.location.origin}/stephen/writing/${slug}` : undefined,
+  });
+
+  useEffect(() => {
+    if (!slug) return;
+    const controller = new AbortController();
+    setLoading(true);
+    setNotFound(false);
+
+    fetch(`${API_BASE}/cms/posts/${slug}`, { signal: controller.signal })
+      .then(r => {
+        if (r.status === 404) throw new Error("not_found");
+        if (!r.ok) throw new Error("api_error");
+        return r.json();
+      })
+      .then(json => {
+        const p: CmsPost = json.data ?? json;
+        setPost({
+          title: p.title,
+          date: formatDate(p.publishedAt),
+          tag: CONTENT_TYPE_LABEL[p.contentType] ?? "Essay",
+          content: p.content ?? "",
+          metaDescription: p.metaDescription ?? p.excerpt ?? "",
+        });
+      })
+      .catch((err: Error) => {
+        const staticPost = STATIC_POSTS[slug];
+        if (staticPost) {
+          setPost({ ...staticPost, metaDescription: staticPost.content[0]?.slice(0, 160) ?? "" });
+        } else {
+          void err;
+          setNotFound(true);
+        }
+      })
+      .finally(() => setLoading(false));
+
+    return () => controller.abort();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-3xl mx-auto px-6 pt-28 pb-24">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-white/5 rounded w-32" />
+            <div className="h-8 bg-white/5 rounded w-3/4" />
+            <div className="space-y-3 mt-8">
+              {[1, 2, 3, 4].map(i => <div key={i} className="h-4 bg-white/5 rounded" />)}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (notFound || !post) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -103,11 +233,15 @@ export function WritingDetail() {
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-6">{post.title}</h1>
         </div>
-        <div className="space-y-6">
-          {post.content.map((para, i) => (
-            <p key={i} className="text-[15px] text-muted-foreground/80 leading-[1.8]">{para}</p>
-          ))}
-        </div>
+        {typeof post.content === "string" ? (
+          <MarkdownContent content={post.content} />
+        ) : (
+          <div className="space-y-6">
+            {post.content.map((para, i) => (
+              <p key={i} className="text-[15px] text-muted-foreground/80 leading-[1.8]">{para}</p>
+            ))}
+          </div>
+        )}
         <div className="mt-14 pt-8 border-t border-white/5 flex items-center justify-between">
           <Link href="/writing" className="text-[12px] text-muted-foreground/40 hover:text-muted-foreground transition-colors">
             ← All writing

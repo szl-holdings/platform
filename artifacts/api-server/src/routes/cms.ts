@@ -1,14 +1,27 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
+import multer from "multer";
 import {
   db, sitesTable, pagesTable, sectionsTable, venturesTable, servicesTable,
   featuresTable, useCasesTable, roadmapItemsTable, updatesTable,
   testimonialsTable, faqsTable, ctasTable, articlesTable, caseStudiesTable,
   downloadsTable, navigationItemsTable, siteSettingsTable, mediaAssetsTable,
   formsTable, contactSubmissionsTable, leadStatusTable, redirectsTable,
+  cmsPostsTable,
 } from "@workspace/db";
-import { eq, desc, asc, sql, and } from "drizzle-orm";
+import { eq, desc, asc, sql, and, inArray } from "drizzle-orm";
 import { sendSuccess, sendNotFound, handleRouteError, parsePagination } from "../lib/api-response";
-import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { services } from "@workspace/services";
+
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed"));
+  },
+});
+
 
 const router: IRouter = Router();
 
@@ -760,6 +773,118 @@ router.delete("/cms/redirects/:id", authMiddleware({ required: false }), async (
     await db.delete(redirectsTable).where(eq(redirectsTable.id, id));
     sendSuccess(res, { deleted: true });
   } catch (err) { handleRouteError(res, err, "Failed to delete redirect"); }
+});
+
+// ─── CMS Posts ────────────────────────────────────────────────────────────────
+
+const VALID_CONTENT_TYPES = ["blog", "case-study", "investor-letter", "update"] as const;
+type ContentType = typeof VALID_CONTENT_TYPES[number];
+
+router.get("/cms/posts", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
+    const statusParam = req.query.status as string | undefined;
+
+    const rawContentType = req.query.content_type;
+    const contentTypes: ContentType[] = (
+      Array.isArray(rawContentType) ? rawContentType : rawContentType ? [rawContentType] : []
+    ).filter((t): t is ContentType => VALID_CONTENT_TYPES.includes(t as ContentType));
+
+    const conditions = [];
+    if (!isEditor) {
+      conditions.push(eq(cmsPostsTable.status, "published"));
+    } else if (statusParam && (statusParam === "draft" || statusParam === "published")) {
+      conditions.push(eq(cmsPostsTable.status, statusParam));
+    }
+    if (contentTypes.length === 1) {
+      conditions.push(eq(cmsPostsTable.contentType, contentTypes[0]));
+    } else if (contentTypes.length > 1) {
+      conditions.push(inArray(cmsPostsTable.contentType, contentTypes));
+    }
+
+    const rows = await db.select().from(cmsPostsTable)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(cmsPostsTable.publishedAt))
+      .limit(limit).offset(offset);
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(cmsPostsTable)
+      .where(conditions.length ? and(...conditions) : undefined);
+    sendSuccess(res, { data: rows, meta: { page, limit, total: count } });
+  } catch (err) { handleRouteError(res, err, "Failed to list CMS posts"); }
+});
+
+router.get("/cms/posts/:slug", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
+    const [row] = await db.select().from(cmsPostsTable).where(
+      isEditor
+        ? eq(cmsPostsTable.slug, req.params.slug)
+        : and(eq(cmsPostsTable.slug, req.params.slug), eq(cmsPostsTable.status, "published"))
+    );
+    if (!row) { sendNotFound(res, "Post"); return; }
+    sendSuccess(res, row);
+  } catch (err) { handleRouteError(res, err, "Failed to get CMS post"); }
+});
+
+router.post("/cms/posts", authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+  try {
+    const [row] = await db.insert(cmsPostsTable).values(req.body).returning();
+    sendSuccess(res, row, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to create CMS post"); }
+});
+
+router.put("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const updateData = { ...req.body, updatedAt: new Date() };
+    if (req.body.status === "published" && !req.body.publishedAt) {
+      updateData.publishedAt = new Date();
+    }
+    const [row] = await db.update(cmsPostsTable).set(updateData).where(eq(cmsPostsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Post"); return; }
+    sendSuccess(res, row);
+  } catch (err) { handleRouteError(res, err, "Failed to update CMS post"); }
+});
+
+router.patch("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const updateData = { ...req.body, updatedAt: new Date() };
+    if (req.body.status === "published" && !req.body.publishedAt) {
+      updateData.publishedAt = new Date();
+    }
+    const [row] = await db.update(cmsPostsTable).set(updateData).where(eq(cmsPostsTable.id, id)).returning();
+    if (!row) { sendNotFound(res, "Post"); return; }
+    sendSuccess(res, row);
+  } catch (err) { handleRouteError(res, err, "Failed to update CMS post"); }
+});
+
+router.delete("/cms/posts/:id", authMiddleware(), requireRole("admin", "editor"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    await db.delete(cmsPostsTable).where(eq(cmsPostsTable.id, id));
+    sendSuccess(res, { deleted: true });
+  } catch (err) { handleRouteError(res, err, "Failed to delete CMS post"); }
+});
+
+router.post("/cms/posts/upload-image", authMiddleware(), requireRole("admin", "editor"), imageUpload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: "No image file provided" });
+      return;
+    }
+    const mime = req.file.mimetype;
+    const ext = req.file.originalname.split(".").pop() ?? "bin";
+    const key = `cms-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const result = await services.storage.upload(key, req.file.buffer, mime);
+    const [asset] = await db.insert(mediaAssetsTable).values({
+      fileName: req.file.originalname,
+      fileUrl: result.url,
+      mimeType: mime,
+      altText: (req.body.alt as string | undefined) ?? req.file.originalname,
+    }).returning();
+    sendSuccess(res, { url: result.url, assetId: asset.id }, 201);
+  } catch (err) { handleRouteError(res, err, "Failed to upload image"); }
 });
 
 export default router;
