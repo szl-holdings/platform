@@ -333,7 +333,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
       {/* Proof Reinforcement */}
       <section className="px-6 py-16 max-w-6xl mx-auto">
         <div className="mb-8">
-          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Documented Outcomes</div>
+          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#4B8BDB" }}>Documented Outcomes</div>
           <h2 className="text-2xl font-bold text-white">Results from Alloy-powered deployments</h2>
           <p className="text-white/45 text-sm mt-2 max-w-xl leading-relaxed">
             Specific operational outcomes achieved through Alloy's orchestration layer. Documented with constraints, timelines, and measured impact.
@@ -341,7 +341,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {[
-            { metric: "3.4×", label: "Decision velocity improvement", detail: "Multi-entity procurement: 18 days → 5.3 days average cycle time", accent: "#00d4ff" },
+            { metric: "3.4×", label: "Decision velocity improvement", detail: "Multi-entity procurement: 18 days → 5.3 days average cycle time", accent: "#4B8BDB" },
             { metric: "99%", label: "Legal SLA compliance", detail: "Up from 71% — routing automation eliminated manual hand-off delays", accent: "#06b6d4" },
             { metric: "0", label: "Escalations in first 90 days", detail: "Entity-aware authority matrix prevented mis-routing across all 6 entities", accent: "#0891b2" },
             { metric: "6", label: "Entities integrated", detail: "Full authority matrix encoded — NetSuite, Xero, QuickBooks all unified", accent: "#0e7490" },
@@ -351,7 +351,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             <div
               key={item.label}
               className="rounded-xl p-5 border transition-colors duration-200 hover:border-white/15"
-              style={{ borderColor: "rgba(0,212,255,0.12)", background: "rgba(0,212,255,0.04)" }}
+              style={{ borderColor: "rgba(75,139,219,0.12)", background: "rgba(75,139,219,0.04)" }}
             >
               <div className="text-2xl font-bold mb-1" style={{ color: item.accent }}>{item.metric}</div>
               <div className="text-[13px] font-semibold text-white/80 mb-1.5">{item.label}</div>
@@ -359,7 +359,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             </div>
           ))}
         </div>
-        <a href="/case-studies" className="text-[12px] text-[#00d4ff]/50 hover:text-[#00d4ff]/80 transition-colors inline-flex items-center gap-1.5">
+        <a href="/case-studies" className="text-[12px] text-[#4B8BDB]/50 hover:text-[#4B8BDB]/80 transition-colors inline-flex items-center gap-1.5">
           Read full case study: 3.4× Decision Velocity Across a Multi-Entity Operating Structure
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </a>

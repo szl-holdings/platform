@@ -24,7 +24,7 @@ const categoryGradients: Record<string, string> = {
   commercial: "linear-gradient(135deg, rgba(217,119,6,0.4), rgba(234,179,8,0.2), rgba(249,115,22,0.3))",
   video_production: "linear-gradient(135deg, rgba(37,99,235,0.4), rgba(99,102,241,0.2), rgba(168,85,247,0.3))",
   event_marketing: "linear-gradient(135deg, rgba(5,150,105,0.4), rgba(34,197,94,0.2), rgba(20,184,166,0.3))",
-  default: "linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.08), rgba(0,150,200,0.15))",
+  default: "linear-gradient(135deg, rgba(75,139,219,0.2), rgba(75,139,219,0.08), rgba(0,150,200,0.15))",
 };
 
 const categoryLabels: Record<string, string> = {
@@ -80,7 +80,7 @@ function CalendarEventBadge({ type }: { type: string }) {
     publish: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     meeting: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     production: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-    delivery: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    delivery: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     deadline: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   };
   return <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${styles[type] || styles.meeting}`}>{type}</span>;
@@ -150,14 +150,14 @@ export function CampaignHub() {
               value={newTitle}
               onChange={e => setNewTitle(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleCreate()}
-              className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500/30"
+              className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-blue-500/30"
             />
-            <button onClick={handleCreate} disabled={createCampaign.isPending} className="px-4 py-2 rounded-lg text-sm font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors">Save</button>
+            <button onClick={handleCreate} disabled={createCampaign.isPending} className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-40 transition-colors">Save</button>
             <button onClick={() => setIsCreating(false)} className="px-4 py-2 rounded-lg text-sm font-medium border border-white/10 text-slate-400 hover:border-white/20 transition-colors">Cancel</button>
           </motion.div>
         ) : (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-            <button onClick={() => setIsCreating(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors">
+            <button onClick={() => setIsCreating(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors">
               <Plus className="w-4 h-4" /> New Campaign
             </button>
           </motion.div>
@@ -167,10 +167,10 @@ export function CampaignHub() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {quickStats.map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <div className="p-4 border border-white/8 bg-[#0d1117] hover:border-cyan-400/20 transition-all rounded-xl">
+            <div className="p-4 border border-white/8 bg-[#0d1117] hover:border-blue-400/20 transition-all rounded-xl">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-                  <stat.icon className="w-5 h-5 text-cyan-400" />
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <stat.icon className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
                   {isLoading ? (
@@ -188,7 +188,7 @@ export function CampaignHub() {
 
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
           <span className="ml-3 text-slate-400 text-sm">Loading campaigns...</span>
         </div>
       )}
@@ -204,7 +204,7 @@ export function CampaignHub() {
         {campaigns?.map(campaign => (
           <motion.div key={campaign.id} variants={item}>
             <Link href={`/alloy/creative/campaigns/${campaign.id}`} className="block group">
-              <div className="overflow-hidden border border-white/8 hover:border-cyan-400/30 hover:shadow-lg hover:shadow-cyan-400/5 transition-all duration-300 relative bg-[#0d1117] rounded-xl">
+              <div className="overflow-hidden border border-white/8 hover:border-blue-400/30 hover:shadow-lg hover:shadow-cyan-400/5 transition-all duration-300 relative bg-[#0d1117] rounded-xl">
                 <CampaignThumbnail category={campaign.category} />
                 <div className="p-4">
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -224,7 +224,7 @@ export function CampaignHub() {
                     )}
                   </div>
                   
-                  <h3 className="text-sm font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors leading-tight line-clamp-1">{campaign.name}</h3>
+                  <h3 className="text-sm font-bold text-white mb-1 group-hover:text-blue-400 transition-colors leading-tight line-clamp-1">{campaign.name}</h3>
                   <p className="text-xs text-slate-500 mb-1 flex items-center gap-1.5">
                     <Target className="w-3 h-3 shrink-0" /> {campaign.client}
                   </p>
@@ -255,7 +255,7 @@ export function CampaignHub() {
                         initial={{ width: 0 }}
                         animate={{ width: `${campaign.progress ?? 0}%` }}
                         transition={{ delay: 0.3, duration: 1, ease: "easeOut" }}
-                        className={`h-full rounded-full ${(campaign.progress ?? 0) >= 80 ? "bg-emerald-500" : (campaign.progress ?? 0) >= 50 ? "bg-cyan-400" : (campaign.progress ?? 0) >= 25 ? "bg-amber-500" : "bg-blue-500"}`}
+                        className={`h-full rounded-full ${(campaign.progress ?? 0) >= 80 ? "bg-emerald-500" : (campaign.progress ?? 0) >= 50 ? "bg-blue-400" : (campaign.progress ?? 0) >= 25 ? "bg-amber-500" : "bg-blue-500"}`}
                       />
                     </div>
                     <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mt-1.5">
@@ -275,10 +275,10 @@ export function CampaignHub() {
           <div className="p-5 border border-white/8 bg-[#0d1117] rounded-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-cyan-400" /> Content Calendar
+                <Calendar className="w-5 h-5 text-blue-400" /> Content Calendar
               </h3>
               <Link href="/alloy/creative/content-calendar">
-                <span className="text-xs text-cyan-400 hover:underline cursor-pointer">View Full Calendar</span>
+                <span className="text-xs text-blue-400 hover:underline cursor-pointer">View Full Calendar</span>
               </Link>
             </div>
             <div className="space-y-2">
@@ -297,7 +297,7 @@ export function CampaignHub() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + i * 0.05 }}
-                  className="flex items-center gap-4 p-3 rounded-lg border border-white/6 hover:border-cyan-400/15 hover:bg-white/2 transition-all cursor-pointer"
+                  className="flex items-center gap-4 p-3 rounded-lg border border-white/6 hover:border-blue-400/15 hover:bg-white/2 transition-all cursor-pointer"
                 >
                   <div className="text-center shrink-0 w-12">
                     <div className="text-lg font-bold text-white leading-none">{format(event.date, "d")}</div>
@@ -328,13 +328,13 @@ export function CampaignHub() {
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 + i * 0.05 }}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-white/6 hover:border-cyan-400/15 hover:bg-white/2 transition-all cursor-pointer group"
+                  className="flex items-center gap-3 p-3 rounded-lg border border-white/6 hover:border-blue-400/15 hover:bg-white/2 transition-all cursor-pointer group"
                 >
                   <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${asset.color} flex items-center justify-center shrink-0`}>
                     <Image className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white group-hover:text-cyan-400 transition-colors truncate">{asset.name}</p>
+                    <p className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors truncate">{asset.name}</p>
                     <p className="text-[10px] text-slate-500">{asset.category}</p>
                   </div>
                   <span className="text-xs text-slate-500 font-medium">{asset.count}</span>

@@ -33,8 +33,8 @@ export default function AutomationAnalytics() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <BarChart2 className="w-4 h-4" style={{ color: "#00d4ff" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>Alloy · Automation Analytics</span>
+          <BarChart2 className="w-4 h-4" style={{ color: "#4B8BDB" }} />
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#4B8BDB" }}>Alloy · Automation Analytics</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Automation Analytics</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Execution volume, success rates, connector performance, and automation ROI across all workflows.</p>
@@ -43,7 +43,7 @@ export default function AutomationAnalytics() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: "Success Rate", value: `${successRate}%`, color: successRate >= 90 ? "#10b981" : "#f59e0b", trend: "+3%" },
-          { label: "Avg Duration", value: `${avgDurationSec}s`, color: "#00d4ff", trend: "-12%" },
+          { label: "Avg Duration", value: `${avgDurationSec}s`, color: "#4B8BDB", trend: "-12%" },
           { label: "Total Runs (7d)", value: totalRuns, color: "#8b5cf6", trend: "+18%" },
           { label: "Value Automated", value: formatCurrency(valueAutomated), color: "#f59e0b", trend: "+$340K" },
         ].map(c => (
@@ -64,7 +64,7 @@ export default function AutomationAnalytics() {
                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 9, fill: "rgba(255,255,255,0.3)" }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ background: "#0d1117", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, fontSize: 10 }} />
-                <Bar dataKey="success" name="Success" fill="#00d4ff" opacity={0.8} radius={[2, 2, 0, 0]} />
+                <Bar dataKey="success" name="Success" fill="#4B8BDB" opacity={0.8} radius={[2, 2, 0, 0]} />
                 <Bar dataKey="failed" name="Failed" fill="#ef4444" opacity={0.7} radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -103,7 +103,7 @@ export default function AutomationAnalytics() {
               </div>
               <div className="grid grid-cols-3 gap-1 text-center">
                 <div>
-                  <div className="text-xs font-bold" style={{ color: "#00d4ff" }}>{c.requests_today >= 1000 ? `${Math.round(c.requests_today / 100) / 10}k` : c.requests_today}</div>
+                  <div className="text-xs font-bold" style={{ color: "#4B8BDB" }}>{c.requests_today >= 1000 ? `${Math.round(c.requests_today / 100) / 10}k` : c.requests_today}</div>
                   <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.3)" }}>req</div>
                 </div>
                 <div>

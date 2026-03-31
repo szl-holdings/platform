@@ -24,7 +24,7 @@ const qc = new QueryClient({
 
 const stateColors: Record<string, string> = {
   queued: "text-slate-400 bg-slate-500/10 border-slate-500/20",
-  running: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+  running: "text-blue-400 bg-blue-500/10 border-blue-500/20",
   waiting_approval: "text-amber-400 bg-amber-500/10 border-amber-500/20",
   completed: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   failed: "text-red-400 bg-red-500/10 border-red-500/20",
@@ -65,13 +65,13 @@ function WorkflowCard({ workflow }: { workflow: AlloyWorkflow }) {
   return (
     <div
       className="rounded-xl border transition-all"
-      style={{ borderColor: "rgba(0,212,255,0.12)", background: "rgba(0,212,255,0.02)" }}
+      style={{ borderColor: "rgba(75,139,219,0.12)", background: "rgba(75,139,219,0.02)" }}
     >
       <div className="p-4 flex items-start gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-sm font-semibold text-white/90">{workflow.name}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded border" style={{ borderColor: "rgba(0,212,255,0.2)", color: "#00d4ff80", background: "rgba(0,212,255,0.05)" }}>
+            <span className="text-[10px] px-1.5 py-0.5 rounded border" style={{ borderColor: "rgba(75,139,219,0.2)", color: "#4B8BDB80", background: "rgba(75,139,219,0.05)" }}>
               {workflow.trigger}
             </span>
             {!workflow.isActive && (
@@ -93,7 +93,7 @@ function WorkflowCard({ workflow }: { workflow: AlloyWorkflow }) {
             onClick={trigger}
             disabled={triggering || !workflow.isActive}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all disabled:opacity-50"
-            style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.25)", color: "#00d4ff" }}
+            style={{ background: "rgba(75,139,219,0.1)", border: "1px solid rgba(75,139,219,0.25)", color: "#4B8BDB" }}
           >
             {triggering ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
             Run
@@ -110,7 +110,7 @@ function WorkflowCard({ workflow }: { workflow: AlloyWorkflow }) {
       </div>
 
       {expanded && (
-        <div className="px-4 pb-4 border-t" style={{ borderColor: "rgba(0,212,255,0.07)" }}>
+        <div className="px-4 pb-4 border-t" style={{ borderColor: "rgba(75,139,219,0.07)" }}>
           <div className="text-[10px] text-white/30 uppercase tracking-widest mt-3 mb-2">Recent Runs</div>
           {runsLoading ? (
             <div className="h-8 rounded-lg bg-white/5 animate-pulse" />
@@ -261,7 +261,7 @@ function AuditRow({ entry }: { entry: AuditEntry }) {
     <div className="flex items-start gap-3 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-mono text-cyan-400/70">{entry.action}</span>
+          <span className="text-xs font-mono text-blue-400/70">{entry.action}</span>
           <span className="text-[10px] px-1.5 py-0.5 rounded border border-white/10 text-white/30 bg-white/5">{entry.resourceType}</span>
           {entry.resourceId && <span className="text-[10px] text-white/25 font-mono">{entry.resourceId}</span>}
         </div>
@@ -331,7 +331,7 @@ function ConsoleInner() {
   });
 
   const summaryItems = dashboard ? [
-    { label: "Active Workflows", value: dashboard.summary.activeWorkflows, color: "#00d4ff" },
+    { label: "Active Workflows", value: dashboard.summary.activeWorkflows, color: "#4B8BDB" },
     { label: "Total Runs", value: dashboard.summary.totalRuns, color: "#a78bfa" },
     { label: "Pending Approvals", value: dashboard.summary.pendingApprovals, color: "#f59e0b" },
     { label: "New Signals", value: dashboard.summary.newSignals, color: "#f97316" },
@@ -340,7 +340,7 @@ function ConsoleInner() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
       <div className="mb-8">
-        <div className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "#00d4ff" }}>Platform Console</div>
+        <div className="text-xs font-medium uppercase tracking-widest mb-2" style={{ color: "#4B8BDB" }}>Platform Console</div>
         <h1 className="text-3xl font-bold text-white mb-2">Alloy Control Plane</h1>
         <p className="text-white/40 text-sm">Live workflow management, signal monitoring, artifact approvals, and system administration.</p>
       </div>
@@ -367,9 +367,9 @@ function ConsoleInner() {
             onClick={() => setTab(t.id)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
             style={{
-              background: tab === t.id ? "rgba(0,212,255,0.12)" : "transparent",
-              color: tab === t.id ? "#00d4ff" : "rgba(255,255,255,0.4)",
-              border: tab === t.id ? "1px solid rgba(0,212,255,0.25)" : "1px solid transparent",
+              background: tab === t.id ? "rgba(75,139,219,0.12)" : "transparent",
+              color: tab === t.id ? "#4B8BDB" : "rgba(255,255,255,0.4)",
+              border: tab === t.id ? "1px solid rgba(75,139,219,0.25)" : "1px solid transparent",
             }}
           >
             <t.icon className="w-3 h-3" />
@@ -459,8 +459,8 @@ function ConsoleInner() {
           ) : (
             (users).map(user => (
               <div key={user.id} className="flex items-center gap-4 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-cyan-400">{(user.name ?? user.email)?.[0]?.toUpperCase() ?? "?"}</span>
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-blue-400">{(user.name ?? user.email)?.[0]?.toUpperCase() ?? "?"}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white/80">{user.name ?? user.email}</p>

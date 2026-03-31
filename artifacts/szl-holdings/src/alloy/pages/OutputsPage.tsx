@@ -1,7 +1,7 @@
 import { ALLOY_OUTPUTS } from "../data/outputs";
 
 const CATEGORY_ACCENT: Record<string, string> = {
-  Intelligence: "#00d4ff",
+  Intelligence: "#4B8BDB",
   Operations: "#f59e0b",
   Documents: "#a78bfa",
   Records: "#10b981",
@@ -15,7 +15,7 @@ export default function OutputsPage() {
     <div className="min-h-screen text-white px-6 py-16 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-12">
-        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Outputs</div>
+        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#4B8BDB" }}>Outputs</div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">What Alloy produces</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
           Alloy outputs are structured, contextualised, and traceable. Every output type has a defined format, approval requirements, and connection to the products that use it.
@@ -31,7 +31,7 @@ export default function OutputsPage() {
           { label: "Connected Products", value: "7+" },
         ].map(stat => (
           <div key={stat.label} className="p-5 rounded-xl border text-center" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
-            <div className="text-2xl font-bold mb-1" style={{ color: "#00d4ff" }}>{stat.value}</div>
+            <div className="text-2xl font-bold mb-1" style={{ color: "#4B8BDB" }}>{stat.value}</div>
             <div className="text-xs text-white/40">{stat.label}</div>
           </div>
         ))}
@@ -39,7 +39,7 @@ export default function OutputsPage() {
 
       {/* Outputs by Category */}
       {categories.map(category => {
-        const accent = CATEGORY_ACCENT[category] ?? "#00d4ff";
+        const accent = CATEGORY_ACCENT[category] ?? "#4B8BDB";
         const outputs = ALLOY_OUTPUTS.filter(o => o.category === category);
 
         return (

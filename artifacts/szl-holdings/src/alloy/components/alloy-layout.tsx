@@ -8,7 +8,7 @@ const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
   { phase: "INTERPRET", color: "#f59e0b", active: false, link: "/lyte-command-center/" },
   { phase: "DECIDE", color: "#8b5cf6", active: false },
-  { phase: "EXECUTE", color: "#00d4ff", active: true },
+  { phase: "EXECUTE", color: "#4B8BDB", active: true },
   { phase: "VERIFY", color: "#10b981", active: false },
 ];
 
@@ -58,12 +58,12 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           </Link>
           <div className="h-10 flex items-center px-4">
             <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg shadow-lg" style={{ background: "linear-gradient(135deg, #00d4ff, #0090cc)", boxShadow: "0 0 12px rgba(0,212,255,0.3)" }}>
+              <div className="p-1.5 rounded-lg shadow-lg" style={{ background: "linear-gradient(135deg, #4B8BDB, #0090cc)", boxShadow: "0 0 12px rgba(75,139,219,0.3)" }}>
                 <Zap className="w-4 h-4 text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm tracking-wide text-white leading-none">ALLOY</span>
-                <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#00d4ff" }}>Execution Fabric</span>
+                <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#4B8BDB" }}>Execution Fabric</span>
               </div>
             </div>
           </div>
@@ -101,10 +101,10 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               return (
                 <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-                )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
-                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
+                )} style={{ background: isActive ? "rgba(75,139,219,0.08)" : undefined, color: isActive ? "#4B8BDB" : undefined }}>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -116,10 +116,10 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               return (
                 <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-                )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
-                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
+                )} style={{ background: isActive ? "rgba(75,139,219,0.08)" : undefined, color: isActive ? "#4B8BDB" : undefined }}>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -131,18 +131,18 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
               return (
                 <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-                )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
-                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
+                )} style={{ background: isActive ? "rgba(75,139,219,0.08)" : undefined, color: isActive ? "#4B8BDB" : undefined }}>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
                   <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.08)" }}>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(0,212,255,0.4)" }}>Runtime Health</div>
+          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.08)" }}>
+          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(75,139,219,0.4)" }}>Runtime Health</div>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Connector Mesh</span>
@@ -153,7 +153,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active runs</span>
-              <span className="text-[9px] font-mono" style={{ color: "#00d4ff" }}>14 running</span>
+              <span className="text-[9px] font-mono" style={{ color: "#4B8BDB" }}>14 running</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Queue depth</span>
@@ -161,7 +161,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-            <div className="h-full rounded-full" style={{ width: "72%", background: "linear-gradient(90deg, #00d4ff, #10b981)" }} />
+            <div className="h-full rounded-full" style={{ width: "72%", background: "linear-gradient(90deg, #4B8BDB, #10b981)" }} />
           </div>
           <div className="flex justify-between mt-0.5">
             <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Capacity</span>
@@ -194,8 +194,8 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             >
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#00d4ff" }} />
-            <span className="hidden sm:block" style={{ color: "#00d4ff" }}>14 Active Runs</span>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#4B8BDB" }} />
+            <span className="hidden sm:block" style={{ color: "#4B8BDB" }}>14 Active Runs</span>
             <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
             <span style={{ color: "#10b981" }}>8 Done</span>
             <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
@@ -210,9 +210,9 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <div className="hidden sm:flex items-center gap-2">
               <div className="text-right">
                 <div className="text-xs font-medium text-white">Operator</div>
-                <div className="text-[10px]" style={{ color: "rgba(0,212,255,0.7)" }}>SZL Holdings</div>
+                <div className="text-[10px]" style={{ color: "rgba(75,139,219,0.7)" }}>SZL Holdings</div>
               </div>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border" style={{ background: "linear-gradient(135deg, #00d4ff, #0090cc)", borderColor: "rgba(255,255,255,0.1)" }}>OP</div>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border" style={{ background: "linear-gradient(135deg, #4B8BDB, #0090cc)", borderColor: "rgba(255,255,255,0.1)" }}>OP</div>
             </div>
           </div>
         </header>

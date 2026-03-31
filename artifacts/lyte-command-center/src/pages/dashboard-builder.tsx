@@ -97,7 +97,7 @@ const TEMPLATES: Array<{
     name: "Engineering Ops",
     description: "Workflow runs, latency tracking, service topology, and SRE metrics",
     icon: Zap,
-    accentColor: "#00d4ff",
+    accentColor: "#4B8BDB",
     widgets: [
       { type: "metric_card", title: "Running Workflows", config: { metric: "workflows_running", label: "Running", format: "number" }, gridSize: "sm", col: 0, row: 0 },
       { type: "metric_card", title: "Failed Runs (24h)", config: { metric: "runs_failed_24h", label: "Failed Runs", format: "number" }, gridSize: "sm", col: 1, row: 0 },
@@ -148,11 +148,11 @@ function MetricCardWidget({ widget }: { widget: Widget }) {
   const cfg = widget.config as { metric: string; label: string; format: string };
   const vals: Record<string, { value: number | string; trend: number; color: string }> = {
     signals_active: { value: 23, trend: 12, color: "#f59e0b" },
-    signals_today: { value: 47, trend: -5, color: "#00d4ff" },
+    signals_today: { value: 47, trend: -5, color: "#4B8BDB" },
     value_at_risk: { value: "$5.03M", trend: 8, color: "#ef4444" },
     actions_open: { value: 14, trend: 3, color: "#f97316" },
     platform_health: { value: 94, trend: -1, color: "#10b981" },
-    workflows_running: { value: 3, trend: 0, color: "#00d4ff" },
+    workflows_running: { value: 3, trend: 0, color: "#4B8BDB" },
     runs_failed_24h: { value: 2, trend: -1, color: "#ef4444" },
     api_p99_ms: { value: "182ms", trend: -12, color: "#10b981" },
     threats_critical: { value: 5, trend: 2, color: "#ef4444" },
@@ -223,7 +223,7 @@ function TableWidget({ widget }: { widget: Widget }) {
           <div key={i} className="grid gap-1 text-[9px]" style={{ gridTemplateColumns: `repeat(${cols.length}, 1fr)`, color: "rgba(255,255,255,0.5)" }}>
             <div className="truncate">{r.title}</div>
             <div style={{ color: r.severity === "critical" ? "#ef4444" : r.severity === "high" ? "#f97316" : "#f59e0b" }}>{r.severity}</div>
-            {cols.length > 2 && <div style={{ color: r.status === "open" ? "#f59e0b" : "#00d4ff" }}>{r.status}</div>}
+            {cols.length > 2 && <div style={{ color: r.status === "open" ? "#f59e0b" : "#4B8BDB" }}>{r.status}</div>}
             {cols.length > 3 && <div style={{ color: "rgba(255,255,255,0.3)" }}>{r.createdAt}</div>}
           </div>
         ))}
@@ -260,7 +260,7 @@ function TopologyWidget() {
   const nodes = [
     { id: "api", label: "API Server", x: 50, y: 40, color: "#f59e0b" },
     { id: "lyte", label: "Lyte", x: 20, y: 70, color: "#f59e0b" },
-    { id: "alloy", label: "Alloy", x: 50, y: 75, color: "#00d4ff" },
+    { id: "alloy", label: "Alloy", x: 50, y: 75, color: "#4B8BDB" },
     { id: "vessels", label: "Vessels", x: 80, y: 70, color: "#38bdf8" },
     { id: "db", label: "DB", x: 35, y: 20, color: "#10b981" },
     { id: "sf", label: "Salesforce", x: 70, y: 20, color: "#6b7280" },

@@ -95,7 +95,7 @@ export default function WorkflowHealth() {
                 )}
                 <div className="flex gap-1.5">
                   <a href="/lyte-command-center/" className="text-[9px] px-2 py-1 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>Assign in Lyte</a>
-                  <a href="/alloy" className="text-[9px] px-2 py-1 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.2)" }}>Run in Alloy</a>
+                  <a href="/alloy" className="text-[9px] px-2 py-1 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.1)", border: "1px solid rgba(75,139,219,0.2)" }}>Run in Alloy</a>
                 </div>
               </div>
             </div>

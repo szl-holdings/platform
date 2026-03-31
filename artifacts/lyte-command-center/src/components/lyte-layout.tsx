@@ -231,7 +231,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex gap-1 mt-2">
             <a href="/terra/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#a07848", background: "rgba(160,120,72,0.1)", border: "1px solid rgba(160,120,72,0.2)" }}>TERRA</a>
-            <a href="/alloy" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.2)" }}>ALLOY</a>
+            <a href="/alloy" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.1)", border: "1px solid rgba(75,139,219,0.2)" }}>ALLOY</a>
             <a href="/vessels/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#38bdf8", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>VESSELS</a>
           </div>
         </div>

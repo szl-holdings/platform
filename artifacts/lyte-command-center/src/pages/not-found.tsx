@@ -11,7 +11,7 @@ export default function NotFound() {
           <h1 className="text-4xl font-display font-bold text-foreground mb-2">404</h1>
           <p className="text-base font-semibold text-foreground mb-1">Page not found</p>
           <p className="text-sm text-muted-foreground">
-            The command center view you are looking for does not exist or has been moved.
+            The Lyte view you are looking for does not exist or has been moved.
           </p>
         </div>
         <a

@@ -19,8 +19,8 @@ export default function AlloyDocumentEngine() {
     <div className="flex flex-col h-full overflow-hidden">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex-shrink-0">
         <div className="flex items-center gap-3 px-6 pt-6 pb-0">
-          <div className="w-8 h-8 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-            <BookOpen className="w-4 h-4 text-cyan-400" />
+          <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center">
+            <BookOpen className="w-4 h-4 text-blue-400" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Document Engine</h1>
@@ -38,7 +38,7 @@ export default function AlloyDocumentEngine() {
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-lg border-b-2 transition-colors",
                   isActive
-                    ? "border-cyan-400 text-cyan-400 bg-cyan-500/5"
+                    ? "border-blue-400 text-blue-400 bg-blue-500/5"
                     : "border-transparent text-white/50 hover:text-white"
                 )}
               >

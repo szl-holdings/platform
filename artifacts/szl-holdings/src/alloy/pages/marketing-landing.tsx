@@ -1,7 +1,7 @@
 import { ArrowRight, Zap, GitBranch, Network, Shield, Activity, FileText, CheckCircle, Layers, BarChart3 } from "lucide-react";
 
 const agentRoles = [
-  { name: "Signal Collector", role: "Acquires raw data from operational systems, APIs, and event streams", color: "#00d4ff" },
+  { name: "Signal Collector", role: "Acquires raw data from operational systems, APIs, and event streams", color: "#4B8BDB" },
   { name: "Normalizer", role: "Standardizes heterogeneous inputs into a consistent internal schema", color: "#00b8d9" },
   { name: "Classifier", role: "Applies model-driven tagging to identify signal type, urgency, and domain", color: "#0098ba" },
   { name: "Reasoning Engine", role: "Applies domain logic to assess consequence, context, and recommended action", color: "#007a94" },
@@ -13,7 +13,7 @@ const agentRoles = [
 const powers = [
   { name: "Lyte", desc: "Business observability and command. Alloy drives signal ingestion, anomaly classification, and workflow routing.", accent: "#f59e0b" },
   { name: "Vessels", desc: "Maritime intelligence. Alloy processes voyage data, fleet exceptions, and regulatory signals into command-ready output.", accent: "#3b82f6" },
-  { name: "Creative Workflows", desc: "AI-powered creative orchestration. Alloy sequences campaign production — scripts, storyboards, voice assets, and approvals — from brief to final delivery.", accent: "#00d4ff" },
+  { name: "Creative Workflows", desc: "AI-powered creative orchestration. Alloy sequences campaign production — scripts, storyboards, voice assets, and approvals — from brief to final delivery.", accent: "#4B8BDB" },
 ];
 
 const pipelineSteps = [
@@ -50,13 +50,13 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
         background: "rgba(8,12,20,0.92)", backdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(0,212,255,0.08)",
+        borderBottom: "1px solid rgba(75,139,219,0.08)",
         height: "60px", display: "flex", alignItems: "center",
       }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: "linear-gradient(135deg, #00d4ff22, #00d4ff44)", border: "1px solid #00d4ff40", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Zap size={14} style={{ color: "#00d4ff" }} />
+            <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: "linear-gradient(135deg, #4B8BDB22, #4B8BDB44)", border: "1px solid #4B8BDB40", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Zap size={14} style={{ color: "#4B8BDB" }} />
             </div>
             <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em", color: "#e2e8f0" }}>Alloy</span>
             <span style={{ fontSize: "10px", fontFamily: "monospace", color: "#475569", marginLeft: "4px" }}>by SZL Holdings</span>
@@ -84,11 +84,11 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               onClick={onSignIn}
               style={{
                 padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff",
+                background: "rgba(75,139,219,0.1)", border: "1px solid rgba(75,139,219,0.3)", color: "#4B8BDB",
                 transition: "all 0.15s",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,212,255,0.18)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(0,212,255,0.1)"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(75,139,219,0.18)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(75,139,219,0.1)"; }}
             >
               Sign in
             </button>
@@ -100,7 +100,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       <section style={{ paddingTop: "120px", paddingBottom: "80px", position: "relative", overflow: "hidden" }}>
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "radial-gradient(ellipse 60% 50% at 50% -10%, rgba(0,212,255,0.06) 0%, transparent 65%)",
+          background: "radial-gradient(ellipse 60% 50% at 50% -10%, rgba(75,139,219,0.06) 0%, transparent 65%)",
         }} />
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
@@ -112,10 +112,10 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "8px", marginBottom: "1.5rem",
             padding: "4px 12px 4px 8px", borderRadius: "4px",
-            background: "rgba(0,212,255,0.06)", border: "1px solid rgba(0,212,255,0.15)",
+            background: "rgba(75,139,219,0.06)", border: "1px solid rgba(75,139,219,0.15)",
           }}>
-            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#00d4ff", display: "inline-block", boxShadow: "0 0 6px rgba(0,212,255,0.6)" }} />
-            <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#00d4ff" }}>Orchestration Engine</span>
+            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#4B8BDB", display: "inline-block", boxShadow: "0 0 6px rgba(75,139,219,0.6)" }} />
+            <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#4B8BDB" }}>Orchestration Engine</span>
           </div>
 
           <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.75rem)", fontWeight: 700, letterSpacing: "-0.032em", lineHeight: 1.05, color: "#f1f5f9", marginBottom: "1.25rem" }}>
@@ -130,10 +130,10 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               onClick={onSignIn}
               style={{
                 padding: "12px 28px", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer",
-                background: "#00d4ff", color: "#080c14", border: "none", transition: "all 0.15s",
+                background: "#4B8BDB", color: "#080c14", border: "none", transition: "all 0.15s",
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#00b8d9"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#00d4ff"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#4B8BDB"; }}
             >
               Sign in to Platform
             </button>
@@ -159,7 +159,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "start" }} className="alloy-grid">
             <div>
-              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#00d4ff", marginBottom: "0.75rem" }}>What Alloy Is</p>
+              <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#4B8BDB", marginBottom: "0.75rem" }}>What Alloy Is</p>
               <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "1.25rem" }}>
                 An orchestration engine, not an interface.
               </h2>
@@ -184,7 +184,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                     background: `rgba(${item.rgb}, 0.04)`, border: `1px solid rgba(${item.rgb}, 0.10)`,
                   }}
                 >
-                  <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#00d4ff", flexShrink: 0, marginTop: "5px", boxShadow: "0 0 5px rgba(0,212,255,0.5)" }} />
+                  <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#4B8BDB", flexShrink: 0, marginTop: "5px", boxShadow: "0 0 5px rgba(75,139,219,0.5)" }} />
                   <div>
                     <p style={{ fontSize: "13px", fontWeight: 600, color: "#cbd5e1", marginBottom: "2px" }}>{item.label}</p>
                     <p style={{ fontSize: "12px", lineHeight: 1.55, color: "#475569" }}>{item.desc}</p>
@@ -197,7 +197,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* What It Powers */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(0,212,255,0.015)" }}>
+      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(75,139,219,0.015)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#475569", marginBottom: "0.75rem" }}>What It Powers</p>
           <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "0.75rem" }}>
@@ -252,12 +252,12 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 style={{
                   padding: "1.5rem", borderRadius: "6px",
                   background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-                  borderTop: `2px solid rgba(0,212,255,${0.35 - i * 0.04})`,
+                  borderTop: `2px solid rgba(75,139,219,${0.35 - i * 0.04})`,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                  <span style={{ fontSize: "10px", fontFamily: "monospace", fontWeight: 700, color: "#00d4ff", letterSpacing: "0.08em" }}>{step.step}</span>
-                  <step.icon size={14} style={{ color: "#00d4ff" }} />
+                  <span style={{ fontSize: "10px", fontFamily: "monospace", fontWeight: 700, color: "#4B8BDB", letterSpacing: "0.08em" }}>{step.step}</span>
+                  <step.icon size={14} style={{ color: "#4B8BDB" }} />
                 </div>
                 <p style={{ fontSize: "13.5px", fontWeight: 600, color: "#e2e8f0", marginBottom: "6px" }}>{step.label}</p>
                 <p style={{ fontSize: "12px", lineHeight: 1.58, color: "#475569" }}>{step.desc}</p>
@@ -285,8 +285,8 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLElement;
-                  el.style.background = "rgba(0,212,255,0.05)";
-                  el.style.borderColor = "rgba(0,212,255,0.18)";
+                  el.style.background = "rgba(75,139,219,0.05)";
+                  el.style.borderColor = "rgba(75,139,219,0.18)";
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget as HTMLElement;
@@ -321,8 +321,8 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
               {outputs.map((output) => (
-                <div key={output} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px", borderRadius: "4px", background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.08)" }}>
-                  <CheckCircle size={13} style={{ color: "#00d4ff", flexShrink: 0 }} />
+                <div key={output} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px", borderRadius: "4px", background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.08)" }}>
+                  <CheckCircle size={13} style={{ color: "#4B8BDB", flexShrink: 0 }} />
                   <span style={{ fontSize: "12.5px", color: "#94a3b8" }}>{output}</span>
                 </div>
               ))}
@@ -352,7 +352,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 { label: "Role-based access", desc: "Approval rights scoped to the right person for each decision type" },
               ].map((item) => (
                 <div key={item.label} style={{ display: "flex", gap: "12px", padding: "12px 16px", borderRadius: "4px", background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <Shield size={14} style={{ color: "#00d4ff", flexShrink: 0, marginTop: "2px" }} />
+                  <Shield size={14} style={{ color: "#4B8BDB", flexShrink: 0, marginTop: "2px" }} />
                   <div>
                     <p style={{ fontSize: "13px", fontWeight: 600, color: "#cbd5e1", marginBottom: "2px" }}>{item.label}</p>
                     <p style={{ fontSize: "12px", color: "#475569" }}>{item.desc}</p>
@@ -365,7 +365,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* Platform Stats */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "2.5rem 0", background: "rgba(0,212,255,0.02)" }}>
+      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "2.5rem 0", background: "rgba(75,139,219,0.02)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "2rem" }} className="alloy-stats-grid">
             {[
@@ -375,7 +375,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               { value: "99.97%", label: "Workflow completion rate" },
             ].map((stat) => (
               <div key={stat.label} style={{ textAlign: "center" }}>
-                <p style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", fontWeight: 700, fontFamily: "monospace", color: "#00d4ff", marginBottom: "4px" }}>{stat.value}</p>
+                <p style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", fontWeight: 700, fontFamily: "monospace", color: "#4B8BDB", marginBottom: "4px" }}>{stat.value}</p>
                 <p style={{ fontSize: "11px", color: "#475569", letterSpacing: "0.06em", textTransform: "uppercase" }}>{stat.label}</p>
               </div>
             ))}
@@ -403,14 +403,14 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 key={group.category}
                 style={{
                   padding: "1.5rem", borderRadius: "6px",
-                  background: "rgba(0,212,255,0.025)", border: "1px solid rgba(0,212,255,0.08)",
+                  background: "rgba(75,139,219,0.025)", border: "1px solid rgba(75,139,219,0.08)",
                 }}
               >
-                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#00d4ff", marginBottom: "1rem" }}>{group.category}</p>
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#4B8BDB", marginBottom: "1rem" }}>{group.category}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   {group.items.map((item) => (
                     <div key={item} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <CheckCircle size={11} style={{ color: "#00d4ff", opacity: 0.6, flexShrink: 0 }} />
+                      <CheckCircle size={11} style={{ color: "#4B8BDB", opacity: 0.6, flexShrink: 0 }} />
                       <span style={{ fontSize: "12.5px", color: "#94a3b8" }}>{item}</span>
                     </div>
                   ))}
@@ -435,10 +435,10 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
               onClick={onSignIn}
               style={{
                 display: "flex", alignItems: "center", gap: "6px", padding: "12px 28px", borderRadius: "6px",
-                fontSize: "14px", fontWeight: 600, cursor: "pointer", background: "#00d4ff", color: "#080c14", border: "none", transition: "all 0.15s",
+                fontSize: "14px", fontWeight: 600, cursor: "pointer", background: "#4B8BDB", color: "#080c14", border: "none", transition: "all 0.15s",
               }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#00b8d9"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#00d4ff"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "#4B8BDB"; }}
             >
               Sign in to Alloy
               <ArrowRight size={14} />
@@ -465,8 +465,8 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "3rem", marginBottom: "2.5rem" }} className="alloy-footer-grid">
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                <div style={{ width: "24px", height: "24px", borderRadius: "5px", background: "rgba(0,212,255,0.12)", border: "1px solid rgba(0,212,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Zap size={12} style={{ color: "#00d4ff" }} />
+                <div style={{ width: "24px", height: "24px", borderRadius: "5px", background: "rgba(75,139,219,0.12)", border: "1px solid rgba(75,139,219,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Zap size={12} style={{ color: "#4B8BDB" }} />
                 </div>
                 <span style={{ fontWeight: 700, fontSize: "14px", color: "#e2e8f0" }}>Alloy</span>
               </div>

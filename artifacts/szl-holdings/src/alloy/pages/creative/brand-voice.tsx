@@ -108,7 +108,7 @@ export default function BrandVoiceEngine() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Mic className="w-6 h-6 text-cyan-400" />
+          <Mic className="w-6 h-6 text-blue-400" />
           Brand Voice Engine
         </h1>
         <p className="text-sm text-slate-400 mt-1">AI-powered brand voice calibration — consistent tone across all generated content</p>
@@ -119,7 +119,7 @@ export default function BrandVoiceEngine() {
           <button
             key={voice.id}
             onClick={() => setSelected(voice.id)}
-            className={`text-left p-4 rounded-xl border transition-all hover:border-cyan-400/20 ${selected === voice.id ? "border-cyan-400/30 ring-1 ring-cyan-400/10 bg-cyan-400/3" : "border-white/8 bg-[#0d1117]"}`}
+            className={`text-left p-4 rounded-xl border transition-all hover:border-blue-400/20 ${selected === voice.id ? "border-blue-400/30 ring-1 ring-cyan-400/10 bg-blue-400/3" : "border-white/8 bg-[#0d1117]"}`}
           >
             <div className={`text-xs font-semibold mb-1.5 px-2 py-0.5 rounded-full inline-block border ${voice.color}`}>{voice.name}</div>
             <p className="text-[10px] text-slate-500">{voice.description}</p>
@@ -139,7 +139,7 @@ export default function BrandVoiceEngine() {
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
-              className="w-full h-40 bg-white/3 rounded-lg border border-white/8 p-3 text-sm text-slate-200 resize-none focus:outline-none focus:border-cyan-500/30 placeholder:text-slate-600"
+              className="w-full h-40 bg-white/3 rounded-lg border border-white/8 p-3 text-sm text-slate-200 resize-none focus:outline-none focus:border-blue-500/30 placeholder:text-slate-600"
               placeholder="Enter your content to transform..."
             />
             {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
@@ -147,7 +147,7 @@ export default function BrandVoiceEngine() {
               <button
                 onClick={handleTransform}
                 disabled={loading || !input.trim()}
-                className="flex items-center gap-1.5 text-xs px-3 py-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-lg hover:bg-cyan-500/20 transition-colors disabled:opacity-40"
+                className="flex items-center gap-1.5 text-xs px-3 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-colors disabled:opacity-40"
               >
                 {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                 {loading ? "Transforming…" : "Transform Voice"}
@@ -210,7 +210,7 @@ export default function BrandVoiceEngine() {
                 <div className="relative w-12 h-12 mx-auto">
                   <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                     <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#00d4ff" strokeWidth="3" strokeDasharray={`${value} ${100 - value}`} strokeLinecap="round" />
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#4B8BDB" strokeWidth="3" strokeDasharray={`${value} ${100 - value}`} strokeLinecap="round" />
                   </svg>
                   <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">{value}</span>
                 </div>

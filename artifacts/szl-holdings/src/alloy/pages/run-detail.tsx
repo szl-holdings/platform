@@ -61,7 +61,7 @@ function useRunDetail(id: number) {
 const STATE_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
   completed: { color: "#10b981", label: "Completed", icon: <CheckCircle className="w-4 h-4" /> },
   failed: { color: "#ef4444", label: "Failed", icon: <XCircle className="w-4 h-4" /> },
-  running: { color: "#00d4ff", label: "Running", icon: <Activity className="w-4 h-4" /> },
+  running: { color: "#4B8BDB", label: "Running", icon: <Activity className="w-4 h-4" /> },
   queued: { color: "#f59e0b", label: "Queued", icon: <Clock className="w-4 h-4" /> },
   waiting_approval: { color: "#8b5cf6", label: "Awaiting Approval", icon: <AlertTriangle className="w-4 h-4" /> },
   canceled: { color: "#6b7280", label: "Canceled", icon: <XCircle className="w-4 h-4" /> },
@@ -71,7 +71,7 @@ const STATE_CONFIG: Record<string, { color: string; label: string; icon: React.R
 const STEP_STATUS_COLORS: Record<string, string> = {
   completed: "#10b981",
   failed: "#ef4444",
-  running: "#00d4ff",
+  running: "#4B8BDB",
   pending: "rgba(255,255,255,0.15)",
 };
 
@@ -213,7 +213,7 @@ function StepDetail({ step }: { step: RunStep }) {
       {step.logs && step.logs.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Terminal className="w-3 h-3" style={{ color: "#00d4ff" }} />
+            <Terminal className="w-3 h-3" style={{ color: "#4B8BDB" }} />
             <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>Logs</span>
           </div>
           <div className="rounded-lg p-3 font-mono text-[10px] space-y-0.5" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -358,7 +358,7 @@ export default function RunDetail({ id }: { id: number }) {
 
             <div className="rounded-xl border p-4 space-y-4" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(12,18,30,0.95)" }}>
               <div className="flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5" style={{ color: "#00d4ff" }} />
+                <Activity className="w-3.5 h-3.5" style={{ color: "#4B8BDB" }} />
                 <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>Step Timeline — Gantt View</span>
               </div>
               <div className="mb-3 flex items-center justify-between text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>
@@ -371,7 +371,7 @@ export default function RunDetail({ id }: { id: number }) {
             {steps.length > 0 && (
               <div className="rounded-xl border p-4 space-y-3" style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(12,18,30,0.95)" }}>
                 <div className="flex items-center gap-2">
-                  <GitBranch className="w-3.5 h-3.5" style={{ color: "#00d4ff" }} />
+                  <GitBranch className="w-3.5 h-3.5" style={{ color: "#4B8BDB" }} />
                   <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>Step Details</span>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-2">

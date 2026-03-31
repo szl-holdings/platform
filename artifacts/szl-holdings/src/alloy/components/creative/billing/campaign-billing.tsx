@@ -67,7 +67,7 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
       </div>
     );
   }
@@ -82,10 +82,10 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
       </div>
 
       {paymentLink && (
-        <div className="p-4 border border-cyan-500/20 bg-cyan-500/5 rounded-xl">
+        <div className="p-4 border border-blue-500/20 bg-blue-500/5 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm font-medium text-cyan-400">Payment Link Created</span>
+            <CheckCircle className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-medium text-blue-400">Payment Link Created</span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -94,7 +94,7 @@ export function CampaignBilling({ campaignId, campaignName }: CampaignBillingPro
               className="flex-1 px-3 py-2 text-xs font-mono bg-black/30 border border-white/10 rounded-lg text-slate-300"
             />
             <button onClick={handleCopy} className="p-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300 transition-colors">
-              {copied ? <CheckCircle className="w-4 h-4 text-cyan-400" /> : <Copy className="w-4 h-4" />}
+              {copied ? <CheckCircle className="w-4 h-4 text-blue-400" /> : <Copy className="w-4 h-4" />}
             </button>
             <a href={paymentLink} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg border border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-300 transition-colors">
               <ExternalLink className="w-4 h-4" />

@@ -100,7 +100,7 @@ function generateDemoRuns(): WorkflowRun[] {
 const STATUS_STYLES: Record<string, { color: string; icon: React.ReactNode; label: string; pulse?: boolean }> = {
   completed: { color: "#10b981", icon: <CheckCircle className="w-3.5 h-3.5" />, label: "Completed" },
   failed: { color: "#ef4444", icon: <XCircle className="w-3.5 h-3.5" />, label: "Failed" },
-  running: { color: "#00d4ff", icon: <Activity className="w-3.5 h-3.5" />, label: "Running", pulse: true },
+  running: { color: "#4B8BDB", icon: <Activity className="w-3.5 h-3.5" />, label: "Running", pulse: true },
   retrying: { color: "#8b5cf6", icon: <RotateCcw className="w-3.5 h-3.5" />, label: "Retrying", pulse: true },
   queued: { color: "#f59e0b", icon: <Clock className="w-3.5 h-3.5" />, label: "Queued" },
   cancelled: { color: "#6b7280", icon: <XCircle className="w-3.5 h-3.5" />, label: "Cancelled" },
@@ -113,7 +113,7 @@ function LiveClock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="font-mono text-[10px]" style={{ color: "rgba(0,212,255,0.5)" }}>
+    <span className="font-mono text-[10px]" style={{ color: "rgba(75,139,219,0.5)" }}>
       {time.toLocaleTimeString("en-US", { hour12: false })} UTC
     </span>
   );
@@ -133,7 +133,7 @@ function RunDurationBadge({ startedAt, completedAt, status }: { startedAt?: stri
 
   if (status === "running" || status === "retrying") {
     const m = Math.floor(elapsed / 60), s = elapsed % 60;
-    return <span className="font-mono text-[10px]" style={{ color: "#00d4ff" }}>{m > 0 ? `${m}m ` : ""}{s}s running</span>;
+    return <span className="font-mono text-[10px]" style={{ color: "#4B8BDB" }}>{m > 0 ? `${m}m ` : ""}{s}s running</span>;
   }
   if (startedAt && completedAt) {
     const ms = new Date(completedAt).getTime() - new Date(startedAt).getTime();
@@ -157,14 +157,14 @@ function ExecutionTimeline({ run }: { run: WorkflowRun }) {
           <div className="flex flex-col items-center gap-0.5">
             <div className="w-2 h-2 rounded-full" style={{
               background: p.done
-                ? (run.status === "failed" && i === 2 ? "#ef4444" : "#00d4ff")
+                ? (run.status === "failed" && i === 2 ? "#ef4444" : "#4B8BDB")
                 : "rgba(255,255,255,0.08)",
               border: p.done ? "none" : "1px solid rgba(255,255,255,0.12)",
             }} />
-            <span className="text-[8px] whitespace-nowrap" style={{ color: p.done ? "rgba(0,212,255,0.6)" : "rgba(255,255,255,0.2)" }}>{p.label}</span>
+            <span className="text-[8px] whitespace-nowrap" style={{ color: p.done ? "rgba(75,139,219,0.6)" : "rgba(255,255,255,0.2)" }}>{p.label}</span>
           </div>
           {i < phases.length - 1 && (
-            <div className="w-8 h-px mb-3 mx-0.5" style={{ background: phases[i + 1].done ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.06)" }} />
+            <div className="w-8 h-px mb-3 mx-0.5" style={{ background: phases[i + 1].done ? "rgba(75,139,219,0.3)" : "rgba(255,255,255,0.06)" }} />
           )}
         </div>
       ))}
@@ -196,7 +196,7 @@ function RunDrawer({ run, onClose, onRetry, onCancel }: { run: WorkflowRun; onCl
           </div>
           <div className="flex items-baseline gap-2">
             <h2 className="text-base font-bold text-white">Run #{run.id}</h2>
-            {run.workflowId && <span className="text-[10px] font-mono" style={{ color: "rgba(0,212,255,0.5)" }}>WF-{run.workflowId}</span>}
+            {run.workflowId && <span className="text-[10px] font-mono" style={{ color: "rgba(75,139,219,0.5)" }}>WF-{run.workflowId}</span>}
           </div>
           <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
             Retries: {run.retryCount}/{run.maxRetries}
@@ -241,7 +241,7 @@ function RunDrawer({ run, onClose, onRetry, onCancel }: { run: WorkflowRun; onCl
 
         {run.input && Object.keys(run.input).length > 0 && (
           <div className="p-5 border-b border-white/5">
-            <div className="flex items-center gap-1.5 text-[10px] font-medium mb-2" style={{ color: "rgba(0,212,255,0.7)" }}>
+            <div className="flex items-center gap-1.5 text-[10px] font-medium mb-2" style={{ color: "rgba(75,139,219,0.7)" }}>
               <Terminal className="w-3 h-3" /> Input Payload
             </div>
             <pre className="text-[10px] text-slate-400 overflow-auto bg-white/3 rounded-lg p-3 border border-white/5 max-h-48">{JSON.stringify(run.input, null, 2)}</pre>
@@ -267,7 +267,7 @@ function RunDrawer({ run, onClose, onRetry, onCancel }: { run: WorkflowRun; onCl
                 Cancel Run
               </button>
             )}
-            <button className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "rgba(0,212,255,0.6)", background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)" }}>
+            <button className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "rgba(75,139,219,0.6)", background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.15)" }}>
               <ChevronRight className="w-3 h-3" /> Audit Trail
             </button>
           </div>
@@ -326,8 +326,8 @@ export default function ExecutionRuns() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Activity className="w-3.5 h-3.5" style={{ color: "#00d4ff" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#00d4ff" }}>Alloy · Execution Fabric</span>
+            <Activity className="w-3.5 h-3.5" style={{ color: "#4B8BDB" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#4B8BDB" }}>Alloy · Execution Fabric</span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Execution Runs</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Live and historical workflow runs with retry logic and exception handling.</p>
@@ -350,7 +350,7 @@ export default function ExecutionRuns() {
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
         <div className="flex items-stretch divide-x" style={{ borderLeftColor: "rgba(255,255,255,0.05)" }}>
           {[
-            { label: "Running", value: running.length, color: "#00d4ff", pulse: running.length > 0 },
+            { label: "Running", value: running.length, color: "#4B8BDB", pulse: running.length > 0 },
             { label: "Retrying", value: retrying.length, color: "#8b5cf6", pulse: retrying.length > 0 },
             { label: "Queued", value: queued.length, color: "#f59e0b" },
             { label: "Failed", value: failed.length, color: "#ef4444", urgent: failed.length > 0 },
@@ -380,9 +380,9 @@ export default function ExecutionRuns() {
               onClick={() => setStatusFilter(f)}
               className="text-[10px] px-2.5 py-1 rounded-lg border capitalize transition-all"
               style={{
-                background: statusFilter === f ? "rgba(0,212,255,0.08)" : "rgba(255,255,255,0.02)",
-                borderColor: statusFilter === f ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.06)",
-                color: statusFilter === f ? "#00d4ff" : "rgba(255,255,255,0.35)",
+                background: statusFilter === f ? "rgba(75,139,219,0.08)" : "rgba(255,255,255,0.02)",
+                borderColor: statusFilter === f ? "rgba(75,139,219,0.3)" : "rgba(255,255,255,0.06)",
+                color: statusFilter === f ? "#4B8BDB" : "rgba(255,255,255,0.35)",
               }}
             >
               {f}
@@ -428,8 +428,8 @@ export default function ExecutionRuns() {
               key={run.id}
               className="rounded-xl border cursor-pointer transition-all group"
               style={{
-                borderColor: run.status === "failed" ? "rgba(239,68,68,0.2)" : isActive ? "rgba(0,212,255,0.15)" : "rgba(255,255,255,0.06)",
-                background: run.status === "failed" ? "rgba(239,68,68,0.02)" : isActive ? "rgba(0,212,255,0.02)" : "rgba(255,255,255,0.01)",
+                borderColor: run.status === "failed" ? "rgba(239,68,68,0.2)" : isActive ? "rgba(75,139,219,0.15)" : "rgba(255,255,255,0.06)",
+                background: run.status === "failed" ? "rgba(239,68,68,0.02)" : isActive ? "rgba(75,139,219,0.02)" : "rgba(255,255,255,0.01)",
               }}
               onClick={() => setSelectedRun(run)}
             >
@@ -449,7 +449,7 @@ export default function ExecutionRuns() {
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-sm font-semibold text-white">Run #{run.id}</span>
-                      <span className="text-[11px] font-mono" style={{ color: "rgba(0,212,255,0.5)" }}>{workflow}</span>
+                      <span className="text-[11px] font-mono" style={{ color: "rgba(75,139,219,0.5)" }}>{workflow}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       {run.startedAt && (
@@ -461,7 +461,7 @@ export default function ExecutionRuns() {
                       <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.2)" }}>Retries: {run.retryCount}/{run.maxRetries}</span>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 mt-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(0,212,255,0.4)" }} />
+                  <ChevronRight className="w-4 h-4 mt-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(75,139,219,0.4)" }} />
                 </div>
 
                 {run.errorMessage && (
@@ -497,7 +497,7 @@ export default function ExecutionRuns() {
                     Cancel
                   </button>
                 )}
-                <button className="text-[10px] px-2.5 py-1 rounded-lg font-medium transition-all hover:opacity-80 ml-auto" style={{ color: "rgba(0,212,255,0.5)", background: "rgba(0,212,255,0.03)", border: "1px solid rgba(0,212,255,0.1)" }}>
+                <button className="text-[10px] px-2.5 py-1 rounded-lg font-medium transition-all hover:opacity-80 ml-auto" style={{ color: "rgba(75,139,219,0.5)", background: "rgba(75,139,219,0.03)", border: "1px solid rgba(75,139,219,0.1)" }}>
                   Audit Log
                 </button>
                 <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>#{run.id}</span>

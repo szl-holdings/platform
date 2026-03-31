@@ -37,7 +37,7 @@ function useWorkflow(id: number) {
 const STATUS_COLORS: Record<string, { fill: string; stroke: string; text: string }> = {
   completed: { fill: "rgba(16,185,129,0.12)", stroke: "#10b981", text: "#10b981" },
   failed: { fill: "rgba(239,68,68,0.12)", stroke: "#ef4444", text: "#ef4444" },
-  running: { fill: "rgba(0,212,255,0.12)", stroke: "#00d4ff", text: "#00d4ff" },
+  running: { fill: "rgba(75,139,219,0.12)", stroke: "#4B8BDB", text: "#4B8BDB" },
   pending: { fill: "rgba(255,255,255,0.04)", stroke: "rgba(255,255,255,0.15)", text: "rgba(255,255,255,0.5)" },
 };
 
@@ -179,7 +179,7 @@ export function DAGView({ workflowId, steps: propSteps, highlightStepId }: {
               <path d="M0,0 L0,8 L8,4 z" fill="rgba(255,255,255,0.15)" />
             </marker>
             <marker id="dag-arrow-active" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
-              <path d="M0,0 L0,8 L8,4 z" fill="#00d4ff" />
+              <path d="M0,0 L0,8 L8,4 z" fill="#4B8BDB" />
             </marker>
           </defs>
 
@@ -191,7 +191,7 @@ export function DAGView({ workflowId, steps: propSteps, highlightStepId }: {
                 key={i}
                 d={`M ${e.x1} ${e.y1} C ${mx} ${e.y1}, ${mx} ${e.y2}, ${e.x2} ${e.y2}`}
                 fill="none"
-                stroke={isActive ? "#00d4ff" : "rgba(255,255,255,0.12)"}
+                stroke={isActive ? "#4B8BDB" : "rgba(255,255,255,0.12)"}
                 strokeWidth={isActive ? "1.5" : "1"}
                 markerEnd={isActive ? "url(#dag-arrow-active)" : "url(#dag-arrow)"}
                 style={{ transition: "stroke 0.15s, stroke-width 0.15s" }}

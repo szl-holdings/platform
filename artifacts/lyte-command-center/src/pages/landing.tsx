@@ -289,7 +289,7 @@ export default function LandingPage() {
         <div className="flex items-center justify-center gap-3">
           <Link href="/dashboard">
             <button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500 text-slate-900 font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
-              Open Command Center <ArrowRight className="w-4 h-4" />
+              Open Lyte <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
           <Link href="/use-cases">

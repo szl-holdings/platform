@@ -35,7 +35,7 @@ const demoCalendar = [
 const aiTools = [
   { id: "gen-imagery", name: "Generative Imagery", description: "Create concept art, mood boards, and visual explorations using Stable Diffusion XL and DALL-E 3. Train custom LoRA models on brand assets.", icon: ImageIcon, tech: "SDXL / DALL-E 3", color: "text-purple-400", bgColor: "from-purple-500/20 to-violet-500/10", capabilities: ["Concept Art Generation", "Brand-Trained LoRA Models", "Style Transfer", "Mood Board Assembly"] },
   { id: "ai-voiceover", name: "AI Voiceover Studio", description: "Ultra-realistic voice synthesis powered by ElevenLabs. Clone talent voices for pre-production scratch tracks.", icon: Music, tech: "ElevenLabs V2", color: "text-amber-400", bgColor: "from-amber-500/20 to-orange-500/10", capabilities: ["Voice Cloning", "Multi-language Synthesis", "Emotion Control", "Scratch Track Generation"] },
-  { id: "video-gen", name: "Motion Generation", description: "Generate video from text prompts or extend existing footage using RunwayML Gen-3 Alpha.", icon: Video, tech: "RunwayML Gen-3", color: "text-cyan-400", bgColor: "from-cyan-500/20 to-blue-500/10", capabilities: ["Text-to-Video", "Image-to-Video", "Camera Motion Control", "B-Roll Generation"] },
+  { id: "video-gen", name: "Motion Generation", description: "Generate video from text prompts or extend existing footage using RunwayML Gen-3 Alpha.", icon: Video, tech: "RunwayML Gen-3", color: "text-blue-400", bgColor: "from-cyan-500/20 to-blue-500/10", capabilities: ["Text-to-Video", "Image-to-Video", "Camera Motion Control", "B-Roll Generation"] },
   { id: "color-grade", name: "AI Color Grading", description: "Automated color grading with DaVinci Resolve neural engine integration.", icon: Palette, tech: "DaVinci Neural", color: "text-rose-400", bgColor: "from-rose-500/20 to-pink-500/10", capabilities: ["Auto Color Match", "LUT Generation", "Film Emulation", "Scene-to-Scene Consistency"] },
   { id: "copy-gen", name: "Campaign Copy Engine", description: "Generate headlines, body copy, CTAs, and full campaign messaging frameworks.", icon: Type, tech: "GPT-4o / Claude", color: "text-emerald-400", bgColor: "from-emerald-500/20 to-green-500/10", capabilities: ["Headline Generation", "A/B Copy Variants", "Brand Voice Matching", "Multi-Format Adaptation"] },
   { id: "vfx-comp", name: "VFX Compositing", description: "AI-assisted rotoscoping, background replacement, and object removal.", icon: Layers, tech: "Nuke AI / AE", color: "text-indigo-400", bgColor: "from-indigo-500/20 to-blue-500/10", capabilities: ["AI Rotoscoping", "Background Replacement", "Object Removal", "Sky Replacement"] },
@@ -108,8 +108,8 @@ export default function AIStudio() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-              <Wand2 className="w-5 h-5 text-cyan-400" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <Wand2 className="w-5 h-5 text-blue-400" />
             </div>
             AI Creative Studio
           </h1>
@@ -121,7 +121,7 @@ export default function AIStudio() {
         {aiTools.map((tool, i) => (
           <motion.div key={tool.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <div
-              className={`p-5 border rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-400/5 ${selectedTool === tool.id ? "border-cyan-400/30 ring-1 ring-cyan-400/10" : "border-white/8 bg-[#0d1117] hover:border-cyan-400/15"}`}
+              className={`p-5 border rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-400/5 ${selectedTool === tool.id ? "border-blue-400/30 ring-1 ring-cyan-400/10" : "border-white/8 bg-[#0d1117] hover:border-blue-400/15"}`}
               onClick={() => setSelectedTool(selectedTool === tool.id ? null : tool.id)}
             >
               <div className="flex items-start gap-4">
@@ -141,7 +141,7 @@ export default function AIStudio() {
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mt-4 pt-4 border-t border-white/8">
                     <div className="flex flex-wrap gap-1.5">
                       {tool.capabilities.map(cap => (
-                        <span key={cap} className="text-[10px] px-2 py-0.5 rounded border border-cyan-500/20 bg-cyan-500/5 text-cyan-400">{cap}</span>
+                        <span key={cap} className="text-[10px] px-2 py-0.5 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400">{cap}</span>
                       ))}
                     </div>
                   </motion.div>
@@ -160,17 +160,17 @@ export default function AIStudio() {
             </h3>
             <div className="space-y-3">
               {demoContentIdeas.ideas.map((idea, i) => (
-                <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} className="p-4 rounded-xl border border-white/8 hover:border-cyan-400/15 transition-all cursor-pointer group bg-white/2">
+                <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} className="p-4 rounded-xl border border-white/8 hover:border-blue-400/15 transition-all cursor-pointer group bg-white/2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors">{idea.title}</p>
+                      <p className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">{idea.title}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className="text-[10px] px-2 py-0.5 rounded border border-white/10 text-slate-400">{idea.format}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded border border-cyan-500/20 text-cyan-400">{idea.audience}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded border border-blue-500/20 text-blue-400">{idea.audience}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="flex items-center gap-1 text-xs text-cyan-400">
+                      <div className="flex items-center gap-1 text-xs text-blue-400">
                         <TrendingUp className="w-3 h-3" /> {idea.trendAlignment}%
                       </div>
                       <span className="text-[10px] text-slate-500">{idea.estimatedEngagement} engagement</span>
@@ -183,7 +183,7 @@ export default function AIStudio() {
               <p className="text-xs text-slate-500 mb-2">Trending Topics</p>
               <div className="flex flex-wrap gap-2">
                 {demoContentIdeas.trendingTopics.map((t, i) => (
-                  <span key={i} className="text-[10px] px-2 py-1 rounded border border-cyan-500/20 bg-cyan-500/5 text-cyan-400">{t}</span>
+                  <span key={i} className="text-[10px] px-2 py-1 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400">{t}</span>
                 ))}
               </div>
             </div>
@@ -225,12 +225,12 @@ export default function AIStudio() {
                 value={imagePrompt}
                 onChange={e => setImagePrompt(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && imagePrompt && imageMutation.mutate(imagePrompt)}
-                className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500/30"
+                className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-blue-500/30"
               />
               <button
                 onClick={() => imagePrompt && imageMutation.mutate(imagePrompt)}
                 disabled={imageMutation.isPending || !imagePrompt}
-                className="px-3 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {imageMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
               </button>
@@ -248,7 +248,7 @@ export default function AIStudio() {
             {imageMutation.isError && <p className="text-sm text-red-400 mt-2">Failed to generate image. Try again.</p>}
             <div className="mt-4 flex flex-wrap gap-2">
               {["cinematic car reveal, volumetric fog, golden hour", "luxury product flatlay, marble surface, dramatic lighting", "aerial landscape, Patagonian mountains, dawn mist", "abstract brand identity, geometric, amber and obsidian"].map(p => (
-                <button key={p} onClick={() => { setImagePrompt(p); imageMutation.mutate(p); }} className="text-xs px-3 py-1.5 rounded-full border border-white/10 hover:border-cyan-400/20 hover:bg-cyan-400/3 transition-all text-slate-500 hover:text-slate-300">{p.split(",")[0]}</button>
+                <button key={p} onClick={() => { setImagePrompt(p); imageMutation.mutate(p); }} className="text-xs px-3 py-1.5 rounded-full border border-white/10 hover:border-blue-400/20 hover:bg-blue-400/3 transition-all text-slate-500 hover:text-slate-300">{p.split(",")[0]}</button>
               ))}
             </div>
           </div>
@@ -267,16 +267,16 @@ export default function AIStudio() {
                 value={briefTopic}
                 onChange={e => setBriefTopic(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && generateCampaignCopy()}
-                className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500/30"
+                className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-600 outline-none focus:border-blue-500/30"
               />
-              <button onClick={generateCampaignCopy} disabled={!briefTopic} className="px-3 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              <button onClick={generateCampaignCopy} disabled={!briefTopic} className="px-3 py-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                 <Zap className="w-4 h-4" />
               </button>
             </div>
             <div className="mb-4 p-3 rounded-xl border border-white/8 bg-white/2">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-slate-500">Brand Voice Tone</span>
-                <span className="text-xs font-medium text-cyan-400">{toneLabel}</span>
+                <span className="text-xs font-medium text-blue-400">{toneLabel}</span>
               </div>
               <input
                 type="range"
@@ -311,18 +311,18 @@ export default function AIStudio() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <div className="p-6 border border-white/8 bg-[#0d1117] rounded-xl">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Globe className="w-5 h-5 text-cyan-400" /> Technology Trend Radar
+            <Globe className="w-5 h-5 text-blue-400" /> Technology Trend Radar
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {demoTechTrends.map((trend, i) => (
-              <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} className={`p-4 rounded-xl border transition-all cursor-pointer hover:-translate-y-0.5 ${trend.relevance === "critical" ? "border-cyan-500/20 bg-cyan-500/3" : "border-white/8 bg-white/2"}`}>
+              <motion.div key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} className={`p-4 rounded-xl border transition-all cursor-pointer hover:-translate-y-0.5 ${trend.relevance === "critical" ? "border-blue-500/20 bg-blue-500/3" : "border-white/8 bg-white/2"}`}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] px-2 py-0.5 rounded border border-white/10 text-slate-500">{trend.category}</span>
-                  <span className="text-xs text-cyan-400 font-bold">{trend.momentum}%</span>
+                  <span className="text-xs text-blue-400 font-bold">{trend.momentum}%</span>
                 </div>
                 <p className="text-sm font-semibold text-white">{trend.name}</p>
                 <div className="mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${trend.momentum}%` }} />
+                  <div className="h-full bg-blue-400 rounded-full" style={{ width: `${trend.momentum}%` }} />
                 </div>
                 <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-500">
                   <TrendingUp className="w-3 h-3" /> {trend.direction}

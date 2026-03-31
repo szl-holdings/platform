@@ -1,36 +1,37 @@
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowRight, Activity, Eye, TrendingUp, Radio, Gauge,
-  Network, Target, Users, Shield, GitBranch, Zap, CheckCircle,
+  Target, Users, Shield, Zap, CheckCircle,
   Mail, Calendar, MessageSquare, FileText, Database, Cloud,
   Briefcase, HeartPulse, Factory, CreditCard, CheckSquare,
-  Menu, X, ChevronDown, Monitor,
+  Menu, X, Monitor, GitBranch, Network,
 } from "lucide-react";
 
 const AMBER = "#f59e0b";
+const AMBER_LIGHT = "#fbbf24";
 
 const prism = [
-  { key: "P", name: "Pulse", color: "#10b981", icon: Activity, meaning: "Business health, operating heartbeat, trend status, exposure rhythm", detail: "Pulse monitors the continuous rhythm of your operations — revenue velocity, delivery cadence, customer health, operational tempo. Not infrastructure uptime. Business uptime." },
-  { key: "R", name: "Risk", color: "#ef4444", icon: Target, meaning: "Approvals, churn, delays, ownership gaps, regulatory exposure", detail: "Risk surfaces the slow-burn threats that compound silently: aging approvals, unowned processes, regulatory drift, customer churn signals. Each risk carries a time-to-impact and business cost." },
-  { key: "I", name: "Intelligence", color: "#8b5cf6", icon: Eye, meaning: "Modeled reasoning, evidence, confidence, likely outcomes", detail: "Intelligence synthesizes signals into actionable recommendations with evidence chains and confidence scores. Not AI predictions — structured reasoning an executive can audit and trust." },
-  { key: "S", name: "Signals", color: "#f59e0b", icon: Radio, meaning: "Anomalies, changes, event spikes, workflow drift", detail: "Signals captures state changes across your connected tools — a Jira queue doubling, a Salesforce pipeline stalling, a Slack channel going silent. Each signal is scored, attributed, and routed." },
-  { key: "M", name: "Motion", color: "#0ea5e9", icon: Gauge, meaning: "Escalations, routing, approvals, interventions, workflow execution", detail: "Motion is the execution layer — routing decisions to the right person, escalating stalled work, triggering interventions, and tracking the velocity of organizational response." },
+  { key: "P", name: "Pulse", color: "#10b981", icon: Activity, meaning: "Business health, operating heartbeat, trend status", detail: "Pulse monitors the continuous rhythm of your operations — revenue velocity, delivery cadence, customer health, operational tempo. Not infrastructure uptime. Business uptime." },
+  { key: "R", name: "Risk", color: "#ef4444", icon: Target, meaning: "Approvals, churn, delays, ownership gaps", detail: "Risk surfaces the slow-burn threats that compound silently: aging approvals, unowned processes, regulatory drift, customer churn signals. Each risk carries a time-to-impact and business cost." },
+  { key: "I", name: "Intelligence", color: "#8b5cf6", icon: Eye, meaning: "Modeled reasoning, evidence, confidence", detail: "Intelligence synthesizes signals into actionable recommendations with evidence chains and confidence scores. Not AI predictions — structured reasoning an executive can audit and trust." },
+  { key: "S", name: "Signals", color: "#f59e0b", icon: Radio, meaning: "Anomalies, changes, event spikes, drift", detail: "Signals captures state changes across your connected tools — a Jira queue doubling, a Salesforce pipeline stalling, a Slack channel going silent. Each signal is scored, attributed, and routed." },
+  { key: "M", name: "Motion", color: "#0ea5e9", icon: Gauge, meaning: "Escalations, routing, approvals, execution", detail: "Motion is the execution layer — routing decisions to the right person, escalating stalled work, triggering interventions, and tracking the velocity of organizational response." },
 ];
 
 const pillars = [
-  { name: "Visibility", desc: "See every operational surface — not just infrastructure. Revenue pipelines, approval queues, team handoffs, customer health, vendor dependencies. If it affects outcomes, Lyte shows it." },
+  { name: "Visibility", desc: "See every operational surface — revenue pipelines, approval queues, team handoffs, customer health. If it affects outcomes, Lyte shows it." },
   { name: "Context", desc: "Signals without context are noise. Lyte connects every anomaly to the business process it impacts, the owner responsible, and the financial exposure it creates." },
   { name: "Ownership", desc: "Every process, risk, and decision has an owner. Lyte maps accountability chains so nothing falls between teams, departments, or role boundaries." },
-  { name: "Prioritization", desc: "Not everything is urgent. Lyte scores every signal by business impact, time sensitivity, and confidence — so operators work on what matters, not what's loudest." },
-  { name: "Explainability", desc: "Every recommendation carries an evidence chain. No black-box AI. Executives see why something is flagged, what data supports it, and how confident the assessment is." },
+  { name: "Prioritization", desc: "Not everything is urgent. Lyte scores every signal by business impact, time sensitivity, and confidence — so operators work on what matters." },
+  { name: "Explainability", desc: "Every recommendation carries an evidence chain. No black-box AI. Executives see why something is flagged, what data supports it, and the confidence level." },
   { name: "Intervention", desc: "Visibility without action is a spectator sport. Lyte routes decisions to the right person with full context — approve, escalate, delegate, or resolve." },
-  { name: "Continuous Motion", desc: "Organizations don't stand still. Lyte tracks the velocity of improvement — are decisions getting faster? Are risks being caught earlier? Is the organization accelerating or decelerating?" },
+  { name: "Continuous Motion", desc: "Are decisions getting faster? Are risks caught earlier? Is the organization accelerating or decelerating? Lyte tracks the velocity of improvement itself." },
 ];
 
 const useCases = [
-  { title: "A VP discovers a $400K revenue leak", scenario: "Three Salesforce deals stalled for 18 days. Lyte's Risk lens flagged the ownership gap — the assigned rep had left. Intelligence surfaced the churn probability at 72%. Motion routed the re-assignment to the sales director with full deal context. All three deals closed within 10 days of intervention.", lens: "Risk → Intelligence → Motion" },
-  { title: "An ops lead prevents a delivery failure", scenario: "Pulse detected a 3x spike in Jira ticket cycle time for the platform team. Signals correlated it with a silent Slack channel — the lead engineer was on unplanned leave. Intelligence recommended redistributing the sprint backlog. The CTO approved the intervention before the client SLA was breached.", lens: "Pulse → Signals → Intelligence → Motion" },
-  { title: "A CFO catches approval drag costing $120K/month", scenario: "Risk surfaced 14 procurement approvals aging past 30 days — each blocking vendor onboarding. Intelligence calculated the cumulative delay cost. Motion escalated the batch to the COO with a single-click approval flow. The entire backlog cleared in 48 hours.", lens: "Risk → Intelligence → Motion" },
+  { title: "A VP discovers a $400K revenue leak", scenario: "Three Salesforce deals stalled for 18 days. Risk flagged the ownership gap — the assigned rep had left. Intelligence surfaced 72% churn probability. Motion routed re-assignment to the sales director. All three deals closed within 10 days.", lens: "Risk + Intelligence + Motion", impact: "$400K" },
+  { title: "An ops lead prevents a delivery failure", scenario: "Pulse detected 3x spike in Jira cycle time. Signals correlated it with a silent Slack channel — the lead engineer was on unplanned leave. Intelligence recommended redistributing the sprint. The CTO approved before the SLA breach.", lens: "Pulse + Signals + Intelligence", impact: "SLA saved" },
+  { title: "A CFO catches $120K/month in approval drag", scenario: "Risk surfaced 14 procurement approvals aging past 30 days — each blocking vendor onboarding. Intelligence calculated cumulative delay cost. Motion escalated the batch to the COO with single-click approval. Backlog cleared in 48 hours.", lens: "Risk + Intelligence + Motion", impact: "$120K/mo" },
 ];
 
 const connectorsList = [
@@ -44,7 +45,7 @@ const connectorsList = [
   { name: "SAP", icon: Factory }, { name: "NetSuite", icon: Monitor },
 ];
 
-function useInView(threshold = 0.15) {
+function useInView(threshold = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -57,10 +58,10 @@ function useInView(threshold = 0.15) {
   return { ref, visible };
 }
 
-function Section({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const { ref, visible } = useInView();
   return (
-    <div ref={ref} className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"} ${className}`}>
+    <div ref={ref} className={`transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </div>
   );
@@ -78,280 +79,355 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-300" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen bg-[#060a12] text-slate-300 overflow-x-hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-300 ${scrolled ? "bg-[#080c14]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20" : "bg-transparent"}`}>
-        <div className="max-w-[1120px] mx-auto px-6 w-full flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-[26px] h-[26px] rounded-md flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.25)" }}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? "bg-[#060a12]/90 backdrop-blur-2xl border-b border-amber-400/[0.06]" : "bg-transparent"}`}>
+        <div className="max-w-[1200px] mx-auto px-6 w-full flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
               <Zap size={13} className="text-amber-400" />
             </div>
             <span className="font-bold text-[15px] tracking-tight text-white">Lyte</span>
+            <span className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/15 font-mono ml-1">Business Observability</span>
           </div>
-          <div className="hidden md:flex items-center gap-6">
-            {[{ label: "PRISM", href: "#prism" }, { label: "Pillars", href: "#pillars" }, { label: "Use Cases", href: "#use-cases" }, { label: "Connectors", href: "#connectors" }].map(l => (
-              <a key={l.label} href={l.href} className="text-xs text-white/40 hover:text-white/70 transition-colors tracking-wider font-medium">{l.label}</a>
+          <div className="hidden md:flex items-center gap-7">
+            {[{ label: "PRISM", href: "#prism" }, { label: "Doctrine", href: "#doctrine" }, { label: "Evidence", href: "#evidence" }, { label: "Platform", href: "#platform" }].map(l => (
+              <a key={l.label} href={l.href} className="text-[11px] text-white/30 hover:text-white/60 transition-colors tracking-[0.08em] uppercase font-medium">{l.label}</a>
             ))}
-            <span className="text-[11px] text-white/20 font-mono">SZL Holdings</span>
-            <button onClick={onSignIn} className="text-xs font-semibold text-[#080c14] bg-amber-400 hover:bg-amber-300 rounded-md px-4 py-1.5 transition-colors">Sign in</button>
+            <button onClick={onSignIn} className="text-[12px] font-semibold text-[#060a12] bg-amber-400 hover:bg-amber-300 rounded-lg px-5 py-1.5 transition-all">Sign in</button>
           </div>
-          <button className="md:hidden p-2 text-white/50" onClick={() => setMobileNav(!mobileNav)}>
+          <button className="md:hidden p-2 text-white/40" onClick={() => setMobileNav(!mobileNav)} aria-label={mobileNav ? "Close menu" : "Open menu"} aria-expanded={mobileNav}>
             {mobileNav ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
       {mobileNav && (
-        <div className="fixed inset-0 z-40 bg-[#080c14]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-6 md:hidden">
-          {[{ label: "PRISM", href: "#prism" }, { label: "Pillars", href: "#pillars" }, { label: "Use Cases", href: "#use-cases" }, { label: "Connectors", href: "#connectors" }].map(l => (
-            <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/60 hover:text-white transition-colors">{l.label}</a>
+        <div className="fixed inset-0 z-40 bg-[#060a12]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
+          {[{ label: "PRISM", href: "#prism" }, { label: "Doctrine", href: "#doctrine" }, { label: "Evidence", href: "#evidence" }, { label: "Platform", href: "#platform" }].map(l => (
+            <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/50 hover:text-white tracking-wide transition-colors">{l.label}</a>
           ))}
-          <button onClick={() => { onSignIn?.(); setMobileNav(false); }} className="mt-4 text-sm font-semibold text-[#080c14] bg-amber-400 rounded-md px-6 py-2.5">Sign in</button>
+          <button onClick={() => { onSignIn?.(); setMobileNav(false); }} className="mt-4 text-sm font-semibold text-[#060a12] bg-amber-400 rounded-lg px-8 py-3">Sign in</button>
         </div>
       )}
 
-      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 max-w-[1120px] mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12 lg:gap-20 items-start">
-          <div>
-            <p className="text-[11px] font-bold tracking-[0.12em] uppercase text-amber-400 mb-5 font-mono">Business Observability Platform</p>
-            <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-extrabold leading-[1.08] tracking-tight text-slate-50 mb-6">
-              In the dark,<br />
-              <span className="text-amber-400">let Lyte guide you.</span>
-            </h1>
-            <p className="text-base sm:text-[17px] leading-relaxed text-white/45 max-w-[520px] mb-8">
-              Your business generates thousands of signals every day across dozens of tools.
-              Most go unseen until the damage compounds. Lyte turns operational noise into
-              prioritized human action — so executives see risk, operators see friction,
-              and decisions happen before it's too late.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button onClick={onSignIn} className="text-[13px] font-semibold bg-amber-400 hover:bg-amber-300 text-[#080c14] rounded-md px-6 py-2.5 flex items-center gap-1.5 transition-colors">
-                Start Free Trial <ArrowRight size={14} />
-              </button>
-              <button className="text-[13px] font-medium bg-transparent text-white/55 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-6 py-2.5 transition-colors">
-                Request a Demo
-              </button>
-            </div>
+      <div className="absolute top-0 left-0 right-0 h-[800px] overflow-hidden pointer-events-none">
+        <div className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(245,158,11,0.04) 0%, transparent 70%)" }} />
+      </div>
 
-            <div className="flex flex-wrap gap-x-10 gap-y-4 mt-12 pt-6 border-t border-white/[0.06]">
-              {[{ v: "40+", l: "Connectors" }, { v: "5", l: "PRISM Lenses" }, { v: "7", l: "Pillars" }, { v: "< 5 min", l: "First Signal" }].map(s => (
-                <div key={s.l}>
-                  <span className="text-lg font-extrabold font-mono text-slate-50">{s.v}</span>
-                  <p className="text-[10px] text-white/25 uppercase tracking-wider mt-0.5">{s.l}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+      <section className="relative pt-32 sm:pt-40 pb-24 sm:pb-32 max-w-[1200px] mx-auto px-6">
+        <Reveal>
+          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-amber-400/60 mb-8 font-mono">SZL Holdings</p>
+        </Reveal>
 
-          <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-5 mt-0 lg:mt-4">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-[9px] font-bold tracking-wider uppercase text-white/25">PRISM Analysis</span>
-              <span className="text-[9px] font-mono text-white/15">Live</span>
-            </div>
-            {prism.map((p) => (
-              <div key={p.key} className="flex items-center gap-2.5 py-2 border-t border-white/[0.03]">
-                <span className="text-[11px] font-extrabold font-mono w-3.5" style={{ color: p.color }}>{p.key}</span>
-                <span className="text-xs text-white/65 flex-1">{p.name}</span>
-                <div className="w-[60px] h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${60 + Math.random() * 30}%`, background: p.color, opacity: 0.7 }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        <Reveal delay={100}>
+          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[900px] mb-0">
+            Your business runs on
+          </h1>
+        </Reveal>
+        <Reveal delay={200}>
+          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] max-w-[900px] mb-8">
+            <span className="text-amber-400">thousands of invisible signals.</span>
+          </h1>
+        </Reveal>
 
-      <Section>
-        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <div className="max-w-[680px]">
-            <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-4">Defining the Category</p>
-            <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-6">
-              What is business observability?
-            </h2>
-            <p className="text-[15px] leading-[1.8] text-white/40 mb-5">
-              Infrastructure observability tells you when a server is down. Business observability tells you
-              when a <span className="text-white/75">revenue pipeline is stalling</span>,
-              an <span className="text-white/75">approval is aging past its SLA</span>,
-              a <span className="text-white/75">team handoff is creating customer risk</span>,
-              or a <span className="text-white/75">process owner has gone silent</span>.
-            </p>
-            <p className="text-[15px] leading-[1.8] text-white/40 mb-8">
-              Most operational damage doesn't happen because of a crash. It happens because signals go unseen
-              across disconnected tools — Jira, Salesforce, Slack, ServiceNow, email — until the cost
-              compounds past recovery.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-              {[
-                { label: "Infrastructure Observability", items: ["Server uptime", "API latency", "Error rates", "Memory usage"], note: "Datadog, New Relic, Splunk", highlight: false },
-                { label: "Business Observability", items: ["Revenue velocity", "Approval aging", "Ownership gaps", "Decision latency"], note: "Lyte", highlight: true },
-              ].map(col => (
-                <div key={col.label} className="bg-white/[0.025] border border-white/[0.06] rounded-lg p-5">
-                  <p className={`text-[10px] font-bold tracking-wider uppercase mb-3 ${col.highlight ? "text-amber-400" : "text-white/25"}`}>{col.label}</p>
-                  {col.items.map(item => (
-                    <p key={item} className="text-xs text-white/45 py-1 border-b border-white/[0.03]">{item}</p>
-                  ))}
-                  <p className="text-[10px] text-white/15 mt-2 font-mono">{col.note}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section id="prism" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">The Analytical Framework</p>
-          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-2">PRISM</h2>
-          <p className="text-[15px] text-white/35 mb-10 max-w-[560px]">
-            Five analytical lenses that decompose operational complexity into structured, actionable intelligence.
-            Every signal in Lyte passes through PRISM before it reaches a human.
+        <Reveal delay={300}>
+          <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/35 max-w-[640px] mb-12">
+            Revenue stalling in Salesforce. Approvals aging in ServiceNow. A team lead
+            going silent in Slack. By the time these surface as problems, the damage
+            has already compounded. Lyte makes the invisible visible — before it's too late.
           </p>
+        </Reveal>
 
-          <div className="flex flex-col gap-0.5">
-            {prism.map((p, i) => (
-              <button
-                key={p.key}
-                onClick={() => setExpandedPrism(expandedPrism === i ? null : i)}
-                className={`text-left w-full rounded-lg px-5 py-4 border transition-all duration-200 ${expandedPrism === i ? "bg-white/[0.035]" : "bg-white/[0.025] hover:bg-white/[0.03]"}`}
-                style={{ borderColor: expandedPrism === i ? `${p.color}30` : "rgba(255,255,255,0.06)" }}
-              >
-                <div className="flex items-center gap-3 sm:gap-3.5">
-                  <span className="text-lg font-extrabold font-mono w-6" style={{ color: p.color }}>{p.key}</span>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-semibold text-slate-50">{p.name}</span>
-                    <span className="hidden sm:inline text-xs text-white/30 ml-3">{p.meaning}</span>
-                  </div>
-                  <p.icon size={16} style={{ color: p.color }} className="opacity-50 shrink-0" />
-                  <ChevronDown size={14} className={`text-white/20 transition-transform shrink-0 ${expandedPrism === i ? "rotate-180" : ""}`} />
-                </div>
-                {expandedPrism === i && (
-                  <p className="text-[13px] leading-relaxed text-white/45 mt-3 ml-9 max-w-[600px]">
-                    {p.detail}
-                  </p>
-                )}
-              </button>
-            ))}
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section id="pillars" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">The Doctrine</p>
-          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-2">
-            The 7 Pillars of Business Observability
-          </h2>
-          <p className="text-[15px] text-white/35 mb-12 max-w-[560px]">
-            Every capability in Lyte maps to one of seven foundational pillars. Together, they form a
-            complete doctrine for making operations visible, accountable, and continuously improving.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06] rounded-xl overflow-hidden">
-            {pillars.map((p, i) => (
-              <div key={p.name} className="bg-[#080c14] p-6 sm:p-7">
-                <div className="flex items-baseline gap-2.5 mb-2.5">
-                  <span className="text-2xl font-extrabold text-amber-400/15 font-mono">{String(i + 1).padStart(2, "0")}</span>
-                  <h3 className="text-[15px] font-bold text-slate-50">{p.name}</h3>
-                </div>
-                <p className="text-[12.5px] leading-relaxed text-white/35">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section id="use-cases" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">How It Works</p>
-          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-12">
-            Real workflows. Real outcomes.
-          </h2>
-
-          <div className="flex flex-col gap-6">
-            {useCases.map((uc) => (
-              <div key={uc.title} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6 sm:p-7">
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
-                  <h3 className="text-base font-bold text-slate-50 max-w-[500px]">{uc.title}</h3>
-                  <span className="text-[10px] font-mono text-amber-400 bg-amber-400/[0.08] px-2.5 py-1 rounded whitespace-nowrap self-start">{uc.lens}</span>
-                </div>
-                <p className="text-[13px] leading-[1.8] text-white/40">{uc.scenario}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section id="connectors" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Integrations</p>
-          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-slate-50 mb-2">
-            Connect every tool your teams use.
-          </h2>
-          <p className="text-[15px] text-white/35 mb-10 max-w-[560px]">
-            40+ connectors across productivity, engineering, CRM, support, finance, HR, and data platforms.
-            No code, no agents, no infrastructure changes.
-          </p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-white/[0.06] rounded-lg overflow-hidden">
-            {connectorsList.map(c => (
-              <div key={c.name} className="bg-[#080c14] py-4 px-3.5 flex items-center gap-2">
-                <c.icon size={14} className="text-white/20 shrink-0" />
-                <span className="text-[11px] text-white/50 font-medium">{c.name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { icon: Shield, title: "Enterprise-grade security", desc: "SOC 2 Type II architecture. End-to-end encryption. Role-based access. Audit trails on every action. Your data never leaves your tenant." },
-              { icon: Network, title: "One unified architecture", desc: "Lyte runs on the same infrastructure as every SZL Holdings platform. Shared auth, shared data layer, shared orchestration via Alloy." },
-              { icon: CheckCircle, title: "Built by operators", desc: "Built by a founder who ran operations across cybersecurity, real estate, maritime, and enterprise consulting. Not a toy. Not a science project." },
-            ].map(t => (
-              <div key={t.title} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6">
-                <t.icon size={18} className="text-white/15 mb-3.5" />
-                <h3 className="text-sm font-bold text-slate-50 mb-2">{t.title}</h3>
-                <p className="text-xs leading-relaxed text-white/35">{t.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto text-center">
-          <h2 className="text-2xl sm:text-[28px] font-bold text-slate-50 mb-3">
-            Stop flying blind.
-          </h2>
-          <p className="text-[15px] text-white/35 max-w-[480px] mx-auto mb-8">
-            Connect your first tool in under 5 minutes. See what you've been missing.
-          </p>
-          <div className="flex justify-center flex-wrap gap-3">
-            <button onClick={onSignIn} className="text-sm font-semibold bg-amber-400 hover:bg-amber-300 text-[#080c14] rounded-md px-7 py-3 flex items-center gap-1.5 transition-colors">
+        <Reveal delay={400}>
+          <div className="flex flex-wrap gap-3 mb-20">
+            <button onClick={onSignIn} className="text-[13px] font-semibold bg-amber-400 hover:bg-amber-300 text-[#060a12] rounded-lg px-7 py-3 flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-amber-400/10">
               Start Free Trial <ArrowRight size={14} />
             </button>
-            <button className="text-sm font-medium bg-transparent text-white/55 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-7 py-3 transition-colors">
-              Schedule a Demo
+            <button className="text-[13px] font-medium text-white/40 border border-white/[0.08] hover:border-white/[0.15] hover:text-white/60 rounded-lg px-7 py-3 transition-all">
+              Request a Demo
             </button>
           </div>
-        </section>
-      </Section>
+        </Reveal>
 
-      <footer className="border-t border-white/[0.06] py-10 px-6 max-w-[1120px] mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Zap size={12} className="text-amber-400" />
-            <span className="text-xs font-semibold text-white/35">Lyte</span>
-            <span className="text-[10px] text-white/10 font-mono">by SZL Holdings</span>
+        <Reveal delay={500}>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+            {prism.map((p) => (
+              <div key={p.key} className="bg-[#060a12] py-5 px-4 text-center">
+                <span className="text-[28px] font-extrabold font-mono block leading-none" style={{ color: p.color }}>{p.key}</span>
+                <span className="text-[10px] tracking-[0.1em] uppercase text-white/25 mt-1.5 block">{p.name}</span>
+              </div>
+            ))}
           </div>
-          <p className="text-[10px] text-white/10">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+        </Reveal>
+      </section>
+
+      <Reveal>
+        <section className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[760px] mx-auto">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/20 mb-6">The Problem</p>
+            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.2] tracking-tight text-white mb-8">
+              Infrastructure observability solved the server.
+              <span className="text-white/25"> Nobody solved the business.</span>
+            </h2>
+            <div className="text-[16px] leading-[2] text-white/35 space-y-6">
+              <p>
+                Datadog tells you when a server is down. New Relic tells you when an API is slow.
+                Splunk tells you when a log pattern changes. These are solved problems.
+              </p>
+              <p>
+                But when a <span className="text-white/70">$400K deal stalls because the assigned rep left the company</span> —
+                no tool alerts you. When <span className="text-white/70">14 procurement approvals age past 30 days</span>,
+                blocking $120K/month in vendor onboarding — no dashboard shows it. When a
+                <span className="text-white/70"> team lead goes silent for 72 hours</span> and the sprint
+                starts hemorrhaging tickets — no system correlates the cause.
+              </p>
+              <p>
+                This is the gap Lyte fills. Not infrastructure observability. <span className="text-amber-400/80">Business observability.</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="max-w-[760px] mx-auto mt-16 grid grid-cols-1 sm:grid-cols-2 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+            {[
+              { label: "Infrastructure Observability", items: ["Server uptime", "API latency", "Error rates", "Memory usage"], note: "Datadog, New Relic, Splunk" },
+              { label: "Business Observability", items: ["Revenue velocity", "Approval aging", "Ownership gaps", "Decision latency"], note: "Lyte", highlight: true },
+            ].map(col => (
+              <div key={col.label} className="bg-[#060a12] p-7">
+                <p className={`text-[10px] font-bold tracking-[0.15em] uppercase mb-5 ${col.highlight ? "text-amber-400" : "text-white/20"}`}>{col.label}</p>
+                {col.items.map(item => (
+                  <p key={item} className={`text-[13px] py-2 border-b border-white/[0.04] ${col.highlight ? "text-white/55" : "text-white/30"}`}>{item}</p>
+                ))}
+                <p className={`text-[10px] mt-4 font-mono ${col.highlight ? "text-amber-400/50" : "text-white/10"}`}>{col.note}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section id="prism" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="max-w-[600px] mb-16">
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/20 mb-4">The Analytical Framework</p>
+              <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+                PRISM
+              </h2>
+              <p className="text-[16px] leading-[1.8] text-white/30">
+                Five lenses that decompose operational complexity into structured,
+                actionable intelligence. Every signal passes through PRISM before reaching a human.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10 items-start">
+              <div className="flex flex-col gap-1">
+                {prism.map((p, i) => (
+                  <button
+                    key={p.key}
+                    onClick={() => setExpandedPrism(expandedPrism === i ? null : i)}
+                    className="text-left w-full rounded-xl px-6 py-5 border transition-all duration-300"
+                    style={{
+                      borderColor: expandedPrism === i ? `${p.color}30` : "rgba(255,255,255,0.04)",
+                      background: expandedPrism === i ? `${p.color}06` : "rgba(255,255,255,0.015)",
+                    }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-2xl font-extrabold font-mono w-8" style={{ color: p.color }}>{p.key}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[15px] font-semibold text-white">{p.name}</span>
+                        <span className="hidden sm:inline text-[12px] text-white/25 ml-3">{p.meaning}</span>
+                      </div>
+                      <p.icon size={18} style={{ color: p.color }} className="opacity-40 shrink-0" />
+                    </div>
+                    {expandedPrism === i && (
+                      <p className="text-[14px] leading-[1.8] text-white/40 mt-4 ml-12 max-w-[540px]">
+                        {p.detail}
+                      </p>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 sticky top-24">
+                <div className="flex justify-between items-center mb-5">
+                  <span className="text-[9px] font-bold tracking-[0.15em] uppercase text-white/20">Live PRISM Analysis</span>
+                  <span className="flex items-center gap-1.5 text-[9px] font-mono text-amber-400/50">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    Streaming
+                  </span>
+                </div>
+                {prism.map((p) => {
+                  const val = 55 + Math.floor(Math.random() * 35);
+                  return (
+                    <div key={p.key} className="flex items-center gap-3 py-2.5 border-t border-white/[0.03]">
+                      <span className="text-xs font-extrabold font-mono w-4" style={{ color: p.color }}>{p.key}</span>
+                      <span className="text-[11px] text-white/40 w-20">{p.name}</span>
+                      <div className="flex-1 h-1 rounded-full bg-white/[0.04] overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${val}%`, background: p.color, opacity: 0.6 }} />
+                      </div>
+                      <span className="text-[10px] font-mono text-white/20 w-8 text-right">{val}</span>
+                    </div>
+                  );
+                })}
+                <div className="mt-4 pt-4 border-t border-white/[0.04]">
+                  <div className="flex justify-between text-[10px]">
+                    <span className="text-white/15">Active signals</span>
+                    <span className="font-mono text-amber-400/50">247</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] mt-1">
+                    <span className="text-white/15">Pending actions</span>
+                    <span className="font-mono text-amber-400/50">18</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section id="doctrine" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="max-w-[560px] mb-16">
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/20 mb-4">The Doctrine</p>
+              <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+                Seven pillars of business observability
+              </h2>
+              <p className="text-[16px] leading-[1.8] text-white/30">
+                Every capability maps to one of seven foundational pillars — a complete doctrine
+                for making operations visible, accountable, and continuously improving.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {pillars.map((p, i) => (
+                <div key={p.name} className="bg-[#060a12] p-7 group">
+                  <span className="text-[32px] font-extrabold text-amber-400/[0.07] font-mono leading-none block mb-3">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="text-[14px] font-bold text-white mb-2.5">{p.name}</h3>
+                  <p className="text-[12px] leading-[1.8] text-white/30">{p.desc}</p>
+                </div>
+              ))}
+              <div className="bg-[#060a12] p-7 flex flex-col items-center justify-center text-center">
+                <Zap size={20} className="text-amber-400/20 mb-3" />
+                <p className="text-[11px] text-white/15 leading-relaxed">All seven pillars.<br />One unified platform.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section id="evidence" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[900px] mx-auto">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/20 mb-4">Evidence</p>
+            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+              Real workflows. Measurable outcomes.
+            </h2>
+            <p className="text-[16px] leading-[1.8] text-white/30 mb-16 max-w-[560px]">
+              These aren't hypotheticals. They're the kind of operational failures that
+              happen every day — and the interventions that Lyte makes possible.
+            </p>
+
+            <div className="flex flex-col gap-4">
+              {useCases.map((uc) => (
+                <div key={uc.title} className="border border-white/[0.05] rounded-2xl overflow-hidden">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_160px]">
+                    <div className="p-7 sm:p-8">
+                      <div className="flex flex-wrap items-center gap-3 mb-4">
+                        <span className="text-[10px] font-mono text-amber-400/50 bg-amber-400/[0.06] px-3 py-1 rounded-lg">{uc.lens}</span>
+                      </div>
+                      <h3 className="text-[17px] font-bold text-white mb-3">{uc.title}</h3>
+                      <p className="text-[13px] leading-[1.9] text-white/35">{uc.scenario}</p>
+                    </div>
+                    <div className="bg-white/[0.02] p-6 flex flex-col items-center justify-center border-t lg:border-t-0 lg:border-l border-white/[0.04]">
+                      <span className="text-[28px] font-extrabold font-mono text-amber-400/70">{uc.impact}</span>
+                      <span className="text-[9px] tracking-[0.15em] uppercase text-white/15 mt-1">Impact</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section id="platform" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="max-w-[560px] mb-16">
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/20 mb-4">Connectors</p>
+              <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+                Every tool. One signal stream.
+              </h2>
+              <p className="text-[16px] leading-[1.8] text-white/30">
+                40+ connectors across productivity, engineering, CRM, support, finance, and data platforms.
+                No code. No agents. No infrastructure changes. First signal in under 5 minutes.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {connectorsList.map(c => (
+                <div key={c.name} className="bg-[#060a12] py-5 px-5 flex items-center gap-3 group">
+                  <c.icon size={15} className="text-white/15 group-hover:text-amber-400/40 transition-colors shrink-0" />
+                  <span className="text-[12px] text-white/40 group-hover:text-white/60 font-medium transition-colors">{c.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {[
+                { icon: Shield, title: "Enterprise security", desc: "SOC 2 Type II architecture. E2E encryption. RBAC. Audit trails on every action. Your data never leaves your tenant." },
+                { icon: Network, title: "Unified architecture", desc: "Same infrastructure as every SZL Holdings platform. Shared auth, shared data layer, shared orchestration via Alloy." },
+                { icon: CheckCircle, title: "Built by operators", desc: "Built by a founder who ran operations across cybersecurity, real estate, maritime, and enterprise consulting. Not a toy." },
+              ].map(t => (
+                <div key={t.title} className="bg-[#060a12] p-8">
+                  <t.icon size={20} className="text-white/10 mb-5" />
+                  <h3 className="text-[14px] font-bold text-white mb-3">{t.title}</h3>
+                  <p className="text-[12px] leading-[1.8] text-white/30">{t.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[640px] mx-auto text-center">
+            <h2 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-bold text-white mb-4 tracking-tight">
+              In the dark, let Lyte guide you.
+            </h2>
+            <p className="text-[16px] text-white/30 mb-10">
+              Connect your first tool in under 5 minutes. See what you've been missing.
+            </p>
+            <div className="flex justify-center flex-wrap gap-3">
+              <button onClick={onSignIn} className="text-[14px] font-semibold bg-amber-400 hover:bg-amber-300 text-[#060a12] rounded-lg px-8 py-3.5 flex items-center gap-2 transition-all hover:shadow-lg hover:shadow-amber-400/10">
+                Start Free Trial <ArrowRight size={15} />
+              </button>
+              <button className="text-[14px] font-medium text-white/40 border border-white/[0.08] hover:border-white/[0.15] rounded-lg px-8 py-3.5 transition-all">
+                Schedule a Demo
+              </button>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <footer className="border-t border-white/[0.04] py-12 px-6 max-w-[1200px] mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <Zap size={12} className="text-amber-400/50" />
+            <span className="text-[12px] font-semibold text-white/25">Lyte</span>
+            <span className="text-[10px] text-white/15 font-mono">by SZL Holdings</span>
+          </div>
+          <p className="text-[10px] text-white/15">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
         </div>
       </footer>
-
-      <div className="h-10" />
     </div>
   );
 }

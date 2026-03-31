@@ -26,7 +26,7 @@ function CommandLoopPanel({ activePhase }: { activePhase: string }) {
     { phase: "DETECT", color: "#0ea5e9", current: activePhase === "DETECT" },
     { phase: "INTERPRET", color: "#f59e0b", current: false, link: "/lyte-command-center/" },
     { phase: "DECIDE", color: "#8b5cf6", current: false, link: "/alloy/" },
-    { phase: "EXECUTE", color: "#00d4ff", current: false, link: "/alloy/" },
+    { phase: "EXECUTE", color: "#4B8BDB", current: false, link: "/alloy/" },
     { phase: "VERIFY", color: "#10b981", current: activePhase === "VERIFY" },
   ];
 
@@ -201,7 +201,7 @@ export default function ExecutiveOverview() {
             { label: "DETECT", desc: "Beacon saw it", color: "#0ea5e9", active: true },
             { label: "INTERPRET", desc: "Lyte routed it", color: "#f59e0b", active: true },
             { label: "DECIDE", desc: "Alloy modeled it", color: "#8b5cf6", active: true },
-            { label: "EXECUTE", desc: "Alloy ran it", color: "#00d4ff", active: true },
+            { label: "EXECUTE", desc: "Alloy ran it", color: "#4B8BDB", active: true },
             { label: "VERIFY", desc: "Beacon confirms", color: "#10b981", active: false },
           ].map(p => (
             <div key={p.label} className="flex-1 rounded-lg p-2.5 text-center" style={{ background: p.active ? `${p.color}10` : "rgba(255,255,255,0.02)", border: `1px solid ${p.active ? p.color + "30" : "rgba(255,255,255,0.06)"}` }}>

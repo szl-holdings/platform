@@ -15,7 +15,7 @@ configurePlausible({
 initWebVitals("lyte", "/api/");
 
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary appName="Lyte Command Center">
+  <ErrorBoundary appName="Lyte">
     <GraphQLProvider>
       <App />
     </GraphQLProvider>

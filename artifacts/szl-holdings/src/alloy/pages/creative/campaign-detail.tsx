@@ -16,7 +16,7 @@ import { CampaignBilling } from "@/alloy/components/creative/billing/campaign-bi
 const statusColors: Record<string, string> = {
   concept: "bg-white/5 text-slate-400 border-white/10",
   pre_production: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  production: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  production: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   post_production: "bg-violet-500/10 text-violet-400 border-violet-500/20",
   review: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   published: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -129,7 +129,7 @@ export function CampaignDetail() {
                       initial={{ width: 0 }}
                       animate={{ width: `${campaign.progress}%` }}
                       transition={{ duration: 1, ease: "easeOut" }}
-                      className="h-full bg-cyan-400 rounded-full"
+                      className="h-full bg-blue-400 rounded-full"
                     />
                   </div>
                   <span className="text-xs font-semibold text-slate-400">{campaign.progress}%</span>
@@ -169,12 +169,12 @@ export function CampaignDetail() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === tab.id ? "text-cyan-400" : "text-slate-500 hover:text-slate-300 hover:bg-white/3 rounded-t-lg"}`}
+            className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${activeTab === tab.id ? "text-blue-400" : "text-slate-500 hover:text-slate-300 hover:bg-white/3 rounded-t-lg"}`}
           >
             <tab.icon className="w-4 h-4" />
             {tab.label}
             {activeTab === tab.id && (
-              <motion.div layoutId="creativeActiveTab" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-cyan-400" />
+              <motion.div layoutId="creativeActiveTab" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-blue-400" />
             )}
           </button>
         ))}

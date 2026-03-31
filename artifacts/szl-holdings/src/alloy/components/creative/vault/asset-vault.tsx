@@ -55,13 +55,13 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
       <div className="flex items-center justify-between mb-6 shrink-0">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <FolderOpen className="w-5 h-5 text-cyan-400" /> Production Asset Vault
+            <FolderOpen className="w-5 h-5 text-blue-400" /> Production Asset Vault
           </h2>
           <p className="text-sm text-slate-500">
             {assets?.length || 0} assets · {formattedSize} total
           </p>
         </div>
-        <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors">
+        <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors">
           <Upload className="w-4 h-4" /> Ingest Assets
         </button>
       </div>
@@ -70,7 +70,7 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
         <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 shrink-0">
           <button
             onClick={() => setActiveCategory(null)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-all whitespace-nowrap ${!activeCategory ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20"}`}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all whitespace-nowrap ${!activeCategory ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20"}`}
           >
             All ({assets?.length})
           </button>
@@ -78,7 +78,7 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
             <button
               key={cat}
               onClick={() => setActiveCategory(activeCategory === cat ? null : (cat || null))}
-              className={`text-xs px-3 py-1.5 rounded-full border transition-all whitespace-nowrap ${activeCategory === cat ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20"}`}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-all whitespace-nowrap ${activeCategory === cat ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20"}`}
             >
               {cat} ({assets?.filter(a => a.category === cat).length})
             </button>
@@ -91,7 +91,7 @@ export function AssetVault({ campaignId }: { campaignId: string }) {
           const Icon = TYPE_ICONS[asset.type] || FileText;
           const borderColor = CATEGORY_COLORS[asset.category as keyof typeof CATEGORY_COLORS] || "";
           return (
-            <div key={asset.id} className={`group overflow-hidden flex flex-col relative bg-[#0d1117] border border-white/8 hover:border-cyan-400/30 transition-all hover:shadow-xl hover:-translate-y-1 border-l-2 rounded-xl ${borderColor}`}>
+            <div key={asset.id} className={`group overflow-hidden flex flex-col relative bg-[#0d1117] border border-white/8 hover:border-blue-400/30 transition-all hover:shadow-xl hover:-translate-y-1 border-l-2 rounded-xl ${borderColor}`}>
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <button 
                   className="w-7 h-7 rounded bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 flex items-center justify-center transition-colors"

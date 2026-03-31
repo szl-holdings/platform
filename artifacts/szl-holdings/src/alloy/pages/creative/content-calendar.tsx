@@ -103,7 +103,7 @@ export default function ContentCalendar() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-cyan-400" />
+          <Calendar className="w-6 h-6 text-blue-400" />
           Content Calendar
         </h1>
         <p className="text-sm text-slate-400 mt-1">8-week social media plan derived from active campaign deadlines — LinkedIn, X, and Hackajob</p>
@@ -126,7 +126,7 @@ export default function ContentCalendar() {
         </div>
         <div className="bg-[#0d1117] border border-white/8 rounded-xl p-4">
           <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Scheduled</p>
-          <p className="text-2xl font-bold text-cyan-400">{scheduled}</p>
+          <p className="text-2xl font-bold text-blue-400">{scheduled}</p>
         </div>
         <div className="bg-[#0d1117] border border-white/8 rounded-xl p-4">
           <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Active Campaigns</p>
@@ -141,7 +141,7 @@ export default function ContentCalendar() {
             {upcomingDeadlines.map(c => (
               <div key={c.id} className="p-3 rounded-lg bg-white/3 border border-white/8">
                 <p className="text-xs font-semibold text-white truncate">{c.name}</p>
-                <p className="text-[10px] text-cyan-400 mt-1">{format(new Date(c.deadline!), "MMM d, yyyy")}</p>
+                <p className="text-[10px] text-blue-400 mt-1">{format(new Date(c.deadline!), "MMM d, yyyy")}</p>
                 <p className="text-[10px] text-slate-500 capitalize mt-0.5">{c.status.replace(/_/g, " ")}</p>
               </div>
             ))}
@@ -159,7 +159,7 @@ export default function ContentCalendar() {
                 className="w-full flex items-center justify-between p-4 hover:bg-white/2 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-sm font-bold text-cyan-400">{w.week}</span>
+                  <span className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-sm font-bold text-blue-400">{w.week}</span>
                   <div className="text-left">
                     <p className="text-sm font-semibold text-white">Week {w.week}: {w.theme}</p>
                     <p className="text-xs text-slate-500">{w.posts.length} posts planned</p>
@@ -190,7 +190,7 @@ export default function ContentCalendar() {
                         </div>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${
                           post.status === "published" ? "bg-emerald-400/10 text-emerald-400" :
-                          post.status === "scheduled" ? "bg-cyan-400/10 text-cyan-400" :
+                          post.status === "scheduled" ? "bg-blue-400/10 text-blue-400" :
                           "bg-amber-400/10 text-amber-400"
                         }`}>{post.status}</span>
                       </div>

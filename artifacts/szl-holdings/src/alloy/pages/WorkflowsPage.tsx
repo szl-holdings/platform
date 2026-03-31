@@ -8,7 +8,7 @@ interface NavProps {
 }
 
 const CATEGORY_ACCENT: Record<string, string> = {
-  Intelligence: "#00d4ff",
+  Intelligence: "#4B8BDB",
   Documents: "#a78bfa",
   Operations: "#f59e0b",
   Governance: "#10b981",
@@ -24,7 +24,7 @@ export default function WorkflowsPage({ onNavigate }: NavProps) {
     <div className="min-h-screen text-white px-6 py-16 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-12">
-        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Workflows</div>
+        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#4B8BDB" }}>Workflows</div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Real workflow patterns</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
           These are the structured patterns Alloy executes across the ecosystem — not abstract templates, but the actual sequences that move operational data from signal to action.
@@ -36,7 +36,7 @@ export default function WorkflowsPage({ onNavigate }: NavProps) {
         <div className="lg:w-80 shrink-0 mb-6 lg:mb-0">
           <div className="space-y-2">
             {ALLOY_WORKFLOWS.map(workflow => {
-              const accent = CATEGORY_ACCENT[workflow.category] ?? "#00d4ff";
+              const accent = CATEGORY_ACCENT[workflow.category] ?? "#4B8BDB";
               const isSelected = selected === workflow.id;
               return (
                 <button
@@ -87,7 +87,7 @@ export default function WorkflowsPage({ onNavigate }: NavProps) {
 }
 
 function WorkflowDetail({ workflow, onNavigate }: { workflow: (typeof ALLOY_WORKFLOWS)[number]; onNavigate: (page: string) => void }) {
-  const accent = CATEGORY_ACCENT[workflow.category] ?? "#00d4ff";
+  const accent = CATEGORY_ACCENT[workflow.category] ?? "#4B8BDB";
 
   return (
     <div className="rounded-xl border p-6 md:p-8" style={{ borderColor: `${accent}25`, background: "rgba(255,255,255,0.02)" }}>

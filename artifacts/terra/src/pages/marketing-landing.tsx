@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import {
   ArrowRight, Building2, MapPin, TrendingUp, DollarSign, Flame,
   BarChart3, Users, Search, FileText, Shield, Target, Layers,
-  CheckCircle, Loader2, Menu, X, ChevronDown,
+  CheckCircle, Loader2, Menu, X,
 } from "lucide-react";
 
 const accent = "#5e9a32";
 const accentLight = "#74b844";
-const BG = "#0b1009";
+const BG = "#080c06";
 
 const modules = [
   {
@@ -22,17 +22,17 @@ const modules = [
   },
   {
     icon: TrendingUp, title: "Deal Pipeline", color: "#3b82f6",
-    desc: "Acquisitions and dispositions tracked from lead to close. Stage-gated pipeline with ownership assignments, priority scoring, and Alloy-driven workflow automation across your entire deal book.",
-    metrics: ["Lead → Close tracking", "Stage gates", "Priority scoring", "Workflow automation"],
+    desc: "Acquisitions and dispositions tracked from lead to close. Stage-gated pipeline with ownership assignments, priority scoring, and Alloy-driven workflow automation.",
+    metrics: ["Lead-to-close tracking", "Stage gates", "Priority scoring", "Workflow automation"],
   },
   {
     icon: BarChart3, title: "Market Intelligence", color: "#f59e0b",
-    desc: "Comparable sales analysis, price-per-sqft trends, borough-level market dynamics, and off-market opportunity discovery — updated continuously from primary data sources across NYC.",
+    desc: "Comparable sales analysis, price-per-sqft trends, borough-level market dynamics, and off-market opportunity discovery — updated continuously from primary data sources.",
     metrics: ["Comparable sales", "Price trends", "Market dynamics", "Off-market signals"],
   },
   {
     icon: Users, title: "Broker Operations", color: "#10b981",
-    desc: "Broker-native CRM with contact management, deal history, tenant profiles, lease schedules, payment tracking, and renewal forecasting. Performance scorecards and response-time analytics.",
+    desc: "Broker-native CRM with contact management, deal history, tenant profiles, lease schedules, payment tracking, and renewal forecasting. Performance scorecards and response analytics.",
     metrics: ["Contact management", "Deal history", "Lease tracking", "Performance scoring"],
   },
   {
@@ -43,9 +43,9 @@ const modules = [
 ];
 
 const buyers = [
-  { role: "Investors & Acquisitions", desc: "Source distressed opportunities, analyze ownership structures, model returns, and track deals from discovery to close — all in one operating surface." },
+  { role: "Investors & Acquisitions", desc: "Source distressed opportunities, analyze ownership structures, model returns, and track deals from discovery to close — in one operating surface." },
   { role: "Brokers & Agents", desc: "Manage your deal pipeline, track client relationships, monitor market movement, and hit your numbers with real-time performance analytics." },
-  { role: "Portfolio Teams", desc: "Monitor property health across your portfolio, track lease expirations, model renewals, and surface disposition opportunities before the market shifts." },
+  { role: "Portfolio Teams", desc: "Monitor property health, track lease expirations, model renewals, and surface disposition opportunities before the market shifts." },
   { role: "Lenders & Capital", desc: "Underwrite with confidence. Cross-reference ownership, distress signals, market comps, and borrower history in a single intelligence view." },
 ];
 
@@ -70,7 +70,7 @@ const plans = [
   },
 ];
 
-function useInView(threshold = 0.15) {
+function useInView(threshold = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -83,10 +83,10 @@ function useInView(threshold = 0.15) {
   return { ref, visible };
 }
 
-function Section({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const { ref, visible } = useInView();
   return (
-    <div ref={ref} className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"} ${className}`}>
+    <div ref={ref} className={`transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </div>
   );
@@ -98,6 +98,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeModule, setActiveModule] = useState(0);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -128,293 +129,349 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
   };
 
   return (
-    <div className="min-h-screen text-[#e6ead6]" style={{ background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen text-[#dde4cc] overflow-x-hidden" style={{ background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-300 ${scrolled ? "bg-[#0b1009]/95 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20" : "bg-transparent"}`}>
-        <div className="max-w-[1120px] mx-auto px-6 w-full flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-[26px] h-[26px] rounded-md flex items-center justify-center" style={{ background: `${accent}1a`, border: `1px solid ${accent}40` }}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 h-14 flex items-center transition-all duration-500 ${scrolled ? "bg-[#080c06]/90 backdrop-blur-2xl border-b border-green-600/[0.06]" : "bg-transparent"}`}>
+        <div className="max-w-[1200px] mx-auto px-6 w-full flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${accent}15`, border: `1px solid ${accent}30` }}>
               <Building2 size={13} style={{ color: accentLight }} />
             </div>
             <span className="font-bold text-[15px] tracking-tight text-white">Terra</span>
-            <span className="text-[10px] font-mono text-white/15 ml-1">by SZL Holdings</span>
+            <span className="hidden sm:inline text-[9px] tracking-[0.15em] uppercase text-white/15 font-mono ml-1">Property Intelligence</span>
           </div>
-          <div className="hidden md:flex items-center gap-6">
-            {[{ label: "Platform", href: "#platform" }, { label: "Capabilities", href: "#capabilities" }, { label: "Markets", href: "#markets" }, { label: "Pricing", href: "#pricing" }].map(l => (
-              <a key={l.label} href={l.href} className="text-xs text-white/35 hover:text-white/65 transition-colors tracking-wider font-medium">{l.label}</a>
+          <div className="hidden md:flex items-center gap-7">
+            {[{ label: "Platform", href: "#platform" }, { label: "Modules", href: "#modules" }, { label: "Markets", href: "#markets" }, { label: "Pricing", href: "#pricing" }].map(l => (
+              <a key={l.label} href={l.href} className="text-[11px] text-white/30 hover:text-white/60 transition-colors tracking-[0.08em] uppercase font-medium">{l.label}</a>
             ))}
-            <button onClick={onSignIn} className="text-xs font-semibold text-[#0b1009] rounded-md px-4 py-1.5 transition-colors" style={{ background: accentLight }}>Sign in</button>
+            <button onClick={onSignIn} className="text-[12px] font-semibold text-[#080c06] rounded-lg px-5 py-1.5 transition-all" style={{ background: accentLight }}>Sign in</button>
           </div>
-          <button className="md:hidden p-2 text-white/50" onClick={() => setMobileNav(!mobileNav)}>
+          <button className="md:hidden p-2 text-white/40" onClick={() => setMobileNav(!mobileNav)} aria-label={mobileNav ? "Close menu" : "Open menu"} aria-expanded={mobileNav}>
             {mobileNav ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
       {mobileNav && (
-        <div className="fixed inset-0 z-40 bg-[#0b1009]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-6 md:hidden">
-          {[{ label: "Platform", href: "#platform" }, { label: "Capabilities", href: "#capabilities" }, { label: "Markets", href: "#markets" }, { label: "Pricing", href: "#pricing" }].map(l => (
-            <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/60 hover:text-white transition-colors">{l.label}</a>
+        <div className="fixed inset-0 z-40 bg-[#080c06]/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 md:hidden">
+          {[{ label: "Platform", href: "#platform" }, { label: "Modules", href: "#modules" }, { label: "Markets", href: "#markets" }, { label: "Pricing", href: "#pricing" }].map(l => (
+            <a key={l.label} href={l.href} onClick={() => setMobileNav(false)} className="text-lg text-white/50 hover:text-white tracking-wide transition-colors">{l.label}</a>
           ))}
-          <button onClick={() => { onSignIn?.(); setMobileNav(false); }} className="mt-4 text-sm font-semibold text-[#0b1009] rounded-md px-6 py-2.5" style={{ background: accentLight }}>Sign in</button>
+          <button onClick={() => { onSignIn?.(); setMobileNav(false); }} className="mt-4 text-sm font-semibold text-[#080c06] rounded-lg px-8 py-3" style={{ background: accentLight }}>Sign in</button>
         </div>
       )}
 
-      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 max-w-[1120px] mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12 lg:gap-16 items-start">
-          <div>
-            <p className="text-[10px] font-bold tracking-[0.12em] uppercase mb-5 font-mono" style={{ color: accentLight }}>NYC Real Estate Intelligence</p>
-            <h1 className="text-4xl sm:text-5xl lg:text-[48px] font-extrabold leading-[1.1] tracking-tight text-[#f0f4e8] mb-6">
-              The distress intelligence platform<br />
-              <span style={{ color: accentLight }}>built for NYC real estate.</span>
-            </h1>
-            <p className="text-base sm:text-[16px] leading-relaxed text-white/40 max-w-[520px] mb-8">
-              Terra surfaces distressed properties, tracks ownership structures, manages deal pipelines,
-              and delivers market intelligence — all from one operating surface built for brokers,
-              investors, and portfolio teams who move fast.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button onClick={onSignIn} className="text-[13px] font-semibold text-[#0b1009] rounded-md px-6 py-2.5 flex items-center gap-1.5 transition-colors" style={{ background: accentLight }}>
-                Sign in to Platform <ArrowRight size={14} />
-              </button>
-              <button className="text-[13px] font-medium bg-transparent text-white/45 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-6 py-2.5 transition-colors">
-                Request a Demo
-              </button>
-            </div>
+      <div className="absolute top-0 left-0 right-0 h-[800px] overflow-hidden pointer-events-none">
+        <div className="absolute top-[200px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full" style={{ background: "radial-gradient(ellipse, rgba(94,154,50,0.04) 0%, transparent 70%)" }} />
+      </div>
 
-            <div className="flex flex-wrap gap-x-10 gap-y-4 mt-12 pt-6 border-t border-white/[0.06]">
-              {[{ v: "1,025+", l: "Distressed Properties" }, { v: "$4.8B", l: "Pipeline Value" }, { v: "5", l: "NYC Boroughs" }, { v: "6", l: "Intelligence Modules" }].map(s => (
-                <div key={s.l}>
-                  <span className="text-lg font-extrabold font-mono text-[#f0f4e8]">{s.v}</span>
-                  <p className="text-[10px] text-white/25 uppercase tracking-wider mt-0.5">{s.l}</p>
+      <section className="relative pt-32 sm:pt-40 pb-20 sm:pb-28 max-w-[1200px] mx-auto px-6">
+        <Reveal>
+          <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-8 font-mono">SZL Holdings &middot; NYC Real Estate Intelligence</p>
+        </Reveal>
+
+        <Reveal delay={100}>
+          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-white max-w-[900px]">
+            See the deal before
+          </h1>
+        </Reveal>
+        <Reveal delay={200}>
+          <h1 className="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.04] tracking-[-0.03em] max-w-[900px] mb-8">
+            <span style={{ color: accentLight }}>anyone else does.</span>
+          </h1>
+        </Reveal>
+
+        <Reveal delay={300}>
+          <p className="text-[17px] sm:text-[19px] leading-[1.75] text-white/30 max-w-[640px] mb-12">
+            NYC real estate moves on information asymmetry. Terra surfaces distressed
+            properties, unmasks ownership structures, and delivers market intelligence
+            from one operating surface — so you close deals, not browser tabs.
+          </p>
+        </Reveal>
+
+        <Reveal delay={400}>
+          <div className="flex flex-wrap gap-3 mb-20">
+            <button onClick={onSignIn} className="text-[13px] font-semibold text-[#080c06] rounded-lg px-7 py-3 flex items-center gap-2 transition-all hover:shadow-lg" style={{ background: accentLight }}>
+              Start Free Trial <ArrowRight size={14} />
+            </button>
+            <button className="text-[13px] font-medium text-white/35 border border-white/[0.06] hover:border-white/[0.12] rounded-lg px-7 py-3 transition-all">
+              Request a Demo
+            </button>
+          </div>
+        </Reveal>
+
+        <Reveal delay={500}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+            {[
+              { value: "1,025+", label: "Distressed properties" },
+              { value: "$4.8B", label: "Pipeline value" },
+              { value: "5", label: "NYC boroughs" },
+              { value: "6", label: "Intelligence modules" },
+            ].map(s => (
+              <div key={s.label} className="py-5 px-5" style={{ background: BG }}>
+                <span className="text-[22px] font-extrabold font-mono text-white block">{s.value}</span>
+                <span className="text-[10px] tracking-[0.08em] uppercase text-white/20 mt-1 block">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </section>
+
+      <Reveal>
+        <section id="platform" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[760px] mx-auto">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-6">The Thesis</p>
+            <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-8">
+              Information asymmetry wins deals.
+              <span className="text-white/20"> Terra gives you the edge.</span>
+            </h2>
+            <div className="text-[16px] leading-[2] text-white/30 space-y-6">
+              <p>
+                The brokers and investors who win in NYC are the ones who see
+                <span className="text-white/60"> distress signals first</span>, understand
+                <span className="text-white/60"> ownership structures fastest</span>, and execute
+                <span className="text-white/60"> deals with the most context</span>.
+              </p>
+              <p>
+                Terra doesn't replace your CRM or your spreadsheets. It replaces the
+                14 browser tabs, 3 paid data services, and 2 hours of morning research
+                that currently stand between you and your first actionable lead of the day.
+              </p>
+            </div>
+          </div>
+
+          <div className="max-w-[760px] mx-auto mt-16 border border-white/[0.05] rounded-2xl p-7 sm:p-8" style={{ background: `${accent}04` }}>
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-[9px] font-bold tracking-[0.15em] uppercase text-white/20">NYC Distress Snapshot</span>
+              <span className="flex items-center gap-1.5 text-[9px] font-mono" style={{ color: `${accentLight}80` }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accentLight }} />
+                Live
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              {[
+                { label: "Pre-Foreclosure", count: "340+", color: "#f59e0b" },
+                { label: "Active Foreclosure", count: "180+", color: "#ef4444" },
+                { label: "Tax Lien", count: "290+", color: "#f97316" },
+                { label: "Auction Imminent", count: "95", color: "#a855f7" },
+                { label: "REO / Bank-Owned", count: "120+", color: "#3b82f6" },
+              ].map(d => (
+                <div key={d.label} className="text-center">
+                  <span className="text-[24px] font-extrabold font-mono block" style={{ color: d.color }}>{d.count}</span>
+                  <span className="text-[10px] text-white/25 mt-1 block">{d.label}</span>
                 </div>
               ))}
             </div>
           </div>
+        </section>
+      </Reveal>
 
-          <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-5 mt-0 lg:mt-4">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-[9px] font-bold tracking-wider uppercase text-white/25">NYC Distress Snapshot</span>
-              <span className="text-[9px] font-mono text-white/15">Live</span>
+      <Reveal>
+        <section id="modules" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="max-w-[600px] mb-16">
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-4">Platform Capabilities</p>
+              <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+                Six modules. One operating surface.
+              </h2>
+              <p className="text-[16px] leading-[1.8] text-white/28">
+                Each module serves a distinct function in the real estate intelligence
+                workflow — from discovery through analysis to close.
+              </p>
             </div>
-            {[
-              { label: "Pre-Foreclosure", count: "340+", color: "#f59e0b" },
-              { label: "Active Foreclosure", count: "180+", color: "#ef4444" },
-              { label: "Tax Lien", count: "290+", color: "#f97316" },
-              { label: "Auction Imminent", count: "95", color: "#a855f7" },
-              { label: "REO / Bank-Owned", count: "120+", color: "#3b82f6" },
-            ].map(d => (
-              <div key={d.label} className="flex items-center justify-between py-[7px] border-t border-white/[0.03]">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: d.color }} />
-                  <span className="text-[11px] text-white/45">{d.label}</span>
-                </div>
-                <span className="text-xs font-bold font-mono" style={{ color: d.color }}>{d.count}</span>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+              <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+                {modules.map((mod, i) => (
+                  <button
+                    key={mod.title}
+                    onClick={() => setActiveModule(i)}
+                    className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-left transition-all whitespace-nowrap lg:whitespace-normal shrink-0 lg:shrink"
+                    style={{
+                      background: activeModule === i ? `${mod.color}08` : "transparent",
+                      border: `1px solid ${activeModule === i ? `${mod.color}20` : "transparent"}`,
+                    }}
+                  >
+                    <mod.icon size={15} style={{ color: activeModule === i ? mod.color : "rgba(255,255,255,0.12)" }} className="shrink-0" />
+                    <span className={`text-[12px] font-semibold ${activeModule === i ? "text-white" : "text-white/35"}`}>{mod.title}</span>
+                  </button>
+                ))}
               </div>
-            ))}
-            <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex justify-between items-center">
-              <span className="text-[10px] text-white/20">Pipeline Value</span>
-              <span className="text-[13px] font-extrabold font-mono text-[#c8a060]">$4.8B</span>
+
+              <div className="border border-white/[0.05] rounded-2xl p-8 sm:p-10 transition-all" style={{ background: `${modules[activeModule].color}03` }}>
+                <div className="flex items-center gap-3 mb-2">
+                  {(() => { const Icon = modules[activeModule].icon; return <Icon size={22} style={{ color: modules[activeModule].color }} />; })()}
+                  <h3 className="text-[20px] font-bold text-white">{modules[activeModule].title}</h3>
+                </div>
+                <p className="text-[14px] leading-[1.85] text-white/35 mt-4 mb-6 max-w-[560px]">{modules[activeModule].desc}</p>
+                <div className="flex flex-wrap gap-2">
+                  {modules[activeModule].metrics.map(m => (
+                    <span key={m} className="text-[10px] font-semibold px-3 py-1.5 rounded-lg" style={{ background: `${modules[activeModule].color}08`, color: `${modules[activeModule].color}aa`, border: `1px solid ${modules[activeModule].color}15` }}>{m}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </Reveal>
 
-      <Section>
-        <section id="platform" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <div className="max-w-[680px]">
-            <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-4">The Thesis</p>
-            <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-6">
-              Why property intelligence?
+      <Reveal>
+        <section id="markets" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="max-w-[560px] mb-16">
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-4">Who It's For</p>
+              <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+                Built for the people who close deals
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {buyers.map(b => (
+                <div key={b.role} className="p-8" style={{ background: BG }}>
+                  <h3 className="text-[14px] font-bold text-white mb-3">{b.role}</h3>
+                  <p className="text-[13px] leading-[1.85] text-white/30">{b.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section id="pricing" className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="max-w-[560px] mb-10">
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-white/15 mb-4">Pricing</p>
+              <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[1.15] tracking-tight text-white mb-4">
+                Transparent plans. No surprises.
+              </h2>
+              <p className="text-[14px] text-white/28 mb-6">
+                Start free for 14 days. No credit card required.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 mb-12">
+              <span className={`text-[13px] font-medium ${annual ? "text-white/25" : "text-white/60"}`}>Monthly</span>
+              <button
+                onClick={() => setAnnual(!annual)}
+                className="w-10 h-[22px] rounded-full relative transition-colors"
+                style={{ background: annual ? accentLight : "rgba(255,255,255,0.08)" }}
+              >
+                <span className="absolute top-[3px] w-4 h-4 rounded-full bg-white transition-all" style={{ left: annual ? "21px" : "3px" }} />
+              </button>
+              <span className={`text-[13px] font-medium ${annual ? "text-white/60" : "text-white/25"}`}>
+                Annual <span className="text-[10px] px-2 py-0.5 rounded-lg ml-1" style={{ background: `${accentLight}15`, color: accentLight }}>Save 15%</span>
+              </span>
+            </div>
+
+            {checkoutError && (
+              <div className="mb-6 px-4 py-3 bg-red-500/[0.08] border border-red-500/20 rounded-xl text-[13px] text-red-400">
+                {checkoutError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {plans.map(plan => (
+                <div key={plan.id} className="p-8 relative" style={{ background: plan.highlighted ? `${accent}08` : BG }}>
+                  {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: `linear-gradient(90deg, ${accent}, ${accentLight})` }} />}
+                  {plan.highlighted && <div className="absolute top-4 right-5 text-[9px] font-bold tracking-[0.12em] uppercase" style={{ color: accentLight }}>Most Popular</div>}
+                  <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-white/15 mb-2">Terra</p>
+                  <h3 className="text-xl font-bold text-white mb-5">{plan.name}</h3>
+                  <div className="mb-7">
+                    <span className="text-[36px] font-extrabold text-white font-mono">
+                      {annual ? plan.annualDisplay : plan.monthlyDisplay}
+                    </span>
+                    {!plan.isCustom && <span className="text-[12px] text-white/20 ml-1.5">/{annual ? "yr" : "mo"}</span>}
+                  </div>
+                  <ul className="flex flex-col gap-2.5 mb-8">
+                    {plan.features.map(f => (
+                      <li key={f} className="flex items-start gap-2.5 text-[12px] text-white/35">
+                        <CheckCircle size={13} style={{ color: accentLight }} className="mt-0.5 shrink-0 opacity-60" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => handleSubscribe(plan)}
+                    disabled={checkoutLoading === plan.id}
+                    className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all"
+                    style={{
+                      background: plan.highlighted ? accentLight : "transparent",
+                      color: plan.highlighted ? "#080c06" : "rgba(255,255,255,0.4)",
+                      border: plan.highlighted ? "none" : "1px solid rgba(255,255,255,0.06)",
+                      opacity: checkoutLoading === plan.id ? 0.7 : 1,
+                      cursor: checkoutLoading === plan.id ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {checkoutLoading === plan.id ? (
+                      <><Loader2 size={13} className="animate-spin" /> Processing...</>
+                    ) : plan.isCustom ? (
+                      <>Contact Sales <ArrowRight size={12} /></>
+                    ) : (
+                      <>Get started <ArrowRight size={12} /></>
+                    )}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-white/10 mt-5 text-center">
+              All plans include a 14-day free trial. Cancel anytime. Prices in USD.
+            </p>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {[
+                { icon: MapPin, title: "NYC-native data", desc: "Every source mapped to the five boroughs. DOB, HPD, ACRIS, court filings, auction records — continuously ingested and cross-referenced." },
+                { icon: Shield, title: "Enterprise security", desc: "SOC 2 architecture. Role-based access. Audit trails. Deal data encrypted at rest and in transit with tenant isolation." },
+                { icon: Layers, title: "SZL ecosystem", desc: "Runs on the same unified architecture as Aegis, Lyte, and Vessels. Shared auth, shared orchestration via Alloy, shared intelligence layer." },
+              ].map(t => (
+                <div key={t.title} className="p-8" style={{ background: BG }}>
+                  <t.icon size={20} className="text-white/10 mb-5" />
+                  <h3 className="text-[14px] font-bold text-white mb-3">{t.title}</h3>
+                  <p className="text-[12px] leading-[1.85] text-white/28">{t.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section className="relative py-24 sm:py-32 px-6">
+          <div className="max-w-[640px] mx-auto text-center">
+            <h2 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-bold text-white mb-4 tracking-tight">
+              See what you've been missing.
             </h2>
-            <p className="text-[15px] leading-[1.8] text-white/40 mb-5">
-              NYC real estate moves on information asymmetry. The brokers and investors who win are the ones
-              who see <span className="text-white/75">distress signals first</span>,
-              understand <span className="text-white/75">ownership structures fastest</span>,
-              and execute <span className="text-white/75">deals with the most context</span>.
+            <p className="text-[16px] text-white/28 mb-10">
+              Start with the distress feed. Within minutes, you'll wonder how you operated without it.
             </p>
-            <p className="text-[15px] leading-[1.8] text-white/40">
-              Terra doesn't replace your CRM or your spreadsheets. It replaces the 14 browser tabs,
-              3 paid data services, and 2 hours of morning research that currently stand between you
-              and your first actionable lead of the day.
-            </p>
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section id="capabilities" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Platform Capabilities</p>
-          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-12">
-            Six modules. One operating surface.
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/[0.06] rounded-xl overflow-hidden">
-            {modules.map(mod => (
-              <div key={mod.title} className="p-6 sm:p-7" style={{ background: BG }}>
-                <div className="flex items-center gap-2.5 mb-3">
-                  <mod.icon size={16} style={{ color: mod.color }} />
-                  <h3 className="text-[15px] font-bold text-[#f0f4e8]">{mod.title}</h3>
-                </div>
-                <p className="text-[12.5px] leading-relaxed text-white/35 mb-3.5">{mod.desc}</p>
-                <div className="flex flex-wrap gap-1">
-                  {mod.metrics.map(m => (
-                    <span key={m} className="text-[9px] font-semibold px-2 py-0.5 rounded" style={{ background: `${mod.color}10`, color: `${mod.color}aa`, border: `1px solid ${mod.color}15` }}>{m}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section id="markets" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Who It's For</p>
-          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-12">
-            Built for the people who close deals.
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {buyers.map(b => (
-              <div key={b.role} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6">
-                <h3 className="text-sm font-bold text-[#f0f4e8] mb-2">{b.role}</h3>
-                <p className="text-[12.5px] leading-relaxed text-white/35">{b.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Section>
-
-      <Section>
-        <section id="pricing" className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-[32px] font-bold leading-tight tracking-tight text-[#f0f4e8] mb-3">
-            Simple, transparent plans.
-          </h2>
-          <p className="text-sm text-white/35 mb-8">
-            Start free for 14 days. No credit card required.
-          </p>
-
-          <div className="flex items-center gap-3 mb-10">
-            <span className={`text-[13px] font-medium ${annual ? "text-white/30" : "text-white/70"}`}>Monthly</span>
-            <button
-              onClick={() => setAnnual(!annual)}
-              className="w-10 h-[22px] rounded-full relative transition-colors"
-              style={{ background: annual ? accentLight : "rgba(255,255,255,0.1)" }}
-            >
-              <span className="absolute top-[3px] w-4 h-4 rounded-full bg-white transition-all" style={{ left: annual ? "21px" : "3px" }} />
-            </button>
-            <span className={`text-[13px] font-medium ${annual ? "text-white/70" : "text-white/30"}`}>
-              Annual <span className="text-[10px] px-1.5 py-0.5 rounded ml-1" style={{ background: `${accentLight}20`, color: accentLight }}>Save 15%</span>
-            </span>
-          </div>
-
-          {checkoutError && (
-            <div className="mb-6 px-4 py-3 bg-red-500/[0.1] border border-red-500/30 rounded-lg text-[13px] text-red-400">
-              {checkoutError}
+            <div className="flex justify-center flex-wrap gap-3">
+              <button onClick={onSignIn} className="text-[14px] font-semibold text-[#080c06] rounded-lg px-8 py-3.5 flex items-center gap-2 transition-all hover:shadow-lg" style={{ background: accentLight }}>
+                Start Free Trial <ArrowRight size={15} />
+              </button>
+              <button className="text-[14px] font-medium text-white/35 border border-white/[0.06] hover:border-white/[0.12] rounded-lg px-8 py-3.5 transition-all">
+                Request a Demo
+              </button>
             </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/[0.06] rounded-xl overflow-hidden">
-            {plans.map(plan => (
-              <div key={plan.id} className="p-6 sm:p-7 relative" style={{ background: plan.highlighted ? "rgba(94,154,50,0.06)" : BG }}>
-                {plan.highlighted && <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: `linear-gradient(90deg, ${accent}, ${accentLight})` }} />}
-                {plan.highlighted && <div className="absolute top-3.5 right-4 text-[9px] font-bold tracking-wider uppercase" style={{ color: accentLight }}>Most Popular</div>}
-                <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/25 mb-2">Terra</p>
-                <h3 className="text-xl font-bold text-[#f0f4e8] mb-4">{plan.name}</h3>
-                <div className="mb-6">
-                  <span className="text-[32px] font-extrabold text-[#f0f4e8] font-mono">
-                    {annual ? plan.annualDisplay : plan.monthlyDisplay}
-                  </span>
-                  {!plan.isCustom && <span className="text-xs text-white/25 ml-1.5">/{annual ? "yr" : "mo"}</span>}
-                </div>
-                <ul className="flex flex-col gap-2 mb-7">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-white/40">
-                      <CheckCircle size={12} style={{ color: accentLight }} className="mt-0.5 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => handleSubscribe(plan)}
-                  disabled={checkoutLoading === plan.id}
-                  className="w-full py-2.5 rounded-md text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all"
-                  style={{
-                    background: plan.highlighted ? accentLight : "transparent",
-                    color: plan.highlighted ? "#0b1009" : "rgba(255,255,255,0.5)",
-                    border: plan.highlighted ? "none" : "1px solid rgba(255,255,255,0.06)",
-                    opacity: checkoutLoading === plan.id ? 0.7 : 1,
-                    cursor: checkoutLoading === plan.id ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {checkoutLoading === plan.id ? (
-                    <><Loader2 size={13} className="animate-spin" /> Processing...</>
-                  ) : plan.isCustom ? (
-                    <>Contact Sales <ArrowRight size={12} /></>
-                  ) : (
-                    <>Get started <ArrowRight size={12} /></>
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-          <p className="text-[11px] text-white/15 mt-4 text-center">
-            All plans include a 14-day free trial. Cancel anytime. Prices in USD.
-          </p>
-        </section>
-      </Section>
-
-      <Section>
-        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { icon: MapPin, title: "NYC-native data", desc: "Every data source mapped to the five boroughs. DOB, HPD, ACRIS, court filings, auction records — continuously ingested and cross-referenced." },
-              { icon: Shield, title: "Enterprise-grade security", desc: "SOC 2 architecture. Role-based access. Audit trails. Your deal data encrypted at rest and in transit with tenant isolation." },
-              { icon: Layers, title: "Part of the SZL ecosystem", desc: "Terra runs on the same unified architecture as Aegis, Lyte, and Vessels. Shared auth, shared orchestration via Alloy, shared intelligence layer." },
-            ].map(t => (
-              <div key={t.title} className="bg-white/[0.025] border border-white/[0.06] rounded-xl p-6">
-                <t.icon size={18} className="text-white/15 mb-3.5" />
-                <h3 className="text-sm font-bold text-[#f0f4e8] mb-2">{t.title}</h3>
-                <p className="text-xs leading-relaxed text-white/35">{t.desc}</p>
-              </div>
-            ))}
           </div>
         </section>
-      </Section>
+      </Reveal>
 
-      <Section>
-        <section className="border-t border-white/[0.06] py-16 sm:py-20 px-6 max-w-[1120px] mx-auto text-center">
-          <h2 className="text-2xl sm:text-[28px] font-bold text-[#f0f4e8] mb-3">
-            See what you've been missing.
-          </h2>
-          <p className="text-[15px] text-white/35 max-w-[480px] mx-auto mb-8">
-            Start with the distress feed. Within minutes, you'll wonder how you operated without it.
-          </p>
-          <div className="flex justify-center flex-wrap gap-3">
-            <button onClick={onSignIn} className="text-sm font-semibold text-[#0b1009] rounded-md px-7 py-3 flex items-center gap-1.5 transition-colors" style={{ background: accentLight }}>
-              Start Free Trial <ArrowRight size={14} />
-            </button>
-            <button className="text-sm font-medium bg-transparent text-white/45 border border-white/[0.06] hover:border-white/[0.12] rounded-md px-7 py-3 transition-colors">
-              Request a Demo
-            </button>
+      <footer className="border-t border-white/[0.04] py-12 px-6 max-w-[1200px] mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <Building2 size={12} style={{ color: `${accentLight}50` }} />
+            <span className="text-[12px] font-semibold text-white/25">Terra</span>
+            <span className="text-[10px] text-white/15 font-mono">by SZL Holdings</span>
           </div>
-        </section>
-      </Section>
-
-      <footer className="border-t border-white/[0.06] py-10 px-6 max-w-[1120px] mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Building2 size={12} style={{ color: accentLight }} />
-            <span className="text-xs font-semibold text-white/35">Terra</span>
-            <span className="text-[10px] text-white/10 font-mono">by SZL Holdings</span>
-          </div>
-          <p className="text-[10px] text-white/10">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+          <p className="text-[10px] text-white/15">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
         </div>
       </footer>
-
-      <div className="h-10" />
     </div>
   );
 }

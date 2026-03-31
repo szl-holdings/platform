@@ -3,7 +3,7 @@ import { ALLOY_AGENTS } from "../data/agents";
 import { trackEvent } from "../lib/track-event";
 
 const CATEGORY_ACCENT: Record<string, string> = {
-  Processing: "#00d4ff",
+  Processing: "#4B8BDB",
   Observability: "#f59e0b",
   Orchestration: "#a78bfa",
   Output: "#10b981",
@@ -21,7 +21,7 @@ const ESCALATION_LABELS: Record<string, string> = {
 };
 
 const ESCALATION_COLORS: Record<string, string> = {
-  auto: "#00d4ff",
+  auto: "#4B8BDB",
   threshold: "#f59e0b",
   always: "#ef4444",
   never: "#10b981",
@@ -40,7 +40,7 @@ export default function AgentsPage() {
     <div className="min-h-screen text-white px-6 py-16 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-12">
-        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Agents</div>
+        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#4B8BDB" }}>Agents</div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Agent workflow gallery</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
           Alloy's agent library is the modular workforce behind every workflow. Each agent has a defined role, specific inputs and outputs, and clear escalation behaviour.
@@ -50,7 +50,7 @@ export default function AgentsPage() {
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2 mb-8">
         {categories.map(cat => {
-          const accent = cat === "All" ? "#00d4ff" : CATEGORY_ACCENT[cat] ?? "#00d4ff";
+          const accent = cat === "All" ? "#4B8BDB" : CATEGORY_ACCENT[cat] ?? "#4B8BDB";
           return (
             <button
               key={cat}
@@ -73,7 +73,7 @@ export default function AgentsPage() {
         <div className="lg:flex-1">
           <div className="grid md:grid-cols-2 gap-3 mb-6">
             {filtered.map(agent => {
-              const accent = CATEGORY_ACCENT[agent.category] ?? "#00d4ff";
+              const accent = CATEGORY_ACCENT[agent.category] ?? "#4B8BDB";
               const isSelected = selected === agent.id;
               return (
                 <button
@@ -130,7 +130,7 @@ export default function AgentsPage() {
 }
 
 function AgentDetail({ agent }: { agent: (typeof ALLOY_AGENTS)[number] }) {
-  const accent = CATEGORY_ACCENT[agent.category] ?? "#00d4ff";
+  const accent = CATEGORY_ACCENT[agent.category] ?? "#4B8BDB";
 
   return (
     <div className="sticky top-6 rounded-xl border p-6" style={{ borderColor: `${accent}25`, background: "rgba(255,255,255,0.02)" }}>

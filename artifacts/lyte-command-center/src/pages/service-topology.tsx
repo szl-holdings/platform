@@ -39,7 +39,7 @@ const PLATFORM_NODES = [
 const PLATFORM_COLORS: Record<string, string> = {
   Core:      "#f59e0b",
   Lyte:      "#f59e0b",
-  Alloy:     "#00d4ff",
+  Alloy:     "#4B8BDB",
   Terra:     "#0ea5e9",
   Vessels:   "#38bdf8",
   Firestorm: "#ef4444",

@@ -79,7 +79,7 @@ export const caseStudies: CaseStudy[] = [
   {
     id: "alloy-workflow-output",
     product: "Alloy",
-    productAccent: "#00d4ff",
+    productAccent: "#4B8BDB",
     category: "Workflow Orchestration",
     title: "3.4× Decision Velocity Across a Multi-Entity Operating Structure",
     subtitle: "How Alloy eliminated coordination overhead across procurement, legal, and operations",

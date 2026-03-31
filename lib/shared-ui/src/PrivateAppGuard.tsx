@@ -16,7 +16,7 @@ export interface PrivateAppGuardProps {
 export function PrivateAppGuard({
   children,
   appName = "this application",
-  accentColor = "#00d4ff",
+  accentColor = "#4B8BDB",
   loadingColor,
 }: PrivateAppGuardProps) {
   const { isLoading, isAuthenticated, login } = useAuth();

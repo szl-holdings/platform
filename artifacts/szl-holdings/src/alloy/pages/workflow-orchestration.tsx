@@ -106,7 +106,7 @@ function WorkflowSteps({ workflow }: { workflow: Workflow }) {
     <div className="flex items-center gap-1 mt-2 flex-wrap">
       {steps.slice(0, 5).map((step, i) => (
         <div key={i} className="flex items-center gap-1">
-          <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ color: "rgba(0,212,255,0.5)", background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.1)" }}>
+          <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ color: "rgba(75,139,219,0.5)", background: "rgba(75,139,219,0.05)", border: "1px solid rgba(75,139,219,0.1)" }}>
             {step}
           </span>
           {i < steps.slice(0, 5).length - 1 && <ChevronRight className="w-2 h-2" style={{ color: "rgba(255,255,255,0.15)" }} />}
@@ -144,7 +144,7 @@ function WorkflowDrawer({ workflow, onClose, onUpdate, onRunNow }: { workflow: W
             {meta.owner && (
               <div className="bg-white/3 rounded-lg p-3 border border-white/5">
                 <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>Owner</div>
-                <div className="text-[11px] text-white flex items-center gap-1"><User className="w-3 h-3 text-cyan-400/50" />{meta.owner as string}</div>
+                <div className="text-[11px] text-white flex items-center gap-1"><User className="w-3 h-3 text-blue-400/50" />{meta.owner as string}</div>
               </div>
             )}
             {meta.team && (
@@ -172,7 +172,7 @@ function WorkflowDrawer({ workflow, onClose, onUpdate, onRunNow }: { workflow: W
 
         {Object.keys(config).length > 0 && (
           <div className="p-5 border-b border-white/5">
-            <div className="flex items-center gap-1.5 text-[10px] font-medium mb-2" style={{ color: "rgba(0,212,255,0.7)" }}>
+            <div className="flex items-center gap-1.5 text-[10px] font-medium mb-2" style={{ color: "rgba(75,139,219,0.7)" }}>
               <Terminal className="w-3 h-3" /> Configuration
             </div>
             <pre className="text-[10px] text-slate-400 overflow-auto bg-white/3 rounded-lg p-3 border border-white/5 max-h-48">{JSON.stringify(config, null, 2)}</pre>
@@ -191,7 +191,7 @@ function WorkflowDrawer({ workflow, onClose, onUpdate, onRunNow }: { workflow: W
                 <Pause className="w-3 h-3" /> Pause
               </button>
             )}
-            <button onClick={() => { onRunNow(workflow.id); onClose(); }} className="text-[10px] px-3 py-1.5 rounded-lg font-medium flex items-center gap-1" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}>
+            <button onClick={() => { onRunNow(workflow.id); onClose(); }} className="text-[10px] px-3 py-1.5 rounded-lg font-medium flex items-center gap-1" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.08)", border: "1px solid rgba(75,139,219,0.2)" }}>
               <Zap className="w-3 h-3" /> Run Now
             </button>
             <button className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -245,8 +245,8 @@ export default function WorkflowOrchestration() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <GitBranch className="w-3.5 h-3.5" style={{ color: "#00d4ff" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#00d4ff" }}>Alloy · Workflow Orchestration</span>
+            <GitBranch className="w-3.5 h-3.5" style={{ color: "#4B8BDB" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#4B8BDB" }}>Alloy · Workflow Orchestration</span>
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Workflow Orchestration</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Manage execution workflows — step owners, SLA tracking, and reroute capabilities.</p>
@@ -257,7 +257,7 @@ export default function WorkflowOrchestration() {
       </div>
 
       {isDemo && (
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-medium" style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.1)", color: "rgba(0,212,255,0.6)" }}>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-medium" style={{ background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.1)", color: "rgba(75,139,219,0.6)" }}>
           <Radio className="w-3 h-3 shrink-0 animate-pulse" />
           Demo Environment — Showing illustrative workflows. Connect the Alloy API for live data.
           <DataStateBadge state="demo" className="ml-auto" />
@@ -293,7 +293,7 @@ export default function WorkflowOrchestration() {
         <div className="flex items-center gap-1 flex-wrap">
           {["all", "active", "paused", "draft", "error"].map(f => (
             <button key={f} onClick={() => setStatusFilter(f)} className="text-[10px] px-2.5 py-1 rounded-lg border capitalize transition-all"
-              style={{ background: statusFilter === f ? "rgba(0,212,255,0.08)" : "rgba(255,255,255,0.02)", borderColor: statusFilter === f ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.06)", color: statusFilter === f ? "#00d4ff" : "rgba(255,255,255,0.35)" }}>
+              style={{ background: statusFilter === f ? "rgba(75,139,219,0.08)" : "rgba(255,255,255,0.02)", borderColor: statusFilter === f ? "rgba(75,139,219,0.3)" : "rgba(255,255,255,0.06)", color: statusFilter === f ? "#4B8BDB" : "rgba(255,255,255,0.35)" }}>
               {f}
             </button>
           ))}
@@ -305,8 +305,8 @@ export default function WorkflowOrchestration() {
 
       {!isLoading && filtered.length === 0 && (
         <div className="rounded-xl border p-12 text-center" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <div className="w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.12)" }}>
-            <GitBranch className="w-5 h-5" style={{ color: "rgba(0,212,255,0.3)" }} />
+          <div className="w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "rgba(75,139,219,0.05)", border: "1px solid rgba(75,139,219,0.12)" }}>
+            <GitBranch className="w-5 h-5" style={{ color: "rgba(75,139,219,0.3)" }} />
           </div>
           <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>No workflows found</p>
           <p className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.2)" }}>Create a workflow via the API or import from config</p>
@@ -345,7 +345,7 @@ export default function WorkflowOrchestration() {
                         {s.label}
                       </span>
                       {kindLabel && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ color: "rgba(0,212,255,0.5)", background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.1)" }}>{kindLabel}</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ color: "rgba(75,139,219,0.5)", background: "rgba(75,139,219,0.05)", border: "1px solid rgba(75,139,219,0.1)" }}>{kindLabel}</span>
                       )}
                       <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{w.product}</span>
                     </div>
@@ -367,7 +367,7 @@ export default function WorkflowOrchestration() {
                         <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>value at risk</div>
                       </div>
                     )}
-                    <ChevronRight className="w-4 h-4 mt-2 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(0,212,255,0.4)" }} />
+                    <ChevronRight className="w-4 h-4 mt-2 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(75,139,219,0.4)" }} />
                   </div>
                 </div>
               </div>
@@ -395,7 +395,7 @@ export default function WorkflowOrchestration() {
                   onClick={() => startRun.mutate(w.id)}
                   disabled={startRun.isPending}
                   className="text-[10px] px-2.5 py-1 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1"
-                  style={{ color: "#00d4ff", background: "rgba(0,212,255,0.06)", border: "1px solid rgba(0,212,255,0.15)" }}
+                  style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.06)", border: "1px solid rgba(75,139,219,0.15)" }}
                 >
                   <Play className="w-3 h-3" /> Run Now
                 </button>

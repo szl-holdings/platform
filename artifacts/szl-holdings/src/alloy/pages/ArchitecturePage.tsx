@@ -12,7 +12,7 @@ const LAYERS = [
     description: "Accepts and receives data from all connected systems — API signals, webhook payloads, form submissions, file uploads, and manual operator inputs.",
     components: ["API signal ingestion", "Webhook receivers", "Form & file inputs", "System event streams"],
     products: ["Lyte", "Vessels", "Carlota Jo", "External APIs"],
-    accent: "#00d4ff",
+    accent: "#4B8BDB",
     icon: "📥",
   },
   {
@@ -100,7 +100,7 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
 
       {/* Header */}
       <div className="mb-16">
-        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Architecture</div>
+        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#4B8BDB" }}>Architecture</div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Six-layer intelligence system</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
           Every input enters Alloy at the top and passes through normalisation, reasoning, orchestration, and output layers before reaching the governance layer that wraps the entire pipeline in accountability controls.
@@ -162,16 +162,16 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
 
         {/* Flow indicator */}
         <div className="mt-6 flex items-center gap-2 text-sm text-white/30">
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(0,212,255,0.3), rgba(245,158,11,0.3))" }} />
+          <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(75,139,219,0.3), rgba(245,158,11,0.3))" }} />
           <span className="text-xs uppercase tracking-widest px-3">Execution flows from Input → Governance</span>
-          <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(0,212,255,0.3), rgba(245,158,11,0.3))" }} />
+          <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(75,139,219,0.3), rgba(245,158,11,0.3))" }} />
         </div>
       </div>
 
       {/* Product Integration Map */}
       <div className="mb-20">
         <div className="mb-10">
-          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Product Integrations</div>
+          <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#4B8BDB" }}>Product Integrations</div>
           <h2 className="text-2xl font-bold mb-3">How connected products interact with the layers</h2>
           <p className="text-white/50 max-w-xl">Each product integrates at specific layers, providing inputs and receiving structured outputs from Alloy's pipeline.</p>
         </div>
@@ -208,7 +208,7 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
                     <div className="space-y-1.5">
                       {prod.dataOut.map(d => (
                         <div key={d} className="flex items-center gap-2 text-xs text-white/55">
-                          <div className="w-1 h-1 rounded-full shrink-0 opacity-60" style={{ background: "#00d4ff" }} />
+                          <div className="w-1 h-1 rounded-full shrink-0 opacity-60" style={{ background: "#4B8BDB" }} />
                           {d}
                         </div>
                       ))}
@@ -222,10 +222,10 @@ export default function ArchitecturePage({ onNavigate }: NavProps) {
       </div>
 
       {/* CTA to Workflows */}
-      <div className="rounded-2xl border p-8 text-center" style={{ borderColor: "rgba(0,212,255,0.15)", background: "linear-gradient(135deg, rgba(0,212,255,0.04), rgba(99,102,241,0.04))" }}>
+      <div className="rounded-2xl border p-8 text-center" style={{ borderColor: "rgba(75,139,219,0.15)", background: "linear-gradient(135deg, rgba(75,139,219,0.04), rgba(99,102,241,0.04))" }}>
         <h3 className="text-xl font-bold mb-3">See the architecture in action</h3>
         <p className="text-white/50 mb-6">Explore the workflow patterns that run across these layers.</p>
-        <button onClick={() => onNavigate("workflows")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-black" style={{ background: "#00d4ff" }}>
+        <button onClick={() => onNavigate("workflows")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-black" style={{ background: "#4B8BDB" }}>
           View Workflows <ArrowRight className="w-4 h-4" />
         </button>
       </div>

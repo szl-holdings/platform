@@ -22,8 +22,8 @@ export default function ConnectorMesh() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Network className="w-4 h-4" style={{ color: "#00d4ff" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>Alloy · Connector Mesh</span>
+          <Network className="w-4 h-4" style={{ color: "#4B8BDB" }} />
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#4B8BDB" }}>Alloy · Connector Mesh</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Connector Mesh</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>All integrations, data connectors, health status, and API credentials powering Alloy automation.</p>
@@ -61,7 +61,7 @@ export default function ConnectorMesh() {
 
             <div className="grid grid-cols-3 gap-2 text-center mb-3">
               <div>
-                <div className="text-sm font-bold" style={{ color: "#00d4ff" }}>{c.requests_today.toLocaleString()}</div>
+                <div className="text-sm font-bold" style={{ color: "#4B8BDB" }}>{c.requests_today.toLocaleString()}</div>
                 <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>req today</div>
               </div>
               <div>

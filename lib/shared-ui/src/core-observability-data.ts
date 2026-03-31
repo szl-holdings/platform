@@ -687,7 +687,7 @@ export const COMMAND_LOOP_PHASES: { phase: CommandPhase; label: string; descript
   { phase: "DETECT", label: "Detect", description: "Surface signals, drift, and degradation", product: "beacon", color: "#0ea5e9" },
   { phase: "INTERPRET", label: "Interpret", description: "Route accountability and orchestrate response", product: "lyte", color: "#f59e0b" },
   { phase: "DECIDE", label: "Decide", description: "Model scenarios and recommend actions", product: "alloy", color: "#8b5cf6" },
-  { phase: "EXECUTE", label: "Execute", description: "Run automations and manage interventions", product: "alloyscape", color: "#00d4ff" },
+  { phase: "EXECUTE", label: "Execute", description: "Run automations and manage interventions", product: "alloyscape", color: "#4B8BDB" },
   { phase: "VERIFY", label: "Verify", description: "Confirm recovery and measure value restored", product: "beacon", color: "#10b981" },
 ];
 

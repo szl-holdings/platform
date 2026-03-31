@@ -5,7 +5,7 @@ const CATEGORY_ACCENT: Record<string, string> = {
   Observability: "#f59e0b",
   Assessment: "#3b82f6",
   Documents: "#a78bfa",
-  Operations: "#00d4ff",
+  Operations: "#4B8BDB",
   Maritime: "#10b981",
   Command: "#f472b6",
 };
@@ -23,7 +23,7 @@ export default function UseCasesPage() {
     <div className="min-h-screen text-white px-6 py-16 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-12">
-        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#00d4ff" }}>Use Cases</div>
+        <div className="text-xs font-medium uppercase tracking-widest mb-3" style={{ color: "#4B8BDB" }}>Use Cases</div>
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Practical applications across the ecosystem</h1>
         <p className="text-white/50 max-w-2xl leading-relaxed">
           These are the specific operational problems Alloy solves across the SZL ecosystem — concrete use cases with defined inputs, Alloy's role, and measurable business impact.
@@ -33,7 +33,7 @@ export default function UseCasesPage() {
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2 mb-8">
         {categories.map(cat => {
-          const accent = cat === "All" ? "#00d4ff" : CATEGORY_ACCENT[cat] ?? "#00d4ff";
+          const accent = cat === "All" ? "#4B8BDB" : CATEGORY_ACCENT[cat] ?? "#4B8BDB";
           return (
             <button
               key={cat}
@@ -56,7 +56,7 @@ export default function UseCasesPage() {
         <div className="lg:flex-1">
           <div className="grid md:grid-cols-2 gap-4">
             {filtered.map(uc => {
-              const accent = CATEGORY_ACCENT[uc.category] ?? "#00d4ff";
+              const accent = CATEGORY_ACCENT[uc.category] ?? "#4B8BDB";
               const isSelected = selected === uc.id;
               return (
                 <button
@@ -98,7 +98,7 @@ export default function UseCasesPage() {
 }
 
 function UseCaseDetail({ useCase }: { useCase: (typeof ALLOY_USE_CASES)[number] }) {
-  const accent = CATEGORY_ACCENT[useCase.category] ?? "#00d4ff";
+  const accent = CATEGORY_ACCENT[useCase.category] ?? "#4B8BDB";
 
   return (
     <div className="sticky top-6 rounded-xl border p-6" style={{ borderColor: `${accent}25`, background: "rgba(255,255,255,0.02)" }}>

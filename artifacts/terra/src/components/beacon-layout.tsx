@@ -10,7 +10,7 @@ const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: true },
   { phase: "INTERPRET", color: "#f59e0b", active: false, link: "/lyte-command-center/" },
   { phase: "DECIDE", color: "#8b5cf6", active: false, link: "/alloy/" },
-  { phase: "EXECUTE", color: "#00d4ff", active: false, link: "/alloy/" },
+  { phase: "EXECUTE", color: "#4B8BDB", active: false, link: "/alloy/" },
   { phase: "VERIFY", color: "#10b981", active: true },
 ];
 

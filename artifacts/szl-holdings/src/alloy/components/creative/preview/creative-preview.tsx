@@ -40,7 +40,7 @@ export function CreativePreview({ campaignId }: { campaignId: string }) {
             alt="Video Preview Placeholder"
           />
           <div className="absolute inset-0 flex items-center justify-center">
-            <button className="w-20 h-20 bg-cyan-400/90 text-black rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-cyan-400/20 backdrop-blur">
+            <button className="w-20 h-20 bg-blue-400/90 text-black rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-cyan-400/20 backdrop-blur">
               <PlayCircle className="w-10 h-10 ml-1" />
             </button>
           </div>
@@ -52,7 +52,7 @@ export function CreativePreview({ campaignId }: { campaignId: string }) {
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
             <div className="w-full flex items-center gap-4 text-white">
               <div className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-cyan-400 w-1/3 rounded-full" />
+                <div className="h-full bg-blue-400 w-1/3 rounded-full" />
               </div>
               <span className="text-xs font-mono font-medium">00:14 / 01:30</span>
             </div>
@@ -63,7 +63,7 @@ export function CreativePreview({ campaignId }: { campaignId: string }) {
           <h3 className="text-lg font-bold mb-4 text-white">Storyboard Sequence</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {storyboards?.map(scene => (
-              <div key={scene.id} className="overflow-hidden border border-white/8 hover:border-cyan-400/20 transition-colors rounded-xl bg-[#0d1117]">
+              <div key={scene.id} className="overflow-hidden border border-white/8 hover:border-blue-400/20 transition-colors rounded-xl bg-[#0d1117]">
                 <div className="aspect-video bg-white/3 relative">
                    {scene.thumbnailUrl && <img src={scene.thumbnailUrl} className="w-full h-full object-cover" alt="Scene" />}
                    <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] px-1.5 rounded font-mono">
@@ -168,7 +168,7 @@ export function CreativePreview({ campaignId }: { campaignId: string }) {
             })}
           </div>
 
-          <button className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/5 transition-colors">
+          <button className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-blue-500/20 text-blue-400 hover:bg-blue-500/5 transition-colors">
             <ExternalLink className="w-4 h-4" /> Share Preview Link
           </button>
         </div>

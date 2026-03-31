@@ -581,7 +581,7 @@ function AppRouter() {
         <Route path="/demo" component={EnterpriseDemo} />
         {/* Security Operations */}
         <Route path="/soc" component={SOCDashboard} />
-        <Route path="/" component={SOCDashboard} />
+        <Route path="/" component={AegisMarketingHome} />
         <Route path="/asset-inventory" component={AssetInventoryPage} />
         <Route path="/threat-intel" component={ThreatIntelligence} />
         <Route path="/threat-feed" component={ThreatIntelFeed} />
@@ -701,9 +701,28 @@ const aegisShortcuts: KeyboardShortcut[] = [
   { key: "E", description: "Go to Experiments", category: "Intelligence" },
 ];
 
+const MARKETING_ROUTES = ["/", "/home", "/demo"];
+
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
+  const [location] = useLocation();
+
+  const normalizedPath = location.replace(/\/+$/, "") || "/";
+  const isMarketing = MARKETING_ROUTES.includes(normalizedPath);
+
+  if (isMarketing) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/home" component={AegisMarketingHome} />
+          <Route path="/demo" component={EnterpriseDemo} />
+          <Route path="/" component={AegisMarketingHome} />
+        </Switch>
+        <Toaster />
+      </Suspense>
+    );
+  }
 
   return (
     <PowerUserProvider shortcuts={aegisShortcuts} appName="Aegis" accentColor="#3b82f6">

@@ -23,14 +23,14 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
       <div className="flex items-center justify-between mb-6 shrink-0">
         <div>
           <h2 className="font-semibold text-lg flex items-center gap-2 text-white">
-            <Clapperboard className="w-5 h-5 text-cyan-400" /> Scene Layout
+            <Clapperboard className="w-5 h-5 text-blue-400" /> Scene Layout
           </h2>
           <p className="text-xs text-slate-500 mt-1">{scenes?.length || 0} scenes · {scenes?.reduce((acc, s) => acc + parseInt(s.duration || "0"), 0) || 0}s total runtime</p>
         </div>
         <button
           onClick={handleAddScene}
           disabled={createScene.isPending}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-40 transition-colors"
         >
           <Plus className="w-4 h-4" /> Add Scene
         </button>
@@ -45,7 +45,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
             animate={{ opacity: 1, scale: 1 }}
             className="w-[340px] shrink-0 h-full max-h-[700px] flex flex-col group cursor-grab active:cursor-grabbing"
           >
-            <div className="flex-1 flex flex-col bg-[#0d1117] border border-white/8 hover:border-cyan-400/30 transition-colors overflow-hidden relative rounded-xl">
+            <div className="flex-1 flex flex-col bg-[#0d1117] border border-white/8 hover:border-blue-400/30 transition-colors overflow-hidden relative rounded-xl">
               <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-black/80 rounded text-slate-500">
                 <GripVertical className="w-4 h-4" />
               </div>
@@ -60,9 +60,9 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
                   </div>
                 )}
                 <div className="absolute bottom-2 right-2 bg-black/90 px-2 py-1 rounded text-xs font-bold font-mono text-slate-300 border border-white/10 flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-cyan-400" /> {scene.duration}
+                  <Clock className="w-3 h-3 text-blue-400" /> {scene.duration}
                 </div>
-                <div className="absolute top-2 right-2 bg-cyan-500 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold">
+                <div className="absolute top-2 right-2 bg-blue-500 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold">
                   {scene.sceneNumber}
                 </div>
               </div>
@@ -70,7 +70,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
               <div className="p-4 flex-1 flex flex-col gap-3 overflow-y-auto">
                 {scene.shotType && (
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] px-2 py-1 rounded border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 font-mono flex items-center gap-1">
+                    <span className="text-[10px] px-2 py-1 rounded border border-blue-500/20 bg-blue-500/5 text-blue-400 font-mono flex items-center gap-1">
                       <Camera className="w-3 h-3" /> {scene.shotType}
                     </span>
                   </div>
@@ -116,7 +116,7 @@ export function StoryboardBoard({ campaignId }: { campaignId: string }) {
 
         <button 
           onClick={handleAddScene}
-          className="w-[340px] shrink-0 h-[700px] border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-slate-600 hover:text-cyan-400 hover:border-cyan-400/30 hover:bg-cyan-400/3 transition-all"
+          className="w-[340px] shrink-0 h-[700px] border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-slate-600 hover:text-blue-400 hover:border-blue-400/30 hover:bg-blue-400/3 transition-all"
         >
           <Plus className="w-8 h-8 mb-2" />
           <span className="font-medium text-sm">Add New Scene</span>
