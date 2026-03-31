@@ -10,11 +10,11 @@ import {
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
 const PRISM_ITEMS = [
-  { key: "P", label: "Pulse", color: "#10b981", icon: Heart, href: "/prism/pulse" },
-  { key: "R", label: "Risk", color: "#ef4444", icon: AlertTriangle, href: "/prism/risk" },
-  { key: "I", label: "Intelligence", color: "#8b5cf6", icon: Brain, href: "/prism/intelligence" },
-  { key: "S", label: "Signals", color: "#f59e0b", icon: Radio, href: "/prism/signals" },
-  { key: "M", label: "Motion", color: "#0ea5e9", icon: Workflow, href: "/prism/motion" },
+  { key: "P", label: "Pulse", color: "#d4a054", icon: Heart, href: "/prism/pulse" },
+  { key: "R", label: "Risk", color: "#c45a4a", icon: AlertTriangle, href: "/prism/risk" },
+  { key: "I", label: "Intelligence", color: "#8b7ac8", icon: Brain, href: "/prism/intelligence" },
+  { key: "S", label: "Signals", color: "#c8953c", icon: Radio, href: "/prism/signals" },
+  { key: "M", label: "Motion", color: "#4a90b8", icon: Workflow, href: "/prism/motion" },
 ];
 
 const NAV_GROUPS = [
@@ -35,9 +35,8 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Workspace",
+    label: "Operations",
     items: [
-      { href: "/dashboards", label: "Dashboard Builder", icon: LayoutDashboard },
       { href: "/inbox", label: "Inbox", icon: Inbox },
       { href: "/explorer", label: "Explorer", icon: Search },
       { href: "/topology", label: "Topology", icon: Network },
@@ -45,12 +44,6 @@ const NAV_GROUPS = [
       { href: "/approvals", label: "Approvals", icon: CheckSquare },
       { href: "/workflows", label: "Workflows", icon: Workflow },
       { href: "/readiness", label: "Readiness", icon: Shield },
-    ],
-  },
-  {
-    label: "Microsoft Analytics",
-    items: [
-      { href: "/powerbi", label: "Power BI KPIs", icon: BarChart3 },
     ],
   },
 ];
@@ -67,11 +60,11 @@ const ADMIN_NAV = [
 ];
 
 const PRISM_COLORS: Record<string, string> = {
-  "Pulse": "#10b981",
-  "Risk": "#ef4444",
-  "Intelligence": "#8b5cf6",
-  "Signals": "#f59e0b",
-  "Motion": "#0ea5e9",
+  "Pulse": "#d4a054",
+  "Risk": "#c45a4a",
+  "Intelligence": "#8b7ac8",
+  "Signals": "#c8953c",
+  "Motion": "#4a90b8",
 };
 
 function AdminNavSection({ location }: { location: string }) {
@@ -105,10 +98,10 @@ function AdminNavSection({ location }: { location: string }) {
         return (
           <Link key={item.href} href={item.href} className={cn(
             "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-            isActive ? "text-amber-400" : "text-slate-500 hover:text-white hover:bg-white/5"
-          )} style={{ background: isActive ? "rgba(245,158,11,0.08)" : undefined }}>
-            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#f59e0b" }} />}
-            <item.icon className={cn("w-3 h-3 shrink-0", isActive ? "text-amber-400" : "text-slate-600 group-hover:text-slate-400")} />
+            isActive ? "" : "text-slate-500 hover:text-white hover:bg-white/5"
+          )} style={{ background: isActive ? "rgba(212,160,84,0.06)" : undefined, color: isActive ? "#d4a054" : undefined }}>
+            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#d4a054" }} />}
+            <item.icon className={cn("w-3 h-3 shrink-0", isActive ? "" : "text-slate-600 group-hover:text-slate-400")} style={isActive ? { color: "#d4a054" } : {}} />
             <span className="text-[11px]">{item.label}</span>
           </Link>
         );
@@ -137,12 +130,12 @@ export function LyteLayout({ children }: { children: ReactNode }) {
       )} style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
         <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg shadow-lg" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", boxShadow: "0 0 12px rgba(245,158,11,0.3)" }}>
-              <Zap className="w-4 h-4 text-white" />
+            <div className="p-1.5 rounded-lg" style={{ background: "rgba(212,160,84,0.1)", border: "1px solid rgba(212,160,84,0.15)" }}>
+              <Zap className="w-4 h-4" style={{ color: "#d4a054" }} />
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-sm tracking-wide text-white leading-none">LYTE</span>
-              <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#f59e0b" }}>Business Observability</span>
+              <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#d4a054" }}>Business Observability</span>
             </div>
           </div>
         </div>
@@ -179,14 +172,12 @@ export function LyteLayout({ children }: { children: ReactNode }) {
                   return (
                     <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
                       "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                      isActive
-                        ? prismColor ? "" : "text-amber-400"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                      isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
                     )} style={{
-                      background: isActive ? (prismColor ? `${prismColor}12` : "rgba(245,158,11,0.08)") : undefined,
+                      background: isActive ? (prismColor ? `${prismColor}12` : "rgba(212,160,84,0.06)") : undefined,
                       color: isActive && prismColor ? prismColor : undefined,
                     }}>
-                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: prismColor ?? "#f59e0b" }} />}
+                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: prismColor ?? "#d4a054" }} />}
                       <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "" : "text-slate-500 group-hover:text-slate-300")} style={isActive && prismColor ? { color: prismColor } : {}} />
                       <span className="text-[11px]">{item.label}</span>
                     </Link>
@@ -198,16 +189,16 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             <AdminNavSection location={location} />
           </nav>
 
-          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.08)" }}>
-            <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(245,158,11,0.4)" }}>System Pulse</div>
+          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(212,160,84,0.03)", border: "1px solid rgba(212,160,84,0.06)" }}>
+            <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(212,160,84,0.35)" }}>System Pulse</div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Urgent exposures</span>
-                <span className="text-[9px] font-mono" style={{ color: "#ef4444" }}>5 active</span>
+                <span className="text-[9px] font-mono" style={{ color: "#c45a4a" }}>5 active</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Ownership gaps</span>
-                <span className="text-[9px] font-mono" style={{ color: "#f59e0b" }}>8 open</span>
+                <span className="text-[9px] font-mono" style={{ color: "#c8953c" }}>8 open</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Decision latency</span>
@@ -215,7 +206,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-              <div className="h-full rounded-full" style={{ width: "38%", background: "linear-gradient(90deg, #ef4444, #f59e0b)" }} />
+              <div className="h-full rounded-full" style={{ width: "38%", background: "linear-gradient(90deg, #c45a4a, #c8953c)" }} />
             </div>
             <div className="flex justify-between mt-0.5">
               <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Resolution rate</span>
@@ -248,12 +239,12 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             >
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#ef4444" }} />
-            <span className="hidden sm:block" style={{ color: "#ef4444" }}>5 Urgent</span>
-            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span style={{ color: "#f97316" }}>8 Gaps</span>
-            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span className="hidden sm:block" style={{ color: "#f59e0b" }}>$5.03M at risk</span>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#c45a4a" }} />
+            <span className="hidden sm:block" style={{ color: "#c45a4a" }}>5 Urgent</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+            <span style={{ color: "#c8953c" }}>8 Gaps</span>
+            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+            <span className="hidden sm:block" style={{ color: "#d4a054" }}>$5.03M at risk</span>
           </div>
           <div className="flex items-center gap-3">
             <RealtimeStatusIndicator status={wsStatus} compact />
@@ -265,9 +256,9 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-2">
               <div className="text-right">
                 <div className="text-xs font-medium text-white">Stephen Lutar</div>
-                <div className="text-[10px]" style={{ color: "rgba(245,158,11,0.7)" }}>SZL Holdings</div>
+                <div className="text-[10px]" style={{ color: "rgba(212,160,84,0.6)" }}>SZL Holdings</div>
               </div>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)", borderColor: "rgba(255,255,255,0.1)" }}>SL</div>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border" style={{ background: "rgba(212,160,84,0.15)", borderColor: "rgba(212,160,84,0.2)", color: "#d4a054" }}>SL</div>
             </div>
           </div>
         </header>

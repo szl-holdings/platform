@@ -26,7 +26,7 @@ A premium, command-grade, SZL-branded design system inspired by Palantir Foundry
 
 #### Brand Hierarchy & Visuals
 - **SZL Holdings:** Dark-first, platinum/silver/graphite. Includes the Alloy execution fabric module at `/alloy/*`.
-- **Lyte:** Amber, Business Observability Platform using the PRISM framework.
+- **Lyte:** Burnished amber (#d4a054), Business Observability Platform using the PRISM framework. Premium color palette: amber #d4a054, risk #c45a4a, intelligence #8b7ac8, signals #c8953c, motion #4a90b8, background #0a0d14. Split architecture: editorial website (marketing-landing.tsx) and operational app (dashboard.tsx + lyte-layout.tsx). Website sections: hero, category framing, PRISM, 7 Pillars, Capabilities, Evidence, Why Now, Trust/Governance, CTA close. App: dense operational surface with exposure strip, PRISM cards, Priority Action Queue, Signal Timeline, Correlations, Platform Health, System State, ActionLoop.
 - **Vessels:** Deep ocean blue, maritime command intelligence.
 - **Terra:** Bronze/stone, real-estate portfolio intelligence.
 - **Carlota Jo:** Warm ivory/brushed gold, UHNW residential advisory platform with a public marketing site, private Client Portal, and a native mobile app (`artifacts/carlota-jo-mobile`, Expo/React Native, port 8082).
