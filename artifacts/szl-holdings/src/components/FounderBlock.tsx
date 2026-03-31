@@ -105,13 +105,11 @@ export function FounderBlock() {
               Current Platform Roster
             </p>
             {[
+              { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)" },
               { Icon: Eye, name: "Lyte", role: "Business Observability", color: "hsl(190,90%,55%)" },
               { Icon: Anchor, name: "Vessels", role: "Maritime Intelligence", color: "hsl(205,85%,55%)" },
               { Icon: Shield, name: "Aegis", role: "Defense & Intelligence", color: "hsl(232,68%,60%)" },
-              { Icon: Cpu, name: "INCA", role: "AI Research Platform", color: "hsl(265,80%,60%)" },
-              { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)" },
               { Icon: BarChart3, name: "Terra", role: "Real Estate Intelligence", color: "hsl(88,42%,44%)" },
-              { Icon: Users, name: "Rosie", role: "Incident Command", color: "hsl(215,80%,55%)" },
               { Icon: Sparkles, name: "Carlota Jo", role: "Private Advisory", color: "hsl(38,55%,58%)" },
             ].map((p, i) => (
               <m.div

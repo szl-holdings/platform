@@ -12,7 +12,7 @@ const theses = [
     id: "ai-research",
     area: "AI Research Infrastructure",
     thesis: "Every company doing serious ML work has the same pain: fragmented experiment tracking, no model lineage, and no coherent way to monitor production drift. This is table stakes infrastructure that doesn't exist as a clean product.",
-    position: "Building — INCA is live.",
+    position: "Building — Aegis Intelligence Engine is live.",
   },
   {
     id: "fintech-infra",

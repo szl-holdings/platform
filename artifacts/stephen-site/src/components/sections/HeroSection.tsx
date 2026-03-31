@@ -152,7 +152,7 @@ export function HeroSection() {
               className="mt-8 flex flex-wrap gap-8 sm:gap-10"
             >
               {[
-                { value: "10", label: "Platforms live" },
+                { value: "6", label: "Platforms live" },
                 { value: "5+", label: "Years operating" },
                 { value: "Full-stack", label: "Founder-operator" },
               ].map((stat) => (

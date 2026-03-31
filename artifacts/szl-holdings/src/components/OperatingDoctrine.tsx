@@ -23,7 +23,7 @@ const doctrine = [
     desc: "Leadership teams receive structured, explainable recommendations with confidence scores, value-at-risk estimates, and clear action options — not data dumps.",
     accent: "hsl(265,80%,60%)",
     accentRgb: "139,92,246",
-    platform: "INCA",
+    platform: "Aegis",
   },
   {
     step: "04",

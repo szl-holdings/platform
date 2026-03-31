@@ -11,12 +11,12 @@ const work = [
     link: "/vessels/",
   },
   {
-    id: "inca",
+    id: "aegis-intel",
     tag: "AI Research Infrastructure",
-    title: "INCA — Agentic AI research command centre",
+    title: "Aegis Intelligence Engine — AI research command centre",
     description: "Built a full-stack ML operations platform: experiment tracking, model registry with lineage graphs, live inference monitoring with drift detection, and an ensemble studio for multi-model pipelines.",
     metrics: ["Parallel experiment tracking", "Full model lineage graph", "Integrated drift alerting"],
-    link: "/inca/",
+    link: "/firestorm/intel/dashboard",
   },
   {
     id: "fintech",
