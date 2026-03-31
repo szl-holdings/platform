@@ -25,6 +25,7 @@ const EXEMPT_PATHS = new Set([
   "/api/billing/terra/subscribe",
   "/api/billing/firestorm/enterprise-quote",
   "/api/billing/customer-portal",
+  "/api/documents/generate",
 ]);
 
 const GRAPHQL_PATHS = ["/api/graphql", "/graphql"];

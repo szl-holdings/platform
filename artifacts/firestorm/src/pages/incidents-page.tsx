@@ -8,11 +8,39 @@ import { Input } from "@workspace/shared-ui/ui/input";
 import { Label } from "@workspace/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
 import { Textarea } from "@workspace/shared-ui/ui/textarea";
-import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight } from "lucide-react";
+import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2 } from "lucide-react";
 import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ExportButton } from "@workspace/shared-ui/data-export";
+
+async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<void> {
+  const res = await fetch("/api/documents/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      template: "firestorm-incident-summary",
+      data: {
+        incident,
+        responseActions: [
+          "Initial detection and severity triage completed.",
+          "Incident record opened in Aegis platform with full audit trail.",
+          "Assigned analyst notified and investigation initiated.",
+          "Affected systems flagged for containment evaluation.",
+          "Stakeholder notification distributed per incident response protocol.",
+        ],
+      },
+    }),
+  });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `aegis-incident-${(incident.id as number) || "report"}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 const statusOrder = ["detection", "triage", "investigation", "containment", "remediation", "closed"];
 const statusColors: Record<string, string> = {
@@ -38,6 +66,7 @@ export default function IncidentsPage() {
   const [view, setView] = useState<"list" | "kanban">("list");
   const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(null);
   const [form, setForm] = useState({ title: "", description: "", severity: "medium", assignedAnalyst: "", attackTechnique: "" });
+  const [downloadingIncidentId, setDownloadingIncidentId] = useState<number | null>(null);
 
   const createMut = useMutation({
     mutationFn: (data: any) => api.incidents.create(data),
@@ -231,6 +260,19 @@ export default function IncidentsPage() {
                             {statusOrder.map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
                           </SelectContent>
                         </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-primary"
+                          disabled={downloadingIncidentId === incident.id}
+                          onClick={async () => {
+                            setDownloadingIncidentId(incident.id);
+                            try { await downloadIncidentPDF(incident); } catch { toast.error("PDF generation failed"); } finally { setDownloadingIncidentId(null); }
+                          }}
+                          title="Export Incident Report PDF"
+                        >
+                          {downloadingIncidentId === incident.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteMut.mutate(incident.id)}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>

@@ -1,10 +1,26 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { ArrowRight, Download, TrendingUp, Shield, Globe, Layers, BarChart3, CheckCircle, FileText, Users } from "lucide-react";
+import { ArrowRight, Download, TrendingUp, Shield, Globe, Layers, BarChart3, CheckCircle, FileText, Users, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+
+async function downloadPDF(template: string, data: Record<string, unknown>, filename: string): Promise<void> {
+  const res = await fetch("/api/documents/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ template, data }),
+  });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 const REVENUE_TRACKS = [
   {
@@ -75,6 +91,33 @@ export default function InvestorRelationsPage() {
   const [requestEmail, setRequestEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [docError, setDocError] = useState("");
+  const [downloadingLetter, setDownloadingLetter] = useState(false);
+  const [downloadingPortfolio, setDownloadingPortfolio] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+
+  const handleDownloadLetter = async () => {
+    setDownloadingLetter(true);
+    setDownloadError("");
+    try {
+      await downloadPDF("szl-investor-letter", { quarter: "Q1 2026" }, "szl-investor-letter-q1-2026.pdf");
+    } catch {
+      setDownloadError("PDF generation failed. Please try again.");
+    } finally {
+      setDownloadingLetter(false);
+    }
+  };
+
+  const handleDownloadPortfolio = async () => {
+    setDownloadingPortfolio(true);
+    setDownloadError("");
+    try {
+      await downloadPDF("szl-portfolio-report", { asOf: "March 31, 2026" }, "szl-portfolio-report-q1-2026.pdf");
+    } catch {
+      setDownloadError("PDF generation failed. Please try again.");
+    } finally {
+      setDownloadingPortfolio(false);
+    }
+  };
 
   usePageMeta({
     title: "Investor Relations — SZL Holdings",
@@ -345,13 +388,34 @@ export default function InvestorRelationsPage() {
                     <p style={{ fontSize: "12.5px", fontWeight: 600, color: "hsl(38,12%,84%)", marginBottom: "0.25rem" }}>{doc.name}</p>
                     <p style={{ fontSize: "10.5px", color: "hsl(210,5%,40%)" }}>{doc.type} · {doc.date}</p>
                   </div>
-                  <span style={{ fontSize: "10px", color: "hsl(210,5%,38%)", display: "flex", alignItems: "center", gap: "3px" }}>
-                    <Download size={12} />
-                    On request
-                  </span>
+                  {i === 0 ? (
+                    <button
+                      onClick={handleDownloadLetter}
+                      disabled={downloadingLetter}
+                      style={{ fontSize: "10px", color: "hsl(190,90%,55%)", display: "flex", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: downloadingLetter ? "not-allowed" : "pointer", opacity: downloadingLetter ? 0.6 : 1 }}
+                    >
+                      {downloadingLetter ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Download size={12} />}
+                      {downloadingLetter ? "Generating..." : "Download PDF"}
+                    </button>
+                  ) : i === 1 ? (
+                    <button
+                      onClick={handleDownloadPortfolio}
+                      disabled={downloadingPortfolio}
+                      style={{ fontSize: "10px", color: "hsl(190,90%,55%)", display: "flex", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: downloadingPortfolio ? "not-allowed" : "pointer", opacity: downloadingPortfolio ? 0.6 : 1 }}
+                    >
+                      {downloadingPortfolio ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> : <Download size={12} />}
+                      {downloadingPortfolio ? "Generating..." : "Download PDF"}
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: "10px", color: "hsl(210,5%,38%)", display: "flex", alignItems: "center", gap: "3px" }}>
+                      <Download size={12} />
+                      On request
+                    </span>
+                  )}
                 </m.div>
               ))}
             </div>
+            {downloadError && <p style={{ fontSize: "11px", color: "hsl(0,72%,51%)", marginTop: "8px" }}>{downloadError}</p>}
             <p style={{ fontSize: "12px", color: "hsl(210,5%,38%)", lineHeight: 1.65, maxWidth: "38rem" }}>
               SZL Holdings is a private operating company. This page describes our business model and platform strategy for qualified investors and strategic partners. Detailed financials are available under NDA. Contact <a href="mailto:hello@szlholdings.com" style={{ color: "hsl(210,5%,52%)" }}>hello@szlholdings.com</a> to begin a conversation.
             </p>

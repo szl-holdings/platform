@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Link } from "wouter";
+import { Download, Loader2 } from "lucide-react";
 
 const milestones = [
   {
@@ -73,7 +75,38 @@ const stats = [
   { value: "2yr", label: "Portfolio build time" },
 ];
 
+async function downloadPDF(template: string, data: Record<string, unknown>, filename: string): Promise<void> {
+  const res = await fetch("/api/documents/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ template, data }),
+  });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function CareerCommand() {
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+
+  const handleDownloadResume = async () => {
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      await downloadPDF("stephen-resume", {}, "stephen-lutar-resume.pdf");
+    } catch {
+      setDownloadError("PDF generation failed. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -84,6 +117,16 @@ export default function CareerCommand() {
           <p className="text-muted-foreground text-[15px] leading-relaxed max-w-xl">
             Five platforms. One architecture. Built, shipped, and operated by a single founding engineer across maritime, cybersecurity, AI infrastructure, real estate, and enterprise operations.
           </p>
+          <button
+            onClick={handleDownloadResume}
+            disabled={downloading}
+            className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-md text-[12px] font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: "hsla(0,0%,100%,0.06)", border: "1px solid hsla(0,0%,100%,0.1)", color: "hsl(0,0%,72%)" }}
+          >
+            {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            {downloading ? "Generating..." : "Download Resume PDF"}
+          </button>
+          {downloadError && <p className="mt-2 text-[11px] text-destructive/80">{downloadError}</p>}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">

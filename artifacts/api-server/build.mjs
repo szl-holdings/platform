@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm, readFile, readdir } from "node:fs/promises";
+import { rm, readFile, readdir, cp, mkdir } from "node:fs/promises";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
@@ -125,7 +125,6 @@ async function buildAll() {
       "@prisma/client",
       "@mikro-orm/*",
       "@grpc/*",
-      "@swc/*",
       "@aws-sdk/*",
       "@azure/*",
       "@opentelemetry/*",
@@ -186,7 +185,43 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
   });
 }
 
-buildAll().catch((err) => {
+async function copyPdfkitData() {
+  let pdfkitDataSrc;
+  const searchPaths = [
+    artifactDir,
+    path.join(artifactDir, "node_modules"),
+    workspaceRoot,
+  ];
+  try {
+    const pdfkitMain = globalThis.require.resolve("pdfkit", { paths: searchPaths });
+    const pdfkitRoot = path.dirname(path.dirname(pdfkitMain));
+    pdfkitDataSrc = path.join(pdfkitRoot, "js", "data");
+  } catch {
+    const pnpmStore = path.resolve(workspaceRoot, "node_modules/.pnpm");
+    try {
+      const entries = await readdir(pnpmStore, { withFileTypes: true });
+      const pdfkitEntry = entries.find(e => e.isDirectory() && e.name.startsWith("pdfkit@"));
+      if (pdfkitEntry) {
+        pdfkitDataSrc = path.join(pnpmStore, pdfkitEntry.name, "node_modules/pdfkit/js/data");
+      } else {
+        throw new Error("pdfkit not found in .pnpm store");
+      }
+    } catch (e) {
+      console.warn("Warning: could not locate pdfkit:", e.message);
+      return;
+    }
+  }
+  const distDataDest = path.join(artifactDir, "dist/data");
+  try {
+    await mkdir(distDataDest, { recursive: true });
+    await cp(pdfkitDataSrc, distDataDest, { recursive: true });
+    console.log("Copied pdfkit data (AFM fonts) to dist/data from:", pdfkitDataSrc);
+  } catch (err) {
+    console.warn("Warning: could not copy pdfkit data directory:", err.message);
+  }
+}
+
+buildAll().then(() => copyPdfkitData()).catch((err) => {
   console.error(err);
   process.exit(1);
 });

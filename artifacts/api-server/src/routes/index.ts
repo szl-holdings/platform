@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
 import { adminGuard } from "../middlewares/admin-guard";
+import documentsRouter from "./documents";
 import healthRouter from "./health";
 import healthIntegrationsRouter from "./health-integrations";
 import webhooksRouter from "./webhooks";
@@ -233,5 +234,8 @@ router.use("/vessels", readLimiter);
 router.use(vesselsLiveRouter);
 
 router.use(configRouter);
+
+router.use("/documents", writeLimiter);
+router.use(documentsRouter);
 
 export default router;

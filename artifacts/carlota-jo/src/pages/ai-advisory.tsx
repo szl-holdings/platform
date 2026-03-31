@@ -1,9 +1,64 @@
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Brain, Send, BookOpen, TrendingUp, Lightbulb, Search, Sparkles, Loader2 } from "lucide-react";
+import { Brain, Send, BookOpen, TrendingUp, Lightbulb, Search, Sparkles, Loader2, Download, FileText } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { CarlotaGraphQLPanel } from "@/components/graphql-data-panel";
+
+async function downloadEngagementSummary(
+  insights: Array<{ title: string; type: string; summary: string; confidence: number; tags: string[] }>,
+  sessionMessages: Array<{ role: string; content: string }>
+): Promise<void> {
+  const assistantMessages = sessionMessages.filter(m => m.role === "assistant");
+  const userQuestions = sessionMessages.filter(m => m.role === "user");
+
+  const derivedRecommendations: string[] = [];
+  const derivedOverview = assistantMessages.length > 0
+    ? `This engagement summary captures ${assistantMessages.length} AI advisory exchange${assistantMessages.length > 1 ? "s" : ""} and ${insights.length} AI-generated research insight${insights.length > 1 ? "s" : ""}. Topics covered: ${userQuestions.map(m => m.content.slice(0, 60)).join("; ")}.`
+    : "This engagement summary compiles the key insights, strategic recommendations, and action items from recent advisory sessions.";
+
+  if (assistantMessages.length > 0) {
+    const lastResponse = assistantMessages[assistantMessages.length - 1].content;
+    const sentences = lastResponse.split(/[.!?]+/).filter(s => s.trim().length > 20);
+    derivedRecommendations.push(...sentences.slice(0, 3).map(s => s.trim()));
+  }
+  if (derivedRecommendations.length < 3) {
+    derivedRecommendations.push(
+      "Accelerate GTM execution in the primary target segment before year-end.",
+      "Initiate pricing architecture review with revenue team within 30 days.",
+      "Establish clearer success metrics for each strategic initiative.",
+      "Review org design to ensure capacity alignment with strategic priorities.",
+    );
+  }
+
+  const res = await fetch("/api/documents/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      template: "carlota-engagement-summary",
+      data: {
+        client: "Advisory Client",
+        period: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+        overview: derivedOverview,
+        insights: insights.map(i => ({ title: i.title, type: i.type, summary: i.summary, confidence: i.confidence, tags: i.tags })),
+        recommendations: derivedRecommendations.slice(0, 5),
+        nextSteps: [
+          { action: "Executive review of pricing architecture proposal", owner: "Client CEO", deadline: "2 weeks" },
+          { action: "Market sizing validation for adjacent segment", owner: "Strategy team", deadline: "30 days" },
+          { action: "Follow-up advisory session: Revenue architecture deep-dive", owner: "Carlota Jo", deadline: "3 weeks" },
+        ],
+      },
+    }),
+  });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "carlota-jo-engagement-summary.pdf";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 const insightCards = [
   { title: "Market Entry Strategy — Southeast Asia", type: "Market Research", summary: "Consumer spending in SEA projected to reach $4.7T by 2028. Key opportunity in B2B SaaS with government digitization initiatives in Singapore, Indonesia, and Vietnam. Recommend phased entry starting with Singapore's regulatory sandbox.", tags: ["Market Entry", "SEA", "B2B SaaS"], confidence: 87 },
@@ -28,6 +83,7 @@ export default function AIAdvisory() {
   const [messages, setMessages] = useState(initialHistory);
   const [streaming, setStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,12 +153,25 @@ export default function AIAdvisory() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Brain className="w-6 h-6 text-primary" />
-          AI Advisory Assistant
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">AI-augmented strategic research and analysis — synthesizing market intelligence, competitive dynamics, and engagement data into conviction-grade recommendations</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Brain className="w-6 h-6 text-primary" />
+            AI Advisory Assistant
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">AI-augmented strategic research and analysis — synthesizing market intelligence, competitive dynamics, and engagement data into conviction-grade recommendations</p>
+        </div>
+        <button
+          onClick={async () => {
+            setDownloadingPDF(true);
+            try { await downloadEngagementSummary(insightCards, messages); } catch { console.error("PDF generation failed"); } finally { setDownloadingPDF(false); }
+          }}
+          disabled={downloadingPDF}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border border-border bg-muted/50 hover:bg-muted transition-colors disabled:opacity-50 shrink-0"
+        >
+          {downloadingPDF ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+          {downloadingPDF ? "Generating..." : "Export Engagement Summary"}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

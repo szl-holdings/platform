@@ -1,10 +1,39 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRoute, Link } from "wouter";
-import { ArrowLeft, Building2, MapPin, Users, DollarSign, TrendingUp, Calendar, Wrench, User, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Building2, MapPin, Users, DollarSign, TrendingUp, Calendar, Wrench, User, AlertTriangle, Download, Loader2 } from "lucide-react";
+
 import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { properties, tenants, alerts } from "@/data/portfolio";
 import { cn } from "@workspace/shared-ui/utils";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+
+async function downloadPropertyPDF(
+  property: Record<string, unknown>,
+  extras: { distressScore?: number; investmentThesis?: string; distressFactors?: string[] } = {}
+): Promise<void> {
+  const res = await fetch("/api/documents/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      template: "terra-property-report",
+      data: {
+        property,
+        distressScore: extras.distressScore,
+        investmentThesis: extras.investmentThesis,
+        distressFactors: extras.distressFactors,
+      },
+    }),
+  });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `terra-${(property.id as string) || "property"}-report.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function formatCurrency(n: number) {
   if (n >= 1e9) return `$${(n / 1e9).toFixed(1)}B`;
@@ -51,6 +80,8 @@ function CustomTooltip({ active, payload, label }: any) {
 
 export default function PropertyDetailPage() {
   const [, params] = useRoute("/property/:id");
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
   const property = properties.find(p => p.id === params?.id);
 
   if (!property) {
@@ -105,6 +136,39 @@ export default function PropertyDetailPage() {
               <span className={cn("text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wide border", status.color)}>{status.label}</span>
             </div>
           </div>
+          <button
+            onClick={async () => {
+              setDownloading(true);
+              const distressScore = property.status === "critical" ? 78 : property.status === "watch" ? 45 : 18;
+              const tenantDelinquency = propertyTenants.filter(t => t.status === "delinquent").length;
+              const leaseExpiring = propertyTenants.filter(t => t.status === "expiring").length;
+              const investmentThesis = property.status === "critical"
+                ? `${property.name} exhibits elevated distress signals consistent with a value-add acquisition target. Below-market occupancy (${property.occupancy}%), ${tenantDelinquency > 0 ? `${tenantDelinquency} delinquent tenant(s), ` : ""}and a cap rate of ${property.capRate}% imply repricing opportunity. Subject to title review and capital stack analysis, this property warrants formal underwriting.`
+                : property.status === "watch"
+                ? `${property.name} is showing early watch-list signals with ${leaseExpiring > 0 ? `${leaseExpiring} lease(s) expiring soon and ` : ""}occupancy at ${property.occupancy}%. The ${property.capRate}% cap rate remains competitive but near-term lease rollover creates uncertainty. Monitor for further deterioration before formal diligence.`
+                : `${property.name} is a performing asset with ${property.occupancy}% occupancy and a ${property.capRate}% cap rate. The property generates $${(property.annualNOI / 1000).toFixed(0)}K annual NOI against a current value of $${(property.value / 1e6).toFixed(1)}M. Hold and optimize position — no distress signals present.`;
+              const distressFactors = [
+                `Occupancy rate: ${property.occupancy}% (${property.occupancy < 85 ? "below" : "near"} market average)`,
+                `Cap rate: ${property.capRate}% (market context: NYC multifamily avg 4.5-6.0%)`,
+                ...(tenantDelinquency > 0 ? [`${tenantDelinquency} tenant(s) with delinquent payment status`] : []),
+                ...(leaseExpiring > 0 ? [`${leaseExpiring} lease(s) expiring — rollover risk in near term`] : []),
+                `Status classification: ${property.status.charAt(0).toUpperCase() + property.status.slice(1)} (multi-factor scoring)`,
+              ];
+              try {
+                await downloadPropertyPDF(
+                  property as unknown as Record<string, unknown>,
+                  { distressScore, investmentThesis, distressFactors }
+                );
+              } catch { setDownloadError("PDF generation failed. Please try again."); } finally { setDownloading(false); }
+            }}
+            disabled={downloading}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 disabled:opacity-50"
+            style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)", color: "#3b82f6" }}
+          >
+            {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            {downloading ? "Generating..." : "Export PDF"}
+          </button>
+          {downloadError && <p className="text-[10px] text-rose-400 mt-1">{downloadError}</p>}
         </div>
       </motion.div>
 

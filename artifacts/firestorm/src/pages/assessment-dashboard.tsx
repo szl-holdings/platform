@@ -10,7 +10,7 @@ import { Label } from "@workspace/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
 import { Textarea } from "@workspace/shared-ui/ui/textarea";
 import { Progress } from "@workspace/shared-ui/ui/progress";
-import { Shield, Target, AlertTriangle, CheckCircle, Plus, Clock, Trash2, ShieldAlert } from "lucide-react";
+import { Shield, Target, AlertTriangle, CheckCircle, Plus, Clock, Trash2, ShieldAlert, Download, Loader2 as LoaderIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -89,6 +89,25 @@ function AssessmentSkeleton() {
   );
 }
 
+async function downloadAssessmentPDF(assessment: Record<string, unknown>, findings: unknown[]): Promise<void> {
+  const res = await fetch("/api/documents/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      template: "aegis-assessment-report",
+      data: { assessment, findings },
+    }),
+  });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `aegis-assessment-${(assessment.id as number) || "report"}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function AssessmentDashboard() {
   const qc = useQueryClient();
   const { data: assessments = [], isLoading } = useQuery({ queryKey: ["assessments"], queryFn: api.assessments.list });
@@ -96,6 +115,7 @@ export default function AssessmentDashboard() {
   const { data: simulations = [] } = useQuery({ queryKey: ["simulations"], queryFn: api.simulations.list });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", assessmentType: "penetration_test" as string, scope: "", targetEnvironment: "", description: "" });
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
   const createMut = useMutation({
     mutationFn: (data: any) => api.assessments.create(data),
@@ -257,6 +277,25 @@ export default function AssessmentDashboard() {
                         {isInProgress && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse-dot" />}
                         {assessment.status?.replace("_", " ")}
                       </Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-primary"
+                        disabled={downloadingId === assessment.id}
+                        onClick={async () => {
+                          setDownloadingId(assessment.id);
+                          try {
+                            await downloadAssessmentPDF(assessment, aFindings);
+                          } catch {
+                            toast.error("PDF generation failed");
+                          } finally {
+                            setDownloadingId(null);
+                          }
+                        }}
+                        title="Export PDF"
+                      >
+                        {downloadingId === assessment.id ? <LoaderIcon className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteMut.mutate(assessment.id)}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>

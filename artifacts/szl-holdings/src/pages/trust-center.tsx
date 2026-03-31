@@ -1,7 +1,24 @@
+import { useState } from "react";
 import { m } from "framer-motion";
-import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle, AlertTriangle } from "lucide-react";
+import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle, AlertTriangle, Download, Loader2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+
+async function downloadPDF(template: string, data: Record<string, unknown>, filename: string): Promise<void> {
+  const res = await fetch("/api/documents/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ template, data }),
+  });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 const sections = [
   {
@@ -140,6 +157,21 @@ const reliabilityPrinciples = [
 ];
 
 export default function TrustCenter() {
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+
+  const handleDownloadCompliance = async () => {
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      await downloadPDF("szl-compliance-summary", {}, "szl-compliance-summary.pdf");
+    } catch {
+      setDownloadError("PDF generation failed. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
       <Navbar />
@@ -436,9 +468,27 @@ export default function TrustCenter() {
         borderTop: "1px solid hsla(0,0%,100%,0.05)",
       }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
-          <p style={{ fontSize: "0.8125rem", color: "hsl(210,5%,38%)", lineHeight: "1.6", maxWidth: "38rem" }}>
-            SZL Holdings does not claim SOC 2 certification or any formal regulatory compliance status at this time. This document describes our engineering and operational practices as they stand today. Enterprise compliance documentation and security posture details are available on request.
-          </p>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem" }}>
+            <p style={{ fontSize: "0.8125rem", color: "hsl(210,5%,38%)", lineHeight: "1.6", maxWidth: "38rem" }}>
+              SZL Holdings does not claim SOC 2 certification or any formal regulatory compliance status at this time. This document describes our engineering and operational practices as they stand today. Enterprise compliance documentation and security posture details are available on request.
+            </p>
+            <button
+              onClick={handleDownloadCompliance}
+              disabled={downloading}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "6px",
+                padding: "0.5rem 1rem", borderRadius: "6px",
+                background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.09)",
+                color: "hsl(210,5%,52%)", fontSize: "12px", fontWeight: 500,
+                cursor: downloading ? "not-allowed" : "pointer", opacity: downloading ? 0.7 : 1,
+                flexShrink: 0,
+              }}
+            >
+              {downloading ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Download size={13} />}
+              {downloading ? "Generating..." : "Download Compliance PDF"}
+            </button>
+            {downloadError && <p style={{ fontSize: "11px", color: "hsl(0,72%,51%)", marginTop: "6px" }}>{downloadError}</p>}
+          </div>
         </div>
       </section>
 
