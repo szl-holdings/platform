@@ -1,105 +1,167 @@
-import { motion } from "framer-motion";
-import { usePageMeta } from "@/hooks/usePageMeta";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { Link } from "wouter";
 
-const careerTimeline = [
-  { year: "2024-Present", role: "Founder & CEO", company: "SZL Holdings", description: "Leading a diversified technology holding company spanning AI, maritime intelligence, cybersecurity, and creative technology.", highlight: true },
-  { year: "2022-2024", role: "Chief Technology Officer", company: "Enterprise SaaS Co.", description: "Led engineering organization of 45+ engineers. Architected microservices platform processing 2M+ daily transactions.", highlight: false },
-  { year: "2020-2022", role: "VP of Engineering", company: "FinTech Startup", description: "Scaled platform from MVP to $10M ARR. Built and managed cross-functional teams across 3 continents.", highlight: false },
-  { year: "2018-2020", role: "Senior Staff Engineer", company: "Fortune 500 Tech", description: "Core platform architect. Designed systems handling 500K concurrent users with 99.99% uptime.", highlight: false },
-  { year: "2016-2018", role: "Lead Software Engineer", company: "Digital Agency", description: "Delivered 20+ enterprise projects. Full-stack development with React, Node.js, and cloud infrastructure.", highlight: false },
+const milestones = [
+  {
+    year: "2023",
+    event: "Founded SZL Holdings",
+    detail: "Established SZL Holdings as a strategic holding company to develop and operate a portfolio of domain-specific enterprise platforms under one compounding architecture.",
+    highlight: true,
+  },
+  {
+    year: "2024 Q1",
+    event: "Alloy — Execution Fabric Engine",
+    detail: "Shipped the core workflow orchestration and signal routing engine. Originally a standalone platform, Alloy was later absorbed as the internal execution fabric powering all portfolio decision workflows.",
+    highlight: false,
+  },
+  {
+    year: "2024 Q2",
+    event: "Launched Vessels Maritime Intelligence",
+    detail: "Shipped the maritime fleet intelligence platform covering AIS tracking, exception management, voyage economics, and sanctions screening. First vertical command platform in the portfolio.",
+    highlight: false,
+  },
+  {
+    year: "2024 Q2",
+    event: "Launched Lyte Command Center",
+    detail: "Shipped the unified AI operations dashboard with multi-model routing, cross-portfolio signal aggregation, and infrastructure observability. Now the operational nerve centre for the full ecosystem.",
+    highlight: false,
+  },
+  {
+    year: "2024 Q3",
+    event: "Launched Aegis — Unified Defense & Intelligence",
+    detail: "Shipped the unified cybersecurity command surface converging SOC operations, threat intelligence, and MSP management. First platform to demonstrate the cross-domain correlation thesis.",
+    highlight: false,
+  },
+  {
+    year: "2024 Q3",
+    event: "Launched Terra — Real Estate Intelligence",
+    detail: "Shipped the distress-first real estate intelligence platform covering all five NYC boroughs with multi-factor distress scoring, deal pipeline, and market context.",
+    highlight: false,
+  },
+  {
+    year: "2025",
+    event: "Portfolio at full operating capacity",
+    detail: "Five platforms live. Shared infrastructure compounding across the portfolio. Alloy absorbed as the internal execution engine. Lyte providing unified observability. Three distinct buyer categories engaged.",
+    highlight: true,
+  },
 ];
 
-const skillRadar = [
-  { skill: "Leadership & Strategy", level: 95, category: "Executive" },
-  { skill: "System Architecture", level: 98, category: "Technical" },
-  { skill: "Full-Stack Development", level: 96, category: "Technical" },
-  { skill: "Cloud Infrastructure", level: 94, category: "Technical" },
-  { skill: "AI / Machine Learning", level: 88, category: "Technical" },
-  { skill: "Team Building", level: 92, category: "Executive" },
-  { skill: "Product Strategy", level: 90, category: "Executive" },
-  { skill: "DevOps & CI/CD", level: 91, category: "Technical" },
+const platforms = [
+  { name: "Lyte", desc: "Business Observability — AI ops, multi-model routing, cross-platform telemetry", status: "Live", color: "hsl(190,90%,55%)" },
+  { name: "Vessels", desc: "Maritime Intelligence — AIS fleet tracking, voyage economics, sanctions screening", status: "Live", color: "hsl(205,85%,55%)" },
+  { name: "Aegis", desc: "Defense & Intelligence Command — SOC, threat intel, MSP operations unified", status: "Live", color: "hsl(232,68%,60%)" },
+  { name: "Terra", desc: "Real Estate Intelligence — distress scoring, deal pipeline, NYC market coverage", status: "Live", color: "hsl(140,56%,40%)" },
+  { name: "Carlota Jo", desc: "Strategic Advisory Platform — client portal, engagement management, AI advisory", status: "Live", color: "hsl(38,55%,58%)" },
 ];
 
-const projectDeepDives = [
-  { name: "Vessels Maritime Intelligence", tech: ["React", "TypeScript", "Real-time Data", "SVG Maps"], impact: "Monitoring 200+ vessels across global shipping lanes", status: "Live" },
-  { name: "Aegis Defense & Intelligence", tech: ["SOC Dashboard", "MITRE ATT&CK", "Threat Intel", "MSP Ops", "AI Research", "GPU Clusters"], impact: "Unified defense, managed operations, and AI intelligence command", status: "Live" },
-  { name: "SZL Alloy Engine", tech: ["Signal Normalization", "Workflow Orchestration", "Artifact Generation"], impact: "Governs cross-platform signal routing, workflows, and approvals across SZL Holdings", status: "Live" },
-  { name: "Lyte Command Center", tech: ["Infrastructure", "AIOps", "Observability"], impact: "Full-stack infrastructure intelligence platform", status: "Live" },
-  { name: "Terra Real Estate Intelligence", tech: ["Deal Pipeline", "Distress Engine", "Market Data", "CRM"], impact: "Full-stack real estate command across NYC's five boroughs", status: "Live" },
-  { name: "Carlota Jo Consulting", tech: ["Client Portal", "Document Management", "Advisory Ops"], impact: "White-glove estate management for high-net-worth families", status: "Live" },
+const techStack = [
+  { layer: "Frontend", items: ["React", "TypeScript", "Vite", "Tailwind CSS", "Framer Motion", "Wouter", "TanStack Query"] },
+  { layer: "Backend", items: ["Node.js", "Express", "TypeScript", "REST APIs", "GraphQL", "WebSockets"] },
+  { layer: "Data", items: ["PostgreSQL", "PostGIS", "Drizzle ORM", "Redis", "Zod validation"] },
+  { layer: "AI & ML", items: ["OpenAI GPT-4", "Anthropic Claude", "Google Gemini", "Multi-model routing", "RAG pipelines"] },
+  { layer: "Infrastructure", items: ["Alloy (Execution Fabric)", "Monorepo (pnpm)", "Shared auth", "Row-level security", "Immutable audit logs", "Multi-tenant isolation"] },
+  { layer: "Domains", items: ["Maritime (AIS, MMSI, IMO)", "Real estate (PostGIS, NYC Open Data)", "Cybersecurity (MITRE ATT&CK)", "Enterprise workflow orchestration"] },
+];
+
+const stats = [
+  { value: "5", label: "Platforms live" },
+  { value: "1", label: "Monorepo codebase" },
+  { value: "150k+", label: "Lines of code" },
+  { value: "1,200+", label: "Commits" },
+  { value: "8", label: "Domain verticals" },
+  { value: "2yr", label: "Portfolio build time" },
 ];
 
 export default function CareerCommand() {
-  usePageMeta({
-    title: "Career | Stephen Lutar – Technology Executive & Full-Stack Engineer",
-    description: "Explore Stephen Lutar's career journey: from Lead Engineer to Founder & CEO of SZL Holdings. 15+ years building enterprise systems at scale.",
-    canonical: "https://szlholdings.com/stephen/career",
-  });
   return (
     <div className="min-h-screen bg-background">
-      <section className="py-24 sm:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
-            <span className="text-primary font-semibold text-sm tracking-widest uppercase mb-4 block">Career Command</span>
-            <h2 className="text-3xl sm:text-5xl font-display font-bold mb-6">
-              Professional <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">Authority</span> Showcase
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mb-12">A decade of building, leading, and scaling technology organizations.</p>
-          </motion.div>
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-6 lg:px-12 pt-28 pb-24">
+        <div className="mb-14">
+          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary/60 mb-3">Career Command</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Builder dashboard</h1>
+          <p className="text-muted-foreground text-[15px] leading-relaxed max-w-xl">
+            Five platforms. One architecture. Built, shipped, and operated by a single founding engineer across maritime, cybersecurity, AI infrastructure, real estate, and enterprise operations.
+          </p>
+        </div>
 
-          <div className="relative pl-8 mb-16">
-            <div className="absolute left-3 top-0 bottom-0 w-px bg-border" />
-            {careerTimeline.map((item, i) => (
-              <motion.div key={item.year} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
-                className={`relative mb-8 last:mb-0 rounded-xl border p-6 ${item.highlight ? "border-primary/30 bg-primary/5" : "border-border bg-card/50"}`}>
-                <div className={`absolute -left-5 top-6 w-3 h-3 rounded-full border-2 border-background ${item.highlight ? "bg-primary" : "bg-muted-foreground"}`} />
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xs font-mono text-primary">{item.year}</span>
-                  <span className="text-sm font-bold">{item.role}</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
+          {stats.map((stat) => (
+            <div key={stat.label} className="border border-white/6 rounded-lg p-5">
+              <div className="text-2xl font-serif font-normal text-primary mb-1">{stat.value}</div>
+              <div className="text-[11px] text-muted-foreground/50 uppercase tracking-[0.12em]">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mb-16">
+          <h2 className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-7">Platforms built</h2>
+          <div className="space-y-px">
+            {platforms.map((platform) => (
+              <div key={platform.name} className="border-t border-white/5 py-5 flex items-start gap-4">
+                <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: platform.color, boxShadow: `0 0 6px ${platform.color}60` }} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="text-[15px] font-semibold text-foreground">{platform.name}</span>
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">{platform.status}</span>
+                  </div>
+                  <p className="text-[13px] text-muted-foreground leading-relaxed">{platform.desc}</p>
                 </div>
-                <p className="text-sm text-muted-foreground mb-1">{item.company}</p>
-                <p className="text-sm">{item.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
-
-          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="mb-16">
-            <h3 className="text-xl font-display font-bold mb-6">Skills Mastery</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {skillRadar.map((s) => (
-                <div key={s.skill} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/50">
-                  <span className="text-sm w-40 font-medium">{s.skill}</span>
-                  <div className="flex-1 bg-muted rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${s.level}%` }} />
-                  </div>
-                  <span className="text-xs font-mono text-muted-foreground w-8">{s.level}%</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">{s.category}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
-            <h3 className="text-xl font-display font-bold mb-6">Project Deep Dives</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {projectDeepDives.map((project) => (
-                <div key={project.name} className="rounded-xl border border-border bg-card/50 p-5 hover:border-primary/30 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-bold">{project.name}</h4>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">{project.status}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">{project.impact}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.tech.map((t) => (
-                      <span key={t} className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground">{t}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
         </div>
-      </section>
+
+        <div className="mb-16">
+          <h2 className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-7">Technology stack</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {techStack.map((layer) => (
+              <div key={layer.layer} className="border border-white/6 rounded-lg p-4">
+                <h3 className="text-[11px] font-semibold text-primary/50 uppercase tracking-[0.12em] mb-3">{layer.layer}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {layer.items.map((item) => (
+                    <span key={item} className="text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-white/50 border border-white/8">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mb-16">
+          <h2 className="text-[12px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-7">Key milestones</h2>
+          <div className="relative">
+            <div className="absolute left-[7px] top-0 bottom-0 w-px bg-white/5" />
+            <div className="space-y-0">
+              {milestones.map((milestone, i) => (
+                <div key={i} className="relative pl-8 pb-8 last:pb-0">
+                  <div className={`absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-background flex items-center justify-center ${milestone.highlight ? "bg-primary" : "bg-white/15"}`}>
+                    {milestone.highlight && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+                  </div>
+                  <div className="flex items-center gap-3 mb-1.5">
+                    <span className="text-[10px] font-mono text-primary/60">{milestone.year}</span>
+                    <span className={`text-[14px] font-semibold ${milestone.highlight ? "text-foreground" : "text-foreground/80"}`}>{milestone.event}</span>
+                  </div>
+                  <p className="text-[13px] text-muted-foreground leading-relaxed">{milestone.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-white/5 pt-10 flex items-center justify-between">
+          <Link href="/work" className="text-[13px] font-medium text-primary hover:text-primary/80 transition-colors">
+            See case studies →
+          </Link>
+          <Link href="/contact" className="text-[13px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+            Get in touch
+          </Link>
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 }

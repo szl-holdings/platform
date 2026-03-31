@@ -3,11 +3,41 @@ import { Footer } from "@/components/layout/Footer";
 import { Link } from "wouter";
 
 const posts = [
-  { slug: "accountability-gap-enterprise-ai", tag: "AI & Enterprise", title: "The accountability gap in enterprise AI", excerpt: "Most enterprise AI tools optimise for output quality. What they underinvest in is decision accountability — the trail from model recommendation to human action. This matters more than any benchmark.", date: "March 2026" },
-  { slug: "command-interface-underbuilt", tag: "Product", title: "The command interface is underbuilt", excerpt: "Enterprise software excels at showing you what's wrong. It is poor at helping you decide what to do in the next ten minutes. The gap between visibility and action is where most platforms stop.", date: "February 2026" },
-  { slug: "vertical-intelligence-vs-horizontal-tooling", tag: "Strategy", title: "Vertical intelligence beats horizontal tooling", excerpt: "General-purpose AI wins on breadth. But in operations with genuine domain complexity — maritime logistics, financial research, AI development — breadth is a liability. Depth is the defensible position.", date: "January 2026" },
-  { slug: "multi-tenant-isolation", tag: "Engineering", title: "Multi-tenant isolation as a building material", excerpt: "Security bolted on after the fact is always weaker than security designed in from the start. True tenant isolation is a design decision about compute separation, not a configuration switch.", date: "December 2025" },
-  { slug: "founding-szl-holdings", tag: "Founder Notes", title: "On building a portfolio company from scratch", excerpt: "The case for a holding structure: portfolio companies that share infrastructure but operate independently. What I've learned building SZL Holdings across five domains in eighteen months.", date: "November 2025" },
+  {
+    slug: "vertical-command-systems",
+    tag: "Strategy",
+    title: "The case for vertical command systems",
+    excerpt: "Generic enterprise software serves every industry equally and most industries poorly. The next defensible category is vertical command — platforms with deep domain intelligence built into the data model, not layered on top.",
+    date: "March 2026",
+  },
+  {
+    slug: "defensive-only-cybersecurity",
+    tag: "Cybersecurity",
+    title: "Why defensive-only is the right position in cybersecurity",
+    excerpt: "The offensive security market is crowded, regulated, and ethically complex. The defensive market — threat detection, incident command, MSP operations — is where operators live and where the durable enterprise relationships are built.",
+    date: "February 2026",
+  },
+  {
+    slug: "distress-intelligence-real-estate",
+    tag: "Real Estate",
+    title: "Distress intelligence as a real estate operating model",
+    excerpt: "Comparable sales analysis is a trailing indicator. The operators who consistently outperform don't wait for listings — they identify distress signals early and reach owners before the asset is marketed. This is a data problem, not a relationships problem.",
+    date: "January 2026",
+  },
+  {
+    slug: "building-for-banks",
+    tag: "Enterprise",
+    title: "Building for banks, not just VCs",
+    excerpt: "VC-funded software is optimised for growth metrics. Enterprise software bought by banks is optimised for auditability, compliance, and reliability. These are different products. The ones that try to be both usually fail at both.",
+    date: "December 2025",
+  },
+  {
+    slug: "portfolio-architecture",
+    tag: "Founder Notes",
+    title: "The portfolio architecture: why I built six platforms at once",
+    excerpt: "The conventional wisdom for technical founders is to build one thing and scale it. I built six simultaneously. Here's the thesis behind the structure — and what the first two years taught me about whether it's right.",
+    date: "November 2025",
+  },
 ];
 
 export function Writing() {
@@ -19,7 +49,7 @@ export function Writing() {
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary/60 mb-3">Writing</p>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Notes, essays, and thinking</h1>
           <p className="text-muted-foreground text-[15px] leading-relaxed">
-            On enterprise software, AI infrastructure, product design, and building from first principles.
+            On enterprise software, AI infrastructure, vertical intelligence, and building from first principles.
           </p>
         </div>
 

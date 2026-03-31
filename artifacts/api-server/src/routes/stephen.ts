@@ -367,16 +367,55 @@ router.post("/stephen/booking-requests", async (req, res) => {
   }
 });
 
+const PLATFORM_HEALTH_URLS: Record<string, string> = {
+  "szl-holdings": `http://localhost:${process.env.SZL_PORT || 80}/szl-holdings/`,
+  "alloy": `http://localhost:${process.env.ALLOY_PORT || 25500}/alloy/`,
+  "lyte": `http://localhost:${process.env.LYTE_PORT || 25501}/lyte-command-center/`,
+  "vessels": `http://localhost:${process.env.VESSELS_PORT || 25502}/vessels/`,
+  "aegis": `http://localhost:${process.env.AEGIS_PORT || 25503}/firestorm/`,
+  "terra": `http://localhost:${process.env.TERRA_PORT || 25504}/terra/`,
+  "carlota-jo": `http://localhost:${process.env.CARLOTA_PORT || 25505}/carlota-jo/`,
+};
+
+async function probeHealth(url: string): Promise<"operational" | "degraded"> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(url, { signal: controller.signal, method: "HEAD" });
+    clearTimeout(timeout);
+    return res.status < 500 ? "operational" : "degraded";
+  } catch {
+    return "degraded";
+  }
+}
+
 router.get("/stephen/ecosystem-status", async (_req, res) => {
   const now = new Date().toISOString();
-  const apps = [
-    { name: "Vessels", slug: "vessels", status: "operational", description: "Maritime fleet & cargo intelligence", lastChecked: now },
-    { name: "Firestorm", slug: "firestorm", status: "operational", description: "Cybersecurity simulation engine", lastChecked: now },
-    { name: "Lyte", slug: "lyte", status: "operational", description: "Enterprise commerce platform", lastChecked: now },
-    { name: "Alloy", slug: "alloy", status: "operational", description: "Execution Fabric · Creative Workflows", lastChecked: now },
-    { name: "Aegis", slug: "aegis", status: "operational", description: "Control plane & risk register · DECIDE", lastChecked: now },
-    { name: "INCA", slug: "inca", status: "operational", description: "AI research command center", lastChecked: now },
+
+  const platformDefs = [
+    { name: "SZL Holdings", slug: "szl-holdings", description: "Parent Company" },
+    { name: "Alloy", slug: "alloy", description: "Execution Fabric" },
+    { name: "Lyte", slug: "lyte", description: "Business Observability" },
+    { name: "Vessels", slug: "vessels", description: "Maritime Intelligence" },
+    { name: "Aegis", slug: "aegis", description: "Defense & Intelligence" },
+    { name: "Terra", slug: "terra", description: "Real Estate Intelligence" },
+    { name: "Carlota Jo", slug: "carlota-jo", description: "Private Advisory" },
   ];
+
+  const healthResults = await Promise.allSettled(
+    platformDefs.map(async (p) => {
+      const url = PLATFORM_HEALTH_URLS[p.slug];
+      const status = url ? await probeHealth(url) : "operational";
+      return { ...p, status, lastChecked: now };
+    })
+  );
+
+  const apps = healthResults.map((result, i) =>
+    result.status === "fulfilled"
+      ? result.value
+      : { ...platformDefs[i], status: "degraded" as const, lastChecked: now }
+  );
+
   const connectors = [
     { name: "GitHub", slug: "github", status: "connected", lastChecked: now },
     { name: "Stripe", slug: "stripe", status: "connected", lastChecked: now },

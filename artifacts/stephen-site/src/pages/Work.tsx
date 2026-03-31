@@ -4,11 +4,54 @@ import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
 const projects = [
-  { slug: "alloy", year: "2024–present", title: "Alloy Execution Fabric", role: "Founder & Architect", description: "Execution fabric and predictive intelligence engine powering Lyte, Vessels, and the full SZL ecosystem. Scenario modeling, confidence scoring, and agent coordination at the platform layer.", tags: ["Execution Fabric", "Predictive Intelligence", "Enterprise"] },
-  { slug: "vessels", year: "2024–present", title: "Vessels Maritime Intelligence", role: "Founder & Architect", description: "Enterprise maritime intelligence platform covering AIS fleet tracking, exception management, voyage economics, sanctions screening, and dark vessel detection. Built for fleet executives, operations teams, and compliance functions.", tags: ["Enterprise SaaS", "Maritime", "AI/ML"] },
-  { slug: "szl-holdings", year: "2023–present", title: "SZL Holdings", role: "Founder & CEO", description: "Strategic technology portfolio spanning enterprise software, maritime intelligence, business telemetry, and consulting. Built to develop and scale a portfolio of domain-specific platforms.", tags: ["Portfolio Company", "Strategic Holding", "Enterprise Technology"] },
-  { slug: "carlota-jo", year: "2024", title: "Carlota Jo Consulting", role: "Technical Advisor", description: "Boutique strategic advisory platform for founder-led businesses. Designed the technology architecture for the client portal, engagement management, and advisory intelligence layer.", tags: ["Consulting Tech", "Strategic Advisory"] },
-  { slug: "lyte-command-center", year: "2024", title: "Lyte Command Center", role: "Founder & Architect", description: "Unified AI operations dashboard aggregating signals from across the SZL portfolio. Multi-model routing, real-time observability, and cross-platform command capabilities.", tags: ["AI Operations", "Enterprise Dashboard", "Platform"] },
+  {
+    slug: "terra",
+    year: "2024–present",
+    title: "Terra — Real Estate Intelligence",
+    role: "Founder & Architect",
+    description: "Distress-first real estate intelligence platform for operators, brokers, and capital allocators working across New York City's five boroughs. Multi-factor distress scoring, live deal pipeline, and borough-level market context.",
+    tags: ["Distress Intelligence", "PostGIS", "NYC Data", "Real Estate"],
+  },
+  {
+    slug: "aegis",
+    year: "2024–present",
+    title: "Aegis — Unified Defense & Intelligence Command",
+    role: "Founder & Architect",
+    description: "Unified command surface for SOC operations, threat intelligence, and MSP management — three historically separate functions converged into one correlated operational layer. Built around the MITRE ATT&CK framework.",
+    tags: ["Cybersecurity", "Threat Intelligence", "SOC", "MSP Command"],
+  },
+  {
+    slug: "vessels",
+    year: "2024–present",
+    title: "Vessels Maritime Intelligence",
+    role: "Founder & Architect",
+    description: "Enterprise maritime intelligence platform covering AIS fleet tracking, exception management, voyage economics, sanctions screening, and dark vessel detection. Built for fleet executives, operations teams, and compliance functions.",
+    tags: ["Maritime", "AIS Tracking", "Voyage Economics", "Sanctions Compliance"],
+  },
+  {
+    slug: "alloy",
+    year: "2024–present",
+    title: "Alloy — Execution Fabric",
+    role: "Founder & Architect",
+    description: "Workflow orchestration and signal routing engine powering cross-platform decision workflows across the SZL portfolio. Built as platform infrastructure, not a product feature — the execution substrate for every other platform.",
+    tags: ["Workflow Orchestration", "Signal Routing", "Platform Infrastructure", "AI Coordination"],
+  },
+  {
+    slug: "lyte-command-center",
+    year: "2024",
+    title: "Lyte Command Center",
+    role: "Founder & Architect",
+    description: "Unified AI operations dashboard aggregating signals from across the SZL portfolio. Multi-model routing, real-time cross-platform observability, and command mode for operational decisions under time pressure.",
+    tags: ["AI Operations", "Multi-Model Routing", "Observability", "Command Interface"],
+  },
+  {
+    slug: "szl-holdings",
+    year: "2023–present",
+    title: "SZL Holdings",
+    role: "Founder & CEO",
+    description: "Strategic technology portfolio spanning enterprise software, maritime intelligence, AI infrastructure, and real estate intelligence. Built to develop and scale a portfolio of domain-specific platforms on a shared architectural foundation.",
+    tags: ["Portfolio Company", "Enterprise Strategy", "Shared Infrastructure"],
+  },
 ];
 
 export function Work() {
@@ -18,9 +61,9 @@ export function Work() {
       <div className="max-w-4xl mx-auto px-6 lg:px-12 pt-28 pb-24">
         <div className="mb-14">
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-primary/60 mb-3">Work</p>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Selected projects</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Selected case studies</h1>
           <p className="text-muted-foreground text-[15px] leading-relaxed max-w-xl">
-            Enterprise infrastructure, AI platforms, and strategic products built within the SZL Holdings portfolio — and earlier.
+            Domain-specific command platforms built across maritime intelligence, cybersecurity, AI infrastructure, and real estate. Each entry covers the problem, the approach, the architecture decisions, and the outcome.
           </p>
         </div>
 
