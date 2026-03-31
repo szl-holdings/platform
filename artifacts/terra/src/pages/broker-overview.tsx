@@ -104,8 +104,20 @@ export default function BrokerOverviewPage() {
       </motion.div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-48">
-          <div className="w-6 h-6 border-2 border-terra-primary border-t-transparent rounded-full animate-spin" />
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-terra-border bg-terra-surface/40 p-5 animate-pulse">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-terra-border" />
+                  <div className="h-2.5 bg-terra-border/60 rounded w-20" />
+                </div>
+                <div className="h-7 bg-terra-border rounded w-16 mb-1" />
+                <div className="h-2 bg-terra-border/40 rounded w-24" />
+              </div>
+            ))}
+          </div>
+          <div className="h-64 rounded-xl border border-terra-border bg-terra-surface/40 animate-pulse" />
         </div>
       ) : error ? (
         <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6 text-center">

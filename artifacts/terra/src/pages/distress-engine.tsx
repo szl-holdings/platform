@@ -74,8 +74,8 @@ function formatCurrency(n: number) {
 }
 
 function ScoreBadge({ score, size = "sm" }: { score: number; size?: "sm" | "lg" }) {
-  const color = score >= 85 ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/30"
-    : score >= 70 ? "text-terra-primary bg-terra-primary/10 border-terra-primary/30"
+  const color = score >= 85 ? "text-[#40856a] bg-[#40856a]/10 border-[#40856a]/30"
+    : score >= 70 ? "text-[#2d6a4f] bg-[#2d6a4f]/10 border-[#2d6a4f]/30"
     : score >= 55 ? "text-amber-400 bg-amber-400/10 border-amber-400/30"
     : "text-slate-400 bg-slate-400/10 border-slate-400/30";
   return (
@@ -244,7 +244,7 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
           <div className="bg-terra-surface rounded-lg p-3 border border-terra-border">
             <p className="text-[10px] text-terra-text-muted uppercase tracking-wider mb-1">Opportunity Score</p>
             <div className="flex items-center gap-2">
-              <span className={cn("text-lg font-bold font-mono", property.opportunityScore >= 85 ? "text-emerald-400" : property.opportunityScore >= 70 ? "text-terra-primary" : "text-amber-400")}>
+              <span className={cn("text-lg font-bold font-mono", property.opportunityScore >= 85 ? "text-[#40856a]" : property.opportunityScore >= 70 ? "text-[#2d6a4f]" : "text-amber-400")}>
                 {property.opportunityScore}
               </span>
               <span className="text-[10px] text-terra-text-muted capitalize">{property.confidenceLevel} confidence</span>
@@ -265,7 +265,7 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
           {equityPercent !== null && (
             <div className="bg-terra-surface rounded-lg p-3 border border-terra-border">
               <p className="text-[10px] text-terra-text-muted uppercase tracking-wider mb-1">Equity</p>
-              <p className={cn("text-lg font-bold font-mono", equityPercent >= 30 ? "text-emerald-400" : equityPercent >= 10 ? "text-amber-400" : "text-red-400")}>{equityPercent}%</p>
+              <p className={cn("text-lg font-bold font-mono", equityPercent >= 30 ? "text-[#40856a]" : equityPercent >= 10 ? "text-amber-400" : "text-red-400")}>{equityPercent}%</p>
             </div>
           )}
           <div className="bg-terra-surface rounded-lg p-3 border border-terra-border">
@@ -302,11 +302,11 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
             <span className="text-[9px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20 ml-auto">DISTRESS ENGINE</span>
           </div>
           <div className="h-1.5 bg-terra-border rounded-full overflow-hidden mb-2">
-            <div className={cn("h-full rounded-full", property.opportunityScore >= 85 ? "bg-emerald-400" : property.opportunityScore >= 70 ? "bg-terra-primary" : "bg-amber-400")} style={{ width: `${property.opportunityScore}%` }} />
+            <div className={cn("h-full rounded-full", property.opportunityScore >= 85 ? "bg-[#40856a]" : property.opportunityScore >= 70 ? "bg-[#2d6a4f]" : "bg-amber-400")} style={{ width: `${property.opportunityScore}%` }} />
           </div>
           <p className="text-xs text-terra-text-secondary leading-relaxed">{property.scoreRationale}</p>
           <div className="mt-2 pt-2 border-t border-terra-border">
-            <p className="text-[10px] text-terra-text-muted">Likelihood of Sale: <span className={cn("font-semibold", property.opportunityScore >= 80 ? "text-emerald-400" : "text-amber-400")}>{property.opportunityScore >= 80 ? "High (70–85%)" : property.opportunityScore >= 65 ? "Medium (40–70%)" : "Low (10–40%)"}</span></p>
+            <p className="text-[10px] text-terra-text-muted">Likelihood of Sale: <span className={cn("font-semibold", property.opportunityScore >= 80 ? "text-[#40856a]" : "text-amber-400")}>{property.opportunityScore >= 80 ? "High (70–85%)" : property.opportunityScore >= 65 ? "Medium (40–70%)" : "Low (10–40%)"}</span></p>
           </div>
         </div>
 
@@ -356,7 +356,7 @@ function PropertyDetailPanel({ property, onClose, onConvertToLead }: { property:
               className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-terra-primary/10 border border-terra-primary/30 text-terra-primary text-xs font-semibold hover:bg-terra-primary/20 transition-colors">
               <LinkIcon className="w-3 h-3" /> Convert to Lead
             </button>
-            <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors">
+            <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#40856a]/10 border border-[#40856a]/30 text-[#40856a] text-xs font-semibold hover:bg-[#40856a]/20 transition-colors">
               <Eye className="w-3 h-3" /> Add to Watchlist
             </button>
             <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-semibold hover:bg-amber-400/20 transition-colors">
@@ -532,7 +532,7 @@ export default function DistressEnginePage() {
         <div className={cn(
           "fixed top-4 right-4 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl border shadow-xl text-sm font-medium transition-all",
           conversionState.status === "loading" ? "bg-terra-bg-secondary border-terra-border text-terra-text-muted" :
-          conversionState.status === "success" ? "bg-emerald-900/90 border-emerald-500/50 text-emerald-200" :
+          conversionState.status === "success" ? "bg-[#0f2a1e] border-[#2d6a4f]/50 text-[#40856a]" :
           "bg-rose-900/90 border-rose-500/50 text-rose-200"
         )}>
           {conversionState.status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -673,8 +673,24 @@ export default function DistressEnginePage() {
 
       <div className="flex-1 overflow-hidden">
         {isLoading && (
-          <div className="flex items-center justify-center h-full text-terra-text-muted text-sm">
-            <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Loading distress database...
+          <div className="p-4 space-y-2 overflow-auto">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-terra-border bg-terra-surface/40 p-4 flex items-start gap-3 animate-pulse">
+                <div className="w-8 h-8 rounded-lg bg-terra-border shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-2 min-w-0">
+                  <div className="h-3 bg-terra-border rounded w-2/3" />
+                  <div className="h-2.5 bg-terra-border/60 rounded w-1/3" />
+                  <div className="flex gap-2 mt-1">
+                    <div className="h-4 w-20 bg-terra-border/50 rounded-full" />
+                    <div className="h-4 w-16 bg-terra-border/40 rounded-full" />
+                  </div>
+                </div>
+                <div className="shrink-0 text-right space-y-1.5">
+                  <div className="h-6 w-10 bg-terra-border rounded" />
+                  <div className="h-2.5 w-14 bg-terra-border/50 rounded" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

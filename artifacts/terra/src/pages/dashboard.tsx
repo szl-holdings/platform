@@ -1,58 +1,120 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { cn } from "@workspace/shared-ui/utils";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { DataStateBadge, useRealtimeChannel, DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
-import type { DataProvenanceInfo } from "@workspace/shared-ui";
+import { DataStateBadge, useRealtimeChannel, ActionLoop } from "@workspace/shared-ui";
 import {
-  Building2, MapPin, TrendingUp, DollarSign, Users, Activity,
-  ChevronRight, Flame, AlertTriangle, Eye, Clock, Home,
-  ArrowRight, BarChart3, Target, Search, Shield, Zap, Globe, Map
+  Building2, MapPin, TrendingUp, Users, Activity,
+  ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3
 } from "lucide-react";
-import { brokerageSummary, brokerageDeals, riskSignals, agents, automationRuns } from "@/data/brokerage";
+import { brokerageSummary, brokerageDeals, riskSignals, agents } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
-const TACTICAL_MODULES = [
-  { id: "distress", label: "Distress Watch", icon: Flame, color: "#f97316", count: 3, href: "/distress-engine", desc: "Pre-foreclosure & auction tracking" },
-  { id: "offmarket", label: "Off-Market Intel", icon: Eye, color: "#8b5cf6", count: 12, href: "/investor-mode", desc: "Ownership analysis & opportunities" },
-  { id: "investor", label: "Investor Mode", icon: TrendingUp, color: "#10b981", count: 0, href: "/investor-mode", desc: "IRR modeling & scenario builder" },
-  { id: "pipeline", label: "Deal Pipeline", icon: Activity, color: "#3b82f6", count: 8, href: "/deals", desc: "Active deals & stage tracking" },
-  { id: "commercial", label: "Commercial Intel", icon: Building2, color: "#a07848", count: 0, href: "/commercial", desc: "Market comps & analysis" },
-  { id: "brokers", label: "Broker Scorecards", icon: Users, color: "#06b6d4", count: 0, href: "/agents", desc: "Performance & conversion rates" },
-  { id: "property-map", label: "Property Map", icon: Globe, color: "#10b981", count: 8, href: "/property-map", desc: "Geographic portfolio view · Mapbox" },
+const DOCTRINE_MODULES = [
+  { id: "foundation", label: "Foundation", icon: Building2, color: "rgba(255,255,255,0.3)", desc: "Data layer", href: "/investor-mode" },
+  { id: "watch", label: "Watch", icon: Eye, color: "#f59e0b", count: 3, desc: "Distress signals", href: "/distress-engine" },
+  { id: "pipeline", label: "Pipeline", icon: Activity, color: "#3a7ad4", count: 8, desc: "Active deals", href: "/pipeline" },
+  { id: "intelligence", label: "Intelligence", icon: BarChart3, color: "rgba(255,255,255,0.3)", desc: "Market data", href: "/market" },
+  { id: "action", label: "Action", icon: ArrowRight, color: "rgba(255,255,255,0.3)", desc: "Execute", href: "/deals" },
 ];
 
 const MARKET_SIGNALS = [
-  { time: "5m ago", text: "New pre-foreclosure filing — 847 Park Ave, Queens (Est. $2.1M)", severity: "high" as const, type: "distress" },
-  { time: "12m ago", text: "Price reduction: 1240 Broadway commercial listing dropped 8% ($4.2M → $3.9M)", severity: "medium" as const, type: "market" },
-  { time: "28m ago", text: "Ownership transfer detected — LLC → individual on 3 Tribeca parcels", severity: "high" as const, type: "ownership" },
-  { time: "45m ago", text: "New listing match: 2BR Chelsea, $890K — matches 3 active buyer profiles", severity: "medium" as const, type: "listing" },
-  { time: "1h ago", text: "Distress cluster alert: 4 new filings in East Harlem zip 10029", severity: "critical" as const, type: "distress" },
-  { time: "2h ago", text: "Broker response SLA warning — 2 inquiries aging past 4h target", severity: "high" as const, type: "ops" },
+  { time: "5m ago", text: "New pre-foreclosure filing — 847 Park Ave, Queens (Est. $2.1M)", severity: "high" as const },
+  { time: "12m ago", text: "Price reduction: 1240 Broadway commercial listing dropped 8% ($4.2M → $3.9M)", severity: "medium" as const },
+  { time: "28m ago", text: "Ownership transfer detected — LLC → individual on 3 Tribeca parcels", severity: "high" as const },
+  { time: "45m ago", text: "New listing match: 2BR Chelsea, $890K — matches 3 active buyer profiles", severity: "medium" as const },
+  { time: "1h ago", text: "Distress cluster: 4 new filings in East Harlem zip 10029", severity: "critical" as const },
+  { time: "2h ago", text: "Broker SLA warning — 2 inquiries aging past 4h target", severity: "high" as const },
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
-  low: "rgba(255,255,255,0.3)",
+  critical: "#c0503a",
+  high: "#b8943c",
+  medium: "rgba(255,255,255,0.3)",
+  low: "rgba(255,255,255,0.18)",
 };
 
-const WATCHLIST = [
-  { address: "847 Park Ave, Queens", type: "Pre-Foreclosure", value: "$2.1M", delta: "New filing", deltaColor: "#ef4444" },
-  { address: "1240 Broadway, Manhattan", type: "Commercial", value: "$3.9M", delta: "-8%", deltaColor: "#f97316" },
-  { address: "312 W 23rd St, Chelsea", type: "Residential", value: "$890K", delta: "3 matches", deltaColor: "#10b981" },
-  { address: "45 Warren St, Tribeca", type: "Multi-Family", value: "$4.8M", delta: "LLC transfer", deltaColor: "#8b5cf6" },
-  { address: "1890 Adam C Powell, Harlem", type: "Mixed-Use", value: "$1.6M", delta: "Cluster alert", deltaColor: "#ef4444" },
+const OPPORTUNITY_QUEUE = [
+  {
+    address: "847 Park Ave, Queens",
+    type: "Pre-Foreclosure",
+    owner: "Estate of R. Martinez",
+    stage: "Distress",
+    confidence: 87,
+    evidence: "14yr hold · Q2 2026 debt maturity · filing confirmed",
+    nextAction: "Initiate outreach",
+    value: "$2.1M",
+    flag: "urgent" as const,
+  },
+  {
+    address: "1240 Broadway, Manhattan",
+    type: "Commercial",
+    owner: "Midtown RE LLC (unmask: Cerberus Capital)",
+    stage: "Watch",
+    confidence: 74,
+    evidence: "Listing price down 8% · 47 DOM · LLC transfer pending",
+    nextAction: "Comp analysis",
+    value: "$3.9M",
+    flag: "active" as const,
+  },
+  {
+    address: "45 Warren St, Tribeca",
+    type: "Multi-Family",
+    owner: "W.Capital Partners LLC",
+    stage: "Investigate",
+    confidence: 61,
+    evidence: "LLC transfer detected · 11yr hold · no active filings",
+    nextAction: "Ownership verify",
+    value: "$4.8M",
+    flag: "watch" as const,
+  },
+  {
+    address: "1890 Adam C Powell Blvd, Harlem",
+    type: "Mixed-Use",
+    owner: "R&B Holding Corp",
+    stage: "Distress",
+    confidence: 82,
+    evidence: "Cluster alert: 4 filings, zip 10029 · tax lien delinquent",
+    nextAction: "File review",
+    value: "$1.6M",
+    flag: "urgent" as const,
+  },
+  {
+    address: "312 W 23rd St, Chelsea",
+    type: "Residential",
+    owner: "J. Park (individual)",
+    stage: "Qualified",
+    confidence: 55,
+    evidence: "3 active buyer matches · motivated seller indicated",
+    nextAction: "Schedule showing",
+    value: "$890K",
+    flag: "active" as const,
+  },
 ];
+
+const FLAG_STYLES: Record<string, { color: string; label: string }> = {
+  urgent: { color: "#c0503a", label: "Urgent" },
+  active: { color: "#b8943c", label: "Active" },
+  watch: { color: "rgba(255,255,255,0.3)", label: "Watch" },
+};
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API = BASE.replace(/\/[^/]+$/, "/api");
 
 export default function TerraIntelligence() {
   const qc = useQueryClient();
   const { lastMessage: wsSignal } = useRealtimeChannel("terra-signals");
+
+  const { data: healthData, isError: apiDown } = useQuery({
+    queryKey: ["terra-dashboard-health"],
+    queryFn: () => fetch(`${API}/terra/pipeline/deals?limit=1`).then(r => r.json()).then(d => d.data ?? d),
+    staleTime: 60000,
+    retry: 1,
+  });
+  const dataMode: "live" | "demo" = (!apiDown && healthData?.dataMode === "live") ? "live" : "demo";
 
   useEffect(() => {
     if (!wsSignal) return;
@@ -67,19 +129,20 @@ export default function TerraIntelligence() {
   const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 4);
   const { token: mapToken } = useMapboxToken();
   const [showMap, setShowMap] = useState(false);
-  const [activeRole, setActiveRole] = useState("operator");
 
   return (
     <div className="space-y-4 max-w-[1400px]">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-white tracking-tight font-display">Portfolio Intelligence</h1>
-          <p className="text-[11px] mt-0.5" style={{ color: "rgba(200,160,96,0.5)" }}>Property · Market · Pipeline — {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+          <h1 className="text-base font-bold text-white tracking-tight font-display">Property Intelligence</h1>
+          <p className="text-[10px] mt-0.5 font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>
+            Terra · {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <DataStateBadge state="demo" label="Demo Data" />
+        <div className="flex items-center gap-2.5">
+          <DataStateBadge state={dataMode} label={dataMode === "live" ? "Live" : "Demo"} />
           {criticalSignals.length > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-semibold animate-pulse" style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] font-semibold animate-pulse" style={{ color: "#c0503a", background: "rgba(192,80,58,0.09)", border: "1px solid rgba(192,80,58,0.18)" }}>
               <AlertTriangle className="w-3 h-3" />
               {criticalSignals.length} Critical
             </div>
@@ -87,178 +150,159 @@ export default function TerraIntelligence() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <RoleSelector
-          currentRole={activeRole}
-          onRoleChange={setActiveRole}
-          roles={[
-            { id: "executive", label: "Executive", description: "Portfolio value, exposure, strategy" },
-            { id: "operator", label: "Broker/Operator", description: "Active deals, leads, pipeline management" },
-            { id: "analyst", label: "Analyst", description: "Market data, distress patterns, comps" },
-            { id: "admin", label: "Admin", description: "System health, ingestion, agents" },
-            { id: "buyer", label: "Investor / Demo", description: "Opportunity discovery, watchlists" },
-          ]}
-        />
-        <DataProvenance
-          compact
-          provenance={{
-            source: "Terra Intelligence Engine",
-            lastUpdated: new Date().toISOString(),
-            freshness: "minutes",
-            confidence: "high",
-            dataState: "demo",
-            owner: "Terra Operations",
-          } as DataProvenanceInfo}
-        />
-      </div>
-
-      {activeRole === "executive" && (
-        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(200,160,96,0.15)", background: "rgba(200,160,96,0.04)" }}>
-          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(200,160,96,0.5)" }}>Executive Briefing</div>
-          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
-            {criticalSignals.length > 0
-              ? `${criticalSignals.length} critical distress signal${criticalSignals.length > 1 ? "s" : ""} detected — potential acquisition targets. Portfolio tracking $2.4B across NYC markets. ${brokerageSummary.activeDeals} active deals in pipeline. Market trending +2.1% over 30 days.`
-              : `No critical signals. Portfolio tracking $2.4B across NYC markets. ${brokerageSummary.activeDeals} active deals in pipeline. Market trending +2.1% over 30 days. All broker response SLAs within target.`}
-          </div>
-        </div>
-      )}
-
-      {activeRole === "analyst" && (
-        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(139,92,246,0.15)", background: "rgba(139,92,246,0.04)" }}>
-          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(139,92,246,0.5)" }}>Market Analysis Focus</div>
-          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
-            Distress cluster detected in East Harlem (zip 10029) — 4 new filings suggest neighborhood-level opportunity. LLC-to-individual ownership transfers in Tribeca warrant investigation. Pre-foreclosure pipeline at 3 active leads. Commercial listing price reductions accelerating in Midtown corridor.
-          </div>
-        </div>
-      )}
-
-      {activeRole === "buyer" && (
-        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(116,184,68,0.15)", background: "rgba(116,184,68,0.04)" }}>
-          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(116,184,68,0.5)" }}>Investor / Demo View</div>
-          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
-            You're viewing Terra — SZL's property intelligence platform for NYC real estate. Terra surfaces distressed properties, tracks ownership changes, models deal economics, and routes market signals to operators before they hit the open market. Every data point demonstrates the operational advantage of intelligence-driven real estate.
-          </div>
-        </div>
-      )}
-
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
         <div className="grid grid-cols-3 md:grid-cols-6">
           {[
-            { label: "Active Listings", value: brokerageSummary.activeListings.toString(), color: "#c8a060" },
-            { label: "Distress Signals", value: "3", color: "#f97316", pulse: true },
-            { label: "Deals in Motion", value: brokerageSummary.activeDeals.toString(), color: "#3b82f6" },
-            { label: "Broker Response", value: "2.4h", color: "#10b981", sub: "avg" },
-            { label: "Portfolio Tracked", value: "$2.4B", color: "#c8a060" },
-            { label: "Market Movement", value: "+2.1%", color: "#10b981", sub: "30d" },
+            { label: "Active Listings", value: brokerageSummary.activeListings.toString(), color: "#b8943c" },
+            { label: "Distress Signals", value: "3", color: "#c0503a", pulse: true },
+            { label: "Deals in Motion", value: brokerageSummary.activeDeals.toString(), color: "#3a7ad4" },
+            { label: "Broker Response", value: "2.4h", color: "#40856a", sub: "avg" },
+            { label: "Market Movement", value: "+2.1%", color: "#40856a", sub: "30d" },
+            { label: "Portfolio Tracked", value: "$2.4B", color: "#b8943c" },
           ].map((c, i) => (
-            <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+            <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
                 <span className="text-base font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
                 {c.pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: c.color }} />}
               </div>
-              <div className="text-[8px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
+              <div className="text-[8px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.25)" }}>{c.label}</div>
               {c.sub && <div className="text-[7px] mt-0.5" style={{ color: "rgba(255,255,255,0.15)" }}>{c.sub}</div>}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-        {TACTICAL_MODULES.map((mod) => (
-          <Link key={mod.id} href={mod.href} className="group rounded-xl border p-3 transition-all hover:scale-[1.02] cursor-pointer" style={{
-            borderColor: `${mod.color}15`,
-            background: `linear-gradient(135deg, ${mod.color}04, transparent)`,
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+        {DOCTRINE_MODULES.map((mod) => (
+          <Link key={mod.id} href={mod.href} className="group rounded-xl border p-3 transition-all hover:border-white/10 cursor-pointer" style={{
+            borderColor: "rgba(255,255,255,0.05)",
+            background: "rgba(255,255,255,0.012)",
           }}>
             <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${mod.color}12`, border: `1px solid ${mod.color}20` }}>
-                <mod.icon className="w-3.5 h-3.5" style={{ color: mod.color }} />
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <mod.icon className="w-3 h-3" style={{ color: mod.color }} />
               </div>
-              {mod.count > 0 && <span className="text-[9px] font-bold font-mono" style={{ color: mod.color }}>{mod.count}</span>}
+              {mod.count !== undefined && mod.count > 0 && <span className="text-[9px] font-bold font-mono" style={{ color: mod.color }}>{mod.count}</span>}
             </div>
-            <div className="text-[10px] font-semibold text-white/80">{mod.label}</div>
-            <div className="text-[8px] mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{mod.desc}</div>
+            <div className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{mod.label}</div>
+            <div className="text-[8px] mt-0.5 hidden sm:block" style={{ color: "rgba(255,255,255,0.2)" }}>{mod.desc}</div>
           </Link>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="w-3.5 h-3.5" style={{ color: "#c8a060" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(200,160,96,0.6)" }}>Active Watchlist</span>
-              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>({WATCHLIST.length})</span>
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+              <MapPin className="w-3.5 h-3.5" style={{ color: "#b8943c" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(184,148,60,0.7)" }}>Opportunity Queue</span>
+              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>({OPPORTUNITY_QUEUE.length})</span>
+              <Link href="/distress-engine" className="ml-auto flex items-center gap-1 text-[10px] font-medium transition-opacity hover:opacity-70" style={{ color: "#b8943c" }}>
+                Full watchlist <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
-            <div className="space-y-0">
-              {WATCHLIST.map((item, i) => (
-                <div key={i} className="flex items-center gap-3 py-2.5 hover:bg-white/[0.02] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(200,160,96,0.08)", border: "1px solid rgba(200,160,96,0.15)" }}>
-                    <Building2 className="w-3.5 h-3.5" style={{ color: "#c8a060" }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium text-white/80 truncate">{item.address}</p>
-                    <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{item.type}</span>
-                  </div>
-                  <span className="text-[11px] font-mono font-bold" style={{ color: "#c8a060" }}>{item.value}</span>
-                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{
-                    color: item.deltaColor,
-                    background: `${item.deltaColor}10`,
-                    border: `1px solid ${item.deltaColor}15`,
-                  }}>{item.delta}</span>
+
+            <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+              {["Property", "Owner", "Stage", "Conf.", "Evidence", "Action"].map((h, i) => (
+                <div key={h} className={`text-[8px] font-semibold uppercase tracking-wider ${i === 0 ? "col-span-3" : i === 1 ? "col-span-2" : i === 4 ? "col-span-3" : "col-span-1"}`} style={{ color: "rgba(255,255,255,0.2)" }}>
+                  {h}
                 </div>
               ))}
             </div>
-            <Link href="/listings" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#c8a060" }}>
-              View all properties <ArrowRight className="w-3 h-3" />
-            </Link>
+
+            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+              {OPPORTUNITY_QUEUE.map((item, i) => {
+                const flag = FLAG_STYLES[item.flag];
+                return (
+                  <div key={i}>
+                    <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-2.5 items-start hover:bg-white/[0.015] transition-colors">
+                      <div className="col-span-3 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: flag.color }} />
+                          <p className="text-[11px] font-medium text-white/80 truncate">{item.address}</p>
+                        </div>
+                        <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{item.type} · {item.value}</span>
+                      </div>
+                      <div className="col-span-2 min-w-0">
+                        <p className="text-[10px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{item.owner}</p>
+                      </div>
+                      <div className="col-span-1">
+                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ color: flag.color, background: `${flag.color}12` }}>{item.stage}</span>
+                      </div>
+                      <div className="col-span-1">
+                        <span className="text-[11px] font-bold font-mono" style={{ color: item.confidence >= 80 ? "#40856a" : item.confidence >= 65 ? "#b8943c" : "rgba(255,255,255,0.4)" }}>{item.confidence}%</span>
+                      </div>
+                      <div className="col-span-3 min-w-0">
+                        <p className="text-[9px] leading-relaxed" style={{ color: "rgba(255,255,255,0.3)" }}>{item.evidence}</p>
+                      </div>
+                      <div className="col-span-2 min-w-0">
+                        <p className="text-[9px] font-medium" style={{ color: "#40856a" }}>→ {item.nextAction}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5 md:hidden px-4 py-3 hover:bg-white/[0.015] transition-colors">
+                      <div className="flex items-start gap-2 justify-between">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5" style={{ background: flag.color }} />
+                          <p className="text-[11px] font-medium text-white/80 truncate">{item.address}</p>
+                        </div>
+                        <span className="text-[11px] font-bold font-mono shrink-0" style={{ color: item.confidence >= 80 ? "#40856a" : item.confidence >= 65 ? "#b8943c" : "rgba(255,255,255,0.4)" }}>{item.confidence}%</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{item.type} · {item.value}</span>
+                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded" style={{ color: flag.color, background: `${flag.color}12` }}>{item.stage}</span>
+                      </div>
+                      <p className="text-[9px] font-medium" style={{ color: "#40856a" }}>→ {item.nextAction}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(59,130,246,0.6)" }}>Deal Pipeline — Top Deals</span>
+              <Activity className="w-3.5 h-3.5" style={{ color: "#3a7ad4" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(58,122,212,0.7)" }}>Deal Pipeline</span>
+              <Link href="/deals" className="ml-auto flex items-center gap-1 text-[10px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#3a7ad4" }}>
+                Full pipeline <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
             <div className="space-y-0">
               {topDeals.map((deal, i) => (
-                <div key={deal.id} className="flex items-center gap-3 py-2 hover:bg-white/[0.02] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
+                <div key={deal.id} className="flex items-center gap-3 py-2 hover:bg-white/[0.015] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-medium text-white/80 truncate">{deal.address}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      {deal.buyerName && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{deal.buyerName}</span>}
-                    </div>
+                    {deal.buyerName && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{deal.buyerName}</span>}
                   </div>
                   <StageBadge stage={deal.stage} />
                   <RiskBadge level={deal.riskLevel} />
-                  <span className="text-[11px] font-mono font-bold" style={{ color: "#c8a060" }}>{formatCurrency(deal.price)}</span>
+                  <span className="text-[11px] font-mono font-bold" style={{ color: "#b8943c" }}>{formatCurrency(deal.price)}</span>
                 </div>
               ))}
             </div>
-            <Link href="/deals" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#3b82f6" }}>
-              View full pipeline <ArrowRight className="w-3 h-3" />
-            </Link>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-3.5 h-3.5" style={{ color: "#f97316" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(249,115,22,0.6)" }}>Market Signals</span>
+              <AlertTriangle className="w-3.5 h-3.5" style={{ color: "#b8943c" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(184,148,60,0.7)" }}>Market Signals</span>
             </div>
             <div className="space-y-0">
               {MARKET_SIGNALS.map((sig, i) => (
                 <div key={i} className="flex gap-2.5 py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
                   <div className="flex flex-col items-center shrink-0 pt-0.5">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: SEVERITY_COLORS[sig.severity] }} />
-                    {i < MARKET_SIGNALS.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: "rgba(255,255,255,0.05)" }} />}
+                    {i < MARKET_SIGNALS.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: "rgba(255,255,255,0.04)" }} />}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{sig.text}</p>
+                    <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{sig.text}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{sig.time}</span>
-                      <span className="text-[8px] px-1 py-0.5 rounded uppercase" style={{
+                      <span className="text-[8px] px-1 py-0.5 rounded uppercase font-semibold" style={{
                         color: SEVERITY_COLORS[sig.severity],
-                        background: `${SEVERITY_COLORS[sig.severity]}10`,
+                        background: `${SEVERITY_COLORS[sig.severity]}12`,
                       }}>{sig.severity}</span>
                     </div>
                   </div>
@@ -267,10 +311,13 @@ export default function TerraIntelligence() {
             </div>
           </div>
 
-          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Users className="w-3.5 h-3.5" style={{ color: "#06b6d4" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(6,182,212,0.6)" }}>Top Brokers</span>
+              <Users className="w-3.5 h-3.5" style={{ color: "#3a7ad4" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(58,122,212,0.7)" }}>Top Brokers</span>
+              <Link href="/leads" className="ml-auto flex items-center gap-1 text-[10px] font-medium hover:opacity-70 transition-opacity" style={{ color: "#3a7ad4" }}>
+                Scorecards <ArrowRight className="w-3 h-3" />
+              </Link>
             </div>
             {topAgents.map((agent, i) => (
               <div key={agent.id} className="flex items-center gap-3 py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
@@ -279,59 +326,59 @@ export default function TerraIntelligence() {
                   <p className="text-[10px] font-medium text-white/70">{agent.name}</p>
                   <p className="text-[8px]" style={{ color: "rgba(255,255,255,0.25)" }}>{agent.activeDeals} deals · {agent.conversionRate}% conv</p>
                 </div>
-                <span className="text-[10px] font-mono font-bold" style={{ color: "#10b981" }}>{formatCurrency(agent.commissionMTD)}</span>
+                <span className="text-[10px] font-mono font-bold" style={{ color: "#40856a" }}>{formatCurrency(agent.commissionMTD)}</span>
               </div>
             ))}
-            <Link href="/agents" className="flex items-center gap-1 mt-2 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#06b6d4" }}>
-              Full scorecards <ArrowRight className="w-3 h-3" />
-            </Link>
           </div>
 
-          <div className="rounded-xl border p-3" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
-            <div className="flex items-center justify-between">
+          <div className="rounded-xl border p-3" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.012)" }}>
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Shield className="w-3 h-3" style={{ color: "rgba(255,255,255,0.3)" }} />
-                <span className="text-[9px] uppercase tracking-wider font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>System</span>
+                <Shield className="w-3 h-3" style={{ color: "rgba(255,255,255,0.25)" }} />
+                <span className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: "rgba(255,255,255,0.25)" }}>System</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#10b981" }} />
-                <span className="text-[9px] font-mono" style={{ color: "#10b981" }}>Demo</span>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: dataMode === "live" ? "#40856a" : "#9a7840" }} />
+                <span className="text-[9px] font-mono font-semibold" style={{ color: dataMode === "live" ? "#40856a" : "#9a7840" }}>{dataMode === "live" ? "Live" : "Demo"}</span>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <div>
-                <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Occupancy</div>
-                <div className="text-[10px] font-mono font-bold" style={{ color: "#c8a060" }}>81%</div>
-              </div>
-              <div>
-                <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Pipeline</div>
-                <div className="text-[10px] font-mono font-bold" style={{ color: "#3b82f6" }}>{formatCurrency(brokerageSummary.pipelineValue)}</div>
-              </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { label: "Occupancy", value: "81%", color: "#b8943c" },
+                { label: "Pipeline", value: formatCurrency(brokerageSummary.pipelineValue), color: "#3a7ad4" },
+                { label: "Freshness", value: "2m ago", color: "rgba(255,255,255,0.35)" },
+                { label: "Confidence", value: "High", color: "#40856a" },
+              ].map(s => (
+                <div key={s.label}>
+                  <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>{s.label}</div>
+                  <div className="text-[10px] font-mono font-bold" style={{ color: s.color }}>{s.value}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(200,160,96,0.1)", background: "rgba(255,255,255,0.012)" }}>
-        <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: "rgba(200,160,96,0.08)" }}>
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(184,148,60,0.08)", background: "rgba(255,255,255,0.012)" }}>
+        <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
           <div className="flex items-center gap-2">
-            <Map className="w-3.5 h-3.5" style={{ color: "#c8a060" }} />
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(200,160,96,0.6)" }}>Portfolio Map</span>
-            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>— {properties.length} properties · Mapbox GL</span>
+            <Map className="w-3.5 h-3.5" style={{ color: "#b8943c" }} />
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(184,148,60,0.6)" }}>Spatial Context</span>
+            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>— {properties.length} properties tracked</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowMap(s => !s)}
               className="text-[9px] px-2.5 py-1 rounded-lg border transition-all"
               style={{
-                color: showMap ? "#c8a060" : "rgba(255,255,255,0.35)",
-                borderColor: showMap ? "rgba(200,160,96,0.3)" : "rgba(255,255,255,0.08)",
-                background: showMap ? "rgba(200,160,96,0.06)" : "transparent",
+                color: showMap ? "#b8943c" : "rgba(255,255,255,0.35)",
+                borderColor: showMap ? "rgba(184,148,60,0.25)" : "rgba(255,255,255,0.07)",
+                background: showMap ? "rgba(184,148,60,0.06)" : "transparent",
               }}
             >
               {showMap ? "Hide Map" : "Show Map"}
             </button>
-            <Link href="/property-map" className="text-[9px] px-2.5 py-1 rounded-lg border transition-all hover:bg-white/5" style={{ color: "#c8a060", borderColor: "rgba(200,160,96,0.2)" }}>
+            <Link href="/property-map" className="text-[9px] px-2.5 py-1 rounded-lg border transition-all hover:bg-white/5" style={{ color: "#b8943c", borderColor: "rgba(184,148,60,0.18)" }}>
               Full Map →
             </Link>
           </div>
@@ -341,7 +388,7 @@ export default function TerraIntelligence() {
             {mapToken ? (
               <Suspense fallback={
                 <div className="flex items-center justify-center h-full">
-                  <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(200,160,96,0.2)", borderTopColor: "#c8a060" }} />
+                  <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(184,148,60,0.2)", borderTopColor: "#b8943c" }} />
                 </div>
               }>
                 <PropertyMap properties={properties} token={mapToken} height="300px" showPanel={false} />
@@ -349,7 +396,7 @@ export default function TerraIntelligence() {
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-1">
-                  <Globe className="w-6 h-6 mx-auto" style={{ color: "rgba(200,160,96,0.3)" }} />
+                  <Globe className="w-5 h-5 mx-auto" style={{ color: "rgba(184,148,60,0.3)" }} />
                   <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>Map loading…</p>
                 </div>
               </div>
@@ -359,13 +406,13 @@ export default function TerraIntelligence() {
         {!showMap && (
           <div className="px-4 py-2.5 flex items-center gap-4">
             {[
-              { label: "Performing", color: "#10b981", count: properties.filter(p => p.status === "performing").length },
-              { label: "Watch", color: "#f59e0b", count: properties.filter(p => p.status === "watch").length },
-              { label: "Critical", color: "#ef4444", count: properties.filter(p => p.status === "critical").length },
+              { label: "Performing", color: "#40856a", count: properties.filter(p => p.status === "performing").length },
+              { label: "Watch", color: "#b8943c", count: properties.filter(p => p.status === "watch").length },
+              { label: "Critical", color: "#c0503a", count: properties.filter(p => p.status === "critical").length },
             ].map(s => (
               <div key={s.label} className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>{s.count} {s.label}</span>
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{s.count} {s.label}</span>
               </div>
             ))}
             <span className="ml-auto text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>Click "Show Map" to view geographic distribution</span>
@@ -376,11 +423,11 @@ export default function TerraIntelligence() {
       <ActionLoop
         title="Next Best Actions"
         actions={[
-          { id: "1", label: "Review 847 Park Ave pre-foreclosure", type: "investigate", severity: "high" },
-          { id: "2", label: "Follow up on Tribeca LLC transfer", type: "investigate" },
-          { id: "3", label: "Respond to aging broker inquiries", type: "remediate", severity: "high" },
-          { id: "4", label: "Approve Harlem cluster analysis", type: "approve" },
-          { id: "5", label: "Assign 1240 Broadway price reduction", type: "assign" },
+          { id: "1", label: "Review 847 Park Ave pre-foreclosure — outreach window open", type: "investigate", severity: "high" },
+          { id: "2", label: "Verify Tribeca LLC transfer on 45 Warren St", type: "investigate" },
+          { id: "3", label: "Respond to 2 aging broker inquiries (SLA breach)", type: "remediate", severity: "high" },
+          { id: "4", label: "Approve East Harlem cluster analysis — zip 10029", type: "approve" },
+          { id: "5", label: "Assign 1240 Broadway price reduction to acquisition team", type: "assign" },
         ]}
       />
     </div>

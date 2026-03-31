@@ -148,7 +148,7 @@ function TableRow({ deal }: { deal: ApiDeal }) {
       <td className="py-3 px-4 text-xs text-terra-text">{deal.price ? formatCurrency(deal.price) : "—"}</td>
       <td className="py-3 px-4">
         <span className={cn("text-xs font-bold",
-          deal.probability >= 75 ? "text-emerald-400" :
+          deal.probability >= 75 ? "text-[#40856a]" :
           deal.probability >= 50 ? "text-amber-400" : "text-rose-400"
         )}>{deal.probability}%</span>
       </td>
@@ -306,8 +306,8 @@ export default function DealsPage() {
             <h1 className="text-2xl font-display font-bold text-terra-text">Deal Pipeline</h1>
             <p className="text-sm text-terra-text-secondary mt-1">12-stage brokerage pipeline — kanban and table views with close probability and agent views</p>
             <div className="flex items-center gap-2 mt-2">
-              <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded border", isError ? "text-amber-400 bg-amber-400/10 border-amber-400/30" : "text-emerald-400 bg-emerald-400/10 border-emerald-400/30")}>
-                {isError ? "API OFFLINE" : "LIVE DB"}
+              <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded border", isError ? "text-amber-400 bg-amber-400/10 border-amber-400/30" : data?.dataMode === "live" ? "text-[#40856a] bg-[#40856a]/10 border-[#40856a]/30" : "text-amber-400 bg-amber-400/10 border-amber-400/30")}>
+                {isError ? "API OFFLINE" : data?.dataMode === "live" ? "LIVE DB" : "DEMO"}
               </span>
             </div>
           </div>
@@ -342,8 +342,26 @@ export default function DealsPage() {
       </div>
 
       {isLoading && (
-        <div className="flex items-center justify-center h-32 text-terra-text-muted text-sm">
-          <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Loading deals...
+        <div className="overflow-x-auto pb-4">
+          <div className="flex gap-4" style={{ minWidth: `${STAGES.length * 220}px` }}>
+            {STAGES.slice(0, 6).map(stage => (
+              <div key={stage} className="w-52 flex-shrink-0">
+                <div className="h-4 bg-terra-border/60 rounded w-24 mb-3 animate-pulse" />
+                <div className="space-y-2">
+                  {Array.from({ length: 2 + Math.floor(Math.random() * 2) }).map((_, i) => (
+                    <div key={i} className="rounded-lg border border-terra-border bg-terra-surface/40 p-3 animate-pulse">
+                      <div className="h-2.5 bg-terra-border rounded w-3/4 mb-2" />
+                      <div className="h-2 bg-terra-border/50 rounded w-1/2 mb-3" />
+                      <div className="flex justify-between items-center">
+                        <div className="h-2 bg-terra-border/50 rounded w-16" />
+                        <div className="h-4 bg-terra-border/60 rounded-full w-12" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

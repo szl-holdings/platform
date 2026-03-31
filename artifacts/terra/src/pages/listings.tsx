@@ -48,7 +48,7 @@ function ListingRow({ listing }: { listing: Listing }) {
         <td className="py-3 px-4 text-xs text-terra-text">{listing.showings}</td>
         <td className="py-3 px-4 text-xs">
           {listing.offerCount > 0 ? (
-            <span className="font-semibold text-emerald-400">{listing.offerCount}</span>
+            <span className="font-semibold text-[#40856a]">{listing.offerCount}</span>
           ) : (
             <span className="text-terra-text-muted">—</span>
           )}

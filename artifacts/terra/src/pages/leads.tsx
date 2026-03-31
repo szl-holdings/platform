@@ -59,13 +59,13 @@ const sourceLabels: Record<string, string> = {
 };
 
 function ScoreBar({ score }: { score: number }) {
-  const color = score >= 80 ? "bg-emerald-500" : score >= 60 ? "bg-amber-500" : score >= 40 ? "bg-orange-500" : "bg-rose-500";
+  const color = score >= 80 ? "bg-[#40856a]" : score >= 60 ? "bg-amber-500" : score >= 40 ? "bg-orange-500" : "bg-rose-500";
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-terra-border rounded-full overflow-hidden">
         <div className={cn("h-full rounded-full", color)} style={{ width: `${score}%` }} />
       </div>
-      <span className={cn("text-xs font-bold w-6 text-right", score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-rose-400")}>{score}</span>
+      <span className={cn("text-xs font-bold w-6 text-right", score >= 80 ? "text-[#40856a]" : score >= 60 ? "text-amber-400" : "text-rose-400")}>{score}</span>
     </div>
   );
 }
@@ -119,7 +119,7 @@ function LeadDetail({ lead, onClose, onConvertToDeal }: { lead: ApiLead; onClose
             </div>
           )}
           {lead.linkedDealId && (
-            <div className="flex items-center gap-2 text-xs text-emerald-400">
+            <div className="flex items-center gap-2 text-xs text-[#40856a]">
               <CheckSquare className="w-4 h-4" />
               Converted · Deal #{lead.linkedDealId}
             </div>
@@ -335,8 +335,18 @@ export default function LeadsPage() {
       </div>
 
       {isLoading && (
-        <div className="flex items-center justify-center h-32 text-terra-text-muted text-sm">
-          <RefreshCw className="w-4 h-4 animate-spin mr-2" /> Loading leads...
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-terra-border bg-terra-surface/40 p-4 flex items-center gap-4 animate-pulse">
+              <div className="w-9 h-9 rounded-full bg-terra-border shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 bg-terra-border rounded w-1/3" />
+                <div className="h-2.5 bg-terra-border/60 rounded w-1/2" />
+              </div>
+              <div className="h-5 w-16 bg-terra-border rounded-full" />
+              <div className="h-5 w-12 bg-terra-border/60 rounded" />
+            </div>
+          ))}
         </div>
       )}
 
@@ -390,7 +400,7 @@ export default function LeadsPage() {
                       <td className="py-3 px-4 w-32"><ScoreBar score={lead.score} /></td>
                       <td className="py-3 px-4">
                         <span className={cn("text-xs font-semibold",
-                          lead.conversionProbability >= 0.7 ? "text-emerald-400" :
+                          lead.conversionProbability >= 0.7 ? "text-[#40856a]" :
                           lead.conversionProbability >= 0.4 ? "text-amber-400" : "text-rose-400"
                         )}>{Math.round(lead.conversionProbability * 100)}%</span>
                       </td>

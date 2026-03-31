@@ -220,8 +220,15 @@ export default function MarketPage() {
             <h3 className="font-display font-bold text-terra-text">Price Per Sq Ft by Region</h3>
           </div>
           {isLoading ? (
-            <div className="h-72 flex items-center justify-center">
-              <div className="w-8 h-8 border-2 border-terra-primary border-t-transparent rounded-full animate-spin" />
+            <div className="h-72 flex flex-col gap-2 justify-end pb-2 animate-pulse">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-end gap-2">
+                  <div className="bg-terra-border/60 rounded-t" style={{ height: `${30 + Math.round(i * 8)}px`, width: "100%" }} />
+                </div>
+              ))}
+              <div className="flex gap-2 mt-1">
+                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-2 bg-terra-border/40 rounded flex-1" />)}
+              </div>
             </div>
           ) : (
             <div className="h-72">
@@ -244,8 +251,15 @@ export default function MarketPage() {
             <h3 className="font-display font-bold text-terra-text">Market Performance Radar</h3>
           </div>
           {isLoading ? (
-            <div className="h-72 flex items-center justify-center">
-              <div className="w-8 h-8 border-2 border-terra-emerald border-t-transparent rounded-full animate-spin" />
+            <div className="h-72 flex items-center justify-center animate-pulse">
+              <div className="relative w-48 h-48">
+                <div className="absolute inset-0 rounded-full border-2 border-terra-border/40" />
+                <div className="absolute inset-6 rounded-full border border-terra-border/30" />
+                <div className="absolute inset-12 rounded-full border border-terra-border/20" />
+                {[0,60,120,180,240,300].map((deg, i) => (
+                  <div key={i} className="absolute w-1.5 h-1.5 rounded-full bg-terra-border/60" style={{ top: `${50 + 44 * Math.sin(deg * Math.PI / 180)}%`, left: `${50 + 44 * Math.cos(deg * Math.PI / 180)}%`, transform: "translate(-50%,-50%)" }} />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="h-72">

@@ -2,58 +2,45 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
 import {
-  Building2, LayoutDashboard, Activity, Flame, Home,
-  UserCheck, Users, Brain, Zap, FileText, ClipboardList,
-  ArrowLeftRight, Bell, Menu, X, Inbox, BarChart3, Upload,
-  TrendingUp, Globe, Shield
+  Building2, LayoutDashboard, Eye, Activity,
+  BarChart3, Users, FileText, CheckSquare,
+  Bell, Menu, X, Briefcase, Map, Globe, TrendingUp
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { useQuery } from "@tanstack/react-query";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API = BASE.replace(/\/[^/]+$/, "/api");
 
 const NAV_SECTIONS = [
   {
-    title: "Portfolio",
+    title: "Core",
     items: [
-      { href: "/", label: "Portfolio Overview", icon: LayoutDashboard },
-      { href: "/broker-overview", label: "Broker Dashboard", icon: BarChart3 },
-      { href: "/property-map", label: "Property Map", icon: Globe, highlight: false },
-      { href: "/market", label: "Market Intelligence", icon: BarChart3, highlight: false },
+      { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+      { href: "/distress-engine", label: "Watchlists", icon: Eye },
+      { href: "/market", label: "Market", icon: BarChart3 },
     ],
   },
   {
-    title: "Operations",
+    title: "Intelligence",
     items: [
-      { href: "/distress-engine", label: "Distress Engine", icon: Flame, highlight: true },
-      { href: "/investor-mode", label: "Investor Mode", icon: TrendingUp, highlight: false },
-      { href: "/deals", label: "Deal Pipeline", icon: Activity },
-      { href: "/listings", label: "Property Listings", icon: Home },
-      { href: "/commercial", label: "Commercial Intel", icon: Building2 },
-      { href: "/offers", label: "Offer Management", icon: ArrowLeftRight },
-      { href: "/inquiries", label: "Inquiry Routing", icon: Inbox },
+      { href: "/pipeline", label: "Pipeline", icon: Activity },
+      { href: "/investor-mode", label: "Ownership", icon: Globe },
     ],
   },
   {
-    title: "Relationships",
+    title: "Brokerage",
     items: [
-      { href: "/agents", label: "Agents & Brokerage", icon: Users },
-      { href: "/leads", label: "Leads & CRM", icon: UserCheck },
-      { href: "/team", label: "Team Performance", icon: TrendingUp },
+      { href: "/deals", label: "Deals", icon: TrendingUp },
+      { href: "/leads", label: "Brokers", icon: Users },
+      { href: "/listings", label: "Portfolio", icon: Briefcase },
     ],
   },
   {
-    title: "Administration",
+    title: "Admin",
     items: [
-      { href: "/transactions", label: "Transactions", icon: ClipboardList },
-      { href: "/documents", label: "Docs & Compliance", icon: FileText },
-      { href: "/document-engine", label: "Document Engine", icon: Shield },
-      { href: "/ingestion", label: "Data Ingestion", icon: Upload },
-      { href: "/predictions", label: "AI Intelligence", icon: Brain },
-      { href: "/automations", label: "Workflow Automation", icon: Zap },
-    ],
-  },
-  {
-    title: "Microsoft Analytics",
-    items: [
-      { href: "/powerbi", label: "Power BI Reports", icon: BarChart3 },
+      { href: "/transactions", label: "Approvals", icon: CheckSquare },
+      { href: "/broker-overview", label: "Admin", icon: FileText },
     ],
   },
 ];
@@ -63,57 +50,63 @@ export function TerraLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("terra-signals");
 
+  const { data: apiHealth, isError: apiDown } = useQuery({
+    queryKey: ["terra-api-health"],
+    queryFn: () => fetch(`${API}/terra/pipeline/deals?limit=1`).then(r => r.json()).then(d => d.data ?? d),
+    staleTime: 60000,
+    retry: 1,
+  });
+  const sidebarDataMode = (!apiDown && apiHealth?.dataMode === "live") ? "Live" : "Demo";
+  const sidebarModeColor = sidebarDataMode === "Live" ? "#40856a" : "#9a7840";
+
   return (
     <div className="flex h-full overflow-hidden">
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-10 md:hidden"
+          className="fixed inset-0 bg-black/70 z-10 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
       <aside className={cn(
         "border-r flex flex-col shrink-0 z-20 transition-transform duration-200",
-        "fixed md:relative inset-y-0 left-0 w-60",
+        "fixed md:relative inset-y-0 left-0 w-52",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-      )} style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(10,12,18,0.97)" }}>
-        <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+      )} style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,14,0.98)" }}>
+
+        <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg shadow-lg" style={{ background: "linear-gradient(135deg, #a07848, #c8a060)", boxShadow: "0 0 12px rgba(160,120,72,0.3)" }}>
-              <Building2 className="w-4 h-4 text-white" />
+            <div className="p-1.5 rounded-lg" style={{ background: "rgba(45,106,79,0.15)", border: "1px solid rgba(45,106,79,0.25)" }}>
+              <Building2 className="w-4 h-4" style={{ color: "#40856a" }} />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm tracking-wide text-white leading-none">Terra</span>
-              <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#a07848" }}>Portfolio Intelligence</span>
+              <span className="font-bold text-sm tracking-tight text-white leading-none">Terra</span>
+              <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>Property Intelligence</span>
             </div>
           </div>
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col">
-          <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-3 overflow-y-auto">
+          <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-2.5 overflow-y-auto">
             {NAV_SECTIONS.map((section) => (
               <div key={section.title}>
-                <p className="text-[9px] font-medium uppercase tracking-widest mb-1.5 px-3" style={{ color: "rgba(255,255,255,0.25)" }}>{section.title}</p>
+                <p className="text-[9px] font-semibold uppercase tracking-widest mb-1 px-3" style={{ color: "rgba(255,255,255,0.2)" }}>{section.title}</p>
                 <div className="flex flex-col gap-0.5">
                   {section.items.map((item) => {
-                    const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
-                    const isDistress = item.highlight;
+                    const isActive = item.href === "/dashboard"
+                      ? (location === "/dashboard" || location === "/" || location === "")
+                      : location.startsWith(item.href);
                     return (
                       <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                        "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                        "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 relative",
                         isActive
-                          ? isDistress
-                            ? "text-orange-400"
-                            : "text-[#c8a060]"
-                          : isDistress
-                          ? "text-orange-400/70 hover:text-orange-400 hover:bg-red-500/5"
-                          : "text-slate-400 hover:text-white hover:bg-white/5"
-                      )} style={{ background: isActive ? (isDistress ? "rgba(249,115,22,0.08)" : "rgba(160,120,72,0.08)") : undefined }}>
-                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: isDistress ? "#f97316" : "#c8a060" }} />}
-                        <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? (isDistress ? "text-orange-400" : "text-[#c8a060]") : "text-slate-500 group-hover:text-slate-300")} />
+                          ? "text-white"
+                          : "text-slate-500 hover:text-slate-200 hover:bg-white/[0.04]"
+                      )} style={{
+                        background: isActive ? "rgba(255,255,255,0.06)" : undefined
+                      }}>
+                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "rgba(255,255,255,0.4)" }} />}
+                        <item.icon className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? "rgba(255,255,255,0.8)" : undefined }} />
                         <span>{item.label}</span>
-                        {isDistress && !isActive && (
-                          <span className="ml-auto text-[8px] px-1 py-0.5 rounded font-bold uppercase" style={{ color: "#f97316", background: "rgba(249,115,22,0.12)" }}>LIVE</span>
-                        )}
                       </Link>
                     );
                   })}
@@ -122,70 +115,56 @@ export function TerraLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(200,160,96,0.04)", border: "1px solid rgba(200,160,96,0.08)" }}>
-            <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(200,160,96,0.4)" }}>Portfolio Pulse</div>
+          <div className="shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(45,106,79,0.04)", border: "1px solid rgba(45,106,79,0.08)" }}>
+            <div className="text-[9px] uppercase tracking-widest font-semibold mb-2" style={{ color: "rgba(64,133,106,0.5)" }}>System State</div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active listings</span>
-                <span className="text-[9px] font-mono" style={{ color: "#c8a060" }}>24 live</span>
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Data mode</span>
+                <span className="text-[9px] font-mono font-semibold" style={{ color: sidebarModeColor }}>{sidebarDataMode}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Distress signals</span>
-                <span className="text-[9px] font-mono" style={{ color: "#f97316" }}>3 flagged</span>
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Distress signals</span>
+                <span className="text-[9px] font-mono font-semibold" style={{ color: "#f59e0b" }}>3 flagged</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Portfolio value</span>
-                <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>$2.4B</span>
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Portfolio value</span>
+                <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>$2.4B</span>
               </div>
-            </div>
-            <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-              <div className="h-full rounded-full" style={{ width: "81%", background: "linear-gradient(90deg, #c8a060, #a07848)" }} />
-            </div>
-            <div className="flex justify-between mt-0.5">
-              <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Occupancy</span>
-              <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>81%</span>
             </div>
           </div>
         </div>
 
-        <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <div className="flex items-center gap-2 text-[10px] mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>
+        <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          <div className="flex items-center gap-2 text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>
             <Building2 className="w-3 h-3" />
             <span>SZL Holdings · Real Estate</span>
-          </div>
-          <div className="flex gap-1 flex-wrap">
-            <a href="/lyte-command-center/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#06b6d4", background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)" }}>LYTE</a>
-            <a href="/alloy" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.1)", border: "1px solid rgba(75,139,219,0.2)" }}>ALLOY</a>
-            <a href="/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80 transition-opacity" style={{ color: "#94a3b8", background: "rgba(148,163,184,0.1)", border: "1px solid rgba(148,163,184,0.2)" }}>SZL</a>
           </div>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-12 border-b flex items-center justify-between px-4 md:px-6 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(10,12,18,0.85)", backdropFilter: "blur(8px)" }}>
-          <div className="flex items-center gap-3 text-xs font-mono">
+        <header className="h-11 border-b flex items-center justify-between px-4 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.04)", background: "rgba(8,10,14,0.92)", backdropFilter: "blur(8px)" }}>
+          <div className="flex items-center gap-3 text-xs">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors mr-2"
-              style={{ color: "rgba(255,255,255,0.5)" }}
+              className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+              style={{ color: "rgba(255,255,255,0.4)" }}
               aria-label="Toggle sidebar"
             >
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#a07848" }} />
-            <span className="hidden sm:block" style={{ color: "#c8a060" }}>Terra · Portfolio Intelligence</span>
-            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
-            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.4)" }}>SZL Holdings</span>
+            <span className="w-1.5 h-1.5 rounded-full hidden sm:block" style={{ background: "rgba(45,106,79,0.6)" }} />
+            <span className="hidden sm:block font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Terra · Property Intelligence</span>
           </div>
           <div className="flex items-center gap-3">
             <RealtimeStatusIndicator status={wsStatus} compact />
-            <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+            <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <Bell className="w-3.5 h-3.5" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#f59e0b" }} />
             </button>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: "#0a0e16" }}>
+        <main className="flex-1 overflow-auto p-4 md:p-5" style={{ background: "#0a0c10" }}>
           {children}
         </main>
       </div>

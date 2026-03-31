@@ -72,17 +72,17 @@ export function StageBadge({ stage, className }: { stage: string; className?: st
   const stageColors: Record<string, string> = {
     lead: "bg-slate-500/10 text-slate-400",
     qualified: "bg-blue-500/10 text-blue-400",
-    showing: "bg-cyan-500/10 text-cyan-400",
+    showing: "bg-sky-500/10 text-sky-400",
     "offer-drafted": "bg-indigo-500/10 text-indigo-400",
     "offer-submitted": "bg-violet-500/10 text-violet-400",
     negotiation: "bg-purple-500/10 text-purple-400",
-    accepted: "bg-fuchsia-500/10 text-fuchsia-400",
-    "attorney-review": "bg-pink-500/10 text-pink-400",
-    inspection: "bg-rose-500/10 text-rose-400",
-    financing: "bg-orange-500/10 text-orange-400",
+    accepted: "bg-[#40856a]/10 text-[#40856a]",
+    "attorney-review": "bg-amber-500/10 text-amber-400",
+    inspection: "bg-orange-500/10 text-orange-400",
+    financing: "bg-orange-600/10 text-orange-500",
     appraisal: "bg-amber-500/10 text-amber-400",
-    "under-contract": "bg-lime-500/10 text-lime-400",
-    "clear-to-close": "bg-emerald-500/10 text-emerald-400",
+    "under-contract": "bg-[#40856a]/10 text-[#40856a]",
+    "clear-to-close": "bg-[#40856a]/10 text-[#40856a]",
     closed: "bg-terra-primary/10 text-terra-primary",
     "lost-stalled": "bg-terra-text-muted/10 text-terra-text-muted",
     new: "bg-slate-500/10 text-slate-400",
@@ -90,8 +90,8 @@ export function StageBadge({ stage, className }: { stage: string; className?: st
     nurtured: "bg-amber-500/10 text-amber-400",
     hot: "bg-rose-500/10 text-rose-400",
     inactive: "bg-terra-text-muted/10 text-terra-text-muted",
-    converted: "bg-emerald-500/10 text-emerald-400",
-    active: "bg-emerald-500/10 text-emerald-400",
+    converted: "bg-[#40856a]/10 text-[#40856a]",
+    active: "bg-[#40856a]/10 text-[#40856a]",
     pending: "bg-amber-500/10 text-amber-400",
     "under-contract-l": "bg-violet-500/10 text-violet-400",
     expired: "bg-terra-text-muted/10 text-terra-text-muted",
@@ -128,7 +128,7 @@ export function WorkflowTraceView({ steps, compact = false }: {
   compact?: boolean;
 }) {
   const statusConfig = {
-    complete: { color: "bg-emerald-500", text: "text-emerald-400", label: "Complete" },
+    complete: { color: "bg-[#40856a]", text: "text-[#40856a]", label: "Complete" },
     "in-progress": { color: "bg-blue-500", text: "text-blue-400", label: "In Progress" },
     pending: { color: "bg-terra-text-muted", text: "text-terra-text-muted", label: "Pending" },
     overdue: { color: "bg-rose-500", text: "text-rose-400", label: "Overdue" },
@@ -143,7 +143,7 @@ export function WorkflowTraceView({ steps, compact = false }: {
           <div key={i} className="flex gap-3">
             <div className="flex flex-col items-center">
               <div className={cn("w-3 h-3 rounded-full flex-shrink-0 mt-0.5", cfg.color)} />
-              {!isLast && <div className={cn("w-0.5 flex-1 mt-1", step.status === "complete" ? "bg-emerald-500/30" : "bg-terra-border")} />}
+              {!isLast && <div className={cn("w-0.5 flex-1 mt-1", step.status === "complete" ? "bg-[#40856a]/30" : "bg-terra-border")} />}
             </div>
             <div className={cn("pb-3", isLast && "pb-0")}>
               <div className="flex items-center gap-2">

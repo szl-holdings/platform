@@ -75,6 +75,8 @@ router.get("/terra/crm/leads", authMiddleware({ required: false }), async (req, 
 
     sendSuccess(res, {
       count: rows.length,
+      fetchedAt: new Date().toISOString(),
+      dataMode: rows.length > 0 ? "live" : "empty",
       leads: rows.map(r => ({
         id: r.externalId ?? String(r.id),
         firstName: r.firstName,
@@ -122,6 +124,23 @@ router.get("/terra/crm/leads/:id", authMiddleware({ required: false }), async (r
     }
 
     const r = rows[0]!;
+
+    let linkedDealValid = false;
+    if (r.linkedDealId) {
+      const dealCheck = await db.select({ id: terraDealsTable.id }).from(terraDealsTable)
+        .where(and(eq(terraDealsTable.id, r.linkedDealId), eq(terraDealsTable.isActive, true)))
+        .limit(1);
+      linkedDealValid = dealCheck.length > 0;
+    }
+
+    let distressPropertyValid = false;
+    if (r.distressPropertyId) {
+      const propCheck = await db.select({ id: terraDistressPropertiesTable.id }).from(terraDistressPropertiesTable)
+        .where(eq(terraDistressPropertiesTable.id, r.distressPropertyId))
+        .limit(1);
+      distressPropertyValid = propCheck.length > 0;
+    }
+
     sendSuccess(res, {
       id: r.externalId ?? String(r.id),
       firstName: r.firstName,
@@ -141,6 +160,10 @@ router.get("/terra/crm/leads/:id", authMiddleware({ required: false }), async (r
       nextAction: r.nextAction,
       distressPropertyId: r.distressPropertyExternalId ?? (r.distressPropertyId ? String(r.distressPropertyId) : null),
       linkedDealId: r.linkedDealId ? String(r.linkedDealId) : null,
+      linkIntegrity: {
+        linkedDealValid: r.linkedDealId ? linkedDealValid : null,
+        distressPropertyValid: r.distressPropertyId ? distressPropertyValid : null,
+      },
       budget: r.budget,
       desiredAreas: r.desiredAreas ?? [],
       notes: r.notes,
@@ -224,6 +247,8 @@ router.get("/terra/pipeline/deals", authMiddleware({ required: false }), async (
 
     sendSuccess(res, {
       count: rows.length,
+      fetchedAt: new Date().toISOString(),
+      dataMode: rows.length > 0 ? "live" : "empty",
       deals: rows.map(r => ({
         id: r.externalId ?? String(r.id),
         address: r.address,
@@ -259,6 +284,68 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: false }), async 
       return;
     }
 
+    const VALID_STAGES = ["lead","qualified","showing","offer","negotiation","accepted","inspection","financing","under-contract","clear-to-close","closed","lost"];
+    const VALID_TYPES = ["acquisition", "disposition", "refinance", "development"];
+    const VALID_RISK = ["low", "medium", "high", "critical"];
+
+    const stage = body.stage ?? "lead";
+    const type = body.type ?? "acquisition";
+    const riskLevel = body.riskLevel ?? "medium";
+
+    if (!VALID_STAGES.includes(stage)) {
+      res.status(400).json({ error: `Invalid stage. Valid: ${VALID_STAGES.join(", ")}` });
+      return;
+    }
+    if (!VALID_TYPES.includes(type)) {
+      res.status(400).json({ error: `Invalid type. Valid: ${VALID_TYPES.join(", ")}` });
+      return;
+    }
+    if (!VALID_RISK.includes(riskLevel)) {
+      res.status(400).json({ error: `Invalid riskLevel. Valid: ${VALID_RISK.join(", ")}` });
+      return;
+    }
+
+    let resolvedLeadId: number | null = null;
+    if (body.leadId) {
+      const numericId = parseInt(String(body.leadId), 10);
+      const conditions = isNaN(numericId)
+        ? eq(terraLeadsTable.externalId, String(body.leadId))
+        : or(eq(terraLeadsTable.externalId, String(body.leadId)), eq(terraLeadsTable.id, numericId))!;
+      const linkedLead = await db.select({ id: terraLeadsTable.id }).from(terraLeadsTable)
+        .where(conditions).limit(1);
+      if (linkedLead.length === 0) {
+        res.status(422).json({ error: `leadId "${body.leadId}" does not reference a valid lead` });
+        return;
+      }
+      resolvedLeadId = linkedLead[0]!.id;
+    }
+
+    let resolvedDistressPropertyId: number | null = null;
+    let resolvedDistressPropertyExternalId: string | null = body.distressPropertyExternalId ?? null;
+    if (body.distressPropertyId) {
+      const numericId = parseInt(String(body.distressPropertyId), 10);
+      const conditions = isNaN(numericId)
+        ? eq(terraDistressPropertiesTable.externalId, String(body.distressPropertyId))
+        : or(eq(terraDistressPropertiesTable.externalId, String(body.distressPropertyId)), eq(terraDistressPropertiesTable.id, numericId))!;
+      const linkedProp = await db.select({ id: terraDistressPropertiesTable.id, externalId: terraDistressPropertiesTable.externalId }).from(terraDistressPropertiesTable)
+        .where(conditions).limit(1);
+      if (linkedProp.length === 0) {
+        res.status(422).json({ error: `distressPropertyId "${body.distressPropertyId}" does not reference a valid property` });
+        return;
+      }
+      resolvedDistressPropertyId = linkedProp[0]!.id;
+      resolvedDistressPropertyExternalId = linkedProp[0]!.externalId ?? resolvedDistressPropertyExternalId;
+    }
+
+    const STAGE_ORDER = ["lead","qualified","showing","offer","negotiation","accepted","inspection","financing","under-contract","clear-to-close","closed","lost"];
+    const stageIdx = STAGE_ORDER.indexOf(stage);
+    const probability = stage === "closed" ? 100 : stage === "lost" ? 5 :
+      stage === "clear-to-close" ? 95 : stage === "under-contract" ? 85 :
+      stage === "financing" ? 78 : stage === "inspection" ? 70 :
+      stage === "accepted" ? 65 : stage === "negotiation" ? 55 :
+      stage === "offer" ? 40 : stage === "showing" ? 30 :
+      stage === "qualified" ? 20 : 10;
+
     const externalId = `deal-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const deal: InsertTerraDeal = {
       externalId,
@@ -266,23 +353,23 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: false }), async 
       borough: body.borough ?? null,
       county: body.county ?? null,
       zipCode: body.zipCode ?? null,
-      stage: body.stage ?? "lead",
-      type: body.type ?? "acquisition",
+      stage,
+      type,
       price: body.price ? String(body.price) : null,
       askingPrice: body.askingPrice ? String(body.askingPrice) : null,
       arv: body.arv ? String(body.arv) : null,
-      probability: body.probability ?? 25,
-      riskLevel: body.riskLevel ?? "medium",
+      probability: body.probability ?? probability,
+      riskLevel,
       ownerName: body.ownerName ?? null,
       ownerUserId: body.ownerUserId ?? null,
       clientName: body.clientName ?? null,
-      distressPropertyId: body.distressPropertyId ? Number(body.distressPropertyId) : null,
-      distressPropertyExternalId: body.distressPropertyExternalId ?? null,
-      leadId: body.leadId ? Number(body.leadId) : null,
+      distressPropertyId: resolvedDistressPropertyId,
+      distressPropertyExternalId: resolvedDistressPropertyExternalId,
+      leadId: resolvedLeadId,
       estimatedCloseDate: body.estimatedCloseDate ?? null,
       nextAction: body.nextAction ?? "Initial review",
       notes: body.notes ?? null,
-      timeline: [{ date: nowStr(), event: "Deal created", type: "created" }],
+      timeline: [{ date: nowStr(), event: "Deal created", type: "created", stage, stageIndex: stageIdx }],
       isActive: true,
     };
 
@@ -482,12 +569,14 @@ router.get("/terra/opportunities/saved", authMiddleware({ required: false }), as
         note: terraSavedOpportunitiesTable.note,
         savedAt: terraSavedOpportunitiesTable.savedAt,
         propertyId: terraDistressPropertiesTable.externalId,
+        propertyDbId: terraDistressPropertiesTable.id,
         address: terraDistressPropertiesTable.address,
         borough: terraDistressPropertiesTable.borough,
         distressType: terraDistressPropertiesTable.distressType,
         opportunityScore: terraDistressPropertiesTable.opportunityScore,
         estimatedValue: terraDistressPropertiesTable.estimatedValue,
         stage: terraDistressPropertiesTable.stage,
+        propertyUpdatedAt: terraDistressPropertiesTable.updatedAt,
       })
       .from(terraSavedOpportunitiesTable)
       .leftJoin(terraDistressPropertiesTable, eq(terraSavedOpportunitiesTable.distressPropertyId, terraDistressPropertiesTable.id))
@@ -495,7 +584,45 @@ router.get("/terra/opportunities/saved", authMiddleware({ required: false }), as
       .orderBy(desc(terraSavedOpportunitiesTable.savedAt))
       .limit(200);
 
-    sendSuccess(res, { count: rows.length, opportunities: rows });
+    const propertyDbIds = rows.map(r => r.propertyDbId).filter((id): id is number => id != null);
+    const activeDealsByProperty = propertyDbIds.length > 0
+      ? await db.select({ distressPropertyId: terraDealsTable.distressPropertyId, stage: terraDealsTable.stage })
+          .from(terraDealsTable)
+          .where(and(
+            eq(terraDealsTable.isActive, true),
+            sql`${terraDealsTable.distressPropertyId} = ANY(ARRAY[${sql.raw(propertyDbIds.join(","))}]::int[])`
+          ))
+      : [];
+
+    const dealLookup = new Map<number, string>();
+    for (const d of activeDealsByProperty) {
+      if (d.distressPropertyId != null) dealLookup.set(d.distressPropertyId, d.stage);
+    }
+
+    const now = Date.now();
+    const enriched = rows.map(r => {
+      const savedMs = r.savedAt ? new Date(r.savedAt).getTime() : now;
+      const updatedMs = r.propertyUpdatedAt ? new Date(r.propertyUpdatedAt).getTime() : savedMs;
+      const daysSinceSaved = Math.floor((now - savedMs) / 86400000);
+      const daysSinceUpdate = Math.floor((now - updatedMs) / 86400000);
+      const isStale = daysSinceSaved > 7 && daysSinceUpdate > 7;
+      const linkedDealStage = r.propertyDbId != null ? dealLookup.get(r.propertyDbId) ?? null : null;
+      const isConverted = linkedDealStage === "closed";
+      const hasActiveDeal = linkedDealStage != null && linkedDealStage !== "lost";
+      const { propertyDbId: _drop, ...rest } = r;
+      return {
+        ...rest,
+        linkedDealStage,
+        hasActiveDeal,
+        daysSinceSaved,
+        daysSincePropertyUpdate: daysSinceUpdate,
+        isStale,
+        isConverted,
+        watchlistState: isConverted ? "converted" : hasActiveDeal ? "in-deal" : r.stage === "acquired" ? "closed" : isStale ? "stale" : "active",
+      };
+    });
+
+    sendSuccess(res, { count: enriched.length, fetchedAt: new Date().toISOString(), dataMode: enriched.length > 0 ? "live" : "empty", opportunities: enriched });
   } catch (err) { handleRouteError(res, err, "Failed to fetch saved opportunities"); }
 });
 
