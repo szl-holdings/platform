@@ -29,7 +29,10 @@ function PageLoader() {
   );
 }
 
-const ExecutionRuns = lazy(() => import("@/pages/execution-runs"));
+const FactoryFloor = lazy(() => import("@/pages/factory-floor"));
+const ExecutionHistory = lazy(() => import("@/pages/execution-history"));
+const RunDetail = lazy(() => import("@/pages/run-detail"));
+const SignalFeed = lazy(() => import("@/pages/signal-feed"));
 const WorkflowOrchestration = lazy(() => import("@/pages/workflow-orchestration"));
 const ConnectorMesh = lazy(() => import("@/pages/connector-mesh"));
 const GovernanceAudit = lazy(() => import("@/pages/governance-audit"));
@@ -43,11 +46,19 @@ const BrandVoice = lazy(() => import("@/pages/creative/brand-voice"));
 const ContentCalendar = lazy(() => import("@/pages/creative/content-calendar"));
 const AIStudio = lazy(() => import("@/pages/creative/ai-studio"));
 
+function RunDetailRoute({ params }: { params: { id: string } }) {
+  const id = parseInt(params.id ?? "0");
+  return <RunDetail id={id} />;
+}
+
 function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={ExecutionRuns} />
+        <Route path="/" component={FactoryFloor} />
+        <Route path="/runs" component={ExecutionHistory} />
+        <Route path="/runs/:id" component={RunDetailRoute} />
+        <Route path="/signals" component={SignalFeed} />
         <Route path="/workflows" component={WorkflowOrchestration} />
         <Route path="/connectors" component={ConnectorMesh} />
         <Route path="/governance" component={GovernanceAudit} />
@@ -67,7 +78,9 @@ function PrivateRouter() {
 }
 
 const alloyCommands: CommandItem[] = [
-  { id: "nav-runs", label: "Execution Runs", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-factory", label: "Factory Floor", icon: "🏭", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-runs", label: "Execution History", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/runs"); } },
+  { id: "nav-signals", label: "Signal & Event Feed", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
   { id: "nav-workflows", label: "Workflow Orchestration", icon: "🔀", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/workflows"); } },
   { id: "nav-connectors", label: "Connector Mesh", icon: "🔌", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/connectors"); } },
   { id: "nav-governance", label: "Governance & Audit", icon: "🛡️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/governance"); } },
@@ -76,6 +89,8 @@ const alloyCommands: CommandItem[] = [
 ];
 
 const alloyShortcuts: KeyboardShortcut[] = [
+  { key: "R", description: "Execution History", category: "Navigation" },
+  { key: "S", description: "Signal Feed", category: "Navigation" },
   { key: "W", description: "Workflow Orchestration", category: "Navigation" },
   { key: "C", description: "Connector Mesh", category: "Navigation" },
   { key: "G", description: "Governance & Audit", category: "Navigation" },

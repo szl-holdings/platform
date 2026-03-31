@@ -139,21 +139,6 @@ router.post("/alloy/ingest/batch", authMiddleware(), requireRole("super_admin", 
   }
 });
 
-router.get("/alloy/signals", authMiddleware(), async (req, res) => {
-  try {
-    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-    const orgIds = getUserOrgIds(req.user);
-    const orgFilter = !isGlobalAdmin(req.user) && orgIds.length > 0 ? inArray(alloySignalsTable.orgId, orgIds) : undefined;
-    const baseQuery = orgFilter ? db.select().from(alloySignalsTable).where(orgFilter) : db.select().from(alloySignalsTable);
-    const rows = await baseQuery.orderBy(desc(alloySignalsTable.receivedAt)).limit(limit).offset(offset);
-    const countQuery = orgFilter ? db.select({ count: sql<number>`count(*)::int` }).from(alloySignalsTable).where(orgFilter) : db.select({ count: sql<number>`count(*)::int` }).from(alloySignalsTable);
-    const [{ count }] = await countQuery;
-    sendSuccess(res, rows, 200, { page, limit, total: count });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to list signals");
-  }
-});
-
 router.get("/alloy/workflows", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
@@ -315,52 +300,6 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), async (req, res) => {
   }
 });
 
-router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req, res) => {
-  try {
-    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-    const stateFilter = typeof req.query.state === "string" ? req.query.state : null;
-    const validStates = ["queued", "running", "waiting_approval", "completed", "failed", "canceled"];
-
-    const stateCondition = stateFilter && validStates.includes(stateFilter)
-      ? eq(alloyWorkflowRunsTable.state, stateFilter as "queued" | "running" | "waiting_approval" | "completed" | "failed" | "canceled")
-      : undefined;
-
-    if (!isGlobalAdmin(req.user)) {
-      const orgIds = getUserOrgIds(req.user);
-      if (orgIds.length === 0) {
-        sendSuccess(res, [], 200, { page, limit, total: 0 });
-        return;
-      }
-      const allowedWorkflowIds = (await db
-        .select({ id: alloyWorkflowsTable.id })
-        .from(alloyWorkflowsTable)
-        .where(inArray(alloyWorkflowsTable.orgId, orgIds)))
-        .map(r => r.id);
-
-      if (allowedWorkflowIds.length === 0) {
-        sendSuccess(res, [], 200, { page, limit, total: 0 });
-        return;
-      }
-      const orgWorkflowFilter = inArray(alloyWorkflowRunsTable.workflowId, allowedWorkflowIds);
-      const whereClause = stateCondition ? and(orgWorkflowFilter, stateCondition) : orgWorkflowFilter;
-      const rows = await db.select().from(alloyWorkflowRunsTable).where(whereClause).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset);
-      const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable).where(whereClause);
-      sendSuccess(res, rows, 200, { page, limit, total: count });
-      return;
-    }
-
-    const rows = stateCondition
-      ? await db.select().from(alloyWorkflowRunsTable).where(stateCondition).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset)
-      : await db.select().from(alloyWorkflowRunsTable).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset);
-    const [{ count }] = stateCondition
-      ? await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable).where(stateCondition)
-      : await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable);
-    sendSuccess(res, rows, 200, { page, limit, total: count });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to list runs");
-  }
-});
-
 router.get("/alloy/runs/:id", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
@@ -506,17 +445,6 @@ router.post("/alloy/artifacts/:id/reject", authMiddleware(), requireRole("super_
   }
 });
 
-router.get("/alloy/approvals", authMiddleware(), async (req, res) => {
-  try {
-    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
-    const rows = await db.select().from(alloyApprovalsTable).orderBy(desc(alloyApprovalsTable.createdAt)).limit(limit).offset(offset);
-    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(alloyApprovalsTable);
-    sendSuccess(res, rows, 200, { page, limit, total: count });
-  } catch (err) {
-    handleRouteError(res, err, "Failed to list approvals");
-  }
-});
-
 router.get("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "ops"), async (_req, res) => {
   try {
     const flags = await db.select().from(featureFlagsTable).orderBy(featureFlagsTable.key);
@@ -577,6 +505,193 @@ router.get("/alloy/audit", authMiddleware(), requireRole("super_admin", "ops", "
     sendSuccess(res, rows, 200, { page, limit, total: count });
   } catch (err) {
     handleRouteError(res, err, "Failed to list audit log");
+  }
+});
+
+router.get("/alloy/factory-floor", authMiddleware(), async (_req, res) => {
+  try {
+    const workflows = await db.select().from(alloyWorkflowsTable).orderBy(alloyWorkflowsTable.name);
+    const allRuns = await db.select({
+      id: alloyWorkflowRunsTable.id,
+      workflowId: alloyWorkflowRunsTable.workflowId,
+      state: alloyWorkflowRunsTable.state,
+      queuedAt: alloyWorkflowRunsTable.queuedAt,
+      startedAt: alloyWorkflowRunsTable.startedAt,
+      completedAt: alloyWorkflowRunsTable.completedAt,
+      durationMs: alloyWorkflowRunsTable.durationMs,
+    }).from(alloyWorkflowRunsTable).orderBy(desc(alloyWorkflowRunsTable.queuedAt));
+
+    const now = Date.now();
+    const sevenDaysAgo = new Date(now - 7 * 24 * 3600000);
+
+    const workflowStats = workflows.map(wf => {
+      const runs = allRuns.filter(r => r.workflowId === wf.id);
+      const recentRuns = runs.filter(r => r.queuedAt >= sevenDaysAgo);
+
+      const counts = {
+        running: runs.filter(r => r.state === "running").length,
+        queued: runs.filter(r => r.state === "queued").length,
+        completed: runs.filter(r => r.state === "completed").length,
+        failed: runs.filter(r => r.state === "failed").length,
+        waiting_approval: runs.filter(r => r.state === "waiting_approval").length,
+        canceled: runs.filter(r => r.state === "canceled").length,
+      };
+
+      const sparklineByDay: number[] = [];
+      for (let d = 6; d >= 0; d--) {
+        const dayStart = new Date(now - (d + 1) * 24 * 3600000);
+        const dayEnd = new Date(now - d * 24 * 3600000);
+        const dayRuns = recentRuns.filter(r => r.queuedAt >= dayStart && r.queuedAt < dayEnd);
+        const successes = dayRuns.filter(r => r.state === "completed").length;
+        const total = dayRuns.length;
+        sparklineByDay.push(total === 0 ? 0 : Math.round((successes / total) * 100));
+      }
+
+      const completedRuns = runs.filter(r => r.state === "completed" && r.durationMs != null);
+      const avgDurationMs = completedRuns.length > 0
+        ? Math.round(completedRuns.reduce((sum, r) => sum + (r.durationMs ?? 0), 0) / completedRuns.length)
+        : null;
+
+      const lastRun = runs[0] ?? null;
+
+      return {
+        workflow: wf,
+        counts,
+        totalRuns: runs.length,
+        successRate: runs.length > 0 ? Math.round((counts.completed / runs.length) * 100) : 0,
+        avgDurationMs,
+        sparkline: sparklineByDay,
+        lastRunAt: lastRun?.queuedAt ?? null,
+        lastRunState: lastRun?.state ?? null,
+        recentRuns: runs.slice(0, 5).map(r => ({ id: r.id, state: r.state, queuedAt: r.queuedAt })),
+      };
+    });
+
+    const globalCounts = {
+      running: allRuns.filter(r => r.state === "running").length,
+      queued: allRuns.filter(r => r.state === "queued").length,
+      completed: allRuns.filter(r => r.state === "completed").length,
+      failed: allRuns.filter(r => r.state === "failed").length,
+      waiting_approval: allRuns.filter(r => r.state === "waiting_approval").length,
+    };
+
+    sendSuccess(res, { workflows: workflowStats, globalCounts, fetchedAt: new Date().toISOString() });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to build factory floor");
+  }
+});
+
+router.get("/alloy/signals", authMiddleware(), async (req, res) => {
+  try {
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const source = typeof req.query.source === "string" ? req.query.source : null;
+    const severity = typeof req.query.severity === "string" ? req.query.severity : null;
+    const status = typeof req.query.status === "string" ? req.query.status : null;
+
+    const conditions = [];
+    if (source) conditions.push(eq(alloySignalsTable.source, source));
+    if (severity) conditions.push(eq(alloySignalsTable.severity, severity as "critical" | "high" | "medium" | "low" | "info"));
+    if (status) conditions.push(eq(alloySignalsTable.status, status as "new" | "processing" | "processed" | "failed" | "ignored"));
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    const rows = where
+      ? await db.select().from(alloySignalsTable).where(where).orderBy(desc(alloySignalsTable.receivedAt)).limit(limit).offset(offset)
+      : await db.select().from(alloySignalsTable).orderBy(desc(alloySignalsTable.receivedAt)).limit(limit).offset(offset);
+    const [{ count }] = where
+      ? await db.select({ count: sql<number>`count(*)::int` }).from(alloySignalsTable).where(where)
+      : await db.select({ count: sql<number>`count(*)::int` }).from(alloySignalsTable);
+
+    sendSuccess(res, rows, 200, { page, limit, total: count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list signals");
+  }
+});
+
+router.get("/alloy/runs/:id/steps", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const [run] = await db.select().from(alloyWorkflowRunsTable).where(eq(alloyWorkflowRunsTable.id, id));
+    if (!run) { sendNotFound(res, "Run"); return; }
+    const [workflow] = await db.select().from(alloyWorkflowsTable).where(eq(alloyWorkflowsTable.id, run.workflowId));
+    const steps = (run.output as Record<string, unknown> | null)?.steps ?? (workflow?.steps ?? []);
+    sendSuccess(res, { run, workflow, steps });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to get run steps");
+  }
+});
+
+router.get("/alloy/runs", authMiddleware(), requireRole("super_admin", "admin", "ops"), async (req, res) => {
+  try {
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const stateFilter = typeof req.query.state === "string" ? req.query.state : null;
+    const workflowIdFilter = typeof req.query.workflowId === "string" ? parseInt(req.query.workflowId) : null;
+    const validStates = ["queued", "running", "waiting_approval", "completed", "failed", "canceled"];
+
+    const conditions: ReturnType<typeof eq>[] = [];
+    if (stateFilter && validStates.includes(stateFilter)) {
+      conditions.push(eq(alloyWorkflowRunsTable.state, stateFilter as "queued" | "running" | "waiting_approval" | "completed" | "failed" | "canceled"));
+    }
+    if (workflowIdFilter) {
+      conditions.push(eq(alloyWorkflowRunsTable.workflowId, workflowIdFilter));
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    const rows = where
+      ? await db.select().from(alloyWorkflowRunsTable).where(where).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset)
+      : await db.select().from(alloyWorkflowRunsTable).orderBy(desc(alloyWorkflowRunsTable.queuedAt)).limit(limit).offset(offset);
+    const [{ count }] = where
+      ? await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable).where(where)
+      : await db.select({ count: sql<number>`count(*)::int` }).from(alloyWorkflowRunsTable);
+
+    sendSuccess(res, rows, 200, { page, limit, total: count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list runs");
+  }
+});
+
+router.get("/alloy/approvals", authMiddleware(), async (req, res) => {
+  try {
+    const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
+    const statusFilter = typeof req.query.status === "string" ? req.query.status : null;
+    const validStatuses = ["pending", "approved", "rejected", "expired"];
+    const condition = statusFilter && validStatuses.includes(statusFilter)
+      ? eq(alloyApprovalsTable.status, statusFilter as "pending" | "approved" | "rejected" | "expired")
+      : undefined;
+
+    const rows = condition
+      ? await db.select().from(alloyApprovalsTable).where(condition).orderBy(desc(alloyApprovalsTable.createdAt)).limit(limit).offset(offset)
+      : await db.select().from(alloyApprovalsTable).orderBy(desc(alloyApprovalsTable.createdAt)).limit(limit).offset(offset);
+    const [{ count }] = condition
+      ? await db.select({ count: sql<number>`count(*)::int` }).from(alloyApprovalsTable).where(condition)
+      : await db.select({ count: sql<number>`count(*)::int` }).from(alloyApprovalsTable);
+    sendSuccess(res, rows, 200, { page, limit, total: count });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to list approvals");
+  }
+});
+
+router.post("/alloy/approvals/:id/decide", authMiddleware(), requireRole("super_admin", "admin", "ops", "compliance"), async (req, res) => {
+  try {
+    const id = parseIdParam(req.params.id);
+    const { decision, notes } = req.body;
+    if (!["approved", "rejected"].includes(decision)) {
+      sendBadRequest(res, "Decision must be 'approved' or 'rejected'");
+      return;
+    }
+    const [approval] = await db.select().from(alloyApprovalsTable).where(eq(alloyApprovalsTable.id, id));
+    if (!approval) { sendNotFound(res, "Approval"); return; }
+    if (approval.status !== "pending") { sendBadRequest(res, "Approval already decided"); return; }
+
+    const [updated] = await db.update(alloyApprovalsTable).set({
+      status: decision,
+      decision: notes ?? null,
+      decisionBy: req.user?.id ?? null,
+      decisionAt: new Date(),
+    }).where(eq(alloyApprovalsTable.id, id)).returning();
+
+    sendSuccess(res, updated);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to decide approval");
   }
 });
 

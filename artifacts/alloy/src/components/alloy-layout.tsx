@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2 } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard } from "lucide-react";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -12,7 +12,9 @@ const COMMAND_LOOP = [
 ];
 
 const NAV = [
-  { href: "/", label: "Execution Runs", icon: Activity },
+  { href: "/", label: "Factory Floor", icon: LayoutDashboard },
+  { href: "/runs", label: "Execution History", icon: Activity },
+  { href: "/signals", label: "Signal Feed", icon: Radio },
   { href: "/workflows", label: "Workflow Orchestration", icon: GitBranch },
   { href: "/connectors", label: "Connector Mesh", icon: Network },
   { href: "/governance", label: "Governance & Audit", icon: Shield },
