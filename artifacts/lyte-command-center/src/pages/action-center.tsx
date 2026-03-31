@@ -5,6 +5,7 @@ import { doctrineEventBus } from "@workspace/observability";
 import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
 import { cn } from "@/lib/utils";
 import { api, type LyteAction } from "@/lib/api";
+import { LyteGraphQLPanel } from "@/components/graphql-data-panel";
 
 function formatCurrency(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
@@ -324,6 +325,8 @@ export default function ActionCenter() {
           )}
         </>
       )}
+
+      <LyteGraphQLPanel />
     </div>
   );
 }

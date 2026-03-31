@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { m } from "framer-motion";
+import { HoldingsGraphQLPanel } from "@/components/graphql-data-panel";
 import {
   Search, Shield, Brain, Zap, Ship, Building, Palette, Activity, Globe, BarChart3,
   Laptop, Grid, List, ArrowUpRight, GitBranch, Map, TrendingUp, Radio, CheckCircle2,
@@ -667,6 +668,8 @@ export default function CommandCenter() {
           </div>
         </div>
       </div>
+
+      <HoldingsGraphQLPanel />
     </div>
   );
 }

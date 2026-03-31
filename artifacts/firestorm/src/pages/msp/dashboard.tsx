@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
 import { toast } from "sonner";
 import { DataStateBadge } from "@workspace/shared-ui";
+import { FirestormGraphQLPanel } from "@/components/graphql-data-panel";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {
@@ -711,6 +712,7 @@ export default function Dashboard() {
       </div>
 
       <ActivityFeed entityType="ticket" title="Service Desk Team Activity" limit={8} compact />
+      <FirestormGraphQLPanel />
     </div>
   );
 }

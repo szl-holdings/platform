@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { trackEvent } from "../App";
+import { AlloyGraphQLPanel } from "../components/graphql-data-panel";
 
 const BASE_PATH = import.meta.env.BASE_URL?.replace(/\/$/, "") || "/alloy";
 
@@ -393,6 +394,12 @@ export default function OverviewPage({ onNavigate }: NavProps) {
           >
             Back to Ecosystem <ArrowRight className="w-3.5 h-3.5" />
           </a>
+        </div>
+      </section>
+
+      <section className="py-12 px-6">
+        <div className="max-w-4xl mx-auto">
+          <AlloyGraphQLPanel />
         </div>
       </section>
     </div>

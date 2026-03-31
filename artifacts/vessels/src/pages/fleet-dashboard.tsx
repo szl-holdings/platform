@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { useRoster, useFleetExceptions, useSanctions } from "@/hooks/use-vessels-data";
 import type { RosterVessel } from "@/lib/api";
 import { dataProvider } from "@/data/data-provider";
+import { VesselsGraphQLPanel } from "@/components/graphql-data-panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Link } from "wouter";
@@ -690,6 +691,8 @@ export default function FleetDashboard() {
           {intelTab === "congestion" && <PortCongestionPanel exceptions={fleetExceptions} />}
         </div>
       </div>
+
+      <VesselsGraphQLPanel />
     </div>
   );
 }

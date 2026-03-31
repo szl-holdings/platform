@@ -266,6 +266,22 @@ try {
 
 app.use("/api", router);
 
+let _graphqlHandler: ((req: Request, res: Response, next: import("express").NextFunction) => void) | null = null;
+
+export function registerGraphQLHandler(
+  handler: (req: Request, res: Response, next: import("express").NextFunction) => void,
+): void {
+  _graphqlHandler = handler;
+}
+
+app.use("/api/graphql", (req: Request, res: Response, next: import("express").NextFunction) => {
+  if (_graphqlHandler) {
+    _graphqlHandler(req, res, next);
+  } else {
+    res.status(503).json({ error: "GraphQL not ready", message: "GraphQL is still initializing" });
+  }
+});
+
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
     error: "Not Found",

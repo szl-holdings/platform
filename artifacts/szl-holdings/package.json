@@ -31,10 +31,11 @@
     "wouter": "^3.3.5"
   },
   "dependencies": {
-    "@workspace/observability": "workspace:*",
     "@workspace/analytics": "workspace:*",
-    "@workspace/shared-ui": "workspace:*",
+    "@workspace/graphql-client": "workspace:*",
+    "@workspace/observability": "workspace:*",
     "@workspace/replit-auth-web": "workspace:*",
+    "@workspace/shared-ui": "workspace:*",
     "clsx": "catalog:"
   }
 }

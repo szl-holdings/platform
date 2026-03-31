@@ -6,6 +6,7 @@ import { ServicesSection } from "@/components/sections/ServicesSection";
 import { ThesisSection } from "@/components/sections/ThesisSection";
 import { EcosystemRoleSection } from "@/components/sections/EcosystemRoleSection";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { StephenGraphQLPanel } from "@/components/graphql-data-panel";
 
 export function Home() {
   return (
@@ -18,6 +19,9 @@ export function Home() {
         <ThesisSection />
         <EcosystemRoleSection />
         <ContactSection />
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          <StephenGraphQLPanel />
+        </div>
       </main>
       <Footer />
     </div>

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { FirestormGraphQLPanel } from "@/components/graphql-data-panel";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Button } from "@workspace/shared-ui/ui/button";
@@ -293,6 +294,8 @@ export default function AssessmentDashboard() {
           })}
         </div>
       )}
+
+      <FirestormGraphQLPanel />
     </div>
   );
 }

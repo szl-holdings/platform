@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { configurePlausible } from "@workspace/analytics";
 import { initWebVitals } from "@workspace/observability/react";
+import { GraphQLProvider } from "@workspace/graphql-client/provider";
 import App from "./App";
 import "./index.css";
 
@@ -15,6 +16,8 @@ initWebVitals("lyte", "/api/");
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary appName="Lyte Command Center">
-    <App />
+    <GraphQLProvider>
+      <App />
+    </GraphQLProvider>
   </ErrorBoundary>,
 );

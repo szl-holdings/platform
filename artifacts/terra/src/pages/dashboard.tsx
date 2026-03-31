@@ -5,6 +5,7 @@ import { RiskBadge, StageBadge, DealHealthCard, formatCurrency, AgentAvatar, Sta
 import { cn } from "@workspace/shared-ui/utils";
 import { Link } from "wouter";
 import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
+import { TerraGraphQLPanel } from "@/components/graphql-data-panel";
 
 const commandLoopItems = [
   { label: "DETECT", desc: "Pipeline & listing health", icon: Activity, color: "text-blue-400" },
@@ -290,6 +291,10 @@ export default function DashboardPage() {
           accentColor="#a07848"
           signals={DEAL_SIGNALS}
         />
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="col-span-full">
+        <TerraGraphQLPanel />
       </motion.div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { configurePlausible } from "@workspace/analytics";
+import { GraphQLProvider } from "@workspace/graphql-client/provider";
 import App from "./App";
 import "./index.css";
 
@@ -12,6 +13,8 @@ configurePlausible({
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary appName="Stephen Lutar">
-    <App />
+    <GraphQLProvider>
+      <App />
+    </GraphQLProvider>
   </ErrorBoundary>,
 );

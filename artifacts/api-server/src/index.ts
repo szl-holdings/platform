@@ -23,6 +23,8 @@ import { initializeOpenTelemetry } from "@workspace/observability";
 import { seedTerraDemo } from "./lib/terra-seed";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
+import { buildGraphQLMiddleware } from "./graphql/index.js";
+import { registerGraphQLHandler } from "./app.js";
 
 failFastOnInvalidConfig();
 
@@ -52,6 +54,16 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 const server = http.createServer(app);
+
+buildGraphQLMiddleware(server)
+  .then(middleware => {
+    registerGraphQLHandler(middleware);
+    logger.info("GraphQL endpoint mounted at /api/graphql");
+    logger.info("GraphQL subscriptions available at ws://.../api/graphql/ws");
+  })
+  .catch(err => {
+    logger.warn({ err }, "GraphQL initialization failed — continuing without GraphQL");
+  });
 
 initWebSocket(server);
 startDomainNotificationGenerators();

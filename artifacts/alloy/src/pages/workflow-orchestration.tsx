@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, DataStateBadge } from "@workspace/shared-ui";
 import { GitBranch, User, Clock, ExternalLink, AlertTriangle, RefreshCw, Play, Pause, XCircle, CheckCircle, ChevronRight, Terminal, Zap, Activity, Filter, Radio } from "lucide-react";
 import { useState, useMemo } from "react";
+import { AlloyGraphQLPanel } from "../components/graphql-data-panel";
 
 interface Workflow {
   id: number;
@@ -416,6 +417,8 @@ export default function WorkflowOrchestration() {
           onRunNow={(id) => startRun.mutate(id)}
         />
       )}
+
+      <AlloyGraphQLPanel />
     </div>
   );
 }

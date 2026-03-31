@@ -43,6 +43,15 @@ Nimbus was consolidated into Alloy's intelligence layer (Task #173). It is NOT a
 - All user-facing "Nimbus" labels have been replaced with "AI Recommendations" / "Alloy Intelligence".
 - SZL Holdings Core Command links to Alloy Creative Workflows (at `/alloy/creative`), not Dreamscape or Nimbus.
 
+### GraphQL API Layer (Task #184)
+A unified GraphQL API is mounted at `/api/graphql` on the API server.
+- **Server:** Apollo Server v5 with `@as-integrations/express5`, WebSocket subscriptions via `graphql-ws` v6.
+- **Schema:** 9 domain modules (Auth, Alloy, Firestorm/Aegis, Vessels, Terra, Lyte, Holdings, Stephen, Carlota Jo) with full query/mutation/subscription coverage.
+- **Registration pattern:** `registerGraphQLHandler()` in `app.ts` allows async Apollo initialization before the 404 middleware runs. Implemented in `artifacts/api-server/src/graphql/`.
+- **Client library:** `@workspace/graphql-client` in `lib/graphql-client/` provides Apollo Client (HTTP + WS split link), `GraphQLProvider` wrapper, and typed domain hooks for all 8 frontends.
+- **Frontend integration:** All 8 frontend apps have `GraphQLProvider` in `main.tsx` and a `GraphQLDataPanel` component in their `components/` directory that uses real typed hooks.
+- **REST endpoints remain intact** — GraphQL is additive.
+
 ### Platform Architecture & Features
 The platform features 13 applications sharing authentication and design.
 - **Authentication & RBAC:** Middleware manages Bearer token sessions and Replit Auth with an 11-role RBAC system.

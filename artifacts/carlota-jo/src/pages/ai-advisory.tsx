@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/u
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Brain, Send, BookOpen, TrendingUp, Lightbulb, Search, Sparkles, Loader2 } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { CarlotaGraphQLPanel } from "@/components/graphql-data-panel";
 
 const insightCards = [
   { title: "Market Entry Strategy — Southeast Asia", type: "Market Research", summary: "Consumer spending in SEA projected to reach $4.7T by 2028. Key opportunity in B2B SaaS with government digitization initiatives in Singapore, Indonesia, and Vietnam. Recommend phased entry starting with Singapore's regulatory sandbox.", tags: ["Market Entry", "SEA", "B2B SaaS"], confidence: 87 },
@@ -192,6 +193,8 @@ export default function AIAdvisory() {
           ))}
         </div>
       </div>
+
+      <CarlotaGraphQLPanel />
     </div>
   );
 }

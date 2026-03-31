@@ -22,16 +22,17 @@
     "framer-motion": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
-    "recharts": "catalog:",
     "react-dom": "catalog:",
+    "recharts": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "wouter": "^3.3.5"
   },
   "dependencies": {
-    "@workspace/observability": "workspace:*",
     "@workspace/analytics": "workspace:*",
+    "@workspace/graphql-client": "workspace:*",
+    "@workspace/observability": "workspace:*",
     "@workspace/shared-ui": "workspace:*"
   }
 }
