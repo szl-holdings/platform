@@ -722,11 +722,11 @@ export function getSignalsByType(type: SignalType): BusinessSignal[] {
 }
 
 export const severityColors: Record<SignalSeverity, { text: string; bg: string; border: string; dot: string }> = {
-  critical: { text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", dot: "bg-red-500" },
-  high: { text: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", dot: "bg-orange-500" },
-  medium: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", dot: "bg-amber-400" },
-  low: { text: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", dot: "bg-blue-400" },
-  stable: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", dot: "bg-emerald-400" },
+  critical: { text: "text-[#c45a4a]", bg: "bg-[#c45a4a]/10", border: "border-[#c45a4a]/20", dot: "bg-[#c45a4a]" },
+  high: { text: "text-[#c8953c]", bg: "bg-[#c8953c]/10", border: "border-[#c8953c]/20", dot: "bg-[#c8953c]" },
+  medium: { text: "text-[#d4a054]", bg: "bg-[#d4a054]/10", border: "border-[#d4a054]/20", dot: "bg-[#d4a054]" },
+  low: { text: "text-[#4a90b8]", bg: "bg-[#4a90b8]/10", border: "border-[#4a90b8]/20", dot: "bg-[#4a90b8]" },
+  stable: { text: "text-[#6b8f71]", bg: "bg-[#6b8f71]/10", border: "border-[#6b8f71]/20", dot: "bg-[#6b8f71]" },
 };
 
 export const signalTypeLabels: Record<SignalType, string> = {

@@ -186,7 +186,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   if (isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#080c14" }}>
-        <div style={{ width: 24, height: 24, border: "2px solid rgba(245,158,11,0.25)", borderTopColor: "#f59e0b", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <div style={{ width: 24, height: 24, border: "2px solid rgba(212,160,84,0.25)", borderTopColor: "#d4a054", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
       </div>
     );
   }
