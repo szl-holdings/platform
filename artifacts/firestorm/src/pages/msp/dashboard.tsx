@@ -398,28 +398,28 @@ export default function Dashboard() {
     refetchInterval: 5 * 60_000,
   });
 
-  const { data: ticketsData, isLoading: ticketsLoading, isError: ticketsError } = useQuery<{ tickets: TicketItem[] }>({
+  const { data: ticketsData, isLoading: ticketsLoading, isError: ticketsError, refetch: refetchTickets } = useQuery<{ tickets: TicketItem[] }>({
     queryKey: ["msp-tickets-dashboard"],
     queryFn: () => apiFetch<{ tickets: TicketItem[] }>("/msp/tickets?limit=10"),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: techData, isLoading: techLoading, isError: techError } = useQuery<{ technicians: TechItem[] }>({
+  const { data: techData, isLoading: techLoading, isError: techError, refetch: refetchTech } = useQuery<{ technicians: TechItem[] }>({
     queryKey: ["msp-technicians-dashboard"],
     queryFn: () => apiFetch<{ technicians: TechItem[] }>("/msp/technicians"),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: clientsData, isLoading: clientsLoading, isError: clientsError } = useQuery<{ clients: ClientItem[] }>({
+  const { data: clientsData, isLoading: clientsLoading, isError: clientsError, refetch: refetchClients } = useQuery<{ clients: ClientItem[] }>({
     queryKey: ["msp-clients-dashboard"],
     queryFn: () => apiFetch<{ clients: ClientItem[] }>("/msp/clients"),
     staleTime: 60_000,
     retry: 1,
   });
 
-  const { data: revenueData, isLoading: revenueLoading, isError: revenueError } = useQuery<RevenueData>({
+  const { data: revenueData, isLoading: revenueLoading, isError: revenueError, refetch: refetchRevenue } = useQuery<RevenueData>({
     queryKey: ["msp-revenue-dashboard"],
     queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
     staleTime: 120_000,
@@ -476,7 +476,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-3">
           <DataStateBadge state={isDemo ? "demo" : "live"} pulse={isDemo} />
           <button
-            onClick={() => { refetch(); toast.info("Refreshing metrics…"); }}
+            onClick={() => { refetch(); refetchTickets(); refetchTech(); refetchClients(); refetchRevenue(); toast.info("Refreshing all data…"); }}
             className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg px-3 py-2"
           >
             <RefreshCw className="w-3.5 h-3.5" />
