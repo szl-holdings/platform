@@ -106,6 +106,7 @@ export { MicrosoftGraphAdapter, type GraphFile, type GraphCalendarEvent, type Gr
 export { ResoMlsAdapter, type MlsListing, type ODataQueryParams, type MlsIncrementalSyncResult } from "./adapters/reso-mls.js";
 export { CoStarAdapter, type CoStarProperty, type CoStarMarketStats, type CoStarSaleComp } from "./adapters/costar.js";
 export { CompStakAdapter, type CompStakLeaseComp, type CompStakSaleComp, type CompStakPropertyDetail } from "./adapters/compstak.js";
+export { DataverseAdapter, type DataverseAccount, type DataverseContact, type DataverseLead, type DataverseOpportunity, type DataverseActivity, type DataverseConnectionStatus, type DataverseSyncResult, type DataverseLyteSignal } from "./adapters/dataverse.js";
 
 export {
   HuggingFaceAdapter,

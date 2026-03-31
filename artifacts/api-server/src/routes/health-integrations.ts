@@ -195,9 +195,50 @@ async function checkAzureServices(): Promise<IntegrationHealth> {
     lastChecked: new Date().toISOString(),
     details: {
       azureAd: azureAdConfigured,
+      multiTenantProvisioning: azureAdConfigured,
       appInsights: azureInsightsConfigured,
       blobStorage: azureStorageConfigured,
     },
+  };
+}
+
+async function checkDynamics365(): Promise<IntegrationHealth> {
+  const dataverseOrgUrl = process.env.DATAVERSE_ORG_URL;
+  const dataverseTenantId = process.env.DATAVERSE_TENANT_ID;
+  const dataverseClientId = process.env.DATAVERSE_CLIENT_ID;
+  const dataverseClientSecret = process.env.DATAVERSE_CLIENT_SECRET;
+
+  const configured = !!(dataverseOrgUrl && dataverseTenantId && dataverseClientId && dataverseClientSecret);
+
+  if (!configured) {
+    return {
+      name: "dynamics365",
+      status: "unconfigured",
+      lastChecked: new Date().toISOString(),
+      details: {
+        mode: "demo",
+        orgUrl: dataverseOrgUrl ?? null,
+        entities: ["accounts", "contacts", "leads", "opportunities", "activities"],
+      },
+    };
+  }
+
+  const { result, latencyMs, error } = await checkWithTimeout(async () => {
+    const { services } = await import("@workspace/services");
+    return await services.dataverse.testConnection();
+  });
+
+  return {
+    name: "dynamics365",
+    status: result?.connected ? "healthy" : "degraded",
+    latencyMs,
+    lastChecked: new Date().toISOString(),
+    details: {
+      orgUrl: dataverseOrgUrl,
+      tenantId: dataverseTenantId,
+      entities: ["accounts", "contacts", "leads", "opportunities", "activities"],
+    },
+    ...(error ? { error } : {}),
   };
 }
 
@@ -232,6 +273,7 @@ async function runAllChecks(): Promise<IntegrationHealth[]> {
     checkMapbox(),
     checkGoogleMaps(),
     checkAzureServices(),
+    checkDynamics365(),
     checkRedis(),
   ]);
 

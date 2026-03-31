@@ -17,6 +17,7 @@ import {
   ISSUER_URL,
   isOidcConfigured,
   isAzureAdConfigured,
+  isProvisionedTenant,
 } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -248,7 +249,20 @@ router.get("/azure-ad/login", async (req: Request, res: Response) => {
   }
 
   try {
-    const config = await getAzureAdConfig();
+    const requestedTenantId = req.query.tenantId as string | undefined;
+
+    if (requestedTenantId) {
+      const provisioned = await isProvisionedTenant(requestedTenantId);
+      if (!provisioned) {
+        res.status(403).json({
+          error: "Tenant not provisioned",
+          message: "Your organization has not been provisioned for access to this platform. Contact your administrator.",
+        });
+        return;
+      }
+    }
+
+    const config = await getAzureAdConfig(requestedTenantId);
     const callbackUrl = `${getOrigin(req)}/api/azure-ad/callback`;
     const returnTo = getSafeReturnTo(req.query.returnTo);
 
@@ -270,6 +284,9 @@ router.get("/azure-ad/login", async (req: Request, res: Response) => {
     setOidcCookie(res, "aad_nonce", nonce);
     setOidcCookie(res, "aad_state", state);
     setOidcCookie(res, "aad_return_to", returnTo);
+    if (requestedTenantId) {
+      setOidcCookie(res, "aad_tenant_id", requestedTenantId);
+    }
 
     res.redirect(redirectTo.href);
   } catch (err) {
@@ -285,18 +302,20 @@ router.get("/azure-ad/callback", async (req: Request, res: Response) => {
   }
 
   try {
-    const config = await getAzureAdConfig();
     const callbackUrl = `${getOrigin(req)}/api/azure-ad/callback`;
 
     const codeVerifier = req.cookies?.aad_code_verifier;
     const nonce = req.cookies?.aad_nonce;
     const expectedState = req.cookies?.aad_state;
     const returnTo = getSafeReturnTo(req.cookies?.aad_return_to);
+    const cookieTenantId = req.cookies?.aad_tenant_id as string | undefined;
 
     if (!codeVerifier || !expectedState) {
       res.redirect("/api/azure-ad/login");
       return;
     }
+
+    const config = await getAzureAdConfig(cookieTenantId);
 
     const currentUrl = new URL(
       `${callbackUrl}?${new URL(req.url, `http://${req.headers.host}`).searchParams}`,
@@ -319,11 +338,29 @@ router.get("/azure-ad/callback", async (req: Request, res: Response) => {
     res.clearCookie("aad_nonce", { path: "/" });
     res.clearCookie("aad_state", { path: "/" });
     res.clearCookie("aad_return_to", { path: "/" });
+    res.clearCookie("aad_tenant_id", { path: "/" });
 
     const claims = tokens.claims();
     if (!claims) {
       res.redirect("/api/azure-ad/login");
       return;
+    }
+
+    const azureTenantId = claims.tid as string | undefined;
+    if (azureTenantId) {
+      const configuredTenantId = process.env.AZURE_AD_TENANT_ID;
+      const isOwnerTenant = configuredTenantId && azureTenantId === configuredTenantId;
+      if (!isOwnerTenant) {
+        const isProvisioned = await isProvisionedTenant(azureTenantId);
+        if (!isProvisioned) {
+          req.log?.warn({ azureTenantId }, "Azure AD login attempt from unprovisioned tenant");
+          res.status(403).json({
+            error: "Tenant not provisioned",
+            message: "Your organization has not been provisioned for access to this platform. Contact your administrator.",
+          });
+          return;
+        }
+      }
     }
 
     const user = await upsertUserFromAzureAd(claims as unknown as Record<string, unknown>);

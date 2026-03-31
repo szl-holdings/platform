@@ -56,6 +56,8 @@ import vesselsExtendedRouter from "./vessels-extended";
 import terraCrmRouter from "./terra-crm";
 import microsoftGraphRouter from "./microsoft-graph";
 import lyteObservabilityRouter from "./lyte-observability";
+import tenantProvisioningRouter from "./tenant-provisioning";
+import dataverseRouter from "./dataverse";
 
 const router: IRouter = Router();
 
@@ -208,5 +210,11 @@ router.use(coreRouter);
 
 router.use("/microsoft", readLimiter);
 router.use(microsoftGraphRouter);
+
+router.use("/admin/tenants", writeLimiter);
+router.use(tenantProvisioningRouter);
+
+router.use("/dataverse", readLimiter);
+router.use("/dataverse", dataverseRouter);
 
 export default router;

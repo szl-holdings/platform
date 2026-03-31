@@ -1,7 +1,7 @@
 import * as client from "openid-client";
 import crypto from "crypto";
 import { type Request, type Response } from "express";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable } from "@workspace/db";
+import { db, usersTable, sessionsTable, rolesTable, userRolesTable, azureTenantsTable, orgMembersTable, organizationsTable } from "@workspace/db";
 import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@workspace/db";
 
@@ -11,6 +11,7 @@ export const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 
 let oidcConfig: client.Configuration | null = null;
 let azureAdConfig: client.Configuration | null = null;
+const multiTenantConfigs: Map<string, client.Configuration> = new Map();
 
 export async function getOidcConfig(): Promise<client.Configuration> {
   if (!oidcConfig) {
@@ -34,20 +35,88 @@ export function isAzureAdConfigured(): boolean {
   );
 }
 
-export function getAzureAdIssuerUrl(): string {
-  const tenantId = process.env.AZURE_AD_TENANT_ID!;
-  return `https://login.microsoftonline.com/${tenantId}/v2.0`;
+export function getAzureAdIssuerUrl(tenantId?: string): string {
+  const tid = tenantId ?? process.env.AZURE_AD_TENANT_ID!;
+  return `https://login.microsoftonline.com/${tid}/v2.0`;
 }
 
-export async function getAzureAdConfig(): Promise<client.Configuration> {
-  if (!azureAdConfig) {
-    azureAdConfig = await client.discovery(
-      new URL(getAzureAdIssuerUrl()),
+export async function getAzureAdConfig(tenantId?: string): Promise<client.Configuration> {
+  if (!tenantId) {
+    if (!azureAdConfig) {
+      azureAdConfig = await client.discovery(
+        new URL(getAzureAdIssuerUrl()),
+        process.env.AZURE_AD_CLIENT_ID!,
+        { client_secret: process.env.AZURE_AD_CLIENT_SECRET },
+      );
+    }
+    return azureAdConfig;
+  }
+
+  if (!multiTenantConfigs.has(tenantId)) {
+    const config = await client.discovery(
+      new URL(getAzureAdIssuerUrl(tenantId)),
       process.env.AZURE_AD_CLIENT_ID!,
       { client_secret: process.env.AZURE_AD_CLIENT_SECRET },
     );
+    multiTenantConfigs.set(tenantId, config);
   }
-  return azureAdConfig;
+  return multiTenantConfigs.get(tenantId)!;
+}
+
+export async function isProvisionedTenant(azureTenantId: string): Promise<boolean> {
+  const [tenant] = await db
+    .select()
+    .from(azureTenantsTable)
+    .where(and(
+      eq(azureTenantsTable.azureTenantId, azureTenantId),
+      eq(azureTenantsTable.status, "active"),
+      eq(azureTenantsTable.adminConsentGranted, "granted"),
+    ))
+    .limit(1);
+  return !!tenant;
+}
+
+export async function getProvisionedTenant(azureTenantId: string) {
+  try {
+    const [tenant] = await db
+      .select()
+      .from(azureTenantsTable)
+      .where(eq(azureTenantsTable.azureTenantId, azureTenantId))
+      .limit(1);
+    return tenant ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getOrgForAzureTenant(azureTenantId: string): Promise<number | null> {
+  try {
+    const [tenant] = await db
+      .select({ organizationId: azureTenantsTable.organizationId })
+      .from(azureTenantsTable)
+      .where(eq(azureTenantsTable.azureTenantId, azureTenantId))
+      .limit(1);
+    return tenant?.organizationId ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getAzureTenantForUser(userId: number): Promise<string | null> {
+  try {
+    const [row] = await db
+      .select({ azureTenantId: azureTenantsTable.azureTenantId })
+      .from(orgMembersTable)
+      .innerJoin(azureTenantsTable, eq(azureTenantsTable.organizationId, orgMembersTable.orgId))
+      .where(and(
+        eq(orgMembersTable.userId, userId),
+        eq(azureTenantsTable.status, "active"),
+      ))
+      .limit(1);
+    return row?.azureTenantId ?? null;
+  } catch {
+    return null;
+  }
 }
 
 const AZURE_AD_ROLE_MAP: Record<string, RoleName> = {
@@ -120,6 +189,7 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
   email: string | null;
   avatarUrl: string | null;
   roles: RoleName[];
+  azureTenantId: string | null;
 }> {
   const azureOid = claims.oid as string;
   const sub = claims.sub as string;
@@ -129,6 +199,7 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
   const familyName = (claims.family_name as string) || null;
   const displayName = [givenName, familyName].filter(Boolean).join(" ") || (claims.name as string) || externalId;
   const avatarUrl = null;
+  const azureTenantId = (claims.tid as string) || null;
 
   const [user] = await db
     .insert(usersTable)
@@ -158,6 +229,39 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
     }
   }
 
+  if (azureTenantId) {
+    try {
+      const [tenant] = await db
+        .select({ organizationId: azureTenantsTable.organizationId })
+        .from(azureTenantsTable)
+        .where(and(
+          eq(azureTenantsTable.azureTenantId, azureTenantId),
+          eq(azureTenantsTable.status, "active"),
+        ))
+        .limit(1);
+
+      if (tenant?.organizationId) {
+        const [existing] = await db
+          .select({ id: orgMembersTable.id })
+          .from(orgMembersTable)
+          .where(and(
+            eq(orgMembersTable.orgId, tenant.organizationId),
+            eq(orgMembersTable.userId, user.id),
+          ))
+          .limit(1);
+
+        if (!existing) {
+          await db.insert(orgMembersTable).values({
+            orgId: tenant.organizationId,
+            userId: user.id,
+            role: "member",
+          });
+        }
+      }
+    } catch {
+    }
+  }
+
   const finalRoles = await db
     .select({ roleName: rolesTable.name })
     .from(userRolesTable)
@@ -170,6 +274,7 @@ export async function upsertUserFromAzureAd(claims: Record<string, unknown>): Pr
     email: user.email,
     avatarUrl: user.avatarUrl,
     roles: (finalRoles.length > 0 ? finalRoles.map((r) => r.roleName) : mappedRoles) as RoleName[],
+    azureTenantId,
   };
 }
 

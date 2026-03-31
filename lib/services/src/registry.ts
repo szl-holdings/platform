@@ -37,6 +37,7 @@ import { MicrosoftGraphAdapter } from "./adapters/microsoft-graph.js";
 import { ResoMlsAdapter } from "./adapters/reso-mls.js";
 import { CoStarAdapter } from "./adapters/costar.js";
 import { CompStakAdapter } from "./adapters/compstak.js";
+import { DataverseAdapter } from "./adapters/dataverse.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -88,6 +89,7 @@ export class ServiceRegistry {
   readonly resoMls: ResoMlsAdapter;
   readonly costar: CoStarAdapter;
   readonly compstak: CompStakAdapter;
+  readonly dataverse: DataverseAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -130,6 +132,7 @@ export class ServiceRegistry {
     this.resoMls = new ResoMlsAdapter();
     this.costar = new CoStarAdapter();
     this.compstak = new CompStakAdapter();
+    this.dataverse = new DataverseAdapter();
 
     this.adapters = [
       this.ai,
@@ -170,6 +173,7 @@ export class ServiceRegistry {
       this.resoMls,
       this.costar,
       this.compstak,
+      this.dataverse,
     ];
   }
 
