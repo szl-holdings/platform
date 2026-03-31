@@ -410,4 +410,160 @@ export function buildBillingNotificationEmail(params: {
   `);
 }
 
-export { INTERNAL_EMAIL };
+function stephenBrand(content: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stephen Lutar</title>
+<style>
+  body { margin: 0; padding: 0; background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .wrapper { max-width: 560px; margin: 0 auto; padding: 32px 16px; }
+  .card { background: #111111; border-radius: 12px; padding: 40px; border: 1px solid rgba(255,255,255,0.08); }
+  .logo { font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 32px; letter-spacing: -0.02em; }
+  .logo span { color: rgba(255,255,255,0.35); font-weight: 400; }
+  h2 { font-size: 20px; font-weight: 700; color: #ffffff; margin: 0 0 12px; }
+  p { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; margin: 0 0 16px; }
+  .highlight { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px 16px; margin: 16px 0; }
+  .highlight p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.65); }
+  .label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.25); margin: 0 0 4px; }
+  .divider { height: 1px; background: rgba(255,255,255,0.08); margin: 24px 0; }
+  .footer { font-size: 11px; color: rgba(255,255,255,0.2); line-height: 1.6; margin-top: 24px; }
+  a.cta { display: inline-block; padding: 11px 22px; background: rgba(255,255,255,0.9); color: #0a0a0a; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div class="logo">Stephen Lutar <span>/ SZL Holdings</span></div>
+    ${content}
+    <div class="divider"></div>
+    <div class="footer">
+      <p>stephenlutar.com · London, UK</p>
+      <p>This is a transactional email sent because you submitted a contact form.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function buildStephenContactAckEmail(name: string, inquiryType: string): string {
+  return stephenBrand(`
+    <h2>Message received</h2>
+    <p>Thank you, ${name}. Your message has arrived and I'll review it shortly.</p>
+    <div class="highlight">
+      <p class="label">Inquiry type</p>
+      <p>${inquiryType}</p>
+    </div>
+    <p>I respond to most inquiries within two business days. For time-sensitive opportunities, feel free to connect on LinkedIn.</p>
+    <a class="cta" href="https://linkedin.com/in/stephenlutar">Connect on LinkedIn</a>
+  `);
+}
+
+export function buildStephenContactNotificationEmail(inquiry: {
+  name: string;
+  email: string;
+  company?: string;
+  type: string;
+  message: string;
+}): string {
+  return stephenBrand(`
+    <h2>New Contact Form Submission</h2>
+    <p>A new inquiry has arrived through your contact form.</p>
+    <div class="highlight">
+      <p class="label">From</p>
+      <p>${inquiry.name}${inquiry.company ? ` · ${inquiry.company}` : ""}</p>
+      <p class="label" style="margin-top:8px;">Email</p>
+      <p>${inquiry.email}</p>
+      <p class="label" style="margin-top:8px;">Type</p>
+      <p>${inquiry.type}</p>
+      <p class="label" style="margin-top:8px;">Message</p>
+      <p>${inquiry.message.replace(/\n/g, "<br />")}</p>
+    </div>
+    <p>Reply directly to this email to respond to ${inquiry.name}.</p>
+  `);
+}
+
+function carlotaBrand(content: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carlota Jo Advisory</title>
+<style>
+  body { margin: 0; padding: 0; background: #faf9f7; font-family: Georgia, 'Times New Roman', serif; }
+  .wrapper { max-width: 560px; margin: 0 auto; padding: 48px 24px; }
+  .card { background: #ffffff; padding: 48px; border: 1px solid #e8e2d9; }
+  .logo { font-size: 13px; letter-spacing: 0.25em; text-transform: uppercase; color: #a07850; margin-bottom: 40px; font-family: -apple-system, sans-serif; font-weight: 500; }
+  h2 { font-size: 22px; font-weight: 400; color: #1a1a1a; margin: 0 0 16px; font-style: italic; }
+  p { font-size: 14px; color: #4a4a4a; line-height: 1.75; margin: 0 0 16px; font-family: -apple-system, sans-serif; font-weight: 300; }
+  .highlight { border-left: 2px solid #c9a97a; padding: 12px 16px; margin: 20px 0; background: #fdf8f2; }
+  .highlight p { margin: 0 0 6px; font-size: 13px; }
+  .highlight p:last-child { margin: 0; }
+  .label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; color: #a07850; font-family: -apple-system, sans-serif; }
+  .divider { height: 1px; background: #e8e2d9; margin: 32px 0; }
+  .footer { font-size: 11px; color: #9a8a78; line-height: 1.6; font-family: -apple-system, sans-serif; }
+  a.cta { display: inline-block; padding: 12px 24px; border: 1px solid #c9a97a; color: #a07850; text-decoration: none; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; font-family: -apple-system, sans-serif; font-weight: 500; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div class="logo">Carlota Jo Advisory</div>
+    ${content}
+    <div class="divider"></div>
+    <div class="footer">
+      <p>Carlota Jo Advisory · Private &amp; Confidential</p>
+      <p>This communication is sent in response to your inquiry and is handled with absolute discretion.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function buildCarlotaContactAckEmail(name: string): string {
+  return carlotaBrand(`
+    <h2>Inquiry received.</h2>
+    <p>Thank you, ${name}. Your inquiry has been received and will be reviewed by a senior member of the advisory team.</p>
+    <div class="highlight">
+      <p class="label">What to expect</p>
+      <p>All inquiries are handled with absolute discretion. You will receive a personal response within one business day.</p>
+    </div>
+    <p>Should you have an urgent matter, please contact us directly at <strong>hello@carlotajo.com</strong>.</p>
+    <a class="cta" href="${process.env.VITE_APP_URL || "https://carlotajo.com"}/carlota-jo">Visit Our Site</a>
+  `);
+}
+
+export function buildCarlotaInquiryNotificationEmail(inquiry: {
+  name: string;
+  email: string;
+  company?: string;
+  phone?: string;
+  service?: string;
+  message: string;
+}): string {
+  return carlotaBrand(`
+    <h2>New private inquiry.</h2>
+    <p>A new inquiry has been submitted through the Carlota Jo Advisory contact form.</p>
+    <div class="highlight">
+      <p class="label">From</p>
+      <p>${inquiry.name}${inquiry.company ? ` — ${inquiry.company}` : ""}</p>
+      <p class="label" style="margin-top:10px;">Email</p>
+      <p>${inquiry.email}</p>
+      ${inquiry.phone ? `<p class="label" style="margin-top:10px;">Phone</p><p>${inquiry.phone}</p>` : ""}
+      ${inquiry.service ? `<p class="label" style="margin-top:10px;">Service interest</p><p>${inquiry.service}</p>` : ""}
+      <p class="label" style="margin-top:10px;">Message</p>
+      <p>${inquiry.message.replace(/\n/g, "<br />")}</p>
+    </div>
+    <p>Reply directly to this email to respond to ${inquiry.name}.</p>
+  `);
+}
+
+const STEPHEN_ADMIN_EMAIL = process.env.STEPHEN_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || "stephen@szlholdings.com";
+const CARLOTA_ADMIN_EMAIL = process.env.CARLOTA_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || "hello@carlotajo.com";
+
+export { INTERNAL_EMAIL, STEPHEN_ADMIN_EMAIL, CARLOTA_ADMIN_EMAIL };

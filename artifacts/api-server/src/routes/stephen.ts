@@ -57,6 +57,13 @@ const CreateStephenBookingRequestBody = z.object({
 });
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
+import { logger } from "../lib/logger";
+import {
+  sendEmail,
+  buildStephenContactAckEmail,
+  buildStephenContactNotificationEmail,
+  STEPHEN_ADMIN_EMAIL,
+} from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -361,6 +368,38 @@ router.post("/stephen/booking-requests", async (req, res) => {
         status: "pending",
       })
       .returning();
+
+    Promise.allSettled([
+      sendEmail({
+        to: body.email,
+        subject: "Message received — Stephen Lutar",
+        html: buildStephenContactAckEmail(body.name, body.type),
+        replyTo: STEPHEN_ADMIN_EMAIL,
+      }),
+      sendEmail({
+        to: STEPHEN_ADMIN_EMAIL,
+        subject: `New ${body.type} inquiry from ${body.name}`,
+        html: buildStephenContactNotificationEmail({
+          name: body.name,
+          email: body.email,
+          company: body.company,
+          type: body.type,
+          message: body.message,
+        }),
+        replyTo: body.email,
+      }),
+    ]).then((results) => {
+      for (const r of results) {
+        if (r.status === "rejected") {
+          logger.warn({ err: r.reason }, "[email] Stephen booking email dispatch threw");
+        } else if (!r.value.success) {
+          logger.warn({ error: r.value.error }, "[email] Stephen booking email delivery failed");
+        }
+      }
+    }).catch((err) => {
+      logger.warn({ err }, "[email] Stephen booking email fanout error");
+    });
+
     res.status(201).json(serializeBookingRequest(request));
   } catch (err) {
     handleError(err, req, res, "Failed to create booking request");

@@ -55,7 +55,8 @@ The platform comprises 13 applications sharing authentication and design.
 - **Feature Gating:** `checkFeatureAccess(orgId, featureKey)` controls access based on entitlements.
 - **Admin Panel CMS:** Centralized administration for 16 CMS tables, media assets, site settings, and analytics.
 - **In-App Collaboration Layer:** Platform-wide system for team discussions via a `comments` table and shared UI components.
-- **Universal Notification & Real-Time Alerting System:** `useNotificationCenter` hook and WebSocket integration for real-time pushes.
+- **Universal Notification & Real-Time Alerting System:** `useNotificationCenter` hook and WebSocket integration for real-time pushes. Multi-channel dispatch (`lib/notification-dispatch.ts`) routes critical/warning domain alerts to Slack (via webhook or bot token) and Microsoft Teams (via webhook). When `SLACK_WEBHOOK_URL`, `SLACK_BOT_TOKEN`, or `MICROSOFT_TEAMS_WEBHOOK_URL` are configured, notifications route automatically. Slack and Teams dispatch are gated on severity (`warning`/`critical`); email alerts (to internal team) are gated on `critical` only.
+- **Email Delivery System:** Triple-failover email chain in `artifacts/api-server/src/lib/email.ts` — SendGrid → Resend → SMTP nodemailer. Provider selected via `EMAIL_PROVIDER` env var or auto-detected. Contact form submissions from Stephen Site (`/api/stephen/booking-requests`) and Carlota Jo (`/api/booking/inquiries`) fire dual emails: confirmation to submitter + admin notification. Email brand templates exist for both properties. Configure via `SENDGRID_API_KEY`, `RESEND_API_KEY`, or `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`. Admin inboxes configurable via `STEPHEN_ADMIN_EMAIL` and `CARLOTA_ADMIN_EMAIL` env vars.
 - **Alloy Platform Core — Orchestration Engine:** Canonical shared data model, ingestion layer, normalization pipeline, and workflow orchestration engine.
 
 ### Database Schema

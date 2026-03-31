@@ -1,5 +1,6 @@
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
+import { dispatchExternalAlert } from "./notification-dispatch";
 
 export type NotifSeverity = "info" | "warning" | "critical";
 
@@ -28,6 +29,18 @@ export function broadcastNotification(notif: DomainNotif): void {
 
   publish(WS_CHANNELS.NOTIFICATIONS, "new_notification", payload);
   logger.debug({ appId: notif.appId, title: notif.title, severity: notif.severity }, "Domain notification broadcast");
+
+  if (notif.severity === "critical" || notif.severity === "warning") {
+    dispatchExternalAlert({
+      appName: notif.appName,
+      title: notif.title,
+      message: notif.message,
+      severity: notif.severity,
+      actionUrl: notif.actionUrl,
+    }).catch((err) => {
+      logger.warn({ err }, "External alert dispatch error");
+    });
+  }
 }
 
 const NOTIFICATION_INTERVAL_MS = 45_000;

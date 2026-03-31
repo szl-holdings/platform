@@ -17,6 +17,12 @@ import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagin
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@workspace/services";
 import { logger } from "../lib/logger";
+import {
+  sendEmail,
+  buildCarlotaContactAckEmail,
+  buildCarlotaInquiryNotificationEmail,
+  CARLOTA_ADMIN_EMAIL,
+} from "../lib/email";
 
 const portalUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -47,6 +53,34 @@ router.post("/booking/inquiries", async (req: Request, res: Response) => {
     const [row] = await db.insert(carlotaInquiriesTable).values({
       name, email, company: company || null, phone: phone || null, service: service || null, message,
     }).returning();
+
+    Promise.allSettled([
+      sendEmail({
+        to: email,
+        subject: "Inquiry received — Carlota Jo Advisory",
+        html: buildCarlotaContactAckEmail(name),
+        replyTo: CARLOTA_ADMIN_EMAIL,
+      }),
+      sendEmail({
+        to: CARLOTA_ADMIN_EMAIL,
+        subject: `New private inquiry from ${name}`,
+        html: buildCarlotaInquiryNotificationEmail({
+          name,
+          email,
+          company: company || undefined,
+          phone: phone || undefined,
+          service: service || undefined,
+          message,
+        }),
+        replyTo: email,
+      }),
+    ]).then((results) => {
+      for (const r of results) {
+        if (r.status === "fulfilled" && !r.value.success) {
+          logger.warn({ error: r.value.error }, "[email] Carlota Jo inquiry email failed");
+        }
+      }
+    }).catch(() => {});
 
     res.json({
       success: true,
