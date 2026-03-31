@@ -154,7 +154,7 @@ export default function TerraIntelligence() {
                     </div>
                   </div>
                   <StageBadge stage={deal.stage} />
-                  <RiskBadge risk={deal.risk} />
+                  <RiskBadge level={deal.riskLevel} />
                   <span className="text-[11px] font-mono font-bold" style={{ color: "#c8a060" }}>{formatCurrency(deal.price)}</span>
                 </div>
               ))}
