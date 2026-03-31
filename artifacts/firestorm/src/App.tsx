@@ -99,13 +99,21 @@ function PageLoader() {
 }
 
 
-function Sidebar() {
+function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [location] = useLocation();
   const [moreExpanded, setMoreExpanded] = useState(false);
   const [complianceExpanded, setComplianceExpanded] = useState(location.startsWith("/cr"));
 
   return (
-    <aside className="w-56 bg-[#09080f]/95 border-r border-orange-500/10 flex flex-col h-screen sticky top-0">
+    <>
+      {open && (
+        <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onClose} />
+      )}
+    <aside className={cn(
+      "bg-[#09080f]/95 border-r border-orange-500/10 flex flex-col h-screen sticky top-0 z-30 transition-transform duration-200",
+      "fixed md:relative inset-y-0 left-0 w-56",
+      open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+    )}>
       <div className="px-4 py-4 border-b border-primary/10">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-md bg-primary/8 border border-primary/14 flex items-center justify-center shrink-0">
@@ -209,6 +217,7 @@ function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }
 
@@ -287,6 +296,7 @@ const firestormShortcuts: KeyboardShortcut[] = [
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [location] = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isDashboard = location.startsWith("/dashboard") || location.startsWith("/soc") ||
     location.startsWith("/threat") || location.startsWith("/incidents") ||
     location.startsWith("/findings") || location.startsWith("/mitre") ||
@@ -297,7 +307,9 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/xdr") || location.startsWith("/identity") ||
     location.startsWith("/executive") || location.startsWith("/cr/") ||
     location.startsWith("/sacsayhuaman") || location.startsWith("/adversary") ||
-    location.startsWith("/agent-insights") || location.startsWith("/asset-inventory");
+    location.startsWith("/agent-insights") || location.startsWith("/asset-inventory") ||
+    location.startsWith("/vulnerabilities") || location.startsWith("/hardening") ||
+    location.startsWith("/simulation");
 
   if (!isDashboard && location === "/") {
     return (
@@ -315,8 +327,14 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         </a>
         <EcosystemNav currentAppId="firestorm" currentAppName="Firestorm Cyber Command" accentColor="#ef4444" />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
-          <div className="flex-1 flex flex-col overflow-auto">
+          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+          <div className="flex-1 flex flex-col overflow-auto min-w-0">
+            <div className="h-10 flex items-center px-3 border-b border-orange-500/8 bg-background/80 md:hidden shrink-0">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-orange-500/10 text-orange-400/50 hover:text-orange-300 transition-colors" aria-label="Toggle navigation">
+                <SlidersHorizontal className="w-4 h-4" />
+              </button>
+              <span className="text-[10px] font-mono text-orange-400/40 ml-2">Firestorm Security Command</span>
+            </div>
             <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
               <AppRouter />
             </main>

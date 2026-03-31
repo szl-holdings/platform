@@ -290,47 +290,68 @@ export default function CommandOverviewPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6 max-w-none">
-      <div className="flex items-start justify-between">
+    <div className="p-4 md:p-6 space-y-5 max-w-none">
+      {/* Command Header */}
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-xl font-bold text-sky-50">Fleet Command Overview</h1>
-          <p className="text-xs text-sky-400/50 mt-0.5">
-            {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · All times UTC
+          <div className="flex items-center gap-2 mb-1">
+            <Ship className="w-3.5 h-3.5 text-sky-400/70" />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono text-sky-400/70">Vessels · Fleet Command</span>
+          </div>
+          <h1 className="font-display text-xl font-bold text-sky-50 tracking-tight">Fleet Command Overview</h1>
+          <p className="text-[11px] text-sky-400/50 mt-0.5">
+            {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })} · All times UTC
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           {!isLive && (
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">DEMO DATA</span>
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">DEMO</span>
           )}
           <button onClick={() => refetch()} className="p-1.5 rounded-lg hover:bg-sky-500/10 text-sky-400/50 hover:text-sky-300 transition-colors">
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
-          <div className="flex items-center gap-2">
-            <span className={cn("w-2 h-2 rounded-full", isLive ? "bg-emerald-400 animate-pulse" : "bg-amber-400")} />
-            <span className="text-[10px] text-sky-400/50 font-mono">{isLive ? "Live" : "Demo"} · {totalVessels} vessels tracked</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.12)" }}>
+            <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isLive ? "bg-emerald-400 animate-pulse" : "bg-amber-400")} />
+            <span className="text-[10px] text-sky-400/60 font-mono">{isLive ? "Live" : "Demo"} · {totalVessels} vessels</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
-        {[
-          { label: "Total Vessels", value: totalVessels, icon: Ship, color: "text-sky-400" },
-          { label: "At Sea", value: atSea, icon: Activity, color: "text-emerald-400" },
-          { label: "In Port", value: inPort, icon: Ship, color: "text-sky-400" },
-          { label: "Delayed", value: delayed, icon: Clock, color: "text-orange-400" },
-          { label: "Maintenance", value: maintenanceCount, icon: Wrench, color: "text-red-400" },
-          { label: "Exceptions", value: criticalExceptions, icon: AlertTriangle, color: "text-red-400" },
-          { label: "Fleet Util.", value: `${fleetUtil}%`, icon: BarChart3, color: "text-violet-400" },
-          { label: "Weather Hit", value: weatherAffected, icon: CloudLightning, color: "text-amber-400" },
-        ].map(item => (
-          <div key={item.label} className="bg-[#0a1628]/80 border border-sky-500/10 rounded-lg px-3 py-2.5 flex flex-col items-center text-center">
-            <item.icon className={cn("w-3.5 h-3.5 mb-1", item.color)} />
-            <p className={cn("text-lg font-bold font-display leading-none", item.color)}>{item.value}</p>
-            <p className="text-[9px] text-sky-400/40 mt-0.5 uppercase tracking-wide">{item.label}</p>
-          </div>
-        ))}
+      {/* Fleet status command strip */}
+      {criticalExceptions > 0 && (
+        <div className="rounded-xl border border-red-500/25 bg-red-500/5 px-4 py-3 flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse shrink-0" />
+          <span className="text-xs font-medium text-red-400">{criticalExceptions} critical exception{criticalExceptions > 1 ? "s" : ""} require immediate action</span>
+          <Link href="/exceptions">
+            <button className="ml-auto text-[10px] px-2.5 py-1 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500/10 transition-colors flex items-center gap-1">
+              View All <ChevronRight className="w-3 h-3" />
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {/* Fleet metrics strip */}
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(14,165,233,0.12)", background: "rgba(14,165,233,0.015)" }}>
+        <div className="grid grid-cols-4 md:grid-cols-8">
+          {[
+            { label: "Total", value: totalVessels, color: "text-sky-400", borderColor: "transparent" },
+            { label: "At Sea", value: atSea, color: "text-emerald-400", borderColor: "rgba(14,165,233,0.08)" },
+            { label: "In Port", value: inPort, color: "text-sky-300", borderColor: "rgba(14,165,233,0.08)" },
+            { label: "Delayed", value: delayed, color: "text-orange-400", borderColor: "rgba(14,165,233,0.08)" },
+            { label: "Maintenance", value: maintenanceCount, color: "text-red-400", borderColor: "rgba(14,165,233,0.08)" },
+            { label: "Exceptions", value: criticalExceptions, color: criticalExceptions > 0 ? "text-red-400" : "text-sky-400/40", borderColor: "rgba(14,165,233,0.08)" },
+            { label: "Util.", value: `${fleetUtil}%`, color: "text-violet-400", borderColor: "rgba(14,165,233,0.08)" },
+            { label: "Weather", value: weatherAffected, color: "text-amber-400", borderColor: "rgba(14,165,233,0.08)" },
+          ].map((item, i) => (
+            <div key={item.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(14,165,233,0.08)" : "none" }}>
+              <p className={cn("text-lg font-bold font-display leading-none", item.color)}>{item.value}</p>
+              <p className="text-[9px] text-sky-400/40 mt-0.5 uppercase tracking-wide">{item.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* Tabs */}
       <div className="flex items-center gap-1 border-b border-sky-500/10">
         {tabs.map(tab => (
           <button
@@ -347,14 +368,14 @@ export default function CommandOverviewPage() {
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2 pb-2">
-          <Link href="/fleet">
+          <Link href="/dashboard/fleet">
             <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
-              Full Fleet Map <ChevronRight className="w-3 h-3" />
+              Fleet Map <ChevronRight className="w-3 h-3" />
             </button>
           </Link>
           <Link href="/exceptions">
             <button className="text-[10px] text-sky-400/50 hover:text-sky-300 flex items-center gap-1 transition-colors">
-              All Exceptions <ChevronRight className="w-3 h-3" />
+              Exceptions <ChevronRight className="w-3 h-3" />
             </button>
           </Link>
         </div>

@@ -6,7 +6,7 @@ import { UserButton } from "@workspace/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
-  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor, Brain
+  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor, Brain, Menu
 } from "lucide-react";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
@@ -177,17 +177,24 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
   );
 }
 
-function Sidebar() {
+function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobileClose?: () => void }) {
   const [location] = useLocation();
   const [hovered, setHovered] = useState(false);
   const [legacyExpanded, setLegacyExpanded] = useState(false);
-  const expanded = hovered;
+  const expanded = hovered || (mobileOpen ?? false);
 
   return (
+    <>
+      {mobileOpen && (
+        <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onMobileClose} />
+      )}
     <aside
       className={cn(
-        "bg-[#060e1a]/95 border-r border-sky-500/10 flex flex-col h-screen sticky top-0 transition-all duration-200 ease-out z-30",
-        expanded ? "w-52" : "w-14"
+        "bg-[#060e1a]/95 border-r border-sky-500/10 flex flex-col h-screen transition-all duration-200 ease-out z-30",
+        "fixed md:sticky top-0 inset-y-0 left-0",
+        mobileOpen ? "w-52 translate-x-0" : "-translate-x-full md:translate-x-0",
+        "md:w-14 md:hover:w-52",
+        expanded && "md:w-52",
       )}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setLegacyExpanded(false); }}
@@ -301,6 +308,7 @@ function Sidebar() {
         )}
       </div>
     </aside>
+    </>
   );
 }
 
@@ -404,6 +412,7 @@ const vesselsShortcuts: KeyboardShortcut[] = [
 ];
 
 function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#0ea5e9">
       <div className="flex flex-col h-screen bg-[#060e1a]">
@@ -412,9 +421,15 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         </a>
         <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#0ea5e9" />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
+          <Sidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
           <div className="flex-1 flex flex-col overflow-auto min-w-0">
             <DemoModeBanner />
+            <div className="h-10 flex items-center px-3 border-b border-sky-500/8 bg-[#060e1a]/80 md:hidden shrink-0">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-sky-500/10 text-sky-400/50 hover:text-sky-300 transition-colors" aria-label="Toggle navigation">
+                <Menu className="w-4 h-4" />
+              </button>
+              <span className="text-[10px] font-mono text-sky-400/30 ml-2 uppercase tracking-wider">Vessels Maritime Intelligence</span>
+            </div>
             <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
               <DashboardRouter />
             </main>

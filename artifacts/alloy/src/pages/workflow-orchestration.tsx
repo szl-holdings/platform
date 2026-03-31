@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@workspace/shared-ui";
-import { GitBranch, User, Clock, ArrowRight, ExternalLink, CheckCircle, AlertTriangle, RefreshCw, Play, Pause, XCircle } from "lucide-react";
+import { GitBranch, User, Clock, ExternalLink, AlertTriangle, RefreshCw, Play, Pause, XCircle, CheckCircle, ChevronRight, Terminal, Zap, Activity, Filter } from "lucide-react";
 import { useState } from "react";
 
 interface Workflow {
@@ -25,6 +25,7 @@ function useWorkflows() {
       if (resp && typeof resp === "object" && "data" in resp) return resp.data;
       return resp as Workflow[];
     },
+    refetchInterval: 15000,
   });
 }
 
@@ -62,37 +63,105 @@ function useStartRun() {
   });
 }
 
-const statusColors: Record<string, { color: string; label: string; bg: string; border: string }> = {
-  active: { color: "#10b981", label: "Active", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.2)" },
-  paused: { color: "#f59e0b", label: "Paused", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)" },
-  draft: { color: "#6b7280", label: "Draft", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.2)" },
-  archived: { color: "#4b5563", label: "Archived", bg: "rgba(75,85,99,0.08)", border: "rgba(75,85,99,0.2)" },
-  error: { color: "#ef4444", label: "Error", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)" },
+const STATUS_CONFIG: Record<string, { color: string; label: string; bg: string; border: string; dotColor: string }> = {
+  active: { color: "#10b981", label: "Active", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.2)", dotColor: "#10b981" },
+  paused: { color: "#f59e0b", label: "Paused", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)", dotColor: "#f59e0b" },
+  draft: { color: "#6b7280", label: "Draft", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.2)", dotColor: "#6b7280" },
+  archived: { color: "#4b5563", label: "Archived", bg: "rgba(75,85,99,0.08)", border: "rgba(75,85,99,0.2)", dotColor: "#4b5563" },
+  error: { color: "#ef4444", label: "Error", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)", dotColor: "#ef4444" },
 };
 
+const KIND_LABELS: Record<string, string> = {
+  contract: "Contract",
+  approval: "Approval",
+  onboarding: "Onboarding",
+  compliance: "Compliance",
+  finance: "Finance",
+  automation: "Automation",
+};
+
+function WorkflowSteps({ workflow }: { workflow: Workflow }) {
+  const config = workflow.config as Record<string, unknown> ?? {};
+  const steps = (config.steps as string[]) ?? [];
+  if (steps.length === 0) return null;
+  return (
+    <div className="flex items-center gap-1 mt-2 flex-wrap">
+      {steps.slice(0, 5).map((step, i) => (
+        <div key={i} className="flex items-center gap-1">
+          <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ color: "rgba(0,212,255,0.5)", background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.1)" }}>
+            {step}
+          </span>
+          {i < steps.slice(0, 5).length - 1 && <ChevronRight className="w-2 h-2" style={{ color: "rgba(255,255,255,0.15)" }} />}
+        </div>
+      ))}
+      {steps.length > 5 && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>+{steps.length - 5} more</span>}
+    </div>
+  );
+}
+
 function WorkflowDrawer({ workflow, onClose, onUpdate, onRunNow }: { workflow: Workflow; onClose: () => void; onUpdate: (id: number, data: Partial<Workflow>) => void; onRunNow: (id: number) => void }) {
-  const s = statusColors[workflow.status] ?? statusColors.active;
+  const s = STATUS_CONFIG[workflow.status] ?? STATUS_CONFIG.active;
   const meta = workflow.metadata as Record<string, unknown> ?? {};
+  const config = workflow.config as Record<string, unknown> ?? {};
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
-      <div className="flex-1 bg-black/40" />
+      <div className="flex-1 bg-black/50 backdrop-blur-sm" />
       <div className="w-full max-w-lg bg-[#0c1420] border-l border-white/10 flex flex-col h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="p-5 border-b border-white/5">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wide" style={{ color: s.color, background: s.bg, borderColor: s.border }}>{s.label}</span>
-            <button onClick={onClose} className="text-slate-400 hover:text-white text-xs">✕</button>
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wide" style={{ color: s.color, background: s.bg, borderColor: s.border }}>{s.label}</span>
+            <button onClick={onClose} className="text-slate-400 hover:text-white text-xs p-1 rounded hover:bg-white/5 transition-colors">✕</button>
           </div>
-          <h2 className="text-sm font-semibold text-white">{workflow.name}</h2>
-          {workflow.description && <p className="text-[11px] text-slate-400 mt-1">{workflow.description}</p>}
-          {workflow.kind && <p className="text-[10px] text-slate-500 mt-1">Kind: {workflow.kind}</p>}
+          <h2 className="text-base font-bold text-white">{workflow.name}</h2>
+          {workflow.description && <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">{workflow.description}</p>}
+          <div className="flex items-center gap-3 mt-2 text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+            {workflow.kind && <span className="px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>{workflow.kind}</span>}
+            <span className="font-mono">ID: {workflow.id}</span>
+            <span>Product: {workflow.product}</span>
+          </div>
         </div>
-        {Object.keys(meta).length > 0 && (
-          <div className="p-5 border-b border-white/5">
-            <div className="text-[10px] font-medium text-slate-500 mb-2">Metadata</div>
-            <pre className="text-[10px] text-slate-400 overflow-auto bg-white/3 rounded p-2 border border-white/5">{JSON.stringify(meta, null, 2)}</pre>
+
+        {(meta.owner || meta.team || meta.sla_deadline || meta.value_at_risk) && (
+          <div className="p-5 border-b border-white/5 grid grid-cols-2 gap-3">
+            {meta.owner && (
+              <div className="bg-white/3 rounded-lg p-3 border border-white/5">
+                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>Owner</div>
+                <div className="text-[11px] text-white flex items-center gap-1"><User className="w-3 h-3 text-cyan-400/50" />{meta.owner as string}</div>
+              </div>
+            )}
+            {meta.team && (
+              <div className="bg-white/3 rounded-lg p-3 border border-white/5">
+                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>Team</div>
+                <div className="text-[11px] text-white">{meta.team as string}</div>
+              </div>
+            )}
+            {meta.sla_deadline && (
+              <div className="bg-white/3 rounded-lg p-3 border border-white/5">
+                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>SLA Deadline</div>
+                <div className="text-[11px] text-white flex items-center gap-1"><Clock className="w-3 h-3 text-amber-400/50" />{meta.sla_deadline as string}</div>
+              </div>
+            )}
+            {(meta.value_at_risk as number) > 0 && (
+              <div className="bg-white/3 rounded-lg p-3 border border-amber-500/10">
+                <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>Value at Risk</div>
+                <div className="text-[11px] font-bold text-amber-400">
+                  ${(meta.value_at_risk as number) >= 1e6 ? `${((meta.value_at_risk as number) / 1e6).toFixed(1)}M` : `${((meta.value_at_risk as number) / 1000).toFixed(0)}K`}
+                </div>
+              </div>
+            )}
           </div>
         )}
-        <div className="p-5">
+
+        {Object.keys(config).length > 0 && (
+          <div className="p-5 border-b border-white/5">
+            <div className="flex items-center gap-1.5 text-[10px] font-medium mb-2" style={{ color: "rgba(0,212,255,0.7)" }}>
+              <Terminal className="w-3 h-3" /> Configuration
+            </div>
+            <pre className="text-[10px] text-slate-400 overflow-auto bg-white/3 rounded-lg p-3 border border-white/5 max-h-48">{JSON.stringify(config, null, 2)}</pre>
+          </div>
+        )}
+
+        <div className="p-5 mt-auto">
           <div className="flex flex-wrap gap-2">
             {workflow.status !== "active" && (
               <button onClick={() => { onUpdate(workflow.id, { status: "active" }); onClose(); }} className="text-[10px] px-3 py-1.5 rounded-lg font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:opacity-80 transition-all flex items-center gap-1">
@@ -105,10 +174,31 @@ function WorkflowDrawer({ workflow, onClose, onUpdate, onRunNow }: { workflow: W
               </button>
             )}
             <button onClick={() => { onRunNow(workflow.id); onClose(); }} className="text-[10px] px-3 py-1.5 rounded-lg font-medium flex items-center gap-1" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}>
-              <Play className="w-3 h-3" /> Run Now
+              <Zap className="w-3 h-3" /> Run Now
+            </button>
+            <button className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <ExternalLink className="w-3 h-3" /> Audit Trail
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonWorkflow() {
+  return (
+    <div className="rounded-xl border p-5 animate-pulse" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="h-4 w-12 rounded" style={{ background: "rgba(255,255,255,0.06)" }} />
+            <div className="h-4 w-16 rounded" style={{ background: "rgba(255,255,255,0.04)" }} />
+          </div>
+          <div className="h-4 w-56 rounded mb-1" style={{ background: "rgba(255,255,255,0.05)" }} />
+          <div className="h-3 w-40 rounded" style={{ background: "rgba(255,255,255,0.03)" }} />
+        </div>
+        <div className="h-8 w-20 rounded" style={{ background: "rgba(255,255,255,0.04)" }} />
       </div>
     </div>
   );
@@ -125,141 +215,175 @@ export default function WorkflowOrchestration() {
   const active = workflows.filter(w => w.status === "active");
   const paused = workflows.filter(w => w.status === "paused");
   const error = workflows.filter(w => w.status === "error");
+  const draft = workflows.filter(w => w.status === "draft");
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="max-w-7xl mx-auto space-y-5">
+      {/* Page header */}
+      <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <GitBranch className="w-4 h-4" style={{ color: "#00d4ff" }} />
-            <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#00d4ff" }}>Alloy · Workflow Orchestration</span>
+            <GitBranch className="w-3.5 h-3.5" style={{ color: "#00d4ff" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#00d4ff" }}>Alloy · Workflow Orchestration</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Workflow Orchestration</h1>
-          <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Visual workflow management — step owners, SLA tracking, blocked steps, and reroute capabilities.</p>
+          <h1 className="text-xl font-bold text-white tracking-tight">Workflow Orchestration</h1>
+          <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Manage execution workflows — step owners, SLA tracking, and reroute capabilities.</p>
         </div>
-        <button onClick={() => refetch()} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
+        <button onClick={() => refetch()} className="flex items-center gap-1.5 text-[11px] border px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5 shrink-0" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.08)" }}>
           <RefreshCw className="w-3 h-3" /> Refresh
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-3">
-        {[
-          { label: "Active", value: active.length, color: "#10b981" },
-          { label: "Paused", value: paused.length, color: "#f59e0b" },
-          { label: "Error", value: error.length, color: "#ef4444" },
-          { label: "Total", value: workflows.length, color: "#00d4ff" },
-        ].map(c => (
-          <div key={c.label} className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
-            <div className="text-[10px] font-medium mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>{c.label}</div>
-            <div className="text-2xl font-bold" style={{ color: c.color }}>{c.value}</div>
-          </div>
-        ))}
+      {/* Status strip */}
+      <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
+        <div className="flex items-stretch">
+          {[
+            { label: "Active", value: active.length, color: "#10b981", pulse: active.length > 0 },
+            { label: "Paused", value: paused.length, color: "#f59e0b" },
+            { label: "Draft", value: draft.length, color: "#6b7280" },
+            { label: "Error", value: error.length, color: "#ef4444", urgent: error.length > 0 },
+            { label: "Total", value: workflows.length, color: "rgba(255,255,255,0.5)" },
+          ].map((c, i) => (
+            <div key={c.label} className="flex-1 px-4 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+              <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                <span className="text-xl font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
+                {c.pulse && c.value > 0 && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: c.color }} />}
+              </div>
+              <div className="text-[9px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* Filter bar */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Filter:</span>
-        {["all", "active", "paused", "draft", "error"].map(f => (
-          <button key={f} onClick={() => setStatusFilter(f)} className="text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all"
-            style={{ background: statusFilter === f ? "rgba(0,212,255,0.08)" : "rgba(255,255,255,0.02)", borderColor: statusFilter === f ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.07)", color: statusFilter === f ? "#00d4ff" : "rgba(255,255,255,0.4)" }}>
-            {f}
-          </button>
-        ))}
-        <span className="ml-auto text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{filtered.length} workflows</span>
+        <div className="flex items-center gap-1 text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
+          <Filter className="w-3 h-3" /> Filter:
+        </div>
+        <div className="flex items-center gap-1 flex-wrap">
+          {["all", "active", "paused", "draft", "error"].map(f => (
+            <button key={f} onClick={() => setStatusFilter(f)} className="text-[10px] px-2.5 py-1 rounded-lg border capitalize transition-all"
+              style={{ background: statusFilter === f ? "rgba(0,212,255,0.08)" : "rgba(255,255,255,0.02)", borderColor: statusFilter === f ? "rgba(0,212,255,0.3)" : "rgba(255,255,255,0.06)", color: statusFilter === f ? "#00d4ff" : "rgba(255,255,255,0.35)" }}>
+              {f}
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{filtered.length} workflows</span>
       </div>
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-          <span className="ml-2 text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Loading workflows…</span>
-        </div>
-      )}
+      {isLoading && <div className="space-y-3">{[1, 2, 3].map(i => <SkeletonWorkflow key={i} />)}</div>}
+
       {isError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" /> Failed to load workflows. Check API connectivity.
+        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-red-400">Failed to load workflows</p>
+            <p className="text-[11px] text-red-400/60 mt-0.5">Check API connectivity.</p>
+          </div>
+          <button onClick={() => refetch()} className="ml-auto text-[10px] px-3 py-1.5 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500/10 transition-colors">Retry</button>
         </div>
       )}
+
       {!isLoading && !isError && filtered.length === 0 && (
-        <div className="rounded-xl border p-12 text-center" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-          <GitBranch className="w-10 h-10 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.1)" }} />
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No workflows found</p>
+        <div className="rounded-xl border p-12 text-center" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.12)" }}>
+            <GitBranch className="w-5 h-5" style={{ color: "rgba(0,212,255,0.3)" }} />
+          </div>
+          <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>No workflows found</p>
           <p className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.2)" }}>Create a workflow via the API or import from config</p>
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {filtered.map(w => {
-          const s = statusColors[w.status] ?? statusColors.active;
+          const s = STATUS_CONFIG[w.status] ?? STATUS_CONFIG.active;
           const isError = w.status === "error";
           const isPaused = w.status === "paused";
+          const isActive = w.status === "active";
           const meta = w.metadata as Record<string, unknown> ?? {};
           const owner = (meta.owner as string) ?? undefined;
           const team = (meta.team as string) ?? undefined;
           const slaDeadline = (meta.sla_deadline as string) ?? undefined;
           const valueAtRisk = (meta.value_at_risk as number) ?? 0;
+          const kindLabel = w.kind ? (KIND_LABELS[w.kind] ?? w.kind) : null;
 
           return (
             <div
               key={w.id}
-              className="rounded-xl border p-5 cursor-pointer hover:bg-white/[0.02] transition-all"
+              className="rounded-xl border cursor-pointer transition-all group"
               style={{
-                borderColor: isError ? "rgba(239,68,68,0.2)" : isPaused ? "rgba(245,158,11,0.15)" : "rgba(255,255,255,0.07)",
+                borderColor: isError ? "rgba(239,68,68,0.2)" : isPaused ? "rgba(245,158,11,0.12)" : isActive ? "rgba(16,185,129,0.1)" : "rgba(255,255,255,0.06)",
                 background: isError ? "rgba(239,68,68,0.02)" : "rgba(255,255,255,0.01)",
               }}
               onClick={() => setSelectedWorkflow(w)}
             >
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded" style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}>{s.label}</span>
-                    {w.kind && <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{w.kind}</span>}
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded border" style={{ color: s.color, background: s.bg, borderColor: s.border }}>
+                        {isActive && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: s.color }} />}
+                        {s.label}
+                      </span>
+                      {kindLabel && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ color: "rgba(0,212,255,0.5)", background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.1)" }}>{kindLabel}</span>
+                      )}
+                      <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>{w.product}</span>
+                    </div>
+                    <div className="text-sm font-semibold text-white mb-0.5">{w.name}</div>
+                    {w.description && <div className="text-[10px] mb-2 line-clamp-1" style={{ color: "rgba(255,255,255,0.35)" }}>{w.description}</div>}
+                    <div className="flex items-center gap-3 text-[10px] flex-wrap" style={{ color: "rgba(255,255,255,0.3)" }}>
+                      {owner && <span className="flex items-center gap-1"><User className="w-2.5 h-2.5" />{owner}</span>}
+                      {team && <span className="flex items-center gap-1"><Activity className="w-2.5 h-2.5" />{team}</span>}
+                      {slaDeadline && <span className="flex items-center gap-1 text-amber-400/70"><Clock className="w-2.5 h-2.5" />SLA: {slaDeadline}</span>}
+                    </div>
+                    <WorkflowSteps workflow={w} />
                   </div>
-                  <div className="text-sm font-semibold text-white mb-0.5">{w.name}</div>
-                  {w.description && <div className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>{w.description}</div>}
-                  <div className="text-[10px] flex items-center gap-3" style={{ color: "rgba(255,255,255,0.35)" }}>
-                    {owner && <span className="flex items-center gap-1"><User className="w-3 h-3" />{owner}</span>}
-                    {team && <span>{team}</span>}
-                    {slaDeadline && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />SLA: {slaDeadline}</span>}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  {valueAtRisk > 0 && (
-                    <>
-                      <div className="text-sm font-bold" style={{ color: "#f59e0b" }}>
-                        ${valueAtRisk >= 1_000_000 ? `${(valueAtRisk / 1_000_000).toFixed(1)}M` : valueAtRisk >= 1_000 ? `${(valueAtRisk / 1_000).toFixed(0)}K` : valueAtRisk}
+                  <div className="text-right shrink-0">
+                    {valueAtRisk > 0 && (
+                      <div>
+                        <div className="text-sm font-bold" style={{ color: "#f59e0b" }}>
+                          ${valueAtRisk >= 1_000_000 ? `${(valueAtRisk / 1_000_000).toFixed(1)}M` : `${(valueAtRisk / 1_000).toFixed(0)}K`}
+                        </div>
+                        <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>value at risk</div>
                       </div>
-                      <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>value at risk</div>
-                    </>
-                  )}
+                    )}
+                    <ChevronRight className="w-4 h-4 mt-2 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(0,212,255,0.4)" }} />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                {w.status === "active" && (
+              <div className="px-4 py-2.5 border-t flex items-center gap-2" style={{ borderColor: "rgba(255,255,255,0.04)", background: "rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
+                {isActive && (
                   <button
                     onClick={() => updateWorkflow.mutate({ id: w.id, status: "paused" })}
-                    className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1"
-                    style={{ color: "#f59e0b", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}
+                    className="text-[10px] px-2.5 py-1 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1"
+                    style={{ color: "#f59e0b", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)" }}
                   >
                     <Pause className="w-3 h-3" /> Pause
                   </button>
                 )}
-                {w.status !== "active" && (
+                {!isActive && w.status !== "archived" && (
                   <button
                     onClick={() => updateWorkflow.mutate({ id: w.id, status: "active" })}
-                    className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1"
-                    style={{ color: "#10b981", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}
+                    className="text-[10px] px-2.5 py-1 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1"
+                    style={{ color: "#10b981", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)" }}
                   >
-                    <Play className="w-3 h-3" /> Activate
+                    <CheckCircle className="w-3 h-3" /> Activate
                   </button>
                 )}
                 <button
                   onClick={() => startRun.mutate(w.id)}
                   disabled={startRun.isPending}
-                  className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80"
-                  style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}
+                  className="text-[10px] px-2.5 py-1 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1"
+                  style={{ color: "#00d4ff", background: "rgba(0,212,255,0.06)", border: "1px solid rgba(0,212,255,0.15)" }}
                 >
-                  Run Now
+                  <Play className="w-3 h-3" /> Run Now
                 </button>
+                <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
+                  Updated {new Date(w.updatedAt).toLocaleDateString()}
+                </span>
+                <XCircle className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" style={{ color: "rgba(255,255,255,0.2)" }} title="Archive" onClick={() => updateWorkflow.mutate({ id: w.id, status: "archived" })} />
               </div>
             </div>
           );

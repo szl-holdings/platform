@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
-import { Shield, AlertTriangle, Activity, Clock, Crosshair, Flame, Target, TrendingUp, TrendingDown, Zap, Terminal, Search, BookOpen, Network, ChevronRight } from "lucide-react";
+import { Shield, AlertTriangle, Activity, Clock, Crosshair, Flame, Target, TrendingUp, TrendingDown, Zap, Terminal, Search, BookOpen, Network, ChevronRight, Eye, Radio } from "lucide-react";
 import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { cn } from "@workspace/shared-ui/utils";
 
 type ActivityItem = { type: string; title: string; severity: string; timestamp: string };
 
@@ -55,6 +56,19 @@ const mitreData: Record<string, Record<string, number>> = {
 };
 
 type SOCData = typeof fallbackData;
+
+function SOCLiveClock() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="text-[10px] font-mono text-muted-foreground/50 tabular-nums">
+      UTC {time.toISOString().slice(11, 19)}
+    </div>
+  );
+}
 
 function AnimatedCounter({ value, duration = 1200, decimals = 0 }: { value: number; duration?: number; decimals?: number }) {
   const [display, setDisplay] = useState(0);
@@ -420,79 +434,137 @@ export default function SOCDashboard() {
   return (
     <div className="p-5 space-y-5 max-w-[1600px]">
       {IS_DEMO && (
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400/80">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
-          Simulation Environment — All incidents, alerts, and metrics shown are illustrative training data. No real threats are represented.
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-medium bg-orange-500/8 border border-orange-500/15 text-orange-400/70">
+          <Radio className="w-3 h-3 shrink-0 animate-pulse" />
+          Simulation Environment — Incidents, alerts, and metrics shown are illustrative training data. No real threats are represented.
         </div>
       )}
-      <div className="flex items-center justify-between">
+
+      {/* Command Header */}
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-lg font-bold flex items-center gap-2">
-            <Flame className="w-4.5 h-4.5 text-red-400" />
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest">Firestorm / SOC</span>
+            <span className="text-red-500/20">·</span>
+            <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">Threat Operations</span>
+          </div>
+          <h1 className="font-display text-xl font-bold text-foreground flex items-center gap-2.5">
+            <Flame className="w-5 h-5 text-red-400 shrink-0" />
             Security Operations Center
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Threat detection, triage, and coordinated response across all monitored environments</p>
+          <p className="text-[11px] text-muted-foreground mt-1">Threat detection, triage, and coordinated response · {safeData.totalAlerts?.toLocaleString()} events monitored</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[11px]">
+        <div className="flex items-center gap-2 shrink-0 mt-1">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-500/8 border border-red-500/15">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse shrink-0" />
+            <span className="text-[10px] font-mono text-red-400">{safeData.activeIncidents} ACTIVE</span>
+          </div>
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px] font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-            SOC Active
+            SOC LIVE
           </Badge>
-          <span className="text-[10px] font-mono text-muted-foreground">UTC {new Date().toISOString().slice(11, 19)}</span>
+          <SOCLiveClock />
         </div>
       </div>
 
-      {/* 1-10-60 Timer */}
-      <ResponseTimer />
-
-      {/* Threat Posture Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className={`bg-card border rounded-xl p-5 flex items-center gap-4 ${safeData.activeIncidents > 0 ? "border-red-500/30 ring-1 ring-red-500/10" : "border-border"}`}>
-          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0 animate-pulse">
-            <AlertTriangle className="w-6 h-6 text-red-400" />
-          </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Active Incidents</p>
-            <p className="text-4xl font-bold font-display mt-0.5 text-red-400"><AnimatedCounter value={safeData.activeIncidents} /></p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{safeData.totalIncidents} this quarter</p>
-          </div>
-        </div>
-
-        <div className="col-span-1 bg-card border border-border rounded-xl p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-            <Shield className="w-6 h-6 text-amber-400" />
-          </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Open Alerts</p>
-            <p className="text-4xl font-bold font-display mt-0.5 text-amber-400"><AnimatedCounter value={safeData.openAlerts} /></p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{safeData.totalAlerts.toLocaleString()} processed</p>
-          </div>
-        </div>
-
-        <div className="col-span-1 bg-card border border-border rounded-xl p-5">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono mb-3">Threat Posture</p>
-          <div className="flex items-end gap-3 mb-3">
-            <span className="text-4xl font-bold font-display text-emerald-400">{posturScore}%</span>
-            <div className="pb-1 flex items-center gap-1 text-[11px] text-emerald-400">
-              <TrendingUp className="w-3 h-3" /> +3% vs last week
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            {[
-              { label: "Endpoint Coverage", value: 98, color: "bg-emerald-400" },
-              { label: "Patch Compliance", value: 94, color: "bg-emerald-400" },
-              { label: "MFA Adoption", value: 87, color: "bg-amber-400" },
-              { label: "EDR Health", value: 99, color: "bg-emerald-400" },
-            ].map(m => (
-              <div key={m.label} className="flex items-center gap-2">
-                <span className="text-[9px] text-muted-foreground w-28 shrink-0 font-mono">{m.label}</span>
-                <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${m.color}`} style={{ width: `${m.value}%` }} />
+      {/* Command Strip — KPI rail */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-border/50">
+          {[
+            {
+              label: "Active Incidents",
+              value: <span className="text-red-400"><AnimatedCounter value={safeData.activeIncidents} /></span>,
+              sub: `${safeData.totalIncidents} this quarter`,
+              icon: AlertTriangle,
+              accent: "text-red-400",
+              pulse: safeData.activeIncidents > 0,
+            },
+            {
+              label: "Open Alerts",
+              value: <span className="text-amber-400"><AnimatedCounter value={safeData.openAlerts} /></span>,
+              sub: `${safeData.alertsBySeverity?.critical ?? 0} critical`,
+              icon: Shield,
+              accent: "text-amber-400",
+              pulse: false,
+            },
+            {
+              label: "MTTD",
+              value: <span className="text-sky-400"><AnimatedCounter value={safeData.mttd} decimals={1} /></span>,
+              sub: "minutes avg detection",
+              icon: Clock,
+              accent: "text-sky-400",
+              suffix: "min",
+              pulse: false,
+            },
+            {
+              label: "MTTR",
+              value: <span className="text-violet-400"><AnimatedCounter value={safeData.mttr} /></span>,
+              sub: "minutes avg response",
+              icon: Zap,
+              accent: "text-violet-400",
+              suffix: "min",
+              pulse: false,
+            },
+            {
+              label: "Open Findings",
+              value: <span className="text-orange-400"><AnimatedCounter value={safeData.openFindings} /></span>,
+              sub: `${safeData.criticalFindings ?? 0} critical`,
+              icon: Target,
+              accent: "text-orange-400",
+              pulse: false,
+            },
+            {
+              label: "Posture Score",
+              value: <span className="text-emerald-400">{posturScore}</span>,
+              sub: "+3% vs last week",
+              icon: Eye,
+              accent: "text-emerald-400",
+              suffix: "%",
+              pulse: false,
+            },
+          ].map(({ label, value, sub, icon: Icon, accent, suffix, pulse }) => (
+            <div key={label} className="px-4 py-3 flex items-center gap-3 hover:bg-muted/5 transition-colors">
+              <Icon className={cn("w-4 h-4 shrink-0", accent, pulse && "animate-pulse")} />
+              <div className="min-w-0">
+                <div className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider truncate">{label}</div>
+                <div className="text-xl font-bold font-display leading-none mt-0.5 flex items-baseline gap-0.5">
+                  {value}
+                  {suffix && <span className={cn("text-sm font-normal", accent)}>{suffix}</span>}
                 </div>
-                <span className="text-[9px] font-mono text-foreground w-8 text-right">{m.value}%</span>
+                <div className="text-[10px] text-muted-foreground/60 mt-0.5 truncate">{sub}</div>
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Threat Posture mini-bars */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Eye className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs font-display font-semibold">Threat Posture — {posturScore}% Secure</span>
+            <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20 ml-1">+3% WoW</Badge>
           </div>
+          <span className="text-[9px] font-mono text-muted-foreground">Coverage indicators</span>
+        </div>
+        <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { label: "Endpoint Coverage", value: 98, color: "bg-emerald-400" },
+            { label: "Patch Compliance", value: 94, color: "bg-emerald-400" },
+            { label: "MFA Adoption", value: 87, color: "bg-amber-400" },
+            { label: "EDR Health", value: 99, color: "bg-emerald-400" },
+          ].map(m => (
+            <div key={m.label}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] text-muted-foreground font-mono">{m.label}</span>
+                <span className={cn("text-[10px] font-bold font-mono", m.color === "bg-emerald-400" ? "text-emerald-400" : "text-amber-400")}>{m.value}%</span>
+              </div>
+              <div className="h-1.5 bg-border rounded-full overflow-hidden">
+                <div className={cn("h-full rounded-full transition-all", m.color)} style={{ width: `${m.value}%` }} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
