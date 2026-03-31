@@ -29,12 +29,12 @@ const THREADS = [
 ];
 
 const ACTION_STYLES: Record<string, { color: string; bg: string; border: string; label: string }> = {
-  approve: { color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.25)", label: "Approve" },
-  reroute: { color: "#0ea5e9", bg: "rgba(14,165,233,0.1)", border: "rgba(14,165,233,0.25)", label: "Reroute" },
+  approve: { color: "#6b8f71", bg: "rgba(107,143,113,0.1)", border: "rgba(107,143,113,0.25)", label: "Approve" },
+  reroute: { color: "#4a90b8", bg: "rgba(14,165,233,0.1)", border: "rgba(14,165,233,0.25)", label: "Reroute" },
   escalate: { color: "#ec4899", bg: "rgba(236,72,153,0.1)", border: "rgba(236,72,153,0.25)", label: "Escalate" },
   defer: { color: "rgba(255,255,255,0.4)", bg: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)", label: "Defer" },
-  abort: { color: "#ef4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.25)", label: "Abort" },
-  assign: { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.25)", label: "Assign" },
+  abort: { color: "#c45a4a", bg: "rgba(196,90,74,0.1)", border: "rgba(196,90,74,0.25)", label: "Abort" },
+  assign: { color: "#d4a054", bg: "rgba(212,160,84,0.1)", border: "rgba(212,160,84,0.25)", label: "Assign" },
 };
 
 export default function InterventionWorkspace() {
@@ -45,8 +45,8 @@ export default function InterventionWorkspace() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Wrench className="w-4 h-4" style={{ color: "#f59e0b" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#f59e0b" }}>Lyte · Intervention Workspace</span>
+          <Wrench className="w-4 h-4" style={{ color: "#d4a054" }} />
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#d4a054" }}>Lyte · Intervention Workspace</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Intervention Workspace</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Comment threads, action selection, reroute/escalate/approve/defer/assign — all in context of the workflow and Alloy intelligence.</p>
@@ -58,15 +58,15 @@ export default function InterventionWorkspace() {
           <div className="flex-1 overflow-y-auto divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
             {THREADS.map(t => (
               <button key={t.id} onClick={() => setSelectedThread(t)} className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors" style={{
-                background: selectedThread?.id === t.id ? "rgba(245,158,11,0.06)" : undefined,
-                borderLeft: selectedThread?.id === t.id ? "2px solid #f59e0b" : "2px solid transparent",
+                background: selectedThread?.id === t.id ? "rgba(212,160,84,0.06)" : undefined,
+                borderLeft: selectedThread?.id === t.id ? "2px solid #d4a054" : "2px solid transparent",
               }}>
                 <div className="text-[10px] font-medium text-white mb-0.5 leading-snug">{t.workflow}</div>
                 <div className="text-[9px] flex items-center gap-2" style={{ color: "rgba(255,255,255,0.35)" }}>
                   <span>{t.comments.length} comments</span>
                   <span className="px-1 py-0.5 rounded" style={{
-                    color: t.status === "in_progress" ? "#0ea5e9" : "#f59e0b",
-                    background: t.status === "in_progress" ? "rgba(14,165,233,0.12)" : "rgba(245,158,11,0.12)",
+                    color: t.status === "in_progress" ? "#4a90b8" : "#d4a054",
+                    background: t.status === "in_progress" ? "rgba(14,165,233,0.12)" : "rgba(212,160,84,0.12)",
                   }}>{t.status.replace("_", " ")}</span>
                 </div>
               </button>
@@ -87,7 +87,7 @@ export default function InterventionWorkspace() {
                   <div key={i} className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{
                       background: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(139,92,246,0.15)" : "rgba(14,165,233,0.15)",
-                      color: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "#8b5cf6" : "#0ea5e9",
+                      color: c.author.startsWith("System") || c.author.startsWith("Alloy") ? "#8b7ac8" : "#4a90b8",
                       border: `1px solid ${c.author.startsWith("System") || c.author.startsWith("Alloy") ? "rgba(139,92,246,0.3)" : "rgba(14,165,233,0.3)"}`,
                     }}>
                       {c.author.startsWith("System") ? "AS" : c.author.startsWith("Alloy") ? "AL" : c.author.split(" ").map(n => n[0]).join("")}
@@ -126,7 +126,7 @@ export default function InterventionWorkspace() {
                     className="flex-1 text-xs px-3 py-2 rounded-lg outline-none"
                     style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}
                   />
-                  <button className="text-[10px] px-3 py-2 rounded-lg font-medium" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>Post</button>
+                  <button className="text-[10px] px-3 py-2 rounded-lg font-medium" style={{ color: "#d4a054", background: "rgba(212,160,84,0.1)", border: "1px solid rgba(212,160,84,0.2)" }}>Post</button>
                 </div>
               </div>
             </>

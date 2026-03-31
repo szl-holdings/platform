@@ -20,15 +20,15 @@ const categoryGradients: Record<string, string> = {
 };
 
 const impactColors = {
-  high: "text-purple-400 bg-purple-400/10 border-purple-400/20",
-  medium: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  high: "text-[#8b7ac8] bg-[#8b7ac8]/10 border-[#8b7ac8]/20",
+  medium: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/20",
   low: "text-slate-400 bg-slate-800 border-slate-700",
 };
 
 
 const impactBarColors: Record<string, string> = {
-  high: "bg-purple-500",
-  medium: "bg-blue-500",
+  high: "bg-[#8b7ac8]",
+  medium: "bg-[#4a90b8]",
   low: "bg-slate-500",
 };
 
@@ -59,7 +59,7 @@ export default function Recommendations() {
         </motion.div>
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3">
           {highImpact > 0 && (
-            <div className="flex items-center gap-2 text-xs text-purple-400 bg-purple-400/10 px-3 py-1.5 rounded-full border border-purple-400/20">
+            <div className="flex items-center gap-2 text-xs text-[#8b7ac8] bg-[#8b7ac8]/10 px-3 py-1.5 rounded-full border border-[#8b7ac8]/20">
               <Sparkles className="w-3 h-3" />
               {highImpact} high-impact
             </div>
@@ -111,7 +111,7 @@ export default function Recommendations() {
                 <p className="text-slate-400 text-sm leading-relaxed mb-4">{rec.description}</p>
 
                 {(rec as any).savings && (
-                  <div className="flex items-center gap-2 mb-3 text-xs text-emerald-400 bg-emerald-400/5 px-3 py-1.5 rounded-lg border border-emerald-400/10">
+                  <div className="flex items-center gap-2 mb-3 text-xs text-[#6b8f71] bg-[#6b8f71]/5 px-3 py-1.5 rounded-lg border border-[#6b8f71]/10">
                     <DollarSign className="w-3 h-3" />
                     <span className="font-semibold">{(rec as any).savings}</span>
                     <span className="text-slate-500">estimated savings</span>
@@ -160,7 +160,7 @@ export default function Recommendations() {
                 ) : (
                   <button 
                     onClick={() => updateRec.mutate({ id: rec.id, status: "completed" })}
-                    className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-medium py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                    className="w-full bg-[#6b8f71]/10 hover:bg-[#6b8f71]/20 border border-[#6b8f71]/20 text-[#6b8f71] font-medium py-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
                   >
                     Mark Completed <ArrowRight className="w-4 h-4" />
                   </button>

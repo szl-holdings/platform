@@ -54,7 +54,7 @@ export function CommandPalette({
   onClose,
   commands,
   appName,
-  accentColor = "#a855f7",
+  accentColor = "#8b7ac8",
   placeholder = "Type a command or search...",
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");

@@ -78,7 +78,7 @@ function FractionBar({ label, pct, color }: { label: string; pct: number; color:
 }
 
 function RouteRow({ r }: { r: RouteBreakdown }) {
-  const p99Color = r.p99 > 500 ? "text-red-400" : r.p99 > 200 ? "text-amber-400" : "text-emerald-400";
+  const p99Color = r.p99 > 500 ? "text-[#c45a4a]" : r.p99 > 200 ? "text-[#d4a054]" : "text-[#6b8f71]";
   const dbPct = r.avgTotal > 0 ? ((r.avgDb / r.avgTotal) * 100).toFixed(0) : "0";
   const extPct = r.avgTotal > 0 ? ((r.avgExternal / r.avgTotal) * 100).toFixed(0) : "0";
   return (
@@ -86,8 +86,8 @@ function RouteRow({ r }: { r: RouteBreakdown }) {
       <td className="py-2 pr-3 text-[11px] font-mono text-slate-300 truncate max-w-[180px]">{r.route}</td>
       <td className="py-2 pr-3 text-center text-[11px] font-mono text-slate-400">{r.count}</td>
       <td className="py-2 pr-3 text-center text-[11px] font-mono text-slate-400">{r.avgTotal.toFixed(0)}ms</td>
-      <td className="py-2 pr-3 text-center text-[11px] font-mono text-blue-400/80">{dbPct}%</td>
-      <td className="py-2 pr-3 text-center text-[11px] font-mono text-purple-400/80">{extPct}%</td>
+      <td className="py-2 pr-3 text-center text-[11px] font-mono text-[#4a90b8]/80">{dbPct}%</td>
+      <td className="py-2 pr-3 text-center text-[11px] font-mono text-[#8b7ac8]/80">{extPct}%</td>
       <td className={cn("py-2 text-center text-[11px] font-mono font-semibold", p99Color)}>{r.p99.toFixed(0)}ms</td>
     </tr>
   );
@@ -152,9 +152,9 @@ export default function ApmInstrumentationPage() {
       )}
 
       {error && (
-        <div className="rounded-xl p-4 border border-red-500/20 bg-red-500/5 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-          <span className="text-sm text-red-300">Failed to load APM data: {error}</span>
+        <div className="rounded-xl p-4 border border-[#c45a4a]/20 bg-[#c45a4a]/5 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-[#c45a4a] shrink-0" />
+          <span className="text-sm text-[#c45a4a]">Failed to load APM data: {error}</span>
         </div>
       )}
 
@@ -162,36 +162,36 @@ export default function ApmInstrumentationPage() {
         <>
           <div className="grid grid-cols-4 gap-3">
             <MetricCard label="Routes Monitored" value={routes.length} icon={Activity} color="text-cyan-400" />
-            <MetricCard label="p50 Latency" value={bd.overallP50.toFixed(0)} unit="ms" icon={Clock} color="text-emerald-400" />
-            <MetricCard label="p95 Latency" value={bd.overallP95.toFixed(0)} unit="ms" icon={TrendingUp} color={bd.overallP95 > 300 ? "text-amber-400" : "text-emerald-400"} />
-            <MetricCard label="p99 Latency" value={bd.overallP99.toFixed(0)} unit="ms" icon={TrendingUp} color={bd.overallP99 > 500 ? "text-red-400" : bd.overallP99 > 200 ? "text-amber-400" : "text-emerald-400"} />
+            <MetricCard label="p50 Latency" value={bd.overallP50.toFixed(0)} unit="ms" icon={Clock} color="text-[#6b8f71]" />
+            <MetricCard label="p95 Latency" value={bd.overallP95.toFixed(0)} unit="ms" icon={TrendingUp} color={bd.overallP95 > 300 ? "text-[#d4a054]" : "text-[#6b8f71]"} />
+            <MetricCard label="p99 Latency" value={bd.overallP99.toFixed(0)} unit="ms" icon={TrendingUp} color={bd.overallP99 > 500 ? "text-[#c45a4a]" : bd.overallP99 > 200 ? "text-[#d4a054]" : "text-[#6b8f71]"} />
           </div>
 
           <div className="rounded-xl border border-white/5 bg-white/[0.02] p-5 space-y-4">
             <div className="text-[11px] text-slate-400 uppercase tracking-wide font-semibold">Time Allocation Breakdown (avg across all instrumented routes)</div>
             <div className="space-y-3">
-              <FractionBar label="DB Query Time" pct={bd.avgDbFraction} color="bg-blue-500" />
-              <FractionBar label="External API Time" pct={bd.avgExternalFraction} color="bg-purple-500" />
-              <FractionBar label="Application + Serialization" pct={appFraction} color="bg-emerald-500" />
+              <FractionBar label="DB Query Time" pct={bd.avgDbFraction} color="bg-[#4a90b8]" />
+              <FractionBar label="External API Time" pct={bd.avgExternalFraction} color="bg-[#8b7ac8]" />
+              <FractionBar label="Application + Serialization" pct={appFraction} color="bg-[#6b8f71]" />
             </div>
             <div className="grid grid-cols-3 gap-3 pt-2 border-t border-white/5 text-center">
               <div>
                 <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500 uppercase tracking-wide mb-1">
                   <Database className="w-3 h-3" /> DB
                 </div>
-                <div className="font-mono text-sm text-blue-400">{bd.avgDbFraction.toFixed(1)}%</div>
+                <div className="font-mono text-sm text-[#4a90b8]">{bd.avgDbFraction.toFixed(1)}%</div>
               </div>
               <div>
                 <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500 uppercase tracking-wide mb-1">
                   <Zap className="w-3 h-3" /> External
                 </div>
-                <div className="font-mono text-sm text-purple-400">{bd.avgExternalFraction.toFixed(1)}%</div>
+                <div className="font-mono text-sm text-[#8b7ac8]">{bd.avgExternalFraction.toFixed(1)}%</div>
               </div>
               <div>
                 <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500 uppercase tracking-wide mb-1">
                   <Activity className="w-3 h-3" /> App
                 </div>
-                <div className="font-mono text-sm text-emerald-400">{appFraction.toFixed(1)}%</div>
+                <div className="font-mono text-sm text-[#6b8f71]">{appFraction.toFixed(1)}%</div>
               </div>
             </div>
           </div>
@@ -206,8 +206,8 @@ export default function ApmInstrumentationPage() {
                       <th className="pb-2 text-left text-[10px] text-slate-500 uppercase tracking-wide pr-3">Route</th>
                       <th className="pb-2 text-center text-[10px] text-slate-500 uppercase tracking-wide pr-3">Reqs</th>
                       <th className="pb-2 text-center text-[10px] text-slate-500 uppercase tracking-wide pr-3">Avg</th>
-                      <th className="pb-2 text-center text-[10px] text-blue-400/70 uppercase tracking-wide pr-3">DB%</th>
-                      <th className="pb-2 text-center text-[10px] text-purple-400/70 uppercase tracking-wide pr-3">Ext%</th>
+                      <th className="pb-2 text-center text-[10px] text-[#4a90b8]/70 uppercase tracking-wide pr-3">DB%</th>
+                      <th className="pb-2 text-center text-[10px] text-[#8b7ac8]/70 uppercase tracking-wide pr-3">Ext%</th>
                       <th className="pb-2 text-center text-[10px] text-slate-500 uppercase tracking-wide">p99</th>
                     </tr>
                   </thead>
@@ -229,19 +229,19 @@ export default function ApmInstrumentationPage() {
                   const maxAvg = Math.max(...extCalls.map(e => e.avgMs), 1);
                   return (
                     <div key={stat.provider} className="flex items-center gap-4">
-                      <Zap className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <Zap className="w-3.5 h-3.5 text-[#8b7ac8] shrink-0" />
                       <div className="flex-1">
                         <div className="flex items-center justify-between text-[11px] mb-1">
                           <span className="font-mono text-slate-300">{stat.provider}</span>
                           <div className="flex items-center gap-4">
                             <span className="text-slate-500">{stat.count} calls</span>
                             <span className="text-slate-400">avg: <span className="text-white font-mono">{stat.avgMs.toFixed(0)}ms</span></span>
-                            <span className="text-slate-400">p99: <span className={cn("font-mono", stat.p99Ms > 3000 ? "text-red-400" : stat.p99Ms > 1000 ? "text-amber-400" : "text-emerald-400")}>{stat.p99Ms.toFixed(0)}ms</span></span>
+                            <span className="text-slate-400">p99: <span className={cn("font-mono", stat.p99Ms > 3000 ? "text-[#c45a4a]" : stat.p99Ms > 1000 ? "text-[#d4a054]" : "text-[#6b8f71]")}>{stat.p99Ms.toFixed(0)}ms</span></span>
                           </div>
                         </div>
                         <div className="relative h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div
-                            className="absolute inset-y-0 left-0 rounded-full bg-purple-500/60"
+                            className="absolute inset-y-0 left-0 rounded-full bg-[#8b7ac8]/60"
                             style={{ width: `${(stat.avgMs / maxAvg) * 100}%` }}
                           />
                         </div>

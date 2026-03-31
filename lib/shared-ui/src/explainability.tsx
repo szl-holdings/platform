@@ -64,7 +64,7 @@ export function ExplainabilityDrawer({
   onClose,
   title = "AI Reasoning",
   metadata,
-  accentColor = "#8b5cf6",
+  accentColor = "#8b7ac8",
 }: ExplainabilityDrawerProps) {
   if (!open) return null;
 
@@ -232,7 +232,7 @@ export function ExplainabilityDrawer({
                       lineHeight: 1.4,
                     }}
                   >
-                    <span style={{ color: "#f59e0b", fontSize: "10px", marginTop: "2px", flexShrink: 0 }}>⚠</span>
+                    <span style={{ color: "#d4a054", fontSize: "10px", marginTop: "2px", flexShrink: 0 }}>⚠</span>
                     {a}
                   </div>
                 ))}
@@ -303,7 +303,7 @@ export function useExplainability() {
 
 export function ExplainButton({
   onClick,
-  accentColor = "#8b5cf6",
+  accentColor = "#8b7ac8",
   label = "Explain",
 }: {
   onClick: () => void;

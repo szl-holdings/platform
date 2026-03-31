@@ -12,7 +12,7 @@ const PRISM_CARDS = [
   {
     key: "Pulse",
     icon: Heart,
-    color: "#10b981",
+    color: "#6b8f71",
     score: 72,
     label: "Business Health",
     trend: "stable",
@@ -22,7 +22,7 @@ const PRISM_CARDS = [
   {
     key: "Risk",
     icon: AlertTriangle,
-    color: "#ef4444",
+    color: "#c45a4a",
     score: 5,
     label: "Active Exposures",
     trend: "up",
@@ -32,7 +32,7 @@ const PRISM_CARDS = [
   {
     key: "Intelligence",
     icon: Brain,
-    color: "#8b5cf6",
+    color: "#8b7ac8",
     score: 4,
     label: "AI Recommendations",
     trend: "new",
@@ -42,7 +42,7 @@ const PRISM_CARDS = [
   {
     key: "Signals",
     icon: Radio,
-    color: "#f59e0b",
+    color: "#d4a054",
     score: 18,
     label: "Active Signals",
     trend: "up",
@@ -52,7 +52,7 @@ const PRISM_CARDS = [
   {
     key: "Motion",
     icon: Workflow,
-    color: "#0ea5e9",
+    color: "#4a90b8",
     score: 12,
     label: "In-Flight Actions",
     trend: "down",
@@ -176,9 +176,9 @@ const TYPE_COLORS: Record<string, { color: string; label: string }> = {
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#f59e0b",
+  critical: "#c45a4a",
+  high: "#c8953c",
+  medium: "#d4a054",
   low: "rgba(255,255,255,0.3)",
 };
 
@@ -188,7 +188,7 @@ function LiveDot() {
     const id = setInterval(() => setTick(t => t + 1), 3000);
     return () => clearInterval(id);
   }, []);
-  return <span key={tick} className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: "#10b981" }} />;
+  return <span key={tick} className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0" style={{ background: "#6b8f71" }} />;
 }
 
 export default function LyteOverview() {
@@ -197,13 +197,13 @@ export default function LyteOverview() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-white tracking-tight">Business Observability</h1>
-          <p className="text-[11px] mt-0.5 italic" style={{ color: "rgba(245,158,11,0.5)" }}>In the dark, let Lyte guide you.</p>
+          <p className="text-[11px] mt-0.5 italic" style={{ color: "rgba(212,160,84,0.5)" }}>In the dark, let Lyte guide you.</p>
         </div>
         <div className="flex items-center gap-3">
           <DataStateBadge state="demo" label="Demo Data" />
           <div className="flex items-center gap-1.5">
             <LiveDot />
-            <span className="text-[9px] font-mono" style={{ color: "rgba(16,185,129,0.6)" }}>live</span>
+            <span className="text-[9px] font-mono" style={{ color: "rgba(107,143,113,0.6)" }}>live</span>
           </div>
         </div>
       </div>
@@ -211,12 +211,12 @@ export default function LyteOverview() {
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
         <div className="grid grid-cols-3 md:grid-cols-6">
           {[
-            { label: "Urgent Exposures", value: "5", color: "#ef4444", pulse: true },
-            { label: "Aged Approvals", value: "3", color: "#f97316", sub: ">24h" },
+            { label: "Urgent Exposures", value: "5", color: "#c45a4a", pulse: true },
+            { label: "Aged Approvals", value: "3", color: "#c8953c", sub: ">24h" },
             { label: "Ownership Gaps", value: "8", color: "#a78bfa" },
-            { label: "Active Signals", value: "18", color: "#f59e0b" },
-            { label: "Value at Risk", value: "$5.03M", color: "#ef4444" },
-            { label: "Decision Latency", value: "34h", color: "#f97316", sub: "avg" },
+            { label: "Active Signals", value: "18", color: "#d4a054" },
+            { label: "Value at Risk", value: "$5.03M", color: "#c45a4a" },
+            { label: "Decision Latency", value: "34h", color: "#c8953c", sub: "avg" },
           ].map((c, i) => (
             <div key={c.label} className="px-3 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
@@ -258,10 +258,10 @@ export default function LyteOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#ef4444" }} />
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#ef4444" }}>Priority Action Queue</span>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#c45a4a" }} />
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#c45a4a" }}>Priority Action Queue</span>
             <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>({ACTION_QUEUE.length})</span>
-            <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(239,68,68,0.3), transparent)" }} />
+            <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(196,90,74,0.3), transparent)" }} />
           </div>
 
           {ACTION_QUEUE.map((item) => {
@@ -281,14 +281,14 @@ export default function LyteOverview() {
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-[9px] font-medium px-1.5 py-0.5 rounded" style={{ color: tc.color, background: `${tc.color}10`, border: `1px solid ${tc.color}20` }}>{tc.label}</span>
                       <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{
-                        color: isOverdue ? "#ef4444" : isWarning ? "#f97316" : "rgba(255,255,255,0.35)",
-                        background: isOverdue ? "rgba(239,68,68,0.08)" : isWarning ? "rgba(249,115,22,0.08)" : "rgba(255,255,255,0.04)",
-                        border: `1px solid ${isOverdue ? "rgba(239,68,68,0.2)" : isWarning ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.06)"}`,
+                        color: isOverdue ? "#c45a4a" : isWarning ? "#c8953c" : "rgba(255,255,255,0.35)",
+                        background: isOverdue ? "rgba(196,90,74,0.08)" : isWarning ? "rgba(249,115,22,0.08)" : "rgba(255,255,255,0.04)",
+                        border: `1px solid ${isOverdue ? "rgba(196,90,74,0.2)" : isWarning ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.06)"}`,
                       }}>{item.age_hours}h</span>
                       <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{
-                        color: item.confidence >= 90 ? "#10b981" : "#f59e0b",
-                        background: item.confidence >= 90 ? "rgba(16,185,129,0.08)" : "rgba(245,158,11,0.08)",
-                        border: `1px solid ${item.confidence >= 90 ? "rgba(16,185,129,0.2)" : "rgba(245,158,11,0.2)"}`,
+                        color: item.confidence >= 90 ? "#6b8f71" : "#d4a054",
+                        background: item.confidence >= 90 ? "rgba(107,143,113,0.08)" : "rgba(212,160,84,0.08)",
+                        border: `1px solid ${item.confidence >= 90 ? "rgba(107,143,113,0.2)" : "rgba(212,160,84,0.2)"}`,
                       }}>{item.confidence}% conf</span>
                     </div>
                     <p className="text-sm font-semibold text-white leading-tight">{item.title}</p>
@@ -299,7 +299,7 @@ export default function LyteOverview() {
                           <User className="w-2.5 h-2.5" /> {item.owner}
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-[10px] text-red-400/70">
+                        <span className="flex items-center gap-1 text-[10px] text-[#c45a4a]/70">
                           <User className="w-2.5 h-2.5" /> No owner
                         </span>
                       )}
@@ -312,13 +312,13 @@ export default function LyteOverview() {
                         </a>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-2 p-2 rounded-lg" style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.08)" }}>
-                      <ArrowRight className="w-3 h-3 shrink-0" style={{ color: "#f59e0b" }} />
-                      <span className="text-[10px] font-medium" style={{ color: "#f59e0b" }}>{item.next_action}</span>
+                    <div className="flex items-center gap-2 mt-2 p-2 rounded-lg" style={{ background: "rgba(212,160,84,0.04)", border: "1px solid rgba(212,160,84,0.08)" }}>
+                      <ArrowRight className="w-3 h-3 shrink-0" style={{ color: "#d4a054" }} />
+                      <span className="text-[10px] font-medium" style={{ color: "#d4a054" }}>{item.next_action}</span>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-sm font-bold" style={{ color: "#ef4444" }}>{formatCurrency(item.risk)}</div>
+                    <div className="text-sm font-bold" style={{ color: "#c45a4a" }}>{formatCurrency(item.risk)}</div>
                     <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.25)" }}>at risk</div>
                   </div>
                 </div>
@@ -330,8 +330,8 @@ export default function LyteOverview() {
         <div className="space-y-4">
           <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Radio className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#f59e0b" }}>Signal Timeline</span>
+              <Radio className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#d4a054" }}>Signal Timeline</span>
             </div>
             <div className="space-y-0">
               {SIGNAL_FEED.map((sig, i) => (
@@ -354,23 +354,23 @@ export default function LyteOverview() {
                 </div>
               ))}
             </div>
-            <Link href="/prism/signals" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#f59e0b" }}>
+            <Link href="/prism/signals" className="flex items-center gap-1 mt-3 text-[10px] font-medium hover:opacity-80 transition-opacity" style={{ color: "#d4a054" }}>
               View all signals <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
           <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
             <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-3.5 h-3.5" style={{ color: "#8b5cf6" }} />
-              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#8b5cf6" }}>Correlations</span>
+              <Activity className="w-3.5 h-3.5" style={{ color: "#8b7ac8" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#8b7ac8" }}>Correlations</span>
             </div>
             {CORRELATION_ITEMS.map((corr, i) => (
               <div key={i} className="py-2" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.03)" : "none" }}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-semibold text-white">{corr.entity}</span>
-                  <span className="text-[9px] font-mono font-bold" style={{ color: "#ef4444" }}>{corr.risk}</span>
+                  <span className="text-[9px] font-mono font-bold" style={{ color: "#c45a4a" }}>{corr.risk}</span>
                 </div>
-                <span className="text-[8px] px-1 py-0.5 rounded uppercase" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)" }}>{corr.type}</span>
+                <span className="text-[8px] px-1 py-0.5 rounded uppercase" style={{ color: "#8b7ac8", background: "rgba(139,92,246,0.1)" }}>{corr.type}</span>
                 <div className="flex flex-wrap gap-1 mt-1.5">
                   {corr.connections.map((conn, j) => (
                     <span key={j} className="text-[8px] px-1.5 py-0.5 rounded" style={{ color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>{conn}</span>
@@ -387,8 +387,8 @@ export default function LyteOverview() {
                 <span className="text-[9px] uppercase tracking-wider font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>System State</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#10b981" }} />
-                <span className="text-[9px] font-mono" style={{ color: "#10b981" }}>Demo</span>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#6b8f71" }} />
+                <span className="text-[9px] font-mono" style={{ color: "#6b8f71" }}>Demo</span>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 mt-2">
@@ -398,7 +398,7 @@ export default function LyteOverview() {
               </div>
               <div>
                 <div className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Confidence</div>
-                <div className="text-[9px] font-mono" style={{ color: "#10b981" }}>High</div>
+                <div className="text-[9px] font-mono" style={{ color: "#6b8f71" }}>High</div>
               </div>
             </div>
           </div>

@@ -30,10 +30,10 @@ interface PaginatedResponse<T> {
 
 const stateStyles: Record<string, { label: string; color: string; icon: typeof Clock; pulse?: boolean }> = {
   queued:           { label: "Queued",           color: "text-slate-400 bg-slate-500/10 border-slate-500/20",     icon: Hourglass },
-  running:          { label: "Running",          color: "text-blue-400 bg-blue-500/10 border-blue-500/20",        icon: Play,       pulse: true },
-  waiting_approval: { label: "Awaiting Approval",color: "text-amber-400 bg-amber-500/10 border-amber-500/20",    icon: Clock },
-  completed:        { label: "Completed",        color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle2 },
-  failed:           { label: "Failed",           color: "text-red-400 bg-red-500/10 border-red-500/20",           icon: XCircle },
+  running:          { label: "Running",          color: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/20",        icon: Play,       pulse: true },
+  waiting_approval: { label: "Awaiting Approval",color: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20",    icon: Clock },
+  completed:        { label: "Completed",        color: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20", icon: CheckCircle2 },
+  failed:           { label: "Failed",           color: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20",           icon: XCircle },
   canceled:         { label: "Canceled",         color: "text-muted-foreground bg-white/5 border-white/10",       icon: StopCircle },
 };
 
@@ -93,7 +93,7 @@ export default function RunViewer() {
       <div className="space-y-4">
         <h1 className="text-xl font-display font-bold flex items-center gap-2"><Play className="w-5 h-5 text-primary" />Workflow Runs</h1>
         <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+          <AlertTriangle className="w-8 h-8 text-[#d4a054] mx-auto mb-2" />
           <p className="text-muted-foreground text-sm">Failed to load runs — API unavailable</p>
         </div>
       </div>
@@ -182,7 +182,7 @@ export default function RunViewer() {
                           <button
                             onClick={() => cancelMutation.mutate(run.id)}
                             disabled={cancelMutation.isPending}
-                            className="px-2 py-1 rounded text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                            className="px-2 py-1 rounded text-[10px] font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20 hover:bg-[#d4a054]/20 transition-colors disabled:opacity-50"
                           >
                             Cancel
                           </button>
@@ -191,7 +191,7 @@ export default function RunViewer() {
                           <button
                             onClick={() => retryMutation.mutate(run.id)}
                             disabled={retryMutation.isPending}
-                            className="px-2 py-1 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+                            className="px-2 py-1 rounded text-[10px] font-medium bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20 hover:bg-[#4a90b8]/20 transition-colors disabled:opacity-50"
                           >
                             <RotateCcw className="w-3 h-3" />
                           </button>
@@ -236,7 +236,7 @@ export default function RunViewer() {
               </div>
             </dl>
             {selected.errorMessage && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-400 mb-4">
+              <div className="bg-[#c45a4a]/10 border border-[#c45a4a]/20 rounded-lg p-3 text-xs text-[#c45a4a] mb-4">
                 <span className="font-medium block mb-1">Error</span>
                 {selected.errorMessage}
               </div>
@@ -245,7 +245,7 @@ export default function RunViewer() {
               {selected.state === "failed" && (
                 <button
                   onClick={() => { retryMutation.mutate(selected.id); setSelected(null); }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20 hover:bg-[#4a90b8]/20 transition-colors flex items-center gap-1.5"
                 >
                   <RotateCcw className="w-3 h-3" />Retry
                 </button>

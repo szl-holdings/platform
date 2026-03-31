@@ -24,9 +24,9 @@ interface ServicesHealthMatrix {
 }
 
 const statusIcon = (status: string) => {
-  if (status === "LIVE_CONFIGURED") return <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />;
-  if (status === "MOCKED_DEMO_MODE") return <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />;
-  return <WifiOff className="w-3.5 h-3.5 text-red-400" />;
+  if (status === "LIVE_CONFIGURED") return <CheckCircle className="w-3.5 h-3.5 text-[#6b8f71]" />;
+  if (status === "MOCKED_DEMO_MODE") return <AlertTriangle className="w-3.5 h-3.5 text-[#d4a054]" />;
+  return <WifiOff className="w-3.5 h-3.5 text-[#c45a4a]" />;
 };
 
 export default function Connectors() {
@@ -56,16 +56,16 @@ export default function Connectors() {
 
       {error ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
-          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" /><p>Connector data requires API connection</p>
+          <AlertTriangle className="w-8 h-8 text-[#d4a054] mx-auto mb-2" /><p>Connector data requires API connection</p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-4 gap-4">
             {[
               { label: "Total", value: summary.total, color: "text-foreground" },
-              { label: "Live", value: summary.liveConfigured, color: "text-emerald-400" },
-              { label: "Sandbox", value: summary.mockedDemoMode, color: "text-amber-400" },
-              { label: "Needs Config", value: summary.manualRequired, color: "text-red-400" },
+              { label: "Live", value: summary.liveConfigured, color: "text-[#6b8f71]" },
+              { label: "Sandbox", value: summary.mockedDemoMode, color: "text-[#d4a054]" },
+              { label: "Needs Config", value: summary.manualRequired, color: "text-[#c45a4a]" },
             ].map(({ label, value, color }) => (
               <div key={label} className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">{label}</div>
@@ -93,9 +93,9 @@ export default function Connectors() {
                   <div className="flex items-center gap-3">
                     {svc.latencyMs && <span className="text-xs text-muted-foreground">{svc.latencyMs}ms</span>}
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-                      svc.status === "LIVE_CONFIGURED" ? "bg-emerald-500/10 text-emerald-400" :
-                      svc.status === "MOCKED_DEMO_MODE" ? "bg-amber-500/10 text-amber-400" :
-                      "bg-red-500/10 text-red-400"
+                      svc.status === "LIVE_CONFIGURED" ? "bg-[#6b8f71]/10 text-[#6b8f71]" :
+                      svc.status === "MOCKED_DEMO_MODE" ? "bg-[#d4a054]/10 text-[#d4a054]" :
+                      "bg-[#c45a4a]/10 text-[#c45a4a]"
                     }`}>{svc.mode || svc.status.toLowerCase().replace(/_/g, " ")}</span>
                     <button
                       onClick={() => { setTesting(svc.name); testMutation.mutate(svc.name); }}

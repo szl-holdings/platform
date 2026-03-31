@@ -111,7 +111,7 @@ function SignalDetail({ signal, onClose, onAcknowledge, onResolve, onEscalate }:
           {signal.anomaly && (
             <div>
               <div className="text-[10px] text-slate-500 uppercase tracking-wide mb-1.5">Anomaly Detected</div>
-              <p className="text-sm text-amber-300/90 leading-relaxed">{signal.anomaly}</p>
+              <p className="text-sm text-[#d4a054]/90 leading-relaxed">{signal.anomaly}</p>
             </div>
           )}
 
@@ -183,7 +183,7 @@ function SignalDetail({ signal, onClose, onAcknowledge, onResolve, onEscalate }:
               <div className="text-[10px] text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1.5">
                 <Activity className="w-3 h-3" />
                 Signal Actions
-                <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono ml-1">LIVE</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#6b8f71]/30 bg-[#6b8f71]/10 text-[#6b8f71] font-mono ml-1">LIVE</span>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {backendStatus !== "acknowledged" && backendStatus !== "resolved" && (
@@ -200,7 +200,7 @@ function SignalDetail({ signal, onClose, onAcknowledge, onResolve, onEscalate }:
                   <button
                     disabled={!!transitioning}
                     onClick={() => handleAction("resolve", onResolve)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-[#6b8f71]/10 border border-[#6b8f71]/20 text-[#6b8f71] hover:bg-[#6b8f71]/20 transition-all disabled:opacity-50"
                   >
                     {transitioning === "resolve" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                     Resolve
@@ -209,7 +209,7 @@ function SignalDetail({ signal, onClose, onAcknowledge, onResolve, onEscalate }:
                 <button
                   disabled={!!transitioning}
                   onClick={() => handleAction("escalate", onEscalate)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-[#c45a4a]/10 border border-[#c45a4a]/20 text-[#c45a4a] hover:bg-[#c45a4a]/20 transition-all disabled:opacity-50"
                 >
                   {transitioning === "escalate" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <ArrowUp className="w-3 h-3" />}
                   Escalate
@@ -287,10 +287,10 @@ export default function SignalsFeed() {
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-4 text-[11px]">
             <span className="text-slate-400">{filtered.length} signals</span>
-            <span className="flex items-center gap-1 text-red-400"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />{critCount} critical</span>
-            <span className="flex items-center gap-1 text-orange-400">{highCount} high</span>
+            <span className="flex items-center gap-1 text-[#c45a4a]"><span className="w-1.5 h-1.5 rounded-full bg-[#c45a4a] animate-pulse inline-block" />{critCount} critical</span>
+            <span className="flex items-center gap-1 text-[#c8953c]">{highCount} high</span>
             <span className="text-slate-500">·</span>
-            <span className="text-emerald-400 font-mono">${(totalVaR / 1_000_000).toFixed(1)}M at risk</span>
+            <span className="text-[#6b8f71] font-mono">${(totalVaR / 1_000_000).toFixed(1)}M at risk</span>
           </div>
           <button
             onClick={() => setShowNarrative(!showNarrative)}
@@ -355,7 +355,7 @@ export default function SignalsFeed() {
                   <div className={cn(
                     "w-2 h-2 rounded-full mt-1.5 shrink-0",
                     c.dot,
-                    signal.severity === "critical" && "animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.7)]"
+                    signal.severity === "critical" && "animate-pulse shadow-[0_0_8px_rgba(196,90,74,0.7)]"
                   )} />
                   <div className="flex-1 min-w-0">
                     <h3 className="text-[13px] font-medium text-white/90 leading-snug mb-1.5">{signal.title}</h3>

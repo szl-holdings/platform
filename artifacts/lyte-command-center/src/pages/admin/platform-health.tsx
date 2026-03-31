@@ -24,7 +24,7 @@ function AppCard({ slug }: { slug: string }) {
 
   const status = !data ? "unknown" : data.summary.manualRequired > 0 ? "needs_config" : data.summary.mockedDemoMode > 0 ? "demo" : "live";
   const statusText = { live: "Live", demo: "Sandbox", needs_config: "Needs Config", unknown: "Loading" }[status];
-  const statusColor = { live: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", demo: "text-amber-400 bg-amber-500/10 border-amber-500/20", needs_config: "text-red-400 bg-red-500/10 border-red-500/20", unknown: "text-muted-foreground bg-muted border-border" }[status];
+  const statusColor = { live: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20", demo: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20", needs_config: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20", unknown: "text-muted-foreground bg-muted border-border" }[status];
   const StatusIcon = { live: CheckCircle, demo: AlertTriangle, needs_config: WifiOff, unknown: Server }[status];
 
   return (
@@ -50,7 +50,7 @@ function AppCard({ slug }: { slug: string }) {
               <span className="text-muted-foreground truncate max-w-[60%]">{svc.name}</span>
               <div className="flex items-center gap-1.5">
                 {svc.latencyMs && <span className="text-[10px] text-muted-foreground">{svc.latencyMs}ms</span>}
-                <span className={`w-1.5 h-1.5 rounded-full ${svc.status === "LIVE_CONFIGURED" ? "bg-emerald-400" : svc.status === "MOCKED_DEMO_MODE" ? "bg-amber-400" : "bg-red-400"}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${svc.status === "LIVE_CONFIGURED" ? "bg-[#6b8f71]" : svc.status === "MOCKED_DEMO_MODE" ? "bg-[#d4a054]" : "bg-[#c45a4a]"}`} />
               </div>
             </div>
           ))}

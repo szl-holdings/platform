@@ -22,10 +22,10 @@ const USE_CASES = [
     id: "approval-latency",
     label: "Approval Latency",
     icon: Clock,
-    color: "text-red-400",
-    border: "border-red-500/20",
-    bg: "bg-red-500/5",
-    dot: "bg-red-500",
+    color: "text-[#c45a4a]",
+    border: "border-[#c45a4a]/20",
+    bg: "bg-[#c45a4a]/5",
+    dot: "bg-[#c45a4a]",
     description: "Every approval day over target costs you close rate. Lyte surfaces approval bottlenecks before deals slip.",
     signalType: "approval_latency" as SignalType,
   },
@@ -33,10 +33,10 @@ const USE_CASES = [
     id: "stalled-workflows",
     label: "Stalled Workflows",
     icon: AlertTriangle,
-    color: "text-orange-400",
-    border: "border-orange-500/20",
-    bg: "bg-orange-500/5",
-    dot: "bg-orange-500",
+    color: "text-[#c8953c]",
+    border: "border-[#c8953c]/20",
+    bg: "bg-[#c8953c]/5",
+    dot: "bg-[#c8953c]",
     description: "Work stops. No alert fires. Lyte detects stagnation across implementation queues, SOWs, and handoff stages.",
     signalType: "stalled_workflow" as SignalType,
   },
@@ -44,10 +44,10 @@ const USE_CASES = [
     id: "forecast-drift",
     label: "Forecast Drift",
     icon: TrendingDown,
-    color: "text-amber-400",
-    border: "border-amber-500/20",
-    bg: "bg-amber-500/5",
-    dot: "bg-amber-500",
+    color: "text-[#d4a054]",
+    border: "border-[#d4a054]/20",
+    bg: "bg-[#d4a054]/5",
+    dot: "bg-[#d4a054]",
     description: "Forecast credibility erodes quietly. Lyte tracks reclassification rates, coverage ratios, and drift velocity.",
     signalType: "forecast_drift" as SignalType,
   },
@@ -66,10 +66,10 @@ const USE_CASES = [
     id: "pipeline-hygiene",
     label: "Pipeline Hygiene",
     icon: BarChart3,
-    color: "text-blue-400",
-    border: "border-blue-500/20",
-    bg: "bg-blue-500/5",
-    dot: "bg-blue-400",
+    color: "text-[#4a90b8]",
+    border: "border-[#4a90b8]/20",
+    bg: "bg-[#4a90b8]/5",
+    dot: "bg-[#4a90b8]",
     description: "Stale pipeline corrupts forecast models and wastes capacity. Lyte identifies and ages out ghost opportunities.",
     signalType: "pipeline_hygiene" as SignalType,
   },
@@ -82,9 +82,9 @@ function ApprovalLatencyPanel() {
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Active Approval Delays", value: approvalSignals.length, color: "text-red-400" },
-          { label: "Avg Latency", value: "14.2 days", color: "text-orange-400" },
-          { label: "Value at Risk", value: "$2.97M", color: "text-amber-400" },
+          { label: "Active Approval Delays", value: approvalSignals.length, color: "text-[#c45a4a]" },
+          { label: "Avg Latency", value: "14.2 days", color: "text-[#c8953c]" },
+          { label: "Value at Risk", value: "$2.97M", color: "text-[#d4a054]" },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-3 border border-white/5 bg-white/[0.02]">
             <div className="text-[10px] text-slate-500 mb-1">{s.label}</div>
@@ -115,12 +115,12 @@ function ApprovalLatencyPanel() {
           <div className="space-y-2">
             {wf.stages.map((stage, i) => {
               const ratio = stage.avgDwellDays / Math.max(stage.expectedDays, 0.1);
-              const color = ratio > 3 ? "bg-red-500" : ratio > 2 ? "bg-orange-500" : "bg-amber-500";
+              const color = ratio > 3 ? "bg-[#c45a4a]" : ratio > 2 ? "bg-[#c8953c]" : "bg-[#d4a054]";
               return (
                 <div key={i}>
                   <div className="flex items-center justify-between text-[10px] mb-1">
                     <span className="text-slate-400">{stage.name}</span>
-                    <span className={cn("font-mono", ratio > 2 ? "text-red-400" : "text-slate-300")}>{stage.avgDwellDays.toFixed(1)}d / {stage.expectedDays}d</span>
+                    <span className={cn("font-mono", ratio > 2 ? "text-[#c45a4a]" : "text-slate-300")}>{stage.avgDwellDays.toFixed(1)}d / {stage.expectedDays}d</span>
                   </div>
                   <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                     <div className={cn("h-full rounded-full", color)} style={{ width: `${Math.min(ratio / 6 * 100, 100)}%`, opacity: 0.8 }} />
@@ -141,9 +141,9 @@ function StalledWorkflowsPanel() {
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Stalled Workflows", value: 26, color: "text-orange-400" },
-          { label: "Avg Days Stalled", value: "11.4", color: "text-red-400" },
-          { label: "Value at Risk", value: "$1.99M", color: "text-amber-400" },
+          { label: "Stalled Workflows", value: 26, color: "text-[#c8953c]" },
+          { label: "Avg Days Stalled", value: "11.4", color: "text-[#c45a4a]" },
+          { label: "Value at Risk", value: "$1.99M", color: "text-[#d4a054]" },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-3 border border-white/5 bg-white/[0.02]">
             <div className="text-[10px] text-slate-500 mb-1">{s.label}</div>
@@ -179,9 +179,9 @@ function ForecastDriftPanel() {
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Forecast Drift", value: "-$3.8M", color: "text-red-400" },
-          { label: "Deals Reclassified", value: "22", color: "text-orange-400" },
-          { label: "Coverage Ratio", value: "0.94x", color: "text-amber-400" },
+          { label: "Forecast Drift", value: "-$3.8M", color: "text-[#c45a4a]" },
+          { label: "Deals Reclassified", value: "22", color: "text-[#c8953c]" },
+          { label: "Coverage Ratio", value: "0.94x", color: "text-[#d4a054]" },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-3 border border-white/5 bg-white/[0.02]">
             <div className="text-[10px] text-slate-500 mb-1">{s.label}</div>
@@ -205,7 +205,7 @@ function ForecastDriftPanel() {
               <span className="text-[11px] font-semibold text-white/90">{sig.title}</span>
             </div>
             <p className="text-[11px] text-slate-400 mb-2">{sig.summary}</p>
-            <div className="p-2 rounded bg-white/[0.02] border border-white/5 text-[10px] text-amber-300/90 italic">
+            <div className="p-2 rounded bg-white/[0.02] border border-white/5 text-[10px] text-[#d4a054]/90 italic">
               {sig.anomaly}
             </div>
           </div>
@@ -222,8 +222,8 @@ function HandoffFailuresPanel() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Active Handoff Failures", value: handoffSignals.length, color: "text-violet-400" },
-          { label: "SLA Breached", value: "14 accounts", color: "text-red-400" },
-          { label: "Value at Risk", value: "$2.22M", color: "text-amber-400" },
+          { label: "SLA Breached", value: "14 accounts", color: "text-[#c45a4a]" },
+          { label: "Value at Risk", value: "$2.22M", color: "text-[#d4a054]" },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-3 border border-white/5 bg-white/[0.02]">
             <div className="text-[10px] text-slate-500 mb-1">{s.label}</div>
@@ -258,9 +258,9 @@ function PipelineHygienePanel() {
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Stale Opportunities", value: "116 deals", color: "text-blue-400" },
-          { label: "Staleness Rate", value: "41%", color: "text-orange-400" },
-          { label: "Phantom Pipeline", value: "$8.4M", color: "text-red-400" },
+          { label: "Stale Opportunities", value: "116 deals", color: "text-[#4a90b8]" },
+          { label: "Staleness Rate", value: "41%", color: "text-[#c8953c]" },
+          { label: "Phantom Pipeline", value: "$8.4M", color: "text-[#c45a4a]" },
         ].map(s => (
           <div key={s.label} className="rounded-xl p-3 border border-white/5 bg-white/[0.02]">
             <div className="text-[10px] text-slate-500 mb-1">{s.label}</div>

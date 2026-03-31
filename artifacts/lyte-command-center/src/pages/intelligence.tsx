@@ -25,12 +25,12 @@ function AnimatedCounter({ value }: { value: number }) {
 }
 
 const severityColors: Record<string, string> = {
-  critical: "text-red-400 bg-red-400/10 border-red-400/20",
-  warning: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-  info: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-  active: "text-red-400",
-  investigating: "text-orange-400",
-  monitoring: "text-blue-400",
+  critical: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20",
+  warning: "text-[#c8953c] bg-orange-400/10 border-orange-400/20",
+  info: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/20",
+  active: "text-[#c45a4a]",
+  investigating: "text-[#c8953c]",
+  monitoring: "text-[#4a90b8]",
 };
 
 export default function IntelligencePage() {
@@ -73,21 +73,21 @@ export default function IntelligencePage() {
         </div>
         <div className="bg-glass rounded-2xl p-6 group hover:border-white/10 transition-all">
           <div className="flex justify-between items-start mb-4">
-            <div className={`p-3 rounded-xl border text-red-400 bg-red-400/10 border-red-400/20 ${criticalAnomalies > 0 ? "animate-pulse" : ""}`}><AlertTriangle className="w-6 h-6" /></div>
+            <div className={`p-3 rounded-xl border text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20 ${criticalAnomalies > 0 ? "animate-pulse" : ""}`}><AlertTriangle className="w-6 h-6" /></div>
           </div>
           <h4 className="text-slate-400 text-sm font-medium mb-1">Critical</h4>
-          <div className="text-3xl font-display font-bold text-red-400"><AnimatedCounter value={criticalAnomalies} /></div>
+          <div className="text-3xl font-display font-bold text-[#c45a4a]"><AnimatedCounter value={criticalAnomalies} /></div>
         </div>
         <div className="bg-glass rounded-2xl p-6 group hover:border-white/10 transition-all">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 rounded-xl border text-blue-400 bg-blue-400/10 border-blue-400/20"><Newspaper className="w-6 h-6" /></div>
+            <div className="p-3 rounded-xl border text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/20"><Newspaper className="w-6 h-6" /></div>
           </div>
           <h4 className="text-slate-400 text-sm font-medium mb-1">News Items</h4>
           <div className="text-3xl font-display font-bold text-white"><AnimatedCounter value={news.length} /></div>
         </div>
         <div className="bg-glass rounded-2xl p-6 group hover:border-white/10 transition-all">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 rounded-xl border text-emerald-400 bg-emerald-400/10 border-emerald-400/20"><Shield className="w-6 h-6" /></div>
+            <div className="p-3 rounded-xl border text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20"><Shield className="w-6 h-6" /></div>
           </div>
           <h4 className="text-slate-400 text-sm font-medium mb-1">Threats Tracked</h4>
           <div className="text-3xl font-display font-bold text-white"><AnimatedCounter value={sitRep?.stats?.totalThreats || 0} /></div>
@@ -127,12 +127,12 @@ export default function IntelligencePage() {
 
         <div className="bg-glass rounded-2xl p-6">
           <h3 className="text-xl font-display font-semibold text-white mb-4 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-purple-400" /> AI Situation Report
+            <FileText className="w-5 h-5 text-[#8b7ac8]" /> AI Situation Report
           </h3>
           {sitRep ? (
             <div className="space-y-4">
-              <div className="bg-purple-500/5 rounded-xl p-4 border border-purple-500/10">
-                <p className="text-xs text-purple-400 font-medium mb-2">Executive Summary</p>
+              <div className="bg-[#8b7ac8]/5 rounded-xl p-4 border border-purple-500/10">
+                <p className="text-xs text-[#8b7ac8] font-medium mb-2">Executive Summary</p>
                 <p className="text-sm text-slate-300">{sitRep.summary?.summary || "Generating..."}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -142,11 +142,11 @@ export default function IntelligencePage() {
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500 mb-1">Critical CVEs</p>
-                  <p className="text-xl font-bold text-red-400">{sitRep.stats?.criticalCves}</p>
+                  <p className="text-xl font-bold text-[#c45a4a]">{sitRep.stats?.criticalCves}</p>
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500 mb-1">Anomalies</p>
-                  <p className="text-xl font-bold text-orange-400">{sitRep.stats?.activeAnomalies}</p>
+                  <p className="text-xl font-bold text-[#c8953c]">{sitRep.stats?.activeAnomalies}</p>
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 text-center">
                   <p className="text-xs text-slate-500 mb-1">Geo Events</p>
@@ -164,11 +164,11 @@ export default function IntelligencePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-glass rounded-2xl p-6">
           <h3 className="text-lg font-display font-semibold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-orange-400" /> AI Anomaly Detection
+            <Zap className="w-5 h-5 text-[#c8953c]" /> AI Anomaly Detection
           </h3>
           <div className="space-y-3">
             {anomalies.map((a: any) => (
-              <div key={a.id} className={`p-4 rounded-xl border ${a.severity === "critical" ? "border-red-500/20 bg-red-500/5" : a.severity === "warning" ? "border-orange-500/20 bg-orange-500/5" : "border-white/5 bg-white/5"}`}>
+              <div key={a.id} className={`p-4 rounded-xl border ${a.severity === "critical" ? "border-[#c45a4a]/20 bg-[#c45a4a]/5" : a.severity === "warning" ? "border-[#c8953c]/20 bg-[#c8953c]/5" : "border-white/5 bg-white/5"}`}>
                 <div className="flex items-center justify-between mb-2">
                   <Badge className={`text-xs ${severityColors[a.severity] || ""}`}>{a.severity}</Badge>
                   <Badge variant="outline" className={`text-xs ${severityColors[a.status] || "text-slate-400"}`}>{a.status}</Badge>
@@ -185,14 +185,14 @@ export default function IntelligencePage() {
 
         <div className="bg-glass rounded-2xl p-6">
           <h3 className="text-lg font-display font-semibold text-white mb-4 flex items-center gap-2">
-            <Newspaper className="w-5 h-5 text-blue-400" /> Real-Time News Feed
+            <Newspaper className="w-5 h-5 text-[#4a90b8]" /> Real-Time News Feed
           </h3>
           <div className="space-y-3">
             {news.map((n: any) => (
               <div key={n.id} className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
                 <div className="flex items-center justify-between mb-2">
                   <Badge variant="outline" className="text-xs">{n.category}</Badge>
-                  <Badge variant="outline" className={`text-xs ${n.sentiment === "negative" ? "text-red-400 bg-red-400/10 border-red-400/20" : n.sentiment === "positive" ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : "text-slate-400"}`}>
+                  <Badge variant="outline" className={`text-xs ${n.sentiment === "negative" ? "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20" : n.sentiment === "positive" ? "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20" : "text-slate-400"}`}>
                     {n.sentiment} ({(n.sentimentScore * 100).toFixed(0)}%)
                   </Badge>
                 </div>

@@ -87,7 +87,7 @@ export default function AIOps() {
 
         <div className="bg-glass rounded-2xl p-6">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-400" /> Incident Forecast
+            <TrendingUp className="w-5 h-5 text-[#6b8f71]" /> Incident Forecast
           </h3>
           <div className="space-y-4">
             {forecastData.map((f, i) => (
@@ -95,8 +95,8 @@ export default function AIOps() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-white">{f.label}</span>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                    f.trend === "increasing" ? "bg-red-500/10 text-red-400" :
-                    f.trend === "decreasing" ? "bg-emerald-500/10 text-emerald-400" :
+                    f.trend === "increasing" ? "bg-[#c45a4a]/10 text-[#c45a4a]" :
+                    f.trend === "decreasing" ? "bg-[#6b8f71]/10 text-[#6b8f71]" :
                     "bg-slate-500/10 text-slate-400"
                   }`}>{f.trend}</span>
                 </div>
@@ -113,7 +113,7 @@ export default function AIOps() {
 
       <div className="bg-glass rounded-2xl p-6">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-orange-400" /> AI Anomaly Detection
+          <Activity className="w-5 h-5 text-[#c8953c]" /> AI Anomaly Detection
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {anomalies.slice(0, 6).map((a: any, i: number) => (
@@ -121,9 +121,9 @@ export default function AIOps() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-white">{a.type || a.name || `Anomaly ${i + 1}`}</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                  a.severity === "critical" ? "bg-red-500/10 text-red-400" :
-                  a.severity === "high" ? "bg-orange-500/10 text-orange-400" :
-                  "bg-amber-500/10 text-amber-400"
+                  a.severity === "critical" ? "bg-[#c45a4a]/10 text-[#c45a4a]" :
+                  a.severity === "high" ? "bg-[#c8953c]/10 text-[#c8953c]" :
+                  "bg-[#d4a054]/10 text-[#d4a054]"
                 }`}>{a.severity}</span>
               </div>
               <AnomalySparkline
@@ -131,7 +131,7 @@ export default function AIOps() {
                 anomalyIndices={[Math.floor(Math.random() * 8) + 16]}
                 width={220}
                 height={35}
-                color={a.severity === "critical" ? "#ef4444" : a.severity === "high" ? "#f97316" : "#eab308"}
+                color={a.severity === "critical" ? "#c45a4a" : a.severity === "high" ? "#c8953c" : "#eab308"}
               />
               <p className="text-xs text-slate-500 mt-2">{a.description || "Pattern deviation detected"}</p>
             </div>

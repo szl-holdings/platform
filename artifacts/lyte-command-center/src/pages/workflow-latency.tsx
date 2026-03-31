@@ -16,8 +16,8 @@ function formatCurrency(n: number): string {
 function StageBar({ name, actual, expected, stagnant, owner }: { name: string; actual: number; expected: number; stagnant: number; owner: string }) {
   const ratio = actual / Math.max(expected, 0.1);
   const pct = Math.min((actual / (expected * 6)) * 100, 100);
-  const color = ratio > 4 ? "bg-red-500" : ratio > 2.5 ? "bg-orange-500" : ratio > 1.5 ? "bg-amber-500" : "bg-emerald-500";
-  const textColor = ratio > 4 ? "text-red-400" : ratio > 2.5 ? "text-orange-400" : ratio > 1.5 ? "text-amber-400" : "text-emerald-400";
+  const color = ratio > 4 ? "bg-[#c45a4a]" : ratio > 2.5 ? "bg-[#c8953c]" : ratio > 1.5 ? "bg-[#d4a054]" : "bg-[#6b8f71]";
+  const textColor = ratio > 4 ? "text-[#c45a4a]" : ratio > 2.5 ? "text-[#c8953c]" : ratio > 1.5 ? "text-[#d4a054]" : "text-[#6b8f71]";
 
   return (
     <div className="space-y-1">
@@ -25,7 +25,7 @@ function StageBar({ name, actual, expected, stagnant, owner }: { name: string; a
         <span className="text-slate-300 font-medium">{name}</span>
         <div className="flex items-center gap-3">
           {stagnant > 0 && (
-            <span className="text-red-400 font-mono">{stagnant} stagnant</span>
+            <span className="text-[#c45a4a] font-mono">{stagnant} stagnant</span>
           )}
           <span className={cn("font-mono font-semibold", textColor)}>{actual.toFixed(1)}d</span>
           <span className="text-slate-600">/ {expected.toFixed(1)}d target</span>
@@ -46,7 +46,7 @@ function WorkflowCard({ workflow, expanded, onToggle }: { workflow: WorkflowLate
   const excessDays = workflow.totalDwellDays - workflow.expectedDays;
 
   return (
-    <div className={cn("rounded-xl border transition-all", c.border, workflow.severity === "critical" ? "bg-red-500/[0.03]" : "bg-white/[0.02]")}>
+    <div className={cn("rounded-xl border transition-all", c.border, workflow.severity === "critical" ? "bg-[#c45a4a]/[0.03]" : "bg-white/[0.02]")}>
       <div className="p-4 cursor-pointer" onClick={onToggle}>
         <div className="flex items-start gap-3">
           <div className={cn("w-2 h-2 rounded-full mt-2 shrink-0", c.dot, workflow.severity === "critical" && "animate-pulse")} />
@@ -105,8 +105,8 @@ function WorkflowCard({ workflow, expanded, onToggle }: { workflow: WorkflowLate
             </div>
           </div>
 
-          <div className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/5">
-            <div className="text-[10px] font-mono text-amber-400 uppercase tracking-wide mb-1.5">Slowdown Analysis</div>
+          <div className="p-3 rounded-lg border border-[#d4a054]/20 bg-[#d4a054]/5">
+            <div className="text-[10px] font-mono text-[#d4a054] uppercase tracking-wide mb-1.5">Slowdown Analysis</div>
             <p className="text-[11px] text-slate-300 leading-relaxed">
               This workflow is running <strong className="text-white">{excessDays.toFixed(1)} days</strong> beyond target.
               The biggest bottleneck is <strong className="text-white">{workflow.stages.reduce((max, s) => (s.avgDwellDays - s.expectedDays) > (max.avgDwellDays - max.expectedDays) ? s : max, workflow.stages[0]).name}</strong> with
@@ -136,9 +136,9 @@ export default function WorkflowLatencyPage() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: "Workflows Monitored", value: workflowLatencies.length, color: "text-white" },
-          { label: "Total Stagnant Items", value: totalStagnant, color: "text-red-400" },
-          { label: "Avg Latency Ratio", value: `${avgLatencyRatio.toFixed(1)}x`, color: "text-orange-400" },
-          { label: "Total Value at Risk", value: formatCurrency(totalVaR), color: "text-amber-400" },
+          { label: "Total Stagnant Items", value: totalStagnant, color: "text-[#c45a4a]" },
+          { label: "Avg Latency Ratio", value: `${avgLatencyRatio.toFixed(1)}x`, color: "text-[#c8953c]" },
+          { label: "Total Value at Risk", value: formatCurrency(totalVaR), color: "text-[#d4a054]" },
         ].map(stat => (
           <div key={stat.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02]">
             <div className="text-[11px] text-slate-400 mb-1">{stat.label}</div>

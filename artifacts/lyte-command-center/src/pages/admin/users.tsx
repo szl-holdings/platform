@@ -20,9 +20,9 @@ interface UserInfo {
 }
 
 const roleColors: Record<string, string> = {
-  admin: "text-red-400 bg-red-500/10",
-  editor: "text-blue-400 bg-blue-500/10",
-  viewer: "text-emerald-400 bg-emerald-500/10",
+  admin: "text-[#c45a4a] bg-[#c45a4a]/10",
+  editor: "text-[#4a90b8] bg-[#4a90b8]/10",
+  viewer: "text-[#6b8f71] bg-[#6b8f71]/10",
   developer: "text-violet-400 bg-violet-500/10",
 };
 
@@ -40,7 +40,7 @@ export default function AdminUsers() {
     <div className="space-y-4">
       <h1 className="text-xl font-display font-bold flex items-center gap-2"><Users className="w-5 h-5 text-primary" />Users</h1>
       <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
-        <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+        <AlertTriangle className="w-8 h-8 text-[#d4a054] mx-auto mb-2" />
         <p>User management requires API connection</p>
       </div>
     </div>
@@ -61,8 +61,8 @@ export default function AdminUsers() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Users", value: users.length, color: "text-foreground" },
-          { label: "Admins", value: users.filter(u => u.role === "admin").length, color: "text-red-400" },
-          { label: "Active (30d)", value: users.filter(u => u.status === "active").length, color: "text-emerald-400" },
+          { label: "Admins", value: users.filter(u => u.role === "admin").length, color: "text-[#c45a4a]" },
+          { label: "Active (30d)", value: users.filter(u => u.status === "active").length, color: "text-[#6b8f71]" },
         ].map(({ label, value, color }) => (
           <div key={label} className="rounded-xl border border-border bg-card p-4">
             <div className="text-xs text-muted-foreground mb-1">{label}</div>

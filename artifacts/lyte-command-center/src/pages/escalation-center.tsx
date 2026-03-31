@@ -51,8 +51,8 @@ export default function EscalationCenter() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <AlertOctagon className="w-4 h-4" style={{ color: "#f59e0b" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#f59e0b" }}>Lyte · Escalation Center</span>
+          <AlertOctagon className="w-4 h-4" style={{ color: "#d4a054" }} />
+          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#d4a054" }}>Lyte · Escalation Center</span>
         </div>
         <h1 className="text-2xl font-bold text-white">Escalation Center</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>What needs escalation, why, to whom — with Alloy rationale and recommended actions attached.</p>
@@ -60,9 +60,9 @@ export default function EscalationCenter() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Critical Escalations", value: critical.length, color: "#ef4444" },
-          { label: "High Priority", value: high.length, color: "#f97316" },
-          { label: "Total Impact", value: formatCurrency(ESCALATIONS.reduce((s, e) => s + e.impact, 0)), color: "#f59e0b" },
+          { label: "Critical Escalations", value: critical.length, color: "#c45a4a" },
+          { label: "High Priority", value: high.length, color: "#c8953c" },
+          { label: "Total Impact", value: formatCurrency(ESCALATIONS.reduce((s, e) => s + e.impact, 0)), color: "#d4a054" },
         ].map(c => (
           <div key={c.label} className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
             <div className="text-[10px] font-medium mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>{c.label}</div>
@@ -74,8 +74,8 @@ export default function EscalationCenter() {
       <div className="space-y-4">
         {ESCALATIONS.map(esc => {
           const alloyPred = PREDICTIONS.find(p => p.id === esc.alloy_rationale);
-          const borderColor = esc.urgency === "critical" ? "rgba(239,68,68,0.2)" : "rgba(249,115,22,0.15)";
-          const bgColor = esc.urgency === "critical" ? "rgba(239,68,68,0.03)" : "rgba(249,115,22,0.02)";
+          const borderColor = esc.urgency === "critical" ? "rgba(196,90,74,0.2)" : "rgba(249,115,22,0.15)";
+          const bgColor = esc.urgency === "critical" ? "rgba(196,90,74,0.03)" : "rgba(249,115,22,0.02)";
 
           return (
             <div key={esc.id} className="rounded-xl border p-5" style={{ borderColor, background: bgColor }}>
@@ -83,9 +83,9 @@ export default function EscalationCenter() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded" style={{
-                      color: esc.urgency === "critical" ? "#ef4444" : "#f97316",
-                      background: esc.urgency === "critical" ? "rgba(239,68,68,0.12)" : "rgba(249,115,22,0.12)",
-                      border: `1px solid ${esc.urgency === "critical" ? "rgba(239,68,68,0.25)" : "rgba(249,115,22,0.25)"}`,
+                      color: esc.urgency === "critical" ? "#c45a4a" : "#c8953c",
+                      background: esc.urgency === "critical" ? "rgba(196,90,74,0.12)" : "rgba(249,115,22,0.12)",
+                      border: `1px solid ${esc.urgency === "critical" ? "rgba(196,90,74,0.25)" : "rgba(249,115,22,0.25)"}`,
                     }}>{esc.urgency}</span>
                     <span className="text-[10px] flex items-center gap-1" style={{ color: "rgba(255,255,255,0.4)" }}>
                       <Clock className="w-3 h-3" />{esc.age_hours}h
@@ -95,7 +95,7 @@ export default function EscalationCenter() {
                   <div className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{esc.reason}</div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-lg font-bold mb-0.5" style={{ color: "#f59e0b" }}>{formatCurrency(esc.impact)}</div>
+                  <div className="text-lg font-bold mb-0.5" style={{ color: "#d4a054" }}>{formatCurrency(esc.impact)}</div>
                   <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>impact</div>
                 </div>
               </div>
@@ -115,8 +115,8 @@ export default function EscalationCenter() {
               {alloyPred && (
                 <div className="rounded-lg p-3 mb-4" style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)" }}>
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Brain className="w-3 h-3" style={{ color: "#8b5cf6" }} />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "#8b5cf6" }}>Alloy Rationale</span>
+                    <Brain className="w-3 h-3" style={{ color: "#8b7ac8" }} />
+                    <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "#8b7ac8" }}>Alloy Rationale</span>
                     <span className="text-[9px] ml-1" style={{ color: "rgba(139,92,246,0.6)" }}>Confidence: {alloyPred.confidence}%</span>
                   </div>
                   <div className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{alloyPred.rationale}</div>
@@ -124,13 +124,13 @@ export default function EscalationCenter() {
               )}
 
               <div className="flex gap-2">
-                <button className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80" style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}>
+                <button className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80" style={{ color: "#c45a4a", background: "rgba(196,90,74,0.1)", border: "1px solid rgba(196,90,74,0.25)" }}>
                   Escalate Now
                 </button>
-                <a href="/intervention" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                <a href="/intervention" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1" style={{ color: "#d4a054", background: "rgba(212,160,84,0.1)", border: "1px solid rgba(212,160,84,0.2)" }}>
                   Open Intervention <ArrowRight className="w-3 h-3" />
                 </a>
-                <a href="/alloy" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.15)" }}>
+                <a href="/alloy" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1" style={{ color: "#8b7ac8", background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.15)" }}>
                   <ExternalLink className="w-3 h-3" /> Alloy Full Analysis
                 </a>
               </div>

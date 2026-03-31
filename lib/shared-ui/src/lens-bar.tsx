@@ -41,9 +41,9 @@ function LensScoreChip({ lens }: { lens: LensScore }) {
   const def = LENSES.find(l => l.id === lens.lensId);
   const icon = LENS_ICONS[lens.lensId] || "◆";
   const statusColors = {
-    healthy: "text-emerald-400 border-emerald-500/20",
-    degraded: "text-amber-400 border-amber-500/20",
-    critical: "text-red-400 border-red-500/20",
+    healthy: "text-[#6b8f71] border-[#6b8f71]/20",
+    degraded: "text-[#d4a054] border-[#d4a054]/20",
+    critical: "text-[#c45a4a] border-red-500/20",
     unknown: "text-white/40 border-white/10",
   };
   const color = statusColors[lens.status] || statusColors.unknown;
@@ -61,9 +61,9 @@ function LensScoreChip({ lens }: { lens: LensScore }) {
 
 export function LensBar({ data }: { data: LensBarData }) {
   const statusConfig = {
-    healthy: { color: "text-emerald-400", bg: "bg-emerald-400", label: "Healthy" },
-    degraded: { color: "text-amber-400", bg: "bg-amber-400", label: "Degraded" },
-    critical: { color: "text-red-400", bg: "bg-red-400", label: "Critical" },
+    healthy: { color: "text-[#6b8f71]", bg: "bg-[#6b8f71]", label: "Healthy" },
+    degraded: { color: "text-[#d4a054]", bg: "bg-[#d4a054]", label: "Degraded" },
+    critical: { color: "text-[#c45a4a]", bg: "bg-[#c45a4a]", label: "Critical" },
     unknown: { color: "text-white/40", bg: "bg-white/20", label: "Unknown" },
   };
   const status = statusConfig[data.overallStatus] || statusConfig.unknown;

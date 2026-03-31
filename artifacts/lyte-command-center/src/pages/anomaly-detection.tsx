@@ -18,9 +18,9 @@ const timeSeriesData = Array.from({ length: 30 }, (_, i) => ({
 }));
 
 const sevColor: Record<string, string> = {
-  Critical: "bg-red-500/10 text-red-400 border-red-500/20",
-  High: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  Medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  Critical: "bg-[#c45a4a]/10 text-[#c45a4a] border-[#c45a4a]/20",
+  High: "bg-[#c8953c]/10 text-[#c8953c] border-[#c8953c]/20",
+  Medium: "bg-[#d4a054]/10 text-[#d4a054] border-[#d4a054]/20",
 };
 
 export default function AnomalyDetection() {
@@ -36,10 +36,10 @@ export default function AnomalyDetection() {
 
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: "Active Anomalies", value: "5", color: "text-red-400" },
-          { label: "Noise Suppressed", value: "98.2%", color: "text-emerald-400" },
+          { label: "Active Anomalies", value: "5", color: "text-[#c45a4a]" },
+          { label: "Noise Suppressed", value: "98.2%", color: "text-[#6b8f71]" },
           { label: "Signals Monitored", value: "12,847", color: "text-cyan-400" },
-          { label: "Avg Detect Time", value: "47s", color: "text-amber-400" },
+          { label: "Avg Detect Time", value: "47s", color: "text-[#d4a054]" },
         ].map(({ label, value, color }) => (
           <Card key={label}><CardContent className="p-4"><p className="text-xs text-muted-foreground">{label}</p><p className={`text-2xl font-bold ${color}`}>{value}</p></CardContent></Card>
         ))}
@@ -54,8 +54,8 @@ export default function AnomalyDetection() {
               <XAxis dataKey="t" tick={{ fontSize: 10, fill: "#94a3b8" }} interval={4} />
               <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
               <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-              <Area type="monotone" dataKey="normal" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.15} connectNulls />
-              <Area type="monotone" dataKey="anomaly" stroke="#ef4444" fill="#ef4444" fillOpacity={0.2} connectNulls />
+              <Area type="monotone" dataKey="normal" stroke="#4a90b8" fill="#4a90b8" fillOpacity={0.15} connectNulls />
+              <Area type="monotone" dataKey="anomaly" stroke="#c45a4a" fill="#c45a4a" fillOpacity={0.2} connectNulls />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -63,11 +63,11 @@ export default function AnomalyDetection() {
 
       <div className="space-y-3">
         {anomalies.map((a) => (
-          <Card key={a.id} className={a.severity === "Critical" ? "border-red-500/30" : ""}>
+          <Card key={a.id} className={a.severity === "Critical" ? "border-[#c45a4a]/30" : ""}>
             <CardContent className="p-4">
               <div className="flex items-start gap-4">
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${a.severity === "Critical" ? "bg-red-500/10" : a.severity === "High" ? "bg-orange-500/10" : "bg-amber-500/10"}`}>
-                  <AlertTriangle className={`w-5 h-5 ${a.severity === "Critical" ? "text-red-400" : a.severity === "High" ? "text-orange-400" : "text-amber-400"}`} />
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${a.severity === "Critical" ? "bg-[#c45a4a]/10" : a.severity === "High" ? "bg-[#c8953c]/10" : "bg-[#d4a054]/10"}`}>
+                  <AlertTriangle className={`w-5 h-5 ${a.severity === "Critical" ? "text-[#c45a4a]" : a.severity === "High" ? "text-[#c8953c]" : "text-[#d4a054]"}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -77,12 +77,12 @@ export default function AnomalyDetection() {
                     <span className="text-[10px] text-muted-foreground">{a.detected}</span>
                   </div>
                   <div className="flex gap-4 mt-1.5 text-xs">
-                    <span>Current: <span className="font-bold text-red-400">{a.value}</span></span>
+                    <span>Current: <span className="font-bold text-[#c45a4a]">{a.value}</span></span>
                     <span>Baseline: <span className="text-muted-foreground">{a.baseline}</span></span>
-                    <span>Deviation: <span className="font-bold text-red-400">{a.deviation}</span></span>
+                    <span>Deviation: <span className="font-bold text-[#c45a4a]">{a.deviation}</span></span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Root cause: {a.rootCause}</p>
-                  <p className="text-xs text-amber-400 mt-0.5">Impact: {a.impact}</p>
+                  <p className="text-xs text-[#d4a054] mt-0.5">Impact: {a.impact}</p>
                 </div>
                 <button className="text-xs px-3 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors shrink-0">Investigate</button>
               </div>

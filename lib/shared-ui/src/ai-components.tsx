@@ -135,8 +135,8 @@ export function TypewriterText({
 const ENTITY_COLORS: Record<string, string> = {
   PER: "bg-violet-500/20 text-violet-300 border-violet-500/30",
   ORG: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-  LOC: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-  MISC: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+  LOC: "bg-[#6b8f71]/20 text-[#6b8f71] border-[#6b8f71]/30",
+  MISC: "bg-[#d4a054]/20 text-[#d4a054] border-[#d4a054]/30",
   DATE: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
   MONEY: "bg-green-500/20 text-green-300 border-green-500/30",
   GPE: "bg-rose-500/20 text-rose-300 border-rose-500/30",
@@ -214,11 +214,11 @@ export function AnimatedGauge({
 
   const colorMap: Record<string, string> = {
     cyan: "#06b6d4",
-    red: "#ef4444",
-    orange: "#f97316",
-    emerald: "#10b981",
-    violet: "#8b5cf6",
-    blue: "#3b82f6",
+    red: "#c45a4a",
+    orange: "#c8953c",
+    emerald: "#6b8f71",
+    violet: "#8b7ac8",
+    blue: "#4a90b8",
   };
   const strokeColor = colorMap[color] || colorMap.cyan;
 
@@ -288,11 +288,11 @@ export function AnomalySparkline({
         const y = height - ((data[idx] - min) / range) * (height - 4) - 2;
         return (
           <g key={idx}>
-            <circle cx={x} cy={y} r={4} fill="none" stroke="#ef4444" strokeWidth={2}>
+            <circle cx={x} cy={y} r={4} fill="none" stroke="#c45a4a" strokeWidth={2}>
               <animate attributeName="r" values="3;6;3" dur="1.5s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite" />
             </circle>
-            <circle cx={x} cy={y} r={2} fill="#ef4444" />
+            <circle cx={x} cy={y} r={2} fill="#c45a4a" />
           </g>
         );
       })}
@@ -310,7 +310,7 @@ export function SeverityMeter({
   label?: string;
 }) {
   const [animated, setAnimated] = useState(0);
-  const colors = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e" };
+  const colors = { critical: "#c45a4a", high: "#c8953c", medium: "#d4a054", low: "#6b8f71" };
   const fillColor = colors[level] || colors.medium;
 
   useEffect(() => {
@@ -383,14 +383,14 @@ export function RiskPill({
   label?: string;
   tooltip?: string;
 }) {
-  const color = score >= 80 ? "bg-red-500/15 text-red-400 border-red-500/30" :
+  const color = score >= 80 ? "bg-red-500/15 text-[#c45a4a] border-red-500/30" :
     score >= 60 ? "bg-orange-500/15 text-orange-400 border-orange-500/30" :
-    score >= 40 ? "bg-amber-500/15 text-amber-400 border-amber-500/30" :
-    "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
+    score >= 40 ? "bg-[#d4a054]/15 text-[#d4a054] border-[#d4a054]/30" :
+    "bg-[#6b8f71]/15 text-[#6b8f71] border-[#6b8f71]/30";
 
   const dotColor = score >= 80 ? "bg-red-500" :
     score >= 60 ? "bg-orange-500" :
-    score >= 40 ? "bg-amber-500" : "bg-emerald-500";
+    score >= 40 ? "bg-[#d4a054]" : "bg-[#6b8f71]";
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border cursor-help transition-all hover:scale-105 ${color}`} title={tooltip}>

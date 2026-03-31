@@ -99,7 +99,7 @@ export function ShortcutHelpOverlay({
   onClose,
   shortcuts = [],
   appName,
-  accentColor = "#a855f7",
+  accentColor = "#8b7ac8",
 }: ShortcutHelpOverlayProps) {
   useEffect(() => {
     if (!open) return;

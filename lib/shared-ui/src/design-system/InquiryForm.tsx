@@ -132,7 +132,7 @@ export function InquiryForm({
     cn(
       "w-full px-4 py-3 rounded-xl border text-neutral-900 placeholder-neutral-400 text-sm focus:outline-none focus:ring-2 transition-all bg-white",
       errors[field]
-        ? "border-red-400 focus:ring-red-200"
+        ? "border-[#c45a4a] focus:ring-red-200"
         : "border-neutral-200 focus:border-current focus:ring-current/15"
     );
 

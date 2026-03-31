@@ -89,7 +89,7 @@ function PowerBiFrame({ config, title }: { config: PowerBiEmbedConfig; title: st
     return (
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-3" />
+          <AlertCircle className="w-8 h-8 text-[#c45a4a] mx-auto mb-3" />
           <div className="text-sm font-medium text-foreground mb-1">Failed to load report</div>
           <div className="text-xs text-muted-foreground max-w-xs">{error}</div>
         </div>
@@ -119,7 +119,7 @@ export function PowerBiEmbed({
   height = 520,
   className,
   onConfigureClick,
-  accentColor = "#3b82f6",
+  accentColor = "#4a90b8",
 }: PowerBiEmbedProps) {
   const isConfigured = !!(config?.embedUrl && config?.embedToken && config?.reportId);
   const heightValue = typeof height === "number" ? `${height}px` : height;
@@ -206,7 +206,7 @@ export function PowerBiEmbed({
       {isConfigured && (
         <div className="flex items-center justify-between px-4 py-2 border-t border-border/40 bg-muted/20 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#6b8f71] animate-pulse" />
             <span className="text-[10px] text-muted-foreground">Live · Power BI Embedded · Token server-minted</span>
           </div>
           {config!.expiration && (

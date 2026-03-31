@@ -298,7 +298,7 @@ function renderElement(props: RenderElementProps): React.ReactElement {
     case "blockquote":
       return <blockquote {...attributes} style={alignStyle} className="border-l-4 border-indigo-500/50 pl-4 py-2 italic text-white/60 outline-none">{children}</blockquote>;
     case "code-block":
-      return <pre {...attributes} className="bg-black/40 font-mono text-xs rounded-lg p-3 text-emerald-400 whitespace-pre-wrap overflow-x-auto outline-none">{children}</pre>;
+      return <pre {...attributes} className="bg-black/40 font-mono text-xs rounded-lg p-3 text-[#6b8f71] whitespace-pre-wrap overflow-x-auto outline-none">{children}</pre>;
     case "thematic-break":
       return (
         <div {...attributes} contentEditable={false} className="py-2">
@@ -335,7 +335,7 @@ function renderLeaf({ attributes, children, leaf }: { attributes: React.HTMLAttr
   if (t.italic) el = <em>{el}</em>;
   if (t.underline) el = <u>{el}</u>;
   if (t.strikethrough) el = <s>{el}</s>;
-  if (t.code) el = <code className="bg-black/40 text-emerald-400 font-mono text-xs px-1 rounded">{el}</code>;
+  if (t.code) el = <code className="bg-black/40 text-[#6b8f71] font-mono text-xs px-1 rounded">{el}</code>;
   const style: React.CSSProperties = {};
   if (t.color) style.color = t.color;
   if (t.fontSize) style.fontSize = t.fontSize;
@@ -512,17 +512,17 @@ function EditorToolbar({
               {diff && (
                 <div>
                   <div className="flex gap-3 mb-2 text-[10px]">
-                    <span className="text-emerald-400">+{diff.summary.added}</span>
+                    <span className="text-[#6b8f71]">+{diff.summary.added}</span>
                     <span className="text-rose-400">-{diff.summary.removed}</span>
-                    <span className="text-amber-400">~{diff.summary.changed}</span>
+                    <span className="text-[#d4a054]">~{diff.summary.changed}</span>
                     <span className="text-white/30">{diff.summary.unchanged} same</span>
                   </div>
                   <div className="space-y-1 max-h-48 overflow-y-auto">
                     {diff.diff.filter(d => d.op !== "equal").map((d, i) => (
                       <div key={i} className={cn("rounded px-2 py-1 text-xs",
-                        d.op === "add" && "bg-emerald-500/10 text-emerald-300",
+                        d.op === "add" && "bg-[#6b8f71]/10 text-[#6b8f71]",
                         d.op === "remove" && "bg-rose-500/10 text-rose-300",
-                        d.op === "change" && "bg-amber-500/10 text-amber-300"
+                        d.op === "change" && "bg-[#d4a054]/10 text-[#d4a054]"
                       )}>
                         <span className="font-mono mr-1">{d.op === "add" ? "+" : d.op === "remove" ? "−" : "~"}</span>
                         {d.op === "change" ? (

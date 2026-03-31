@@ -31,9 +31,9 @@ export interface SidebarNavProps {
 
 const BADGE_COLORS: Record<string, string> = {
   default: "bg-white/10 text-white/60",
-  danger: "bg-red-500/20 text-red-400",
-  warning: "bg-amber-500/20 text-amber-400",
-  success: "bg-emerald-500/20 text-emerald-400",
+  danger: "bg-red-500/20 text-[#c45a4a]",
+  warning: "bg-[#d4a054]/20 text-[#d4a054]",
+  success: "bg-[#6b8f71]/20 text-[#6b8f71]",
 };
 
 export function SidebarNav({

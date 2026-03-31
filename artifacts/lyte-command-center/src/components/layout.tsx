@@ -40,9 +40,9 @@ function DemoModeBanner() {
 
   if (hasUnhealthy) {
     return (
-      <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center gap-2 shrink-0">
-        <WifiOff className="w-3 h-3 text-red-400" />
-        <span className="text-[11px] text-red-400">{data.summary.manualRequired} integration(s) not configured</span>
+      <div className="bg-[#c45a4a]/10 border-b border-[#c45a4a]/20 px-4 py-1.5 flex items-center gap-2 shrink-0">
+        <WifiOff className="w-3 h-3 text-[#c45a4a]" />
+        <span className="text-[11px] text-[#c45a4a]">{data.summary.manualRequired} integration(s) not configured</span>
       </div>
     );
   }
@@ -200,17 +200,17 @@ export function Layout({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-[10px] font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-red-400">3 Critical</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c45a4a] animate-pulse" />
+              <span className="text-[#c45a4a]">3 Critical</span>
               <span className="text-slate-600 mx-1">·</span>
-              <span className="text-orange-400">5 High</span>
+              <span className="text-[#c8953c]">5 High</span>
               <span className="text-slate-600 mx-1">·</span>
-              <span className="text-amber-400">$17.6M at risk</span>
+              <span className="text-[#d4a054]">$17.6M at risk</span>
             </div>
             <div className="h-6 w-px bg-white/10" />
             <button className="relative p-1.5 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
               <Bell className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#c45a4a] rounded-full animate-pulse" />
             </button>
             <div className="h-6 w-px bg-white/10" />
             <div className="flex items-center gap-2">

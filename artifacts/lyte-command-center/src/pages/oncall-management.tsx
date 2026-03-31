@@ -45,7 +45,7 @@ export default function OnCallManagement() {
           <Card key={metric}>
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">{metric}</p>
-              <p className={`text-2xl font-bold ${status === "good" ? "text-emerald-400" : "text-red-400"}`}>{value}</p>
+              <p className={`text-2xl font-bold ${status === "good" ? "text-[#6b8f71]" : "text-[#c45a4a]"}`}>{value}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">Target: {target}</p>
             </CardContent>
           </Card>
@@ -63,12 +63,12 @@ export default function OnCallManagement() {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">{sched.team}</span>
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="w-2 h-2 rounded-full bg-[#6b8f71] animate-pulse" />
                       </div>
                       <div className="grid grid-cols-2 gap-x-4 mt-2 text-xs">
                         <div>
                           <p className="text-muted-foreground">Primary</p>
-                          <p className="font-medium text-emerald-400">{sched.primary}</p>
+                          <p className="font-medium text-[#6b8f71]">{sched.primary}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Secondary</p>
@@ -76,7 +76,7 @@ export default function OnCallManagement() {
                         </div>
                         <div className="mt-1 col-span-2">
                           <p className="text-muted-foreground">Escalation</p>
-                          <p className="font-medium text-amber-400">{sched.escalation}</p>
+                          <p className="font-medium text-[#d4a054]">{sched.escalation}</p>
                         </div>
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-2 flex items-center gap-1"><Clock className="w-3 h-3" />{sched.shift}</p>
@@ -95,13 +95,13 @@ export default function OnCallManagement() {
               <Card key={page.id}>
                 <CardContent className="p-3">
                   <div className="flex items-start gap-3">
-                    <Bell className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <Bell className="w-4 h-4 text-[#d4a054] shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-xs font-semibold">{page.incident}</p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">{page.team} → {page.paged}</p>
                       <div className="flex gap-3 mt-1 text-[10px]">
                         <span className="text-sky-400">Ack: {page.ack}</span>
-                        <span className="text-emerald-400">Resolved: {page.resolved}</span>
+                        <span className="text-[#6b8f71]">Resolved: {page.resolved}</span>
                         <span className="text-muted-foreground">{page.time}</span>
                       </div>
                     </div>

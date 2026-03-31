@@ -11,18 +11,18 @@ import { toast } from "sonner";
 import { cn } from "@workspace/shared-ui/utils";
 
 const ITEM_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
-  launch_gate: { label: "Launch Gate", icon: Shield, color: "text-amber-400" },
-  blocker: { label: "Blocker", icon: XCircle, color: "text-red-400" },
-  dependency: { label: "Dependency", icon: ArrowRight, color: "text-blue-400" },
-  milestone: { label: "Milestone", icon: CheckCircle, color: "text-emerald-400" },
-  owner_check: { label: "Owner Check", icon: User, color: "text-purple-400" },
+  launch_gate: { label: "Launch Gate", icon: Shield, color: "text-[#d4a054]" },
+  blocker: { label: "Blocker", icon: XCircle, color: "text-[#c45a4a]" },
+  dependency: { label: "Dependency", icon: ArrowRight, color: "text-[#4a90b8]" },
+  milestone: { label: "Milestone", icon: CheckCircle, color: "text-[#6b8f71]" },
+  owner_check: { label: "Owner Check", icon: User, color: "text-[#8b7ac8]" },
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   not_started: { label: "Not Started", color: "text-zinc-400", bg: "bg-zinc-500/15 border-zinc-500/30" },
-  in_progress: { label: "In Progress", color: "text-blue-400", bg: "bg-blue-500/15 border-blue-500/30" },
-  blocked: { label: "Blocked", color: "text-red-400", bg: "bg-red-500/15 border-red-500/30" },
-  complete: { label: "Complete", color: "text-emerald-400", bg: "bg-emerald-500/15 border-emerald-500/30" },
+  in_progress: { label: "In Progress", color: "text-[#4a90b8]", bg: "bg-[#4a90b8]/15 border-[#4a90b8]/30" },
+  blocked: { label: "Blocked", color: "text-[#c45a4a]", bg: "bg-[#c45a4a]/15 border-[#c45a4a]/30" },
+  complete: { label: "Complete", color: "text-[#6b8f71]", bg: "bg-[#6b8f71]/15 border-[#6b8f71]/30" },
   waived: { label: "Waived", color: "text-zinc-400", bg: "bg-zinc-500/10 border-zinc-500/20" },
 };
 
@@ -83,7 +83,7 @@ export default function ReadinessModulePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Package className="w-5 h-5 text-amber-400" />
+            <Package className="w-5 h-5 text-[#d4a054]" />
             Lyte Readiness
           </h1>
           <p className="text-sm text-zinc-400 mt-0.5">Launch gates, blockers, dependencies, and owner clarity</p>
@@ -91,41 +91,41 @@ export default function ReadinessModulePage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-amber-500/5 border-amber-500/20">
+        <Card className="bg-[#d4a054]/5 border-[#d4a054]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-amber-400 font-medium mb-1">Readiness Score</div>
-            <div className="text-3xl font-bold text-amber-400">{summary.score}%</div>
+            <div className="text-xs text-[#d4a054] font-medium mb-1">Readiness Score</div>
+            <div className="text-3xl font-bold text-[#d4a054]">{summary.score}%</div>
             <Progress value={summary.score} className="h-1 mt-2 bg-zinc-800" />
           </CardContent>
         </Card>
-        <Card className="bg-emerald-500/5 border-emerald-500/20">
+        <Card className="bg-[#6b8f71]/5 border-[#6b8f71]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-emerald-400 font-medium mb-1">Gates Cleared</div>
-            <div className="text-3xl font-bold text-emerald-400">{gatesCleared}/{gates.length}</div>
+            <div className="text-xs text-[#6b8f71] font-medium mb-1">Gates Cleared</div>
+            <div className="text-3xl font-bold text-[#6b8f71]">{gatesCleared}/{gates.length}</div>
             <div className="text-[10px] text-zinc-500 mt-1">Launch gates</div>
           </CardContent>
         </Card>
-        <Card className="bg-red-500/5 border-red-500/20">
+        <Card className="bg-[#c45a4a]/5 border-[#c45a4a]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-red-400 font-medium mb-1">Blockers</div>
-            <div className="text-3xl font-bold text-red-400">{blockers.length}</div>
+            <div className="text-xs text-[#c45a4a] font-medium mb-1">Blockers</div>
+            <div className="text-3xl font-bold text-[#c45a4a]">{blockers.length}</div>
             <div className="text-[10px] text-zinc-500 mt-1">Must resolve first</div>
           </CardContent>
         </Card>
-        <Card className="bg-blue-500/5 border-blue-500/20">
+        <Card className="bg-[#4a90b8]/5 border-[#4a90b8]/20">
           <CardContent className="p-4">
-            <div className="text-xs text-blue-400 font-medium mb-1">Total Items</div>
-            <div className="text-3xl font-bold text-blue-400">{summary.total}</div>
+            <div className="text-xs text-[#4a90b8] font-medium mb-1">Total Items</div>
+            <div className="text-3xl font-bold text-[#4a90b8]">{summary.total}</div>
             <div className="text-[10px] text-zinc-500 mt-1">{summary.complete} complete</div>
           </CardContent>
         </Card>
       </div>
 
       {blockers.length > 0 && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+        <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/5 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-red-400" />
-            <span className="text-sm font-semibold text-red-400">Active Blockers</span>
+            <AlertTriangle className="w-4 h-4 text-[#c45a4a]" />
+            <span className="text-sm font-semibold text-[#c45a4a]">Active Blockers</span>
           </div>
           <div className="space-y-2">
             {blockers.map((item: any) => (
@@ -134,7 +134,7 @@ export default function ReadinessModulePage() {
                   <span className="text-white font-medium">{item.title}</span>
                   <span className="text-zinc-400 text-xs ml-2">— {item.owner}</span>
                 </div>
-                <div className="text-xs text-red-400 font-medium">{formatDate(item.dueAt)}</div>
+                <div className="text-xs text-[#c45a4a] font-medium">{formatDate(item.dueAt)}</div>
               </div>
             ))}
           </div>
@@ -152,8 +152,8 @@ export default function ReadinessModulePage() {
           return (
             <Card key={item.id} className={cn(
               "border transition-all",
-              item.status === "blocked" ? "border-red-500/30 bg-red-500/3" :
-              item.status === "complete" ? "border-emerald-500/20 bg-emerald-500/3" :
+              item.status === "blocked" ? "border-[#c45a4a]/30 bg-[#c45a4a]/3" :
+              item.status === "complete" ? "border-[#6b8f71]/20 bg-[#6b8f71]/3" :
               "border-zinc-800 bg-zinc-900/30"
             )}>
               <CardContent className="p-4">
@@ -168,7 +168,7 @@ export default function ReadinessModulePage() {
                         {typeInfo.label}
                       </div>
                       {isOverdue && (
-                        <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-[10px]">
+                        <Badge variant="outline" className="bg-[#c45a4a]/10 text-[#c45a4a] border-[#c45a4a]/30 text-[10px]">
                           OVERDUE
                         </Badge>
                       )}
@@ -177,7 +177,7 @@ export default function ReadinessModulePage() {
                     <div className="text-xs text-zinc-400 mb-2">{item.description}</div>
                     <div className="flex items-center gap-3 text-[10px] text-zinc-500">
                       <span className="flex items-center gap-1"><User className="w-3 h-3" />{item.owner}</span>
-                      <span className={cn("font-medium", isOverdue ? "text-red-400" : "text-zinc-500")}>{dueText}</span>
+                      <span className={cn("font-medium", isOverdue ? "text-[#c45a4a]" : "text-zinc-500")}>{dueText}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -185,7 +185,7 @@ export default function ReadinessModulePage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 px-2.5 text-[10px] border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                        className="h-7 px-2.5 text-[10px] border-[#6b8f71]/30 text-[#6b8f71] hover:bg-[#6b8f71]/10"
                         onClick={() => updateStatus.mutate({ id: item.id, status: "complete" })}
                         disabled={updateStatus.isPending}
                       >
@@ -197,7 +197,7 @@ export default function ReadinessModulePage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 px-2.5 text-[10px] border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                        className="h-7 px-2.5 text-[10px] border-[#4a90b8]/30 text-[#4a90b8] hover:bg-[#4a90b8]/10"
                         onClick={() => updateStatus.mutate({ id: item.id, status: "in_progress" })}
                         disabled={updateStatus.isPending}
                       >

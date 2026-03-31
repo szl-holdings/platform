@@ -81,7 +81,7 @@ const TEMPLATES: Array<{
     name: "Executive Overview",
     description: "High-level KPIs, risk indicators, and portfolio health for leadership",
     icon: Layers,
-    accentColor: "#f59e0b",
+    accentColor: "#d4a054",
     widgets: [
       { type: "metric_card", title: "Active Signals", config: { metric: "signals_active", label: "Active Signals", format: "number" }, gridSize: "sm", col: 0, row: 0 },
       { type: "metric_card", title: "Value at Risk", config: { metric: "value_at_risk", label: "Value at Risk", format: "currency" }, gridSize: "sm", col: 1, row: 0 },
@@ -113,7 +113,7 @@ const TEMPLATES: Array<{
     name: "Security Posture",
     description: "Threat signals, compliance status, escalation tracking, and risk exposure",
     icon: Shield,
-    accentColor: "#ef4444",
+    accentColor: "#c45a4a",
     widgets: [
       { type: "metric_card", title: "Critical Threats", config: { metric: "threats_critical", label: "Critical", format: "number" }, gridSize: "sm", col: 0, row: 0 },
       { type: "metric_card", title: "Compliance Score", config: { metric: "compliance_score", label: "Compliance", format: "score" }, gridSize: "sm", col: 1, row: 0 },
@@ -147,17 +147,17 @@ function generateId(): string {
 function MetricCardWidget({ widget }: { widget: Widget }) {
   const cfg = widget.config as { metric: string; label: string; format: string };
   const vals: Record<string, { value: number | string; trend: number; color: string }> = {
-    signals_active: { value: 23, trend: 12, color: "#f59e0b" },
+    signals_active: { value: 23, trend: 12, color: "#d4a054" },
     signals_today: { value: 47, trend: -5, color: "#4B8BDB" },
-    value_at_risk: { value: "$5.03M", trend: 8, color: "#ef4444" },
-    actions_open: { value: 14, trend: 3, color: "#f97316" },
-    platform_health: { value: 94, trend: -1, color: "#10b981" },
+    value_at_risk: { value: "$5.03M", trend: 8, color: "#c45a4a" },
+    actions_open: { value: 14, trend: 3, color: "#c8953c" },
+    platform_health: { value: 94, trend: -1, color: "#6b8f71" },
     workflows_running: { value: 3, trend: 0, color: "#4B8BDB" },
-    runs_failed_24h: { value: 2, trend: -1, color: "#ef4444" },
-    api_p99_ms: { value: "182ms", trend: -12, color: "#10b981" },
-    threats_critical: { value: 5, trend: 2, color: "#ef4444" },
-    compliance_score: { value: "87/100", trend: 1, color: "#10b981" },
-    escalations_open: { value: 4, trend: -1, color: "#f97316" },
+    runs_failed_24h: { value: 2, trend: -1, color: "#c45a4a" },
+    api_p99_ms: { value: "182ms", trend: -12, color: "#6b8f71" },
+    threats_critical: { value: 5, trend: 2, color: "#c45a4a" },
+    compliance_score: { value: "87/100", trend: 1, color: "#6b8f71" },
+    escalations_open: { value: 4, trend: -1, color: "#c8953c" },
   };
   const d = vals[cfg.metric] ?? { value: "—", trend: 0, color: "#6b7280" };
   return (
@@ -165,7 +165,7 @@ function MetricCardWidget({ widget }: { widget: Widget }) {
       <div className="text-[10px] font-medium mb-2" style={{ color: "rgba(255,255,255,0.45)" }}>{cfg.label || widget.title}</div>
       <div className="font-bold text-2xl font-mono" style={{ color: d.color }}>{String(d.value)}</div>
       <div className="flex items-center gap-1 mt-1">
-        <span className="text-[10px] font-mono" style={{ color: d.trend > 0 ? "#ef4444" : d.trend < 0 ? "#10b981" : "rgba(255,255,255,0.3)" }}>
+        <span className="text-[10px] font-mono" style={{ color: d.trend > 0 ? "#c45a4a" : d.trend < 0 ? "#6b8f71" : "rgba(255,255,255,0.3)" }}>
           {d.trend > 0 ? "↑" : d.trend < 0 ? "↓" : "→"} {Math.abs(d.trend)}%
         </span>
         <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>vs yesterday</span>
@@ -192,12 +192,12 @@ function TimeSeriesWidget({ widget }: { widget: Widget }) {
         <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="w-full h-full">
           <defs>
             <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+              <stop offset="0%" stopColor="#d4a054" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#d4a054" stopOpacity="0" />
             </linearGradient>
           </defs>
           <polygon points={`0,${h} ${pts} ${w},${h}`} fill="url(#tg)" />
-          <polyline points={pts} fill="none" stroke="#f59e0b" strokeWidth="2" />
+          <polyline points={pts} fill="none" stroke="#d4a054" strokeWidth="2" />
         </svg>
       </div>
     </div>
@@ -222,8 +222,8 @@ function TableWidget({ widget }: { widget: Widget }) {
         {rows.map((r, i) => (
           <div key={i} className="grid gap-1 text-[9px]" style={{ gridTemplateColumns: `repeat(${cols.length}, 1fr)`, color: "rgba(255,255,255,0.5)" }}>
             <div className="truncate">{r.title}</div>
-            <div style={{ color: r.severity === "critical" ? "#ef4444" : r.severity === "high" ? "#f97316" : "#f59e0b" }}>{r.severity}</div>
-            {cols.length > 2 && <div style={{ color: r.status === "open" ? "#f59e0b" : "#4B8BDB" }}>{r.status}</div>}
+            <div style={{ color: r.severity === "critical" ? "#c45a4a" : r.severity === "high" ? "#c8953c" : "#d4a054" }}>{r.severity}</div>
+            {cols.length > 2 && <div style={{ color: r.status === "open" ? "#d4a054" : "#4B8BDB" }}>{r.status}</div>}
             {cols.length > 3 && <div style={{ color: "rgba(255,255,255,0.3)" }}>{r.createdAt}</div>}
           </div>
         ))}
@@ -245,7 +245,7 @@ function AlertFeedWidget({ widget }: { widget: Widget }) {
     <div className="h-full flex flex-col p-1 space-y-1 overflow-hidden">
       {alerts.slice(0, limit).map(a => (
         <div key={a.id} className="flex items-start gap-2 p-1.5 rounded" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
-          <span className="mt-0.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: a.severity === "critical" ? "#ef4444" : a.severity === "high" ? "#f97316" : "#f59e0b" }} />
+          <span className="mt-0.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: a.severity === "critical" ? "#c45a4a" : a.severity === "high" ? "#c8953c" : "#d4a054" }} />
           <div className="flex-1 min-w-0">
             <div className="text-[10px] font-medium truncate" style={{ color: "rgba(255,255,255,0.8)" }}>{a.title}</div>
             <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>{a.time}</div>
@@ -258,11 +258,11 @@ function AlertFeedWidget({ widget }: { widget: Widget }) {
 
 function TopologyWidget() {
   const nodes = [
-    { id: "api", label: "API Server", x: 50, y: 40, color: "#f59e0b" },
-    { id: "lyte", label: "Lyte", x: 20, y: 70, color: "#f59e0b" },
+    { id: "api", label: "API Server", x: 50, y: 40, color: "#d4a054" },
+    { id: "lyte", label: "Lyte", x: 20, y: 70, color: "#d4a054" },
     { id: "alloy", label: "Alloy", x: 50, y: 75, color: "#4B8BDB" },
     { id: "vessels", label: "Vessels", x: 80, y: 70, color: "#38bdf8" },
-    { id: "db", label: "DB", x: 35, y: 20, color: "#10b981" },
+    { id: "db", label: "DB", x: 35, y: 20, color: "#6b8f71" },
     { id: "sf", label: "Salesforce", x: 70, y: 20, color: "#6b7280" },
   ];
   const edges = [["api", "lyte"], ["api", "alloy"], ["api", "vessels"], ["api", "db"], ["api", "sf"]];
@@ -291,7 +291,7 @@ function StatusIndicatorWidget({ widget }: { widget: Widget }) {
   const values: Record<string, number> = { platform_health: 94, api_health: 91, security_posture: 78 };
   const value = values[cfg.metric] ?? 85;
   const { warning = 70, critical = 50 } = cfg.thresholds ?? {};
-  const color = value >= warning ? "#10b981" : value >= critical ? "#f59e0b" : "#ef4444";
+  const color = value >= warning ? "#6b8f71" : value >= critical ? "#d4a054" : "#c45a4a";
   const label = value >= warning ? "Healthy" : value >= critical ? "Warning" : "Critical";
   const pct = (value / 100) * 280;
   return (
@@ -354,14 +354,14 @@ function SortableWidget({
     >
       <div
         className="flex items-center gap-2 px-3 py-2 border-b shrink-0"
-        style={{ borderColor: editing ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.015)" }}
+        style={{ borderColor: editing ? "rgba(212,160,84,0.2)" : "rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.015)" }}
       >
         {editing && (
           <button {...listeners} className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-white/5 shrink-0 touch-none" title="Drag to reorder">
             <GripVertical className="w-3 h-3" style={{ color: "rgba(255,255,255,0.3)" }} />
           </button>
         )}
-        <Icon className="w-3 h-3 shrink-0" style={{ color: "rgba(245,158,11,0.6)" }} />
+        <Icon className="w-3 h-3 shrink-0" style={{ color: "rgba(212,160,84,0.6)" }} />
         <span className="text-[11px] font-medium flex-1 truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{widget.title}</span>
         {editing && (
           <div className="flex items-center gap-1">
@@ -380,7 +380,7 @@ function SortableWidget({
                       key={size}
                       onClick={() => { onResize(widget.id, size); setShowResize(false); }}
                       className={cn("block w-full text-left text-[10px] px-3 py-1.5 rounded hover:bg-white/5 whitespace-nowrap")}
-                      style={{ color: widget.gridSize === size ? "#f59e0b" : "rgba(255,255,255,0.5)" }}
+                      style={{ color: widget.gridSize === size ? "#d4a054" : "rgba(255,255,255,0.5)" }}
                     >
                       {GRID_SIZE_LABELS[size]} width
                     </button>
@@ -388,7 +388,7 @@ function SortableWidget({
                 </div>
               )}
             </div>
-            <button onClick={() => onRemove(widget.id)} className="p-1 rounded hover:bg-red-500/10 transition-colors" style={{ color: "rgba(239,68,68,0.6)" }}>
+            <button onClick={() => onRemove(widget.id)} className="p-1 rounded hover:bg-[#c45a4a]/10 transition-colors" style={{ color: "rgba(196,90,74,0.6)" }}>
               <Trash2 className="w-3 h-3" />
             </button>
           </div>
@@ -571,7 +571,7 @@ export default function DashboardBuilder() {
       <div className="max-w-5xl mx-auto space-y-8 p-6">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <LayoutDashboard className="w-5 h-5" style={{ color: "#f59e0b" }} />
+            <LayoutDashboard className="w-5 h-5" style={{ color: "#d4a054" }} />
             <h1 className="font-bold text-2xl text-white tracking-tight">Dashboard Builder</h1>
           </div>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
@@ -587,7 +587,7 @@ export default function DashboardBuilder() {
                 <div key={d.id} className="relative group">
                   <button
                     onClick={() => { setActiveDashboard(d); setShowTemplates(false); }}
-                    className="w-full text-left p-4 rounded-xl border hover:border-amber-500/30 transition-all"
+                    className="w-full text-left p-4 rounded-xl border hover:border-[#d4a054]/30 transition-all"
                     style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
                   >
                     <div className="font-medium text-sm text-white mb-1">{d.name}</div>
@@ -597,8 +597,8 @@ export default function DashboardBuilder() {
                   </button>
                   <button
                     onClick={() => { deleteMutation.mutate(d.id); }}
-                    className="absolute top-2 right-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/10"
-                    style={{ color: "rgba(239,68,68,0.5)" }}
+                    className="absolute top-2 right-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#c45a4a]/10"
+                    style={{ color: "rgba(196,90,74,0.5)" }}
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -648,7 +648,7 @@ export default function DashboardBuilder() {
                 style={{ borderColor: "rgba(255,255,255,0.15)" }}
                 autoFocus
               />
-              <button onClick={handleCreateBlank} className="px-4 py-1.5 rounded-lg text-xs font-medium text-white" style={{ background: "#f59e0b" }}>Create</button>
+              <button onClick={handleCreateBlank} className="px-4 py-1.5 rounded-lg text-xs font-medium text-white" style={{ background: "#d4a054" }}>Create</button>
               <button onClick={() => setShowNewDashboard(false)} className="p-1.5 rounded-lg hover:bg-white/5" style={{ color: "rgba(255,255,255,0.4)" }}>
                 <X className="w-4 h-4" />
               </button>
@@ -656,7 +656,7 @@ export default function DashboardBuilder() {
           ) : (
             <button
               onClick={() => setShowNewDashboard(true)}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all hover:border-amber-500/30 hover:bg-amber-500/5"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all hover:border-[#d4a054]/30 hover:bg-[#d4a054]/5"
               style={{ borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}
             >
               <Plus className="w-4 h-4" /> Create blank dashboard
@@ -680,10 +680,10 @@ export default function DashboardBuilder() {
         <ChevronRight className="w-3 h-3" style={{ color: "rgba(255,255,255,0.2)" }} />
         <span className="text-[11px] font-medium text-white">{activeDashboard?.name ?? "Untitled"}</span>
         {activeDashboard?.isShared && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded font-medium" style={{ color: "#10b981", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)" }}>Shared</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded font-medium" style={{ color: "#6b8f71", background: "rgba(107,143,113,0.1)", border: "1px solid rgba(107,143,113,0.2)" }}>Shared</span>
         )}
         {editing && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded font-medium" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)" }}>
+          <span className="text-[9px] px-1.5 py-0.5 rounded font-medium" style={{ color: "#d4a054", background: "rgba(212,160,84,0.08)", border: "1px solid rgba(212,160,84,0.2)" }}>
             Drag widgets to reorder
           </span>
         )}
@@ -701,9 +701,9 @@ export default function DashboardBuilder() {
               onClick={handleCopyShareLink}
               className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all hover:opacity-80"
               style={{
-                color: copiedLink ? "#10b981" : "rgba(255,255,255,0.5)",
-                borderColor: copiedLink ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.08)",
-                background: copiedLink ? "rgba(16,185,129,0.06)" : undefined,
+                color: copiedLink ? "#6b8f71" : "rgba(255,255,255,0.5)",
+                borderColor: copiedLink ? "rgba(107,143,113,0.3)" : "rgba(255,255,255,0.08)",
+                background: copiedLink ? "rgba(107,143,113,0.06)" : undefined,
               }}
             >
               {copiedLink ? <Check className="w-3 h-3" /> : <Link className="w-3 h-3" />}
@@ -714,7 +714,7 @@ export default function DashboardBuilder() {
             <button
               onClick={() => setShowCatalog(true)}
               className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all hover:opacity-80"
-              style={{ color: "#f59e0b", borderColor: "rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.06)" }}
+              style={{ color: "#d4a054", borderColor: "rgba(212,160,84,0.3)", background: "rgba(212,160,84,0.06)" }}
             >
               <Plus className="w-3 h-3" /> Add Widget
             </button>
@@ -724,8 +724,8 @@ export default function DashboardBuilder() {
             className={cn("flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all hover:opacity-80")}
             style={{
               color: editing ? "white" : "rgba(255,255,255,0.4)",
-              borderColor: editing ? "rgba(245,158,11,0.4)" : "rgba(255,255,255,0.08)",
-              background: editing ? "rgba(245,158,11,0.12)" : undefined,
+              borderColor: editing ? "rgba(212,160,84,0.4)" : "rgba(255,255,255,0.08)",
+              background: editing ? "rgba(212,160,84,0.12)" : undefined,
             }}
           >
             <Edit3 className="w-3 h-3" /> {editing ? "Done" : "Edit"}
@@ -734,7 +734,7 @@ export default function DashboardBuilder() {
             onClick={handleSave}
             disabled={saveMutation.isPending}
             className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg transition-all hover:opacity-80 disabled:opacity-60"
-            style={{ color: "white", background: saved ? "#10b981" : "#f59e0b" }}
+            style={{ color: "white", background: saved ? "#6b8f71" : "#d4a054" }}
           >
             {saved ? <Check className="w-3 h-3" /> : <Save className="w-3 h-3" />}
             {saved ? "Saved" : saveMutation.isPending ? "Saving…" : "Save"}
@@ -745,8 +745,8 @@ export default function DashboardBuilder() {
       <div className="flex-1 overflow-auto p-6">
         {activeDashboard && activeDashboard.widgets.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64 gap-4">
-            <div className="p-4 rounded-xl" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>
-              <LayoutDashboard className="w-8 h-8" style={{ color: "rgba(245,158,11,0.5)" }} />
+            <div className="p-4 rounded-xl" style={{ background: "rgba(212,160,84,0.06)", border: "1px solid rgba(212,160,84,0.12)" }}>
+              <LayoutDashboard className="w-8 h-8" style={{ color: "rgba(212,160,84,0.5)" }} />
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-white mb-1">No widgets yet</p>
@@ -755,7 +755,7 @@ export default function DashboardBuilder() {
             <button
               onClick={() => { setEditing(true); setShowCatalog(true); }}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: "#f59e0b", color: "white" }}
+              style={{ background: "#d4a054", color: "white" }}
             >
               <Plus className="w-4 h-4" /> Add your first widget
             </button>
@@ -813,11 +813,11 @@ export default function DashboardBuilder() {
                   <button
                     key={item.type}
                     onClick={() => handleAddWidget(item.type)}
-                    className="flex items-start gap-3 p-3 rounded-xl border text-left hover:border-amber-500/30 hover:bg-amber-500/5 transition-all"
+                    className="flex items-start gap-3 p-3 rounded-xl border text-left hover:border-[#d4a054]/30 hover:bg-[#d4a054]/5 transition-all"
                     style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
                   >
-                    <div className="p-1.5 rounded-lg mt-0.5" style={{ background: "rgba(245,158,11,0.1)" }}>
-                      <Icon className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />
+                    <div className="p-1.5 rounded-lg mt-0.5" style={{ background: "rgba(212,160,84,0.1)" }}>
+                      <Icon className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
                     </div>
                     <div>
                       <div className="text-xs font-semibold text-white mb-0.5">{item.label}</div>

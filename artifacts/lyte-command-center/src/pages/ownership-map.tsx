@@ -11,27 +11,27 @@ function formatCurrency(n: number): string {
 const statusConfig = {
   clear: {
     label: "Clear",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/5",
-    border: "border-emerald-500/20",
+    color: "text-[#6b8f71]",
+    bg: "bg-[#6b8f71]/5",
+    border: "border-[#6b8f71]/20",
     icon: CheckCircle2,
-    dot: "bg-emerald-500",
+    dot: "bg-[#6b8f71]",
   },
   ambiguous: {
     label: "Ambiguous",
-    color: "text-amber-400",
-    bg: "bg-amber-500/5",
-    border: "border-amber-500/20",
+    color: "text-[#d4a054]",
+    bg: "bg-[#d4a054]/5",
+    border: "border-[#d4a054]/20",
     icon: HelpCircle,
-    dot: "bg-amber-500",
+    dot: "bg-[#d4a054]",
   },
   missing: {
     label: "Missing",
-    color: "text-red-400",
-    bg: "bg-red-500/5",
-    border: "border-red-500/20",
+    color: "text-[#c45a4a]",
+    bg: "bg-[#c45a4a]/5",
+    border: "border-[#c45a4a]/20",
     icon: AlertTriangle,
-    dot: "bg-red-500 animate-pulse",
+    dot: "bg-[#c45a4a] animate-pulse",
   },
 };
 
@@ -58,7 +58,7 @@ function OwnerCard({ record }: { record: OwnershipRecord }) {
       <div className="grid grid-cols-3 gap-2 text-[11px]">
         <div>
           <div className="text-slate-600 mb-0.5">Owner</div>
-          <div className={cn("font-medium", record.owner ? "text-white" : "text-red-400")}>{record.owner || "Unassigned"}</div>
+          <div className={cn("font-medium", record.owner ? "text-white" : "text-[#c45a4a]")}>{record.owner || "Unassigned"}</div>
         </div>
         <div>
           <div className="text-slate-600 mb-0.5">Open Items</div>
@@ -66,7 +66,7 @@ function OwnerCard({ record }: { record: OwnershipRecord }) {
         </div>
         <div>
           <div className="text-slate-600 mb-0.5">Stalled</div>
-          <div className={cn("font-mono font-semibold", record.stalledItems > 0 ? s.color : "text-emerald-400")}>
+          <div className={cn("font-mono font-semibold", record.stalledItems > 0 ? s.color : "text-[#6b8f71]")}>
             {record.stalledItems}
           </div>
         </div>
@@ -97,10 +97,10 @@ export default function OwnershipMapPage() {
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Missing Owner", value: missing.length, color: "text-red-400", bg: "border-red-500/20 bg-red-500/5" },
-          { label: "Ambiguous", value: ambiguous.length, color: "text-amber-400", bg: "border-amber-500/20 bg-amber-500/5" },
-          { label: "Clear Ownership", value: clear.length, color: "text-emerald-400", bg: "border-emerald-500/20 bg-emerald-500/5" },
-          { label: "VaR Without Owner", value: formatCurrency(totalVaRAtRisk), color: "text-red-300", bg: "border-red-500/20 bg-red-500/5" },
+          { label: "Missing Owner", value: missing.length, color: "text-[#c45a4a]", bg: "border-[#c45a4a]/20 bg-[#c45a4a]/5" },
+          { label: "Ambiguous", value: ambiguous.length, color: "text-[#d4a054]", bg: "border-[#d4a054]/20 bg-[#d4a054]/5" },
+          { label: "Clear Ownership", value: clear.length, color: "text-[#6b8f71]", bg: "border-[#6b8f71]/20 bg-[#6b8f71]/5" },
+          { label: "VaR Without Owner", value: formatCurrency(totalVaRAtRisk), color: "text-[#c45a4a]", bg: "border-[#c45a4a]/20 bg-[#c45a4a]/5" },
         ].map(stat => (
           <div key={stat.label} className={cn("rounded-xl p-4 border", stat.bg)}>
             <div className="text-[11px] text-slate-400 mb-1">{stat.label}</div>
@@ -114,9 +114,9 @@ export default function OwnershipMapPage() {
           {missing.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-red-400" />
-                <h2 className="font-display font-semibold text-sm text-red-300">Missing Owner — Immediate Risk</h2>
-                <span className="text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">{missing.length}</span>
+                <AlertTriangle className="w-4 h-4 text-[#c45a4a]" />
+                <h2 className="font-display font-semibold text-sm text-[#c45a4a]">Missing Owner — Immediate Risk</h2>
+                <span className="text-[10px] text-[#c45a4a] bg-[#c45a4a]/10 px-1.5 py-0.5 rounded border border-[#c45a4a]/20">{missing.length}</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {missing.map(r => <OwnerCard key={r.id} record={r} />)}
@@ -127,9 +127,9 @@ export default function OwnershipMapPage() {
           {ambiguous.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <HelpCircle className="w-4 h-4 text-amber-400" />
-                <h2 className="font-display font-semibold text-sm text-amber-300">Ambiguous — Clarity Required</h2>
-                <span className="text-[10px] text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">{ambiguous.length}</span>
+                <HelpCircle className="w-4 h-4 text-[#d4a054]" />
+                <h2 className="font-display font-semibold text-sm text-[#d4a054]">Ambiguous — Clarity Required</h2>
+                <span className="text-[10px] text-[#d4a054] bg-[#d4a054]/10 px-1.5 py-0.5 rounded border border-[#d4a054]/20">{ambiguous.length}</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {ambiguous.map(r => <OwnerCard key={r.id} record={r} />)}
@@ -140,9 +140,9 @@ export default function OwnershipMapPage() {
           {clear.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <h2 className="font-display font-semibold text-sm text-emerald-300">Clear Ownership</h2>
-                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">{clear.length}</span>
+                <CheckCircle2 className="w-4 h-4 text-[#6b8f71]" />
+                <h2 className="font-display font-semibold text-sm text-[#6b8f71]">Clear Ownership</h2>
+                <span className="text-[10px] text-[#6b8f71] bg-[#6b8f71]/10 px-1.5 py-0.5 rounded border border-[#6b8f71]/20">{clear.length}</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {clear.map(r => <OwnerCard key={r.id} record={r} />)}
@@ -156,9 +156,9 @@ export default function OwnershipMapPage() {
             <h3 className="font-display font-semibold text-sm text-white mb-4">Ownership Health</h3>
             <div className="space-y-3">
               {[
-                { label: "Clear", count: clear.length, color: "bg-emerald-500", pct: (clear.length / ownershipMap.length) * 100 },
-                { label: "Ambiguous", count: ambiguous.length, color: "bg-amber-500", pct: (ambiguous.length / ownershipMap.length) * 100 },
-                { label: "Missing", count: missing.length, color: "bg-red-500", pct: (missing.length / ownershipMap.length) * 100 },
+                { label: "Clear", count: clear.length, color: "bg-[#6b8f71]", pct: (clear.length / ownershipMap.length) * 100 },
+                { label: "Ambiguous", count: ambiguous.length, color: "bg-[#d4a054]", pct: (ambiguous.length / ownershipMap.length) * 100 },
+                { label: "Missing", count: missing.length, color: "bg-[#c45a4a]", pct: (missing.length / ownershipMap.length) * 100 },
               ].map(bar => (
                 <div key={bar.label}>
                   <div className="flex items-center justify-between text-[11px] mb-1">
@@ -173,10 +173,10 @@ export default function OwnershipMapPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-red-500/15 bg-red-500/5 p-4">
+          <div className="rounded-xl border border-[#c45a4a]/15 bg-[#c45a4a]/5 p-4">
             <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-4 h-4 text-red-400" />
-              <h3 className="font-display font-semibold text-sm text-red-300">Top Risk Areas</h3>
+              <AlertTriangle className="w-4 h-4 text-[#c45a4a]" />
+              <h3 className="font-display font-semibold text-sm text-[#c45a4a]">Top Risk Areas</h3>
             </div>
             <div className="space-y-2">
               {[...missing, ...ambiguous]
@@ -185,7 +185,7 @@ export default function OwnershipMapPage() {
                 .map(r => (
                   <div key={r.id} className="flex items-center justify-between text-[11px]">
                     <span className="text-slate-300 truncate flex-1 mr-2">{r.area}</span>
-                    <span className={cn("font-mono shrink-0", r.status === "missing" ? "text-red-400" : "text-amber-400")}>
+                    <span className={cn("font-mono shrink-0", r.status === "missing" ? "text-[#c45a4a]" : "text-[#d4a054]")}>
                       {formatCurrency(r.valueAtRisk)}
                     </span>
                   </div>

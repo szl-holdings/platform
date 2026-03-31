@@ -74,7 +74,7 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     name: "Aegis",
     subtitle: "Security · Defense & Intelligence Command",
     path: "/firestorm/",
-    accent: "#6366f1",
+    accent: "#8b7ac8",
     icon: "⬡",
     description: "Unified Defense, Managed Operations & AI Intelligence",
   },
@@ -117,9 +117,9 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
 ];
 
 const LEVEL_COLORS: Record<EcosystemNotification["level"], string> = {
-  info: "#3b82f6",
-  warning: "#f59e0b",
-  critical: "#ef4444",
+  info: "#4a90b8",
+  warning: "#d4a054",
+  critical: "#c45a4a",
 };
 
 const LEVEL_BG: Record<EcosystemNotification["level"], string> = {
@@ -129,9 +129,9 @@ const LEVEL_BG: Record<EcosystemNotification["level"], string> = {
 };
 
 const LEVEL_DOT: Record<EcosystemNotification["level"], string> = {
-  info: "#3b82f6",
-  warning: "#f59e0b",
-  critical: "#ef4444",
+  info: "#4a90b8",
+  warning: "#d4a054",
+  critical: "#c45a4a",
 };
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
@@ -344,7 +344,7 @@ function AppSwitcherPanel({
             style={{
               width: "20px",
               height: "20px",
-              background: "linear-gradient(135deg, #a855f7, #3b82f6)",
+              background: "linear-gradient(135deg, #8b7ac8, #4a90b8)",
               borderRadius: "5px",
               display: "flex",
               alignItems: "center",
@@ -516,7 +516,7 @@ function NotificationsPanel({
           {unread.length > 0 && (
             <span
               style={{
-                background: "#ef4444",
+                background: "#c45a4a",
                 color: "#fff",
                 fontSize: "10px",
                 fontWeight: 700,
@@ -953,8 +953,8 @@ function getSearchResults(query: string): SearchResult[] {
 function getDomainSearchResults(q: string): SearchResult[] {
   const results: SearchResult[] = [];
   const searchableContent = [
-    { keywords: ["fleet", "vessel", "ship", "port", "maritime", "route", "anchor"], app: "Vessels", icon: "🚢", accent: "#3b82f6", href: "/vessels/", items: ["Fleet Dashboard", "Port Analytics", "Route Planning", "Risk Scoring", "Dark Vessel Detection"] },
-    { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#f59e0b", href: "/lyte-command-center/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
+    { keywords: ["fleet", "vessel", "ship", "port", "maritime", "route", "anchor"], app: "Vessels", icon: "🚢", accent: "#4a90b8", href: "/vessels/", items: ["Fleet Dashboard", "Port Analytics", "Route Planning", "Risk Scoring", "Dark Vessel Detection"] },
+    { keywords: ["signal", "workflow", "observability", "playbook", "ops", "anomaly", "business", "escalation"], app: "Lyte", icon: "⚡", accent: "#d4a054", href: "/lyte-command-center/", items: ["Command Inbox", "Approvals Center", "Ownership Map", "Escalation Center", "Intervention Workspace"] },
     { keywords: ["alloy", "automation", "connector", "workflow", "orchestration", "execution", "run"], app: "Alloy", icon: "⬡", accent: "#60a5fa", href: "/alloy/", items: ["Execution Runs", "Workflow Orchestration", "Connector Mesh", "Governance", "Automation Analytics"] },
     { keywords: ["brand", "consulting", "advisory", "discreet", "residence", "estate", "private"], app: "Carlota Jo", icon: "◈", accent: "#d4b896", href: "/carlota-jo/", items: ["Services", "Approach", "Private Inquiry"] },
     { keywords: ["founder", "stephen", "lutar", "systems", "visibility", "writing", "frameworks"], app: "Stephen Lutar", icon: "○", accent: "#94a3b8", href: "/stephen/", items: ["Work", "Frameworks", "Writing", "Contact"] },
@@ -1021,7 +1021,7 @@ function DoctrineNavBadge({ appId }: { appId: string }) {
 export function EcosystemNav({
   currentAppId,
   currentAppName,
-  accentColor = "#a855f7",
+  accentColor = "#8b7ac8",
   notifications: notificationsProp,
   onNotificationRead,
   onSearch,
@@ -1103,7 +1103,7 @@ export function EcosystemNav({
             style={{
               width: "26px",
               height: "26px",
-              background: "linear-gradient(135deg, #a855f7, #3b82f6)",
+              background: "linear-gradient(135deg, #8b7ac8, #4a90b8)",
               borderRadius: "7px",
               display: "flex",
               alignItems: "center",
@@ -1264,7 +1264,7 @@ export function EcosystemNav({
                     width: "16px",
                     height: "16px",
                     borderRadius: "50%",
-                    background: "#ef4444",
+                    background: "#c45a4a",
                     border: "2px solid rgba(8,10,18,0.9)",
                     display: "flex",
                     alignItems: "center",

@@ -25,7 +25,7 @@ const recommendations = [
   { action: "Delete 47 idle Elastic IPs", saving: "$340/mo", effort: "Low", confidence: 100 },
 ];
 
-const COLORS = ["#3b82f6", "#06b6d4", "#22c55e", "#8b5cf6", "#f97316", "#eab308"];
+const COLORS = ["#4a90b8", "#4a90b8", "#6b8f71", "#8b7ac8", "#c8953c", "#eab308"];
 
 const pieData = costByService.map(s => ({ name: s.service.split(" ")[0], value: s.monthly }));
 
@@ -46,9 +46,9 @@ export default function CloudCost() {
       <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Monthly Cloud Spend", value: `$${(totalMonthly / 1000).toFixed(0)}k`, color: "text-foreground" },
-          { label: "Identified Waste", value: `$${(totalWaste / 1000).toFixed(0)}k`, color: "text-red-400" },
-          { label: "Savings Opportunity", value: `$${(recommendations.reduce((a, r) => a + parseFloat(r.saving.replace(/[$,\/mo]/g, "")), 0) / 1000).toFixed(1)}k/mo`, color: "text-emerald-400" },
-          { label: "MoM Change", value: "+7.9%", color: "text-amber-400" },
+          { label: "Identified Waste", value: `$${(totalWaste / 1000).toFixed(0)}k`, color: "text-[#c45a4a]" },
+          { label: "Savings Opportunity", value: `$${(recommendations.reduce((a, r) => a + parseFloat(r.saving.replace(/[$,\/mo]/g, "")), 0) / 1000).toFixed(1)}k/mo`, color: "text-[#6b8f71]" },
+          { label: "MoM Change", value: "+7.9%", color: "text-[#d4a054]" },
         ].map(({ label, value, color }) => (
           <Card key={label}><CardContent className="p-4"><p className="text-xs text-muted-foreground">{label}</p><p className={`text-2xl font-bold ${color}`}>{value}</p></CardContent></Card>
         ))}
@@ -65,7 +65,7 @@ export default function CloudCost() {
                   <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8" }} />
                   <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} formatter={(v: number | string) => [`$${Number(v).toLocaleString()}`, "Cost"]} />
-                  <Bar dataKey="cost" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="cost" fill="#4a90b8" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -84,7 +84,7 @@ export default function CloudCost() {
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-4">
-                    <p className="text-sm font-bold text-emerald-400">{r.saving}</p>
+                    <p className="text-sm font-bold text-[#6b8f71]">{r.saving}</p>
                     <button className="text-[10px] text-primary hover:underline mt-0.5">Apply</button>
                   </div>
                 </div>
@@ -119,7 +119,7 @@ export default function CloudCost() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">${(s.monthly / 1000).toFixed(1)}k</span>
-                    <span className={`text-[10px] ${s.trend.startsWith("+") ? "text-red-400" : "text-emerald-400"}`}>{s.trend}</span>
+                    <span className={`text-[10px] ${s.trend.startsWith("+") ? "text-[#c45a4a]" : "text-[#6b8f71]"}`}>{s.trend}</span>
                   </div>
                 </div>
               ))}

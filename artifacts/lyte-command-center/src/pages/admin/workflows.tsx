@@ -17,8 +17,8 @@ const changeLog = [
   { id: "CHG-037", type: "security", description: "SSL certificate rotated for all services", author: "Automated", timestamp: "09:00", status: "completed", impact: "medium" },
 ];
 
-const statusStyles = { active: "bg-emerald-500/10 text-emerald-400", paused: "bg-amber-500/10 text-amber-400", error: "bg-red-500/10 text-red-400" };
-const impactColors = { low: "bg-emerald-500/10 text-emerald-400", medium: "bg-amber-500/10 text-amber-400", high: "bg-red-500/10 text-red-400" };
+const statusStyles = { active: "bg-[#6b8f71]/10 text-[#6b8f71]", paused: "bg-[#d4a054]/10 text-[#d4a054]", error: "bg-[#c45a4a]/10 text-[#c45a4a]" };
+const impactColors = { low: "bg-[#6b8f71]/10 text-[#6b8f71]", medium: "bg-[#d4a054]/10 text-[#d4a054]", high: "bg-[#c45a4a]/10 text-[#c45a4a]" };
 
 export default function WorkflowAutomation() {
   return (
@@ -35,10 +35,10 @@ export default function WorkflowAutomation() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Active Workflows", value: workflows.filter(w => w.status === "active").length, icon: Play, color: "text-emerald-400" },
-          { label: "Runs (24h)", value: workflows.reduce((a, w) => a + w.runs24h, 0), icon: Zap, color: "text-blue-400" },
+          { label: "Active Workflows", value: workflows.filter(w => w.status === "active").length, icon: Play, color: "text-[#6b8f71]" },
+          { label: "Runs (24h)", value: workflows.reduce((a, w) => a + w.runs24h, 0), icon: Zap, color: "text-[#4a90b8]" },
           { label: "Avg Success Rate", value: `${(workflows.reduce((a, w) => a + w.successRate, 0) / workflows.length).toFixed(1)}%`, icon: CheckCircle, color: "text-violet-400" },
-          { label: "Changes Today", value: changeLog.length, icon: GitBranch, color: "text-amber-400" },
+          { label: "Changes Today", value: changeLog.length, icon: GitBranch, color: "text-[#d4a054]" },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
             <s.icon className={`w-5 h-5 ${s.color}`} />
@@ -68,7 +68,7 @@ export default function WorkflowAutomation() {
                 <div><span className="block text-[10px] uppercase tracking-wider mb-0.5">Last Run</span>{wf.lastRun}</div>
                 <div><span className="block text-[10px] uppercase tracking-wider mb-0.5">Next Run</span>{wf.nextRun}</div>
                 <div><span className="block text-[10px] uppercase tracking-wider mb-0.5">Runs 24h</span>{wf.runs24h}</div>
-                <div><span className="block text-[10px] uppercase tracking-wider mb-0.5">Success</span><span className={wf.successRate >= 95 ? "text-emerald-400" : "text-amber-400"}>{wf.successRate}%</span></div>
+                <div><span className="block text-[10px] uppercase tracking-wider mb-0.5">Success</span><span className={wf.successRate >= 95 ? "text-[#6b8f71]" : "text-[#d4a054]"}>{wf.successRate}%</span></div>
               </div>
             </div>
           ))}
@@ -76,7 +76,7 @@ export default function WorkflowAutomation() {
       </div>
 
       <div className="rounded-xl border border-border bg-card">
-        <div className="p-4 border-b border-border"><h2 className="font-display font-semibold text-sm flex items-center gap-2"><GitBranch className="w-4 h-4 text-amber-400" />Change Management Log</h2></div>
+        <div className="p-4 border-b border-border"><h2 className="font-display font-semibold text-sm flex items-center gap-2"><GitBranch className="w-4 h-4 text-[#d4a054]" />Change Management Log</h2></div>
         <div className="divide-y divide-border">
           {changeLog.map((ch) => (
             <div key={ch.id} className="px-4 py-3 hover:bg-muted/30 transition-colors">

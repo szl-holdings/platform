@@ -98,9 +98,9 @@ export default function Commerce() {
 
   const modeColor =
     config?.stripeMode === "live"
-      ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+      ? "text-[#6b8f71] border-[#6b8f71]/30 bg-[#6b8f71]/10"
       : config?.stripeMode === "test"
-        ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
+        ? "text-[#d4a054] border-[#d4a054]/30 bg-[#d4a054]/10"
         : "text-slate-400 border-slate-500/30 bg-slate-500/10";
 
   return (
@@ -118,26 +118,26 @@ export default function Commerce() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4 flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-400" />
-          <span className="text-sm text-red-400">{error}</span>
+        <div className="rounded-xl border border-[#c45a4a]/30 bg-[#c45a4a]/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-[#c45a4a]" />
+          <span className="text-sm text-[#c45a4a]">{error}</span>
         </div>
       )}
 
       {checkoutError && (
-        <div className="rounded-xl border border-orange-500/30 bg-orange-500/5 p-4 flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-orange-400" />
-          <span className="text-sm text-orange-400">{checkoutError}</span>
+        <div className="rounded-xl border border-[#c8953c]/30 bg-[#c8953c]/5 p-4 flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-[#c8953c]" />
+          <span className="text-sm text-[#c8953c]">{checkoutError}</span>
         </div>
       )}
 
       {config && config.stripeMode === "mock" && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+        <div className="rounded-xl border border-[#d4a054]/30 bg-[#d4a054]/5 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-[#d4a054] shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-amber-400 mb-1">Stripe is in mock mode</p>
-              <p className="text-xs text-amber-400/70">{config.instructions}</p>
+              <p className="text-sm font-semibold text-[#d4a054] mb-1">Stripe is in mock mode</p>
+              <p className="text-xs text-[#d4a054]/70">{config.instructions}</p>
             </div>
           </div>
         </div>
@@ -156,8 +156,8 @@ export default function Commerce() {
 
         <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#6b8f71]/20 flex items-center justify-center">
+              <CheckCircle className="w-4 h-4 text-[#6b8f71]" />
             </div>
             <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Active Products</span>
           </div>
@@ -166,8 +166,8 @@ export default function Commerce() {
 
         <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <CreditCard className="w-4 h-4 text-purple-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#8b7ac8]/20 flex items-center justify-center">
+              <CreditCard className="w-4 h-4 text-[#8b7ac8]" />
             </div>
             <span className="text-xs text-slate-400 uppercase tracking-wider font-medium">Total Price Points</span>
           </div>
@@ -212,7 +212,7 @@ export default function Commerce() {
                     <div className="flex items-center gap-3 mb-2">
                       <h4 className="text-base font-semibold text-white">{product.name}</h4>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        product.active ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" : "bg-red-500/10 text-red-400 border border-red-500/30"
+                        product.active ? "bg-[#6b8f71]/10 text-[#6b8f71] border border-[#6b8f71]/30" : "bg-[#c45a4a]/10 text-[#c45a4a] border border-[#c45a4a]/30"
                       }`}>
                         {product.active ? "Active" : "Inactive"}
                       </span>
@@ -275,13 +275,13 @@ export default function Commerce() {
               <>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
                   <span className="text-sm text-slate-300">Stripe Secret Key</span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${config.stripeConnected ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${config.stripeConnected ? "bg-[#6b8f71]/10 text-[#6b8f71]" : "bg-[#c45a4a]/10 text-[#c45a4a]"}`}>
                     {config.stripeConnected ? "Configured" : "Missing"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
                   <span className="text-sm text-slate-300">Webhook Secret</span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${config.webhookSecretConfigured ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${config.webhookSecretConfigured ? "bg-[#6b8f71]/10 text-[#6b8f71]" : "bg-[#d4a054]/10 text-[#d4a054]"}`}>
                     {config.webhookSecretConfigured ? "Configured" : "Missing"}
                   </span>
                 </div>

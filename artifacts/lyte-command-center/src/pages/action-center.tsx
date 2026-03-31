@@ -21,18 +21,18 @@ function formatDate(iso?: string): string {
 }
 
 const urgencyConfig = {
-  immediate: { label: "Immediate", color: "text-red-400 bg-red-500/10 border-red-500/20", border: "border-red-500/20" },
-  today: { label: "Today", color: "text-orange-400 bg-orange-500/10 border-orange-500/20", border: "border-orange-500/20" },
-  this_week: { label: "This Week", color: "text-amber-400 bg-amber-500/10 border-amber-500/20", border: "border-amber-500/15" },
-  next_week: { label: "Next Week", color: "text-blue-400 bg-blue-500/10 border-blue-500/20", border: "border-blue-500/10" },
+  immediate: { label: "Immediate", color: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20", border: "border-[#c45a4a]/20" },
+  today: { label: "Today", color: "text-[#c8953c] bg-[#c8953c]/10 border-[#c8953c]/20", border: "border-[#c8953c]/20" },
+  this_week: { label: "This Week", color: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20", border: "border-[#d4a054]/15" },
+  next_week: { label: "Next Week", color: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/20", border: "border-[#4a90b8]/10" },
 };
 
 const statusConfig = {
   open: { label: "Open", color: "text-slate-400", icon: <AlertTriangle className="w-3 h-3" /> },
   in_progress: { label: "In Progress", color: "text-cyan-400", icon: <ArrowRight className="w-3 h-3" /> },
-  blocked: { label: "Blocked", color: "text-red-400", icon: <AlertTriangle className="w-3 h-3" /> },
-  done: { label: "Done", color: "text-emerald-400", icon: <CheckCircle2 className="w-3 h-3" /> },
-  resolved: { label: "Resolved", color: "text-emerald-400", icon: <CheckCircle2 className="w-3 h-3" /> },
+  blocked: { label: "Blocked", color: "text-[#c45a4a]", icon: <AlertTriangle className="w-3 h-3" /> },
+  done: { label: "Done", color: "text-[#6b8f71]", icon: <CheckCircle2 className="w-3 h-3" /> },
+  resolved: { label: "Resolved", color: "text-[#6b8f71]", icon: <CheckCircle2 className="w-3 h-3" /> },
 };
 
 type UrgencyKey = keyof typeof urgencyConfig;
@@ -109,7 +109,7 @@ function ActionCard({ action, expanded, onToggle, onUpdate }: {
   };
 
   return (
-    <div className={cn("rounded-xl border transition-all", action.urgency === "immediate" ? "border-red-500/20 bg-red-500/[0.03]" : "border-white/5 bg-white/[0.02]")}>
+    <div className={cn("rounded-xl border transition-all", action.urgency === "immediate" ? "border-[#c45a4a]/20 bg-[#c45a4a]/[0.03]" : "border-white/5 bg-white/[0.02]")}>
       <div className="p-4 cursor-pointer" onClick={onToggle}>
         <div className="flex items-start gap-3">
           <div className="flex-1 min-w-0">
@@ -133,14 +133,14 @@ function ActionCard({ action, expanded, onToggle, onUpdate }: {
               {action.valueProtected > 0 && (
                 <>
                   <span className="text-slate-600">·</span>
-                  <span className="text-emerald-400 font-mono flex items-center gap-1"><DollarSign className="w-3 h-3" />{formatCurrency(action.valueProtected)} protected</span>
+                  <span className="text-[#6b8f71] font-mono flex items-center gap-1"><DollarSign className="w-3 h-3" />{formatCurrency(action.valueProtected)} protected</span>
                 </>
               )}
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {action.dependencies.length > 0 && (
-              <span className="text-[10px] text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+              <span className="text-[10px] text-[#d4a054] bg-[#d4a054]/10 px-1.5 py-0.5 rounded border border-[#d4a054]/20">
                 {action.dependencies.length} dep
               </span>
             )}
@@ -159,7 +159,7 @@ function ActionCard({ action, expanded, onToggle, onUpdate }: {
               <div className="text-[10px] text-slate-500 uppercase tracking-wide mb-2">Dependencies</div>
               <div className="flex flex-wrap gap-2">
                 {action.dependencies.map(dep => (
-                  <span key={dep} className="text-[10px] font-mono px-2 py-1 rounded border border-amber-500/20 text-amber-400 bg-amber-500/5">
+                  <span key={dep} className="text-[10px] font-mono px-2 py-1 rounded border border-[#d4a054]/20 text-[#d4a054] bg-[#d4a054]/5">
                     {dep}
                   </span>
                 ))}
@@ -181,7 +181,7 @@ function ActionCard({ action, expanded, onToggle, onUpdate }: {
               <button
                 disabled={!!transitioning || !action.backendId}
                 onClick={() => handleStatusUpdate("done")}
-                className="text-xs px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10 transition-colors ml-auto disabled:opacity-50 flex items-center gap-1.5"
+                className="text-xs px-3 py-1.5 rounded-lg border border-[#6b8f71]/20 bg-[#6b8f71]/5 text-[#6b8f71] hover:bg-[#6b8f71]/10 transition-colors ml-auto disabled:opacity-50 flex items-center gap-1.5"
               >
                 {transitioning === "done" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                 Mark Done
@@ -262,10 +262,10 @@ export default function ActionCenter() {
   }, [immediate.length]);
 
   const sections = [
-    { key: "immediate", items: immediate, label: "Immediate", icon: Zap, color: "text-red-300", badgeColor: "text-red-400 bg-red-500/10 border-red-500/20" },
-    { key: "today", items: today, label: "Today", icon: Clock, color: "text-orange-300", badgeColor: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
-    { key: "this_week", items: thisWeek, label: "This Week", icon: Clock, color: "text-amber-300", badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/15" },
-    { key: "next_week", items: nextWeek, label: "Next Week", icon: Clock, color: "text-blue-300", badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/10" },
+    { key: "immediate", items: immediate, label: "Immediate", icon: Zap, color: "text-[#c45a4a]", badgeColor: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20" },
+    { key: "today", items: today, label: "Today", icon: Clock, color: "text-[#c8953c]", badgeColor: "text-[#c8953c] bg-[#c8953c]/10 border-[#c8953c]/20" },
+    { key: "this_week", items: thisWeek, label: "This Week", icon: Clock, color: "text-[#d4a054]", badgeColor: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/15" },
+    { key: "next_week", items: nextWeek, label: "Next Week", icon: Clock, color: "text-[#4a90b8]", badgeColor: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/10" },
   ];
 
   return (
@@ -275,7 +275,7 @@ export default function ActionCenter() {
           <div className="flex items-center gap-3 mb-0.5">
             <h1 className="font-display font-bold text-2xl text-white tracking-tight">Action Center</h1>
             <DoctrineLayerBadge appId="lyte" variant="compact" />
-            <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono uppercase tracking-wide">Live</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#6b8f71]/30 bg-[#6b8f71]/10 text-[#6b8f71] font-mono uppercase tracking-wide">Live</span>
           </div>
           <p className="text-sm text-slate-400 mt-1">
             Prioritized actions{totalProtected > 0 ? ` · ${formatCurrency(totalProtected)} value protected` : ""}
@@ -286,9 +286,9 @@ export default function ActionCenter() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: "Total Actions", value: isLoading ? "—" : actions.length, color: "text-white" },
-          { label: "Open", value: isLoading ? "—" : openCount, color: "text-amber-400" },
+          { label: "Open", value: isLoading ? "—" : openCount, color: "text-[#d4a054]" },
           { label: "In Progress", value: isLoading ? "—" : inProgressCount, color: "text-cyan-400" },
-          { label: "Value Protected", value: isLoading ? "—" : formatCurrency(totalProtected), color: "text-emerald-400" },
+          { label: "Value Protected", value: isLoading ? "—" : formatCurrency(totalProtected), color: "text-[#6b8f71]" },
         ].map(stat => (
           <div key={stat.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02]">
             <div className="text-[11px] text-slate-400 mb-1">{stat.label}</div>
@@ -326,7 +326,7 @@ export default function ActionCenter() {
 
           {actions.length === 0 && (
             <div className="text-center py-20 text-slate-500">
-              <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-emerald-400" />
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-[#6b8f71]" />
               <p className="text-sm">No open actions</p>
             </div>
           )}

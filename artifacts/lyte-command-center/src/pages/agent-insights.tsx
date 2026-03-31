@@ -22,8 +22,8 @@ function GlobalFeedStats() {
     <div className="grid grid-cols-3 gap-4 mb-6">
       {[
         { label: "Health Findings", value: knowledge?.byDomain?.["lyte"] ?? 0, icon: Activity, color: "text-indigo-400", bg: "bg-indigo-500/10" },
-        { label: "Cross-Domain Signals", value: globalFeed?.correlations?.length ?? 0, icon: Zap, color: "text-purple-400", bg: "bg-purple-500/10" },
-        { label: "Events Published", value: eventBus?.totalPublished ?? 0, icon: Radio, color: "text-amber-400", bg: "bg-amber-500/10" },
+        { label: "Cross-Domain Signals", value: globalFeed?.correlations?.length ?? 0, icon: Zap, color: "text-[#8b7ac8]", bg: "bg-[#8b7ac8]/10" },
+        { label: "Events Published", value: eventBus?.totalPublished ?? 0, icon: Radio, color: "text-[#d4a054]", bg: "bg-[#d4a054]/10" },
       ].map(({ label, value, icon: Icon, color, bg }) => (
         <div key={label} className="bg-background border border-border rounded-xl p-4 flex items-center gap-3">
           <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
@@ -64,7 +64,7 @@ export default function AgentInsightsPage() {
       <AgentInsightsWidget
         domain="lyte"
         apiBase="/api"
-        accentColor="#06b6d4"
+        accentColor="#4a90b8"
         compact={false}
       />
 

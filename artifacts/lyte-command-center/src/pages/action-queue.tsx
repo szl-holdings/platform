@@ -16,13 +16,13 @@ type Role = "executive" | "operations" | "delivery";
 type ActionState = "new" | "acknowledged" | "assigned" | "escalated" | "resolved" | "dismissed";
 
 const SIGNAL_CATEGORY_LABELS: Record<string, { label: string; icon: any; color: string }> = {
-  approval_latency: { label: "Approval Latency", icon: Clock, color: "text-amber-400" },
-  ownership_gap: { label: "Ownership Gap", icon: User, color: "text-orange-400" },
-  forecast_drift: { label: "Forecast Drift", icon: TrendingDown, color: "text-red-400" },
-  stalled_workflow: { label: "Stalled Workflow", icon: GitBranch, color: "text-purple-400" },
+  approval_latency: { label: "Approval Latency", icon: Clock, color: "text-[#d4a054]" },
+  ownership_gap: { label: "Ownership Gap", icon: User, color: "text-[#c8953c]" },
+  forecast_drift: { label: "Forecast Drift", icon: TrendingDown, color: "text-[#c45a4a]" },
+  stalled_workflow: { label: "Stalled Workflow", icon: GitBranch, color: "text-[#8b7ac8]" },
   handoff_failure: { label: "Handoff Failure", icon: AlertTriangle, color: "text-rose-400" },
   status_conflict: { label: "Status Conflict", icon: AlertOctagon, color: "text-yellow-400" },
-  readiness_blocker: { label: "Readiness Blocker", icon: Package, color: "text-blue-400" },
+  readiness_blocker: { label: "Readiness Blocker", icon: Package, color: "text-[#4a90b8]" },
   pipeline_hygiene: { label: "Pipeline Hygiene", icon: Filter, color: "text-cyan-400" },
 };
 
@@ -36,11 +36,11 @@ const STATE_TRANSITIONS: Record<ActionState, ActionState[]> = {
 };
 
 const STATE_COLORS: Record<ActionState, string> = {
-  new: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  acknowledged: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  assigned: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  escalated: "bg-red-500/15 text-red-400 border-red-500/30",
-  resolved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  new: "bg-[#4a90b8]/15 text-[#4a90b8] border-[#4a90b8]/30",
+  acknowledged: "bg-[#d4a054]/15 text-[#d4a054] border-[#d4a054]/30",
+  assigned: "bg-[#8b7ac8]/15 text-[#8b7ac8] border-purple-500/30",
+  escalated: "bg-[#c45a4a]/15 text-[#c45a4a] border-[#c45a4a]/30",
+  resolved: "bg-[#6b8f71]/15 text-[#6b8f71] border-[#6b8f71]/30",
   dismissed: "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
 };
 
@@ -49,7 +49,7 @@ const ROLE_KPI_CONFIG: Record<Role, { kpis: string[]; defaultSort: string; label
     kpis: ["Value at Risk", "Escalations", "SLA Breaches", "Resolution Rate"],
     defaultSort: "valueAtRisk",
     label: "Executive View",
-    accent: "text-amber-400",
+    accent: "text-[#d4a054]",
   },
   operations: {
     kpis: ["Open Actions", "Avg Age (hrs)", "Assigned", "Stalled Workflows"],
@@ -61,7 +61,7 @@ const ROLE_KPI_CONFIG: Record<Role, { kpis: string[]; defaultSort: string; label
     kpis: ["Readiness Blockers", "Ownership Gaps", "Pipeline Issues", "Pending Handoffs"],
     defaultSort: "priority",
     label: "Delivery View",
-    accent: "text-emerald-400",
+    accent: "text-[#6b8f71]",
   },
 };
 
@@ -164,7 +164,7 @@ export default function ActionQueuePage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <CheckSquare className="w-5 h-5 text-amber-400" />
+            <CheckSquare className="w-5 h-5 text-[#d4a054]" />
             Action Queue
           </h1>
           <p className="text-sm text-zinc-400 mt-0.5">Business signals → state transitions → resolution</p>
@@ -177,7 +177,7 @@ export default function ActionQueuePage() {
                 onClick={() => setRole(r)}
                 className={cn(
                   "px-3 py-1.5 text-xs font-medium capitalize transition-all",
-                  role === r ? "bg-amber-500/20 text-amber-400" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                  role === r ? "bg-[#d4a054]/20 text-[#d4a054]" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
                 )}
               >
                 {r === "executive" ? "Exec" : r === "operations" ? "Ops" : "Delivery"}
@@ -189,10 +189,10 @@ export default function ActionQueuePage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Value at Risk", value: formatCurrency(totalVAR), color: "text-red-400", bg: "bg-red-500/5 border-red-500/20" },
-          { label: "Escalated", value: escalated, color: "text-orange-400", bg: "bg-orange-500/5 border-orange-500/20" },
-          { label: "SLA Breached", value: slaBreached, color: "text-amber-400", bg: "bg-amber-500/5 border-amber-500/20" },
-          { label: "Resolved", value: resolved, color: "text-emerald-400", bg: "bg-emerald-500/5 border-emerald-500/20" },
+          { label: "Value at Risk", value: formatCurrency(totalVAR), color: "text-[#c45a4a]", bg: "bg-[#c45a4a]/5 border-[#c45a4a]/20" },
+          { label: "Escalated", value: escalated, color: "text-[#c8953c]", bg: "bg-[#c8953c]/5 border-[#c8953c]/20" },
+          { label: "SLA Breached", value: slaBreached, color: "text-[#d4a054]", bg: "bg-[#d4a054]/5 border-[#d4a054]/20" },
+          { label: "Resolved", value: resolved, color: "text-[#6b8f71]", bg: "bg-[#6b8f71]/5 border-[#6b8f71]/20" },
         ].map(({ label, value, color, bg }) => (
           <Card key={label} className={bg}>
             <CardContent className="p-4">
@@ -249,8 +249,8 @@ export default function ActionQueuePage() {
           return (
             <Card key={action.id} className={cn(
               "border transition-all",
-              action.priority === "urgent" ? "border-red-500/30 bg-red-500/3" :
-              action.priority === "high" ? "border-orange-500/20 bg-orange-500/3" :
+              action.priority === "urgent" ? "border-[#c45a4a]/30 bg-[#c45a4a]/3" :
+              action.priority === "high" ? "border-[#c8953c]/20 bg-[#c8953c]/3" :
               "border-zinc-800 bg-zinc-900/30"
             )}>
               <CardContent className="p-4">
@@ -265,7 +265,7 @@ export default function ActionQueuePage() {
                         {catInfo.label}
                       </div>
                       {isOverdue && (
-                        <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30 text-[10px]">
+                        <Badge variant="outline" className="bg-[#c45a4a]/10 text-[#c45a4a] border-[#c45a4a]/30 text-[10px]">
                           ⚠ SLA BREACHED ({ageHours}h)
                         </Badge>
                       )}
@@ -275,7 +275,7 @@ export default function ActionQueuePage() {
                     <div className="flex items-center gap-3 text-[10px] text-zinc-500">
                       <span className="flex items-center gap-1"><User className="w-3 h-3" />{action.owner}</span>
                       {action.assignedTo && <span className="flex items-center gap-1"><Users className="w-3 h-3" />→ {action.assignedTo}</span>}
-                      {action.valueAtRisk && <span className="flex items-center gap-1 text-amber-400"><BarChart3 className="w-3 h-3" />{formatCurrency(action.valueAtRisk)} VAR</span>}
+                      {action.valueAtRisk && <span className="flex items-center gap-1 text-[#d4a054]"><BarChart3 className="w-3 h-3" />{formatCurrency(action.valueAtRisk)} VAR</span>}
                       <span>{ageHours}h old</span>
                     </div>
                   </div>
@@ -287,9 +287,9 @@ export default function ActionQueuePage() {
                         variant="outline"
                         className={cn(
                           "h-7 px-2.5 text-[10px] capitalize",
-                          nextState === "escalated" ? "border-red-500/30 text-red-400 hover:bg-red-500/10" :
-                          nextState === "resolved" ? "border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" :
-                          "border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                          nextState === "escalated" ? "border-[#c45a4a]/30 text-[#c45a4a] hover:bg-[#c45a4a]/10" :
+                          nextState === "resolved" ? "border-[#6b8f71]/30 text-[#6b8f71] hover:bg-[#6b8f71]/10" :
+                          "border-[#d4a054]/30 text-[#d4a054] hover:bg-[#d4a054]/10"
                         )}
                         onClick={() => transition.mutate({ id: action.id, state: nextState })}
                         disabled={transition.isPending}

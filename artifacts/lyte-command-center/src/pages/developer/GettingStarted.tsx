@@ -12,9 +12,9 @@ export default function GettingStarted() {
       <div className="grid md:grid-cols-2 gap-4">
         {[
           { icon: Key, title: "1. Get Your API Key", desc: "Generate scoped API keys for authentication", href: "/developer/api-keys", color: "text-primary" },
-          { icon: Code2, title: "2. Explore the API", desc: "Interactive documentation with live request sandbox", href: "/developer/api-explorer", color: "text-blue-400" },
-          { icon: Webhook, title: "3. Set Up Webhooks", desc: "Real-time event notifications for your app", href: "/developer/webhooks", color: "text-emerald-400" },
-          { icon: Zap, title: "4. Install the SDK", desc: "Type-safe TypeScript client with retry logic", href: "/developer/sdk-guide", color: "text-amber-400" },
+          { icon: Code2, title: "2. Explore the API", desc: "Interactive documentation with live request sandbox", href: "/developer/api-explorer", color: "text-[#4a90b8]" },
+          { icon: Webhook, title: "3. Set Up Webhooks", desc: "Real-time event notifications for your app", href: "/developer/webhooks", color: "text-[#6b8f71]" },
+          { icon: Zap, title: "4. Install the SDK", desc: "Type-safe TypeScript client with retry logic", href: "/developer/sdk-guide", color: "text-[#d4a054]" },
         ].map((item) => (
           <Link key={item.href} href={item.href}>
             <div className="p-5 bg-card rounded-xl border border-border hover:border-primary/30 transition-all cursor-pointer group">
@@ -31,12 +31,12 @@ export default function GettingStarted() {
         <h2 className="text-base font-display font-semibold mb-4">API Domains</h2>
         <div className="grid md:grid-cols-3 gap-3">
           {[
-            { icon: Shield, name: "Security", desc: "Firestorm — threat detection, compliance, red team simulations", color: "text-red-400 bg-red-500/10" },
-            { icon: Globe, name: "Analytics", desc: "Lyte — decision analytics, metrics, observability", color: "text-blue-400 bg-blue-500/10" },
+            { icon: Shield, name: "Security", desc: "Firestorm — threat detection, compliance, red team simulations", color: "text-[#c45a4a] bg-[#c45a4a]/10" },
+            { icon: Globe, name: "Analytics", desc: "Lyte — decision analytics, metrics, observability", color: "text-[#4a90b8] bg-[#4a90b8]/10" },
             { icon: Globe, name: "Maritime", desc: "Vessels — fleet tracking, voyage management, maritime intelligence", color: "text-cyan-400 bg-cyan-500/10" },
             { icon: Zap, name: "AI / ML", desc: "INCA, Alloy — agentic intelligence, workflow orchestration, signal analysis", color: "text-violet-400 bg-violet-500/10" },
-            { icon: Globe, name: "Real Estate", desc: "Terra — portfolio intelligence, climate risk, property analytics", color: "text-emerald-400 bg-emerald-500/10" },
-            { icon: Globe, name: "Platform", desc: "Auth, CMS, ecosystem health, extensions", color: "text-amber-400 bg-amber-500/10" },
+            { icon: Globe, name: "Real Estate", desc: "Terra — portfolio intelligence, climate risk, property analytics", color: "text-[#6b8f71] bg-[#6b8f71]/10" },
+            { icon: Globe, name: "Platform", desc: "Auth, CMS, ecosystem health, extensions", color: "text-[#d4a054] bg-[#d4a054]/10" },
           ].map((domain) => (
             <div key={domain.name} className="p-4 bg-card rounded-xl border border-border">
               <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${domain.color} mb-3`}>

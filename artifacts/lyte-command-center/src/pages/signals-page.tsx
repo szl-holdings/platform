@@ -4,24 +4,24 @@ import { Activity, AlertTriangle, CheckCircle, Clock, ChevronDown, ChevronRight,
 import { cn } from "@/lib/utils";
 
 const severityColors: Record<string, { text: string; bg: string; border: string; dot: string }> = {
-  critical: { text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", dot: "bg-red-500" },
-  high: { text: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", dot: "bg-orange-500" },
-  medium: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", dot: "bg-amber-400" },
-  low: { text: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", dot: "bg-blue-400" },
+  critical: { text: "text-[#c45a4a]", bg: "bg-[#c45a4a]/10", border: "border-[#c45a4a]/20", dot: "bg-[#c45a4a]" },
+  high: { text: "text-[#c8953c]", bg: "bg-[#c8953c]/10", border: "border-[#c8953c]/20", dot: "bg-[#c8953c]" },
+  medium: { text: "text-[#d4a054]", bg: "bg-[#d4a054]/10", border: "border-[#d4a054]/20", dot: "bg-[#d4a054]" },
+  low: { text: "text-[#4a90b8]", bg: "bg-[#4a90b8]/10", border: "border-[#4a90b8]/20", dot: "bg-[#4a90b8]" },
 };
 
 const statusColors: Record<string, string> = {
-  new: "text-red-400 bg-red-500/10 border-red-500/20",
-  acknowledged: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  resolved: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  new: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20",
+  acknowledged: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20",
+  resolved: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20",
   closed: "text-slate-400 bg-slate-500/10 border-slate-500/20",
 };
 
 function SignalDrawer({ signal, onClose, onUpdate }: { signal: any; onClose: () => void; onUpdate: (id: number, status: string) => void }) {
   const transitions: { label: string; status: string; color: string }[] = [
-    { label: "Acknowledge", status: "acknowledged", color: "text-amber-400 border-amber-500/30 bg-amber-500/10" },
-    { label: "Resolve", status: "resolved", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
-    { label: "Escalate", status: "escalated", color: "text-red-400 border-red-500/30 bg-red-500/10" },
+    { label: "Acknowledge", status: "acknowledged", color: "text-[#d4a054] border-[#d4a054]/30 bg-[#d4a054]/10" },
+    { label: "Resolve", status: "resolved", color: "text-[#6b8f71] border-[#6b8f71]/30 bg-[#6b8f71]/10" },
+    { label: "Escalate", status: "escalated", color: "text-[#c45a4a] border-[#c45a4a]/30 bg-[#c45a4a]/10" },
   ];
   const sc = severityColors[signal.severity] ?? severityColors.medium;
   return (
@@ -45,7 +45,7 @@ function SignalDrawer({ signal, onClose, onUpdate }: { signal: any; onClose: () 
           <h3 className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Signal History</h3>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[11px]">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#d4a054]" />
               <span className="text-slate-400">Received</span>
               <span className="text-slate-500 ml-auto">{new Date(signal.receivedAt || signal.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
             </div>
@@ -98,8 +98,8 @@ export default function SignalsPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Activity className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-medium uppercase tracking-widest text-amber-400">Lyte · Signals Feed</span>
+            <Activity className="w-4 h-4 text-[#d4a054]" />
+            <span className="text-xs font-medium uppercase tracking-widest text-[#d4a054]">Lyte · Signals Feed</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Signals</h1>
           <p className="text-sm text-slate-400 mt-1">Live signal feed — all sources, all severities</p>
@@ -111,9 +111,9 @@ export default function SignalsPage() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Active Signals", value: activeCount, color: "text-red-400" },
-          { label: "Acknowledged", value: ackCount, color: "text-amber-400" },
-          { label: "Critical Now", value: criticalCount, color: "text-red-400" },
+          { label: "Active Signals", value: activeCount, color: "text-[#c45a4a]" },
+          { label: "Acknowledged", value: ackCount, color: "text-[#d4a054]" },
+          { label: "Critical Now", value: criticalCount, color: "text-[#c45a4a]" },
         ].map(c => (
           <div key={c.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
             <div className="text-[10px] text-slate-500 mb-1">{c.label}</div>
@@ -126,7 +126,7 @@ export default function SignalsPage() {
         <div className="flex items-center gap-1">
           <span className="text-[10px] text-slate-500 mr-1">Status:</span>
           {["all", "new", "acknowledged", "resolved"].map(f => (
-            <button key={f} onClick={() => setStatusFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", statusFilter === f ? "bg-amber-500/10 border-amber-500/30 text-amber-300" : "border-white/5 text-slate-500 hover:text-white")}>
+            <button key={f} onClick={() => setStatusFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", statusFilter === f ? "bg-[#d4a054]/10 border-[#d4a054]/30 text-[#d4a054]" : "border-white/5 text-slate-500 hover:text-white")}>
               {f}
             </button>
           ))}
@@ -134,7 +134,7 @@ export default function SignalsPage() {
         <div className="flex items-center gap-1">
           <span className="text-[10px] text-slate-500 mr-1">Severity:</span>
           {["all", "critical", "high", "medium", "low"].map(f => (
-            <button key={f} onClick={() => setSeverityFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", severityFilter === f ? "bg-amber-500/10 border-amber-500/30 text-amber-300" : "border-white/5 text-slate-500 hover:text-white")}>
+            <button key={f} onClick={() => setSeverityFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", severityFilter === f ? "bg-[#d4a054]/10 border-[#d4a054]/30 text-[#d4a054]" : "border-white/5 text-slate-500 hover:text-white")}>
               {f}
             </button>
           ))}
@@ -144,18 +144,18 @@ export default function SignalsPage() {
 
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" />
           <span className="ml-2 text-sm text-slate-400">Loading signals…</span>
         </div>
       )}
       {isError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+        <div className="rounded-xl border border-[#c45a4a]/20 bg-[#c45a4a]/5 p-4 text-sm text-[#c45a4a]">
           Failed to load signals. Check API connectivity.
         </div>
       )}
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="rounded-xl border border-white/5 p-12 text-center">
-          <CheckCircle className="w-10 h-10 text-emerald-400/20 mx-auto mb-3" />
+          <CheckCircle className="w-10 h-10 text-[#6b8f71]/20 mx-auto mb-3" />
           <p className="text-sm text-slate-400">No signals match current filters</p>
         </div>
       )}
@@ -172,7 +172,7 @@ export default function SignalsPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                  <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", sc.dot, signal.severity === "critical" && signal.status === "new" && "animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.7)]")} />
+                  <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 shrink-0", sc.dot, signal.severity === "critical" && signal.status === "new" && "animate-pulse shadow-[0_0_8px_rgba(196,90,74,0.7)]")} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-white/90 leading-tight mb-1">{signal.title}</p>
                     <div className="flex items-center gap-2 text-[10px] text-slate-500">

@@ -16,10 +16,10 @@ interface IncaAgentIndicatorProps extends IncaAgentConfig {
 }
 
 const STATUS_CONFIG = {
-  active: { label: "Active", dotClass: "bg-emerald-400 animate-pulse", textClass: "text-emerald-400" },
-  monitoring: { label: "Monitoring", dotClass: "bg-amber-400", textClass: "text-amber-400" },
+  active: { label: "Active", dotClass: "bg-[#6b8f71] animate-pulse", textClass: "text-[#6b8f71]" },
+  monitoring: { label: "Monitoring", dotClass: "bg-[#d4a054]", textClass: "text-[#d4a054]" },
   standby: { label: "Standby", dotClass: "bg-slate-500", textClass: "text-slate-400" },
-  processing: { label: "Processing", dotClass: "bg-blue-400 animate-pulse", textClass: "text-blue-400" },
+  processing: { label: "Processing", dotClass: "bg-blue-400 animate-pulse", textClass: "text-[#4a90b8]" },
 };
 
 export function IncaAgentIndicator({
@@ -43,19 +43,19 @@ export function IncaAgentIndicator({
     <div className={cn("fixed bottom-4 right-4 z-50 select-none", className)}>
       <div className={cn(
         "rounded-xl border bg-card/95 backdrop-blur-md shadow-xl transition-all",
-        "border-amber-400/20",
+        "border-[#d4a054]/20",
         expanded ? "w-72" : "w-auto"
       )}>
         <button
           onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-2.5 px-3 py-2 w-full hover:bg-amber-400/5 transition-colors rounded-xl"
+          className="flex items-center gap-2.5 px-3 py-2 w-full hover:bg-[#d4a054]/5 transition-colors rounded-xl"
         >
-          <div className="relative w-7 h-7 rounded-lg bg-amber-400/10 flex items-center justify-center shrink-0">
-            <Brain className="w-3.5 h-3.5 text-amber-400" />
+          <div className="relative w-7 h-7 rounded-lg bg-[#d4a054]/10 flex items-center justify-center shrink-0">
+            <Brain className="w-3.5 h-3.5 text-[#d4a054]" />
             <span className={cn("absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-card", statusCfg.dotClass)} />
           </div>
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-[11px] font-bold text-amber-400 truncate leading-none mb-0.5">
+            <p className="text-[11px] font-bold text-[#d4a054] truncate leading-none mb-0.5">
               INCA · {agentName}
             </p>
             <p className="text-[9px] text-muted-foreground/60 font-mono truncate">{statusCfg.label}</p>
@@ -72,7 +72,7 @@ export function IncaAgentIndicator({
         </button>
 
         {expanded && (
-          <div className="px-3 pb-3 border-t border-amber-400/10 mt-0 pt-2 space-y-2">
+          <div className="px-3 pb-3 border-t border-[#d4a054]/10 mt-0 pt-2 space-y-2">
             <div className="flex items-center justify-end">
               <button
                 onClick={(e) => { e.stopPropagation(); setDismissed(true); }}
@@ -96,11 +96,11 @@ export function IncaAgentIndicator({
                   <div className="flex items-center gap-1.5">
                     <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-amber-400/70 rounded-full"
+                        className="h-full bg-[#d4a054]/70 rounded-full"
                         style={{ width: `${Math.round(confidence * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-mono text-amber-400">{Math.round(confidence * 100)}%</span>
+                    <span className="text-[10px] font-mono text-[#d4a054]">{Math.round(confidence * 100)}%</span>
                   </div>
                 </div>
               )}
@@ -113,7 +113,7 @@ export function IncaAgentIndicator({
             </div>
 
             <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/40 font-mono">
-              <span className="w-1 h-1 rounded-full bg-amber-400/40 inline-block" />
+              <span className="w-1 h-1 rounded-full bg-[#d4a054]/40 inline-block" />
               Quipu Engine · SZL Holdings · INCA Cortex
             </div>
           </div>

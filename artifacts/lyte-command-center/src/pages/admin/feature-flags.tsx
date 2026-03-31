@@ -20,10 +20,10 @@ interface FeatureFlag {
 }
 
 const categoryColors: Record<string, string> = {
-  ui: "text-blue-400 bg-blue-500/10",
-  security: "text-red-400 bg-red-500/10",
+  ui: "text-[#4a90b8] bg-[#4a90b8]/10",
+  security: "text-[#c45a4a] bg-[#c45a4a]/10",
   analytics: "text-violet-400 bg-violet-500/10",
-  infrastructure: "text-amber-400 bg-amber-500/10",
+  infrastructure: "text-[#d4a054] bg-[#d4a054]/10",
   experimental: "text-pink-400 bg-pink-500/10",
 };
 
@@ -54,7 +54,7 @@ export default function FeatureFlags() {
 
       {error ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
-          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+          <AlertTriangle className="w-8 h-8 text-[#d4a054] mx-auto mb-2" />
           <p>Feature flags require API connection</p>
         </div>
       ) : (
@@ -62,7 +62,7 @@ export default function FeatureFlags() {
           <div className="grid grid-cols-3 gap-4">
             {[
               { label: "Total Flags", value: flags.length, color: "text-foreground" },
-              { label: "Enabled", value: flags.filter(f => f.enabled).length, color: "text-emerald-400" },
+              { label: "Enabled", value: flags.filter(f => f.enabled).length, color: "text-[#6b8f71]" },
               { label: "Disabled", value: flags.filter(f => !f.enabled).length, color: "text-muted-foreground" },
             ].map(({ label, value, color }) => (
               <div key={label} className="rounded-xl border border-border bg-card p-4">

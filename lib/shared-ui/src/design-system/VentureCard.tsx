@@ -30,8 +30,8 @@ export interface VentureCardProps {
 }
 
 const STATUS_COLORS: Record<VentureStatus, string> = {
-  live: "bg-emerald-500 text-white",
-  beta: "bg-amber-400 text-white",
+  live: "bg-[#6b8f71] text-white",
+  beta: "bg-[#d4a054] text-white",
   dev: "bg-neutral-300 text-neutral-700",
   acquired: "bg-sky-500 text-white",
   sunset: "bg-neutral-400 text-white",

@@ -62,12 +62,12 @@ function timeAgo(ts: number): string {
 
 function getSeverityColor(entry: KnowledgeEntry): string {
   const severity = (entry.data?.severity as string) ?? "";
-  if (severity === "critical") return "text-red-400 bg-red-500/10 border-red-500/20";
+  if (severity === "critical") return "text-[#c45a4a] bg-red-500/10 border-red-500/20";
   if (severity === "high") return "text-orange-400 bg-orange-500/10 border-orange-500/20";
   if (severity === "medium") return "text-yellow-400 bg-yellow-500/10 border-yellow-500/20";
   if (entry.type === "alert") return "text-orange-400 bg-orange-500/10 border-orange-500/20";
   if (entry.type === "correlation") return "text-purple-400 bg-purple-500/10 border-purple-500/20";
-  if (entry.type === "anomaly") return "text-red-400 bg-red-500/10 border-red-500/20";
+  if (entry.type === "anomaly") return "text-[#c45a4a] bg-red-500/10 border-red-500/20";
   return "text-sky-400 bg-sky-500/10 border-sky-500/20";
 }
 
@@ -82,15 +82,15 @@ function EntryTypeIcon({ entry }: { entry: KnowledgeEntry }) {
 }
 
 function RunStatusIcon({ run }: { run: AgentRun }) {
-  if (run.status === "completed") return <CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" />;
-  if (run.status === "failed") return <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />;
+  if (run.status === "completed") return <CheckCircle className="w-3 h-3 text-[#6b8f71] shrink-0" />;
+  if (run.status === "failed") return <AlertTriangle className="w-3 h-3 text-[#c45a4a] shrink-0" />;
   return <RefreshCw className="w-3 h-3 text-sky-400 animate-spin shrink-0" />;
 }
 
 export function AgentInsightsWidget({
   domain,
   apiBase = "/api",
-  accentColor = "#3b82f6",
+  accentColor = "#4a90b8",
   className = "",
   compact = false,
 }: AgentInsightsWidgetProps) {
@@ -182,7 +182,7 @@ export function AgentInsightsWidget({
                 <span>Scanning...</span>
               ) : lastRunAt ? (
                 <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#6b8f71] animate-pulse inline-block" />
                   Last scan {timeAgo(lastRunAt)}
                 </>
               ) : (
@@ -191,7 +191,7 @@ export function AgentInsightsWidget({
             </div>
           </div>
           {alertCount > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-500/15 text-red-400 border border-red-500/20">
+            <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-red-500/15 text-[#c45a4a] border border-red-500/20">
               {alertCount} alert{alertCount !== 1 ? "s" : ""}
             </span>
           )}

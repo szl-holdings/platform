@@ -4,10 +4,10 @@ import { cn } from "@workspace/shared-ui/utils";
 
 const NODES = [
   { id: "aegis", name: "Aegis Command", role: "Defense & Intelligence", agent: "Sentinel Engine", color: "text-indigo-400", bg: "bg-indigo-400/10", border: "border-indigo-400/25", x: 50, y: 15, type: "cortex" },
-  { id: "lyte", name: "Lyte", role: "Spinal Cord", agent: "Qhapaq Ñan", color: "text-amber-300", bg: "bg-amber-300/10", border: "border-amber-300/20", x: 50, y: 50, type: "hub" },
+  { id: "lyte", name: "Lyte", role: "Spinal Cord", agent: "Qhapaq Ñan", color: "text-[#d4a054]", bg: "bg-[#d4a054]/10", border: "border-[#d4a054]/20", x: 50, y: 50, type: "hub" },
   { id: "vessels", name: "Vessels", role: "Maritime Organ", agent: "Maritime Analyst", color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20", x: 17, y: 30, type: "organ" },
-  { id: "msp", name: "Rosie", role: "Threat Command Organ", agent: "IT Sentinel", color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20", x: 5, y: 55, type: "organ" },
-  { id: "terra", name: "Terra", role: "Real Estate Intelligence Organ", agent: "Deal Scout", color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20", x: 17, y: 78, type: "organ" },
+  { id: "msp", name: "Rosie", role: "Threat Command Organ", agent: "IT Sentinel", color: "text-[#c45a4a]", bg: "bg-[#c45a4a]/10", border: "border-[#c45a4a]/20", x: 5, y: 55, type: "organ" },
+  { id: "terra", name: "Terra", role: "Real Estate Intelligence Organ", agent: "Deal Scout", color: "text-[#6b8f71]", bg: "bg-green-400/10", border: "border-green-400/20", x: 17, y: 78, type: "organ" },
   { id: "alloy", name: "Alloy", role: "Orchestration Engine", agent: "Intelligence Engine", color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20", x: 38, y: 85, type: "organ" },
   { id: "carlota-jo", name: "Carlota Jo", role: "Advisory Organ", agent: "Advisory Agent", color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20", x: 62, y: 85, type: "organ" },
   { id: "szl-holdings", name: "SZL Holdings", role: "Portfolio Organ", agent: "Portfolio Analyst", color: "text-indigo-400", bg: "bg-indigo-400/10", border: "border-indigo-400/20", x: 83, y: 78, type: "organ" },
@@ -48,19 +48,19 @@ const AGENT_ACTIVITY: { time: string; app: string; agent: string; action: string
 ];
 
 const MESH_STATS = [
-  { label: "Active Nodes", value: "12", color: "text-emerald-400" },
+  { label: "Active Nodes", value: "12", color: "text-[#6b8f71]" },
   { label: "Roads Online", value: "10", sub: "connections", color: "text-cyan-400" },
-  { label: "Signal Volume", value: "1,247/min", color: "text-amber-400" },
+  { label: "Signal Volume", value: "1,247/min", color: "text-[#d4a054]" },
   { label: "Avg Latency", value: "84ms", color: "text-foreground" },
   { label: "Agents Active", value: "9", color: "text-violet-400" },
-  { label: "Mesh Health", value: "99.1%", color: "text-emerald-400" },
+  { label: "Mesh Health", value: "99.1%", color: "text-[#6b8f71]" },
 ];
 
 const TYPE_COLORS = {
-  signal: "text-amber-400 bg-amber-400/10",
+  signal: "text-[#d4a054] bg-[#d4a054]/10",
   intelligence: "text-violet-400 bg-violet-400/10",
-  policy: "text-orange-400 bg-orange-400/10",
-  reflex: "text-emerald-400 bg-emerald-400/10",
+  policy: "text-[#c8953c] bg-orange-400/10",
+  reflex: "text-[#6b8f71] bg-[#6b8f71]/10",
 };
 
 export default function QhapaqNan() {
@@ -80,7 +80,7 @@ export default function QhapaqNan() {
       <div>
         <div className="flex items-center gap-3 mb-1">
           <h2 className="text-2xl font-bold text-white">Qhapaq Ñan</h2>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#d4a054]/20 text-[#d4a054] border border-[#d4a054]/30">
             Intelligence Mesh
           </span>
         </div>
@@ -102,15 +102,15 @@ export default function QhapaqNan() {
       {/* Network topology */}
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <Globe className="w-5 h-5 text-amber-400" />
+          <Globe className="w-5 h-5 text-[#d4a054]" />
           Empire Intelligence Mesh — Live Topology
         </h3>
         <div className="relative" style={{ paddingBottom: "56%", minHeight: 300 }}>
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
             <defs>
               <radialGradient id="centerGlow">
-                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+                <stop offset="0%" stopColor="#d4a054" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#d4a054" stopOpacity="0" />
               </radialGradient>
               <filter id="nodeGlow">
                 <feGaussianBlur stdDeviation="0.8" result="coloredBlur" />
@@ -128,7 +128,7 @@ export default function QhapaqNan() {
               return (
                 <line key={i}
                   x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-                  stroke={isHighlighted ? "#f59e0b" : "#334155"}
+                  stroke={isHighlighted ? "#d4a054" : "#334155"}
                   strokeWidth={isHighlighted ? weight * 1.5 : weight}
                   strokeDasharray={conn.weight === "low" ? "2 2" : "none"}
                   opacity={isHighlighted ? 0.9 : 0.5}
@@ -145,7 +145,7 @@ export default function QhapaqNan() {
               const px = from.x + (to.x - from.x) * progress;
               const py = from.y + (to.y - from.y) * progress;
               return (
-                <circle key={i} cx={px} cy={py} r="0.8" fill="#f59e0b" opacity="0.8" />
+                <circle key={i} cx={px} cy={py} r="0.8" fill="#d4a054" opacity="0.8" />
               );
             })}
 
@@ -155,8 +155,8 @@ export default function QhapaqNan() {
               const isHub = node.type === "hub" || node.type === "cortex";
               const r = node.type === "cortex" ? 4.5 : node.type === "hub" ? 3.5 : 2.5;
               const colors: Record<string, string> = {
-                "text-amber-400": "#f59e0b", "text-amber-300": "#fcd34d", "text-orange-400": "#fb923c",
-                "text-cyan-400": "#22d3ee", "text-blue-400": "#60a5fa", "text-emerald-400": "#34d399",
+                "text-[#d4a054]": "#d4a054", "text-[#c8953c]": "#c8953c", "text-[#c45a4a]": "#c45a4a",
+                "text-cyan-400": "#22d3ee", "text-[#4a90b8]": "#4a90b8", "text-[#6b8f71]": "#6b8f71",
                 "text-violet-400": "#a78bfa", "text-pink-400": "#f472b6", "text-indigo-400": "#818cf8",
                 "text-rose-400": "#fb7185",
               };
@@ -199,9 +199,9 @@ export default function QhapaqNan() {
         )}
 
         <div className="flex items-center gap-6 mt-4 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5"><span className="w-8 h-0.5 bg-amber-400/60 inline-block rounded" />High traffic</span>
+          <span className="flex items-center gap-1.5"><span className="w-8 h-0.5 bg-[#d4a054]/60 inline-block rounded" />High traffic</span>
           <span className="flex items-center gap-1.5"><span className="w-8 h-0.5 bg-slate-600 inline-block rounded" />Normal traffic</span>
-          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />Data packet in transit</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#d4a054] inline-block" />Data packet in transit</span>
           <span className="flex items-center gap-1.5">Click a node to inspect it</span>
         </div>
       </div>
@@ -211,9 +211,9 @@ export default function QhapaqNan() {
         <div className="p-4 border-b border-white/10 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Radio className="w-5 h-5 text-amber-400" />
+              <Radio className="w-5 h-5 text-[#d4a054]" />
               Agent Activity Feed
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#6b8f71] animate-pulse" />
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Real-time stream of what INCA's agents are doing across all ecosystem apps</p>
           </div>
@@ -225,7 +225,7 @@ export default function QhapaqNan() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-white/80">{item.action}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-amber-400/70">{item.app}</span>
+                  <span className="text-xs text-[#d4a054]/70">{item.app}</span>
                   <span className="text-slate-600">·</span>
                   <span className="text-xs text-slate-500">{item.agent}</span>
                 </div>

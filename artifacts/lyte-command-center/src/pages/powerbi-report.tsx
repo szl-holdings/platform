@@ -4,22 +4,22 @@ import { cn } from "@workspace/shared-ui/utils";
 import { PowerBiEmbed, type PowerBiEmbedConfig, apiFetch } from "@workspace/shared-ui";
 
 const OPS_METRICS = [
-  { label: "SLA Compliance", value: "97.8%", delta: "+0.3%", up: true, color: "text-amber-400", icon: CheckCircle2 },
-  { label: "Open Escalations", value: "4", delta: "-2 this week", up: false, color: "text-emerald-400", icon: AlertOctagon },
-  { label: "MTTR (hrs)", value: "2.4", delta: "-0.6", up: false, color: "text-emerald-400", icon: Clock },
-  { label: "Signal Volume", value: "1,243", delta: "+18%", up: true, color: "text-amber-400", icon: Activity },
-  { label: "PRISM Health Score", value: "82", delta: "+4 pts", up: true, color: "text-emerald-400", icon: BarChart3 },
-  { label: "Workflow Success Rate", value: "96.1%", delta: "+1.2%", up: true, color: "text-emerald-400", icon: TrendingUp },
+  { label: "SLA Compliance", value: "97.8%", delta: "+0.3%", up: true, color: "text-[#d4a054]", icon: CheckCircle2 },
+  { label: "Open Escalations", value: "4", delta: "-2 this week", up: false, color: "text-[#6b8f71]", icon: AlertOctagon },
+  { label: "MTTR (hrs)", value: "2.4", delta: "-0.6", up: false, color: "text-[#6b8f71]", icon: Clock },
+  { label: "Signal Volume", value: "1,243", delta: "+18%", up: true, color: "text-[#d4a054]", icon: Activity },
+  { label: "PRISM Health Score", value: "82", delta: "+4 pts", up: true, color: "text-[#6b8f71]", icon: BarChart3 },
+  { label: "Workflow Success Rate", value: "96.1%", delta: "+1.2%", up: true, color: "text-[#6b8f71]", icon: TrendingUp },
 ];
 
 const PRISM_LENSES = [
-  { name: "Financial Health", score: 84, color: "#10b981" },
-  { name: "Operational Risk", score: 71, color: "#f59e0b" },
-  { name: "Growth Velocity", score: 88, color: "#3b82f6" },
-  { name: "Customer Retention", score: 91, color: "#10b981" },
-  { name: "Team Effectiveness", score: 76, color: "#f59e0b" },
-  { name: "Infrastructure Stability", score: 93, color: "#10b981" },
-  { name: "Compliance Readiness", score: 79, color: "#f59e0b" },
+  { name: "Financial Health", score: 84, color: "#6b8f71" },
+  { name: "Operational Risk", score: 71, color: "#d4a054" },
+  { name: "Growth Velocity", score: 88, color: "#4a90b8" },
+  { name: "Customer Retention", score: 91, color: "#6b8f71" },
+  { name: "Team Effectiveness", score: 76, color: "#d4a054" },
+  { name: "Infrastructure Stability", score: 93, color: "#6b8f71" },
+  { name: "Compliance Readiness", score: 79, color: "#d4a054" },
 ];
 
 const ESCALATION_TREND = [
@@ -75,7 +75,7 @@ export default function LytePowerBiReport() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-amber-400" />
+            <BarChart3 className="w-5 h-5 text-[#d4a054]" />
             Operational KPIs
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -85,7 +85,7 @@ export default function LytePowerBiReport() {
         <button
           onClick={fetchEmbedToken}
           disabled={fetching}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition-colors border border-amber-500/20 flex-shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#d4a054]/10 text-[#d4a054] text-xs font-semibold hover:bg-[#d4a054]/20 transition-colors border border-[#d4a054]/20 flex-shrink-0"
         >
           {fetching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Activity className="w-3.5 h-3.5" />}
           {embedConfig ? "Refresh Token" : "Load Live Report"}
@@ -93,10 +93,10 @@ export default function LytePowerBiReport() {
       </div>
 
       {fetchError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 flex items-start gap-3">
-          <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="rounded-xl border border-[#c45a4a]/20 bg-[#c45a4a]/5 p-4 flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-[#c45a4a] mt-0.5 flex-shrink-0" />
           <div className="text-xs text-slate-400">
-            <strong className="text-red-400">Embed error:</strong> {fetchError}
+            <strong className="text-[#c45a4a]">Embed error:</strong> {fetchError}
           </div>
         </div>
       )}
@@ -106,14 +106,14 @@ export default function LytePowerBiReport() {
         title="Operational KPIs Report"
         description="SLA compliance, escalation trends, and PRISM intelligence scores"
         height={520}
-        accentColor="#f59e0b"
+        accentColor="#d4a054"
         onConfigureClick={fetchEmbedToken}
       />
 
       {!embedConfig && (
         <>
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-start gap-3">
-            <Info className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+          <div className="rounded-xl border border-[#d4a054]/20 bg-[#d4a054]/5 p-4 flex items-start gap-3">
+            <Info className="w-4 h-4 text-[#d4a054] mt-0.5 flex-shrink-0" />
             <div className="text-xs text-slate-400 leading-relaxed">
               <strong className="text-white">Sample data shown below.</strong> Click "Load Live Report" to fetch a server-minted embed token. Configure Power BI credentials in SZL Admin → Power BI.
             </div>
@@ -126,7 +126,7 @@ export default function LytePowerBiReport() {
                 <div key={m.label} className="bg-slate-900 border border-slate-700/60 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
                     <Icon className="w-4 h-4 text-slate-500" />
-                    <span className={cn("text-xs font-semibold", m.up ? "text-emerald-400" : "text-red-400/80")}>{m.delta}</span>
+                    <span className={cn("text-xs font-semibold", m.up ? "text-[#6b8f71]" : "text-[#c45a4a]/80")}>{m.delta}</span>
                   </div>
                   <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{m.label}</div>
                   <div className={cn("text-xl font-bold font-mono", m.color)}>{m.value}</div>
@@ -138,7 +138,7 @@ export default function LytePowerBiReport() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-slate-900 border border-slate-700/60 rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-amber-400" /> Escalation Volume (6-week)
+                <Activity className="w-4 h-4 text-[#d4a054]" /> Escalation Volume (6-week)
               </h3>
               <div className="space-y-2">
                 {ESCALATION_TREND.map(d => {
@@ -147,11 +147,11 @@ export default function LytePowerBiReport() {
                     <div key={d.week} className="flex items-center gap-3">
                       <span className="text-[10px] text-slate-500 w-5">{d.week}</span>
                       <div className="flex-1 h-5 bg-slate-800 rounded-sm overflow-hidden flex">
-                        {d.critical > 0 && <div className="bg-red-500/70 h-full" style={{ width: `${(d.critical / (maxEscalation || 1)) * 100}%` }} />}
-                        {d.high > 0 && <div className="bg-amber-400/60 h-full" style={{ width: `${(d.high / (maxEscalation || 1)) * 100}%` }} />}
+                        {d.critical > 0 && <div className="bg-[#c45a4a]/70 h-full" style={{ width: `${(d.critical / (maxEscalation || 1)) * 100}%` }} />}
+                        {d.high > 0 && <div className="bg-[#d4a054]/60 h-full" style={{ width: `${(d.high / (maxEscalation || 1)) * 100}%` }} />}
                       </div>
                       <span className="text-[10px] text-slate-400 w-14 text-right">{total} open</span>
-                      <span className="text-[10px] text-emerald-400 w-16 text-right">{d.resolved} resolved</span>
+                      <span className="text-[10px] text-[#6b8f71] w-16 text-right">{d.resolved} resolved</span>
                     </div>
                   );
                 })}
@@ -160,7 +160,7 @@ export default function LytePowerBiReport() {
 
             <div className="bg-slate-900 border border-slate-700/60 rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-amber-400" /> PRISM Intelligence Scores
+                <BarChart3 className="w-4 h-4 text-[#d4a054]" /> PRISM Intelligence Scores
               </h3>
               <div className="space-y-3">
                 {PRISM_LENSES.map(l => (

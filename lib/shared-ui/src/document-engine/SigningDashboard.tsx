@@ -31,8 +31,8 @@ interface SignatureSummary {
 
 const STATUS_CONFIG = {
   pending: { label: "Pending", color: "text-slate-400", bg: "bg-slate-500/10 border-slate-500/20", icon: Clock },
-  viewed: { label: "Viewed", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", icon: Eye },
-  signed: { label: "Signed", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle },
+  viewed: { label: "Viewed", color: "text-[#d4a054]", bg: "bg-[#d4a054]/10 border-[#d4a054]/20", icon: Eye },
+  signed: { label: "Signed", color: "text-[#6b8f71]", bg: "bg-[#6b8f71]/10 border-[#6b8f71]/20", icon: CheckCircle },
   declined: { label: "Declined", color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/20", icon: XCircle },
   expired: { label: "Expired", color: "text-slate-500", bg: "bg-slate-600/10 border-slate-600/20", icon: AlertCircle },
 };
@@ -43,7 +43,7 @@ interface SigningDashboardProps {
   className?: string;
 }
 
-export function SigningDashboard({ appSource, accentColor = "#6366f1", className }: SigningDashboardProps) {
+export function SigningDashboard({ appSource, accentColor = "#8b7ac8", className }: SigningDashboardProps) {
   const [stats, setStats] = useState({ pending: 0, viewed: 0, signed: 0, declined: 0, expired: 0 });
   const [signatures, setSignatures] = useState<SignatureSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,8 +98,8 @@ export function SigningDashboard({ appSource, accentColor = "#6366f1", className
       <div className="grid grid-cols-5 gap-2">
         {[
           { label: "Pending", value: stats.pending, color: "text-slate-400" },
-          { label: "Viewed", value: stats.viewed, color: "text-amber-400" },
-          { label: "Signed", value: stats.signed, color: "text-emerald-400" },
+          { label: "Viewed", value: stats.viewed, color: "text-[#d4a054]" },
+          { label: "Signed", value: stats.signed, color: "text-[#6b8f71]" },
           { label: "Declined", value: stats.declined, color: "text-rose-400" },
           { label: "Expired", value: stats.expired, color: "text-slate-500" },
         ].map(s => (

@@ -20,8 +20,8 @@ async function apiFetch(path: string, options?: RequestInit) {
 
 const JOB_STATUS_CONFIG = {
   pending: { label: "Pending", color: "text-slate-400", bg: "bg-slate-500/10", icon: Clock },
-  processing: { label: "Processing", color: "text-amber-400", bg: "bg-amber-500/10", icon: RefreshCw },
-  completed: { label: "Complete", color: "text-emerald-400", bg: "bg-emerald-500/10", icon: CheckCircle },
+  processing: { label: "Processing", color: "text-[#d4a054]", bg: "bg-[#d4a054]/10", icon: RefreshCw },
+  completed: { label: "Complete", color: "text-[#6b8f71]", bg: "bg-[#6b8f71]/10", icon: CheckCircle },
   failed: { label: "Failed", color: "text-rose-400", bg: "bg-rose-500/10", icon: AlertCircle },
   cancelled: { label: "Cancelled", color: "text-slate-500", bg: "bg-slate-600/10", icon: XCircle },
 };
@@ -33,7 +33,7 @@ interface BatchPdfPanelProps {
   sampleEntities?: Array<{ id: string; label: string; type: string }>;
 }
 
-export function BatchPdfPanel({ appSource = "general", accentColor = "#6366f1", className, sampleEntities }: BatchPdfPanelProps) {
+export function BatchPdfPanel({ appSource = "general", accentColor = "#8b7ac8", className, sampleEntities }: BatchPdfPanelProps) {
   const [batches, setBatches] = useState<PdfBatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<{ batch: PdfBatch; jobs: PdfJob[] } | null>(null);
@@ -156,7 +156,7 @@ export function BatchPdfPanel({ appSource = "general", accentColor = "#6366f1", 
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Total Batches", value: batches.length, color: "text-white" },
-          { label: "PDFs Generated", value: batches.reduce((a, b) => a + b.completedJobs, 0), color: "text-emerald-400" },
+          { label: "PDFs Generated", value: batches.reduce((a, b) => a + b.completedJobs, 0), color: "text-[#6b8f71]" },
           { label: "Failed", value: batches.reduce((a, b) => a + b.failedJobs, 0), color: "text-rose-400" },
         ].map(s => (
           <div key={s.label} className="rounded-xl border border-white/10 bg-white/5 p-3">

@@ -9,6 +9,10 @@ import {
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
+const BG = { sidebar: "#060a12", header: "rgba(6,10,18,0.85)", main: "#080c14" };
+const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)" };
+const TEXT = { primary: "rgba(255,255,255,0.88)", secondary: "rgba(255,255,255,0.5)", tertiary: "rgba(255,255,255,0.28)", muted: "rgba(255,255,255,0.14)" };
+
 const PRISM_ITEMS = [
   { key: "P", label: "Pulse", color: "#d4a054", icon: Heart, href: "/prism/pulse" },
   { key: "R", label: "Risk", color: "#c45a4a", icon: AlertTriangle, href: "/prism/risk" },
@@ -20,9 +24,7 @@ const PRISM_ITEMS = [
 const NAV_GROUPS = [
   {
     label: null,
-    items: [
-      { href: "/", label: "Overview", icon: Gauge },
-    ],
+    items: [{ href: "/", label: "Overview", icon: Gauge }],
   },
   {
     label: "PRISM",
@@ -49,62 +51,54 @@ const NAV_GROUPS = [
 ];
 
 const ADMIN_NAV = [
-  { href: "/admin/overview", label: "System Overview", icon: Settings },
+  { href: "/admin/overview", label: "System", icon: Settings },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/flags", label: "Feature Flags", icon: Flag },
-  { href: "/admin/runs", label: "Workflow Runs", icon: Play },
-  { href: "/admin/approvals", label: "Approval Queue", icon: CheckSquare },
-  { href: "/admin/audit", label: "Audit Log", icon: FileText },
-  { href: "/admin/seeder", label: "Demo Data Seeder", icon: Database },
-  { href: "/admin/jobs", label: "Job Status", icon: Activity },
+  { href: "/admin/flags", label: "Flags", icon: Flag },
+  { href: "/admin/runs", label: "Runs", icon: Play },
+  { href: "/admin/approvals", label: "Queue", icon: CheckSquare },
+  { href: "/admin/audit", label: "Audit", icon: FileText },
+  { href: "/admin/seeder", label: "Seeder", icon: Database },
+  { href: "/admin/jobs", label: "Jobs", icon: Activity },
 ];
 
-const PRISM_COLORS: Record<string, string> = {
-  "Pulse": "#d4a054",
-  "Risk": "#c45a4a",
-  "Intelligence": "#8b7ac8",
-  "Signals": "#c8953c",
-  "Motion": "#4a90b8",
-};
+const PRISM_COLORS: Record<string, string> = { "Pulse": "#d4a054", "Risk": "#c45a4a", "Intelligence": "#8b7ac8", "Signals": "#c8953c", "Motion": "#4a90b8" };
 
-function AdminNavSection({ location }: { location: string }) {
+function NavItem({ href, icon: Icon, label, isActive, accent, onClick }: { href: string; icon: any; label: string; isActive: boolean; accent?: string; onClick?: () => void }) {
+  return (
+    <Link href={href} onClick={onClick} className={cn(
+      "flex items-center gap-2 px-2.5 py-[5px] text-[10px] font-medium transition-all relative group",
+      isActive ? "" : "hover:bg-white/[0.03]"
+    )} style={{ color: isActive ? (accent ?? "#d4a054") : TEXT.secondary }}>
+      {isActive && <div className="absolute left-0 top-1 bottom-1 w-[2px] rounded-r" style={{ background: accent ?? "#d4a054" }} />}
+      <Icon className="w-3 h-3 shrink-0" style={{ color: isActive ? (accent ?? "#d4a054") : TEXT.tertiary, opacity: isActive ? 1 : 0.7 }} />
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function AdminSection({ location }: { location: string }) {
   const [open, setOpen] = useState(false);
   const isInAdmin = location.startsWith("/admin");
   if (!open && !isInAdmin) {
     return (
-      <div className="mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-        <button
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 w-full text-slate-500 hover:text-white hover:bg-white/5"
-        >
-          <Settings className="w-3.5 h-3.5 shrink-0" />
+      <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
+        <button onClick={() => setOpen(true)} className="flex items-center gap-2 px-2.5 py-[5px] text-[10px] font-medium w-full transition-all hover:bg-white/[0.03]" style={{ color: TEXT.tertiary }}>
+          <Settings className="w-3 h-3 shrink-0" />
           <span>Admin</span>
-          <ChevronDown className="w-3 h-3 ml-auto" />
+          <ChevronDown className="w-2.5 h-2.5 ml-auto" />
         </button>
       </div>
     );
   }
   return (
-    <div className="mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-      <button
-        onClick={() => setOpen(false)}
-        className="flex items-center gap-2 px-3 pb-1.5 w-full"
-      >
-        <span className="text-[9px] uppercase tracking-widest font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Admin</span>
-        <ChevronDown className="w-3 h-3 ml-auto rotate-180" style={{ color: "rgba(255,255,255,0.2)" }} />
+    <div className="mt-1 pt-1" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
+      <button onClick={() => setOpen(false)} className="flex items-center gap-2 px-2.5 pb-1 w-full">
+        <span className="text-[8px] uppercase tracking-widest font-medium" style={{ color: TEXT.muted }}>Admin</span>
+        <ChevronDown className="w-2.5 h-2.5 ml-auto rotate-180" style={{ color: TEXT.muted }} />
       </button>
-      {ADMIN_NAV.map((item) => {
+      {ADMIN_NAV.map(item => {
         const isActive = location.startsWith(item.href);
-        return (
-          <Link key={item.href} href={item.href} className={cn(
-            "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-            isActive ? "" : "text-slate-500 hover:text-white hover:bg-white/5"
-          )} style={{ background: isActive ? "rgba(212,160,84,0.06)" : undefined, color: isActive ? "#d4a054" : undefined }}>
-            {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#d4a054" }} />}
-            <item.icon className={cn("w-3 h-3 shrink-0", isActive ? "" : "text-slate-600 group-hover:text-slate-400")} style={isActive ? { color: "#d4a054" } : {}} />
-            <span className="text-[11px]">{item.label}</span>
-          </Link>
-        );
+        return <NavItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={isActive} />;
       })}
     </div>
   );
@@ -117,41 +111,37 @@ export function LyteLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-full overflow-hidden">
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-10 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-10 md:hidden" onClick={() => setSidebarOpen(false)} />}
+
       <aside className={cn(
-        "border-r flex flex-col shrink-0 relative z-20 transition-transform duration-200",
-        "fixed md:relative inset-y-0 left-0 w-56",
+        "flex flex-col shrink-0 relative z-20 transition-transform duration-200",
+        "fixed md:relative inset-y-0 left-0 w-48",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-      )} style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(8,12,20,0.95)" }}>
-        <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg" style={{ background: "rgba(212,160,84,0.1)", border: "1px solid rgba(212,160,84,0.15)" }}>
-              <Zap className="w-4 h-4" style={{ color: "#d4a054" }} />
+      )} style={{ background: BG.sidebar, borderRight: `1px solid ${BORDER.subtle}` }}>
+
+        <div className="h-12 flex items-center px-3" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: "rgba(212,160,84,0.08)", border: `1px solid rgba(212,160,84,0.12)` }}>
+              <Zap className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-sm tracking-wide text-white leading-none">LYTE</span>
-              <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "#d4a054" }}>Business Observability</span>
+            <div>
+              <div className="text-[11px] font-bold tracking-wide leading-none" style={{ color: TEXT.primary }}>LYTE</div>
+              <div className="text-[7px] uppercase tracking-[0.15em] mt-px" style={{ color: "rgba(212,160,84,0.5)" }}>Business Observability</div>
             </div>
           </div>
         </div>
 
-        <div className="px-3 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
-          <div className="text-[9px] uppercase tracking-widest mb-2 font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>PRISM</div>
-          <div className="grid grid-cols-5 gap-1">
-            {PRISM_ITEMS.map((p) => {
+        <div className="px-2 py-2" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
+          <div className="grid grid-cols-5 gap-0.5">
+            {PRISM_ITEMS.map(p => {
               const isActive = location.startsWith(p.href);
               return (
-                <Link key={p.key} href={p.href} className="flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-md transition-all hover:opacity-80" style={{
-                  background: isActive ? `${p.color}15` : `${p.color}08`,
-                  border: `1px solid ${isActive ? p.color + "40" : p.color + "15"}`,
+                <Link key={p.key} href={p.href} className="flex flex-col items-center py-1 rounded transition-all" style={{
+                  background: isActive ? `${p.color}12` : "transparent",
+                  border: `1px solid ${isActive ? p.color + "30" : "transparent"}`,
                 }}>
-                  <span className="text-[10px] font-black" style={{ color: p.color }}>{p.key}</span>
-                  <span className="text-[7px] uppercase tracking-wider" style={{ color: `${p.color}90` }}>{p.label}</span>
+                  <span className="text-[9px] font-black" style={{ color: p.color }}>{p.key}</span>
+                  <span className="text-[6px] uppercase tracking-wider" style={{ color: `${p.color}70` }}>{p.label}</span>
                 </Link>
               );
             })}
@@ -159,112 +149,92 @@ export function LyteLayout({ children }: { children: ReactNode }) {
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col">
-          <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
+          <nav className="flex-1 min-h-0 px-1.5 py-2 flex flex-col gap-px overflow-y-auto">
             {NAV_GROUPS.map((group, gi) => (
-              <div key={group.label ?? gi} className={gi > 0 ? "mt-2 pt-2 border-t" : ""} style={gi > 0 ? { borderColor: "rgba(255,255,255,0.05)" } : {}}>
-                {group.label && (
-                  <div className="px-3 pb-1.5 text-[9px] font-medium uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.2)" }}>{group.label}</div>
-                )}
-                {group.items.map((item) => {
+              <div key={group.label ?? gi} className={gi > 0 ? "mt-1 pt-1" : ""} style={gi > 0 ? { borderTop: `1px solid ${BORDER.subtle}` } : {}}>
+                {group.label && <div className="px-2.5 pb-1 text-[8px] font-medium uppercase tracking-widest" style={{ color: TEXT.muted }}>{group.label}</div>}
+                {group.items.map(item => {
                   const isPrism = item.href.startsWith("/prism/");
                   const prismColor = isPrism ? PRISM_COLORS[item.label] : undefined;
                   const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
-                  return (
-                    <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                      "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                      isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
-                    )} style={{
-                      background: isActive ? (prismColor ? `${prismColor}12` : "rgba(212,160,84,0.06)") : undefined,
-                      color: isActive && prismColor ? prismColor : undefined,
-                    }}>
-                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: prismColor ?? "#d4a054" }} />}
-                      <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "" : "text-slate-500 group-hover:text-slate-300")} style={isActive && prismColor ? { color: prismColor } : {}} />
-                      <span className="text-[11px]">{item.label}</span>
-                    </Link>
-                  );
+                  return <NavItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={isActive} accent={prismColor} onClick={() => setSidebarOpen(false)} />;
                 })}
               </div>
             ))}
-
-            <AdminNavSection location={location} />
+            <AdminSection location={location} />
           </nav>
 
-          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(212,160,84,0.03)", border: "1px solid rgba(212,160,84,0.06)" }}>
-            <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(212,160,84,0.35)" }}>System Pulse</div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Urgent exposures</span>
-                <span className="text-[9px] font-mono" style={{ color: "#c45a4a" }}>5 active</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Ownership gaps</span>
-                <span className="text-[9px] font-mono" style={{ color: "#c8953c" }}>8 open</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Decision latency</span>
-                <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>34h avg</span>
-              </div>
+          <div className="shrink-0 mx-2 mb-2 px-2.5 py-2 rounded" style={{ background: "rgba(212,160,84,0.02)", border: `1px solid rgba(212,160,84,0.05)` }}>
+            <div className="text-[7px] uppercase tracking-widest font-mono mb-1.5" style={{ color: TEXT.muted }}>System Pulse</div>
+            <div className="space-y-1">
+              {[
+                { k: "Urgent", v: "5", c: "#c45a4a" },
+                { k: "Gaps", v: "8", c: "#c8953c" },
+                { k: "Latency", v: "34h", c: TEXT.tertiary },
+              ].map(r => (
+                <div key={r.k} className="flex justify-between text-[8px]">
+                  <span style={{ color: TEXT.tertiary }}>{r.k}</span>
+                  <span className="font-mono" style={{ color: r.c }}>{r.v}</span>
+                </div>
+              ))}
             </div>
-            <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-              <div className="h-full rounded-full" style={{ width: "38%", background: "linear-gradient(90deg, #c45a4a, #c8953c)" }} />
+            <div className="mt-1.5 h-px overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <div className="h-full" style={{ width: "38%", background: "linear-gradient(90deg, #c45a4a, #c8953c)" }} />
             </div>
-            <div className="flex justify-between mt-0.5">
-              <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Resolution rate</span>
-              <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>38%</span>
+            <div className="flex justify-between mt-px">
+              <span className="text-[7px]" style={{ color: TEXT.muted }}>Resolution</span>
+              <span className="text-[7px] font-mono" style={{ color: TEXT.tertiary }}>38%</span>
             </div>
           </div>
         </div>
 
-        <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <div className="flex items-center gap-2 text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-            <Zap className="w-3 h-3" />
-            <span>SZL Business OS</span>
+        <div className="px-3 py-2" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
+          <div className="flex items-center gap-1.5 text-[8px] mb-1.5" style={{ color: TEXT.muted }}>
+            <Zap className="w-2.5 h-2.5" />
+            <span className="font-mono tracking-wide">SZL Business OS</span>
           </div>
-          <div className="flex gap-1 mt-2">
-            <a href="/terra/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#a07848", background: "rgba(160,120,72,0.1)", border: "1px solid rgba(160,120,72,0.2)" }}>TERRA</a>
-            <a href="/alloy" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.1)", border: "1px solid rgba(75,139,219,0.2)" }}>ALLOY</a>
-            <a href="/vessels/" className="text-[9px] px-1.5 py-0.5 rounded font-medium hover:opacity-80" style={{ color: "#38bdf8", background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>VESSELS</a>
+          <div className="flex gap-1">
+            {[
+              { label: "TERRA", href: "/terra/", color: "#a07848" },
+              { label: "ALLOY", href: "/alloy", color: "#4B8BDB" },
+              { label: "VESSELS", href: "/vessels/", color: "#38bdf8" },
+            ].map(p => (
+              <a key={p.label} href={p.href} className="text-[7px] px-1 py-px rounded font-mono hover:opacity-80" style={{ color: p.color, background: `${p.color}10`, border: `1px solid ${p.color}18` }}>{p.label}</a>
+            ))}
           </div>
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 md:ml-0 ml-0">
-        <header className="h-11 border-b flex items-center justify-between px-4 md:px-6 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,12,20,0.8)", backdropFilter: "blur(8px)" }}>
-          <div className="flex items-center gap-3 text-xs font-mono">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors mr-2"
-              style={{ color: "rgba(255,255,255,0.5)" }}
-              aria-label="Toggle sidebar"
-            >
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-10 flex items-center justify-between px-3 md:px-4 shrink-0 z-10" style={{ borderBottom: `1px solid ${BORDER.subtle}`, background: BG.header, backdropFilter: "blur(8px)" }}>
+          <div className="flex items-center gap-2.5 text-[10px] font-mono">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1 rounded hover:bg-white/5 mr-1" style={{ color: TEXT.tertiary }} aria-label="Toggle sidebar">
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse hidden sm:block" style={{ background: "#c45a4a" }} />
+            <span className="w-1 h-1 rounded-full animate-pulse hidden sm:block" style={{ background: "#c45a4a" }} />
             <span className="hidden sm:block" style={{ color: "#c45a4a" }}>5 Urgent</span>
-            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+            <span className="hidden sm:block" style={{ color: TEXT.muted }}>·</span>
             <span style={{ color: "#c8953c" }}>8 Gaps</span>
-            <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+            <span className="hidden sm:block" style={{ color: TEXT.muted }}>·</span>
             <span className="hidden sm:block" style={{ color: "#d4a054" }}>$5.03M at risk</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <RealtimeStatusIndicator status={wsStatus} compact />
-            <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            <button className="relative p-1 rounded hover:bg-white/5 transition-colors" style={{ color: TEXT.tertiary }}>
+              <Bell className="w-3.5 h-3.5" />
+              <span className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full animate-pulse" style={{ background: "#d4a054" }} />
             </button>
-            <div className="h-5 w-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+            <div className="h-4 w-px" style={{ background: BORDER.subtle }} />
             <div className="flex items-center gap-2">
-              <div className="text-right">
-                <div className="text-xs font-medium text-white">Stephen Lutar</div>
-                <div className="text-[10px]" style={{ color: "rgba(212,160,84,0.6)" }}>SZL Holdings</div>
+              <div className="text-right hidden sm:block">
+                <div className="text-[10px] font-medium" style={{ color: TEXT.primary }}>Stephen Lutar</div>
+                <div className="text-[8px] font-mono" style={{ color: "rgba(212,160,84,0.45)" }}>SZL Holdings</div>
               </div>
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border" style={{ background: "rgba(212,160,84,0.15)", borderColor: "rgba(212,160,84,0.2)", color: "#d4a054" }}>SL</div>
+              <div className="w-6 h-6 rounded flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(212,160,84,0.1)", border: `1px solid rgba(212,160,84,0.15)`, color: "#d4a054" }}>SL</div>
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto" style={{ background: "#080c14" }}>
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto" style={{ background: BG.main }}>{children}</main>
       </div>
     </div>
   );

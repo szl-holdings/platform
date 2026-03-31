@@ -24,21 +24,21 @@ const SEVERITY_STYLES: Record<AlertSeverity, { bg: string; border: string; icon:
     text: "text-sky-100",
   },
   success: {
-    bg: "bg-emerald-500/8",
-    border: "border-emerald-500/20",
-    icon: "text-emerald-400",
+    bg: "bg-[#6b8f71]/8",
+    border: "border-[#6b8f71]/20",
+    icon: "text-[#6b8f71]",
     text: "text-emerald-100",
   },
   warning: {
-    bg: "bg-amber-500/8",
-    border: "border-amber-500/20",
-    icon: "text-amber-400",
+    bg: "bg-[#d4a054]/8",
+    border: "border-[#d4a054]/20",
+    icon: "text-[#d4a054]",
     text: "text-amber-100",
   },
   error: {
     bg: "bg-red-500/8",
     border: "border-red-500/20",
-    icon: "text-red-400",
+    icon: "text-[#c45a4a]",
     text: "text-red-100",
   },
   critical: {
@@ -141,9 +141,9 @@ export function AlertCard({
                         severity === "error" || severity === "critical"
                           ? "bg-red-500/30 hover:bg-red-500/40"
                           : severity === "warning"
-                          ? "bg-amber-500/30 hover:bg-amber-500/40"
+                          ? "bg-[#d4a054]/30 hover:bg-[#d4a054]/40"
                           : severity === "success"
-                          ? "bg-emerald-500/30 hover:bg-emerald-500/40"
+                          ? "bg-[#6b8f71]/30 hover:bg-[#6b8f71]/40"
                           : "bg-sky-500/30 hover:bg-sky-500/40"
                       )
                 )}

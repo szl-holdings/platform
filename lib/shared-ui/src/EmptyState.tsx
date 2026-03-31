@@ -26,7 +26,7 @@ export function EmptyState({
   description,
   action,
   secondaryAction,
-  accentColor = "#6366f1",
+  accentColor = "#8b7ac8",
   className,
   compact = false,
 }: EmptyStateProps) {

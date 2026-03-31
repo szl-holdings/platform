@@ -104,12 +104,12 @@ export function IntelligencePhilosophy({ compact = false }: { compact?: boolean 
           {philosophy.maturityModel.map((level) => {
             const colors = [
               "from-red-500/20 border-red-500/30",
-              "from-amber-500/20 border-amber-500/30",
+              "from-[#d4a054]/20 border-[#d4a054]/30",
               "from-blue-500/20 border-blue-500/30",
-              "from-emerald-500/20 border-emerald-500/30",
+              "from-[#6b8f71]/20 border-[#6b8f71]/30",
               "from-violet-500/20 border-violet-500/30",
             ];
-            const labelColors = ["text-red-400", "text-amber-400", "text-blue-400", "text-emerald-400", "text-violet-400"];
+            const labelColors = ["text-[#c45a4a]", "text-[#d4a054]", "text-[#4a90b8]", "text-[#6b8f71]", "text-[#8b7ac8]"];
             return (
               <div key={level.level} className={`flex-1 rounded-xl border bg-gradient-to-t ${colors[level.level - 1]} p-4`}>
                 <div className="flex items-center gap-2 mb-1">
@@ -119,7 +119,7 @@ export function IntelligencePhilosophy({ compact = false }: { compact?: boolean 
                 <p className="text-[11px] text-white/40 leading-relaxed">{level.description}</p>
                 {level.level === 5 && (
                   <div className="mt-2 flex items-center gap-1">
-                    <span className="text-[10px] font-semibold text-violet-400 bg-violet-400/10 px-1.5 py-0.5 rounded">Lens-Native</span>
+                    <span className="text-[10px] font-semibold text-[#8b7ac8] bg-violet-400/10 px-1.5 py-0.5 rounded">Lens-Native</span>
                   </div>
                 )}
               </div>
@@ -135,8 +135,8 @@ export function IntelligenceMaturityBadge({ level }: { level: number }) {
   const maturity = SIX_LENSES_PHILOSOPHY.maturityModel.find(m => m.level === level);
   if (!maturity) return null;
 
-  const colors = ["text-red-400", "text-amber-400", "text-blue-400", "text-emerald-400", "text-violet-400"];
-  const bgs = ["bg-red-400/10 border-red-400/20", "bg-amber-400/10 border-amber-400/20", "bg-blue-400/10 border-blue-400/20", "bg-emerald-400/10 border-emerald-400/20", "bg-violet-400/10 border-violet-400/20"];
+  const colors = ["text-[#c45a4a]", "text-[#d4a054]", "text-[#4a90b8]", "text-[#6b8f71]", "text-[#8b7ac8]"];
+  const bgs = ["bg-[#c45a4a]/10 border-[#c45a4a]/20", "bg-[#d4a054]/10 border-[#d4a054]/20", "bg-blue-400/10 border-[#4a90b8]/20", "bg-[#6b8f71]/10 border-[#6b8f71]/20", "bg-violet-400/10 border-[#8b7ac8]/20"];
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${colors[level - 1]} ${bgs[level - 1]}`}>

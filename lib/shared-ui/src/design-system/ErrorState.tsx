@@ -108,7 +108,7 @@ export function ErrorState({
               style={{
                 background: accentColor
                   ? `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`
-                  : "linear-gradient(135deg, #ef4444, #dc2626)",
+                  : "linear-gradient(135deg, #c45a4a, #dc2626)",
               }}
             >
               {retryLabel}

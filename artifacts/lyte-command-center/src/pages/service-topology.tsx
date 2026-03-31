@@ -37,25 +37,25 @@ const PLATFORM_NODES = [
 ];
 
 const PLATFORM_COLORS: Record<string, string> = {
-  Core:      "#f59e0b",
-  Lyte:      "#f59e0b",
+  Core:      "#d4a054",
+  Lyte:      "#d4a054",
   Alloy:     "#4B8BDB",
-  Terra:     "#0ea5e9",
+  Terra:     "#4a90b8",
   Vessels:   "#38bdf8",
-  Firestorm: "#ef4444",
+  Firestorm: "#c45a4a",
 };
 
 const HEALTH_STYLES = {
-  healthy:  { dot: "#10b981", border: "rgba(16,185,129,0.2)",  bg: "rgba(16,185,129,0.04)"  },
-  degraded: { dot: "#f59e0b", border: "rgba(245,158,11,0.3)",  bg: "rgba(245,158,11,0.06)"  },
-  down:     { dot: "#ef4444", border: "rgba(239,68,68,0.3)",   bg: "rgba(239,68,68,0.06)"   },
+  healthy:  { dot: "#6b8f71", border: "rgba(107,143,113,0.2)",  bg: "rgba(107,143,113,0.04)"  },
+  degraded: { dot: "#d4a054", border: "rgba(212,160,84,0.3)",  bg: "rgba(212,160,84,0.06)"  },
+  down:     { dot: "#c45a4a", border: "rgba(196,90,74,0.3)",   bg: "rgba(196,90,74,0.06)"   },
 };
 
 function ServiceCard({ node, metricsNode, selected, onClick }: { node: typeof PLATFORM_NODES[0]; metricsNode: TopologyNode | undefined; selected: boolean; onClick: () => void }) {
   const Icon = node.icon;
   const health = metricsNode?.health ?? "healthy";
   const hs = HEALTH_STYLES[health];
-  const pColor = PLATFORM_COLORS[node.platform] ?? "#f59e0b";
+  const pColor = PLATFORM_COLORS[node.platform] ?? "#d4a054";
 
   return (
     <div
@@ -86,9 +86,9 @@ function ServiceCard({ node, metricsNode, selected, onClick }: { node: typeof PL
       {metricsNode && (
         <div className="grid grid-cols-3 gap-1 mt-1">
           {[
-            { label: "Latency", value: `${metricsNode.avgLatency}ms`, color: metricsNode.avgLatency > 200 ? "#f59e0b" : "#10b981" },
-            { label: "Error %", value: `${metricsNode.avgErrorRate.toFixed(1)}%`, color: metricsNode.avgErrorRate > 2 ? "#ef4444" : "#10b981" },
-            { label: "Anomalies", value: metricsNode.anomalyCount.toString(), color: metricsNode.anomalyCount > 0 ? "#f97316" : "rgba(255,255,255,0.3)" },
+            { label: "Latency", value: `${metricsNode.avgLatency}ms`, color: metricsNode.avgLatency > 200 ? "#d4a054" : "#6b8f71" },
+            { label: "Error %", value: `${metricsNode.avgErrorRate.toFixed(1)}%`, color: metricsNode.avgErrorRate > 2 ? "#c45a4a" : "#6b8f71" },
+            { label: "Anomalies", value: metricsNode.anomalyCount.toString(), color: metricsNode.anomalyCount > 0 ? "#c8953c" : "rgba(255,255,255,0.3)" },
           ].map(c => (
             <div key={c.label} className="text-center">
               <div className="text-[10px] font-mono font-bold" style={{ color: c.color }}>{c.value}</div>
@@ -145,8 +145,8 @@ export default function ServiceTopology() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Network className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#f59e0b" }}>Lyte · Service Topology</span>
+            <Network className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#d4a054" }}>Lyte · Service Topology</span>
           </div>
           <h1 className="text-xl font-bold text-white">Service Topology Map</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Visual map of all SZL platforms with connection health, data flow, and latency between services.</p>
@@ -160,15 +160,15 @@ export default function ServiceTopology() {
         <div className="flex items-stretch">
           {[
             { label: "Total Services", value: PLATFORM_NODES.length.toString(), color: "rgba(255,255,255,0.5)" },
-            { label: "Healthy", value: (PLATFORM_NODES.length - degraded.length).toString(), color: "#10b981" },
-            { label: "Degraded", value: degraded.length.toString(), color: degraded.length > 0 ? "#f59e0b" : "rgba(255,255,255,0.3)" },
-            { label: "Firing Alerts", value: firingAlerts.toString(), color: firingAlerts > 0 ? "#ef4444" : "rgba(255,255,255,0.3)", pulse: firingAlerts > 0 },
-            { label: "Data Sources", value: nodes.length.toString(), color: "#3b82f6" },
+            { label: "Healthy", value: (PLATFORM_NODES.length - degraded.length).toString(), color: "#6b8f71" },
+            { label: "Degraded", value: degraded.length.toString(), color: degraded.length > 0 ? "#d4a054" : "rgba(255,255,255,0.3)" },
+            { label: "Firing Alerts", value: firingAlerts.toString(), color: firingAlerts > 0 ? "#c45a4a" : "rgba(255,255,255,0.3)", pulse: firingAlerts > 0 },
+            { label: "Data Sources", value: nodes.length.toString(), color: "#4a90b8" },
           ].map((c, i) => (
             <div key={c.label} className="flex-1 px-4 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
                 <span className="text-lg font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
-                {(c as any).pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-red-500 shrink-0" />}
+                {(c as any).pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#c45a4a] shrink-0" />}
               </div>
               <div className="text-[9px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
             </div>
@@ -178,7 +178,7 @@ export default function ServiceTopology() {
 
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
@@ -186,7 +186,7 @@ export default function ServiceTopology() {
         <div className="flex-1 space-y-5">
           {platforms.map(platform => {
             const pNodes = PLATFORM_NODES.filter(n => n.platform === platform);
-            const pColor = PLATFORM_COLORS[platform] ?? "#f59e0b";
+            const pColor = PLATFORM_COLORS[platform] ?? "#d4a054";
             return (
               <div key={platform}>
                 <div className="flex items-center gap-2 mb-2">
@@ -221,9 +221,9 @@ export default function ServiceTopology() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { label: "Avg Latency", value: `${selectedMetrics.avgLatency}ms`, color: selectedMetrics.avgLatency > 200 ? "#f59e0b" : "#10b981" },
-                    { label: "Error Rate", value: `${selectedMetrics.avgErrorRate.toFixed(2)}%`, color: selectedMetrics.avgErrorRate > 2 ? "#ef4444" : "#10b981" },
-                    { label: "Anomalies", value: selectedMetrics.anomalyCount.toString(), color: selectedMetrics.anomalyCount > 0 ? "#f97316" : "#10b981" },
+                    { label: "Avg Latency", value: `${selectedMetrics.avgLatency}ms`, color: selectedMetrics.avgLatency > 200 ? "#d4a054" : "#6b8f71" },
+                    { label: "Error Rate", value: `${selectedMetrics.avgErrorRate.toFixed(2)}%`, color: selectedMetrics.avgErrorRate > 2 ? "#c45a4a" : "#6b8f71" },
+                    { label: "Anomalies", value: selectedMetrics.anomalyCount.toString(), color: selectedMetrics.anomalyCount > 0 ? "#c8953c" : "#6b8f71" },
                     { label: "Data Points", value: selectedMetrics.dataPoints.toString(), color: "rgba(255,255,255,0.5)" },
                   ].map(c => (
                     <div key={c.label} className="p-2 rounded-lg text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -248,7 +248,7 @@ export default function ServiceTopology() {
                   <p className="text-[10px] text-slate-600">No downstream connections</p>
                 ) : selectedNode.connects.map(c => {
                   const connNode = PLATFORM_NODES.find(n => n.id === c);
-                  const connColor = connNode ? PLATFORM_COLORS[connNode.platform] : "#f59e0b";
+                  const connColor = connNode ? PLATFORM_COLORS[connNode.platform] : "#d4a054";
                   return (
                     <div key={c} className="flex items-center gap-2 text-[10px] cursor-pointer hover:opacity-80" onClick={() => setSelected(c)}>
                       <span className="w-1 h-1 rounded-full" style={{ background: connColor }} />

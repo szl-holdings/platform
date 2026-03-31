@@ -6,18 +6,18 @@ import { cn } from "@/lib/utils";
 type ActionRole = "executive_viewer" | "operator" | "analyst";
 
 const urgencyColors: Record<string, string> = {
-  immediate: "text-red-400 bg-red-500/10 border-red-500/20",
-  today: "text-orange-400 bg-orange-500/10 border-orange-500/20",
-  this_week: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  next_week: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+  immediate: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20",
+  today: "text-[#c8953c] bg-[#c8953c]/10 border-[#c8953c]/20",
+  this_week: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20",
+  next_week: "text-[#4a90b8] bg-[#4a90b8]/10 border-[#4a90b8]/20",
 };
 
 const stateColors: Record<string, string> = {
-  open: "text-red-400 bg-red-500/10 border-red-500/20",
+  open: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20",
   in_progress: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
-  blocked: "text-orange-400 bg-orange-500/10 border-orange-500/20",
-  resolved: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  done: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  blocked: "text-[#c8953c] bg-[#c8953c]/10 border-[#c8953c]/20",
+  resolved: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20",
+  done: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20",
 };
 
 function formatCurrency(n: number): string {
@@ -29,8 +29,8 @@ function formatCurrency(n: number): string {
 function ActionDrawer({ action, onClose, onTransition }: { action: any; onClose: () => void; onTransition: (id: number, state: string) => void }) {
   const transitions = [
     { label: "Mark In Progress", state: "in_progress", color: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10" },
-    { label: "Mark Resolved", state: "resolved", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
-    { label: "Mark Blocked", state: "blocked", color: "text-orange-400 border-orange-500/30 bg-orange-500/10" },
+    { label: "Mark Resolved", state: "resolved", color: "text-[#6b8f71] border-[#6b8f71]/30 bg-[#6b8f71]/10" },
+    { label: "Mark Blocked", state: "blocked", color: "text-[#c8953c] border-[#c8953c]/30 bg-[#c8953c]/10" },
   ];
   const history = (action.stateHistory as Array<{ from: string; to: string; at: string }>) ?? [];
   return (
@@ -54,7 +54,7 @@ function ActionDrawer({ action, onClose, onTransition }: { action: any; onClose:
             </div>
           )}
           {action.valueProtected > 0 && (
-            <div className="text-[11px] text-emerald-400 font-mono">{formatCurrency(action.valueProtected)} protected</div>
+            <div className="text-[11px] text-[#6b8f71] font-mono">{formatCurrency(action.valueProtected)} protected</div>
           )}
           {action.dueBy && (
             <div className="flex items-center gap-2 text-[11px] text-slate-400">
@@ -127,8 +127,8 @@ export default function ActionsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Zap className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-medium uppercase tracking-widest text-amber-400">Lyte · Action Center</span>
+            <Zap className="w-4 h-4 text-[#d4a054]" />
+            <span className="text-xs font-medium uppercase tracking-widest text-[#d4a054]">Lyte · Action Center</span>
           </div>
           <h1 className="text-2xl font-bold text-white">Action Center</h1>
           <p className="text-sm text-slate-400 mt-1">Assigned actions, state transitions, escalations</p>
@@ -139,7 +139,7 @@ export default function ActionsPage() {
               <button
                 key={r}
                 onClick={() => setRole(r)}
-                className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", role === r ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "text-slate-400 hover:text-white")}
+                className={cn("px-3 py-1.5 rounded-md text-xs font-medium transition-all", role === r ? "bg-[#d4a054]/20 text-[#d4a054] border border-[#d4a054]/30" : "text-slate-400 hover:text-white")}
               >
                 {roleMap[r]}
               </button>
@@ -153,9 +153,9 @@ export default function ActionsPage() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Open", value: openCount, color: "text-red-400" },
+          { label: "Open", value: openCount, color: "text-[#c45a4a]" },
           { label: "In Progress", value: inProgressCount, color: "text-cyan-400" },
-          { label: "Blocked", value: blockedCount, color: "text-orange-400" },
+          { label: "Blocked", value: blockedCount, color: "text-[#c8953c]" },
         ].map(c => (
           <div key={c.label} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
             <div className="text-[10px] text-slate-500 mb-1">{c.label}</div>
@@ -167,7 +167,7 @@ export default function ActionsPage() {
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[10px] text-slate-500">Filter:</span>
         {["all", "open", "in_progress", "blocked", "resolved"].map(f => (
-          <button key={f} onClick={() => setStateFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", stateFilter === f ? "bg-amber-500/10 border-amber-500/30 text-amber-300" : "border-white/5 text-slate-500 hover:text-white")}>
+          <button key={f} onClick={() => setStateFilter(f)} className={cn("text-[10px] px-2.5 py-1.5 rounded-lg border capitalize transition-all", stateFilter === f ? "bg-[#d4a054]/10 border-[#d4a054]/30 text-[#d4a054]" : "border-white/5 text-slate-500 hover:text-white")}>
             {f.replace("_", " ")}
           </button>
         ))}
@@ -176,18 +176,18 @@ export default function ActionsPage() {
 
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" />
           <span className="ml-2 text-sm text-slate-400">Loading actions…</span>
         </div>
       )}
       {isError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">
+        <div className="rounded-xl border border-[#c45a4a]/20 bg-[#c45a4a]/5 p-4 text-sm text-[#c45a4a]">
           Failed to load actions. Check API connectivity.
         </div>
       )}
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="rounded-xl border border-white/5 p-12 text-center">
-          <CheckCircle className="w-10 h-10 text-emerald-400/20 mx-auto mb-3" />
+          <CheckCircle className="w-10 h-10 text-[#6b8f71]/20 mx-auto mb-3" />
           <p className="text-sm text-slate-400">No actions match current filters</p>
         </div>
       )}
@@ -200,7 +200,7 @@ export default function ActionsPage() {
             <div
               key={action.id}
               className={cn("rounded-xl border bg-white/[0.02] p-4 cursor-pointer hover:bg-white/[0.04] transition-all",
-                action.state === "open" ? "border-red-500/10" : action.state === "blocked" ? "border-orange-500/10" : "border-white/5"
+                action.state === "open" ? "border-[#c45a4a]/10" : action.state === "blocked" ? "border-[#c8953c]/10" : "border-white/5"
               )}
               onClick={() => setSelectedAction(action)}
             >
@@ -215,7 +215,7 @@ export default function ActionsPage() {
                   <div className="flex items-center gap-2 text-[10px] text-slate-500">
                     {action.owner && <span className="flex items-center gap-1"><User className="w-2.5 h-2.5" />{action.owner}</span>}
                     {action.dueBy && <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{action.dueBy}</span>}
-                    {(action.valueProtected ?? 0) > 0 && <span className="text-emerald-400 font-mono">{formatCurrency(action.valueProtected ?? 0)}</span>}
+                    {(action.valueProtected ?? 0) > 0 && <span className="text-[#6b8f71] font-mono">{formatCurrency(action.valueProtected ?? 0)}</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

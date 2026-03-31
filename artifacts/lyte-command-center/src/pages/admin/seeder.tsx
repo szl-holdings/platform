@@ -25,15 +25,15 @@ interface SeedValidation {
 }
 
 const statusStyles = {
-  pass:  { color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", label: "Pass" },
-  fail:  { color: "text-amber-400 bg-amber-500/10 border-amber-500/20",   label: "Low" },
-  error: { color: "text-red-400 bg-red-500/10 border-red-500/20",         label: "Error" },
+  pass:  { color: "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20", label: "Pass" },
+  fail:  { color: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20",   label: "Low" },
+  error: { color: "text-[#c45a4a] bg-[#c45a4a]/10 border-[#c45a4a]/20",         label: "Error" },
 };
 
 const overallColors = {
-  complete:   "text-emerald-400",
-  incomplete: "text-amber-400",
-  error:      "text-red-400",
+  complete:   "text-[#6b8f71]",
+  incomplete: "text-[#d4a054]",
+  error:      "text-[#c45a4a]",
 };
 
 export default function DemoDataSeeder() {
@@ -93,7 +93,7 @@ export default function DemoDataSeeder() {
       {actionResult && (
         <div className={cn(
           "rounded-xl border p-4 flex items-center gap-3 text-sm",
-          actionResult.type === "success" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400"
+          actionResult.type === "success" ? "bg-[#6b8f71]/10 border-[#6b8f71]/20 text-[#6b8f71]" : "bg-[#c45a4a]/10 border-[#c45a4a]/20 text-[#c45a4a]"
         )}>
           {actionResult.type === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
           <span>{actionResult.message}</span>
@@ -105,9 +105,9 @@ export default function DemoDataSeeder() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Total Tables", value: summary.total, color: "text-foreground" },
-            { label: "Passing",  value: summary.passed, color: "text-emerald-400" },
-            { label: "Low / Missing", value: summary.failed, color: "text-amber-400" },
-            { label: "Errors",  value: summary.errors, color: "text-red-400" },
+            { label: "Passing",  value: summary.passed, color: "text-[#6b8f71]" },
+            { label: "Low / Missing", value: summary.failed, color: "text-[#d4a054]" },
+            { label: "Errors",  value: summary.errors, color: "text-[#c45a4a]" },
           ].map((s) => (
             <div key={s.label} className="rounded-xl border border-border bg-card p-4">
               <div className={cn("text-2xl font-bold font-display", s.color)}>{s.value}</div>
@@ -117,8 +117,8 @@ export default function DemoDataSeeder() {
         </div>
       )}
 
-      <div className="flex items-start gap-2 p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-xs text-amber-300/80">
-        <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+      <div className="flex items-start gap-2 p-3 rounded-xl border border-[#d4a054]/20 bg-[#d4a054]/5 text-xs text-[#d4a054]/80">
+        <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#d4a054]" />
         <span>Seeder auto-runs on startup when tables are empty. Use manual seed only to force re-populate, and reset only in development.</span>
       </div>
 
@@ -134,18 +134,18 @@ export default function DemoDataSeeder() {
         {!confirmReset ? (
           <button
             onClick={() => setConfirmReset(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-[#c45a4a]/10 text-[#c45a4a] border border-[#c45a4a]/20 hover:bg-[#c45a4a]/20 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             Reset Demo Data
           </button>
         ) : (
-          <div className="flex items-center gap-2 p-2 rounded-lg border border-red-500/30 bg-red-500/10">
-            <span className="text-xs text-red-400 font-medium">Confirm reset?</span>
+          <div className="flex items-center gap-2 p-2 rounded-lg border border-[#c45a4a]/30 bg-[#c45a4a]/10">
+            <span className="text-xs text-[#c45a4a] font-medium">Confirm reset?</span>
             <button
               onClick={() => resetMutation.mutate()}
               disabled={resetMutation.isPending}
-              className="px-2 py-1 rounded text-[10px] font-bold bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+              className="px-2 py-1 rounded text-[10px] font-bold bg-[#c45a4a] text-white hover:bg-[#b34a3e] transition-colors disabled:opacity-50"
             >
               {resetMutation.isPending ? "Resetting..." : "Yes, Reset"}
             </button>
@@ -160,7 +160,7 @@ export default function DemoDataSeeder() {
         </div>
       ) : error ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+          <AlertTriangle className="w-8 h-8 text-[#d4a054] mx-auto mb-2" />
           <p className="text-muted-foreground text-sm">Failed to load seed validation</p>
         </div>
       ) : (

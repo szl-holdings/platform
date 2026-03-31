@@ -142,7 +142,7 @@ export function EmbeddedSigner({
   signingNotes,
   onComplete,
   onDecline,
-  themeColor = "#6366f1",
+  themeColor = "#8b7ac8",
   className,
 }: EmbeddedSignerProps) {
   const [mode, setMode] = useState<SignatureMode>("type");
@@ -296,8 +296,8 @@ export function EmbeddedSigner({
   if (step === "done") {
     return (
       <div className={cn("flex flex-col items-center justify-center gap-6 p-12 rounded-2xl bg-slate-900 border border-white/10 text-center", className)}>
-        <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
-          <Check className="w-10 h-10 text-emerald-400" />
+        <div className="w-20 h-20 rounded-full bg-[#6b8f71]/10 border-2 border-[#6b8f71]/30 flex items-center justify-center">
+          <Check className="w-10 h-10 text-[#6b8f71]" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">Document Signed</h2>
@@ -331,8 +331,8 @@ export function EmbeddedSigner({
         </div>
 
         {signingNotes && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-            <p className="text-sm text-amber-300">{signingNotes}</p>
+          <div className="bg-[#d4a054]/10 border border-[#d4a054]/20 rounded-xl p-4">
+            <p className="text-sm text-[#d4a054]">{signingNotes}</p>
           </div>
         )}
 

@@ -70,26 +70,26 @@ export interface DataProvenanceInfo {
 }
 
 export const SEVERITY_CONFIG: Record<SignalSeverity, { label: string; color: string; bg: string }> = {
-  critical: { label: "Critical", color: "#ef4444", bg: "rgba(239,68,68,0.12)" },
-  high: { label: "High", color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
-  medium: { label: "Medium", color: "#3b82f6", bg: "rgba(59,130,246,0.12)" },
+  critical: { label: "Critical", color: "#c45a4a", bg: "rgba(239,68,68,0.12)" },
+  high: { label: "High", color: "#d4a054", bg: "rgba(245,158,11,0.12)" },
+  medium: { label: "Medium", color: "#4a90b8", bg: "rgba(59,130,246,0.12)" },
   low: { label: "Low", color: "#6b7280", bg: "rgba(107,114,128,0.12)" },
-  info: { label: "Info", color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
+  info: { label: "Info", color: "#8b7ac8", bg: "rgba(139,92,246,0.12)" },
 };
 
 export const CONFIDENCE_CONFIG: Record<ConfidenceLevel, { label: string; color: string }> = {
-  verified: { label: "Verified", color: "#10b981" },
-  high: { label: "High Confidence", color: "#22c55e" },
-  medium: { label: "Medium Confidence", color: "#f59e0b" },
-  low: { label: "Low Confidence", color: "#ef4444" },
+  verified: { label: "Verified", color: "#6b8f71" },
+  high: { label: "High Confidence", color: "#6b8f71" },
+  medium: { label: "Medium Confidence", color: "#d4a054" },
+  low: { label: "Low Confidence", color: "#c45a4a" },
   unverified: { label: "Unverified", color: "#6b7280" },
 };
 
 export const FRESHNESS_CONFIG: Record<FreshnessWindow, { label: string; color: string }> = {
-  realtime: { label: "Real-time", color: "#10b981" },
-  minutes: { label: "< 5 min", color: "#22c55e" },
-  hourly: { label: "Hourly", color: "#3b82f6" },
-  daily: { label: "Daily", color: "#f59e0b" },
-  stale: { label: "Stale", color: "#ef4444" },
+  realtime: { label: "Real-time", color: "#6b8f71" },
+  minutes: { label: "< 5 min", color: "#6b8f71" },
+  hourly: { label: "Hourly", color: "#4a90b8" },
+  daily: { label: "Daily", color: "#d4a054" },
+  stale: { label: "Stale", color: "#c45a4a" },
   unknown: { label: "Unknown", color: "#6b7280" },
 };

@@ -18,9 +18,9 @@ function formatCurrency(n: number): string {
 }
 
 const categoryColors: Record<string, string> = {
-  "Forecast Drift": "#ef4444",
-  "Ownership Gaps": "#f97316",
-  "Approval Latency": "#f59e0b",
+  "Forecast Drift": "#c45a4a",
+  "Ownership Gaps": "#c8953c",
+  "Approval Latency": "#d4a054",
   "Stalled Workflows": "#eab308",
   "Handoff Failures": "#a78bfa",
   "Pipeline Hygiene": "#60a5fa",
@@ -45,23 +45,23 @@ export default function ValueAtRiskPage() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-3 md:col-span-1 rounded-xl p-5 border border-red-500/30 bg-red-500/5">
-          <div className="text-[11px] text-red-400 font-mono uppercase tracking-wide mb-2">Total Value at Risk</div>
-          <div className="font-display font-bold text-4xl text-red-300 mb-1">{formatCurrency(totalValueAtRisk)}</div>
+        <div className="col-span-3 md:col-span-1 rounded-xl p-5 border border-[#c45a4a]/30 bg-[#c45a4a]/5">
+          <div className="text-[11px] text-[#c45a4a] font-mono uppercase tracking-wide mb-2">Total Value at Risk</div>
+          <div className="font-display font-bold text-4xl text-[#c45a4a] mb-1">{formatCurrency(totalValueAtRisk)}</div>
           <div className="text-[11px] text-slate-400 mb-4">Across {activeSignals.length} active signals</div>
           <div className="h-24">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={varTrend}>
                 <defs>
                   <linearGradient id="varGrad2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#c45a4a" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#c45a4a" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="amount" stroke="#ef4444" strokeWidth={2} fill="url(#varGrad2)" dot={false} />
+                <Area type="monotone" dataKey="amount" stroke="#c45a4a" strokeWidth={2} fill="url(#varGrad2)" dot={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 9, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ background: "#0f172a", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, fontSize: 11 }}
+                  contentStyle={{ background: "#0f172a", border: "1px solid rgba(196,90,74,0.2)", borderRadius: 8, fontSize: 11 }}
                   formatter={(v: number) => [`$${v}M`, "Value at Risk"]}
                   labelStyle={{ color: "#94a3b8" }}
                 />
@@ -102,7 +102,7 @@ export default function ValueAtRiskPage() {
                 <div className="flex items-center justify-between text-[11px] mb-1">
                   <span className="text-slate-300">{r.category}</span>
                   <div className="flex items-center gap-2">
-                    <span className={cn("flex items-center gap-0.5 text-[10px]", r.trend > 0 ? "text-red-400" : "text-emerald-400")}>
+                    <span className={cn("flex items-center gap-0.5 text-[10px]", r.trend > 0 ? "text-[#c45a4a]" : "text-[#6b8f71]")}>
                       {r.trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                       {Math.abs(r.trend).toFixed(1)}%
                     </span>
@@ -140,7 +140,7 @@ export default function ValueAtRiskPage() {
                   {byWorkflow.map((entry, i) => (
                     <Cell
                       key={i}
-                      fill={entry.severity === "critical" ? "#ef4444" : entry.severity === "high" ? "#f97316" : "#f59e0b"}
+                      fill={entry.severity === "critical" ? "#c45a4a" : entry.severity === "high" ? "#c8953c" : "#d4a054"}
                       fillOpacity={0.8}
                     />
                   ))}

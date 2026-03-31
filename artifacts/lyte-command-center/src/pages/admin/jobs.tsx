@@ -70,10 +70,10 @@ function timeUntil(ts?: number) {
 function StatusBadge({ status }: { status?: string }) {
   if (!status) return <span className="text-xs text-muted-foreground">—</span>;
   const colors: Record<string, string> = {
-    completed: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    failed: "bg-red-500/15 text-red-400 border-red-500/30",
-    running: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-    pending: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+    completed: "bg-[#6b8f71]/15 text-[#6b8f71] border-[#6b8f71]/30",
+    failed: "bg-[#c45a4a]/15 text-[#c45a4a] border-[#c45a4a]/30",
+    running: "bg-[#4a90b8]/15 text-[#4a90b8] border-[#4a90b8]/30",
+    pending: "bg-[#d4a054]/15 text-[#d4a054] border-[#d4a054]/30",
   };
   const icons: Record<string, React.ReactNode> = {
     completed: <CheckCircle className="w-3 h-3" />,
@@ -92,7 +92,7 @@ function ScheduleBadge({ schedule }: { schedule: string }) {
   const map: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
     daily: { label: "Daily", color: "text-violet-400 bg-violet-500/10 border-violet-500/20", icon: <Calendar className="w-3 h-3" /> },
     hourly: { label: "Hourly", color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20", icon: <Clock className="w-3 h-3" /> },
-    on_demand: { label: "On-demand", color: "text-amber-400 bg-amber-500/10 border-amber-500/20", icon: <Zap className="w-3 h-3" /> },
+    on_demand: { label: "On-demand", color: "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20", icon: <Zap className="w-3 h-3" /> },
   };
   const info = map[schedule] ?? { label: schedule, color: "text-muted-foreground bg-muted border-border", icon: null };
   return (
@@ -141,10 +141,10 @@ export default function JobsPage() {
   const statsData = stats ?? { pending: 0, running: 0, completed: 0, failed: 0 };
 
   const kpis = [
-    { label: "Pending", value: statsData.pending, color: "text-amber-400" },
-    { label: "Running", value: statsData.running, color: "text-blue-400" },
-    { label: "Completed", value: statsData.completed, color: "text-emerald-400" },
-    { label: "Failed", value: statsData.failed, color: "text-red-400" },
+    { label: "Pending", value: statsData.pending, color: "text-[#d4a054]" },
+    { label: "Running", value: statsData.running, color: "text-[#4a90b8]" },
+    { label: "Completed", value: statsData.completed, color: "text-[#6b8f71]" },
+    { label: "Failed", value: statsData.failed, color: "text-[#c45a4a]" },
   ];
 
   return (
@@ -194,8 +194,8 @@ export default function JobsPage() {
                         <span>Last run: {formatTime(job.lastRunAt)}</span>
                         {job.schedule !== "on_demand" && <span>Next: {timeUntil(job.nextRunAt)}</span>}
                         <span>Duration: {formatMs(job.lastDurationMs)}</span>
-                        <span className="text-emerald-400">{job.runCount} runs</span>
-                        {job.failCount > 0 && <span className="text-red-400">{job.failCount} failures</span>}
+                        <span className="text-[#6b8f71]">{job.runCount} runs</span>
+                        {job.failCount > 0 && <span className="text-[#c45a4a]">{job.failCount} failures</span>}
                         <span className="font-mono text-[9px] opacity-60">{job.type}</span>
                       </div>
                     </div>
@@ -237,8 +237,8 @@ export default function JobsPage() {
               {job.completedAt && job.startedAt && (
                 <span className="text-xs text-muted-foreground">{formatMs(job.completedAt - job.startedAt)}</span>
               )}
-              {job.error && <span className="text-xs text-red-400 truncate max-w-xs">{job.error}</span>}
-              {job.retries > 0 && <span className="text-xs text-amber-400">{job.retries} retries</span>}
+              {job.error && <span className="text-xs text-[#c45a4a] truncate max-w-xs">{job.error}</span>}
+              {job.retries > 0 && <span className="text-xs text-[#d4a054]">{job.retries} retries</span>}
             </div>
           ))}
         </div>

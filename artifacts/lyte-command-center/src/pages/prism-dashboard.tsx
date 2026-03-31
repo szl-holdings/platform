@@ -5,13 +5,13 @@ import { TrendingUp, TrendingDown, Minus, BarChart3, ChevronRight, Zap, AlertTri
 import { cn } from "@workspace/shared-ui/utils";
 
 const LENS_META: Record<string, { label: string; color: string; emoji: string; description: string }> = {
-  financial_health:   { label: "Financial Health",    color: "#10b981", emoji: "💰", description: "Revenue, burn rate, cash position, ARR" },
-  operational_risk:   { label: "Operational Risk",    color: "#ef4444", emoji: "⚠️", description: "Process failures, SLA breaches, bottlenecks" },
-  growth_velocity:    { label: "Growth Velocity",     color: "#3b82f6", emoji: "🚀", description: "Pipeline, conversion, expansion signals" },
-  customer_sentiment: { label: "Customer Sentiment",  color: "#f59e0b", emoji: "❤️", description: "NPS, CSAT, churn, engagement indicators" },
-  compliance_drift:   { label: "Compliance Drift",    color: "#a855f7", emoji: "🛡️", description: "Regulatory exposure, audit gaps, policy drift" },
-  talent_stability:   { label: "Talent Stability",    color: "#06b6d4", emoji: "👥", description: "Retention, capacity, ownership gaps" },
-  market_position:    { label: "Market Position",     color: "#f97316", emoji: "📈", description: "Competitive signals, deal velocity, win/loss" },
+  financial_health:   { label: "Financial Health",    color: "#6b8f71", emoji: "💰", description: "Revenue, burn rate, cash position, ARR" },
+  operational_risk:   { label: "Operational Risk",    color: "#c45a4a", emoji: "⚠️", description: "Process failures, SLA breaches, bottlenecks" },
+  growth_velocity:    { label: "Growth Velocity",     color: "#4a90b8", emoji: "🚀", description: "Pipeline, conversion, expansion signals" },
+  customer_sentiment: { label: "Customer Sentiment",  color: "#d4a054", emoji: "❤️", description: "NPS, CSAT, churn, engagement indicators" },
+  compliance_drift:   { label: "Compliance Drift",    color: "#8b7ac8", emoji: "🛡️", description: "Regulatory exposure, audit gaps, policy drift" },
+  talent_stability:   { label: "Talent Stability",    color: "#4a90b8", emoji: "👥", description: "Retention, capacity, ownership gaps" },
+  market_position:    { label: "Market Position",     color: "#c8953c", emoji: "📈", description: "Competitive signals, deal velocity, win/loss" },
 };
 
 const LENS_ORDER = ["financial_health", "operational_risk", "growth_velocity", "customer_sentiment", "compliance_drift", "talent_stability", "market_position"] as const;
@@ -57,12 +57,12 @@ function ScoreGauge({ score, color }: { score: number; color: string }) {
 
 function TrendBadge({ trend, delta }: { trend: "up" | "down" | "flat"; delta: number | null }) {
   if (trend === "up") return (
-    <span className="flex items-center gap-0.5 text-[10px] font-mono" style={{ color: "#10b981" }}>
+    <span className="flex items-center gap-0.5 text-[10px] font-mono" style={{ color: "#6b8f71" }}>
       <TrendingUp className="w-3 h-3" />{delta !== null ? `+${Math.abs(delta).toFixed(1)}` : "↑"}
     </span>
   );
   if (trend === "down") return (
-    <span className="flex items-center gap-0.5 text-[10px] font-mono" style={{ color: "#ef4444" }}>
+    <span className="flex items-center gap-0.5 text-[10px] font-mono" style={{ color: "#c45a4a" }}>
       <TrendingDown className="w-3 h-3" />{delta !== null ? `-${Math.abs(delta).toFixed(1)}` : "↓"}
     </span>
   );
@@ -74,10 +74,10 @@ function TrendBadge({ trend, delta }: { trend: "up" | "down" | "flat"; delta: nu
 }
 
 function LensCard({ score, onDrill }: { score: PrismScore; onDrill: (lens: string) => void }) {
-  const meta = LENS_META[score.lens] ?? { label: score.lens, color: "#f59e0b", emoji: "⚡", description: "" };
+  const meta = LENS_META[score.lens] ?? { label: score.lens, color: "#d4a054", emoji: "⚡", description: "" };
   const signals = score.topSignals ?? [];
   const scoreNum = score.score ?? 0;
-  const scoreColor = scoreNum >= 70 ? "#10b981" : scoreNum >= 50 ? "#f59e0b" : "#ef4444";
+  const scoreColor = scoreNum >= 70 ? "#6b8f71" : scoreNum >= 50 ? "#d4a054" : "#c45a4a";
 
   return (
     <div
@@ -108,7 +108,7 @@ function LensCard({ score, onDrill }: { score: PrismScore; onDrill: (lens: strin
           <div className="space-y-1">
             <div className="text-[9px] font-medium uppercase tracking-wider mb-1.5" style={{ color: "rgba(255,255,255,0.25)" }}>Top Signals</div>
             {signals.slice(0, 3).map((sig, i) => {
-              const sigColor = sig.severity === "critical" ? "#ef4444" : sig.severity === "high" ? "#f97316" : sig.severity === "medium" ? "#f59e0b" : "#60a5fa";
+              const sigColor = sig.severity === "critical" ? "#c45a4a" : sig.severity === "high" ? "#c8953c" : sig.severity === "medium" ? "#d4a054" : "#60a5fa";
               return (
                 <div key={i} className="flex items-center gap-2 text-[10px]">
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sigColor }} />
@@ -125,7 +125,7 @@ function LensCard({ score, onDrill }: { score: PrismScore; onDrill: (lens: strin
 }
 
 function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void }) {
-  const meta = LENS_META[lens] ?? { label: lens, color: "#f59e0b", emoji: "⚡", description: "" };
+  const meta = LENS_META[lens] ?? { label: lens, color: "#d4a054", emoji: "⚡", description: "" };
 
   const { data, isLoading } = useQuery({
     queryKey: ["prism-lens-history", lens],
@@ -154,7 +154,7 @@ function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void 
 
         {isLoading ? (
           <div className="flex items-center justify-center p-8">
-            <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="p-5 space-y-5">
@@ -177,7 +177,7 @@ function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void 
                 <div className="text-[10px] font-medium uppercase tracking-wider mb-3" style={{ color: "rgba(255,255,255,0.3)" }}>Contributing Signals</div>
                 <div className="space-y-2">
                   {latest.topSignals.map((sig, i) => {
-                    const c = sig.severity === "critical" ? "#ef4444" : sig.severity === "high" ? "#f97316" : "#f59e0b";
+                    const c = sig.severity === "critical" ? "#c45a4a" : sig.severity === "high" ? "#c8953c" : "#d4a054";
                     return (
                       <div key={i} className="p-3 rounded-lg border" style={{ borderColor: `${c}20`, background: `${c}06` }}>
                         <div className="flex items-center gap-2 mb-1">
@@ -198,7 +198,7 @@ function LensDetailPanel({ lens, onClose }: { lens: string; onClose: () => void 
               <div className="space-y-1.5">
                 {scores.slice(0, 10).map((s, i) => (
                   <div key={s.id} className="flex items-center gap-3">
-                    <div className="w-14 text-right font-mono font-bold" style={{ fontSize: 11, color: s.score >= 70 ? "#10b981" : s.score >= 50 ? "#f59e0b" : "#ef4444" }}>{s.score}</div>
+                    <div className="w-14 text-right font-mono font-bold" style={{ fontSize: 11, color: s.score >= 70 ? "#6b8f71" : s.score >= 50 ? "#d4a054" : "#c45a4a" }}>{s.score}</div>
                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
                       <div className="h-full rounded-full" style={{ width: `${s.score}%`, background: meta.color, opacity: 0.7 - i * 0.05 }} />
                     </div>
@@ -227,7 +227,7 @@ export default function PrismDashboard() {
 
   const lenses = data?.lenses ?? [];
   const compositeScore = data?.compositeScore ?? 0;
-  const compositeColor = compositeScore >= 70 ? "#10b981" : compositeScore >= 50 ? "#f59e0b" : "#ef4444";
+  const compositeColor = compositeScore >= 70 ? "#6b8f71" : compositeScore >= 50 ? "#d4a054" : "#c45a4a";
 
   const scoredLenses = lenses.filter(Boolean) as PrismScore[];
   const atRisk = scoredLenses.filter(l => l.score < 50).length;
@@ -238,8 +238,8 @@ export default function PrismDashboard() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <BarChart3 className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#f59e0b" }}>Lyte · PRISM</span>
+            <BarChart3 className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#d4a054" }}>Lyte · PRISM</span>
           </div>
           <h1 className="text-xl font-bold text-white">PRISM Dashboard</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>7-lens intelligence model. Each lens scored 0-100 based on live signals. Click any lens to drill into contributing factors.</p>
@@ -253,8 +253,8 @@ export default function PrismDashboard() {
         <div className="flex items-stretch">
           {[
             { label: "Composite Score", value: compositeScore.toString(), color: compositeColor, sub: "7-lens average" },
-            { label: "At Risk Lenses", value: atRisk.toString(), color: "#ef4444", sub: "score < 50" },
-            { label: "Healthy Lenses", value: healthy.toString(), color: "#10b981", sub: "score ≥ 70" },
+            { label: "At Risk Lenses", value: atRisk.toString(), color: "#c45a4a", sub: "score < 50" },
+            { label: "Healthy Lenses", value: healthy.toString(), color: "#6b8f71", sub: "score ≥ 70" },
             { label: "Total Lenses", value: "7", color: "rgba(255,255,255,0.5)", sub: "PRISM coverage" },
           ].map((c, i) => (
             <div key={c.label} className="flex-1 px-4 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
@@ -268,21 +268,21 @@ export default function PrismDashboard() {
 
       {isLoading && (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
       {isError && (
-        <div className="flex items-center gap-3 p-4 rounded-xl border" style={{ borderColor: "rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.06)" }}>
-          <AlertTriangle className="w-4 h-4 text-red-400" />
-          <span className="text-sm text-red-400">Failed to load PRISM scores. Make sure you have seeded data via the admin seeder.</span>
-          <button onClick={() => refetch()} className="ml-auto text-[10px] text-red-400/70 hover:text-red-400">Retry</button>
+        <div className="flex items-center gap-3 p-4 rounded-xl border" style={{ borderColor: "rgba(196,90,74,0.2)", background: "rgba(196,90,74,0.06)" }}>
+          <AlertTriangle className="w-4 h-4 text-[#c45a4a]" />
+          <span className="text-sm text-[#c45a4a]">Failed to load PRISM scores. Make sure you have seeded data via the admin seeder.</span>
+          <button onClick={() => refetch()} className="ml-auto text-[10px] text-[#c45a4a]/70 hover:text-[#c45a4a]">Retry</button>
         </div>
       )}
 
       {!isLoading && !isError && scoredLenses.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
-          <Zap className="w-8 h-8" style={{ color: "rgba(245,158,11,0.3)" }} />
+          <Zap className="w-8 h-8" style={{ color: "rgba(212,160,84,0.3)" }} />
           <p className="text-sm text-slate-400">No PRISM scores yet.</p>
           <p className="text-[11px] text-slate-500">Use the Admin Seeder to populate PRISM data.</p>
         </div>

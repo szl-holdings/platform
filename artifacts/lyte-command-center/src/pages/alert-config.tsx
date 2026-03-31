@@ -39,14 +39,14 @@ interface AlertsResponse {
 }
 
 const STATUS_CONFIG: Record<LyteAlert["status"], { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
-  firing:   { label: "FIRING",   color: "#ef4444", bg: "rgba(239,68,68,0.1)",  border: "rgba(239,68,68,0.25)",  icon: <AlertTriangle className="w-3 h-3" /> },
-  active:   { label: "ACTIVE",   color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.2)",  icon: <CheckCircle className="w-3 h-3" /> },
+  firing:   { label: "FIRING",   color: "#c45a4a", bg: "rgba(196,90,74,0.1)",  border: "rgba(196,90,74,0.25)",  icon: <AlertTriangle className="w-3 h-3" /> },
+  active:   { label: "ACTIVE",   color: "#6b8f71", bg: "rgba(107,143,113,0.1)", border: "rgba(107,143,113,0.2)",  icon: <CheckCircle className="w-3 h-3" /> },
   resolved: { label: "RESOLVED", color: "#60a5fa", bg: "rgba(96,165,250,0.1)", border: "rgba(96,165,250,0.2)",  icon: <CheckCircle className="w-3 h-3" /> },
   silenced: { label: "SILENCED", color: "#6b7280", bg: "rgba(107,114,128,0.1)",border: "rgba(107,114,128,0.2)", icon: <Clock className="w-3 h-3" /> },
-  draft:    { label: "DRAFT",    color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.2)",  icon: <Zap className="w-3 h-3" /> },
+  draft:    { label: "DRAFT",    color: "#d4a054", bg: "rgba(212,160,84,0.1)", border: "rgba(212,160,84,0.2)",  icon: <Zap className="w-3 h-3" /> },
 };
 
-const SEV_COLORS: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#f59e0b", low: "#60a5fa" };
+const SEV_COLORS: Record<string, string> = { critical: "#c45a4a", high: "#c8953c", medium: "#d4a054", low: "#60a5fa" };
 const COND_LABELS: Record<string, string> = { gt: ">", lt: "<", gte: "≥", lte: "≤", eq: "=", anomaly: "anomaly" };
 
 function AlertDetail({ alertId, onClose }: { alertId: number; onClose: () => void }) {
@@ -65,7 +65,7 @@ function AlertDetail({ alertId, onClose }: { alertId: number; onClose: () => voi
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1 bg-black/50" />
       <div className="w-full max-w-lg border-l flex items-center justify-center" style={{ background: "#0c1626", borderColor: "rgba(255,255,255,0.08)" }}>
-        <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" />
       </div>
     </div>
   );
@@ -115,7 +115,7 @@ function AlertDetail({ alertId, onClose }: { alertId: number; onClose: () => voi
               <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Notification Channels</div>
               <div className="flex flex-wrap gap-2">
                 {alert.notificationChannels.map(ch => (
-                  <span key={ch} className="text-[10px] px-2 py-1 rounded-lg border font-medium" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.2)" }}>{ch}</span>
+                  <span key={ch} className="text-[10px] px-2 py-1 rounded-lg border font-medium" style={{ color: "#d4a054", background: "rgba(212,160,84,0.08)", borderColor: "rgba(212,160,84,0.2)" }}>{ch}</span>
                 ))}
               </div>
             </div>
@@ -123,7 +123,7 @@ function AlertDetail({ alertId, onClose }: { alertId: number; onClose: () => voi
 
           <div className="flex gap-2">
             {alert.status === "active" && <button onClick={() => updateMutation.mutate({ status: "silenced" })} className="flex-1 text-[11px] py-2 rounded-lg border font-medium" style={{ color: "#6b7280", borderColor: "rgba(107,114,128,0.3)", background: "rgba(107,114,128,0.08)" }}>Silence</button>}
-            {alert.status === "silenced" && <button onClick={() => updateMutation.mutate({ status: "active" })} className="flex-1 text-[11px] py-2 rounded-lg border font-medium" style={{ color: "#10b981", borderColor: "rgba(16,185,129,0.3)", background: "rgba(16,185,129,0.08)" }}>Re-enable</button>}
+            {alert.status === "silenced" && <button onClick={() => updateMutation.mutate({ status: "active" })} className="flex-1 text-[11px] py-2 rounded-lg border font-medium" style={{ color: "#6b8f71", borderColor: "rgba(107,143,113,0.3)", background: "rgba(107,143,113,0.08)" }}>Re-enable</button>}
             {alert.status === "firing" && <button onClick={() => updateMutation.mutate({ status: "resolved" })} className="flex-1 text-[11px] py-2 rounded-lg border font-medium" style={{ color: "#60a5fa", borderColor: "rgba(96,165,250,0.3)", background: "rgba(96,165,250,0.08)" }}>Mark Resolved</button>}
           </div>
 
@@ -132,7 +132,7 @@ function AlertDetail({ alertId, onClose }: { alertId: number; onClose: () => voi
               <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Alert History</div>
               <div className="space-y-1.5">
                 {alert.events.slice(0, 20).map(ev => {
-                  const evColor = ev.eventType === "fired" ? "#ef4444" : ev.eventType === "resolved" ? "#10b981" : "#f59e0b";
+                  const evColor = ev.eventType === "fired" ? "#c45a4a" : ev.eventType === "resolved" ? "#6b8f71" : "#d4a054";
                   return (
                     <div key={ev.id} className="flex items-center gap-2 text-[10px]">
                       <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: evColor }} />
@@ -190,7 +190,7 @@ function CreateAlertModal({ onClose }: { onClose: () => void }) {
     });
   };
 
-  const fieldClass = "w-full px-3 py-2 rounded-lg border text-[11px] font-mono outline-none focus:border-amber-500/40";
+  const fieldClass = "w-full px-3 py-2 rounded-lg border text-[11px] font-mono outline-none focus:border-[#d4a054]/40";
   const fieldStyle = { background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)", color: "white" };
 
   return (
@@ -254,7 +254,7 @@ function CreateAlertModal({ onClose }: { onClose: () => void }) {
           {form.notificationChannels.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {form.notificationChannels.map(ch => (
-                <span key={ch} className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg" style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", color: "#f59e0b" }}>
+                <span key={ch} className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg" style={{ background: "rgba(212,160,84,0.1)", border: "1px solid rgba(212,160,84,0.2)", color: "#d4a054" }}>
                   {ch}
                   <button type="button" onClick={() => setForm(f => ({ ...f, notificationChannels: f.notificationChannels.filter(c => c !== ch) }))}><X className="w-2.5 h-2.5" /></button>
                 </span>
@@ -265,11 +265,11 @@ function CreateAlertModal({ onClose }: { onClose: () => void }) {
 
         <div className="flex gap-3 pt-1">
           <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border text-[11px]" style={{ borderColor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)" }}>Cancel</button>
-          <button type="submit" disabled={mutation.isPending} className="flex-1 py-2 rounded-lg text-[11px] font-semibold" style={{ background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.3)", color: "#f59e0b" }}>
+          <button type="submit" disabled={mutation.isPending} className="flex-1 py-2 rounded-lg text-[11px] font-semibold" style={{ background: "rgba(212,160,84,0.15)", border: "1px solid rgba(212,160,84,0.3)", color: "#d4a054" }}>
             {mutation.isPending ? "Creating..." : "Create Alert"}
           </button>
         </div>
-        {mutation.isError && <p className="text-[10px] text-red-400">{String(mutation.error)}</p>}
+        {mutation.isError && <p className="text-[10px] text-[#c45a4a]">{String(mutation.error)}</p>}
       </form>
     </div>
   );
@@ -308,8 +308,8 @@ export default function AlertConfig() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Bell className="w-3.5 h-3.5" style={{ color: "#f59e0b" }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#f59e0b" }}>Lyte · Alert Config</span>
+            <Bell className="w-3.5 h-3.5" style={{ color: "#d4a054" }} />
+            <span className="text-[10px] font-bold uppercase tracking-widest font-mono" style={{ color: "#d4a054" }}>Lyte · Alert Config</span>
           </div>
           <h1 className="text-xl font-bold text-white">Alert Configuration</h1>
           <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>Threshold, anomaly, and composite alert rules with history and notification channels.</p>
@@ -318,7 +318,7 @@ export default function AlertConfig() {
           <button onClick={() => refetch()} className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border" style={{ color: "rgba(255,255,255,0.4)", borderColor: "rgba(255,255,255,0.1)" }}>
             <RefreshCw className="w-3 h-3" />
           </button>
-          <button onClick={() => setCreating(true)} className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border font-semibold" style={{ color: "#f59e0b", borderColor: "rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.08)" }}>
+          <button onClick={() => setCreating(true)} className="flex items-center gap-1.5 text-[10px] px-3 py-1.5 rounded-lg border font-semibold" style={{ color: "#d4a054", borderColor: "rgba(212,160,84,0.3)", background: "rgba(212,160,84,0.08)" }}>
             <Plus className="w-3 h-3" /> New Alert
           </button>
         </div>
@@ -327,14 +327,14 @@ export default function AlertConfig() {
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
         <div className="flex items-stretch">
           {[
-            { label: "Firing Now", value: firingCount.toString(), color: firingCount > 0 ? "#ef4444" : "rgba(255,255,255,0.3)", pulse: firingCount > 0 },
-            { label: "Active Rules", value: activeCount.toString(), color: "#10b981" },
+            { label: "Firing Now", value: firingCount.toString(), color: firingCount > 0 ? "#c45a4a" : "rgba(255,255,255,0.3)", pulse: firingCount > 0 },
+            { label: "Active Rules", value: activeCount.toString(), color: "#6b8f71" },
             { label: "Total Alerts", value: alerts.length.toString(), color: "rgba(255,255,255,0.5)" },
           ].map((c, i) => (
             <div key={c.label} className="flex-1 px-4 py-3 text-center" style={{ borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
               <div className="flex items-center justify-center gap-1.5 mb-0.5">
                 <span className="text-lg font-bold font-mono" style={{ color: c.color }}>{c.value}</span>
-                {c.pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0 bg-red-500" />}
+                {c.pulse && <span className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0 bg-[#c45a4a]" />}
               </div>
               <div className="text-[9px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>{c.label}</div>
             </div>
@@ -347,30 +347,30 @@ export default function AlertConfig() {
           <button key={s} onClick={() => setStatusFilter(s)}
             className="text-[10px] px-3 py-1.5 rounded-lg border font-medium capitalize"
             style={{
-              background: statusFilter === s ? "rgba(245,158,11,0.1)" : "transparent",
-              color: statusFilter === s ? "#f59e0b" : "rgba(255,255,255,0.35)",
-              borderColor: statusFilter === s ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.08)",
+              background: statusFilter === s ? "rgba(212,160,84,0.1)" : "transparent",
+              color: statusFilter === s ? "#d4a054" : "rgba(255,255,255,0.35)",
+              borderColor: statusFilter === s ? "rgba(212,160,84,0.3)" : "rgba(255,255,255,0.08)",
             }}
           >{s}</button>
         ))}
       </div>
 
       {isLoading && (
-        <div className="flex items-center justify-center py-12"><div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>
+        <div className="flex items-center justify-center py-12"><div className="w-5 h-5 border-2 border-[#d4a054] border-t-transparent rounded-full animate-spin" /></div>
       )}
 
       {isError && (
-        <div className="p-4 rounded-xl border flex items-center gap-3" style={{ borderColor: "rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.06)" }}>
-          <AlertTriangle className="w-4 h-4 text-red-400" />
-          <p className="text-sm text-red-400">Failed to load alerts.</p>
+        <div className="p-4 rounded-xl border flex items-center gap-3" style={{ borderColor: "rgba(196,90,74,0.2)", background: "rgba(196,90,74,0.06)" }}>
+          <AlertTriangle className="w-4 h-4 text-[#c45a4a]" />
+          <p className="text-sm text-[#c45a4a]">Failed to load alerts.</p>
         </div>
       )}
 
       {!isLoading && !isError && alerts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
-          <Bell className="w-8 h-8" style={{ color: "rgba(245,158,11,0.2)" }} />
+          <Bell className="w-8 h-8" style={{ color: "rgba(212,160,84,0.2)" }} />
           <p className="text-sm text-slate-400">No alerts configured yet.</p>
-          <button onClick={() => setCreating(true)} className="text-[11px] px-4 py-2 rounded-lg border font-medium" style={{ color: "#f59e0b", borderColor: "rgba(245,158,11,0.3)", background: "rgba(245,158,11,0.08)" }}>
+          <button onClick={() => setCreating(true)} className="text-[11px] px-4 py-2 rounded-lg border font-medium" style={{ color: "#d4a054", borderColor: "rgba(212,160,84,0.3)", background: "rgba(212,160,84,0.08)" }}>
             Create First Alert
           </button>
         </div>
@@ -383,7 +383,7 @@ export default function AlertConfig() {
           return (
             <div key={alert.id}
               className="group rounded-xl border cursor-pointer transition-all hover:border-opacity-50"
-              style={{ borderColor: alert.status === "firing" ? "rgba(239,68,68,0.25)" : "rgba(255,255,255,0.07)", background: alert.status === "firing" ? "rgba(239,68,68,0.04)" : "rgba(255,255,255,0.012)" }}
+              style={{ borderColor: alert.status === "firing" ? "rgba(196,90,74,0.25)" : "rgba(255,255,255,0.07)", background: alert.status === "firing" ? "rgba(196,90,74,0.04)" : "rgba(255,255,255,0.012)" }}
               onClick={() => setSelectedAlert(alert.id)}
             >
               <div className="p-4 flex items-center gap-4">
@@ -391,7 +391,7 @@ export default function AlertConfig() {
                   <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border" style={{ color: sc.color, background: sc.bg, borderColor: sc.border }}>
                     {sc.icon}{sc.label}
                   </span>
-                  {alert.status === "firing" && <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-red-500" />}
+                  {alert.status === "firing" && <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-[#c45a4a]" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -404,15 +404,15 @@ export default function AlertConfig() {
                 </div>
                 <div className="shrink-0 flex items-center gap-3">
                   <div className="text-right">
-                    <div className="text-[10px] font-mono" style={{ color: alert.firingCount > 0 ? "#ef4444" : "rgba(255,255,255,0.3)" }}>{alert.firingCount}x fired</div>
+                    <div className="text-[10px] font-mono" style={{ color: alert.firingCount > 0 ? "#c45a4a" : "rgba(255,255,255,0.3)" }}>{alert.firingCount}x fired</div>
                     {alert.lastFiredAt && <div className="text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>
                       {new Date(alert.lastFiredAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                     </div>}
                   </div>
                   <button
                     onClick={e => { e.stopPropagation(); if (confirm("Delete this alert?")) deleteMutation.mutate(alert.id); }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-500/10"
-                    style={{ color: "rgba(239,68,68,0.5)" }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-[#c45a4a]/10"
+                    style={{ color: "rgba(196,90,74,0.5)" }}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

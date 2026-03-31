@@ -45,7 +45,7 @@ export function WelcomeOverlay({
   subtitle,
   description,
   features,
-  accentColor = "#6366f1",
+  accentColor = "#8b7ac8",
   icon: AppIcon,
   onDismiss,
 }: WelcomeOverlayProps) {

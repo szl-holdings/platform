@@ -73,7 +73,7 @@ export function exportToCSV(
 }
 
 export function exportToPDF(options: ExportOptions = {}): void {
-  const { title = "Report", subtitle, appName = "SZL Platform", accentColor = "#a855f7", filename = "report" } = options;
+  const { title = "Report", subtitle, appName = "SZL Platform", accentColor = "#8b7ac8", filename = "report" } = options;
 
   const timestamp = new Date().toLocaleString();
 
@@ -116,7 +116,7 @@ export function exportToPDF(options: ExportOptions = {}): void {
         .header-brand-logo {
           width: 32px;
           height: 32px;
-          background: linear-gradient(135deg, #a855f7, #3b82f6);
+          background: linear-gradient(135deg, #8b7ac8, #4a90b8);
           border-radius: 8px;
           display: flex;
           align-items: center;

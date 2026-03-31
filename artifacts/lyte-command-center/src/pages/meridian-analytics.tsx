@@ -23,7 +23,7 @@ const heatmapData = [
 ];
 
 function HeatCell({ value }: { value: number }) {
-  const bg = value > 80 ? "bg-red-400" : value > 60 ? "bg-amber-400" : value > 40 ? "bg-blue-400" : "bg-emerald-400";
+  const bg = value > 80 ? "bg-[#c45a4a]" : value > 60 ? "bg-[#d4a054]" : value > 40 ? "bg-[#4a90b8]" : "bg-[#6b8f71]";
   const opacity = Math.max(0.3, value / 100);
   return (
     <div className={`w-full h-8 rounded ${bg} flex items-center justify-center text-[10px] font-mono text-white`} style={{ opacity }}>
@@ -50,12 +50,12 @@ export default function MeridianAnalytics() {
               <div className="text-2xl font-display font-bold">
                 {typeof m.current === "number" && m.current > 100 ? m.current.toLocaleString() : m.current}{m.unit}
               </div>
-              <span className={`flex items-center gap-1 text-xs ${m.trend === "up" ? "text-amber-400" : "text-emerald-400"}`}>
+              <span className={`flex items-center gap-1 text-xs ${m.trend === "up" ? "text-[#d4a054]" : "text-[#6b8f71]"}`}>
                 {m.trend === "up" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
               </span>
             </div>
             <div className="mt-2 w-full bg-muted rounded-full h-2">
-              <div className={`h-2 rounded-full ${typeof m.current === "number" && m.current > 80 ? "bg-red-400" : m.current > 60 ? "bg-amber-400" : "bg-emerald-400"}`} style={{ width: `${Math.min(typeof m.current === "number" ? m.current : 50, 100)}%` }} />
+              <div className={`h-2 rounded-full ${typeof m.current === "number" && m.current > 80 ? "bg-[#c45a4a]" : m.current > 60 ? "bg-[#d4a054]" : "bg-[#6b8f71]"}`} style={{ width: `${Math.min(typeof m.current === "number" ? m.current : 50, 100)}%` }} />
             </div>
             <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
               <span>Avg: {typeof m.avg === "number" && m.avg > 100 ? m.avg.toLocaleString() : m.avg}{m.unit}</span>
@@ -67,7 +67,7 @@ export default function MeridianAnalytics() {
 
       <div className="rounded-xl border border-border bg-card p-5">
         <h2 className="font-display font-semibold mb-4 flex items-center gap-2">
-          <Zap className="w-4 h-4 text-amber-400" /> Resource Utilization Heatmap (24h)
+          <Zap className="w-4 h-4 text-[#d4a054]" /> Resource Utilization Heatmap (24h)
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[500px]">
@@ -100,7 +100,7 @@ export default function MeridianAnalytics() {
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <div className="p-4 border-b border-border">
           <h2 className="font-display font-semibold flex items-center gap-2">
-            <Clock className="w-4 h-4 text-blue-400" /> Service Latency Distribution
+            <Clock className="w-4 h-4 text-[#4a90b8]" /> Service Latency Distribution
           </h2>
         </div>
         <table className="w-full">
@@ -121,7 +121,7 @@ export default function MeridianAnalytics() {
                 <td className="p-4 text-center text-sm font-mono">{s.p95}ms</td>
                 <td className="p-4 text-center text-sm font-mono text-muted-foreground">{s.p99}ms</td>
                 <td className="p-4 text-center">
-                  <span className={`px-2 py-0.5 rounded text-xs font-semibold ${s.status === "healthy" ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"}`}>
+                  <span className={`px-2 py-0.5 rounded text-xs font-semibold ${s.status === "healthy" ? "bg-[#6b8f71]/10 text-[#6b8f71]" : "bg-[#d4a054]/10 text-[#d4a054]"}`}>
                     {s.status}
                   </span>
                 </td>

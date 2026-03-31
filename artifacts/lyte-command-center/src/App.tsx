@@ -24,7 +24,7 @@ const queryClient = new QueryClient({
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(212,160,84,0.25)", borderTopColor: "#d4a054" }} />
     </div>
   );
 }
@@ -56,6 +56,7 @@ const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
 const CommandInboxLegacy = lazy(() => import("@/pages/action-queue"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard-builder"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
 const ApmInstrumentation = lazy(() => import("@/pages/apm-instrumentation"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
@@ -79,7 +80,7 @@ function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={CommandInbox} />
+        <Route path="/" component={Dashboard} />
         <Route path="/inbox" component={CommandInbox} />
         <Route path="/signals" component={SignalsPage} />
         <Route path="/actions" component={ActionsPage} />
@@ -144,9 +145,9 @@ const lyteShortcuts: KeyboardShortcut[] = [
 
 function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   return (
-    <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor="#f59e0b">
+    <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor="#d4a054">
       <div className="flex flex-col h-screen bg-[#080c14]">
-        <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor="#f59e0b" />
+        <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor="#d4a054" />
         <div className="flex-1 overflow-hidden">
           <LyteLayout>
             <PrivateRouter />
@@ -158,14 +159,14 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         onClose={() => setCmdOpen(false)}
         commands={lyteCommands}
         appName="Lyte"
-        accentColor="#f59e0b"
+        accentColor="#d4a054"
       />
       <WelcomeOverlay
         appId="lyte"
         appName="Lyte"
         subtitle="Business Observability"
         description="In the dark, let Lyte guide you. Lyte is the business observability layer that detects operational risk, surfaces ownership gaps, and routes action before business damage occurs."
-        accentColor="#f59e0b"
+        accentColor="#d4a054"
         icon={Zap}
         features={[
           { icon: Activity, title: "PRISM Framework", description: "Pulse, Risk, Intelligence, Signals, Motion — the spine of business observability" },
@@ -193,8 +194,9 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 
   const params = new URLSearchParams(window.location.search);
   const forceWebsite = params.get("view") === "website";
+  const forceApp = params.get("view") === "app";
 
-  if (!isAuthenticated || forceWebsite) {
+  if ((!isAuthenticated || forceWebsite) && !forceApp) {
     return (
       <Suspense fallback={<div style={{ height: "100vh", background: "#080c14" }} />}>
         <LyteMarketingLanding onSignIn={login} />

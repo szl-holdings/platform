@@ -30,9 +30,9 @@ const typeIcons: Record<string, typeof Server> = {
 };
 
 const statusStyles: Record<string, { dot: string; bg: string }> = {
-  healthy: { dot: "bg-emerald-400", bg: "border-emerald-500/20" },
-  degraded: { dot: "bg-amber-400 animate-pulse", bg: "border-amber-500/30 bg-amber-500/5" },
-  down: { dot: "bg-red-400 animate-pulse", bg: "border-red-500/30 bg-red-500/5" },
+  healthy: { dot: "bg-[#6b8f71]", bg: "border-[#6b8f71]/20" },
+  degraded: { dot: "bg-[#d4a054] animate-pulse", bg: "border-[#d4a054]/30 bg-[#d4a054]/5" },
+  down: { dot: "bg-[#c45a4a] animate-pulse", bg: "border-[#c45a4a]/30 bg-[#c45a4a]/5" },
 };
 
 const regions = [...new Set(services.map(s => s.region))];
@@ -52,15 +52,15 @@ export default function Topology() {
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <Server className="w-5 h-5 text-blue-400" />
+          <Server className="w-5 h-5 text-[#4a90b8]" />
           <div><div className="text-xl font-bold">{services.length}</div><div className="text-xs text-muted-foreground">Total Services</div></div>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <Activity className="w-5 h-5 text-emerald-400" />
+          <Activity className="w-5 h-5 text-[#6b8f71]" />
           <div><div className="text-xl font-bold">{healthyCount}</div><div className="text-xs text-muted-foreground">Healthy</div></div>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <AlertTriangle className="w-5 h-5 text-[#d4a054]" />
           <div><div className="text-xl font-bold">{degradedCount}</div><div className="text-xs text-muted-foreground">Degraded</div></div>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
@@ -72,7 +72,7 @@ export default function Topology() {
       {regions.map((region) => (
         <div key={region} className="rounded-xl border border-border bg-card">
           <div className="p-4 border-b border-border flex items-center gap-2">
-            <Cloud className="w-4 h-4 text-blue-400" />
+            <Cloud className="w-4 h-4 text-[#4a90b8]" />
             <h2 className="font-display font-semibold">{region}</h2>
             <span className="text-xs text-muted-foreground">({services.filter(s => s.region === region).length} services)</span>
           </div>
@@ -94,7 +94,7 @@ export default function Topology() {
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-xs mb-2">
                     <div><span className="text-muted-foreground">Latency:</span> <span className="font-medium">{svc.latency}</span></div>
-                    <div><span className="text-muted-foreground">Load:</span> <span className={`font-medium ${svc.load > 80 ? "text-red-400" : svc.load > 60 ? "text-amber-400" : "text-emerald-400"}`}>{svc.load}%</span></div>
+                    <div><span className="text-muted-foreground">Load:</span> <span className={`font-medium ${svc.load > 80 ? "text-[#c45a4a]" : svc.load > 60 ? "text-[#d4a054]" : "text-[#6b8f71]"}`}>{svc.load}%</span></div>
                     <div><span className="text-muted-foreground">Type:</span> <span className="font-medium capitalize">{svc.type}</span></div>
                   </div>
                   {svc.connections.length > 0 && (

@@ -13,18 +13,18 @@ const LENS_ICONS: Record<string, string> = {
 
 function statusColor(status: string): string {
   switch (status) {
-    case "healthy": return "text-emerald-400";
-    case "degraded": return "text-amber-400";
-    case "critical": return "text-red-400";
+    case "healthy": return "text-[#6b8f71]";
+    case "degraded": return "text-[#d4a054]";
+    case "critical": return "text-[#c45a4a]";
     default: return "text-slate-400";
   }
 }
 
 function statusBg(status: string): string {
   switch (status) {
-    case "healthy": return "bg-emerald-400/10 border-emerald-400/20";
-    case "degraded": return "bg-amber-400/10 border-amber-400/20";
-    case "critical": return "bg-red-400/10 border-red-400/20";
+    case "healthy": return "bg-[#6b8f71]/10 border-[#6b8f71]/20";
+    case "degraded": return "bg-[#d4a054]/10 border-[#d4a054]/20";
+    case "critical": return "bg-[#c45a4a]/10 border-[#c45a4a]/20";
     default: return "bg-slate-400/10 border-slate-400/20";
   }
 }
@@ -33,7 +33,7 @@ function PortfolioScoreRing({ score, size = 120 }: { score: number; size?: numbe
   const r = (size - 12) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (score / 100) * circ;
-  const color = score >= 80 ? "#10b981" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const color = score >= 80 ? "#6b8f71" : score >= 50 ? "#d4a054" : "#c45a4a";
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -107,7 +107,7 @@ function LensAggregateRow({ lensId, apps }: { lensId: LensId; apps: AppObservabi
       </div>
       <div className="flex items-center gap-1">
         {scores.map((s, i) => (
-          <div key={i} className={`w-6 h-6 rounded text-[9px] font-bold flex items-center justify-center ${s >= 80 ? "bg-emerald-400/10 text-emerald-400" : s >= 50 ? "bg-amber-400/10 text-amber-400" : "bg-red-400/10 text-red-400"}`}>
+          <div key={i} className={`w-6 h-6 rounded text-[9px] font-bold flex items-center justify-center ${s >= 80 ? "bg-[#6b8f71]/10 text-[#6b8f71]" : s >= 50 ? "bg-[#d4a054]/10 text-[#d4a054]" : "bg-[#c45a4a]/10 text-[#c45a4a]"}`}>
             {s}
           </div>
         ))}
@@ -202,7 +202,7 @@ export default function PortfolioObservability() {
           <p className="text-sm text-slate-400 mt-1">The 6 Lenses of Business Observability across {appStates.length} portfolio applications</p>
         </div>
         <div className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium ${statusBg(portfolioStatus)} ${statusColor(portfolioStatus)}`}>
-          <span className={`w-2 h-2 rounded-full ${portfolioStatus === "healthy" ? "bg-emerald-400" : portfolioStatus === "degraded" ? "bg-amber-400" : "bg-red-400"}`} />
+          <span className={`w-2 h-2 rounded-full ${portfolioStatus === "healthy" ? "bg-[#6b8f71]" : portfolioStatus === "degraded" ? "bg-[#d4a054]" : "bg-[#c45a4a]"}`} />
           Portfolio: {portfolioStatus}
         </div>
       </div>
@@ -254,7 +254,7 @@ export default function PortfolioObservability() {
             const lensId = e.lens || e.pillar;
             return (
               <div key={e.id} className="flex items-start gap-3 py-2 px-4 hover:bg-white/5 transition-colors">
-                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs flex-shrink-0 mt-0.5 ${e.severity === "critical" ? "text-red-400 bg-red-400/10" : e.severity === "warning" ? "text-amber-400 bg-amber-400/10" : "text-blue-400 bg-blue-400/10"}`}>
+                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs flex-shrink-0 mt-0.5 ${e.severity === "critical" ? "text-[#c45a4a] bg-[#c45a4a]/10" : e.severity === "warning" ? "text-[#d4a054] bg-[#d4a054]/10" : "text-[#4a90b8] bg-[#4a90b8]/10"}`}>
                   {e.severity === "critical" ? "!" : e.severity === "warning" ? "▲" : "●"}
                 </span>
                 <div className="flex-1 min-w-0">

@@ -9,10 +9,10 @@ interface DataProvenanceProps {
 }
 
 const STATE_DOT: Record<string, string> = {
-  live: "#10b981",
-  demo: "#3b82f6",
-  simulated: "#8b5cf6",
-  cached: "#f59e0b",
+  live: "#6b8f71",
+  demo: "#4a90b8",
+  simulated: "#8b7ac8",
+  cached: "#d4a054",
 };
 
 const STATE_LABEL: Record<string, string> = {
@@ -180,11 +180,11 @@ const ACTION_ICONS: Record<string, string> = {
 };
 
 const ACTION_COLORS: Record<string, string> = {
-  remediate: "#10b981",
-  approve: "#22c55e",
-  escalate: "#ef4444",
-  assign: "#3b82f6",
-  investigate: "#8b5cf6",
+  remediate: "#6b8f71",
+  approve: "#6b8f71",
+  escalate: "#c45a4a",
+  assign: "#4a90b8",
+  investigate: "#8b7ac8",
   dismiss: "#6b7280",
 };
 

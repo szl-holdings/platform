@@ -6,15 +6,15 @@ const HOW_LYTE_WORKS = [
   {
     step: "01",
     label: "Ingest",
-    color: "border-red-500/20 bg-red-500/5",
-    accent: "text-red-400",
+    color: "border-[#c45a4a]/20 bg-[#c45a4a]/5",
+    accent: "text-[#c45a4a]",
     desc: "Lyte connects to your operational data sources — CRM, ERP, project management, finance systems — and continuously monitors for signal anomalies across approval chains, workflow queues, and ownership records.",
   },
   {
     step: "02",
     label: "Detect",
-    color: "border-orange-500/20 bg-orange-500/5",
-    accent: "text-orange-400",
+    color: "border-[#c8953c]/20 bg-[#c8953c]/5",
+    accent: "text-[#c8953c]",
     desc: "The signal engine surfaces anomalies with severity scoring, affected function, owner attribution, and value-at-risk estimation. Every signal carries context — not just a data point.",
   },
   {
@@ -34,8 +34,8 @@ const HOW_LYTE_WORKS = [
   {
     step: "05",
     label: "Approve",
-    color: "border-emerald-500/20 bg-emerald-500/5",
-    accent: "text-emerald-400",
+    color: "border-[#6b8f71]/20 bg-[#6b8f71]/5",
+    accent: "text-[#6b8f71]",
     desc: "High-stakes actions route through human approval gates. Lyte keeps humans in the loop on consequential decisions while automating the routine.",
   },
 ];
@@ -59,8 +59,8 @@ const ROLE_CARDS = [
     role: "Delivery & Sales",
     headline: "Pipeline and delivery in one view",
     description: "Deal stage health. Implementation handoff status. SOW signing age. Renewal calendar. All surfaced through the lens of what's moving and what's stuck.",
-    color: "border-amber-500/30 bg-amber-500/5",
-    labelColor: "text-amber-400",
+    color: "border-[#d4a054]/30 bg-[#d4a054]/5",
+    labelColor: "text-[#d4a054]",
   },
 ];
 
@@ -81,9 +81,9 @@ const SIGNALS_PREVIEW = [
 ];
 
 const severityColors: Record<string, string> = {
-  critical: "text-red-400 border-red-500/20 bg-red-500/5",
-  high: "text-orange-400 border-orange-500/20 bg-orange-500/5",
-  medium: "text-amber-400 border-amber-500/20 bg-amber-500/5",
+  critical: "text-[#c45a4a] border-[#c45a4a]/20 bg-[#c45a4a]/5",
+  high: "text-[#c8953c] border-[#c8953c]/20 bg-[#c8953c]/5",
+  medium: "text-[#d4a054] border-[#d4a054]/20 bg-[#d4a054]/5",
 };
 
 export default function LandingPage() {
@@ -132,7 +132,7 @@ export default function LandingPage() {
           <div className="text-[11px] text-slate-600 text-center mb-3 uppercase tracking-wide">Live signal preview</div>
           {SIGNALS_PREVIEW.map((s, i) => (
             <div key={i} className={cn("flex items-start gap-3 p-3.5 rounded-xl border text-[12px]", severityColors[s.severity])}>
-              <div className={cn("w-2 h-2 rounded-full mt-1 shrink-0", s.severity === "critical" ? "bg-red-500 animate-pulse" : "bg-orange-500")} />
+              <div className={cn("w-2 h-2 rounded-full mt-1 shrink-0", s.severity === "critical" ? "bg-[#c45a4a] animate-pulse" : "bg-[#c8953c]")} />
               <div className="flex-1 min-w-0">
                 <span className="font-medium text-white/90">{s.title}</span>
                 <span className="text-slate-500 ml-2 text-[10px]">· {s.func}</span>
@@ -155,7 +155,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-3 gap-4">
           {[
-            { step: "01", label: "Signals", color: "border-red-500/20 bg-red-500/5", accent: "text-red-400", icon: Activity, desc: "Lyte detects anomalies across approval chains, workflow queues, ownership records, forecast data, and pipeline health. Every signal carries severity, affected function, owner, and value at risk." },
+            { step: "01", label: "Signals", color: "border-[#c45a4a]/20 bg-[#c45a4a]/5", accent: "text-[#c45a4a]", icon: Activity, desc: "Lyte detects anomalies across approval chains, workflow queues, ownership records, forecast data, and pipeline health. Every signal carries severity, affected function, owner, and value at risk." },
             { step: "02", label: "Intelligence", color: "border-violet-500/20 bg-violet-500/5", accent: "text-violet-400", icon: Eye, desc: "Correlated signals become Narrative Intelligence — human-readable paragraphs explaining what's happening, why it matters, and the business consequence. No decoding required." },
             { step: "03", label: "Actions", color: "border-cyan-500/20 bg-cyan-500/5", accent: "text-cyan-400", icon: Zap, desc: "Each insight surfaces a prioritized action with owner, urgency, estimated value protected, and dependency chain. Your next move is always clear." },
           ].map(card => {
@@ -261,7 +261,7 @@ export default function LandingPage() {
         </p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {[
-            { metric: "4 min", label: "Detection-to-action time", detail: "Approval queue stall identified and routed to owner in under 4 minutes", accent: "#06b6d4" },
+            { metric: "4 min", label: "Detection-to-action time", detail: "Approval queue stall identified and routed to owner in under 4 minutes", accent: "#4a90b8" },
             { metric: "$340K", label: "Revenue recovered / quarter", detail: "Critical approval stall surfaced 8 days before the weekly review would have", accent: "#0891b2" },
             { metric: "8 days", label: "Lead over manual review", detail: "Lyte's continuous monitoring eliminated the 7-day blind spot in weekly ops reviews", accent: "#0e7490" },
             { metric: "14", label: "Approval workflows monitored", detail: "Continuous — across procurement, legal, and finance; ownership gaps auto-detected", accent: "#155e75" },

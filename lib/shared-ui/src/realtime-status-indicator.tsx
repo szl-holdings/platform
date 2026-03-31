@@ -14,20 +14,20 @@ export function RealtimeStatusIndicator({
 }: RealtimeStatusIndicatorProps) {
   const config = {
     connected: {
-      dot: "bg-emerald-400",
-      text: "text-emerald-400",
+      dot: "bg-[#6b8f71]",
+      text: "text-[#6b8f71]",
       label: "Live",
       pulse: true,
     },
     reconnecting: {
-      dot: "bg-amber-400",
-      text: "text-amber-400",
+      dot: "bg-[#d4a054]",
+      text: "text-[#d4a054]",
       label: "Reconnecting",
       pulse: true,
     },
     offline: {
-      dot: "bg-red-400",
-      text: "text-red-400",
+      dot: "bg-[#c45a4a]",
+      text: "text-[#c45a4a]",
       label: "Offline",
       pulse: false,
     },
@@ -55,9 +55,9 @@ export function RealtimeStatusIndicator({
     <span
       className={cn(
         "inline-flex items-center gap-1.5 text-[10px] font-mono font-semibold uppercase tracking-wide px-2 py-0.5 rounded border",
-        status === "connected" && "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-        status === "reconnecting" && "text-amber-400 bg-amber-500/10 border-amber-500/20",
-        status === "offline" && "text-red-400 bg-red-500/10 border-red-500/20",
+        status === "connected" && "text-[#6b8f71] bg-[#6b8f71]/10 border-[#6b8f71]/20",
+        status === "reconnecting" && "text-[#d4a054] bg-[#d4a054]/10 border-[#d4a054]/20",
+        status === "offline" && "text-[#c45a4a] bg-red-500/10 border-red-500/20",
         className,
       )}
       title={`WebSocket: ${c.label}`}

@@ -9,17 +9,17 @@ import {
 
 const itemTypeConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   launch_gate: { label: "Launch Gate", icon: Shield, color: "text-cyan-400" },
-  blocker: { label: "Blocker", icon: Lock, color: "text-red-400" },
-  dependency: { label: "Dependency", icon: Activity, color: "text-purple-400" },
-  milestone: { label: "Milestone", icon: Cpu, color: "text-emerald-400" },
-  owner_check: { label: "Owner Check", icon: Users, color: "text-amber-400" },
+  blocker: { label: "Blocker", icon: Lock, color: "text-[#c45a4a]" },
+  dependency: { label: "Dependency", icon: Activity, color: "text-[#8b7ac8]" },
+  milestone: { label: "Milestone", icon: Cpu, color: "text-[#6b8f71]" },
+  owner_check: { label: "Owner Check", icon: Users, color: "text-[#d4a054]" },
 };
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  complete: { label: "Complete", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+  complete: { label: "Complete", color: "text-[#6b8f71]", bg: "bg-[#6b8f71]/10", border: "border-[#6b8f71]/20" },
   in_progress: { label: "In Progress", color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20" },
   not_started: { label: "Not Started", color: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-500/20" },
-  blocked: { label: "Blocked", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
+  blocked: { label: "Blocked", color: "text-[#c45a4a]", bg: "bg-[#c45a4a]/10", border: "border-[#c45a4a]/20" },
   waived: { label: "Waived", color: "text-slate-500", bg: "bg-slate-500/5", border: "border-slate-500/15" },
 };
 
@@ -32,7 +32,7 @@ function computeScore(items: LyteReadinessItem[]): number {
 }
 
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444";
+  const color = score >= 80 ? "#6b8f71" : score >= 60 ? "#d4a054" : "#c45a4a";
   const r = 36;
   const circ = 2 * Math.PI * r;
   const dash = (score / 100) * circ;
@@ -72,7 +72,7 @@ function ReadinessItemCard({ item, onUpdate }: { item: LyteReadinessItem; onUpda
   };
 
   return (
-    <div className={cn("rounded-xl border transition-all", item.status === "blocked" ? "border-red-500/20" : "border-white/5")}>
+    <div className={cn("rounded-xl border transition-all", item.status === "blocked" ? "border-[#c45a4a]/20" : "border-white/5")}>
       <button
         className="w-full text-left p-4 flex items-start gap-3 hover:bg-white/[0.02] transition-colors"
         onClick={() => setExpanded(!expanded)}
@@ -105,7 +105,7 @@ function ReadinessItemCard({ item, onUpdate }: { item: LyteReadinessItem; onUpda
               <button
                 disabled={!!loading}
                 onClick={() => update("complete")}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-[#6b8f71]/10 border border-[#6b8f71]/20 text-[#6b8f71] hover:bg-[#6b8f71]/20 transition-all disabled:opacity-50"
               >
                 {loading === "complete" ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                 Mark Complete
@@ -179,7 +179,7 @@ export default function ReadinessPage() {
       </div>
 
       {isError && (
-        <div className="p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-sm text-red-400">
+        <div className="p-4 rounded-xl border border-[#c45a4a]/20 bg-[#c45a4a]/5 text-sm text-[#c45a4a]">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           Failed to load readiness items — <button onClick={() => refetch()} className="underline">retry</button>
         </div>
@@ -190,7 +190,7 @@ export default function ReadinessPage() {
           <div className="relative mb-2">
             <ScoreRing score={score} />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-display font-bold" style={{ color: score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444" }}>{score}</span>
+              <span className="text-2xl font-display font-bold" style={{ color: score >= 80 ? "#6b8f71" : score >= 60 ? "#d4a054" : "#c45a4a" }}>{score}</span>
             </div>
           </div>
           <div className="text-[11px] text-slate-500 text-center">Readiness Score</div>
@@ -199,9 +199,9 @@ export default function ReadinessPage() {
         <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: "Total Items", value: items.length, color: "text-white" },
-            { label: "Complete", value: completeCount, color: "text-emerald-400" },
+            { label: "Complete", value: completeCount, color: "text-[#6b8f71]" },
             { label: "In Progress", value: inProgressCount, color: "text-cyan-400" },
-            { label: "Blocked", value: blockedCount, color: "text-red-400" },
+            { label: "Blocked", value: blockedCount, color: "text-[#c45a4a]" },
           ].map(stat => (
             <div key={stat.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02]">
               <div className="text-[11px] text-slate-400 mb-1">{stat.label}</div>

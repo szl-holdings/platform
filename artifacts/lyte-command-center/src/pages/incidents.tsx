@@ -8,14 +8,14 @@ import { ExportButton } from "@workspace/shared-ui/data-export";
 import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
 const severityColors = {
-  critical: "bg-red-500/20 text-red-400 border-red-500/30",
-  high: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  critical: "bg-[#c45a4a]/20 text-[#c45a4a] border-[#c45a4a]/30",
+  high: "bg-[#c8953c]/20 text-[#c8953c] border-[#c8953c]/30",
   medium: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  low: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  low: "bg-[#4a90b8]/20 text-[#4a90b8] border-[#4a90b8]/30",
 };
 
 const severityGlows = {
-  critical: "shadow-[0_0_20px_rgba(239,68,68,0.1)]",
+  critical: "shadow-[0_0_20px_rgba(196,90,74,0.1)]",
   high: "shadow-[0_0_15px_rgba(249,115,22,0.08)]",
   medium: "",
   low: "",
@@ -24,10 +24,10 @@ const severityGlows = {
 const statusOrder = ["open", "investigating", "mitigating", "resolved", "closed"];
 
 const statusStepColors: Record<string, string> = {
-  open: "bg-red-500",
-  investigating: "bg-orange-500",
+  open: "bg-[#c45a4a]",
+  investigating: "bg-[#c8953c]",
   mitigating: "bg-yellow-500",
-  resolved: "bg-emerald-500",
+  resolved: "bg-[#6b8f71]",
   closed: "bg-slate-500",
 };
 
@@ -41,8 +41,8 @@ function StatusTimeline({ currentStatus }: { currentStatus: string }) {
             "w-2 h-2 rounded-full transition-all",
             i <= currentIdx ? statusStepColors[step] : "bg-slate-700",
             i === currentIdx && "ring-2 ring-offset-1 ring-offset-transparent w-2.5 h-2.5",
-            i === currentIdx && step === 'open' && "ring-red-500/50",
-            i === currentIdx && step === 'investigating' && "ring-orange-500/50",
+            i === currentIdx && step === 'open' && "ring-[#c45a4a]/50",
+            i === currentIdx && step === 'investigating' && "ring-[#c8953c]/50",
             i === currentIdx && step === 'mitigating' && "ring-yellow-500/50",
             i === currentIdx && step === 'resolved' && "ring-emerald-500/50",
             i === currentIdx && step === 'closed' && "ring-slate-500/50",
@@ -112,7 +112,7 @@ export default function Incidents() {
           <div className="flex items-center gap-2 text-xs">
             <span className="text-slate-500">{openCount} open</span>
             {criticalCount > 0 && (
-              <span className="text-red-400 bg-red-400/10 px-2 py-0.5 rounded-full border border-red-400/20 font-medium">
+              <span className="text-[#c45a4a] bg-[#c45a4a]/10 px-2 py-0.5 rounded-full border border-[#c45a4a]/20 font-medium">
                 {criticalCount} critical
               </span>
             )}
@@ -136,7 +136,7 @@ export default function Incidents() {
               "Assigned To": i.assignedTo || "",
               "Created At": i.createdAt || "",
             }))}
-            options={{ filename: "incidents", title: "Incident Tracker", accentColor: "#06b6d4" }}
+            options={{ filename: "incidents", title: "Incident Tracker", accentColor: "#4a90b8" }}
           />
           <button 
             onClick={handleCreate}
@@ -165,10 +165,10 @@ export default function Incidents() {
                 onClick={() => setExpandedId(expandedId === inc.id ? null : inc.id)}
               >
                 {inc.severity === 'critical' && isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#c45a4a] shadow-[0_0_8px_rgba(196,90,74,0.6)]" />
                 )}
                 {inc.severity === 'high' && isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#c8953c]" />
                 )}
 
                 <div className="flex items-center gap-6 relative z-10">
@@ -224,7 +224,7 @@ export default function Incidents() {
                             {isActive ? (
                               <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
                             ) : (
-                              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                              <ShieldCheck className="w-4 h-4 text-[#6b8f71]" />
                             )}
                             {inc.status}
                           </div>

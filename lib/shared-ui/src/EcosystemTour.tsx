@@ -87,7 +87,7 @@ export function EcosystemTour({
 
   const step = steps[currentStep];
   const Icon = step.icon;
-  const accentColor = step.accentColor || "#6366f1";
+  const accentColor = step.accentColor || "#8b7ac8";
   const isLast = currentStep === steps.length - 1;
 
   return (

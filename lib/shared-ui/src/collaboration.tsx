@@ -94,8 +94,8 @@ function renderMarkdown(content: string): React.ReactNode {
 }
 
 const AVATAR_COLORS = [
-  "bg-blue-500", "bg-violet-500", "bg-emerald-500",
-  "bg-amber-500", "bg-rose-500", "bg-cyan-500",
+  "bg-blue-500", "bg-violet-500", "bg-[#6b8f71]",
+  "bg-[#d4a054]", "bg-rose-500", "bg-cyan-500",
   "bg-orange-500", "bg-teal-500",
 ];
 

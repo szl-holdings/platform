@@ -30,7 +30,7 @@ function formatBytes(b: number) {
 }
 
 function StatusDot({ status }: { status: string }) {
-  const color = status === "healthy" || status === "active" ? "bg-emerald-500" : status === "demo" ? "bg-amber-500" : "bg-red-500";
+  const color = status === "healthy" || status === "active" ? "bg-[#6b8f71]" : status === "demo" ? "bg-[#d4a054]" : "bg-[#c45a4a]";
   return <span className={`inline-block w-2 h-2 rounded-full ${color}`} />;
 }
 
@@ -46,7 +46,7 @@ export default function AdminOverview() {
     <div className="space-y-4">
       <h1 className="text-xl font-display font-bold text-foreground flex items-center gap-2"><Server className="w-5 h-5 text-primary" />Administration Overview</h1>
       <div className="bg-card border border-border rounded-xl p-6 text-center text-muted-foreground">
-        <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+        <AlertTriangle className="w-8 h-8 text-[#d4a054] mx-auto mb-2" />
         <p>Admin API unavailable — connect to the API server to view live data</p>
       </div>
     </div>
@@ -74,8 +74,8 @@ export default function AdminOverview() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { icon: Layers, label: "Apps", value: `${data.counts.activeApps}/${data.counts.apps}`, sub: "active", color: "text-primary" },
-          { icon: Zap, label: "Connectors", value: `${data.counts.liveConnectors}/${data.counts.connectors}`, sub: "live", color: "text-emerald-400" },
-          { icon: Users, label: "Users", value: `${data.counts.activeUsers}/${data.counts.users}`, sub: "active", color: "text-blue-400" },
+          { icon: Zap, label: "Connectors", value: `${data.counts.liveConnectors}/${data.counts.connectors}`, sub: "live", color: "text-[#6b8f71]" },
+          { icon: Users, label: "Users", value: `${data.counts.activeUsers}/${data.counts.users}`, sub: "active", color: "text-[#4a90b8]" },
           { icon: Activity, label: "Uptime", value: formatUptime(data.system.uptime), sub: data.system.platform, color: "text-cyan-400" },
         ].map(({ icon: Icon, label, value, sub, color }) => (
           <div key={label} className="rounded-xl border border-border bg-card p-4">
@@ -108,7 +108,7 @@ export default function AdminOverview() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Heap Used</span><span>{formatBytes(mem.heapUsed)}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Heap Total</span><span>{formatBytes(mem.heapTotal)}</span></div>
-            <div className="h-2 bg-muted rounded-full mt-2"><div className={`h-full rounded-full ${heapPct > 80 ? "bg-red-400" : heapPct > 60 ? "bg-amber-400" : "bg-emerald-400"}`} style={{ width: `${heapPct}%` }} /></div>
+            <div className="h-2 bg-muted rounded-full mt-2"><div className={`h-full rounded-full ${heapPct > 80 ? "bg-[#c45a4a]" : heapPct > 60 ? "bg-[#d4a054]" : "bg-[#6b8f71]"}`} style={{ width: `${heapPct}%` }} /></div>
           </div>
         </div>
       </div>

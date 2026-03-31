@@ -28,8 +28,8 @@ export default function InsightsPage() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Active Insights", value: narrativeInsights.length, color: "text-white" },
-          { label: "Worsening", value: narrativeInsights.filter(i => i.trend === "worsening").length, color: "text-red-400" },
-          { label: "Total VaR Covered", value: formatCurrency(narrativeInsights.reduce((sum, i) => sum + i.valueAtRisk, 0)), color: "text-amber-400" },
+          { label: "Worsening", value: narrativeInsights.filter(i => i.trend === "worsening").length, color: "text-[#c45a4a]" },
+          { label: "Total VaR Covered", value: formatCurrency(narrativeInsights.reduce((sum, i) => sum + i.valueAtRisk, 0)), color: "text-[#d4a054]" },
         ].map(stat => (
           <div key={stat.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02]">
             <div className="text-[11px] text-slate-400 mb-1">{stat.label}</div>
@@ -42,7 +42,7 @@ export default function InsightsPage() {
         {narrativeInsights.map(ins => {
           const c = severityColors[ins.severity];
           const TrendIcon = ins.trend === "worsening" ? TrendingUp : ins.trend === "improving" ? TrendingDown : Minus;
-          const trendColor = ins.trend === "worsening" ? "text-red-400" : ins.trend === "improving" ? "text-emerald-400" : "text-amber-400";
+          const trendColor = ins.trend === "worsening" ? "text-[#c45a4a]" : ins.trend === "improving" ? "text-[#6b8f71]" : "text-[#d4a054]";
 
           return (
             <article key={ins.id} className={cn("rounded-xl border p-5", c.border, c.bg)}>

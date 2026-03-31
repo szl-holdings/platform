@@ -25,16 +25,16 @@ async function apiFetch(path: string, options?: RequestInit) {
 
 const STATUS_CONFIG = {
   draft: { label: "Draft", color: "text-slate-400", bg: "bg-slate-500/10 border-slate-500/20", icon: Edit3 },
-  review: { label: "In Review", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", icon: Clock },
-  approved: { label: "Approved", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle },
-  signed: { label: "Signed", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20", icon: CheckCircle },
+  review: { label: "In Review", color: "text-[#d4a054]", bg: "bg-[#d4a054]/10 border-[#d4a054]/20", icon: Clock },
+  approved: { label: "Approved", color: "text-[#6b8f71]", bg: "bg-[#6b8f71]/10 border-[#6b8f71]/20", icon: CheckCircle },
+  signed: { label: "Signed", color: "text-[#4a90b8]", bg: "bg-blue-500/10 border-blue-500/20", icon: CheckCircle },
   archived: { label: "Archived", color: "text-slate-500", bg: "bg-slate-600/10 border-slate-600/20", icon: XCircle },
 };
 
 const SIG_CONFIG = {
   pending: { label: "Pending", color: "text-slate-400", icon: Clock },
-  viewed: { label: "Viewed", color: "text-amber-400", icon: Eye },
-  signed: { label: "Signed", color: "text-emerald-400", icon: CheckCircle },
+  viewed: { label: "Viewed", color: "text-[#d4a054]", icon: Eye },
+  signed: { label: "Signed", color: "text-[#6b8f71]", icon: CheckCircle },
   declined: { label: "Declined", color: "text-rose-400", icon: XCircle },
   expired: { label: "Expired", color: "text-slate-500", icon: AlertCircle },
 };
@@ -52,7 +52,7 @@ export function DocumentEnginePanel({
   appSource = "general",
   entityType,
   entityId,
-  accentColor = "#6366f1",
+  accentColor = "#8b7ac8",
   className,
   isDemo = true,
 }: DocumentEnginePanelProps) {
@@ -228,8 +228,8 @@ export function DocumentEnginePanel({
             {[
               { label: "Total", value: stats.total, color: "text-white" },
               { label: "Draft", value: stats.draft, color: "text-slate-400" },
-              { label: "In Review", value: stats.review, color: "text-amber-400" },
-              { label: "Signed", value: stats.signed, color: "text-emerald-400" },
+              { label: "In Review", value: stats.review, color: "text-[#d4a054]" },
+              { label: "Signed", value: stats.signed, color: "text-[#6b8f71]" },
             ].map(s => (
               <div key={s.label} className="rounded-xl border border-white/10 bg-white/5 p-3">
                 <p className="text-[10px] text-white/40 uppercase tracking-wider">{s.label}</p>
@@ -310,7 +310,7 @@ export function DocumentEnginePanel({
               <p className="text-[10px] text-white/40 capitalize">{selectedDoc.type.replace(/_/g, " ")}</p>
             </div>
             <div className="flex items-center gap-2">
-              {saveMessage && <span className="text-xs text-emerald-400">{saveMessage}</span>}
+              {saveMessage && <span className="text-xs text-[#6b8f71]">{saveMessage}</span>}
               <button
                 onClick={() => setView("versions")}
                 className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
@@ -584,7 +584,7 @@ function CommentsPanel({ doc, onBack, accentColor }: { doc: DocumentRecord; onBa
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-semibold text-white/70">{c.authorName}</span>
                 <span className="text-[10px] text-white/30">{new Date(c.createdAt).toLocaleString()}</span>
-                {c.resolved && <span className="text-[10px] text-emerald-400 ml-auto">Resolved</span>}
+                {c.resolved && <span className="text-[10px] text-[#6b8f71] ml-auto">Resolved</span>}
               </div>
               <p className="text-xs text-white/60">{c.content}</p>
             </div>

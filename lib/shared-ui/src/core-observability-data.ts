@@ -684,11 +684,11 @@ export const KPI_FRAMEWORK = {
 };
 
 export const COMMAND_LOOP_PHASES: { phase: CommandPhase; label: string; description: string; product: ProductId; color: string }[] = [
-  { phase: "DETECT", label: "Detect", description: "Surface signals, drift, and degradation", product: "beacon", color: "#0ea5e9" },
-  { phase: "INTERPRET", label: "Interpret", description: "Route accountability and orchestrate response", product: "lyte", color: "#f59e0b" },
-  { phase: "DECIDE", label: "Decide", description: "Model scenarios and recommend actions", product: "alloy", color: "#8b5cf6" },
+  { phase: "DETECT", label: "Detect", description: "Surface signals, drift, and degradation", product: "beacon", color: "#4a90b8" },
+  { phase: "INTERPRET", label: "Interpret", description: "Route accountability and orchestrate response", product: "lyte", color: "#d4a054" },
+  { phase: "DECIDE", label: "Decide", description: "Model scenarios and recommend actions", product: "alloy", color: "#8b7ac8" },
   { phase: "EXECUTE", label: "Execute", description: "Run automations and manage interventions", product: "alloyscape", color: "#4B8BDB" },
-  { phase: "VERIFY", label: "Verify", description: "Confirm recovery and measure value restored", product: "beacon", color: "#10b981" },
+  { phase: "VERIFY", label: "Verify", description: "Confirm recovery and measure value restored", product: "beacon", color: "#6b8f71" },
 ];
 
 export const DRIFT_EVENTS = [
@@ -753,25 +753,25 @@ export function formatDuration(ms: number): string {
 
 export function getSeverityColor(severity: Severity): string {
   return {
-    critical: "#ef4444",
-    high: "#f97316",
-    medium: "#f59e0b",
-    low: "#3b82f6",
+    critical: "#c45a4a",
+    high: "#c8953c",
+    medium: "#d4a054",
+    low: "#4a90b8",
     info: "#6b7280",
   }[severity] ?? "#6b7280";
 }
 
 export function getStateColor(state: EntityState): string {
   return {
-    healthy: "#10b981",
-    degraded: "#f59e0b",
-    blocked: "#ef4444",
-    pending_approval: "#f97316",
-    escalated: "#ec4899",
-    executing: "#0ea5e9",
-    retried: "#8b5cf6",
-    completed: "#10b981",
-    failed: "#ef4444",
-    recovered: "#10b981",
+    healthy: "#6b8f71",
+    degraded: "#d4a054",
+    blocked: "#c45a4a",
+    pending_approval: "#c8953c",
+    escalated: "#c45a4a",
+    executing: "#4a90b8",
+    retried: "#8b7ac8",
+    completed: "#6b8f71",
+    failed: "#c45a4a",
+    recovered: "#6b8f71",
   }[state] ?? "#6b7280";
 }

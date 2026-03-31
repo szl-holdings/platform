@@ -34,24 +34,24 @@ const LEVEL_CONFIG: Record<CommandModeSignalLevel, {
 }> = {
   critical: {
     label: "Critical",
-    color: "#ef4444",
+    color: "#c45a4a",
     bg: "rgba(239,68,68,0.06)",
     border: "rgba(239,68,68,0.18)",
-    dot: "#ef4444",
+    dot: "#c45a4a",
   },
   high: {
     label: "High",
-    color: "#f97316",
+    color: "#c8953c",
     bg: "rgba(249,115,22,0.06)",
     border: "rgba(249,115,22,0.18)",
-    dot: "#f97316",
+    dot: "#c8953c",
   },
   medium: {
     label: "Medium",
-    color: "#f59e0b",
+    color: "#d4a054",
     bg: "rgba(245,158,11,0.06)",
     border: "rgba(245,158,11,0.18)",
-    dot: "#f59e0b",
+    dot: "#d4a054",
   },
   low: {
     label: "Low",

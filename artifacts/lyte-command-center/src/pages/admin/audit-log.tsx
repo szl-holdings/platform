@@ -23,15 +23,15 @@ interface AuditEntry {
 
 const actionIcons: Record<string, typeof FileText> = { auth: Shield, user: User, system: Zap, data: FileText };
 const severityColors: Record<string, string> = {
-  low: "text-emerald-400 bg-emerald-500/10",
-  medium: "text-amber-400 bg-amber-500/10",
-  high: "text-red-400 bg-red-500/10",
-  critical: "text-red-400 bg-red-500/10 ring-1 ring-red-500/30",
+  low: "text-[#6b8f71] bg-[#6b8f71]/10",
+  medium: "text-[#d4a054] bg-[#d4a054]/10",
+  high: "text-[#c45a4a] bg-[#c45a4a]/10",
+  critical: "text-[#c45a4a] bg-[#c45a4a]/10 ring-1 ring-[#c45a4a]/30",
 };
 const statusColors: Record<string, string> = {
-  success: "text-emerald-400",
-  failure: "text-red-400",
-  warning: "text-amber-400",
+  success: "text-[#6b8f71]",
+  failure: "text-[#c45a4a]",
+  warning: "text-[#d4a054]",
 };
 
 export default function AuditLog() {
@@ -59,7 +59,7 @@ export default function AuditLog() {
 
       {error ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
-          <AlertTriangle className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+          <AlertTriangle className="w-8 h-8 text-[#d4a054] mx-auto mb-2" />
           <p>Audit log requires API connection</p>
         </div>
       ) : (
