@@ -247,7 +247,6 @@ export default function CommercialIntelligencePage() {
         setComps(compsRes.comps ?? []);
         setDemoMode(propRes.demoMode !== false);
       } catch {
-        const { CoStarAdapter } = await import("@workspace/services" as never) as { CoStarAdapter: { new(): { getMockProperties(): CommercialProperty[] } } };
       } finally {
         setLoading(false);
       }
