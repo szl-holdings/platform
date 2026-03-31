@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
-import Header from "@/components/Header";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 
@@ -106,11 +105,8 @@ function App() {
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
       <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#c8a96a">
-        <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <Header />
-          <div style={{ flex: 1 }}>
-            <Router />
-          </div>
+        <div style={{ minHeight: "100vh" }}>
+          <Router />
         </div>
         <CommandPalette
           open={cmdOpen}

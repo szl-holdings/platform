@@ -71,7 +71,7 @@ function HeroMesh() {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-24 pb-8 md:pt-28 md:pb-12 lg:pt-32 lg:pb-14" style={{ background: "hsl(210,12%,5%)" }}>
+    <section className="relative overflow-hidden pt-24 pb-16 md:pt-28 md:pb-20 lg:pt-32 lg:pb-24" style={{ background: "hsl(210,12%,5%)", minHeight: "min(88vh, 860px)" }}>
       <HeroMesh />
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{
         background: "radial-gradient(ellipse 70% 50% at 70% 30%, hsla(210,40%,25%,0.06) 0%, transparent 60%)",

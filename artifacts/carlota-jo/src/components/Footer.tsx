@@ -17,7 +17,7 @@ const aboutLinks = [
 ];
 
 const ecosystemLinks = [
-  { label: "SZL Holdings", href: "/" },
+  { label: "SZL Holdings", href: "/szl-holdings/" },
   { label: "Alloy", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },

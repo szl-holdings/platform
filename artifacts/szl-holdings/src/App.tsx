@@ -23,6 +23,8 @@ const CoreCommandPage = lazy(() => import("@/pages/core-command"));
 const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
 const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
 const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
+const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
+const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -204,6 +206,12 @@ function App() {
             </Route>
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
+            </Route>
+            <Route path="/legal/privacy">
+              <Suspense fallback={<PageLoader />}><LegalPrivacyPage /></Suspense>
+            </Route>
+            <Route path="/legal/terms">
+              <Suspense fallback={<PageLoader />}><LegalTermsPage /></Suspense>
             </Route>
             <Route>
               <Redirect to="/" />

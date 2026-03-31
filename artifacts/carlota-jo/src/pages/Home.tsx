@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
+import Proof from "@/components/Proof";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
@@ -255,6 +256,7 @@ export default function Home() {
       <Services />
       <RosaBlock />
       <TrustPillars />
+      <Proof />
       <ProcessStrip />
       <InquiryCard />
       <Footer />

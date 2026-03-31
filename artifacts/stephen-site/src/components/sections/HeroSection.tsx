@@ -49,17 +49,19 @@ function SubtleGrid() {
 }
 
 const ecosystemBrands = [
+  { name: "Lyte", desc: "Business Observability", color: "hsl(190,90%,55%)" },
   { name: "Vessels", desc: "Maritime Intelligence", color: "hsl(205,85%,55%)" },
   { name: "Firestorm", desc: "Cyber Defense", color: "hsl(0,80%,55%)" },
   { name: "INCA", desc: "AI Research", color: "hsl(265,80%,60%)" },
-  { name: "Lyte", desc: "Business Observability", color: "hsl(190,90%,55%)" },
   { name: "Alloy", desc: "Execution Fabric", color: "hsl(214,80%,65%)" },
+  { name: "Terra", desc: "Business Telemetry", color: "hsl(160,70%,45%)" },
+  { name: "Rosie", desc: "Incident Command", color: "hsl(215,80%,55%)" },
   { name: "Carlota Jo", desc: "Private Advisory", color: "hsl(38,55%,58%)" },
 ];
 
 export function HeroSection() {
   return (
-    <section id="hero" className="relative overflow-hidden bg-[#0a0e14] pt-24 pb-10 sm:pt-28 sm:pb-14 lg:pt-32 lg:pb-16">
+    <section id="hero" className="relative overflow-hidden bg-[#0a0e14] pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24" style={{ minHeight: "min(88vh, 860px)" }}>
       <SubtleGrid />
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-[20%] w-[500px] h-[400px] bg-[#4a6fa5]/3 rounded-full blur-[160px]" />
