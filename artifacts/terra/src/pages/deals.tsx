@@ -161,7 +161,7 @@ function TableRow({ deal }: { deal: ApiDeal }) {
         )}
       </td>
       <td className="py-3 px-4"><DealHealthCard score={deal.probability} className="w-9 h-9" /></td>
-      <td className="py-3 px-4"><RiskBadge level={deal.riskLevel as any} /></td>
+      <td className="py-3 px-4"><RiskBadge level={deal.riskLevel} /></td>
     </tr>
   );
 }

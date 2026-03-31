@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, index } from "drizzle-orm/pg-core";
 
 export const mspClientsTable = pgTable("msp_clients", {
   id: serial("id").primaryKey(),
@@ -59,7 +59,11 @@ export const mspTicketsTable = pgTable("msp_tickets", {
   tags: jsonb("tags").$type<string[]>().default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("msp_tickets_client_idx").on(t.clientId),
+  index("msp_tickets_assignee_idx").on(t.assigneeId),
+  index("msp_tickets_status_idx").on(t.status),
+]);
 
 export const mspDevicesTable = pgTable("msp_devices", {
   id: serial("id").primaryKey(),
@@ -82,7 +86,9 @@ export const mspDevicesTable = pgTable("msp_devices", {
   lastSeen: timestamp("last_seen").defaultNow(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("msp_devices_client_idx").on(t.clientId),
+]);
 
 export const mspContractsTable = pgTable("msp_contracts", {
   id: serial("id").primaryKey(),
@@ -102,7 +108,9 @@ export const mspContractsTable = pgTable("msp_contracts", {
   terms: jsonb("terms").$type<Record<string, unknown>>().default({}),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("msp_contracts_client_idx").on(t.clientId),
+]);
 
 export type MspClient = typeof mspClientsTable.$inferSelect;
 export type InsertMspClient = typeof mspClientsTable.$inferInsert;

@@ -3,11 +3,14 @@ import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { useServer } from "graphql-ws/use/ws";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import depthLimit from "graphql-depth-limit";
 import type { Server as HttpServer } from "http";
 import type { Request, RequestHandler } from "express";
 import { WebSocketServer } from "ws";
 import { typeDefs, resolvers } from "./schema.js";
 import { logger } from "../lib/logger.js";
+
+const MAX_QUERY_DEPTH = 10;
 
 export interface GraphQLContext {
   user?: {
@@ -49,6 +52,7 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
   const apolloServer = new ApolloServer<GraphQLContext>({
     schema,
     introspection: !isProduction,
+    validationRules: [depthLimit(MAX_QUERY_DEPTH)],
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
       {

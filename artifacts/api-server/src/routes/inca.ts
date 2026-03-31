@@ -18,7 +18,7 @@ router.get("/inca/health", (_req, res) => {
   res.json({ service: "inca", status: "ok", timestamp: new Date().toISOString() });
 });
 
-router.get("/inca/dashboard", async (_req, res) => {
+router.get("/inca/dashboard", authMiddleware(), async (_req, res) => {
   try {
     const projects = await db.select().from(incaProjectsTable);
     const experiments = await db.select().from(incaExperimentsTable);
@@ -42,7 +42,7 @@ router.get("/inca/dashboard", async (_req, res) => {
   }
 });
 
-router.get("/inca/projects", async (req, res) => {
+router.get("/inca/projects", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(incaProjectsTable).orderBy(desc(incaProjectsTable.updatedAt)).limit(limit).offset(offset);
@@ -115,7 +115,7 @@ router.get("/inca/projects/:id/models", async (req, res) => {
   }
 });
 
-router.get("/inca/experiments", async (req, res) => {
+router.get("/inca/experiments", authMiddleware(), async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(incaExperimentsTable).orderBy(desc(incaExperimentsTable.createdAt)).limit(limit).offset(offset);
@@ -273,12 +273,25 @@ const incaLiveLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 });
 
+const INCA_CACHE_MAX_SIZE = 100;
 const incaCache = new Map<string, { data: unknown; expiry: number }>();
+function incaCacheSet(key: string, value: { data: unknown; expiry: number }) {
+  incaCache.delete(key);
+  incaCache.set(key, value);
+  if (incaCache.size > INCA_CACHE_MAX_SIZE) {
+    const lruKey = incaCache.keys().next().value;
+    if (lruKey) incaCache.delete(lruKey);
+  }
+}
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const c = incaCache.get(key);
-  if (c && c.expiry > Date.now()) return Promise.resolve(c.data as T);
+  if (c && c.expiry > Date.now()) {
+    incaCache.delete(key);
+    incaCache.set(key, c);
+    return Promise.resolve(c.data as T);
+  }
   return fetcher().then(data => {
-    incaCache.set(key, { data, expiry: Date.now() + ttlMs });
+    incaCacheSet(key, { data, expiry: Date.now() + ttlMs });
     return data;
   }).catch(() => {
     const stale = incaCache.get(key);

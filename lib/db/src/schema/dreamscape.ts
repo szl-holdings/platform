@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -26,7 +26,9 @@ export const dreamscapeAssetsTable = pgTable("dreamscape_assets", {
   height: integer("height"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("dreamscape_assets_project_idx").on(t.projectId),
+]);
 
 export const dreamscapeCampaignsTable = pgTable("dreamscape_campaigns", {
   id: serial("id").primaryKey(),
@@ -52,7 +54,9 @@ export const dreamscapeScriptsTable = pgTable("dreamscape_scripts", {
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("dreamscape_scripts_campaign_idx").on(t.campaignId),
+]);
 
 export const dreamscapeStoryboardsTable = pgTable("dreamscape_storyboards", {
   id: serial("id").primaryKey(),
@@ -68,7 +72,10 @@ export const dreamscapeStoryboardsTable = pgTable("dreamscape_storyboards", {
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("dreamscape_storyboards_campaign_idx").on(t.campaignId),
+  index("dreamscape_storyboards_script_idx").on(t.scriptId),
+]);
 
 export const dreamscapeVoiceAssetsTable = pgTable("dreamscape_voice_assets", {
   id: serial("id").primaryKey(),
@@ -82,7 +89,9 @@ export const dreamscapeVoiceAssetsTable = pgTable("dreamscape_voice_assets", {
   status: text("status", { enum: ["pending", "generating", "ready", "failed"] }).notNull().default("pending"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("dreamscape_voice_assets_campaign_idx").on(t.campaignId),
+]);
 
 export const dreamscapeCampaignAssetsTable = pgTable("dreamscape_campaign_assets", {
   id: serial("id").primaryKey(),
@@ -96,7 +105,9 @@ export const dreamscapeCampaignAssetsTable = pgTable("dreamscape_campaign_assets
   tags: jsonb("tags"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("dreamscape_campaign_assets_campaign_idx").on(t.campaignId),
+]);
 
 export const dreamscapeReviewsTable = pgTable("dreamscape_reviews", {
   id: serial("id").primaryKey(),
@@ -107,7 +118,10 @@ export const dreamscapeReviewsTable = pgTable("dreamscape_reviews", {
   comment: text("comment").notNull(),
   status: text("status", { enum: ["pending", "approved", "changes_requested", "rejected"] }).notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("dreamscape_reviews_project_idx").on(t.projectId),
+  index("dreamscape_reviews_campaign_idx").on(t.campaignId),
+]);
 
 export const insertDreamscapeCampaignSchema = createInsertSchema(dreamscapeCampaignsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertDreamscapeCampaign = z.infer<typeof insertDreamscapeCampaignSchema>;

@@ -3,7 +3,7 @@ import { lt, sql } from "drizzle-orm";
 import { publish, WS_CHANNELS } from "./websocket";
 import { logger } from "./logger";
 
-const POLL_INTERVAL_MS = 60_000;
+const POLL_INTERVAL_MS = 5 * 60_000;
 const SIGNAL_COOLDOWN_MS = 10 * 60_000;
 const SIGNAL_MAX_AGE_DAYS = 30;
 const SIGNAL_MAX_COUNT = 200;
@@ -46,9 +46,13 @@ async function fetchHealth(): Promise<HealthDetailedResponse | null> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 10_000);
     try {
+      const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
       const res = await fetch(HEALTH_URL, {
         signal: controller.signal,
-        headers: { "User-Agent": "Lyte-SelfMonitor/1.0" },
+        headers: {
+          "User-Agent": "Lyte-SelfMonitor/1.0",
+          ...(internalToken ? { "x-internal-token": internalToken } : {}),
+        },
       });
       clearTimeout(timer);
       if (!res.ok) {
@@ -161,8 +165,6 @@ async function runMonitoringCycle(): Promise<void> {
     return;
   }
 
-  lastSignalAt.delete("health-unreachable");
-
   const { memory, checks, uptime, status: overallStatus } = health;
 
   const dbCheck = checks["database"];
@@ -182,26 +184,21 @@ async function runMonitoringCycle(): Promise<void> {
         },
       });
     }
-  } else {
-    lastSignalAt.delete("db-unreachable");
-    if (dbCheck?.latencyMs != null && dbCheck.latencyMs > 500) {
-      if (shouldEmitSignal("db-latency")) {
-        await createSignal({
-          severity: "high",
-          title: `Database query latency elevated — ${dbCheck.latencyMs}ms (threshold: 500ms)`,
-          body: `API Server health check detected database query latency of ${dbCheck.latencyMs}ms, exceeding the 500ms warning threshold. This may indicate index degradation or lock contention.`,
-          metadata: {
-            affectedFunction: "Database Infrastructure",
-            owner: "Platform Team",
-            ownerTeam: "SRE",
-            recommendedAction: "Run EXPLAIN ANALYZE on recent slow queries. Check pg_stat_activity for long-running transactions. Consider VACUUM ANALYZE.",
-            anomaly: `DB latency: ${dbCheck.latencyMs}ms (baseline: < 50ms)`,
-            sourceData: "/api/health/detailed — database check",
-          },
-        });
-      }
-    } else {
-      lastSignalAt.delete("db-latency");
+  } else if (dbCheck?.latencyMs != null && dbCheck.latencyMs > 500) {
+    if (shouldEmitSignal("db-latency")) {
+      await createSignal({
+        severity: "high",
+        title: `Database query latency elevated — ${dbCheck.latencyMs}ms (threshold: 500ms)`,
+        body: `API Server health check detected database query latency of ${dbCheck.latencyMs}ms, exceeding the 500ms warning threshold. This may indicate index degradation or lock contention.`,
+        metadata: {
+          affectedFunction: "Database Infrastructure",
+          owner: "Platform Team",
+          ownerTeam: "SRE",
+          recommendedAction: "Run EXPLAIN ANALYZE on recent slow queries. Check pg_stat_activity for long-running transactions. Consider VACUUM ANALYZE.",
+          anomaly: `DB latency: ${dbCheck.latencyMs}ms (baseline: < 50ms)`,
+          sourceData: "/api/health/detailed — database check",
+        },
+      });
     }
   }
 
@@ -248,13 +245,7 @@ async function runMonitoringCycle(): Promise<void> {
           },
         });
       }
-    } else {
-      lastSignalAt.delete("api-latency");
-      lastSignalAt.delete("api-error-rate");
     }
-  } else {
-    lastSignalAt.delete("api-latency");
-    lastSignalAt.delete("api-error-rate");
   }
 
   const jobQueueCheck = checks["job_queue"];
@@ -275,8 +266,6 @@ async function runMonitoringCycle(): Promise<void> {
         },
       });
     }
-  } else {
-    lastSignalAt.delete("job-queue-backpressure");
   }
 
   if (memory) {
@@ -299,27 +288,22 @@ async function runMonitoringCycle(): Promise<void> {
           },
         });
       }
-    } else {
-      lastSignalAt.delete("heap-critical");
-      if (heapPct > 75) {
-        if (shouldEmitSignal("heap-elevated")) {
-          await createSignal({
-            severity: "medium",
-            title: `API Server heap memory elevated — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
-            body: `Node.js heap utilization is at ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB). No immediate action required, but trend monitoring recommended to prevent GC pressure.`,
-            metadata: {
-              affectedFunction: "API Infrastructure",
-              owner: "Platform Team",
-              ownerTeam: "SRE",
-              recommendedAction: "Monitor heap trend over next 30 minutes. If crossing 85%, plan a non-disruptive restart.",
-              sourceData: "process.memoryUsage() — API Server",
-              heapUsedMb: memory.heapUsedMb,
-              heapTotalMb: memory.heapTotalMb,
-            },
-          });
-        }
-      } else {
-        lastSignalAt.delete("heap-elevated");
+    } else if (heapPct > 75) {
+      if (shouldEmitSignal("heap-elevated")) {
+        await createSignal({
+          severity: "medium",
+          title: `API Server heap memory elevated — ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB / ${memory.heapTotalMb}MB)`,
+          body: `Node.js heap utilization is at ${heapPct.toFixed(0)}% (${memory.heapUsedMb}MB). No immediate action required, but trend monitoring recommended to prevent GC pressure.`,
+          metadata: {
+            affectedFunction: "API Infrastructure",
+            owner: "Platform Team",
+            ownerTeam: "SRE",
+            recommendedAction: "Monitor heap trend over next 30 minutes. If crossing 85%, plan a non-disruptive restart.",
+            sourceData: "process.memoryUsage() — API Server",
+            heapUsedMb: memory.heapUsedMb,
+            heapTotalMb: memory.heapTotalMb,
+          },
+        });
       }
     }
   }

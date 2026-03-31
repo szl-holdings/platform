@@ -15,6 +15,7 @@ interface SubscribedClient {
   lastPing: number;
 }
 
+const MAX_WS_CLIENTS = 500;
 const clients = new Map<string, SubscribedClient>();
 let wss: WebSocketServer | null = null;
 
@@ -22,6 +23,12 @@ export function initWebSocket(server: Server): void {
   wss = new WebSocketServer({ server, path: "/ws" });
 
   wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+    if (clients.size >= MAX_WS_CLIENTS) {
+      logger.warn({ clientCount: clients.size, maxClients: MAX_WS_CLIENTS }, "WebSocket: max client limit reached, rejecting connection");
+      ws.close(1013, "Server overloaded — try again later");
+      return;
+    }
+
     const clientId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const client: SubscribedClient = { ws, channels: new Set(), lastPing: Date.now() };
     clients.set(clientId, client);

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, numeric, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, numeric, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -34,7 +34,9 @@ export const incaExperimentsTable = pgTable("inca_experiments", {
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("inca_experiments_project_idx").on(t.projectId),
+]);
 
 export const incaModelsTable = pgTable("inca_models", {
   id: serial("id").primaryKey(),
@@ -55,7 +57,9 @@ export const incaModelsTable = pgTable("inca_models", {
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("inca_models_project_idx").on(t.projectId),
+]);
 
 export const incaInsightsTable = pgTable("inca_insights", {
   id: serial("id").primaryKey(),
@@ -83,7 +87,9 @@ export const incaDatasetsTable = pgTable("inca_datasets", {
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => [
+  index("inca_datasets_project_idx").on(t.projectId),
+]);
 
 export const insertIncaProjectSchema = createInsertSchema(incaProjectsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertIncaProject = z.infer<typeof insertIncaProjectSchema>;

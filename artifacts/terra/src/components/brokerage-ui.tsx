@@ -1,13 +1,14 @@
 import { cn } from "@workspace/shared-ui/utils";
 import { AlertTriangle, CheckCircle, Clock, TrendingUp, Shield, Zap, XCircle } from "lucide-react";
 
-export function RiskBadge({ level, className }: { level: "low" | "medium" | "high" | "critical"; className?: string }) {
-  const cfg = {
+export function RiskBadge({ level, className }: { level: "low" | "medium" | "high" | "critical" | string; className?: string }) {
+  const cfgMap: Record<string, { label: string; cls: string }> = {
     low: { label: "Low Risk", cls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
     medium: { label: "Medium Risk", cls: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
     high: { label: "High Risk", cls: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
     critical: { label: "Critical", cls: "bg-red-600/15 text-red-400 border-red-500/20" },
-  }[level];
+  };
+  const cfg = cfgMap[level] ?? { label: level ?? "Unknown", cls: "bg-slate-500/10 text-slate-400 border-slate-500/20" };
   return (
     <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wide", cfg.cls, className)}>
       <span className="w-1.5 h-1.5 rounded-full bg-current" />

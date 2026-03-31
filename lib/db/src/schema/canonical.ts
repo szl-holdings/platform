@@ -19,7 +19,7 @@ export const productsTable = pgTable("products", {
 export const platformSignalsTable = pgTable("platform_signals", {
   id: serial("id").primaryKey(),
   orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
-  workflowId: integer("workflow_id"),
+  workflowId: integer("workflow_id").references(() => workflowsTable.id, { onDelete: "set null" }),
   source: text("source").notNull(),
   sourceType: text("source_type", { enum: ["connector", "webhook", "api", "manual", "scheduled", "monitoring"] }).notNull(),
   severity: text("severity", { enum: ["critical", "high", "medium", "low", "info"] }).notNull().default("info"),

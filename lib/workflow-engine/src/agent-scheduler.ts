@@ -4,6 +4,8 @@ import { agentEventBus, type AgentEventType } from "./event-bus.js";
 import { services } from "@workspace/services";
 import type { ChatMessage } from "@workspace/services";
 import { serverTelemetry } from "@workspace/observability";
+import { db, agentKnowledgeTable, agentRunsTable } from "@workspace/db";
+import { lt } from "drizzle-orm";
 
 export interface AgentSchedule {
   agentId: string;
@@ -100,12 +102,16 @@ function parseFindingsFromText(text: string): Array<{ title: string; severity: s
 }
 
 const MAX_RUN_HISTORY = 200;
+const DB_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+const DB_CLEANUP_MAX_AGE_DAYS = 7;
 
 export class AgentScheduler {
   private schedules: Map<string, AgentSchedule> = new Map();
   private timers: Map<string, ReturnType<typeof setInterval>> = new Map();
   private runHistory: AgentRunRecord[] = [];
   private isRunning = false;
+  private activeAgents: Set<string> = new Set();
+  private cleanupTimer: ReturnType<typeof setInterval> | null = null;
 
   register(schedule: AgentSchedule) {
     this.schedules.set(schedule.agentId, schedule);
@@ -138,6 +144,12 @@ export class AgentScheduler {
       }, initialDelay);
     }
 
+    this.cleanupTimer = setInterval(() => {
+      this.pruneOldDbRecords().catch(err => {
+        logger.warn({ err }, "Agent scheduler: DB cleanup failed");
+      });
+    }, DB_CLEANUP_INTERVAL_MS);
+
     logger.info({ agentCount: this.schedules.size }, "Agent scheduler started");
   }
 
@@ -146,13 +158,53 @@ export class AgentScheduler {
       clearInterval(timer);
     }
     this.timers.clear();
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
     this.isRunning = false;
     logger.info("Agent scheduler stopped");
+  }
+
+  private async pruneOldDbRecords(): Promise<void> {
+    try {
+      const cutoff = Date.now() - DB_CLEANUP_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+      const [knowledgeResult, runsResult] = await Promise.all([
+        db.delete(agentKnowledgeTable).where(lt(agentKnowledgeTable.timestamp, cutoff)),
+        db.delete(agentRunsTable).where(lt(agentRunsTable.startedAt, cutoff)),
+      ]);
+      const deletedKnowledge = knowledgeResult.rowCount ?? 0;
+      const deletedRuns = runsResult.rowCount ?? 0;
+      if (deletedKnowledge > 0 || deletedRuns > 0) {
+        logger.info({ deletedKnowledge, deletedRuns, maxAgeDays: DB_CLEANUP_MAX_AGE_DAYS }, "Agent scheduler: pruned old DB records");
+      }
+    } catch (err) {
+      logger.warn({ err }, "Agent scheduler: DB pruning error (non-fatal)");
+    }
   }
 
   async runAgent(agentId: string): Promise<AgentRunRecord> {
     const schedule = this.schedules.get(agentId);
     if (!schedule) throw new Error(`Agent schedule not found: ${agentId}`);
+
+    if (this.activeAgents.has(agentId)) {
+      logger.warn({ agentId }, "Agent run skipped — previous run still in progress");
+      const skipped: AgentRunRecord = {
+        runId: `skipped-${agentId}-${Date.now()}`,
+        agentId,
+        domain: schedule.domain,
+        startedAt: Date.now(),
+        completedAt: Date.now(),
+        durationMs: 0,
+        status: "failed",
+        error: "Skipped: previous run still in progress",
+        knowledgeEntryIds: [],
+        eventsPublished: [],
+      };
+      return skipped;
+    }
+
+    this.activeAgents.add(agentId);
 
     const runId = `run-${agentId}-${Date.now()}`;
     const record: AgentRunRecord = {
@@ -303,7 +355,7 @@ export class AgentScheduler {
       record.durationMs = record.completedAt - record.startedAt;
       record.error = err instanceof Error ? err.message : String(err);
 
-      await agentEventBus.publish({
+      agentEventBus.publish({
         type: "scheduled_run_failed",
         sourceAgent: agentId,
         sourceDomain: schedule.domain,
@@ -323,6 +375,8 @@ export class AgentScheduler {
       });
 
       persistAgentRun(record).catch(() => {});
+    } finally {
+      this.activeAgents.delete(agentId);
     }
 
     return record;

@@ -81,7 +81,9 @@ export class AgentEventBus {
       }
     }
 
-    await Promise.all(handlers);
+    if (handlers.length > 0) {
+      Promise.all(handlers).catch(() => {});
+    }
     return full;
   }
 

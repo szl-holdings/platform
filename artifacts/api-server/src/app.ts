@@ -9,12 +9,14 @@ import { readFileSync } from "fs";
 import { parse } from "yaml";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { randomBytes } from "crypto";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { correlationMiddleware } from "./middlewares/correlation";
 import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
 import { authMiddleware } from "./middlewares/authMiddleware";
+import { csrfMiddleware } from "./middlewares/csrf";
 
 const app: Express = express();
 
@@ -69,7 +71,7 @@ app.use(cors({
   origin: corsOriginFn,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Correlation-Id", "X-CSRF-Token"],
   exposedHeaders: ["X-Correlation-Id"],
   maxAge: 86400,
 }));
@@ -121,6 +123,7 @@ app.use(express.json({
   },
 }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(csrfMiddleware);
 app.use(authMiddleware);
 
 app.get("/api/health", (_req: Request, res: Response) => {
@@ -181,20 +184,32 @@ app.get("/api/health/ready", async (_req: Request, res: Response) => {
   });
 });
 
-app.get("/api/health/detailed", async (_req: Request, res: Response) => {
+app.get("/api/health/detailed", async (req: Request, res: Response) => {
+  if (isProduction) {
+    const internalToken = process.env.ALLOY_INTERNAL_TOKEN;
+    const providedToken = req.headers["x-internal-token"];
+    const hasInternalAccess = internalToken && providedToken === internalToken;
+    if (!hasInternalAccess && !req.isAuthenticated()) {
+      res.status(401).json({ error: "Authentication required", message: "Detailed health information is restricted." });
+      return;
+    }
+  }
   const checks: Record<string, { status: string; latencyMs?: number; details?: string }> = {};
 
   const dbUrl = process.env.DATABASE_URL;
   if (dbUrl) {
     const start = Date.now();
     try {
-      const { db } = await import("@workspace/db");
+      const { db, pool } = await import("@workspace/db");
       const { sql } = await import("drizzle-orm");
       await Promise.race([
         db.execute(sql`SELECT 1`),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
       ]);
-      checks["database"] = { status: "connected", latencyMs: Date.now() - start };
+      const poolDetails = pool
+        ? `total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`
+        : undefined;
+      checks["database"] = { status: "connected", latencyMs: Date.now() - start, details: poolDetails };
     } catch {
       checks["database"] = { status: "unreachable", latencyMs: Date.now() - start };
     }
@@ -263,6 +278,21 @@ try {
 } catch (err) {
   logger.warn({ err }, "Failed to load OpenAPI spec — /api/docs will be unavailable");
 }
+
+app.get("/api/csrf-token", (req: Request, res: Response) => {
+  let token = req.cookies?.["csrf_token"] as string | undefined;
+  if (!token) {
+    token = randomBytes(32).toString("hex");
+    res.cookie("csrf_token", token, {
+      httpOnly: false,
+      secure: isProduction,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+  }
+  res.json({ csrfToken: token });
+});
 
 app.use("/api", router);
 

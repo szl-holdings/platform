@@ -282,12 +282,25 @@ const dreamLiveLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 });
 
+const DREAM_CACHE_MAX_SIZE = 100;
 const dreamCache = new Map<string, { data: unknown; expiry: number }>();
+function dreamCacheSet(key: string, value: { data: unknown; expiry: number }) {
+  dreamCache.delete(key);
+  dreamCache.set(key, value);
+  if (dreamCache.size > DREAM_CACHE_MAX_SIZE) {
+    const lruKey = dreamCache.keys().next().value;
+    if (lruKey) dreamCache.delete(lruKey);
+  }
+}
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
   const c = dreamCache.get(key);
-  if (c && c.expiry > Date.now()) return Promise.resolve(c.data as T);
+  if (c && c.expiry > Date.now()) {
+    dreamCache.delete(key);
+    dreamCache.set(key, c);
+    return Promise.resolve(c.data as T);
+  }
   return fetcher().then(data => {
-    dreamCache.set(key, { data, expiry: Date.now() + ttlMs });
+    dreamCacheSet(key, { data, expiry: Date.now() + ttlMs });
     return data;
   }).catch(() => {
     const stale = dreamCache.get(key);
