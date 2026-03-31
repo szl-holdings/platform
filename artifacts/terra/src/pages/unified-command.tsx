@@ -274,7 +274,7 @@ export default function UnifiedCommandDashboard() {
           <div className="flex items-center gap-2 mb-3">
             <GitBranch className="w-4 h-4 text-cyan-400" />
             <span className="text-sm font-semibold text-white">Recent Workflow Runs</span>
-            <a href="/alloy/" className="ml-auto text-[10px] text-cyan-400 flex items-center gap-1 hover:opacity-80">
+            <a href="/alloy" className="ml-auto text-[10px] text-cyan-400 flex items-center gap-1 hover:opacity-80">
               View All <ExternalLink className="w-2.5 h-2.5" />
             </a>
           </div>

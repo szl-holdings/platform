@@ -7,7 +7,7 @@ const frameworks = [
     tag: "Observability",
     title: "Business observability as an operating layer",
     text: "A company's ability to see itself clearly is a structural advantage, not a reporting function. Visibility into workflow state, ownership gaps, and execution latency should be designed in — not bolted on after problems compound.",
-    metric: "Applied across: Lyte, Alloy",
+    metric: "Applied across: Lyte, SZL Platform",
   },
   {
     number: "02",
@@ -28,7 +28,7 @@ const frameworks = [
     tag: "Systems Design",
     title: "Command-centered product architecture",
     text: "The best tools don't just display information — they surface the right decision at the right moment, to the right person, with the right context. That's the command metaphor: observation to action, with governance at every step.",
-    metric: "Across all 6 platforms",
+    metric: "Across all 5 platforms",
   },
 ];
 

@@ -788,7 +788,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
               <a href="/szl-holdings/" style={{ fontSize: "11px", color: "#475569", textDecoration: "none" }}>SZL Holdings</a>
-              <a href="/alloy/" style={{ fontSize: "11px", color: "#475569", textDecoration: "none" }}>Alloy</a>
+              <a href="/alloy" style={{ fontSize: "11px", color: "#475569", textDecoration: "none" }}>Alloy</a>
               <a href="/vessels/" style={{ fontSize: "11px", color: "#475569", textDecoration: "none" }}>Vessels</a>
             </div>
           </div>

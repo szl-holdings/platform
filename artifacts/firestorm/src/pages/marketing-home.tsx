@@ -342,7 +342,7 @@ export default function FirestormMarketingHome() {
             <div>
               <p className="text-[11px] font-semibold text-gray-400 tracking-[0.1em] uppercase mb-4">Ecosystem</p>
               <div className="space-y-2.5">
-                {["SZL Holdings", "Alloy", "Vessels", "INCA", "Lyte"].map(l => (
+                {["SZL Holdings", "Vessels", "Lyte", "Terra", "Carlota Jo"].map(l => (
                   <p key={l} className="text-[13px] text-gray-500 hover:text-white transition-colors cursor-pointer">{l}</p>
                 ))}
               </div>

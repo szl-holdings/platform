@@ -334,7 +334,7 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
         <UserButton showName={expanded} className="w-full" />
         <RoleSelector expanded={expanded} />
         {expanded && (
-          <a href="/alloy/" className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg w-full transition-colors hover:bg-sky-500/5" title="Alloy Intelligence Layer">
+          <a href="/alloy" className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg w-full transition-colors hover:bg-sky-500/5" title="Alloy Execution Fabric">
             <span className="text-[10px] text-sky-400/50 font-medium">⬡ Powered by Alloy</span>
           </a>
         )}
@@ -433,7 +433,7 @@ const vesselsCommands: CommandItem[] = [
   { id: "nav-economics", label: "Voyage Economics", icon: "💰", group: "Navigation", keywords: ["economics", "revenue", "margin"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/economics"); } },
   { id: "nav-command", label: "Command Mode", icon: "🎯", group: "Navigation", keywords: ["command", "operational", "focused"], action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/command"); } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Business Observability", action: () => { window.location.href = "/lyte-command-center/"; } },
-  { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy/"; } },
+  { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy"; } },
 ];
 
 const vesselsShortcuts: KeyboardShortcut[] = [

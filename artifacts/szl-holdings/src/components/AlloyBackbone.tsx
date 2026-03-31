@@ -55,7 +55,7 @@ export function AlloyBackbone() {
               Alloy is the intelligence and orchestration layer powering workflows, signals, outputs, and decision support across the SZL ecosystem.
             </p>
             <a
-              href="/alloy/"
+              href="/alloy"
               style={{
                 display: "inline-flex",
                 alignItems: "center",

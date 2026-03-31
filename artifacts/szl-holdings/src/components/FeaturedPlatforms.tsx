@@ -3,7 +3,6 @@ import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 interface EcosystemSummary {
-  alloy: { workflowRuns: number };
   lyte: { incidents: number };
   vessels: { trackedVessels: number; fleets: number };
   aegis: { incidents: number; findings: number };
@@ -12,25 +11,6 @@ interface EcosystemSummary {
 }
 
 const PLATFORM_DEFS = [
-  {
-    name: "Alloy",
-    label: "Workflow & Intelligence Engine",
-    copy: "Normalize signals, orchestrate multi-step workflows, generate artifacts, and govern approvals across the SZL ecosystem.",
-    cta: "Explore Alloy",
-    href: "/alloy/",
-    accent: "hsl(214,80%,65%)",
-    accentRgb: "92,155,228",
-    accentBg: "hsla(214,80%,65%,0.05)",
-    accentBorder: "hsla(214,80%,65%,0.12)",
-    key: "alloy" as const,
-    getMetrics: (d: EcosystemSummary) => [
-      { label: "Workflow Runs", value: d.alloy.workflowRuns.toLocaleString() },
-    ],
-    fallbackMetrics: [
-      { label: "Orchestration", value: "Live" },
-      { label: "Multi-agent", value: "Active" },
-    ],
-  },
   {
     name: "Lyte",
     label: "Business Observability Platform",
@@ -175,7 +155,7 @@ export function FeaturedPlatforms() {
             lineHeight: "1.06",
             fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
           }}>
-            Six platforms. One architecture.
+            Five platforms. One architecture.
           </h2>
         </m.div>
 

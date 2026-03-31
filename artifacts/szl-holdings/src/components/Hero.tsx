@@ -4,7 +4,6 @@ import { ArrowRight, Layers, Shield, Anchor, Cpu, BarChart3, Eye, Users, Sparkle
 import { Link } from "wouter";
 
 const PLATFORM_META = [
-  { name: "Alloy", role: "Execution Fabric", icon: Layers, color: "hsl(214,80%,65%)", glow: "214,80%,65%" },
   { name: "Lyte", role: "Business Observability", icon: Eye, color: "hsl(190,90%,55%)", glow: "190,90%,55%" },
   { name: "Vessels", role: "Maritime Command", icon: Anchor, color: "hsl(205,85%,55%)", glow: "205,85%,55%" },
   { name: "Aegis", role: "Defense & Intelligence", icon: Shield, color: "hsl(232,68%,60%)", glow: "232,68%,60%" },
@@ -93,7 +92,6 @@ function EcosystemPanel() {
   }, []);
 
   const KEY_MAP: Record<string, string> = {
-    "Alloy": "alloy",
     "Lyte": "lyte",
     "Vessels": "vessels",
     "Aegis": "aegis",
@@ -207,7 +205,7 @@ export function Hero() {
               className="text-[15px] sm:text-base leading-relaxed max-w-lg mb-7"
               style={{ color: "hsl(210,10%,55%)" }}
             >
-              Six platforms. One architecture. Command systems for observability, defense, and enterprise operations — built to compound.
+              Five platforms. One architecture. Command systems for observability, defense, and enterprise operations — built to compound.
             </m.p>
 
             <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }} className="flex flex-col sm:flex-row items-start gap-3 mb-8">
@@ -237,7 +235,7 @@ export function Hero() {
               className="flex flex-wrap gap-8 sm:gap-10"
             >
               {[
-                { value: "6", label: "Platforms Live" },
+                { value: "5", label: "Platforms Live" },
                 { value: "1", label: "Unified Arch." },
                 { value: "5+", label: "Years Operating" },
               ].map((stat) => (

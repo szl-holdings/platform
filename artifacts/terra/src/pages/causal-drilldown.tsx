@@ -76,7 +76,7 @@ export default function CausalDrilldown() {
                 <Brain className="w-3.5 h-3.5" style={{ color: "#8b5cf6" }} />
                 <span className="text-xs font-semibold text-white">Alloy Predictions</span>
                 <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.15)" }}>DECIDE</span>
-                <a href="/alloy/" className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80" style={{ color: "#8b5cf6" }}><ExternalLink className="w-3 h-3" /> Open in Alloy</a>
+                <a href="/alloy" className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80" style={{ color: "#8b5cf6" }}><ExternalLink className="w-3 h-3" /> Open in Alloy</a>
               </div>
               <div className="space-y-2 ml-4">
                 {chain.predictions.map(p => (
@@ -102,7 +102,7 @@ export default function CausalDrilldown() {
                 <Zap className="w-3.5 h-3.5" style={{ color: "#00d4ff" }} />
                 <span className="text-xs font-semibold text-white">Alloy Execution Runs</span>
                 <span className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.15)" }}>EXECUTE</span>
-                <a href="/alloy/" className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80" style={{ color: "#00d4ff" }}><ExternalLink className="w-3 h-3" /> Open in Alloy</a>
+                <a href="/alloy" className="ml-auto text-[9px] flex items-center gap-1 hover:opacity-80" style={{ color: "#00d4ff" }}><ExternalLink className="w-3 h-3" /> Open in Alloy</a>
               </div>
               <div className="space-y-2 ml-4">
                 {chain.runs.map(r => (

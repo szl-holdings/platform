@@ -4,7 +4,6 @@ const PLATFORMS_LINKS = [
   { label: "Lyte", href: "/lyte-command-center/", desc: "Business Observability" },
   { label: "Vessels", href: "/vessels/", desc: "Maritime Intelligence" },
   { label: "Aegis", href: "/firestorm/", desc: "Defense & Intelligence" },
-  { label: "Alloy", href: "/alloy/", desc: "Execution Fabric" },
   { label: "Terra", href: "/terra/", desc: "Real Estate Intelligence" },
 ];
 
@@ -66,7 +65,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.875rem", lineHeight: 1.65, maxWidth: "17rem", marginBottom: "0.75rem" }}>
-              Premium command systems across observability, maritime, cybersecurity, AI, and high-trust operations. Six platforms. One compounding architecture.
+              Premium command systems across observability, maritime, cybersecurity, AI, and high-trust operations. Five platforms. One compounding architecture.
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
               Washington, D.C. · London · Singapore

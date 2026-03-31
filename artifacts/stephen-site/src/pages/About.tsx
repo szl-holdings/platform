@@ -18,7 +18,7 @@ export function About() {
             I build enterprise infrastructure, AI platforms, and domain-specific intelligence systems. My focus is on the category of software where the problem is genuinely hard — where domain depth, auditability, and decision-support quality matter more than feature count.
           </p>
           <p>
-            I founded SZL Holdings in 2023 as a strategic holding structure for a portfolio of domain-specific platforms. The portfolio spans platform orchestration (Alloy), business observability (Lyte), maritime intelligence (Vessels), unified defense and intelligence (Aegis), real estate intelligence (Terra), and strategic advisory (Carlota Jo) — six platforms under one compounding architecture.
+            I founded SZL Holdings in 2023 as a strategic holding structure for a portfolio of domain-specific platforms. The portfolio spans business observability (Lyte), maritime intelligence (Vessels), unified defense and intelligence (Aegis), real estate intelligence (Terra), and strategic advisory (Carlota Jo) — five platforms under one compounding architecture, powered by the Alloy execution engine.
           </p>
           <p>
             My background is in enterprise software architecture, product design, and the infrastructure layer that sits between raw data and operational decisions. I'm particularly focused on the intersection of AI and accountability — building platforms where intelligence outputs are explainable, traceable, and defensible.
@@ -33,7 +33,7 @@ export function About() {
           <div className="grid sm:grid-cols-2 gap-5">
             {[
               { title: "Vessels Maritime", body: "Building the maritime intelligence layer for fleet operators — from AIS tracking to voyage economics to sanctions compliance." },
-              { title: "Alloy Engine", body: "Building the execution fabric and predictive intelligence layer powering decision-making across the ecosystem." },
+              { title: "SZL Alloy Engine", body: "Building the execution fabric and predictive intelligence layer powering decision-making across the SZL Holdings ecosystem." },
               { title: "SZL Portfolio", body: "Scaling the portfolio company model across complementary enterprise software domains." },
               { title: "Enterprise AI", body: "Writing and advising on the accountability and explainability requirements for AI in regulated operations." },
             ].map((item) => (

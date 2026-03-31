@@ -54,8 +54,8 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
   {
     id: "alloy",
     name: "Alloy",
-    subtitle: "Engine · Intelligence Backbone",
-    path: "/alloy/",
+    subtitle: "Engine · SZL Holdings Module",
+    path: "/alloy",
     accent: "#60a5fa",
     icon: "⬡",
     description: "Execution Fabric & Orchestration Engine",

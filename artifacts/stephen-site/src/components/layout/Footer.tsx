@@ -11,7 +11,6 @@ const navLinks = [
 
 const ecosystemLinks = [
   { label: "SZL Holdings", href: "/" },
-  { label: "Alloy", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
   { label: "Aegis", href: "/firestorm/" },
@@ -40,7 +39,7 @@ export function Footer() {
               Founder & CEO, SZL Holdings
             </p>
             <p className="text-[13px] text-white/25 font-light leading-relaxed max-w-xs">
-              Builder of enterprise infrastructure, AI platforms, and founder-led teams. Six platforms. One compounding architecture.
+              Builder of enterprise infrastructure, AI platforms, and founder-led teams. Five platforms. One compounding architecture.
             </p>
           </div>
 

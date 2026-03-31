@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Layers, Shield, Anchor, Cpu, BarChart3, Eye, Users, Sparkles } from "lucide-react";
 
 const platforms = [
-  { Icon: Layers, name: "Alloy", role: "Execution Fabric", color: "hsl(214,80%,65%)", desc: "Cross-platform workflow orchestration. Signals normalized, decisions routed, actions governed.", href: "/alloy/" },
   { Icon: Eye, name: "Lyte", role: "Business Observability", color: "hsl(190,90%,55%)", desc: "Command-layer business visibility. Risk, latency, ownership gaps — surfaced before they hit execution.", href: "/lyte-command-center/" },
   { Icon: Anchor, name: "Vessels", role: "Maritime Intelligence", color: "hsl(205,85%,55%)", desc: "Real-time fleet command for shipping operators. Voyage economics, route visibility, and AIS-grade signal processing.", href: "/vessels/" },
   { Icon: Shield, name: "Aegis", role: "Defense & Intelligence", color: "hsl(232,68%,60%)", desc: "Unified defense command — SOC, XDR, managed operations, and AI intelligence engine in one platform.", href: "/firestorm/" },
@@ -27,7 +26,7 @@ export function EcosystemRoleSection() {
           <div className="grid lg:grid-cols-12 gap-8">
             <div className="lg:col-span-7">
               <h2 className="text-4xl md:text-5xl font-semibold text-white leading-tight tracking-tight mb-5">
-                Six platforms. One operator.
+                Five platforms. One operator.
               </h2>
               <p className="text-white/45 text-base font-light leading-relaxed">
                 Every platform in the SZL Holdings portfolio is founder-built, founder-operated, and connected by a single shared architecture. Here's the current roster — what each does and why it exists.
@@ -36,7 +35,7 @@ export function EcosystemRoleSection() {
             <div className="lg:col-span-5 flex flex-col justify-end">
               <div className="flex items-center gap-4 flex-wrap">
                 <div>
-                  <p className="text-2xl font-semibold text-[#7ba3d4] leading-none">6</p>
+                  <p className="text-2xl font-semibold text-[#7ba3d4] leading-none">5</p>
                   <p className="text-[9px] text-white/25 uppercase tracking-[0.2em] mt-1">Platforms live</p>
                 </div>
                 <div className="w-px h-8 bg-white/8 hidden sm:block" />

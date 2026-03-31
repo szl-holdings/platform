@@ -436,7 +436,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <p style={{ fontSize: "13px", color: "#4e6042" }}>Terra runs on the Alloy orchestration engine — every distress signal, deal workflow, and market data point is acquired, normalized, and acted upon by the same intelligence layer powering the entire SZL ecosystem.</p>
           </div>
           <a
-            href="/alloy/"
+            href="/alloy"
             style={{ marginLeft: "auto", fontSize: "13px", fontWeight: 600, color: "#00d4ff", textDecoration: "none", display: "flex", alignItems: "center", gap: "5px", flexShrink: 0, transition: "opacity 0.15s" }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}

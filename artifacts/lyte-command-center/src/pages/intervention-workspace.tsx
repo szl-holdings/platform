@@ -114,7 +114,7 @@ export default function InterventionWorkspace() {
                       </button>
                     );
                   })}
-                  <a href="/alloy/" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}>
+                  <a href="/alloy" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}>
                     <ExternalLink className="w-3 h-3" /> Run in AlloyScape
                   </a>
                 </div>

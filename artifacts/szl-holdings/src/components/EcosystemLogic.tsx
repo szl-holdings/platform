@@ -19,8 +19,8 @@ const stages = [
     color: "hsl(214,80%,65%)",
     rgb: "92,155,228",
     number: "02",
-    platform: "Alloy",
-    desc: "Alloy normalizes raw signal across platforms and applies reasoning to classify, contextualize, and connect events. Pattern recognition separates noise from consequence.",
+    platform: "Lyte + Alloy Engine",
+    desc: "The Alloy execution engine normalizes raw signal across platforms and applies reasoning to classify, contextualize, and connect events. Pattern recognition separates noise from consequence.",
   },
   {
     id: "execute",
@@ -29,8 +29,8 @@ const stages = [
     color: "hsl(205,85%,55%)",
     rgb: "38,164,218",
     number: "03",
-    platform: "Vessels + Alloy",
-    desc: "Alloy orchestrates multi-step workflows — routing tasks, triggering actions, escalating decisions — while Vessels commands maritime execution with the same precision applied to fleet operations.",
+    platform: "Vessels + Alloy Engine",
+    desc: "The Alloy engine orchestrates multi-step workflows — routing tasks, triggering actions, escalating decisions — while Vessels commands maritime execution with the same precision applied to fleet operations.",
   },
   {
     id: "advise",
@@ -226,7 +226,6 @@ export function EcosystemLogic() {
 
             <div className="space-y-2.5">
               {[
-                { entity: "Alloy", role: "Execution fabric. Cross-platform workflow orchestration and intelligence backbone.", accent: "hsl(214,80%,65%)", accentRgb: "92,155,228" },
                 { entity: "Lyte", role: "Business observability. Surfaces risk before it hits execution.", accent: "hsl(190,90%,55%)", accentRgb: "14,201,224" },
                 { entity: "Vessels", role: "Maritime command. Fleet intelligence in one layer.", accent: "hsl(205,85%,55%)", accentRgb: "38,164,218" },
                 { entity: "Aegis", role: "Unified defense & intelligence. SOC, managed ops, and AI research in one platform.", accent: "hsl(232,68%,60%)", accentRgb: "92,102,204" },

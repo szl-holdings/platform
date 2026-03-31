@@ -83,7 +83,7 @@ export default function DriftDetection() {
               <a href="/lyte-command-center/" className="text-[9px] px-2.5 py-1 rounded font-medium hover:opacity-80 transition-opacity flex items-center gap-1" style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
                 <ArrowRight className="w-3 h-3" /> Route in Lyte
               </a>
-              <a href="/alloy/" className="text-[9px] px-2.5 py-1 rounded font-medium hover:opacity-80 transition-opacity flex items-center gap-1" style={{ color: "#6366f1", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>
+              <a href="/alloy" className="text-[9px] px-2.5 py-1 rounded font-medium hover:opacity-80 transition-opacity flex items-center gap-1" style={{ color: "#6366f1", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>
                 <ArrowRight className="w-3 h-3" /> Model in Alloy
               </a>
               <a href="/causal-drilldown" className="text-[9px] px-2.5 py-1 rounded font-medium hover:opacity-80 transition-opacity flex items-center gap-1" style={{ color: "#0ea5e9", background: "rgba(14,165,233,0.1)", border: "1px solid rgba(14,165,233,0.2)" }}>

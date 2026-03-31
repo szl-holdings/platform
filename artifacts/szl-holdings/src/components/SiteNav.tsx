@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { label: "Ecosystem", href: "/ecosystem", section: "Company" },
   { label: "Architecture", href: "/architecture", section: "Company" },
-  { label: "Alloy", href: "/alloy", external: "/alloy/", section: "Flagships" },
-  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/", section: "Flagships" },
-  { label: "Vessels", href: "/vessels", external: "/vessels/", section: "Flagships" },
+  { label: "Alloy", href: "/alloy", section: "Operations" },
+  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/", section: "Platforms" },
+  { label: "Vessels", href: "/vessels", external: "/vessels/", section: "Platforms" },
   { label: "Aegis", href: "/aegis", external: "/firestorm/", section: "Platforms" },
   { label: "Terra", href: "/terra", external: "/terra/", section: "Platforms" },
   { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/", section: "Services" },
@@ -22,7 +22,7 @@ const NAV_LINKS = [
 
 const NAV_LINKS_PRIMARY = [
   { label: "Ecosystem", href: "/ecosystem" },
-  { label: "Alloy", href: "/alloy", external: "/alloy/" },
+  { label: "Alloy", href: "/alloy" },
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
   { label: "Investors", href: "/investor-relations" },
@@ -180,7 +180,7 @@ export function SiteNav() {
             }}
           >
             <div className="px-6 py-6 flex flex-col gap-5">
-              {(["Flagships", "Platforms", "Services", "Company"] as const).map((section) => {
+              {(["Operations", "Platforms", "Services", "Company"] as const).map((section) => {
                 const sectionLinks = NAV_LINKS.filter(l => l.section === section);
                 if (sectionLinks.length === 0) return null;
                 return (

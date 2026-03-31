@@ -50,7 +50,6 @@ function SubtleGrid() {
 
 const ecosystemBrands = [
   { name: "SZL Holdings", desc: "Parent Company", color: "hsl(38,55%,60%)" },
-  { name: "Alloy", desc: "Execution Fabric", color: "hsl(214,80%,65%)" },
   { name: "Lyte", desc: "Business Observability", color: "hsl(190,90%,55%)" },
   { name: "Vessels", desc: "Maritime Intelligence", color: "hsl(205,85%,55%)" },
   { name: "Aegis", desc: "Defense & Intelligence", color: "hsl(232,68%,60%)" },
@@ -107,7 +106,7 @@ export function HeroSection() {
               transition={{ duration: 0.7, delay: 0.38 }}
               className="text-[13px] sm:text-sm text-foreground/35 max-w-md mb-7 leading-relaxed font-light"
             >
-              Building command systems across maritime, cybersecurity, AI, and enterprise operations. Six platforms. One compounding architecture.
+              Building command systems across maritime, cybersecurity, AI, and enterprise operations. Five platforms. One compounding architecture.
             </motion.p>
 
             <motion.div
@@ -152,7 +151,7 @@ export function HeroSection() {
               className="mt-8 flex flex-wrap gap-8 sm:gap-10"
             >
               {[
-                { value: "6", label: "Platforms live" },
+                { value: "5", label: "Platforms live" },
                 { value: "5+", label: "Years operating" },
                 { value: "Full-stack", label: "Founder-operator" },
               ].map((stat) => (

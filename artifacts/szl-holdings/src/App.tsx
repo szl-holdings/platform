@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
+import { AlloyLayout } from "@/alloy/components/alloy-layout";
 
 const HomePage = lazy(() => import("@/pages/landing"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
@@ -26,6 +27,21 @@ const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const PlatformArchitecturePage = lazy(() => import("@/pages/platform-architecture"));
+
+const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
+const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
+const AlloyRunDetail = lazy(() => import("@/alloy/pages/run-detail"));
+const AlloySignalFeed = lazy(() => import("@/alloy/pages/signal-feed"));
+const AlloyWorkflowOrchestration = lazy(() => import("@/alloy/pages/workflow-orchestration"));
+const AlloyConnectorMesh = lazy(() => import("@/alloy/pages/connector-mesh"));
+const AlloyGovernanceAudit = lazy(() => import("@/alloy/pages/governance-audit"));
+const AlloyAutomationAnalytics = lazy(() => import("@/alloy/pages/automation-analytics"));
+const AlloyConsolePage = lazy(() => import("@/alloy/pages/ConsolePage"));
+const AlloyCampaignHub = lazy(() => import("@/alloy/pages/creative/campaign-hub").then(m => ({ default: m.CampaignHub })));
+const AlloyCampaignDetail = lazy(() => import("@/alloy/pages/creative/campaign-detail").then(m => ({ default: m.CampaignDetail })));
+const AlloyBrandVoice = lazy(() => import("@/alloy/pages/creative/brand-voice"));
+const AlloyContentCalendar = lazy(() => import("@/alloy/pages/creative/content-calendar"));
+const AlloyAIStudio = lazy(() => import("@/alloy/pages/creative/ai-studio"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +86,21 @@ function ExternalRedirect({ to }: { to: string }) {
   return <PageLoader />;
 }
 
+function AlloyRunDetailRoute({ params }: { params: { id: string } }) {
+  const id = parseInt(params.id ?? "0");
+  return <AlloyRunDetail id={id} />;
+}
+
+function AlloyPage({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col h-screen" style={{ background: "#080c14" }}>
+      <div className="flex-1 overflow-hidden">
+        <AlloyLayout>{children}</AlloyLayout>
+      </div>
+    </div>
+  );
+}
+
 function PageLoader() {
   return (
     <div
@@ -110,13 +141,46 @@ function App() {
               <Suspense fallback={<PageLoader />}><VenturesPage /></Suspense>
             </Route>
             <Route path="/alloy">
-              <ExternalRedirect to="/alloy/" />
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyFactoryFloor /></AlloyPage></Suspense>
             </Route>
-            <Route path="/alloy/architecture">
-              <ExternalRedirect to="/alloy/architecture" />
+            <Route path="/alloy/runs">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyExecutionHistory /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/runs/:id">
+              {(params) => <Suspense fallback={<PageLoader />}><AlloyPage><AlloyRunDetailRoute params={params} /></AlloyPage></Suspense>}
+            </Route>
+            <Route path="/alloy/signals">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloySignalFeed /></AlloyPage></Suspense>
             </Route>
             <Route path="/alloy/workflows">
-              <ExternalRedirect to="/alloy/workflows" />
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyWorkflowOrchestration /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/connectors">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyConnectorMesh /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/governance">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyGovernanceAudit /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/analytics">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyAutomationAnalytics /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/console">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyConsolePage /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/creative">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyCampaignHub /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/creative/campaigns/:id">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyCampaignDetail /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/creative/brand-voice">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyBrandVoice /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/creative/content-calendar">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyContentCalendar /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/creative/ai-studio">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyAIStudio /></AlloyPage></Suspense>
             </Route>
             <Route path="/lyte">
               <ExternalRedirect to="/lyte-command-center/" />

@@ -179,7 +179,7 @@ export function AlloyStrip() {
                   textTransform: "uppercase",
                   color: "hsl(210,5%,44%)",
                 }}>Orchestration flow</span>
-                <a href="/alloy/" style={{
+                <a href="/alloy" style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",
