@@ -359,7 +359,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             </div>
           ))}
         </div>
-        <a href="/szl-holdings/case-studies" className="text-[12px] text-[#00d4ff]/50 hover:text-[#00d4ff]/80 transition-colors inline-flex items-center gap-1.5">
+        <a href="/case-studies" className="text-[12px] text-[#00d4ff]/50 hover:text-[#00d4ff]/80 transition-colors inline-flex items-center gap-1.5">
           Read full case study: 3.4× Decision Velocity Across a Multi-Entity Operating Structure
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </a>
@@ -387,7 +387,7 @@ export default function OverviewPage({ onNavigate }: NavProps) {
             Meet the Agents
           </button>
           <a
-            href="/szl-holdings/"
+            href="/"
             onClick={() => trackEvent("cta_click", { label: "Back to Ecosystem", from: "overview_bottom_cta" })}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm text-sm font-medium border transition-all hover:bg-white/5"
             style={{ borderColor: "rgba(110,158,245,0.3)", color: "#6e9ef5" }}

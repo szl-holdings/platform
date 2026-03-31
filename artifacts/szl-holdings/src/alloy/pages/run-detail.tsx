@@ -265,7 +265,7 @@ export default function RunDetail({ id }: { id: number }) {
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/alloy")}
             className="flex items-center gap-1 text-xs transition-colors hover:text-white"
             style={{ color: "rgba(255,255,255,0.35)" }}
           >

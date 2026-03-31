@@ -37,6 +37,7 @@ const AlloyConnectorMesh = lazy(() => import("@/alloy/pages/connector-mesh"));
 const AlloyGovernanceAudit = lazy(() => import("@/alloy/pages/governance-audit"));
 const AlloyAutomationAnalytics = lazy(() => import("@/alloy/pages/automation-analytics"));
 const AlloyConsolePage = lazy(() => import("@/alloy/pages/ConsolePage"));
+const AlloyDagView = lazy(() => import("@/alloy/pages/dag-view"));
 const AlloyCampaignHub = lazy(() => import("@/alloy/pages/creative/campaign-hub").then(m => ({ default: m.CampaignHub })));
 const AlloyCampaignDetail = lazy(() => import("@/alloy/pages/creative/campaign-detail").then(m => ({ default: m.CampaignDetail })));
 const AlloyBrandVoice = lazy(() => import("@/alloy/pages/creative/brand-voice"));
@@ -166,6 +167,9 @@ function App() {
             </Route>
             <Route path="/alloy/console">
               <Suspense fallback={<PageLoader />}><AlloyPage><AlloyConsolePage /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/dag">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyDagView /></AlloyPage></Suspense>
             </Route>
             <Route path="/alloy/creative">
               <Suspense fallback={<PageLoader />}><AlloyPage><AlloyCampaignHub /></AlloyPage></Suspense>

@@ -370,7 +370,7 @@ export default function ExecutionHistory() {
                 workflows={workflows}
                 onRetry={id => retryRun.mutate(id)}
                 onCancel={id => cancelRun.mutate(id)}
-                onView={id => navigate(`/runs/${id}`)}
+                onView={id => navigate(`/alloy/runs/${id}`)}
               />
             ))
           )}

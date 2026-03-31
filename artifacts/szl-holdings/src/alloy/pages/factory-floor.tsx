@@ -357,7 +357,7 @@ export default function FactoryFloor() {
               <WorkflowCard
                 key={stat.workflow.id}
                 stat={stat}
-                onClick={() => navigate(`/runs?workflowId=${stat.workflow.id}&name=${encodeURIComponent(stat.workflow.name)}`)}
+                onClick={() => navigate(`/alloy/runs?workflowId=${stat.workflow.id}&name=${encodeURIComponent(stat.workflow.name)}`)}
               />
             ))}
           </div>
