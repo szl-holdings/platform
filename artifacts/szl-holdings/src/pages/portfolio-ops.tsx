@@ -78,12 +78,6 @@ const apps: AppReadiness[] = [
     features: { shipped: 15, planned: 5 }, deployment: { region: "US-East", lastRelease: "Mar 27" }, confidence: "Medium",
   },
   {
-    name: "Dreamscape", slug: "dreamscape", icon: Brain, accent: "hsl(330,80%,55%)",
-    stage: "Live", maturity: 72, readinessScore: 76, owner: "Creative Ops", team: "Creative",
-    blockers: [], risks: ["Campaign analytics depth"],
-    features: { shipped: 12, planned: 7 }, deployment: { region: "US-East", lastRelease: "Mar 26" }, confidence: "Medium",
-  },
-  {
     name: "Carlota Jo", slug: "carlota-jo", icon: Globe, accent: "hsl(36,52%,54%)",
     stage: "Live", maturity: 86, readinessScore: 89, owner: "Advisory Services", team: "Advisory",
     blockers: [], risks: [],

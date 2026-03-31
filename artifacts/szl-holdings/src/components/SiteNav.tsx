@@ -12,7 +12,6 @@ const NAV_LINKS = [
   { label: "Vessels", href: "/vessels", external: "/vessels/", section: "Flagships" },
   { label: "Aegis", href: "/aegis", external: "/firestorm/", section: "Platforms" },
   { label: "Terra", href: "/terra", external: "/terra/", section: "Platforms" },
-  { label: "Dreamscape", href: "/dreamscape", external: "/dreamscape/", section: "Platforms" },
   { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/", section: "Services" },
   { label: "Founder", href: "/founder", section: "Company" },
   { label: "Trust", href: "/trust", section: "Company" },

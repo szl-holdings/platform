@@ -19,12 +19,12 @@ const FLAGSHIP: Platform[] = [
   {
     name: "Alloy",
     role: "Intelligence & Orchestration Engine",
-    description: "The systems backbone. Workflow orchestration, signal processing, multi-agent execution, and cross-platform intelligence. Every platform in the ecosystem runs through Alloy.",
+    description: "The systems backbone. Workflow orchestration, signal processing, multi-agent execution, and Creative Workflows. Every platform in the ecosystem runs through Alloy.",
     accent: "hsl(222,68%,58%)",
     href: "/alloy/",
     icon: Zap,
     serves: "Platform operators, engineering teams",
-    capabilities: ["Workflow orchestration", "Signal ingestion", "Multi-agent execution", "Audit trail"],
+    capabilities: ["Workflow orchestration", "Signal ingestion", "Multi-agent execution", "Creative Workflows"],
   },
   {
     name: "Lyte",
@@ -68,16 +68,6 @@ const OPERATIONS: Platform[] = [
     icon: Building,
     serves: "Brokers, investors, real estate operators",
     capabilities: ["Distress engine", "Deal pipeline", "Market intelligence", "Ownership analysis"],
-  },
-  {
-    name: "Dreamscape",
-    role: "Creative Studio",
-    description: "Campaign intelligence, creative production management, and brand operations. Where creative strategy meets operational execution.",
-    accent: "hsl(330,80%,55%)",
-    href: "/dreamscape/",
-    icon: Sparkles,
-    serves: "Creative teams, brand managers, campaign leads",
-    capabilities: ["Campaign hub", "Creative production", "Brand analytics", "Asset management"],
   },
 ];
 

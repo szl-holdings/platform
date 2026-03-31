@@ -68,7 +68,7 @@ const ORACLES = [
 const EXAMPLE_CONSULTATIONS = [
   { question: "What maritime disruptions should we anticipate in the next 30 days based on current geopolitical signals?", oracle: "Maritime Oracle", confidence: 87, summary: "El Niño weather pattern will increase Suez Canal delays by 15–22%. Red Sea tensions remain elevated — recommend rerouting 3 key fleet segments via Cape of Good Hope. Panama Canal water levels critical through April." },
   { question: "What is the SZL Holdings portfolio's greatest systemic risk in Q2 2026?", oracle: "Willaq Umu 70B", confidence: 91, summary: "Cross-portfolio talent concentration risk is highest — 4 of 9 apps rely on the same 3 engineers for critical path work. Secondary risk: MSP's customer concentration (top 3 clients = 62% of ARR). Recommend: talent redundancy planning and MSP diversification initiative." },
-  { question: "Which Dreamscape campaign targeting segments show highest predicted ROAS for Q2?", oracle: "Creative Oracle", confidence: 78, summary: "B2B SaaS decision-makers aged 35–44 in the US Southeast show 2.8x predicted ROAS based on Q1 engagement data. LinkedIn video format outperforms display by 3.1x for this cohort. Recommend shifting 40% of Q2 budget to this segment and format combination." },
+  { question: "Which Alloy creative campaign targeting segments show highest predicted ROAS for Q2?", oracle: "Creative Oracle", confidence: 78, summary: "B2B SaaS decision-makers aged 35–44 in the US Southeast show 2.8x predicted ROAS based on Q1 engagement data. LinkedIn video format outperforms display by 3.1x for this cohort. Recommend shifting 40% of Q2 budget to this segment and format combination." },
 ];
 
 interface ComparisonResult {

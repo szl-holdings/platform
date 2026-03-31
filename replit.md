@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-A pnpm monorepo consisting of 10 live applications + 1 API server + 1 design sandbox. Shares a common PostgreSQL database, authentication system, and command-grade design system. Built for Stephen Lutar, founder of SZL Holdings. Follows a strict brand hierarchy: SZL Holdings, Alloy, Lyte, Vessels, Terra, Aegis, Dreamscape, Carlota Jo, and Stephen Lutar's personal identity. The ecosystem provides command and intelligence platforms across maritime, cybersecurity, AI research, real estate, and enterprise operations.
+A pnpm monorepo consisting of 10 live applications + 1 API server + 1 design sandbox. Shares a common PostgreSQL database, authentication system, and command-grade design system. Built for Stephen Lutar, founder of SZL Holdings. Follows a strict brand hierarchy: SZL Holdings, Alloy, Lyte, Vessels, Terra, Aegis, Carlota Jo, and Stephen Lutar's personal identity. The ecosystem provides command and intelligence platforms across maritime, cybersecurity, AI research, real estate, and enterprise operations. Note: Dreamscape was consolidated into Alloy as "Creative Workflows" (Task #177) — the standalone Dreamscape artifact is retired but API routes remain at `/api/dreamscape/*`. Rosie (MSP) and INCA were consolidated into Aegis (Security/Ops/Intel platform).
 
 ## User Preferences
 I prefer detailed explanations.
@@ -32,7 +32,7 @@ A premium, command-grade design system inspired by Palantir Foundry/Anduril Latt
 - **Terra:** Bronze/stone (#a07848), portfolio intelligence for real-estate — distinct from Lyte. Terminology: Portfolio Intelligence, not generic brokerage.
 - **Carlota Jo:** Warm ivory/brushed gold, light luxury, serif fonts.
 - **Stephen Lutar:** Near-monochrome, founder identity.
-- **Dreamscape:** Pink (#ec4899), Creative Studio — campaigns, brand voice, AI studio, motion graphics, voice studio. Standalone product, not a data/intelligence app.
+- **Alloy Creative Workflows:** Integrated into Alloy (cyan/steel) — Campaign Hub, Brand Voice Engine, Content Calendar, AI Studio. These are accessed at `/alloy/creative` and subdirectories. API routes remain at `/api/dreamscape/*` for backward compatibility. Dreamscape standalone artifact is retired.
 - **Aegis:** Indigo/violet (#6366f1), Unified Defense & Intelligence Command — consolidates Firestorm (security), Rosie/MSP (managed operations), and INCA (AI intelligence) into one platform. Three modules: Security Operations (/soc), Managed Operations (/ops/*), Intelligence Engine (/intel/*). Artifact slug remains `firestorm`, base path `/firestorm/`.
 
 #### Architecture Decision: Nimbus Dissolved as Public Brand
@@ -41,7 +41,7 @@ Nimbus was consolidated into Alloy's intelligence layer (Task #173). It is NOT a
 - The `recommendations` DB table stores cross-platform AI recommendations attributed to Alloy intelligence.
 - The `alloyPredictiveConfig` copilot config represents Alloy's predictive capability.
 - All user-facing "Nimbus" labels have been replaced with "AI Recommendations" / "Alloy Intelligence".
-- SZL Holdings Core Command links to Dreamscape (Creative Studio), not Nimbus.
+- SZL Holdings Core Command links to Alloy Creative Workflows (at `/alloy/creative`), not Dreamscape or Nimbus.
 
 ### Platform Architecture & Features
 The platform features 13 applications sharing authentication and design.

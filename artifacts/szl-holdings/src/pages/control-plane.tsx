@@ -21,7 +21,6 @@ const platformRegistry = [
   { name: "INCA", slug: "inca", type: "AI Research Command", tier: "Platform", status: "operational", uptime: "99.89%", version: "2.1.0", env: "production", lastDeploy: "2026-03-24T10:10:00Z", owner: "AI Research" },
   { name: "Terra", slug: "terra", type: "Portfolio Intelligence", tier: "Platform", status: "operational", uptime: "99.91%", version: "2.3.4", env: "production", lastDeploy: "2026-03-28T13:55:00Z", owner: "Real Estate Ops" },
   { name: "Rosie", slug: "msp", type: "Incident Command", tier: "Platform", status: "operational", uptime: "99.93%", version: "1.9.2", env: "production", lastDeploy: "2026-03-27T15:40:00Z", owner: "MSP Engineering" },
-  { name: "Dreamscape", slug: "dreamscape", type: "Creative Studio", tier: "Platform", status: "operational", uptime: "99.88%", version: "1.7.0", env: "production", lastDeploy: "2026-03-26T09:25:00Z", owner: "Creative Ops" },
   { name: "Carlota Jo", slug: "carlota-jo", type: "Premium Advisory", tier: "Service", status: "operational", uptime: "99.96%", version: "2.0.1", env: "production", lastDeploy: "2026-03-23T14:00:00Z", owner: "Advisory Services" },
   { name: "Stephen Lutar", slug: "stephen-site", type: "Founder Identity", tier: "Brand", status: "operational", uptime: "99.99%", version: "1.4.0", env: "production", lastDeploy: "2026-03-20T11:00:00Z", owner: "Stephen Lutar" },
 ];

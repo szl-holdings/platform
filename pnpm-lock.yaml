@@ -188,6 +188,9 @@ importers:
 
   artifacts/alloy:
     dependencies:
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       recharts:
         specifier: 'catalog:'
         version: 2.15.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

@@ -137,21 +137,6 @@ export function registerDefaultSchedules() {
         return `Analyze this services data and identify the top 1-2 most significant findings for managed service delivery:\n\nServices Health: ${JSON.stringify(health)?.slice(0, 2000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
       },
     },
-    {
-      agentId: "dreamscape-autonomous",
-      name: "Dreamscape Creative Monitor",
-      domain: "dreamscape" as const,
-      intervalMs: 30 * 60 * 1000,
-      enabled: true,
-      taskDescription: "Analyze campaign performance, identify content opportunities, track creative trends",
-      systemPrompt: `You are an autonomous creative intelligence agent. Analyze campaign data to generate concise creative strategy findings. Focus on: campaign performance gaps, content opportunities, and emerging creative trends.`,
-      analysisPrompt: async () => {
-        const [campaigns] = await Promise.all([
-          fetchData("/api/dreamscape/campaigns"),
-        ]);
-        return `Analyze this campaign data and identify the top 1-2 most significant findings:\n\nCampaigns: ${JSON.stringify(campaigns)?.slice(0, 2000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
-      },
-    },
   ];
 
   for (const schedule of schedules) {

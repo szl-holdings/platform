@@ -1,31 +1,11 @@
 kind = "web"
 previewPath = "/dreamscape/"
-title = "Dreamscape — Scenario Intelligence"
+title = "Dreamscape (retired — Creative Workflows now in Alloy)"
 version = "1.0.0"
 id = "artifacts/dreamscape"
 router = "path"
+retired = true
 
 [[integratedSkills]]
 name = "react-vite"
 version = "1.0.0"
-
-[[services]]
-name = "web"
-paths = [ "/dreamscape/" ]
-localPort = 23397
-
-[services.development]
-run = "pnpm --filter @workspace/dreamscape run dev"
-
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/dreamscape", "run", "build" ]
-publicDir = "artifacts/dreamscape/dist/public"
-serve = "static"
-
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
-
-[services.env]
-PORT = "23397"
-BASE_PATH = "/dreamscape/"

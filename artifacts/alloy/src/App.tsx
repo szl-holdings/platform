@@ -29,6 +29,12 @@ const AutomationAnalytics = lazy(() => import("@/pages/automation-analytics"));
 const ConsolePage = lazy(() => import("@/pages/ConsolePage"));
 const AlloyMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 
+const CampaignHub = lazy(() => import("@/pages/creative/campaign-hub").then(m => ({ default: m.CampaignHub })));
+const CampaignDetail = lazy(() => import("@/pages/creative/campaign-detail").then(m => ({ default: m.CampaignDetail })));
+const BrandVoice = lazy(() => import("@/pages/creative/brand-voice"));
+const ContentCalendar = lazy(() => import("@/pages/creative/content-calendar"));
+const AIStudio = lazy(() => import("@/pages/creative/ai-studio"));
+
 function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -39,6 +45,11 @@ function PrivateRouter() {
         <Route path="/governance" component={GovernanceAudit} />
         <Route path="/analytics" component={AutomationAnalytics} />
         <Route path="/console" component={ConsolePage} />
+        <Route path="/creative" component={CampaignHub} />
+        <Route path="/creative/campaigns/:id" component={CampaignDetail} />
+        <Route path="/creative/brand-voice" component={BrandVoice} />
+        <Route path="/creative/content-calendar" component={ContentCalendar} />
+        <Route path="/creative/ai-studio" component={AIStudio} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

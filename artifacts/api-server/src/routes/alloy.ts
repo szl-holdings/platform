@@ -12,7 +12,7 @@ import {
   insertAlloySignalSchema,
 } from "@workspace/db";
 import { eq, desc, and, sql, inArray, gte, lte } from "drizzle-orm";
-import { authMiddleware, requireRole } from "../middlewares/auth";
+import { authMiddleware, requireRole, parseIdParam, type AuthenticatedUser } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
 import { platformAuth, logPlatformEvent } from "../middlewares/platform-auth";
 import {
@@ -25,7 +25,6 @@ import {
   handleRouteError,
   parsePagination,
 } from "../lib/api-response";
-import { authMiddleware, requireRole, parseIdParam, type AuthenticatedUser } from "../middlewares/auth";
 import { logger } from "../lib/logger";
 const router: IRouter = Router();
 

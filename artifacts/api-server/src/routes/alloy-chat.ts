@@ -198,7 +198,7 @@ The platform includes these registered applications:
 - Vessels Maritime Intelligence — vessel fleet management and compliance
 - Lyte Readiness — operational readiness and maturity assessment module within Lyte
 - Lyte Command Center — ITOps signal processing and incident response
-- Dreamscape Creative Engine — AI-powered creative campaign platform
+- Alloy Creative Workflows — AI-powered creative campaign platform (Campaign Hub, Brand Voice, AI Studio)
 - Carlota Jo Consulting — consulting services booking and management
 - Component Preview Server — design system component library
 

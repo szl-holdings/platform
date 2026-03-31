@@ -147,9 +147,6 @@ function App() {
             <Route path="/msp">
               <ExternalRedirect to="/msp/" />
             </Route>
-            <Route path="/dreamscape">
-              <ExternalRedirect to="/dreamscape/" />
-            </Route>
             <Route path="/stephen">
               <ExternalRedirect to="/stephen-site/" />
             </Route>
