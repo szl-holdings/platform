@@ -42,6 +42,27 @@ const WINDOW_SIZE = 300_000;
 
 const MAX_BUSINESS_EVENTS = 1000;
 const MAX_ALERTS = 50;
+const MAX_APM_SPANS = 500;
+const MAX_EXTERNAL_CALLS = 200;
+
+export interface ApmSpan {
+  route: string;
+  method: string;
+  statusCode: number;
+  totalMs: number;
+  dbQueryMs: number;
+  externalApiMs: number;
+  serializationMs: number;
+  timestamp: number;
+  correlationId?: string;
+}
+
+export interface ExternalCallRecord {
+  provider: string;
+  durationMs: number;
+  timestamp: number;
+  success?: boolean;
+}
 
 export class ServerTelemetryCollector {
   private requests: RequestTelemetry[] = [];
@@ -52,6 +73,8 @@ export class ServerTelemetryCollector {
   private authFailureCount = 0;
   private retryCount = 0;
   private dbQueryLatencies: Array<{ durationMs: number; timestamp: number; query?: string }> = [];
+  private apmSpans: ApmSpan[] = [];
+  private externalCalls: ExternalCallRecord[] = [];
 
   recordRequest(data: RequestTelemetry) {
     this.requests.push(data);
@@ -135,6 +158,99 @@ export class ServerTelemetryCollector {
     if (this.dbQueryLatencies.length > MAX_DB_SAMPLES) {
       this.dbQueryLatencies.splice(0, this.dbQueryLatencies.length - MAX_DB_SAMPLES);
     }
+  }
+
+  recordDbQuery(data: { durationMs: number; query?: string; timestamp: number }) {
+    this.recordDbQueryLatency(data.durationMs, data.query);
+  }
+
+  recordApmSpan(span: ApmSpan) {
+    this.apmSpans.push(span);
+    if (this.apmSpans.length > MAX_APM_SPANS) {
+      this.apmSpans.splice(0, this.apmSpans.length - MAX_APM_SPANS);
+    }
+  }
+
+  recordExternalCall(call: ExternalCallRecord) {
+    this.externalCalls.push(call);
+    if (this.externalCalls.length > MAX_EXTERNAL_CALLS) {
+      this.externalCalls.splice(0, this.externalCalls.length - MAX_EXTERNAL_CALLS);
+    }
+  }
+
+  getApmSpans(windowMs = WINDOW_SIZE): ApmSpan[] {
+    const cutoff = Date.now() - windowMs;
+    return this.apmSpans.filter(s => s.timestamp >= cutoff);
+  }
+
+  getApmLatencyBreakdown(windowMs = WINDOW_SIZE): {
+    routes: Array<{ route: string; avgTotal: number; avgDb: number; avgExternal: number; avgSerialization: number; count: number; p99: number }>;
+    overallP50: number;
+    overallP95: number;
+    overallP99: number;
+    avgDbFraction: number;
+    avgExternalFraction: number;
+  } {
+    const spans = this.getApmSpans(windowMs);
+    if (spans.length === 0) {
+      return { routes: [], overallP50: 0, overallP95: 0, overallP99: 0, avgDbFraction: 0, avgExternalFraction: 0 };
+    }
+
+    const byRoute = new Map<string, ApmSpan[]>();
+    for (const s of spans) {
+      const key = `${s.method} ${s.route}`;
+      if (!byRoute.has(key)) byRoute.set(key, []);
+      byRoute.get(key)!.push(s);
+    }
+
+    const routes = Array.from(byRoute.entries()).map(([route, ss]) => {
+      const sorted = ss.map(s => s.totalMs).sort((a, b) => a - b);
+      const avg = (arr: number[]) => arr.reduce((s, v) => s + v, 0) / arr.length;
+      return {
+        route,
+        avgTotal: avg(ss.map(s => s.totalMs)),
+        avgDb: avg(ss.map(s => s.dbQueryMs)),
+        avgExternal: avg(ss.map(s => s.externalApiMs)),
+        avgSerialization: avg(ss.map(s => s.serializationMs)),
+        count: ss.length,
+        p99: sorted[Math.floor(sorted.length * 0.99)] ?? sorted[sorted.length - 1] ?? 0,
+      };
+    }).sort((a, b) => b.avgTotal - a.avgTotal);
+
+    const allTotals = spans.map(s => s.totalMs).sort((a, b) => a - b);
+    const p = (pct: number) => allTotals[Math.floor(allTotals.length * pct)] ?? 0;
+    const totalDb = spans.reduce((s, sp) => s + sp.dbQueryMs, 0);
+    const totalExt = spans.reduce((s, sp) => s + sp.externalApiMs, 0);
+    const totalAll = spans.reduce((s, sp) => s + sp.totalMs, 0) || 1;
+
+    return {
+      routes: routes.slice(0, 20),
+      overallP50: p(0.5),
+      overallP95: p(0.95),
+      overallP99: p(0.99),
+      avgDbFraction: (totalDb / totalAll) * 100,
+      avgExternalFraction: (totalExt / totalAll) * 100,
+    };
+  }
+
+  getExternalCallStats(windowMs = WINDOW_SIZE): Record<string, { count: number; avgMs: number; p99Ms: number }> {
+    const cutoff = Date.now() - windowMs;
+    const recent = this.externalCalls.filter(c => c.timestamp >= cutoff);
+    const byProvider = new Map<string, number[]>();
+    for (const c of recent) {
+      if (!byProvider.has(c.provider)) byProvider.set(c.provider, []);
+      byProvider.get(c.provider)!.push(c.durationMs);
+    }
+    const result: Record<string, { count: number; avgMs: number; p99Ms: number }> = {};
+    for (const [provider, durations] of byProvider) {
+      const sorted = [...durations].sort((a, b) => a - b);
+      result[provider] = {
+        count: durations.length,
+        avgMs: durations.reduce((s, v) => s + v, 0) / durations.length,
+        p99Ms: sorted[Math.floor(sorted.length * 0.99)] ?? sorted[sorted.length - 1] ?? 0,
+      };
+    }
+    return result;
   }
 
   getDbLatencyP50(): number {

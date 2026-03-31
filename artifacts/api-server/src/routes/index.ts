@@ -64,6 +64,7 @@ import lyteLiveRouter from "./lyte-live";
 import vesselsLiveRouter from "./vessels-live";
 import integrationsRouter from "./integrations";
 import configRouter from "./config";
+import apmRouter from "./apm";
 
 const router: IRouter = Router();
 
@@ -234,6 +235,8 @@ router.use("/vessels", readLimiter);
 router.use(vesselsLiveRouter);
 
 router.use(configRouter);
+
+router.use(apmRouter);
 
 router.use("/documents", writeLimiter);
 router.use(documentsRouter);

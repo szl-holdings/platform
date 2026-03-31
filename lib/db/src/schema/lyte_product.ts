@@ -4,6 +4,26 @@ import { z } from "zod/v4";
 import { usersTable } from "./auth";
 import { lyteSignalsTable } from "./lyte";
 
+export const lyteDashboardsTable = pgTable("lyte_dashboards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id, { onDelete: "cascade" }).notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  widgets: jsonb("widgets").notNull().default([]),
+  template: text("template"),
+  isShared: boolean("is_shared").notNull().default(false),
+  shareToken: text("share_token"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("lyte_dashboards_user_idx").on(table.userId),
+  index("lyte_dashboards_share_token_idx").on(table.shareToken),
+]);
+
+export const insertLyteDashboardSchema = createInsertSchema(lyteDashboardsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertLyteDashboard = z.infer<typeof insertLyteDashboardSchema>;
+export type LyteDashboard = typeof lyteDashboardsTable.$inferSelect;
+
 export const lyteSignalCommentsTable = pgTable("lyte_signal_comments", {
   id: serial("id").primaryKey(),
   signalId: integer("signal_id").references(() => lyteSignalsTable.id, { onDelete: "cascade" }),

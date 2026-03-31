@@ -55,6 +55,8 @@ const ServiceTopology = lazy(() => import("@/pages/service-topology"));
 const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
 const CommandInboxLegacy = lazy(() => import("@/pages/action-queue"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
+const DashboardBuilder = lazy(() => import("@/pages/dashboard-builder"));
+const ApmInstrumentation = lazy(() => import("@/pages/apm-instrumentation"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -101,6 +103,8 @@ function PrivateRouter() {
         <Route path="/alerts" component={AlertConfig} />
         <Route path="/topology" component={ServiceTopology} />
         <Route path="/powerbi" component={PowerBiReport} />
+        <Route path="/dashboards" component={DashboardBuilder} />
+        <Route path="/apm" component={ApmInstrumentation} />
         <Route path="/admin/jobs">{() => <AdminRoute component={AdminJobsPage} />}</Route>
         <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>
         <Route path="/admin/flags">{() => <AdminRoute component={AdminFlagsPage} />}</Route>

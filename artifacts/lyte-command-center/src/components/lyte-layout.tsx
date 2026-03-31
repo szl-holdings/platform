@@ -5,7 +5,7 @@ import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
-  ChevronRight, Gauge, BarChart3
+  ChevronRight, Gauge, BarChart3, LayoutDashboard
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
@@ -37,6 +37,7 @@ const NAV_GROUPS = [
   {
     label: "Workspace",
     items: [
+      { href: "/dashboards", label: "Dashboard Builder", icon: LayoutDashboard },
       { href: "/inbox", label: "Inbox", icon: Inbox },
       { href: "/explorer", label: "Explorer", icon: Search },
       { href: "/topology", label: "Topology", icon: Network },

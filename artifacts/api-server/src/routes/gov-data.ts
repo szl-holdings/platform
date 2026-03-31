@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { withExternalSpan } from "../middlewares/telemetry";
 
 const router: IRouter = Router();
 
@@ -241,9 +242,9 @@ async function fetchArxivPapersXml(query: string, maxResults = 8): Promise<typeo
   }
 }
 
-router.get("/gov/cisa-kev", govRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+router.get("/gov/cisa-kev", govRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
-    const data = await getCached("cisa-kev", 3600000, fetchCisaKev);
+    const data = await withExternalSpan(req, "cisa.gov", () => getCached("cisa-kev", 3600000, fetchCisaKev));
     sendSuccess(res, {
       source: "CISA Known Exploited Vulnerabilities (KEV) Catalog",
       url: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
@@ -271,7 +272,7 @@ router.get("/gov/nvd-cves", govRateLimit, authMiddleware({ required: false }), a
       params.set("keywordSearch", keyword);
     }
 
-    const data = await getCached(`nvd-cves-${severity || "all"}-${keyword || "all"}-${limit}`, 600000, async () => {
+    const data = await withExternalSpan(req, "nvd.nist.gov", () => getCached(`nvd-cves-${severity || "all"}-${keyword || "all"}-${limit}`, 600000, async () => {
       const raw = await fetchJson(`https://services.nvd.nist.gov/rest/json/cves/2.0?${params.toString()}`, {}, 15000) as any;
       const items = raw?.vulnerabilities;
       if (!Array.isArray(items)) throw new Error("No NVD data");
@@ -305,7 +306,7 @@ router.get("/gov/nvd-cves", govRateLimit, authMiddleware({ required: false }), a
           cisaDueDate: cve?.cisaActionDue ?? null,
         };
       });
-    });
+    }));
     sendSuccess(res, {
       source: "NIST National Vulnerability Database (NVD) CVE 2.0 API",
       url: "https://nvd.nist.gov/",

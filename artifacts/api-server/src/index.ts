@@ -14,6 +14,7 @@ import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler"
 import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
 import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
+import { ensureLyteDashboardsTable } from "./lib/lyte-dashboard-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -73,6 +74,7 @@ import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
 ensureAlloyTables()
   .then(() => ensurePlatformOpsTables())
+  .then(() => ensureLyteDashboardsTable())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {
     registerDefaultSchedules();

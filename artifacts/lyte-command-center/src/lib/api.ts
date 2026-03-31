@@ -237,6 +237,13 @@ export const api = {
     score: (workspaceId?: number) => apiFetch<{ score: number; breakdown: unknown[]; readyCount: number; totalItems: number; lastUpdated: string }>(`/lyte/readiness/score${workspaceId ? `?workspaceId=${workspaceId}` : ""}`),
   },
   dashboard: () => apiFetch<LyteDashboard>("/lyte/dashboard"),
+  dashboards: {
+    list: () => apiFetch<unknown[]>("/lyte/dashboards"),
+    get: (id: number) => apiFetch<unknown>(`/lyte/dashboards/${id}`),
+    create: (data: Record<string, unknown>) => apiFetch<unknown>("/lyte/dashboards", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Record<string, unknown>) => apiFetch<unknown>(`/lyte/dashboards/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    delete: (id: number) => apiFetch<{ deleted: boolean }>(`/lyte/dashboards/${id}`, { method: "DELETE" }),
+  },
   executiveSummary: () => apiFetch<Record<string, unknown>>("/lyte/executive-summary"),
   insights: () => apiFetch<{ narratives: Array<{ type: string; priority: string; headline: string; detail: string }>; signalSummary: Record<string, number>; sourceSummary: Record<string, number> }>("/lyte/insights/narratives"),
   live: {

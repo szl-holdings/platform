@@ -15,6 +15,7 @@ import {
   WifiOff,
   Brain,
   Shield,
+  Gauge,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@workspace/shared-ui/utils";
@@ -65,6 +66,7 @@ const PRIMARY_NAV = [
 
 const ANALYTICS_NAV = [
   { href: "/workflow-latency", label: "Workflow Latency", icon: Clock },
+  { href: "/apm", label: "APM Instrumentation", icon: Gauge },
   { href: "/ownership-map", label: "Ownership Map", icon: Users },
   { href: "/value-at-risk", label: "Value at Risk", icon: DollarSign },
   { href: "/use-cases", label: "Use Cases", icon: BookOpen },
@@ -79,7 +81,7 @@ const ALL_NAV = [...PRIMARY_NAV, ...ANALYTICS_NAV, ...MARKETING_NAV];
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [analyticsExpanded, setAnalyticsExpanded] = useState(
-    location.startsWith("/workflow") || location.startsWith("/ownership") || location.startsWith("/value") || location.startsWith("/use-case")
+    location.startsWith("/workflow") || location.startsWith("/ownership") || location.startsWith("/value") || location.startsWith("/use-case") || location.startsWith("/apm")
   );
 
   return (
