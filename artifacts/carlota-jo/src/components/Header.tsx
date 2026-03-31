@@ -36,17 +36,18 @@ export default function Header() {
         backdropFilter: scrolled ? "blur(12px)" : "none",
         borderBottom: scrolled ? "1px solid rgba(154,125,82,0.12)" : "none",
       }}
+      data-scrolled={scrolled}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12 h-[60px] flex items-center justify-between">
         <Link href="/" className="group">
           <div className="flex flex-col">
             <span
-              className="font-light text-[17px] leading-none tracking-wide"
-              style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "var(--color-ink-900)" }}
+              className="font-light text-[17px] leading-none tracking-wide transition-colors duration-300"
+              style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: scrolled ? "var(--color-ink-900)" : "#f5f0e8" }}
             >
               Carlota Jo
             </span>
-            <span className="text-[9px] tracking-[0.3em] uppercase font-medium mt-0.5" style={{ color: "var(--color-gold)", opacity: 0.7 }}>
+            <span className="text-[9px] tracking-[0.3em] uppercase font-medium mt-0.5 transition-colors duration-300" style={{ color: "var(--color-gold)", opacity: scrolled ? 0.7 : 0.5 }}>
               Consulting
             </span>
           </div>
@@ -57,13 +58,15 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-[13px] font-light transition-colors duration-200 tracking-wide"
+              className="text-[13px] font-light transition-colors duration-300 tracking-wide"
               style={{
-                color: location === link.href ? "var(--color-ink-900)" : "var(--color-ink-500)",
+                color: scrolled
+                  ? (location === link.href ? "var(--color-ink-900)" : "var(--color-ink-500)")
+                  : (location === link.href ? "#f5f0e8" : "rgba(245,240,232,0.5)"),
                 textDecoration: "none",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-ink-900)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = location === link.href ? "var(--color-ink-900)" : "var(--color-ink-500)"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = scrolled ? "var(--color-ink-900)" : "#f5f0e8"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = scrolled ? (location === link.href ? "var(--color-ink-900)" : "var(--color-ink-500)") : (location === link.href ? "#f5f0e8" : "rgba(245,240,232,0.5)"); }}
             >
               {link.label}
             </Link>
