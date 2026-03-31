@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
-import { GitBranch, User, Clock, ExternalLink, AlertTriangle, RefreshCw, Play, Pause, XCircle, CheckCircle, ChevronRight, Terminal, Zap, Activity, Filter } from "lucide-react";
-import { useState } from "react";
+import { apiFetch, DataStateBadge } from "@workspace/shared-ui";
+import { GitBranch, User, Clock, ExternalLink, AlertTriangle, RefreshCw, Play, Pause, XCircle, CheckCircle, ChevronRight, Terminal, Zap, Activity, Filter, Radio } from "lucide-react";
+import { useState, useMemo } from "react";
 
 interface Workflow {
   id: number;
@@ -79,6 +79,23 @@ const KIND_LABELS: Record<string, string> = {
   finance: "Finance",
   automation: "Automation",
 };
+
+function generateDemoWorkflows(): Workflow[] {
+  const now = new Date();
+  const ago = (h: number) => new Date(now.getTime() - h * 3600000).toISOString();
+  return [
+    { id: 1, orgId: 1, name: "Client Onboarding — Enterprise Tier", description: "End-to-end onboarding flow: KYC verification → legal review → account provisioning → welcome sequence.", status: "active", product: "alloy-core", kind: "onboarding", config: { steps: ["KYC Check", "Legal Review", "Account Setup", "Welcome Email", "Assign CSM"] }, metadata: { owner: "Sarah Chen", team: "Client Success", sla_deadline: "48h", value_at_risk: 2400000 }, createdAt: ago(720), updatedAt: ago(2) },
+    { id: 2, orgId: 1, name: "Contract Renewal Pipeline", description: "Automated renewal tracking with escalation paths for at-risk accounts.", status: "active", product: "alloy-core", kind: "contract", config: { steps: ["90-Day Notice", "Usage Review", "Pricing Update", "Legal Approval", "Signature"] }, metadata: { owner: "Marcus Rivera", team: "Revenue Ops", sla_deadline: "72h", value_at_risk: 8500000 }, createdAt: ago(1440), updatedAt: ago(6) },
+    { id: 3, orgId: 1, name: "SOC 2 Evidence Collection", description: "Continuous compliance evidence gathering across all control families.", status: "active", product: "alloy-compliance", kind: "compliance", config: { steps: ["Access Reviews", "Change Mgmt Logs", "Incident Reports", "Pen Test Results", "Policy Sign-offs"] }, metadata: { owner: "Diana Park", team: "InfoSec", sla_deadline: "Monthly", value_at_risk: 500000 }, createdAt: ago(2160), updatedAt: ago(12) },
+    { id: 4, orgId: 1, name: "Invoice Approval Workflow", description: "Multi-tier approval chain for vendor invoices > $10K with automatic escalation.", status: "active", product: "alloy-finance", kind: "finance", config: { steps: ["Receipt Scan", "Budget Check", "Manager Approve", "Director Approve", "AP Process"] }, metadata: { owner: "James Okafor", team: "Finance", sla_deadline: "5 business days" }, createdAt: ago(960), updatedAt: ago(1) },
+    { id: 5, orgId: 1, name: "Quarterly Board Report Assembly", description: "Automated data pull from 12 sources, formatting, and review cycle for board materials.", status: "paused", product: "alloy-core", kind: "automation", config: { steps: ["Data Pull", "KPI Calc", "Narrative Draft", "Exec Review", "Final Format"] }, metadata: { owner: "Lisa Thornton", team: "Strategy", sla_deadline: "Q2 2026" }, createdAt: ago(480), updatedAt: ago(48) },
+    { id: 6, orgId: 1, name: "Vendor Risk Assessment", description: "Automated vendor security questionnaire distribution, scoring, and tracking.", status: "active", product: "alloy-compliance", kind: "compliance", config: { steps: ["Questionnaire Send", "Response Collection", "Risk Scoring", "Review Meeting", "Decision"] }, metadata: { owner: "Diana Park", team: "InfoSec", sla_deadline: "30 days", value_at_risk: 1200000 }, createdAt: ago(336), updatedAt: ago(4) },
+    { id: 7, orgId: 1, name: "Employee Offboarding", description: "Coordinated deprovisioning across IT, HR, and facilities with compliance checks.", status: "active", product: "alloy-hr", kind: "onboarding", config: { steps: ["HR Notify", "IT Deprovision", "Badge Revoke", "Knowledge Transfer", "Exit Interview"] }, metadata: { owner: "Kenji Watanabe", team: "People Ops" }, createdAt: ago(2880), updatedAt: ago(18) },
+    { id: 8, orgId: 1, name: "Data Pipeline Health Monitor", description: "Monitors ETL pipeline health and triggers alerts on schema drift or SLA breach.", status: "error", product: "alloy-data", kind: "automation", config: { steps: ["Schema Validate", "Row Count Check", "Latency Monitor", "Alert Dispatch"] }, metadata: { owner: "Raj Patel", team: "Data Engineering", value_at_risk: 350000 }, createdAt: ago(168), updatedAt: ago(0.5) },
+    { id: 9, orgId: 1, name: "Marketing Campaign Approval", description: "Creative review, legal compliance check, and budget sign-off for campaign launches.", status: "draft", product: "alloy-marketing", kind: "approval", config: { steps: ["Creative Review", "Brand Check", "Legal Scan", "Budget Approve", "Schedule"] }, metadata: { owner: "Aisha Johnson", team: "Marketing" }, createdAt: ago(72), updatedAt: ago(72) },
+    { id: 10, orgId: 1, name: "Incident Post-Mortem Pipeline", description: "Structured post-mortem process with auto-generated timelines and action item tracking.", status: "active", product: "alloy-ops", kind: "automation", config: { steps: ["Timeline Build", "Root Cause", "Action Items", "Review Meeting", "Publish"] }, metadata: { owner: "Tom Bradley", team: "SRE", sla_deadline: "5 business days" }, createdAt: ago(1080), updatedAt: ago(8) },
+  ];
+}
 
 function WorkflowSteps({ workflow }: { workflow: Workflow }) {
   const config = workflow.config as Record<string, unknown> ?? {};
@@ -205,11 +222,15 @@ function SkeletonWorkflow() {
 }
 
 export default function WorkflowOrchestration() {
-  const { data: workflows = [], isLoading, isError, refetch } = useWorkflows();
+  const { data: apiWorkflows, isLoading, isError, refetch } = useWorkflows();
   const updateWorkflow = useUpdateWorkflow();
   const startRun = useStartRun();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
+
+  const isDemo = isError || (!isLoading && (!apiWorkflows || apiWorkflows.length === 0));
+  const demoWorkflows = useMemo(() => generateDemoWorkflows(), []);
+  const workflows = isDemo ? demoWorkflows : (apiWorkflows ?? []);
 
   const filtered = workflows.filter(w => statusFilter === "all" || w.status === statusFilter);
   const active = workflows.filter(w => w.status === "active");
@@ -233,6 +254,14 @@ export default function WorkflowOrchestration() {
           <RefreshCw className="w-3 h-3" /> Refresh
         </button>
       </div>
+
+      {isDemo && (
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-medium" style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.1)", color: "rgba(0,212,255,0.6)" }}>
+          <Radio className="w-3 h-3 shrink-0 animate-pulse" />
+          Demo Environment — Showing illustrative workflows. Connect the Alloy API for live data.
+          <DataStateBadge state="demo" className="ml-auto" />
+        </div>
+      )}
 
       {/* Status strip */}
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
@@ -273,18 +302,7 @@ export default function WorkflowOrchestration() {
 
       {isLoading && <div className="space-y-3">{[1, 2, 3].map(i => <SkeletonWorkflow key={i} />)}</div>}
 
-      {isError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 flex items-center gap-3">
-          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-red-400">Failed to load workflows</p>
-            <p className="text-[11px] text-red-400/60 mt-0.5">Check API connectivity.</p>
-          </div>
-          <button onClick={() => refetch()} className="ml-auto text-[10px] px-3 py-1.5 rounded-lg text-red-400 border border-red-500/20 hover:bg-red-500/10 transition-colors">Retry</button>
-        </div>
-      )}
-
-      {!isLoading && !isError && filtered.length === 0 && (
+      {!isLoading && filtered.length === 0 && (
         <div className="rounded-xl border p-12 text-center" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="w-10 h-10 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.12)" }}>
             <GitBranch className="w-5 h-5" style={{ color: "rgba(0,212,255,0.3)" }} />

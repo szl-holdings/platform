@@ -13,6 +13,62 @@ async function apiFetch<T>(path: string): Promise<T> {
   return res.json();
 }
 
+const DEMO_METRICS: DashboardMetrics = {
+  metrics: {
+    activeClients: 47, totalClients: 52, atRiskClients: 3, monthlyRevenue: 284500, revenueGrowth: 8.2,
+    uptime: 99.97, ticketsOpen: 18, ticketsInProgress: 12, ticketsResolved: 847, slaBreaches: 2, slaAtRisk: 4,
+    resolvedToday: 23, managedDevices: 3842, devicesOnline: 3701, devicesWarning: 98, devicesCritical: 12,
+    devicesOffline: 31, activeAlerts: 7, activeContracts: 44, expiringContracts: 5, totalContractValue: 4120000,
+    avgSlaCompliance: 96.4, clientSatisfaction: 4.7, avgResolutionTime: "4h 12m",
+  },
+};
+
+const DEMO_TICKETS: TicketItem[] = [
+  { id: 1, ticketNumber: "TK-4821", subject: "Exchange server unresponsive — mail queue backing up", clientName: "Meridian Corp", priority: "critical", status: "in-progress", assigneeName: "James Chen", slaDeadline: new Date(Date.now() + 1800000).toISOString(), slaStatus: "at-risk", category: "Infrastructure" },
+  { id: 2, ticketNumber: "TK-4820", subject: "VPN tunnel flapping between HQ and DR site", clientName: "Atlas Industries", priority: "high", status: "in-progress", assigneeName: "Maria Santos", slaDeadline: new Date(Date.now() + 7200000).toISOString(), slaStatus: "on-track", category: "Networking" },
+  { id: 3, ticketNumber: "TK-4819", subject: "Print spooler crash on PRINT-SRV-02", clientName: "Vertex Labs", priority: "medium", status: "open", assigneeName: "Tom Bradley", slaDeadline: new Date(Date.now() + 14400000).toISOString(), slaStatus: "on-track", category: "Endpoint" },
+  { id: 4, ticketNumber: "TK-4818", subject: "Azure AD sync failure — 14 users affected", clientName: "Pinnacle Healthcare", priority: "high", status: "in-progress", assigneeName: "Aisha Johnson", slaDeadline: new Date(Date.now() - 600000).toISOString(), slaStatus: "breached", category: "Identity" },
+  { id: 5, ticketNumber: "TK-4817", subject: "Backup job failed on SQL-PROD-01", clientName: "Cascade Financial", priority: "high", status: "open", assigneeName: "Raj Patel", slaDeadline: new Date(Date.now() + 3600000).toISOString(), slaStatus: "at-risk", category: "Backup" },
+  { id: 6, ticketNumber: "TK-4816", subject: "New employee onboarding — 3 workstations", clientName: "Summit Partners", priority: "low", status: "waiting", assigneeName: "Kevin Wu", slaDeadline: new Date(Date.now() + 86400000).toISOString(), slaStatus: "on-track", category: "Provisioning" },
+  { id: 7, ticketNumber: "TK-4815", subject: "SSL certificate expiring in 48 hours", clientName: "Meridian Corp", priority: "medium", status: "open", assigneeName: "James Chen", slaDeadline: new Date(Date.now() + 28800000).toISOString(), slaStatus: "on-track", category: "Security" },
+  { id: 8, ticketNumber: "TK-4814", subject: "Firewall rule change request — port 8443", clientName: "Atlas Industries", priority: "low", status: "waiting", assigneeName: "Maria Santos", slaDeadline: new Date(Date.now() + 172800000).toISOString(), slaStatus: "on-track", category: "Security" },
+];
+
+const DEMO_CLIENTS: ClientItem[] = [
+  { id: 1, name: "Meridian Corp", status: "active", deviceCount: 487, openTickets: 4, healthScore: 92, mrr: 24500, tier: "enterprise" },
+  { id: 2, name: "Atlas Industries", status: "active", deviceCount: 312, openTickets: 2, healthScore: 88, mrr: 18200, tier: "enterprise" },
+  { id: 3, name: "Vertex Labs", status: "active", deviceCount: 156, openTickets: 1, healthScore: 95, mrr: 12800, tier: "professional" },
+  { id: 4, name: "Pinnacle Healthcare", status: "at-risk", deviceCount: 523, openTickets: 6, healthScore: 64, mrr: 32100, tier: "enterprise" },
+  { id: 5, name: "Cascade Financial", status: "active", deviceCount: 245, openTickets: 3, healthScore: 81, mrr: 19400, tier: "professional" },
+  { id: 6, name: "Summit Partners", status: "active", deviceCount: 89, openTickets: 1, healthScore: 97, mrr: 8900, tier: "standard" },
+  { id: 7, name: "Ironclad Security", status: "active", deviceCount: 178, openTickets: 0, healthScore: 99, mrr: 15600, tier: "professional" },
+  { id: 8, name: "Northwind Logistics", status: "at-risk", deviceCount: 342, openTickets: 5, healthScore: 58, mrr: 22800, tier: "enterprise" },
+];
+
+const DEMO_TECHNICIANS: TechItem[] = [
+  { id: 1, name: "James Chen", specialties: ["Exchange", "Azure AD"], status: "on-site", completedToday: 4, location: "Meridian Corp HQ" },
+  { id: 2, name: "Maria Santos", specialties: ["Networking", "Firewalls"], status: "available", completedToday: 6, location: "Remote" },
+  { id: 3, name: "Tom Bradley", specialties: ["Endpoint", "Print"], status: "available", completedToday: 3, location: "Remote" },
+  { id: 4, name: "Aisha Johnson", specialties: ["Identity", "Azure"], status: "on-call", completedToday: 5, location: "NOC" },
+  { id: 5, name: "Raj Patel", specialties: ["Backup", "SQL"], status: "available", completedToday: 7, location: "Remote" },
+  { id: 6, name: "Kevin Wu", specialties: ["Provisioning", "Imaging"], status: "on-site", completedToday: 2, location: "Summit Partners" },
+];
+
+const DEMO_REVENUE: RevenueData = {
+  byClient: [
+    { clientName: "Pinnacle Healthcare", mrr: 32100, tier: "enterprise", churnRisk: "high", contractValue: 385200, daysToRenewal: 45 },
+    { clientName: "Meridian Corp", mrr: 24500, tier: "enterprise", churnRisk: "low", contractValue: 294000, daysToRenewal: 180 },
+    { clientName: "Northwind Logistics", mrr: 22800, tier: "enterprise", churnRisk: "high", contractValue: 273600, daysToRenewal: 30 },
+    { clientName: "Cascade Financial", mrr: 19400, tier: "professional", churnRisk: "low", contractValue: 232800, daysToRenewal: 240 },
+    { clientName: "Atlas Industries", mrr: 18200, tier: "enterprise", churnRisk: "low", contractValue: 218400, daysToRenewal: 310 },
+    { clientName: "Ironclad Security", mrr: 15600, tier: "professional", churnRisk: "low", contractValue: 187200, daysToRenewal: 195 },
+    { clientName: "Vertex Labs", mrr: 12800, tier: "professional", churnRisk: "medium", contractValue: 153600, daysToRenewal: 90 },
+    { clientName: "Summit Partners", mrr: 8900, tier: "standard", churnRisk: "low", contractValue: 106800, daysToRenewal: 365 },
+    { clientName: "Horizon Media", mrr: 11200, tier: "professional", churnRisk: "medium", contractValue: 134400, daysToRenewal: 120 },
+    { clientName: "Tidewater Solutions", mrr: 7400, tier: "standard", churnRisk: "low", contractValue: 88800, daysToRenewal: 270 },
+  ],
+};
+
 interface DashboardMetrics {
   metrics: {
     activeClients: number;
@@ -334,39 +390,50 @@ function ClientChurnHeatmap({ byClient }: { byClient: RevenueData["byClient"] })
 }
 
 export default function Dashboard() {
-  const { data: dashboardData, isLoading: dashLoading, isError, refetch } = useQuery<DashboardMetrics>({
+  const { data: dashboardData, isLoading: dashLoading, isError: dashError, refetch } = useQuery<DashboardMetrics>({
     queryKey: ["msp-dashboard"],
     queryFn: () => apiFetch<DashboardMetrics>("/msp/dashboard"),
     staleTime: 60_000,
-    retry: 2,
+    retry: 1,
     refetchInterval: 5 * 60_000,
   });
 
-  const { data: ticketsData, isLoading: ticketsLoading } = useQuery<{ tickets: TicketItem[] }>({
+  const { data: ticketsData, isLoading: ticketsLoading, isError: ticketsError } = useQuery<{ tickets: TicketItem[] }>({
     queryKey: ["msp-tickets-dashboard"],
     queryFn: () => apiFetch<{ tickets: TicketItem[] }>("/msp/tickets?limit=10"),
     staleTime: 60_000,
+    retry: 1,
   });
 
-  const { data: techData, isLoading: techLoading } = useQuery<{ technicians: TechItem[] }>({
+  const { data: techData, isLoading: techLoading, isError: techError } = useQuery<{ technicians: TechItem[] }>({
     queryKey: ["msp-technicians-dashboard"],
     queryFn: () => apiFetch<{ technicians: TechItem[] }>("/msp/technicians"),
     staleTime: 60_000,
+    retry: 1,
   });
 
-  const { data: clientsData, isLoading: clientsLoading } = useQuery<{ clients: ClientItem[] }>({
+  const { data: clientsData, isLoading: clientsLoading, isError: clientsError } = useQuery<{ clients: ClientItem[] }>({
     queryKey: ["msp-clients-dashboard"],
     queryFn: () => apiFetch<{ clients: ClientItem[] }>("/msp/clients"),
     staleTime: 60_000,
+    retry: 1,
   });
 
-  const { data: revenueData, isLoading: revenueLoading } = useQuery<RevenueData>({
+  const { data: revenueData, isLoading: revenueLoading, isError: revenueError } = useQuery<RevenueData>({
     queryKey: ["msp-revenue-dashboard"],
     queryFn: () => apiFetch<RevenueData>("/msp/revenue"),
     staleTime: 120_000,
+    retry: 1,
   });
 
-  const metrics = dashboardData?.metrics;
+  const useDemoDash = dashError || (!dashLoading && !dashboardData?.metrics);
+  const useDemoTickets = ticketsError || (!ticketsLoading && !ticketsData?.tickets?.length);
+  const useDemoTechs = techError || (!techLoading && !techData?.technicians?.length);
+  const useDemoClients = clientsError || (!clientsLoading && !clientsData?.clients?.length);
+  const useDemoRevenue = revenueError || (!revenueLoading && !revenueData?.byClient?.length);
+  const isDemo = useDemoDash || useDemoTickets || useDemoClients || useDemoTechs || useDemoRevenue;
+
+  const metrics = useDemoDash ? DEMO_METRICS.metrics : dashboardData?.metrics;
   const mrr = metrics?.monthlyRevenue ?? 0;
   const growth = metrics?.revenueGrowth ?? 0;
   const activeClients = metrics?.activeClients ?? 0;
@@ -377,10 +444,10 @@ export default function Dashboard() {
   const slaBreachCount = metrics?.slaBreaches ?? 0;
   const activeAlertCount = metrics?.activeAlerts ?? 0;
 
-  const tickets = ticketsData?.tickets ?? [];
-  const technicians = techData?.technicians ?? [];
-  const clients = clientsData?.clients ?? [];
-  const byClient = revenueData?.byClient ?? [];
+  const tickets = useDemoTickets ? DEMO_TICKETS : (ticketsData?.tickets ?? []);
+  const technicians = useDemoTechs ? DEMO_TECHNICIANS : (techData?.technicians ?? []);
+  const clients = useDemoClients ? DEMO_CLIENTS : (clientsData?.clients ?? []);
+  const byClient = useDemoRevenue ? DEMO_REVENUE.byClient : (revenueData?.byClient ?? []);
 
   const nocAlerts = [
     ...(metrics?.devicesCritical ? [{ id: "crit1", severity: "critical", client: "Managed Devices", message: `${metrics.devicesCritical} device${metrics.devicesCritical > 1 ? "s" : ""} in critical state — immediate attention required`, time: "Live" }] : []),
@@ -407,7 +474,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <DataStateBadge state={isError ? "stub" : "demo"} pulse={!isError} />
+          <DataStateBadge state={isDemo ? "demo" : "live"} pulse={isDemo} />
           <button
             onClick={() => { refetch(); toast.info("Refreshing metrics…"); }}
             className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg px-3 py-2"
