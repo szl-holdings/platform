@@ -13,6 +13,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { doctrineEventBus } from "@workspace/observability";
 import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
+import { DataStateBadge, DataStateBanner } from "@workspace/shared-ui";
 
 interface FleetAlert {
   id: number;
@@ -200,12 +201,12 @@ export default function AlertCenterPage() {
           <DoctrineLayerBadge appId="vessels" variant="compact" />
         </div>
         <p className="text-sm text-muted-foreground mt-1">Active alert stream, rule configuration, and escalation thresholds across fleet operations</p>
-        {isDemo && (
-          <div className="mt-2 flex items-center gap-2 text-xs text-sky-400/60 bg-sky-500/5 border border-sky-500/10 px-3 py-1.5 rounded-lg w-fit">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-            Simulation data — connect live AIS & fleet API for production alerts
-          </div>
-        )}
+        <div className="flex items-center gap-2 mt-2">
+          <DataStateBadge state={isDemo ? "demo" : "live"} pulse={!isDemo} />
+          {isDemo && (
+            <DataStateBanner state="demo" message="Connect live AIS & fleet API for production alerts" />
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

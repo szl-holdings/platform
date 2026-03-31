@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
 import { RiskBadge, StageBadge, DealHealthCard, ProbabilityBar, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { cn } from "@workspace/shared-ui/utils";
+import { DataStateBadge, DataStateBanner } from "@workspace/shared-ui";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = BASE.replace(/\/[^/]+$/, "/api");
@@ -317,12 +318,12 @@ export default function DealsPage() {
           <div>
             <h1 className="text-2xl font-display font-bold text-terra-text">Deal Pipeline</h1>
             <p className="text-sm text-terra-text-secondary mt-1">15-stage brokerage pipeline — kanban and table views with close probability and agent views</p>
-            {isDemo && (
-              <div className="mt-2 flex items-center gap-2 text-xs text-sky-400/60 bg-sky-500/5 border border-sky-500/10 px-3 py-1.5 rounded-lg w-fit">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-                {showEmptyState ? "Sample pipeline — add your first deal to get started" : "Simulation data — API offline, showing demo pipeline"}
-              </div>
-            )}
+            <div className="flex items-center gap-2 mt-2">
+              <DataStateBadge state={isDemo ? "demo" : "live"} pulse={!isDemo} />
+              {isDemo && (
+                <DataStateBanner state="demo" message={showEmptyState ? "Sample pipeline — add your first deal to get started" : "API offline — showing demo pipeline"} />
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex rounded-lg border border-terra-border overflow-hidden">

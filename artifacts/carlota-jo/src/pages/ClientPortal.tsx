@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { LayoutDashboard, FileText, MessageSquare, Bell, Settings, LogOut, CheckCircle2, Clock, ArrowRight, Download, Eye } from "lucide-react";
+import { DataStateBadge } from "@workspace/shared-ui";
 
 const portalNav = [
   { label: "Overview", href: "/client-portal", icon: LayoutDashboard },
@@ -77,6 +78,7 @@ export function ClientPortalOverview() {
           Good morning, Jane
         </h1>
         <p className="text-[#f5f0e8]/35 text-[13px] font-light">Active engagement · Phase 2: Strategic Positioning</p>
+        <div className="mt-2"><DataStateBadge state="demo" label="Demo Portal" /></div>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4 mb-8">
