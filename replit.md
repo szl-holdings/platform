@@ -91,6 +91,17 @@ Aegis (artifact slug `firestorm`, path `/firestorm/`) consolidates three former 
 - **Cloud Storage:** Dropbox, OneDrive
 - **Analytics:** Plausible, Posthog
 - **Voice Synthesis:** Elevenlabs
-- **Government Data Feeds:** CISA KEV, NVD CVE, MITRE ATT&CK, FedRAMP, Census Bureau, BLS, FEMA, USAspending.gov, NOAA, arXiv, Semantic Scholar, PapersWithCode, HuggingFace Hub, SEC EDGAR
-- **Other:** AbuseIPDB (IP reputation), Figma (design collaboration)
+- **Government Data Feeds:** CISA KEV, NVD CVE, MITRE ATT&CK, FedRAMP, Census Bureau ACS, BLS Construction Employment, FEMA NRI, USAspending.gov, NOAA, arXiv, Semantic Scholar, PapersWithCode, HuggingFace Hub, SEC EDGAR, NYC Open Data (PLUTO + 311), FRED (Federal Reserve), HUD Fair Market Rents
+- **Maritime Data:** Digitraffic AIS (Finnish Transport Infrastructure Agency), BarentsWatch AIS (Norwegian Coastal Administration), Open-Meteo Marine Weather API
+- **Threat Intelligence (keyless):** Shodan InternetDB, GreyNoise Community API, MalwareBazaar (Abuse.ch), URLhaus (Abuse.ch)
+- **Other:** GitHub Public API (OAuth via Replit integration), AbuseIPDB (IP reputation), Figma (design collaboration)
+
+### External Data Feed Health Dashboard
+A unified external data feed status panel at `/api/health/external-feeds` monitors 16 external APIs across all four platforms:
+- **Vessels:** Digitraffic AIS positions (5min TTL), Open-Meteo Marine Weather (15min TTL), BarentsWatch AIS (5min TTL)
+- **Terra:** NYC PLUTO (6hr TTL, filter by zipcode or borough), NYC 311 complaints (1hr TTL), Census ACS (daily), FRED mortgage rates (6hr), BLS construction employment (daily), FEMA NRI (30-day)
+- **Aegis:** Shodan InternetDB (1hr, keyless), GreyNoise Community (1hr, keyless), MalwareBazaar (1hr), URLhaus (1hr), NVD CVE (1hr), CISA KEV (daily)
+- **Lyte:** GitHub API (5min), real process telemetry (uptime, heap, CPU, DB latency)
+
+All feeds implement: TTL-based in-memory caching, stale data indicators, graceful fallback to demo data, circuit-breaker pattern via Promise.allSettled, and `isStale`/`cacheAgeSeconds` metadata in all responses.
 - **Azure Services:** Key Vault, Blob Storage, Redis, PostgreSQL, App Insights (infrastructure stubs)
