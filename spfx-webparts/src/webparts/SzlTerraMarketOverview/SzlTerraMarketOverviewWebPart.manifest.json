@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/core-build/package-solution/2017-02/package-solution.schema.json",
+  "manifestVersion": 2,
+  "componentType": "WebPart",
+  "id": "szl-terra-market-overview",
+  "alias": "SzlTerraMarketOverviewWebPart",
+  "version": "*",
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsTab"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "SZL Platform" },
+      "title": { "default": "Terra Market Overview" },
+      "description": {
+        "default": "Embeds Terra Real Estate Intelligence market data, property pipeline signals, and investment intelligence directly in SharePoint."
+      },
+      "officeFabricIconFontName": "CityNext",
+      "properties": {
+        "apiBaseUrl": "",
+        "orgId": "",
+        "refreshIntervalSeconds": 300,
+        "marketFilter": "all",
+        "showHeatmap": false,
+        "currency": "USD"
+      }
+    }
+  ]
+}

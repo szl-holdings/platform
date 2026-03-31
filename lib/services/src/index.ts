@@ -109,6 +109,26 @@ export { CompStakAdapter, type CompStakLeaseComp, type CompStakSaleComp, type Co
 export { DataverseAdapter, type DataverseAccount, type DataverseContact, type DataverseLead, type DataverseOpportunity, type DataverseActivity, type DataverseConnectionStatus, type DataverseSyncResult, type DataverseLyteSignal } from "./adapters/dataverse.js";
 
 export {
+  Dynamics365Adapter,
+  type DynamicsAccount,
+  type DynamicsContact,
+  type DynamicsOpportunity,
+  type DynamicsLead,
+  type DynamicsCase,
+  type DynamicsActivity,
+  type DynamicsSyncSignal,
+} from "./adapters/dynamics365.js";
+
+export {
+  SharePointSPFxAdapter,
+  type SPFxWebPartManifest,
+  type SPFxPreconfiguredEntry,
+  type SPFxSiteInfo,
+  type SPFxDeploymentStatus,
+  type SPFxDeployedPackage,
+} from "./adapters/sharepoint-spfx.js";
+
+export {
   HuggingFaceAdapter,
   type HFTextGenerationResult,
   type HFSummarizationResult,

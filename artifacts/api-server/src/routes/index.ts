@@ -58,6 +58,7 @@ import microsoftGraphRouter from "./microsoft-graph";
 import lyteObservabilityRouter from "./lyte-observability";
 import tenantProvisioningRouter from "./tenant-provisioning";
 import dataverseRouter from "./dataverse";
+import microsoftIntegrationsRouter from "./microsoft-integrations";
 
 const router: IRouter = Router();
 
@@ -216,5 +217,8 @@ router.use(tenantProvisioningRouter);
 
 router.use("/dataverse", readLimiter);
 router.use("/dataverse", dataverseRouter);
+
+router.use("/integrations", readLimiter);
+router.use(microsoftIntegrationsRouter);
 
 export default router;

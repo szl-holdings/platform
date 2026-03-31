@@ -73,6 +73,27 @@ export const PLATFORM_FLAGS = [
     isEnabled: false,
     rolloutPercentage: 20,
   },
+  {
+    key: "dynamics365_sync_enabled",
+    name: "Microsoft — Dynamics 365 Sync",
+    description: "Enables the Dynamics 365 Dataverse connector for bidirectional CRM sync. Ingests opportunity stage changes, case escalations, and lead scoring signals into Lyte. Requires DYNAMICS_TENANT_ID, DYNAMICS_CLIENT_ID, DYNAMICS_CLIENT_SECRET, and DYNAMICS_ORG_URL to go live; runs in demo mode otherwise.",
+    isEnabled: true,
+    rolloutPercentage: 100,
+  },
+  {
+    key: "sharepoint_spfx_enabled",
+    name: "Microsoft — SharePoint SPFx Web Parts",
+    description: "Enables the SharePoint SPFx integration endpoints for deploying and managing SZL embedded web parts (Lyte Signal Summary, Vessels Fleet Status, Terra Market Overview, Alloy Workflow Status). Requires SHAREPOINT_TENANT_ID, SHAREPOINT_CLIENT_ID, SHAREPOINT_CLIENT_SECRET, and SHAREPOINT_TENANT_URL.",
+    isEnabled: true,
+    rolloutPercentage: 100,
+  },
+  {
+    key: "power_automate_webhook_enabled",
+    name: "Microsoft — Power Automate Webhook",
+    description: "Enables the Power Automate webhook endpoint that allows Power Automate flows to trigger Alloy workflows or push signals into Lyte. Supports HMAC signature validation via POWER_AUTOMATE_WEBHOOK_SECRET.",
+    isEnabled: true,
+    rolloutPercentage: 100,
+  },
 ] as const;
 
 export type PlatformFlagKey = typeof PLATFORM_FLAGS[number]["key"];

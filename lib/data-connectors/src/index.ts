@@ -90,6 +90,26 @@ export {
 } from "@workspace/services";
 
 export {
+  Dynamics365Adapter,
+  type DynamicsAccount,
+  type DynamicsContact,
+  type DynamicsOpportunity,
+  type DynamicsLead,
+  type DynamicsCase,
+  type DynamicsActivity,
+  type DynamicsSyncSignal,
+} from "@workspace/services";
+
+export {
+  SharePointSPFxAdapter,
+  type SPFxWebPartManifest,
+  type SPFxPreconfiguredEntry,
+  type SPFxSiteInfo,
+  type SPFxDeploymentStatus,
+  type SPFxDeployedPackage,
+} from "@workspace/services";
+
+export {
   vesselsMockProvider,
   type VesselRecord,
   incaMockProvider,

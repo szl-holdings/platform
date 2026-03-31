@@ -38,6 +38,8 @@ import { ResoMlsAdapter } from "./adapters/reso-mls.js";
 import { CoStarAdapter } from "./adapters/costar.js";
 import { CompStakAdapter } from "./adapters/compstak.js";
 import { DataverseAdapter } from "./adapters/dataverse.js";
+import { Dynamics365Adapter } from "./adapters/dynamics365.js";
+import { SharePointSPFxAdapter } from "./adapters/sharepoint-spfx.js";
 
 export interface IntegrationHealthMatrix {
   timestamp: string;
@@ -90,6 +92,8 @@ export class ServiceRegistry {
   readonly costar: CoStarAdapter;
   readonly compstak: CompStakAdapter;
   readonly dataverse: DataverseAdapter;
+  readonly dynamics365: Dynamics365Adapter;
+  readonly sharepointSpfx: SharePointSPFxAdapter;
 
   private readonly adapters: ServiceAdapter[];
 
@@ -133,6 +137,8 @@ export class ServiceRegistry {
     this.costar = new CoStarAdapter();
     this.compstak = new CompStakAdapter();
     this.dataverse = new DataverseAdapter();
+    this.dynamics365 = new Dynamics365Adapter();
+    this.sharepointSpfx = new SharePointSPFxAdapter();
 
     this.adapters = [
       this.ai,
@@ -174,6 +180,8 @@ export class ServiceRegistry {
       this.costar,
       this.compstak,
       this.dataverse,
+      this.dynamics365,
+      this.sharepointSpfx,
     ];
   }
 
