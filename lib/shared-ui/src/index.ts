@@ -27,3 +27,5 @@ export { DataStateBadge, DataStateBanner, type DataState } from "./data-state-ba
 export { useRealtimeChannel, type RealtimeConnectionStatus, type RealtimeChannelMessage, type UseRealtimeChannelOptions, type UseRealtimeChannelResult } from "./use-realtime-channel";
 export { RealtimeStatusIndicator } from "./realtime-status-indicator";
 export * from "./document-engine";
+export * from "./ontology";
+export { DataProvenance, ActionLoop, RoleSelector } from "./data-provenance";

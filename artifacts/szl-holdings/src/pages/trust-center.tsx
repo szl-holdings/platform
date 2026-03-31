@@ -137,6 +137,35 @@ const sections = [
   },
 ];
 
+const COMPLIANCE_FRAMEWORKS = [
+  { name: "SOC 2 Type II", status: "In Progress", color: "#f59e0b", detail: "Audit preparation underway. Expected Q3 2026." },
+  { name: "NIST 800-53", status: "Aligned", color: "#10b981", detail: "Controls mapped and implemented across all products." },
+  { name: "GDPR", status: "Compliant", color: "#10b981", detail: "Data processing agreements, DPIAs, and subject access request workflows in place." },
+  { name: "ISO 27001", status: "Planned", color: "#3b82f6", detail: "ISMS development in progress. Certification targeted Q1 2027." },
+  { name: "CCPA", status: "Compliant", color: "#10b981", detail: "Consumer privacy rights implemented. Opt-out and deletion workflows operational." },
+  { name: "MITRE ATT&CK", status: "Mapped", color: "#10b981", detail: "Aegis Defense maps all detections to ATT&CK framework techniques." },
+];
+
+const SLA_COMMITMENTS = [
+  { metric: "Platform Uptime", target: "99.9%", current: "99.94%", color: "#10b981" },
+  { metric: "API Response (p95)", target: "< 200ms", current: "142ms", color: "#10b981" },
+  { metric: "Incident Response", target: "< 4 hours", current: "2.3h avg", color: "#10b981" },
+  { metric: "Data Freshness (Signals)", target: "< 5 min", current: "Real-time", color: "#10b981" },
+  { metric: "Security Patch SLA", target: "< 48 hours", current: "< 24h avg", color: "#10b981" },
+  { metric: "Post-Incident Review", target: "< 5 business days", current: "3.1d avg", color: "#10b981" },
+];
+
+const VENDOR_DOCS = [
+  { name: "Security Architecture Overview", format: "PDF", available: true },
+  { name: "Data Processing Agreement (DPA)", format: "PDF", available: true },
+  { name: "Penetration Test Summary", format: "PDF", available: true },
+  { name: "Business Continuity Plan", format: "PDF", available: true },
+  { name: "AI Governance Policy", format: "PDF", available: true },
+  { name: "Subprocessor List", format: "PDF", available: true },
+  { name: "Insurance Certificate", format: "PDF", available: false },
+  { name: "SOC 2 Report", format: "PDF", available: false },
+];
+
 const reliabilityPrinciples = [
   {
     title: "Graceful degradation",
@@ -458,6 +487,121 @@ export default function TrustCenter() {
               </m.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Compliance Frameworks */}
+      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)", borderTop: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            style={{ marginBottom: "2.5rem" }}
+          >
+            <span style={{ display: "block", fontSize: "11px", fontWeight: "500", letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(210,5%,46%)", marginBottom: "1rem" }}>Compliance</span>
+            <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: "700", letterSpacing: "-0.02em", lineHeight: "1.12", color: "hsl(38,12%,94%)", marginBottom: "0.875rem" }}>Framework alignment</h2>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: "1.65", maxWidth: "40rem" }}>
+              SZL platforms are built to meet enterprise security and privacy standards. Current framework alignment status:
+            </p>
+          </m.div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1px", background: "hsla(0,0%,100%,0.05)", borderRadius: "12px", overflow: "hidden" }}>
+            {COMPLIANCE_FRAMEWORKS.map((fw) => (
+              <div key={fw.name} style={{ padding: "1.25rem 1.5rem", background: "hsl(210,12%,5%)" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                  <span style={{ fontSize: "0.9375rem", fontWeight: "600", color: "hsl(38,12%,92%)" }}>{fw.name}</span>
+                  <span style={{ fontSize: "10px", fontWeight: "600", padding: "2px 8px", borderRadius: "4px", background: `${fw.color}18`, color: fw.color, border: `1px solid ${fw.color}30`, textTransform: "uppercase", letterSpacing: "0.06em" }}>{fw.status}</span>
+                </div>
+                <p style={{ fontSize: "0.8125rem", color: "hsl(210,5%,56%)", lineHeight: "1.5" }}>{fw.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SLA Commitments */}
+      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)", background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.05)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            style={{ marginBottom: "2.5rem" }}
+          >
+            <span style={{ display: "block", fontSize: "11px", fontWeight: "500", letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(210,5%,46%)", marginBottom: "1rem" }}>Service Levels</span>
+            <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: "700", letterSpacing: "-0.02em", lineHeight: "1.12", color: "hsl(38,12%,94%)", marginBottom: "0.875rem" }}>Uptime and performance commitments</h2>
+          </m.div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1px", background: "hsla(0,0%,100%,0.05)", borderRadius: "12px", overflow: "hidden" }}>
+            {SLA_COMMITMENTS.map((sla) => (
+              <div key={sla.metric} style={{ padding: "1.25rem 1.5rem", background: "hsl(210,12%,5%)" }}>
+                <div style={{ fontSize: "10px", fontWeight: "500", textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(210,5%,42%)", marginBottom: "0.625rem" }}>{sla.metric}</div>
+                <div style={{ fontSize: "1.125rem", fontWeight: "700", fontFamily: "monospace", color: sla.color, marginBottom: "0.25rem" }}>{sla.current}</div>
+                <div style={{ fontSize: "10px", color: "hsl(210,5%,36%)" }}>Target: {sla.target}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Vendor Review Documents */}
+      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            style={{ marginBottom: "2.5rem" }}
+          >
+            <span style={{ display: "block", fontSize: "11px", fontWeight: "500", letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(210,5%,46%)", marginBottom: "1rem" }}>Procurement</span>
+            <h2 style={{ fontSize: "clamp(1.5rem,3vw,2rem)", fontWeight: "700", letterSpacing: "-0.02em", lineHeight: "1.12", color: "hsl(38,12%,94%)", marginBottom: "0.875rem" }}>Vendor review documents</h2>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: "1.65", maxWidth: "40rem" }}>
+              Self-serve access to the documents your security and procurement teams need. Available documents can be downloaded directly. For restricted documents, contact our security team.
+            </p>
+          </m.div>
+          <div style={{ background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "12px", overflow: "hidden" }}>
+            {VENDOR_DOCS.map((doc, i) => (
+              <div key={doc.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.875rem 1.5rem", borderBottom: i < VENDOR_DOCS.length - 1 ? "1px solid hsla(0,0%,100%,0.04)" : "none" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <Download size={14} style={{ color: doc.available ? "hsl(210,55%,52%)" : "hsl(210,5%,28%)" }} />
+                  <span style={{ fontSize: "0.875rem", color: doc.available ? "hsl(38,12%,88%)" : "hsl(210,5%,36%)" }}>{doc.name}</span>
+                  <span style={{ fontSize: "10px", padding: "1px 6px", borderRadius: "3px", background: "hsla(0,0%,100%,0.04)", color: "hsl(210,5%,42%)", fontFamily: "monospace" }}>{doc.format}</span>
+                </div>
+                <span style={{ fontSize: "10px", fontWeight: "500", color: doc.available ? "hsl(152,50%,42%)" : "hsl(210,5%,36%)" }}>{doc.available ? "Available" : "On Request"}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Security Contact */}
+      <section style={{ paddingTop: "clamp(3rem,5vw,4rem)", paddingBottom: "clamp(3rem,5vw,4rem)", background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.05)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3rem" }}>
+              <div>
+                <h3 style={{ fontSize: "1.0625rem", fontWeight: "700", color: "hsl(38,12%,94%)", marginBottom: "0.75rem" }}>Security inquiries</h3>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,56%)", lineHeight: "1.6", marginBottom: "1rem" }}>
+                  For security reviews, vulnerability disclosures, penetration test coordination, or compliance questionnaires.
+                </p>
+                <a href="mailto:security@stephenl.dev" style={{ fontSize: "0.875rem", color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@stephenl.dev</a>
+              </div>
+              <div>
+                <h3 style={{ fontSize: "1.0625rem", fontWeight: "700", color: "hsl(38,12%,94%)", marginBottom: "0.75rem" }}>Procurement & compliance</h3>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,56%)", lineHeight: "1.6", marginBottom: "1rem" }}>
+                  For vendor onboarding, data processing agreements, compliance documentation, and enterprise contracts.
+                </p>
+                <a href="mailto:contact@stephenl.dev" style={{ fontSize: "0.875rem", color: "hsl(210,55%,52%)", textDecoration: "none" }}>contact@stephenl.dev</a>
+              </div>
+            </div>
+          </m.div>
         </div>
       </section>
 

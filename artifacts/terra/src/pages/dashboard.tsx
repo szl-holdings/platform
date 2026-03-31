@@ -2,7 +2,8 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@workspace/shared-ui/utils";
 import { Link } from "wouter";
-import { DataStateBadge, useRealtimeChannel } from "@workspace/shared-ui";
+import { DataStateBadge, useRealtimeChannel, DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
+import type { DataProvenanceInfo } from "@workspace/shared-ui";
 import {
   Building2, MapPin, TrendingUp, DollarSign, Users, Activity,
   ChevronRight, Flame, AlertTriangle, Eye, Clock, Home,
@@ -66,6 +67,7 @@ export default function TerraIntelligence() {
   const topAgents = [...agents].sort((a, b) => b.commissionMTD - a.commissionMTD).slice(0, 4);
   const { token: mapToken } = useMapboxToken();
   const [showMap, setShowMap] = useState(false);
+  const [activeRole, setActiveRole] = useState("operator");
 
   return (
     <div className="space-y-4 max-w-[1400px]">
@@ -84,6 +86,60 @@ export default function TerraIntelligence() {
           )}
         </div>
       </div>
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <RoleSelector
+          currentRole={activeRole}
+          onRoleChange={setActiveRole}
+          roles={[
+            { id: "executive", label: "Executive", description: "Portfolio value, exposure, strategy" },
+            { id: "operator", label: "Broker/Operator", description: "Active deals, leads, pipeline management" },
+            { id: "analyst", label: "Analyst", description: "Market data, distress patterns, comps" },
+            { id: "admin", label: "Admin", description: "System health, ingestion, agents" },
+            { id: "buyer", label: "Investor / Demo", description: "Opportunity discovery, watchlists" },
+          ]}
+        />
+        <DataProvenance
+          compact
+          provenance={{
+            source: "Terra Intelligence Engine",
+            lastUpdated: new Date().toISOString(),
+            freshness: "minutes",
+            confidence: "high",
+            dataState: "demo",
+            owner: "Terra Operations",
+          } as DataProvenanceInfo}
+        />
+      </div>
+
+      {activeRole === "executive" && (
+        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(200,160,96,0.15)", background: "rgba(200,160,96,0.04)" }}>
+          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(200,160,96,0.5)" }}>Executive Briefing</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            {criticalSignals.length > 0
+              ? `${criticalSignals.length} critical distress signal${criticalSignals.length > 1 ? "s" : ""} detected — potential acquisition targets. Portfolio tracking $2.4B across NYC markets. ${brokerageSummary.activeDeals} active deals in pipeline. Market trending +2.1% over 30 days.`
+              : `No critical signals. Portfolio tracking $2.4B across NYC markets. ${brokerageSummary.activeDeals} active deals in pipeline. Market trending +2.1% over 30 days. All broker response SLAs within target.`}
+          </div>
+        </div>
+      )}
+
+      {activeRole === "analyst" && (
+        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(139,92,246,0.15)", background: "rgba(139,92,246,0.04)" }}>
+          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(139,92,246,0.5)" }}>Market Analysis Focus</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            Distress cluster detected in East Harlem (zip 10029) — 4 new filings suggest neighborhood-level opportunity. LLC-to-individual ownership transfers in Tribeca warrant investigation. Pre-foreclosure pipeline at 3 active leads. Commercial listing price reductions accelerating in Midtown corridor.
+          </div>
+        </div>
+      )}
+
+      {activeRole === "buyer" && (
+        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(116,184,68,0.15)", background: "rgba(116,184,68,0.04)" }}>
+          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(116,184,68,0.5)" }}>Investor / Demo View</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            You're viewing Terra — SZL's property intelligence platform for NYC real estate. Terra surfaces distressed properties, tracks ownership changes, models deal economics, and routes market signals to operators before they hit the open market. Every data point demonstrates the operational advantage of intelligence-driven real estate.
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
         <div className="grid grid-cols-3 md:grid-cols-6">
@@ -316,6 +372,17 @@ export default function TerraIntelligence() {
           </div>
         )}
       </div>
+
+      <ActionLoop
+        title="Next Best Actions"
+        actions={[
+          { id: "1", label: "Review 847 Park Ave pre-foreclosure", type: "investigate", severity: "high" },
+          { id: "2", label: "Follow up on Tribeca LLC transfer", type: "investigate" },
+          { id: "3", label: "Respond to aging broker inquiries", type: "remediate", severity: "high" },
+          { id: "4", label: "Approve Harlem cluster analysis", type: "approve" },
+          { id: "5", label: "Assign 1240 Broadway price reduction", type: "assign" },
+        ]}
+      />
     </div>
   );
 }

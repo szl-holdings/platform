@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
+import type { DataProvenanceInfo } from "@workspace/shared-ui";
 import { Link } from "wouter";
 import { TrendingDown, TrendingUp, ChevronRight, Clock, Zap, Target, Activity, ArrowUpRight, RefreshCw, Shield, CheckCircle2 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
@@ -64,6 +66,7 @@ function LiveSignalCard({ signal }: { signal: LyteSignal }) {
 
 export default function Dashboard() {
   const [showDetails, setShowDetails] = useState(false);
+  const [activeRole, setActiveRole] = useState("operator");
 
   const { data: dashboardData, isLoading: dashLoading, error: dashError, refetch: refetchDash } = useQuery<LyteDashboard>({
     queryKey: ["lyte-dashboard"],
@@ -180,6 +183,60 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <RoleSelector currentRole={activeRole} onRoleChange={setActiveRole} />
+        <DataProvenance
+          compact
+          provenance={{
+            source: "SZL Platform API",
+            lastUpdated: dashboardData?.fetchedAt || new Date().toISOString(),
+            freshness: dashLoading ? "unknown" : "minutes",
+            confidence: "high",
+            dataState: dashError ? "demo" : "live",
+            owner: "Lyte Operations",
+            nextRefresh: "Auto · 60s",
+          } as DataProvenanceInfo}
+        />
+      </div>
+
+      {activeRole === "executive" && (
+        <div className="rounded-xl border border-amber-500/15 bg-amber-500/5 p-4">
+          <div className="text-[10px] uppercase tracking-wider text-amber-400/60 font-semibold mb-2">Executive Briefing</div>
+          <div className="text-[13px] text-white/80 leading-relaxed">
+            {criticalSignals.length > 0
+              ? `${criticalSignals.length} critical signal${criticalSignals.length > 1 ? "s" : ""} require immediate attention. ${highSignals.length} high-severity items in queue. Portfolio readiness at ${summary?.readinessScore ?? 0}%.`
+              : `No critical signals active. ${highSignals.length > 0 ? `${highSignals.length} high-severity items under monitoring.` : "All systems nominal."} Portfolio readiness at ${summary?.readinessScore ?? 0}%.`}
+          </div>
+        </div>
+      )}
+
+      {activeRole === "operator" && (
+        <div className="rounded-xl border border-amber-500/15 bg-amber-500/5 p-4">
+          <div className="text-[10px] uppercase tracking-wider text-amber-400/60 font-semibold mb-2">Operator Focus</div>
+          <div className="text-[13px] text-white/80 leading-relaxed">
+            {criticalSignals.length > 0 ? `${criticalSignals.length} critical signal${criticalSignals.length > 1 ? "s" : ""} in triage queue.` : "No critical signals in queue."} {highSignals.length > 0 ? `${highSignals.length} high-severity items under active monitoring.` : ""} {(summary?.openActions ?? 0) > 0 ? `${summary?.openActions} open actions requiring resolution.` : "No pending actions."} Platform readiness at {summary?.readinessScore ?? 0}%.
+          </div>
+        </div>
+      )}
+
+      {activeRole === "analyst" && (
+        <div className="rounded-xl border border-violet-500/15 bg-violet-500/5 p-4">
+          <div className="text-[10px] uppercase tracking-wider text-violet-400/60 font-semibold mb-2">Signal Analysis</div>
+          <div className="text-[13px] text-white/80 leading-relaxed">
+            {signals.length} total signals ingested. Distribution: {criticalSignals.length} critical, {highSignals.length} high, {signals.filter(s => s.severity === "medium").length} medium. Source diversity across {new Set(signals.map(s => s.source)).size} connectors. Review 7-day trend for volume anomalies and emerging patterns.
+          </div>
+        </div>
+      )}
+
+      {activeRole === "buyer" && (
+        <div className="rounded-xl border border-blue-500/15 bg-blue-500/5 p-4">
+          <div className="text-[10px] uppercase tracking-wider text-blue-400/60 font-semibold mb-2">Product Demo View</div>
+          <div className="text-[13px] text-white/80 leading-relaxed">
+            You're viewing Lyte's Business Observability platform with sample data. Every signal, risk, and action you see represents the kind of operational intelligence Lyte surfaces from your existing tools — Salesforce, ServiceNow, Jira, Slack, and more.
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
         {kpiCards.map((kpi, i) => {
@@ -417,6 +474,17 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <ActionLoop
+        title="Next Best Actions"
+        actions={[
+          { id: "1", label: "Triage critical signals", type: "investigate" },
+          { id: "2", label: "Approve pending workflows", type: "approve" },
+          { id: "3", label: "Escalate SLA breaches", type: "escalate" },
+          { id: "4", label: "Assign ownership gaps", type: "assign" },
+          { id: "5", label: "Remediate aging approvals", type: "remediate" },
+        ]}
+      />
 
       <ActivityFeed entityType="incident" title="Operations Team Activity" limit={8} compact />
     </div>

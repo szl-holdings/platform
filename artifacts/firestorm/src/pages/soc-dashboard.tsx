@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@workspace/shared-ui/utils";
+import { DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
+import type { DataProvenanceInfo } from "@workspace/shared-ui";
 import { Link } from "wouter";
 import {
   Shield, Server, Brain, AlertTriangle, Activity, Clock,
@@ -116,6 +118,7 @@ const CROSS_CORRELATIONS = [
 
 export default function AegisUnifiedOverview() {
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | "all">("all");
+  const [activeRole, setActiveRole] = useState("operator");
 
   const filteredFeed = activeWorkspace === "all"
     ? CROSS_MODULE_FEED
@@ -136,6 +139,58 @@ export default function AegisUnifiedOverview() {
           </div>
         </div>
       </div>
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <RoleSelector
+          currentRole={activeRole}
+          onRoleChange={setActiveRole}
+          roles={[
+            { id: "executive", label: "Executive", description: "Strategic risk overview, portfolio impact" },
+            { id: "operator", label: "SOC Operator", description: "Active incidents, SLA tracking, triage queue" },
+            { id: "analyst", label: "Analyst", description: "Threat hunting, IOC investigation, forensics" },
+            { id: "admin", label: "Admin", description: "System health, configuration, audit" },
+            { id: "buyer", label: "Buyer / Demo", description: "Product capabilities overview" },
+          ]}
+        />
+        <DataProvenance
+          compact
+          provenance={{
+            source: "Aegis SOC Engine",
+            lastUpdated: new Date().toISOString(),
+            freshness: "realtime",
+            confidence: "high",
+            dataState: "demo",
+            owner: "Defense Operations",
+          } as DataProvenanceInfo}
+        />
+      </div>
+
+      {activeRole === "executive" && (
+        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(239,68,68,0.15)", background: "rgba(239,68,68,0.04)" }}>
+          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(239,68,68,0.5)" }}>Executive Briefing</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            2 active P1 incidents requiring executive awareness. Defense posture at 78/100 — elevated due to APT29 activity and unpatched firewall CVE. Command SLA breach on Northgate migration. MTTD trending down 18% this week — improvement driven by Labs neural explorer pre-detection.
+          </div>
+        </div>
+      )}
+
+      {activeRole === "analyst" && (
+        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(139,92,246,0.15)", background: "rgba(139,92,246,0.04)" }}>
+          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(139,92,246,0.5)" }}>Threat Hunting Focus</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            Active APT29 indicators detected across 2 incidents. Labs neural explorer identified C2 beacon 8 minutes before SIEM — prioritize IOC correlation on T1071.001 and T1021.002 MITRE techniques. 142 IOC feeds tracked. Unpatched CVE-2024-3400 on edge firewall creates additional attack surface.
+          </div>
+        </div>
+      )}
+
+      {activeRole === "buyer" && (
+        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(59,130,246,0.15)", background: "rgba(59,130,246,0.04)" }}>
+          <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(59,130,246,0.5)" }}>Product Demo View</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+            You're viewing Aegis — SZL's unified defense and intelligence platform. Three workspaces (Command, Defense, Labs) share a single intelligence layer with cross-module correlation. Every signal, incident, and SLA metric you see demonstrates the kind of operational visibility Aegis provides to managed security and IT operations teams.
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.015)" }}>
         <div className="grid grid-cols-3 md:grid-cols-6">
@@ -380,6 +435,17 @@ export default function AegisUnifiedOverview() {
           </div>
         </div>
       </div>
+
+      <ActionLoop
+        title="Immediate Actions"
+        actions={[
+          { id: "1", label: "Contain lateral movement — DC-PROD-03", type: "remediate", severity: "critical" },
+          { id: "2", label: "Escalate SLA breach — Northgate #4827", type: "escalate", severity: "high" },
+          { id: "3", label: "Investigate APT29 C2 beacon", type: "investigate", severity: "critical" },
+          { id: "4", label: "Approve patch deployment — FW-EDGE-01", type: "approve", severity: "high" },
+          { id: "5", label: "Assign IR lead — INC-2847", type: "assign" },
+        ]}
+      />
     </div>
   );
 }

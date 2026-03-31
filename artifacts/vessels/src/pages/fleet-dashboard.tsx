@@ -11,6 +11,8 @@ import { Ship, Globe, MapPin, X, ChevronRight, Radio, Shield, Clock, AlertTriang
 import React, { useState, useEffect, useRef } from "react";
 import { ExportButton } from "@workspace/shared-ui/data-export";
 import { ActivityFeed } from "@workspace/shared-ui/collaboration";
+import { DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
+import type { DataProvenanceInfo } from "@workspace/shared-ui";
 
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -528,7 +530,80 @@ function VesselDrawer({ vessel, onClose }: { vessel: RosterVessel; onClose: () =
   );
 }
 
-type IntelTab = "behavioral" | "dark" | "sanctions" | "cargo" | "congestion";
+function DocumentValidationPanel() {
+  const docs = [
+    { vessel: "MV Caspian Star", doc: "P&I Certificate", status: "expired", expires: "2026-01-15", severity: "critical" },
+    { vessel: "MV Nordic Spirit", doc: "ISM Safety Certificate", status: "expiring", expires: "2026-04-10", severity: "high" },
+    { vessel: "MV Atlantic Runner", doc: "ISPS Certificate", status: "valid", expires: "2027-06-30", severity: "low" },
+    { vessel: "MV Orion Trader", doc: "Class Certificate", status: "expiring", expires: "2026-04-22", severity: "high" },
+    { vessel: "MV Pacific Horizon", doc: "CLC Certificate", status: "valid", expires: "2027-09-01", severity: "low" },
+  ];
+  const expired = docs.filter(d => d.status === "expired").length;
+  const expiring = docs.filter(d => d.status === "expiring").length;
+
+  return (
+    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+        <Shield className="w-3.5 h-3.5 text-amber-400" />
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Document Validation</span>
+        {expired > 0 && <Badge variant="outline" className="ml-auto text-[9px] bg-red-500/10 text-red-400 border-red-500/20">{expired} Expired</Badge>}
+        {expiring > 0 && <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-400 border-amber-500/20">{expiring} Expiring</Badge>}
+      </div>
+      <div className="divide-y divide-sky-500/5">
+        {docs.map((d, i) => (
+          <div key={i} className="px-4 py-2.5 flex items-center gap-3 hover:bg-sky-500/5 transition-colors">
+            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${d.status === "expired" ? "bg-red-400 animate-pulse" : d.status === "expiring" ? "bg-amber-400" : "bg-emerald-400"}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-sky-100">{d.vessel}</p>
+              <p className="text-[10px] text-sky-400/50">{d.doc}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <span className={`text-[10px] font-bold uppercase ${d.status === "expired" ? "text-red-400" : d.status === "expiring" ? "text-amber-400" : "text-emerald-400"}`}>{d.status}</span>
+              <p className="text-[9px] text-sky-400/30 font-mono">{d.expires}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RouteForecasePanel() {
+  const forecasts = [
+    { vessel: "MV Atlantic Runner", route: "Singapore → Rotterdam", eta: "Apr 12", delay: "+2.5d", cause: "Suez congestion", impact: "$84K", severity: "high" },
+    { vessel: "MV Caspian Star", route: "Houston → Yokohama", eta: "Apr 18", delay: "On time", cause: "—", impact: "—", severity: "low" },
+    { vessel: "MV Pacific Horizon", route: "Dubai → Shanghai", eta: "Apr 8", delay: "+1d", cause: "Weather", impact: "$32K", severity: "medium" },
+    { vessel: "MV Nordic Spirit", route: "Rotterdam → Singapore", eta: "Apr 25", delay: "+4d", cause: "Port strike", impact: "$156K", severity: "critical" },
+  ];
+
+  return (
+    <div className="bg-[#0a1628]/80 backdrop-blur border border-sky-500/10 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-sky-500/10 flex items-center gap-2">
+        <TrendingUp className="w-3.5 h-3.5 text-sky-400" />
+        <span className="text-[11px] font-mono text-sky-300 uppercase tracking-wider">Route Forecast & Delay Causes</span>
+        <Badge variant="outline" className="ml-auto text-[9px] bg-sky-500/10 text-sky-400 border-sky-500/20">{forecasts.filter(f => f.severity !== "low").length} Delays</Badge>
+      </div>
+      <div className="divide-y divide-sky-500/5">
+        {forecasts.map((f, i) => (
+          <div key={i} className="px-4 py-2.5 hover:bg-sky-500/5 transition-colors">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold text-sky-100">{f.vessel}</span>
+              <span className={`text-[10px] font-bold ${f.severity === "critical" ? "text-red-400" : f.severity === "high" ? "text-orange-400" : f.severity === "medium" ? "text-amber-400" : "text-emerald-400"}`}>{f.delay}</span>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] text-sky-400/50">
+              <span className="font-mono">{f.route}</span>
+              <span>ETA {f.eta}</span>
+              {f.cause !== "—" && <span className="text-amber-400/60">{f.cause}</span>}
+              {f.impact !== "—" && <span className="font-mono text-sky-400/30">impact {f.impact}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type IntelTab = "behavioral" | "dark" | "sanctions" | "cargo" | "congestion" | "documents" | "routes";
 
 export default function FleetDashboard() {
   const { data: kpis } = useQuery({ queryKey: ["fleet-kpis"], queryFn: () => dataProvider.getFleetKPIs() });
@@ -538,6 +613,7 @@ export default function FleetDashboard() {
 
   const [selectedVessel, setSelectedVessel] = useState<RosterVessel | null>(null);
   const [intelTab, setIntelTab] = useState<IntelTab>("behavioral");
+  const [activeRole, setActiveRole] = useState("operator");
 
   const darkVesselCount = fleetExceptions.filter(e => e.type === "ais_dark").length;
 
@@ -549,6 +625,8 @@ export default function FleetDashboard() {
     { id: "behavioral", label: "Behavioral Risk", icon: Shield },
     { id: "dark", label: "Dark Vessels", icon: EyeOff },
     { id: "sanctions", label: "Sanctions", icon: AlertTriangle },
+    { id: "routes", label: "Route Forecast", icon: TrendingUp },
+    { id: "documents", label: "Documents", icon: BarChart3 },
     { id: "cargo", label: "Cargo Flow", icon: Package },
     { id: "congestion", label: "Port Congestion", icon: Anchor },
   ];
@@ -612,6 +690,58 @@ export default function FleetDashboard() {
             </div>
           )}
 
+          <div className="flex items-center justify-between gap-2 px-3 py-1 border-b border-sky-500/10 bg-[#0a1628]/60 shrink-0 overflow-x-auto">
+            <RoleSelector
+              currentRole={activeRole}
+              onRoleChange={setActiveRole}
+              roles={[
+                { id: "executive", label: "Executive", description: "Fleet economics, portfolio risk" },
+                { id: "operator", label: "Ops Center", description: "Vessel tracking, alerts, scheduling" },
+                { id: "analyst", label: "Intel Analyst", description: "Behavioral risk, sanctions, anomalies" },
+                { id: "admin", label: "Admin", description: "System health, configuration" },
+                { id: "buyer", label: "Buyer / Demo", description: "Product capabilities overview" },
+              ]}
+            />
+            <DataProvenance
+              compact
+              provenance={{
+                source: "Maritime Intelligence Engine",
+                lastUpdated: new Date().toISOString(),
+                freshness: "realtime",
+                confidence: "high",
+                dataState: "demo",
+                owner: "Fleet Operations",
+              } as DataProvenanceInfo}
+            />
+          </div>
+
+          {activeRole === "executive" && (
+            <div className="mx-3 mt-2 rounded-xl border p-3" style={{ borderColor: "rgba(14,165,233,0.15)", background: "rgba(14,165,233,0.04)" }}>
+              <div className="text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: "rgba(14,165,233,0.5)" }}>Executive Briefing</div>
+              <div className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+                Fleet utilization at {kpis ? `${kpis.averageUtilization}%` : "—"}. {darkVesselCount > 0 ? `${darkVesselCount} dark vessel event${darkVesselCount > 1 ? "s" : ""} detected — AIS gaps require investigation.` : "No dark vessel events."} {kpis && kpis.criticalAlerts > 0 ? `${kpis.criticalAlerts} critical alerts active.` : "No critical alerts."} Fleet health score: {kpis?.fleetHealthScore ?? "—"}/100.
+              </div>
+            </div>
+          )}
+
+          {activeRole === "buyer" && (
+            <div className="mx-3 mt-2 rounded-xl border p-3" style={{ borderColor: "rgba(14,165,233,0.15)", background: "rgba(14,165,233,0.04)" }}>
+              <div className="text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: "rgba(14,165,233,0.5)" }}>Product Demo View</div>
+              <div className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+                You're viewing Vessels — SZL's maritime intelligence platform. Real-time AIS tracking, behavioral AI scoring, sanctions screening, dark vessel detection, and port congestion analysis. Every vessel position and risk metric demonstrates mission-grade maritime domain awareness.
+              </div>
+            </div>
+          )}
+
+          {activeRole === "analyst" && (
+            <div className="mx-3 mt-2 rounded-xl border p-3" style={{ borderColor: "rgba(139,92,246,0.15)", background: "rgba(139,92,246,0.04)" }}>
+              <div className="text-[10px] uppercase tracking-wider font-semibold mb-1" style={{ color: "rgba(139,92,246,0.5)" }}>Intel Analysis Focus</div>
+              <div className="text-[12px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+                {darkVesselCount > 0 ? `${darkVesselCount} AIS gap event${darkVesselCount > 1 ? "s" : ""} flagged for behavioral analysis.` : "No AIS anomalies."} {fleetExceptions.filter(e => e.type === "sanctions_match").length > 0 ? `Active sanctions matches require cross-referencing with OFAC/EU/UN lists.` : "No sanctions flags."} Behavioral risk models running on 90-day AIS history. Route deviation and speed anomaly patterns under continuous monitoring.
+              </div>
+            </div>
+          )}
+
           <div className="flex-1 relative overflow-hidden">
             {roster.length > 0 ? (
               <FleetMap vessels={roster} onVesselClick={setSelectedVessel} selectedVesselId={selectedVessel?.id} />
@@ -663,7 +793,18 @@ export default function FleetDashboard() {
         )}
       </div>
 
-      {/* Fleet Team Activity */}
+      <div className="shrink-0 px-4 py-2">
+        <ActionLoop
+          title="Immediate Actions"
+          actions={[
+            { id: "1", label: "Investigate AIS gap — MV Caspian Star", type: "investigate", severity: "critical" },
+            { id: "2", label: "Approve route deviation — MV Atlantic Runner", type: "approve", severity: "high" },
+            { id: "3", label: "Escalate sanctions match — MV Orion Trader", type: "escalate", severity: "critical" },
+            { id: "4", label: "Assign overdue inspection — MV Nordic Spirit", type: "assign" },
+          ]}
+        />
+      </div>
+
       <div className="shrink-0 px-4 pb-4">
         <ActivityFeed entityType="vessel" title="Fleet Team Activity" limit={6} compact />
       </div>
@@ -687,6 +828,8 @@ export default function FleetDashboard() {
           {intelTab === "behavioral" && <BehavioralRiskPanel exceptions={fleetExceptions} />}
           {intelTab === "dark" && <DarkVesselPanel exceptions={fleetExceptions} />}
           {intelTab === "sanctions" && <SanctionsPanel exceptions={fleetExceptions} />}
+          {intelTab === "routes" && <RouteForecasePanel />}
+          {intelTab === "documents" && <DocumentValidationPanel />}
           {intelTab === "cargo" && <CargoFlowPanel exceptions={fleetExceptions} />}
           {intelTab === "congestion" && <PortCongestionPanel exceptions={fleetExceptions} />}
         </div>

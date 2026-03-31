@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, DataStateBadge, isAuthError } from "@workspace/shared-ui";
+import { apiFetch, DataStateBadge, isAuthError, DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
+import type { DataProvenanceInfo } from "@workspace/shared-ui";
 import { Activity, CheckCircle, XCircle, Clock, AlertTriangle, ChevronRight, Zap, TrendingUp, Timer } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -335,6 +336,7 @@ export default function FactoryFloor() {
   const { data, isLoading, error } = useFactoryFloor();
   const [, navigate] = useLocation();
   const [filter, setFilter] = useState<"all" | "running" | "failed" | "queued">("all");
+  const [activeRole, setActiveRole] = useState("operator");
 
   const workflows = data?.workflows ?? [];
   const global = data?.globalCounts;
@@ -359,6 +361,58 @@ export default function FactoryFloor() {
           </div>
           <DataStateBadge state="live" />
         </div>
+
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <RoleSelector
+            currentRole={activeRole}
+            onRoleChange={setActiveRole}
+            roles={[
+              { id: "executive", label: "Executive", description: "Pipeline throughput, failure rates, governance" },
+              { id: "operator", label: "Operator", description: "Active runs, queued jobs, retry management" },
+              { id: "analyst", label: "Analyst", description: "Performance metrics, bottleneck analysis" },
+              { id: "admin", label: "Admin", description: "Connector health, system configuration" },
+              { id: "buyer", label: "Buyer / Demo", description: "Orchestration capabilities overview" },
+            ]}
+          />
+          <DataProvenance
+            compact
+            provenance={{
+              source: "Alloy Orchestration Engine",
+              lastUpdated: data?.fetchedAt || new Date().toISOString(),
+              freshness: data ? "minutes" : "unknown",
+              confidence: "high",
+              dataState: error ? "demo" : "live",
+              owner: "Alloy Operations",
+            } as DataProvenanceInfo}
+          />
+        </div>
+
+        {activeRole === "executive" && (
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(75,139,219,0.15)", background: "rgba(75,139,219,0.04)" }}>
+            <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(75,139,219,0.5)" }}>Executive Briefing</div>
+            <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+              {global ? `${global.running} workflows actively running. ${global.failed} failures in current window (${global.failed > 0 ? "requires attention" : "nominal"}). ${global.waiting_approval} items awaiting approval. Overall pipeline throughput: ${global.completed} completed.` : "Loading orchestration data..."}
+            </div>
+          </div>
+        )}
+
+        {activeRole === "buyer" && (
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(75,139,219,0.15)", background: "rgba(75,139,219,0.04)" }}>
+            <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(75,139,219,0.5)" }}>Alloy Execution Fabric</div>
+            <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+              You're viewing Alloy's orchestration engine — the invisible execution layer behind every SZL platform. Each workflow represents an automated pipeline: data ingestion, threat aggregation, compliance generation, signal routing, and more. Alloy connects every platform into one unified operating surface.
+            </div>
+          </div>
+        )}
+
+        {activeRole === "analyst" && (
+          <div className="rounded-xl border p-4" style={{ borderColor: "rgba(139,92,246,0.15)", background: "rgba(139,92,246,0.04)" }}>
+            <div className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(139,92,246,0.5)" }}>Performance Analysis</div>
+            <div className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>
+              {global ? `Pipeline success rate trending at ${((global.completed / (global.completed + global.failed)) * 100).toFixed(1)}%. ${global.queued} jobs in queue. Focus on workflows with sub-90% success rates for optimization. Average duration metrics available per workflow card.` : "Loading metrics..."}
+            </div>
+          </div>
+        )}
 
         {global && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -431,6 +485,64 @@ export default function FactoryFloor() {
             ))}
           </div>
         )}
+
+        {global && global.waiting_approval > 0 && (
+          <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(139,92,246,0.15)", background: "rgba(139,92,246,0.03)" }}>
+            <div className="px-4 py-2.5 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(139,92,246,0.1)" }}>
+              <AlertTriangle className="w-3.5 h-3.5" style={{ color: "#8b5cf6" }} />
+              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#8b5cf6" }}>Approval Queue</span>
+              <span className="text-[9px] font-mono ml-auto" style={{ color: "rgba(139,92,246,0.5)" }}>{global.waiting_approval} pending</span>
+            </div>
+            <div className="divide-y" style={{ borderColor: "rgba(139,92,246,0.06)" }}>
+              {workflows.filter(w => w.counts.waiting_approval > 0).map(stat => (
+                <div key={stat.workflow.id} className="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition-colors">
+                  <div className="min-w-0">
+                    <span className="text-[11px] font-medium text-white/80 truncate block">{stat.workflow.name}</span>
+                    <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.25)" }}>{stat.counts.waiting_approval} awaiting approval</span>
+                  </div>
+                  <button className="text-[9px] px-2 py-1 rounded font-medium transition-all" style={{ color: "#8b5cf6", background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)" }}>Review</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="rounded-xl border p-4" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-3.5 h-3.5" style={{ color: "#4B8BDB" }} />
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.5)" }}>Orchestration Pipeline</span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {[
+              { stage: "Ingest", count: workflows.filter(w => w.workflow.trigger === "webhook" || w.workflow.trigger === "signal").reduce((a, w) => a + w.counts.running, 0), color: "#0ea5e9" },
+              { stage: "Transform", count: workflows.filter(w => w.workflow.outputType === "report").reduce((a, w) => a + w.counts.running, 0), color: "#8b5cf6" },
+              { stage: "Analyze", count: workflows.filter(w => w.workflow.outputType === "alert" || w.workflow.outputType === "action").reduce((a, w) => a + w.counts.running, 0), color: "#f59e0b" },
+              { stage: "Approve", count: global?.waiting_approval ?? 0, color: "#a855f7" },
+              { stage: "Deliver", count: workflows.filter(w => w.workflow.outputType === "notification" || w.workflow.outputType === "document").reduce((a, w) => a + w.counts.running + w.counts.completed, 0), color: "#10b981" },
+            ].map((s, i, arr) => (
+              <div key={s.stage} className="flex items-center gap-2 shrink-0">
+                <div className="rounded-lg px-3 py-2 text-center min-w-[80px]" style={{ background: `${s.color}08`, border: `1px solid ${s.color}20` }}>
+                  <div className="text-sm font-bold font-mono" style={{ color: s.color }}>{s.count}</div>
+                  <div className="text-[9px] font-medium uppercase tracking-wider" style={{ color: `${s.color}80` }}>{s.stage}</div>
+                </div>
+                {i < arr.length - 1 && (
+                  <ChevronRight className="w-3.5 h-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.12)" }} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <ActionLoop
+          title="Operator Actions"
+          actions={[
+            { id: "1", label: "Approve pending client onboarding workflows", type: "approve", severity: "high" },
+            { id: "2", label: "Investigate failing Vessels AIS sync", type: "investigate", severity: "critical" },
+            { id: "3", label: "Review compliance report generation", type: "approve" },
+            { id: "4", label: "Retry failed ETL pipeline runs", type: "remediate" },
+            { id: "5", label: "Escalate Lyte routing decision failures", type: "escalate", severity: "high" },
+          ]}
+        />
       </div>
     </div>
   );
