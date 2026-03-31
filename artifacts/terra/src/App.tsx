@@ -36,6 +36,7 @@ const TerraMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 const CommercialIntelligence = lazy(() => import("@/pages/commercial-intelligence"));
 const PropertyMapPage = lazy(() => import("@/pages/property-map-page"));
 const PropertyDetail = lazy(() => import("@/pages/property-detail"));
+const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
 
 function PageLoader() {
   return (
@@ -72,6 +73,7 @@ function PrivateRouter() {
         <Route path="/investor-mode" component={InvestorMode} />
         <Route path="/property-map" component={PropertyMapPage} />
         <Route path="/property/:id" component={PropertyDetail} />
+        <Route path="/powerbi" component={PowerBiReport} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -93,6 +95,7 @@ const terraCommands: CommandItem[] = [
   { id: "nav-ingestion", label: "Ingestion Framework", icon: "⬆️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ingestion"); } },
   { id: "nav-commercial", label: "Commercial Intelligence", icon: "🏢", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/commercial"); } },
   { id: "nav-property-map", label: "Property Map", icon: "🗺️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/property-map"); } },
+  { id: "nav-powerbi", label: "Power BI Portfolio Analytics", icon: "📊", group: "Analytics", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/powerbi"); } },
 ];
 
 const terraShortcuts: KeyboardShortcut[] = [

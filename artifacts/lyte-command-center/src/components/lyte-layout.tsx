@@ -5,7 +5,7 @@ import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
-  ChevronRight, Gauge
+  ChevronRight, Gauge, BarChart3
 } from "lucide-react";
 
 const PRISM_ITEMS = [
@@ -43,6 +43,12 @@ const NAV_GROUPS = [
       { href: "/approvals", label: "Approvals", icon: CheckSquare },
       { href: "/workflows", label: "Workflows", icon: Workflow },
       { href: "/readiness", label: "Readiness", icon: Shield },
+    ],
+  },
+  {
+    label: "Microsoft Analytics",
+    items: [
+      { href: "/powerbi", label: "Power BI KPIs", icon: BarChart3 },
     ],
   },
 ];

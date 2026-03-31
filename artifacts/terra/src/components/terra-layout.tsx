@@ -48,6 +48,12 @@ const NAV_SECTIONS = [
       { href: "/automations", label: "Workflow Automation", icon: Zap },
     ],
   },
+  {
+    title: "Microsoft Analytics",
+    items: [
+      { href: "/powerbi", label: "Power BI Reports", icon: BarChart3 },
+    ],
+  },
 ];
 
 export function TerraLayout({ children }: { children: ReactNode }) {

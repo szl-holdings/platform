@@ -54,6 +54,7 @@ const AlertConfig = lazy(() => import("@/pages/alert-config"));
 const ServiceTopology = lazy(() => import("@/pages/service-topology"));
 const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
 const CommandInboxLegacy = lazy(() => import("@/pages/action-queue"));
+const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -99,6 +100,7 @@ function PrivateRouter() {
         <Route path="/metrics" component={MetricsExplorer} />
         <Route path="/alerts" component={AlertConfig} />
         <Route path="/topology" component={ServiceTopology} />
+        <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/admin/jobs">{() => <AdminRoute component={AdminJobsPage} />}</Route>
         <Route path="/admin/users">{() => <AdminRoute component={AdminUsersPage} />}</Route>
         <Route path="/admin/flags">{() => <AdminRoute component={AdminFlagsPage} />}</Route>
@@ -124,6 +126,7 @@ const lyteCommands: CommandItem[] = [
   { id: "nav-ownership", label: "Ownership Map", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ownership"); } },
   { id: "nav-escalation", label: "Escalation Center", icon: "🚨", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/escalation"); } },
   { id: "nav-intervention", label: "Intervention Workspace", icon: "🔧", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/intervention"); } },
+  { id: "nav-powerbi", label: "Power BI Operational KPIs", icon: "📊", group: "Analytics", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/powerbi"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [

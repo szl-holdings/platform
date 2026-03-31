@@ -28,6 +28,9 @@ const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const PlatformArchitecturePage = lazy(() => import("@/pages/platform-architecture"));
 const IntegrationsMarketplacePage = lazy(() => import("@/pages/integrations-marketplace"));
+const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
+const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
+const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -235,6 +238,15 @@ function App() {
             <Route path="/kpis">
               <RequireAuth><Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense></RequireAuth>
             </Route>
+            <Route path="/admin/azure-onboarding">
+              <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantOnboardingPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/azure-tenants">
+              <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantDashboardPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/powerbi">
+              <RequireAuth><Suspense fallback={<PageLoader />}><PowerBiConfigPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/admin">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
             </Route>
@@ -291,6 +303,15 @@ function App() {
             </Route>
             <Route path="/integrations/jira">
               <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
+            </Route>
+            <Route path="/admin/azure-onboarding">
+              <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantOnboardingPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/azure-tenants">
+              <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantDashboardPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/powerbi">
+              <RequireAuth><Suspense fallback={<PageLoader />}><PowerBiConfigPage /></Suspense></RequireAuth>
             </Route>
             <Route>
               <Redirect to="/" />

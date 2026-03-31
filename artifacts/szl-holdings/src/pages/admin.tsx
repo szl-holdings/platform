@@ -796,6 +796,7 @@ const ADMIN_SECTIONS = [
   { id: "capital-readiness", label: "Capital Readiness", icon: DollarSign },
   { id: "certification-readiness", label: "Cert Readiness", icon: Shield },
   { id: "azure-tenants", label: "Azure Tenants", icon: Cloud },
+  { id: "powerbi", label: "Power BI", icon: BarChart3 },
   { id: "pages", label: "Pages", icon: FileText },
   { id: "ventures", label: "Ventures", icon: Building2 },
   { id: "services", label: "Services", icon: Star },
@@ -1263,7 +1264,83 @@ export default function AdminPage() {
             {activeSection === "dashboard" && <DashboardPanel />}
             {activeSection === "capital-readiness" && <CapitalReadinessOS />}
             {activeSection === "certification-readiness" && <CertificationReadinessOS />}
-            {activeSection === "azure-tenants" && <AzureTenantsPanel />}
+            {activeSection === "azure-tenants" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                      <Cloud className="w-4 h-4 text-primary" /> Azure AD Tenant Management
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">Manage enterprise Azure AD tenants and SSO provisioning.</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link href="/admin/azure-onboarding">
+                      <a className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-foreground hover:bg-muted/30 transition-colors">
+                        <UserCheck className="w-3.5 h-3.5" /> Onboard Wizard
+                      </a>
+                    </Link>
+                    <Link href="/admin/azure-tenants">
+                      <a className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors">
+                        <ExternalLink className="w-3.5 h-3.5" /> Full Dashboard
+                      </a>
+                    </Link>
+                  </div>
+                </div>
+                <AzureTenantsPanel />
+              </div>
+            )}
+            {activeSection === "powerbi" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-primary" /> Power BI Embedded
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">Configure Power BI workspace credentials to embed live analytics reports.</p>
+                  </div>
+                  <Link href="/admin/powerbi">
+                    <a className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors">
+                      <Settings className="w-3.5 h-3.5" /> Configure
+                    </a>
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {[
+                    { icon: "🛡️", label: "Security Posture Report", app: "Aegis", path: "/firestorm/powerbi", color: "#3b82f6", desc: "Real-time security posture metrics, incident trends, and compliance scores." },
+                    { icon: "🏢", label: "Portfolio Analytics Report", app: "Terra", path: "/terra/powerbi", color: "#10b981", desc: "Property-level analytics including NOI, occupancy, IRR, and distress signals." },
+                    { icon: "⚡", label: "Operational KPIs Report", app: "Lyte", path: "/lyte-command-center/powerbi", color: "#f59e0b", desc: "Business observability KPIs including SLA performance and PRISM health scores." },
+                  ].map(r => (
+                    <div key={r.label} className="bg-card border border-border rounded-xl p-4 flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: r.color + "22" }}>
+                        {r.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <div className="text-sm font-semibold text-foreground">{r.label}</div>
+                          <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">{r.app}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{r.desc}</div>
+                      </div>
+                      <Link href={r.path}>
+                        <a className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-foreground hover:bg-muted/30 transition-colors flex-shrink-0">
+                          <ExternalLink className="w-3.5 h-3.5" /> Open
+                        </a>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl border border-border bg-muted/10 p-5 text-center">
+                  <BarChart3 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
+                  <div className="text-sm font-medium text-foreground mb-1">Configure Power BI credentials to activate embedded reports</div>
+                  <p className="text-xs text-muted-foreground mb-4">Requires a Power BI Pro or Premium license and an Azure App Registration.</p>
+                  <Link href="/admin/powerbi">
+                    <a className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors">
+                      <Settings className="w-3.5 h-3.5" /> Open Configuration Page
+                    </a>
+                  </Link>
+                </div>
+              </div>
+            )}
             {activeSection === "pages" && <PagesPanel />}
             {activeSection === "ventures" && <VenturesPanel />}
             {activeSection === "services" && <ServicesPanel />}
