@@ -54,18 +54,24 @@ const queryClient = new QueryClient({
 });
 
 const primaryDashboardNav = [
-  { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { path: "/dashboard/signals", label: "Signals", icon: Radio },
-  { path: "/dashboard/findings", label: "Findings", icon: Eye },
+  { path: "/dashboard", label: "Research Dashboard", icon: LayoutDashboard },
+  { path: "/dashboard/signals", label: "Signal Feed", icon: Radio },
+  { path: "/dashboard/findings", label: "Research Findings", icon: Eye },
   { path: "/dashboard/investigations", label: "Investigations", icon: FolderKanban },
   { path: "/dashboard/alerts", label: "Alerts", icon: BellRing },
   { path: "/dashboard/reports", label: "Reports", icon: BarChart3 },
-  { path: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-const adminDashboardNav = [
-  { path: "/dashboard/team", label: "Team", icon: Users },
-  { path: "/dashboard/audit-log", label: "Audit Log", icon: FileText },
+const researchNavItems = [
+  { path: "/projects", label: "Research Projects", icon: FolderKanban },
+  { path: "/experiments", label: "Experiment Tracker", icon: FlaskConical },
+  { path: "/models", label: "Model Registry", icon: Cpu },
+  { path: "/neural-explorer", label: "Neural Explorer", icon: Brain },
+  { path: "/ensemble", label: "Ensemble Studio", icon: Layers },
+  { path: "/registry", label: "Version Registry", icon: Database },
+  { path: "/benchmarking", label: "Benchmarking Suite", icon: Trophy },
+  { path: "/llm-eval", label: "LLM Evaluation", icon: FlaskConical },
+  { path: "/gpu-monitoring", label: "GPU Monitor", icon: Cpu },
 ];
 
 const cortexNavItems = [
@@ -77,29 +83,22 @@ const cortexNavItems = [
   { path: "/agent-insights", label: "Agent Insights", icon: Brain },
 ];
 
-const researchNavItems = [
-  { path: "/projects", label: "Projects", icon: FolderKanban },
-  { path: "/experiments", label: "Experiments", icon: FlaskConical },
-  { path: "/models", label: "Models", icon: Cpu },
-  { path: "/neural-explorer", label: "Neural Explorer", icon: Brain },
-  { path: "/ensemble", label: "Ensemble Studio", icon: Layers },
-  { path: "/gpu-monitoring", label: "GPU Monitor", icon: Cpu },
+const adminDashboardNav = [
+  { path: "/dashboard/settings", label: "Settings", icon: Settings },
+  { path: "/dashboard/team", label: "Team", icon: Users },
+  { path: "/dashboard/audit-log", label: "Audit Log", icon: FileText },
 ];
 
 const secondaryNavItems = [
   { path: "/dashboard/insights", label: "Insights", icon: Lightbulb },
   { path: "/observability", label: "Observability", icon: Activity },
   { path: "/predictions", label: "Predictions", icon: TrendingUp },
-  { path: "/alerts", label: "Alerts", icon: BellRing },
   { path: "/drift", label: "Prediction Drift", icon: Activity },
   { path: "/anomalies", label: "Anomaly Timeline", icon: Eye },
   { path: "/correlation-alerts", label: "Alert Correlation", icon: Link2 },
-  { path: "/confidence", label: "Confidence", icon: BarChart3 },
+  { path: "/confidence", label: "Confidence Histogram", icon: BarChart3 },
   { path: "/scenarios", label: "Scenario Builder", icon: Boxes },
-  { path: "/correlations", label: "Correlations", icon: GitBranch },
-  { path: "/registry", label: "Model Registry", icon: Database },
-  { path: "/benchmarking", label: "Benchmarking", icon: Trophy },
-  { path: "/llm-eval", label: "LLM Evaluation", icon: FlaskConical },
+  { path: "/correlations", label: "Correlation Analysis", icon: GitBranch },
 ];
 
 function PageLoader() {
@@ -112,134 +111,96 @@ function PageLoader() {
 
 function DashboardSidebar() {
   const [location] = useLocation();
-  const [researchExpanded, setResearchExpanded] = useState(false);
+  const [cortexExpanded, setCortexExpanded] = useState(false);
   const [moreExpanded, setMoreExpanded] = useState(false);
 
+  const NavItem = ({ path, label, icon: Icon, dimmed = false }: { path: string; label: string; icon: typeof Brain; dimmed?: boolean }) => {
+    const isActive = path === "/dashboard" ? location === "/dashboard" : location.startsWith(path);
+    return (
+      <Link key={path} href={path}>
+        <div className={cn(
+          "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
+          isActive ? "bg-amber-400/10 text-amber-400" : dimmed ? "text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        )}>
+          {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-amber-400 rounded-r-full" />}
+          <Icon className="w-3.5 h-3.5 shrink-0" />
+          {label}
+        </div>
+      </Link>
+    );
+  };
+
   return (
-    <aside className="w-56 bg-[#0d0a1a]/80 border-r border-violet-500/10 flex flex-col h-screen sticky top-0 backdrop-blur-sm">
+    <aside className="w-60 bg-[#0d0a1a]/80 border-r border-violet-500/10 flex flex-col h-screen sticky top-0 backdrop-blur-sm">
       <div className="px-4 py-4 border-b border-violet-500/10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-amber-400/12 flex items-center justify-center shrink-0"
-            style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.15), rgba(16,185,129,0.1))" }}>
-            <Brain className="w-4 h-4 text-primary animate-neural-pulse" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.2), rgba(16,185,129,0.12))" }}>
+            <Brain className="w-4 h-4 text-amber-400 animate-neural-pulse" />
           </div>
           <div>
             <h1 className="font-display text-sm font-bold text-foreground tracking-tight">INCA</h1>
-            <p className="text-[10px] text-amber-400/70 font-mono uppercase tracking-[0.1em]">Agentic Cortex</p>
+            <p className="text-[10px] text-amber-400/60 font-mono uppercase tracking-[0.1em]">AI Research Command</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-        <div className="px-3 py-1 mb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/50">Intelligence</span>
-        </div>
-        {primaryDashboardNav.map(({ path, label, icon: Icon }) => {
-          const isActive = path === "/dashboard" ? location === "/dashboard" : location.startsWith(path);
-          return (
-            <Link key={path} href={path}>
-              <div className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
-                isActive ? "bg-amber-400/10 text-amber-400" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              )}>
-                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-amber-400 rounded-r-full" />}
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                {label}
-              </div>
-            </Link>
-          );
-        })}
-
-        <div className="px-3 pt-3 pb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/40">Admin</span>
-        </div>
-        {adminDashboardNav.map(({ path, label, icon: Icon }) => {
-          const isActive = location === path;
-          return (
-            <Link key={path} href={path}>
-              <div className={cn(
-                "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
-                isActive ? "bg-amber-400/10 text-amber-400" : "text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30"
-              )}>
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                {label}
-              </div>
-            </Link>
-          );
-        })}
-
-        <div className="px-3 pt-3 pb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/50">Intelligence Cortex</span>
-        </div>
-        {cortexNavItems.map(({ path, label, icon: Icon }) => {
-          const isActive = location.startsWith(path);
-          return (
-            <Link key={path} href={path}>
-              <div className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
-                isActive ? "bg-amber-400/10 text-amber-400" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              )}>
-                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-amber-400 rounded-r-full" />}
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                {label}
-              </div>
-            </Link>
-          );
-        })}
-
-        <div className="px-3 pt-3 pb-1">
-          <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/40">Research Lab</span>
-        </div>
-        <button
-          onClick={() => setResearchExpanded(!researchExpanded)}
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 transition-all w-full"
-        >
-          <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", researchExpanded && "rotate-90")} />
-          Research Pages
-        </button>
-        {researchExpanded && (
-          <div className="mt-0.5 space-y-0.5">
-            {researchNavItems.map(({ path, label, icon: Icon }) => {
-              const isActive = location.startsWith(path);
-              return (
-                <Link key={path} href={path}>
-                  <div className={cn(
-                    "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ml-2",
-                    isActive ? "bg-primary/12 text-primary" : "text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30"
-                  )}>
-                    <Icon className="w-3 h-3 shrink-0" />
-                    {label}
-                  </div>
-                </Link>
-              );
-            })}
+      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4">
+        <div>
+          <div className="px-3 pb-1">
+            <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/50">Intelligence Feed</span>
           </div>
-        )}
+          <div className="space-y-0.5">
+            {primaryDashboardNav.map(({ path, label, icon: Icon }) => (
+              <NavItem key={path} path={path} label={label} icon={Icon} />
+            ))}
+          </div>
+        </div>
 
-        <div className="pt-1">
+        <div>
+          <div className="px-3 pb-1">
+            <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/50">Research Lab</span>
+          </div>
+          <div className="space-y-0.5">
+            {researchNavItems.map(({ path, label, icon: Icon }) => (
+              <NavItem key={path} path={path} label={label} icon={Icon} />
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <button
+            onClick={() => setCortexExpanded(!cortexExpanded)}
+            className="flex items-center gap-2 px-3 py-1 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400/40 hover:text-amber-400/70 transition-all w-full"
+          >
+            <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", cortexExpanded && "rotate-90")} />
+            Agentic Cortex
+          </button>
+          {cortexExpanded && (
+            <div className="mt-0.5 space-y-0.5">
+              {cortexNavItems.map(({ path, label, icon: Icon }) => (
+                <NavItem key={path} path={path} label={label} icon={Icon} dimmed />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
           <button
             onClick={() => setMoreExpanded(!moreExpanded)}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted/30 transition-all w-full"
+            className="flex items-center gap-2 px-3 py-1 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-muted-foreground/30 hover:text-muted-foreground/60 transition-all w-full"
           >
-            <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
-            More tools
+            <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", moreExpanded && "rotate-90")} />
+            Analysis Tools
           </button>
           {moreExpanded && (
             <div className="mt-0.5 space-y-0.5">
-              {secondaryNavItems.map(({ path, label, icon: Icon }) => {
-                const isActive = location.startsWith(path);
-                return (
-                  <Link key={path} href={path}>
-                    <div className={cn(
-                      "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ml-2",
-                      isActive ? "bg-violet-500/12 text-violet-300" : "text-violet-400/30 hover:text-violet-200 hover:bg-violet-500/5"
-                    )}>
-                      <Icon className="w-3 h-3 shrink-0" />
-                      {label}
-                    </div>
-                  </Link>
-                );
-              })}
+              {secondaryNavItems.map(({ path, label, icon: Icon }) => (
+                <NavItem key={path} path={path} label={label} icon={Icon} dimmed />
+              ))}
+              {adminDashboardNav.map(({ path, label, icon: Icon }) => (
+                <NavItem key={path} path={path} label={label} icon={Icon} dimmed />
+              ))}
             </div>
           )}
         </div>
@@ -249,7 +210,7 @@ function DashboardSidebar() {
         <UserButton showName className="w-full" />
         <div className="flex items-center gap-2 text-[10px] text-amber-400/30">
           <Brain className="w-3 h-3" />
-          <span className="font-mono">SZL Holdings · Quipu Engine</span>
+          <span className="font-mono">SZL Holdings · AI Research</span>
         </div>
       </div>
     </aside>
@@ -354,7 +315,7 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium">
           Skip to main content
         </a>
-        <EcosystemNav currentAppId="inca" currentAppName="INCA — Agentic Intelligence Cortex" accentColor="#f59e0b" />
+        <EcosystemNav currentAppId="inca" currentAppName="INCA — AI Research Command" accentColor="#f59e0b" />
         <div className="flex flex-1 overflow-hidden">
           <DashboardSidebar />
           <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>

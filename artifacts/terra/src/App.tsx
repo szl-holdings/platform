@@ -94,7 +94,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   return (
     <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#a07848">
       <div className="flex flex-col h-screen bg-terra-bg">
-        <EcosystemNav currentAppId="terra" currentAppName="Terra" accentColor="#a07848" />
+        <EcosystemNav currentAppId="terra" currentAppName="Terra — Portfolio Intelligence" accentColor="#a07848" />
         <div className="flex-1 overflow-hidden">
           <TerraLayout>
             <PrivateRouter />

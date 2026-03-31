@@ -57,33 +57,39 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: "Overview",
+    title: "Command",
     items: [
-      { path: "/dashboard", label: "Client Dashboard", icon: Building2 },
+      { path: "/dashboard", label: "Operations Dashboard", icon: LayoutDashboard },
       { path: "/noc", label: "NOC Operations", icon: Activity },
     ],
   },
   {
-    title: "Service Management",
+    title: "Clients",
     items: [
-      { path: "/tickets", label: "Service Desk", icon: Ticket },
-      { path: "/devices", label: "Device Inventory", icon: Monitor },
+      { path: "/clients", label: "Client Accounts", icon: Building2 },
       { path: "/contracts", label: "Contracts & SLAs", icon: FileText },
+    ],
+  },
+  {
+    title: "Service Desk",
+    items: [
+      { path: "/tickets", label: "Ticket Queue", icon: Ticket },
+      { path: "/devices", label: "Device Inventory", icon: Monitor },
       { path: "/dispatch", label: "Technician Dispatch", icon: Wrench },
+      { path: "/technicians", label: "Technicians", icon: Users },
     ],
   },
   {
     title: "Business",
     items: [
       { path: "/revenue", label: "Revenue & Billing", icon: DollarSign },
-      { path: "/technicians", label: "Technicians", icon: Users },
+      { path: "/mrr", label: "MRR Dashboard", icon: DollarSign },
     ],
   },
   {
     title: "Intelligence",
     items: [
       { path: "/rmm", label: "RMM Console", icon: Monitor },
-      { path: "/mrr", label: "MRR Dashboard", icon: DollarSign },
       { path: "/agent-insights", label: "Agent Insights", icon: Brain },
       { path: "/observability", label: "Observability", icon: Activity },
     ],

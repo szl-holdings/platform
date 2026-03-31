@@ -27,11 +27,23 @@ A premium, command-grade design system inspired by Palantir Foundry/Anduril Latt
 #### Brand Hierarchy & Visuals
 - **SZL Holdings:** Dark-first, platinum/silver/graphite, Space Grotesk.
 - **Alloy:** Cool steel / signal blue, infrastructure engine aesthetic.
-- **Lyte:** Signal cyan, for business observability.
+- **Lyte:** Signal cyan, for business observability (AIOps Command).
 - **Vessels:** Deep ocean blue, maritime command intelligence.
-- **Terra:** Stone/slate, elite real estate.
+- **Terra:** Bronze/stone (#a07848), portfolio intelligence for real-estate — distinct from Lyte. Terminology: Portfolio Intelligence, not generic brokerage.
 - **Carlota Jo:** Warm ivory/brushed gold, light luxury, serif fonts.
 - **Stephen Lutar:** Near-monochrome, founder identity.
+- **Dreamscape:** Pink (#ec4899), Creative Studio — campaigns, brand voice, AI studio, motion graphics, voice studio. Standalone product, not a data/intelligence app.
+- **INCA:** Amber (#f59e0b), AI Research Command — scientific ML research platform. Research Lab primary section. Distinct scientific identity.
+- **Rosie (MSP):** Red (#ef4444), Threat & Incident Command — full MSP operational depth with Clients, Service Desk, Business, Intelligence sections.
+- **Firestorm:** Red, Security Simulation (SOC/cyber defense).
+
+#### Architecture Decision: Nimbus Dissolved as Public Brand
+Nimbus was consolidated into Alloy's intelligence layer (Task #173). It is NOT a standalone public product.
+- Internal API routes (`/api/nimbus/*`, `/api/core/recommendations`) are preserved as Alloy's predictive engine.
+- The `recommendations` DB table stores cross-platform AI recommendations attributed to Alloy intelligence.
+- The `alloyPredictiveConfig` copilot config represents Alloy's predictive capability.
+- All user-facing "Nimbus" labels have been replaced with "AI Recommendations" / "Alloy Intelligence".
+- SZL Holdings Core Command links to Dreamscape (Creative Studio), not Nimbus.
 
 ### Platform Architecture & Features
 The platform features 13 applications sharing authentication and design.

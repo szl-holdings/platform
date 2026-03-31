@@ -26,8 +26,8 @@ export default function DashboardPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-display font-bold text-terra-text">Brokerage Command Center</h1>
-            <p className="text-sm text-terra-text-secondary mt-1">Listings, deals, leads, and pipeline — {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+            <h1 className="text-2xl font-display font-bold text-terra-text">Portfolio Intelligence</h1>
+            <p className="text-sm text-terra-text-secondary mt-1">Property operations, deal pipeline, and asset telemetry — {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
           </div>
           <div className="flex items-center gap-2">
             {criticalSignals.length > 0 && (
