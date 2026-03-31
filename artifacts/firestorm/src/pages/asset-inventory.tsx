@@ -93,10 +93,9 @@ export default function AssetInventoryPage() {
   const { data: rawAssets, isLoading } = useQuery({
     queryKey: ["firestorm-assets"],
     queryFn: () => api.assets.list(),
-    placeholderData: DEMO_ASSETS as any,
   });
 
-  const assets: any[] = (rawAssets && Array.isArray(rawAssets) && rawAssets.length > 0) ? rawAssets : DEMO_ASSETS;
+  const assets: any[] = (rawAssets && Array.isArray(rawAssets)) ? rawAssets : [];
 
   const triggerWorkflow = useMutation({
     mutationFn: ({ entityId, actionType, assignedTo }: any) =>

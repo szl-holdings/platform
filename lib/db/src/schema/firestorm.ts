@@ -272,3 +272,47 @@ export type FirestormComplianceControl = typeof firestormComplianceControlsTable
 export const insertFirestormAlertSchema = createInsertSchema(firestormAlertsTable).omit({ id: true, createdAt: true });
 export type InsertFirestormAlert = z.infer<typeof insertFirestormAlertSchema>;
 export type FirestormAlert = typeof firestormAlertsTable.$inferSelect;
+
+export const firestormCasesTable = pgTable("firestorm_cases", {
+  id: serial("id").primaryKey(),
+  caseNumber: text("case_number").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status", { enum: ["open", "in_progress", "pending_review", "resolved", "closed"] }).notNull().default("open"),
+  priority: text("priority", { enum: ["p1_critical", "p2_high", "p3_medium", "p4_low"] }).notNull().default("p3_medium"),
+  assignedAnalyst: text("assigned_analyst"),
+  relatedIncidentIds: jsonb("related_incident_ids").$type<number[]>().default([]),
+  relatedFindingIds: jsonb("related_finding_ids").$type<number[]>().default([]),
+  slaTriage: integer("sla_triage_minutes").notNull().default(60),
+  slaResolve: integer("sla_resolve_minutes").notNull().default(1440),
+  triagedAt: timestamp("triaged_at"),
+  resolvedAt: timestamp("resolved_at"),
+  notes: jsonb("notes").$type<Array<{ content: string; author: string; at: string }>>().default([]),
+  evidence: jsonb("evidence").$type<Array<{ name: string; type: string; url?: string; addedAt: string }>>().default([]),
+  auditTrail: jsonb("audit_trail").$type<Array<{ action: string; user: string; at: string }>>().default([]),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFirestormCaseSchema = createInsertSchema(firestormCasesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormCase = z.infer<typeof insertFirestormCaseSchema>;
+export type FirestormCase = typeof firestormCasesTable.$inferSelect;
+
+export const firestormMitreDetectionsTable = pgTable("firestorm_mitre_detections", {
+  id: serial("id").primaryKey(),
+  techniqueId: text("technique_id").notNull(),
+  techniqueName: text("technique_name").notNull(),
+  tactic: text("tactic").notNull(),
+  detectionCount: integer("detection_count").notNull().default(0),
+  incidentCount: integer("incident_count").notNull().default(0),
+  lastDetectedAt: timestamp("last_detected_at"),
+  coverageStatus: text("coverage_status", { enum: ["detected", "partial", "not_covered"] }).notNull().default("not_covered"),
+  relatedIncidentIds: jsonb("related_incident_ids").$type<number[]>().default([]),
+  relatedFindingIds: jsonb("related_finding_ids").$type<number[]>().default([]),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFirestormMitreDetectionSchema = createInsertSchema(firestormMitreDetectionsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormMitreDetection = z.infer<typeof insertFirestormMitreDetectionSchema>;
+export type FirestormMitreDetection = typeof firestormMitreDetectionsTable.$inferSelect;

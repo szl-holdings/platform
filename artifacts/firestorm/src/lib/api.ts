@@ -87,6 +87,21 @@ export const api = {
     create: (data: any) => apiFetch<any>("/firestorm/workflow-actions", { method: "POST", body: JSON.stringify(data) }),
     update: (id: number, data: any) => apiFetch<any>(`/firestorm/workflow-actions/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   },
+  cases: {
+    list: (params?: { status?: string; priority?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.status) q.set("status", params.status);
+      if (params?.priority) q.set("priority", params.priority);
+      return apiFetch<any[]>(`/firestorm/cases${q.toString() ? `?${q}` : ""}`);
+    },
+    get: (id: number) => apiFetch<any>(`/firestorm/cases/${id}`),
+    create: (data: any) => apiFetch<any>("/firestorm/cases", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: any) => apiFetch<any>(`/firestorm/cases/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  },
+  mitreDetections: {
+    list: () => apiFetch<any[]>("/firestorm/mitre-detections"),
+    get: (techniqueId: string) => apiFetch<any>(`/firestorm/mitre-detections/${techniqueId}`),
+  },
   live: {
     nvdCves: (severity?: string, keyword?: string, limit?: number) => {
       const params = new URLSearchParams();

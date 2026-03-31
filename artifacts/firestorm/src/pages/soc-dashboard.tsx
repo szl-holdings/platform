@@ -10,7 +10,7 @@ import { cn } from "@workspace/shared-ui/utils";
 
 type ActivityItem = { type: string; title: string; severity: string; timestamp: string };
 
-const IS_DEMO = import.meta.env.VITE_DEMO_MODE !== "false";
+const IS_DEMO = false;
 
 const fallbackData = {
   activeIncidents: 7,
@@ -385,48 +385,33 @@ const typeLabel: Record<string, string> = {
 };
 
 export default function SOCDashboard() {
-  const { data: apiData } = useQuery<SOCData>({
+  const { data: apiData, isLoading } = useQuery<SOCData>({
     queryKey: ["soc-dashboard"],
     queryFn: api.socDashboard.get as () => Promise<SOCData>,
     refetchInterval: 30000,
-    enabled: !IS_DEMO,
   });
 
   const data: SOCData | null = useMemo(() => {
-    if (!IS_DEMO) {
-      if (apiData && typeof apiData.activeIncidents === "number") return apiData;
-      return null;
-    }
-    return fallbackData;
+    if (apiData && typeof apiData.activeIncidents === "number") return apiData;
+    return null;
   }, [apiData]);
 
-  const posturScore = Math.round(
-    (98 * 0.25) + (94 * 0.25) + (87 * 0.25) + (99 * 0.25)
-  );
+  const posturScore = useMemo(() => {
+    if (!data) return 0;
+    const totalOpen = (data.openFindings ?? 0) + (data.criticalFindings ?? 0);
+    const base = Math.max(40, 100 - Math.min(totalOpen, 60));
+    return Math.round(base);
+  }, [data]);
 
-  const safeData = data as SOCData;
+  const safeData = data ?? fallbackData;
 
-  if (!IS_DEMO) {
+  if (isLoading && !data) {
     return (
-      <div className="p-5 space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-lg font-bold flex items-center gap-2">
-              <Flame className="w-4.5 h-4.5 text-red-400" />
-              Security Operations Center
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Threat detection, triage, and coordinated response</p>
-          </div>
+      <div className="p-5 flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-red-500/40 border-t-red-400 rounded-full animate-spin" />
+          <p className="text-xs text-muted-foreground font-mono">Loading SOC data...</p>
         </div>
-        {safeData ? (
-          <div className="text-xs text-muted-foreground">Live SOC data loaded from connected source.</div>
-        ) : (
-          <div className="bg-card border border-border rounded-xl p-10 flex flex-col items-center justify-center text-center gap-3">
-            <Shield className="w-8 h-8 text-muted-foreground/40" />
-            <p className="text-sm font-medium text-foreground/70">No SOC data connected</p>
-            <p className="text-xs text-muted-foreground max-w-sm">Connect your SIEM or data source, or enable simulation mode to view SOC operations and metrics.</p>
-          </div>
-        )}
       </div>
     );
   }
