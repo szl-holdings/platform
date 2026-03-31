@@ -3,11 +3,9 @@ import { Link } from "wouter";
 const PLATFORMS_LINKS = [
   { label: "Lyte", href: "/lyte-command-center/", desc: "Business Observability" },
   { label: "Vessels", href: "/vessels/", desc: "Maritime Intelligence" },
-  { label: "Firestorm", href: "/firestorm/", desc: "Cyber Defense" },
-  { label: "INCA", href: "/inca/", desc: "AI Research" },
+  { label: "Aegis", href: "/firestorm/", desc: "Defense & Intelligence" },
   { label: "Alloy", href: "/alloy/", desc: "Execution Fabric" },
   { label: "Terra", href: "/terra/", desc: "Business Telemetry" },
-  { label: "Rosie", href: "/msp/", desc: "Incident Command" },
   { label: "Dreamscape", href: "/dreamscape/", desc: "Scenario Intelligence" },
 ];
 

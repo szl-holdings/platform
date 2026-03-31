@@ -103,6 +103,14 @@ export const DOCTRINE_APP_MAP: DoctrineLayerConfig[] = [
     description: "Founder identity and canonical narrative — one voice, one operating philosophy.",
     primaryRole: "Founder",
   },
+  {
+    appId: "aegis",
+    appName: "Aegis",
+    displayName: "Aegis — Unified Defense & Intelligence Command",
+    layers: ["OBSERVE", "UNDERSTAND", "DECIDE", "EXECUTE"],
+    description: "Unified security, managed operations, and AI intelligence. SOC command, XDR, MSP operations, model registry, and agentic cortex in one platform.",
+    primaryRole: "Unified Defense & Intelligence Command",
+  },
 ];
 
 export function getDoctrineConfig(appId: string): DoctrineLayerConfig | undefined {

@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/msp/"
-title = "Rosie — Threat & Incident Command"
+title = "[Retired] Rosie → Consolidated into Aegis"
 version = "1.0.0"
 id = "artifacts/msp"
 router = "path"

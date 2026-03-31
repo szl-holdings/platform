@@ -50,24 +50,14 @@ const FLAGSHIP: Platform[] = [
 
 const OPERATIONS: Platform[] = [
   {
-    name: "Firestorm",
-    role: "Cyber Defense & Security Simulation",
-    description: "Unified XDR, identity threat detection, adversary emulation, and SOC automation. Security command for high-stakes environments.",
-    accent: "hsl(24,88%,52%)",
+    name: "Aegis",
+    role: "Unified Defense & Intelligence Command",
+    description: "Consolidated security, managed operations, and AI intelligence in one platform. SOC command, XDR, adversary emulation, MSP operations, client management, AI research, model registry, and agentic cortex — for operators who need everything in one place.",
+    accent: "hsl(232,68%,60%)",
     href: "/firestorm/",
     icon: Shield,
-    serves: "Security teams, SOC analysts, CISOs",
-    capabilities: ["Threat detection", "Adversary simulation", "Vulnerability management", "SOC automation"],
-  },
-  {
-    name: "INCA",
-    role: "AI Research Command",
-    description: "Structured AI research operations: model registry, experiment tracking, explainable triage, and auditable decision workflows for teams that need to trust their models.",
-    accent: "hsl(250,58%,58%)",
-    href: "/inca/",
-    icon: Brain,
-    serves: "AI researchers, ML engineers, research leads",
-    capabilities: ["Model registry", "Experiment tracking", "Research lab", "AI governance"],
+    serves: "Security teams, SOC analysts, MSP operators, AI researchers, CISOs",
+    capabilities: ["SOC & XDR command", "Managed operations", "AI intelligence engine", "Agentic cortex"],
   },
   {
     name: "Terra",
@@ -78,16 +68,6 @@ const OPERATIONS: Platform[] = [
     icon: Building,
     serves: "Brokers, investors, real estate operators",
     capabilities: ["Distress engine", "Deal pipeline", "Market intelligence", "Ownership analysis"],
-  },
-  {
-    name: "Rosie",
-    role: "Threat & Incident Command",
-    description: "MSP operations command: SLA prediction, client health scoring, technician dispatch, and AI-powered incident triage for managed service providers.",
-    accent: "hsl(356,70%,52%)",
-    href: "/msp/",
-    icon: Activity,
-    serves: "MSP teams, service desk, NOC operators",
-    capabilities: ["Incident triage", "Client health", "Technician dispatch", "SLA management"],
   },
   {
     name: "Dreamscape",

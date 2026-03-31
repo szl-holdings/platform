@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/inca/"
-title = "INCA AI Research Command Center"
+title = "[Retired] INCA → Consolidated into Aegis"
 version = "1.0.0"
 id = "artifacts/inca"
 router = "path"

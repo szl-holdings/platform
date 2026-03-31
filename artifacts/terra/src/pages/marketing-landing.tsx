@@ -524,7 +524,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div>
               <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#4e6042", marginBottom: "1rem" }}>Ecosystem</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {["SZL Holdings", "Alloy", "Lyte", "Vessels", "Firestorm"].map(l => (
+                {["SZL Holdings", "Alloy", "Lyte", "Vessels", "Aegis"].map(l => (
                   <span key={l} style={{ fontSize: "13px", color: "#4e6042", cursor: "pointer", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#92a478"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#4e6042"; }}>

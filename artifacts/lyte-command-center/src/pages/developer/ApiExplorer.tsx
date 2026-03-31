@@ -16,13 +16,12 @@ const ENDPOINTS: Endpoint[] = [
   { method: "GET", path: "/api/ecosystem/health", summary: "Full ecosystem health with per-app status", tag: "Platform", auth: false },
   { method: "POST", path: "/api/auth/login", summary: "Authenticate and receive session token", tag: "Platform", auth: false, body: '{\n  "username": "string",\n  "password": "string"\n}' },
 
-  { method: "GET", path: "/api/rosie/health", summary: "ROSIE security platform health", tag: "Security", auth: false },
-  { method: "GET", path: "/api/rosie/threats", summary: "List detected security threats", tag: "Security", auth: true },
-  { method: "GET", path: "/api/aegis/health", summary: "Aegis compliance platform health", tag: "Security", auth: false },
+  { method: "GET", path: "/api/aegis/health", summary: "Aegis platform health — all modules", tag: "Security", auth: false },
   { method: "GET", path: "/api/aegis/threat-data", summary: "Threat intelligence data and analysis", tag: "Security", auth: true },
   { method: "GET", path: "/api/aegis/compliance", summary: "Compliance framework assessment", tag: "Security", auth: true },
-  { method: "GET", path: "/api/firestorm/health", summary: "Firestorm simulation lab health", tag: "Security", auth: false },
-  { method: "GET", path: "/api/firestorm/scenarios", summary: "Security simulation scenarios", tag: "Security", auth: true },
+  { method: "GET", path: "/api/aegis/soc/alerts", summary: "SOC active alerts and incidents", tag: "Security", auth: true },
+  { method: "GET", path: "/api/aegis/ops/tickets", summary: "MSP ticket queue and SLA status", tag: "Security", auth: true },
+  { method: "GET", path: "/api/aegis/intel/models", summary: "Intelligence engine model registry", tag: "Security", auth: true },
 
   { method: "GET", path: "/api/beacon/health", summary: "Beacon analytics health", tag: "Analytics", auth: false },
   { method: "GET", path: "/api/beacon/metrics", summary: "Decision analytics metrics", tag: "Analytics", auth: true },
@@ -37,8 +36,6 @@ const ENDPOINTS: Endpoint[] = [
 
   { method: "GET", path: "/api/alloy/health", summary: "Alloy orchestration layer health", tag: "AI", auth: false },
   { method: "GET", path: "/api/alloy/signals", summary: "Active signal queue from Alloy engine", tag: "AI", auth: true },
-  { method: "GET", path: "/api/inca/health", summary: "INCA intelligence health", tag: "AI", auth: false },
-  { method: "GET", path: "/api/inca/campaigns", summary: "Intelligence campaigns", tag: "AI", auth: false },
 
   { method: "GET", path: "/api/zeus/health", summary: "Zeus infrastructure health", tag: "Infrastructure", auth: false },
   { method: "GET", path: "/api/zeus/topology", summary: "Service topology map", tag: "Infrastructure", auth: true },

@@ -6,15 +6,15 @@ const pdfGuides = [
   { id: "PDF-002", title: "LinkedIn Carousel: Platform Overview", description: "10-slide carousel showcasing the SZL Holdings ecosystem with key features of each platform app", pages: 10, category: "carousel", size: "8.1 MB" },
   { id: "PDF-003", title: "LinkedIn Carousel: Tech Stack Deep Dive", description: "8-slide carousel breaking down the technical architecture, frameworks, and infrastructure", pages: 8, category: "carousel", size: "6.5 MB" },
   { id: "PDF-004", title: "Profile Kit: Stephen Lutar", description: "Professional profile kit with bio, headshot guidelines, speaking topics, and media kit materials", pages: 6, category: "profile-kit", size: "3.8 MB" },
-  { id: "PDF-005", title: "LinkedIn Carousel: Security Operations", description: "7-slide carousel highlighting Firestorm's security capabilities and SOC dashboard features", pages: 7, category: "carousel", size: "5.9 MB" },
+  { id: "PDF-005", title: "LinkedIn Carousel: Aegis Security Ops", description: "7-slide carousel highlighting Aegis security capabilities and SOC dashboard features", pages: 7, category: "carousel", size: "5.9 MB" },
   { id: "PDF-006", title: "Content Creator Guide", description: "Step-by-step guide for creating on-brand social media content with templates and best practices", pages: 16, category: "strategy", size: "3.2 MB" },
-  { id: "PDF-007", title: "LinkedIn Carousel: AI Research", description: "9-slide carousel featuring INCA's AI research capabilities, model registry, and prediction dashboard", pages: 9, category: "carousel", size: "7.3 MB" },
+  { id: "PDF-007", title: "LinkedIn Carousel: Aegis Intelligence", description: "9-slide carousel featuring Aegis Intelligence Engine capabilities, model registry, and prediction dashboard", pages: 9, category: "carousel", size: "7.3 MB" },
   { id: "PDF-008", title: "Brand Guidelines Document", description: "Complete brand identity guidelines including colors, typography, logo usage, and tone of voice", pages: 32, category: "strategy", size: "12.4 MB" },
 ];
 
 const screenshots = [
-  { name: "Firestorm SOC Dashboard", app: "Firestorm", description: "Security Operations Center with live threat map and alert feed" },
-  { name: "INCA Research Command", app: "INCA", description: "AI Research dashboard with model health scores and experiment tracking" },
+  { name: "Aegis SOC Dashboard", app: "Aegis", description: "Security Operations Center with live threat map and alert feed" },
+  { name: "Aegis Intelligence Command", app: "Aegis", description: "AI Research dashboard with model health scores and experiment tracking" },
   { name: "Alloy Prediction Studio", app: "Alloy", description: "Predictive intelligence with scenario modeling and confidence scoring" },
   { name: "Beacon Intelligence Map", app: "Beacon", description: "Business telemetry with KPI drift detection and market signals" },
   { name: "Vessels Maritime", app: "Vessels", description: "Maritime intelligence dashboard with fleet tracking" },

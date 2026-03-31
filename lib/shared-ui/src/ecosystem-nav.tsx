@@ -70,6 +70,15 @@ const ECOSYSTEM_APPS: EcosystemApp[] = [
     description: "Business Observability Command Platform",
   },
   {
+    id: "aegis",
+    name: "Aegis",
+    subtitle: "Security · Defense & Intelligence Command",
+    path: "/firestorm/",
+    accent: "#6366f1",
+    icon: "⬡",
+    description: "Unified Defense, Managed Operations & AI Intelligence",
+  },
+  {
     id: "vessels",
     name: "Vessels",
     subtitle: "Platform · Maritime Command",

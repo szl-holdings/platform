@@ -67,8 +67,7 @@ const platformLinks = [
   { name: "Lyte", role: "INTERPRET", subtitle: "AIOps Command", href: "/lyte-command-center/", icon: Zap, color: "#f59e0b" },
   { name: "Dreamscape", role: "CREATE", subtitle: "Creative Studio", href: "/dreamscape/", icon: Brain, color: "#ec4899" },
   { name: "AlloyScape", role: "EXECUTE", subtitle: "Execution Fabric", href: "/alloy/", icon: Layers, color: "#6366f1" },
-  { name: "Firestorm", role: "SECURE", subtitle: "Security Simulation", href: "/firestorm/", icon: Shield, color: "#ef4444" },
-  { name: "Rosie", role: "COMMAND", subtitle: "Incident Command", href: "/msp/", icon: Activity, color: "#f97316" },
+  { name: "Aegis", role: "DEFEND", subtitle: "Defense & Intelligence", href: "/firestorm/", icon: Shield, color: "#6366f1" },
   { name: "Vessels", role: "TRACK", subtitle: "Maritime Intelligence", href: "/vessels/", icon: Ship, color: "#3b82f6" },
   { name: "Carlota Jo", role: "CONSULT", subtitle: "Brand Strategy", href: "/carlota-jo/", icon: Globe, color: "#10b981" },
 ];
@@ -466,10 +465,9 @@ export default function CoreCommandCenter() {
                   <div className="space-y-1">
                     {[
                       { label: "Beacon — Distress Search", href: "/terra/", color: "#0ea5e9", icon: Building },
-                      { label: "Firestorm — SOC Dashboard", href: "/firestorm/", color: "#ef4444", icon: Shield },
+                      { label: "Aegis — Defense & Intelligence", href: "/firestorm/", color: "#6366f1", icon: Shield },
                       { label: "Carlota Jo — Consulting", href: "/carlota-jo/", color: "#10b981", icon: Globe },
                       { label: "Vessels — Maritime", href: "/vessels/", color: "#3b82f6", icon: Ship },
-                      { label: "INCA — AI Research", href: "/inca/", color: "#a855f7", icon: Brain },
                       { label: "Dreamscape — Creative Studio", href: "/dreamscape/", color: "#ec4899", icon: Eye },
                     ].map((link) => (
                       <a

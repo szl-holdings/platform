@@ -3,11 +3,9 @@ import { Activity, Globe, Shield, Brain, Cpu, TrendingUp, Zap, Radio, ArrowRight
 import { cn } from "@workspace/shared-ui/utils";
 
 const NODES = [
-  { id: "inca", name: "INCA Cortex", role: "The Brain", agent: "Quipu Engine", color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/25", x: 50, y: 15, type: "cortex" },
+  { id: "aegis", name: "Aegis Command", role: "Defense & Intelligence", agent: "Sentinel Engine", color: "text-indigo-400", bg: "bg-indigo-400/10", border: "border-indigo-400/25", x: 50, y: 15, type: "cortex" },
   { id: "lyte", name: "Lyte", role: "Spinal Cord", agent: "Qhapaq Ñan", color: "text-amber-300", bg: "bg-amber-300/10", border: "border-amber-300/20", x: 50, y: 50, type: "hub" },
-  { id: "firestorm", name: "Firestorm", role: "Immune System", agent: "Sacsayhuamán Shield", color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20", x: 83, y: 30, type: "system" },
   { id: "vessels", name: "Vessels", role: "Maritime Organ", agent: "Maritime Analyst", color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20", x: 17, y: 30, type: "organ" },
-  { id: "msp", name: "Rosie", role: "Threat Command Organ", agent: "IT Sentinel", color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20", x: 5, y: 55, type: "organ" },
   { id: "terra", name: "Beacon", role: "Business Telemetry Organ", agent: "Deal Scout", color: "text-sky-400", bg: "bg-sky-400/10", border: "border-sky-400/20", x: 17, y: 78, type: "organ" },
   { id: "alloy", name: "Alloy", role: "Orchestration Engine", agent: "Intelligence Engine", color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20", x: 38, y: 85, type: "organ" },
   { id: "carlota-jo", name: "Carlota Jo", role: "Advisory Organ", agent: "Advisory Agent", color: "text-pink-400", bg: "bg-pink-400/10", border: "border-pink-400/20", x: 62, y: 85, type: "organ" },
@@ -16,16 +14,14 @@ const NODES = [
 ];
 
 const CONNECTIONS = [
-  { from: "inca", to: "lyte", weight: "high" },
-  { from: "lyte", to: "firestorm", weight: "high" },
+  { from: "aegis", to: "lyte", weight: "high" },
+  { from: "lyte", to: "aegis", weight: "high" },
   { from: "lyte", to: "vessels", weight: "medium" },
-  { from: "lyte", to: "msp", weight: "medium" },
   { from: "lyte", to: "terra", weight: "medium" },
   { from: "lyte", to: "alloy", weight: "medium" },
   { from: "lyte", to: "carlota-jo", weight: "medium" },
   { from: "lyte", to: "szl-holdings", weight: "medium" },
   { from: "lyte", to: "stephen", weight: "low" },
-  { from: "inca", to: "firestorm", weight: "high" },
 ];
 
 interface TrafficPacket {
@@ -38,13 +34,13 @@ interface TrafficPacket {
 
 const AGENT_ACTIVITY: { time: string; app: string; agent: string; action: string; type: "signal" | "intelligence" | "policy" | "reflex" }[] = [
   { time: "now", app: "Vessels", agent: "Maritime Analyst", action: "Dark vessel alert: MV Poseidon off Strait of Malacca", type: "signal" },
-  { time: "12s", app: "INCA Cortex", agent: "Quipu Engine", action: "Spawning investigative sub-agent for maritime anomaly", type: "intelligence" },
-  { time: "28s", app: "Firestorm", agent: "Sacsayhuamán Shield", action: "Policy check passed for cross-domain data access", type: "policy" },
-  { time: "45s", app: "Rosie", agent: "IT Sentinel", action: "Auto-remediated memory leak — TKT-4821 closed", type: "reflex" },
+  { time: "12s", app: "Aegis Intel", agent: "Quipu Engine", action: "Spawning investigative sub-agent for maritime anomaly", type: "intelligence" },
+  { time: "28s", app: "Aegis SOC", agent: "Sacsayhuamán Shield", action: "Policy check passed for cross-domain data access", type: "policy" },
+  { time: "45s", app: "Aegis Ops", agent: "IT Sentinel", action: "Auto-remediated memory leak — TKT-4821 closed", type: "reflex" },
   { time: "1m", app: "Beacon", agent: "Deal Scout", action: "Off-market opportunity flagged: Brickell, Miami — $4.2M cap rate 7.1%", type: "signal" },
-  { time: "1m 20s", app: "INCA Cortex", agent: "Willaq Umu Oracle", action: "Q1 synthesis complete — 94% portfolio health, 3 risk vectors", type: "intelligence" },
+  { time: "1m 20s", app: "Aegis Intel", agent: "Willaq Umu Oracle", action: "Q1 synthesis complete — 94% portfolio health, 3 risk vectors", type: "intelligence" },
   { time: "2m", app: "Alloy", agent: "Creative Director", action: "Campaign rebalance: +$12K to LinkedIn video segment", type: "reflex" },
-  { time: "2m 30s", app: "Firestorm", agent: "Security Sentinel LLM", action: "Blocked external write — agent action escalated for review", type: "policy" },
+  { time: "2m 30s", app: "Aegis SOC", agent: "Security Sentinel LLM", action: "Blocked external write — agent action escalated for review", type: "policy" },
   { time: "3m", app: "Carlota Jo", agent: "Advisory Agent", action: "Client briefing ready: Acme Portfolio Q1 2026", type: "intelligence" },
   { time: "4m", app: "SZL Holdings", agent: "Portfolio Analyst", action: "Health score update: ecosystem posture 87/100 → 89/100", type: "signal" },
   { time: "5m", app: "Stephen", agent: "Brand Monitor", action: "Reputation alert: negative tweet thread, 4.2K impressions", type: "signal" },

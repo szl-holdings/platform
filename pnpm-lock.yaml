@@ -693,6 +693,9 @@ importers:
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@workspace/services':
+        specifier: workspace:*
+        version: link:../../lib/services
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0

@@ -372,9 +372,9 @@ const entityPaths: Record<string, (id: string) => string> = {
   vessel: (id) => `/vessels/vessel/${id}`,
   incident: (id) => `/firestorm/incidents/${id}`,
   alert: (id) => `/firestorm/alerts/${id}`,
-  ticket: (id) => `/msp/tickets/${id}`,
+  ticket: (id) => `/firestorm/ops/tickets/${id}`,
   property: (id) => `/terra/properties/${id}`,
-  experiment: (id) => `/inca/experiments/${id}`,
+  experiment: (id) => `/firestorm/intel/experiments/${id}`,
   campaign: (id) => `/dreamscape/campaigns/${id}`,
   risk: (id) => `/firestorm/cr/risks/${id}`,
 };

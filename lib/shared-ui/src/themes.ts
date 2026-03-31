@@ -95,35 +95,6 @@ export const vesselsTheme: BrandTheme = {
   },
 };
 
-export const incaTheme: BrandTheme = {
-  name: "INCA Intelligence Platform",
-  slug: "inca",
-  colors: {
-    primary: colors.lane.inca.primary,
-    primaryLight: colors.lane.inca.primaryLight,
-    primaryDark: colors.lane.inca.primaryDark,
-    primaryMuted: colors.lane.inca.muted,
-    accent: colors.lane.inca.accent,
-    accentLight: "hsl(260 35% 68%)",
-    surface: colors.lane.inca.surface,
-    surfaceHover: "hsla(245 30% 12% / 0.65)",
-  },
-  gradient: {
-    primary: "linear-gradient(135deg, hsl(245 50% 45%), hsl(260 35% 55%))",
-    subtle: "linear-gradient(135deg, hsla(245 50% 45% / 0.08), hsla(260 35% 55% / 0.06))",
-    text: "linear-gradient(135deg, hsl(245 50% 65%), hsl(260 35% 72%))",
-  },
-  typography: {
-    displayWeight: "700",
-    headingWeight: "600",
-    bodyWeight: "400",
-  },
-  motion: {
-    duration: "0.28s",
-    easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-    stagger: 0.05,
-  },
-};
 
 export const carlotaJoTheme: BrandTheme = {
   name: "Carlota Jo Consulting",
@@ -189,37 +160,6 @@ export const stephenLutarTheme: BrandTheme = {
 export const stephenTheme = stephenLutarTheme;
 
 // ─── Supporting app themes ────────────────────────────────────────────────────
-
-export const firestormTheme: BrandTheme = {
-  name: "Firestorm Security",
-  slug: "firestorm",
-  colors: {
-    primary: colors.laneAccents.firestorm.primary,
-    primaryLight: "hsl(36 84% 64%)",
-    primaryDark: "hsl(36 84% 40%)",
-    primaryMuted: colors.laneAccents.firestorm.muted,
-    primarySubtle: "hsla(36 84% 52% / 0.05)",
-    secondary: colors.laneAccents.firestorm.secondary,
-    secondaryLight: "hsl(22 76% 60%)",
-    surface: "hsl(24 8% 8%)",
-    surfaceHover: "hsl(24 8% 11%)",
-  },
-  gradient: {
-    primary: "linear-gradient(135deg, hsl(36 84% 52%), hsl(22 76% 48%))",
-    subtle: "linear-gradient(135deg, hsla(36 84% 52% / 0.08), hsla(22 76% 48% / 0.08))",
-    text: "linear-gradient(135deg, hsl(36 84% 68%), hsl(22 76% 64%))",
-  },
-  typography: {
-    displayWeight: "700",
-    headingWeight: "600",
-    bodyWeight: "400",
-  },
-  motion: {
-    duration: "0.22s",
-    easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-    stagger: 0.04,
-  },
-};
 
 export const dreamscapeTheme: BrandTheme = {
   name: "Dreamscape Creative",
@@ -314,24 +254,26 @@ export const lyteTheme: BrandTheme = {
   },
 };
 
-export const mspTheme: BrandTheme = {
-  name: "MSP Command Center",
-  slug: "msp",
+export const aegisTheme: BrandTheme = {
+  name: "Aegis — Unified Defense & Intelligence Command",
+  slug: "aegis",
   colors: {
-    primary: colors.laneAccents.msp.primary,
-    primaryLight: "hsl(218 72% 64%)",
-    primaryDark: "hsl(218 72% 40%)",
-    primaryMuted: colors.laneAccents.msp.muted,
-    primarySubtle: "hsla(218 72% 52% / 0.05)",
-    secondary: colors.laneAccents.msp.secondary,
-    secondaryLight: "hsl(204 60% 60%)",
-    surface: "hsl(214 10% 9%)",
-    surfaceHover: "hsl(214 10% 12%)",
+    primary: colors.laneAccents.aegis.primary,
+    primaryLight: "hsl(220 72% 70%)",
+    primaryDark: "hsl(220 72% 40%)",
+    primaryMuted: colors.laneAccents.aegis.muted,
+    primarySubtle: "hsla(220 72% 56% / 0.05)",
+    secondary: colors.laneAccents.aegis.secondary,
+    secondaryLight: "hsl(262 55% 72%)",
+    accent: colors.laneAccents.aegis.tertiary,
+    accentLight: "hsl(0 62% 68%)",
+    surface: "hsl(220 10% 7%)",
+    surfaceHover: "hsl(220 10% 10%)",
   },
   gradient: {
-    primary: "linear-gradient(135deg, hsl(218 72% 52%), hsl(204 60% 48%))",
-    subtle: "linear-gradient(135deg, hsla(218 72% 52% / 0.08), hsla(204 60% 48% / 0.08))",
-    text: "linear-gradient(135deg, hsl(218 72% 68%), hsl(204 60% 64%))",
+    primary: "linear-gradient(135deg, hsl(220 72% 56%), hsl(262 55% 58%))",
+    subtle: "linear-gradient(135deg, hsla(220 72% 56% / 0.08), hsla(262 55% 58% / 0.08))",
+    text: "linear-gradient(135deg, hsl(220 72% 72%), hsl(262 55% 74%))",
   },
   typography: {
     displayWeight: "700",
@@ -341,7 +283,7 @@ export const mspTheme: BrandTheme = {
   motion: {
     duration: "0.22s",
     easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-    stagger: 0.05,
+    stagger: 0.04,
   },
 };
 
@@ -376,19 +318,24 @@ export const alloyTheme: BrandTheme = {
   },
 };
 
+export const firestormTheme = aegisTheme;
+export const incaTheme = aegisTheme;
+export const mspTheme = aegisTheme;
+
 // ─── Theme registry ───────────────────────────────────────────────────────────
 
 export const brandThemes = {
   "szl-holdings": szlHoldingsTheme,
   vessels: vesselsTheme,
-  inca: incaTheme,
   "carlota-jo": carlotaJoTheme,
   stephen: stephenLutarTheme,
-  firestorm: firestormTheme,
+  aegis: aegisTheme,
+  firestorm: aegisTheme,
+  inca: aegisTheme,
+  msp: aegisTheme,
   dreamscape: dreamscapeTheme,
   terra: terraTheme,
   lyte: lyteTheme,
-  msp: mspTheme,
   alloy: alloyTheme,
 } as const;
 

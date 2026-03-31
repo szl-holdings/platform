@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-A pnpm monorepo consisting of 10 live applications + 1 API server + 1 design sandbox. Shares a common PostgreSQL database, authentication system, and command-grade design system. Built for Stephen Lutar, founder of SZL Holdings. Follows a strict brand hierarchy: SZL Holdings, Alloy, Lyte, Vessels, Terra, Firestorm, INCA, Dreamscape, Carlota Jo, MSP/Rosie, and Stephen Lutar's personal identity. The ecosystem provides command and intelligence platforms across maritime, cybersecurity, AI research, real estate, and enterprise operations.
+A pnpm monorepo consisting of 10 live applications + 1 API server + 1 design sandbox. Shares a common PostgreSQL database, authentication system, and command-grade design system. Built for Stephen Lutar, founder of SZL Holdings. Follows a strict brand hierarchy: SZL Holdings, Alloy, Lyte, Vessels, Terra, Aegis, Dreamscape, Carlota Jo, and Stephen Lutar's personal identity. The ecosystem provides command and intelligence platforms across maritime, cybersecurity, AI research, real estate, and enterprise operations.
 
 ## User Preferences
 I prefer detailed explanations.
@@ -33,9 +33,7 @@ A premium, command-grade design system inspired by Palantir Foundry/Anduril Latt
 - **Carlota Jo:** Warm ivory/brushed gold, light luxury, serif fonts.
 - **Stephen Lutar:** Near-monochrome, founder identity.
 - **Dreamscape:** Pink (#ec4899), Creative Studio — campaigns, brand voice, AI studio, motion graphics, voice studio. Standalone product, not a data/intelligence app.
-- **INCA:** Amber (#f59e0b), AI Research Command — scientific ML research platform. Research Lab primary section. Distinct scientific identity.
-- **Rosie (MSP):** Red (#ef4444), Threat & Incident Command — full MSP operational depth with Clients, Service Desk, Business, Intelligence sections.
-- **Firestorm:** Red, Security Simulation (SOC/cyber defense).
+- **Aegis:** Indigo/violet (#6366f1), Unified Defense & Intelligence Command — consolidates Firestorm (security), Rosie/MSP (managed operations), and INCA (AI intelligence) into one platform. Three modules: Security Operations (/soc), Managed Operations (/ops/*), Intelligence Engine (/intel/*). Artifact slug remains `firestorm`, base path `/firestorm/`.
 
 #### Architecture Decision: Nimbus Dissolved as Public Brand
 Nimbus was consolidated into Alloy's intelligence layer (Task #173). It is NOT a standalone public product.
@@ -71,12 +69,14 @@ The platform features 13 applications sharing authentication and design.
 ### Database Schema
 Over 95 tables across 20+ schema files, covering authentication, billing, various application-specific data (Vessels, Firestorm, Lyte, Alloy Platform, Dreamscape, Readiness, Stephen/Holdings), Alloy Chat, Collaboration, and MSP (5 tables: msp_clients, msp_technicians, msp_tickets, msp_devices, msp_contracts).
 
-### MSP / Rosie — Real Data & System Metrics
-- **DB Schema:** `lib/db/src/schema/msp.ts` — 5 tables seeded with 12 clients, 7 technicians, 32 tickets, 163 devices, 9 contracts.
-- **API Routes:** `artifacts/api-server/src/routes/msp.ts` — full CRUD for /msp/dashboard, /msp/clients, /msp/tickets (GET/POST/PATCH), /msp/devices, /msp/contracts, /msp/technicians, /msp/revenue.
-- **Live System Metrics:** `artifacts/api-server/src/routes/msp-live.ts` — `/api/msp/live/system-metrics` reports real CPU, memory, uptime, load averages, and process info from the API server using Node.js `os` module. Polled every 30s by NOC and RMM Console pages.
-- **Revenue Endpoint:** Returns `summary`, `monthly` (6-month trend), `byClient` (churn risk + tier), and `forecast` (6-month projection) — all computed from real DB data.
-- **Frontend pages:** All MSP pages fully wired to real API with React Query, loading skeletons, and refresh buttons. AI triage runs automatically on ticket creation.
+### Aegis — Consolidated Defense & Intelligence Platform
+Aegis (artifact slug `firestorm`, path `/firestorm/`) consolidates three former standalone apps into one unified platform:
+- **Security Operations (SOC):** Former Firestorm — SOC dashboard, MITRE ATT&CK, XDR console, threat hunting, forensics, identity threat, compliance readiness, Sacsayhuamán Shield.
+- **Managed Operations (Ops):** Former Rosie/MSP — NOC, client management, ticket queue, RMM console, technician dispatch, revenue/MRR dashboards. Pages in `src/pages/msp/`, routes at `/ops/*`.
+- **Intelligence Engine (Intel):** Former INCA — Quipu Command, Chasqui Relay, model registry, experiments, neural explorer, Willaq Umu Oracle. Pages in `src/pages/intel/`, routes at `/intel/*`.
+- **DB Schema:** MSP data in `lib/db/src/schema/msp.ts` — 5 tables. INCA data via `@workspace/services`.
+- **API Routes:** `/api/msp/*` and `/api/aegis/ops/*` (managed ops), `/api/inca/*` and `/api/aegis/intel/*` (intelligence), `/api/firestorm/*` and `/api/aegis/soc/*` (security), `/api/aegis/*` (readiness/compliance).
+- **Theme:** `aegisTheme` in shared-ui, with legacy aliases for `firestormTheme`, `mspTheme`, `incaTheme` all pointing to aegisTheme.
 
 ## External Dependencies
 - **Database:** PostgreSQL

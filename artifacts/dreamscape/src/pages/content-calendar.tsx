@@ -14,8 +14,8 @@ const weeks = [
   {
     week: 2, theme: "Product Deep Dives",
     posts: [
-      { day: "Tue", platform: "linkedin", title: "Firestorm Security Operations", status: "published", type: "Post" },
-      { day: "Thu", platform: "x", title: "INCA AI Research Thread", status: "published", type: "Thread" },
+      { day: "Tue", platform: "linkedin", title: "Aegis Security Operations", status: "published", type: "Post" },
+      { day: "Thu", platform: "x", title: "Aegis Intelligence Thread", status: "published", type: "Thread" },
       { day: "Fri", platform: "hackajob", title: "Engineering Culture Post", status: "published", type: "Article" },
     ]
   },
@@ -46,7 +46,7 @@ const weeks = [
   {
     week: 6, theme: "Innovation Spotlight",
     posts: [
-      { day: "Tue", platform: "linkedin", title: "AI-Powered Predictions with INCA", status: "draft", type: "Article" },
+      { day: "Tue", platform: "linkedin", title: "AI-Powered Intelligence with Aegis", status: "draft", type: "Article" },
       { day: "Thu", platform: "x", title: "Creative Engine Behind Dreamscape", status: "draft", type: "Thread" },
       { day: "Sat", platform: "linkedin", title: "Weekend Read: Future of SaaS", status: "draft", type: "Post" },
     ]

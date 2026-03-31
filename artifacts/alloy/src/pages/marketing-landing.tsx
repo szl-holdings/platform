@@ -498,7 +498,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <div>
               <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#334155", marginBottom: "1rem" }}>Ecosystem</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {["SZL Holdings", "Terra", "Lyte", "Vessels", "Firestorm"].map(l => (
+                {["SZL Holdings", "Terra", "Lyte", "Vessels", "Aegis"].map(l => (
                   <span key={l} style={{ fontSize: "13px", color: "#334155", cursor: "pointer", transition: "color 0.15s" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#334155"; }}>

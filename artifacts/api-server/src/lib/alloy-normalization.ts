@@ -14,10 +14,12 @@ export type RawSignalInput = {
 const DOMAIN_CATEGORIES: Record<string, string> = {
   vessels: "maritime",
   firestorm: "security",
+  aegis: "security",
   lyte: "observability",
   inca: "research",
   terra: "real-estate",
   msp: "managed-services",
+  "aegis-ops": "managed-services",
   alloy: "orchestration",
   global: "cross-domain",
 };

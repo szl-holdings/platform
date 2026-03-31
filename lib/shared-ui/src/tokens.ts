@@ -229,6 +229,12 @@ export const colors = {
       secondary: "hsl(204 58% 48%)",
       muted: "hsla(218 65% 52% / 0.10)",
     },
+    aegis: {
+      primary: "hsl(220 72% 56%)",
+      secondary: "hsl(262 55% 58%)",
+      tertiary: "hsl(0 62% 52%)",
+      muted: "hsla(220 72% 56% / 0.10)",
+    },
   },
 
   border: {

@@ -6,6 +6,14 @@ import { usePageMeta } from "@/hooks/usePageMeta";
 
 const VENTURES = [
   {
+    name: "Aegis",
+    type: "Defense & Intelligence Platform",
+    description: "Unified defense and intelligence command. Integrates security operations, managed services, and AI-powered intelligence into a single elite platform.",
+    status: "Live",
+    accent: "hsl(230,80%,65%)",
+    href: "/firestorm/",
+  },
+  {
     name: "Alloy",
     type: "Platform / Engine",
     description: "Intelligence and orchestration engine. Powers workflows, signals, outputs, and human-guided decision support across the ecosystem.",
@@ -42,7 +50,7 @@ const VENTURES = [
 export default function VenturesPage() {
   usePageMeta({
     title: "Ventures — SZL Holdings",
-    description: "SZL Holdings portfolio: Alloy, Lyte, Vessels, and Carlota Jo — purpose-built platforms across observability, maritime command, and premium services.",
+    description: "SZL Holdings portfolio: Aegis, Alloy, Lyte, Vessels, and Carlota Jo — purpose-built platforms across defense, intelligence, observability, maritime command, and premium services.",
     canonical: "https://szlholdings.com/ventures",
   });
 
@@ -64,7 +72,7 @@ export default function VenturesPage() {
                 The portfolio.
               </h1>
               <p style={{ fontSize: "1rem", lineHeight: "1.7", color: "hsl(210,5%,58%)", maxWidth: "32rem" }}>
-                SZL Holdings is the parent ecosystem behind Alloy, Lyte, Vessels, and Carlota Jo. Every entity is built with a defined purpose, a clear role, and zero internal competition.
+                SZL Holdings is the parent ecosystem behind Aegis, Alloy, Lyte, Vessels, and Carlota Jo. Every entity is built with a defined purpose, a clear role, and zero internal competition.
               </p>
             </m.div>
           </div>

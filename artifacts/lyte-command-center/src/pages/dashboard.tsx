@@ -358,10 +358,10 @@ export default function Dashboard() {
               {[
                 { label: "API Server", count: signals.filter(s => s.source.toLowerCase().includes("api") && s.status !== "resolved").length },
                 { label: "Vessels", count: signals.filter(s => s.source.toLowerCase().includes("vessel") && s.status !== "resolved").length },
-                { label: "MSP/Security", count: signals.filter(s => (s.source.toLowerCase().includes("msp") || s.source.toLowerCase().includes("rosie")) && s.status !== "resolved").length },
+                { label: "Aegis SOC", count: signals.filter(s => (s.source.toLowerCase().includes("firestorm") || s.source.toLowerCase().includes("aegis")) && s.status !== "resolved").length },
+                { label: "Aegis Ops", count: signals.filter(s => (s.source.toLowerCase().includes("msp") || s.source.toLowerCase().includes("rosie")) && s.status !== "resolved").length },
+                { label: "Aegis Intel", count: signals.filter(s => s.source.toLowerCase().includes("inca") && s.status !== "resolved").length },
                 { label: "Terra/Beacon", count: signals.filter(s => (s.source.toLowerCase().includes("terra") || s.source.toLowerCase().includes("beacon")) && s.status !== "resolved").length },
-                { label: "INCA", count: signals.filter(s => s.source.toLowerCase().includes("inca") && s.status !== "resolved").length },
-                { label: "Firestorm", count: signals.filter(s => s.source.toLowerCase().includes("firestorm") && s.status !== "resolved").length },
               ].map(item => (
                 <div key={item.label} className="flex items-center justify-between text-[11px]">
                   <span className="text-slate-400">{item.label}</span>

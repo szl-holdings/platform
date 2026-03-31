@@ -13,7 +13,7 @@ interface AppHealthSummary {
   summary: { total: number; liveConfigured: number; mockedDemoMode: number; manualRequired: number };
 }
 
-const apps = ["firestorm", "lyte", "inca", "terra", "msp", "vessels", "dreamscape", "carlota-jo", "szl-holdings"];
+const apps = ["firestorm", "lyte", "aegis", "terra", "vessels", "dreamscape", "carlota-jo", "szl-holdings"];
 
 function AppCard({ slug }: { slug: string }) {
   const { data, isLoading, refetch, isRefetching } = useQuery<AppHealthSummary>({

@@ -47,26 +47,15 @@ const ECOSYSTEM_NODES: EcosystemNode[] = [
     angle: 270,
   },
   {
-    id: "rosie",
-    name: "Rosie",
-    icon: "🛡️",
+    id: "aegis",
+    name: "Aegis",
+    icon: "⬡",
     layer: 1,
-    accent: "#f87171",
-    path: "/msp/",
-    subtitle: "Incident Command",
-    description: "Threat visibility & incident response command",
-    angle: 45,
-  },
-  {
-    id: "firestorm",
-    name: "Firestorm",
-    icon: "🔥",
-    layer: 1,
-    accent: "#fb923c",
+    accent: "#6366f1",
     path: "/firestorm/",
-    subtitle: "Cyber Range",
-    description: "Security simulation, threat hunting & SOC training",
-    angle: 135,
+    subtitle: "Unified Defense & Intelligence",
+    description: "Security, managed operations & AI intelligence command",
+    angle: 90,
   },
   {
     id: "vessels",
@@ -78,17 +67,6 @@ const ECOSYSTEM_NODES: EcosystemNode[] = [
     subtitle: "Maritime Intelligence",
     description: "Fleet operations, voyage economics & AIS anomaly detection",
     angle: 225,
-  },
-  {
-    id: "inca",
-    name: "INCA",
-    icon: "🧠",
-    layer: 2,
-    accent: "#818cf8",
-    path: "/inca/",
-    subtitle: "AI Research",
-    description: "AI research command center & model evaluation platform",
-    angle: 315,
   },
   {
     id: "carlota-jo",
@@ -122,16 +100,12 @@ const LAYER_CONFIG = [
 ];
 
 const CONNECTION_PAIRS: Array<[string, string, string]> = [
-  ["vessels", "rosie", "AIS anomaly → alert"],
-  ["rosie", "firestorm", "Incident → simulation"],
-  ["firestorm", "alloy", "Containment → playbook"],
-  ["vessels", "inca", "Maritime signal → research"],
-  ["inca", "alloy", "Intelligence → forecast"],
+  ["vessels", "aegis", "AIS anomaly → alert"],
+  ["aegis", "alloy", "Containment → playbook"],
   ["alloy", "lyte", "Prediction → workflow"],
   ["lyte", "alloy", "Action → execution"],
   ["alloy", "beacon", "Result → telemetry"],
-  ["beacon", "rosie", "KPI signal → incident"],
-  ["carlota-jo", "inca", "Advisory → intelligence"],
+  ["carlota-jo", "aegis", "Advisory → intelligence"],
 ];
 
 function polarToCartesian(angle: number, radius: number, cx: number, cy: number) {

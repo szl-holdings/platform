@@ -16,13 +16,13 @@ import featureFlagsRouter from "./feature-flags";
 import filesRouter from "./files";
 import stephenRouter from "./stephen";
 import vesselsRouter from "./vessels";
-import firestormRouter from "./firestorm";
+import aegisSocRouter from "./firestorm";
 import lyteRouter from "./lyte";
 import dreamscapeRouter from "./dreamscape";
 import readinessRouter from "./readiness";
 import adminRouter from "./admin";
 import intelligenceRouter from "./intelligence";
-import incaRouter from "./inca";
+import aegisIntelRouter from "./inca";
 import bookingRouter from "./booking";
 import holdingsRouter from "./holdings";
 import carlotaJoRouter from "./carlota-jo";
@@ -36,8 +36,8 @@ import govDataRouter from "./gov-data";
 import terraRouter from "./terra";
 import terraDistressRouter from "./terra-distress";
 import terraBrokerRouter from "./terra-broker";
-import mspLiveRouter from "./msp-live";
-import mspRouter from "./msp";
+import aegisOpsLiveRouter from "./msp-live";
+import aegisOpsRouter from "./msp";
 import terraLiveRouter from "./terra-live";
 import agentTrainingRouter from "./agent-training";
 import commentsRouter from "./comments";
@@ -57,6 +57,23 @@ import terraCrmRouter from "./terra-crm";
 
 const router: IRouter = Router();
 
+router.use((req, _res, next) => {
+  if (req.path.startsWith("/aegis/soc/")) {
+    req.url = req.url.replace("/aegis/soc/", "/firestorm/");
+  } else if (req.path.startsWith("/aegis/soc")) {
+    req.url = req.url.replace("/aegis/soc", "/firestorm");
+  } else if (req.path.startsWith("/aegis/ops/")) {
+    req.url = req.url.replace("/aegis/ops/", "/msp/");
+  } else if (req.path.startsWith("/aegis/ops")) {
+    req.url = req.url.replace("/aegis/ops", "/msp");
+  } else if (req.path.startsWith("/aegis/intel/")) {
+    req.url = req.url.replace("/aegis/intel/", "/inca/");
+  } else if (req.path.startsWith("/aegis/intel")) {
+    req.url = req.url.replace("/aegis/intel", "/inca");
+  }
+  next();
+});
+
 router.use("/auth", authLimiter);
 
 router.use("/billing", writeLimiter);
@@ -68,7 +85,10 @@ router.use("/files", writeLimiter);
 
 router.use("/vessels", readLimiter);
 router.use("/intelligence", readLimiter);
+router.use("/firestorm", readLimiter);
 router.use("/inca", readLimiter);
+router.use("/msp", readLimiter);
+router.use("/aegis", readLimiter);
 router.use("/booking", readLimiter);
 router.use("/holdings/inquiries", writeLimiter);
 router.use("/holdings", readLimiter);
@@ -99,14 +119,14 @@ router.use(lytePlatformRouter);
 router.use("/vessels/platform", readLimiter);
 router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
-router.use(firestormRouter);
+router.use(aegisSocRouter);
 router.use(lyteRouter);
 router.use(dreamscapeRouter);
 router.use(readinessRouter);
 router.use("/admin", adminGuard);
 router.use(adminRouter);
 router.use(intelligenceRouter);
-router.use(incaRouter);
+router.use(aegisIntelRouter);
 router.use(bookingRouter);
 router.use(holdingsRouter);
 router.use(carlotaJoRouter);
@@ -137,12 +157,8 @@ router.use(terraDistressRouter);
 router.use("/terra", readLimiter);
 router.use(terraBrokerRouter);
 
-router.use("/msp", readLimiter);
-router.use(mspLiveRouter);
-router.use(mspRouter);
-router.use("/rosie", readLimiter);
-router.use(mspLiveRouter);
-router.use(mspRouter);
+router.use(aegisOpsLiveRouter);
+router.use(aegisOpsRouter);
 
 router.use("/terra", readLimiter);
 router.use(terraLiveRouter);
