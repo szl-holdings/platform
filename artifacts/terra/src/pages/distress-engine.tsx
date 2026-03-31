@@ -7,6 +7,7 @@ import {
   CheckCircle, ArrowUpRight, LinkIcon, Layers, Loader2
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { DataStateBadge } from "@workspace/shared-ui";
 import { distressedProperties, distressAlerts, distressStats, type DistressedProperty, type DistressType, type Borough } from "@/data/distress";
 import { Link } from "wouter";
 
@@ -459,17 +460,20 @@ export default function DistressEnginePage() {
                 <p className="text-[10px] text-terra-text-muted">NYC / NY State · {distressStats.totalProperties} properties · {distressStats.auctionImminentCount} auctions imminent</p>
               </div>
             </div>
-            <div className="flex items-center gap-1 bg-terra-surface border border-terra-border rounded-lg p-0.5">
-              {[
-                { mode: "split" as const, icon: Layers },
-                { mode: "list" as const, icon: List },
-                { mode: "map" as const, icon: MapPin },
-              ].map(({ mode, icon: Icon }) => (
-                <button key={mode} onClick={() => setViewMode(mode)}
-                  className={cn("p-1.5 rounded transition-colors", viewMode === mode ? "bg-terra-primary/20 text-terra-primary" : "text-terra-text-muted hover:text-terra-text")}>
-                  <Icon className="w-3.5 h-3.5" />
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <DataStateBadge state="seeded" label="Seed Data" />
+              <div className="flex items-center gap-1 bg-terra-surface border border-terra-border rounded-lg p-0.5">
+                {[
+                  { mode: "split" as const, icon: Layers },
+                  { mode: "list" as const, icon: List },
+                  { mode: "map" as const, icon: MapPin },
+                ].map(({ mode, icon: Icon }) => (
+                  <button key={mode} onClick={() => setViewMode(mode)}
+                    className={cn("p-1.5 rounded transition-colors", viewMode === mode ? "bg-terra-primary/20 text-terra-primary" : "text-terra-text-muted hover:text-terra-text")}>
+                    <Icon className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">

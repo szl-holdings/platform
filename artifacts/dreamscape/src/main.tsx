@@ -14,7 +14,7 @@ configurePlausible({
 initWebVitals("dreamscape", "/api/");
 
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary appName="Alloy Predictive Intelligence">
+  <ErrorBoundary appName="Dreamscape Creative Intelligence">
     <App />
   </ErrorBoundary>,
 );

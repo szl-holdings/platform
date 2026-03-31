@@ -1,7 +1,7 @@
 import { APPROVALS, WORKFLOWS, EVENTS, formatCurrency, getSeverityColor, getStateColor, type Severity } from "@workspace/shared-ui/core-observability-data";
 import { cn } from "@workspace/shared-ui/utils";
 import { Inbox, AlertTriangle, Clock, User, ArrowRight, Zap, ExternalLink } from "lucide-react";
-import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
+import { CommandModeSurface, type CommandModeSignal, DataStateBadge } from "@workspace/shared-ui";
 
 type ActionPriority = "urgent" | "high" | "medium";
 
@@ -129,9 +129,12 @@ export default function CommandInbox() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Inbox className="w-4 h-4" style={{ color: "#f59e0b" }} />
-          <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#f59e0b" }}>Lyte · Command Inbox</span>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <Inbox className="w-4 h-4" style={{ color: "#f59e0b" }} />
+            <span className="text-xs font-medium uppercase tracking-widest" style={{ color: "#f59e0b" }}>Lyte · Command Inbox</span>
+          </div>
+          <DataStateBadge state="demo" label="Demo Data" />
         </div>
         <h1 className="text-2xl font-bold text-white">Command Inbox</h1>
         <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Prioritized actions requiring human decisions — approvals, escalations, ownership gaps, and exception interventions.</p>

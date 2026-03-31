@@ -4,6 +4,7 @@ import { ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { Link } from "wouter";
 import { projects, experiments, models, insights, getResearchHealthScore } from "@/data/seed-data";
 import { cn } from "@workspace/shared-ui/utils";
+import { DataStateBadge } from "@workspace/shared-ui";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 
 function LiveClock() {
@@ -379,7 +380,10 @@ export default function Dashboard() {
             The nervous system of the SZL ecosystem — 9 domain agents active, 6 Lenses as sensory perception, Qhapaq Ñan intelligence mesh online.
           </p>
         </div>
-        <LiveClock />
+        <div className="flex items-center gap-3">
+          <DataStateBadge state="seeded" label="Seed Data" />
+          <LiveClock />
+        </div>
       </div>
 
       {/* Inca Mythology Cortex Banner */}

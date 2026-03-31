@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@workspace/shared-ui";
+import { apiFetch, DataStateBadge } from "@workspace/shared-ui";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, ExternalLink, RefreshCw, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 
@@ -156,9 +156,12 @@ export default function ExecutionRuns() {
           <h1 className="text-2xl font-bold text-white">Execution Runs</h1>
           <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>Live and historical workflow runs with retry logic and exception handling.</p>
         </div>
-        <button onClick={() => refetch()} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
-          <RefreshCw className="w-3 h-3" /> Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <DataStateBadge state={isError ? "stub" : "live"} pulse={!isError} />
+          <button onClick={() => refetch()} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
+            <RefreshCw className="w-3 h-3" /> Refresh
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-3">

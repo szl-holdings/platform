@@ -22,3 +22,4 @@ export { useRole, RoleGate, type UserRoles, type AppRole } from "./use-role";
 export { default as AuthGate, type AuthGateProps } from "./AuthGate";
 export { EcosystemMap, ECOSYSTEM_NODES, LAYER_CONFIG, CONNECTION_PAIRS, type EcosystemNode, type EcosystemMapProps } from "./ecosystem-map";
 export { CompanyKPIDashboard, DEMO_COMPANY_KPIS, type CompanyKPI, type CompanyKPIDashboardProps } from "./company-kpi-dashboard";
+export { DataStateBadge, DataStateBanner, type DataState } from "./data-state-badge";

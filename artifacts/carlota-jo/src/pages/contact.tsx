@@ -41,13 +41,38 @@ const CONVERSATION_PATHS = [
 export default function ContactPage() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", message: "", howHeard: "" });
 
   const activePath = CONVERSATION_PATHS.find(p => p.id === selectedPath);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const basePath = import.meta.env.BASE_URL || "/";
+      const apiBase = basePath.replace(/\/$/, "") + "/api";
+      const res = await fetch(`${apiBase}/cms/contact-submissions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          siteId: 3,
+          formKey: "carlota_jo_contact",
+          fullName: formData.name,
+          email: formData.email,
+          message: `[${selectedPath ?? "inquiry"}] ${formData.message}`,
+          metadataJson: { path: selectedPath, howHeard: formData.howHeard },
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSubmitted(true);
+    } catch {
+      setSubmitError("Something went wrong. Please try again or email Rosa directly.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -228,15 +253,19 @@ export default function ContactPage() {
                           onBlur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--color-stone-200)"; }}
                         />
                       </div>
+                      {submitError && (
+                        <p className="text-sm text-red-600 font-light" style={{ marginBottom: "0.5rem" }}>{submitError}</p>
+                      )}
                       <div>
                         <button
                           type="submit"
-                          className="px-8 py-3.5 text-[13px] font-medium tracking-[0.08em] transition-colors"
+                          disabled={submitting}
+                          className="px-8 py-3.5 text-[13px] font-medium tracking-[0.08em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                           style={{ color: "var(--color-cream)", background: "var(--color-gold)" }}
-                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
+                          onMouseEnter={(e) => { if (!submitting) (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
                           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
                         >
-                          Send confidential enquiry
+                          {submitting ? "Sending..." : "Send confidential enquiry"}
                         </button>
                         <p className="text-[11px] mt-3 font-light" style={{ color: "var(--color-stone-400)" }}>
                           Rosa responds personally within two business days.

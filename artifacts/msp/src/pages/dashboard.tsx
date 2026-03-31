@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@workspace/shared-ui/ui/skeleton";
 import { toast } from "sonner";
+import { DataStateBadge } from "@workspace/shared-ui";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string): Promise<T> {
@@ -405,13 +406,16 @@ export default function Dashboard() {
             {dashLoading ? "Loading metrics…" : `${activeClients} active clients · ${managedDevices} managed devices · All systems monitored`}
           </p>
         </div>
-        <button
-          onClick={() => { refetch(); toast.info("Refreshing metrics…"); }}
-          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg px-3 py-2"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Refresh
-        </button>
+        <div className="flex items-center gap-3">
+          <DataStateBadge state={isError ? "stub" : "demo"} pulse={!isError} />
+          <button
+            onClick={() => { refetch(); toast.info("Refreshing metrics…"); }}
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors border border-border rounded-lg px-3 py-2"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Hero Revenue Banner */}

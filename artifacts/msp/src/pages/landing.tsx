@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useEffect } from "react";
-import { ArrowRight, Shield, Monitor, Headphones, BarChart3, Clock, Users, ChevronDown, Zap, Globe, Lock, Server } from "lucide-react";
+import { ArrowRight, Shield, Monitor, Headphones, BarChart3, Clock, Users, ChevronDown, Zap, Globe, Lock, Server, CheckCircle } from "lucide-react";
 
 function ParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -173,11 +173,85 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="relative py-24 sm:py-32 border-t border-border/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-16">
+            <span className="text-primary font-semibold text-sm tracking-widest uppercase mb-4 block">Pricing</span>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold mb-4">
+              Simple, transparent <span className="gradient-text">pricing</span>
+            </h2>
+            <p className="text-muted-foreground text-base max-w-xl mx-auto">
+              Per-endpoint pricing that scales with your business. No hidden fees, no per-technician seats.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {[
+              {
+                tier: "Starter",
+                price: "$249",
+                period: "/mo",
+                desc: "For growing MSPs managing up to 100 endpoints.",
+                features: ["Up to 100 endpoints", "Service desk & ticketing", "Basic RMM monitoring", "Standard SLA tracking", "Email support"],
+                cta: "Start free trial",
+                highlight: false,
+              },
+              {
+                tier: "Professional",
+                price: "$699",
+                period: "/mo",
+                desc: "Full command center for established MSPs.",
+                features: ["Up to 500 endpoints", "All Starter features", "Full RMM console", "Revenue & MRR analytics", "Technician dispatch", "SOC integration", "Priority support"],
+                cta: "Start free trial",
+                highlight: true,
+              },
+              {
+                tier: "Enterprise",
+                price: "Custom",
+                period: "",
+                desc: "Unlimited scale with dedicated infrastructure.",
+                features: ["Unlimited endpoints", "All Professional features", "Dedicated infrastructure", "Custom SLA SLOs", "White-label option", "Dedicated CSM", "24/7 phone support"],
+                cta: "Contact sales",
+                highlight: false,
+              },
+            ].map((plan, i) => (
+              <motion.div key={plan.tier} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }} className={`relative rounded-2xl border p-8 flex flex-col ${plan.highlight ? "border-primary/60 bg-primary/5 shadow-xl shadow-primary/10" : "border-border/60 bg-card/50"}`}>
+                {plan.highlight && <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary rounded-full text-primary-foreground text-xs font-bold tracking-wide uppercase">Most Popular</div>}
+                <div className="mb-6">
+                  <h3 className="text-lg font-display font-bold text-foreground mb-2">{plan.tier}</h3>
+                  <div className="flex items-baseline gap-1 mb-3">
+                    <span className="text-3xl font-display font-extrabold text-foreground">{plan.price}</span>
+                    <span className="text-muted-foreground text-sm">{plan.period}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{plan.desc}</p>
+                </div>
+                <ul className="space-y-2 flex-1 mb-8">
+                  {plan.features.map(f => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href={`${import.meta.env.BASE_URL}dashboard`} className={`w-full text-center px-6 py-3 rounded-xl font-semibold text-sm transition-all ${plan.highlight ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/30" : "border border-border/60 text-foreground hover:border-primary/40 hover:bg-primary/5"}`}>
+                  {plan.cta}
+                </a>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 border-t border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            MSP Command Center &middot; Part of the <a href="/szl-holdings/" className="text-primary hover:underline">SZL Holdings</a> Platform
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+            <p>MSP Command Center &middot; Part of the <a href="/szl-holdings/" className="text-primary hover:underline">SZL Holdings</a> Platform</p>
+            <div className="flex items-center gap-6">
+              <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5" /> SOC 2 Compliant</span>
+              <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> RBAC + Encryption</span>
+              <span className="flex items-center gap-1.5"><Server className="w-3.5 h-3.5" /> 99.99% Uptime SLA</span>
+            </div>
+          </div>
         </div>
       </section>
     </div>
