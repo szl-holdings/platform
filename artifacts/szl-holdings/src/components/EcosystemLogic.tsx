@@ -226,15 +226,12 @@ export function EcosystemLogic() {
 
             <div className="space-y-2.5">
               {[
-                { entity: "SZL Holdings", role: "Ecosystem authority. Sets standards, holds the system together.", accent: "hsl(210,10%,60%)", accentRgb: "148,163,184" },
-                { entity: "Alloy", role: "Intelligence backbone. Powers every platform.", accent: "hsl(214,80%,65%)", accentRgb: "92,155,228" },
+                { entity: "Alloy", role: "Execution fabric. Cross-platform workflow orchestration and intelligence backbone.", accent: "hsl(214,80%,65%)", accentRgb: "92,155,228" },
                 { entity: "Lyte", role: "Business observability. Surfaces risk before it hits execution.", accent: "hsl(190,90%,55%)", accentRgb: "14,201,224" },
                 { entity: "Vessels", role: "Maritime command. Fleet intelligence in one layer.", accent: "hsl(205,85%,55%)", accentRgb: "38,164,218" },
-                { entity: "Aegis", role: "Unified defense. SOC, XDR, threat detection, managed ops.", accent: "hsl(232,68%,60%)", accentRgb: "92,102,204" },
-                { entity: "INCA", role: "AI research. Structured intelligence and decision workflows.", accent: "hsl(265,80%,60%)", accentRgb: "139,92,246" },
-                { entity: "Terra", role: "Business telemetry. Real-time KPI and health monitoring.", accent: "hsl(160,70%,45%)", accentRgb: "34,168,120" },
-                { entity: "Rosie", role: "Incident command. MSP operations and SLA management.", accent: "hsl(215,80%,55%)", accentRgb: "55,120,210" },
-                { entity: "Carlota Jo", role: "Premium service. High-trust execution support.", accent: "hsl(38,55%,58%)", accentRgb: "191,152,82" },
+                { entity: "Aegis", role: "Unified defense & intelligence. SOC, managed ops, and AI research in one platform.", accent: "hsl(232,68%,60%)", accentRgb: "92,102,204" },
+                { entity: "Terra", role: "Real estate intelligence. Portfolio tracking and deal pipeline.", accent: "hsl(160,70%,45%)", accentRgb: "34,168,120" },
+                { entity: "Carlota Jo", role: "Private advisory. High-trust execution support.", accent: "hsl(38,55%,58%)", accentRgb: "191,152,82" },
               ].map((tier, i) => (
                 <m.div
                   key={tier.entity}

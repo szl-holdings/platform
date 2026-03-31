@@ -183,7 +183,7 @@ export default function EcosystemPage() {
                 Product Registry
               </p>
               <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1rem", fontFamily: "var(--font-display)" }}>
-                One holding company.<br />One architecture. Ten platforms.
+                One holding company.<br />One architecture. Six platforms.
               </h1>
               <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "40rem" }}>
                 Every entity in the SZL ecosystem has a defined role, a defined audience, and a defined relationship to the whole. Nothing competes. Everything compounds.

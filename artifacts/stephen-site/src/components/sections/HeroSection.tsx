@@ -54,9 +54,7 @@ const ecosystemBrands = [
   { name: "Lyte", desc: "Business Observability", color: "hsl(190,90%,55%)" },
   { name: "Vessels", desc: "Maritime Intelligence", color: "hsl(205,85%,55%)" },
   { name: "Aegis", desc: "Defense & Intelligence", color: "hsl(232,68%,60%)" },
-  { name: "INCA", desc: "AI Research", color: "hsl(265,80%,60%)" },
   { name: "Terra", desc: "Real Estate Intelligence", color: "hsl(140,56%,40%)" },
-  { name: "Rosie", desc: "Incident Command", color: "hsl(356,70%,52%)" },
   { name: "Carlota Jo", desc: "Private Advisory", color: "hsl(38,55%,58%)" },
   { name: "Stephen Lutar", desc: "Founder Identity", color: "hsl(210,8%,56%)" },
 ];
@@ -109,7 +107,7 @@ export function HeroSection() {
               transition={{ duration: 0.7, delay: 0.38 }}
               className="text-[13px] sm:text-sm text-foreground/35 max-w-md mb-7 leading-relaxed font-light"
             >
-              Building command systems across maritime, cybersecurity, AI, and enterprise operations. Ten platforms. One compounding architecture.
+              Building command systems across maritime, cybersecurity, AI, and enterprise operations. Six platforms. One compounding architecture.
             </motion.p>
 
             <motion.div

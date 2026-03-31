@@ -21,7 +21,7 @@ const frameworks = [
     tag: "Execution",
     title: "Precision over throughput in high-stakes domains",
     text: "In maritime, cybersecurity, and AI operations, the cost of a wrong decision vastly exceeds the cost of a slow one. Systems in these domains should be built for correctness, auditability, and clear decision authority.",
-    metric: "Applied across: Vessels, Aegis, INCA",
+    metric: "Applied across: Vessels, Aegis, Terra",
   },
   {
     number: "04",

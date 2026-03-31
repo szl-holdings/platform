@@ -1,7 +1,7 @@
 # SZL Holdings Platform
 
 ## Overview
-A pnpm monorepo consisting of 10 live applications + 1 API server + 1 design sandbox. Shares a common PostgreSQL database, authentication system, and command-grade design system. Built for Stephen Lutar, founder of SZL Holdings. Follows a strict brand hierarchy: SZL Holdings, Alloy, Lyte, Vessels, Terra, Aegis, Carlota Jo, and Stephen Lutar's personal identity. The ecosystem provides command and intelligence platforms across maritime, cybersecurity, AI research, real estate, and enterprise operations. Note: Dreamscape was consolidated into Alloy as "Creative Workflows" (Task #177) — the standalone Dreamscape artifact is retired but API routes remain at `/api/dreamscape/*`. Rosie (MSP) and INCA were consolidated into Aegis (Security/Ops/Intel platform).
+A pnpm monorepo consisting of 8 active applications + 1 API server + 1 design sandbox. Shares a common PostgreSQL database, authentication system, and command-grade design system. Built for Stephen Lutar, founder of SZL Holdings. The ecosystem has 6 product platforms (Alloy, Lyte, Vessels, Aegis, Terra, Carlota Jo), 1 parent company site (SZL Holdings), and 1 founder identity site (Stephen Lutar). Provides command and intelligence systems across maritime, cybersecurity, AI, real estate, and enterprise operations. Note: Dreamscape was consolidated into Alloy as "Creative Workflows" (Task #177). Rosie (MSP) and INCA (AI Research) were consolidated into Aegis as modules — they are not standalone platforms.
 
 ## User Preferences
 I prefer detailed explanations.

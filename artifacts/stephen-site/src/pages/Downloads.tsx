@@ -4,7 +4,7 @@ import { Download, FileText, Presentation } from "lucide-react";
 
 const downloads = [
   { icon: FileText, title: "CV / Résumé", description: "Current CV covering enterprise software, AI infrastructure, and portfolio company experience.", format: "PDF", size: "85 KB" },
-  { icon: Presentation, title: "SZL Holdings overview", description: "Portfolio summary covering Vessels, INCA, Carlota Jo, and the shared infrastructure thesis.", format: "PDF", size: "1.2 MB" },
+  { icon: Presentation, title: "SZL Holdings overview", description: "Portfolio summary covering Alloy, Lyte, Vessels, Aegis, Terra, Carlota Jo, and the shared infrastructure thesis.", format: "PDF", size: "1.2 MB" },
   { icon: FileText, title: "AI explainability in enterprise operations", description: "Technical paper on the accountability and auditability requirements for enterprise AI deployments.", format: "PDF", size: "220 KB" },
 ];
 

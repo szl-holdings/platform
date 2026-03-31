@@ -17,10 +17,13 @@ const aboutLinks = [
 ];
 
 const ecosystemLinks = [
-  { label: "SZL Holdings", href: "/szl-holdings/" },
+  { label: "SZL Holdings", href: "/" },
   { label: "Alloy", href: "/alloy/" },
   { label: "Lyte", href: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels/" },
+  { label: "Aegis", href: "/firestorm/" },
+  { label: "Terra", href: "/terra/" },
+  { label: "Stephen Lutar", href: "/stephen/" },
 ];
 
 const legalLinks = [
