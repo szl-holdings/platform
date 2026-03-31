@@ -31,7 +31,7 @@ const Predictions = lazy(() => import("@/pages/predictions"));
 const Automations = lazy(() => import("@/pages/automations"));
 const BrokerOverview = lazy(() => import("@/pages/broker-overview"));
 const Ingestion = lazy(() => import("@/pages/ingestion"));
-const BeaconMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
+const TerraMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 
 function PageLoader() {
   return (
@@ -126,7 +126,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   if (!isAuthenticated) {
     return (
       <Suspense fallback={<div style={{ height: "100vh", background: "#080c14" }} />}>
-        <BeaconMarketingLanding onSignIn={login} />
+        <TerraMarketingLanding onSignIn={login} />
       </Suspense>
     );
   }

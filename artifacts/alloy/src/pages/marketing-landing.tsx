@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, GitBranch, Network, Shield, Activity, FileText, CheckCircle, Layers } from "lucide-react";
+import { ArrowRight, Zap, GitBranch, Network, Shield, Activity, FileText, CheckCircle, Layers, BarChart3 } from "lucide-react";
 
 const agentRoles = [
   { name: "Signal Collector", role: "Acquires raw data from operational systems, APIs, and event streams", color: "#00d4ff" },
@@ -33,6 +33,14 @@ const outputs = [
   "Executive briefings and summaries",
 ];
 
+const alloyNavLinks = [
+  { label: "Platform", href: "#platform" },
+  { label: "Pipeline", href: "#pipeline" },
+  { label: "Agents", href: "#agents" },
+  { label: "Governance", href: "#governance" },
+  { label: "Integrations", href: "#integrations" },
+];
+
 export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
   return (
     <div style={{ minHeight: "100vh", background: "#080c14", color: "#e2e8f0", fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif" }}>
@@ -51,6 +59,19 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
             </div>
             <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em", color: "#e2e8f0" }}>Alloy</span>
             <span style={{ fontSize: "10px", fontFamily: "monospace", color: "#475569", marginLeft: "4px" }}>by SZL Holdings</span>
+          </div>
+          <div style={{ display: "none", alignItems: "center", gap: "28px" }} className="alloy-nav-links">
+            {alloyNavLinks.map(link => (
+              <a
+                key={link.label}
+                href={link.href}
+                style={{ fontSize: "13px", color: "#64748b", textDecoration: "none", transition: "color 0.15s" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#94a3b8"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <a href="/" style={{ fontSize: "13px", color: "#64748b", textDecoration: "none" }}
@@ -133,7 +154,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* What Alloy Is */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
+      <section id="platform" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "start" }} className="alloy-grid">
             <div>
@@ -217,7 +238,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* How It Works — Pipeline */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
+      <section id="pipeline" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#475569", marginBottom: "0.75rem" }}>How It Works</p>
           <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "2.5rem" }}>
@@ -246,7 +267,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* Agent Roles */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(255,255,255,0.01)" }}>
+      <section id="agents" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(255,255,255,0.01)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#475569", marginBottom: "0.75rem" }}>Agent Roles</p>
           <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "2.5rem" }}>
@@ -310,7 +331,7 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* Governance */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(255,255,255,0.01)" }}>
+      <section id="governance" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(255,255,255,0.01)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }} className="gov-grid">
             <div>
@@ -338,6 +359,63 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Stats */}
+      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "2.5rem 0", background: "rgba(0,212,255,0.02)" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "2rem" }} className="alloy-stats-grid">
+            {[
+              { value: "4.2M+", label: "Signals processed / day" },
+              { value: "1,800+", label: "Workflows orchestrated" },
+              { value: "47", label: "Agent deployments" },
+              { value: "99.97%", label: "Workflow completion rate" },
+            ].map((stat) => (
+              <div key={stat.label} style={{ textAlign: "center" }}>
+                <p style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", fontWeight: 700, fontFamily: "monospace", color: "#00d4ff", marginBottom: "4px" }}>{stat.value}</p>
+                <p style={{ fontSize: "11px", color: "#475569", letterSpacing: "0.06em", textTransform: "uppercase" }}>{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Integration Ecosystem */}
+      <section id="integrations" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
+          <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#475569", marginBottom: "0.75rem" }}>Integration Ecosystem</p>
+          <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "0.75rem" }}>
+            Connect to anything.
+          </h2>
+          <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "#64748b", marginBottom: "2.5rem", maxWidth: "32rem" }}>
+            Alloy connects to the systems your business already runs on — acquiring signals from any source and routing outputs to any downstream target.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }} className="integrations-grid">
+            {[
+              { category: "Data Sources", items: ["REST APIs", "Webhooks", "Database connectors", "Event streams", "File ingestion", "Custom adapters"] },
+              { category: "Enterprise Systems", items: ["CRM platforms", "ERP systems", "Task management", "Identity providers", "Cloud storage", "BI / Analytics tools"] },
+              { category: "Output Targets", items: ["Email & notifications", "Slack / Teams", "API callbacks", "Database writes", "Audit log systems", "Report generation"] },
+            ].map((group) => (
+              <div
+                key={group.category}
+                style={{
+                  padding: "1.5rem", borderRadius: "6px",
+                  background: "rgba(0,212,255,0.025)", border: "1px solid rgba(0,212,255,0.08)",
+                }}
+              >
+                <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#00d4ff", marginBottom: "1rem" }}>{group.category}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {group.items.map((item) => (
+                    <div key={item} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <CheckCircle size={11} style={{ color: "#00d4ff", opacity: 0.6, flexShrink: 0 }} />
+                      <span style={{ fontSize: "12.5px", color: "#94a3b8" }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -381,19 +459,77 @@ export default function AlloyMarketingLanding({ onSignIn }: { onSignIn?: () => v
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "2rem 1.5rem", textAlign: "center" }}>
-        <p style={{ fontSize: "12px", color: "#334155", fontFamily: "monospace" }}>
-          © {new Date().getFullYear()} Alloy · SZL Holdings · inquiries@szlholdings.com
-        </p>
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "3rem 1.5rem" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "3rem", marginBottom: "2.5rem" }} className="alloy-footer-grid">
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <div style={{ width: "24px", height: "24px", borderRadius: "5px", background: "rgba(0,212,255,0.12)", border: "1px solid rgba(0,212,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Zap size={12} style={{ color: "#00d4ff" }} />
+                </div>
+                <span style={{ fontWeight: 700, fontSize: "14px", color: "#e2e8f0" }}>Alloy</span>
+              </div>
+              <p style={{ fontSize: "12px", color: "#334155", lineHeight: 1.65 }}>Intelligence orchestration engine by SZL Holdings. Signal acquisition, reasoning, and workflow automation across the entire ecosystem.</p>
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#334155", marginBottom: "1rem" }}>Platform</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {["Execution Runs", "Workflow Orchestration", "Connector Mesh", "Governance Audit"].map(l => (
+                  <span key={l} style={{ fontSize: "13px", color: "#334155", cursor: "pointer", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#334155"; }}>
+                    {l}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#334155", marginBottom: "1rem" }}>Company</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {["About", "Security", "Compliance", "Contact"].map(l => (
+                  <span key={l} style={{ fontSize: "13px", color: "#334155", cursor: "pointer", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#334155"; }}>
+                    {l}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#334155", marginBottom: "1rem" }}>Ecosystem</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {["SZL Holdings", "Terra", "Lyte", "Vessels", "Firestorm"].map(l => (
+                  <span key={l} style={{ fontSize: "13px", color: "#334155", cursor: "pointer", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#334155"; }}>
+                    {l}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+            <p style={{ fontSize: "11px", color: "#1e293b", fontFamily: "monospace" }}>© {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+            <p style={{ fontSize: "11px", color: "#1e293b", fontFamily: "monospace" }}>inquiries@szlholdings.com</p>
+          </div>
+        </div>
       </footer>
 
       <style>{`
+        @media (min-width: 768px) {
+          .alloy-nav-links { display: flex !important; }
+        }
         @media (max-width: 768px) {
           .alloy-grid, .powers-grid, .outputs-grid, .gov-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
           .pipeline-grid { grid-template-columns: 1fr 1fr !important; }
+          .alloy-stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .integrations-grid { grid-template-columns: 1fr !important; }
+          .alloy-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 2rem !important; }
         }
         @media (max-width: 480px) {
           .pipeline-grid { grid-template-columns: 1fr !important; }
+          .alloy-stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .alloy-footer-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

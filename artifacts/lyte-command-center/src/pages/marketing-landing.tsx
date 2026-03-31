@@ -1,4 +1,4 @@
-import { ArrowRight, Zap, Activity, CheckSquare, Users, AlertOctagon, Shield, TrendingDown, Clock, Eye } from "lucide-react";
+import { ArrowRight, Zap, Activity, CheckSquare, Users, AlertOctagon, Shield, Eye } from "lucide-react";
 
 const useCases = [
   { title: "Approval Latency", desc: "Identify which approvals are stalling, by whom, and for how long — before the delay compounds." },
@@ -6,7 +6,7 @@ const useCases = [
   { title: "Workflow Friction", desc: "Map where handoffs break, where steps bottleneck, and what's preventing clean execution." },
   { title: "Escalation Detection", desc: "Identify what needs to escalate, to whom, and why — with Alloy-generated rationale attached." },
   { title: "Readiness Tracking", desc: "Structured view of execution readiness across every team, milestone, and initiative." },
-  { title: "Decision Velocity", desc: "Measure how quickly decisions are made, who's blocking, and where the friction lives." },
+  { title: "Execution Drift", desc: "Detect when teams, timelines, or processes are quietly departing from plan — before drift becomes failure." },
 ];
 
 const roleViews = [
@@ -30,6 +30,14 @@ const roleViews = [
   },
 ];
 
+const lyteNavLinks = [
+  { label: "Platform", href: "#platform" },
+  { label: "Use Cases", href: "#use-cases" },
+  { label: "Roles", href: "#roles" },
+  { label: "Readiness", href: "#readiness" },
+  { label: "Pricing", href: "#pricing" },
+];
+
 export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
   return (
     <div style={{ minHeight: "100vh", background: "#080c14", color: "#e2e8f0", fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif" }}>
@@ -48,6 +56,19 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
             </div>
             <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em", color: "#e2e8f0" }}>Lyte</span>
             <span style={{ fontSize: "10px", fontFamily: "monospace", color: "#475569", marginLeft: "4px" }}>by SZL Holdings</span>
+          </div>
+          <div style={{ display: "none", alignItems: "center", gap: "28px" }} className="lyte-nav-links">
+            {lyteNavLinks.map(link => (
+              <a
+                key={link.label}
+                href={link.href}
+                style={{ fontSize: "13px", color: "#64748b", textDecoration: "none", transition: "color 0.15s" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#94a3b8"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <a href="/" style={{ fontSize: "13px", color: "#64748b", textDecoration: "none" }}
@@ -124,7 +145,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
       </section>
 
       {/* What Lyte Does */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
+      <section id="platform" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "start" }} className="lyte-grid">
             <div>
@@ -211,7 +232,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
       </section>
 
       {/* Role-Based Command */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
+      <section id="roles" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#475569", marginBottom: "0.75rem" }}>Role-Based Command</p>
           <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "0.75rem" }}>
@@ -254,7 +275,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
       </section>
 
       {/* Use Cases */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(255,255,255,0.01)" }}>
+      <section id="use-cases" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0", background: "rgba(255,255,255,0.01)" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
           <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#475569", marginBottom: "0.75rem" }}>Use Cases</p>
           <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "2.5rem" }}>
@@ -289,7 +310,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
       </section>
 
       {/* Why It Matters */}
-      <section style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
+      <section id="readiness" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "5rem 0" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", padding: "0 1.5rem" }}>
           <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#475569", marginBottom: "0.75rem" }}>Why It Matters</p>
           <h2 style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", fontWeight: 700, letterSpacing: "-0.026em", color: "#f1f5f9", lineHeight: 1.08, marginBottom: "1.25rem" }}>
@@ -301,6 +322,26 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
           <p style={{ fontSize: "0.9375rem", lineHeight: 1.75, color: "#64748b" }}>
             Lyte makes execution visible. It makes accountability structural. And it routes the right decisions to the right people — before the damage is done.
           </p>
+        </div>
+      </section>
+
+      {/* Platform Stats / Plans */}
+      <section id="pricing" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)", padding: "2.5rem 0", background: "rgba(245,158,11,0.015)" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.5rem" }}>
+          <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#475569", marginBottom: "0.5rem", textAlign: "center" }}>Platform · Available to SZL Holdings operators · Contact for access</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "2rem" }} className="lyte-stats-grid">
+            {[
+              { value: "2.8M+", label: "Signals monitored / day" },
+              { value: "340+", label: "Actions routed / week" },
+              { value: "< 4hr", label: "Avg resolution time" },
+              { value: "91%", label: "On-time decision rate" },
+            ].map((stat) => (
+              <div key={stat.label} style={{ textAlign: "center" }}>
+                <p style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", fontWeight: 700, fontFamily: "monospace", color: "#f59e0b", marginBottom: "4px" }}>{stat.value}</p>
+                <p style={{ fontSize: "11px", color: "#475569", letterSpacing: "0.06em", textTransform: "uppercase" }}>{stat.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -362,15 +403,73 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "2rem 1.5rem", textAlign: "center" }}>
-        <p style={{ fontSize: "12px", color: "#334155", fontFamily: "monospace" }}>
-          © {new Date().getFullYear()} Lyte · SZL Holdings · inquiries@szlholdings.com
-        </p>
+      <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "3rem 1.5rem" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "3rem", marginBottom: "2.5rem" }} className="lyte-footer-grid">
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <div style={{ width: "24px", height: "24px", borderRadius: "5px", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Zap size={12} style={{ color: "#f59e0b" }} />
+                </div>
+                <span style={{ fontWeight: 700, fontSize: "14px", color: "#e2e8f0" }}>Lyte</span>
+              </div>
+              <p style={{ fontSize: "12px", color: "#334155", lineHeight: 1.65 }}>Business observability and command platform by SZL Holdings. Signal visibility, action routing, and execution readiness for operators.</p>
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#334155", marginBottom: "1rem" }}>Platform</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {["Command Inbox", "Signals Feed", "Action Center", "Ownership Map", "Escalation Center"].map(l => (
+                  <span key={l} style={{ fontSize: "13px", color: "#334155", cursor: "pointer", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#334155"; }}>
+                    {l}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#334155", marginBottom: "1rem" }}>Company</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {["About", "Security", "Compliance", "Contact"].map(l => (
+                  <span key={l} style={{ fontSize: "13px", color: "#334155", cursor: "pointer", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#334155"; }}>
+                    {l}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#334155", marginBottom: "1rem" }}>Ecosystem</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {["SZL Holdings", "Alloy", "Terra", "Vessels", "Firestorm"].map(l => (
+                  <span key={l} style={{ fontSize: "13px", color: "#334155", cursor: "pointer", transition: "color 0.15s" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#64748b"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#334155"; }}>
+                    {l}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+            <p style={{ fontSize: "11px", color: "#1e293b", fontFamily: "monospace" }}>© {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+            <p style={{ fontSize: "11px", color: "#1e293b", fontFamily: "monospace" }}>inquiries@szlholdings.com</p>
+          </div>
+        </div>
       </footer>
 
       <style>{`
+        @media (min-width: 768px) {
+          .lyte-nav-links { display: flex !important; }
+        }
         @media (max-width: 768px) {
           .lyte-grid, .flow-grid, .roles-grid, .usecases-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          .lyte-stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .lyte-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 2rem !important; }
+        }
+        @media (max-width: 480px) {
+          .lyte-stats-grid, .lyte-footer-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>
