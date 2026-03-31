@@ -76,38 +76,65 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <nav className="px-2 py-3 flex-1 flex flex-col gap-3 overflow-y-auto">
-          {NAV_SECTIONS.map((section) => (
-            <div key={section.title}>
-              <p className="text-[9px] font-medium uppercase tracking-widest mb-1.5 px-3" style={{ color: "rgba(255,255,255,0.25)" }}>{section.title}</p>
-              <div className="flex flex-col gap-0.5">
-                {section.items.map((item) => {
-                  const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
-                  const isDistress = item.highlight;
-                  return (
-                    <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                      isActive
-                        ? isDistress
-                          ? "text-orange-400"
-                          : "text-[#c8a060]"
-                        : isDistress
-                        ? "text-orange-400/70 hover:text-orange-400 hover:bg-red-500/5"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
-                    )} style={{ background: isActive ? (isDistress ? "rgba(249,115,22,0.08)" : "rgba(160,120,72,0.08)") : undefined }}>
-                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: isDistress ? "#f97316" : "#c8a060" }} />}
-                      <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? (isDistress ? "text-orange-400" : "text-[#c8a060]") : "text-slate-500 group-hover:text-slate-300")} />
-                      <span>{item.label}</span>
-                      {isDistress && !isActive && (
-                        <span className="ml-auto text-[8px] px-1 py-0.5 rounded font-bold uppercase" style={{ color: "#f97316", background: "rgba(249,115,22,0.12)" }}>LIVE</span>
-                      )}
-                    </Link>
-                  );
-                })}
+        <div className="flex-1 min-h-0 flex flex-col">
+          <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-3 overflow-y-auto">
+            {NAV_SECTIONS.map((section) => (
+              <div key={section.title}>
+                <p className="text-[9px] font-medium uppercase tracking-widest mb-1.5 px-3" style={{ color: "rgba(255,255,255,0.25)" }}>{section.title}</p>
+                <div className="flex flex-col gap-0.5">
+                  {section.items.map((item) => {
+                    const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
+                    const isDistress = item.highlight;
+                    return (
+                      <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
+                        "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                        isActive
+                          ? isDistress
+                            ? "text-orange-400"
+                            : "text-[#c8a060]"
+                          : isDistress
+                          ? "text-orange-400/70 hover:text-orange-400 hover:bg-red-500/5"
+                          : "text-slate-400 hover:text-white hover:bg-white/5"
+                      )} style={{ background: isActive ? (isDistress ? "rgba(249,115,22,0.08)" : "rgba(160,120,72,0.08)") : undefined }}>
+                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: isDistress ? "#f97316" : "#c8a060" }} />}
+                        <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? (isDistress ? "text-orange-400" : "text-[#c8a060]") : "text-slate-500 group-hover:text-slate-300")} />
+                        <span>{item.label}</span>
+                        {isDistress && !isActive && (
+                          <span className="ml-auto text-[8px] px-1 py-0.5 rounded font-bold uppercase" style={{ color: "#f97316", background: "rgba(249,115,22,0.12)" }}>LIVE</span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(200,160,96,0.04)", border: "1px solid rgba(200,160,96,0.08)" }}>
+            <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(200,160,96,0.4)" }}>Portfolio Pulse</div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active listings</span>
+                <span className="text-[9px] font-mono" style={{ color: "#c8a060" }}>24 live</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Distress signals</span>
+                <span className="text-[9px] font-mono" style={{ color: "#f97316" }}>3 flagged</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Portfolio value</span>
+                <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>$2.4B</span>
               </div>
             </div>
-          ))}
-        </nav>
+            <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+              <div className="h-full rounded-full" style={{ width: "81%", background: "linear-gradient(90deg, #c8a060, #a07848)" }} />
+            </div>
+            <div className="flex justify-between mt-0.5">
+              <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Occupancy</span>
+              <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>81%</span>
+            </div>
+          </div>
+        </div>
 
         <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2 text-[10px] mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>

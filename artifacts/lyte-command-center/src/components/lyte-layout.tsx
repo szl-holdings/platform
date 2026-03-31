@@ -131,23 +131,50 @@ export function LyteLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <nav className="px-2 py-3 flex-1 flex flex-col gap-0.5 overflow-y-auto">
-          {NAV.map((item) => {
-            const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
-            return (
-              <Link key={item.href} href={item.href} className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                isActive ? "text-amber-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-              )} style={{ background: isActive ? "rgba(245,158,11,0.08)" : undefined }}>
-                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#f59e0b" }} />}
-                <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-amber-400" : "text-slate-500 group-hover:text-slate-300")} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+        <div className="flex-1 min-h-0 flex flex-col">
+          <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
+            {NAV.map((item) => {
+              const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
+              return (
+                <Link key={item.href} href={item.href} className={cn(
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                  isActive ? "text-amber-400" : "text-slate-400 hover:text-white hover:bg-white/5"
+                )} style={{ background: isActive ? "rgba(245,158,11,0.08)" : undefined }}>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#f59e0b" }} />}
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-amber-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
 
-          <AdminNavSection location={location} />
-        </nav>
+            <AdminNavSection location={location} />
+          </nav>
+
+          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.08)" }}>
+            <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(245,158,11,0.4)" }}>Command Pulse</div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Urgent signals</span>
+                <span className="text-[9px] font-mono" style={{ color: "#ef4444" }}>5 unresolved</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Pending actions</span>
+                <span className="text-[9px] font-mono" style={{ color: "#f59e0b" }}>12 queued</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Gaps flagged</span>
+                <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>8 open</span>
+              </div>
+            </div>
+            <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+              <div className="h-full rounded-full" style={{ width: "38%", background: "linear-gradient(90deg, #ef4444, #f59e0b)" }} />
+            </div>
+            <div className="flex justify-between mt-0.5">
+              <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Resolution rate</span>
+              <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>38%</span>
+            </div>
+          </div>
+        </div>
 
         <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2 text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>

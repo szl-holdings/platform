@@ -348,7 +348,8 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         </div>
 
         {/* Nav Content */}
-        <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
+        <div className="flex-1 min-h-0 flex flex-col">
+        <nav className="flex-1 min-h-0 px-2 py-2 space-y-0.5 overflow-y-auto">
           {activeModule === "security" && (
             <>
               {renderNavItems(securityNavPrimary)}
@@ -484,6 +485,72 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
             </>
           )}
         </nav>
+
+        <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{
+          background: activeModule === "security" ? "rgba(239,68,68,0.04)" : activeModule === "operations" ? "rgba(59,130,246,0.04)" : "rgba(139,92,246,0.04)",
+          border: `1px solid ${activeModule === "security" ? "rgba(239,68,68,0.1)" : activeModule === "operations" ? "rgba(59,130,246,0.1)" : "rgba(139,92,246,0.1)"}`,
+        }}>
+          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: activeModule === "security" ? "rgba(239,68,68,0.5)" : activeModule === "operations" ? "rgba(59,130,246,0.5)" : "rgba(139,92,246,0.5)" }}>
+            {activeModule === "security" ? "Threat Status" : activeModule === "operations" ? "Ops Status" : "Intel Status"}
+          </div>
+          <div className="space-y-1.5">
+            {activeModule === "security" && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Threat level</span>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    <span className="text-[9px] font-mono text-amber-400">ELEVATED</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Open incidents</span>
+                  <span className="text-[9px] font-mono text-red-400">7 active</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>IOCs tracked</span>
+                  <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>142 feeds</span>
+                </div>
+              </>
+            )}
+            {activeModule === "operations" && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Systems online</span>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className="text-[9px] font-mono text-emerald-400">98.7%</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active playbooks</span>
+                  <span className="text-[9px] font-mono text-blue-400">14 running</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Alert queue</span>
+                  <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>3 pending</span>
+                </div>
+              </>
+            )}
+            {activeModule === "intelligence" && (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>OSINT sources</span>
+                  <span className="text-[9px] font-mono text-violet-400">89 active</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Cortex jobs</span>
+                  <span className="text-[9px] font-mono text-violet-400">6 running</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Reports ready</span>
+                  <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>11 queued</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        </div>
 
         {/* Footer */}
         <div className="px-4 py-3 border-t border-white/5 space-y-2">

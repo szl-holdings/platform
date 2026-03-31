@@ -213,7 +213,8 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
         </div>
       </Link>
 
-      <nav className="flex-1 px-1.5 py-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 min-h-0 flex flex-col">
+      <nav className="flex-1 min-h-0 px-1.5 py-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
         {primaryNavItems.map(({ path, label, icon: Icon }) => {
           const isActive = location === path || location.startsWith(path + "/");
           return (
@@ -290,6 +291,37 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
           </div>
         )}
       </nav>
+
+      {expanded && (
+        <div className="mt-auto shrink-0 px-3 py-3 mx-1.5 mb-2 rounded-lg" style={{ background: "rgba(14,165,233,0.04)", border: "1px solid rgba(14,165,233,0.08)" }}>
+          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(14,165,233,0.4)" }}>Fleet Status</div>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Vessels tracked</span>
+              <span className="text-[9px] font-mono" style={{ color: "#38bdf8" }}>1,247 live</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Distress signals</span>
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                <span className="text-[9px] font-mono text-red-400">2 active</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Zones monitored</span>
+              <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>18 regions</span>
+            </div>
+          </div>
+          <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div className="h-full rounded-full" style={{ width: "94%", background: "linear-gradient(90deg, #0ea5e9, #38bdf8)" }} />
+          </div>
+          <div className="flex justify-between mt-0.5">
+            <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>AIS coverage</span>
+            <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>94%</span>
+          </div>
+        </div>
+      )}
+      </div>
 
       <div className="px-1.5 py-3 border-t border-sky-500/10 space-y-2">
         {expanded && (

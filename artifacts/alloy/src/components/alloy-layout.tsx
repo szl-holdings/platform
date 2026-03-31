@@ -79,37 +79,67 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <nav className="px-2 py-3 flex-1 flex flex-col gap-0.5 overflow-y-auto">
-          <div className="text-[9px] uppercase tracking-widest px-3 mb-1 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Automation</div>
-          {NAV.map((item) => {
-            const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
-            return (
-              <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-              )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
-                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
-                <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+        <div className="flex-1 min-h-0 flex flex-col">
+          <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Automation</div>
+            {NAV.map((item) => {
+              const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
+              return (
+                <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                  isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
+                )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
 
-          <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Creative Workflows</div>
-          {CREATIVE_NAV.map((item) => {
-            const isActive = item.href === "/creative" ? location === "/creative" : location.startsWith(item.href);
-            return (
-              <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
-              )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
-                {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
-                <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Creative Workflows</div>
+            {CREATIVE_NAV.map((item) => {
+              const isActive = item.href === "/creative" ? location === "/creative" : location.startsWith(item.href);
+              return (
+                <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                  isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
+                )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.08)" }}>
+          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(0,212,255,0.4)" }}>Runtime Health</div>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Connector Mesh</span>
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[9px] font-mono" style={{ color: "#10b981" }}>All healthy</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active runs</span>
+              <span className="text-[9px] font-mono" style={{ color: "#00d4ff" }}>14 running</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Queue depth</span>
+              <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>8 pending</span>
+            </div>
+          </div>
+          <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div className="h-full rounded-full" style={{ width: "72%", background: "linear-gradient(90deg, #00d4ff, #10b981)" }} />
+          </div>
+          <div className="flex justify-between mt-0.5">
+            <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Capacity</span>
+            <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>72%</span>
+          </div>
+          </div>
+        </div>
 
         <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2 text-[10px] mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>
