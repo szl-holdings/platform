@@ -191,7 +191,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     );
   }
 
-  if (!isAuthenticated) {
+  const params = new URLSearchParams(window.location.search);
+  const forceWebsite = params.get("view") === "website";
+
+  if (!isAuthenticated || forceWebsite) {
     return (
       <Suspense fallback={<div style={{ height: "100vh", background: "#080c14" }} />}>
         <LyteMarketingLanding onSignIn={login} />
