@@ -1,3 +1,6 @@
+import { publish, WS_CHANNELS } from "../../lib/websocket.js";
+import { pubsub, CARLOTA_EVENTS } from "../../lib/pubsub-bridge.js";
+
 export const carlotaJoTypeDefs = `#graphql
   type CarlotaService {
     id: ID!
@@ -46,6 +49,10 @@ export const carlotaJoTypeDefs = `#graphql
 
   extend type Mutation {
     createCarlotaInquiry(name: String!, email: String!, service: String!, message: String!): CarlotaInquiry!
+  }
+
+  extend type Subscription {
+    carlotaInquiryCreated: CarlotaInquiry!
   }
 `;
 
@@ -127,10 +134,23 @@ export const carlotaJoResolvers = {
           .insert(carlotaInquiriesTable)
           .values({ name: args.name, email: args.email, service: args.service, message: args.message, status: "new" })
           .returning();
-        return rows[0];
+        const inquiry = rows[0];
+        publish(WS_CHANNELS.BOOKINGS, "inquiry-created", {
+          id: inquiry.id,
+          name: inquiry.name,
+          service: inquiry.service,
+          status: inquiry.status,
+        });
+        pubsub.publish(CARLOTA_EVENTS.INQUIRY_CREATED, { carlotaInquiryCreated: inquiry });
+        return inquiry;
       } catch (err) {
         throw new Error(`Failed to create inquiry: ${err}`);
       }
+    },
+  },
+  Subscription: {
+    carlotaInquiryCreated: {
+      subscribe: () => pubsub.asyncIterableIterator(CARLOTA_EVENTS.INQUIRY_CREATED),
     },
   },
 };

@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/shared-ui/ui/card";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Brain, Activity, Globe, AlertTriangle, FileText, Radio, TrendingUp, Clock, Newspaper, Zap, Shield } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRealtimeChannel } from "@workspace/shared-ui";
 
 const API_BASE = "/api";
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
@@ -37,6 +38,14 @@ export default function IntelligencePage() {
   const { data: opsHeatmap = [] } = useQuery({ queryKey: ["intel-ops-heatmap"], queryFn: () => apiFetch<any[]>("/intelligence/ops-heatmap"), refetchInterval: 60000 });
   const { data: news = [] } = useQuery({ queryKey: ["intel-news"], queryFn: () => apiFetch<any[]>("/intelligence/news"), refetchInterval: 120000 });
   const { data: sitRep } = useQuery({ queryKey: ["intel-sitrep"], queryFn: () => apiFetch<any>("/intelligence/ai/situation-report", { method: "POST", body: JSON.stringify({}) }), refetchInterval: 600000, retry: 1 });
+
+  const qcIntel = useQueryClient();
+  const { lastMessage: wsLyteMsg } = useRealtimeChannel("lyte-metrics");
+  useEffect(() => {
+    if (!wsLyteMsg) return;
+    qcIntel.invalidateQueries({ queryKey: ["intel-anomalies"] });
+    qcIntel.invalidateQueries({ queryKey: ["intel-ops-heatmap"] });
+  }, [wsLyteMsg, qcIntel]);
 
   const criticalAnomalies = anomalies.filter((a: any) => a.severity === "critical").length;
 

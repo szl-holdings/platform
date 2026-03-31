@@ -13,7 +13,7 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
-import { PrivateAppGuard } from "@workspace/shared-ui";
+import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { DemoModeProvider } from "@workspace/shared-ui";
@@ -445,6 +445,7 @@ const vesselsShortcuts: KeyboardShortcut[] = [
 
 function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { status: wsStatus } = useRealtimeChannel("vessel-positions");
   return (
     <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#0ea5e9">
       <div className="flex flex-col h-screen bg-[#060e1a]">
@@ -461,6 +462,7 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
                 <Menu className="w-4 h-4" />
               </button>
               <span className="text-[10px] font-mono text-sky-400/30 ml-2 uppercase tracking-wider">Vessels Maritime Intelligence</span>
+              <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
             </div>
             <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
               <DashboardRouter />

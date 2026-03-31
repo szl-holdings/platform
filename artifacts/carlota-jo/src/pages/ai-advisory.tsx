@@ -4,6 +4,7 @@ import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Brain, Send, BookOpen, TrendingUp, Lightbulb, Search, Sparkles, Loader2, Download, FileText } from "lucide-react";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { CarlotaGraphQLPanel } from "@/components/graphql-data-panel";
+import { useRealtimeChannel } from "@workspace/shared-ui";
 
 async function downloadEngagementSummary(
   insights: Array<{ title: string; type: string; summary: string; confidence: number; tags: string[] }>,
@@ -84,7 +85,16 @@ export default function AIAdvisory() {
   const [streaming, setStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const [newInquiryAlert, setNewInquiryAlert] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { lastMessage: wsBookingMsg } = useRealtimeChannel("bookings");
+  useEffect(() => {
+    if (!wsBookingMsg) return;
+    setNewInquiryAlert(true);
+    const t = setTimeout(() => setNewInquiryAlert(false), 8000);
+    return () => clearTimeout(t);
+  }, [wsBookingMsg]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -160,6 +170,12 @@ export default function AIAdvisory() {
             AI Advisory Assistant
           </h1>
           <p className="text-sm text-muted-foreground mt-1">AI-augmented strategic research and analysis — synthesizing market intelligence, competitive dynamics, and engagement data into conviction-grade recommendations</p>
+          {newInquiryAlert && (
+            <div className="mt-2 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border" style={{ background: "rgba(16,185,129,0.1)", borderColor: "rgba(16,185,129,0.3)", color: "#10b981" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+              New inquiry received via live booking channel
+            </div>
+          )}
         </div>
         <button
           onClick={async () => {

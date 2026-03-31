@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
@@ -8,8 +8,9 @@ import {
   CheckCircle2, XCircle, Minus, RefreshCw
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-import { CommandModeSurface, type CommandModeSignal } from "@workspace/shared-ui";
+import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@workspace/shared-ui";
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
+import { useQueryClient } from "@tanstack/react-query";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
@@ -266,6 +267,15 @@ export default function CommandOverviewPage() {
   const { fleetExceptions } = useFleetExceptions();
   const { voyageEconomics } = useVoyages();
   const { maintenanceItems } = useMaintenance();
+
+  const qcVessels = useQueryClient();
+  const { lastMessage: wsVesselMsg } = useRealtimeChannel("vessel-positions");
+  useEffect(() => {
+    if (!wsVesselMsg) return;
+    qcVessels.invalidateQueries({ queryKey: ["vessels"] });
+    qcVessels.invalidateQueries({ queryKey: ["vessels-dashboard"] });
+    qcVessels.invalidateQueries({ queryKey: ["fleet-exceptions"] });
+  }, [wsVesselMsg, qcVessels]);
 
   const [activeTab, setActiveTab] = useState<TabId>(
     user.role === "exec" ? "exec" : user.role === "compliance" ? "commercial" : "ops"

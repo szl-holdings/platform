@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { DemoModeProvider } from "@workspace/shared-ui";
+import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -699,6 +699,7 @@ const aegisShortcuts: KeyboardShortcut[] = [
 
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
 
   return (
     <PowerUserProvider shortcuts={aegisShortcuts} appName="Aegis" accentColor="#3b82f6">
@@ -715,6 +716,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
                 <Menu className="w-4 h-4" />
               </button>
               <span className="text-[10px] font-mono text-blue-400/40 ml-2">Aegis — Unified Defense & Intelligence</span>
+              <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
             </div>
             <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
               <AppRouter />

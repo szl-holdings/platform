@@ -1,4 +1,6 @@
 import { parseIntId } from "../utils.js";
+import { publish, WS_CHANNELS } from "../../lib/websocket.js";
+import { pubsub, TERRA_EVENTS } from "../../lib/pubsub-bridge.js";
 
 export const terraTypeDefs = `#graphql
   type TerraProperty {
@@ -62,6 +64,10 @@ export const terraTypeDefs = `#graphql
   extend type Mutation {
     updateTerraDeal(id: ID!, stage: String, probability: Int): TerraDeal!
     createTerraLead(firstName: String!, lastName: String!, type: String): TerraLead!
+  }
+
+  extend type Subscription {
+    terraDealUpdated: TerraDeal!
   }
 `;
 
@@ -162,7 +168,14 @@ export const terraResolvers = {
           .set(updateData)
           .where(eq(terraDealsTable.id, parseIntId(args.id)))
           .returning();
-        return rows[0];
+        const deal = rows[0];
+        publish(WS_CHANNELS.TERRA_SIGNALS, "deal-updated", {
+          id: deal.id,
+          stage: (deal as Record<string, unknown>).stage,
+          probability: (deal as Record<string, unknown>).probability,
+        });
+        pubsub.publish(TERRA_EVENTS.DEAL_UPDATED, { terraDealUpdated: deal });
+        return deal;
       } catch (err) {
         throw new Error(`Failed to update deal: ${err}`);
       }
@@ -179,6 +192,11 @@ export const terraResolvers = {
       } catch (err) {
         throw new Error(`Failed to create lead: ${err}`);
       }
+    },
+  },
+  Subscription: {
+    terraDealUpdated: {
+      subscribe: () => pubsub.asyncIterableIterator(TERRA_EVENTS.DEAL_UPDATED),
     },
   },
 };

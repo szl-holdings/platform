@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
 import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft } from "lucide-react";
+import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -31,6 +32,7 @@ const CREATIVE_NAV = [
 export function AlloyLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { status: wsStatus } = useRealtimeChannel("workflow-runs");
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -181,6 +183,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <span className="hidden sm:block" style={{ color: "#ef4444" }}>2 Failed</span>
           </div>
           <div className="flex items-center gap-3">
+            <RealtimeStatusIndicator status={wsStatus} compact />
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               <Bell className="w-4 h-4" />
             </button>

@@ -81,7 +81,7 @@ export function useVessels() {
   const { data: apiVessels = [], isLoading, error, refetch } = useQuery({
     queryKey: ["vessels"],
     queryFn: () => api.vessels.list(),
-    refetchInterval: 60_000,
+    refetchInterval: 300_000,
   });
 
   const isLive = apiVessels.length > 0;
@@ -98,7 +98,7 @@ export function useVesselsDashboard() {
   return useQuery({
     queryKey: ["vessels-dashboard"],
     queryFn: () => api.dashboard(),
-    refetchInterval: 60_000,
+    refetchInterval: 300_000,
   });
 }
 
@@ -106,7 +106,7 @@ export function useFleetExceptions(params?: { status?: string; severity?: string
   const { data: apiExceptions = [], isLoading, error, refetch } = useQuery({
     queryKey: ["fleet-exceptions", params],
     queryFn: () => api.exceptions.list(params),
-    refetchInterval: 60_000,
+    refetchInterval: 300_000,
   });
 
   const isLive = apiExceptions.length > 0;

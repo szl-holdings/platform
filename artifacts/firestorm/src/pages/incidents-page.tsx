@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@workspace/shared-ui/ui/textarea";
 import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2 } from "lucide-react";
 import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useRealtimeChannel } from "@workspace/shared-ui";
 import { ExportButton } from "@workspace/shared-ui/data-export";
 
 async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<void> {
@@ -42,6 +43,42 @@ async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<v
   URL.revokeObjectURL(url);
 }
 
+interface ExtendedWindow extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
+function playAlertTone(severity: string): void {
+  try {
+    const win = window as ExtendedWindow;
+    const AudioCtx = win.AudioContext ?? win.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(severity === "critical" ? 880 : 660, ctx.currentTime);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.8);
+    if (severity === "critical") {
+      const osc2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      osc2.connect(g2);
+      g2.connect(ctx.destination);
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(1100, ctx.currentTime + 0.3);
+      g2.gain.setValueAtTime(0.25, ctx.currentTime + 0.3);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.1);
+      osc2.start(ctx.currentTime + 0.3);
+      osc2.stop(ctx.currentTime + 1.1);
+    }
+  } catch {
+  }
+}
+
 const statusOrder = ["detection", "triage", "investigation", "containment", "remediation", "closed"];
 const statusColors: Record<string, string> = {
   detection: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -59,10 +96,31 @@ const severityColors: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
+interface IncidentPayload { id?: number; severity?: string; status?: string; title?: string; }
+
 export default function IncidentsPage() {
   const qc = useQueryClient();
   const { data: incidents = [], isLoading } = useQuery({ queryKey: ["incidents"], queryFn: api.incidents.list });
   const [open, setOpen] = useState(false);
+
+  const [liveAlert, setLiveAlert] = useState<{ title?: string; severity?: string } | null>(null);
+  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { lastMessage: wsIncident } = useRealtimeChannel<IncidentPayload>("aegis-incidents");
+  useEffect(() => {
+    if (!wsIncident) return;
+    qc.invalidateQueries({ queryKey: ["incidents"] });
+    const sev = wsIncident.data?.severity;
+    const title = wsIncident.data?.title;
+    if (sev === "critical" || sev === "high") {
+      playAlertTone(sev);
+      setLiveAlert({ title, severity: sev });
+      if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+      alertTimerRef.current = setTimeout(() => setLiveAlert(null), 10000);
+    }
+    return () => {
+      if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+    };
+  }, [wsIncident, qc]);
   const [view, setView] = useState<"list" | "kanban">("list");
   const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(null);
   const [form, setForm] = useState({ title: "", description: "", severity: "medium", assignedAnalyst: "", attackTechnique: "" });
@@ -96,6 +154,16 @@ export default function IncidentsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {liveAlert && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-lg border animate-pulse" style={{ background: liveAlert.severity === "critical" ? "rgba(239,68,68,0.12)" : "rgba(249,115,22,0.10)", borderColor: liveAlert.severity === "critical" ? "rgba(239,68,68,0.4)" : "rgba(249,115,22,0.3)" }}>
+          <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: liveAlert.severity === "critical" ? "#ef4444" : "#f97316" }} />
+          <span className="text-sm font-semibold" style={{ color: liveAlert.severity === "critical" ? "#ef4444" : "#f97316" }}>
+            {liveAlert.severity?.toUpperCase()} incident received live
+          </span>
+          {liveAlert.title && <span className="text-sm text-muted-foreground truncate">{liveAlert.title}</span>}
+          <span className="ml-auto text-xs text-muted-foreground">via realtime channel</span>
+        </div>
+      )}
       <div className="flex items-center justify-between animate-fade-in-up">
         <div>
           <h1 className="font-display text-2xl font-bold flex items-center gap-2">

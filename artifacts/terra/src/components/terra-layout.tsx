@@ -7,6 +7,7 @@ import {
   ArrowLeftRight, Bell, Menu, X, Inbox, BarChart3, Upload,
   TrendingUp, Globe, Shield
 } from "lucide-react";
+import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
 const NAV_SECTIONS = [
   {
@@ -59,6 +60,7 @@ const NAV_SECTIONS = [
 export function TerraLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { status: wsStatus } = useRealtimeChannel("terra-signals");
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -175,6 +177,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
             <span className="hidden sm:block" style={{ color: "rgba(255,255,255,0.4)" }}>SZL Holdings</span>
           </div>
           <div className="flex items-center gap-3">
+            <RealtimeStatusIndicator status={wsStatus} compact />
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               <Bell className="w-4 h-4" />
               <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />

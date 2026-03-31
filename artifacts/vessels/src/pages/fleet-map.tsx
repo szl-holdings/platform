@@ -12,6 +12,8 @@ import {
   AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown, Layers, Play, Pause
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { useRealtimeChannel } from "@workspace/shared-ui";
+import { useQueryClient } from "@tanstack/react-query";
 
 const statusColors: Record<string, string> = {
   at_sea: "#22c55e",
@@ -693,6 +695,15 @@ export default function FleetMapPage() {
   });
 
   const aisVessels: AisVessel[] = aisData?.vessels ?? [];
+
+  const qcFleet = useQueryClient();
+  const { lastMessage: wsPositionMsg } = useRealtimeChannel("vessel-positions");
+  useEffect(() => {
+    if (!wsPositionMsg) return;
+    qcFleet.invalidateQueries({ queryKey: ["vessels"] });
+    qcFleet.invalidateQueries({ queryKey: ["vessels-dashboard"] });
+    qcFleet.invalidateQueries({ queryKey: ["fleet-exceptions"] });
+  }, [wsPositionMsg, qcFleet]);
 
   const filteredVessels = useMemo(() => {
     return vessels.filter(v => {

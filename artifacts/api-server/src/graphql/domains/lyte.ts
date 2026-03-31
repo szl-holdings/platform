@@ -1,9 +1,5 @@
-import { pubsub } from "./alloy.js";
 import { parseIntId } from "../utils.js";
-
-export const LYTE_EVENTS = {
-  INCIDENT_UPDATED: "LYTE_INCIDENT_UPDATED",
-};
+import { pubsub, LYTE_EVENTS } from "../../lib/pubsub-bridge.js";
 
 export const lyteTypeDefs = `#graphql
   type LyteWorkspace {

@@ -1,11 +1,13 @@
 import { Router, type IRouter } from "express";
-import { db, usersTable, sessionsTable, rolesTable, userRolesTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { db, usersTable, sessionsTable, rolesTable, userRolesTable, toCanonicalRole, type RoleName } from "@workspace/db";
+import { eq, desc, and } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, sendForbidden, sendError, handleRouteError } from "../lib/api-response";
 import { logActivity } from "../lib/activity-logger";
 import { createAuthService } from "@workspace/auth";
+import { issueWsTicket } from "../lib/websocket.js";
+import { getSessionToken, getSessionUser } from "../lib/auth";
 
 const router: IRouter = Router();
 const authService = createAuthService();
@@ -200,6 +202,48 @@ router.get("/auth/users", authMiddleware(), requireRole("ops"), async (_req, res
     sendSuccess(res, users);
   } catch (err) {
     handleRouteError(res, err, "Failed to list users");
+  }
+});
+
+router.post("/auth/ws-ticket", async (req, res) => {
+  try {
+    let userId: number | undefined;
+    let legacyRoles: RoleName[] = [];
+
+    const sessionToken = getSessionToken(req);
+    if (sessionToken) {
+      const sessionUser = await getSessionUser(sessionToken);
+      if (sessionUser) {
+        userId = sessionUser.id;
+        legacyRoles = (sessionUser.roles ?? []) as RoleName[];
+      }
+    }
+
+    if (!userId && req.user?.id) {
+      userId = req.user.id;
+      legacyRoles = (req.user.roles ?? []) as RoleName[];
+    }
+
+    if (!userId) {
+      sendForbidden(res);
+      return;
+    }
+
+    const [userRow] = await db
+      .select({ platformRole: usersTable.platformRole })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+
+    let platformRole = userRow?.platformRole;
+    if (!platformRole) {
+      platformRole = legacyRoles.length > 0 ? toCanonicalRole(legacyRoles) : "anonymous_visitor";
+    }
+
+    const ticket = issueWsTicket(userId, platformRole);
+    sendSuccess(res, { ticket, expiresIn: 300 });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to issue WS ticket");
   }
 });
 

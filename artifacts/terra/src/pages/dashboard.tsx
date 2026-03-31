@@ -1,7 +1,8 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@workspace/shared-ui/utils";
 import { Link } from "wouter";
-import { DataStateBadge } from "@workspace/shared-ui";
+import { DataStateBadge, useRealtimeChannel } from "@workspace/shared-ui";
 import {
   Building2, MapPin, TrendingUp, DollarSign, Users, Activity,
   ChevronRight, Flame, AlertTriangle, Eye, Clock, Home,
@@ -49,6 +50,16 @@ const WATCHLIST = [
 ];
 
 export default function TerraIntelligence() {
+  const qc = useQueryClient();
+  const { lastMessage: wsSignal } = useRealtimeChannel("terra-signals");
+
+  useEffect(() => {
+    if (!wsSignal) return;
+    qc.invalidateQueries({ queryKey: ["terra-deals"] });
+    qc.invalidateQueries({ queryKey: ["terra-signals"] });
+    qc.invalidateQueries({ queryKey: ["terra-leads"] });
+  }, [wsSignal, qc]);
+
   const activeSignals = riskSignals.filter(s => !s.acknowledged);
   const criticalSignals = activeSignals.filter(s => s.severity === "critical");
   const topDeals = [...brokerageDeals].sort((a, b) => b.price - a.price).slice(0, 5);

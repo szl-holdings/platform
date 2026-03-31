@@ -7,6 +7,7 @@ import {
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3
 } from "lucide-react";
+import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
 const PRISM_ITEMS = [
   { key: "P", label: "Pulse", color: "#10b981", icon: Heart, href: "/prism/pulse" },
@@ -118,6 +119,7 @@ function AdminNavSection({ location }: { location: string }) {
 export function LyteLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { status: wsStatus } = useRealtimeChannel("lyte-metrics");
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -253,6 +255,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             <span className="hidden sm:block" style={{ color: "#f59e0b" }}>$5.03M at risk</span>
           </div>
           <div className="flex items-center gap-3">
+            <RealtimeStatusIndicator status={wsStatus} compact />
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               <Bell className="w-4 h-4" />
               <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />

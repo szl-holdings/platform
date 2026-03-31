@@ -24,6 +24,7 @@ import {
 import { eq, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
+import { broadcastWs, pubsub, VESSELS_EVENTS } from "../lib/pubsub-bridge.js";
 
 const router: IRouter = Router();
 
@@ -116,6 +117,11 @@ router.put("/vessels/:id", authMiddleware(), requireRole("ops", "exec", "admin",
     const data = insertVesselSchema.partial().parse(req.body);
     const [vessel] = await db.update(vesselsTable).set({ ...data, updatedAt: new Date() }).where(eq(vesselsTable.id, id)).returning();
     if (!vessel) { sendNotFound(res, "Vessel"); return; }
+    broadcastWs("vessel-positions", "vessel-updated", { id: vessel.id, status: vessel.status });
+    const [latestPos] = await db.select().from(vesselsPositionsTable).where(eq(vesselsPositionsTable.vesselId, vessel.id)).orderBy(desc(vesselsPositionsTable.recordedAt)).limit(1);
+    if (latestPos) {
+      void pubsub.publish(VESSELS_EVENTS.POSITION_UPDATED, { vesselPositionUpdated: latestPos });
+    }
     sendSuccess(res, vessel);
   } catch (err) {
     handleRouteError(res, err, "Failed to update vessel");

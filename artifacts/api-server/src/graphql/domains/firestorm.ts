@@ -1,8 +1,5 @@
-import { pubsub } from "./alloy.js";
-
-export const FIRESTORM_EVENTS = {
-  INCIDENT_UPDATED: "FIRESTORM_INCIDENT_UPDATED",
-};
+import { publish, WS_CHANNELS } from "../../lib/websocket.js";
+import { pubsub, FIRESTORM_EVENTS } from "../../lib/pubsub-bridge.js";
 
 export const firestormTypeDefs = `#graphql
   type FirestormAssessment {
@@ -162,6 +159,11 @@ export const firestormResolvers = {
           .returning();
         const incident = rows[0];
         pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, { firestormIncidentUpdated: incident });
+        publish(WS_CHANNELS.AEGIS_INCIDENTS, "incident-updated", {
+          id: incident.id,
+          status: incident.status,
+          severity: (incident as Record<string, unknown>).severity,
+        });
         return incident;
       } catch (err) {
         throw new Error(`Failed to update incident: ${err}`);

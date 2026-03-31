@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Zap, Clock, ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, Users, DollarSign, ArrowRight, RefreshCw } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRealtimeChannel } from "@workspace/shared-ui";
 import { doctrineEventBus } from "@workspace/observability";
 import { DoctrineLayerBadge } from "@workspace/shared-ui/doctrine-layer-badge";
 import { cn } from "@/lib/utils";
@@ -200,8 +201,14 @@ export default function ActionCenter() {
   const { data: liveActions = [], isLoading } = useQuery({
     queryKey: ["lyte-actions"],
     queryFn: () => api.actions.list(),
-    refetchInterval: 60_000,
+    refetchInterval: 300_000,
   });
+
+  const { lastMessage: wsLyteMsg } = useRealtimeChannel("lyte-metrics");
+  useEffect(() => {
+    if (!wsLyteMsg) return;
+    queryClient.invalidateQueries({ queryKey: ["lyte-actions"] });
+  }, [wsLyteMsg, queryClient]);
 
   const updateMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>

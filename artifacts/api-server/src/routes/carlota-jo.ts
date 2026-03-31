@@ -17,6 +17,7 @@ import { sendSuccess, sendNotFound, handleRouteError, sendBadRequest, parsePagin
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
 import { services } from "@workspace/services";
 import { logger } from "../lib/logger";
+import { broadcastWs, pubsub, CARLOTA_EVENTS } from "../lib/pubsub-bridge.js";
 import {
   sendEmail,
   buildCarlotaContactAckEmail,
@@ -82,6 +83,8 @@ router.post("/booking/inquiries", async (req: Request, res: Response) => {
       }
     }).catch(() => {});
 
+    broadcastWs("bookings", "inquiry-created", { id: row.id, name: row.name, service: row.service });
+    void pubsub.publish(CARLOTA_EVENTS.INQUIRY_CREATED, { carlotaInquiryCreated: row });
     res.json({
       success: true,
       inquiryId: row.id,
@@ -109,6 +112,7 @@ router.patch("/booking/inquiries/:id", authMiddleware(), async (req, res) => {
     const id = parseInt(String(req.params.id), 10);
     const [row] = await db.update(carlotaInquiriesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(carlotaInquiriesTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Inquiry"); return; }
+    broadcastWs("bookings", "inquiry-updated", { id: row.id, status: row.status });
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update inquiry");

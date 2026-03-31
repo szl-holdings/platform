@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, isAuthError, DataStateBadge } from "@workspace/shared-ui";
+import { apiFetch, isAuthError, DataStateBadge, useRealtimeChannel } from "@workspace/shared-ui";
 import { Activity, Clock, CheckCircle, XCircle, RotateCcw, RefreshCw, AlertTriangle, Zap, Terminal, ChevronRight, Play, Filter } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -32,7 +32,7 @@ function useRuns(status?: string) {
     },
     refetchInterval: (query) => {
       if (isAuthError(query.state.error)) return false;
-      return 8000;
+      return 120_000;
     },
     retry: (failureCount, error) => {
       if (isAuthError(error)) return false;
@@ -300,6 +300,13 @@ export default function ExecutionRuns() {
   const { data: apiRuns, isLoading, isError, refetch, dataUpdatedAt } = useRuns(statusFilter !== "all" ? statusFilter : undefined);
   const retryRun = useRetryRun();
   const cancelRun = useCancelRun();
+
+  const qcRuns = useQueryClient();
+  const { lastMessage: wsMsg } = useRealtimeChannel("workflow-runs");
+  useEffect(() => {
+    if (!wsMsg) return;
+    qcRuns.invalidateQueries({ queryKey: ["alloyRuns"] });
+  }, [wsMsg, qcRuns]);
 
   const [demoRuns] = useState(() => generateDemoRuns());
   const usingDemo = isError || (!isLoading && (!apiRuns || apiRuns.length === 0));

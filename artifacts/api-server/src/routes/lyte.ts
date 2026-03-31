@@ -15,6 +15,7 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam, denyIfReadOnly, requireRole } from "../middlewares/auth";
+import { broadcastWs } from "../lib/pubsub-bridge.js";
 
 const router: IRouter = Router();
 
@@ -63,6 +64,7 @@ router.get("/lyte/signals", authMiddleware(), async (req, res) => {
 router.post("/lyte/signals", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteSignalsTable).values(req.body).returning();
+    broadcastWs("lyte-metrics", "signal-created", { id: row.id, type: row.type, severity: row.severity });
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, "Failed to create signal");
@@ -74,6 +76,7 @@ router.patch("/lyte/signals/:id", authMiddleware(), denyIfReadOnly(), async (req
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSignalsTable).set(req.body).where(eq(lyteSignalsTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Signal"); return; }
+    broadcastWs("lyte-metrics", "signal-updated", { id: row.id, type: row.type, severity: row.severity });
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update signal");

@@ -1,12 +1,9 @@
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { withFilter } from "graphql-subscriptions";
 import { parseIntId } from "../utils.js";
+import { publish, WS_CHANNELS } from "../../lib/websocket.js";
+import { pubsub, ALLOY_EVENTS } from "../../lib/pubsub-bridge.js";
 
-export const pubsub = new PubSub();
-
-export const ALLOY_EVENTS = {
-  WORKFLOW_RUN_UPDATED: "ALLOY_WORKFLOW_RUN_UPDATED",
-  SIGNAL_CREATED: "ALLOY_SIGNAL_CREATED",
-};
+export { pubsub, ALLOY_EVENTS };
 
 export const alloyTypeDefs = `#graphql
   type AlloySignal {
@@ -225,6 +222,12 @@ export const alloyResolvers = {
           .returning();
         const run = rows[0];
         pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: run });
+        publish(WS_CHANNELS.WORKFLOW_RUNS, "workflow-run-updated", {
+          id: run.id,
+          workflowId: run.workflowId,
+          status: run.status,
+          durationMs: run.durationMs,
+        });
         return run;
       } catch (err) {
         throw new Error(`Failed to update workflow run: ${err}`);

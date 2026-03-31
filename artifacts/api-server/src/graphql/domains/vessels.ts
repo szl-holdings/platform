@@ -1,9 +1,5 @@
-import { pubsub } from "./alloy.js";
 import { withFilter } from "graphql-subscriptions";
-
-export const VESSELS_EVENTS = {
-  POSITION_UPDATED: "VESSELS_POSITION_UPDATED",
-};
+import { pubsub, VESSELS_EVENTS } from "../../lib/pubsub-bridge.js";
 
 export const vesselsTypeDefs = `#graphql
   type Vessel {

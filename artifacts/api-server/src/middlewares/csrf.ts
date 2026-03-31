@@ -18,6 +18,7 @@ const EXEMPT_PATHS = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/callback",
+  "/api/auth/ws-ticket",
   "/api/webhooks",
   "/api/billing/webhooks",
   "/api/stripe/checkout",

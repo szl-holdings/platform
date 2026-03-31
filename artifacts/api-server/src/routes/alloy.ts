@@ -26,6 +26,7 @@ import {
   parsePagination,
 } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { broadcastWs, pubsub, ALLOY_EVENTS } from "../lib/pubsub-bridge.js";
 const router: IRouter = Router();
 
 function getUserOrgIds(user?: AuthenticatedUser): number[] {
@@ -277,7 +278,7 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), async (req, res) => {
         }
 
         const completedAt = new Date();
-        await db.update(alloyWorkflowRunsTable).set({
+        const [finalRun] = await db.update(alloyWorkflowRunsTable).set({
           state: nextState,
           completedAt: requiresApproval ? undefined : completedAt,
           durationMs: completedAt.getTime() - now.getTime() + 500,
@@ -287,7 +288,9 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), async (req, res) => {
             { state: "running", at: now.toISOString(), by: "system" },
             { state: nextState, at: completedAt.toISOString(), by: "system" },
           ],
-        }).where(eq(alloyWorkflowRunsTable.id, run.id));
+        }).where(eq(alloyWorkflowRunsTable.id, run.id)).returning();
+        broadcastWs("workflow-runs", "run-updated", { id: finalRun.id, workflowId: id, state: finalRun.state });
+        void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: finalRun });
       } catch (err) {
         logger.error({ err, runId: run.id }, "Failed to execute workflow run");
         await db.update(alloyWorkflowRunsTable).set({ state: "failed", errorMessage: "Execution error" }).where(eq(alloyWorkflowRunsTable.id, run.id));
@@ -338,6 +341,8 @@ router.post("/alloy/runs/:id/retry", authMiddleware(), requireRole("super_admin"
       startedAt: null,
       completedAt: null,
     }).where(eq(alloyWorkflowRunsTable.id, id)).returning();
+    broadcastWs("workflow-runs", "run-updated", { id: updated.id, workflowId: updated.workflowId, state: "queued" });
+    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: updated });
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to retry run");
@@ -352,6 +357,8 @@ router.post("/alloy/runs/:id/cancel", authMiddleware(), requireRole("super_admin
     const check = transitionRunState(run.state, "canceled");
     if (!check.valid) { sendBadRequest(res, check.message ?? "Cannot cancel run in current state"); return; }
     const [updated] = await db.update(alloyWorkflowRunsTable).set({ state: "canceled" }).where(eq(alloyWorkflowRunsTable.id, id)).returning();
+    broadcastWs("workflow-runs", "run-updated", { id: updated.id, workflowId: updated.workflowId, state: "canceled" });
+    void pubsub.publish(ALLOY_EVENTS.WORKFLOW_RUN_UPDATED, { alloyWorkflowRunUpdated: updated });
     sendSuccess(res, updated);
   } catch (err) {
     handleRouteError(res, err, "Failed to cancel run");

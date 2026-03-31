@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@workspace/replit-auth-web";
+import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
 const portalNav = [
   { label: "Overview", href: "/client-portal", icon: LayoutDashboard },
@@ -79,22 +80,26 @@ function PortalAuthGuard({ children }: { children: React.ReactNode }) {
 
 function PortalShell({ children, currentPath }: { children: React.ReactNode; currentPath: string }) {
   const { logout } = useAuth();
+  const { status: wsStatus } = useRealtimeChannel("bookings");
 
   return (
     <PortalAuthGuard>
       <div className="min-h-screen flex" style={{ background: "#0e0c09" }}>
         <aside className="w-56 border-r flex flex-col h-screen sticky top-0" style={{ borderColor: "rgba(196,170,126,0.08)" }}>
           <div className="px-5 py-5 border-b" style={{ borderColor: "rgba(196,170,126,0.08)" }}>
-            <div>
-              <h1
-                className="text-[15px] font-light leading-none"
-                style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}
-              >
-                Carlota Jo
-              </h1>
-              <p className="text-[9px] tracking-[0.25em] uppercase mt-0.5" style={{ color: "rgba(200,169,106,0.45)" }}>
-                Client Portal
-              </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1
+                  className="text-[15px] font-light leading-none"
+                  style={{ fontFamily: "Georgia, 'Palatino Linotype', serif", color: "#f5f0e8" }}
+                >
+                  Carlota Jo
+                </h1>
+                <p className="text-[9px] tracking-[0.25em] uppercase mt-0.5" style={{ color: "rgba(200,169,106,0.45)" }}>
+                  Client Portal
+                </p>
+              </div>
+              <RealtimeStatusIndicator status={wsStatus} compact />
             </div>
           </div>
           <nav className="flex-1 px-3 py-4 space-y-0.5">

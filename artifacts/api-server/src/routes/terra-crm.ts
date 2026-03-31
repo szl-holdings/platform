@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { broadcastWs, pubsub, TERRA_EVENTS } from "../lib/pubsub-bridge.js";
 import { db, pool } from "@workspace/db";
 import {
   terraLeadsTable,
@@ -287,6 +288,8 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: false }), async 
 
     const inserted = await db.insert(terraDealsTable).values(deal).returning();
     await auditLog("deal_created", "terra_deal", externalId, { stage: deal.stage, address: deal.address }, req.user?.id);
+    broadcastWs("terra-signals", "deal-created", { id: externalId, stage: deal.stage, address: deal.address });
+    if (inserted[0]) void pubsub.publish(TERRA_EVENTS.DEAL_UPDATED, { terraDealUpdated: inserted[0] });
 
     sendSuccess(res, { id: externalId, deal: inserted[0] });
   } catch (err) { handleRouteError(res, err, "Failed to create deal"); }
@@ -961,6 +964,8 @@ router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: false
     await auditLog("deal_stage_changed", "terra_deal", deal.externalId ?? String(deal.id), {
       prevStage, newStage: stage, address: deal.address,
     }, req.user?.id);
+    broadcastWs("terra-signals", "deal-stage-changed", { id: deal.externalId ?? String(deal.id), prevStage, newStage: stage, address: deal.address });
+    void pubsub.publish(TERRA_EVENTS.DEAL_UPDATED, { terraDealUpdated: { ...deal, stage } });
 
     sendSuccess(res, {
       dealId: deal.externalId ?? String(deal.id),

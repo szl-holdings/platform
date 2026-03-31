@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRealtimeChannel } from "@workspace/shared-ui";
 import { Activity, AlertTriangle, RefreshCw, Plus, X } from "lucide-react";
 import { RiskBadge, StageBadge, DealHealthCard, ProbabilityBar, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { cn } from "@workspace/shared-ui/utils";
@@ -282,6 +283,12 @@ export default function DealsPage() {
     queryFn: () => fetchJson("/terra/pipeline/deals?limit=200"),
     staleTime: 30000,
   });
+
+  const { lastMessage: wsTerraMsg } = useRealtimeChannel("terra-signals");
+  useEffect(() => {
+    if (!wsTerraMsg) return;
+    qc.invalidateQueries({ queryKey: ["terra-deals"] });
+  }, [wsTerraMsg, qc]);
 
   const deals: ApiDeal[] = data?.deals ?? [];
   const showEmptyState = !isLoading && !isError && deals.length === 0;
