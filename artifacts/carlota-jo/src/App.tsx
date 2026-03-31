@@ -34,6 +34,7 @@ const ClientIntel = lazy(() => import("@/pages/client-intel"));
 const ROICalculator = lazy(() => import("@/pages/roi-calculator"));
 const BrandAudit = lazy(() => import("@/pages/brand-audit"));
 const ContentStrategy = lazy(() => import("@/pages/content-strategy"));
+const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 
 function PageLoader() {
   return (
@@ -80,6 +81,8 @@ function Router() {
         <Route path="/roi-calculator" component={ROICalculator} />
         <Route path="/brand-audit" component={BrandAudit} />
         <Route path="/content-strategy" component={ContentStrategy} />
+        <Route path="/document-engine" component={DocumentEngine} />
+        <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

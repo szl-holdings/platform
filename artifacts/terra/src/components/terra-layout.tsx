@@ -44,6 +44,7 @@ const NAV_SECTIONS = [
     items: [
       { href: "/transactions", label: "Transactions", icon: ClipboardList },
       { href: "/documents", label: "Docs & Compliance", icon: FileText },
+      { href: "/document-engine", label: "Document Engine", icon: Shield },
       { href: "/ingestion", label: "Data Ingestion", icon: Upload },
       { href: "/predictions", label: "AI Intelligence", icon: Brain },
       { href: "/automations", label: "Workflow Automation", icon: Zap },

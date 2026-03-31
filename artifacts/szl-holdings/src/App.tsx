@@ -47,6 +47,7 @@ const AlloyCampaignDetail = lazy(() => import("@/alloy/pages/creative/campaign-d
 const AlloyBrandVoice = lazy(() => import("@/alloy/pages/creative/brand-voice"));
 const AlloyContentCalendar = lazy(() => import("@/alloy/pages/creative/content-calendar"));
 const AlloyAIStudio = lazy(() => import("@/alloy/pages/creative/ai-studio"));
+const AlloyDocumentEngine = lazy(() => import("@/alloy/pages/document-engine"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -189,6 +190,12 @@ function App() {
             </Route>
             <Route path="/alloy/creative/ai-studio">
               <Suspense fallback={<PageLoader />}><AlloyPage><AlloyAIStudio /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/documents">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyDocumentEngine /></AlloyPage></Suspense>
+            </Route>
+            <Route path="/alloy/documents/:sub">
+              <Suspense fallback={<PageLoader />}><AlloyPage><AlloyDocumentEngine /></AlloyPage></Suspense>
             </Route>
             <Route path="/lyte">
               <ExternalRedirect to="/lyte-command-center/" />

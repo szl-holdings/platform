@@ -26,3 +26,4 @@ export { CompanyKPIDashboard, DEMO_COMPANY_KPIS, type CompanyKPI, type CompanyKP
 export { DataStateBadge, DataStateBanner, type DataState } from "./data-state-badge";
 export { useRealtimeChannel, type RealtimeConnectionStatus, type RealtimeChannelMessage, type UseRealtimeChannelOptions, type UseRealtimeChannelResult } from "./use-realtime-channel";
 export { RealtimeStatusIndicator } from "./realtime-status-indicator";
+export * from "./document-engine";

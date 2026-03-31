@@ -37,6 +37,7 @@ const CommercialIntelligence = lazy(() => import("@/pages/commercial-intelligenc
 const PropertyMapPage = lazy(() => import("@/pages/property-map-page"));
 const PropertyDetail = lazy(() => import("@/pages/property-detail"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
+const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 
 function PageLoader() {
   return (
@@ -74,6 +75,8 @@ function PrivateRouter() {
         <Route path="/property-map" component={PropertyMapPage} />
         <Route path="/property/:id" component={PropertyDetail} />
         <Route path="/powerbi" component={PowerBiReport} />
+        <Route path="/document-engine" component={DocumentEngine} />
+        <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

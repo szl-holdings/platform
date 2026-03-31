@@ -50,6 +50,7 @@ const HardeningControlsPage = lazy(() => import("@/pages/hardening-controls"));
 const CasesPage = lazy(() => import("@/pages/cases-page"));
 const SimulationPanelPage = lazy(() => import("@/pages/simulation-panel"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
+const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 const ReadinessDashboard = lazy(() => import("@/pages/compliance/readiness-dashboard"));
 const FrameworkScorecards = lazy(() => import("@/pages/compliance/framework-scorecards"));
 const ComplianceRisks = lazy(() => import("@/pages/compliance/compliance-risks"));
@@ -120,6 +121,7 @@ const securityNavPrimary = [
   { path: "/findings", label: "Findings", icon: Target },
   { path: "/simulation-panel", label: "Simulation Panel", icon: Play },
   { path: "/hardening-controls", label: "Hardening Controls", icon: SlidersHorizontal },
+  { path: "/document-engine", label: "Document Engine", icon: FileText },
 ];
 
 const securityNavSecondary = [
@@ -612,6 +614,8 @@ function AppRouter() {
         <Route path="/cases" component={CasesPage} />
         <Route path="/simulation-panel" component={SimulationPanelPage} />
         <Route path="/powerbi" component={PowerBiReport} />
+        <Route path="/document-engine" component={DocumentEngine} />
+        <Route path="/document-engine/:sub" component={DocumentEngine} />
 
         {/* Managed Operations */}
         <Route path="/ops/dashboard" component={MspDashboard} />

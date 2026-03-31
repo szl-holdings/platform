@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 
 const COMMAND_LOOP = [
@@ -27,6 +27,10 @@ const CREATIVE_NAV = [
   { href: "/alloy/creative/brand-voice", label: "Brand Voice", icon: Mic },
   { href: "/alloy/creative/content-calendar", label: "Content Calendar", icon: Calendar },
   { href: "/alloy/creative/ai-studio", label: "AI Studio", icon: Wand2 },
+];
+
+const DOCS_NAV = [
+  { href: "/alloy/documents", label: "Document Engine", icon: FileText },
 ];
 
 export function AlloyLayout({ children }: { children: ReactNode }) {
@@ -109,6 +113,21 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Creative Workflows</div>
             {CREATIVE_NAV.map((item) => {
               const isActive = item.href === "/alloy/creative" ? location === "/alloy/creative" : location.startsWith(item.href);
+              return (
+                <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+                  isActive ? "text-cyan-400" : "text-slate-400 hover:text-white hover:bg-white/5"
+                )} style={{ background: isActive ? "rgba(0,212,255,0.08)" : undefined }}>
+                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#00d4ff" }} />}
+                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", isActive ? "text-cyan-400" : "text-slate-500 group-hover:text-slate-300")} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Documents</div>
+            {DOCS_NAV.map((item) => {
+              const isActive = location.startsWith(item.href);
               return (
                 <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",

@@ -6,7 +6,7 @@ import { UserButton } from "@workspace/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
-  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor, Brain, Menu
+  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor, Brain, Menu, FileText
 } from "lucide-react";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
@@ -53,6 +53,7 @@ const SanctionsScreening = lazy(() => import("@/pages/sanctions-screening"));
 const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
 const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
 const CommandWorkflowsPage = lazy(() => import("@/pages/command-workflows"));
+const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -85,6 +86,7 @@ const legacyNavItems = [
   { path: "/corridors", label: "Corridors", icon: Navigation },
   { path: "/agent-insights", label: "Agent Insights", icon: Brain },
   { path: "/command-workflows", label: "Command Workflows", icon: ShieldAlert },
+  { path: "/document-engine", label: "Document Engine", icon: FileText },
 ];
 
 function PageLoader() {
@@ -415,6 +417,8 @@ function DashboardRouter() {
         <Route path="/incidents" component={IncidentReporting} />
         <Route path="/agent-insights" component={AgentInsightsPage} />
         <Route path="/command-workflows" component={CommandWorkflowsPage} />
+        <Route path="/document-engine" component={DocumentEngine} />
+        <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -495,7 +499,8 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/dark-vessel-detection") || location.startsWith("/sanctions-screening") ||
     location.startsWith("/cyber-threats") || location.startsWith("/incidents") ||
     location.startsWith("/agent-insights") || location.startsWith("/vessels-list") ||
-    location.startsWith("/routes") || location.startsWith("/command-workflows");
+    location.startsWith("/routes") || location.startsWith("/command-workflows") ||
+    location.startsWith("/document-engine");
 
   if (isDashboard) {
     return (

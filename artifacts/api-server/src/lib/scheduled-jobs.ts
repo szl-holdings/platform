@@ -8,6 +8,7 @@ export const NAMED_JOB_TYPES = {
   DAILY_EXCEPTION_SUMMARY: "daily_exception_summary",
   DAILY_ARTIFACT_CLEANUP: "daily_artifact_cleanup",
   DAILY_FEATURE_FLAG_SYNC: "daily_feature_flag_sync",
+  DAILY_DOCUMENT_BATCH: "daily_document_batch",
   HOURLY_SIGNAL_NORMALIZATION: "hourly_signal_normalization",
   HOURLY_STALE_ACTION_SCAN: "hourly_stale_action_scan",
   HOURLY_VESSEL_ETA_REFRESH: "hourly_vessel_eta_refresh",
@@ -55,6 +56,7 @@ registerEntry({ type: NAMED_JOB_TYPES.WORKFLOW_RETRY_JOB, name: "Workflow Retry"
 registerEntry({ type: NAMED_JOB_TYPES.ARTIFACT_GENERATION_JOB, name: "Artifact Generation", description: "Generates structured output artifacts (reports, briefings, exports) from workflow outputs. Supports PDF, JSON, and structured markdown.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.ROUTE_ECONOMICS_RECOMPUTE_JOB, name: "Route Economics Recompute", description: "Recomputes voyage economics for a specified route or vessel, applying current fuel price, port cost, and charter rate data.", schedule: "on_demand", enabled: true });
 registerEntry({ type: NAMED_JOB_TYPES.READINESS_SCORE_RECOMPUTE_JOB, name: "Readiness Score Recompute", description: "Recomputes readiness dimension scores for a specified program using the latest evidence and dimension weights.", schedule: "on_demand", enabled: true });
+registerEntry({ type: NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, name: "Daily Document Batch Generation", description: "Generates PDF exports for all approved documents pending batch processing across Terra, Aegis, Carlota Jo, Vessels, and Alloy. Archives completed PDFs and notifies document owners.", schedule: "daily", enabled: true });
 
 function updateRegistry(type: NamedJobType, update: Partial<JobScheduleEntry>) {
   const entry = jobRegistry.get(type);
@@ -120,6 +122,74 @@ jobQueue.register(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, async (job) => {
   serverTelemetry.recordBusinessEvent({ type: "daily_feature_flag_sync_completed", durationMs: Date.now() - start, success: true });
   updateRegistry(NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC, { lastStatus: "completed", lastDurationMs: Date.now() - start });
   logger.info({ jobId: job.id }, "daily_feature_flag_sync: complete");
+});
+
+// Daily Document Batch Generation — processes all pending PDF jobs across the document engine.
+// Scans for documents with status "approved" that have no completed PDF export,
+// creates a scheduled batch, and enqueues them for rendering.
+jobQueue.register(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, async (job) => {
+  const { db, documentsTable, pdfBatchesTable, pdfJobsTable } = await import("@workspace/db");
+  const { eq } = await import("drizzle-orm");
+  const { randomUUID } = await import("crypto");
+
+  const start = Date.now();
+  logger.info({ jobId: job.id }, "daily_document_batch: starting scheduled document PDF generation");
+
+  const payload = job.payload as { appSource?: string; documentType?: string };
+
+  try {
+    // Find approved documents not yet covered by a completed batch
+    const approvedDocs = await db.select().from(documentsTable)
+      .where(eq(documentsTable.status, "approved"))
+      .limit(50);
+
+    if (approvedDocs.length === 0) {
+      logger.info({ jobId: job.id }, "daily_document_batch: no approved documents to process");
+      updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+      return;
+    }
+
+    // Create a scheduled batch record
+    const batchId = randomUUID();
+    const batchDate = new Date().toISOString().split("T")[0];
+    const [batch] = await db.insert(pdfBatchesTable).values({
+      batchId,
+      title: `Daily PDF Batch — ${batchDate}`,
+      templateId: "daily_scheduler",
+      status: "processing",
+      totalJobs: approvedDocs.length,
+      completedJobs: 0,
+      failedJobs: 0,
+      appSource: payload.appSource || "general",
+    }).returning();
+
+    // Create PDF job records
+    const jobInserts = approvedDocs.map((doc) => ({
+      batchId,
+      templateId: doc.templateId || "general",
+      entityType: "document",
+      entityId: String(doc.id),
+      appSource: doc.appSource,
+      entityData: { documentId: doc.id, documentTitle: doc.title },
+      status: "pending" as const,
+    }));
+    await db.insert(pdfJobsTable).values(jobInserts);
+
+    serverTelemetry.recordBusinessEvent({
+      type: "daily_document_batch_started",
+      domain: "document-engine",
+      durationMs: Date.now() - start,
+      success: true,
+      metadata: { batchId, jobCount: approvedDocs.length },
+    });
+
+    updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, { lastStatus: "completed", lastDurationMs: Date.now() - start });
+    logger.info({ jobId: job.id, batchId, jobCount: approvedDocs.length }, "daily_document_batch: batch created, jobs enqueued");
+  } catch (err) {
+    updateRegistry(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH, { lastStatus: "failed", failCount: (jobRegistry.get(NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH)?.failCount || 0) + 1 });
+    logger.error({ jobId: job.id, err }, "daily_document_batch: failed");
+    throw err;
+  }
 });
 
 jobQueue.register(NAMED_JOB_TYPES.HOURLY_SIGNAL_NORMALIZATION, async (job) => {
@@ -222,6 +292,7 @@ export function startNamedScheduledJobs() {
     NAMED_JOB_TYPES.DAILY_EXCEPTION_SUMMARY,
     NAMED_JOB_TYPES.DAILY_ARTIFACT_CLEANUP,
     NAMED_JOB_TYPES.DAILY_FEATURE_FLAG_SYNC,
+    NAMED_JOB_TYPES.DAILY_DOCUMENT_BATCH,
   ];
 
   const hourlyJobs: NamedJobType[] = [

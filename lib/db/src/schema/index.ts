@@ -50,3 +50,4 @@ export * from "./platform_ops";
 export * from "./msp";
 export * from "./recommendations";
 export * from "./azure_tenants";
+export * from "./documents";
