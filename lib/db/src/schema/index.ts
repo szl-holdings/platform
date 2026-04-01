@@ -51,3 +51,4 @@ export * from "./msp";
 export * from "./recommendations";
 export * from "./azure_tenants";
 export * from "./documents";
+export * from "./scim";

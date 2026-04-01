@@ -808,6 +808,7 @@ const ADMIN_SECTIONS = [
   { id: "capital-readiness", label: "Capital Readiness", icon: DollarSign },
   { id: "certification-readiness", label: "Cert Readiness", icon: Shield },
   { id: "azure-tenants", label: "Azure Tenants", icon: Cloud },
+  { id: "scim-provisioning", label: "SCIM Provisioning", icon: Shield },
   { id: "powerbi", label: "Power BI", icon: BarChart3 },
   { id: "cms-posts", label: "CMS Posts", icon: BookOpen },
   { id: "pages", label: "Pages", icon: FileText },
@@ -1795,6 +1796,36 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <AzureTenantsPanel />
+              </div>
+            )}
+            {activeSection === "scim-provisioning" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-primary" /> SCIM 2.0 Provisioning
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">Enterprise IdP user auto-sync — manage tokens, provisioned users, and sync status per tenant.</p>
+                  </div>
+                  <Link href="/admin/scim">
+                    <a className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors">
+                      <ExternalLink className="w-3.5 h-3.5" /> Open Dashboard
+                    </a>
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { icon: "🔐", label: "Bearer Token Auth", desc: "Per-tenant SCIM tokens generated and stored securely. Revoke anytime." },
+                    { icon: "👥", label: "User Provisioning", desc: "Users created, updated, and deactivated via RFC 7644 PATCH/PUT/DELETE." },
+                    { icon: "🏷️", label: "Group → Role Mapping", desc: "IdP groups map to platform roles automatically on sync." },
+                  ].map(r => (
+                    <div key={r.label} className="bg-card border border-border rounded-xl p-4">
+                      <div className="text-2xl mb-2">{r.icon}</div>
+                      <div className="text-sm font-semibold text-foreground mb-1">{r.label}</div>
+                      <div className="text-xs text-muted-foreground">{r.desc}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             {activeSection === "cms-posts" && <CmsPostsPanel />}

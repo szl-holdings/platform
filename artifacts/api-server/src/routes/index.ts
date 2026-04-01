@@ -65,6 +65,7 @@ import vesselsLiveRouter from "./vessels-live";
 import integrationsRouter from "./integrations";
 import configRouter from "./config";
 import apmRouter from "./apm";
+import scimRouter from "./scim";
 
 const router: IRouter = Router();
 
@@ -240,5 +241,7 @@ router.use(apmRouter);
 
 router.use("/documents", writeLimiter);
 router.use(documentsRouter);
+
+router.use(scimRouter);
 
 export default router;

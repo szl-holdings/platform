@@ -31,6 +31,7 @@ const IntegrationsMarketplacePage = lazy(() => import("@/pages/integrations-mark
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
 const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
+const ScimProvisioningPage = lazy(() => import("@/pages/scim-provisioning"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -254,6 +255,9 @@ function App() {
             <Route path="/admin/powerbi">
               <RequireAuth><Suspense fallback={<PageLoader />}><PowerBiConfigPage /></Suspense></RequireAuth>
             </Route>
+            <Route path="/admin/scim">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ScimProvisioningPage /></Suspense></RequireAuth>
+            </Route>
             <Route path="/admin">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
             </Route>
@@ -319,6 +323,9 @@ function App() {
             </Route>
             <Route path="/admin/powerbi">
               <RequireAuth><Suspense fallback={<PageLoader />}><PowerBiConfigPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/scim">
+              <RequireAuth><Suspense fallback={<PageLoader />}><ScimProvisioningPage /></Suspense></RequireAuth>
             </Route>
             <Route>
               <Redirect to="/" />
