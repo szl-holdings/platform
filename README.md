@@ -1,8 +1,10 @@
 # SZL Holdings — Platform Ecosystem
 
-**Five platforms. One architecture. Built to compound.**
+**Business observability and execution accountability — built to operate where unreliability isn't recoverable.**
 
-SZL Holdings designs and operates enterprise command systems that connect operational signal to strategic decision — across business observability, maritime intelligence, cybersecurity, real estate, and private advisory. Every platform shares one data layer, one execution fabric, and one AI engine.
+SZL Holdings is built around a focused operating wedge: **Lyte + Alloy**. Lyte is the business observability engine — PRISM-powered signal detection, risk interpretation, and action routing. Alloy is the execution fabric — the workflow engine, audit trail, and orchestration layer that makes every action traceable and every outcome verifiable.
+
+Together, Lyte + Alloy deliver *business observability and execution accountability* to organizations that can't afford to discover problems after the fact.
 
 Founded and operated by [Stephen Lutar](https://linkedin.com/in/stephen-l-279315240).
 
@@ -10,11 +12,40 @@ Founded and operated by [Stephen Lutar](https://linkedin.com/in/stephen-l-279315
 [![Build](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/build.yml)
 [![Deploy](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/deploy.yml)
 
-![SZL Holdings](docs/screenshots/szl-holdings-home.jpg)
+---
+
+## The Operating Wedge: Lyte + Alloy
+
+**Lyte** defines the category of Business Observability — making every operational surface visible, contextual, and actionable through the PRISM framework:
+
+- **P**ulse — Business health, operating heartbeat, trend status
+- **R**isk — Approvals, churn, delays, ownership gaps, regulatory exposure
+- **I**ntelligence — Modeled reasoning, evidence, confidence, likely outcomes
+- **S**ignals — Anomalies, changes, event spikes, workflow drift
+- **M**otion — Escalations, routing, approvals, interventions, execution
+
+**Alloy** is the execution fabric that closes the loop — workflow engine, human-in-the-loop gates, audit trail, and agent coordination. When Lyte surfaces a signal, Alloy routes the action, tracks the response, and creates the immutable record. Every consequential decision is attributed, auditable, and verifiable.
+
+The combination creates a single operating system for organizations where execution drift compounds into operational failure.
 
 ---
 
-## Platform Hierarchy
+## Broader Ecosystem
+
+The Lyte + Alloy wedge is the foundation. The same architecture — shared data layer, shared execution fabric, shared AI engine — extends to four additional domain verticals:
+
+| Platform | Domain | Expansion Path |
+|----------|--------|---------------|
+| **Aegis** | Unified Defense & Intelligence | Security observability on the same PRISM backbone |
+| **Terra** | NYC Real Estate Intelligence | Property signal → deal execution through Alloy |
+| **Vessels** | Maritime Intelligence & Fleet Operations | Fleet telemetry → operational decisions through Alloy |
+| **Carlota Jo** | Private Advisory & Strategy | Principal advisory grounded in platform intelligence |
+
+These platforms share one architecture. Each one is an expansion path built on the same infrastructure — not a separate product requiring separate infrastructure investment.
+
+---
+
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -25,50 +56,12 @@ Founded and operated by [Stephen Lutar](https://linkedin.com/in/stephen-l-279315
 │  Alloy — Execution Fabric, Workflow Engine, Audit Trail             │
 ├─────────────────────────────────────────────────────────────────────┤
 │  OBSERVE · DECIDE · ACT                                             │
-│  Lyte — Business Observability (PRISM Framework)                    │
-│  Aegis — Unified Defense & Intelligence (Defense/Command/Labs)      │
-│  Terra — NYC Real Estate Intelligence                               │
-│  Vessels — Maritime Intelligence & Fleet Operations                 │
+│  Lyte — Business Observability (PRISM Framework)    ← Operating Wedge │
+│  Aegis — Unified Defense & Intelligence             ← Expansion     │
+│  Terra — NYC Real Estate Intelligence               ← Expansion     │
+│  Vessels — Maritime Intelligence & Fleet Operations ← Expansion     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
-
-### The Five Platforms
-
-| Platform | Domain | Doctrine Role |
-|----------|--------|---------------|
-| **Lyte** | Business Observability | OBSERVE · INTERPRET · ROUTE |
-| **Vessels** | Maritime Intelligence | TRACK · ANALYZE · COMMAND |
-| **Aegis** | Unified Defense & Intelligence | DETECT · RESPOND · RESEARCH |
-| **Terra** | NYC Real Estate Intelligence | DISCOVER · UNDERWRITE · CLOSE |
-| **Carlota Jo** | Private Advisory & Strategy | ADVISE · POSITION · GROW |
-
-### Internal Systems
-
-| System | Role |
-|--------|------|
-| **Alloy** | Execution Fabric — workflow engine, audit trail, automation |
-| **INCA** | AI Research — model registry, experiment tracking (Aegis module) |
-| **Rosie** | Managed Security Operations (Aegis module) |
-
----
-
-## Screenshots
-
-| Lyte — Business Observability | Aegis — SOC Dashboard |
-|---|---|
-| ![Lyte](docs/screenshots/lyte-marketing.jpg) | ![Aegis SOC](docs/screenshots/aegis-soc-dashboard.jpg) |
-
-| Terra — Real Estate Intelligence | Vessels — Maritime Intelligence |
-|---|---|
-| ![Terra](docs/screenshots/terra-marketing.jpg) | ![Vessels](docs/screenshots/vessels-dashboard.jpg) |
-
-| Aegis — Marketing | Stephen Lutar — Founder Site |
-|---|---|
-| ![Aegis Marketing](docs/screenshots/aegis-marketing.jpg) | ![Stephen](docs/screenshots/stephen-site.jpg) |
-
----
-
-## Architecture
 
 This is a **pnpm monorepo** with a shared TypeScript foundation. Every frontend artifact is a Vite + React SPA. The API server is a single Express process serving all platform backends. PostgreSQL (Drizzle ORM) is the persistence layer. WebSocket provides real-time push to all clients.
 
@@ -76,13 +69,13 @@ This is a **pnpm monorepo** with a shared TypeScript foundation. Every frontend 
 /
 ├── artifacts/              # Deployable applications
 │   ├── api-server/         # Express API — all platform backends
+│   ├── szl-holdings/       # SZL Holdings — corporate site + Alloy console
 │   ├── lyte-command-center/# Lyte — Business Observability
 │   ├── firestorm/          # Aegis — Defense & Intelligence
 │   ├── terra/              # Terra — Real Estate Intelligence
 │   ├── vessels/            # Vessels — Maritime Intelligence
 │   ├── carlota-jo/         # Carlota Jo — Advisory web app
 │   ├── carlota-jo-mobile/  # Carlota Jo — Expo/React Native client app
-│   ├── szl-holdings/       # SZL Holdings — corporate site
 │   └── stephen-site/       # Stephen Lutar — founder authority site
 ├── lib/                    # Shared libraries
 │   ├── db/                 # Drizzle schema, migrations, seed
@@ -186,51 +179,39 @@ pnpm --filter @workspace/api-server build
 
 *"In the dark, let Lyte guide you."*
 
-The flagship platform. Lyte defines the category of **Business Observability** — the discipline of making every operational surface visible, contextual, and actionable. Built on the **PRISM** analytical framework:
-
-- **P**ulse — Business health, operating heartbeat, trend status
-- **R**isk — Approvals, churn, delays, ownership gaps, regulatory exposure
-- **I**ntelligence — Modeled reasoning, evidence, confidence, likely outcomes
-- **S**ignals — Anomalies, changes, event spikes, workflow drift
-- **M**otion — Escalations, routing, approvals, interventions, execution
-
-PRISM color system: Pulse (#10b981), Risk (#ef4444), Intelligence (#8b5cf6), Signals (#f59e0b), Motion (#0ea5e9).
+The flagship platform and operating wedge. Lyte defines the category of **Business Observability** — the discipline of making every operational surface visible, contextual, and actionable. Built on the **PRISM** analytical framework (Pulse / Risk / Intelligence / Signals / Motion).
 
 40+ connector integrations. 7 Pillars of Business Observability doctrine.
+
+### Alloy — Execution Fabric
+
+The internal platform that closes the loop. When Lyte surfaces a signal, Alloy routes the action. Workflow engine, audit trail, human-in-the-loop gates, and agent coordination — the infrastructure layer that makes business observability and execution accountability a reality.
 
 ### Aegis — Unified Defense & Intelligence
 
 *"One platform. Three workspaces. One shared intelligence layer."*
 
-Enterprise cybersecurity and managed services command console. Three workspaces sharing one data context:
-
-- **Defense** (red) — SOC operations, incident response, MITRE ATT&CK, threat intel
-- **Command** (blue) — Managed operations, SLA management, client oversight
-- **Labs** (violet) — AI research, model training, neural exploration
-
-Includes INCA (AI Research) and Rosie (Managed Security) as integrated modules.
+Enterprise cybersecurity and managed services command console. Three workspaces sharing one data context: Defense (SOC operations), Command (managed operations), Labs (AI research). Built on the same PRISM observability backbone as Lyte.
 
 ### Terra — NYC Real Estate Intelligence
 
 *"The distress intelligence platform built for NYC real estate."*
 
-Property intelligence for brokers, investors, and portfolio teams. Surfaces distressed properties, tracks ownership structures, manages deal pipelines, and delivers market intelligence — all from one operating surface.
-
-Six modules: Distress Intelligence, Ownership Intelligence, Deal Pipeline, Market Intelligence, Broker Operations, Investment Analysis.
+Property intelligence for brokers, investors, and portfolio teams. Surfaces distressed properties, tracks ownership structures, manages deal pipelines. Executes through Alloy's workflow fabric.
 
 ### Vessels — Maritime Intelligence
 
 *"Fleet operations. Decided faster."*
 
-Maritime command platform for fleet operators. Real-time AIS telemetry, voyage economics, route intelligence, maintenance readiness, dark vessel detection, sanctions screening, and Mapbox-powered fleet tracking.
+Maritime command platform for fleet operators. Real-time AIS telemetry, voyage economics, route intelligence, dark vessel detection, sanctions screening. All execution flows through Alloy.
 
 ### Carlota Jo — Private Advisory & Strategy
 
-Luxury consulting platform for brand strategy, advisory, and client engagement. Web app + native mobile client (Expo/React Native) with OIDC authentication, booking flows, document vault, and Stripe-powered billing.
+Luxury consulting platform for brand strategy, advisory, and client engagement. Web app + native mobile client (Expo/React Native). Principal advisory grounded in platform intelligence.
 
 ### SZL Holdings — Corporate Site
 
-The parent company site. Ecosystem overview, investor relations, trust center, compliance documentation, and contact. Presents the unified platform hierarchy.
+The parent company site. Ecosystem overview, investor relations, trust center, compliance documentation, and contact. Presents the unified platform hierarchy with Lyte + Alloy as the operating wedge.
 
 ### Stephen Lutar — Founder Authority Site
 
@@ -258,22 +239,6 @@ Stripe powers all commercial flows:
 - **Lyte**: Self-serve and enterprise pricing
 - **Vessels**: Enterprise sales model (contact-driven)
 
-Webhook signature verification uses raw request body for HMAC integrity. CSRF exemptions are configured for payment initiation endpoints (Stripe handles security on the payment side).
-
----
-
-## Email & Notifications
-
-Multi-channel notification pipeline:
-
-- **Email**: Resend (primary), SendGrid (fallback), SMTP (tertiary)
-- **Slack**: Webhook or Bot Token delivery for warning+ severity
-- **Microsoft Teams**: Webhook delivery for warning+ severity
-- **WebSocket**: Real-time push to connected clients
-- **In-app**: Toast notifications via WebSocket channel subscriptions
-
-Contact form submissions (Stephen Site, Carlota Jo) send dual emails: confirmation to the submitter, notification to the admin inbox.
-
 ---
 
 ## PDF Document Generation
@@ -290,6 +255,20 @@ Server-side PDF generation via pdfkit with 8 branded templates:
 | `aegis-assessment-report` | Security assessment |
 | `firestorm-incident-summary` | Incident post-mortem |
 | `carlota-engagement-summary` | Client engagement summary |
+
+---
+
+## Security & Trust
+
+- CSRF protection (double-submit cookie pattern) on all mutation endpoints
+- GraphQL depth limiting (max 10 levels)
+- WebSocket connection limits (max 500 concurrent)
+- HMAC-signed WebSocket tickets with TTL
+- Role-based access control on all API routes
+- Constant-time comparison for webhook secret validation
+- No secrets in client bundles — all sensitive config server-side only
+
+See [docs/trust-center.md](docs/trust-center.md) for the full security posture.
 
 ---
 
@@ -313,58 +292,6 @@ See [docs/deployment.md](docs/deployment.md) for full deployment guide.
 
 ---
 
-## Marketplace Integrations
-
-### Salesforce AppExchange (`packages/salesforce-appexchange/`)
-
-Custom objects, Apex callouts, and webhook listeners for bidirectional sync between Salesforce and the SZL platform. Webhook authentication uses HMAC-signed secrets.
-
-### Jira Marketplace (`packages/atlassian-connect/`)
-
-Atlassian Connect app with JWT-verified lifecycle hooks, issue panel integration, and persistent tenant storage. Syncs Jira issues as platform signals.
-
----
-
-## Security & Trust
-
-- CSRF protection (double-submit cookie pattern) on all mutation endpoints
-- GraphQL depth limiting (max 10 levels)
-- WebSocket connection limits (max 500 concurrent)
-- HMAC-signed WebSocket tickets with TTL
-- Role-based access control on all API routes
-- Per-tenant Power BI embed token scoping with RLS
-- Constant-time comparison for webhook secret validation
-- No secrets in client bundles — all sensitive config server-side only
-
-See [docs/trust-center.md](docs/trust-center.md) for the full security posture.
-
----
-
-## Environment Variables
-
-See [`.env.example`](.env.example) for the complete list. Key categories:
-
-| Category | Required | Notes |
-|----------|----------|-------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `SESSION_SECRET` | Yes | Cookie signing key |
-| `STRIPE_*` | No | Payments run in mock mode without keys |
-| `RESEND_API_KEY` | No | Email delivery disabled without key |
-| `MAPBOX_ACCESS_TOKEN` | No | Maps fall back to styled SVG without token |
-| `OPENAI_API_KEY` | No | AI features disabled without key |
-| `SLACK_WEBHOOK_URL` | No | Slack notifications disabled without URL |
-| `ALLOY_INTERNAL_TOKEN` | Recommended | Server-to-server auth for WebSocket, self-monitor |
-
----
-
-## Repository Policy
-
-This repository is the **public code mirror** of the live SZL Holdings platform workspace. The source of truth is the live Replit workspace. This mirror is updated periodically to reflect the current state of the platform.
-
-**Predecessor**: This repo succeeds the archived `stephenlutar2-hash/szl-holdings-platform` repository (if archived). All lineage traces back to the original repository.
-
----
-
 ## Documentation
 
 | Document | Description |
@@ -374,13 +301,18 @@ This repository is the **public code mirror** of the live SZL Holdings platform 
 | [Deployment](docs/deployment.md) | Deployment strategies, Azure IaC, CI/CD |
 | [Integrations](docs/integrations.md) | Third-party integrations, secrets map, connectors |
 | [Product Matrix](docs/product-matrix.md) | Platform inventory, naming, lane ownership |
-| [GitHub Mirror Policy](docs/github-mirror-policy.md) | Mirror update policy, branch strategy |
 | [Investor Narrative](docs/investor-narrative.md) | Company thesis, market positioning |
+
+---
+
+## Entity Ownership & Legal
+
+SZL Holdings is a private operating company. All platforms, IP, and trademarks are owned by SZL Holdings. Stephen Lutar is the founder and sole officer.
+
+**Contact**: [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com) · [LinkedIn](https://linkedin.com/in/stephen-l-279315240)
 
 ---
 
 ## License
 
 Proprietary. All rights reserved. SZL Holdings.
-
-**Contact**: [contact@stephenl.dev](mailto:contact@stephenl.dev) · [LinkedIn](https://linkedin.com/in/stephen-l-279315240)

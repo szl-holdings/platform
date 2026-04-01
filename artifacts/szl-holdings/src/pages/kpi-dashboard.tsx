@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { m } from "framer-motion";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
+import { DataStateBadge } from "@/components/DataStateBadge";
 import { useAuth } from "@workspace/replit-auth-web";
 import { Lock, TrendingUp, Ship, Layers, Eye, Shield, Sparkles, BarChart3, ArrowUpRight, RefreshCw } from "lucide-react";
 
@@ -185,7 +186,8 @@ export default function KpiDashboardPage() {
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 style={{ marginBottom: "2.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}
               >
-                <div>
+                <div style={{ position: "relative" }}>
+                  <DataStateBadge state="DEMO DATA" position="top-left" style={{ position: "relative", top: "auto", left: "auto", right: "auto", bottom: "auto", display: "inline-flex", marginBottom: "0.75rem" }} />
                   <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.5rem" }}>
                     Command Dashboard
                   </p>

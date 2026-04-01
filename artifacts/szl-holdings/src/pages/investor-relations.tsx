@@ -84,7 +84,7 @@ export default function InvestorRelationsPage() {
                 Focused now. Expandable later.
               </h1>
               <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "38rem", marginBottom: "2rem" }}>
-                SZL Holdings is building around a single wedge — operational risk that compounds between systems — and expanding when the architecture proves its value in adjacent domains. We're not selling a portfolio of ideas. We're building one compounding system.
+                SZL Holdings is built around a focused operating wedge: Lyte + Alloy, delivering business observability and execution accountability to organizations where unreliability is not a recoverable condition. The broader ecosystem — Aegis, Terra, Vessels, Carlota Jo — represents expansion paths built on the same shared architecture.
               </p>
               <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                 <a

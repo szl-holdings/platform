@@ -57,6 +57,19 @@ export function sendForbidden(res: Response, message = "Insufficient permissions
   sendError(res, message, 403, "FORBIDDEN");
 }
 
+export function sendMutation<T>(res: Response, data: T, status = 200): void {
+  res.status(status).json({ success: true, data, error: null });
+}
+
+export function sendMutationCreated<T>(res: Response, data: T): void {
+  sendMutation(res, data, 201);
+}
+
+export function sendMutationError(res: Response, error: string, status = 500, code?: string): void {
+  const correlationId = getOrCreateCorrelationId(res);
+  res.status(status).json({ success: false, data: null, error, code, correlationId });
+}
+
 export function parsePagination(query: Record<string, unknown>) {
   const page = Math.max(1, parseInt(String(query.page || "1"), 10) || 1);
   const limit = Math.min(100, Math.max(1, parseInt(String(query.limit || "50"), 10) || 50));

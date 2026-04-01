@@ -25,6 +25,8 @@ const StatusPage = lazy(() => import("@/pages/status"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
+const DemoPage = lazy(() => import("@/pages/demo"));
+const PricingPage = lazy(() => import("@/pages/pricing"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -147,6 +149,14 @@ function App() {
             </Route>
             <Route path="/investors">
               <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
+            </Route>
+
+            {/* Product pages — accessible but not in primary nav */}
+            <Route path="/demo">
+              <Suspense fallback={<PageLoader />}><DemoPage /></Suspense>
+            </Route>
+            <Route path="/pricing">
+              <Suspense fallback={<PageLoader />}><PricingPage /></Suspense>
             </Route>
 
             {/* Alloy internal routes — accessible but not in public nav */}

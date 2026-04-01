@@ -126,9 +126,14 @@ export function SiteFooter() {
         </div>
 
         <div style={{ paddingTop: "1.5rem", borderTop: "1px solid var(--color-szl-border)", display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center", justifyContent: "space-between" }}>
-          <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>
-            &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
-          </p>
+          <div>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>
+              &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
+            </p>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", marginTop: "0.25rem", opacity: 0.7 }}>
+              SZL Holdings · Stephen Lutar, Founder &amp; Officer · Proprietary platform ecosystem
+            </p>
+          </div>
           <div className="flex items-center gap-4 flex-wrap">
             <Link
               href="/legal/privacy"
@@ -153,6 +158,14 @@ export function SiteFooter() {
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
             >
               Accessibility
+            </Link>
+            <Link
+              href="/trust"
+              style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textDecoration: "none", transition: "color 0.18s ease" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
+            >
+              Trust
             </Link>
           </div>
         </div>

@@ -6,7 +6,11 @@
 
 ## Overview
 
-The SZL platform is built around a layered Business Observability architecture. Five platforms share one data layer, one execution fabric, and one AI engine. Each platform owns a domain vertical. The compounding value comes from shared infrastructure — not from portfolio diversity alone.
+The SZL platform is built around a focused operating wedge: **Lyte + Alloy**. Lyte delivers business observability — making every operational surface visible, contextual, and actionable through the PRISM framework. Alloy delivers execution accountability — the workflow engine, audit trail, and human-in-the-loop gates that close the loop from signal to confirmed action.
+
+The thesis: **business observability and execution accountability** delivered together, as a system, to organizations where execution drift compounds into operational failure.
+
+Four additional domain platforms (Aegis, Terra, Vessels, Carlota Jo) share the same architecture as expansion paths — one data layer, one execution fabric, one AI engine. The compounding value comes from shared infrastructure, not from portfolio diversity alone.
 
 ---
 
