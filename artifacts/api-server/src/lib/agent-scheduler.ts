@@ -39,6 +39,17 @@ async function fetchData(path: string): Promise<unknown> {
 
 export { fetchData, getInternalHeaders, BASE_URL };
 
+function safeSerialize(data: unknown, maxLen: number): string {
+  if (data == null) return "null";
+  if (Array.isArray(data)) {
+    const limited = data.slice(0, 20);
+    const s = JSON.stringify(limited);
+    return s.length > maxLen ? s.slice(0, maxLen) + "..." : s;
+  }
+  const s = JSON.stringify(data);
+  return s.length > maxLen ? s.slice(0, maxLen) + "..." : s;
+}
+
 export function registerDefaultSchedules() {
   const schedules = [
     {
@@ -55,7 +66,7 @@ export function registerDefaultSchedules() {
           fetchData("/api/intelligence/maritime/chokepoints"),
           fetchData("/api/intelligence/maritime/sanctions"),
         ]);
-        return `Analyze this maritime data and identify the top 1-2 most significant findings or anomalies:\n\nVessels: ${JSON.stringify(vessels)?.slice(0, 2000)}\nChokepoints: ${JSON.stringify(chokepoints)?.slice(0, 1000)}\nSanctions: ${JSON.stringify(sanctions)?.slice(0, 500)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return `Analyze this maritime data and identify the top 1-2 most significant findings or anomalies:\n\nVessels: ${safeSerialize(vessels, 2000)}\nChokepoints: ${safeSerialize(chokepoints, 1000)}\nSanctions: ${safeSerialize(sanctions, 500)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
       },
     },
     {
@@ -71,7 +82,7 @@ export function registerDefaultSchedules() {
           fetchData("/api/intelligence/threats"),
           fetchData("/api/intelligence/cves"),
         ]);
-        return `Analyze this security data and identify the top 1-2 most significant findings:\n\nThreats: ${JSON.stringify(threats)?.slice(0, 2000)}\nCVEs: ${JSON.stringify(cves)?.slice(0, 1000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return `Analyze this security data and identify the top 1-2 most significant findings:\n\nThreats: ${safeSerialize(threats, 2000)}\nCVEs: ${safeSerialize(cves, 1000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
       },
     },
     {
@@ -87,7 +98,7 @@ export function registerDefaultSchedules() {
           fetchData("/api/lyte/executive-summary"),
           fetchData("/api/lyte/signals"),
         ]);
-        return `Analyze this system health data and identify the top 1-2 most significant findings:\n\nHealth: ${JSON.stringify(health)?.slice(0, 2000)}\nSignals: ${JSON.stringify(signals)?.slice(0, 1000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return `Analyze this system health data and identify the top 1-2 most significant findings:\n\nHealth: ${safeSerialize(health, 2000)}\nSignals: ${safeSerialize(signals, 1000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
       },
     },
     {
@@ -104,7 +115,7 @@ export function registerDefaultSchedules() {
           fetchData("/api/inca/models"),
           fetchData("/api/inca/insights"),
         ]);
-        return `Analyze this research data and identify the top 1-2 most significant findings:\n\nExperiments: ${JSON.stringify(experiments)?.slice(0, 1500)}\nModels: ${JSON.stringify(models)?.slice(0, 800)}\nInsights: ${JSON.stringify(insights)?.slice(0, 500)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return `Analyze this research data and identify the top 1-2 most significant findings:\n\nExperiments: ${safeSerialize(experiments, 1500)}\nModels: ${safeSerialize(models, 800)}\nInsights: ${safeSerialize(insights, 500)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
       },
     },
     {
@@ -119,7 +130,7 @@ export function registerDefaultSchedules() {
         const [geoEvents] = await Promise.all([
           fetchData("/api/intelligence/geopolitical"),
         ]);
-        return `Analyze this geopolitical data for real estate market impact and identify the top 1-2 most significant findings:\n\nGeopolitical Events: ${JSON.stringify(geoEvents)?.slice(0, 2000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return `Analyze this geopolitical data for real estate market impact and identify the top 1-2 most significant findings:\n\nGeopolitical Events: ${safeSerialize(geoEvents, 2000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
       },
     },
     {
@@ -134,7 +145,7 @@ export function registerDefaultSchedules() {
         const [health] = await Promise.all([
           fetchData("/api/services/health"),
         ]);
-        return `Analyze this services data and identify the top 1-2 most significant findings for managed service delivery:\n\nServices Health: ${JSON.stringify(health)?.slice(0, 2000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
+        return `Analyze this services data and identify the top 1-2 most significant findings for managed service delivery:\n\nServices Health: ${safeSerialize(health, 2000)}\n\nRespond with findings in this format:\nFINDING: [title]\nSEVERITY: [low|medium|high|critical]\nSUMMARY: [2-3 sentence summary]\nTAGS: [comma-separated tags]`;
       },
     },
   ];
