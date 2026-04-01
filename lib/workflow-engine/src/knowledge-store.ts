@@ -48,7 +48,7 @@ export interface KnowledgeQuery {
   minConfidence?: number;
 }
 
-const MAX_ENTRIES = 2000;
+const MAX_ENTRIES = 500;
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
 export class KnowledgeStore {

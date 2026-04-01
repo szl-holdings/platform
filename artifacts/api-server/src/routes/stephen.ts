@@ -407,13 +407,13 @@ router.post("/stephen/booking-requests", async (req, res) => {
 });
 
 const PLATFORM_HEALTH_URLS: Record<string, string> = {
-  "szl-holdings": `http://localhost:${process.env.SZL_PORT || 80}/szl-holdings/`,
-  "alloy": `http://localhost:${process.env.ALLOY_PORT || 25500}/alloy/`,
-  "lyte": `http://localhost:${process.env.LYTE_PORT || 25501}/lyte-command-center/`,
-  "vessels": `http://localhost:${process.env.VESSELS_PORT || 25502}/vessels/`,
-  "aegis": `http://localhost:${process.env.AEGIS_PORT || 25503}/firestorm/`,
-  "terra": `http://localhost:${process.env.TERRA_PORT || 25504}/terra/`,
-  "carlota-jo": `http://localhost:${process.env.CARLOTA_PORT || 25505}/carlota-jo/`,
+  "szl-holdings": "http://localhost:80/szl-holdings/",
+  "alloy": "http://localhost:80/szl-holdings/alloy",
+  "lyte": "http://localhost:80/lyte-command-center/",
+  "vessels": "http://localhost:80/vessels/",
+  "aegis": "http://localhost:80/firestorm/",
+  "terra": "http://localhost:80/terra/",
+  "carlota-jo": "http://localhost:80/carlota-jo/",
 };
 
 async function probeHealth(url: string): Promise<"operational" | "degraded"> {
