@@ -1,3 +1,15 @@
+/**
+ * Legacy multi-platform banner generator (PDFKit → PDF).
+ *
+ * For the production LinkedIn PNG banner (1584×396) featuring the
+ * "7 Lenses of Business Observability" framework, use instead:
+ *
+ *   NODE_PATH=$(npm root -g) node social-content/generate-linkedin-7lenses-banner.js
+ *
+ * Requires: sharp (installed globally — `npm install -g sharp`)
+ * Output:   social-content/banners/linkedin-7-lenses-banner.png
+ */
+
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
