@@ -68,6 +68,7 @@ import apmRouter from "./apm";
 import scimRouter from "./scim";
 import pushTokensRouter from "./push-tokens";
 import pushNotificationsRouter from "./push-notifications";
+import backupRouter from "./backup";
 
 const router: IRouter = Router();
 
@@ -250,5 +251,8 @@ router.use("/push-tokens", writeLimiter);
 router.use(pushTokensRouter);
 router.use("/push-notifications", writeLimiter);
 router.use(pushNotificationsRouter);
+
+router.use("/admin/backup", writeLimiter);
+router.use(backupRouter);
 
 export default router;
