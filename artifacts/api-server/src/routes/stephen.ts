@@ -11,7 +11,7 @@ import {
 import { z } from "zod";
 import { eq, desc, asc } from "drizzle-orm";
 
-const CONTENT_BLOCK_TYPES = ["achievement", "about", "service", "stat", "skill"] as const;
+const CONTENT_BLOCK_TYPES = ["achievement", "about", "service", "stat", "skill", "thesis", "doctrine"] as const;
 const BOOKING_TYPES = ["consultation", "project", "recruitment", "partnership", "investment", "speaking", "other"] as const;
 
 const ListStephenContentBlocksQueryParams = z.object({ type: z.enum(CONTENT_BLOCK_TYPES).optional() });
