@@ -139,12 +139,19 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   const [, navigate] = useLocation();
   const prevAuth = useRef(isAuthenticated);
 
+  const params = new URLSearchParams(window.location.search);
+  const demoMode = params.get("view") === "app" || params.get("demo") === "true";
+
   useEffect(() => {
     if (!prevAuth.current && isAuthenticated) {
       navigate("/dashboard");
     }
     prevAuth.current = isAuthenticated;
   }, [isAuthenticated, navigate]);
+
+  if (demoMode) {
+    return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+  }
 
   if (isLoading) {
     return (

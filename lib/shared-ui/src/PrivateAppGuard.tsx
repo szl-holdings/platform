@@ -12,6 +12,7 @@ export interface PrivateAppGuardProps {
  * Wraps an entire private app with authentication enforcement.
  * Unauthenticated users see a styled sign-in prompt instead of the app.
  * Used in /app/* surfaces: Alloy, Lyte, Terra, Vessels dashboard, etc.
+ * Supports ?demo=true or ?view=app query params to bypass auth for demo mode.
  */
 export function PrivateAppGuard({
   children,
@@ -20,8 +21,14 @@ export function PrivateAppGuard({
   loadingColor,
 }: PrivateAppGuardProps) {
   const { isLoading, isAuthenticated, login } = useAuth();
+  const params = new URLSearchParams(window.location.search);
+  const isDemoMode = params.get("demo") === "true" || params.get("view") === "app";
 
   const color = loadingColor ?? accentColor;
+
+  if (isDemoMode) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (

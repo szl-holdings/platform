@@ -273,14 +273,14 @@ export default function MarketingHomePage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-start gap-3"
             >
-              <Link href="/demo">
+              <a href="./dashboard?demo=true">
                 <button className="flex items-center gap-2 px-7 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-[#050c17] font-semibold text-[13px] tracking-wide transition-all duration-200">
-                  Request a demo <ChevronRight className="w-3.5 h-3.5" />
+                  Enter Fleet Command <ChevronRight className="w-3.5 h-3.5" />
                 </button>
-              </Link>
-              <Link href="/platform">
+              </a>
+              <Link href="/demo">
                 <button className="flex items-center gap-2 px-7 py-3.5 border border-sky-500/15 hover:border-sky-400/30 text-sky-300/70 hover:text-sky-200 font-medium text-[13px] transition-all duration-200">
-                  Explore platform <ArrowRight className="w-3.5 h-3.5" />
+                  Request a demo <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </Link>
             </m.div>
@@ -490,14 +490,14 @@ export default function MarketingHomePage() {
               A private walkthrough tailored to your fleet, routes, and operational priorities.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/demo">
+              <a href="./dashboard?demo=true">
                 <button className="px-8 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-[#050c17] font-semibold text-[13px] transition-all duration-200">
-                  Request a private demo
+                  Enter Fleet Command Demo
                 </button>
-              </Link>
-              <Link href="/dashboard">
+              </a>
+              <Link href="/demo">
                 <button className="px-6 py-3.5 text-[13px] text-sky-400/50 hover:text-sky-300 transition-colors font-medium">
-                  Explore the platform <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
+                  Request a private demo <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
                 </button>
               </Link>
             </div>

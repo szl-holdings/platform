@@ -207,10 +207,13 @@ function App() {
               <ExternalRedirect to="/lyte-command-center/use-cases" />
             </Route>
             <Route path="/lyte/demo">
-              <ExternalRedirect to="/lyte-command-center/demo" />
+              <ExternalRedirect to="/lyte-command-center/?view=app" />
             </Route>
             <Route path="/vessels">
               <ExternalRedirect to="/vessels/" />
+            </Route>
+            <Route path="/vessels/demo">
+              <ExternalRedirect to="/vessels/dashboard?demo=true" />
             </Route>
             <Route path="/vessels/platform">
               <ExternalRedirect to="/vessels/platform" />
@@ -271,6 +274,9 @@ function App() {
             </Route>
             <Route path="/terra">
               <Suspense fallback={<PageLoader />}><TerraPage /></Suspense>
+            </Route>
+            <Route path="/terra/demo">
+              <ExternalRedirect to="/terra/dashboard?demo=true" />
             </Route>
             <Route path="/terra/platform">
               <Suspense fallback={<PageLoader />}><TerraPlatformPage /></Suspense>

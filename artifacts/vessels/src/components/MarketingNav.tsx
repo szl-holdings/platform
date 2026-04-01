@@ -59,12 +59,12 @@ export function MarketingNav() {
           >
             Sign In
           </Link>
-          <Link
-            href="/demo"
+          <a
+            href="./dashboard?demo=true"
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold text-[#060e1a] bg-sky-400 hover:bg-sky-300 transition-colors"
           >
-            Request demo <ChevronRight size={13} />
-          </Link>
+            Try Demo <ChevronRight size={13} />
+          </a>
         </div>
 
         <button

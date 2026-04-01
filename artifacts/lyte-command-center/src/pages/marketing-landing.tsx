@@ -162,10 +162,10 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         <Reveal delay={400}>
           <div className="flex flex-wrap gap-3 mb-24">
             <button onClick={onSignIn} className="text-[13px] font-semibold rounded-lg px-7 py-3 flex items-center gap-2 transition-all hover:shadow-lg" style={{ background: "#d4a054", color: "#0a0d14", boxShadow: "0 0 24px rgba(212,160,84,0.08)" }}>
-              Start Free Trial <ArrowRight size={14} />
+              Sign In <ArrowRight size={14} />
             </button>
-            <button className="text-[13px] font-medium border rounded-lg px-7 py-3 transition-all" style={{ color: "rgba(255,255,255,0.3)", borderColor: "rgba(255,255,255,0.07)" }}>
-              Request a Demo
+            <button onClick={() => { window.location.href = "/lyte-command-center/?view=app"; }} className="text-[13px] font-medium border rounded-lg px-7 py-3 transition-all hover:border-[rgba(212,160,84,0.3)] hover:text-[rgba(212,160,84,0.8)]" style={{ color: "rgba(255,255,255,0.5)", borderColor: "rgba(255,255,255,0.12)" }}>
+              Try Live Demo →
             </button>
           </div>
         </Reveal>

@@ -184,6 +184,14 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const { isLoading, isAuthenticated, login } = useAuth();
 
+  const params = new URLSearchParams(window.location.search);
+  const forceWebsite = params.get("view") === "website";
+  const forceApp = params.get("view") === "app" || params.get("demo") === "true";
+
+  if (forceApp) {
+    return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
+  }
+
   if (isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#080c14" }}>
@@ -192,11 +200,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     );
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const forceWebsite = params.get("view") === "website";
-  const forceApp = params.get("view") === "app";
-
-  if ((!isAuthenticated || forceWebsite) && !forceApp) {
+  if (!isAuthenticated || forceWebsite) {
     return (
       <Suspense fallback={<div style={{ height: "100vh", background: "#080c14" }} />}>
         <LyteMarketingLanding onSignIn={login} />

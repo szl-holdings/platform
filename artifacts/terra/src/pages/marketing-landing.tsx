@@ -195,8 +195,8 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
             <button onClick={onSignIn} className="inline-flex items-center gap-2 text-[13px] font-semibold px-7 py-3 rounded-lg transition-all" style={{ background: ACCENT_LIGHT, color: "#fff" }}>
               Sign In <ArrowRight size={14} />
             </button>
-            <a href="#access" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.07)" }}>
-              Request Enterprise Access
+            <a href="./dashboard?demo=true" className="inline-flex items-center gap-2 text-[13px] font-medium px-7 py-3 rounded-lg transition-all" style={{ color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)" }}>
+              Try Platform Demo →
             </a>
           </div>
         </Reveal>

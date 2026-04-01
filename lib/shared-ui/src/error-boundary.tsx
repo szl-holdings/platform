@@ -153,7 +153,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.props.onError?.(error, errorInfo);
 
     try {
-      import("@sentry/react").then((Sentry) => {
+      const pkg = "@sentry/react";
+      import(/* @vite-ignore */ pkg).then((Sentry) => {
         if (Sentry.isInitialized()) {
           Sentry.captureException(error, {
             contexts: { react: { componentStack: errorInfo.componentStack } },
