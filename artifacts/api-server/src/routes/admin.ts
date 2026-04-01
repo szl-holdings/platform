@@ -1206,6 +1206,63 @@ adminRouter.get("/admin/health-dashboard", async (_req, res) => {
   });
 });
 
+adminRouter.get("/admin/push-tokens/stats", async (_req, res) => {
+  try {
+    const { pushTokensTable } = await import("@workspace/db");
+    const { sql: drizzleSql, eq } = await import("drizzle-orm");
+    const totalResult = await db.select({ count: drizzleSql<number>`count(*)::int` }).from(pushTokensTable);
+    const activeResult = await db.select({ count: drizzleSql<number>`count(*)::int` }).from(pushTokensTable).where(eq(pushTokensTable.isActive, true));
+    const byPlatform = await db
+      .select({
+        platform: pushTokensTable.platform,
+        count: drizzleSql<number>`count(*)::int`,
+      })
+      .from(pushTokensTable)
+      .where(eq(pushTokensTable.isActive, true))
+      .groupBy(pushTokensTable.platform);
+    const byApp = await db
+      .select({
+        appId: pushTokensTable.appId,
+        count: drizzleSql<number>`count(*)::int`,
+      })
+      .from(pushTokensTable)
+      .where(eq(pushTokensTable.isActive, true))
+      .groupBy(pushTokensTable.appId);
+    res.json({
+      total: totalResult[0]?.count ?? 0,
+      active: activeResult[0]?.count ?? 0,
+      byPlatform,
+      byApp,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch push token stats" });
+  }
+});
+
+adminRouter.post("/admin/push-notifications/broadcast", async (req, res) => {
+  try {
+    const { title, body, data, template, vars } = req.body;
+    const { sendPushBroadcast } = await import("../lib/expo-push");
+    const { buildPushMessage } = await import("../lib/push-templates");
+
+    let payload;
+    if (template) {
+      payload = buildPushMessage(template, vars ?? {});
+    } else {
+      if (!title || !body) {
+        res.status(400).json({ error: "title and body are required" });
+        return;
+      }
+      payload = { title, body, data: data ?? {}, sound: "default" as const };
+    }
+
+    const result = await sendPushBroadcast(payload);
+    res.json({ success: true, sent: result.sent, failed: result.failed });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to send broadcast push notification" });
+  }
+});
+
 adminRouter.get("/admin/environment/full", (_req, res) => {
   const { validateStartupConfig } = require("../lib/startup-validation");
   const result = validateStartupConfig();

@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
+import { NotificationBell } from "@/components/NotificationCenter";
 
 const ENGAGEMENT_STAGES = [
   { phase: "Discovery Call", status: "complete" as const, dates: "Feb 15, 2026" },
@@ -219,9 +220,12 @@ export default function DashboardScreen() {
         }
       >
         <View style={styles.greeting}>
-          <Text style={[styles.greetingEyebrow, { color: colors.goldSubtle }]}>
-            CLIENT PORTAL
-          </Text>
+          <View style={styles.greetingHeaderRow}>
+            <Text style={[styles.greetingEyebrow, { color: colors.goldSubtle }]}>
+              CLIENT PORTAL
+            </Text>
+            <NotificationBell size={18} />
+          </View>
           {authLoading ? (
             <View style={{ gap: 8 }}>
               <SkeletonLoader width="60%" height={20} />
@@ -310,11 +314,16 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20 },
   greeting: { marginBottom: 28 },
+  greetingHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
   greetingEyebrow: {
     fontSize: 9,
     fontFamily: "Inter_500Medium",
     letterSpacing: 3,
-    marginBottom: 10,
   },
   greetingName: {
     fontSize: 28,

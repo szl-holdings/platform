@@ -66,6 +66,8 @@ import integrationsRouter from "./integrations";
 import configRouter from "./config";
 import apmRouter from "./apm";
 import scimRouter from "./scim";
+import pushTokensRouter from "./push-tokens";
+import pushNotificationsRouter from "./push-notifications";
 
 const router: IRouter = Router();
 
@@ -243,5 +245,10 @@ router.use("/documents", writeLimiter);
 router.use(documentsRouter);
 
 router.use(scimRouter);
+
+router.use("/push-tokens", writeLimiter);
+router.use(pushTokensRouter);
+router.use("/push-notifications", writeLimiter);
+router.use(pushNotificationsRouter);
 
 export default router;
