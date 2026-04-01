@@ -6,6 +6,10 @@ SZL Holdings designs and operates enterprise command systems that connect operat
 
 Founded and operated by [Stephen Lutar](https://linkedin.com/in/stephen-l-279315240).
 
+[![CI](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/ci.yml)
+[![Build](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/build.yml)
+[![Deploy](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/stephenlutar2-hash/szl-holdings-platform/actions/workflows/deploy.yml)
+
 ![SZL Holdings](docs/screenshots/szl-holdings-home.jpg)
 
 ---
