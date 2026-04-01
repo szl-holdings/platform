@@ -139,21 +139,21 @@ function WorkflowDrawer({ workflow, onClose, onUpdate, onRunNow }: { workflow: W
           </div>
         </div>
 
-        {(meta.owner || meta.team || meta.sla_deadline || meta.value_at_risk) && (
+        {!!(meta.owner || meta.team || meta.sla_deadline || meta.value_at_risk) && (
           <div className="p-5 border-b border-white/5 grid grid-cols-2 gap-3">
-            {meta.owner && (
+            {!!meta.owner && (
               <div className="bg-white/3 rounded-lg p-3 border border-white/5">
                 <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>Owner</div>
                 <div className="text-[11px] text-white flex items-center gap-1"><User className="w-3 h-3 text-blue-400/50" />{meta.owner as string}</div>
               </div>
             )}
-            {meta.team && (
+            {!!meta.team && (
               <div className="bg-white/3 rounded-lg p-3 border border-white/5">
                 <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>Team</div>
                 <div className="text-[11px] text-white">{meta.team as string}</div>
               </div>
             )}
-            {meta.sla_deadline && (
+            {!!meta.sla_deadline && (
               <div className="bg-white/3 rounded-lg p-3 border border-white/5">
                 <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.3)" }}>SLA Deadline</div>
                 <div className="text-[11px] text-white flex items-center gap-1"><Clock className="w-3 h-3 text-amber-400/50" />{meta.sla_deadline as string}</div>
@@ -402,7 +402,7 @@ export default function WorkflowOrchestration() {
                 <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
                   Updated {new Date(w.updatedAt).toLocaleDateString()}
                 </span>
-                <XCircle className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" style={{ color: "rgba(255,255,255,0.2)" }} title="Archive" onClick={() => updateWorkflow.mutate({ id: w.id, status: "archived" })} />
+                <XCircle className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" aria-label="Archive" style={{ color: "rgba(255,255,255,0.2)" }} onClick={() => updateWorkflow.mutate({ id: w.id, status: "archived" })} />
               </div>
             </div>
           );

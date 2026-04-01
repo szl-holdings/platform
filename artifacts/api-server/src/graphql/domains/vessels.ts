@@ -60,7 +60,7 @@ export const vesselsResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(vesselsTable).orderBy(desc(vesselsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
-          return await query.where(eq(vesselsTable.status, args.status));
+          return await query.where(eq(vesselsTable.status, args.status as any));
         }
         return await query;
       } catch {
@@ -72,7 +72,7 @@ export const vesselsResolvers = {
         const { db } = await import("@workspace/db");
         const { vesselsTable } = await import("@workspace/db/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(vesselsTable).where(eq(vesselsTable.id, args.id)).limit(1);
+        const rows = await db.select().from(vesselsTable).where(eq(vesselsTable.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
@@ -85,7 +85,7 @@ export const vesselsResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(vesselsPositionsTable).orderBy(desc(vesselsPositionsTable.recordedAt)).limit(args.limit ?? 100);
         if (args.vesselId) {
-          return await query.where(eq(vesselsPositionsTable.vesselId, args.vesselId));
+          return await query.where(eq(vesselsPositionsTable.vesselId, parseInt(args.vesselId, 10)));
         }
         return await query;
       } catch {
@@ -98,8 +98,8 @@ export const vesselsResolvers = {
         const { vesselsRoutesTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.vesselId) conditions.push(eq(vesselsRoutesTable.vesselId, args.vesselId));
-        if (args.status) conditions.push(eq(vesselsRoutesTable.status, args.status));
+        if (args.vesselId) conditions.push(eq(vesselsRoutesTable.vesselId, parseInt(args.vesselId, 10)));
+        if (args.status) conditions.push(eq(vesselsRoutesTable.status, args.status as any));
         const query = db.select().from(vesselsRoutesTable).orderBy(desc(vesselsRoutesTable.departureAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -115,8 +115,8 @@ export const vesselsResolvers = {
         const { vesselsEventsTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.vesselId) conditions.push(eq(vesselsEventsTable.vesselId, args.vesselId));
-        if (args.severity) conditions.push(eq(vesselsEventsTable.severity, args.severity));
+        if (args.vesselId) conditions.push(eq(vesselsEventsTable.vesselId, parseInt(args.vesselId, 10)));
+        if (args.severity) conditions.push(eq(vesselsEventsTable.severity, args.severity as any));
         const query = db.select().from(vesselsEventsTable).orderBy(desc(vesselsEventsTable.occurredAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));

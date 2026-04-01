@@ -48,7 +48,7 @@ function renderTextNode(node: TextNode, key: number): React.ReactElement {
   if (node.underline) styleArr.push(styles.underline);
   if (node.code) styleArr.push(styles.code);
   if (node.color) styleArr.push({ color: node.color });
-  return React.createElement(Text, { key, style: styleArr.length ? styleArr : undefined }, text);
+  return React.createElement(Text, { key, style: styleArr.length ? styleArr : undefined } as any, text);
 }
 
 function renderInline(children: TextNode[]): React.ReactElement {
@@ -63,7 +63,7 @@ function renderInline(children: TextNode[]): React.ReactElement {
     if (node.underline) styleArr.push(styles.underline);
     if (node.code) styleArr.push(styles.code);
     if (node.color) styleArr.push({ color: node.color });
-    return React.createElement(Text, { style: styleArr.length ? styleArr : undefined }, node.text || "");
+    return React.createElement(Text, { style: styleArr.length ? styleArr : undefined } as any, node.text || "");
   }
   return React.createElement(Text, {}, ...children.map(renderTextNode));
 }

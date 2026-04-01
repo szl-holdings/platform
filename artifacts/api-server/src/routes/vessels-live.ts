@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -12,7 +12,7 @@ const vesLiveLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Vessels live rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const cache = new Map<string, { data: unknown; expiry: number; fetchedAt: number; source: string }>();
 
@@ -118,7 +118,7 @@ async function fetchDigitrafficAis(): Promise<{ vessels: typeof DEMO_AIS_VESSELS
       };
     });
 
-    return { vessels, source: "live-digitraffic" };
+    return { vessels: vessels as any, source: "live-digitraffic" };
   } catch {
     return { vessels: DEMO_AIS_VESSELS, source: "demo" };
   }
@@ -164,7 +164,7 @@ router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }
     const provider = (req.query.provider as string) ?? "digitraffic";
     const cacheKey = `ais-${provider}`;
 
-    const result = await getCached(cacheKey, 5 * 60 * 1000, async () => {
+    const result = await getCached<any>(cacheKey, 5 * 60 * 1000, async () => {
       const fetched = provider === "barentswatch" ? await fetchBarentsWatchAis() : await fetchDigitrafficAis();
       return { data: fetched.vessels, source: fetched.source };
     });
@@ -186,7 +186,7 @@ router.get("/vessels/live/ais", vesLiveLimit, authMiddleware({ required: false }
 
 router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const result = await getCached("ais-combined", 5 * 60 * 1000, async () => {
+    const result = await getCached<any>("ais-combined", 5 * 60 * 1000, async () => {
       const [digitraffic, barentswatch] = await Promise.allSettled([
         fetchDigitrafficAis(),
         fetchBarentsWatchAis(),
@@ -222,7 +222,7 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
 router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const { mmsi } = req.params;
-    const result = await getCached(`vessel-details-${mmsi}`, 5 * 60 * 1000, async () => {
+    const result = await getCached<any>(`vessel-details-${mmsi}`, 5 * 60 * 1000, async () => {
       try {
         const data = await fetchJson(
           `https://meri.digitraffic.fi/api/ais/v1/vessels/${mmsi}`,
@@ -274,7 +274,7 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
   try {
     const lat = parseFloat(req.query.lat as string) || 60.0;
     const lon = parseFloat(req.query.lon as string) || 25.0;
-    const result = await getCached(`weather-marine-${lat.toFixed(2)}-${lon.toFixed(2)}`, 15 * 60 * 1000, async () => {
+    const result = await getCached<any>(`weather-marine-${lat.toFixed(2)}-${lon.toFixed(2)}`, 15 * 60 * 1000, async () => {
       try {
         const raw = await fetchJson(
           `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_direction,wave_period,wind_wave_height,swell_wave_height,swell_wave_period,swell_wave_direction&current=wave_height,wind_wave_height,swell_wave_height,wave_direction,wave_period&timezone=UTC&forecast_days=3`,
@@ -348,7 +348,7 @@ router.get("/vessels/live/weather", vesLiveLimit, authMiddleware({ required: fal
 
 router.get("/vessels/live/fleet-summary", vesLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const result = await getCached("fleet-summary", 5 * 60 * 1000, async () => {
+    const result = await getCached<any>("fleet-summary", 5 * 60 * 1000, async () => {
       try {
         const [dt, bw] = await Promise.allSettled([
           fetchDigitrafficAis(),

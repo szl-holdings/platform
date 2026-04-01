@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import { db } from "@workspace/db";
 import { aiSafetyEvents, agentModelAssignments, agentUsageStats } from "@workspace/db";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
@@ -13,7 +13,7 @@ const safetyRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const PROMPT_INJECTION_PATTERNS = [
   /ignore\s+(previous|all|prior)\s+instructions?/gi,

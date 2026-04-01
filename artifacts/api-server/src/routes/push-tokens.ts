@@ -65,7 +65,7 @@ router.post("/push-tokens", authMiddleware(), async (req, res) => {
 
 router.delete("/push-tokens/:token", authMiddleware(), async (req, res) => {
   try {
-    const { token } = req.params;
+    const { token } = req.params as Record<string, string>;
     const userId = req.user!.id;
 
     await db

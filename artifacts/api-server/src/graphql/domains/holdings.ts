@@ -101,7 +101,7 @@ export const holdingsResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(holdingsVenturesTable).orderBy(desc(holdingsVenturesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
-          return await query.where(eq(holdingsVenturesTable.status, args.status));
+          return await query.where(eq(holdingsVenturesTable.status, args.status as any));
         }
         return await query;
       } catch {
@@ -124,7 +124,7 @@ export const holdingsResolvers = {
         const { db } = await import("@workspace/db");
         const { holdingsVenturesTable } = await import("@workspace/db/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.slug, args.slug)).limit(1);
+        const rows = await db.select().from(holdingsVenturesTable).where(eq(holdingsVenturesTable.slug, args.slug as any)).limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
@@ -157,7 +157,7 @@ export const holdingsResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(holdingsInquiriesTable).orderBy(desc(holdingsInquiriesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
-          return await query.where(eq(holdingsInquiriesTable.status, args.status));
+          return await query.where(eq(holdingsInquiriesTable.status, args.status as any));
         }
         return await query;
       } catch {

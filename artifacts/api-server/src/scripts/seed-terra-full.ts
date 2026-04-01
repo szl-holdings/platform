@@ -18,7 +18,7 @@ function rand(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function pick<T>(arr: T[]): T {
+function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]!;
 }
 
@@ -256,7 +256,7 @@ function generateProperties(): InsertTerraDistressProperty[] {
       const distressType = pick(DISTRESS_TYPES);
       const propertyType = pick(PROPERTY_TYPES);
       const ownerType = pick(OWNER_TYPES);
-      const stage = pick(STAGES_BY_TYPE[distressType] ?? ["unknown"]);
+      const stage = pick(STAGES_BY_TYPE[distressType as string] ?? ["unknown"]);
       const daysInDistress = rand(14, 480);
       const filingDate = dateStr(daysInDistress + rand(0, 10));
       const lastActivityDate = dateStr(rand(1, 60));
@@ -320,7 +320,7 @@ function generateProperties(): InsertTerraDistressProperty[] {
       const distressType = pick(DISTRESS_TYPES);
       const propertyType = pick(PROPERTY_TYPES);
       const ownerType = pick(OWNER_TYPES);
-      const stage = pick(STAGES_BY_TYPE[distressType] ?? ["unknown"]);
+      const stage = pick(STAGES_BY_TYPE[distressType as string] ?? ["unknown"]);
       const daysInDistress = rand(14, 480);
       const filingDate = dateStr(daysInDistress + rand(0, 10));
       const lastActivityDate = dateStr(rand(1, 60));
@@ -619,7 +619,7 @@ async function main() {
   const leadDbIds: number[] = [];
   for (const lead of leads) {
     try {
-      const result = await db.insert(terraLeadsTable).values(lead).onConflictDoNothing({ target: terraLeadsTable.externalId }).returning({ id: terraLeadsTable.id });
+      const result = await db.insert(terraLeadsTable).values(lead as any).onConflictDoNothing({ target: terraLeadsTable.externalId }).returning({ id: terraLeadsTable.id });
       if (result[0]) leadDbIds.push(result[0].id);
     } catch (err) {
       console.error(`  ! Failed lead: ${lead.externalId}`, err);

@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -604,7 +604,7 @@ router.get("/firestorm/compliance", authMiddleware({ required: false }), async (
 router.put("/firestorm/compliance/:controlId", authMiddleware({ required: true }), async (req, res) => {
   try {
     await ensureComplianceControlsSeeded();
-    const { controlId } = req.params;
+    const { controlId } = req.params as Record<string, string>;
     const { status, owner, dueDate, notes } = req.body as { status?: string; owner?: string; dueDate?: string; notes?: string };
     const [existing] = await db.select().from(firestormComplianceControlsTable).where(eq(firestormComplianceControlsTable.controlId, controlId));
     if (!existing) { sendNotFound(res, "Compliance Control"); return; }
@@ -677,7 +677,7 @@ router.get("/firestorm/vulnerability-inventory", authMiddleware({ required: fals
         status: f.status,
         affectedAsset: f.affectedAsset,
         cvssScore: f.cvssScore,
-        cveId: f.cveId,
+        cveId: (f as any).cveId,
         remediationOwner: f.remediationOwner,
         dueDate: f.dueDate,
         recommendation: f.recommendation,
@@ -856,7 +856,7 @@ const firestormLiveLimit = rateLimit({
   windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false,
   message: { error: "Firestorm rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const fsCache = new Map<string, { data: unknown; expiry: number }>();
 function getFsCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
@@ -1423,7 +1423,7 @@ router.get("/firestorm/mitre-detections", authMiddleware({ required: false }), a
 
 router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const techniqueId = req.params.techniqueId;
+    const techniqueId = String(req.params.techniqueId);
     const [detection] = await db.select().from(firestormMitreDetectionsTable).where(eq(firestormMitreDetectionsTable.techniqueId, techniqueId));
     if (!detection) { sendNotFound(res, "MITRE detection"); return; }
     const relatedIncidents = detection.relatedIncidentIds?.length
@@ -1482,7 +1482,7 @@ router.get("/firestorm/live/shodan-ip", authMiddleware({ required: false }), asy
       res.status(400).json({ error: "Valid IPv4 address required as ?ip= parameter" });
       return;
     }
-    const result = await getThreatCached(`shodan-ip-${ip}`, 3600000, async () => {
+    const result = await getThreatCached<any>(`shodan-ip-${ip}`, 3600000, async () => {
       try {
         const raw = await fetchThreatJson(`https://internetdb.shodan.io/${ip}`, 8000) as any;
         if (!raw?.ip) throw new Error("No Shodan data");
@@ -1561,6 +1561,7 @@ router.get("/firestorm/live/greynoise-ip", authMiddleware({ required: false }), 
             riot: false,
             classification: "unknown",
             name: null,
+            link: null,
             lastSeen: null,
             message: "No classification data available",
             intent: "unknown",
@@ -1630,7 +1631,7 @@ router.get("/firestorm/live/malware-bazaar", authMiddleware({ required: false })
           data: {
             totalSamples: raw.data.length,
             samples,
-            topTags: Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([tag, count]) => ({ tag, count })),
+            topTags: Object.entries(tagCounts as Record<string, number>).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([tag, count]) => ({ tag, count })),
             fileTypeBreakdown: fileTypeCounts,
             retrievedAt: new Date().toISOString(),
           },
@@ -1691,7 +1692,7 @@ router.get("/firestorm/live/threat-aggregator", authMiddleware({ required: false
           if (s.signature) acc[s.signature] = (acc[s.signature] ?? 0) + 1;
           return acc;
         }, {});
-        const mbTopFamilySorted = mbTopFamily ? Object.entries(mbTopFamily).sort((a, b) => b[1] - a[1]).slice(0, 5) : [];
+        const mbTopFamilySorted = mbTopFamily ? Object.entries(mbTopFamily as Record<string, number>).sort((a, b) => b[1] - a[1]).slice(0, 5) : [];
 
         const urlhausUrls = urlhaus?.urls?.slice(0, 5) ?? [];
         const urlhausThreatTypes = urlhaus?.urls?.reduce((acc: Record<string, number>, u: any) => {

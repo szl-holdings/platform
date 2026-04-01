@@ -70,7 +70,7 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
   await apolloServer.start();
 
   const middleware = expressMiddleware(apolloServer, {
-    context: async ({ req }: { req: Request }) => {
+    context: async ({ req }: { req: any }) => {
       const authReq = req as Request & { user?: GraphQLContext["user"] };
       return {
         user: authReq.user,
@@ -79,5 +79,5 @@ export async function buildGraphQLMiddleware(httpServer: HttpServer): Promise<Re
     },
   });
 
-  return middleware;
+  return middleware as any;
 }

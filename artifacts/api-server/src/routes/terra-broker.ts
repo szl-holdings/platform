@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -23,7 +23,7 @@ const terraRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Terra broker rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const auth = authMiddleware({ required: true });
 

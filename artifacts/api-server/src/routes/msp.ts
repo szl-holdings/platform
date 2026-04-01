@@ -124,7 +124,7 @@ router.get("/msp/clients", auth, async (req, res) => {
 
 router.get("/msp/clients/:id", auth, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid client ID");
     const [client] = await db.select().from(mspClientsTable).where(eq(mspClientsTable.id, id));
     if (!client) return sendNotFound(res, "Client");
@@ -168,7 +168,7 @@ router.get("/msp/tickets", auth, async (req, res) => {
 
 router.get("/msp/tickets/:id", auth, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ticket ID");
     const [ticket] = await db.select().from(mspTicketsTable).where(eq(mspTicketsTable.id, id));
     if (!ticket) return sendNotFound(res, "Ticket");
@@ -213,7 +213,7 @@ router.post("/msp/tickets", auth, async (req, res) => {
 
 router.patch("/msp/tickets/:id", auth, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid ticket ID");
 
     const { status, priority, assigneeId, assigneeName, slaStatus, aiTriage } = req.body;
@@ -360,7 +360,7 @@ router.get("/msp/revenue", auth, async (_req, res) => {
     const byClient = clients.filter(c => c.status !== "inactive").map(c => {
       const churnRiskPct = c.churnRisk || 0;
       const churnRiskLabel: "low" | "medium" | "high" = churnRiskPct >= 60 ? "high" : churnRiskPct >= 30 ? "medium" : "low";
-      const tier = c.mrr >= 10000 ? "platinum" : c.mrr >= 7000 ? "gold" : c.mrr >= 4000 ? "silver" : "bronze";
+      const tier = (c.mrr ?? 0) >= 10000 ? "platinum" : (c.mrr ?? 0) >= 7000 ? "gold" : (c.mrr ?? 0) >= 4000 ? "silver" : "bronze";
       return {
         clientName: c.name,
         mrr: c.mrr || 0,

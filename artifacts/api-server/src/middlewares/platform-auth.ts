@@ -225,7 +225,7 @@ export function logPlatformEvent(eventType: string, entityType: string) {
           entityId: req.params.id ?? null,
           ip: req.ip ?? null,
           userAgent: req.headers["user-agent"] ?? null,
-        });
+        } as any);
       }
     } catch {
     }

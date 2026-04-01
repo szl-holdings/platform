@@ -74,6 +74,7 @@ async function enqueueNamedJob(type: NamedJobType, payload: Record<string, unkno
   } catch (err) {
     logger.warn({ err, type }, "Failed to enqueue named job");
     updateRegistry(type, { lastStatus: "failed", failCount: (entry.failCount || 0) + 1 });
+    return undefined;
   }
 }
 

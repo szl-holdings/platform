@@ -146,8 +146,8 @@ router.get("/terra/crm/leads", authMiddleware({ required: false }), async (req, 
     const str = (v: unknown) => typeof v === "string" ? v : undefined;
 
     const conditions = [eq(terraLeadsTable.isActive, true)];
-    if (stage) conditions.push(eq(terraLeadsTable.stage, stage as string));
-    if (source) conditions.push(eq(terraLeadsTable.source, source as string));
+    if (stage) conditions.push(eq(terraLeadsTable.stage, stage as any));
+    if (source) conditions.push(eq(terraLeadsTable.source, source as any));
     if (q) {
       const qStr = str(q)!;
       conditions.push(
@@ -201,7 +201,7 @@ router.get("/terra/crm/leads", authMiddleware({ required: false }), async (req, 
 
 router.get("/terra/crm/leads/:id", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     let rows = await db.select().from(terraLeadsTable)
       .where(and(eq(terraLeadsTable.externalId, id), eq(terraLeadsTable.isActive, true)))
       .limit(1);
@@ -288,9 +288,9 @@ router.post("/terra/crm/leads", authMiddleware({ required: true }), async (req, 
       lastName: body.lastName,
       email: body.email ?? null,
       phone: body.phone ?? null,
-      type: body.type ?? "buyer",
-      source: body.source ?? "manual",
-      stage: body.stage ?? "new",
+      type: (body.type ?? "buyer") as any,
+      source: (body.source ?? "manual") as any,
+      stage: (body.stage ?? "new") as any,
       score: body.score ?? 50,
       conversionProbability: String(body.conversionProbability ?? "0.5"),
       ownerName: body.ownerName ?? null,
@@ -307,7 +307,7 @@ router.post("/terra/crm/leads", authMiddleware({ required: true }), async (req, 
       isActive: true,
     };
 
-    const inserted = await db.insert(terraLeadsTable).values(lead).returning();
+    const inserted = await db.insert(terraLeadsTable).values(lead as any).returning();
     await auditLog("lead_created", "terra_lead", externalId, { source: lead.source, stage: lead.stage }, req.user?.id);
 
     sendSuccess(res, { id: externalId, lead: inserted[0] });
@@ -321,7 +321,7 @@ router.get("/terra/pipeline/deals", authMiddleware({ required: false }), async (
     const { stage, q, limit, offset } = req.query;
 
     const conditions = [eq(terraDealsTable.isActive, true)];
-    if (stage) conditions.push(eq(terraDealsTable.stage, stage as string));
+    if (stage) conditions.push(eq(terraDealsTable.stage, stage as any));
     if (q) {
       const qStr = String(q);
       conditions.push(
@@ -432,8 +432,8 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: true }), async (
       borough: body.borough ?? null,
       county: body.county ?? null,
       zipCode: body.zipCode ?? null,
-      stage,
-      type,
+      stage: stage as any,
+      type: type as any,
       price: body.price ? String(body.price) : null,
       askingPrice: body.askingPrice ? String(body.askingPrice) : null,
       arv: body.arv ? String(body.arv) : null,
@@ -448,11 +448,11 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: true }), async (
       estimatedCloseDate: body.estimatedCloseDate ?? null,
       nextAction: body.nextAction ?? "Initial review",
       notes: body.notes ?? null,
-      timeline: [{ date: nowStr(), event: "Deal created", type: "created", stage, stageIndex: stageIdx }],
+      timeline: [{ date: nowStr(), event: "Deal created", type: "created", stage, stageIndex: stageIdx } as any],
       isActive: true,
     };
 
-    const inserted = await db.insert(terraDealsTable).values(deal).returning();
+    const inserted = await db.insert(terraDealsTable).values(deal as any).returning();
     await auditLog("deal_created", "terra_deal", externalId, { stage: deal.stage, address: deal.address }, req.user?.id);
     broadcastWs("terra-signals", "deal-created", { id: externalId, stage: deal.stage, address: deal.address });
     if (inserted[0]) void pubsub.publish(TERRA_EVENTS.DEAL_UPDATED, { terraDealUpdated: inserted[0] });
@@ -519,7 +519,7 @@ router.post("/terra/convert/distress-to-lead", authMiddleware({ required: true }
       isActive: true,
     };
 
-    const inserted = await db.insert(terraLeadsTable).values(lead).returning();
+    const inserted = await db.insert(terraLeadsTable).values(lead as any).returning();
     const leadRow = inserted[0]!;
 
     // Mark property as linked
@@ -1105,7 +1105,7 @@ router.get("/terra/investor/opportunities", authMiddleware({ required: false }),
 
 router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     const parsed = UpdateDealStageSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
       sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
@@ -1186,7 +1186,7 @@ router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: true 
 
 router.patch("/terra/crm/leads/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as Record<string, string>;
     const parsed = UpdateLeadSchema.safeParse(req.body ?? {});
     if (!parsed.success) {
       sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
@@ -1216,7 +1216,7 @@ router.patch("/terra/crm/leads/:id", authMiddleware({ required: true }), async (
     const nowStr = new Date().toISOString().slice(0, 10);
 
     const updates: Partial<typeof terraLeadsTable.$inferSelect> = { updatedAt: new Date() };
-    if (body.stage) updates.stage = body.stage;
+    if (body.stage) updates.stage = body.stage as any;
     if (body.score !== undefined) updates.score = body.score;
     if (body.nextFollowUp !== undefined) updates.nextFollowUp = body.nextFollowUp;
     if (body.nextAction !== undefined) updates.nextAction = body.nextAction;

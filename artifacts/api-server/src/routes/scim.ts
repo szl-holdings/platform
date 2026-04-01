@@ -137,7 +137,7 @@ async function scimBearerAuth(req: Request, res: Response, next: NextFunction) {
     organizationId: tenant.organizationId,
   };
 
-  next();
+  return next();
 }
 
 // ─── SCIM Response Helpers ────────────────────────────────────────────────────
@@ -422,7 +422,7 @@ router.get("/scim/v2/Users", scimBearerAuth, async (req: Request, res: Response)
 
     const provisionedMap = new Map(provisionedRows.map((r) => [r.userId, r]));
 
-    scimResponse(res, 200, {
+    return scimResponse(res, 200, {
       schemas: [SCIM_LIST_SCHEMA],
       totalResults,
       startIndex,
@@ -431,7 +431,7 @@ router.get("/scim/v2/Users", scimBearerAuth, async (req: Request, res: Response)
     });
   } catch (err) {
     console.error("SCIM GET /Users error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -439,7 +439,7 @@ router.get("/scim/v2/Users", scimBearerAuth, async (req: Request, res: Response)
 router.get("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const userId = parseInt(req.params.id!, 10);
+    const userId = parseInt(String(req.params.id), 10);
     if (isNaN(userId)) return scimError(res, 400, "invalidValue", "Invalid user ID");
 
     const [provisioned] = await db
@@ -456,10 +456,10 @@ router.get("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Respo
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
     if (!user) return scimError(res, 404, "notFound", "User not found");
 
-    scimResponse(res, 200, buildUserScimResource(user, provisioned, getBaseUrl(req)));
+    return scimResponse(res, 200, buildUserScimResource(user, provisioned, getBaseUrl(req)));
   } catch (err) {
     console.error("SCIM GET /Users/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -550,14 +550,14 @@ router.post("/scim/v2/Users", scimBearerAuth, async (req: Request, res: Response
       requestBody: body,
     });
 
-    scimResponse(res, 201, buildUserScimResource(user, provisionedRow ?? null, baseUrl));
+    return scimResponse(res, 201, buildUserScimResource(user, provisionedRow ?? null, baseUrl));
   } catch (err) {
     console.error("SCIM POST /Users error:", err);
     await logScimOperation(req.scimContext?.tenantId ?? 0, "create_user", "User", "error", {
       errorMessage: String(err),
       requestBody: req.body,
     });
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -565,7 +565,7 @@ router.post("/scim/v2/Users", scimBearerAuth, async (req: Request, res: Response
 router.put("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const userId = parseInt(req.params.id!, 10);
+    const userId = parseInt(String(req.params.id), 10);
     if (isNaN(userId)) return scimError(res, 400, "invalidValue", "Invalid user ID");
 
     const body = req.body ?? {};
@@ -614,10 +614,10 @@ router.put("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Respo
       requestBody: body,
     });
 
-    scimResponse(res, 200, buildUserScimResource(updatedUser, updatedProvisioned ?? null, baseUrl));
+    return scimResponse(res, 200, buildUserScimResource(updatedUser, updatedProvisioned ?? null, baseUrl));
   } catch (err) {
     console.error("SCIM PUT /Users/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -625,7 +625,7 @@ router.put("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Respo
 router.patch("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const userId = parseInt(req.params.id!, 10);
+    const userId = parseInt(String(req.params.id), 10);
     if (isNaN(userId)) return scimError(res, 400, "invalidValue", "Invalid user ID");
 
     const body = req.body ?? {};
@@ -703,10 +703,10 @@ router.patch("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Res
       requestBody: body,
     });
 
-    scimResponse(res, 200, buildUserScimResource(updatedUser, updatedProvisioned ?? null, baseUrl));
+    return scimResponse(res, 200, buildUserScimResource(updatedUser, updatedProvisioned ?? null, baseUrl));
   } catch (err) {
     console.error("SCIM PATCH /Users/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -714,7 +714,7 @@ router.patch("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Res
 router.delete("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const userId = parseInt(req.params.id!, 10);
+    const userId = parseInt(String(req.params.id), 10);
     if (isNaN(userId)) return scimError(res, 400, "invalidValue", "Invalid user ID");
 
     const [provisioned] = await db
@@ -740,10 +740,10 @@ router.delete("/scim/v2/Users/:id", scimBearerAuth, async (req: Request, res: Re
 
     await logScimOperation(ctx.tenantId, "delete_user", "User", "success", { userId });
 
-    res.status(204).end();
+    return res.status(204).end();
   } catch (err) {
     console.error("SCIM DELETE /Users/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -786,7 +786,7 @@ router.get("/scim/v2/Groups", scimBearerAuth, async (req: Request, res: Response
       membersByGroup.get(m.groupId)!.push(m);
     }
 
-    scimResponse(res, 200, {
+    return scimResponse(res, 200, {
       schemas: [SCIM_LIST_SCHEMA],
       totalResults,
       startIndex,
@@ -799,7 +799,7 @@ router.get("/scim/v2/Groups", scimBearerAuth, async (req: Request, res: Response
     });
   } catch (err) {
     console.error("SCIM GET /Groups error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -807,7 +807,7 @@ router.get("/scim/v2/Groups", scimBearerAuth, async (req: Request, res: Response
 router.get("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const groupId = parseInt(req.params.id!, 10);
+    const groupId = parseInt(String(req.params.id), 10);
     if (isNaN(groupId)) return scimError(res, 400, "invalidValue", "Invalid group ID");
 
     const [group] = await db
@@ -829,14 +829,14 @@ router.get("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Resp
       .innerJoin(usersTable, eq(scimGroupMembersTable.userId, usersTable.id))
       .where(eq(scimGroupMembersTable.groupId, groupId));
 
-    scimResponse(res, 200, buildGroupScimResource(
+    return scimResponse(res, 200, buildGroupScimResource(
       group,
       members.map((m) => ({ userId: m.userId, userName: m.userName ?? "", displayName: m.displayName })),
       getBaseUrl(req),
     ));
   } catch (err) {
     console.error("SCIM GET /Groups/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -880,14 +880,14 @@ router.post("/scim/v2/Groups", scimBearerAuth, async (req: Request, res: Respons
       requestBody: body,
     });
 
-    scimResponse(res, 201, buildGroupScimResource(
+    return scimResponse(res, 201, buildGroupScimResource(
       group!,
       [],
       baseUrl,
     ));
   } catch (err) {
     console.error("SCIM POST /Groups error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -895,7 +895,7 @@ router.post("/scim/v2/Groups", scimBearerAuth, async (req: Request, res: Respons
 router.put("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const groupId = parseInt(req.params.id!, 10);
+    const groupId = parseInt(String(req.params.id), 10);
     if (isNaN(groupId)) return scimError(res, 400, "invalidValue", "Invalid group ID");
 
     const body = req.body ?? {};
@@ -946,14 +946,14 @@ router.put("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Resp
         .where(eq(scimGroupMembersTable.groupId, groupId))
       : [];
 
-    scimResponse(res, 200, buildGroupScimResource(
+    return scimResponse(res, 200, buildGroupScimResource(
       updatedGroup!,
       finalMembers.map((m) => ({ userId: m.userId, userName: m.userName ?? "", displayName: m.displayName })),
       baseUrl,
     ));
   } catch (err) {
     console.error("SCIM PUT /Groups/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -961,7 +961,7 @@ router.put("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Resp
 router.patch("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const groupId = parseInt(req.params.id!, 10);
+    const groupId = parseInt(String(req.params.id), 10);
     if (isNaN(groupId)) return scimError(res, 400, "invalidValue", "Invalid group ID");
 
     const body = req.body ?? {};
@@ -1033,14 +1033,14 @@ router.patch("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Re
       .innerJoin(usersTable, eq(scimGroupMembersTable.userId, usersTable.id))
       .where(eq(scimGroupMembersTable.groupId, groupId));
 
-    scimResponse(res, 200, buildGroupScimResource(
+    return scimResponse(res, 200, buildGroupScimResource(
       updatedGroup!,
       finalMembers.map((m) => ({ userId: m.userId, userName: m.userName ?? "", displayName: m.displayName })),
       baseUrl,
     ));
   } catch (err) {
     console.error("SCIM PATCH /Groups/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 
@@ -1048,7 +1048,7 @@ router.patch("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Re
 router.delete("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: Response) => {
   try {
     const ctx = req.scimContext!;
-    const groupId = parseInt(req.params.id!, 10);
+    const groupId = parseInt(String(req.params.id), 10);
     if (isNaN(groupId)) return scimError(res, 400, "invalidValue", "Invalid group ID");
 
     const [group] = await db
@@ -1064,10 +1064,10 @@ router.delete("/scim/v2/Groups/:id", scimBearerAuth, async (req: Request, res: R
 
     await logScimOperation(ctx.tenantId, "delete_group", "Group", "success", { externalId: group.externalId });
 
-    res.status(204).end();
+    return res.status(204).end();
   } catch (err) {
     console.error("SCIM DELETE /Groups/:id error:", err);
-    scimError(res, 500, "internalError", "Internal server error");
+    return scimError(res, 500, "internalError", "Internal server error");
   }
 });
 

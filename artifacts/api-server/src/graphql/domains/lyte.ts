@@ -70,8 +70,8 @@ export const lyteResolvers = {
         const { lyteSignalsTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.severity) conditions.push(eq(lyteSignalsTable.severity, args.severity));
-        if (args.status) conditions.push(eq(lyteSignalsTable.status, args.status));
+        if (args.severity) conditions.push(eq(lyteSignalsTable.severity, args.severity as any));
+        if (args.status) conditions.push(eq(lyteSignalsTable.status, args.status as any));
         const query = db.select().from(lyteSignalsTable).orderBy(desc(lyteSignalsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -88,7 +88,7 @@ export const lyteResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(lyteActionsTable).orderBy(desc(lyteActionsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.state) {
-          return await query.where(eq(lyteActionsTable.state, args.state));
+          return await query.where(eq(lyteActionsTable.state, args.state as any));
         }
         return await query;
       } catch {
@@ -101,8 +101,8 @@ export const lyteResolvers = {
         const { lyteIncidentsTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.status) conditions.push(eq(lyteIncidentsTable.status, args.status));
-        if (args.severity) conditions.push(eq(lyteIncidentsTable.severity, args.severity));
+        if (args.status) conditions.push(eq(lyteIncidentsTable.status, args.status as any));
+        if (args.severity) conditions.push(eq(lyteIncidentsTable.severity, args.severity as any));
         const query = db.select().from(lyteIncidentsTable).orderBy(desc(lyteIncidentsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -132,7 +132,7 @@ export const lyteResolvers = {
         const { eq } = await import("drizzle-orm");
         const rows = await db
           .update(lyteIncidentsTable)
-          .set({ status: args.status })
+          .set({ status: args.status as any })
           .where(eq(lyteIncidentsTable.id, parseIntId(args.id)))
           .returning();
         const incident = rows[0];

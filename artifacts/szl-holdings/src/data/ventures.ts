@@ -341,7 +341,7 @@ export const ventures: Venture[] = [
     tagline: "Business Telemetry & Observability — OBSERVE Layer",
     oneLiner: "Continuous business observability detecting KPI movement, value leakage, and market anomalies across enterprise verticals.",
     audience: "Enterprise operators, fund managers, and business intelligence teams managing data-intensive portfolios.",
-    category: "Business Telemetry",
+    category: "Command Systems",
     status: "Live",
     accentColor: "#0ea5e9",
     description:
@@ -447,7 +447,7 @@ export const ventures: Venture[] = [
     tagline: "Managed Services Command — OBSERVE Layer",
     oneLiner: "Evidence-backed incident command delivering threat detection, anomaly visibility, and MSP-grade operational intelligence.",
     audience: "MSPs, enterprise IT operators, and security teams managing multi-tenant threat environments.",
-    category: "Incident Command",
+    category: "Managed Services",
     status: "Live",
     accentColor: "#ef4444",
     description:

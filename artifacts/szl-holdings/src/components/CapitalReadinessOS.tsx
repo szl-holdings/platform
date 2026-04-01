@@ -71,7 +71,7 @@ function ReadinessMeter({ value, label, color }: { value: number; label: string;
   );
 }
 
-function DeliverableRow({ item, endpoint, qk }: { item: Deliverable; endpoint: string; qk: string[] }) {
+function DeliverableRow({ item, endpoint, qk }: { item: Deliverable; endpoint: string; qk: (string | number)[] }) {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const [notes, setNotes] = useState(item.content ?? "");
@@ -147,7 +147,7 @@ function PacketBuilder({
   packet: LenderPacket | InvestorPacket;
   endpoint: string;
   deliverableEndpoint: string;
-  queryKey: string[];
+  queryKey: (string | number)[];
 }) {
   const { data: detail, isLoading } = useQuery<LenderPacket & InvestorPacket>({
     queryKey: [...queryKey, packet.id],

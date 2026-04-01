@@ -25,6 +25,7 @@ interface EcosystemPlatform {
   role: string;
   status: string;
   checkedAt: string;
+  latencyMs?: number | null;
 }
 
 interface EcosystemHealth {

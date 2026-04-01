@@ -45,6 +45,7 @@ interface Allocation {
 interface ControlRole {
   id: number;
   personName: string;
+  roleType?: string;
   hasDayToDayControl: boolean;
   hasLongTermDecisionAuthority: boolean;
   hasHiringFiringAuthority: boolean;
@@ -263,8 +264,8 @@ function EquityChart({ allocations }: { allocations: Allocation[] }) {
             <span className="text-sm font-medium text-foreground flex-1">{a.personName}</span>
             <span className="text-xs text-muted-foreground">{a.role.replace(/_/g, " ")}</span>
             <span className="text-sm font-bold text-foreground tabular-nums">{a.equityPct}%</span>
-            {a.isControlling && <Shield className="w-3 h-3 text-primary" title="Controlling" />}
-            {!a.citizenshipConfirmed && a.isControlling && <AlertCircle className="w-3 h-3 text-amber-500" title="Citizenship not confirmed" />}
+            {a.isControlling && <Shield className="w-3 h-3 text-primary" aria-label="Controlling" />}
+            {!a.citizenshipConfirmed && a.isControlling && <AlertCircle className="w-3 h-3 text-amber-500" aria-label="Citizenship not confirmed" />}
           </div>
         ))}
       </div>
@@ -609,7 +610,7 @@ function ScenarioDetailView({ scenarioId, onBack }: { scenarioId: number; onBack
         </button>
         <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40" />
         <span className="text-sm text-foreground font-medium truncate">{scenario.name}</span>
-        {scenario.isPreferred && <Star className="w-3.5 h-3.5 text-amber-500" title="Preferred structure" />}
+        {scenario.isPreferred && <Star className="w-3.5 h-3.5 text-amber-500" aria-label="Preferred structure" />}
         {scenario.isActive && <span className="text-[10px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2 py-0.5 rounded-full font-semibold">ACTIVE</span>}
       </div>
 
@@ -744,7 +745,7 @@ function ScenarioDetailView({ scenarioId, onBack }: { scenarioId: number; onBack
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-foreground">{a.personName}</span>
-                      {a.isControlling && <Shield className="w-3 h-3 text-primary" title="Controlling owner" />}
+                      {a.isControlling && <Shield className="w-3 h-3 text-primary" aria-label="Controlling owner" />}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-base font-bold text-foreground tabular-nums">{a.equityPct}%</span>
@@ -886,7 +887,7 @@ function ScenarioDetailView({ scenarioId, onBack }: { scenarioId: number; onBack
                       <div className="flex items-center gap-2 shrink-0 mt-0.5">
                         {r.isDocumented
                           ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                          : <AlertCircle className="w-3.5 h-3.5 text-amber-500/60" title="Not yet documented" />}
+                          : <AlertCircle className="w-3.5 h-3.5 text-amber-500/60" aria-label="Not yet documented" />}
                         <button onClick={() => managerCrud.deleteMutation.mutate(r.id)} className="text-muted-foreground/40 hover:text-red-500 transition-colors" title="Delete">
                           <Trash2 className="w-3 h-3" />
                         </button>

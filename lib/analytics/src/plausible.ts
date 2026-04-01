@@ -29,11 +29,11 @@ function isLocalhost(): boolean {
 }
 
 function hasPlausible(): boolean {
-  return typeof window !== "undefined" && typeof (window as Record<string, unknown>)["plausible"] === "function";
+  return typeof window !== "undefined" && typeof (window as unknown as Record<string, unknown>)["plausible"] === "function";
 }
 
 function hasGtag(): boolean {
-  return typeof window !== "undefined" && typeof (window as Record<string, unknown>)["gtag"] === "function";
+  return typeof window !== "undefined" && typeof (window as unknown as Record<string, unknown>)["gtag"] === "function";
 }
 
 export function trackEvent(
@@ -55,7 +55,7 @@ export function trackEvent(
 
   if (hasPlausible()) {
     try {
-      (window as Record<string, Function>)["plausible"](eventName, { props: properties });
+      (window as unknown as Record<string, (...args: unknown[]) => void>)["plausible"](eventName, { props: properties });
     } catch (e) {
       console.warn("[analytics] Plausible error:", e);
     }
@@ -64,7 +64,7 @@ export function trackEvent(
 
   if (_config.fallbackToGtag && hasGtag()) {
     try {
-      (window as Record<string, Function>)["gtag"]("event", eventName, properties);
+      (window as unknown as Record<string, (...args: unknown[]) => void>)["gtag"]("event", eventName, properties);
     } catch (e) {
       console.warn("[analytics] gtag error:", e);
     }

@@ -148,10 +148,10 @@ router.patch("/ownership/scenarios/:id", async (req, res) => {
           { scenarioId: id, flagType: "banking_change" as const, title: "Bank Account Signature Authority", description: "Business bank accounts must reflect controlling owner as primary signatory.", priority: "critical" as const, status: "open" as const },
         ];
         if (controllingOwner && !controllingOwner.citizenshipConfirmed) {
-          checklist.push({ scenarioId: id, flagType: "certification_docs" as const, title: `Citizenship Documentation — ${controllingOwner.personName}`, description: "U.S. citizenship must be confirmed before any certification application.", priority: "critical" as const, status: "open" as const });
+          checklist.push({ scenarioId: id, flagType: "certification_docs" as any, title: `Citizenship Documentation — ${controllingOwner.personName}`, description: "U.S. citizenship must be confirmed before any certification application.", priority: "critical" as const, status: "open" as const });
         }
-        checklist.push({ scenarioId: id, flagType: "cpa_review" as const, title: "Capital Contribution Valuation", description: "CPA review needed to value contributions and confirm equity alignment.", priority: "high" as const, status: "open" as const });
-        checklist.push({ scenarioId: id, flagType: "operating_agreement" as const, title: "Articles of Organization Alignment", description: "State registration must reflect controlling owner as primary officer.", priority: "high" as const, status: "open" as const });
+        checklist.push({ scenarioId: id, flagType: "cpa_review" as any, title: "Capital Contribution Valuation", description: "CPA review needed to value contributions and confirm equity alignment.", priority: "critical" as const, status: "open" as const });
+        checklist.push({ scenarioId: id, flagType: "operating_agreement" as any, title: "Articles of Organization Alignment", description: "State registration must reflect controlling owner as primary officer.", priority: "critical" as const, status: "open" as const });
         await db.insert(legalReviewFlagsTable).values(checklist);
         await db.insert(ownershipDecisionLogsTable).values({
           scenarioId: id,

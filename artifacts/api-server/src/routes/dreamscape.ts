@@ -1,5 +1,5 @@
 // Creative Workflows routes (file: dreamscape.ts — legacy filename, module now known as creative-workflows)
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -281,7 +281,7 @@ const dreamLiveLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Dreamscape rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const DREAM_CACHE_MAX_SIZE = 100;
 const dreamCache = new Map<string, { data: unknown; expiry: number }>();

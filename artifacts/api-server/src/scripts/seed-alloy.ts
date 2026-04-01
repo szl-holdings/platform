@@ -253,7 +253,7 @@ async function seedAlloyWorkflows() {
     runCount: 0,
   }));
 
-  const inserted = await db.insert(alloyWorkflowsTable).values(workflows).returning();
+  const inserted = await db.insert(alloyWorkflowsTable).values(workflows as any).returning();
   console.log(`  Inserted ${inserted.length} workflows.`);
   return inserted;
 }
@@ -371,7 +371,7 @@ async function seedAlloyRuns(workflows: Array<{ id: number; name: string; requir
     }
   }
 
-  await db.insert(alloyWorkflowRunsTable).values(allRuns);
+  await db.insert(alloyWorkflowRunsTable).values(allRuns as any);
   console.log(`  Inserted ${allRuns.length} workflow runs.`);
   return allRuns;
 }

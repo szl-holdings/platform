@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import os from "os";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
@@ -13,7 +13,7 @@ const mspLiveRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "MSP Live rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const mspCache = new Map<string, { data: unknown; expiry: number }>();
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {

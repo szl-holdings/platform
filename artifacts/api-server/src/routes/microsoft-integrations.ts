@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import crypto from "crypto";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -24,7 +24,7 @@ const powerAutomateWebhookLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Power Automate webhook rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const dynamicsWebhookLimit = rateLimit({
   windowMs: 60 * 1000,
@@ -33,7 +33,7 @@ const dynamicsWebhookLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Dynamics webhook rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 function validateHmacSignature(
   payload: string,
@@ -335,7 +335,7 @@ router.get("/integrations/sharepoint/webparts/:id", authMiddleware(), async (req
     }
 
     const adapter = services.sharepointSpfx;
-    const manifest = adapter.getWebPartManifest(req.params.id);
+    const manifest = adapter.getWebPartManifest(String(req.params.id));
     if (!manifest) {
       sendNotFound(res, "Web part");
       return;

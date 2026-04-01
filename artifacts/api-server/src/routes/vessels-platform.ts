@@ -385,8 +385,8 @@ router.post("/vessels/platform/vessels", authMiddleware(), async (req, res) => {
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const vesselType = (typeof body.vesselType === "string" ? body.vesselType : "container") as "container" | "bulk_carrier" | "tanker" | "ro_ro" | "general_cargo" | "lng" | "lpg" | "cruise" | "offshore" | "other";
-    const vesselStatus = (typeof body.status === "string" ? body.status : "active") as "active" | "inactive" | "under_maintenance" | "decommissioned" | "at_sea" | "in_port" | "anchored";
+    const vesselType = (typeof body.vesselType === "string" ? body.vesselType : "container") as "container" | "tanker" | "bulk" | "cargo" | "passenger" | "ro-ro" | "lpg" | "lng" | "chemical" | "other";
+    const vesselStatus = (typeof body.status === "string" ? body.status : "active") as "active" | "in_port" | "at_sea" | "anchored" | "maintenance" | "decommissioned" | "off_hire";
 
     const [vessel] = await db.insert(maritimeVesselsTable).values({
       orgId,
@@ -489,7 +489,7 @@ router.post("/vessels/platform/voyages", authMiddleware(), async (req, res) => {
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const voyageStatus = (typeof body.status === "string" ? body.status : "planned") as "planned" | "active" | "in_progress" | "completed" | "cancelled" | "delayed";
+    const voyageStatus = (typeof body.status === "string" ? body.status : "planned") as "planned" | "loading" | "departed" | "at_sea" | "arrived" | "discharging" | "completed" | "cancelled" | "diverted";
 
     const [voyage] = await db.insert(voyagesTable).values({
       orgId,
@@ -526,7 +526,7 @@ router.patch("/vessels/platform/voyages/:id", authMiddleware(), async (req, res)
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
     const { orgId: _drop, ...safeBody } = req.body as Record<string, unknown>;
-    const [voyage] = await db.update(voyagesTable).set({ ...safeBody, updatedAt: new Date() } as Partial<typeof maritimeVesselsTable.$inferInsert>).where(
+    const [voyage] = await db.update(voyagesTable).set({ ...safeBody, updatedAt: new Date() } as Partial<typeof voyagesTable.$inferInsert>).where(
       and(eq(voyagesTable.id, id), eq(voyagesTable.orgId, orgId))
     ).returning();
 
@@ -686,7 +686,7 @@ router.post("/vessels/platform/exceptions", authMiddleware(), async (req, res) =
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const exceptionType = (typeof body.exceptionType === "string" ? body.exceptionType : "other") as "eta_delay" | "cargo_damage" | "weather_deviation" | "mechanical_failure" | "crew_incident" | "port_delay" | "route_deviation" | "fuel_overconsumption" | "regulatory_violation" | "security_incident" | "other";
+    const exceptionType = (typeof body.exceptionType === "string" ? body.exceptionType : "other") as "eta_deviation" | "route_deviation" | "weather_delay" | "port_congestion" | "mechanical" | "cargo_incident" | "security_threat" | "regulatory" | "commercial" | "other";
     const severity = (typeof body.severity === "string" ? body.severity : "medium") as "low" | "medium" | "high" | "critical";
 
     const [exc] = await db.insert(maritimeExceptionsTable).values({

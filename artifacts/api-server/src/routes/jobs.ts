@@ -98,12 +98,12 @@ router.post("/jobs/enqueue", authMiddleware(), requireRole("ops", "admin"), asyn
       return;
     }
 
-    if (!ALL_JOB_TYPE_VALUES.has(type)) {
+    if (!ALL_JOB_TYPE_VALUES.has(type as any)) {
       sendBadRequest(res, `Invalid job type: "${type}". Allowed types: ${Array.from(ALL_JOB_TYPE_VALUES).join(", ")}`);
       return;
     }
 
-    const job = await jobQueue.enqueue(type, payload ?? {}, { maxRetries: maxRetries ?? 3 });
+    const job = await jobQueue.enqueue(type as any, payload ?? {}, { maxRetries: maxRetries ?? 3 });
     await logActivity(req, "enqueue_job", "job", job.id, `Manually enqueued job: ${type}`);
     sendSuccess(res, { id: job.id, type: job.type, status: job.status }, 202);
   } catch (err) {

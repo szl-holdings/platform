@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID, createHash, createSign, createHmac } from "crypto";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
-interface ExtendedRequest extends Request { user?: AuthUser }
+type ExtendedRequest = Request & { user?: AuthUser }
 import { db, documentsTable, documentVersionsTable, documentCommentsTable, documentTemplatesTable, contentLibraryBlocksTable, signaturesTable, pdfJobsTable, pdfBatchesTable } from "@workspace/db";
 import { eq, desc, sql, and, or, ne } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, handleRouteError, sendBadRequest, parsePagination } from "../lib/api-response";
@@ -1563,7 +1563,7 @@ router.post("/documents/docusign/webhook", async (req: Request, res: Response) =
 
     return res.status(200).json({ received: true });
   } catch (err) {
-    handleRouteError(res, err, "Failed to process DocuSign webhook");
+    return handleRouteError(res, err, "Failed to process DocuSign webhook");
   }
 });
 

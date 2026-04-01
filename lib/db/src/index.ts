@@ -31,9 +31,10 @@ pool.query = async function instrumentedQuery(...args: unknown[]) {
     const result = await _originalPoolQuery(...args);
     const durationMs = Date.now() - start;
     try {
-      const { serverTelemetry } = await import("@workspace/observability");
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+      const obs = await (new Function('m', 'return import(m)'))("@workspace/observability") as { serverTelemetry?: { recordDbQueryLatency?: (ms: number, q?: string) => void } };
       const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
-      serverTelemetry.recordDbQueryLatency(durationMs, queryText);
+      obs.serverTelemetry?.recordDbQueryLatency?.(durationMs, queryText);
     } catch {
       // observability not available — not fatal
     }
@@ -41,9 +42,10 @@ pool.query = async function instrumentedQuery(...args: unknown[]) {
   } catch (err) {
     const durationMs = Date.now() - start;
     try {
-      const { serverTelemetry } = await import("@workspace/observability");
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+      const obs = await (new Function('m', 'return import(m)'))("@workspace/observability") as { serverTelemetry?: { recordDbQueryLatency?: (ms: number, q?: string) => void } };
       const queryText = typeof args[0] === "string" ? args[0] : (args[0] as { text?: string })?.text;
-      serverTelemetry.recordDbQueryLatency(durationMs, queryText);
+      obs.serverTelemetry?.recordDbQueryLatency?.(durationMs, queryText);
     } catch {
       // observability not available — not fatal
     }

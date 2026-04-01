@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 
 const router: IRouter = Router();
@@ -9,7 +9,7 @@ const configLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 router.get("/config/mapbox-token", configLimit, (req: Request, res: Response) => {
   if (!req.isAuthenticated()) {

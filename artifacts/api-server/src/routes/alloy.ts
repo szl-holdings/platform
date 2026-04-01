@@ -269,7 +269,7 @@ router.post("/alloy/workflows/:id/run", authMiddleware(), async (req, res) => {
         .from(alloyWorkflowRunsTable)
         .innerJoin(alloyWorkflowsTable, eq(alloyWorkflowRunsTable.workflowId, alloyWorkflowsTable.id))
         .where(and(
-          eq(alloyWorkflowsTable.orgId, workflow.orgId),
+          eq(alloyWorkflowsTable.orgId, workflow.orgId!),
           inArray(alloyWorkflowRunsTable.state, ["queued", "running"]),
         )), "alloy_runs:concurrent_count");
       const ORG_CONCURRENT_RUN_LIMIT = 20;
@@ -583,7 +583,7 @@ router.post("/alloy/admin/flags", authMiddleware(), requireRole("super_admin", "
 
 router.patch("/alloy/admin/flags/:key", authMiddleware(), requireRole("super_admin", "ops"), async (req, res) => {
   try {
-    const key = req.params.key;
+    const key = String(req.params.key);
     const [existing] = await db.select().from(featureFlagsTable).where(eq(featureFlagsTable.key, key));
     if (!existing) { sendNotFound(res, "Feature flag"); return; }
     const [updated] = await db.update(featureFlagsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(featureFlagsTable.key, key)).returning();

@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import express, { Router, type IRouter } from "express";
+import express, { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { services } from "@workspace/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
@@ -39,7 +39,7 @@ const intelRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Intelligence rate limit exceeded. Please try again later." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const aiRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -48,7 +48,7 @@ const aiRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "AI inference rate limit exceeded. Please try again later." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 async function fetchJson(url: string, timeoutMs = 8000): Promise<unknown> {
   const controller = new AbortController();
@@ -615,19 +615,19 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
         .slice(0, -1) as Array<{ role: string; content: string }>;
       services.huggingface.initSessionFromHistory(sid, priorTurns, {
         systemPrompt: systemMsg?.content,
-        ownerId,
+        ownerId: ownerId !== undefined ? String(ownerId) : undefined,
       });
       const hfResult = await services.huggingface.chat(sid, lastUserMsg.content, {
         systemPrompt: systemMsg?.content,
         maxTokens,
-        ownerId,
+        ownerId: ownerId !== undefined ? String(ownerId) : undefined,
       });
       sendSuccess(res, { content: hfResult.reply, model: hfResult.model, provider: "huggingface", tier: hfResult.tier, sessionId: sid, usage: { promptTokens: 0, completionTokens: 0 } });
       return;
     }
 
     if (!message) { sendError(res, "Either 'message' (string) or 'messages' (array) is required", 400); return; }
-    const result = await services.huggingface.chat(sid, message, { systemPrompt, maxTokens, ownerId });
+    const result = await services.huggingface.chat(sid, message, { systemPrompt, maxTokens, ownerId: ownerId !== undefined ? String(ownerId) : undefined });
     sendSuccess(res, { content: result.reply, model: result.model, provider: "huggingface", tier: result.tier, sessionId: sid, usage: { promptTokens: 0, completionTokens: 0 } });
   } catch (err) { handleRouteError(res, err, "Failed to generate chat response"); }
 });
@@ -1397,7 +1397,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ requi
             model: agent.model,
             max_tokens: maxTokens,
             system: agent.systemPrompt,
-            messages: nonSystem as AnthropicMessageParam[],
+            messages: nonSystem as any,
           });
           for await (const event of streamResp) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
@@ -1435,7 +1435,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ requi
         model: agent.model,
         max_tokens: maxTokens,
         system: agent.systemPrompt,
-        messages: nonSystem as AnthropicMessageParam[],
+        messages: nonSystem as any,
       });
       content = result.content[0]?.type === "text" ? result.content[0].text : "";
     } else {
@@ -1579,7 +1579,7 @@ router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware({ required:
       model: "claude-sonnet-4-6",
       max_tokens: 2048,
       system: systemPrompt,
-      messages: messages as AnthropicMessageParam[],
+      messages: messages as any,
     });
 
     for await (const event of stream) {

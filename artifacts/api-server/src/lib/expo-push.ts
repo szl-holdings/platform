@@ -3,7 +3,7 @@ import { db, pushTokensTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { logger } from "./logger";
 
-const expo = new Expo({ useFcmV1: true });
+const expo = new Expo({});
 
 export type PushMessagePayload = {
   title: string;

@@ -27,6 +27,7 @@ export default function VentureDetailPage() {
       const cleanup = initScrollDepthTracking(`venture-${venture.id}`);
       return cleanup;
     }
+    return undefined;
   }, [venture]);
 
   if (!venture) {

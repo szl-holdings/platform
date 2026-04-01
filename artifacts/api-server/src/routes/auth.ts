@@ -237,10 +237,10 @@ router.post("/auth/ws-ticket", async (req, res) => {
 
     let platformRole = userRow?.platformRole;
     if (!platformRole) {
-      platformRole = legacyRoles.length > 0 ? toCanonicalRole(legacyRoles) : "anonymous_visitor";
+      platformRole = legacyRoles.length > 0 ? toCanonicalRole(legacyRoles) as any : "anonymous_visitor";
     }
 
-    const ticket = issueWsTicket(userId, platformRole);
+    const ticket = issueWsTicket(userId, platformRole!);
     sendSuccess(res, { ticket, expiresIn: 300 });
   } catch (err) {
     handleRouteError(res, err, "Failed to issue WS ticket");

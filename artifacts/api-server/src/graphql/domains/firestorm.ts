@@ -79,7 +79,7 @@ export const firestormResolvers = {
         const { db } = await import("@workspace/db");
         const { firestormAssessmentsTable } = await import("@workspace/db/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, args.id)).limit(1);
+        const rows = await db.select().from(firestormAssessmentsTable).where(eq(firestormAssessmentsTable.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
@@ -91,8 +91,8 @@ export const firestormResolvers = {
         const { firestormFindingsTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.assessmentId) conditions.push(eq(firestormFindingsTable.assessmentId, args.assessmentId));
-        if (args.severity) conditions.push(eq(firestormFindingsTable.severity, args.severity));
+        if (args.assessmentId) conditions.push(eq(firestormFindingsTable.assessmentId, parseInt(args.assessmentId, 10)));
+        if (args.severity) conditions.push(eq(firestormFindingsTable.severity, args.severity as any));
         const query = db.select().from(firestormFindingsTable).orderBy(desc(firestormFindingsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -108,8 +108,8 @@ export const firestormResolvers = {
         const { firestormIncidentsTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.status) conditions.push(eq(firestormIncidentsTable.status, args.status));
-        if (args.severity) conditions.push(eq(firestormIncidentsTable.severity, args.severity));
+        if (args.status) conditions.push(eq(firestormIncidentsTable.status, args.status as any));
+        if (args.severity) conditions.push(eq(firestormIncidentsTable.severity, args.severity as any));
         const query = db.select().from(firestormIncidentsTable).orderBy(desc(firestormIncidentsTable.detectedAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -124,7 +124,7 @@ export const firestormResolvers = {
         const { db } = await import("@workspace/db");
         const { firestormIncidentsTable } = await import("@workspace/db/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, args.id)).limit(1);
+        const rows = await db.select().from(firestormIncidentsTable).where(eq(firestormIncidentsTable.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
@@ -154,8 +154,8 @@ export const firestormResolvers = {
         const { eq } = await import("drizzle-orm");
         const rows = await db
           .update(firestormIncidentsTable)
-          .set({ status: args.status })
-          .where(eq(firestormIncidentsTable.id, args.id))
+          .set({ status: args.status as any })
+          .where(eq(firestormIncidentsTable.id, parseInt(args.id, 10)))
           .returning();
         const incident = rows[0];
         pubsub.publish(FIRESTORM_EVENTS.INCIDENT_UPDATED, { firestormIncidentUpdated: incident });

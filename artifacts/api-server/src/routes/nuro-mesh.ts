@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import { db } from "@workspace/db";
 import { agentMemoryFacts, agentUsageStats, agentToolCalls, advisoryFindings } from "@workspace/db";
 import { eq, desc, and, gt } from "drizzle-orm";
@@ -16,7 +16,7 @@ const meshRateLimit = rateLimit({
   legacyHeaders: false,
   validate: { xForwardedForHeader: false, ip: false },
   message: { error: "Nuro Mesh rate limit exceeded. Please try again later." },
-});
+}) as unknown as RequestHandler;
 
 export interface AgentDefinition {
   id: string;

@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -13,7 +13,7 @@ const govRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Government data rate limit exceeded. Please try again later." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const govCache = new Map<string, { data: unknown; expiry: number }>();
 

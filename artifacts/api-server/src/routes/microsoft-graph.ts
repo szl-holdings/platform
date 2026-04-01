@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -13,7 +13,7 @@ const msGraphLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Microsoft Graph rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 router.get("/microsoft/status", msGraphLimit, authMiddleware({ required: false }), async (_req: Request, res: Response) => {
   try {

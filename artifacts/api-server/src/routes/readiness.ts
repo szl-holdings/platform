@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import {
@@ -50,7 +50,7 @@ router.post("/readiness/programs", authMiddleware(), async (req, res) => {
   const parsed = programCreateSchema.safeParse(req.body);
   if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
-    const [row] = await db.insert(readinessProgramsTable).values(parsed.data).returning();
+    const [row] = await db.insert(readinessProgramsTable).values(parsed.data as any).returning();
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, "Failed to create program");
@@ -73,7 +73,7 @@ router.patch("/readiness/programs/:id", authMiddleware(), async (req, res) => {
   if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
     const id = parseIdParam(req.params.id);
-    const [row] = await db.update(readinessProgramsTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(readinessProgramsTable.id, id)).returning();
+    const [row] = await db.update(readinessProgramsTable).set({ ...parsed.data, updatedAt: new Date() } as any).where(eq(readinessProgramsTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Program"); return; }
     sendSuccess(res, row);
   } catch (err) {
@@ -311,7 +311,7 @@ const readinessLiveRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Readiness Live rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const readinessCache = new Map<string, { data: unknown; expiry: number }>();
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {

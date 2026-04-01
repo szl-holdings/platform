@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole } from "../middlewares/auth";
@@ -23,7 +23,7 @@ const dataverseRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Dataverse API rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const ADMIN_ROLES = new Set(["admin", "super_admin"]);
 
@@ -155,7 +155,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const adapter = services.dataverse;
-      const { accountId } = req.params;
+      const { accountId } = req.params as Record<string, string>;
       const connParams = await buildConnParams(req);
       if ("error" in connParams) {
         res.status(connParams.status).json({ error: connParams.error });
@@ -335,7 +335,7 @@ router.patch(
   requireRole("analyst"),
   async (req: Request, res: Response) => {
     try {
-      const { opportunityId } = req.params;
+      const { opportunityId } = req.params as Record<string, string>;
       const { stageName } = req.body ?? {};
 
       if (!stageName) {
@@ -588,7 +588,7 @@ router.get(
         return;
       }
       const contact = await adapter.getContact(
-        req.params.contactId!,
+        String(req.params.contactId),
         connParams.orgUrl,
         connParams.tenantId,
         connParams.clientId,
@@ -619,7 +619,7 @@ router.patch(
         return;
       }
       const result = await adapter.updateContact(
-        req.params.contactId!,
+        String(req.params.contactId),
         req.body ?? {},
         connParams.orgUrl,
         connParams.tenantId,
@@ -628,7 +628,7 @@ router.patch(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Contact Updated",
-        contactId: req.params.contactId,
+        contactId: String(req.params.contactId),
         ...result,
         isLive: adapter.isLive,
         updatedAt: new Date().toISOString(),
@@ -653,7 +653,7 @@ router.delete(
         return;
       }
       const result = await adapter.deleteContact(
-        req.params.contactId!,
+        String(req.params.contactId),
         connParams.orgUrl,
         connParams.tenantId,
         connParams.clientId,
@@ -661,7 +661,7 @@ router.delete(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Contact Deleted",
-        contactId: req.params.contactId,
+        contactId: String(req.params.contactId),
         ...result,
         isLive: adapter.isLive,
         deletedAt: new Date().toISOString(),
@@ -729,7 +729,7 @@ router.get(
         return;
       }
       const lead = await adapter.getLead(
-        req.params.leadId!,
+        String(req.params.leadId),
         connParams.orgUrl,
         connParams.tenantId,
         connParams.clientId,
@@ -760,7 +760,7 @@ router.patch(
         return;
       }
       const result = await adapter.updateLead(
-        req.params.leadId!,
+        String(req.params.leadId),
         req.body ?? {},
         connParams.orgUrl,
         connParams.tenantId,
@@ -769,7 +769,7 @@ router.patch(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Lead Updated",
-        leadId: req.params.leadId,
+        leadId: String(req.params.leadId),
         ...result,
         isLive: adapter.isLive,
         updatedAt: new Date().toISOString(),
@@ -794,7 +794,7 @@ router.delete(
         return;
       }
       const result = await adapter.deleteLead(
-        req.params.leadId!,
+        String(req.params.leadId),
         connParams.orgUrl,
         connParams.tenantId,
         connParams.clientId,
@@ -802,7 +802,7 @@ router.delete(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Lead Deleted",
-        leadId: req.params.leadId,
+        leadId: String(req.params.leadId),
         ...result,
         isLive: adapter.isLive,
         deletedAt: new Date().toISOString(),
@@ -826,7 +826,7 @@ router.get(
         return;
       }
       const opportunity = await adapter.getOpportunity(
-        req.params.opportunityId!,
+        String(req.params.opportunityId),
         connParams.orgUrl,
         connParams.tenantId,
         connParams.clientId,
@@ -861,7 +861,7 @@ router.patch(
         return;
       }
       const result = await adapter.updateOpportunity(
-        req.params.opportunityId!,
+        String(req.params.opportunityId),
         req.body ?? {},
         connParams.orgUrl,
         connParams.tenantId,
@@ -870,7 +870,7 @@ router.patch(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Opportunity Updated",
-        opportunityId: req.params.opportunityId,
+        opportunityId: String(req.params.opportunityId),
         ...result,
         isLive: adapter.isLive,
         updatedAt: new Date().toISOString(),
@@ -895,7 +895,7 @@ router.delete(
         return;
       }
       const result = await adapter.deleteOpportunity(
-        req.params.opportunityId!,
+        String(req.params.opportunityId),
         connParams.orgUrl,
         connParams.tenantId,
         connParams.clientId,
@@ -903,7 +903,7 @@ router.delete(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Opportunity Deleted",
-        opportunityId: req.params.opportunityId,
+        opportunityId: String(req.params.opportunityId),
         ...result,
         isLive: adapter.isLive,
         deletedAt: new Date().toISOString(),
@@ -928,7 +928,7 @@ router.get(
         return;
       }
       const activity = await adapter.getActivity(
-        req.params.activityId!,
+        String(req.params.activityId),
         activityType,
         connParams.orgUrl,
         connParams.tenantId,
@@ -962,7 +962,7 @@ router.patch(
         return;
       }
       const result = await adapter.updateActivity(
-        req.params.activityId!,
+        String(req.params.activityId),
         activityType,
         body,
         connParams.orgUrl,
@@ -972,7 +972,7 @@ router.patch(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Activity Updated",
-        activityId: req.params.activityId,
+        activityId: String(req.params.activityId),
         ...result,
         isLive: adapter.isLive,
         updatedAt: new Date().toISOString(),
@@ -998,7 +998,7 @@ router.delete(
         return;
       }
       const result = await adapter.deleteActivity(
-        req.params.activityId!,
+        String(req.params.activityId),
         activityType,
         connParams.orgUrl,
         connParams.tenantId,
@@ -1007,7 +1007,7 @@ router.delete(
       );
       sendSuccess(res, {
         source: "Dynamics 365 Dataverse — Activity Deleted",
-        activityId: req.params.activityId,
+        activityId: String(req.params.activityId),
         ...result,
         isLive: adapter.isLive,
         deletedAt: new Date().toISOString(),
@@ -1165,12 +1165,12 @@ router.post(
             externalId,
             firstName,
             lastName,
-            email: lead.email ?? null,
-            phone: lead.phone ?? null,
+            email: (lead as any).email ?? null,
+            phone: (lead as any).phone ?? null,
             source: "csv-import",
             stage: "new",
             score: 50,
-            notes: `Synced from Dynamics 365 — ${lead.topic ?? ""}`.trim(),
+            notes: `Synced from Dynamics 365 — ${(lead as any).topic ?? ""}`.trim(),
             tags: ["dataverse", "d365-sync"],
           });
           leadsUpserted++;

@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { db, pool } from "@workspace/db";
 import { conversations, messages } from "@workspace/db";
@@ -26,7 +26,7 @@ const aiLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "AlloyChat rate limit exceeded. Please try again later." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 // ─── Ensure KB / advisory / comparison tables exist ───────────────────────────
 

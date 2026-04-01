@@ -39,7 +39,7 @@ router.get("/comments/activity-feed", authMiddleware({ required: false }), async
 
 router.get("/comments/:entityType/:entityId", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const { entityType, entityId } = req.params;
+    const { entityType, entityId } = req.params as Record<string, string>;
     if (!entityType || !entityId) {
       sendBadRequest(res, "entityType and entityId are required");
       return;
@@ -63,7 +63,7 @@ router.get("/comments/:entityType/:entityId", authMiddleware({ required: false }
 
 router.post("/comments/:entityType/:entityId", authMiddleware({ required: false }), async (req, res) => {
   try {
-    const { entityType, entityId } = req.params;
+    const { entityType, entityId } = req.params as Record<string, string>;
     const { content, mentions, parentId } = req.body;
 
     if (!content || typeof content !== "string" || content.trim().length === 0) {

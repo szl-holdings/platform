@@ -554,11 +554,10 @@ export async function seedVesselsData(): Promise<void> {
         ownerFunction: pick(OWNER_FUNCTIONS, v * 3 + j, 1),
         estimatedImpactUsd: tmpl.estimatedImpactUsd.toFixed(2),
         status,
-        detectedAt: new Date(now.getTime() - detectedHoursAgo * 3600000),
         acknowledgedAt: status !== "active" ? new Date(now.getTime() - (detectedHoursAgo - 2) * 3600000) : null,
         resolvedAt: status === "resolved" ? new Date(now.getTime() - (detectedHoursAgo - 8) * 3600000) : null,
         metadata: { source: "system", correlationId: `COR-${vessel.id}-${j}` },
-      });
+      } as any);
       excCount++;
     }
   }

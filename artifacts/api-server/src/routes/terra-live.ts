@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -13,7 +13,7 @@ const terraLiveLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Terra Live rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const terraLiveCache = new Map<string, { data: unknown; expiry: number; fetchedAt: number; source: string }>();
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<{ data: T; source: string }>): Promise<{ data: T; source: string; cacheAgeSeconds: number; isStale: boolean }> {
@@ -76,7 +76,7 @@ const DEMO_HUD_FAIR_MARKET = [
 router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const msaCode = req.query.msa as string;
-    const result = await getCached(`terra-census-housing-${msaCode ?? "all"}`, 86400000, async () => {
+    const result = await getCached<any>(`terra-census-housing-${msaCode ?? "all"}`, 86400000, async () => {
       try {
         const url = `https://api.census.gov/data/2022/acs/acs5?get=NAME,B25077_001E,B19013_001E,B25003_002E,B25003_001E,B25004_003E&for=metropolitan+statistical+area/micropolitan+statistical+area:12420,33100,35620,38060,42660&key=DEMO`;
         const raw = await fetchJson(url, 10000) as any[];
@@ -126,7 +126,7 @@ router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ requir
 
 router.get("/terra/live/hud-fair-market-rents", terraLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const result = await getCached("terra-hud-fmr", 86400000 * 7, async () => {
+    const result = await getCached<any>("terra-hud-fmr", 86400000 * 7, async () => {
       try {
         const raw = await fetchJson("https://www.huduser.gov/hudapi/public/fmr/listMetroAreas", 10000) as any;
         if (!Array.isArray(raw?.data)) throw new Error("No HUD data");
@@ -157,7 +157,7 @@ router.get("/terra/live/hud-fair-market-rents", terraLiveLimit, authMiddleware({
 
 router.get("/terra/live/mortgage-rates", terraLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const result = await getCached("terra-mortgage-rates", 3600000 * 6, async () => {
+    const result = await getCached<any>("terra-mortgage-rates", 3600000 * 6, async () => {
       try {
         const raw = await fetchJson(
           "https://api.stlouisfed.org/fred/series/observations?series_id=MORTGAGE30US&api_key=DEMO_KEY&limit=4&sort_order=desc&file_type=json",
@@ -200,7 +200,7 @@ router.get("/terra/live/mortgage-rates", terraLiveLimit, authMiddleware({ requir
 
 router.get("/terra/live/bls-construction", terraLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const result = await getCached("terra-bls-construction", 86400000, async () => {
+    const result = await getCached<any>("terra-bls-construction", 86400000, async () => {
       try {
         const raw = await fetchJson(
           "https://api.bls.gov/publicAPI/v2/timeseries/data/CES2000000001",
@@ -259,7 +259,7 @@ router.get("/terra/live/bls-construction", terraLiveLimit, authMiddleware({ requ
 router.get("/terra/live/fema-nri", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const stateAbbr = (req.query.state as string)?.toUpperCase() ?? "FL";
-    const result = await getCached(`terra-fema-nri-${stateAbbr}`, 86400000 * 30, async () => {
+    const result = await getCached<any>(`terra-fema-nri-${stateAbbr}`, 86400000 * 30, async () => {
       try {
         const raw = await fetchJson(
           `https://hazards.fema.gov/nri/api/counties?stateAbbreviation=${stateAbbr}&top=5`,
@@ -397,7 +397,7 @@ router.get("/terra/live/nyc-pluto", terraLiveLimit, authMiddleware({ required: f
     const zipcode = (req.query.zipcode as string) ?? "10024";
     const borough = (req.query.borough as string) ?? "MN";
     const cacheKey = req.query.zipcode ? `terra-nyc-pluto-zip-${zipcode}` : `terra-nyc-pluto-${borough}-${neighborhood}`;
-    const result = await getCached(cacheKey, 6 * 3600000, async () => {
+    const result = await getCached<any>(cacheKey, 6 * 3600000, async () => {
       try {
         const filterParam = req.query.zipcode
           ? `zipcode=%27${encodeURIComponent(zipcode)}%27`
@@ -491,7 +491,7 @@ router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: fal
   try {
     const neighborhood = (req.query.neighborhood as string) ?? "Upper West Side";
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
-    const result = await getCached(`terra-nyc-311-${neighborhood}`, 60 * 60 * 1000, async () => {
+    const result = await getCached<any>(`terra-nyc-311-${neighborhood}`, 60 * 60 * 1000, async () => {
       try {
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 3600000).toISOString().split("T")[0];
         const encoded = encodeURIComponent(neighborhood);
@@ -507,7 +507,7 @@ router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: fal
           return acc;
         }, {});
 
-        const sorted = Object.entries(complaintCounts).sort((a, b) => b[1] - a[1]);
+        const sorted = Object.entries(complaintCounts as Record<string, number>).sort((a, b) => b[1] - a[1]);
         const openCount = raw.filter(c => c.status === "Open" || c.status === "Assigned" || c.status === "In Progress").length;
         const closedCount = raw.filter(c => c.status === "Closed").length;
 
@@ -525,7 +525,7 @@ router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: fal
             closedComplaints: closedCount,
             avgResponseHours: avgResponseHours > 0 ? +avgResponseHours.toFixed(1) : null,
             topComplaintTypes: sorted.slice(0, 10).map(([type, count]) => ({ type, count })),
-            qualityScore: Math.max(0, 100 - (openCount / Math.max(raw.length, 1)) * 40 - (sorted[0]?.[1] ?? 0) / 2),
+            qualityScore: Math.max(0, 100 - (openCount / Math.max(raw.length, 1)) * 40 - (Number(sorted[0]?.[1] ?? 0)) / 2),
             recentComplaints: raw.slice(0, 10).map(c => ({
               id: c.unique_key,
               createdAt: c.created_date,
@@ -581,7 +581,7 @@ router.get("/terra/live/census-acs-demographics", terraLiveLimit, authMiddleware
   try {
     const county = (req.query.county as string) ?? "061";
     const state = (req.query.state as string) ?? "36";
-    const result = await getCached(`terra-census-acs-${state}-${county}`, 86400000 * 7, async () => {
+    const result = await getCached<any>(`terra-census-acs-${state}-${county}`, 86400000 * 7, async () => {
       try {
         const url = `https://api.census.gov/data/2022/acs/acs5?get=NAME,B01003_001E,B19013_001E,B25077_001E,B25064_001E,B23025_005E,B23025_002E,B15003_022E,B15003_001E,B25003_002E,B25003_001E,B17001_002E,B17001_001E&for=county:${county}&in=state:${state}`;
         const raw = await fetchJson(url, 10000) as any[][];

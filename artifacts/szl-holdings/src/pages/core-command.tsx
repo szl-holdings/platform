@@ -109,7 +109,7 @@ function SummaryCard({
   label: string;
   value: string | number;
   sub?: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   color: string;
   loading?: boolean;
   alert?: boolean;

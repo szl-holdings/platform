@@ -1,5 +1,5 @@
 import rateLimit from "express-rate-limit";
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -24,7 +24,7 @@ export const globalLimiter = rateLimit({
     req.path === "/api/health" ||
     req.path === "/api/health/live" ||
     req.path === "/api/health/ready",
-});
+}) as unknown as RequestHandler;
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -32,7 +32,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many authentication attempts, please try again later." },
-});
+}) as unknown as RequestHandler;
 
 export const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -40,7 +40,7 @@ export const writeLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many write requests, please try again later." },
-});
+}) as unknown as RequestHandler;
 
 export const readLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -48,4 +48,4 @@ export const readLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many read requests, please try again later." },
-});
+}) as unknown as RequestHandler;

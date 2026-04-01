@@ -32,7 +32,7 @@ router.post("/connectors", authMiddleware(), requireRole("ops", "super_admin"), 
     }
     const [connector] = await db.insert(connectorsTable).values({
       name: name.trim(),
-      type: type as (typeof validConnectorTypes)[number],
+      type: type as any,
       config: config ?? null,
       orgId: orgId ?? null,
     }).returning();

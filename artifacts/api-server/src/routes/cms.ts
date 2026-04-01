@@ -36,7 +36,7 @@ router.get("/cms/sites", async (req, res) => {
 
 router.get("/cms/sites/:slug", async (req, res) => {
   try {
-    const [row] = await db.select().from(sitesTable).where(eq(sitesTable.slug, req.params.slug));
+    const [row] = await db.select().from(sitesTable).where(eq(sitesTable.slug, String(req.params.slug)));
     if (!row) { sendNotFound(res, "Site"); return; }
     sendSuccess(res, row);
   } catch (err) { handleRouteError(res, err, "Failed to get site"); }
@@ -156,7 +156,7 @@ router.get("/cms/ventures", async (req, res) => {
 
 router.get("/cms/ventures/:slug", async (req, res) => {
   try {
-    const [row] = await db.select().from(venturesTable).where(eq(venturesTable.slug, req.params.slug));
+    const [row] = await db.select().from(venturesTable).where(eq(venturesTable.slug, String(req.params.slug)));
     if (!row) { sendNotFound(res, "Venture"); return; }
     sendSuccess(res, row);
   } catch (err) { handleRouteError(res, err, "Failed to get venture"); }
@@ -215,7 +215,7 @@ router.get("/cms/articles/:slug", authMiddleware({ required: false }), async (re
   try {
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
     const [row] = await db.select().from(articlesTable).where(
-      isEditor ? eq(articlesTable.slug, req.params.slug) : and(eq(articlesTable.slug, req.params.slug), eq(articlesTable.status, "published"))
+      isEditor ? eq(articlesTable.slug, String(req.params.slug)) : and(eq(articlesTable.slug, String(req.params.slug)), eq(articlesTable.status, "published"))
     );
     if (!row) { sendNotFound(res, "Article"); return; }
     sendSuccess(res, row);
@@ -269,7 +269,7 @@ router.get("/cms/case-studies/:slug", authMiddleware({ required: false }), async
   try {
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
     const [row] = await db.select().from(caseStudiesTable).where(
-      isEditor ? eq(caseStudiesTable.slug, req.params.slug) : and(eq(caseStudiesTable.slug, req.params.slug), eq(caseStudiesTable.status, "published"))
+      isEditor ? eq(caseStudiesTable.slug, String(req.params.slug)) : and(eq(caseStudiesTable.slug, String(req.params.slug)), eq(caseStudiesTable.status, "published"))
     );
     if (!row) { sendNotFound(res, "Case study"); return; }
     sendSuccess(res, row);
@@ -818,8 +818,8 @@ router.get("/cms/posts/:slug", authMiddleware({ required: false }), async (req, 
     const isEditor = req.user && (req.user.roles.includes("admin") || req.user.roles.includes("super_admin") || req.user.roles.includes("editor"));
     const [row] = await db.select().from(cmsPostsTable).where(
       isEditor
-        ? eq(cmsPostsTable.slug, req.params.slug)
-        : and(eq(cmsPostsTable.slug, req.params.slug), eq(cmsPostsTable.status, "published"))
+        ? eq(cmsPostsTable.slug, String(req.params.slug))
+        : and(eq(cmsPostsTable.slug, String(req.params.slug)), eq(cmsPostsTable.status, "published"))
     );
     if (!row) { sendNotFound(res, "Post"); return; }
     sendSuccess(res, row);

@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from "express";
+import { Router, type Request, type Response, type RequestHandler } from "express";
 import { randomBytes } from "crypto";
 import rateLimit from "express-rate-limit";
 import { isValidAgentType, AGENT_CONFIGS, type AgentType } from "./configs";
@@ -17,7 +17,7 @@ const agentChatLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Agent chat rate limit exceeded. Please try again later." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 router.get("/domain-agents/health", (_req, res) => {
   const agents = Object.entries(AGENT_CONFIGS).map(([id, config]) => ({

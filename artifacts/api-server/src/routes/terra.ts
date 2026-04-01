@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
@@ -22,7 +22,7 @@ const terraRateLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Terra rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const terraCache = new Map<string, { data: unknown; expiry: number }>();
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {

@@ -813,7 +813,7 @@ router.get("/certification/mom-led-readiness", ...auth, async (req, res) => {
       db.select().from(ownershipScenariosTable),
     ]);
 
-    const preferredScenario = scenarios.find(s => s.status === "preferred") ?? scenarios[0] ?? null;
+    const preferredScenario = scenarios.find(s => s.isPreferred) ?? scenarios[0] ?? null;
 
     const SECONDARY_ONLY = new Set(["vosb-sdvosb"]);
     const LEGAL_REVIEW_REQUIRED = new Set(["sba-8a", "vosb-sdvosb"]);
@@ -839,7 +839,7 @@ router.get("/certification/mom-led-readiness", ...auth, async (req, res) => {
         return { status: "check", note: "All federal WOSB requirements must be met first." };
       }
       if (scenario) {
-        const eligibility = scenario.programEligibilityJson as Record<string, string> | null;
+        const eligibility = (scenario as any).programEligibilityJson as Record<string, string> | null;
         if (eligibility && key in eligibility) {
           const val = eligibility[key];
           if (val === "met") return { status: "met", note: "Recorded as met in preferred ownership scenario." };
@@ -894,7 +894,7 @@ router.get("/certification/mom-led-readiness", ...auth, async (req, res) => {
 
     sendSuccess(res, {
       preferredScenario: preferredScenario
-        ? { id: preferredScenario.id, scenarioName: preferredScenario.scenarioName, description: preferredScenario.description, status: preferredScenario.status }
+        ? { id: preferredScenario.id, scenarioName: preferredScenario.name, description: preferredScenario.description, status: preferredScenario.status }
         : null,
       programReadiness,
     });

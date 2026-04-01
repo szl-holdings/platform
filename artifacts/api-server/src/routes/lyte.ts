@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -64,7 +64,7 @@ router.get("/lyte/signals", authMiddleware(), async (req, res) => {
 router.post("/lyte/signals", authMiddleware(), denyIfReadOnly(), async (req, res) => {
   try {
     const [row] = await db.insert(lyteSignalsTable).values(req.body).returning();
-    broadcastWs("lyte-metrics", "signal-created", { id: row.id, type: row.type, severity: row.severity });
+    broadcastWs("lyte-metrics", "signal-created", { id: row.id, type: (row as any).type, severity: row.severity });
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, "Failed to create signal");
@@ -76,7 +76,7 @@ router.patch("/lyte/signals/:id", authMiddleware(), denyIfReadOnly(), async (req
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(lyteSignalsTable).set(req.body).where(eq(lyteSignalsTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Signal"); return; }
-    broadcastWs("lyte-metrics", "signal-updated", { id: row.id, type: row.type, severity: row.severity });
+    broadcastWs("lyte-metrics", "signal-updated", { id: row.id, type: (row as any).type, severity: row.severity });
     sendSuccess(res, row);
   } catch (err) {
     handleRouteError(res, err, "Failed to update signal");
@@ -419,7 +419,7 @@ const lyteLiveLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "Lyte Live rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const lyteCache = new Map<string, { data: unknown; expiry: number }>();
 function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {

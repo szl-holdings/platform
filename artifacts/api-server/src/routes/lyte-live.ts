@@ -222,7 +222,7 @@ router.get("/lyte/live/signals", authMiddleware({ required: false }), async (_re
 
 router.get("/lyte/live/database-telemetry", authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const result = await getLyteCached("lyte-db-telemetry", 30000, async () => {
+    const result = await getLyteCached<any>("lyte-db-telemetry", 30000, async () => {
       const [tableSizes, connections] = await Promise.all([
         getDbTableSizes(),
         getDbConnections(),
@@ -263,7 +263,7 @@ router.get("/lyte/live/github-activity", authMiddleware({ required: false }), as
     const repo = (req.query.repo as string) ?? "";
     const token = process.env.GITHUB_TOKEN;
 
-    const result = await getLyteCached(`lyte-github-${owner}-${repo}`, 5 * 60 * 1000, async () => {
+    const result = await getLyteCached<any>(`lyte-github-${owner}-${repo}`, 5 * 60 * 1000, async () => {
       try {
         if (!repo) {
           const repos = await fetchGitHubJson(`https://api.github.com/users/${owner}/repos?sort=updated&per_page=10`, token) as any[];
@@ -433,7 +433,7 @@ router.get("/lyte/live/operations-summary", authMiddleware({ required: false }),
 
     const overallStatus = errorRate > 10 ? "degraded" : memUsage.heapUsed / memUsage.heapTotal > 0.9 ? "degraded" : "operational";
 
-    const dbResult = await getLyteCached("lyte-ops-db-check", 15000, async () => {
+    const dbResult = await getLyteCached<any>("lyte-ops-db-check", 15000, async () => {
       const start = Date.now();
       try {
         await db.execute(sql`SELECT 1`);

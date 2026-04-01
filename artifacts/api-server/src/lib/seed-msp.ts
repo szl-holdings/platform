@@ -105,7 +105,7 @@ export async function seedMspData(): Promise<void> {
   let devNum = 100;
 
   for (const client of clients) {
-    const count = Math.floor(client.deviceCount / 15) + 3;
+    const count = Math.floor((client.deviceCount ?? 0) / 15) + 3;
     for (let j = 0; j < count; j++) {
       const type = deviceTypes[j % deviceTypes.length];
       const statusRoll = Math.random();
@@ -139,7 +139,7 @@ export async function seedMspData(): Promise<void> {
     }
   }
 
-  await db.insert(mspDevicesTable).values(deviceData);
+  await db.insert(mspDevicesTable).values(deviceData as any);
   logger.info({ count: deviceData.length }, "[msp-seed] Devices inserted");
 
   const contracts = await db.insert(mspContractsTable).values([

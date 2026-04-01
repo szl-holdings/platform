@@ -47,8 +47,8 @@ export const stephenResolvers = {
         const { stephenContentBlocksTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.type) conditions.push(eq(stephenContentBlocksTable.type, args.type));
-        if (args.featured != null) conditions.push(eq(stephenContentBlocksTable.featured, args.featured));
+        if (args.type) conditions.push(eq(stephenContentBlocksTable.type, args.type as any));
+        if (args.featured != null) conditions.push(eq(stephenContentBlocksTable.featured, args.featured as any));
         const query = db.select().from(stephenContentBlocksTable).orderBy(desc(stephenContentBlocksTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -65,7 +65,7 @@ export const stephenResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(stephenCaseStudiesTable).orderBy(desc(stephenCaseStudiesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.featured != null) {
-          return await query.where(eq(stephenCaseStudiesTable.featured, args.featured));
+          return await query.where(eq(stephenCaseStudiesTable.featured, args.featured as any));
         }
         return await query;
       } catch {
@@ -77,7 +77,7 @@ export const stephenResolvers = {
         const { db } = await import("@workspace/db");
         const { stephenCaseStudiesTable } = await import("@workspace/db/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(stephenCaseStudiesTable).where(eq(stephenCaseStudiesTable.slug, args.slug)).limit(1);
+        const rows = await db.select().from(stephenCaseStudiesTable).where(eq(stephenCaseStudiesTable.slug, args.slug as any)).limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
@@ -90,7 +90,7 @@ export const stephenResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(stephenBookingRequestsTable).orderBy(desc(stephenBookingRequestsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
-          return await query.where(eq(stephenBookingRequestsTable.status, args.status));
+          return await query.where(eq(stephenBookingRequestsTable.status, args.status as any));
         }
         return await query;
       } catch {
@@ -105,7 +105,7 @@ export const stephenResolvers = {
         const { stephenBookingRequestsTable } = await import("@workspace/db/schema");
         const rows = await db
           .insert(stephenBookingRequestsTable)
-          .values({ name: args.name, email: args.email, type: args.type, status: "pending" })
+          .values({ name: args.name, email: args.email, type: args.type, status: "pending" } as any)
           .returning();
         return rows[0];
       } catch (err) {

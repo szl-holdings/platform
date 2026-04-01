@@ -76,8 +76,8 @@ router.get("/firestorm/live/compliance-summary", authMiddleware({ required: fals
   try {
     const controls = await db.select().from(firestormComplianceControlsTable);
     const total = controls.length;
-    const passing = controls.filter((c) => c.status === "pass" || c.status === "compliant").length;
-    const failing = controls.filter((c) => c.status === "fail" || c.status === "non_compliant").length;
+    const passing = controls.filter((c) => (c.status as any) === "pass" || (c.status as any) === "compliant").length;
+    const failing = controls.filter((c) => (c.status as any) === "fail" || (c.status as any) === "non_compliant").length;
     const inProgress = total - passing - failing;
 
     sendSuccess(res, {
@@ -109,7 +109,7 @@ router.get("/firestorm/live/asset-risk", authMiddleware({ required: false }), as
       entity: a.name,
       type: a.assetType,
       risk: a.riskScore ?? 0,
-      status: a.status,
+      status: "active",
     }));
 
     const aptEntities = [

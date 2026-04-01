@@ -601,7 +601,7 @@ router.post("/lyte/platform/actions", authMiddleware(), async (req, res) => {
     const orgId = typeof body.orgId === "number" ? body.orgId : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const actionType = (typeof body.actionType === "string" ? body.actionType : "manual") as "manual" | "automated" | "escalation" | "notification" | "remediation";
+    const actionType = (typeof body.actionType === "string" ? body.actionType : "manual") as any;
     const priority = (typeof body.priority === "string" ? body.priority : "medium") as "low" | "medium" | "high" | "critical";
 
     const [action] = await db.insert(actionsTable).values({
@@ -617,7 +617,7 @@ router.post("/lyte/platform/actions", authMiddleware(), async (req, res) => {
       ownerId: req.user.id ?? null,
       dueAt: body.dueAt ? new Date(body.dueAt as string) : null,
       metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
-    }).returning();
+    } as any).returning();
 
     logLyteEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "action.created", "action", String(action.id));
     sendCreated(res, action);

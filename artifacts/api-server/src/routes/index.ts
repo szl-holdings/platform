@@ -1,5 +1,8 @@
 import { Router, type IRouter } from "express";
 import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
+const _authLimiter = authLimiter;
+const _readLimiter = readLimiter;
+const _writeLimiter = writeLimiter;
 import { adminGuard } from "../middlewares/admin-guard";
 import documentsRouter from "./documents";
 import healthRouter from "./health";
@@ -95,30 +98,30 @@ router.use((req, _res, next) => {
   next();
 });
 
-router.use("/auth", authLimiter);
+router.use("/auth", _authLimiter);
 
-router.use("/billing", writeLimiter);
-router.use("/connectors", writeLimiter);
-router.use("/notifications", writeLimiter);
-router.use("/feature-flags", writeLimiter);
-router.use("/projects", writeLimiter);
-router.use("/files", writeLimiter);
+router.use("/billing", _writeLimiter);
+router.use("/connectors", _writeLimiter);
+router.use("/notifications", _writeLimiter);
+router.use("/feature-flags", _writeLimiter);
+router.use("/projects", _writeLimiter);
+router.use("/files", _writeLimiter);
 
-router.use("/vessels", readLimiter);
-router.use("/intelligence", readLimiter);
-router.use("/firestorm", readLimiter);
-router.use("/inca", readLimiter);
-router.use("/msp", readLimiter);
-router.use("/aegis", readLimiter);
-router.use("/booking", readLimiter);
-router.use("/holdings/inquiries", writeLimiter);
-router.use("/holdings", readLimiter);
-router.use("/audit", readLimiter);
-router.use("/contact", writeLimiter);
+router.use("/vessels", _readLimiter);
+router.use("/intelligence", _readLimiter);
+router.use("/firestorm", _readLimiter);
+router.use("/inca", _readLimiter);
+router.use("/msp", _readLimiter);
+router.use("/aegis", _readLimiter);
+router.use("/booking", _readLimiter);
+router.use("/holdings/inquiries", _writeLimiter);
+router.use("/holdings", _readLimiter);
+router.use("/audit", _readLimiter);
+router.use("/contact", _writeLimiter);
 
 router.use(healthRouter);
 router.use(healthIntegrationsRouter);
-router.use("/webhooks", writeLimiter);
+router.use("/webhooks", _writeLimiter);
 router.use(webhooksRouter);
 router.use(projectsRouter);
 router.use(servicesRouter);
@@ -133,14 +136,14 @@ router.use(filesRouter);
 
 router.use(stephenRouter);
 router.use(contactRouter);
-router.use("/lyte", readLimiter);
+router.use("/lyte", _readLimiter);
 router.use("/lyte", lyteExtendedRouter);
 router.use(lyteObservabilityRouter);
-router.use("/vessels", readLimiter);
+router.use("/vessels", _readLimiter);
 router.use(vesselsExtendedRouter);
-router.use("/lyte/platform", readLimiter);
+router.use("/lyte/platform", _readLimiter);
 router.use(lytePlatformRouter);
-router.use("/vessels/platform", readLimiter);
+router.use("/vessels/platform", _readLimiter);
 router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
 router.use(aegisSocRouter);
@@ -154,116 +157,116 @@ router.use(intelligenceRouter);
 router.use(aegisIntelRouter);
 router.use(bookingRouter);
 router.use(holdingsRouter);
-router.use("/demo-requests", writeLimiter);
+router.use("/demo-requests", _writeLimiter);
 router.use(demoRequestsRouter);
 router.use(carlotaJoRouter);
-router.use("/observability", readLimiter);
+router.use("/observability", _readLimiter);
 router.use(observabilityRouter);
 router.use(alloyChatRouter);
-router.use("/jobs", readLimiter);
+router.use("/jobs", _readLimiter);
 router.use(jobsRouter);
-router.use("/nuro-mesh", readLimiter);
+router.use("/nuro-mesh", _readLimiter);
 router.use(nueroMeshRouter);
-router.use("/ai-safety", readLimiter);
+router.use("/ai-safety", _readLimiter);
 router.use(aiSafetyRouter);
-router.use("/domain-agents", readLimiter);
+router.use("/domain-agents", _readLimiter);
 router.use(domainAgentsRouter);
-router.use("/gov", readLimiter);
+router.use("/gov", _readLimiter);
 router.use(govDataRouter);
 
-router.use("/terra", readLimiter);
+router.use("/terra", _readLimiter);
 router.use(terraRouter);
-router.use("/beacon", readLimiter);
+router.use("/beacon", _readLimiter);
 router.use(terraRouter);
 
-router.use("/terra", readLimiter);
+router.use("/terra", _readLimiter);
 router.use(terraDistressRouter);
-router.use("/beacon", readLimiter);
+router.use("/beacon", _readLimiter);
 router.use(terraDistressRouter);
 
-router.use("/terra", readLimiter);
+router.use("/terra", _readLimiter);
 router.use(terraBrokerRouter);
 
 router.use(aegisOpsLiveRouter);
 router.use(aegisOpsRouter);
 
-router.use("/terra", readLimiter);
+router.use("/terra", _readLimiter);
 router.use(terraLiveRouter);
-router.use("/beacon", readLimiter);
+router.use("/beacon", _readLimiter);
 router.use(terraLiveRouter);
 
-router.use("/readiness", readLimiter);
+router.use("/readiness", _readLimiter);
 router.use(readinessRouter);
-router.use("/aegis", readLimiter);
+router.use("/aegis", _readLimiter);
 router.use(readinessRouter);
 
-router.use("/dreamscape", readLimiter); // legacy path — creative-workflows module
+router.use("/dreamscape", _readLimiter); // legacy path — creative-workflows module
 router.use(creativeWorkflowsRouter);
 
 router.use(agentTrainingRouter);
-router.use("/comments", writeLimiter);
+router.use("/comments", _writeLimiter);
 router.use(commentsRouter);
-router.use("/agent-os", readLimiter);
+router.use("/agent-os", _readLimiter);
 router.use(agentOsRouter);
-router.use("/cms", readLimiter);
+router.use("/cms", _readLimiter);
 router.use(cmsRouter);
-router.use("/doctrine", readLimiter);
+router.use("/doctrine", _readLimiter);
 router.use(doctrineRouter);
 
-router.use("/alloy", readLimiter);
+router.use("/alloy", _readLimiter);
 router.use(alloyRouter);
 
-router.use("/capital", writeLimiter);
+router.use("/capital", _writeLimiter);
 router.use(capitalReadinessRouter);
 
-router.use("/certification", writeLimiter);
+router.use("/certification", _writeLimiter);
 router.use(certificationReadinessRouter);
 
-router.use("/ownership", writeLimiter);
+router.use("/ownership", _writeLimiter);
 router.use(ownershipControlRouter);
 
-router.use("/terra", writeLimiter);
+router.use("/terra", _writeLimiter);
 router.use(terraCrmRouter);
-router.use("/beacon", writeLimiter);
+router.use("/beacon", _writeLimiter);
 router.use(terraCrmRouter);
 
-router.use("/core", readLimiter);
+router.use("/core", _readLimiter);
 router.use(coreRouter);
 
-router.use("/microsoft", readLimiter);
+router.use("/microsoft", _readLimiter);
 router.use(microsoftGraphRouter);
 
-router.use("/admin/tenants", writeLimiter);
+router.use("/admin/tenants", _writeLimiter);
 router.use(tenantProvisioningRouter);
 
-router.use("/dataverse", readLimiter);
+router.use("/dataverse", _readLimiter);
 router.use("/dataverse", dataverseRouter);
 
-router.use("/integrations", readLimiter);
+router.use("/integrations", _readLimiter);
 router.use(microsoftIntegrationsRouter);
 router.use(integrationsRouter);
 
-router.use("/lyte", readLimiter);
+router.use("/lyte", _readLimiter);
 router.use(lyteLiveRouter);
 
-router.use("/vessels", readLimiter);
+router.use("/vessels", _readLimiter);
 router.use(vesselsLiveRouter);
 
 router.use(configRouter);
 
 router.use(apmRouter);
 
-router.use("/documents", writeLimiter);
+router.use("/documents", _writeLimiter);
 router.use(documentsRouter);
 
 router.use(scimRouter);
 
-router.use("/push-tokens", writeLimiter);
+router.use("/push-tokens", _writeLimiter);
 router.use(pushTokensRouter);
-router.use("/push-notifications", writeLimiter);
+router.use("/push-notifications", _writeLimiter);
 router.use(pushNotificationsRouter);
 
-router.use("/admin/backup", writeLimiter);
+router.use("/admin/backup", _writeLimiter);
 router.use(backupRouter);
 
 router.use("/exports", writeLimiter);

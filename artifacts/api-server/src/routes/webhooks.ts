@@ -259,7 +259,7 @@ router.patch("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, r
     return;
   }
   try {
-    const endpoint = webhookEndpoints.get(req.params.id);
+    const endpoint = webhookEndpoints.get(String(req.params.id));
     if (!endpoint) {
       sendNotFound(res, "Webhook endpoint");
       return;
@@ -286,11 +286,11 @@ router.patch("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, r
 
 router.delete("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    if (!webhookEndpoints.has(req.params.id)) {
+    if (!webhookEndpoints.has(String(req.params.id))) {
       sendNotFound(res, "Webhook endpoint");
       return;
     }
-    webhookEndpoints.delete(req.params.id);
+    webhookEndpoints.delete(String(req.params.id));
     res.status(204).send();
   } catch (err) {
     handleRouteError(res, err, "Failed to delete webhook endpoint");
@@ -299,7 +299,7 @@ router.delete("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, 
 
 router.post("/webhooks/endpoints/:id/ping", authMiddleware(), async (req: Request, res: Response) => {
   try {
-    const endpoint = webhookEndpoints.get(req.params.id);
+    const endpoint = webhookEndpoints.get(String(req.params.id));
     if (!endpoint) {
       sendNotFound(res, "Webhook endpoint");
       return;

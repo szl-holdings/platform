@@ -94,7 +94,7 @@ export const alloyResolvers = {
         const { db } = await import("@workspace/db");
         const { alloySignals } = await import("@workspace/db/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(alloySignals).where(eq(alloySignals.id, args.id)).limit(1);
+        const rows = await db.select().from(alloySignals).where(eq(alloySignals.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
@@ -120,7 +120,7 @@ export const alloyResolvers = {
         const { db } = await import("@workspace/db");
         const { alloyWorkflows } = await import("@workspace/db/schema");
         const { eq } = await import("drizzle-orm");
-        const rows = await db.select().from(alloyWorkflows).where(eq(alloyWorkflows.id, args.id)).limit(1);
+        const rows = await db.select().from(alloyWorkflows).where(eq(alloyWorkflows.id, parseInt(args.id, 10))).limit(1);
         return rows[0] ?? null;
       } catch {
         return null;
@@ -138,7 +138,7 @@ export const alloyResolvers = {
           .limit(args.limit ?? 50)
           .offset(args.offset ?? 0);
         if (args.workflowId) {
-          return await query.where(eq(alloyWorkflowRuns.workflowId, args.workflowId));
+          return await query.where(eq(alloyWorkflowRuns.workflowId, parseInt(args.workflowId, 10)));
         }
         return await query;
       } catch {
@@ -168,7 +168,7 @@ export const alloyResolvers = {
           .limit(args.limit ?? 50)
           .offset(args.offset ?? 0);
         if (args.workflowId) {
-          return await query.where(eq(alloyActions.workflowId, args.workflowId));
+          return await query.where(eq(alloyActions.workflowId, parseInt(args.workflowId, 10)));
         }
         return await query;
       } catch {
@@ -203,7 +203,7 @@ export const alloyResolvers = {
             type: args.type ?? "standard",
             priority: args.priority ?? "medium",
             status: "pending",
-          })
+          } as any)
           .returning();
         return rows[0];
       } catch (err) {
@@ -217,7 +217,7 @@ export const alloyResolvers = {
         const { eq } = await import("drizzle-orm");
         const rows = await db
           .update(alloyWorkflowRuns)
-          .set({ status: args.status, ...(args.status === "completed" ? { completedAt: new Date() } : {}) })
+          .set({ status: args.status as any, ...(args.status === "completed" ? { completedAt: new Date() } : {}) })
           .where(eq(alloyWorkflowRuns.id, parseIntId(args.id)))
           .returning();
         const run = rows[0];

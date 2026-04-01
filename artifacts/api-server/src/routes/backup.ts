@@ -62,7 +62,7 @@ backupRouter.post("/admin/backup/export-tenant", async (req, res) => {
 
     const manifest = {
       exportedAt: new Date().toISOString(),
-      tenantId: tenantId ?? "all",
+      tenantId: orgId ?? "all",
       tables: Object.keys(data),
       rowCounts: Object.fromEntries(
         Object.entries(data).map(([k, v]) => [k, v.length])

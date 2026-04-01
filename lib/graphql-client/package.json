@@ -13,6 +13,9 @@
     "graphql": "^16.13.2",
     "graphql-ws": "^6.0.8"
   },
+  "devDependencies": {
+    "@types/react": "catalog:"
+  },
   "peerDependencies": {
     "react": ">=18"
   }

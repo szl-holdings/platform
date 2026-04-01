@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "./utils";
 
 export interface EmptyStateProps {
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   illustration?: React.ReactNode;
   headline: string;
   description?: string;

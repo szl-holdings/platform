@@ -1,5 +1,5 @@
 // Aegis Intelligence routes (file: inca.ts — legacy filename, module now known as Aegis Intelligence)
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import {
   db,
@@ -272,7 +272,7 @@ const incaLiveLimit = rateLimit({
   legacyHeaders: false,
   message: { error: "INCA rate limit exceeded." },
   validate: { xForwardedForHeader: false, ip: false },
-});
+}) as unknown as RequestHandler;
 
 const INCA_CACHE_MAX_SIZE = 100;
 const incaCache = new Map<string, { data: unknown; expiry: number }>();

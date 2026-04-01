@@ -124,7 +124,7 @@ router.get("/stephen/case-studies", authMiddleware(), async (_req, res) => {
 
 router.get("/stephen/case-studies/:slug", authMiddleware(), async (req, res) => {
   try {
-    const slug = req.params.slug as string;
+    const slug = String(String(req.params.slug)) as string;
     const [study] = await db.select().from(stephenSiteCaseStudiesTable).where(eq(stephenSiteCaseStudiesTable.slug, slug));
     if (!study) {
       sendNotFound(res, "Case study");
@@ -158,7 +158,7 @@ router.get("/stephen/content-blocks", async (req, res) => {
       const blocks = await db
         .select()
         .from(stephenContentBlocksTable)
-        .where(eq(stephenContentBlocksTable.type, query.type))
+        .where(eq(stephenContentBlocksTable.type, query.type as any))
         .orderBy(asc(stephenContentBlocksTable.sortOrder));
       res.json(blocks.map(serializeContentBlock));
     } else {
@@ -179,7 +179,7 @@ router.post("/stephen/content-blocks", async (req, res) => {
     const [block] = await db
       .insert(stephenContentBlocksTable)
       .values({
-        type: body.type,
+        type: body.type as any,
         title: body.title,
         content: body.content,
         icon: body.icon ?? null,
@@ -197,7 +197,7 @@ router.post("/stephen/content-blocks", async (req, res) => {
 
 router.patch("/stephen/content-blocks/:id", async (req, res) => {
   try {
-    const { id } = UpdateStephenContentBlockParams.parse({ id: req.params.id });
+    const { id } = UpdateStephenContentBlockParams.parse({ id: String(req.params.id) });
     const body = UpdateStephenContentBlockBody.parse(req.body);
     const updateData: Record<string, unknown> = {};
     if (body.title !== undefined) updateData.title = body.title;
@@ -225,7 +225,7 @@ router.patch("/stephen/content-blocks/:id", async (req, res) => {
 
 router.delete("/stephen/content-blocks/:id", async (req, res) => {
   try {
-    const { id } = DeleteStephenContentBlockParams.parse({ id: req.params.id });
+    const { id } = DeleteStephenContentBlockParams.parse({ id: String(req.params.id) });
     const [deleted] = await db
       .delete(stephenContentBlocksTable)
       .where(eq(stephenContentBlocksTable.id, id))
@@ -278,7 +278,7 @@ router.post("/stephen/portfolio-case-studies", async (req, res) => {
 
 router.get("/stephen/portfolio-case-studies/:slug", async (req, res) => {
   try {
-    const { slug } = GetStephenPortfolioCaseStudyParams.parse({ slug: req.params.slug });
+    const { slug } = GetStephenPortfolioCaseStudyParams.parse({ slug: String(String(req.params.slug)) });
     const [study] = await db
       .select()
       .from(stephenCaseStudiesTable)
@@ -295,7 +295,7 @@ router.get("/stephen/portfolio-case-studies/:slug", async (req, res) => {
 
 router.patch("/stephen/portfolio-case-studies/:slug", async (req, res) => {
   try {
-    const { slug } = UpdateStephenPortfolioCaseStudyParams.parse({ slug: req.params.slug });
+    const { slug } = UpdateStephenPortfolioCaseStudyParams.parse({ slug: String(String(req.params.slug)) });
     const body = UpdateStephenPortfolioCaseStudyBody.parse(req.body);
     const updateData: Record<string, unknown> = {};
     if (body.title !== undefined) updateData.title = body.title;
@@ -325,7 +325,7 @@ router.patch("/stephen/portfolio-case-studies/:slug", async (req, res) => {
 
 router.delete("/stephen/portfolio-case-studies/:slug", async (req, res) => {
   try {
-    const { slug } = DeleteStephenPortfolioCaseStudyParams.parse({ slug: req.params.slug });
+    const { slug } = DeleteStephenPortfolioCaseStudyParams.parse({ slug: String(String(req.params.slug)) });
     const [deleted] = await db
       .delete(stephenCaseStudiesTable)
       .where(eq(stephenCaseStudiesTable.slug, slug))
@@ -362,7 +362,7 @@ router.post("/stephen/booking-requests", async (req, res) => {
         email: body.email,
         company: body.company ?? null,
         role: body.role ?? null,
-        type: body.type,
+        type: body.type as any,
         message: body.message,
         preferredDate: body.preferredDate ?? null,
         status: "pending",
@@ -383,7 +383,7 @@ router.post("/stephen/booking-requests", async (req, res) => {
           name: body.name,
           email: body.email,
           company: body.company,
-          type: body.type,
+          type: body.type as any,
           message: body.message,
         }),
         replyTo: body.email,

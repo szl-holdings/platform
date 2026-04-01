@@ -226,7 +226,7 @@ function CmsTablePanel({
   queryKey: string[];
   endpoint: string;
   fields: FieldDef[];
-  renderRow: (item: Record<string, unknown>) => React.ReactNode;
+  renderRow: (item: Record<string, string | number | boolean | null | undefined>) => React.ReactNode;
   emptyMessage?: string;
 }) {
   const qc = useQueryClient();
@@ -303,7 +303,7 @@ function CmsTablePanel({
         <div className="bg-card border border-border rounded-xl divide-y divide-border/50">
           {rows.map(item => (
             <div key={(item as any).id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/20 transition-colors">
-              <div className="flex-1 min-w-0 pr-4">{renderRow(item)}</div>
+              <div className="flex-1 min-w-0 pr-4">{renderRow(item as Record<string, string | number | boolean | null | undefined>)}</div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <button onClick={() => openEdit(item)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <Edit3 className="w-3.5 h-3.5" />
@@ -1926,7 +1926,7 @@ function PagesPanel() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">{item.title}</span>
-            <StatusBadge status={item.status} />
+            <StatusBadge status={String(item.status ?? "")} />
           </div>
           <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
             <span className="font-mono">{item.slug}</span>
@@ -1962,7 +1962,7 @@ function ArticlesPanel() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">{item.title}</span>
-            <StatusBadge status={item.status} />
+            <StatusBadge status={String(item.status ?? "")} />
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">
             {item.authorName} · <span className="font-mono">{item.slug}</span>
@@ -1997,7 +1997,7 @@ function CaseStudiesPanel() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">{item.title}</span>
-            <StatusBadge status={item.status} />
+            <StatusBadge status={String(item.status ?? "")} />
           </div>
           <div className="text-xs text-muted-foreground mt-0.5 font-mono">{item.slug}</div>
         </div>
@@ -2028,7 +2028,7 @@ function RoadmapPanel() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">{item.title}</span>
-            <StatusBadge status={item.status} />
+            <StatusBadge status={String(item.status ?? "")} />
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">
             {item.phaseLabel} · {item.targetQuarter}
@@ -2060,10 +2060,10 @@ function UpdatesPanel() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">{item.title}</span>
-            <StatusBadge status={item.status} />
+            <StatusBadge status={String(item.status ?? "")} />
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">
-            {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : "Draft"} · <span className="font-mono">{item.slug}</span>
+            {item.publishedAt ? new Date(String(item.publishedAt)).toLocaleDateString() : "Draft"} · <span className="font-mono">{item.slug}</span>
           </div>
         </div>
       )}

@@ -64,8 +64,8 @@ export const carlotaJoResolvers = {
         const { carlotaServicesTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.category) conditions.push(eq(carlotaServicesTable.category, args.category));
-        if (args.isActive != null) conditions.push(eq(carlotaServicesTable.isActive, args.isActive));
+        if (args.category) conditions.push(eq(carlotaServicesTable.category, args.category as any));
+        if (args.isActive != null) conditions.push(eq(carlotaServicesTable.isActive, args.isActive as any));
         const query = db.select().from(carlotaServicesTable).orderBy(desc(carlotaServicesTable.createdAt)).limit(args.limit ?? 50);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -82,7 +82,7 @@ export const carlotaJoResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(carlotaReservationsTable).orderBy(desc(carlotaReservationsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
-          return await query.where(eq(carlotaReservationsTable.status, args.status));
+          return await query.where(eq(carlotaReservationsTable.status, args.status as any));
         }
         return await query;
       } catch {
@@ -107,7 +107,7 @@ export const carlotaJoResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(carlotaInquiriesTable).orderBy(desc(carlotaInquiriesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
-          return await query.where(eq(carlotaInquiriesTable.status, args.status));
+          return await query.where(eq(carlotaInquiriesTable.status, args.status as any));
         }
         return await query;
       } catch {
@@ -132,7 +132,7 @@ export const carlotaJoResolvers = {
         const { carlotaInquiriesTable } = await import("@workspace/db/schema");
         const rows = await db
           .insert(carlotaInquiriesTable)
-          .values({ name: args.name, email: args.email, service: args.service, message: args.message, status: "new" })
+          .values({ name: args.name, email: args.email, service: args.service, message: args.message, status: "new" } as any)
           .returning();
         const inquiry = rows[0];
         publish(WS_CHANNELS.BOOKINGS, "inquiry-created", {

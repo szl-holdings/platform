@@ -56,7 +56,7 @@ function useSignals(source: string | null, severity: string | null, page: number
           const r = resp as SignalResp;
           if (r.data && r.data.length > 0) return r;
         }
-        const arr = (resp as Signal[]) ?? [];
+        const arr = (resp as unknown as Signal[]) ?? [];
         if (arr.length > 0) return { data: arr, meta: { page: 1, limit: 50, total: arr.length } };
         return DEMO_SIGNAL_RESP;
       } catch {

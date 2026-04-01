@@ -1,4 +1,4 @@
-import React, { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ApolloProvider } from "@apollo/client";
 import { getApolloClient } from "./client.js";
 
@@ -14,5 +14,7 @@ export function GraphQLProvider({
   wsEndpoint,
 }: GraphQLProviderProps) {
   const client = getApolloClient(graphqlEndpoint, wsEndpoint);
-  return <ApolloProvider client={client}>{children}</ApolloProvider>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Provider = ApolloProvider as any;
+  return <Provider client={client}>{children}</Provider>;
 }

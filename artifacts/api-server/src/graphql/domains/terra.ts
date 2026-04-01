@@ -90,7 +90,7 @@ export const terraResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(terraListingsTable).orderBy(desc(terraListingsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.status) {
-          return await query.where(eq(terraListingsTable.status, args.status));
+          return await query.where(eq(terraListingsTable.status, args.status as any));
         }
         return await query;
       } catch {
@@ -103,8 +103,8 @@ export const terraResolvers = {
         const { terraDistressPropertiesTable } = await import("@workspace/db/schema");
         const { desc, eq, and } = await import("drizzle-orm");
         const conditions = [];
-        if (args.borough) conditions.push(eq(terraDistressPropertiesTable.borough, args.borough));
-        if (args.distressType) conditions.push(eq(terraDistressPropertiesTable.distressType, args.distressType));
+        if (args.borough) conditions.push(eq(terraDistressPropertiesTable.borough, args.borough as any));
+        if (args.distressType) conditions.push(eq(terraDistressPropertiesTable.distressType, args.distressType as any));
         const query = db.select().from(terraDistressPropertiesTable).orderBy(desc(terraDistressPropertiesTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (conditions.length > 0) {
           return await query.where(and(...conditions));
@@ -121,7 +121,7 @@ export const terraResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(terraDealsTable).orderBy(desc(terraDealsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.stage) {
-          return await query.where(eq(terraDealsTable.stage, args.stage));
+          return await query.where(eq(terraDealsTable.stage, args.stage as any));
         }
         return await query;
       } catch {
@@ -146,7 +146,7 @@ export const terraResolvers = {
         const { desc, eq } = await import("drizzle-orm");
         const query = db.select().from(terraLeadsTable).orderBy(desc(terraLeadsTable.createdAt)).limit(args.limit ?? 50).offset(args.offset ?? 0);
         if (args.stage) {
-          return await query.where(eq(terraLeadsTable.stage, args.stage));
+          return await query.where(eq(terraLeadsTable.stage, args.stage as any));
         }
         return await query;
       } catch {
@@ -186,7 +186,7 @@ export const terraResolvers = {
         const { terraLeadsTable } = await import("@workspace/db/schema");
         const rows = await db
           .insert(terraLeadsTable)
-          .values({ firstName: args.firstName, lastName: args.lastName, type: args.type ?? "buyer", stage: "new" })
+          .values({ firstName: args.firstName, lastName: args.lastName, type: args.type ?? "buyer", stage: "new" } as any)
           .returning();
         return rows[0];
       } catch (err) {
