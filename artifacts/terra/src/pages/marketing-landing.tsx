@@ -476,15 +476,28 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
 
       {/* FOOTER */}
       <footer className="border-t px-6 py-10" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-        <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg" style={{ background: "rgba(45,106,79,0.10)", border: "1px solid rgba(45,106,79,0.16)" }}>
-              <Building2 size={12} style={{ color: ACCENT_LIGHT }} />
+        <div className="max-w-[1100px] mx-auto flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg" style={{ background: "rgba(45,106,79,0.10)", border: "1px solid rgba(45,106,79,0.16)" }}>
+                <Building2 size={12} style={{ color: ACCENT_LIGHT }} />
+              </div>
+              <span className="text-sm font-bold text-white">Terra</span>
+              <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(255,255,255,0.2)" }}>Property Intelligence</span>
             </div>
-            <span className="text-sm font-bold text-white">Terra</span>
-            <span className="text-[9px] font-mono ml-1" style={{ color: "rgba(255,255,255,0.2)" }}>Property Intelligence</span>
+            <div className="flex items-center gap-4">
+              {[
+                { name: "Lyte", href: "/lyte-command-center/" },
+                { name: "Vessels", href: "/vessels/" },
+                { name: "Aegis", href: "/firestorm/" },
+                { name: "Carlota Jo", href: "/carlota-jo/" },
+                { name: "SZL", href: "/szl-holdings/" },
+              ].map(l => (
+                <a key={l.name} href={l.href} className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.15)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.15)")}>{l.name}</a>
+              ))}
+            </div>
           </div>
-          <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.2)" }}>
+          <p className="text-[11px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.12)" }}>
             &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
           </p>
         </div>

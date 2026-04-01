@@ -342,8 +342,14 @@ export default function FirestormMarketingHome() {
             <div>
               <p className="text-[11px] font-semibold text-gray-400 tracking-[0.1em] uppercase mb-4">Ecosystem</p>
               <div className="space-y-2.5">
-                {["SZL Holdings", "Vessels", "Lyte", "Terra", "Carlota Jo"].map(l => (
-                  <p key={l} className="text-[13px] text-gray-500 hover:text-white transition-colors cursor-pointer">{l}</p>
+                {[
+                  { name: "SZL Holdings", href: "/szl-holdings/" },
+                  { name: "Vessels", href: "/vessels/" },
+                  { name: "Lyte", href: "/lyte-command-center/" },
+                  { name: "Terra", href: "/terra/" },
+                  { name: "Carlota Jo", href: "/carlota-jo/" },
+                ].map(l => (
+                  <a key={l.name} href={l.href} className="block text-[13px] text-gray-500 hover:text-white transition-colors">{l.name}</a>
                 ))}
               </div>
             </div>

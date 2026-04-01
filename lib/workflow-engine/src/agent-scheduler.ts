@@ -101,7 +101,7 @@ function parseFindingsFromText(text: string): Array<{ title: string; severity: s
   return findings;
 }
 
-const MAX_RUN_HISTORY = 200;
+const MAX_RUN_HISTORY = 50;
 const DB_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
 const DB_CLEANUP_MAX_AGE_DAYS = 7;
 
@@ -140,6 +140,7 @@ export class AgentScheduler {
             logger.error({ err, agentId }, "Scheduled agent run failed");
           });
         }, schedule.intervalMs);
+        timer.unref();
         this.timers.set(agentId, timer);
       }, initialDelay);
     }
@@ -149,6 +150,7 @@ export class AgentScheduler {
         logger.warn({ err }, "Agent scheduler: DB cleanup failed");
       });
     }, DB_CLEANUP_INTERVAL_MS);
+    this.cleanupTimer.unref();
 
     logger.info({ agentCount: this.schedules.size }, "Agent scheduler started");
   }

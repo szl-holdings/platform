@@ -406,14 +406,16 @@ router.post("/stephen/booking-requests", async (req, res) => {
   }
 });
 
+const PROXY_BASE = `http://localhost:${process.env.PROXY_PORT || 80}`;
+
 const PLATFORM_HEALTH_URLS: Record<string, string> = {
-  "szl-holdings": "http://localhost:80/szl-holdings/",
-  "alloy": "http://localhost:80/szl-holdings/alloy",
-  "lyte": "http://localhost:80/lyte-command-center/",
-  "vessels": "http://localhost:80/vessels/",
-  "aegis": "http://localhost:80/firestorm/",
-  "terra": "http://localhost:80/terra/",
-  "carlota-jo": "http://localhost:80/carlota-jo/",
+  "szl-holdings": `${PROXY_BASE}/szl-holdings/`,
+  "alloy": `${PROXY_BASE}/szl-holdings/alloy`,
+  "lyte": `${PROXY_BASE}/lyte-command-center/`,
+  "vessels": `${PROXY_BASE}/vessels/`,
+  "aegis": `${PROXY_BASE}/firestorm/`,
+  "terra": `${PROXY_BASE}/terra/`,
+  "carlota-jo": `${PROXY_BASE}/carlota-jo/`,
 };
 
 async function probeHealth(url: string): Promise<"operational" | "degraded"> {

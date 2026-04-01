@@ -553,13 +553,26 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
       </Reveal>
 
       <footer className="py-14 px-6 max-w-[1140px] mx-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.03)" }}>
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <Zap size={12} style={{ color: "rgba(212,160,84,0.4)" }} />
-            <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.2)" }}>Lyte</span>
-            <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.1)" }}>by SZL Holdings</span>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2.5">
+              <Zap size={12} style={{ color: "rgba(212,160,84,0.4)" }} />
+              <span className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.2)" }}>Lyte</span>
+              <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.1)" }}>by SZL Holdings</span>
+            </div>
+            <div className="flex items-center gap-4">
+              {[
+                { name: "Terra", href: "/terra/" },
+                { name: "Vessels", href: "/vessels/" },
+                { name: "Aegis", href: "/firestorm/" },
+                { name: "Carlota Jo", href: "/carlota-jo/" },
+                { name: "SZL", href: "/szl-holdings/" },
+              ].map(l => (
+                <a key={l.name} href={l.href} className="text-[10px] transition-colors" style={{ color: "rgba(255,255,255,0.1)" }} onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")} onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.1)")}>{l.name}</a>
+              ))}
+            </div>
           </div>
-          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.1)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
+          <p className="text-[10px] text-center sm:text-left" style={{ color: "rgba(255,255,255,0.08)" }}>&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
         </div>
       </footer>
     </div>

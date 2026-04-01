@@ -264,7 +264,12 @@ export default function Dashboard() {
               <Link href="/signals" className="text-[9px] font-mono flex items-center gap-0.5 hover:opacity-80" style={{ color: TEXT.tertiary }}>Feed <ArrowUpRight className="w-2.5 h-2.5" /></Link>
             } />
             <div className="px-3">
-              {recentSignals.slice(0, 7).map(s => (
+              {recentSignals.length === 0 ? (
+                <div className="flex items-center gap-2 py-4 justify-center">
+                  <CheckCircle2 className="w-3 h-3" style={{ color: "#6b8f71" }} />
+                  <span className="text-[9px] font-mono" style={{ color: TEXT.muted }}>No recent signals — system quiet</span>
+                </div>
+              ) : recentSignals.slice(0, 7).map(s => (
                 <div key={s.id} className="flex items-center gap-2 py-1.5" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
                   <Dot sev={s.severity} pulse={s.severity === "critical"} />
                   <span className="text-[9px] truncate flex-1 min-w-0" style={{ color: TEXT.secondary }}>{s.title}</span>
