@@ -13,10 +13,63 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
-import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { DemoModeProvider } from "@workspace/shared-ui";
+
+const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
+  appId: "vessels",
+  appName: "Vessels",
+  accentColor: "#0ea5e9",
+  steps: [
+    {
+      id: "welcome",
+      title: "Welcome to Vessels",
+      description: "Vessels is your maritime intelligence command — real-time AIS fleet tracking, voyage economics, risk scoring, dark vessel detection, and sanctions screening for 1,200+ vessels.",
+      placement: "center",
+      icon: Ship,
+    },
+    {
+      id: "fleet-map",
+      title: "Live Fleet Map",
+      description: "The Fleet Map shows real-time vessel positions from AIS feeds. Click any vessel to drill into voyage details, fuel performance, ETAs, and flag risk indicators.",
+      targetSelector: "a[href='/fleet']",
+      placement: "right",
+      icon: Globe,
+    },
+    {
+      id: "command-overview",
+      title: "Command Overview",
+      description: "Your command dashboard surfaces fleet KPIs — vessels in port, at sea, flagged for exceptions, and distress signals — all in one operational view.",
+      targetSelector: "a[href='/dashboard']",
+      placement: "right",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "alerts",
+      title: "Alert Center",
+      description: "The Alert Center consolidates all fleet alerts — geofence violations, AIS blackouts, sanctions exposure, and weather routing conflicts — with severity triage.",
+      targetSelector: "a[href='/alerts']",
+      placement: "right",
+      icon: AlertTriangle,
+    },
+    {
+      id: "intelligence",
+      title: "Maritime Intelligence",
+      description: "Go deeper with maritime intelligence: dark vessel detection, sanctions screening, corridor risk analysis, and cyber threat assessment for your fleet.",
+      placement: "center",
+      icon: Brain,
+    },
+  ],
+  checklist: [
+    { id: "view-fleet-map", label: "Explore the live fleet map", description: "Check real-time vessel positions" },
+    { id: "review-dashboard", label: "Review command overview", description: "Check fleet KPIs and exception counts" },
+    { id: "check-alerts", label: "Review active alerts", description: "Triage geofence and AIS blackout alerts" },
+    { id: "view-voyage-economics", label: "Check voyage economics", description: "Review fuel costs and voyage P&L" },
+    { id: "check-risk-scoring", label: "Review vessel risk scores", description: "Check sanctions and compliance flags" },
+  ],
+};
 
 // Marketing pages
 const MarketingHomePage = lazy(() => import("@/pages/marketing-home"));
@@ -327,6 +380,17 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
       )}
       </div>
 
+      {expanded && VESSELS_ONBOARDING_CONFIG.checklist && (
+        <div className="px-1.5 pb-1">
+          <GettingStartedChecklist
+            appId={VESSELS_ONBOARDING_CONFIG.appId}
+            appName={VESSELS_ONBOARDING_CONFIG.appName}
+            items={VESSELS_ONBOARDING_CONFIG.checklist}
+            accentColor={VESSELS_ONBOARDING_CONFIG.accentColor}
+            collapsed
+          />
+        </div>
+      )}
       <div className="px-1.5 py-3 border-t border-sky-500/10 space-y-2">
         {expanded && (
           <Link href="/platform">
@@ -484,6 +548,7 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         appName="Vessels"
         accentColor="#0ea5e9"
       />
+      <OnboardingWizard config={VESSELS_ONBOARDING_CONFIG} />
     </PowerUserProvider>
   );
 }

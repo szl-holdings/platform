@@ -7,9 +7,7 @@ import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { WelcomeOverlay } from "@workspace/shared-ui/WelcomeOverlay";
 import { useAuth } from "@workspace/replit-auth-web";
-import { Zap, Inbox, CheckSquare, Users, AlertOctagon, Activity, Shield, BarChart3, Network, Bell } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -160,22 +158,6 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         commands={lyteCommands}
         appName="Lyte"
         accentColor="#d4a054"
-      />
-      <WelcomeOverlay
-        appId="lyte"
-        appName="Lyte"
-        subtitle="Business Observability"
-        description="In the dark, let Lyte guide you. Lyte is the business observability layer that detects operational risk, surfaces ownership gaps, and routes action before business damage occurs."
-        accentColor="#d4a054"
-        icon={Zap}
-        features={[
-          { icon: Activity, title: "PRISM Framework", description: "Pulse, Risk, Intelligence, Signals, Motion — the spine of business observability" },
-          { icon: Inbox, title: "Priority Action Queue", description: "Highest-priority issues with evidence, confidence scores, and recommended next actions" },
-          { icon: Shield, title: "Risk Detection", description: "Approvals drag, churn risk, ownership gaps, compliance exposure, exception handling" },
-          { icon: Users, title: "Ownership Intelligence", description: "Who owns what, what's unassigned, where handoffs break, who's overloaded" },
-          { icon: CheckSquare, title: "Workflow Motion", description: "Escalations, approvals, routing, and intervention orchestration" },
-          { icon: AlertOctagon, title: "Signal Correlation", description: "Cross-system signal correlation with AI-powered reasoning and evidence chains" },
-        ]}
       />
     </PowerUserProvider>
   );

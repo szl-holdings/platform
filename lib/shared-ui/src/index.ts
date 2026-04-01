@@ -31,3 +31,16 @@ export * from "./ontology";
 export { DataProvenance, ActionLoop, RoleSelector } from "./data-provenance";
 export { LanguageSwitcher, type LanguageSwitcherProps, type SupportedLocale } from "./language-switcher";
 export { ContactModal, useContactModal, type ContactModalProps } from "./contact-modal";
+export {
+  OnboardingWizard,
+  GettingStartedChecklist,
+  OnboardingReplayButton,
+  useOnboardingState,
+  useChecklistState,
+  type OnboardingStep,
+  type OnboardingChecklistItem,
+  type OnboardingConfig,
+  type OnboardingWizardProps,
+  type GettingStartedChecklistProps,
+} from "./onboarding";
+export { WelcomeOverlay, useWelcomeState, type WelcomeOverlayProps, type WelcomeFeature } from "./WelcomeOverlay";

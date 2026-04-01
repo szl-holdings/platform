@@ -8,7 +8,61 @@ import {
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
+
+const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {
+  appId: "lyte",
+  appName: "Lyte",
+  accentColor: "#d4a054",
+  steps: [
+    {
+      id: "welcome",
+      title: "Welcome to Lyte",
+      description: "Lyte is your business observability command center — detecting operational risk, surfacing ownership gaps, and routing action before business damage occurs.",
+      placement: "center",
+      icon: Zap,
+    },
+    {
+      id: "prism",
+      title: "The PRISM Framework",
+      description: "PRISM is Lyte's intelligence spine: Pulse (health), Risk (exposure), Intelligence (analysis), Signals (events), and Motion (action). Each dimension gives you a different lens on your business.",
+      placement: "center",
+      icon: Activity,
+    },
+    {
+      id: "signals",
+      title: "Signals Feed",
+      description: "Signals are cross-system events that matter — approval delays, ownership gaps, compliance exposure, SLA risks. Each signal carries evidence, confidence scores, and recommended next actions.",
+      targetSelector: "a[href='/prism/signals']",
+      placement: "right",
+      icon: Radio,
+    },
+    {
+      id: "inbox",
+      title: "Command Inbox",
+      description: "Your inbox surfaces the highest-priority items requiring your attention — ranked by business impact and urgency, not alert timestamp.",
+      targetSelector: "a[href='/inbox']",
+      placement: "right",
+      icon: Inbox,
+    },
+    {
+      id: "ownership",
+      title: "Ownership Intelligence",
+      description: "See who owns what, what's unassigned, where handoffs break, and who's overloaded — the gaps that cause issues to fall through the cracks.",
+      targetSelector: "a[href='/ownership']",
+      placement: "right",
+      icon: Users,
+    },
+  ],
+  checklist: [
+    { id: "explore-prism", label: "Explore the PRISM framework", description: "Check all five intelligence dimensions" },
+    { id: "check-signals", label: "Review your signals feed", description: "See cross-system events by urgency" },
+    { id: "check-inbox", label: "Clear your command inbox", description: "Review high-priority action items" },
+    { id: "check-ownership", label: "Check ownership gaps", description: "Review unassigned ownership areas" },
+    { id: "configure-alerts", label: "Configure alert thresholds", description: "Set risk tolerance and routing rules" },
+    { id: "explore-topology", label: "Explore service topology", description: "View system dependency relationships" },
+  ],
+};
 
 const BG = { sidebar: "#060a12", header: "rgba(6,10,18,0.85)", main: "#080c14" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.06)" };
@@ -109,6 +163,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("lyte-metrics");
+  const { replay: replayOnboarding } = useOnboardingState("lyte");
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -167,6 +222,18 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             <AdminSection location={location} />
           </nav>
 
+          {LYTE_ONBOARDING_CONFIG.checklist && (
+            <div className="mx-2 mb-2">
+              <GettingStartedChecklist
+                appId={LYTE_ONBOARDING_CONFIG.appId}
+                appName={LYTE_ONBOARDING_CONFIG.appName}
+                items={LYTE_ONBOARDING_CONFIG.checklist}
+                accentColor={LYTE_ONBOARDING_CONFIG.accentColor}
+                onReplayTour={replayOnboarding}
+                collapsed
+              />
+            </div>
+          )}
           <div className="shrink-0 mx-2 mb-2 px-2.5 py-2 rounded" style={{ background: "rgba(212,160,84,0.02)", border: `1px solid rgba(212,160,84,0.05)` }}>
             <div className="text-[7px] uppercase tracking-widest font-mono mb-1.5" style={{ color: TEXT.muted }}>System Pulse</div>
             <div className="space-y-1">
@@ -243,6 +310,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
           </SectionErrorBoundary>
         </main>
       </div>
+      <OnboardingWizard config={LYTE_ONBOARDING_CONFIG} />
     </div>
   );
 }

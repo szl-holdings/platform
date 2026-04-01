@@ -1,14 +1,68 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useCallback } from "react";
 import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 import { useQuery } from "@tanstack/react-query";
+
+const TERRA_ONBOARDING_CONFIG: OnboardingConfig = {
+  appId: "terra",
+  appName: "Terra",
+  accentColor: "#40856a",
+  steps: [
+    {
+      id: "welcome",
+      title: "Welcome to Terra",
+      description: "Terra is your real estate intelligence platform — distress detection, deal pipeline, market analytics, and ownership intelligence for institutional-grade property operations.",
+      placement: "center",
+      icon: Building2,
+    },
+    {
+      id: "dashboard",
+      title: "Portfolio Overview",
+      description: "The Overview dashboard gives you a real-time snapshot of your portfolio — active deals, distress signals, market conditions, and KPI performance across all assets.",
+      targetSelector: "a[href='/dashboard']",
+      placement: "right",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "distress-engine",
+      title: "Distress Engine & Watchlists",
+      description: "The Distress Engine continuously scores assets for financial stress indicators — loan maturity risk, NOI compression, cap rate expansion — so you can act before distress becomes default.",
+      targetSelector: "a[href='/distress-engine']",
+      placement: "right",
+      icon: Eye,
+    },
+    {
+      id: "pipeline",
+      title: "Deal Pipeline",
+      description: "Track deals from initial sourcing through closing. Manage offers, approvals, and transaction milestones with full team collaboration and audit trails.",
+      targetSelector: "a[href='/pipeline']",
+      placement: "right",
+      icon: Activity,
+    },
+    {
+      id: "market",
+      title: "Market Intelligence",
+      description: "Benchmark your assets against real-time market data — cap rates, rent trends, transaction comps, and supply/demand signals across every submarket you operate in.",
+      targetSelector: "a[href='/market']",
+      placement: "right",
+      icon: BarChart3,
+    },
+  ],
+  checklist: [
+    { id: "view-overview", label: "Review your portfolio overview", description: "Check active deals and distress signals" },
+    { id: "check-distress", label: "Check the Distress Engine", description: "Review assets flagged for financial stress" },
+    { id: "explore-pipeline", label: "Explore the deal pipeline", description: "Track deals from sourcing to closing" },
+    { id: "view-market", label: "Check market conditions", description: "Review cap rates and rent trends" },
+    { id: "review-listings", label: "Review your portfolio listings", description: "Browse and filter your asset portfolio" },
+  ],
+};
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = BASE.replace(/\/[^/]+$/, "/api");
@@ -50,6 +104,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("terra-signals");
+  const { replay: replayOnboarding } = useOnboardingState("terra");
 
   const { data: apiHealth, isError: apiDown } = useQuery({
     queryKey: ["terra-api-health"],
@@ -119,6 +174,18 @@ export function TerraLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
+          {TERRA_ONBOARDING_CONFIG.checklist && (
+            <div className="mx-2 mb-2">
+              <GettingStartedChecklist
+                appId={TERRA_ONBOARDING_CONFIG.appId}
+                appName={TERRA_ONBOARDING_CONFIG.appName}
+                items={TERRA_ONBOARDING_CONFIG.checklist}
+                accentColor={TERRA_ONBOARDING_CONFIG.accentColor}
+                onReplayTour={replayOnboarding}
+                collapsed
+              />
+            </div>
+          )}
           <div className="shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(45,106,79,0.04)", border: "1px solid rgba(45,106,79,0.08)" }}>
             <div className="text-[9px] uppercase tracking-widest font-semibold mb-2" style={{ color: "rgba(64,133,106,0.5)" }}>System State</div>
             <div className="space-y-1.5">
@@ -176,6 +243,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           </SectionErrorBoundary>
         </main>
       </div>
+      <OnboardingWizard config={TERRA_ONBOARDING_CONFIG} />
     </div>
   );
 }

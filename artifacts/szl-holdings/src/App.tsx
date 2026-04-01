@@ -2,10 +2,54 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider } from "@workspace/shared-ui";
+import { DemoModeProvider, OnboardingWizard, type OnboardingConfig } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
+import { Building2, BarChart3, Globe, TrendingUp, Layers, Shield } from "lucide-react";
+
+const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
+  appId: "szl-holdings",
+  appName: "SZL Holdings",
+  accentColor: "#6366f1",
+  steps: [
+    {
+      id: "welcome",
+      title: "Welcome to SZL Holdings",
+      description: "SZL Holdings is the operating center for a portfolio of AI-native platforms — Terra (real estate), Aegis (security), Lyte (observability), Vessels (maritime), and Alloy (automation).",
+      placement: "center",
+      icon: Building2,
+    },
+    {
+      id: "ecosystem",
+      title: "The SZL Ecosystem",
+      description: "Navigate the full platform ecosystem from this portal. Each platform is purpose-built and intelligence-native, sharing a common data and agent layer through Alloy.",
+      placement: "center",
+      icon: Globe,
+    },
+    {
+      id: "ventures",
+      title: "Portfolio & Ventures",
+      description: "Explore SZL's venture portfolio, investment thesis, and the operating doctrine that guides how we build and operate companies.",
+      placement: "center",
+      icon: TrendingUp,
+    },
+    {
+      id: "kpi-dashboard",
+      title: "KPI Command",
+      description: "The KPI dashboard gives you a real-time view of portfolio performance across all platforms — revenue, growth, adoption, and operational health.",
+      placement: "center",
+      icon: BarChart3,
+    },
+  ],
+  checklist: [
+    { id: "explore-ecosystem", label: "Explore the SZL ecosystem", description: "See all platforms and their connections" },
+    { id: "view-ventures", label: "View the venture portfolio", description: "Review investment thesis and portfolio companies" },
+    { id: "check-kpis", label: "Check portfolio KPIs", description: "Review real-time performance metrics" },
+    { id: "explore-terra", label: "Visit Terra", description: "Real estate intelligence platform" },
+    { id: "explore-aegis", label: "Visit Aegis", description: "Unified defense and intelligence command" },
+  ],
+};
 
 const HomePage = lazy(() => import("@/pages/landing"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
@@ -344,6 +388,7 @@ function App() {
         </WouterRouter>
       </LazyMotion>
       <Toaster />
+      <OnboardingWizard config={SZL_ONBOARDING_CONFIG} />
     </QueryClientProvider>
     </DemoModeProvider>
   );

@@ -1,7 +1,7 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -261,7 +261,61 @@ function deriveModule(loc: string): Module {
   return "security";
 }
 
-function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+const AEGIS_ONBOARDING_CONFIG: OnboardingConfig = {
+  appId: "aegis",
+  appName: "Aegis",
+  accentColor: "#3b82f6",
+  steps: [
+    {
+      id: "welcome",
+      title: "Welcome to Aegis",
+      description: "Aegis is your unified defense and intelligence command — three workspaces (Defense, Command, Labs) sharing a single intelligence layer for complete operational visibility.",
+      placement: "center",
+      icon: Hexagon,
+    },
+    {
+      id: "soc",
+      title: "SOC Dashboard",
+      description: "The SOC Dashboard is your command center. Monitor active incidents, review threat severity scores, and track real-time MTTD metrics across your entire security posture.",
+      targetSelector: "a[href='/soc']",
+      placement: "right",
+      icon: Shield,
+    },
+    {
+      id: "incidents",
+      title: "Incident Management",
+      description: "Track and triage P1/P2 security incidents with full MITRE ATT&CK mapping, assignee tracking, and evidence chains linking alerts to business impact.",
+      targetSelector: "a[href='/incidents']",
+      placement: "right",
+      icon: AlertTriangle,
+    },
+    {
+      id: "threat-intel",
+      title: "Threat Intelligence",
+      description: "Correlate IOCs from 142+ threat feeds, track APT actor activity, and surface actionable intelligence before alerts fire in your SIEM.",
+      targetSelector: "a[href='/threat-intel']",
+      placement: "right",
+      icon: Target,
+    },
+    {
+      id: "module-tabs",
+      title: "Switch Workspaces",
+      description: "Use the Defense / Command / Labs tabs to navigate between security operations, managed services, and the intelligence engine — all sharing the same data layer.",
+      placement: "center",
+      icon: Layers,
+    },
+  ],
+  checklist: [
+    { id: "explore-soc", label: "Review the SOC Dashboard", description: "Check active incidents and threat score" },
+    { id: "explore-incidents", label: "View open incidents", description: "Triage P1/P2 incidents by severity" },
+    { id: "explore-threat-intel", label: "Check threat intelligence feeds", description: "Review active IOCs and APT activity" },
+    { id: "explore-compliance", label: "Review compliance posture", description: "Check NIST/SOC2 readiness scores" },
+    { id: "explore-alerts", label: "Configure alert thresholds", description: "Set severity filters and notification rules" },
+    { id: "explore-playbooks", label: "Review SOAR playbooks", description: "Check automated response playbooks" },
+  ],
+};
+
+function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () => void; onReplayTour?: () => void }) {
   const [location] = useLocation();
 
   const [activeModule, setActiveModule] = useState<Module>(deriveModule(location));
@@ -568,6 +622,18 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
 
         {/* Footer */}
         <div className="shrink-0 px-4 py-3 border-t border-white/5 space-y-2 bg-[#0A0D14]/98">
+          {AEGIS_ONBOARDING_CONFIG.checklist && (
+            <div className="mb-1">
+              <GettingStartedChecklist
+                appId={AEGIS_ONBOARDING_CONFIG.appId}
+                appName={AEGIS_ONBOARDING_CONFIG.appName}
+                items={AEGIS_ONBOARDING_CONFIG.checklist}
+                accentColor={AEGIS_ONBOARDING_CONFIG.accentColor}
+                onReplayTour={onReplayTour}
+                collapsed
+              />
+            </div>
+          )}
           <UserButton showName className="w-full" />
           <div className="flex items-center gap-2 text-[10px] text-white/50">
             <Hexagon className="w-3 h-3" />
@@ -716,6 +782,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
   const [location] = useLocation();
+  const { replay: replayOnboarding } = useOnboardingState("aegis");
 
   const normalizedPath = location.replace(/\/+$/, "") || "/";
   const isMarketing = MARKETING_ROUTES.includes(normalizedPath);
@@ -741,7 +808,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         </a>
         <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Unified Defense & Intelligence" accentColor="#3b82f6" />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onReplayTour={replayOnboarding} />
           <div className="flex-1 flex flex-col overflow-auto min-w-0">
             <div className="h-10 flex items-center px-3 border-b border-white/5 bg-[#0A0D14]/80 md:hidden shrink-0">
               <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-blue-500/10 text-blue-400/80 hover:text-blue-300 transition-colors" aria-label={sidebarOpen ? "Close navigation" : "Open navigation"} aria-expanded={sidebarOpen}>
@@ -763,6 +830,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
           appName="Aegis"
           accentColor="#3b82f6"
         />
+        <OnboardingWizard config={AEGIS_ONBOARDING_CONFIG} />
       </div>
     </PowerUserProvider>
   );
