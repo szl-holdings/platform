@@ -222,6 +222,38 @@ Playwright E2E tests require running apps and system-level glib/gtk libraries. I
 
 ---
 
+## Recent Work (Task #253 — Investor-Grade Hardening & Public Credibility Build)
+
+### Completed — 10-Phase program
+
+1. **Audit & Canonicalization** — `docs/audit/public-surface-audit.md`, `docs/audit/repo-canonicalization-plan.md`. Canonical flagship: `stephenlutar2-hash/szl-holdings-platform`.
+
+2. **Public Mirror Discipline** — `docs/public/public-mirror-policy.md`, `scripts/public-mirror/validate-mirror.sh` (pre-push validation script), `scripts/public-mirror/detect-noisy-folders.sh`. `.gitignore` updated with noisy directory patterns.
+
+3. **Flagship Repo Trust Files** — Created: `CHANGELOG.md`, `SECURITY.md`, `CONTRIBUTING.md`, `LICENSE.md`, `CODEOWNERS`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/ISSUE_TEMPLATE/` (bug_report, feature_request, config.yml).
+
+4. **Architecture & Trust Docs** — New canonical suites:
+   - `docs/architecture/` — system-overview, platform-map, data-flow (supersede `docs/architecture.md`)
+   - `docs/trust/` — trust-center, security-posture, deployment-model, privacy-boundaries (supersede `docs/trust-center.md`)
+
+5. **README Rewrite** — `README.md` fully rewritten: platform hierarchy diagram, products with readiness labels (Functional Alpha / Public Beta Candidate), architecture at a glance, trust section, documentation map, Start Here tracks for Investors / Technical Reviewers / Design-Product / Enterprise Buyers.
+
+6. **Profile README Package** — `profile-readme/README.md` (Stephen Lutar founder profile), `profile-readme/PROFILE_REPO_SETUP.md` (setup instructions for `stephenlutar2-hash/stephenlutar2-hash` repo).
+
+7. **Release Discipline** — `docs/releases/release-strategy.md`, `docs/releases/versioning-policy.md`, `docs/releases/release-checklist.md`, `docs/releases/v0.1.0.md`.
+
+8. **GitHub Automation** — `scripts/github/create-release.sh`, `scripts/github/update-repo-metadata.sh`, `scripts/github/bootstrap-labels.sh`, `ops/github/` directory with commands.sh, commands.ps1, manual-checklist.md, repo-settings.json, profile-values.md.
+
+9. **Design System Audit** — `docs/design/design-audit.md`, `docs/design/design-system-tokens.md`, `docs/design/ui-remediation-plan.md`.
+
+10. **Investor & Buyer Docs** — 10 investor docs + 5 buyer docs in `docs/investor/` and `docs/buyer/`.
+
+11. **Final Proof Layer** — `docs/final/execution-summary.md`, `docs/final/what-changed.md`, `docs/final/manual-actions-remaining.md`, `docs/final/next-30-days.md`.
+
+**Manual GitHub actions remaining:** ~55 minutes of work documented in `docs/final/manual-actions-remaining.md` (repo settings, release v0.1.0, labels, profile README, profile settings, branch protection).
+
+---
+
 ## Recent Work (Task #233 — Competitive Gap Closure)
 
 ### Completed

@@ -56,3 +56,15 @@ attached_assets/
 .env.local
 .env.*.local
 *.env
+
+# Noisy directories — quarantine from public mirror
+.archive/
+backups/
+exports/
+scratch/
+temp/
+*.bak
+*.backup
+
+# Mirror validation reports (generated, not committed)
+scripts/public-mirror/mirror-report.md
