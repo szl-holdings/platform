@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "nzr-lNpu4x7sxci7NOjEs"
@@ -84,3 +83,15 @@ id = "2l4gnEVImV_teY9nUTFU4"
 uri = "file://artifacts/vessels-mobile/assets/images/splash-icon.png"
 type = "image"
 title = "vessels splash screen"
+
+[[outputs]]
+id = "I_ORUhKS2b7MEVDwDdGWJ"
+uri = "file://social-content/banners/linkedin-7-lenses-banner.png"
+type = "image"
+title = "LinkedIn Banner — 7 Lenses of Business Observability"
+
+[[outputs]]
+id = "EKaAPqjUt9LHTMpRNhdAO"
+uri = "file://social-content/banners/header-linkedin-1584x396.png"
+type = "image"
+title = "LinkedIn Header (1584×396)"
