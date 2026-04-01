@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Clock, AlertTriangle, TrendingUp, Users, BarChart3, DollarSign, Zap, Target, Activity, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ContactModal } from "@workspace/shared-ui";
 
 const HOW_LYTE_WORKS = [
   {
@@ -87,6 +89,7 @@ const severityColors: Record<string, string> = {
 };
 
 export default function LandingPage() {
+  const [demoOpen, setDemoOpen] = useState(false);
   return (
     <div className="max-w-[1100px] space-y-20 pb-20">
       <section className="pt-6 pb-8 relative">
@@ -287,18 +290,27 @@ export default function LandingPage() {
           Explore the full platform with real business signals, narrative intelligence, and a complete use case walkthrough.
         </p>
         <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={() => setDemoOpen(true)}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500 text-slate-900 font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20"
+          >
+            Request Demo <ArrowRight className="w-4 h-4" />
+          </button>
           <Link href="/dashboard">
-            <button className="flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-500 text-slate-900 font-semibold text-sm hover:bg-cyan-400 transition-colors shadow-lg shadow-cyan-500/20">
-              Open Lyte <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
-          <Link href="/use-cases">
             <button className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 transition-colors">
-              View Use Cases
+              Open Lyte <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
         </div>
       </section>
+
+      <ContactModal
+        isOpen={demoOpen}
+        onClose={() => setDemoOpen(false)}
+        type="demo"
+        app="lyte"
+        subtitle="Lyte Command Center"
+      />
     </div>
   );
 }

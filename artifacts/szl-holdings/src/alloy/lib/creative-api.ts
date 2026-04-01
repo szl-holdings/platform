@@ -8,7 +8,7 @@ async function apiFetchList<T>(path: string): Promise<T[]> {
   return json as T[];
 }
 
-export interface DreamscapeCampaign {
+export interface AlloyCampaign {
   id: number;
   name: string;
   description?: string;
@@ -22,7 +22,7 @@ export interface DreamscapeCampaign {
   updatedAt: string;
 }
 
-export interface DreamscapeScript {
+export interface AlloyScript {
   id: number;
   campaignId: number;
   title: string;
@@ -34,7 +34,7 @@ export interface DreamscapeScript {
   updatedAt: string;
 }
 
-export interface DreamscapeStoryboard {
+export interface AlloyStoryboard {
   id: number;
   campaignId: number;
   scriptId?: number;
@@ -52,7 +52,7 @@ export interface DreamscapeStoryboard {
   updatedAt: string;
 }
 
-export interface DreamscapeVoiceAsset {
+export interface AlloyVoiceAsset {
   id: number;
   campaignId: number;
   name: string;
@@ -66,7 +66,7 @@ export interface DreamscapeVoiceAsset {
   createdAt: string;
 }
 
-export interface DreamscapeCampaignAsset {
+export interface AlloyCampaignAsset {
   id: number;
   campaignId: number;
   name: string;
@@ -85,7 +85,7 @@ export interface DreamscapeCampaignAsset {
   createdAt: string;
 }
 
-export interface DreamscapeReview {
+export interface AlloyReview {
   id: number;
   projectId?: number;
   campaignId?: number;
@@ -103,40 +103,40 @@ export interface DreamscapeReview {
 
 export const creativeApi = {
   campaigns: {
-    list: () => apiFetchList<DreamscapeCampaign>("/dreamscape/campaigns"),
-    get: (id: number) => apiFetch<DreamscapeCampaign>(`/dreamscape/campaigns/${id}`),
-    create: (data: Partial<DreamscapeCampaign>) => apiFetch<DreamscapeCampaign>("/dreamscape/campaigns", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<DreamscapeCampaign>) => apiFetch<DreamscapeCampaign>(`/dreamscape/campaigns/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    list: () => apiFetchList<AlloyCampaign>("/dreamscape/campaigns"),
+    get: (id: number) => apiFetch<AlloyCampaign>(`/dreamscape/campaigns/${id}`),
+    create: (data: Partial<AlloyCampaign>) => apiFetch<AlloyCampaign>("/dreamscape/campaigns", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<AlloyCampaign>) => apiFetch<AlloyCampaign>(`/dreamscape/campaigns/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/dreamscape/campaigns/${id}`, { method: "DELETE" }),
   },
   scripts: {
-    listForCampaign: (campaignId: number) => apiFetch<DreamscapeScript[]>(`/dreamscape/campaigns/${campaignId}/scripts`),
-    get: (id: number) => apiFetch<DreamscapeScript>(`/dreamscape/scripts/${id}`),
-    create: (data: Partial<DreamscapeScript>) => apiFetch<DreamscapeScript>("/dreamscape/scripts", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<DreamscapeScript>) => apiFetch<DreamscapeScript>(`/dreamscape/scripts/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    listForCampaign: (campaignId: number) => apiFetch<AlloyScript[]>(`/dreamscape/campaigns/${campaignId}/scripts`),
+    get: (id: number) => apiFetch<AlloyScript>(`/dreamscape/scripts/${id}`),
+    create: (data: Partial<AlloyScript>) => apiFetch<AlloyScript>("/dreamscape/scripts", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<AlloyScript>) => apiFetch<AlloyScript>(`/dreamscape/scripts/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/dreamscape/scripts/${id}`, { method: "DELETE" }),
   },
   storyboards: {
-    listForCampaign: (campaignId: number) => apiFetch<DreamscapeStoryboard[]>(`/dreamscape/campaigns/${campaignId}/storyboards`),
-    create: (data: Partial<DreamscapeStoryboard>) => apiFetch<DreamscapeStoryboard>("/dreamscape/storyboards", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<DreamscapeStoryboard>) => apiFetch<DreamscapeStoryboard>(`/dreamscape/storyboards/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    listForCampaign: (campaignId: number) => apiFetch<AlloyStoryboard[]>(`/dreamscape/campaigns/${campaignId}/storyboards`),
+    create: (data: Partial<AlloyStoryboard>) => apiFetch<AlloyStoryboard>("/dreamscape/storyboards", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<AlloyStoryboard>) => apiFetch<AlloyStoryboard>(`/dreamscape/storyboards/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/dreamscape/storyboards/${id}`, { method: "DELETE" }),
   },
   voiceAssets: {
-    listForCampaign: (campaignId: number) => apiFetch<DreamscapeVoiceAsset[]>(`/dreamscape/campaigns/${campaignId}/voice-assets`),
-    create: (data: Partial<DreamscapeVoiceAsset>) => apiFetch<DreamscapeVoiceAsset>("/dreamscape/voice-assets", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<DreamscapeVoiceAsset>) => apiFetch<DreamscapeVoiceAsset>(`/dreamscape/voice-assets/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    listForCampaign: (campaignId: number) => apiFetch<AlloyVoiceAsset[]>(`/dreamscape/campaigns/${campaignId}/voice-assets`),
+    create: (data: Partial<AlloyVoiceAsset>) => apiFetch<AlloyVoiceAsset>("/dreamscape/voice-assets", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<AlloyVoiceAsset>) => apiFetch<AlloyVoiceAsset>(`/dreamscape/voice-assets/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/dreamscape/voice-assets/${id}`, { method: "DELETE" }),
   },
   campaignAssets: {
-    listForCampaign: (campaignId: number) => apiFetch<DreamscapeCampaignAsset[]>(`/dreamscape/campaigns/${campaignId}/assets`),
-    create: (data: Partial<DreamscapeCampaignAsset>) => apiFetch<DreamscapeCampaignAsset>("/dreamscape/campaign-assets", { method: "POST", body: JSON.stringify(data) }),
+    listForCampaign: (campaignId: number) => apiFetch<AlloyCampaignAsset[]>(`/dreamscape/campaigns/${campaignId}/assets`),
+    create: (data: Partial<AlloyCampaignAsset>) => apiFetch<AlloyCampaignAsset>("/dreamscape/campaign-assets", { method: "POST", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/dreamscape/campaign-assets/${id}`, { method: "DELETE" }),
   },
   reviews: {
-    listForCampaign: (campaignId: number) => apiFetch<DreamscapeReview[]>(`/dreamscape/campaigns/${campaignId}/reviews`),
-    create: (data: Partial<DreamscapeReview>) => apiFetch<DreamscapeReview>("/dreamscape/reviews", { method: "POST", body: JSON.stringify(data) }),
-    update: (id: number, data: Partial<DreamscapeReview>) => apiFetch<DreamscapeReview>(`/dreamscape/reviews/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    listForCampaign: (campaignId: number) => apiFetch<AlloyReview[]>(`/dreamscape/campaigns/${campaignId}/reviews`),
+    create: (data: Partial<AlloyReview>) => apiFetch<AlloyReview>("/dreamscape/reviews", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: number, data: Partial<AlloyReview>) => apiFetch<AlloyReview>(`/dreamscape/reviews/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
     delete: (id: number) => apiFetch<{ deleted: boolean }>(`/dreamscape/reviews/${id}`, { method: "DELETE" }),
   },
 };

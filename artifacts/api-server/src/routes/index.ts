@@ -70,6 +70,7 @@ import pushTokensRouter from "./push-tokens";
 import pushNotificationsRouter from "./push-notifications";
 import backupRouter from "./backup";
 import demoRequestsRouter from "./demo-requests";
+import contactRouter from "./contact";
 
 const router: IRouter = Router();
 
@@ -109,6 +110,7 @@ router.use("/booking", readLimiter);
 router.use("/holdings/inquiries", writeLimiter);
 router.use("/holdings", readLimiter);
 router.use("/audit", readLimiter);
+router.use("/contact", writeLimiter);
 
 router.use(healthRouter);
 router.use(healthIntegrationsRouter);
@@ -126,6 +128,7 @@ router.use(featureFlagsRouter);
 router.use(filesRouter);
 
 router.use(stephenRouter);
+router.use(contactRouter);
 router.use("/lyte", readLimiter);
 router.use("/lyte", lyteExtendedRouter);
 router.use(lyteObservabilityRouter);

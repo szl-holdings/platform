@@ -282,7 +282,7 @@ router.post(
         },
         meta: {
           latency_ms: latencyMs,
-          engine: "Nimbus v2.0 — Deterministic Scoring Engine",
+          engine: "Alloy Intelligence Engine v2.0 — Deterministic Scoring",
           domain: effectiveDomain,
         },
       });
@@ -374,7 +374,7 @@ router.get("/core/health", async (_req, res) => {
             status: "ok",
             memory_mb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
           },
-          nimbus: { status: "ok", version: "2.0.0" },
+          intelligence: { status: "ok", version: "2.0.0" },
           beacon: { status: "ok" },
           rosie: { status: "ok" },
           alloy: { status: "ok" },

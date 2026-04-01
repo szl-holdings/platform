@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { Ship, Navigation, AlertTriangle, Wrench, DollarSign, Activity, ChevronRight, MapPin, BarChart3, TrendingUp, Anchor } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import { ContactModal } from "@workspace/shared-ui";
 
 const CORE_VIEWS = [
   {
@@ -41,6 +43,7 @@ const WHAT_IT_SOLVES = [
 ];
 
 export default function VesselsLandingPage() {
+  const [demoOpen, setDemoOpen] = useState(false);
   return (
     <div className="min-h-screen bg-[#060e1a] text-sky-50 overflow-x-hidden">
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16">
@@ -203,19 +206,28 @@ export default function VesselsLandingPage() {
             Vessels is built for maritime operators who need more than a position feed. Request a demo — we will walk through the full command center with your fleet data in mind.
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
+            <button
+              onClick={() => setDemoOpen(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-sky-500 hover:bg-sky-400 text-[#060e1a] font-semibold rounded-xl transition-all text-sm"
+            >
+              Request a Demo <Ship className="w-4 h-4" />
+            </button>
             <Link href="/fleet">
-              <button className="flex items-center gap-2 px-6 py-3 bg-sky-500 hover:bg-sky-400 text-[#060e1a] font-semibold rounded-xl transition-all text-sm">
-                Open Fleet Command <Ship className="w-4 h-4" />
-              </button>
-            </Link>
-            <Link href="/command">
               <button className="flex items-center gap-2 px-6 py-3 border border-sky-500/20 hover:border-sky-500/40 text-sky-300 font-medium rounded-xl transition-all text-sm">
-                View Command Mode <Activity className="w-4 h-4" />
+                Open Fleet Command <Activity className="w-4 h-4" />
               </button>
             </Link>
           </div>
         </div>
       </section>
+
+      <ContactModal
+        isOpen={demoOpen}
+        onClose={() => setDemoOpen(false)}
+        type="demo"
+        app="vessels"
+        subtitle="Vessels Maritime Intelligence Platform"
+      />
     </div>
   );
 }

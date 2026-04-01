@@ -26,8 +26,8 @@
   {
     "year": "2022",
     "quarter": "Q4",
-    "title": "Firestorm & Dreamscape Launch",
-    "description": "Simultaneously launched Firestorm cybersecurity simulation platform (securing a DoD subcontractor pilot) and Dreamscape creative production engine. Team expanded to 45 engineers across three time zones.",
+    "title": "Aegis & Alloy Creative Engine Launch",
+    "description": "Simultaneously launched Aegis cybersecurity and defense intelligence platform (securing a DoD subcontractor pilot) and the Alloy Creative Engine for campaign production and brand workflows. Team expanded to 45 engineers across three time zones.",
     "highlight": "2 New Platforms",
     "metric": { "label": "Team Size", "value": "45" }
   },
@@ -35,7 +35,7 @@
     "year": "2023",
     "quarter": "Q2",
     "title": "Government & Enterprise Traction",
-    "description": "Firestorm selected for a U.S. defense contractor evaluation program. Vessels surpassed 25,000 tracked vessels and expanded to European shipping lanes. Total portfolio ARR crossed $8M.",
+    "description": "Aegis selected for a U.S. defense contractor evaluation program. Vessels surpassed 25,000 tracked vessels and expanded to European shipping lanes. Total portfolio ARR crossed $8M.",
     "highlight": "Defense Sector Entry",
     "metric": { "label": "Portfolio ARR", "value": "$8M" }
   },
@@ -67,7 +67,7 @@
     "year": "2025",
     "quarter": "Q1",
     "title": "Ecosystem Convergence",
-    "description": "Achieved full cross-platform data integration: unified authentication, shared threat intelligence between Firestorm and Vessels, and AI model portability via Lyte. The ecosystem thesis becomes operational reality.",
+    "description": "Achieved full cross-platform data integration: unified authentication, shared threat intelligence between Aegis and Vessels, and AI model portability via Lyte. The ecosystem thesis becomes operational reality.",
     "highlight": "Unified Platform",
     "metric": { "label": "Shared Data Points", "value": "2.5B/day" }
   },
@@ -83,7 +83,7 @@
     "year": "2026",
     "quarter": "Q1",
     "title": "Series B & Global Scale",
-    "description": "Targeting $45M Series B to fund international expansion, accelerate INCA and Carlota Jo to general availability, and triple Firestorm's defense sector presence. Portfolio ARR exceeding $35M with a path to profitability.",
+    "description": "Targeting $45M Series B to fund international expansion, accelerate INCA and Carlota Jo to general availability, and triple Aegis's defense sector presence. Portfolio ARR exceeding $35M with a path to profitability.",
     "highlight": "Series B Target · $45M",
     "metric": { "label": "Target ARR", "value": "$35M+" }
   }

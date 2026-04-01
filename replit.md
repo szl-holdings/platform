@@ -181,3 +181,22 @@ tests/
 
 ### E2E Notes
 Playwright E2E tests require running apps and system-level glib/gtk libraries. In the Replit dev environment, the browser binary downloads successfully but lacks system libs. These tests are designed to run in CI (GitHub Actions etc.) with `pnpm test:e2e`.
+
+---
+
+## Recent Work (Task #233 — Competitive Gap Closure)
+
+### Completed
+1. **Dreamscape/Nimbus purge** — All `DreamscapeCampaign/*` interfaces renamed to `AlloyCampaign/*` in creative-api.ts and use-campaigns.ts. milestones.json updated. core.ts engine label renamed. API URL paths kept for backward compat.
+
+2. **Universal ContactModal** — `lib/shared-ui/src/contact-modal.tsx` — reusable `<ContactModal>` component supporting `demo`, `consultation`, `trial`, `general` types. Exported from `@workspace/shared-ui`. Wired to CTA buttons in: vessels (landing), lyte (landing), firestorm/aegis-home, terra (marketing-landing). SZL Holdings has a dedicated `/contact` page already wired to `/api/holdings/inquiries`.
+
+3. **Contact API** — `artifacts/api-server/src/routes/contact.ts` — `POST /api/contact/submit` inserts to `platform_contact_requests` table (auto-created). `GET /api/contact/requests` for admin access. Rate-limited. Registered in `index.ts`.
+
+4. **Case Studies** — Added Aegis ("Ransomware Lateral Movement Contained in 9 Minutes") and Carlota Jo ("Estate Transition Across 4 Jurisdictions in 18 Days") case studies to `szl-holdings/src/data/case-studies.ts`. Filter tabs updated to show all 6 products.
+
+5. **OpenGraph/JSON-LD** — terra, lyte-command-center, firestorm index.html all updated with: `<link rel="canonical">`, `og:site_name`, `og:image:width/height`, `twitter:image`, JSON-LD `SoftwareApplication` structured data.
+
+6. **Favicons** — Created `terra/public/favicon.svg` and `carlota-jo/public/favicon.svg`. Updated terra's index.html to reference the SVG favicon. Carlota-jo index.html updated with favicon link.
+
+7. **API stub audit** — `MOCK_BILLING` in admin.ts: intentional fallback defaults for when Stripe is disconnected. `cap_table_placeholder` in capital-readiness.ts: audit log identifiers (not mocks). `MOCKED_DEMO_MODE` status strings: real connector status values. No broken stubs found requiring changes.

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { creativeApi, type DreamscapeCampaign } from "@/alloy/lib/creative-api";
+import { creativeApi, type AlloyCampaign } from "@/alloy/lib/creative-api";
 
 export type Campaign = {
   id: number;
@@ -20,7 +20,7 @@ export type Campaign = {
   kpis?: { label: string; value: string; trend?: string }[];
 };
 
-function toCampaign(c: DreamscapeCampaign): Campaign {
+function toCampaign(c: AlloyCampaign): Campaign {
   const meta = (c.metadata || {}) as Record<string, unknown>;
   return {
     id: c.id,

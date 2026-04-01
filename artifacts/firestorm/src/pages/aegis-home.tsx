@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { ContactModal } from "@workspace/shared-ui";
 import { Link } from "wouter";
 import {
   Shield, ArrowRight, Layers, Server, Brain, Eye, Target,
@@ -98,6 +99,7 @@ export default function AegisHomePage() {
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeWs, setActiveWs] = useState(0);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -178,7 +180,10 @@ export default function AegisHomePage() {
                 Enter SOC Command <ArrowRight size={14} />
               </span>
             </Link>
-            <button className="text-[13px] font-medium text-white/35 border border-white/[0.06] hover:border-white/[0.12] rounded-lg px-7 py-3 transition-all">
+            <button
+              onClick={() => setDemoOpen(true)}
+              className="text-[13px] font-medium text-white/60 hover:text-white border border-white/[0.06] hover:border-white/[0.20] rounded-lg px-7 py-3 transition-all"
+            >
               Request a Demo
             </button>
           </div>
@@ -380,6 +385,14 @@ export default function AegisHomePage() {
           <p className="text-[10px] text-white/15">&copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.</p>
         </div>
       </footer>
+
+      <ContactModal
+        isOpen={demoOpen}
+        onClose={() => setDemoOpen(false)}
+        type="demo"
+        app="aegis"
+        subtitle="Aegis — Unified Defense & Intelligence Command"
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import {
   BarChart3, Users, Search, FileText, Shield, Layers,
   CheckCircle, Menu, X, Eye, Activity,
 } from "lucide-react";
+import { ContactModal } from "@workspace/shared-ui";
 
 const ACCENT = "#2d6a4f";
 const ACCENT_LIGHT = "#40856a";
@@ -114,6 +115,8 @@ function Reveal({ children, className = "", delay = 0 }: { children: React.React
 export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => void }) {
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [demoType, setDemoType] = useState<"demo" | "consultation" | "trial">("demo");
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -427,6 +430,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 accent: BRASS_LIGHT,
                 note: "30 min · No commitment",
                 highlight: false,
+                ctaType: "demo" as const,
               },
               {
                 tier: "Pilot",
@@ -435,6 +439,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 accent: ACCENT_LIGHT,
                 note: "90 days · Scoped engagement",
                 highlight: true,
+                ctaType: "trial" as const,
               },
               {
                 tier: "Enterprise",
@@ -443,6 +448,7 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 accent: "rgba(255,255,255,0.5)",
                 note: "Custom terms · SLA included",
                 highlight: false,
+                ctaType: "consultation" as const,
               },
             ].map(t => (
               <div key={t.tier} className="p-6 rounded-2xl flex flex-col" style={{
@@ -452,11 +458,15 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
                 <div className="text-[10px] font-bold tracking-[0.14em] uppercase mb-3 font-mono" style={{ color: t.accent }}>{t.tier}</div>
                 <p className="text-[13px] leading-[1.85] flex-1 mb-5" style={{ color: "rgba(255,255,255,0.35)" }}>{t.desc}</p>
                 <div>
-                  <button onClick={onSignIn} className="w-full text-[12px] font-semibold py-2.5 rounded-lg transition-all mb-2" style={{
-                    background: t.highlight ? ACCENT_LIGHT : "rgba(255,255,255,0.05)",
-                    color: t.highlight ? "#fff" : t.accent,
-                    border: t.highlight ? "none" : `1px solid rgba(255,255,255,0.07)`,
-                  }}>
+                  <button
+                    onClick={() => { setDemoType(t.ctaType); setDemoOpen(true); }}
+                    className="w-full text-[12px] font-semibold py-2.5 rounded-lg transition-all mb-2"
+                    style={{
+                      background: t.highlight ? ACCENT_LIGHT : "rgba(255,255,255,0.05)",
+                      color: t.highlight ? "#fff" : t.accent,
+                      border: t.highlight ? "none" : `1px solid rgba(255,255,255,0.07)`,
+                    }}
+                  >
                     {t.cta} →
                   </button>
                   <p className="text-[10px] text-center" style={{ color: "rgba(255,255,255,0.2)" }}>{t.note}</p>
@@ -502,6 +512,14 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
           </p>
         </div>
       </footer>
+
+      <ContactModal
+        isOpen={demoOpen}
+        onClose={() => setDemoOpen(false)}
+        type={demoType}
+        app="terra"
+        subtitle="Terra — Real Estate Intelligence"
+      />
     </div>
   );
 }
