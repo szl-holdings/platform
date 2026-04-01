@@ -488,8 +488,6 @@ router.get("/core/metrics", async (_req, res) => {
         },
         alloy: {
           workflow_runs_30d: workflowRuns?.count ?? 0,
-        },
-        nimbus: {
           total_recommendations: recsTotal?.count ?? 0,
           recent_recommendations: recentRecs.map((r) => ({
             id: r.id,

@@ -22,6 +22,7 @@ import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/k
 
 // ─── Security Operations pages (from Firestorm) ──────────────────────────────
 const AegisMarketingHome = lazy(() => import("@/pages/aegis-home"));
+const AegisPricingPage = lazy(() => import("@/pages/aegis-pricing"));
 const EnterpriseDemo = lazy(() => import("@/pages/enterprise-demo"));
 const SOCDashboard = lazy(() => import("@/pages/soc-dashboard"));
 const ThreatIntelligence = lazy(() => import("@/pages/threat-intelligence"));
@@ -655,6 +656,7 @@ function AppRouter() {
         {/* Security Operations */}
         <Route path="/soc" component={SOCDashboard} />
         <Route path="/" component={AegisMarketingHome} />
+        <Route path="/pricing" component={AegisPricingPage} />
         <Route path="/asset-inventory" component={AssetInventoryPage} />
         <Route path="/threat-intel" component={ThreatIntelligence} />
         <Route path="/threat-feed" component={ThreatIntelFeed} />

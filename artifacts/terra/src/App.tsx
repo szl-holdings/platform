@@ -39,6 +39,7 @@ const DocumentEngine = lazy(() => import("@/pages/document-engine"));
 const InquiriesPage = lazy(() => import("@/pages/inquiries-command"));
 const AgentsPage = lazy(() => import("@/pages/agents-command"));
 const CaseStudyPage = lazy(() => import("@/pages/case-study"));
+const TerraPerricingPage = lazy(() => import("@/pages/pricing"));
 
 function PageLoader() {
   return (
@@ -87,6 +88,7 @@ function PrivateRouter() {
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+        <Route path="/pricing" component={TerraPerricingPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

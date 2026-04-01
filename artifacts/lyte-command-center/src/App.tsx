@@ -57,6 +57,7 @@ const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
 const DashboardBuilder = lazy(() => import("@/pages/dashboard-builder"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const ApmInstrumentation = lazy(() => import("@/pages/apm-instrumentation"));
+const PricingPage = lazy(() => import("@/pages/pricing"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -114,6 +115,7 @@ function PrivateRouter() {
         <Route path="/admin/approvals">{() => <AdminRoute component={AdminApprovalQueuePage} />}</Route>
         <Route path="/admin/seeder">{() => <AdminRoute component={AdminSeederPage} />}</Route>
         <Route path="/admin/exports">{() => <AdminRoute component={AdminExportHistoryPage} />}</Route>
+        <Route path="/pricing" component={PricingPage} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

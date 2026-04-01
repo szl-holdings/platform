@@ -1,111 +1,127 @@
 import { useState } from "react";
-import { CheckCircle, ArrowRight, Ship, Shield, Building2, X } from "lucide-react";
-import { MarketingNav } from "@/components/MarketingNav";
-import { MarketingFooter } from "@/components/MarketingFooter";
+import { CheckCircle, ArrowRight, Zap, Shield, Building2, X } from "lucide-react";
+import { Link } from "wouter";
+import { ContactModal, useContactModal } from "@workspace/shared-ui";
 
-const ACCENT = "#0ea5e9";
-const BG = "#060c14";
+const ACCENT = "#d4a054";
+const BG = "#0a0b0e";
 
 const tiers = [
   {
-    name: "Navigator",
-    monthly: 499,
-    annual: 415,
-    description: "For maritime operators tracking a small fleet or monitoring specific corridors.",
-    icon: Ship,
+    name: "Starter",
+    monthly: 299,
+    annual: 249,
+    description: "For small teams getting started with business observability.",
+    icon: Zap,
     cta: "Start Free Trial",
     trialDays: 14,
     highlight: false,
     features: [
-      "Up to 50 vessels",
-      "Real-time AIS tracking",
-      "Basic route deviation alerts",
-      "Port congestion feed",
-      "7-day voyage history",
-      "Email & SMS alerts",
-      "Standard OFAC sanctions screening",
-      "2 user seats",
+      "Up to 5 team members",
+      "3 connected data sources",
+      "PRISM dashboard — Pulse & Signals",
+      "7-day signal history",
+      "Standard alert routing",
+      "Email support (48h response)",
+      "1 workspace",
+      "Community access",
     ],
     notIncluded: [
-      "Dark vessel detection",
-      "Chokepoint intelligence",
-      "Custom risk scoring",
-      "API access",
+      "Intelligence Engine (AI reasoning)",
+      "Ownership mapping",
+      "Custom playbooks",
+      "SSO / SAML",
     ],
   },
   {
-    name: "Command",
-    monthly: 1499,
-    annual: 1249,
-    description: "For fleet operators and maritime intelligence teams needing full domain awareness.",
+    name: "Professional",
+    monthly: 899,
+    annual: 749,
+    description: "For growing operations teams that need full command capability.",
     icon: Shield,
     cta: "Start Free Trial",
     trialDays: 14,
     highlight: true,
     features: [
-      "Up to 500 vessels",
-      "Full AIS + satellite tracking",
-      "Dark vessel detection",
-      "Chokepoint congestion intelligence",
-      "90-day voyage history",
-      "Predictive weather & routing",
-      "Advanced OFAC & sanctions screening",
-      "Cyber threat correlation",
-      "Helmsman AI copilot",
-      "Fleet performance analytics",
-      "10 user seats",
+      "Up to 25 team members",
+      "Unlimited data sources",
+      "Full PRISM — all 5 lenses",
+      "90-day signal history",
+      "Intelligence Engine with evidence chains",
+      "Ownership mapping & accountability chains",
+      "Action routing & escalation workflows",
+      "Custom playbooks & runbooks",
+      "Slack, Teams, PagerDuty integration",
+      "Priority support (4h response)",
+      "3 workspaces",
       "API access",
-      "Slack & Teams integration",
     ],
     notIncluded: [
-      "Dedicated intelligence analyst",
-      "Custom data integration",
+      "SSO / SAML (add-on)",
+      "Dedicated CSM",
     ],
   },
   {
     name: "Enterprise",
     monthly: null,
     annual: null,
-    description: "For ship managers, port authorities, and government agencies with full-spectrum requirements.",
+    description: "For enterprises needing custom data flows, compliance, and dedicated support.",
     icon: Building2,
     cta: "Contact Sales",
     trialDays: null,
     highlight: false,
     features: [
-      "Unlimited vessel tracking",
-      "Full SIGINT-grade AIS coverage",
-      "Custom dark vessel models",
-      "Dedicated intelligence analyst",
-      "Historical data (5+ years)",
-      "Custom data integration & feeds",
-      "Classified corridor access",
+      "Unlimited team members",
+      "Unlimited data sources",
+      "Full PRISM with custom lenses",
+      "Unlimited signal history",
+      "Custom AI reasoning models",
+      "Enterprise ownership & RBAC",
       "SSO / SAML / SCIM",
       "Audit logs & compliance exports",
-      "99.9% SLA guarantee",
-      "Unlimited user seats",
+      "Dedicated Customer Success Manager",
+      "SLA: 99.9% uptime guarantee",
+      "Custom contract & procurement",
+      "On-premises / private cloud option",
       "White-glove onboarding",
-      "Quarterly strategic briefings",
+      "Executive briefings quarterly",
     ],
     notIncluded: [],
   },
 ];
 
-export default function MarketingPricingPage() {
+export default function PricingPage() {
   const [annual, setAnnual] = useState(true);
+  const { isOpen: contactOpen, open: openContact, close: closeContact } = useContactModal("demo");
 
   return (
     <div className="min-h-screen" style={{ background: BG, color: "rgba(255,255,255,0.88)" }}>
-      <MarketingNav />
+      <ContactModal isOpen={contactOpen} onClose={closeContact} type="demo" app="lyte" title="Request Enterprise Access" subtitle="Tell us about your team and use case." />
+
+      <div className="border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: ACCENT }}>
+              <Zap className="w-3.5 h-3.5 text-black" />
+            </div>
+            <span className="text-sm font-semibold tracking-tight text-white">Lyte</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-6 text-[13px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <Link href="/" style={{ color: "rgba(255,255,255,0.5)" }}>Platform</Link>
+            <Link href="/pricing" style={{ color: "rgba(255,255,255,0.88)" }}>Pricing</Link>
+          </nav>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-6 py-20 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium mb-6" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}30` }}>
-          Maritime Intelligence Pricing
+          Transparent Pricing
         </div>
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-white">
-          Intelligence at every scale
+          Command starts here
         </h1>
         <p className="text-[15px] max-w-xl mx-auto mb-10" style={{ color: "rgba(255,255,255,0.5)" }}>
-          From single-fleet operators to global port authorities. Full domain awareness, designed for maritime.
+          From small ops teams to enterprise command centers. Every plan includes a full-featured trial.
         </p>
 
         <div className="inline-flex items-center gap-1 p-1 rounded-full mb-16" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -133,7 +149,7 @@ export default function MarketingPricingPage() {
                 key={tier.name}
                 className="relative rounded-2xl p-8 text-left flex flex-col"
                 style={{
-                  background: tier.highlight ? `linear-gradient(135deg, rgba(14,165,233,0.12), rgba(14,165,233,0.06))` : "rgba(255,255,255,0.04)",
+                  background: tier.highlight ? `linear-gradient(135deg, rgba(212,160,84,0.12), rgba(212,160,84,0.06))` : "rgba(255,255,255,0.04)",
                   border: tier.highlight ? `1px solid ${ACCENT}40` : "1px solid rgba(255,255,255,0.08)",
                 }}
               >
@@ -147,7 +163,9 @@ export default function MarketingPricingPage() {
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: tier.highlight ? `${ACCENT}25` : "rgba(255,255,255,0.07)" }}>
                     <Icon className="w-4 h-4" style={{ color: tier.highlight ? ACCENT : "rgba(255,255,255,0.6)" }} />
                   </div>
-                  <div className="text-[15px] font-bold text-white">{tier.name}</div>
+                  <div>
+                    <div className="text-[15px] font-bold text-white">{tier.name}</div>
+                  </div>
                 </div>
 
                 <div className="mb-4">
@@ -166,16 +184,26 @@ export default function MarketingPricingPage() {
 
                 <p className="text-[13px] mb-6 leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{tier.description}</p>
 
-                <button
-                  className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all mb-8"
-                  style={{
-                    background: tier.highlight ? ACCENT : "rgba(255,255,255,0.1)",
-                    color: tier.highlight ? "#000" : "white",
-                    border: tier.highlight ? "none" : "1px solid rgba(255,255,255,0.15)",
-                  }}
-                >
-                  {tier.cta} {tier.trialDays ? `— ${tier.trialDays} days free` : ""} <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                {tier.cta === "Contact Sales" ? (
+                  <button
+                    onClick={() => openContact()}
+                    className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all mb-8"
+                    style={{ background: "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.15)" }}
+                  >
+                    {tier.cta} <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all mb-8"
+                    style={{
+                      background: tier.highlight ? ACCENT : "rgba(255,255,255,0.1)",
+                      color: tier.highlight ? "#000" : "white",
+                      border: tier.highlight ? "none" : "1px solid rgba(255,255,255,0.15)",
+                    }}
+                  >
+                    {tier.cta} {tier.trialDays && `— ${tier.trialDays} days free`} <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
 
                 <div className="space-y-2.5 flex-1">
                   {tier.features.map((f) => (
@@ -198,9 +226,9 @@ export default function MarketingPricingPage() {
 
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center max-w-3xl mx-auto">
           {[
-            { label: "14-day free trial", desc: "No credit card required. Full AIS coverage from day one." },
-            { label: "No vessel minimums", desc: "Start with a single vessel. Scale as your fleet grows." },
-            { label: "GDPR & IMO compliant", desc: "Data residency controls and maritime regulatory compliance." },
+            { label: "14-day free trial", desc: "No credit card required. Full access to all features." },
+            { label: "No lock-in", desc: "Cancel any time. Data export included in all plans." },
+            { label: "SOC 2 compliant", desc: "Enterprise-grade security baked in, not bolted on." },
           ].map((item) => (
             <div key={item.label}>
               <div className="text-[14px] font-semibold text-white mb-1">{item.label}</div>
@@ -209,8 +237,6 @@ export default function MarketingPricingPage() {
           ))}
         </div>
       </div>
-
-      <MarketingFooter />
     </div>
   );
 }

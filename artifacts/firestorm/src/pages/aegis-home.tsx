@@ -352,6 +352,42 @@ export default function AegisHomePage() {
         </section>
       </Reveal>
 
+      {/* PRODUCT TOUR */}
+      <Reveal>
+        <section className="py-24 sm:py-32 px-6 max-w-[1140px] mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-red-400/50">Platform Walkthrough</p>
+            <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">How Aegis works in practice</h2>
+            <p className="text-[14px] max-w-xl mx-auto text-white/25">From deployment to full command in under an hour. Three workspaces, one unified console.</p>
+          </div>
+          <div className="relative">
+            <div className="hidden md:block absolute left-[39px] top-0 bottom-0 w-px bg-white/[0.03]" />
+            <div className="space-y-10">
+              {[
+                { step: "01", title: "Provision your workspace", body: "Choose your deployment model — cloud, on-premises, or air-gapped. Ingest your first data sources: endpoint telemetry, network flows, identity events. Aegis normalizes everything into a unified event schema.", tag: "Setup" },
+                { step: "02", title: "SOC command activates immediately", body: "The SOC dashboard surfaces your threat landscape within minutes of ingestion: active alerts, open incidents, MITRE ATT&CK coverage gaps, and CVE exposure. No tuning period. No custom rules required to get started.", tag: "Detection" },
+                { step: "03", title: "Incidents route with full context", body: "Every incident carries a full evidence chain — correlated events, affected assets, MITRE technique mapping, and recommended response. Analysts see what happened, how, and what to do next.", tag: "Response" },
+                { step: "04", title: "Compliance readiness runs continuously", body: "Framework scorecards track your posture against NIST, SOC 2, ISO 27001, and others in real-time. Every control maps to your actual configuration — not a point-in-time assessment.", tag: "Compliance" },
+                { step: "05", title: "Intelligence layer compounds over time", body: "Sentinel's reasoning engine learns your environment. Anomaly baselines improve. False positive rates drop. Each week, the command surface gets more precise — without manual tuning.", tag: "Intelligence" },
+              ].map((item) => (
+                <div key={item.step} className="flex items-start gap-8 md:gap-10">
+                  <div className="flex-shrink-0 w-20 text-right">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">{item.step}</div>
+                  </div>
+                  <div className="flex-1 pb-10 border-b border-white/[0.03]">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-[16px] font-semibold text-white">{item.title}</h3>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-red-500/8 text-red-400/60 border border-red-500/10">{item.tag}</span>
+                    </div>
+                    <p className="text-[13.5px] leading-relaxed text-white/35">{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
       <Reveal>
         <section className="relative py-24 sm:py-32 px-6">
           <div className="max-w-[640px] mx-auto text-center">
@@ -367,7 +403,7 @@ export default function AegisHomePage() {
                   Enter SOC Command <ArrowRight size={15} />
                 </span>
               </Link>
-              <button className="text-[14px] font-medium text-white/35 border border-white/[0.06] hover:border-white/[0.12] rounded-lg px-8 py-3.5 transition-all">
+              <button onClick={() => setDemoOpen(true)} className="text-[14px] font-medium text-white/35 border border-white/[0.06] hover:border-white/[0.12] rounded-lg px-8 py-3.5 transition-all">
                 Schedule a Demo
               </button>
             </div>

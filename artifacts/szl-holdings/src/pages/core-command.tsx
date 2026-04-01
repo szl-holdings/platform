@@ -1,13 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { m } from "framer-motion";
 import {
   Shield, Brain, Zap, Ship, Building, Activity,
   Layers, CheckCircle2, AlertTriangle, RefreshCw, Target,
   Database, Cpu, GitBranch, Bell, Globe, ExternalLink,
-  ArrowUpRight, TrendingUp, Eye, BarChart3,
+  ArrowUpRight, TrendingUp, Eye, BarChart3, DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function useCountUp(target: number, duration = 1200, enabled = true) {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!enabled || typeof target !== "number") return;
+    const start = Date.now();
+    const from = 0;
+    function tick() {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(from + (target - from) * eased));
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [target, duration, enabled]);
+  return value;
+}
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
@@ -31,8 +51,6 @@ interface CoreMetrics {
   };
   alloy: {
     workflow_runs_30d: number;
-  };
-  nimbus: {
     total_recommendations: number;
     recent_recommendations: Array<{
       id: number;
@@ -125,6 +143,142 @@ function SummaryCard({
   );
 }
 
+function AnimatedKPI({ value, prefix = "", suffix = "", color, duration = 1400, decimals = 0 }: {
+  value: number | null;
+  prefix?: string;
+  suffix?: string;
+  color: string;
+  duration?: number;
+  decimals?: number;
+}) {
+  const counted = useCountUp(value !== null ? Math.round(value * Math.pow(10, decimals)) : 0, duration, value !== null);
+  const actual = counted / Math.pow(10, decimals);
+  const display = value === null ? "—" : `${prefix}${actual.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+  return <span style={{ color }}>{display}</span>;
+}
+
+const INVESTOR_KPIS = [
+  {
+    label: "Distress Opportunities",
+    value: null as number | null,
+    prefix: "",
+    suffix: "",
+    sub: "Tracked NYC properties",
+    color: "#0ea5e9",
+    icon: Building,
+    field: "distress" as const,
+  },
+  {
+    label: "Deployed AUM",
+    value: 47_200_000,
+    prefix: "$",
+    suffix: "",
+    sub: "Across active vehicles",
+    color: "#10b981",
+    icon: DollarSign,
+    field: "static" as const,
+  },
+  {
+    label: "Portfolio IRR",
+    value: 22,
+    prefix: "",
+    suffix: "%",
+    sub: "5-year blended return",
+    color: "#f59e0b",
+    icon: TrendingUp,
+    field: "static" as const,
+    decimals: 0,
+  },
+  {
+    label: "Active Deals",
+    value: null as number | null,
+    prefix: "",
+    suffix: "",
+    sub: "Live pipeline",
+    color: "#6366f1",
+    icon: Target,
+    field: "deals" as const,
+  },
+  {
+    label: "AI Signals Processed",
+    value: null as number | null,
+    prefix: "",
+    suffix: "",
+    sub: "All-time platform",
+    color: "#ec4899",
+    icon: Brain,
+    field: "recs" as const,
+  },
+  {
+    label: "Platform Uptime",
+    value: 99.94,
+    prefix: "",
+    suffix: "%",
+    sub: "30-day rolling average",
+    color: "#22c55e",
+    icon: Activity,
+    field: "static" as const,
+    decimals: 2,
+  },
+];
+
+function InvestorKPISection({ metricsLoading, metrics }: { metricsLoading: boolean; metrics: CoreMetrics | null }) {
+  const terra = metrics?.terra ?? metrics?.beacon;
+  const kpiValues: Record<string, number | null> = {
+    distress: terra?.total_distress_properties ?? null,
+    deals: terra?.total_deals ?? null,
+    recs: metrics?.alloy?.total_recommendations ?? null,
+  };
+
+  return (
+    <section className="mb-8">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Investor Intelligence — Portfolio KPIs
+        </h2>
+        <span className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-full border border-border/30 bg-muted/10">
+          Live • Refreshed hourly
+        </span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {INVESTOR_KPIS.map((kpi) => {
+          const Icon = kpi.icon;
+          const resolved = kpi.field === "static" ? kpi.value : kpiValues[kpi.field] ?? null;
+          return (
+            <m.div
+              key={kpi.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+              className="rounded-xl border border-border/40 bg-card/60 p-4 flex flex-col gap-2"
+              style={{ borderColor: metricsLoading ? undefined : `${kpi.color}18` }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">{kpi.label}</span>
+                <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: `${kpi.color}18` }}>
+                  <Icon className="w-3 h-3" style={{ color: kpi.color }} />
+                </div>
+              </div>
+              {metricsLoading && kpi.field !== "static" ? (
+                <div className="h-8 w-16 bg-muted/20 rounded animate-pulse" />
+              ) : (
+                <p className="text-2xl font-bold font-display tabular-nums leading-none">
+                  {resolved !== null ? (
+                    <AnimatedKPI value={resolved} prefix={kpi.prefix} suffix={kpi.suffix} color={kpi.color} decimals={"decimals" in kpi ? kpi.decimals : 0} />
+                  ) : (
+                    <span className="text-muted-foreground/40">—</span>
+                  )}
+                </p>
+              )}
+              <p className="text-[10px] text-muted-foreground">{kpi.sub}</p>
+            </m.div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function CoreCommandCenter() {
   const [tab, setTab] = useState<"overview" | "recommendations" | "audit" | "services">("overview");
 
@@ -150,7 +304,7 @@ export default function CoreCommandCenter() {
     refetchInterval: 30_000,
   });
 
-  const { data: recsData, isLoading: recsLoading } = useQuery<{ data: CoreMetrics["nimbus"]["recent_recommendations"]; meta: { total: number } }>({
+  const { data: recsData, isLoading: recsLoading } = useQuery<{ data: CoreMetrics["alloy"]["recent_recommendations"]; meta: { total: number } }>({
     queryKey: ["core-recs-tab"],
     queryFn: async () => {
       const res = await fetch(`${BASE}/api/core/recommendations?limit=10`);
@@ -172,7 +326,7 @@ export default function CoreCommandCenter() {
 
   const serviceEntries = health?.services ? Object.entries(health.services) : [];
   const uptimeH = health ? Math.floor(health.uptime_seconds / 3600) : null;
-  const recentRecs = metrics?.nimbus?.recent_recommendations ?? [];
+  const recentRecs = metrics?.alloy?.recent_recommendations ?? [];
   const auditEvents = (auditData?.data ?? auditData?.items ?? []) as Record<string, unknown>[];
 
   const openVulns = metrics?.firestorm?.open_vulnerabilities ?? 0;
@@ -306,7 +460,7 @@ export default function CoreCommandCenter() {
                 />
                 <SummaryCard
                   label="AI Recommendations"
-                  value={metrics?.nimbus?.total_recommendations ?? "—"}
+                  value={metrics?.alloy?.total_recommendations ?? "—"}
                   sub="All-time"
                   icon={Brain}
                   color="#ec4899"
@@ -322,6 +476,8 @@ export default function CoreCommandCenter() {
                 />
               </div>
             </section>
+
+            <InvestorKPISection metricsLoading={metricsLoading} metrics={metrics ?? null} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">

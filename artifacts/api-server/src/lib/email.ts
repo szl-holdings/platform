@@ -155,7 +155,6 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
     }
   }
 
-  console.error("[email] All email providers failed");
   return { success: false, error: `All providers failed. Last error: ${lastError?.message}` };
 }
 

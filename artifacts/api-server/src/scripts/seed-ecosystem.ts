@@ -510,9 +510,9 @@ async function seedWorkflowRuns() {
     },
     {
       runId: `run-${randomUUID()}`,
-      workflowType: "nimbus.score.batch",
+      workflowType: "alloy.score.batch",
       status: "completed" as const,
-      domain: "nimbus",
+      domain: "alloy",
       triggeredBy: "scheduler",
       payload: { entity_type: "distress_property", count: 12 },
       result: { scored: 12, recommendations_generated: 12 },
@@ -590,7 +590,7 @@ async function seedAuditLogs() {
   const events = [
     { actionType: "distress_property.ingested", entityType: "distress_property", entityId: "dp-seed-001", payloadJson: { source: "NYC ACRIS", score: 87 } },
     { actionType: "distress_property.ingested", entityType: "distress_property", entityId: "dp-seed-002", payloadJson: { source: "NYC Auction Registry", score: 92 } },
-    { actionType: "nimbus.recommendation.generated", entityType: "recommendation", entityId: "rec-batch-001", payloadJson: { entity_type: "distress_property", count: 12 } },
+    { actionType: "alloy.recommendation.generated", entityType: "recommendation", entityId: "rec-batch-001", payloadJson: { entity_type: "distress_property", count: 12 } },
     { actionType: "firestorm.finding.created", entityType: "vulnerability", entityId: "finding-sql-001", payloadJson: { severity: "critical", cvss: "9.1" } },
     { actionType: "alloy.workflow.started", entityType: "workflow", entityId: "wf-normalize-001", payloadJson: { domain: "alloy", type: "signal.normalize" } },
     { actionType: "user.login", entityType: "session", entityId: "admin", payloadJson: { method: "replit-oidc", ip: "10.0.0.1" } },
@@ -605,7 +605,7 @@ async function seedAuditLogs() {
 }
 
 async function seedRecommendations() {
-  console.log("Seeding Nimbus recommendations…");
+  console.log("Seeding Alloy recommendations…");
 
   const existing = await db.select({ id: recommendationsTable.id }).from(recommendationsTable).limit(1);
   if (existing.length > 0) {

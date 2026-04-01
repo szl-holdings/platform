@@ -66,6 +66,27 @@ const STATIC_POSTS = [
     excerpt: "The conventional wisdom for technical founders is to build one thing and scale it. I built six simultaneously. Here's the thesis behind the structure — and what the first two years taught me about whether it's right.",
     date: "November 2025",
   },
+  {
+    slug: "ai-copilot-command-surface",
+    tag: "AI & Product",
+    title: "The AI copilot is not the product — the command surface is",
+    excerpt: "Everyone is adding a chat interface to their product and calling it AI. The valuable thing is not the chat interface. It is the command surface underneath: the structured intelligence, the evidence chain, the contextualised decision support. The chat box is just a way in.",
+    date: "April 2026",
+  },
+  {
+    slug: "data-gravity-enterprise",
+    tag: "Enterprise",
+    title: "Data gravity and the enterprise deal that never closes",
+    excerpt: "Enterprise software has a gravity problem. The bigger the customer, the harder it is to displace the incumbent — not because the incumbent is good, but because moving a decade of operational data is expensive, risky, and politically difficult. Understanding this is the first step to selling around it.",
+    date: "March 2026",
+  },
+  {
+    slug: "maritime-intelligence-underbuilt",
+    tag: "Maritime",
+    title: "Why maritime intelligence is the most underbuilt vertical in enterprise software",
+    excerpt: "The global maritime industry moves 90% of world trade, operates in a highly adversarial intelligence environment, and relies on a combination of AIS transponders, paper-based documentation, and legacy port systems that haven't changed materially since the 1990s. This is not a sector that has been well-served by software.",
+    date: "February 2026",
+  },
 ];
 
 export function Writing() {

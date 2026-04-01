@@ -161,9 +161,9 @@ export const stephenTheme = stephenLutarTheme;
 
 // ─── Supporting app themes ────────────────────────────────────────────────────
 
-export const dreamscapeTheme: BrandTheme = {
-  name: "Dreamscape Creative",
-  slug: "dreamscape",
+export const alloyCreativeTheme: BrandTheme = {
+  name: "Alloy Creative",
+  slug: "alloy-creative",
   colors: {
     primary: colors.laneAccents.dreamscape.primary,
     primaryLight: "hsl(280 52% 70%)",
@@ -322,6 +322,8 @@ export const firestormTheme = aegisTheme;
 export const incaTheme = aegisTheme;
 export const mspTheme = aegisTheme;
 
+export const dreamscapeTheme = alloyCreativeTheme;
+
 // ─── Theme registry ───────────────────────────────────────────────────────────
 
 export const brandThemes = {
@@ -333,7 +335,8 @@ export const brandThemes = {
   firestorm: aegisTheme,
   inca: aegisTheme,
   msp: aegisTheme,
-  dreamscape: dreamscapeTheme,
+  dreamscape: alloyCreativeTheme,
+  "alloy-creative": alloyCreativeTheme,
   terra: terraTheme,
   lyte: lyteTheme,
   alloy: alloyTheme,

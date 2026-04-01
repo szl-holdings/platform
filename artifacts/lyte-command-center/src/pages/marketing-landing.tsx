@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { ContactModal } from "@workspace/shared-ui";
 import {
   ArrowRight, Activity, Eye, TrendingUp, Radio, Gauge,
   Target, Users, Shield, Zap, CheckCircle,
@@ -78,6 +79,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
   const [expandedPrism, setExpandedPrism] = useState<number | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40);
@@ -527,6 +529,42 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
         </section>
       </Reveal>
 
+      {/* PRODUCT TOUR */}
+      <Reveal>
+        <section className="py-24 sm:py-32 px-6 max-w-[1140px] mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3" style={{ color: "rgba(212,160,84,0.5)" }}>Platform Walkthrough</p>
+            <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">How Lyte works in practice</h2>
+            <p className="text-[14px] max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.3)" }}>From connection to command in under 5 minutes. No configuration. No professional services required.</p>
+          </div>
+          <div className="relative">
+            <div className="hidden md:block absolute left-[39px] top-0 bottom-0 w-px" style={{ background: "rgba(255,255,255,0.04)" }} />
+            <div className="space-y-10">
+              {[
+                { step: "01", title: "Connect your tools", body: "Lyte connects to your existing stack in one click — no custom integrations, no engineering time. Microsoft 365, Slack, Jira, Salesforce, GitHub, and 50+ more connectors available out of the box.", tag: "Setup" },
+                { step: "02", title: "PRISM surfaces your first signals", body: "Within minutes, the PRISM engine begins building your operational picture. Pulse shows business health. Signals flags anomalies. Risk scores every process gap by financial exposure. No configuration required.", tag: "Intelligence" },
+                { step: "03", title: "Ownership mapping resolves accountability", body: "Lyte maps every process, approval, and risk to the person accountable for it — across teams, departments, and role boundaries. Nothing falls through the cracks when ownership is explicit.", tag: "Command" },
+                { step: "04", title: "Intelligence delivers evidence-backed decisions", body: "Each recommendation carries an evidence chain: what data triggered it, what the business impact is, and what confidence the engine has. Executives see why, not just what.", tag: "Reasoning" },
+                { step: "05", title: "Motion routes and tracks action", body: "Decisions reach the right person with full context. Approve, escalate, delegate, or resolve — every action is tracked, timestamped, and auditable. The organizational velocity improves visibly over time.", tag: "Execution" },
+              ].map((item) => (
+                <div key={item.step} className="flex items-start gap-8 md:gap-10">
+                  <div className="flex-shrink-0 w-20 text-right">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold" style={{ background: "rgba(212,160,84,0.12)", color: "#d4a054", border: "1px solid rgba(212,160,84,0.2)" }}>{item.step}</div>
+                  </div>
+                  <div className="flex-1 pb-10 border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-[16px] font-semibold text-white">{item.title}</h3>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(212,160,84,0.08)", color: "rgba(212,160,84,0.6)", border: "1px solid rgba(212,160,84,0.1)" }}>{item.tag}</span>
+                    </div>
+                    <p className="text-[13.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
       {/* CTA CLOSE */}
       <Reveal>
         <section className="relative py-28 sm:py-36 px-6">
@@ -541,7 +579,7 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
               <button onClick={onSignIn} className="text-[14px] font-semibold rounded-lg px-8 py-3.5 flex items-center gap-2 transition-all" style={{ background: "#d4a054", color: "#0a0d14" }}>
                 Start Free Trial <ArrowRight size={15} />
               </button>
-              <button className="text-[14px] font-medium border rounded-lg px-8 py-3.5 transition-all" style={{ color: "rgba(255,255,255,0.3)", borderColor: "rgba(255,255,255,0.07)" }}>
+              <button onClick={() => setDemoOpen(true)} className="text-[14px] font-medium border rounded-lg px-8 py-3.5 transition-all" style={{ color: "rgba(255,255,255,0.3)", borderColor: "rgba(255,255,255,0.07)" }}>
                 Schedule a Demo
               </button>
             </div>
@@ -551,6 +589,14 @@ export default function LyteMarketingLanding({ onSignIn }: { onSignIn?: () => vo
           </div>
         </section>
       </Reveal>
+
+      <ContactModal
+        isOpen={demoOpen}
+        onClose={() => setDemoOpen(false)}
+        type="demo"
+        app="lyte"
+        subtitle="Lyte — Business Observability Platform"
+      />
 
       <footer className="py-14 px-6 max-w-[1140px] mx-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.03)" }}>
         <div className="flex flex-col gap-5">

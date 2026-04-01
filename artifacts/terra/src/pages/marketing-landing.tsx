@@ -484,6 +484,42 @@ export default function TerraMarketingLanding({ onSignIn }: { onSignIn?: () => v
         </div>
       </section>
 
+      {/* PRODUCT TOUR */}
+      <section className="py-24 sm:py-32 px-6" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="max-w-[1100px] mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3" style={{ color: "rgba(64,133,106,0.6)" }}>Platform Walkthrough</p>
+            <h2 className="text-[clamp(1.6rem,3vw,2.1rem)] font-bold text-white mb-3 tracking-tight">How Terra works in practice</h2>
+            <p className="text-[14px] max-w-xl mx-auto" style={{ color: "rgba(255,255,255,0.3)" }}>From data connection to first distress lead in under 30 minutes.</p>
+          </div>
+          <div className="relative">
+            <div className="hidden md:block absolute left-[39px] top-0 bottom-0 w-px" style={{ background: "rgba(255,255,255,0.03)" }} />
+            <div className="space-y-10">
+              {[
+                { step: "01", title: "Connect your market data sources", body: "Terra ingests public records data automatically — NYC ACRIS, DOB, HPD, tax records, court filings. Your existing CRM and deal tracking tools connect in one click.", tag: "Setup" },
+                { step: "02", title: "Distress scores surface within minutes", body: "The PRISM engine begins scoring every property in your selected market by acquisition urgency. Pre-foreclosure, lis pendens, auction calendar, tax arrears, and ownership signals combined into a single ranked list.", tag: "Intelligence" },
+                { step: "03", title: "Ownership resolution unlocks the deal", body: "LLC unmasking and entity resolution identify the real decision-maker behind every property — not the registered agent. Terra surfaces contact pathways that don't exist in any other platform.", tag: "Sourcing" },
+                { step: "04", title: "Pipeline manages the acquisition workflow", body: "Move properties from watchlist to active deal in a structured, stage-gated workflow. Every property carries its distress context, comparable data, and ownership resolution into the deal stage.", tag: "Execution" },
+                { step: "05", title: "AI analyst contextualizes every opportunity", body: "The Terra AI copilot answers questions about any property, compares opportunity sets, and synthesizes market intelligence on demand. Not a search box — a reasoning layer with real domain knowledge.", tag: "Intelligence" },
+              ].map((item) => (
+                <div key={item.step} className="flex items-start gap-8 md:gap-10">
+                  <div className="flex-shrink-0 w-20 text-right">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold" style={{ background: "rgba(64,133,106,0.12)", color: "#40856a", border: "1px solid rgba(64,133,106,0.2)" }}>{item.step}</div>
+                  </div>
+                  <div className="flex-1 pb-10 border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-[16px] font-semibold text-white">{item.title}</h3>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(64,133,106,0.08)", color: "rgba(64,133,106,0.6)", border: "1px solid rgba(64,133,106,0.1)" }}>{item.tag}</span>
+                    </div>
+                    <p className="text-[13.5px] leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="border-t px-6 py-10" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
         <div className="max-w-[1100px] mx-auto flex flex-col gap-6">

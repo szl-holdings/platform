@@ -1,8 +1,8 @@
 import type { DomainConfig } from "../types.js";
 
 export const dreamscapeConfig: DomainConfig = {
-  appSlug: "dreamscape",
-  appName: "Dreamscape Creative Engine",
+  appSlug: "alloy-creative",
+  appName: "Alloy Creative Engine",
   domain: "creative",
   description: "Asset pipeline, campaign performance, and creative workflow observability",
   connectors: ["ai", "storage", "elevenlabs"],

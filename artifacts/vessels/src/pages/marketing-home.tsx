@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Ship, ChevronRight, Shield, BarChart3, AlertTriangle, Activity, Globe, Anchor, Navigation, DollarSign, ArrowRight, Eye, TrendingUp, Zap, Clock, Waves, MapPin, Lock } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
+import { ContactModal } from "@workspace/shared-ui";
 import { motion as m, useMotionValue, useTransform, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
@@ -228,6 +229,7 @@ const useCases = [
 ];
 
 export default function MarketingHomePage() {
+  const [demoOpen, setDemoOpen] = useState(false);
   return (
     <div className="min-h-screen bg-[#050c17] text-sky-50 overflow-x-hidden">
       <MarketingNav />
@@ -479,6 +481,41 @@ export default function MarketingHomePage() {
         </div>
       </section>
 
+      <section className="py-24 sm:py-32 border-t border-sky-500/[0.06]">
+        <div className="max-w-[1140px] mx-auto px-5 sm:px-6">
+          <div className="text-center mb-16">
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase mb-3 text-cyan-400/40">Platform Walkthrough</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-sky-50 mb-3 tracking-tight">How Vessels works in practice</h2>
+            <p className="text-sky-300/30 text-[14px] max-w-xl mx-auto">From AIS connection to full fleet intelligence in under 15 minutes.</p>
+          </div>
+          <div className="relative">
+            <div className="hidden md:block absolute left-[39px] top-0 bottom-0 w-px bg-sky-500/[0.04]" />
+            <div className="space-y-10">
+              {[
+                { step: "01", title: "Connect your AIS feed", body: "Vessels ingests real-time AIS data from your existing provider or our direct satellite feed. Historical voyage data loads automatically. Fleet roster builds from your existing records in minutes.", tag: "Setup" },
+                { step: "02", title: "Fleet intelligence activates immediately", body: "Your vessel map populates with live positions, route overlays, and anomaly indicators. Dark period detection, route deviation alerts, and chokepoint congestion data activate without configuration.", tag: "Intelligence" },
+                { step: "03", title: "Risk scoring identifies exceptions", body: "Every vessel in your fleet receives a composite risk score combining AIS behaviour, sanctions screening, cyber exposure, and weather risk. High-risk vessels surface to the top of your command view.", tag: "Risk" },
+                { step: "04", title: "Helmsman contextualizes every exception", body: "The Helmsman AI copilot answers questions about any vessel or voyage — in plain language. 'Why is MT Pacific Star scoring high?' gets a structured answer with evidence, not a data dump.", tag: "Intelligence" },
+                { step: "05", title: "Alerts route to the right team", body: "Exceptions route to port operations, compliance, or security based on type and severity. Every alert carries full context — vessel history, voyage details, risk factors — for immediate action.", tag: "Execution" },
+              ].map((item) => (
+                <div key={item.step} className="flex items-start gap-8 md:gap-10">
+                  <div className="flex-shrink-0 w-20 text-right">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-full text-[11px] font-bold bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">{item.step}</div>
+                  </div>
+                  <div className="flex-1 pb-10 border-b border-sky-500/[0.05]">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-[16px] font-semibold text-sky-50">{item.title}</h3>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-400/8 text-cyan-400/50 border border-cyan-400/10">{item.tag}</span>
+                    </div>
+                    <p className="text-[13.5px] leading-relaxed text-sky-300/35">{item.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 sm:py-24 border-t border-sky-500/6">
         <div className="max-w-3xl mx-auto px-5 sm:px-6 text-center">
           <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
@@ -495,17 +532,23 @@ export default function MarketingHomePage() {
                   Enter Fleet Command Demo
                 </button>
               </a>
-              <Link href="/demo">
-                <button className="px-6 py-3.5 text-[13px] text-sky-400/50 hover:text-sky-300 transition-colors font-medium">
-                  Request a private demo <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
-                </button>
-              </Link>
+              <button onClick={() => setDemoOpen(true)} className="px-6 py-3.5 text-[13px] text-sky-400/50 hover:text-sky-300 transition-colors font-medium">
+                Request a private demo <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
+              </button>
             </div>
           </m.div>
         </div>
       </section>
 
       <MarketingFooter />
+
+      <ContactModal
+        isOpen={demoOpen}
+        onClose={() => setDemoOpen(false)}
+        type="demo"
+        app="vessels"
+        subtitle="Vessels — Maritime Fleet Intelligence"
+      />
     </div>
   );
 }
