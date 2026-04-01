@@ -132,3 +132,48 @@ After setting secrets and restarting the API server, check: `GET /api/billing/st
 
 ### Note on Replit Stripe Integration
 The Replit Stripe OAuth integration (connector) was dismissed. This project uses direct API keys via `STRIPE_SECRET_KEY` instead. The `lib/services/src/adapters/stripe.ts` adapter handles all Stripe API calls and automatically switches from mock to live mode when `STRIPE_SECRET_KEY` is set.
+
+## Testing
+
+### Test Suite Overview
+A comprehensive automated testing suite is configured across the full stack using Vitest (unit/integration) and Playwright (E2E).
+
+### Running Tests
+```sh
+pnpm test              # Run all unit + component tests
+pnpm test:api          # API integration tests (Vitest, node env)
+pnpm test:components   # Component tests (Vitest, happy-dom env)
+pnpm test:coverage     # API tests with coverage report
+pnpm test:e2e          # E2E tests (Playwright, requires browser + running apps)
+```
+
+### Test Structure
+```
+tests/
+├── api/
+│   ├── auth.test.ts         # Auth routes: login, providers, /me, roles, users, sessions
+│   ├── health.test.ts       # Health check endpoint
+│   └── integrations.test.ts # Salesforce + Jira integration routes
+├── components/
+│   ├── command-palette.test.tsx  # CommandPalette filtering, keyboard, groups
+│   ├── ecosystem-nav.test.tsx    # EcosystemNav rendering
+│   ├── powerbi-embed.test.tsx    # PowerBiEmbed states and callbacks
+│   ├── user-button.test.tsx      # UserButton auth states
+│   └── utils.test.ts            # cn, formatDate, formatCurrency, formatNumber
+├── e2e/
+│   ├── szl-holdings.spec.ts  # SZL Holdings homepage E2E flow
+│   ├── aegis.spec.ts         # Aegis SOC dashboard navigation
+│   └── terra.spec.ts         # Terra portfolio overview
+└── utils/
+    ├── setup.ts              # API test mocks (db, auth, services)
+    ├── setup-dom.ts          # Component test DOM setup + mocks
+    └── test-app.ts           # Express test app factory helper
+```
+
+### Config Files
+- `vitest.config.ts` — API/unit tests (node environment), workspace package aliases
+- `vitest.components.config.ts` — Component tests (happy-dom), React plugin, workspace aliases
+- `playwright.config.ts` — E2E tests via Playwright (chromium), uses `PLAYWRIGHT_BASE_URL` env var
+
+### E2E Notes
+Playwright E2E tests require running apps and system-level glib/gtk libraries. In the Replit dev environment, the browser binary downloads successfully but lacks system libs. These tests are designed to run in CI (GitHub Actions etc.) with `pnpm test:e2e`.
