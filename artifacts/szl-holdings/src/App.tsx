@@ -2,7 +2,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, OnboardingWizard, type OnboardingConfig } from "@workspace/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, OnboardingWizard, type OnboardingConfig } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
@@ -182,6 +182,7 @@ function PageLoader() {
 
 function App() {
   return (
+    <SandboxModeProvider>
     <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
       <LazyMotion features={domMax} strict>
@@ -395,6 +396,7 @@ function App() {
       <OnboardingWizard config={SZL_ONBOARDING_CONFIG} />
     </QueryClientProvider>
     </DemoModeProvider>
+    </SandboxModeProvider>
   );
 }
 

@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { OnboardingWizard, type OnboardingConfig } from "@workspace/shared-ui";
+import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider } from "@workspace/shared-ui";
 import { BookOpen, Users, Calendar, MessageSquare, FileText, Sparkles } from "lucide-react";
 
 const CARLOTA_ONBOARDING_CONFIG: OnboardingConfig = {
@@ -153,21 +153,23 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(carlotaCommands);
 
   return (
-    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#c8a96a">
-        <div style={{ minHeight: "100vh" }}>
-          <Router />
-        </div>
-        <CommandPalette
-          open={cmdOpen}
-          onClose={() => setCmdOpen(false)}
-          commands={carlotaCommands}
-          appName="Carlota Jo"
-          accentColor="#c8a96a"
-        />
-        <OnboardingWizard config={CARLOTA_ONBOARDING_CONFIG} />
-      </PowerUserProvider>
-    </WouterRouter>
+    <SandboxModeProvider>
+      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#c8a96a">
+          <div style={{ minHeight: "100vh" }}>
+            <Router />
+          </div>
+          <CommandPalette
+            open={cmdOpen}
+            onClose={() => setCmdOpen(false)}
+            commands={carlotaCommands}
+            appName="Carlota Jo"
+            accentColor="#c8a96a"
+          />
+          <OnboardingWizard config={CARLOTA_ONBOARDING_CONFIG} />
+        </PowerUserProvider>
+      </WouterRouter>
+    </SandboxModeProvider>
   );
 }
 

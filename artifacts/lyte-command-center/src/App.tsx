@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
 import { LyteLayout } from "@/components/lyte-layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
@@ -150,6 +151,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor="#d4a054">
       <div className="flex flex-col h-screen bg-[#080c14]">
         <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor="#d4a054" />
+        <SandboxModeBanner />
         <div className="flex-1 overflow-hidden">
           <LyteLayout>
             <PrivateRouter />
@@ -201,12 +203,14 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(lyteCommands);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-        <AgentCopilot config={beaconConfig} />
-      </WouterRouter>
-    </QueryClientProvider>
+    <SandboxModeProvider>
+      <QueryClientProvider client={queryClient}>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+          <AgentCopilot config={beaconConfig} />
+        </WouterRouter>
+      </QueryClientProvider>
+    </SandboxModeProvider>
   );
 }
 

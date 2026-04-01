@@ -91,7 +91,8 @@
     "./EmptyState": "./src/EmptyState.tsx",
     "./EcosystemTour": "./src/EcosystemTour.tsx",
     "./agent-insights-widget": "./src/agent-insights-widget.tsx",
-    "./core-observability-data": "./src/core-observability-data.ts"
+    "./core-observability-data": "./src/core-observability-data.ts",
+    "./sandbox-mode": "./src/sandbox-mode.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",

@@ -16,7 +16,7 @@ import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/aut
 import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
-import { DemoModeProvider } from "@workspace/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
 
 const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "vessels",
@@ -523,6 +523,7 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
           Skip to main content
         </a>
         <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#0ea5e9" />
+        <SandboxModeBanner />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
           <div className="flex-1 flex flex-col overflow-auto min-w-0">
@@ -600,16 +601,18 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
   return (
-    <DemoModeProvider>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-        </WouterRouter>
-      </AuthProvider>
-      <AgentCopilot config={helmsmanConfig} />
-    </QueryClientProvider>
-    </DemoModeProvider>
+    <SandboxModeProvider>
+      <DemoModeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+            </WouterRouter>
+          </AuthProvider>
+          <AgentCopilot config={helmsmanConfig} />
+        </QueryClientProvider>
+      </DemoModeProvider>
+    </SandboxModeProvider>
   );
 }
 

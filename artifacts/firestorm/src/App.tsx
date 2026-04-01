@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
+import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -809,6 +809,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
           Skip to main content
         </a>
         <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Unified Defense & Intelligence" accentColor="#3b82f6" />
+        <SandboxModeBanner />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onReplayTour={replayOnboarding} />
           <div className="flex-1 flex flex-col overflow-auto min-w-0">
@@ -842,14 +843,16 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(aegisCommands);
 
   return (
-    <DemoModeProvider>
-      <QueryClientProvider client={queryClient}>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-        </WouterRouter>
-        <AgentCopilot config={sentinelConfig} />
-      </QueryClientProvider>
-    </DemoModeProvider>
+    <SandboxModeProvider>
+      <DemoModeProvider>
+        <QueryClientProvider client={queryClient}>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+          </WouterRouter>
+          <AgentCopilot config={sentinelConfig} />
+        </QueryClientProvider>
+      </DemoModeProvider>
+    </SandboxModeProvider>
   );
 }
 

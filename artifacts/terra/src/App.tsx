@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
+import { SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
@@ -120,6 +121,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#40856a">
       <div className="flex flex-col h-screen" style={{ background: "#0a0c10" }}>
         <EcosystemNav currentAppId="terra" currentAppName="Terra — Property Intelligence" accentColor="#40856a" />
+        <SandboxModeBanner />
         <div className="flex-1 overflow-hidden">
           <TerraLayout>
             <PrivateRouter />
@@ -179,13 +181,15 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(terraCommands);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-        <AgentCopilot config={beaconConfig} />
-        <Toaster />
-      </WouterRouter>
-    </QueryClientProvider>
+    <SandboxModeProvider>
+      <QueryClientProvider client={queryClient}>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+          <AgentCopilot config={beaconConfig} />
+          <Toaster />
+        </WouterRouter>
+      </QueryClientProvider>
+    </SandboxModeProvider>
   );
 }
 

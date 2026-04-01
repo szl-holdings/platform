@@ -1,17 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSandboxMode } from "@workspace/shared-ui";
 import { api, type LyteIncident, type LyteAction, type LyteSavedView } from "../lib/api";
+import { lyteSignals as mockSignals, lyteIncidents as mockIncidents, lyteRecommendations as mockRecommendations, lytePlaybooks as mockPlaybooks } from "@workspace/services";
 
 export function useSignals() {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["signals"],
-    queryFn: () => api.signals.list(),
+    queryKey: ["signals", sandboxActive ? "sandbox" : "live", resetKey],
+    queryFn: sandboxActive ? async () => mockSignals as unknown[] : () => api.signals.list(),
   });
 }
 
 export function useUpdateSignal() {
+  const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      if (sandboxActive) {
+        const signal = mockSignals.find(s => s.id === id);
+        if (signal) signal.status = status;
+        return signal;
+      }
       return await api.signals.update(id, { status });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["signals"] }),
@@ -19,16 +28,21 @@ export function useUpdateSignal() {
 }
 
 export function useIncidents() {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["incidents"],
-    queryFn: () => api.incidents.list(),
+    queryKey: ["incidents", sandboxActive ? "sandbox" : "live", resetKey],
+    queryFn: sandboxActive ? async () => mockIncidents as unknown[] : () => api.incidents.list(),
   });
 }
 
 export function useCreateIncident() {
+  const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: Partial<LyteIncident>) => {
+      if (sandboxActive) {
+        return { id: Date.now(), ...data };
+      }
       return await api.incidents.create(data);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["incidents"] }),
@@ -36,9 +50,15 @@ export function useCreateIncident() {
 }
 
 export function useUpdateIncident() {
+  const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & Partial<LyteIncident>) => {
+      if (sandboxActive) {
+        const incident = mockIncidents.find(i => i.id === id);
+        if (incident) Object.assign(incident, data);
+        return incident;
+      }
       return await api.incidents.update(id, data);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["incidents"] }),
@@ -46,16 +66,23 @@ export function useUpdateIncident() {
 }
 
 export function useRecommendations() {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["recommendations"],
-    queryFn: () => api.recommendations.list(),
+    queryKey: ["recommendations", sandboxActive ? "sandbox" : "live", resetKey],
+    queryFn: sandboxActive ? async () => mockRecommendations as unknown[] : () => api.recommendations.list(),
   });
 }
 
 export function useUpdateRecommendation() {
+  const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      if (sandboxActive) {
+        const rec = mockRecommendations.find(r => r.id === id);
+        if (rec) rec.status = status;
+        return rec;
+      }
       return await api.recommendations.update(id, { status });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recommendations"] }),
@@ -63,37 +90,52 @@ export function useUpdateRecommendation() {
 }
 
 export function usePlaybooks() {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["playbooks"],
-    queryFn: () => api.playbooks.list(),
+    queryKey: ["playbooks", sandboxActive ? "sandbox" : "live", resetKey],
+    queryFn: sandboxActive ? async () => mockPlaybooks as unknown[] : () => api.playbooks.list(),
   });
 }
 
 export function useCommandCards() {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["commandCards"],
+    queryKey: ["commandCards", sandboxActive ? "sandbox" : "live", resetKey],
     queryFn: () => api.commandCards.list(),
   });
 }
 
 export function useExecutiveSummary() {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["executiveSummary"],
-    queryFn: () => api.executiveSummary(),
+    queryKey: ["executiveSummary", sandboxActive ? "sandbox" : "live", resetKey],
+    queryFn: sandboxActive
+      ? async () => ({
+          openIncidents: mockIncidents.filter(i => i.status !== "resolved").length,
+          criticalSignals: mockSignals.filter(s => s.severity === "critical").length,
+          pendingActions: 7,
+          systemHealth: 91,
+          riskScore: 68,
+          trend: "stable" as const,
+        })
+      : () => api.executiveSummary(),
   });
 }
 
 export function useActions(params?: { role?: string; state?: string }) {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["actions", params],
+    queryKey: ["actions", params, sandboxActive ? "sandbox" : "live", resetKey],
     queryFn: () => api.actions.list(params),
   });
 }
 
 export function useUpdateAction() {
+  const { sandboxActive } = useSandboxMode();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...data }: { id: number } & Partial<LyteAction>) => {
+      if (sandboxActive) return { id, ...data };
       return await api.actions.update(id, data);
     },
     onMutate: async ({ id, ...data }) => {
@@ -138,8 +180,9 @@ export function useDeleteSavedView() {
 }
 
 export function useReadiness() {
+  const { sandboxActive, resetKey } = useSandboxMode();
   return useQuery({
-    queryKey: ["readiness"],
+    queryKey: ["readiness", sandboxActive ? "sandbox" : "live", resetKey],
     queryFn: () => api.readiness.get(),
   });
 }

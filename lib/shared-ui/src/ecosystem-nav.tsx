@@ -8,6 +8,7 @@ import {
   type DoctrineLayer,
 } from "./doctrine-layer";
 import { DemoModeSwitcher } from "./demo-mode";
+import { SandboxToggle } from "./sandbox-mode";
 
 export interface EcosystemApp {
   id: string;
@@ -1184,6 +1185,9 @@ export function EcosystemNav({
           }}
         >
           <div style={{ display: "none" }} className="eco-nav-demomode">
+            <SandboxToggle compact />
+          </div>
+          <div style={{ display: "none" }} className="eco-nav-persona">
             <DemoModeSwitcher compact />
           </div>
           <button
@@ -1391,6 +1395,7 @@ export function EcosystemNav({
           .eco-nav-search-label { display: inline !important; }
           .eco-nav-user-info { display: block !important; }
           .eco-nav-demomode { display: flex !important; }
+          .eco-nav-persona { display: flex !important; }
         }
       `}</style>
     </>
