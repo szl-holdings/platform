@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
+import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
 import {
   Building2, LayoutDashboard, Eye, Activity,
@@ -165,7 +166,9 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-5" style={{ background: "#0a0c10" }}>
-          {children}
+          <SectionErrorBoundary sectionName="Terra">
+            {children}
+          </SectionErrorBoundary>
         </main>
       </div>
     </div>

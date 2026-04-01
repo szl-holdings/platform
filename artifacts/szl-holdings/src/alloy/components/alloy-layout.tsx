@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
+import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
 import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
@@ -217,7 +218,9 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4 md:p-6" style={{ background: "#080c14" }}>
-          {children}
+          <SectionErrorBoundary sectionName="Alloy">
+            {children}
+          </SectionErrorBoundary>
         </main>
       </div>
     </div>

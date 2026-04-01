@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
+import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
 import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
@@ -234,7 +235,11 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto" style={{ background: BG.main }}>{children}</main>
+        <main className="flex-1 overflow-auto" style={{ background: BG.main }}>
+          <SectionErrorBoundary sectionName="Lyte">
+            {children}
+          </SectionErrorBoundary>
+        </main>
       </div>
     </div>
   );
