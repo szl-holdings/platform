@@ -1,3 +1,4 @@
+// Aegis Operations routes (file: msp.ts — legacy filename, module now known as Aegis Operations)
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import {

@@ -61,7 +61,7 @@ const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-i
 const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 
-// ─── Managed Operations pages (from Rosie/MSP) ───────────────────────────────
+// ─── Managed Operations pages (Aegis Operations/MSP) ─────────────────────────
 const MspDashboard = lazy(() => import("@/pages/msp/dashboard"));
 const MspClients = lazy(() => import("@/pages/msp/clients"));
 const MspTickets = lazy(() => import("@/pages/msp/tickets"));

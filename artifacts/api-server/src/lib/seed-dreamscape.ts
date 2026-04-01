@@ -144,7 +144,7 @@ EXT. MARITIME COAST — DAWN
 A container vessel cuts through morning fog. The horizon is clear.
 
 NARRATOR (V.O.)
-AlloyScape. Execution fabric for the decisions that define industries.
+Alloy. Execution fabric for the decisions that define industries.
 
 MONTAGE: Alloy dashboard, Vessels command, Firestorm alert cascade, INCA research threads.
 
@@ -152,7 +152,7 @@ NARRATOR (V.O.)
 Seven platforms. One nervous system. Zero tolerance for ambiguity.
 
 SMASH CUT TO BLACK.
-TEXT ON SCREEN: "AlloyScape. Execute with intelligence."
+TEXT ON SCREEN: "Alloy. Execute with intelligence."
 
 FADE OUT.`,
       version: 3,
@@ -180,7 +180,7 @@ VO: "Alloy doesn't just collect intelligence. It acts on it."
 
 SCREEN: Approval modal. Executive approves. Action dispatched.
 
-VO: "AlloyScape. The execution layer your enterprise has been waiting for."
+VO: "Alloy. The execution layer your enterprise has been waiting for."
 
 END CARD: alloy.szlholdings.com — Request Access`,
       version: 1,
@@ -208,7 +208,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
       title: "Maritime Horizon Shot",
       sceneNumber: 2,
       visualDescription: "Aerial shot of container vessel at dawn, golden fog, wide establishing",
-      dialogue: "NARRATOR: AlloyScape. Execution fabric for the decisions that define industries.",
+      dialogue: "NARRATOR: Alloy. Execution fabric for the decisions that define industries.",
       duration: "0:08 – 0:18",
       metadata: { shotType: "Aerial — Establishing", transition: "Hard Cut" },
     },
@@ -227,8 +227,8 @@ END CARD: alloy.szlholdings.com — Request Access`,
       scriptId: scripts[0]?.id,
       title: "End Card",
       sceneNumber: 4,
-      visualDescription: "Black frame, AlloyScape wordmark appears, tagline fades in",
-      dialogue: "TEXT: AlloyScape. Execute with intelligence.",
+      visualDescription: "Black frame, Alloy wordmark appears, tagline fades in",
+      dialogue: "TEXT: Alloy. Execute with intelligence.",
       duration: "0:45 – 0:60",
       metadata: { shotType: "Graphic — Logo", transition: "Fade to Black" },
     },
@@ -261,7 +261,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
       name: "Horizon VO — Final Take",
       voiceId: "rachel",
       provider: "elevenlabs",
-      text: "In a world of noise, the signal matters. AlloyScape. Execution fabric for the decisions that define industries. Seven platforms. One nervous system. Zero tolerance for ambiguity.",
+      text: "In a world of noise, the signal matters. Alloy. Execution fabric for the decisions that define industries. Seven platforms. One nervous system. Zero tolerance for ambiguity.",
       audioUrl: undefined,
       duration: "0:32",
       status: "ready",
@@ -272,7 +272,7 @@ END CARD: alloy.szlholdings.com — Request Access`,
       name: "Horizon VO — Alternate (Male)",
       voiceId: "adam",
       provider: "elevenlabs",
-      text: "In a world of noise, the signal matters. AlloyScape. Execution fabric for the decisions that define industries.",
+      text: "In a world of noise, the signal matters. Alloy. Execution fabric for the decisions that define industries.",
       audioUrl: undefined,
       duration: "0:18",
       status: "ready",

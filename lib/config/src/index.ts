@@ -8,8 +8,8 @@ export const PLATFORM_APPS = [
   { slug: "vessels", name: "Vessels Maritime Intelligence", icon: "Ship", color: "#06b6d4" },
   { slug: "firestorm", name: "Firestorm Security Simulation", icon: "Flame", color: "#f97316" },
   { slug: "inca", name: "INCA AI Research", icon: "Brain", color: "#14b8a6" },
-  { slug: "beacon", name: "Beacon Business Telemetry", icon: "BarChart3", color: "#0ea5e9" },
-  { slug: "rosie", name: "Rosie Incident Command", icon: "AlertTriangle", color: "#ef4444" },
+  { slug: "beacon", name: "Terra", icon: "BarChart3", color: "#0ea5e9" },
+  { slug: "rosie", name: "Aegis Operations", icon: "AlertTriangle", color: "#ef4444" },
   { slug: "carlota-jo", name: "Carlota Jo Advisory", icon: "Crown", color: "#f43f5e" },
   { slug: "aegis", name: "Aegis Control Plane", icon: "Shield", color: "#10b981" },
   { slug: "career", name: "Career — Founder Identity", icon: "Globe", color: "#6366f1" },
@@ -99,13 +99,13 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
   },
   rosie: {
     connectors: ["ai", "monitoring", "posthog", "slack", "gmail"],
-    description: "Rosie (formerly MSP) — threat and anomaly visibility, evidence-backed incident command, government contract intelligence, FedRAMP products, CMMC compliance tracking.",
+    description: "Aegis Operations (slug: rosie/msp) — threat and anomaly visibility, evidence-backed incident command, government contract intelligence, FedRAMP products, CMMC compliance tracking.",
     liveFeeds: ["USAspending.gov Federal Contracts", "FedRAMP Authorized Products", "SAM.gov Contract Pipeline"],
     doctrineRole: "OBSERVE",
   },
   beacon: {
     connectors: ["ai", "monitoring", "storage"],
-    description: "Beacon (formerly Terra) — business telemetry, KPI movement, value leakage detection, Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings.",
+    description: "Terra (slug: beacon) — business telemetry, KPI movement, value leakage detection, Census demographics, BLS employment, FEMA risk, SEC EDGAR REIT filings.",
     liveFeeds: ["Census Bureau ACS Demographics", "BLS Employment Data", "FEMA National Risk Index", "SEC EDGAR REIT Filings", "Open-Meteo Climate Projections"],
     doctrineRole: "OBSERVE",
   },
@@ -139,7 +139,7 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
   },
   terra: {
     connectors: ["ai", "monitoring", "storage"],
-    description: "Legacy slug for Beacon — Business Telemetry",
+    description: "Legacy slug for Terra (beacon) — Business Telemetry",
     doctrineRole: "OBSERVE",
   },
   readiness: {
@@ -149,7 +149,7 @@ export const APP_INTEGRATIONS: Record<string, { connectors: string[]; descriptio
   },
   msp: {
     connectors: ["ai", "monitoring", "posthog", "slack", "gmail"],
-    description: "Legacy slug for Rosie — Incident Command",
+    description: "Legacy slug for Aegis Operations — Managed Services Command",
     doctrineRole: "OBSERVE",
   },
 } as const;

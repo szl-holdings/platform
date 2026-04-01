@@ -206,11 +206,11 @@ const domainConfigs: DomainNotifConfig[] = [
   },
   {
     appId: "terra",
-    appName: "Beacon",
+    appName: "Terra",
     generators: [
       () => ({
         appId: "terra",
-        appName: "Beacon",
+        appName: "Terra",
         title: "Lease Expiry Alert",
         message: `${2 + Math.floor(Math.random() * 5)} properties have leases expiring within 30 days — renewal outreach needed`,
         severity: "warning" as NotifSeverity,
@@ -218,7 +218,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "terra",
-        appName: "Beacon",
+        appName: "Terra",
         title: "Vacancy Rate Spike",
         message: `Portfolio vacancy rate increased to ${8 + Math.floor(Math.random() * 7)}% — above 10% threshold approaching`,
         severity: "warning" as NotifSeverity,
@@ -226,7 +226,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "terra",
-        appName: "Beacon",
+        appName: "Terra",
         title: "Market Valuation Update",
         message: "Q1 2026 valuations complete — 3 properties show 12%+ appreciation",
         severity: "info" as NotifSeverity,
@@ -234,7 +234,7 @@ const domainConfigs: DomainNotifConfig[] = [
       }),
       () => ({
         appId: "terra",
-        appName: "Beacon",
+        appName: "Terra",
         title: "Investment Alert",
         message: "High-yield acquisition opportunity flagged — cap rate 7.8% in target market",
         severity: "info" as NotifSeverity,

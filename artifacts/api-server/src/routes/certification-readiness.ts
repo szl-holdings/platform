@@ -770,7 +770,7 @@ router.post("/certification/seed", ...auth, async (req, res) => {
     }
 
     const naicsCodes = [
-      { naicsCode: "541512", title: "Computer Systems Design Services", businessLine: "Technology Consulting", isSetAsideEligible: true, notes: "AlloyScape, Lyte — primary federal tech NAICS" },
+      { naicsCode: "541512", title: "Computer Systems Design Services", businessLine: "Technology Consulting", isSetAsideEligible: true, notes: "Alloy, Lyte — primary federal tech NAICS" },
       { naicsCode: "541511", title: "Custom Computer Programming Services", businessLine: "Software Development", isSetAsideEligible: true, notes: "Custom development services" },
       { naicsCode: "541519", title: "Other Computer Related Services", businessLine: "Technology Services", isSetAsideEligible: true, notes: "Catch-all for IT services" },
       { naicsCode: "541611", title: "Administrative Management and General Management Consulting Services", businessLine: "Management Consulting", isSetAsideEligible: true, notes: "Carlota Jo — consulting services" },

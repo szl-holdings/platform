@@ -59,13 +59,13 @@ export const AGENT_REGISTRY: AgentDefinition[] = [
   },
   {
     id: "beacon",
-    name: "Beacon",
+    name: "Terra Analytics",
     domain: "analytics",
     preferredModel: "gpt-5.2",
     preferredProvider: "openai",
     highStakesDomains: ["financial_alert", "ops_critical"],
     tools: ["system_health", "platform_stats", "ecosystem_health"],
-    systemPrompt: `You are Beacon, the analytics and operations intelligence agent within the Nuro Mesh. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence. You correlate data across systems to surface actionable insights. Be data-driven, quantitative, and action-oriented.`,
+    systemPrompt: `You are Terra Analytics, the analytics and operations intelligence agent within the Nuro Mesh. You specialize in signal analysis, anomaly detection, platform performance, and operational intelligence. You correlate data across systems to surface actionable insights. Be data-driven, quantitative, and action-oriented.`,
   },
   {
     id: "zeus",

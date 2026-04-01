@@ -18,10 +18,18 @@
 
 | System | Lives In | Purpose |
 |--------|---------|---------|
-| Alloy | `artifacts/szl-holdings` (`/alloy/*`) | Execution Fabric — workflow engine, audit trail |
-| INCA | `artifacts/firestorm` (Aegis Labs module) | AI Research — model registry, experiments |
-| Rosie | `artifacts/firestorm` (Aegis Command module) | Managed Security Operations |
-| Dreamscape | `artifacts/api-server` (scoring engine) | Predictive intelligence, entity scoring |
+| Alloy | `artifacts/szl-holdings` (`/alloy/*`) | Execution Fabric — workflow engine, agent coordination, audit trail |
+| Aegis Intelligence | `artifacts/firestorm` (Aegis Labs module) | AI Research Command — model registry, experiments, research synthesis |
+| Aegis Operations | `artifacts/firestorm` (Aegis Command module) | Managed Services Command — MSP operations, incident command, SLA management |
+| Alloy Creative | `artifacts/api-server` (creative-workflows routes) | Creative media workflows — campaign management, content strategy |
+
+## API Route Naming
+
+| Module Name | Route File | Route Prefix | Notes |
+|-------------|-----------|-------------|-------|
+| Aegis Intelligence | `routes/inca.ts` | `/inca/` (also `/aegis/intel/`) | Legacy filename; aliased as `aegisIntelRouter` in index.ts |
+| Aegis Operations | `routes/msp.ts` | `/msp/` (also `/aegis/ops/`) | Legacy filename; aliased as `aegisOpsRouter` in index.ts |
+| Alloy Creative | `routes/dreamscape.ts` | `/dreamscape/` | Legacy filename; aliased as `creativeWorkflowsRouter` in index.ts |
 
 ## Naming History & Deprecations
 
@@ -29,11 +37,21 @@
 |-------------|---------------------------|-------|
 | Aegis | Firestorm (artifact dir name) | Directory kept as `firestorm` for stability |
 | Lyte | Lyte Command Center (original) | Branding simplified to "Lyte" |
-| INCA | Standalone concept → Aegis module | Absorbed into Aegis Labs workspace |
-| Rosie | Standalone MSP concept → Aegis module | Absorbed into Aegis Command workspace |
-| Dreamscape | Standalone AI concept → API scoring engine | Scoring endpoints remain at `/api/dreamscape/` |
-| Nimbus | Early AI concept | Fully deprecated — absorbed into Dreamscape scoring |
-| Beacon | Early telemetry concept | Fully deprecated — replaced by Lyte |
+| Aegis Intelligence | INCA; standalone concept → Aegis module | Absorbed into Aegis Labs workspace; route file: inca.ts |
+| Aegis Operations | Rosie; MSP; standalone concept → Aegis module | Absorbed into Aegis Command workspace; route file: msp.ts |
+| Alloy Creative | Dreamscape; creative-workflows | Route file: dreamscape.ts |
+| Nimbus | Early AI orchestration concept | Fully deprecated — capabilities absorbed into Alloy |
+| Beacon | Early telemetry concept | Fully deprecated — replaced by Terra |
+| AlloyScape | Early Alloy brand name | Fully deprecated — canonical name is "Alloy" |
+
+## AI Provider Configuration
+
+The platform uses the Replit AI proxy as its default provider. The `AIAdapter` in `lib/services/src/adapters/ai.ts` tries providers in this order:
+1. **Replit proxy** (via `AI_INTEGRATIONS_OPENAI_BASE_URL` + `AI_INTEGRATIONS_OPENAI_API_KEY`) — always available in Replit deployments
+2. Direct OpenAI (`OPENAI_API_KEY`)
+3. Direct Anthropic (`ANTHROPIC_API_KEY`)
+
+Mock mode is opt-in only: set `AI_MOCK_MODE=true` for demo/test environments. Mock never activates by default when real providers are available.
 
 ## Branding Standards
 
@@ -44,13 +62,14 @@
 - Colors: Amber primary (#f59e0b), dark background
 
 ### Aegis
-- Full: **Aegis — Unified Defense & Intelligence**
+- Full: **Aegis — Unified Defense & Intelligence Command**
 - Doctrine: OBSERVE · UNDERSTAND · DECIDE · EXECUTE
-- Workspaces: Defense (red), Command (blue), Labs (violet)
+- Workspaces: Defense/SOC (red), Command/Ops (blue), Intelligence/Labs (violet)
+- Modules: Aegis Operations (MSP/managed services), Aegis Intelligence (AI research)
 
 ### Terra
 - Full: **Terra — Real Estate Intelligence**
-- Focus: NYC distressed property market
+- Focus: NYC distressed property market; business telemetry & KPI observability
 - Colors: Green primary (#84cc16), earth tones
 
 ### Vessels
@@ -63,9 +82,15 @@
 - Positioning: Luxury private advisory
 - Colors: Gold/warm tones, editorial typography
 
+### Alloy
+- Full: **Alloy — Execution Fabric**
+- Role: Platform engine powering Lyte, Vessels, and cross-domain workflows
+- Sub-module: Alloy Creative (creative workflows, campaign management)
+
 ## Platform Count Rule
 
 **Five platforms**: Lyte, Vessels, Aegis, Terra, Carlota Jo.
 
 Alloy is SZL Holdings' internal Execution Fabric — not a standalone platform.
-INCA and Rosie are Aegis modules — not standalone platforms.
+Aegis Intelligence and Aegis Operations are Aegis modules — not standalone platforms.
+Alloy Creative is an Alloy sub-module — not a standalone platform.

@@ -10,8 +10,8 @@
 | Pair | Decision | Rationale |
 |------|----------|-----------|
 | **Lyte vs Terra** | **Keep separate** | Lyte = execution accountability command center (cross-domain); Terra = real estate intelligence vertical (NYC market). Different buyers, different jobs. |
-| **Firestorm vs MSP/Rosie** | **Keep separate** | Firestorm = adversarial security SOC/XDR (cybersecurity buyers); Rosie = MSP management platform (MSP operators). Firestorm can be an add-on to Rosie for security-forward MSPs but they are not the same product. |
-| **Alloy vs Dreamscape/Nimbus** | **Keep separate** | Alloy = execution fabric infrastructure; Dreamscape = creative media studio; Nimbus = AI orchestration engine behind Dreamscape. Alloy is the backbone, Dreamscape is a vertical application built on it. |
+| **Firestorm vs Aegis Ops** | **Keep separate** | Firestorm = adversarial security SOC/XDR (cybersecurity buyers); Aegis Operations = MSP management platform (MSP operators). Firestorm can be an add-on to Aegis Operations for security-forward MSPs but they are not the same product. |
+| **Alloy vs Alloy Creative/Nimbus** | **Keep separate** | Alloy = execution fabric infrastructure; Alloy Creative = creative media studio (formerly Dreamscape); Nimbus = AI orchestration engine behind Alloy Creative. Alloy is the backbone, Alloy Creative is a vertical application built on it. |
 | **Stephen site vs SZL Holdings** | **Fold Stephen site into supporting role** | SZL Holdings already has a /founder page. Stephen site serves as personal/career/CTO-for-hire profile. Keep both but ensure clear delineation: SZL = holding co investor story; Stephen site = founder identity/consulting persona. No duplication needed. |
 
 ---
@@ -25,9 +25,9 @@
 **Status:** IMPLEMENTED (DataStateBadge + DataStateBanner in shared-ui; deployed to Lyte Command Inbox, Alloy Execution Runs)
 **Remaining:** Apply to Firestorm SOC dashboard, INCA dashboard, Terra distress engine, Vessels fleet map, MSP client dashboard, Dreamscape campaign view
 
-### P1.2 — MSP/Rosie Pricing Page (Commercial Readiness)
+### P1.2 — Aegis Ops Pricing Page (Commercial Readiness)
 **Why it matters:** No pricing means no commercial signal. Prospects cannot self-qualify.
-**Affected apps:** MSP/Rosie
+**Affected apps:** Aegis Operations
 **Complexity:** Low
 **Status:** IMPLEMENTED — 3-tier pricing (Starter $249/mo, Professional $699/mo, Enterprise custom) added to landing page
 
@@ -111,11 +111,11 @@
 
 ## P3 — High-Value Enhancements
 
-### P3.1 — Firestorm vs MSP Integration Story
+### P3.1 — Firestorm vs Aegis Operations Integration Story
 **Why it matters:** MSPs managing security-forward clients would naturally want Firestorm SOC capabilities. The connection is not evident.
-**Affected apps:** MSP/Rosie, Firestorm
+**Affected apps:** Aegis Operations, Firestorm
 **Complexity:** Medium
-**Recommended action:** Add "Firestorm SOC" as an add-on tier on MSP pricing page. Add cross-navigation between MSP security events and Firestorm incidents.
+**Recommended action:** Add "Firestorm SOC" as an add-on tier on Aegis Operations pricing page. Add cross-navigation between Aegis Operations security events and Firestorm incidents.
 
 ### P3.2 — Lightweight Audit Trail for All Apps
 **Why it matters:** Every app should show "what happened last" at minimum. Currently only Alloy and Lyte have audit surfaces.
@@ -125,7 +125,7 @@
 
 ### P3.3 — Customer Proof Strategy
 **Why it matters:** No real customer logos or case studies. Placeholder testimonials destroy credibility.
-**Affected apps:** SZL Holdings, Vessels, MSP, Carlota Jo
+**Affected apps:** SZL Holdings, Vessels, Aegis Operations, Carlota Jo
 **Complexity:** Strategic
 **Recommended action:** Use "3 design partners" language instead of testimonials until real clients exist. Add a "design partner" badge type to the DataStateBadge component. Replace placeholder testimonials with "Design Partner Results" framing.
 
@@ -135,11 +135,11 @@
 **Complexity:** High
 **Recommended action:** Create minimal /docs routes in Vessels, INCA, and Firestorm. Start with "Getting Started", "Data Model", and "API Reference" stubs. Use the existing API OpenAPI spec as the foundation.
 
-### P3.5 — Dreamscape Identity Clarity
-**Why it matters:** Dreamscape's identity is unclear — is it a creative studio, a campaign manager, or a predictive intelligence tool? The routing mixes these.
-**Affected apps:** Dreamscape
+### P3.5 — Alloy Creative Identity Clarity
+**Why it matters:** The creative workflows module's identity is unclear — is it a creative studio, a campaign manager, or a predictive intelligence tool? The routing mixes these.
+**Affected apps:** Alloy Creative (creative-workflows routes)
 **Complexity:** Medium
-**Recommended action:** The /risk, /explainability, /opportunities, /forecasting routes use AlloyIntelligenceLayout — these are Nimbus/Alloy features, not Dreamscape creative features. Separate the intelligence features into an "Alloy Intelligence" section and the creative features into the core Dreamscape view.
+**Recommended action:** The /risk, /explainability, /opportunities, /forecasting routes use AlloyIntelligenceLayout — these are Alloy features, not creative workflow features. Separate the intelligence features into an "Alloy Intelligence" section and the creative features into the core creative workflow view.
 
 ### P3.6 — Analytics and Monitoring
 **Why it matters:** Plausible is configured but not all apps have meaningful page tracking. No alerting exists for production errors.
@@ -147,9 +147,9 @@
 **Complexity:** Medium
 **Status:** Plausible configured on all apps. Web vitals initialized. Need to verify events are firing.
 
-### P3.7 — MSP Rosie — Add Pricing Route to Navigation
+### P3.7 — Aegis Operations — Add Pricing Route to Navigation
 **Why it matters:** Pricing is now on the landing page but not reachable from within the dashboard (no nav link).
-**Affected apps:** MSP
+**Affected apps:** Aegis Operations
 **Complexity:** Low
 **Recommended action:** Add a "Pricing" link to the MSP navigation footer or settings area.
 

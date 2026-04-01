@@ -67,7 +67,7 @@ function ControlCard({ control, categoryColor }: { control: HardeningControl; ca
   const workflowMutation = useMutation({
     mutationFn: (actionType: string) =>
       api.workflowActions.create({ entityType: "asset", entityId: control.id, actionType, assignedTo: control.owner, notes: `Control: ${control.controlId} — ${control.name}` }),
-    onSuccess: () => toast.success("Workflow action triggered via AlloyScape"),
+    onSuccess: () => toast.success("Workflow action triggered via Alloy"),
     onError: () => toast.error("Failed to trigger workflow"),
   });
 

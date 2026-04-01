@@ -42,7 +42,7 @@ export async function seedPlatformData(): Promise<void> {
   }
 
   const [alloyOrg] = await db.insert(organizationsTable).values({
-    name: "AlloyScape Demo Corp",
+    name: "Alloy Demo Corp",
     slug: "alloy-demo",
     orgType: "platform_customer",
     status: "active",
@@ -78,10 +78,10 @@ export async function seedPlatformData(): Promise<void> {
   const seedVesselsOrgId = vesselsOrgId ?? 3;
 
   await db.insert(szlProductsTable).values([
-    { slug: "alloy", name: "AlloyScape", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", productType: "platform" as const, isActive: true },
+    { slug: "alloy", name: "Alloy", description: "Execution Fabric — signal ingest, workflow orchestration, artifact management", productType: "platform" as const, isActive: true },
     { slug: "lyte", name: "Lyte Command Center", description: "Business telemetry and ops signal management for MSPs", productType: "module" as const, isActive: true },
     { slug: "vessels", name: "Vessels Maritime Intelligence", description: "Maritime fleet monitoring, voyage management, and exception handling", productType: "vertical" as const, isActive: true },
-    { slug: "terra", name: "Beacon Business Telemetry", description: "Predictive intelligence and business analytics", productType: "module" as const, isActive: true },
+    { slug: "terra", name: "Terra", description: "Predictive intelligence and business analytics", productType: "module" as const, isActive: true },
     { slug: "inca", name: "INCA AI Research Command", description: "AI research orchestration and knowledge management", productType: "service" as const, isActive: true },
   ]).onConflictDoNothing();
 

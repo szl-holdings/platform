@@ -187,7 +187,7 @@ function scoreEntity(
       severity: sev,
       title: `Active ${sev.charAt(0).toUpperCase() + sev.slice(1)} Incident: ${incidentTitle}`,
       reasoning: `Incident severity is ${sev}. Containment status and blast radius indicate ${rawScore >= 80 ? "immediate escalation required" : "managed response warranted"}. Cross-domain correlation with known threat patterns.`,
-      recommended_action: `${cfg.actionPrefix} immediately in Rosie — assign incident commander, activate playbook, notify stakeholders within ${sev === "critical" ? "15 minutes" : sev === "high" ? "1 hour" : "4 hours"}.`,
+      recommended_action: `${cfg.actionPrefix} immediately in Aegis Operations — assign incident commander, activate playbook, notify stakeholders within ${sev === "critical" ? "15 minutes" : sev === "high" ? "1 hour" : "4 hours"}.`,
       timeframe: sev === "critical" ? "15 minutes" : sev === "high" ? "1 hour" : "4 hours",
     };
   }

@@ -14,14 +14,14 @@ const DOMAIN_TEMPLATES = [
     id: "it-ops", name: "IT Sentinel", icon: Cpu, color: "text-blue-400", bg: "bg-blue-400/10",
     description: "Auto-triages IT tickets, predicts outages, and orchestrates remediation playbooks.",
     defaultInstruction: "Monitor ticket queue for patterns, predict infrastructure failures 4 hours ahead, auto-triage P1 incidents.",
-    domain: "Rosie", systemType: "mama-quilla" as const,
+    domain: "Aegis Operations", systemType: "mama-quilla" as const,
     capabilities: ["Ticket auto-triage", "Outage prediction", "Playbook orchestration", "SLA tracking"],
   },
   {
     id: "deal-scout", name: "Deal Scout", icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-400/10",
     description: "Surfaces investment opportunities, predicts market shifts, and scores properties.",
     defaultInstruction: "Scan MLS, off-market signals, and economic indicators to surface high-yield opportunities in target markets.",
-    domain: "Beacon", systemType: "mama-quilla" as const,
+    domain: "Terra", systemType: "mama-quilla" as const,
     capabilities: ["Off-market opportunity detection", "Market shift prediction", "Yield scoring", "Comparable analysis"],
   },
   {
@@ -63,8 +63,8 @@ const DOMAIN_TEMPLATES = [
 
 const LIVE_AGENTS = [
   { name: "Maritime Analyst", domain: "Vessels", status: "active", uptime: "14d 6h", actions: 1240, lastAction: "2m ago" },
-  { name: "IT Sentinel", domain: "Rosie", status: "active", uptime: "7d 2h", actions: 3847, lastAction: "30s ago" },
-  { name: "Deal Scout", domain: "Beacon", status: "active", uptime: "21d 0h", actions: 892, lastAction: "5m ago" },
+  { name: "IT Sentinel", domain: "Aegis Operations", status: "active", uptime: "7d 2h", actions: 3847, lastAction: "30s ago" },
+  { name: "Deal Scout", domain: "Terra", status: "active", uptime: "21d 0h", actions: 892, lastAction: "5m ago" },
   { name: "Alloy Predictor", domain: "Alloy Predict", status: "active", uptime: "3d 18h", actions: 445, lastAction: "8m ago" },
   { name: "Advisory Agent", domain: "Carlota Jo", status: "monitoring", uptime: "10d 4h", actions: 312, lastAction: "1h ago" },
   { name: "Security Sentinel", domain: "Firestorm", status: "active", uptime: "30d 0h", actions: 7234, lastAction: "1s ago" },

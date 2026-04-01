@@ -1,3 +1,4 @@
+// Creative Workflows routes (file: dreamscape.ts — legacy filename, module now known as creative-workflows)
 import { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
 import {

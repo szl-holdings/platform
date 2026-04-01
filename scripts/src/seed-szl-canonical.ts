@@ -24,7 +24,7 @@ async function seedCanonical() {
   // ─── PRODUCTS ─────────────────────────────────────────────────────────────
   const productRows = await db.insert(szlProductsTable).values([
     { slug: "szl-holdings", name: "SZL Holdings", description: "Parent holding company — portfolio, ventures, strategic oversight", productType: "platform", isActive: true },
-    { slug: "alloy", name: "AlloyScape", description: "Execution fabric and predictive intelligence engine powering Lyte and Vessels", productType: "platform", parentSlug: "szl-holdings", isActive: true },
+    { slug: "alloy", name: "Alloy", description: "Execution fabric and predictive intelligence engine powering Lyte and Vessels", productType: "platform", parentSlug: "szl-holdings", isActive: true },
     { slug: "lyte", name: "Lyte", description: "Business observability command center — signals, ownership, approvals, escalations", productType: "platform", parentSlug: "alloy", isActive: true },
     { slug: "lyte-readiness", name: "Lyte Readiness", description: "First-class readiness and maturity assessment module within Lyte", productType: "module", parentSlug: "lyte", isActive: true },
     { slug: "vessels", name: "Vessels", description: "Maritime intelligence — fleet operations, voyage economics, AIS anomaly detection", productType: "vertical", parentSlug: "alloy", isActive: true },
@@ -219,7 +219,7 @@ async function seedCanonical() {
       correlationId: "deploy-blocked-2026-03-30", detectedAt: new Date(now.getTime() - 55 * 60 * 1000),
     },
     {
-      orgId, productSlug: "lyte", source: "Beacon", sourceType: "monitoring",
+      orgId, productSlug: "lyte", source: "Terra", sourceType: "monitoring",
       severity: "medium", title: "Q1 revenue forecast drift — 8.3% below plan as of EOD",
       body: "Forecast model updated: Q1 close at $8.7M vs $9.5M plan. Primary drivers: payment decline rate and SSO outage.",
       whyItMatters: "Board reporting Q1 actuals next week. Forecast miss without explanation damages credibility.",
@@ -227,7 +227,7 @@ async function seedCanonical() {
       correlationId: "q1-forecast-2026-03-30", detectedAt: new Date(now.getTime() - 90 * 60 * 1000),
     },
     {
-      orgId, productSlug: "lyte", source: "Beacon", sourceType: "monitoring",
+      orgId, productSlug: "lyte", source: "Terra", sourceType: "monitoring",
       severity: "medium", title: "TechCorp account — usage down 35%, NPS drop 42 pts",
       body: "TechCorp (acct-4821) 30-day API usage down 35%. Support ticket volume up 80%. Competitor evaluation confirmed.",
       whyItMatters: "$480K ARR at risk. Alloy model: 88% churn probability without executive engagement in 12h.",
@@ -235,7 +235,7 @@ async function seedCanonical() {
       correlationId: "techcorp-churn-2026-03-30", detectedAt: new Date(now.getTime() - 24 * 60 * 60 * 1000),
     },
     {
-      orgId, productSlug: "lyte", source: "Beacon", sourceType: "monitoring",
+      orgId, productSlug: "lyte", source: "Terra", sourceType: "monitoring",
       severity: "medium", title: "Northgate contract approval SLA breach — 48h overdue",
       body: "Contract 840K ARR. Legal team at 94% capacity. VP Legal unavailable until Monday. Q1 close window: 6 days.",
       whyItMatters: "Missing Q1 close window = no revenue recognition this quarter. $840K deferred to Q2.",
@@ -275,7 +275,7 @@ async function seedCanonical() {
       correlationId: "weather-malacca-2026-03-30", detectedAt: new Date(now.getTime() - 90 * 60 * 1000),
     },
     {
-      orgId, productSlug: "lyte", source: "Beacon", sourceType: "monitoring",
+      orgId, productSlug: "lyte", source: "Terra", sourceType: "monitoring",
       severity: "low", title: "Apex Logistics vendor onboarding — compliance step has no owner",
       body: "Compliance step unowned for 6 days. Blocking 6 downstream vendor onboardings. Process gap from team reorg.",
       whyItMatters: "Each blocked onboarding costs ~$53K in delayed procurement savings. 6 × $53K = $318K.",
@@ -299,7 +299,7 @@ async function seedCanonical() {
       correlationId: "cdn-purge-2026-03-30", detectedAt: new Date(now.getTime() - 55 * 60 * 1000),
     },
     {
-      orgId, productSlug: "lyte", source: "Beacon", sourceType: "monitoring",
+      orgId, productSlug: "lyte", source: "Terra", sourceType: "monitoring",
       severity: "low", title: "Lambda cold starts +340% — order-processor post-deploy",
       body: "Cold start rate at 340% above baseline after deploy. Affects 6% of order processing requests.",
       whyItMatters: "Elevated cold starts increase p99 latency during peak. Non-critical but contributes to API SLA risk.",

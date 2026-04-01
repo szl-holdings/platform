@@ -662,7 +662,7 @@ async function seedRecommendations() {
       severity: "critical" as const,
       title: "Active Critical Incident: Lyte Playbook Execution Timeout",
       reasoning: "Incident severity is critical. Containment status and blast radius indicate immediate escalation required. Cross-domain correlation with known threat patterns.",
-      recommendedAction: "Escalate and contain immediately in Rosie — assign incident commander, activate playbook, notify stakeholders within 15 minutes.",
+      recommendedAction: "Escalate and contain immediately in Aegis Operations — assign incident commander, activate playbook, notify stakeholders within 15 minutes.",
       timeframe: "15 minutes",
       context: { severity: "critical", title: "Lyte Playbook Execution Timeout", incident_id: "inc-7821" },
     },

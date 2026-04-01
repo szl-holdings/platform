@@ -61,7 +61,7 @@ const client = new SZLClient({
             icon: Shield,
             color: "text-tag-security",
             code: `// ROSIE threat detection
-const threats = await client.security.getRosieThreats();
+const threats = await client.security.getAegisThreats();
 
 // Aegis compliance
 const compliance = await client.security.getAegisCompliance();
@@ -176,7 +176,7 @@ ws.close();`}</code></pre>
         <pre><code>{`import type { ApiError } from "@szl-holdings/sdk";
 
 try {
-  const data = await client.security.getRosieThreats();
+  const data = await client.security.getAegisThreats();
 } catch (error) {
   const apiError = error as ApiError;
   console.error(\`

@@ -9,7 +9,7 @@ const THREADS = [
     correlation_id: "gf-2026-q1-001",
     comments: [
       { author: "Jordan Alvarez", time: "2h ago", text: "Legal team is at capacity. VP unavailable until tomorrow. Recommending reroute to CFO backup." },
-      { author: "System (AlloyScape)", time: "1.5h ago", text: "Reroute initiated to CFO backup approver. ETA: 2 hours. Correlation ID: gf-2026-q1-001." },
+      { author: "System (Alloy)", time: "1.5h ago", text: "Reroute initiated to CFO backup approver. ETA: 2 hours. Correlation ID: gf-2026-q1-001." },
       { author: "Priya Mehta", time: "45m ago", text: "CFO backup has been notified. Contract is under review." },
     ],
     actions_available: ["approve", "reroute", "escalate", "defer", "abort"],
@@ -115,7 +115,7 @@ export default function InterventionWorkspace() {
                     );
                   })}
                   <a href="/alloy" className="text-[10px] px-3 py-1.5 rounded-lg font-medium transition-all hover:opacity-80 flex items-center gap-1 ml-auto" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.08)", border: "1px solid rgba(75,139,219,0.2)" }}>
-                    <ExternalLink className="w-3 h-3" /> Run in AlloyScape
+                    <ExternalLink className="w-3 h-3" /> Run in Alloy
                   </a>
                 </div>
                 <div className="flex items-center gap-2">

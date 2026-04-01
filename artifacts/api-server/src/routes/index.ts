@@ -19,7 +19,7 @@ import stephenRouter from "./stephen";
 import vesselsRouter from "./vessels";
 import aegisSocRouter from "./firestorm";
 import lyteRouter from "./lyte";
-import dreamscapeRouter from "./dreamscape";
+import creativeWorkflowsRouter from "./dreamscape"; // creative-workflows module (legacy filename: dreamscape.ts)
 import readinessRouter from "./readiness";
 import adminRouter from "./admin";
 import intelligenceRouter from "./intelligence";
@@ -145,7 +145,7 @@ router.use(vesselsRouter);
 router.use(aegisSocRouter);
 router.use(aegisSocLiveRouter);
 router.use(lyteRouter);
-router.use(dreamscapeRouter);
+router.use(creativeWorkflowsRouter);
 router.use(readinessRouter);
 router.use("/admin", adminGuard);
 router.use(adminRouter);
@@ -196,8 +196,8 @@ router.use(readinessRouter);
 router.use("/aegis", readLimiter);
 router.use(readinessRouter);
 
-router.use("/dreamscape", readLimiter);
-router.use(dreamscapeRouter);
+router.use("/dreamscape", readLimiter); // legacy path — creative-workflows module
+router.use(creativeWorkflowsRouter);
 
 router.use(agentTrainingRouter);
 router.use("/comments", writeLimiter);

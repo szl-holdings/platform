@@ -337,7 +337,7 @@ export const ventures: Venture[] = [
   },
   {
     id: "terra",
-    name: "Beacon",
+    name: "Terra",
     tagline: "Business Telemetry & Observability — OBSERVE Layer",
     oneLiner: "Continuous business observability detecting KPI movement, value leakage, and market anomalies across enterprise verticals.",
     audience: "Enterprise operators, fund managers, and business intelligence teams managing data-intensive portfolios.",
@@ -345,9 +345,9 @@ export const ventures: Venture[] = [
     status: "Live",
     accentColor: "#0ea5e9",
     description:
-      "Beacon turns Census Bureau, BLS, FEMA, and SEC EDGAR data into continuous business telemetry — detecting KPI drift, market anomalies, and value leakage before they compound. Part of the OBSERVE layer in the SZL intelligence doctrine.",
+      "Terra turns Census Bureau, BLS, FEMA, and SEC EDGAR data into continuous business telemetry — detecting KPI drift, market anomalies, and value leakage before they compound. Part of the OBSERVE layer in the SZL intelligence doctrine.",
     painSolved:
-      "Enterprise teams are making billion-dollar decisions on fragmented, stale data. Beacon consolidates market signals, climate exposure, and portfolio metrics so leadership has complete observability — not a patchwork of reports.",
+      "Enterprise teams are making billion-dollar decisions on fragmented, stale data. Terra consolidates market signals, climate exposure, and portfolio metrics so leadership has complete observability — not a patchwork of reports.",
     metrics: [
       { label: "Enterprise Clients", value: "34", trend: "up" },
       { label: "ARR", value: "$3.1M", trend: "up" },
@@ -443,17 +443,17 @@ export const ventures: Venture[] = [
   },
   {
     id: "msp",
-    name: "Rosie",
-    tagline: "Threat & Incident Command — OBSERVE Layer",
+    name: "Aegis Operations",
+    tagline: "Managed Services Command — OBSERVE Layer",
     oneLiner: "Evidence-backed incident command delivering threat detection, anomaly visibility, and MSP-grade operational intelligence.",
     audience: "MSPs, enterprise IT operators, and security teams managing multi-tenant threat environments.",
     category: "Incident Command",
     status: "Live",
     accentColor: "#ef4444",
     description:
-      "Rosie delivers the OBSERVE layer for threat and incident intelligence — combining endpoint monitoring, NOC operations, and FedRAMP-grade security telemetry into a unified command center. Evidence-backed incident command at enterprise scale.",
+      "Aegis Operations delivers the OBSERVE layer for threat and incident intelligence — combining endpoint monitoring, NOC operations, and FedRAMP-grade security telemetry into a unified command center. Evidence-backed incident command at enterprise scale.",
     painSolved:
-      "Security and IT teams operate on stacks of disconnected tools: RMM, PSA, ticketing, billing, and reporting all live separately. Rosie consolidates the operational layer so teams can scale clients without scaling headcount.",
+      "Security and IT teams operate on stacks of disconnected tools: RMM, PSA, ticketing, billing, and reporting all live separately. Aegis Operations consolidates the operational layer so teams can scale clients without scaling headcount.",
     metrics: [
       { label: "Managed Client Environments", value: "240+", trend: "up" },
       { label: "SLA Compliance Rate", value: "99.2%", trend: "neutral" },
@@ -470,7 +470,7 @@ export const ventures: Venture[] = [
       {
         title: "Incident Command at MSP Scale Without Headcount Growth",
         problem: "An MSP managing 80 client environments was growing client count but couldn't scale service quality without hiring.",
-        solution: "Rosie consolidated 6 tools into one, with AI-assisted incident triage reducing L1 ticket volume by 34%.",
+        solution: "Aegis Operations consolidated 6 tools into one, with AI-assisted incident triage reducing L1 ticket volume by 34%.",
         result: "Client base grew from 80 to 140 environments. Team headcount unchanged. SLA compliance improved.",
       },
     ],

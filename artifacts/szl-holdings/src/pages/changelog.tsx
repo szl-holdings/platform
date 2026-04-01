@@ -22,13 +22,13 @@ const entries = [
     version: "v3.7.0",
     date: "March 12, 2026",
     type: "minor",
-    highlight: "Beacon Portfolio Performance + Rosie RMM Console launch",
+    highlight: "Terra Portfolio Performance + Aegis Operations RMM Console launch",
     changes: [
-      { type: "feature", text: "Beacon: Portfolio Performance module with IRR, cash-on-cash, and equity multiple tracking" },
-      { type: "feature", text: "Beacon: Climate Risk Overlay with flood, wildfire, and sea level exposure scoring" },
-      { type: "feature", text: "Beacon: Investor Relations module with LP portal and performance reporting" },
-      { type: "feature", text: "Rosie: RMM Console with endpoint monitoring, patch management, and threat status" },
-      { type: "feature", text: "Rosie: MRR Dashboard with cohort analysis and churn waterfall visualization" },
+      { type: "feature", text: "Terra: Portfolio Performance module with IRR, cash-on-cash, and equity multiple tracking" },
+      { type: "feature", text: "Terra: Climate Risk Overlay with flood, wildfire, and sea level exposure scoring" },
+      { type: "feature", text: "Terra: Investor Relations module with LP portal and performance reporting" },
+      { type: "feature", text: "Aegis Operations: RMM Console with endpoint monitoring, patch management, and threat status" },
+      { type: "feature", text: "Aegis Operations: MRR Dashboard with cohort analysis and churn waterfall visualization" },
       { type: "improvement", text: "Vessels: Fleet map rendering performance improved 40% on large datasets" },
     ],
   },
@@ -101,7 +101,7 @@ const versionBadge: Record<string, string> = {
 export default function Changelog() {
   usePageMeta({
     title: "Changelog | SZL Holdings – Platform Release Notes",
-    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, INCA, Beacon, Vessels, Lyte, Alloy, Rosie, and Aegis.",
+    description: "Latest updates, features, and improvements across the SZL Holdings platform portfolio. Track product releases from Firestorm, Aegis Intelligence, Terra, Vessels, Lyte, Alloy, Aegis Operations, and Aegis.",
     canonical: "https://szlholdings.com/changelog",
   });
   return (

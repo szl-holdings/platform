@@ -142,10 +142,15 @@ export class AIAdapter extends ServiceAdapter {
     messages: ChatMessage[],
     options?: { model?: string; maxTokens?: number },
   ): Promise<ChatCompletionResult> {
-    if (!this.isLive) {
+    // Mock mode is opt-in only — set AI_MOCK_MODE=true to enable demo/test mode.
+    // In normal Replit deployments the Replit AI proxy keys are always present,
+    // so this guard ensures mock never silently activates in production.
+    if (process.env["AI_MOCK_MODE"] === "true") {
       return this.mockChatCompletion(messages);
     }
 
+    // Try Replit proxy first (always available in Replit environments), then
+    // fall back to direct OpenAI/Anthropic keys if configured.
     const providers: Array<() => Promise<ChatCompletionResult>> = [];
 
     if (this.hasReplitProxy) {
@@ -156,6 +161,12 @@ export class AIAdapter extends ServiceAdapter {
     }
     if (this.anthropicKey) {
       providers.push(() => this.anthropicCompletion(messages, options));
+    }
+
+    if (providers.length === 0) {
+      // No real providers configured — fall back to mock to avoid hard crash.
+      // Set AI_INTEGRATIONS_OPENAI_API_KEY or OPENAI_API_KEY to enable live AI.
+      return this.mockChatCompletion(messages);
     }
 
     for (const tryProvider of providers) {

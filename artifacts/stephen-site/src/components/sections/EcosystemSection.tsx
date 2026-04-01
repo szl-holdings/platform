@@ -23,7 +23,7 @@ export function EcosystemSection() {
       { name: "Alloy", slug: "alloy", description: "Execution fabric & predictive intelligence · ENGINE", status: "operational", lastChecked: new Date().toISOString() },
       { name: "Lyte", slug: "lyte", description: "Business observability & orchestration", status: "operational", lastChecked: new Date().toISOString() },
       { name: "Vessels", slug: "vessels", description: "Maritime fleet & cargo intelligence", status: "operational", lastChecked: new Date().toISOString() },
-      { name: "Beacon", slug: "beacon", description: "Business telemetry & KPI observability", status: "operational", lastChecked: new Date().toISOString() },
+      { name: "Terra", slug: "terra", description: "Business telemetry & KPI observability", status: "operational", lastChecked: new Date().toISOString() },
       { name: "Carlota Jo", slug: "carlota", description: "Strategic advisory platform", status: "operational", lastChecked: new Date().toISOString() },
     ],
     connectors: [

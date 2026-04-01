@@ -305,7 +305,7 @@ export const PREDICTIONS: PredictionEntity[] = [
   },
   {
     id: "pred-004",
-    title: "AlloyScape reroute will recover 6.2h cycle time on contract workflow",
+    title: "Alloy reroute will recover 6.2h cycle time on contract workflow",
     prediction_type: "recovery",
     confidence: 85,
     probability: 0.85,
@@ -315,7 +315,7 @@ export const PREDICTIONS: PredictionEntity[] = [
     linked_beacon_events: ["evt-001"],
     linked_lyte_states: ["apr-001"],
     rationale: "If the Northgate contract is rerouted to the secondary approver (CFO backup), the parallel path reduces approval time by 6.2 hours. Historical reroute success rate for similar contracts is 91%.",
-    recommended_action: "Execute reroute in AlloyScape to CFO backup approver. Notify original approver. Set 2h SLA on new path.",
+    recommended_action: "Execute reroute in Alloy to CFO backup approver. Notify original approver. Set 2h SLA on new path.",
     correlation_id: GOLDEN_FLOW_CORRELATION_ID,
     created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
   },
@@ -540,7 +540,7 @@ export const WORKFLOWS_UI: WorkflowUI[] = WORKFLOWS.map(w => {
   const stepMap: Record<string, WorkflowStep[]> = {
     "wf-001": [
       { name: "CRM Trigger", status: "completed", assignee: "System" },
-      { name: "Contract Gen", status: "completed", assignee: "AlloyScape" },
+      { name: "Contract Gen", status: "completed", assignee: "Alloy" },
       { name: "Internal Review", status: "completed", assignee: "Jordan Alvarez" },
       { name: "Legal Review", status: "blocked", assignee: undefined },
       { name: "DocuSign", status: "pending" },
@@ -561,7 +561,7 @@ export const WORKFLOWS_UI: WorkflowUI[] = WORKFLOWS.map(w => {
       { name: "Activation", status: "pending" },
     ],
     "wf-004": [
-      { name: "NPS Alert", status: "completed", assignee: "Beacon" },
+      { name: "NPS Alert", status: "completed", assignee: "Terra" },
       { name: "CS Assignment", status: "completed", assignee: "Marcus Webb" },
       { name: "Exec Outreach", status: "blocked" },
       { name: "Offer Approval", status: "pending" },

@@ -41,9 +41,9 @@ const pressItems = [
   },
   {
     type: "Media Coverage", date: "January 15, 2026",
-    headline: "Beacon Business Telemetry: The Intelligence Platform Changing How Enterprise Teams Make Decisions",
-    summary: "Commercial Observer profiles Beacon's growth to $3.1M ARR with 34 enterprise clients, noting its continuous KPI telemetry and anomaly detection as key differentiators.",
-    tags: ["Portfolio", "Beacon", "Business Telemetry"],
+    headline: "Terra: The Intelligence Platform Changing How Enterprise Teams Make Decisions",
+    summary: "Commercial Observer profiles Terra's growth to $3.1M ARR with 34 enterprise clients, noting its continuous KPI telemetry and anomaly detection as key differentiators.",
+    tags: ["Portfolio", "Terra", "Business Telemetry"],
     source: "Commercial Observer",
   },
 ];

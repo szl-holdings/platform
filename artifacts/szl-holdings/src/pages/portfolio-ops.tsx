@@ -72,7 +72,7 @@ const apps: AppReadiness[] = [
     features: { shipped: 19, planned: 4 }, deployment: { region: "US-East", lastRelease: "Mar 28" }, confidence: "High",
   },
   {
-    name: "Rosie", slug: "msp", icon: Activity, accent: "hsl(356,70%,52%)",
+    name: "Aegis Operations", slug: "msp", icon: Activity, accent: "hsl(356,70%,52%)",
     stage: "Live", maturity: 76, readinessScore: 80, owner: "MSP Engineering", team: "MSP",
     blockers: [], risks: ["SLA prediction model calibration"],
     features: { shipped: 15, planned: 5 }, deployment: { region: "US-East", lastRelease: "Mar 27" }, confidence: "Medium",

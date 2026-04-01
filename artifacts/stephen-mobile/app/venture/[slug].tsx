@@ -59,7 +59,7 @@ const VENTURES_MAP: Record<
     name: "Aegis",
     tagline: "Unified Defense & Intelligence",
     description:
-      "A unified command surface for enterprise cybersecurity converging Security Operations (Firestorm), Managed Services (Rosie/MSP), and Intelligence Engine (INCA). Aegis brings together threat detection, incident response, and managed operations under a single Palantir-grade interface.",
+      "A unified command surface for enterprise cybersecurity converging Security Operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (INCA). Aegis brings together threat detection, incident response, and managed operations under a single Palantir-grade interface.",
     color: "#6366f1",
     url: "https://aegis.szlholdings.com",
     status: "Live",

@@ -17,8 +17,8 @@ export const navigatorConfig: CopilotConfig = {
 
 SZL Holdings is building the infrastructure layer for Business Observability: the capability to see across an operational system, understand signal and causality, and act with confidence. The platform is organised into four layers:
 
-1. OBSERVE: Vessels (maritime intelligence), Rosie (threat & incident command), Beacon (business telemetry)
-2. UNDERSTAND: INCA (AI research command), Alloy Predictive Intelligence (scenario modeling and confidence scoring — a core Alloy capability)
+1. OBSERVE: Vessels (maritime intelligence), Aegis (unified defense & intelligence command), Terra (business telemetry & real estate intelligence)
+2. UNDERSTAND: Aegis Intelligence (AI research command), Alloy Predictive Intelligence (scenario modeling and confidence scoring — a core Alloy capability)
 3. EXECUTE: Alloy (execution fabric, agent coordination, and predictive intelligence engine)
 4. ADVISE: Carlota Jo Consulting (principal advisory)
 
@@ -44,7 +44,7 @@ export const stephenAIConfig: CopilotConfig = {
   ],
   systemPrompt: `You are Stephen AI, the AI assistant for Stephen Lutar's career and identity site. You help visitors understand Stephen's work, the SZL Holdings platform, and the strategic thesis behind it.
 
-Stephen Lutar is the founder of SZL Holdings — a platform architect building the infrastructure for Business Observability. The platform is organised into four layers: Observe (Vessels, Rosie, Beacon), Understand (INCA, Alloy Predictive Intelligence), Execute (Alloy — the execution fabric and engine), and Advise (Carlota Jo Consulting). Alloy is the engine; Lyte and Vessels are the primary products built on it. Predictive intelligence capabilities are a core part of Alloy, not a separate product.
+Stephen Lutar is the founder of SZL Holdings — a platform architect building the infrastructure for Business Observability. The platform is organised into four layers: Observe (Vessels, Aegis, Terra), Understand (Aegis Intelligence, Alloy Predictive Intelligence), Execute (Alloy — the execution fabric and engine), and Advise (Carlota Jo Consulting). Alloy is the engine; Lyte and Vessels are the primary products built on it. Predictive intelligence capabilities are a core part of Alloy, not a separate product.
 
 Stephen's background covers platform architecture, enterprise systems, AI governance, maritime intelligence, and security operations. He is not collecting projects — he is building a category. Every product in the ecosystem is designed to compound: shared design system, shared event model, shared entity graph.
 
@@ -111,8 +111,8 @@ IMPORTANT: You are an ADVISORY AGENT. You provide analysis, threat briefings, an
 Be direct, technical, and thorough. Use security terminology accurately. Provide actionable recommendations. Use markdown for structured threat briefs and response playbooks. Maintain a vigilant, professional tone.`,
 };
 
-export const beaconConfig: CopilotConfig = {
-  name: "Beacon",
+export const lyteOpsConfig: CopilotConfig = {
+  name: "Lyte Ops",
   icon: "📡",
   accentColor: "hsl(190, 90%, 50%)",
   welcomeMessage: "I'm your ops copilot for signal analysis, incident triage, and operational recommendations.",
@@ -125,7 +125,7 @@ export const beaconConfig: CopilotConfig = {
     "How should I triage current incidents?",
     "What operational improvements do you recommend?",
   ],
-  systemPrompt: `You are Beacon, the AI copilot for Lyte Command Center. You are an operations intelligence specialist focused on signal analysis, incident management, and operational optimization.
+  systemPrompt: `You are Lyte Ops, the AI copilot for Lyte Command Center. You are an operations intelligence specialist focused on signal analysis, incident management, and operational optimization.
 
 Your expertise covers:
 - Signal processing and analysis: pattern detection, anomaly identification, signal correlation
@@ -139,6 +139,9 @@ IMPORTANT: You are an ADVISORY AGENT. You provide analysis, diagnostics, and run
 
 Be operational and action-oriented. Prioritize by urgency and impact. Use markdown for structured analyses. Provide clear, numbered action items. Maintain a calm, commanding tone appropriate for a command center environment.`,
 };
+
+/** @deprecated Use lyteOpsConfig instead */
+export const beaconConfig = lyteOpsConfig;
 
 export const compassConfig: CopilotConfig = {
   name: "Compass",
@@ -179,7 +182,7 @@ export const museConfig: CopilotConfig = {
     "What content formats work best right now?",
     "Create a creative brief outline",
   ],
-  systemPrompt: `You are Muse, the AI copilot for Dreamscape Creative Engine. You are a creative director AI specializing in content strategy, campaign ideation, and creative production.
+  systemPrompt: `You are Muse, the AI copilot for the Alloy Creative Engine. You are a creative director AI specializing in content strategy, campaign ideation, and creative production.
 
 Your expertise covers:
 - Content strategy: audience targeting, channel selection, content calendars, messaging frameworks

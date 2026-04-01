@@ -107,7 +107,7 @@ export default function SimulationPanelPage() {
   const workflowMutation = useMutation({
     mutationFn: ({ entityId, actionType, assignedTo }: { entityId: number; actionType: string; assignedTo?: string }) =>
       api.workflowActions.create({ entityType: "simulation", entityId, actionType, assignedTo }),
-    onSuccess: () => toast.success("Workflow action triggered via AlloyScape"),
+    onSuccess: () => toast.success("Workflow action triggered via Alloy"),
     onError: () => toast.error("Failed to trigger workflow"),
   });
 

@@ -194,7 +194,7 @@ const MILESTONES = [
     logoInitials: "AG",
     logoColor: "#6366f1",
     detail:
-      "Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (Rosie/MSP), and Intelligence Engine (INCA).",
+      "Shipped unified cybersecurity command surface converging SOC operations (Firestorm), Managed Services (Aegis Operations), and Intelligence Engine (INCA).",
     achievement: "MITRE ATT&CK mapping, <1 min automated response",
     highlight: false,
   },

@@ -15,7 +15,7 @@ export interface EcosystemNode {
 const ECOSYSTEM_NODES: EcosystemNode[] = [
   {
     id: "beacon",
-    name: "Beacon",
+    name: "Terra",
     icon: "📡",
     layer: 0,
     accent: "#4a90b8",
@@ -37,7 +37,7 @@ const ECOSYSTEM_NODES: EcosystemNode[] = [
   },
   {
     id: "alloy",
-    name: "AlloyScape",
+    name: "Alloy",
     icon: "⚙️",
     layer: 0,
     accent: "#60a5fa",

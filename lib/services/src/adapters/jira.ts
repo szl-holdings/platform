@@ -110,7 +110,7 @@ const MOCK_PROJECTS: JiraProject[] = [
   {
     id: "10003",
     key: "ALLOY",
-    name: "AlloyScape Execution Fabric",
+    name: "Alloy Execution Fabric",
     projectType: "software",
     lead: "carol.wu@szl.example.com",
     description: "Alloy workflow engine and orchestration platform",
@@ -199,7 +199,7 @@ const MOCK_ISSUES: JiraIssue[] = [
     assignee: "carol.wu@szl.example.com",
     reporter: "product@szl.example.com",
     projectKey: "ALLOY",
-    projectName: "AlloyScape Execution Fabric",
+    projectName: "Alloy Execution Fabric",
     labels: ["salesforce", "workflow", "automation"],
     created: "2026-03-25T11:00:00Z",
     updated: "2026-03-29T11:00:00Z",

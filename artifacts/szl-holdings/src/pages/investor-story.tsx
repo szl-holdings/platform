@@ -9,8 +9,8 @@ const laneProducts = [
     accent: "hsl(208,65%,48%)",
     products: [
       { name: "Vessels", tagline: "Real-time fleet and voyage intelligence for operators who cannot afford to be wrong." },
-      { name: "Rosie", tagline: "SOC-grade threat and incident command, designed to work at the speed of an actual incident." },
-      { name: "Beacon", tagline: "Operational telemetry that connects infrastructure signals to business outcomes." },
+      { name: "Aegis Operations", tagline: "SOC-grade threat and incident command, designed to work at the speed of an actual incident." },
+      { name: "Terra", tagline: "Operational telemetry that connects infrastructure signals to business outcomes." },
     ],
   },
   {
@@ -423,7 +423,7 @@ export default function InvestorStory() {
                 phase: "Phase 1",
                 label: "Core Engine",
                 status: "Achieved",
-                body: "Build the Observe-Understand-Execute architecture and prove it in high-stakes verticals. Maritime (Vessels) and Security (Rosie) were selected because the cost of poor observability is quantifiable and the buyers are sophisticated.",
+                body: "Build the Observe-Understand-Execute architecture and prove it in high-stakes verticals. Maritime (Vessels) and Security (Aegis Operations) were selected because the cost of poor observability is quantifiable and the buyers are sophisticated.",
               },
               {
                 phase: "Phase 2",

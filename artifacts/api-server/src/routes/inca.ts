@@ -1,3 +1,4 @@
+// Aegis Intelligence routes (file: inca.ts — legacy filename, module now known as Aegis Intelligence)
 import { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
 import {
