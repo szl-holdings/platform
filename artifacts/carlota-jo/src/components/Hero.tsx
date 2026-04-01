@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 function GoldDust() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -58,13 +59,30 @@ function GoldDust() {
 }
 
 export default function Hero() {
+  const { t } = useTranslation();
+
+  const stats = [
+    { value: t("hero.stats.retention.value"), label: t("hero.stats.retention.label") },
+    { value: t("hero.stats.response.value"), label: t("hero.stats.response.label") },
+    { value: t("hero.stats.discreet.value"), label: t("hero.stats.discreet.label") },
+  ];
+
+  const practiceAreas = [
+    t("hero.areas.residenceOps"),
+    t("hero.areas.propertyCoord"),
+    t("hero.areas.householdSystems"),
+    t("hero.areas.vendorManagement"),
+    t("hero.areas.lifestyleAdmin"),
+    t("hero.areas.specialProjects"),
+  ];
+
   return (
     <section className="relative overflow-hidden" style={{ background: "#1a1714", minHeight: "min(92vh, 820px)" }}>
       <GoldDust />
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(196,170,126,0.15), transparent)" }} />
+        <div className="absolute top-0 inset-inline-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(196,170,126,0.15), transparent)" }} />
         <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 75% 30%, rgba(196,170,126,0.04) 0%, transparent 70%)" }} />
-        <div className="absolute bottom-0 left-0 right-0 h-32" style={{ background: "linear-gradient(to top, #1a1714, transparent)" }} />
+        <div className="absolute bottom-0 inset-inline-0 h-32" style={{ background: "linear-gradient(to top, #1a1714, transparent)" }} />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 pt-36 sm:pt-40 lg:pt-44 pb-16 sm:pb-20">
@@ -78,7 +96,7 @@ export default function Hero() {
             >
               <div className="w-6 h-px" style={{ background: "rgba(196,170,126,0.5)" }} />
               <span className="text-[11px] font-medium tracking-[0.3em] uppercase" style={{ color: "rgba(196,170,126,0.7)" }}>
-                Private Advisory
+                {t("hero.badge")}
               </span>
             </motion.div>
 
@@ -89,9 +107,9 @@ export default function Hero() {
               className="font-serif leading-[1.06] mb-7"
               style={{ fontSize: "clamp(2.6rem, 5.5vw, 4.5rem)", fontWeight: 300, color: "#f5f0e8" }}
             >
-              Quietly structured.
+              {t("hero.headline")}
               <br />
-              <span style={{ fontStyle: "italic", color: "rgba(196,170,126,0.85)" }}>Precisely executed.</span>
+              <span style={{ fontStyle: "italic", color: "rgba(196,170,126,0.85)" }}>{t("hero.headlineEmphasis")}</span>
             </motion.h1>
 
             <motion.p
@@ -101,7 +119,7 @@ export default function Hero() {
               className="text-[15px] font-light leading-relaxed mb-10 max-w-md"
               style={{ color: "rgba(245,240,232,0.65)" }}
             >
-              Estate management and residential operations for high-net-worth families — through one trusted operator.
+              {t("hero.subheadline")}
             </motion.p>
 
             <motion.div
@@ -117,7 +135,7 @@ export default function Hero() {
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(196,170,126,1)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(196,170,126,0.9)"; }}
               >
-                Begin a Conversation
+                {t("common.beginConversation")}
                 <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <Link
@@ -133,7 +151,7 @@ export default function Hero() {
                   (e.currentTarget as HTMLElement).style.color = "rgba(196,170,126,0.5)";
                 }}
               >
-                Services
+                {t("nav.services")}
               </Link>
             </motion.div>
           </div>
@@ -146,11 +164,7 @@ export default function Hero() {
           >
             <div className="border" style={{ borderColor: "rgba(196,170,126,0.1)", background: "rgba(26,23,20,0.6)", backdropFilter: "blur(12px)" }}>
               <div className="grid grid-cols-3 gap-px" style={{ background: "rgba(196,170,126,0.08)" }}>
-                {[
-                  { value: "100%", label: "Retention" },
-                  { value: "< 2hr", label: "Response" },
-                  { value: "Discreet", label: "By Design" },
-                ].map((stat) => (
+                {stats.map((stat) => (
                   <div key={stat.label} className="px-5 py-6 text-center" style={{ background: "rgba(26,23,20,0.9)" }}>
                     <p className="font-serif text-xl sm:text-2xl font-light mb-1" style={{ color: "#f5f0e8" }}>{stat.value}</p>
                     <p className="text-[9px] tracking-[0.2em] uppercase font-medium" style={{ color: "rgba(196,170,126,0.45)" }}>{stat.label}</p>
@@ -160,17 +174,10 @@ export default function Hero() {
 
               <div className="p-7" style={{ borderTop: "1px solid rgba(196,170,126,0.08)" }}>
                 <p className="text-[10px] font-semibold tracking-[0.3em] uppercase mb-5" style={{ color: "rgba(196,170,126,0.5)" }}>
-                  Core Practice Areas
+                  {t("hero.practiceAreas")}
                 </p>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                  {[
-                    "Residence Operations",
-                    "Property Coordination",
-                    "Household Systems",
-                    "Vendor Management",
-                    "Lifestyle & Admin",
-                    "Special Projects",
-                  ].map((item) => (
+                  {practiceAreas.map((item) => (
                     <div key={item} className="flex items-center gap-2 text-[12px] font-light" style={{ color: "rgba(245,240,232,0.5)" }}>
                       <span style={{ color: "rgba(196,170,126,0.4)" }}>—</span>
                       {item}
@@ -181,8 +188,8 @@ export default function Hero() {
             </div>
 
             <div className="mt-4 flex items-center justify-between px-1">
-              <span className="text-[10px] tracking-[0.2em] uppercase" style={{ color: "rgba(196,170,126,0.25)" }}>London · New York</span>
-              <span className="text-[10px]" style={{ color: "rgba(196,170,126,0.25)" }}>inquiries@carlotajo.com</span>
+              <span className="text-[10px] tracking-[0.2em] uppercase" style={{ color: "rgba(196,170,126,0.25)" }}>{t("hero.location")}</span>
+              <span className="text-[10px]" style={{ color: "rgba(196,170,126,0.25)" }}>{t("hero.email")}</span>
             </div>
           </motion.div>
         </div>

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Home, Building, Settings, Users, Briefcase, Compass, ArrowRight } from "lucide-react";
 import servicesData from "@/data/services.json";
 import { Link } from "wouter";
+import { useTranslation } from "react-i18next";
 
 const iconMap: Record<string, React.ElementType> = {
   Home,
@@ -13,6 +14,8 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 export default function Services() {
+  const { t } = useTranslation();
+
   return (
     <section id="services" className="py-24 lg:py-32 border-t" style={{ background: "var(--color-cream-warm)", borderColor: "var(--color-stone-200)" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -25,12 +28,12 @@ export default function Services() {
             className="lg:col-span-5"
           >
             <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-6" style={{ color: "var(--color-gold)" }}>
-              Services
+              {t("services.badge")}
             </p>
             <h2 className="font-serif text-4xl md:text-5xl font-light leading-tight" style={{ color: "var(--color-ink-900)" }}>
-              Six practice areas.
+              {t("services.headline")}
               <br />
-              <span style={{ fontStyle: "italic", opacity: 0.8 }}>One clear standard.</span>
+              <span style={{ fontStyle: "italic", opacity: 0.8 }}>{t("services.headlineEmphasis")}</span>
             </h2>
           </motion.div>
 
@@ -42,7 +45,7 @@ export default function Services() {
             className="lg:col-span-7 flex items-end"
           >
             <p className="text-sm font-light leading-relaxed max-w-xl" style={{ color: "var(--color-ink-600)" }}>
-              Cross-domain precision and absolute discretion across every engagement.
+              {t("services.description")}
             </p>
           </motion.div>
         </div>
@@ -93,7 +96,7 @@ export default function Services() {
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-gold)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(154,125,82,0.7)"; }}
                 >
-                  Inquire
+                  {t("services.inquire")}
                   <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform duration-300" />
                 </Link>
               </motion.div>

@@ -2,18 +2,25 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
-
-const navLinks = [
-  { label: "Services", href: "/services" },
-  { label: "Who We Serve", href: "/who-we-serve" },
-  { label: "How We Work", href: "/engagements" },
-  { label: "About Carlota Jo", href: "/founder" },
-];
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher, type SupportedLocale } from "@workspace/shared-ui";
+import i18n from "../i18n";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
+  const { t } = useTranslation();
+  const [currentLocale, setCurrentLocale] = useState<SupportedLocale>(
+    (i18n.language?.split("-")[0] as SupportedLocale) || "en"
+  );
+
+  const navLinks = [
+    { label: t("nav.services"), href: "/services" },
+    { label: t("nav.whoWeServe"), href: "/who-we-serve" },
+    { label: t("nav.howWeWork"), href: "/engagements" },
+    { label: t("nav.about"), href: "/founder" },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -23,14 +30,18 @@ export default function Header() {
 
   useEffect(() => setMobileOpen(false), [location]);
 
-  const isLight = !scrolled;
+  function handleLocaleChange(locale: SupportedLocale) {
+    i18n.changeLanguage(locale);
+    setCurrentLocale(locale);
+    document.documentElement.lang = locale;
+  }
 
   return (
     <motion.header
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      className="fixed top-0 inset-inline-0 z-50 transition-all duration-300"
       style={{
         background: scrolled ? "rgba(249,247,243,0.97)" : "transparent",
         backdropFilter: scrolled ? "blur(12px)" : "none",
@@ -48,12 +59,12 @@ export default function Header() {
               Carlota Jo
             </span>
             <span className="text-[9px] tracking-[0.3em] uppercase font-medium mt-0.5 transition-colors duration-300" style={{ color: "var(--color-gold)", opacity: scrolled ? 0.7 : 0.5 }}>
-              Consulting
+              {t("footer.consulting")}
             </span>
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -71,6 +82,14 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+
+          <LanguageSwitcher
+            currentLocale={currentLocale}
+            onLocaleChange={handleLocaleChange}
+            supportedLocales={["en", "es"]}
+            variant={scrolled ? "light" : "gold"}
+          />
+
           <Link
             href="/contact"
             className="px-5 py-2 text-[12px] font-medium tracking-[0.08em] transition-colors duration-200"
@@ -78,7 +97,7 @@ export default function Header() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
           >
-            Request Consultation
+            {t("nav.requestConsultation")}
           </Link>
         </div>
 
@@ -86,7 +105,7 @@ export default function Header() {
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden transition-colors"
           style={{ color: "var(--color-ink-500)" }}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-label={mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -116,13 +135,21 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
+              <div className="flex justify-start">
+                <LanguageSwitcher
+                  currentLocale={currentLocale}
+                  onLocaleChange={handleLocaleChange}
+                  supportedLocales={["en", "es"]}
+                  variant="light"
+                />
+              </div>
               <Link
                 href="/contact"
                 onClick={() => setMobileOpen(false)}
                 className="mt-1 px-5 py-3 text-[13px] font-medium text-center transition-colors"
                 style={{ color: "var(--color-cream)", background: "var(--color-gold)" }}
               >
-                Request Consultation
+                {t("nav.requestConsultation")}
               </Link>
             </div>
           </motion.div>

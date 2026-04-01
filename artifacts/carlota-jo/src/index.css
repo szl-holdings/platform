@@ -263,6 +263,12 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-stone-400);
 }
 
+/* RTL-ready: CSS logical properties ensure correct layout for future RTL locales.
+   When adding a new RTL locale, set dir="rtl" on <html> and localization is handled automatically. */
+[dir="rtl"] {
+  text-align: start;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

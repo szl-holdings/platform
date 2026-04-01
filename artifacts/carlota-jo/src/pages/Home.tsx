@@ -5,24 +5,10 @@ import Proof from "@/components/Proof";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
-
-const trustPillars = [
-  { name: "Discretion", desc: "Every engagement is conducted with absolute confidentiality. Your affairs, your staff, and your residence are never discussed." },
-  { name: "Responsiveness", desc: "You will hear back within two hours during business hours. For urgent matters, the same day — always." },
-  { name: "Structure", desc: "Operations run on documented systems, not memory. Every process is tracked, every vendor vetted, every task owned." },
-  { name: "Professionalism", desc: "Communication is clear, precise, and appropriately formal. We represent you to vendors, staff, and third parties at your standard." },
-  { name: "High-Touch Execution", desc: "The level of attention you'd expect from a personal COO — applied to the operational layer of your home and life." },
-];
-
-const processSteps = [
-  { step: "01", label: "Discovery Call", desc: "A confidential conversation to understand your household, priorities, and what support you're looking for. No obligation." },
-  { step: "02", label: "Needs Assessment", desc: "Rosa visits the property, meets the household team, and forms her own independent view of the operational situation." },
-  { step: "03", label: "Service Plan", desc: "A tailored plan defining scope, protocols, and decision thresholds — prepared with you, not imposed on you." },
-  { step: "04", label: "Onboarding", desc: "Rosa assumes oversight, confirms vendor relationships, documents the standards, and transitions cleanly into the engagement." },
-  { step: "05", label: "Active Management", desc: "Proactive, ongoing management. Monthly summaries. Quarterly reviews. You are informed, not burdened." },
-];
+import { useTranslation } from "react-i18next";
 
 function RosaBlock() {
+  const { t } = useTranslation();
   return (
     <section className="py-20 lg:py-28" style={{ background: "var(--color-cream-warm)", borderTop: "1px solid var(--color-stone-200)" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -35,24 +21,24 @@ function RosaBlock() {
         >
           <div className="lg:col-span-4">
             <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>
-              The Principal
+              {t("rosa.badge")}
             </p>
             <h2 className="font-serif text-3xl font-light mb-4" style={{ color: "var(--color-ink-900)" }}>
-              Carlota Jo
+              {t("rosa.name")}
             </h2>
             <p className="text-sm font-light leading-relaxed mb-1" style={{ color: "var(--color-ink-600)" }}>
-              Fractional Director of Properties & Residence
+              {t("rosa.title")}
             </p>
             <p className="text-xs font-light" style={{ color: "var(--color-stone-500)" }}>
-              SZL Holdings
+              {t("rosa.company")}
             </p>
           </div>
           <div className="lg:col-span-5">
             <p className="text-sm font-light leading-relaxed mb-4" style={{ color: "var(--color-ink-600)" }}>
-              Rosa built Carlota Jo for principals who need one person they can genuinely trust to manage the operational layer of their residential life — with warmth, detail-orientation, and the discretion that high-net-worth families require as a baseline.
+              {t("rosa.bio1")}
             </p>
             <p className="text-sm font-light leading-relaxed" style={{ color: "var(--color-ink-500)" }}>
-              With experience spanning multiple residences, international properties, and the full complexity of high-net-worth household operations, Rosa brings a structured, professional approach to every engagement.
+              {t("rosa.bio2")}
             </p>
           </div>
           <div className="lg:col-span-3 flex flex-col items-start gap-4">
@@ -63,7 +49,7 @@ function RosaBlock() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.75"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
             >
-              About Carlota Jo
+              {t("nav.about")}
             </Link>
             <Link
               href="/contact"
@@ -72,7 +58,7 @@ function RosaBlock() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
             >
-              Request a consultation
+              {t("nav.requestConsultation")}
             </Link>
           </div>
         </motion.div>
@@ -82,6 +68,16 @@ function RosaBlock() {
 }
 
 function TrustPillars() {
+  const { t } = useTranslation();
+
+  const pillars = [
+    { name: t("trust.pillars.discretion.name"), desc: t("trust.pillars.discretion.desc") },
+    { name: t("trust.pillars.responsiveness.name"), desc: t("trust.pillars.responsiveness.desc") },
+    { name: t("trust.pillars.structure.name"), desc: t("trust.pillars.structure.desc") },
+    { name: t("trust.pillars.professionalism.name"), desc: t("trust.pillars.professionalism.desc") },
+    { name: t("trust.pillars.execution.name"), desc: t("trust.pillars.execution.desc") },
+  ];
+
   return (
     <section className="py-20 lg:py-28" style={{ background: "var(--color-stone-50)", borderTop: "1px solid var(--color-stone-200)" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -93,16 +89,16 @@ function TrustPillars() {
           className="mb-14"
         >
           <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>
-            The Standard
+            {t("trust.badge")}
           </p>
           <h2 className="font-serif text-3xl lg:text-4xl font-light leading-tight" style={{ color: "var(--color-ink-900)" }}>
-            Five pillars.<br />
-            <span style={{ fontStyle: "italic" }}>One uncompromising standard.</span>
+            {t("trust.headline")}<br />
+            <span style={{ fontStyle: "italic" }}>{t("trust.headlineEmphasis")}</span>
           </h2>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-px" style={{ background: "var(--color-stone-200)" }}>
-          {trustPillars.map((pillar, idx) => (
+          {pillars.map((pillar, idx) => (
             <motion.div
               key={pillar.name}
               initial={{ opacity: 0, y: 14 }}
@@ -132,6 +128,16 @@ function TrustPillars() {
 }
 
 function ProcessStrip() {
+  const { t } = useTranslation();
+
+  const processSteps = [
+    { step: t("process.steps.discovery.step"), label: t("process.steps.discovery.label"), desc: t("process.steps.discovery.desc") },
+    { step: t("process.steps.assessment.step"), label: t("process.steps.assessment.label"), desc: t("process.steps.assessment.desc") },
+    { step: t("process.steps.plan.step"), label: t("process.steps.plan.label"), desc: t("process.steps.plan.desc") },
+    { step: t("process.steps.onboarding.step"), label: t("process.steps.onboarding.label"), desc: t("process.steps.onboarding.desc") },
+    { step: t("process.steps.management.step"), label: t("process.steps.management.label"), desc: t("process.steps.management.desc") },
+  ];
+
   return (
     <section className="py-20 lg:py-28" style={{ background: "var(--color-cream-warm)", borderTop: "1px solid var(--color-stone-200)" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -144,10 +150,11 @@ function ProcessStrip() {
         >
           <div>
             <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>
-              How It Works
+              {t("process.badge")}
             </p>
             <h2 className="font-serif text-3xl lg:text-4xl font-light" style={{ color: "var(--color-ink-900)" }}>
-              Five stages to a managed engagement.
+              {t("process.headline")}<br />
+              <span style={{ fontStyle: "italic" }}>{t("process.headlineEmphasis")}</span>
             </h2>
           </div>
           <Link
@@ -157,7 +164,7 @@ function ProcessStrip() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
           >
-            View the full process →
+            {t("nav.howWeWork")} →
           </Link>
         </motion.div>
 
@@ -193,6 +200,14 @@ function ProcessStrip() {
 }
 
 function InquiryCard() {
+  const { t } = useTranslation();
+
+  const contactDetails = [
+    { label: t("rosa.contactInfo.responseTime"), value: t("rosa.contactInfo.responseValue") },
+    { label: t("rosa.contactInfo.locations"), value: t("rosa.contactInfo.locationsValue") },
+    { label: t("rosa.contactInfo.contact"), value: t("rosa.contactInfo.contactValue") },
+  ];
+
   return (
     <section className="py-20 lg:py-28" style={{ background: "var(--color-stone-50)", borderTop: "1px solid var(--color-stone-200)" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -204,13 +219,14 @@ function InquiryCard() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-6" style={{ color: "var(--color-gold)" }}>
-              Private Inquiry
+              {t("contact.badge")}
             </p>
             <h2 className="font-serif text-3xl lg:text-4xl font-light mb-6" style={{ color: "var(--color-ink-900)" }}>
-              Begin a confidential conversation.
+              {t("inquiry.headline")}<br />
+              <span style={{ fontStyle: "italic" }}>{t("inquiry.headlineEmphasis")}</span>
             </h2>
             <p className="text-[14px] font-light leading-relaxed mb-8 max-w-xl" style={{ color: "var(--color-ink-500)" }}>
-              All enquiries are handled personally by Rosa with complete discretion. There is no obligation after an initial conversation. Tell us a little about your situation, and Rosa will respond personally within two business days.
+              {t("inquiry.description")}
             </p>
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <Link
@@ -220,7 +236,7 @@ function InquiryCard() {
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
               >
-                Request a Confidential Consultation
+                {t("inquiry.cta")}
               </Link>
               <Link
                 href="/services"
@@ -235,17 +251,13 @@ function InquiryCard() {
                   (e.currentTarget as HTMLElement).style.color = "var(--color-ink-500)";
                 }}
               >
-                View Services
+                {t("common.viewServices")}
               </Link>
             </div>
 
             <div className="mt-12 pt-8 border-t" style={{ borderColor: "var(--color-stone-200)" }}>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {[
-                  { label: "Response time", value: "Within two business days" },
-                  { label: "Locations", value: "London · New York, NY" },
-                  { label: "Contact", value: "inquiries@carlotajo.com" },
-                ].map((item) => (
+                {contactDetails.map((item) => (
                   <div key={item.label}>
                     <p className="text-[10px] tracking-[0.2em] uppercase mb-1.5" style={{ color: "var(--color-stone-400)" }}>{item.label}</p>
                     <p className="text-[13px] font-light" style={{ color: "var(--color-ink-600)" }}>{item.value}</p>

@@ -15,6 +15,7 @@ Do not make changes to the file `Y`.
 ### Core Technologies
 The platform is a pnpm monorepo utilizing Node.js 24 and TypeScript 5.9.
 - **Frontend:** React, Vite, TanStack React Query, Wouter, Tailwind CSS, Framer Motion, Lucide React, Recharts.
+- **Internationalization (i18n):** react-i18next + i18next + i18next-browser-languagedetector. Shared i18n library at `lib/i18n/`. Each public-facing artifact (carlota-jo, szl-holdings, stephen-site) has its own `src/i18n.ts` setup and `src/locales/<lang>/translation.json` files. Language detection order: querystring (`?lang=`), cookie, localStorage, browser navigator. Carlota Jo supports English + Spanish (full translation), szl-holdings and stephen-site have English with framework ready for future languages. A `LanguageSwitcher` component is exported from `@workspace/shared-ui` and renders in the Carlota Jo header. Locale-aware date/number/currency formatting uses `Intl` APIs via `src/hooks/use-locale.ts` hooks. RTL support: CSS logical properties used throughout (`inset-inline-0`, `margin-inline-*`, `padding-inline-*`, `start/end`), with a `[dir="rtl"]` CSS rule prepared.
 - **Backend:** Express 5, Drizzle ORM, Zod validation, pino logging.
 - **Database:** PostgreSQL with Drizzle ORM (over 120 tables), including comprehensive CMS, product-specific, client portal, and organization membership schemas with a 7-role CMS model.
 - **Authentication:** Replit Auth (OIDC/PKCE), session-based with cookie+Bearer token, 7-role RBAC.

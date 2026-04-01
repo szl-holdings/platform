@@ -4,6 +4,7 @@ import { configurePlausible } from "@workspace/analytics";
 import { initSentry, initWebVitals } from "@workspace/observability/react";
 import { GraphQLProvider } from "@workspace/graphql-client/provider";
 import App from "./App";
+import "./i18n";
 import "./index.css";
 
 configurePlausible({

@@ -1,21 +1,5 @@
 import { Link } from "wouter";
-
-const serviceLinks = [
-  { label: "Residence Operations", href: "/services" },
-  { label: "Property Coordination", href: "/services" },
-  { label: "Household Systems", href: "/services" },
-  { label: "Vendor Coordination", href: "/services" },
-  { label: "Lifestyle Support", href: "/services" },
-  { label: "Special Projects", href: "/services" },
-];
-
-const aboutLinks = [
-  { label: "Who We Serve", href: "/who-we-serve" },
-  { label: "How We Work", href: "/engagements" },
-  { label: "About Carlota Jo", href: "/founder" },
-  { label: "Request Consultation", href: "/contact" },
-  { label: "Client Portal", href: "/client-portal" },
-];
+import { useTranslation } from "react-i18next";
 
 const ecosystemLinks = [
   { label: "SZL Holdings", href: "/" },
@@ -26,12 +10,30 @@ const ecosystemLinks = [
   { label: "Stephen Lutar", href: "/stephen/" },
 ];
 
-const legalLinks = [
-  { label: "Privacy", href: "/legal/privacy" },
-  { label: "Terms", href: "/legal/terms" },
-];
-
 export default function Footer() {
+  const { t } = useTranslation();
+
+  const serviceLinks = [
+    { label: t("hero.areas.residenceOps"), href: "/services" },
+    { label: t("hero.areas.propertyCoord"), href: "/services" },
+    { label: t("hero.areas.householdSystems"), href: "/services" },
+    { label: t("hero.areas.vendorManagement"), href: "/services" },
+    { label: t("hero.areas.lifestyleAdmin"), href: "/services" },
+    { label: t("hero.areas.specialProjects"), href: "/services" },
+  ];
+
+  const aboutLinks = [
+    { label: t("nav.whoWeServe"), href: "/who-we-serve" },
+    { label: t("nav.howWeWork"), href: "/engagements" },
+    { label: t("nav.about"), href: "/founder" },
+    { label: t("nav.requestConsultation"), href: "/contact" },
+  ];
+
+  const legalLinks = [
+    { label: t("footer.privacy"), href: "/legal/privacy" },
+    { label: t("footer.terms"), href: "/legal/terms" },
+  ];
+
   return (
     <footer className="py-14 lg:py-16" style={{ background: "var(--color-stone-50)", borderTop: "1px solid var(--color-stone-200)" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -45,7 +47,7 @@ export default function Footer() {
                 Carlota Jo
               </h3>
               <p className="text-[9px] tracking-[0.3em] uppercase font-medium mt-1" style={{ color: "var(--color-gold)", opacity: 0.7 }}>
-                Consulting
+                {t("footer.consulting")}
               </p>
             </div>
             <p className="text-[13px] leading-relaxed max-w-xs font-light" style={{ color: "var(--color-ink-500)" }}>
@@ -59,14 +61,14 @@ export default function Footer() {
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold-light)"; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--color-gold)"; }}
               >
-                Request a Confidential Consultation
+                {t("nav.requestConsultation")}
               </Link>
             </div>
           </div>
 
           <div className="md:col-span-2">
             <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4" style={{ color: "var(--color-stone-400)" }}>
-              Services
+              {t("nav.services")}
             </h4>
             <ul className="space-y-2.5">
               {serviceLinks.map((link) => (
@@ -120,17 +122,17 @@ export default function Footer() {
 
           <div className="md:col-span-2">
             <h4 className="text-[10px] font-medium tracking-[0.22em] uppercase mb-4" style={{ color: "var(--color-stone-400)" }}>
-              Contact
+              {t("footer.contact")}
             </h4>
             <ul className="space-y-2.5 text-[13px] font-light" style={{ color: "var(--color-ink-500)" }}>
-              <li>inquiries@carlotajo.com</li>
-              <li className="leading-relaxed">London · New York, NY</li>
+              <li>{t("common.email")}</li>
+              <li className="leading-relaxed">{t("common.locations")}</li>
               <li>
                 <Link href="/contact" className="text-[12px] font-light transition-colors" style={{ color: "var(--color-gold)", opacity: 0.8, textDecoration: "none" }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; }}
                 >
-                  Request a consultation →
+                  {t("footer.requestConsultation")}
                 </Link>
               </li>
             </ul>
@@ -139,7 +141,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-7 border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style={{ borderColor: "var(--color-stone-200)" }}>
           <p className="text-[11px] tracking-wider" style={{ color: "var(--color-stone-400)" }}>
-            &copy; {new Date().getFullYear()} Carlota Jo Consulting. A SZL Holdings company. All rights reserved.
+            {t("footer.copyright", { year: new Date().getFullYear() })}
           </p>
           <div className="flex items-center gap-6">
             {legalLinks.map((link) => (

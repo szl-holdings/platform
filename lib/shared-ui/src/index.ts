@@ -29,3 +29,4 @@ export { RealtimeStatusIndicator } from "./realtime-status-indicator";
 export * from "./document-engine";
 export * from "./ontology";
 export { DataProvenance, ActionLoop, RoleSelector } from "./data-provenance";
+export { LanguageSwitcher, type LanguageSwitcherProps, type SupportedLocale } from "./language-switcher";
