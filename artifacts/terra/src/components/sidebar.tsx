@@ -44,6 +44,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
     title: "Intelligence",
     items: [
       { path: "/team", label: "Team Performance", icon: Users },
+      { path: "/market-intelligence", label: "Market Intelligence", icon: Activity },
       { path: "/predictions", label: "Alloy Intelligence", icon: Brain },
     ],
   },

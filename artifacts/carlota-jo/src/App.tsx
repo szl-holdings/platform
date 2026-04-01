@@ -80,6 +80,7 @@ const ROICalculator = lazy(() => import("@/pages/roi-calculator"));
 const BrandAudit = lazy(() => import("@/pages/brand-audit"));
 const ContentStrategy = lazy(() => import("@/pages/content-strategy"));
 const DocumentEngine = lazy(() => import("@/pages/document-engine"));
+const MethodologyPage = lazy(() => import("@/pages/methodology"));
 
 function PageLoader() {
   return (
@@ -96,6 +97,7 @@ function Router() {
         {/* Marketing / public pages */}
         <Route path="/" component={Home} />
         <Route path="/services" component={ServicesPage} />
+        <Route path="/methodology" component={MethodologyPage} />
         <Route path="/who-we-serve" component={WhoWeServePage} />
         <Route path="/founder" component={FounderPage} />
         <Route path="/contact" component={ContactPage} />

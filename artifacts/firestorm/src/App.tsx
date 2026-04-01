@@ -40,6 +40,7 @@ const Watchlists = lazy(() => import("@/pages/watchlists"));
 const ForensicsTimeline = lazy(() => import("@/pages/forensics-timeline"));
 const XDRConsole = lazy(() => import("@/pages/xdr-console"));
 const ThreatHunting = lazy(() => import("@/pages/threat-hunting"));
+const ThreatKillChain = lazy(() => import("@/pages/threat-kill-chain"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
 const ExecutiveRisk = lazy(() => import("@/pages/executive-risk"));
 const SacsayhuamanShield = lazy(() => import("@/pages/sacsayhuaman-shield"));
@@ -129,6 +130,7 @@ const securityNavPrimary = [
 
 const securityNavSecondary = [
   { path: "/xdr-console", label: "XDR Console", icon: Layers },
+  { path: "/threat-kill-chain", label: "Kill Chain Analysis", icon: Target },
   { path: "/threat-hunting", label: "Threat Hunting", icon: Search },
   { path: "/identity-threat", label: "Identity Threats", icon: Users },
   { path: "/forensics", label: "Forensics", icon: Flame },
@@ -675,6 +677,7 @@ function AppRouter() {
         <Route path="/forensics" component={ForensicsTimeline} />
         <Route path="/xdr-console" component={XDRConsole} />
         <Route path="/threat-hunting" component={ThreatHunting} />
+        <Route path="/threat-kill-chain" component={ThreatKillChain} />
         <Route path="/identity-threat" component={IdentityThreat} />
         <Route path="/executive-risk" component={ExecutiveRisk} />
         <Route path="/cr/dashboard" component={ReadinessDashboard} />

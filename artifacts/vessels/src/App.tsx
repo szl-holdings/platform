@@ -97,6 +97,7 @@ const CorridorRoutesPage = lazy(() => import("@/pages/corridor-routes"));
 const AlertCenterPage = lazy(() => import("@/pages/alert-center"));
 const AgentInsightsPage = lazy(() => import("@/pages/agent-insights"));
 const MaritimeIntelligence = lazy(() => import("@/pages/maritime-intelligence"));
+const CommodityFlowIntelligence = lazy(() => import("@/pages/commodity-flow-intelligence"));
 const WeatherPage = lazy(() => import("@/pages/weather-page"));
 const PortAnalyticsPage = lazy(() => import("@/pages/port-analytics"));
 const CO2EmissionsPage = lazy(() => import("@/pages/co2-emissions"));
@@ -132,6 +133,7 @@ const legacyNavItems = [
   { path: "/fleet", label: "Fleet Map", icon: Globe },
   { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
   { path: "/economics", label: "Voyage Economics", icon: DollarSign },
+  { path: "/commodity-flow", label: "Commodity Flow", icon: BarChart3 },
   { path: "/maintenance", label: "Maintenance", icon: Wrench },
   { path: "/command", label: "Command Mode", icon: Activity },
   { path: "/analytics", label: "Analytics", icon: BarChart3 },
@@ -479,6 +481,7 @@ function DashboardRouter() {
         <Route path="/risk-scoring" component={RiskScoringPage} />
         <Route path="/dark-vessel-detection" component={DarkVesselDetection} />
         <Route path="/sanctions-screening" component={SanctionsScreening} />
+        <Route path="/commodity-flow" component={CommodityFlowIntelligence} />
         <Route path="/cyber-threats" component={CyberThreatPanel} />
         <Route path="/incidents" component={IncidentReporting} />
         <Route path="/agent-insights" component={AgentInsightsPage} />

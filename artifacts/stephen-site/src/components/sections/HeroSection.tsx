@@ -155,12 +155,21 @@ function EcosystemWidget() {
   );
 }
 
+const PLATFORM_VERTICALS = [
+  { label: "Cybersecurity", color: "hsl(232,68%,60%)", dot: true },
+  { label: "Maritime", color: "hsl(205,85%,55%)", dot: true },
+  { label: "Real Estate", color: "hsl(140,56%,40%)", dot: true },
+  { label: "AI Orchestration", color: "hsl(190,90%,55%)", dot: true },
+  { label: "Private Advisory", color: "hsl(38,55%,58%)", dot: true },
+];
+
 export function HeroSection() {
   return (
     <section id="hero" className="relative overflow-hidden bg-[#0a0e14] pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24" style={{ minHeight: "min(88vh, 860px)" }}>
       <SubtleGrid />
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-[20%] w-[500px] h-[400px] bg-[#4a6fa5]/3 rounded-full blur-[160px]" />
+        <div className="absolute top-0 right-[20%] w-[600px] h-[500px] rounded-full blur-[200px]" style={{ background: "hsla(232,68%,60%,0.04)" }} />
+        <div className="absolute bottom-[30%] left-[10%] w-[400px] h-[300px] rounded-full blur-[160px]" style={{ background: "hsla(140,56%,40%,0.03)" }} />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
       </div>
 
@@ -170,68 +179,82 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="flex items-center gap-2 mb-6"
+              transition={{ duration: 0.6, delay: 0.08 }}
+              className="inline-flex items-center gap-2 mb-7 px-3 py-1.5"
+              style={{ border: "1px solid hsla(0,0%,100%,0.07)", background: "hsla(0,0%,100%,0.03)" }}
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 8px hsla(160,80%,52%,0.5)" }} />
-              <span className="text-[11px] font-medium text-foreground/45 tracking-[0.15em] uppercase">
-                Founder & CEO — SZL Holdings. Builder. Operator. Systems thinker.
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 8px hsla(160,80%,52%,0.6)" }} />
+              <span className="text-[10px] font-semibold text-foreground/45 tracking-[0.18em] uppercase">
+                Founder — CEO — Architect
               </span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.15 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-serif font-normal text-foreground leading-[1.05] mb-4 tracking-tight"
+              transition={{ duration: 0.8, delay: 0.14 }}
+              className="text-5xl sm:text-6xl lg:text-[4.25rem] font-serif font-normal text-foreground leading-[1.03] mb-5 tracking-tight"
             >
-              Stephen Lutar
+              Stephen<br />
+              <span className="text-foreground/50">Lutar</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="text-base sm:text-lg text-foreground/55 max-w-lg mb-3 leading-relaxed font-light"
+              transition={{ duration: 0.7, delay: 0.28 }}
+              className="text-base sm:text-lg text-foreground/55 max-w-xl mb-4 leading-relaxed font-light"
             >
-              Building command systems that close the loop from signal to decision to auditable action.
+              I build command systems that close the loop from signal to decision to auditable action — across five distinct industries under one compounding architecture.
             </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.38 }}
-              className="text-[13px] sm:text-sm text-foreground/35 max-w-md mb-7 leading-relaxed font-light"
+              transition={{ duration: 0.6, delay: 0.36 }}
+              className="flex flex-wrap gap-2 mb-7"
             >
-              Five platforms across maritime, cybersecurity, AI, real estate, and enterprise operations. One compounding architecture. Full-stack founder-operator.
-            </motion.p>
+              {PLATFORM_VERTICALS.map((v) => (
+                <span
+                  key={v.label}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium tracking-wide"
+                  style={{ border: `1px solid ${v.color}22`, background: `${v.color}0d`, color: v.color }}
+                >
+                  <span className="w-1 h-1 rounded-full" style={{ background: v.color }} />
+                  {v.label}
+                </span>
+              ))}
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.46 }}
-              className="flex flex-col sm:flex-row items-start sm:items-center gap-3"
+              transition={{ duration: 0.6, delay: 0.44 }}
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6"
             >
               <Link
                 href="/contact"
-                className="group inline-flex items-center gap-2.5 px-7 py-3 bg-primary text-primary-foreground text-[13px] font-semibold hover:bg-primary/90 transition-colors duration-200"
+                className="group inline-flex items-center gap-2.5 px-7 py-3.5 text-[13px] font-semibold transition-all duration-200"
+                style={{ background: "hsl(210,8%,88%)", color: "hsl(210,12%,8%)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(0,0%,100%)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
               >
                 Start a conversation
                 <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <Link
                 href="/work"
-                className="inline-flex items-center gap-2 text-[13px] font-medium text-foreground/40 hover:text-primary transition-colors duration-200 px-2 py-3"
+                className="inline-flex items-center gap-2 text-[13px] font-medium text-foreground/40 hover:text-foreground/65 transition-colors duration-200 px-2 py-3.5"
               >
-                View case studies <ArrowRight size={12} />
+                Case studies <ArrowRight size={12} />
               </Link>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.55 }}
-              className="flex items-center gap-5 mt-6"
+              transition={{ duration: 0.6, delay: 0.52 }}
+              className="flex items-center gap-5 mb-8"
             >
               <a href="https://linkedin.com/in/stephen-l-279315240" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[11px] text-foreground/30 hover:text-foreground/60 transition-colors">
                 <Linkedin size={13} /> LinkedIn
@@ -244,26 +267,28 @@ export function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.65 }}
-              className="mt-8 flex flex-wrap gap-8 sm:gap-10"
+              transition={{ duration: 0.7, delay: 0.6 }}
+              className="flex flex-wrap gap-8 sm:gap-12 pt-6"
+              style={{ borderTop: "1px solid hsla(0,0%,100%,0.05)" }}
             >
               {[
-                { value: "5", label: "Platforms live" },
+                { value: "6", label: "Products live" },
                 { value: "5+", label: "Years operating" },
-                { value: "Full-stack", label: "Founder-operator" },
+                { value: "Solo", label: "Full-stack build" },
+                { value: "1", label: "Architecture" },
               ].map((stat) => (
                 <div key={stat.label} className="flex flex-col">
-                  <span className="text-xl sm:text-2xl font-serif text-primary leading-none">{stat.value}</span>
-                  <span className="text-[9px] text-foreground/30 uppercase tracking-[0.18em] mt-1.5">{stat.label}</span>
+                  <span className="text-2xl sm:text-3xl font-serif text-primary leading-none mb-1">{stat.value}</span>
+                  <span className="text-[9px] text-foreground/28 uppercase tracking-[0.2em]">{stat.label}</span>
                 </div>
               ))}
             </motion.div>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.38 }}
             className="hidden lg:block lg:col-span-5"
           >
             <EcosystemWidget />

@@ -97,10 +97,18 @@ const NAV_GROUPS = [
       { href: "/inbox", label: "Inbox", icon: Inbox },
       { href: "/explorer", label: "Explorer", icon: Search },
       { href: "/topology", label: "Topology", icon: Network },
+      { href: "/error-budget", label: "Error Budget", icon: AlertTriangle },
       { href: "/ownership", label: "Ownership", icon: Users },
       { href: "/approvals", label: "Approvals", icon: CheckSquare },
       { href: "/workflows", label: "Workflows", icon: Workflow },
       { href: "/readiness", label: "Readiness", icon: Shield },
+    ],
+  },
+  {
+    label: "Alloy Engine",
+    items: [
+      { href: "/alloy/canvas", label: "Workflow Canvas", icon: Brain },
+      { href: "/alloy/runs", label: "Run Monitor", icon: Activity },
     ],
   },
 ];

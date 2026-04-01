@@ -28,6 +28,7 @@ const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
 const DemoPage = lazy(() => import("@/pages/demo"));
 const PricingPage = lazy(() => import("@/pages/pricing"));
 
+const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
 const AlloyRunDetail = lazy(() => import("@/alloy/pages/run-detail"));
@@ -286,6 +287,10 @@ function App() {
             </Route>
             <Route path="/ownership">
               <RequireAuth><Suspense fallback={<PageLoader />}><OwnershipOsPage /></Suspense></RequireAuth>
+            </Route>
+
+            <Route path="/venture-portfolio">
+              <Suspense fallback={<PageLoader />}><VenturePortfolioPage /></Suspense>
             </Route>
 
             {/* Legal / utility routes */}

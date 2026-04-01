@@ -33,6 +33,7 @@ const InvestorMode = lazy(() => import("@/pages/investor-mode"));
 const Pipeline = lazy(() => import("@/pages/pipeline"));
 const TerraMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 const CommercialIntelligence = lazy(() => import("@/pages/commercial-intelligence"));
+const MarketIntelligence = lazy(() => import("@/pages/market-intelligence"));
 const PropertyMapPage = lazy(() => import("@/pages/property-map-page"));
 const PropertyDetail = lazy(() => import("@/pages/property-detail"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
@@ -82,6 +83,7 @@ function PrivateRouter() {
         <Route path="/broker-overview" component={BrokerOverview} />
         <Route path="/ingestion" component={Ingestion} />
         <Route path="/commercial" component={CommercialIntelligence} />
+        <Route path="/market-intelligence" component={MarketIntelligence} />
         <Route path="/investor-mode" component={InvestorMode} />
         <Route path="/pipeline" component={Pipeline} />
         <Route path="/property-map" component={PropertyMapPage} />

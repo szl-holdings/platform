@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_LINKS_PRIMARY = [
   { label: "Platform", href: "/platform" },
+  { label: "Portfolio", href: "/venture-portfolio" },
   { label: "Design Partners", href: "/design-partners" },
   { label: "Trust", href: "/trust" },
   { label: "Investors", href: "/investors" },
@@ -14,6 +15,7 @@ const NAV_LINKS_PRIMARY = [
 
 const NAV_LINKS_MOBILE = [
   { label: "Platform", href: "/platform" },
+  { label: "Portfolio", href: "/venture-portfolio" },
   { label: "Design Partners", href: "/design-partners" },
   { label: "Trust", href: "/trust" },
   { label: "Investors", href: "/investors" },

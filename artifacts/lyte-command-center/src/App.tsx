@@ -52,6 +52,8 @@ const PrismDashboard = lazy(() => import("@/pages/prism-dashboard"));
 const MetricsExplorer = lazy(() => import("@/pages/metrics-explorer"));
 const AlertConfig = lazy(() => import("@/pages/alert-config"));
 const ServiceTopology = lazy(() => import("@/pages/service-topology"));
+const ErrorBudgetBurn = lazy(() => import("@/pages/error-budget-burn"));
+const AlloyWorkflowCanvas = lazy(() => import("@/pages/alloy-workflow-canvas"));
 const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
 const CommandInboxLegacy = lazy(() => import("@/pages/action-queue"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
@@ -104,6 +106,9 @@ function PrivateRouter() {
         <Route path="/metrics" component={MetricsExplorer} />
         <Route path="/alerts" component={AlertConfig} />
         <Route path="/topology" component={ServiceTopology} />
+        <Route path="/error-budget" component={ErrorBudgetBurn} />
+        <Route path="/alloy/canvas" component={AlloyWorkflowCanvas} />
+        <Route path="/alloy/runs" component={AlloyWorkflowCanvas} />
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/dashboards" component={DashboardBuilder} />
         <Route path="/apm" component={ApmInstrumentation} />

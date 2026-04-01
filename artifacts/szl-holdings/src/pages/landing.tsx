@@ -130,7 +130,7 @@ export default function HomePage() {
               </p>
             </m.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3" style={{ marginBottom: "1.5rem" }}>
               {EXPANSION_PLATFORMS.map((p, i) => (
                 <m.div
                   key={p.name}
@@ -153,6 +153,25 @@ export default function HomePage() {
                 </m.div>
               ))}
             </div>
+            <m.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Link
+                href="/venture-portfolio"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: "5px",
+                  fontSize: "12px", fontWeight: 600, color: "hsl(210,5%,45%)",
+                  textDecoration: "none", letterSpacing: "0.04em",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,65%)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,45%)"; }}
+              >
+                View full portfolio <ArrowRight size={12} strokeWidth={2.5} />
+              </Link>
+            </m.div>
           </div>
         </section>
 
