@@ -44,3 +44,13 @@ export {
   type GettingStartedChecklistProps,
 } from "./onboarding";
 export { WelcomeOverlay, useWelcomeState, type WelcomeOverlayProps, type WelcomeFeature } from "./WelcomeOverlay";
+export {
+  TenantBrandProvider,
+  useTenantBrand,
+  useTenantCSSVars,
+  mergeBranding,
+  DEFAULT_BRAND,
+  type TenantBranding,
+  type TenantBrandConfig,
+  type TenantBrandProviderProps,
+} from "./use-tenant-brand";

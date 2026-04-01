@@ -579,3 +579,120 @@ const STEPHEN_ADMIN_EMAIL = process.env.STEPHEN_ADMIN_EMAIL || process.env.SZL_I
 const CARLOTA_ADMIN_EMAIL = process.env.CARLOTA_ADMIN_EMAIL || process.env.SZL_INTERNAL_EMAIL || "hello@carlotajo.com";
 
 export { INTERNAL_EMAIL, STEPHEN_ADMIN_EMAIL, CARLOTA_ADMIN_EMAIL };
+
+// ─── Tenant-Branded Email Templates ──────────────────────────────────────────
+
+export interface TenantEmailBranding {
+  companyName?: string | null;
+  logoUrl?: string | null;
+  primaryColor?: string | null;
+  accentColor?: string | null;
+  emailFromName?: string | null;
+  emailFooterText?: string | null;
+  tagline?: string | null;
+}
+
+export function buildTenantBrand(branding: TenantEmailBranding, content: string): string {
+  const primaryColor = branding.primaryColor || "#6366f1";
+  const accentColor = branding.accentColor || "#7c3aed";
+  const companyName = branding.companyName || "SZL Holdings";
+  const footerText = branding.emailFooterText || `${companyName} · Powered by SZL Holdings`;
+
+  const logoHtml = branding.logoUrl
+    ? `<img src="${branding.logoUrl}" alt="${companyName}" style="height:28px;object-fit:contain;max-width:180px;" />`
+    : `<div style="display:inline-flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,${primaryColor},${accentColor});border-radius:7px;display:inline-flex;align-items:center;justify-content:center;">
+          <span style="color:white;font-weight:700;font-size:11px;">${companyName.charAt(0)}</span>
+        </div>
+        <span style="font-size:14px;font-weight:600;color:#111827;">${companyName}</span>
+      </div>`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>${companyName}</title>
+<style>
+  body { margin: 0; padding: 0; background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .wrapper { max-width: 560px; margin: 0 auto; padding: 32px 16px; }
+  .card { background: #ffffff; border-radius: 12px; padding: 40px; border: 1px solid #e5e7eb; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+  h2 { font-size: 20px; font-weight: 700; color: #111827; margin: 0 0 12px; }
+  p { font-size: 14px; color: #4b5563; line-height: 1.6; margin: 0 0 16px; }
+  .cta { display: inline-block; padding: 12px 24px; background: ${primaryColor}; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px; }
+  .divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
+  .footer { font-size: 11px; color: #9ca3af; line-height: 1.6; margin-top: 24px; }
+  .highlight { background: #f8f7ff; border-left: 3px solid ${primaryColor}; border-radius: 4px; padding: 12px 16px; margin: 16px 0; }
+  .highlight p { margin: 0; font-size: 13px; color: #374151; }
+  .label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin: 0 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div class="logo">
+      ${logoHtml}
+    </div>
+    ${content}
+    <div class="divider"></div>
+    <div class="footer">
+      <p>${footerText}</p>
+      <p>This is a transactional notification sent on behalf of ${companyName}.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function buildTenantWelcomeEmail(
+  branding: TenantEmailBranding,
+  name: string,
+  dashboardUrl?: string,
+): string {
+  const companyName = branding.companyName || "the platform";
+  return buildTenantBrand(branding, `
+    <h2>Welcome to ${companyName}</h2>
+    <p>Hello ${name},</p>
+    <p>Your account has been created and you now have access to <strong>${companyName}</strong>. You can sign in and get started right away.</p>
+    ${dashboardUrl ? `<a class="cta" href="${dashboardUrl}">Access Your Dashboard</a>` : ""}
+  `);
+}
+
+export function buildTenantInviteEmail(
+  branding: TenantEmailBranding,
+  name: string,
+  inviteUrl: string,
+  expiresAt?: string,
+): string {
+  const companyName = branding.companyName || "the platform";
+  return buildTenantBrand(branding, `
+    <h2>You've been invited</h2>
+    <p>Hello ${name},</p>
+    <p>You have been invited to join <strong>${companyName}</strong>. Click the button below to set up your account.</p>
+    ${expiresAt ? `
+    <div class="highlight">
+      <p class="label">Invitation Expires</p>
+      <p>${expiresAt}</p>
+    </div>
+    ` : ""}
+    <a class="cta" href="${inviteUrl}">Accept Invitation</a>
+    <p style="margin-top:16px;font-size:12px;color:#9ca3af;">If you did not expect this invitation, you can safely ignore this email.</p>
+  `);
+}
+
+export function buildTenantNotificationEmail(
+  branding: TenantEmailBranding,
+  title: string,
+  body: string,
+  ctaLabel?: string,
+  ctaUrl?: string,
+): string {
+  return buildTenantBrand(branding, `
+    <h2>${title}</h2>
+    <p>${body}</p>
+    ${ctaLabel && ctaUrl ? `<a class="cta" href="${ctaUrl}">${ctaLabel}</a>` : ""}
+  `);
+}
+

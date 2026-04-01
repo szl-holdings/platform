@@ -5,7 +5,7 @@ import {
   Building2, CheckCircle2, AlertCircle, Clock, RefreshCw, Users,
   Plus, ExternalLink, Settings, ChevronRight, ArrowLeft, Shield,
   Database, Activity, Loader2, Copy, Check, MoreHorizontal, Trash2,
-  Link as LinkIcon, X, Search, Filter, CircleOff,
+  Link as LinkIcon, X, Search, Filter, CircleOff, Palette,
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
@@ -177,6 +177,11 @@ function TenantDetailPanel({
 
         <div className="space-y-2">
           <div className="text-xs font-semibold text-foreground">Actions</div>
+          <Link href={`/admin/tenant-branding/${tenant.id}`}>
+            <a className="flex items-center gap-1.5 w-full mb-2 py-2 rounded-xl bg-violet-500/10 text-violet-500 text-xs font-medium hover:bg-violet-500/20 transition-colors border border-violet-500/20 justify-center">
+              <Palette className="w-3.5 h-3.5" /> Manage Branding
+            </a>
+          </Link>
           <div className="grid grid-cols-2 gap-2">
             {tenant.status === "pending" && (
               <button

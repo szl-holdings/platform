@@ -75,6 +75,7 @@ const PlatformArchitecturePage = lazy(() => import("@/pages/platform-architectur
 const IntegrationsMarketplacePage = lazy(() => import("@/pages/integrations-marketplace"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
+const TenantBrandingPage = lazy(() => import("@/pages/tenant-branding"));
 const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
 const ScimProvisioningPage = lazy(() => import("@/pages/scim-provisioning"));
 const DevelopersPage = lazy(() => import("@/pages/developers"));
@@ -302,6 +303,9 @@ function App() {
             </Route>
             <Route path="/admin/azure-tenants">
               <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantDashboardPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/tenant-branding/:id">
+              <RequireAuth><Suspense fallback={<PageLoader />}><TenantBrandingPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/powerbi">
               <RequireAuth><Suspense fallback={<PageLoader />}><PowerBiConfigPage /></Suspense></RequireAuth>

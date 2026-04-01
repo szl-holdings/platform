@@ -38,6 +38,23 @@ export const dataverseConnectionsTable = pgTable("dataverse_connections", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const tenantBrandingTable = pgTable("tenant_branding", {
+  id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").notNull().references(() => azureTenantsTable.id, { onDelete: "cascade" }).unique(),
+  companyName: text("company_name"),
+  tagline: text("tagline"),
+  logoUrl: text("logo_url"),
+  faviconUrl: text("favicon_url"),
+  primaryColor: text("primary_color"),
+  accentColor: text("accent_color"),
+  sidebarHeaderText: text("sidebar_header_text"),
+  customDomainLabel: text("custom_domain_label"),
+  emailFromName: text("email_from_name"),
+  emailFooterText: text("email_footer_text"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertAzureTenantSchema = createInsertSchema(azureTenantsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertAzureTenant = z.infer<typeof insertAzureTenantSchema>;
 export type AzureTenant = typeof azureTenantsTable.$inferSelect;
@@ -45,6 +62,10 @@ export type AzureTenant = typeof azureTenantsTable.$inferSelect;
 export const insertDataverseConnectionSchema = createInsertSchema(dataverseConnectionsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertDataverseConnection = z.infer<typeof insertDataverseConnectionSchema>;
 export type DataverseConnection = typeof dataverseConnectionsTable.$inferSelect;
+
+export const insertTenantBrandingSchema = createInsertSchema(tenantBrandingTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTenantBranding = z.infer<typeof insertTenantBrandingSchema>;
+export type TenantBranding = typeof tenantBrandingTable.$inferSelect;
 
 export type AzureTenantStatus = "pending" | "active" | "suspended";
 export type DataverseConnectionStatus = "pending" | "active" | "error" | "disconnected";
