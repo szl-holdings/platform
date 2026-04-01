@@ -39,7 +39,7 @@ Generated: 2026-04-01
 | Field | Value |
 |---|---|
 | CI context included | `false` |
-| Reason | GitHub API rejected `required_status_checks` for context `CI` because the check has not run against this repository yet (invalid integration IDs error) |
+| Reason | GitHub API rejected `required_status_checks` for context `ci` because the check has not run against this repository yet (invalid integration IDs error) |
 
 ### Next Step: Re-add CI Status Check
 
@@ -70,7 +70,7 @@ PATCH /repos/stephenlutar2-hash/szl-holdings-platform/rulesets/14609056
       "parameters": {
         "strict_required_status_checks_policy": false,
         "required_status_checks": [
-          { "context": "CI" }
+          { "context": "ci" }
         ]
       }
     }
