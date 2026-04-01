@@ -195,6 +195,32 @@ Playwright E2E tests require running apps and system-level glib/gtk libraries. I
 
 ---
 
+## Recent Work (Task #232 — Capital Arsenal)
+
+### Completed
+1. **Capital Arsenal Data File** — `artifacts/szl-holdings/src/data/capital-arsenal.ts` — 20+ investor-grade capital documents across 5 channels. Includes:
+   - Investor channel: SZL one-pager, investor memo, 12-slide pitch deck content, cap table/data room structure
+   - Per-lane one-pagers: Lyte, Vessels, Aegis, Terra, Carlota Jo (each with market sizing, competition, revenue model)
+   - Bank/SBA channel: Full bank-ready business plan, use-of-funds memo (12-month and 24-month), 12-month operating model, founder background summary, risk/mitigation sheet, entity/banking checklist
+   - NY State channel: NY MWBE certification guide (full eligibility, checklist, application timeline), Excelsior Jobs Program, NYSTAR/Innovation Hot Spots, NYC SBS M/WBE, ESD lending programs
+   - Federal channel: SBA 8(a) guide with full eligibility and checklist, WOSB/EDWOSB guide, SBIR/STTR guide with agency-specific alignment per product lane (NSF for Lyte, DoD/DHS for Vessels and Aegis), SAM.gov checklist, FedRAMP readiness assessment
+   - Angel/equity channel: Angel investor narrative memo ("why now" story), commercial wedge strategy, traction narrative, milestone-based raise plan, use-of-proceeds investor breakdown
+
+2. **Capital Arsenal Page** — `artifacts/szl-holdings/src/pages/capital-arsenal.tsx` — Full-featured admin page with:
+   - Channel accordion navigation (Investor, Bank/SBA, Angel, NY State, Federal)
+   - Document card grid with status badges, lane icons, printable indicators
+   - Split-pane document viewer (right panel slides in, left panel remains scrollable)
+   - Section expand/collapse with smooth animation
+   - Full search across all documents
+   - Print support (browser print, CSS @media print)
+   - Internal-use disclaimer prominently displayed
+
+3. **Routing** — Wired into `App.tsx` as `/admin/capital-arsenal` (RequireAuth protected route)
+
+4. **Admin Integration** — Added "Capital Arsenal" to `ADMIN_SECTIONS` in `admin.tsx` with overview card grid and "Full Arsenal View" link to standalone page
+
+---
+
 ## Recent Work (Task #233 — Competitive Gap Closure)
 
 ### Completed

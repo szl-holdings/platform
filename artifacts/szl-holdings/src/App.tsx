@@ -35,6 +35,7 @@ const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
 const ScimProvisioningPage = lazy(() => import("@/pages/scim-provisioning"));
 const DevelopersPage = lazy(() => import("@/pages/developers"));
 const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
+const CapitalArsenalPage = lazy(() => import("@/pages/capital-arsenal"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -263,6 +264,9 @@ function App() {
             </Route>
             <Route path="/admin/scim">
               <RequireAuth><Suspense fallback={<PageLoader />}><ScimProvisioningPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/capital-arsenal">
+              <RequireAuth><Suspense fallback={<PageLoader />}><CapitalArsenalPage /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>

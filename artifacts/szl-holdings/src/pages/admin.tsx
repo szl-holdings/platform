@@ -13,6 +13,7 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { CapitalReadinessOS } from "@/components/CapitalReadinessOS";
 import { CertificationReadinessOS } from "@/components/CertificationReadinessOS";
+import { CAPITAL_DOCUMENTS, getDocumentsByChannel } from "@/data/capital-arsenal";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API = `${BASE}/api`;
@@ -1045,6 +1046,7 @@ const ADMIN_SECTIONS = [
   { id: "dashboard", label: "Dashboard", icon: Gauge },
   { id: "revenue", label: "Revenue", icon: DollarSign },
   { id: "capital-readiness", label: "Capital Readiness", icon: DollarSign },
+  { id: "capital-arsenal", label: "Capital Arsenal", icon: BookOpen },
   { id: "certification-readiness", label: "Cert Readiness", icon: Shield },
   { id: "azure-tenants", label: "Azure Tenants", icon: Cloud },
   { id: "scim-provisioning", label: "SCIM Provisioning", icon: Shield },
@@ -2308,6 +2310,68 @@ export default function AdminPage() {
             {activeSection === "dashboard" && <DashboardPanel />}
             {activeSection === "revenue" && <RevenuePanel />}
             {activeSection === "capital-readiness" && <CapitalReadinessOS />}
+            {activeSection === "capital-arsenal" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-primary" /> Capital Arsenal
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">Complete document library: investor materials, bank/SBA package, NY state programs, and federal programs.</p>
+                  </div>
+                  <Link href="/admin/capital-arsenal">
+                    <a className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors">
+                      <ExternalLink className="w-3.5 h-3.5" /> Full Arsenal View
+                    </a>
+                  </Link>
+                </div>
+                <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold text-amber-600">Internal Use Only</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">All documents contain projections and assumptions. Not financial, legal, or investment advice. Review with qualified counsel before external distribution.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { channel: "investor" as const, label: "Investor Materials", color: "#3b82f6", desc: "One-pager, memo, deck, cap table" },
+                    { channel: "bank" as const, label: "Bank / SBA Package", color: "#10b981", desc: "Business plan, use-of-funds, model, checklist" },
+                    { channel: "angel" as const, label: "Angel / Equity Package", color: "#f59e0b", desc: "Narrative memo, traction, raise plan" },
+                    { channel: "ny_state" as const, label: "NY State Programs", color: "#6366f1", desc: "MWBE, Excelsior, NYSTAR, SBS, ESD" },
+                    { channel: "federal" as const, label: "Federal Programs", color: "#ef4444", desc: "SBA 8(a), SBIR/STTR, SAM.gov, FedRAMP" },
+                  ].map(card => {
+                    const count = getDocumentsByChannel(card.channel).length;
+                    return (
+                      <div key={card.channel} className="p-4 rounded-xl border border-border bg-card">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: card.color }} />
+                          <p className="text-sm font-semibold text-foreground">{card.label}</p>
+                          <span className="ml-auto text-lg font-bold" style={{ color: card.color }}>{count}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{card.desc}</p>
+                      </div>
+                    );
+                  })}
+                  <div className="p-4 rounded-xl border border-border bg-card">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "#8b5cf6" }} />
+                      <p className="text-sm font-semibold text-foreground">Total Documents</p>
+                      <span className="ml-auto text-lg font-bold" style={{ color: "#8b5cf6" }}>{CAPITAL_DOCUMENTS.length}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{CAPITAL_DOCUMENTS.filter(d => d.status === "ready" || d.status === "final").length} ready, {CAPITAL_DOCUMENTS.filter(d => d.printable).length} printable</p>
+                  </div>
+                </div>
+                <div className="text-center pt-2">
+                  <Link href="/admin/capital-arsenal">
+                    <a className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">
+                      <BookOpen className="w-4 h-4" /> Open Full Capital Arsenal
+                    </a>
+                  </Link>
+                </div>
+              </div>
+            )}
             {activeSection === "certification-readiness" && <CertificationReadinessOS />}
             {activeSection === "azure-tenants" && (
               <div className="space-y-4">
