@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api, type VoyageEconomics, type SanctionsScreening, type PortCall, type RosterVessel, type VesselDetail } from "@/lib/api";
-import { vesselsDomainMockData, type VesselProfile } from "@/data/mock-data";
+import type { VesselProfile } from "@/data/mock-data";
 
 type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert" | "ais_dark" | "sanctions_match" | "overdue_arrival" | "inspection_failure";
 type ExceptionSeverity = "critical" | "high" | "watch" | "normal";
@@ -63,18 +63,49 @@ function mapStatusToProfile(apiStatus: string): VesselProfile["status"] {
   return map[apiStatus] ?? "at_sea";
 }
 
-function mergeApiVesselWithMock(apiVessel: Record<string, unknown>, mockFallback: VesselProfile): VesselProfile {
+function mapApiVesselToProfile(apiVessel: Record<string, unknown>): VesselProfile {
   return {
-    ...mockFallback,
     id: apiVessel["id"] as number,
-    name: apiVessel["name"] as string,
-    imo: (apiVessel["imo"] as string | null) ?? mockFallback.imo,
-    mmsi: (apiVessel["mmsi"] as string | null) ?? mockFallback.mmsi,
-    flag: (apiVessel["flag"] as string | null) ?? mockFallback.flag,
-    type: (apiVessel["vesselType"] as string | null) ?? mockFallback.type,
+    name: (apiVessel["name"] as string) ?? "Unknown Vessel",
+    imo: (apiVessel["imo"] as string | null) ?? "—",
+    mmsi: (apiVessel["mmsi"] as string | null) ?? "—",
+    flag: (apiVessel["flag"] as string | null) ?? "—",
+    type: (apiVessel["vesselType"] as string | null) ?? "Cargo",
     status: mapStatusToProfile(apiVessel["status"] as string),
-    yearBuilt: (apiVessel["yearBuilt"] as number | null) ?? mockFallback.yearBuilt,
-  };
+    yearBuilt: (apiVessel["yearBuilt"] as number | null) ?? 2000,
+    utilization: 0,
+    dwt: 0,
+    gt: 0,
+    loa: 0,
+    beam: 0,
+    draft: 0,
+    engineType: "—",
+    fuelConsumption: 0,
+    currentPort: null,
+    destination: null,
+    eta: null,
+    lat: null,
+    lon: null,
+    course: null,
+    speed: null,
+    nextServiceDue: null,
+    classSociety: "—",
+    owner: "—",
+    operator: "—",
+    charterer: null,
+    charterType: null,
+    charterRate: null,
+    charterExpiry: null,
+    insuranceExpiry: null,
+    lastInspection: null,
+    nextInspection: null,
+    deficiencies: 0,
+    detentions: 0,
+    aiBriefing: null,
+    riskScore: 0,
+    complianceScore: 100,
+    emissionsIntensity: 0,
+  } as unknown as VesselProfile;
 }
 
 export function useVessels() {
@@ -85,11 +116,7 @@ export function useVessels() {
   });
 
   const isLive = apiVessels.length > 0;
-  const mockVessels = vesselsDomainMockData.vessels;
-
-  const vessels: VesselProfile[] = isLive
-    ? apiVessels.map((v: Record<string, unknown>, i: number) => mergeApiVesselWithMock(v, mockVessels[i % mockVessels.length]))
-    : mockVessels;
+  const vessels: VesselProfile[] = (apiVessels as Record<string, unknown>[]).map(mapApiVesselToProfile);
 
   return { vessels, isLoading, error, isLive, refetch };
 }
@@ -281,20 +308,22 @@ export function usePerformanceMetrics() {
   const { voyageEconomics, isLoading: voyLoading } = useVoyages();
 
   const isLoading = vLoading || voyLoading;
-  const mockMetrics = vesselsDomainMockData.performanceMetrics;
 
-  const performanceMetrics = vessels.map((v, i) => {
-    const mock = mockMetrics[i % mockMetrics.length];
+  const performanceMetrics = vessels.map((v) => {
     const vesselVoyages = voyageEconomics.filter(voyage => voyage.vesselId === v.id);
     const tce = vesselVoyages.length > 0
       ? vesselVoyages.reduce((s, voy) => s + voy.tce, 0) / vesselVoyages.length
-      : mock.tce;
+      : 0;
     return {
-      ...mock,
       vesselId: v.id,
       vesselName: v.name,
-      utilization: v.utilization,
+      utilization: (v as Record<string, unknown>)["utilization"] as number ?? 0,
       tce,
+      fuelEfficiency: 0,
+      onTimeArrivalRate: 0,
+      avgDelayHours: 0,
+      cargoTonnes: 0,
+      revenuePerDay: 0,
     };
   });
 

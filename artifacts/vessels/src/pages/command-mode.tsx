@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { vesselsDomainMockData, type VesselProfile } from "@/data/mock-data";
+import type { VesselProfile } from "@/data/mock-data";
 import { useVessels, useFleetExceptions, useMaintenance } from "@/hooks/use-vessels-data";
 import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
@@ -8,8 +8,6 @@ import {
   Activity, Wrench, X, Maximize2, Fuel, TrendingUp, TrendingDown
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
-
-const { eventLogs } = vesselsDomainMockData;
 
 const statusColors: Record<string, string> = {
   at_sea: "#22c55e",
@@ -76,10 +74,6 @@ function AlertStream({ fleetExceptions }: { fleetExceptions: ReturnType<typeof u
     ...fleetExceptions.filter(e => e.status === "active").map(e => ({
       id: e.id, type: "exception" as const, severity: e.severity,
       vessel: e.vesselName, message: e.title, time: e.detectedAt
-    })),
-    ...eventLogs.filter(e => e.severity !== "Info").map(e => ({
-      id: String(e.id), type: "event" as const, severity: e.severity === "Critical" ? "critical" as const : "high" as const,
-      vessel: e.vesselName, message: e.message, time: e.timestamp
     })),
   ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 8);
 
@@ -210,7 +204,7 @@ export default function CommandModePage() {
   const { fleetExceptions } = useFleetExceptions();
   const { maintenanceItems } = useMaintenance();
 
-  const defaultVessel = vessels[0] ?? vesselsDomainMockData.vessels[0];
+  const defaultVessel = vessels[0] ?? null;
   const [selectedVessel, setSelectedVessel] = useState<VesselProfile | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -227,8 +221,8 @@ export default function CommandModePage() {
     return () => clearInterval(interval);
   }, []);
 
-  const vesselExceptions = fleetExceptions.filter(e => e.vesselId === activeVessel.id && e.status === "active");
-  const vesselMaint = maintenanceItems.filter(m => m.vesselId === activeVessel.id && m.status !== "completed");
+  const vesselExceptions = activeVessel ? fleetExceptions.filter(e => e.vesselId === activeVessel.id && e.status === "active") : [];
+  const vesselMaint = activeVessel ? maintenanceItems.filter(m => m.vesselId === activeVessel.id && m.status !== "completed") : [];
   const criticalCount = fleetExceptions.filter(e => e.severity === "critical" && e.status === "active").length;
   const activeExcCount = fleetExceptions.filter(e => e.status === "active").length;
 
@@ -264,7 +258,7 @@ export default function CommandModePage() {
           </div>
           <div className="flex-1 overflow-y-auto">
             {vessels.map(v => (
-              <VesselRail key={v.id} vessel={v} selected={activeVessel.id === v.id} onSelect={() => setSelectedVessel(v)} />
+              <VesselRail key={v.id} vessel={v} selected={activeVessel?.id === v.id} onSelect={() => setSelectedVessel(v)} />
             ))}
           </div>
         </div>
@@ -293,81 +287,74 @@ export default function CommandModePage() {
         </div>
 
         <div className="w-72 shrink-0 border-l border-sky-500/10 flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-sky-500/10 flex items-center gap-2">
-            <Ship className="w-3 h-3 text-sky-400/50" />
-            <span className="text-[10px] font-mono text-sky-400/50 truncate">{activeVessel.name}</span>
-          </div>
+          {activeVessel ? (
+            <>
+              <div className="px-3 py-2 border-b border-sky-500/10 flex items-center gap-2">
+                <Ship className="w-3 h-3 text-sky-400/50" />
+                <span className="text-[10px] font-mono text-sky-400/50 truncate">{activeVessel.name}</span>
+              </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { label: "Status", value: statusLabels[activeVessel.status] },
-                { label: "Speed", value: `${activeVessel.currentSpeed} kn` },
-                { label: "Heading", value: `${activeVessel.heading}°` },
-                { label: "ETA", value: activeVessel.etaDelta === 0 ? "On time" : activeVessel.etaDelta > 0 ? `+${activeVessel.etaDelta}h` : `${activeVessel.etaDelta}h` },
-              ].map(item => (
-                <div key={item.label} className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                  <p className="text-[9px] text-sky-400/30">{item.label}</p>
-                  <p className="text-[10px] font-mono text-sky-100 mt-0.5">{item.value}</p>
+              <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Status", value: statusLabels[activeVessel.status] ?? activeVessel.status },
+                    { label: "Speed", value: `${(activeVessel as Record<string, unknown>)["currentSpeed"] ?? "—"} kn` },
+                    { label: "Heading", value: `${(activeVessel as Record<string, unknown>)["heading"] ?? "—"}°` },
+                    { label: "ETA", value: "—" },
+                  ].map(item => (
+                    <div key={item.label} className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
+                      <p className="text-[9px] text-sky-400/30">{item.label}</p>
+                      <p className="text-[10px] font-mono text-sky-100 mt-0.5">{item.value}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Navigation className="w-3 h-3 text-sky-400/40" />
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Route</p>
-              </div>
-              <p className="text-[10px] text-sky-200">{activeVessel.lastPort} → {activeVessel.nextPort}</p>
-              <div className="mt-2 h-1 bg-sky-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-sky-400 rounded-full" style={{ width: `${activeVessel.routeProgress}%` }} />
-              </div>
-              <p className="text-[9px] text-sky-400/30 mt-1">{activeVessel.routeProgress}% complete</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                <p className="text-[9px] text-sky-400/30">TCE</p>
-                <p className="text-[10px] font-mono text-emerald-400">{activeVessel.tce > 0 ? `$${activeVessel.tce.toLocaleString()}` : "—"}</p>
-              </div>
-              <div className="bg-sky-500/5 rounded p-2 border border-sky-500/10">
-                <p className="text-[9px] text-sky-400/30">Readiness</p>
-                <p className={cn("text-[10px] font-mono", activeVessel.readinessScore >= 80 ? "text-emerald-400" : activeVessel.readinessScore >= 60 ? "text-amber-400" : "text-red-400")}>
-                  {activeVessel.readinessScore}/100
-                </p>
-              </div>
-            </div>
-
-            {vesselExceptions.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Active Exceptions</p>
-                {vesselExceptions.map(exc => (
-                  <div key={exc.id} className="bg-red-500/5 border border-red-500/10 rounded p-2">
-                    <p className="text-[9px] font-medium text-red-300">{exc.title}</p>
-                    <p className="text-[9px] text-sky-400/40 mt-0.5">{exc.ownerFunction}</p>
+                <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/10">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Navigation className="w-3 h-3 text-sky-400/40" />
+                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Route</p>
                   </div>
-                ))}
-              </div>
-            )}
+                  <p className="text-[10px] text-sky-200">
+                    {(activeVessel as Record<string, unknown>)["lastPort"] as string ?? "—"} → {activeVessel.destination ?? "—"}
+                  </p>
+                </div>
 
-            {vesselMaint.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Maintenance</p>
-                {vesselMaint.slice(0, 2).map(m => (
-                  <div key={m.id} className="bg-amber-500/5 border border-amber-500/10 rounded p-2">
-                    <p className="text-[9px] font-medium text-amber-300">{m.component}</p>
-                    <p className="text-[9px] text-sky-400/40">{m.daysToDue < 0 ? `${Math.abs(m.daysToDue)}d overdue` : `Due in ${m.daysToDue}d`}</p>
+                {vesselExceptions.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Active Exceptions</p>
+                    {vesselExceptions.map(exc => (
+                      <div key={exc.id} className="bg-red-500/5 border border-red-500/10 rounded p-2">
+                        <p className="text-[9px] font-medium text-red-300">{exc.title}</p>
+                        <p className="text-[9px] text-sky-400/40 mt-0.5">{exc.ownerFunction}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                )}
 
-            <Link href={`/vessel/${activeVessel.id}`}>
-              <button className="w-full text-[10px] text-sky-400 border border-sky-500/20 rounded-lg py-1.5 hover:bg-sky-500/5 transition-colors">
-                Full Detail <ChevronRight className="w-3 h-3 inline" />
-              </button>
-            </Link>
-          </div>
+                {vesselMaint.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Maintenance</p>
+                    {vesselMaint.slice(0, 2).map(m => (
+                      <div key={m.id} className="bg-amber-500/5 border border-amber-500/10 rounded p-2">
+                        <p className="text-[9px] font-medium text-amber-300">{m.component}</p>
+                        <p className="text-[9px] text-sky-400/40">{m.daysToDue < 0 ? `${Math.abs(m.daysToDue)}d overdue` : `Due in ${m.daysToDue}d`}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <Link href={`/vessel/${activeVessel.id}`}>
+                  <button className="w-full text-[10px] text-sky-400 border border-sky-500/20 rounded-lg py-1.5 hover:bg-sky-500/5 transition-colors">
+                    Full Detail <ChevronRight className="w-3 h-3 inline" />
+                  </button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-4">
+              <p className="text-[10px] text-sky-400/30 font-mono text-center">No vessels available.<br />Seed the fleet to begin.</p>
+            </div>
+          )}
 
           <div className="border-t border-sky-500/10 shrink-0">
             <AlertStream fleetExceptions={fleetExceptions} />

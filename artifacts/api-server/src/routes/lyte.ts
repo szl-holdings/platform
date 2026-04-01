@@ -539,20 +539,7 @@ router.get("/lyte/live/bls-employment", lyteLiveLimit, authMiddleware(), async (
           source: "live",
         };
       } catch {
-        return {
-          unemploymentRate: 3.7,
-          period: "February 2026",
-          previousPeriod: "January 2026",
-          previousRate: 4.0,
-          trend: "improving",
-          historicalData: [
-            { period: "Feb 2026", rate: 3.7 },
-            { period: "Jan 2026", rate: 4.0 },
-            { period: "Dec 2025", rate: 4.2 },
-            { period: "Nov 2025", rate: 4.1 },
-          ],
-          source: "demo",
-        };
+        return { source: "unavailable", data: null };
       }
     });
     sendSuccess(res, {
@@ -588,10 +575,7 @@ router.get("/lyte/live/github-trending", lyteLiveLimit, authMiddleware(), async 
           source: "live",
         }));
       } catch {
-        return [
-          { name: "vercel/ai", description: "Build AI-powered applications with React, Svelte, Vue, and Solid", stars: 8924, forks: 1123, language: "TypeScript", topics: ["ai", "llm", "streaming"], url: "https://github.com/vercel/ai", source: "demo" },
-          { name: "openai/openai-node", description: "The official Node.js / Typescript library for the OpenAI API", stars: 7234, forks: 891, language: "TypeScript", topics: ["openai", "api", "sdk"], url: "https://github.com/openai/openai-node", source: "demo" },
-        ];
+        return [];
       }
     });
     sendSuccess(res, {

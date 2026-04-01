@@ -360,7 +360,7 @@ async function fetchArxivXml(query: string, maxResults: number, category?: strin
   }
 }
 
-const DEMO_PAPERS = [
+const FALLBACK_PAPERS = [
   { id: "2401.12345", title: "Scaling Language Models: Methods, Analysis & Insights from Training", authors: ["Hoffmann, J.", "Borgeaud, S."], abstract: "This paper presents a comprehensive study of scaling laws for language models.", categories: ["cs.CL", "cs.LG"], published: "2024-01-15", updated: "2024-01-20", pdfUrl: "https://arxiv.org/abs/2401.12345", source: "demo" },
   { id: "2402.34567", title: "Constitutional AI: Harmlessness from AI Feedback at Scale", authors: ["Bai, Y.", "Jones, A."], abstract: "We propose Constitutional AI for training harmless AI assistants.", categories: ["cs.AI", "cs.CL"], published: "2024-02-10", updated: "2024-02-15", pdfUrl: "https://arxiv.org/abs/2402.34567", source: "demo" },
   { id: "2403.56789", title: "Mixture of Experts for Efficient Large Language Model Inference", authors: ["Fedus, W.", "Zoph, B."], abstract: "Novel routing mechanisms for sparse mixture of experts models.", categories: ["cs.LG", "cs.CL"], published: "2024-03-05", updated: "2024-03-08", pdfUrl: "https://arxiv.org/abs/2403.56789", source: "demo" },
@@ -374,7 +374,7 @@ router.get("/inca/live/arxiv", incaLiveLimit, authMiddleware({ required: false }
     const cacheKey = `inca-arxiv-${query}-${limit}-${category ?? ""}`;
     const papers = await getCached(cacheKey, 1800000, async () => {
       const live = await fetchArxivXml(query, limit, category);
-      return live.length > 0 ? live : DEMO_PAPERS;
+      return live.length > 0 ? live : FALLBACK_PAPERS;
     });
     sendSuccess(res, {
       source: "arXiv Open Access Research — Live Feed",

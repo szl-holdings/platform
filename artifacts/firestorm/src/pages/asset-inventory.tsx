@@ -57,20 +57,6 @@ function getRiskBg(score: number): string {
   return "bg-emerald-500/10 border-emerald-500/20";
 }
 
-const DEMO_ASSETS = [
-  { id: 1, name: "prod-api-gateway-01", assetType: "server", owner: "Alex Chen", team: "Platform", environment: "production", exposureLevel: "public", riskScore: "9.2", criticalFindings: 3, highFindings: 7, lastScannedAt: new Date(Date.now() - 2 * 3600000).toISOString(), isActive: true },
-  { id: 2, name: "auth-service-cluster", assetType: "application", owner: "Sarah Kim", team: "Security", environment: "production", exposureLevel: "critical", riskScore: "8.7", criticalFindings: 2, highFindings: 4, lastScannedAt: new Date(Date.now() - 1 * 3600000).toISOString(), isActive: true },
-  { id: 3, name: "customer-data-db-primary", assetType: "database", owner: "Marcus Webb", team: "Data", environment: "production", exposureLevel: "restricted", riskScore: "7.5", criticalFindings: 1, highFindings: 6, lastScannedAt: new Date(Date.now() - 4 * 3600000).toISOString(), isActive: true },
-  { id: 4, name: "aws-eks-prod-cluster", assetType: "cloud_resource", owner: "Jordan Alvarez", team: "Infrastructure", environment: "production", exposureLevel: "internal", riskScore: "6.8", criticalFindings: 0, highFindings: 8, lastScannedAt: new Date(Date.now() - 6 * 3600000).toISOString(), isActive: true },
-  { id: 5, name: "corporate-vpn-gateway", assetType: "network_device", owner: "Riley Torres", team: "Network", environment: "dmz", exposureLevel: "public", riskScore: "8.1", criticalFindings: 2, highFindings: 3, lastScannedAt: new Date(Date.now() - 3 * 3600000).toISOString(), isActive: true },
-  { id: 6, name: "dev-k8s-cluster", assetType: "container", owner: "Sam Park", team: "DevOps", environment: "development", exposureLevel: "internal", riskScore: "3.2", criticalFindings: 0, highFindings: 1, lastScannedAt: new Date(Date.now() - 12 * 3600000).toISOString(), isActive: true },
-  { id: 7, name: "payment-api-v3", assetType: "api", owner: "Alex Chen", team: "Payments", environment: "production", exposureLevel: "public", riskScore: "9.5", criticalFindings: 4, highFindings: 9, lastScannedAt: new Date(Date.now() - 30 * 60000).toISOString(), isActive: true },
-  { id: 8, name: "admin-portal-sso", assetType: "iam_identity", owner: "Morgan Lee", team: "Security", environment: "production", exposureLevel: "critical", riskScore: "7.9", criticalFindings: 1, highFindings: 5, lastScannedAt: new Date(Date.now() - 8 * 3600000).toISOString(), isActive: true },
-  { id: 9, name: "legacy-fin-server-03", assetType: "server", owner: "Jordan Alvarez", team: "Finance", environment: "production", exposureLevel: "internal", riskScore: "5.4", criticalFindings: 0, highFindings: 3, lastScannedAt: new Date(Date.now() - 24 * 3600000).toISOString(), isActive: true },
-  { id: 10, name: "staging-api-cluster", assetType: "application", owner: "Sam Park", team: "Platform", environment: "staging", exposureLevel: "internal", riskScore: "2.1", criticalFindings: 0, highFindings: 0, lastScannedAt: new Date(Date.now() - 48 * 3600000).toISOString(), isActive: true },
-  { id: 11, name: "endpoint-win-fleet", assetType: "endpoint", owner: "Riley Torres", team: "IT", environment: "internal", exposureLevel: "internal", riskScore: "6.2", criticalFindings: 0, highFindings: 11, lastScannedAt: new Date(Date.now() - 2 * 3600000).toISOString(), isActive: true },
-  { id: 12, name: "ml-inference-api", assetType: "api", owner: "Marcus Webb", team: "AI", environment: "production", exposureLevel: "restricted", riskScore: "4.8", criticalFindings: 0, highFindings: 2, lastScannedAt: new Date(Date.now() - 5 * 3600000).toISOString(), isActive: true },
-];
 
 function formatTimeSince(isoDate: string | null | undefined): string {
   if (!isoDate) return "Never";

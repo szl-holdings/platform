@@ -481,21 +481,6 @@ async function fetchText(url: string, timeoutMs = 10000): Promise<string> {
   }
 }
 
-const DEMO_ECONOMIC_INDICATORS = {
-  gdpGrowth: { us: 2.1, eu: 1.2, china: 5.2, global: 3.2 },
-  inflation: { us: 3.2, eu: 2.8, uk: 4.1, global: 5.7 },
-  ceoConfidence: { index: 62, trend: "declining", previousQuarter: 67 },
-  boardroomPriorities: ["AI Integration", "Workforce Strategy", "ESG Compliance", "Geopolitical Risk", "Supply Chain Resilience"],
-  advisoryDemand: { strategy: 94, transformation: 88, riskManagement: 81, leadership: 76, digitalStrategy: 91 },
-};
-
-const DEMO_STRATEGIC_NEWS = [
-  { id: "SN-001", title: "McKinsey: 70% of Digital Transformations Fail — New Frameworks Emerge", source: "McKinsey Insights", date: "2026-03-25", category: "transformation", relevance: "critical", insight: "Focus shifts from technology to organizational operating model design" },
-  { id: "SN-002", title: "Boardroom Shifts: ESG Integration Now Mandatory for 92% of Fortune 500", source: "Harvard Business Review", date: "2026-03-22", category: "esg", relevance: "high", insight: "SEC climate disclosure rules accelerating board-level ESG accountability" },
-  { id: "SN-003", title: "AI Governance Gap: 83% of CEOs Lack Framework for Enterprise AI Decisions", source: "Deloitte Insights", date: "2026-03-20", category: "ai-governance", relevance: "critical", insight: "Advisory opportunity for AI ethics and governance frameworks" },
-  { id: "SN-004", title: "Geopolitical Risk Tops CEO Agenda for Third Consecutive Year — BCG Survey", source: "Boston Consulting Group", date: "2026-03-18", category: "geopolitical", relevance: "high", insight: "Clients need scenario planning for supply chain and market access disruption" },
-  { id: "SN-005", title: "Succession Planning Crisis: 67% of S&P 500 Companies Lack CEO Succession Plans", source: "Spencer Stuart", date: "2026-03-15", category: "leadership", relevance: "high", insight: "Board advisory opportunity for succession framework development" },
-];
 
 router.get("/carlota/live/economic-outlook", carlotaLiveLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
@@ -511,9 +496,9 @@ router.get("/carlota/live/economic-outlook", carlotaLiveLimit, authMiddleware({ 
         for (const e of entries) {
           if (e.value !== null) gdpGrowth[e.country?.value ?? e.countryiso3code] = parseFloat(e.value?.toFixed(2));
         }
-        return { ...DEMO_ECONOMIC_INDICATORS, gdpGrowth: { ...DEMO_ECONOMIC_INDICATORS.gdpGrowth, ...gdpGrowth }, source: "live" };
+        return { gdpGrowth, source: "live" };
       } catch {
-        return { ...DEMO_ECONOMIC_INDICATORS, source: "demo" };
+        return { gdpGrowth: {}, source: "unavailable" };
       }
     });
     sendSuccess(res, {
@@ -554,7 +539,7 @@ router.get("/carlota/live/strategic-news", carlotaLiveLimit, authMiddleware({ re
         if (items.length === 0) throw new Error("No HBR articles parsed");
         return { news: items, liveCount: items.length };
       } catch {
-        return { news: DEMO_STRATEGIC_NEWS, liveCount: 0 };
+        return { news: [], liveCount: 0 };
       }
     });
     sendSuccess(res, {

@@ -42,20 +42,9 @@ interface WorkflowDef {
   name: string;
 }
 
-const DEMO_APPROVALS: Approval[] = [
-  { id: 1, workflowRunId: 1, artifactId: null, requestedFrom: "admin", status: "pending", decision: null, decisionBy: null, decisionAt: null, expiresAt: new Date(Date.now() + 86400000).toISOString(), createdAt: new Date(Date.now() - 7200000).toISOString() },
-  { id: 2, workflowRunId: 2, artifactId: null, requestedFrom: "compliance", status: "pending", decision: null, decisionBy: null, decisionAt: null, expiresAt: new Date(Date.now() + 172800000).toISOString(), createdAt: new Date(Date.now() - 14400000).toISOString() },
-  { id: 3, workflowRunId: 3, artifactId: null, requestedFrom: "admin", status: "approved", decision: "Reviewed and approved — all controls verified", decisionBy: null, decisionAt: new Date(Date.now() - 3600000).toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString(), createdAt: new Date(Date.now() - 86400000).toISOString() },
-  { id: 4, workflowRunId: 4, artifactId: null, requestedFrom: "finance", status: "approved", decision: "Approved pending minor revisions", decisionBy: null, decisionAt: new Date(Date.now() - 7200000).toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString(), createdAt: new Date(Date.now() - 172800000).toISOString() },
-  { id: 5, workflowRunId: 5, artifactId: null, requestedFrom: "legal", status: "rejected", decision: "Rejected — non-compliant with SOC 2 CC6.1", decisionBy: null, decisionAt: new Date(Date.now() - 14400000).toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString(), createdAt: new Date(Date.now() - 259200000).toISOString() },
-  { id: 6, workflowRunId: 6, artifactId: null, requestedFrom: "ops", status: "approved", decision: "Approved — deployment window confirmed", decisionBy: null, decisionAt: new Date(Date.now() - 28800000).toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString(), createdAt: new Date(Date.now() - 345600000).toISOString() },
-  { id: 7, workflowRunId: 7, artifactId: null, requestedFrom: "compliance", status: "expired", decision: "Expired — no reviewer response within 48h", decisionBy: null, decisionAt: null, expiresAt: new Date(Date.now() - 86400000).toISOString(), createdAt: new Date(Date.now() - 432000000).toISOString() },
-  { id: 8, workflowRunId: 8, artifactId: null, requestedFrom: "admin", status: "approved", decision: "Reviewed and approved", decisionBy: null, decisionAt: new Date(Date.now() - 43200000).toISOString(), expiresAt: new Date(Date.now() + 86400000).toISOString(), createdAt: new Date(Date.now() - 518400000).toISOString() },
-];
-
-const DEMO_APPROVALS_RESP: ApprovalsResp = {
-  data: DEMO_APPROVALS,
-  meta: { page: 1, limit: 20, total: 8 },
+const EMPTY_APPROVALS_RESP: ApprovalsResp = {
+  data: [],
+  meta: { page: 1, limit: 20, total: 0 },
 };
 
 function useApprovals(status: string | null, page: number) {
@@ -67,16 +56,12 @@ function useApprovals(status: string | null, page: number) {
         if (status) params.set("status", status);
         const resp = await apiFetch<ApprovalsResp | Approval[]>(`/alloy/approvals?${params}`);
         if (resp && typeof resp === "object" && "data" in resp && Array.isArray((resp as ApprovalsResp).data)) {
-          const r = resp as ApprovalsResp;
-          if (r.data.length > 0) return r;
+          return resp as ApprovalsResp;
         }
         const arr = (resp as Approval[]) ?? [];
-        if (arr.length > 0) return { data: arr, meta: { page: 1, limit: 20, total: arr.length } };
-        return DEMO_APPROVALS_RESP;
+        return { data: arr, meta: { page: 1, limit: 20, total: arr.length } };
       } catch {
-        let filtered = DEMO_APPROVALS;
-        if (status) filtered = filtered.filter(a => a.status === status);
-        return { data: filtered, meta: { page: 1, limit: 20, total: filtered.length } };
+        return EMPTY_APPROVALS_RESP;
       }
     },
     refetchInterval: 30000,
@@ -117,28 +102,6 @@ function useRecentRuns() {
   });
 }
 
-function generateDemoAuditEntries(): AuditEntry[] {
-  const now = Date.now();
-  const ago = (h: number) => new Date(now - h * 3600000).toISOString();
-  return [
-    { id: "run-101", type: "run", title: "Execution Run #101 — Client Onboarding", status: "completed", timestamp: ago(0.5), details: "Workflow 1 · Retries: 0 · Duration: 12m 34s · Enterprise onboarding for Meridian Corp", entityId: 101 },
-    { id: "artifact-201", type: "artifact", title: "Artifact: Q1 2026 Compliance Report", status: "approved", timestamp: ago(1.2), details: "Kind: compliance · Status: approved · Approved by Diana Park · SOC 2 Type II evidence package", entityId: 201 },
-    { id: "run-100", type: "run", title: "Execution Run #100 — Contract Renewal", status: "completed", timestamp: ago(2), details: "Workflow 2 · Retries: 0 · Duration: 3m 18s · Atlas Industries renewal processed", entityId: 100 },
-    { id: "run-99", type: "run", title: "Execution Run #99 — Invoice Approval", status: "completed", timestamp: ago(3.5), details: "Workflow 4 · Retries: 0 · Duration: 1m 47s · Vendor invoice $24,500 — 3-tier approval chain complete", entityId: 99 },
-    { id: "run-98", type: "run", title: "Execution Run #98 — Data Pipeline Monitor", status: "failed", timestamp: ago(5), details: "Workflow 8 · Retries: 3 · Schema drift detected in staging ETL — alerting data engineering", entityId: 98 },
-    { id: "artifact-200", type: "artifact", title: "Artifact: Vendor Risk Assessment — CloudSync", status: "pending", timestamp: ago(6), details: "Kind: compliance · Status: pending · Risk questionnaire sent, awaiting vendor response", entityId: 200 },
-    { id: "run-97", type: "run", title: "Execution Run #97 — Employee Offboarding", status: "completed", timestamp: ago(8), details: "Workflow 7 · Retries: 0 · Duration: 8m 12s · IT deprovisioning + badge revocation complete", entityId: 97 },
-    { id: "artifact-199", type: "artifact", title: "Artifact: Board Materials — Q4 2025", status: "approved", timestamp: ago(12), details: "Kind: automation · Status: approved · Approved by Lisa Thornton · 12-source data assembly", entityId: 199 },
-    { id: "run-96", type: "run", title: "Execution Run #96 — SOC 2 Evidence Collection", status: "completed", timestamp: ago(14), details: "Workflow 3 · Retries: 0 · Duration: 45m · Monthly evidence snapshot — all control families", entityId: 96 },
-    { id: "run-95", type: "run", title: "Execution Run #95 — Client Onboarding", status: "retrying", timestamp: ago(16), details: "Workflow 1 · Retries: 1 · KYC verification timeout for Pinnacle Healthcare — retrying", entityId: 95 },
-    { id: "artifact-198", type: "artifact", title: "Artifact: Marketing Campaign — Spring Launch", status: "rejected", timestamp: ago(20), details: "Kind: approval · Status: rejected · Legal review flagged non-compliant claims in ad copy", entityId: 198 },
-    { id: "run-94", type: "run", title: "Execution Run #94 — Contract Renewal", status: "completed", timestamp: ago(24), details: "Workflow 2 · Retries: 0 · Duration: 2m 51s · Vertex Labs renewal — pricing tier updated", entityId: 94 },
-    { id: "run-93", type: "run", title: "Execution Run #93 — Incident Post-Mortem", status: "completed", timestamp: ago(30), details: "Workflow 10 · Retries: 0 · Duration: 22m · INC-2841 post-mortem published with 4 action items", entityId: 93 },
-    { id: "run-92", type: "run", title: "Execution Run #92 — Invoice Approval", status: "cancelled", timestamp: ago(36), details: "Workflow 4 · Retries: 0 · Duplicate invoice detected — auto-cancelled by validation step", entityId: 92 },
-    { id: "artifact-197", type: "artifact", title: "Artifact: Vendor Risk Report — DataVault Inc", status: "approved", timestamp: ago(48), details: "Kind: compliance · Status: approved · Approved by Diana Park · Risk score: 72/100 — acceptable", entityId: 197 },
-  ];
-}
-
 function useAuditData() {
   const [runs, artifacts] = [
     useQuery({
@@ -162,7 +125,7 @@ function useAuditData() {
   const isLoading = runs.isLoading || artifacts.isLoading;
   const isError = runs.isError || artifacts.isError;
 
-  const apiEntries: AuditEntry[] = [
+  const entries: AuditEntry[] = [
     ...(runs.data ?? []).map(r => ({
       id: `run-${r.id}`,
       type: "run" as const,
@@ -183,10 +146,7 @@ function useAuditData() {
     })),
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  const isDemo = isError || (!isLoading && apiEntries.length === 0);
-  const entries = isDemo ? generateDemoAuditEntries() : apiEntries;
-
-  return { entries, isLoading, isError: false, isDemo, refetch: () => { runs.refetch(); artifacts.refetch(); } };
+  return { entries, isLoading, isError, refetch: () => { runs.refetch(); artifacts.refetch(); } };
 }
 
 function useWorkflows() {
@@ -231,7 +191,7 @@ const RUN_STATE_COLORS: Record<string, string> = {
 };
 
 export default function GovernanceAudit() {
-  const { entries, isLoading, isError, isDemo, refetch } = useAuditData();
+  const { entries, isLoading, isError, refetch } = useAuditData();
   const [typeFilter, setTypeFilter] = useState<"all" | "run" | "artifact">("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [tab, setTab] = useState<"approvals" | "audit">("approvals");
@@ -378,11 +338,10 @@ function ApprovalCard({ approval, onDecide }: {
           </div>
         </div>
 
-        {isDemo && (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-medium" style={{ background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.1)", color: "rgba(75,139,219,0.6)" }}>
-            <Radio className="w-3 h-3 shrink-0 animate-pulse" />
-            Demo Environment — Showing illustrative audit records. Connect the Alloy API for live data.
-            <DataStateBadge state="demo" className="ml-auto" />
+        {isError && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-medium" style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.1)", color: "rgba(239,68,68,0.7)" }}>
+            <Radio className="w-3 h-3 shrink-0" />
+            Unable to load audit data — check API connectivity.
           </div>
         )}
 

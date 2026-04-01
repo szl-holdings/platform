@@ -32,18 +32,7 @@ interface WorkflowDef {
   trigger: string;
 }
 
-const DEMO_RUNS: WorkflowRun[] = [
-  { id: 1, workflowId: 1, state: "running", stateHistory: [{ state: "queued", at: new Date(Date.now() - 180000).toISOString(), by: "scheduler" }, { state: "running", at: new Date(Date.now() - 120000).toISOString(), by: "system" }], input: { trigger: "schedule", params: { batchSize: 2500 } }, output: null, errorMessage: null, retryCount: 0, maxRetries: 3, durationMs: null, queuedAt: new Date(Date.now() - 180000).toISOString(), startedAt: new Date(Date.now() - 120000).toISOString(), completedAt: null },
-  { id: 2, workflowId: 9, state: "running", stateHistory: [{ state: "queued", at: new Date(Date.now() - 60000).toISOString(), by: "webhook" }, { state: "running", at: new Date(Date.now() - 45000).toISOString(), by: "system" }], input: { trigger: "webhook", params: { batchSize: 100 } }, output: null, errorMessage: null, retryCount: 0, maxRetries: 3, durationMs: null, queuedAt: new Date(Date.now() - 60000).toISOString(), startedAt: new Date(Date.now() - 45000).toISOString(), completedAt: null },
-  { id: 3, workflowId: 3, state: "completed", stateHistory: [{ state: "queued", at: new Date(Date.now() - 900000).toISOString(), by: "scheduler" }, { state: "running", at: new Date(Date.now() - 840000).toISOString(), by: "system" }, { state: "completed", at: new Date(Date.now() - 720000).toISOString(), by: "system" }], input: { trigger: "schedule", params: { batchSize: 1000 } }, output: { processed: 847, success: true }, errorMessage: null, retryCount: 0, maxRetries: 3, durationMs: 120000, queuedAt: new Date(Date.now() - 900000).toISOString(), startedAt: new Date(Date.now() - 840000).toISOString(), completedAt: new Date(Date.now() - 720000).toISOString() },
-  { id: 4, workflowId: 4, state: "completed", stateHistory: [{ state: "queued", at: new Date(Date.now() - 1800000).toISOString(), by: "scheduler" }, { state: "running", at: new Date(Date.now() - 1740000).toISOString(), by: "system" }, { state: "completed", at: new Date(Date.now() - 1620000).toISOString(), by: "system" }], input: { trigger: "schedule", params: { batchSize: 500 } }, output: { processed: 342, success: true }, errorMessage: null, retryCount: 0, maxRetries: 3, durationMs: 120000, queuedAt: new Date(Date.now() - 1800000).toISOString(), startedAt: new Date(Date.now() - 1740000).toISOString(), completedAt: new Date(Date.now() - 1620000).toISOString() },
-  { id: 5, workflowId: 2, state: "failed", stateHistory: [{ state: "queued", at: new Date(Date.now() - 3600000).toISOString(), by: "scheduler" }, { state: "running", at: new Date(Date.now() - 3540000).toISOString(), by: "system" }, { state: "failed", at: new Date(Date.now() - 3300000).toISOString(), by: "system" }], input: { trigger: "schedule", params: { batchSize: 3000 } }, output: null, errorMessage: "Connection timeout: upstream provider did not respond within 30s", retryCount: 2, maxRetries: 3, durationMs: 240000, queuedAt: new Date(Date.now() - 3600000).toISOString(), startedAt: new Date(Date.now() - 3540000).toISOString(), completedAt: new Date(Date.now() - 3300000).toISOString() },
-  { id: 6, workflowId: 5, state: "waiting_approval", stateHistory: [{ state: "queued", at: new Date(Date.now() - 7200000).toISOString(), by: "webhook" }, { state: "running", at: new Date(Date.now() - 7140000).toISOString(), by: "system" }, { state: "waiting_approval", at: new Date(Date.now() - 6900000).toISOString(), by: "system" }], input: { trigger: "webhook", params: { batchSize: 1 } }, output: null, errorMessage: null, retryCount: 0, maxRetries: 3, durationMs: null, queuedAt: new Date(Date.now() - 7200000).toISOString(), startedAt: new Date(Date.now() - 7140000).toISOString(), completedAt: null },
-  { id: 7, workflowId: 7, state: "completed", stateHistory: [{ state: "queued", at: new Date(Date.now() - 10800000).toISOString(), by: "signal" }, { state: "running", at: new Date(Date.now() - 10740000).toISOString(), by: "system" }, { state: "completed", at: new Date(Date.now() - 10680000).toISOString(), by: "system" }], input: { trigger: "signal", params: { batchSize: 1 } }, output: { processed: 1, success: true }, errorMessage: null, retryCount: 0, maxRetries: 3, durationMs: 60000, queuedAt: new Date(Date.now() - 10800000).toISOString(), startedAt: new Date(Date.now() - 10740000).toISOString(), completedAt: new Date(Date.now() - 10680000).toISOString() },
-  { id: 8, workflowId: 8, state: "completed", stateHistory: [{ state: "queued", at: new Date(Date.now() - 14400000).toISOString(), by: "scheduler" }, { state: "running", at: new Date(Date.now() - 14340000).toISOString(), by: "system" }, { state: "completed", at: new Date(Date.now() - 14100000).toISOString(), by: "system" }], input: { trigger: "schedule", params: { batchSize: 5000 } }, output: { processed: 4821, success: true }, errorMessage: null, retryCount: 0, maxRetries: 3, durationMs: 240000, queuedAt: new Date(Date.now() - 14400000).toISOString(), startedAt: new Date(Date.now() - 14340000).toISOString(), completedAt: new Date(Date.now() - 14100000).toISOString() },
-];
-
-const DEMO_RUNS_RESP: RunsResp = { data: DEMO_RUNS, meta: { page: 1, limit: 20, total: 8 } };
+const EMPTY_RUNS_RESP: RunsResp = { data: [], meta: { page: 1, limit: 20, total: 0 } };
 
 function useRuns(state: string | null, workflowId: number | null, page: number) {
   return useQuery({
@@ -55,17 +44,12 @@ function useRuns(state: string | null, workflowId: number | null, page: number) 
         if (workflowId) params.set("workflowId", String(workflowId));
         const resp = await apiFetch<RunsResp | WorkflowRun[]>(`/alloy/runs?${params}`);
         if (resp && typeof resp === "object" && "data" in resp && Array.isArray((resp as RunsResp).data)) {
-          const r = resp as RunsResp;
-          if (r.data.length > 0) return r;
+          return resp as RunsResp;
         }
         const arr = (resp as WorkflowRun[]) ?? [];
-        if (arr.length > 0) return { data: arr, meta: { page: 1, limit: 20, total: arr.length } };
-        return DEMO_RUNS_RESP;
+        return { data: arr, meta: { page: 1, limit: 20, total: arr.length } };
       } catch {
-        let filtered = DEMO_RUNS;
-        if (state) filtered = filtered.filter(r => r.state === state);
-        if (workflowId) filtered = filtered.filter(r => r.workflowId === workflowId);
-        return { data: filtered, meta: { page: 1, limit: 20, total: filtered.length } };
+        return EMPTY_RUNS_RESP;
       }
     },
     refetchInterval: 30000,

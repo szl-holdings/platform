@@ -47,14 +47,14 @@ const STATUS_COLORS: Record<string, string> = {
   resolved: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
 };
 
-const DEMO_VESSELS = [
+const FALLBACK_VESSELS = [
   { id: 1, name: "MV Atlantic Pioneer" },
   { id: 2, name: "MV Pacific Guardian" },
   { id: 3, name: "MV Nordic Crest" },
   { id: 4, name: "MV Southern Cross" },
 ];
 
-const DEMO_EVENTS = [
+const FALLBACK_EVENTS = [
   {
     id: 1, vesselId: 1, eventType: "eta_drift", severity: "critical", status: "open",
     title: "ETA Drift — 34h delay on Atlantic Pioneer",
@@ -119,10 +119,10 @@ export default function CommandWorkflowsPage() {
       const q = vesselFilter !== "all" ? `?vesselId=${vesselFilter}` : "";
       return apiFetch<any[]>(`/vessels/events${q}`);
     },
-    placeholderData: DEMO_EVENTS as any,
+    placeholderData: FALLBACK_EVENTS as any,
   });
 
-  const events: any[] = (rawEvents && Array.isArray(rawEvents) && rawEvents.length > 0) ? rawEvents : DEMO_EVENTS;
+  const events: any[] = (rawEvents && Array.isArray(rawEvents) && rawEvents.length > 0) ? rawEvents : FALLBACK_EVENTS;
 
   const acknowledgeEvent = useMutation({
     mutationFn: ({ id }: { id: number }) =>
@@ -196,7 +196,7 @@ export default function CommandWorkflowsPage() {
         <Card className="bg-blue-500/5 border-blue-500/20">
           <CardContent className="p-4">
             <div className="text-xs text-blue-400 font-medium mb-1">Monitored Vessels</div>
-            <div className="text-3xl font-bold text-blue-400">{DEMO_VESSELS.length}</div>
+            <div className="text-3xl font-bold text-blue-400">{FALLBACK_VESSELS.length}</div>
           </CardContent>
         </Card>
       </div>
@@ -208,7 +208,7 @@ export default function CommandWorkflowsPage() {
           </SelectTrigger>
           <SelectContent className="bg-slate-900 border-slate-700">
             <SelectItem value="all">All Vessels</SelectItem>
-            {DEMO_VESSELS.map(v => <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>)}
+            {FALLBACK_VESSELS.map(v => <SelectItem key={v.id} value={String(v.id)}>{v.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={severityFilter} onValueChange={setSeverityFilter}>
@@ -250,7 +250,7 @@ export default function CommandWorkflowsPage() {
           const typeInfo = EVENT_TYPE_CONFIG[event.eventType] || { label: event.eventType, icon: Ship, color: "text-slate-400" };
           const TypeIcon = typeInfo.icon;
           const cd = event.consequenceData || {};
-          const vessel = DEMO_VESSELS.find(v => v.id === event.vesselId);
+          const vessel = FALLBACK_VESSELS.find(v => v.id === event.vesselId);
 
           return (
             <Card key={event.id} className={cn(

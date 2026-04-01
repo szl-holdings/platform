@@ -323,6 +323,11 @@ const domainConfigs: DomainNotifConfig[] = [
 let notifTimers: ReturnType<typeof setInterval>[] = [];
 
 export function startDomainNotificationGenerators(): void {
+  if (process.env.SYNTHETIC_ALERTS !== "true") {
+    logger.info("Synthetic alert generators disabled (SYNTHETIC_ALERTS != true). Notifications will only come from real system events.");
+    return;
+  }
+
   stopDomainNotificationGenerators();
 
   for (const config of domainConfigs) {
@@ -336,7 +341,7 @@ export function startDomainNotificationGenerators(): void {
     notifTimers.push(timer);
   }
 
-  logger.info({ count: domainConfigs.length }, "Domain notification generators started");
+  logger.info({ count: domainConfigs.length }, "Synthetic domain notification generators started (SYNTHETIC_ALERTS=true)");
 }
 
 export function stopDomainNotificationGenerators(): void {

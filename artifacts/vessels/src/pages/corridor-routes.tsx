@@ -5,7 +5,6 @@ import { Badge } from "@workspace/shared-ui/ui/badge";
 import { Navigation, TrendingUp, TrendingDown, Minus, AlertTriangle, Ship, Clock, Activity, RefreshCw } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { api, type Corridor } from "@/lib/api";
-import { vesselsDomainMockData } from "@/data/mock-data";
 
 const weatherRiskColors: Record<string, string> = {
   low: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
@@ -47,25 +46,7 @@ export default function CorridorRoutesPage() {
     refetchInterval: 120_000,
   });
 
-  const corridors: Corridor[] = liveCorridor.length > 0
-    ? liveCorridor
-    : vesselsDomainMockData.corridors.map((c, i) => ({
-        id: i + 1,
-        name: c.name,
-        origin: c.origin,
-        destination: c.destination,
-        region: c.region,
-        commodity: c.commodity,
-        vesselCount: c.vesselCount,
-        delayRate: String(c.delayRate),
-        avgTransitDays: String(c.avgTransitDays),
-        weeklyVolume: String(c.weeklyVolume),
-        profitabilityIndex: String(c.profitabilityIndex),
-        weatherRisk: c.weatherRisk,
-        portCongestionRisk: c.portCongestionRisk,
-        trend: c.trend,
-        activeAlerts: c.activeAlerts,
-      }));
+  const corridors: Corridor[] = liveCorridor;
 
   const selectedCorridor = selected ? corridors.find(c => String(c.id) === selected) : undefined;
   const avgDelay = corridors.length > 0 ? corridors.reduce((a, c) => a + getNum(c.delayRate, 0), 0) / corridors.length : 0;

@@ -8,7 +8,7 @@ const TERRA_ACCENT = "hsl(30,55%,52%)";
 const TERRA_ACCENT_DIM = "hsla(30,55%,52%,0.12)";
 const TERRA_ACCENT_BORDER = "hsla(30,55%,52%,0.22)";
 
-const DEMO_LISTINGS = [
+const STATIC_LISTINGS = [
   {
     id: "L001",
     address: "800 Fifth Avenue, Manhattan, NY 10065",
@@ -141,7 +141,7 @@ export default function TerraListingsPage() {
     document.title = "Terra Listings — Broker Command | SZL Holdings";
   }, []);
 
-  const filtered = filter === "All" ? DEMO_LISTINGS : DEMO_LISTINGS.filter(l => l.type === filter);
+  const filtered = filter === "All" ? STATIC_LISTINGS : STATIC_LISTINGS.filter(l => l.type === filter);
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)", fontFamily: "'Inter', system-ui, sans-serif" }}>

@@ -365,7 +365,7 @@ const NIST_CSF_FRAMEWORK = {
   ],
 };
 
-export const DEMO_COMPLIANCE_CONTROLS = [
+export const REFERENCE_COMPLIANCE_CONTROLS = [
   { controlId: "GV.RM-01", function: "GOVERN", category: "Risk Management Strategy", status: "compliant", score: 92, lastAssessed: "2026-03-15", owner: "CISO", evidence: "Documented risk management strategy reviewed Q1 2026", priority: "high" },
   { controlId: "ID.AM-01", function: "IDENTIFY", category: "Asset Management", status: "compliant", score: 88, lastAssessed: "2026-03-20", owner: "IT Operations", evidence: "Asset inventory updated, 98% coverage", priority: "high" },
   { controlId: "ID.RA-01", function: "IDENTIFY", category: "Risk Assessment", status: "partial", score: 71, lastAssessed: "2026-03-10", owner: "Risk Team", evidence: "Annual risk assessment completed, quarterly updates missing", priority: "medium" },
@@ -376,7 +376,7 @@ export const DEMO_COMPLIANCE_CONTROLS = [
   { controlId: "RC.RP-01", function: "RECOVER", category: "Incident Recovery Plan", status: "partial", score: 74, lastAssessed: "2026-02-28", owner: "BCM Team", evidence: "BCP documented, DR test completed annually (last: Jan 2026)", priority: "medium" },
 ];
 
-const DEMO_AUDIT_FINDINGS = [
+const REFERENCE_AUDIT_FINDINGS = [
   { id: "AF-2026-001", severity: "high", finding: "Multi-factor authentication not enforced on 3 legacy VPN endpoints", standard: "NIST CSF PR.AA-02", status: "remediation_in_progress", dueDate: "2026-04-15", assignee: "Network Operations", riskScore: 78, ciaCritical: ["confidentiality", "access_control"] },
   { id: "AF-2026-002", severity: "medium", finding: "Security awareness training completion rate at 84% — below 95% target", standard: "NIST CSF PR.AT-01", status: "open", dueDate: "2026-04-30", assignee: "HR / Security", riskScore: 52, ciaCritical: ["all"] },
   { id: "AF-2026-003", severity: "critical", finding: "3rd-party vendor with access to CUI has not completed annual security review", standard: "NIST CSF GV.SC-05", status: "open", dueDate: "2026-04-01", assignee: "Vendor Management", riskScore: 91, ciaCritical: ["confidentiality", "integrity"] },
@@ -384,7 +384,7 @@ const DEMO_AUDIT_FINDINGS = [
   { id: "AF-2026-005", severity: "medium", finding: "Privileged access review not completed within 90-day window for 12 accounts", standard: "NIST CSF PR.AA-05", status: "remediation_in_progress", dueDate: "2026-04-10", assignee: "IAM Team", riskScore: 61, ciaCritical: ["confidentiality", "access_control"] },
 ];
 
-const DEMO_FRAMEWORK_MAPPINGS = {
+const REFERENCE_FRAMEWORK_MAPPINGS = {
   "NIST CSF 2.0": { controls: 106, aligned: 89, gap: 17, complianceScore: 84 },
   "CMMC Level 2": { controls: 110, aligned: 98, gap: 12, complianceScore: 89 },
   "ISO 27001:2022": { controls: 93, aligned: 77, gap: 16, complianceScore: 83 },
@@ -408,7 +408,7 @@ router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware({ 
   try {
     const func = req.query.function as string;
     const status = req.query.status as string;
-    let controls = DEMO_COMPLIANCE_CONTROLS;
+    let controls = REFERENCE_COMPLIANCE_CONTROLS;
     if (func) controls = controls.filter(c => c.function === func.toUpperCase());
     if (status) controls = controls.filter(c => c.status === status);
     const avgScore = controls.reduce((s, c) => s + c.score, 0) / controls.length;
@@ -430,7 +430,7 @@ router.get("/readiness/live/controls", readinessLiveRateLimit, authMiddleware({ 
 router.get("/readiness/live/audit-findings", readinessLiveRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const severity = req.query.severity as string;
-    let findings = DEMO_AUDIT_FINDINGS;
+    let findings = REFERENCE_AUDIT_FINDINGS;
     if (severity) findings = findings.filter(f => f.severity === severity);
     const critical = findings.filter(f => f.severity === "critical").length;
     const high = findings.filter(f => f.severity === "high").length;
@@ -449,10 +449,10 @@ router.get("/readiness/live/framework-mappings", readinessLiveRateLimit, authMid
   try {
     sendSuccess(res, {
       source: "Multi-Framework Compliance Mapping Engine",
-      frameworks: DEMO_FRAMEWORK_MAPPINGS,
+      frameworks: REFERENCE_FRAMEWORK_MAPPINGS,
       primaryFramework: "NIST CSF 2.0",
       overallCompliance: Math.round(
-        Object.values(DEMO_FRAMEWORK_MAPPINGS).reduce((s, f) => s + f.complianceScore, 0) / Object.keys(DEMO_FRAMEWORK_MAPPINGS).length,
+        Object.values(REFERENCE_FRAMEWORK_MAPPINGS).reduce((s, f) => s + f.complianceScore, 0) / Object.keys(REFERENCE_FRAMEWORK_MAPPINGS).length,
       ),
       fetchedAt: new Date().toISOString(),
     });
@@ -461,9 +461,9 @@ router.get("/readiness/live/framework-mappings", readinessLiveRateLimit, authMid
 
 router.get("/readiness/live/risk-posture", readinessLiveRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const openFindings = DEMO_AUDIT_FINDINGS.filter(f => f.status === "open").length;
-    const criticalFindings = DEMO_AUDIT_FINDINGS.filter(f => f.severity === "critical").length;
-    const avgControlScore = DEMO_COMPLIANCE_CONTROLS.reduce((s, c) => s + c.score, 0) / DEMO_COMPLIANCE_CONTROLS.length;
+    const openFindings = REFERENCE_AUDIT_FINDINGS.filter(f => f.status === "open").length;
+    const criticalFindings = REFERENCE_AUDIT_FINDINGS.filter(f => f.severity === "critical").length;
+    const avgControlScore = REFERENCE_COMPLIANCE_CONTROLS.reduce((s, c) => s + c.score, 0) / REFERENCE_COMPLIANCE_CONTROLS.length;
     const compositeRisk = 100 - Math.round(
       (avgControlScore * 0.5) +
       (Math.max(0, 100 - openFindings * 5) * 0.3) +
@@ -477,7 +477,7 @@ router.get("/readiness/live/risk-posture", readinessLiveRateLimit, authMiddlewar
         riskRating: criticalFindings > 0 ? "CRITICAL" : compositeRisk > 60 ? "HIGH" : compositeRisk > 40 ? "MEDIUM" : "LOW",
         openFindings,
         criticalFindings,
-        controlsCoverage: DEMO_COMPLIANCE_CONTROLS.length,
+        controlsCoverage: REFERENCE_COMPLIANCE_CONTROLS.length,
         lastAssessment: "2026-03-25",
         nextAssessment: "2026-06-25",
         trendsVs90Days: { controlScore: +2.3, openFindings: -4, criticalFindings: -1 },

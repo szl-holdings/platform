@@ -342,7 +342,7 @@ async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
   }
 }
 
-const DEMO_CREATIVE_TRENDS = [
+const FALLBACK_CREATIVE_TRENDS = [
   { trend: "AI-Generated Short Films", platform: "YouTube + Instagram", growth: "+340%", audienceReach: "2.4B", sentiment: 0.71, contentType: "video", tools: ["RunwayML", "Pika Labs", "Kling AI"] },
   { trend: "Immersive Brand Storytelling", platform: "Meta + TikTok", growth: "+128%", audienceReach: "1.8B", sentiment: 0.68, contentType: "interactive", tools: ["Unreal Engine", "Unity", "SparkAR"] },
   { trend: "AI-Narrated Podcast Campaigns", platform: "Spotify + Apple", growth: "+92%", audienceReach: "680M", sentiment: 0.64, contentType: "audio", tools: ["ElevenLabs", "Murf AI", "LOVO"] },
@@ -350,7 +350,7 @@ const DEMO_CREATIVE_TRENDS = [
   { trend: "Creator Economy Partnerships", platform: "TikTok + YouTube", growth: "+167%", audienceReach: "3.1B", sentiment: 0.73, contentType: "influencer", tools: ["Grin", "AspireIQ", "Upfluence"] },
 ];
 
-const DEMO_MEDIA_SIGNALS = [
+const FALLBACK_MEDIA_SIGNALS = [
   { platform: "YouTube", metric: "avgViewDuration", value: 4.2, unit: "minutes", benchmark: 3.8, trend: "+10.5%", insight: "Long-form content outperforming 2025 baseline" },
   { platform: "Instagram", metric: "reelEngagementRate", value: 8.4, unit: "%", benchmark: 6.2, trend: "+35.5%", insight: "Reel carousels driving 2x engagement vs single images" },
   { platform: "LinkedIn", metric: "thoughtLeadershipCTR", value: 3.1, unit: "%", benchmark: 2.4, trend: "+29.2%", insight: "Founder-authored content outperforming brand pages" },
@@ -382,10 +382,10 @@ router.get("/dreamscape/live/creative-trends", dreamLiveLimit, authMiddleware({ 
 
     sendSuccess(res, {
       source: "Content Marketing Industry Intelligence",
-      creativeTrends: DEMO_CREATIVE_TRENDS,
+      creativeTrends: FALLBACK_CREATIVE_TRENDS,
       liveNews: news.liveItems,
       liveNewsCount: news.liveCount,
-      totalTrends: DEMO_CREATIVE_TRENDS.length,
+      totalTrends: FALLBACK_CREATIVE_TRENDS.length,
       aiContentAdoptionPct: 73,
       fetchedAt: new Date().toISOString(),
     });
@@ -396,8 +396,8 @@ router.get("/dreamscape/live/media-signals", dreamLiveLimit, authMiddleware({ re
   try {
     sendSuccess(res, {
       source: "Cross-Platform Media Analytics Intelligence",
-      count: DEMO_MEDIA_SIGNALS.length,
-      signals: DEMO_MEDIA_SIGNALS,
+      count: FALLBACK_MEDIA_SIGNALS.length,
+      signals: FALLBACK_MEDIA_SIGNALS,
       overallEngagementIndex: 74.2,
       benchmarkPeriod: "Q4 2025",
       insightSummary: "AI-assisted content production shows +47% engagement uplift across measured platforms.",

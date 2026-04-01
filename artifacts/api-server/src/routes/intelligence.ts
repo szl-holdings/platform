@@ -8,27 +8,119 @@ import { getAiModels, getAiModelById, getModelObservabilitySummary } from "../li
 import { getRegistrySummary } from "../lib/model-registry";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
+import { db, intelligenceCacheTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 type AnthropicMessageParam = { role: "user" | "assistant"; content: string | { type: string; text: string }[] };
 
 const router: IRouter = Router();
 
-const cache = new Map<string, { data: unknown; expiry: number }>();
-function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
-  const cached = cache.get(key);
-  if (cached && cached.expiry > Date.now()) return Promise.resolve(cached.data as T);
-  return fetcher().then((data) => {
-    cache.set(key, { data, expiry: Date.now() + ttlMs });
-    return data;
-  }).catch(() => {
-    const stale = cache.get(key);
+const memCache = new Map<string, { data: unknown; expiresAt: number }>();
+const refreshing = new Set<string>();
+
+async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
+  const now = Date.now();
+  const mem = memCache.get(key);
+  if (mem && mem.expiresAt > now) return mem.data as T;
+  try {
+    const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, key)).limit(1);
+    if (row && new Date(row.expiresAt).getTime() > now) {
+      const data = row.data as T;
+      memCache.set(key, { data, expiresAt: new Date(row.expiresAt).getTime() });
+      if (!refreshing.has(key) && new Date(row.expiresAt).getTime() - now < ttlMs * 0.25) {
+        refreshing.add(key);
+        fetcher().then(async (fresh) => {
+          await upsertCache(key, fresh, ttlMs);
+        }).catch(() => {}).finally(() => refreshing.delete(key));
+      }
+      return data;
+    }
+  } catch {}
+  const fresh = await fetcher().catch(async () => {
+    const [stale] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, key)).limit(1).catch(() => [null]);
     if (stale) return stale.data as T;
+    if (mem) return mem.data as T;
     throw new Error("Data unavailable");
   });
+  await upsertCache(key, fresh, ttlMs);
+  return fresh;
+}
+
+async function upsertCache<T>(key: string, data: T, ttlMs: number): Promise<void> {
+  const expiresAt = new Date(Date.now() + ttlMs);
+  memCache.set(key, { data, expiresAt: expiresAt.getTime() });
+  try {
+    await db.insert(intelligenceCacheTable).values({ key, data, expiresAt, fetchedAt: new Date() })
+      .onConflictDoUpdate({ target: intelligenceCacheTable.key, set: { data, expiresAt, fetchedAt: new Date() } });
+  } catch {}
+}
+
+async function computeIntelligenceBriefing(): Promise<Record<string, unknown>> {
+  const [threats, cves, geopolitical] = await Promise.allSettled([
+    getCached("threats", 300000, fetchOtxThreats),
+    getCached("cves", 600000, fetchNvdCves),
+    getCached("geopolitical", 600000, fetchGdeltGeopolitical),
+  ]);
+  const t = threats.status === "fulfilled" ? threats.value : [];
+  const c = cves.status === "fulfilled" ? cves.value : [];
+  const g = geopolitical.status === "fulfilled" ? geopolitical.value : [];
+  return {
+    computedAt: new Date().toISOString(),
+    threatCount: t.length,
+    criticalThreats: t.filter((x: Record<string, unknown>) => x.severity === "critical").length,
+    cveCount: c.length,
+    criticalCves: c.filter((x: Record<string, unknown>) => x.severity === "CRITICAL").length,
+    geopoliticalEvents: g.length,
+    topThreats: t.slice(0, 3),
+    topCves: c.slice(0, 3),
+    riskLevel: t.some((x: Record<string, unknown>) => x.severity === "critical") ? "critical" : t.length > 10 ? "high" : "medium",
+    dataSource: "OTX AlienVault + NIST NVD + GDELT",
+  };
+}
+
+export async function prewarmIntelligenceCache(): Promise<void> {
+  const prewarm = async (key: string, ttlMs: number, fetcher: () => Promise<unknown>) => {
+    try {
+      const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, key)).limit(1);
+      if (row && new Date(row.expiresAt).getTime() > Date.now()) return;
+      const data = await fetcher();
+      await upsertCache(key, data, ttlMs);
+    } catch {}
+  };
+  await Promise.allSettled([
+    prewarm("threats", 300000, fetchOtxThreats),
+    prewarm("marine-weather", 1800000, fetchOpenMeteoMarineWeather),
+    prewarm("geopolitical", 600000, fetchGdeltGeopolitical),
+    prewarm("maritime-vessels", 120000, fetchLiveMaritimeVessels),
+    prewarm("cves", 600000, fetchNvdCves),
+    prewarm("sanctions-enriched", 3600000, fetchAndEnrichSanctions),
+    prewarm("briefing", 300000, computeIntelligenceBriefing),
+  ]);
+}
+
+export function scheduleIntelligenceRefresh(): NodeJS.Timeout {
+  return setInterval(async () => {
+    const jobs: [string, number, () => Promise<unknown>][] = [
+      ["threats", 300000, fetchOtxThreats],
+      ["marine-weather", 1800000, fetchOpenMeteoMarineWeather],
+      ["geopolitical", 600000, fetchGdeltGeopolitical],
+      ["maritime-vessels", 120000, fetchLiveMaritimeVessels],
+      ["cves", 600000, fetchNvdCves],
+      ["sanctions-enriched", 3600000, fetchAndEnrichSanctions],
+      ["briefing", 300000, computeIntelligenceBriefing],
+    ];
+    for (const [key, ttlMs, fetcher] of jobs) {
+      if (refreshing.has(key)) continue;
+      const mem = memCache.get(key);
+      if (mem && mem.expiresAt > Date.now() + ttlMs * 0.25) continue;
+      refreshing.add(key);
+      fetcher().then((data) => upsertCache(key, data, ttlMs)).catch(() => {}).finally(() => refreshing.delete(key));
+    }
+  }, 60000);
 }
 
 function preseedCache<T>(key: string, data: T, ttlMs: number): void {
-  if (!cache.has(key)) {
-    cache.set(key, { data, expiry: Date.now() + ttlMs });
+  if (!memCache.has(key)) {
+    memCache.set(key, { data, expiresAt: Date.now() + ttlMs });
   }
 }
 
@@ -65,61 +157,59 @@ async function fetchJson(url: string, timeoutMs = 8000): Promise<unknown> {
   }
 }
 
-async function fetchNvdCves(): Promise<typeof DEMO_CVES> {
-  try {
-    const raw = await fetchJson(
-      "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=8&startIndex=0",
-      10000,
-    );
-    const data = raw as { vulnerabilities?: { cve: { id?: string; descriptions?: { lang: string; value: string }[]; metrics?: { cvssMetricV31?: { cvssData?: { baseScore?: number } }[] }; configurations?: { nodes?: { cpeMatch?: { criteria?: string }[] }[] }[]; published?: string; references?: unknown[] } }[] };
-    const items = data?.vulnerabilities;
-    if (!Array.isArray(items) || items.length === 0) throw new Error("No NVD data");
-    return items.map((v, idx: number) => {
-      const cve = v.cve;
-      const metrics = cve?.metrics?.cvssMetricV31?.[0]?.cvssData;
-      const score = metrics?.baseScore ?? (9.0 - idx * 0.5);
-      const severity = score >= 9.0 ? "CRITICAL" : score >= 7.0 ? "HIGH" : score >= 4.0 ? "MEDIUM" : "LOW";
-      return {
-        id: cve?.id ?? `CVE-UNKNOWN-${idx}`,
-        description: cve?.descriptions?.find((d) => d.lang === "en")?.value ?? "No description available",
-        severity,
-        score,
-        vendor: cve?.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")[3] ?? "Various",
-        product: cve?.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")[4] ?? "Multiple Products",
-        published: cve?.published ?? new Date().toISOString(),
-        references: cve?.references?.length ?? 0,
-      };
-    });
-  } catch {
-    return DEMO_CVES;
-  }
+type CveItem = { id: string; description: string; severity: string; score: number; vendor: string; product: string; published: string; references: number };
+
+async function fetchNvdCves(): Promise<CveItem[]> {
+  const raw = await fetchJson(
+    "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=8&startIndex=0",
+    10000,
+  );
+  const data = raw as { vulnerabilities?: { cve: { id?: string; descriptions?: { lang: string; value: string }[]; metrics?: { cvssMetricV31?: { cvssData?: { baseScore?: number } }[] }; configurations?: { nodes?: { cpeMatch?: { criteria?: string }[] }[] }[]; published?: string; references?: unknown[] } }[] };
+  const items = data?.vulnerabilities;
+  if (!Array.isArray(items) || items.length === 0) throw new Error("No NVD data");
+  return items.map((v, idx: number) => {
+    const cve = v.cve;
+    const metrics = cve?.metrics?.cvssMetricV31?.[0]?.cvssData;
+    const score = metrics?.baseScore ?? (9.0 - idx * 0.5);
+    const severity = score >= 9.0 ? "CRITICAL" : score >= 7.0 ? "HIGH" : score >= 4.0 ? "MEDIUM" : "LOW";
+    return {
+      id: cve?.id ?? `CVE-UNKNOWN-${idx}`,
+      description: cve?.descriptions?.find((d) => d.lang === "en")?.value ?? "No description available",
+      severity,
+      score,
+      vendor: cve?.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")[3] ?? "Various",
+      product: cve?.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")[4] ?? "Multiple Products",
+      published: cve?.published ?? new Date().toISOString(),
+      references: cve?.references?.length ?? 0,
+    };
+  });
 }
 
-async function fetchRssNews(): Promise<typeof DEMO_NEWS> {
-  try {
-    const raw = await fetchJson(
-      "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.feedburner.com%2FTheHackersNews&count=8",
-      8000,
-    );
-    const rssData = raw as { items?: { title?: string; author?: string; link?: string; pubDate?: string }[] };
-    const items = rssData?.items;
-    if (!Array.isArray(items) || items.length === 0) throw new Error("No RSS data");
-    return items.map((item, idx: number) => ({
-      id: `RSS-${idx}`,
-      title: item.title ?? "Untitled",
-      source: item.author || "The Hacker News",
-      category: "security",
-      url: item.link ?? "#",
-      publishedAt: item.pubDate ?? new Date().toISOString(),
-      sentiment: "neutral",
-      sentimentScore: 0.5,
-    }));
-  } catch {
-    return DEMO_NEWS;
-  }
+type NewsItem = { id: string; title: string; source: string; category: string; url: string; publishedAt: string; sentiment: string; sentimentScore: number };
+
+async function fetchRssNews(): Promise<NewsItem[]> {
+  const raw = await fetchJson(
+    "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.feedburner.com%2FTheHackersNews&count=8",
+    8000,
+  );
+  const rssData = raw as { items?: { title?: string; author?: string; link?: string; pubDate?: string }[] };
+  const items = rssData?.items;
+  if (!Array.isArray(items) || items.length === 0) throw new Error("No RSS data");
+  return items.map((item, idx: number) => ({
+    id: `RSS-${idx}`,
+    title: item.title ?? "Untitled",
+    source: item.author || "The Hacker News",
+    category: "security",
+    url: item.link ?? "#",
+    publishedAt: item.pubDate ?? new Date().toISOString(),
+    sentiment: "neutral",
+    sentimentScore: 0.5,
+  }));
 }
 
-async function fetchOpenMeteoMarineWeather(): Promise<typeof DEMO_MARINE_WEATHER> {
+type MarineWeatherItem = { region: string; lat: number; lon: number; windSpeed: number; windDirection: string | undefined; waveHeight: number; seaTemp: number; visibility: string; condition: string; warning: string | null };
+
+async function fetchOpenMeteoMarineWeather(): Promise<MarineWeatherItem[]> {
   const regions = [
     { region: "Western Black Sea (Constanta)", lat: 43.8, lon: 28.6 },
     { region: "North Atlantic", lat: 45.0, lon: -30.0 },
@@ -130,296 +220,135 @@ async function fetchOpenMeteoMarineWeather(): Promise<typeof DEMO_MARINE_WEATHER
     { region: "Indian Ocean (Monsoon)", lat: -5.0, lon: 72.0 },
     { region: "Barents Sea (NSR)", lat: 69.0, lon: 33.0 },
   ];
-  try {
-    const results = await Promise.all(
-      regions.map(async (r) => {
-        const raw = await fetchJson(
-          `https://api.open-meteo.com/v1/forecast?latitude=${r.lat}&longitude=${r.lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m&timezone=UTC`,
-          6000,
-        );
-        const data = raw as { current?: { temperature_2m?: number; wind_speed_10m?: number; wind_direction_10m?: number } };
-        const current = data?.current;
-        if (!current) throw new Error("No weather data");
-        const windSpeed = Math.round(current.wind_speed_10m ?? 15);
-        const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-        const windDir = dirs[Math.round((current.wind_direction_10m ?? 0) / 45) % 8];
-        const waveHeight = +(Math.max(0.3, windSpeed * 0.12 + Math.random() * 0.5)).toFixed(1);
-        const condition = windSpeed > 30 ? "Rough seas" : windSpeed > 20 ? "Moderate seas" : windSpeed > 10 ? "Slight seas" : "Calm";
-        const warning = windSpeed > 30 ? "High wind advisory" : windSpeed > 25 ? "Gale warning" : null;
-        return {
-          region: r.region,
-          lat: r.lat,
-          lon: r.lon,
-          windSpeed,
-          windDirection: windDir,
-          waveHeight,
-          seaTemp: current.temperature_2m ?? 20,
-          visibility: windSpeed > 25 ? "Poor" : windSpeed > 15 ? "Moderate" : "Good",
-          condition,
-          warning,
-        };
-      }),
-    );
-    return results;
-  } catch {
-    return DEMO_MARINE_WEATHER;
-  }
-}
-
-async function fetchGdeltGeopolitical(): Promise<typeof DEMO_GEO_EVENTS> {
-  try {
-    const raw = await fetchJson(
-      "https://api.gdeltproject.org/api/v2/doc/doc?query=cybersecurity%20OR%20maritime%20OR%20sanctions&mode=ArtList&maxrecords=6&format=json&timespan=24h",
-      5000,
-    );
-    const gdelt = raw as { articles?: { title?: string; url?: string; socialimage?: string; seendate?: string; sourcecountry?: string; domain?: string }[] };
-    const articles = gdelt?.articles;
-    if (!Array.isArray(articles) || articles.length === 0) throw new Error("No GDELT data");
-    const categoryMap: Record<string, string> = {
-      cyber: "cyber_operations", military: "military", regulation: "regulatory",
-      infrastructure: "infrastructure", sanction: "sanctions",
+  const lats = regions.map(r => r.lat).join(",");
+  const lons = regions.map(r => r.lon).join(",");
+  const raw = await fetchJson(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,wind_speed_10m,wind_direction_10m&timezone=UTC`,
+    10000,
+  );
+  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const dataArr = Array.isArray(raw) ? raw : [raw];
+  return regions.map((r, i) => {
+    const entry = dataArr[i] as { current?: { temperature_2m?: number; wind_speed_10m?: number; wind_direction_10m?: number } } | undefined;
+    const current = entry?.current;
+    const windSpeed = Math.round(current?.wind_speed_10m ?? 15);
+    const windDir = dirs[Math.round((current?.wind_direction_10m ?? 0) / 45) % 8];
+    const waveHeight = +(Math.max(0.3, windSpeed * 0.15)).toFixed(1);
+    const condition = windSpeed > 30 ? "Rough seas" : windSpeed > 20 ? "Moderate seas" : windSpeed > 10 ? "Slight seas" : "Calm";
+    const warning = windSpeed > 30 ? "High wind advisory" : windSpeed > 25 ? "Gale warning" : null;
+    return {
+      region: r.region,
+      lat: r.lat,
+      lon: r.lon,
+      windSpeed,
+      windDirection: windDir,
+      waveHeight,
+      seaTemp: current?.temperature_2m ?? 20,
+      visibility: windSpeed > 25 ? "Poor" : windSpeed > 15 ? "Moderate" : "Good",
+      condition,
+      warning,
     };
-    return articles.slice(0, 6).map((a, idx: number) => {
-      const titleLower = (a.title ?? "").toLowerCase();
-      let cat = "cyber_operations";
-      for (const [key, val] of Object.entries(categoryMap)) {
-        if (titleLower.includes(key)) { cat = val; break; }
-      }
-      const severityList = ["critical", "high", "medium"];
-      return {
-        id: `GDELT-${idx}`,
-        title: (a.title ?? "").slice(0, 120),
-        region: a.sourcecountry ?? "Global",
-        severity: severityList[idx % 3],
-        category: cat,
-        timestamp: a.seendate ?? new Date().toISOString(),
-        source: a.domain ?? "GDELT",
-        impact: `Source: ${a.domain ?? "unknown"} — ${(a.title ?? "").slice(0, 60)}`,
-      };
-    });
-  } catch {
-    return DEMO_GEO_EVENTS;
-  }
+  });
 }
 
-async function fetchLiveMaritimeVessels(): Promise<typeof DEMO_MARITIME_VESSELS> {
-  try {
-    const raw = await fetchJson(
-      "https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100",
-      8000,
-    );
-    type AisFeature = { properties?: { mmsi?: string | number; sog?: number; cog?: number; heading?: number; navStat?: number; timestampExternal?: number }; geometry?: { coordinates?: [number, number] } };
-    const aisData = raw as { features?: AisFeature[] };
-    const features = aisData?.features;
-    if (!Array.isArray(features) || features.length === 0) throw new Error("No AIS data");
-    const typeNames = ["Cargo", "Tanker", "Container", "Bulk Carrier", "Passenger", "Fishing"];
-    return features.slice(0, 8).map((f, idx: number) => {
-      const props = f.properties ?? {};
-      const coords = f.geometry?.coordinates ?? [25.0, 60.0];
-      return {
-        mmsi: String(props.mmsi ?? `FIN${idx}`),
-        name: `VESSEL-${props.mmsi ?? idx}`,
-        type: typeNames[idx % typeNames.length],
-        lat: coords[1],
-        lon: coords[0],
-        speed: +(props.sog ?? Math.random() * 15).toFixed(1),
-        course: Math.round(props.cog ?? Math.random() * 360),
-        heading: Math.round(props.heading ?? props.cog ?? 0),
-        destination: "In Transit",
-        status: props.navStat === 0 ? "Under way using engine" : "At anchor",
-        flag: "FI",
-        length: 100 + Math.floor(Math.random() * 250),
-        timestamp: props.timestampExternal ? new Date(props.timestampExternal).toISOString() : new Date().toISOString(),
-      };
-    });
-  } catch {
-    return DEMO_MARITIME_VESSELS;
-  }
+type GeoEvent = { id: string; title: string; region: string; severity: string | undefined; category: string; timestamp: string; source: string; impact: string };
+
+async function fetchGdeltGeopolitical(): Promise<GeoEvent[]> {
+  const raw = await fetchJson(
+    "https://api.gdeltproject.org/api/v2/doc/doc?query=cybersecurity%20OR%20maritime%20OR%20sanctions&mode=ArtList&maxrecords=6&format=json&timespan=24h",
+    5000,
+  );
+  const gdelt = raw as { articles?: { title?: string; url?: string; socialimage?: string; seendate?: string; sourcecountry?: string; domain?: string }[] };
+  const articles = gdelt?.articles;
+  if (!Array.isArray(articles) || articles.length === 0) throw new Error("No GDELT data");
+  const categoryMap: Record<string, string> = {
+    cyber: "cyber_operations", military: "military", regulation: "regulatory",
+    infrastructure: "infrastructure", sanction: "sanctions",
+  };
+  return articles.slice(0, 6).map((a, idx: number) => {
+    const titleLower = (a.title ?? "").toLowerCase();
+    let cat = "cyber_operations";
+    for (const [key, val] of Object.entries(categoryMap)) {
+      if (titleLower.includes(key)) { cat = val; break; }
+    }
+    const severityList = ["critical", "high", "medium"];
+    return {
+      id: `GDELT-${idx}`,
+      title: (a.title ?? "").slice(0, 120),
+      region: a.sourcecountry ?? "Global",
+      severity: severityList[idx % 3],
+      category: cat,
+      timestamp: a.seendate ?? new Date().toISOString(),
+      source: a.domain ?? "GDELT",
+      impact: `Source: ${a.domain ?? "unknown"} — ${(a.title ?? "").slice(0, 60)}`,
+    };
+  });
 }
 
-async function fetchOtxThreats(): Promise<typeof DEMO_THREATS> {
-  try {
-    const raw = await fetchJson(
-      "https://otx.alienvault.com/api/v1/pulses/subscribed?limit=8&page=1",
-      8000,
-    );
-    type OtxPulse = { id?: string | number; name?: string; adversary?: string; targeted_countries?: string[]; references?: string[]; tags?: string[]; industries?: string[]; description?: string; created?: string; indicator_count?: number };
-    const otxData = raw as { results?: OtxPulse[] };
-    const pulses = otxData?.results;
-    if (!Array.isArray(pulses) || pulses.length === 0) throw new Error("No OTX data");
-    return pulses.map((p, idx: number) => {
-      const severityMap = ["critical", "high", "medium", "low"];
-      const sev = severityMap[Math.min(idx, 3)];
-      return {
-        id: `OTX-${p.id ?? idx}`,
-        type: p.adversary ? "apt" : "malware",
-        name: p.name?.slice(0, 60) ?? "Unknown Threat",
-        severity: sev,
-        source: "AlienVault OTX",
-        country: p.targeted_countries?.[0] ?? "Unknown",
-        targetSector: p.industries?.[0] ?? "General",
-        description: p.description?.slice(0, 200) ?? "No description available",
-        lat: 40 + (Math.random() * 30 - 15),
-        lon: 20 + (Math.random() * 60 - 30),
-        timestamp: p.created ?? new Date().toISOString(),
-        indicators: p.indicator_count ?? Math.floor(Math.random() * 50),
-      };
-    });
-  } catch {
-    return DEMO_THREATS;
-  }
+type MaritimeVessel = { mmsi: string; name: string; type: string; lat: number; lon: number; speed: number; course: number; heading: number; destination: string; status: string; flag: string; length: number; timestamp: string };
+
+async function fetchLiveMaritimeVessels(): Promise<MaritimeVessel[]> {
+  const raw = await fetchJson(
+    "https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100",
+    8000,
+  );
+  type AisFeature = { properties?: { mmsi?: string | number; sog?: number; cog?: number; heading?: number; navStat?: number; timestampExternal?: number }; geometry?: { coordinates?: [number, number] } };
+  const aisData = raw as { features?: AisFeature[] };
+  const features = aisData?.features;
+  if (!Array.isArray(features) || features.length === 0) throw new Error("No AIS data");
+  const typeNames = ["Cargo", "Tanker", "Container", "Bulk Carrier", "Passenger", "Fishing"];
+  return features.slice(0, 8).map((f, idx: number) => {
+    const props = f.properties ?? {};
+    const coords = f.geometry?.coordinates ?? [25.0, 60.0];
+    return {
+      mmsi: String(props.mmsi ?? `FIN${idx}`),
+      name: `VESSEL-${props.mmsi ?? idx}`,
+      type: typeNames[idx % typeNames.length],
+      lat: coords[1],
+      lon: coords[0],
+      speed: +(props.sog ?? 0).toFixed(1),
+      course: Math.round(props.cog ?? 0),
+      heading: Math.round(props.heading ?? props.cog ?? 0),
+      destination: "In Transit",
+      status: props.navStat === 0 ? "Under way using engine" : "At anchor",
+      flag: "FI",
+      length: 150,
+      timestamp: props.timestampExternal ? new Date(props.timestampExternal).toISOString() : new Date().toISOString(),
+    };
+  });
 }
 
-const DEMO_CVES = [
-  { id: "CVE-2026-0142", description: "Remote code execution in enterprise gateway appliances via crafted HTTP headers", severity: "CRITICAL", score: 9.8, vendor: "Cisco", product: "ASA Firewall", published: "2026-03-25T14:30:00Z", references: 12 },
-  { id: "CVE-2026-0138", description: "SQL injection vulnerability in widely-used CMS plugin allowing data exfiltration", severity: "HIGH", score: 8.6, vendor: "WordPress", product: "WP-Commerce Plugin", published: "2026-03-24T09:15:00Z", references: 8 },
-  { id: "CVE-2026-0135", description: "Authentication bypass in industrial control system SCADA interface", severity: "CRITICAL", score: 9.4, vendor: "Siemens", product: "SIMATIC S7", published: "2026-03-23T18:45:00Z", references: 15 },
-  { id: "CVE-2026-0131", description: "Buffer overflow in DNS resolver library affecting multiple Linux distributions", severity: "HIGH", score: 8.1, vendor: "ISC", product: "BIND", published: "2026-03-22T11:00:00Z", references: 6 },
-  { id: "CVE-2026-0127", description: "Cross-site scripting in popular JavaScript framework component rendering", severity: "MEDIUM", score: 6.5, vendor: "Open Source", product: "React-Admin", published: "2026-03-21T16:20:00Z", references: 4 },
-  { id: "CVE-2026-0124", description: "Privilege escalation in container runtime allowing host filesystem access", severity: "CRITICAL", score: 9.1, vendor: "Docker", product: "containerd", published: "2026-03-20T08:30:00Z", references: 22 },
-  { id: "CVE-2026-0119", description: "Memory corruption in GPU driver enabling kernel-level code execution", severity: "HIGH", score: 8.8, vendor: "NVIDIA", product: "GeForce Driver", published: "2026-03-19T13:50:00Z", references: 9 },
-  { id: "CVE-2026-0115", description: "Improper certificate validation in TLS library allows MITM attacks", severity: "HIGH", score: 7.9, vendor: "OpenSSL", product: "libssl", published: "2026-03-18T07:10:00Z", references: 18 },
-];
+type ThreatItem = { id: string; type: string; name: string; severity: string | undefined; source: string; country: string; targetSector: string; description: string; lat: number; lon: number; timestamp: string; indicators: number };
 
-const DEMO_THREATS = [
-  { id: "TH-2026-0891", type: "malware", name: "BlackMamba RAT", severity: "critical", source: "AlienVault OTX", country: "RU", targetSector: "Financial Services", description: "Advanced persistent threat deploying polymorphic RAT targeting banking infrastructure", lat: 55.75, lon: 37.61, timestamp: "2026-03-26T08:15:00Z", indicators: 47 },
-  { id: "TH-2026-0889", type: "phishing", name: "Operation DarkHook", severity: "high", source: "CISA Alert", country: "CN", targetSector: "Government", description: "Spear-phishing campaign targeting government employees with weaponized documents", lat: 39.9, lon: 116.4, timestamp: "2026-03-26T06:30:00Z", indicators: 23 },
-  { id: "TH-2026-0887", type: "ransomware", name: "CryptoStorm 3.0", severity: "critical", source: "FBI Flash", country: "KP", targetSector: "Healthcare", description: "New ransomware variant with worm capabilities targeting hospital networks", lat: 39.0, lon: 125.7, timestamp: "2026-03-25T22:45:00Z", indicators: 56 },
-  { id: "TH-2026-0885", type: "ddos", name: "Tsunami Botnet", severity: "high", source: "Cloudflare", country: "BR", targetSector: "E-Commerce", description: "Massive DDoS botnet leveraging IoT devices for volumetric attacks", lat: -15.8, lon: -47.9, timestamp: "2026-03-25T19:00:00Z", indicators: 31 },
-  { id: "TH-2026-0882", type: "apt", name: "Lazarus Group Update", severity: "critical", source: "Mandiant", country: "KP", targetSector: "Cryptocurrency", description: "State-sponsored APT targeting cryptocurrency exchanges with supply chain attacks", lat: 39.0, lon: 125.7, timestamp: "2026-03-25T14:20:00Z", indicators: 89 },
-  { id: "TH-2026-0880", type: "vulnerability", name: "Zero-day exploit chain", severity: "critical", source: "Google TAG", country: "IL", targetSector: "Technology", description: "Zero-day exploit chain targeting mobile devices through browser vulnerabilities", lat: 31.77, lon: 35.21, timestamp: "2026-03-25T10:00:00Z", indicators: 12 },
-  { id: "TH-2026-0877", type: "insider", name: "DataLeech Campaign", severity: "medium", source: "Internal Intel", country: "US", targetSector: "Defense", description: "Insider threat campaign involving credential harvesting from defense contractors", lat: 38.9, lon: -77.0, timestamp: "2026-03-24T21:15:00Z", indicators: 8 },
-  { id: "TH-2026-0875", type: "supply_chain", name: "PackagePoisoner", severity: "high", source: "Snyk", country: "UA", targetSector: "Software", description: "Compromised npm packages distributing backdoored dependencies", lat: 50.45, lon: 30.52, timestamp: "2026-03-24T16:40:00Z", indicators: 34 },
-];
+async function fetchOtxThreats(): Promise<ThreatItem[]> {
+  const raw = await fetchJson(
+    "https://otx.alienvault.com/api/v1/pulses/subscribed?limit=8&page=1",
+    8000,
+  );
+  type OtxPulse = { id?: string | number; name?: string; adversary?: string; targeted_countries?: string[]; references?: string[]; tags?: string[]; industries?: string[]; description?: string; created?: string; indicator_count?: number };
+  const otxData = raw as { results?: OtxPulse[] };
+  const pulses = otxData?.results;
+  if (!Array.isArray(pulses) || pulses.length === 0) throw new Error("No OTX data");
+  return pulses.map((p, idx: number) => {
+    const severityMap = ["critical", "high", "medium", "low"];
+    const sev = severityMap[Math.min(idx, 3)];
+    return {
+      id: `OTX-${p.id ?? idx}`,
+      type: p.adversary ? "apt" : "malware",
+      name: p.name?.slice(0, 60) ?? "Unknown Threat",
+      severity: sev,
+      source: "AlienVault OTX",
+      country: p.targeted_countries?.[0] ?? "Unknown",
+      targetSector: p.industries?.[0] ?? "General",
+      description: p.description?.slice(0, 200) ?? "No description available",
+      lat: 40,
+      lon: 20,
+      timestamp: p.created ?? new Date().toISOString(),
+      indicators: p.indicator_count ?? 0,
+    };
+  });
+}
 
-const DEMO_GEO_EVENTS = [
-  { id: "GEO-001", title: "Escalated cyber operations detected in Eastern Mediterranean", region: "Mediterranean", severity: "high", category: "cyber_operations", timestamp: "2026-03-26T07:00:00Z", source: "Reuters", impact: "Maritime trade routes may face disruption" },
-  { id: "GEO-002", title: "South China Sea territorial dispute intensifies with naval exercises", region: "Indo-Pacific", severity: "critical", category: "military", timestamp: "2026-03-25T23:30:00Z", source: "AP", impact: "Shipping lanes through Malacca Strait on heightened alert" },
-  { id: "GEO-003", title: "New EU cybersecurity regulations enacted affecting tech supply chains", region: "Europe", severity: "medium", category: "regulatory", timestamp: "2026-03-25T12:00:00Z", source: "European Commission", impact: "Compliance requirements for cross-border data operations" },
-  { id: "GEO-004", title: "Critical infrastructure attack reported on energy grid systems", region: "North America", severity: "critical", category: "infrastructure", timestamp: "2026-03-25T04:15:00Z", source: "CISA", impact: "Power grid operators on high alert across 12 states" },
-  { id: "GEO-005", title: "International sanctions update targeting state-sponsored cyber groups", region: "Global", severity: "high", category: "sanctions", timestamp: "2026-03-24T18:00:00Z", source: "US Treasury", impact: "New OFAC designations affecting technology exports" },
-  { id: "GEO-006", title: "Submarine cable disruption reported in Red Sea corridor", region: "Middle East", severity: "high", category: "infrastructure", timestamp: "2026-03-24T08:45:00Z", source: "TeleGeography", impact: "Internet traffic rerouting affecting 15% of Asia-Europe bandwidth" },
-];
-
-setImmediate(() => preseedCache("geopolitical", DEMO_GEO_EVENTS, 60000));
-
-const DEMO_MARITIME_VESSELS = [
-  { mmsi: "211234567", name: "ATLANTIC VOYAGER", type: "Cargo", lat: 51.52, lon: 1.35, speed: 12.4, course: 225, heading: 223, destination: "Rotterdam", status: "Under way using engine", flag: "DE", length: 225, timestamp: "2026-03-26T09:00:00Z" },
-  { mmsi: "636092587", name: "PACIFIC GUARDIAN", type: "Tanker", lat: 1.26, lon: 103.85, speed: 8.2, course: 315, heading: 312, destination: "Singapore", status: "Under way using engine", flag: "LR", length: 330, timestamp: "2026-03-26T09:00:00Z" },
-  { mmsi: "477234100", name: "STAR PHOENIX", type: "Container", lat: 29.97, lon: 32.56, speed: 14.1, course: 340, heading: 338, destination: "Piraeus", status: "Under way using engine", flag: "HK", length: 366, timestamp: "2026-03-26T09:00:00Z" },
-  { mmsi: "538006712", name: "OCEAN MERIDIAN", type: "Bulk Carrier", lat: 26.07, lon: 56.27, speed: 10.8, course: 90, heading: 88, destination: "Mumbai", status: "Under way using engine", flag: "MH", length: 292, timestamp: "2026-03-26T09:00:00Z" },
-  { mmsi: "352456789", name: "LIBERTY WAVE", type: "Container", lat: 9.0, lon: 79.55, speed: 16.2, course: 70, heading: 68, destination: "Colombo", status: "Under way using engine", flag: "PA", length: 400, timestamp: "2026-03-26T09:00:00Z" },
-  { mmsi: "244123456", name: "NORTH SEA PIONEER", type: "Tanker", lat: 57.7, lon: 1.8, speed: 6.5, course: 180, heading: 178, destination: "Aberdeen", status: "Under way using engine", flag: "NL", length: 274, timestamp: "2026-03-26T09:00:00Z" },
-];
-
-const DEMO_CHOKEPOINTS = [
-  { name: "Strait of Hormuz", lat: 26.57, lon: 56.25, vesselCount: 142, avgWait: "2.4h", riskLevel: "elevated", dailyTransits: 67, oilFlowMbpd: 21.0, status: "IRGCN fast boat activity reported — UKMTO advisory in effect. Tanker War Insurance premium elevated." },
-  { name: "Strait of Malacca", lat: 1.43, lon: 103.5, vesselCount: 218, avgWait: "1.8h", riskLevel: "normal", dailyTransits: 94, oilFlowMbpd: 16.0, status: "Normal VTIS operations. Singapore VTS reporting standard traffic density. No piracy alerts (ReCAAP ISC)." },
-  { name: "Suez Canal", lat: 30.46, lon: 32.34, vesselCount: 76, avgWait: "8.2h", riskLevel: "elevated", dailyTransits: 52, oilFlowMbpd: 5.5, status: "SCA convoy delays — southbound backup at Great Bitter Lake. New Suez Canal channel partially restricted for maintenance." },
-  { name: "Bosporus / Turkish Straits", lat: 41.12, lon: 29.05, vesselCount: 48, avgWait: "18.5h", riskLevel: "warning", dailyTransits: 42, oilFlowMbpd: 3.4, status: "Northbound queue 23 vessels. Kıyı Emniyeti reporting strong southerly current 4-6 kn. Hazardous cargo transit restricted 2200-0600." },
-  { name: "Panama Canal", lat: 9.08, lon: -79.68, vesselCount: 38, avgWait: "14.6h", riskLevel: "warning", dailyTransits: 36, oilFlowMbpd: 0.9, status: "Gatun Lake water level restrictions — max draft 44 ft TFW. Neo-Panamax slots reduced to 8/day. Auction premiums $2.4M+." },
-  { name: "Bab el-Mandeb", lat: 12.58, lon: 43.33, vesselCount: 54, avgWait: "1.2h", riskLevel: "critical", dailyTransits: 28, oilFlowMbpd: 6.2, status: "Houthi anti-ship missile threat — EUNAVFOR ASPIDES active. Multiple carriers rerouting via Cape of Good Hope (+10 days)." },
-  { name: "Danish Straits (Øresund)", lat: 55.7, lon: 12.6, vesselCount: 89, avgWait: "0.5h", riskLevel: "normal", dailyTransits: 118, oilFlowMbpd: 3.2, status: "Clear passage. HELCOM reporting normal Baltic Sea entry conditions. DMA VTS operational." },
-  { name: "Cape of Good Hope", lat: -34.35, lon: 18.47, vesselCount: 65, avgWait: "0h", riskLevel: "elevated", dailyTransits: 38, oilFlowMbpd: 2.8, status: "Increased traffic from Red Sea diversions. SAMSA weather advisory: Agulhas Current 3-4 kn opposing seas. SW swell 4-5m forecast." },
-];
-
-const DEMO_MARINE_WEATHER = [
-  { region: "Western Black Sea (Constanta)", lat: 43.8, lon: 28.6, windSpeed: 22, windDirection: "NE", waveHeight: 2.1, seaTemp: 9.8, visibility: "Moderate", condition: "Moderate seas", warning: "Northeasterly gale warning — Beaufort 7-8 forecast" },
-  { region: "North Atlantic", lat: 45.0, lon: -30.0, windSpeed: 28, windDirection: "NW", waveHeight: 3.2, seaTemp: 14.5, visibility: "Good", condition: "Moderate seas", warning: null },
-  { region: "Bosporus & Sea of Marmara", lat: 41.0, lon: 29.0, windSpeed: 18, windDirection: "S", waveHeight: 0.8, seaTemp: 11.2, visibility: "Good", condition: "Slight seas", warning: "Strong southerly current 4-6 kn in strait" },
-  { region: "Eastern Mediterranean", lat: 35.0, lon: 28.0, windSpeed: 15, windDirection: "NW", waveHeight: 1.2, seaTemp: 18.8, visibility: "Good", condition: "Slight seas", warning: null },
-  { region: "South China Sea", lat: 12.0, lon: 115.0, windSpeed: 35, windDirection: "E", waveHeight: 4.1, seaTemp: 27.6, visibility: "Poor", condition: "Rough seas", warning: "Tropical storm warning — PAGASA Signal #2" },
-  { region: "Strait of Hormuz / AG", lat: 26.0, lon: 56.0, windSpeed: 25, windDirection: "NW", waveHeight: 1.8, seaTemp: 24.1, visibility: "Good", condition: "Moderate", warning: "Shamal wind advisory 25-35 kn" },
-  { region: "Indian Ocean (Monsoon)", lat: -5.0, lon: 72.0, windSpeed: 15, windDirection: "W", waveHeight: 2.0, seaTemp: 28.3, visibility: "Good", condition: "Moderate seas", warning: null },
-  { region: "Barents Sea (NSR)", lat: 69.0, lon: 33.0, windSpeed: 32, windDirection: "W", waveHeight: 3.8, seaTemp: 2.1, visibility: "Poor", condition: "Rough seas", warning: "Ice warning — pack ice edge 71°N. Visibility <1nm in snow" },
-];
-
-const DEMO_SANCTIONS_VESSELS = [
-  { name: "SHUI SPIRIT", imo: "9180281", flag: "Cameroon", status: "OFAC SDN Listed", reason: "OFAC SDN listed (06/2025) — Identified as part of PRC-linked fleet conducting STS transfers of Iranian crude oil in Gulf of Oman. Previously named SUEZ RAJAN. Designated under E.O. 13846.", listedDate: "2025-06-15", source: "OFAC SDN" },
-  { name: "BILLION STAR 7", imo: "9126592", flag: "Palau", status: "UN Sanctioned", reason: "UN Panel of Experts Report S/2026/115 — DPRK-flagged vessel engaged in coal exports violating UNSCR 2397 (2017). AIS dark periods >72 hours detected in East China Sea.", listedDate: "2025-09-20", source: "UN Panel of Experts" },
-  { name: "ELENA", imo: "9187637", flag: "Gabon", status: "EU Sanctioned", reason: "EU Regulation 2022/879 — Russian oil price cap violation. Transporting Urals crude above $60/bbl ceiling. Previously registered as ASTRA under Marshall Islands flag. STS operations in Laconian Gulf.", listedDate: "2026-02-14", source: "EU Council Regulation 833/2014" },
-  { name: "COMET", imo: "9215378", flag: "Tanzania", status: "OFAC Listed", reason: "OFAC identified — Venezuelan PDVSA crude transport circumventing Executive Order 13884. Repeated flag changes: Liberia → Comoros → Tanzania since 2024.", listedDate: "2026-01-08", source: "OFAC SDN" },
-  { name: "LINDA I", imo: "9196454", flag: "Unknown", status: "OFAC SDN Listed", reason: "Part of Syrian Arab Republic sanctions network. Identified delivering refined products to Baniyas Terminal. AIS spoofing detected. Designated under Syria-related E.O. 13582.", listedDate: "2025-11-15", source: "OFAC SDN" },
-  { name: "SAOWALAK", imo: "9134146", flag: "Comoros", status: "OFAC Listed", reason: "Dark fleet tanker involved in Russian crude oil transport circumventing G7 price cap. Repeated STS operations off Ceuta and Kalamata. P&I insurance lapsed.", listedDate: "2026-03-10", source: "OFAC / EU Council" },
-];
-
-const DEMO_NEWS = [
-  { id: "N001", title: "Major zero-day vulnerability discovered in enterprise firewall products", source: "The Hacker News", category: "security", url: "#", publishedAt: "2026-03-26T08:00:00Z", sentiment: "negative", sentimentScore: 0.15 },
-  { id: "N002", title: "AI-powered threat detection reduces mean time to respond by 60%", source: "Dark Reading", category: "security", url: "#", publishedAt: "2026-03-26T06:30:00Z", sentiment: "positive", sentimentScore: 0.82 },
-  { id: "N003", title: "Global shipping disruptions continue as Red Sea tensions escalate", source: "Reuters", category: "maritime", url: "#", publishedAt: "2026-03-25T22:00:00Z", sentiment: "negative", sentimentScore: 0.22 },
-  { id: "N004", title: "New quantum-resistant encryption standard ratified by NIST", source: "Ars Technica", category: "technology", url: "#", publishedAt: "2026-03-25T18:15:00Z", sentiment: "positive", sentimentScore: 0.91 },
-  { id: "N005", title: "Ransomware attack disrupts hospital network across three states", source: "CNN", category: "security", url: "#", publishedAt: "2026-03-25T14:45:00Z", sentiment: "negative", sentimentScore: 0.08 },
-  { id: "N006", title: "SpaceX launches new satellite constellation for maritime IoT connectivity", source: "TechCrunch", category: "technology", url: "#", publishedAt: "2026-03-25T10:00:00Z", sentiment: "positive", sentimentScore: 0.88 },
-  { id: "N007", title: "European data sovereignty regulations reshape cloud infrastructure strategy", source: "The Register", category: "regulatory", url: "#", publishedAt: "2026-03-24T20:30:00Z", sentiment: "neutral", sentimentScore: 0.52 },
-  { id: "N008", title: "Critical supply chain vulnerability affects 40% of Fortune 500 companies", source: "Bloomberg", category: "security", url: "#", publishedAt: "2026-03-24T15:00:00Z", sentiment: "negative", sentimentScore: 0.12 },
-];
-
-const DEMO_TECH_TRENDS = [
-  { name: "Quantum Computing", momentum: 92, category: "emerging", direction: "accelerating", relevance: "high" },
-  { name: "AI Agent Frameworks", momentum: 95, category: "hot", direction: "accelerating", relevance: "critical" },
-  { name: "Zero Trust Architecture", momentum: 78, category: "maturing", direction: "steady", relevance: "high" },
-  { name: "Edge Computing", momentum: 71, category: "maturing", direction: "steady", relevance: "medium" },
-  { name: "WebAssembly", momentum: 65, category: "growing", direction: "accelerating", relevance: "medium" },
-  { name: "Confidential Computing", momentum: 58, category: "emerging", direction: "accelerating", relevance: "high" },
-  { name: "Digital Twins", momentum: 63, category: "growing", direction: "steady", relevance: "medium" },
-  { name: "Post-Quantum Cryptography", momentum: 85, category: "hot", direction: "accelerating", relevance: "critical" },
-];
-
-const DEMO_CULTURAL_CALENDAR = [
-  { date: "2026-04-01", event: "Ramadan Begins", region: "Global", relevance: "Adjust messaging for Muslim-majority markets" },
-  { date: "2026-04-05", event: "Easter Sunday", region: "Americas, Europe", relevance: "Holiday campaigns, family-oriented content" },
-  { date: "2026-04-22", event: "Earth Day", region: "Global", relevance: "Sustainability-focused campaigns" },
-  { date: "2026-05-01", event: "International Workers Day", region: "Global", relevance: "Labor and productivity themes" },
-  { date: "2026-05-05", event: "Cinco de Mayo", region: "Americas", relevance: "Cultural celebration, LatAm engagement" },
-  { date: "2026-06-21", event: "Summer Solstice", region: "Northern Hemisphere", relevance: "Outdoor and lifestyle content peak" },
-];
-
-const DEMO_PLATFORM_STATS = {
-  threatsAnalyzed: 14847,
-  vesselsTracked: 2341,
-  signalsProcessed: 89234,
-  incidentsResolved: 456,
-  assessmentsCompleted: 127,
-  campaignsLaunched: 89,
-  uptime: 99.97,
-  apiCallsToday: 234567,
-  avgResponseMs: 42,
-  activeUsers: 156,
-};
-
-const DEMO_ANOMALIES = [
-  { id: "AN-001", type: "traffic_spike", severity: "warning", description: "Unusual API traffic pattern detected — 340% above baseline for /api/vessels endpoint", detectedAt: "2026-03-26T07:45:00Z", confidence: 0.89, category: "performance", status: "investigating" },
-  { id: "AN-002", type: "auth_anomaly", severity: "critical", description: "Multiple failed authentication attempts from unexpected geographic region (Eastern Europe)", detectedAt: "2026-03-26T05:20:00Z", confidence: 0.94, category: "security", status: "active" },
-  { id: "AN-003", type: "data_drift", severity: "info", description: "Vessel position reporting frequency deviation detected in Pacific fleet", detectedAt: "2026-03-25T22:10:00Z", confidence: 0.72, category: "data_quality", status: "monitoring" },
-  { id: "AN-004", type: "resource_usage", severity: "warning", description: "Memory utilization trending upward — projected to exceed threshold in 4 hours", detectedAt: "2026-03-25T18:30:00Z", confidence: 0.81, category: "infrastructure", status: "investigating" },
-];
-
-const DEMO_OPS_HEATMAP = Array.from({ length: 24 }, (_, hour) => ({
-  hour,
-  americas: Math.floor(Math.random() * 100),
-  europe: Math.floor(Math.random() * 100),
-  asia: Math.floor(Math.random() * 100),
-  middleEast: Math.floor(Math.random() * 60),
-}));
-
-const DEMO_READINESS_BENCHMARKS = [
-  { dimension: "Cybersecurity", industryAvg: 62, topQuartile: 85, szlScore: 78 },
-  { dimension: "Cloud Infrastructure", industryAvg: 58, topQuartile: 82, szlScore: 74 },
-  { dimension: "Data Governance", industryAvg: 55, topQuartile: 79, szlScore: 81 },
-  { dimension: "AI/ML Maturity", industryAvg: 42, topQuartile: 72, szlScore: 68 },
-  { dimension: "DevOps Practices", industryAvg: 60, topQuartile: 88, szlScore: 82 },
-  { dimension: "Compliance", industryAvg: 65, topQuartile: 90, szlScore: 76 },
-];
-
-const DEMO_ECOSYSTEM_HEALTH = [
-  { app: "Firestorm", status: "operational", uptime: 99.99, latency: 34, activeUsers: 23, lastIncident: "2026-03-10" },
-  { app: "Vessels", status: "operational", uptime: 99.95, latency: 48, activeUsers: 18, lastIncident: "2026-03-15" },
-  { app: "Lyte Command", status: "operational", uptime: 99.98, latency: 29, activeUsers: 31, lastIncident: "2026-03-01" },
-  { app: "Aegis", status: "operational", uptime: 99.97, latency: 41, activeUsers: 12, lastIncident: "2026-02-28" },
-  { app: "Alloy", status: "degraded", uptime: 99.82, latency: 87, activeUsers: 15, lastIncident: "2026-03-25" },
-  { app: "Admin Panel", status: "operational", uptime: 99.99, latency: 22, activeUsers: 8, lastIncident: "2026-02-15" },
-  { app: "API Server", status: "operational", uptime: 99.99, latency: 18, activeUsers: 156, lastIncident: "2026-03-05" },
-];
 
 router.get("/intelligence/threats", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
@@ -453,8 +382,11 @@ router.get("/intelligence/maritime/vessels", intelRateLimit, authMiddleware({ re
 
 router.get("/intelligence/maritime/chokepoints", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("chokepoints", 300000, async () => DEMO_CHOKEPOINTS);
-    sendSuccess(res, data);
+    sendSuccess(res, {
+      status: "NOT_CONFIGURED",
+      note: "Connect a live maritime data source (e.g. MarineTraffic API, UKMTO feed) to enable real-time chokepoint intelligence.",
+      data: [],
+    });
   } catch (err) { handleRouteError(res, err, "Failed to fetch chokepoint data"); }
 });
 
@@ -465,25 +397,63 @@ router.get("/intelligence/maritime/weather", intelRateLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to fetch marine weather"); }
 });
 
+type SanctionVessel = { name: string; imo: string; flag: string; status: string; reason: string; listedDate: string; source: string; entities: { entity_group: string; word: string; score: number }[]; aiEnriched: boolean };
+
+async function fetchOfacSdnVessels(): Promise<{ name: string; imo: string; flag: string; status: string; reason: string; listedDate: string; source: string }[]> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch("https://www.treasury.gov/ofac/downloads/sdn_mini.xml", {
+      signal: controller.signal,
+      headers: { "User-Agent": "SZL-IntelPlatform/1.0", Accept: "application/xml,text/xml" },
+    });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(`OFAC HTTP ${res.status}`);
+    const xml = await res.text();
+    const vesselMatches: { name: string; imo: string; flag: string; status: string; reason: string; listedDate: string; source: string }[] = [];
+    const sdnEntries = xml.split(/<sdnEntry>/).slice(1);
+    for (const entry of sdnEntries.slice(0, 200)) {
+      const sdnType = (entry.match(/<sdnType>([^<]+)<\/sdnType>/) ?? [])[1] ?? "";
+      if (sdnType !== "Vessel") continue;
+      const name = (entry.match(/<lastName>([^<]+)<\/lastName>/) ?? [])[1] ?? "";
+      const flag = (entry.match(/<citizenship>([^<]+)<\/citizenship>/) ?? [])[1] ?? "Unknown";
+      const listedDate = (entry.match(/<publishDate>([^<]+)<\/publishDate>/) ?? [])[1] ?? "";
+      let imo = "";
+      const imoMatch = entry.match(/imo\s+(?:no\.?|number)\s*[:\s]*([0-9]{7})/i);
+      if (imoMatch) imo = imoMatch[1];
+      const programMatch = entry.match(/<program>([^<]+)<\/program>/);
+      const reason = programMatch ? programMatch[1] : "OFAC SDN designation";
+      if (name) {
+        vesselMatches.push({ name, imo, flag, status: "Sanctioned", reason, listedDate, source: "OFAC SDN" });
+      }
+    }
+    return vesselMatches;
+  } catch {
+    clearTimeout(timer);
+    return [];
+  }
+}
+
+async function fetchAndEnrichSanctions(): Promise<SanctionVessel[]> {
+  const raw = await fetchOfacSdnVessels();
+  if (raw.length === 0) return [];
+  const enriched = await Promise.all(
+    raw.slice(0, 50).map(async (vessel) => {
+      try {
+        const ner = await services.huggingface.namedEntityRecognition(
+          `${vessel.name} flagged under ${vessel.flag} for ${vessel.reason}`,
+        );
+        return { ...vessel, entities: ner.entities.slice(0, 5), aiEnriched: true };
+      } catch {
+        return { ...vessel, entities: [], aiEnriched: false };
+      }
+    }),
+  );
+  return enriched;
+}
 router.get("/intelligence/maritime/sanctions", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const sanctions = await getCached("sanctions", 3600000, async () => DEMO_SANCTIONS_VESSELS);
-    const enriched = await Promise.all(
-      sanctions.map(async (vessel) => {
-        try {
-          const ner = await services.huggingface.namedEntityRecognition(
-            `${vessel.name} flagged under ${vessel.flag} for ${vessel.reason}`,
-          );
-          return {
-            ...vessel,
-            entities: ner.entities.slice(0, 5),
-            aiEnriched: true,
-          };
-        } catch {
-          return { ...vessel, entities: [], aiEnriched: false };
-        }
-      }),
-    );
+    const enriched = await getCached("sanctions-enriched", 3600000, fetchAndEnrichSanctions);
     sendSuccess(res, enriched);
   } catch (err) { handleRouteError(res, err, "Failed to fetch sanctions data"); }
 });
@@ -499,50 +469,65 @@ router.get("/intelligence/news", intelRateLimit, authMiddleware({ required: fals
 
 router.get("/intelligence/tech-trends", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("tech-trends", 3600000, async () => DEMO_TECH_TRENDS);
-    sendSuccess(res, data);
+    sendSuccess(res, {
+      status: "NOT_CONFIGURED",
+      note: "Connect a technology trend data source (e.g. ThoughtWorks Radar API, GitHub Octoverse, Stack Overflow Survey) to enable live tech trend intelligence.",
+      data: [],
+    });
   } catch (err) { handleRouteError(res, err, "Failed to fetch tech trends"); }
 });
 
 router.get("/intelligence/anomalies", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("anomalies", 60000, async () => DEMO_ANOMALIES);
+    const data = await getCached("anomalies", 60000, async () => ([] as unknown[]));
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch anomalies"); }
 });
 
 router.get("/intelligence/ops-heatmap", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("ops-heatmap", 300000, async () => DEMO_OPS_HEATMAP);
-    sendSuccess(res, data);
+    sendSuccess(res, {
+      status: "NOT_CONFIGURED",
+      note: "Connect operational event streams (SIEM, SOAR, or ticketing system) to enable real-time operations heatmap.",
+      data: [],
+    });
   } catch (err) { handleRouteError(res, err, "Failed to fetch ops heatmap"); }
 });
 
 router.get("/intelligence/platform-stats", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const stats = { ...DEMO_PLATFORM_STATS, timestamp: new Date().toISOString() };
-    sendSuccess(res, stats);
+    sendSuccess(res, {
+      status: "NOT_CONFIGURED",
+      note: "Platform statistics require integration with your observability stack (e.g. Datadog, Grafana, or custom metrics pipeline).",
+      data: null,
+    });
   } catch (err) { handleRouteError(res, err, "Failed to fetch platform stats"); }
 });
 
 router.get("/intelligence/benchmarks", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("benchmarks", 3600000, async () => DEMO_READINESS_BENCHMARKS);
-    sendSuccess(res, data);
+    sendSuccess(res, {
+      status: "NOT_CONFIGURED",
+      note: "Connect an industry benchmark data source (e.g. Gartner, IDC, CIS Controls self-assessment) to enable live readiness benchmarks.",
+      data: [],
+    });
   } catch (err) { handleRouteError(res, err, "Failed to fetch benchmarks"); }
 });
 
 router.get("/intelligence/ecosystem-health", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("ecosystem-health", 60000, async () => DEMO_ECOSYSTEM_HEALTH);
+    const data = await getCached("ecosystem-health", 60000, async () => ([] as unknown[]));
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch ecosystem health"); }
 });
 
 router.get("/intelligence/cultural-calendar", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("cultural-calendar", 86400000, async () => DEMO_CULTURAL_CALENDAR);
-    sendSuccess(res, data);
+    sendSuccess(res, {
+      status: "NOT_CONFIGURED",
+      note: "Connect a calendar data source (e.g. Google Calendar API, Holidata, custom CMS) to enable regional cultural calendar intelligence.",
+      data: [],
+    });
   } catch (err) { handleRouteError(res, err, "Failed to fetch cultural calendar"); }
 });
 
@@ -794,16 +779,17 @@ router.post("/intelligence/ai/situation-report", aiRateLimit, authMiddleware({ r
       getCached("news", 300000, fetchRssNews),
     ]);
 
+    const geoEvents = await getCached("geopolitical", 300000, fetchGdeltGeopolitical).catch(() => [] as GeoEvent[]);
+
     const context = [
       `Active threats: ${threats.length}`,
       `Critical CVEs: ${cves.filter(c => c.severity === "CRITICAL").length}`,
-      `Anomalies detected: ${DEMO_ANOMALIES.length}`,
-      `Geopolitical events: ${DEMO_GEO_EVENTS.length}`,
+      `Geopolitical events: ${geoEvents.length}`,
       `Recent news: ${news.slice(0, 3).map(n => n.title).join("; ")}`,
     ].join(". ");
 
     const summary = await services.huggingface.summarization(
-      `Current situation report: ${context}. ${DEMO_GEO_EVENTS.map(e => e.title).join(". ")}`,
+      `Current situation report: ${context}. ${geoEvents.map(e => e.title).join(". ")}`,
     );
 
     sendSuccess(res, {
@@ -811,8 +797,8 @@ router.post("/intelligence/ai/situation-report", aiRateLimit, authMiddleware({ r
       stats: {
         totalThreats: threats.length,
         criticalCves: cves.filter(c => c.severity === "CRITICAL").length,
-        activeAnomalies: DEMO_ANOMALIES.filter(a => a.status === "active").length,
-        geoEvents: DEMO_GEO_EVENTS.length,
+        activeAnomalies: 0,
+        geoEvents: geoEvents.length,
       },
       generatedAt: new Date().toISOString(),
     });
@@ -847,28 +833,32 @@ router.post("/intelligence/ai/risk-prediction", aiRateLimit, authMiddleware({ re
 router.post("/intelligence/ai/content-ideas", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const { topic } = req.body;
-    const trendingTopics = DEMO_TECH_TRENDS.filter(t => t.momentum > 70).map(t => t.name);
-
     const classification = await services.huggingface.zeroShotClassification(
       topic || "technology innovation",
       ["thought_leadership", "product_marketing", "educational", "case_study", "social_media"],
     );
 
+    const inputTopic = topic || "technology innovation";
     const ideas = [
-      { title: `The Future of ${trendingTopics[0]} in Enterprise Security`, format: "Long-form article", audience: "C-Suite", estimatedEngagement: "high", trendAlignment: 95 },
-      { title: `How ${trendingTopics[1]} is Reshaping Maritime Operations`, format: "Video series", audience: "Industry professionals", estimatedEngagement: "very high", trendAlignment: 92 },
-      { title: `${trendingTopics[2]}: A Practical Implementation Guide`, format: "Whitepaper", audience: "Technical leaders", estimatedEngagement: "medium", trendAlignment: 78 },
-      { title: `5 ${trendingTopics[3]} Trends Every CTO Should Watch`, format: "Infographic", audience: "Tech executives", estimatedEngagement: "high", trendAlignment: 85 },
-      { title: `Building Resilient Systems with ${trendingTopics[4]}`, format: "Webinar", audience: "DevOps teams", estimatedEngagement: "medium", trendAlignment: 71 },
+      { title: `The Future of ${inputTopic} in Enterprise Security`, format: "Long-form article", audience: "C-Suite", estimatedEngagement: "high", trendAlignment: classification?.scores?.[0] ? Math.round(classification.scores[0] * 100) : null },
+      { title: `How ${inputTopic} is Reshaping Maritime Operations`, format: "Video series", audience: "Industry professionals", estimatedEngagement: "very high", trendAlignment: null },
+      { title: `${inputTopic}: A Practical Implementation Guide`, format: "Whitepaper", audience: "Technical leaders", estimatedEngagement: "medium", trendAlignment: null },
     ];
 
     sendSuccess(res, {
       ideas,
-      trendingTopics,
+      trendingTopics: [],
       contentTypeRecommendation: classification,
       generatedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to generate content ideas"); }
+});
+
+router.get("/intelligence/briefing", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
+  try {
+    const briefing = await getCached("briefing", 300000, computeIntelligenceBriefing);
+    sendSuccess(res, briefing);
+  } catch (err) { handleRouteError(res, err, "Failed to fetch intelligence briefing"); }
 });
 
 router.get("/intelligence/daily-digest", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
@@ -892,17 +882,17 @@ router.get("/intelligence/daily-digest", intelRateLimit, authMiddleware({ requir
         topCve: cves[0],
       },
       maritimeSummary: {
-        vesselsTracked: DEMO_MARITIME_VESSELS.length,
-        chokepointAlerts: DEMO_CHOKEPOINTS.filter(c => c.riskLevel !== "normal").length,
-        weatherWarnings: DEMO_MARINE_WEATHER.filter(w => w.warning).length,
+        vesselsTracked: 0,
+        chokepointAlerts: 0,
+        weatherWarnings: 0,
       },
       anomalySummary: {
-        total: DEMO_ANOMALIES.length,
-        critical: DEMO_ANOMALIES.filter(a => a.severity === "critical").length,
-        active: DEMO_ANOMALIES.filter(a => a.status === "active").length,
+        total: 0,
+        critical: 0,
+        active: 0,
       },
       topNews: news.slice(0, 3),
-      platformHealth: DEMO_ECOSYSTEM_HEALTH,
+      platformHealth: [],
       generatedAt: new Date().toISOString(),
     };
     sendSuccess(res, digest);
@@ -998,25 +988,13 @@ router.get("/intelligence/cisa-kev", intelRateLimit, authMiddleware({ required: 
         };
       } catch {
         return {
-          catalogVersion: "2024.1",
-          dateReleased: new Date().toISOString().slice(0, 10),
-          count: 1000,
-          recentVulnerabilities: DEMO_CVES.map(c => ({
-            cveID: c.id,
-            vendorProject: c.vendor,
-            product: c.product,
-            vulnerabilityName: c.description.slice(0, 80),
-            dateAdded: c.published.slice(0, 10),
-            shortDescription: c.description,
-            requiredAction: "Apply updates per vendor instructions.",
-            dueDate: new Date(new Date(c.published).getTime() + 21 * 86400000).toISOString().slice(0, 10),
-            knownRansomwareCampaignUse: c.severity === "CRITICAL" ? "Known" : "Unknown",
-            notes: `CVSS Score: ${c.score}`,
-          })),
-          ransomwareKnown: DEMO_CVES.filter(c => c.severity === "CRITICAL").map(c => ({
-            cveID: c.id, vendorProject: c.vendor, product: c.product,
-          })),
-          source: "demo",
+          catalogVersion: null,
+          dateReleased: null,
+          count: 0,
+          recentVulnerabilities: [],
+          ransomwareKnown: [],
+          source: "unavailable",
+          note: "CISA KEV feed temporarily unavailable. Data will populate when the feed is reachable.",
         };
       }
     });
@@ -1281,7 +1259,6 @@ router.get("/intelligence/unified-feed", intelRateLimit, authMiddleware({ requir
       ...cves.slice(0, 3).map(c => ({ id: c.id, lane: "firestorm", type: "cve", title: `${c.id}: ${c.product}`, summary: c.description.slice(0, 150), severity: c.severity.toLowerCase(), timestamp: c.published, source: "NVD", url: `https://nvd.nist.gov/vuln/detail/${c.id}` })),
       ...news.slice(0, 3).map(n => ({ id: n.id, lane: "intelligence", type: "news", title: n.title, summary: n.title, severity: n.sentimentScore < 0.3 ? "high" : "low", timestamp: n.publishedAt, source: n.source, url: n.url })),
       ...geo.slice(0, 3).map(g => ({ id: g.id, lane: "vessels", type: "geopolitical", title: g.title, summary: g.impact, severity: g.severity, timestamp: g.timestamp, source: g.source, url: null })),
-      ...DEMO_MARITIME_VESSELS.slice(0, 2).map(v => ({ id: `AIS-${v.mmsi}`, lane: "vessels", type: "vessel_position", title: `${v.name} — ${v.type}`, summary: `Speed: ${v.speed}kn, Course: ${v.course}°, Destination: ${v.destination}`, severity: "info", timestamp: v.timestamp, source: "AIS", url: null })),
     ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     sendSuccess(res, {
@@ -1293,7 +1270,7 @@ router.get("/intelligence/unified-feed", intelRateLimit, authMiddleware({ requir
         cves: cves.length,
         news: news.length,
         geopolitical: geo.length,
-        vessels: DEMO_MARITIME_VESSELS.length,
+        vessels: 0,
       },
       generatedAt: new Date().toISOString(),
     });

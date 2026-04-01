@@ -351,7 +351,7 @@ router.get("/lyte/live/github-activity", authMiddleware({ required: false }), as
             pullRequests: { total: 0, open: 0, merged: 0, recent: [] },
             issues: { total: 0, open: 0 },
           },
-          source: "demo",
+          source: "unavailable",
         };
       }
     });
@@ -361,7 +361,7 @@ router.get("/lyte/live/github-activity", authMiddleware({ required: false }), as
       url: repo ? `https://github.com/${owner}/${repo}` : `https://github.com/${owner}`,
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source === "live-github",
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),

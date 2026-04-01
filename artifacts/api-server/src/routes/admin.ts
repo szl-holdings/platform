@@ -488,7 +488,7 @@ adminRouter.post("/admin/connectors/:name/sync", async (req, res) => {
     name: adapter.name,
     synced: true,
     syncedAt: new Date().toISOString(),
-    itemsSynced: Math.floor(Math.random() * 20) + 1,
+    itemsSynced: 0,
   };
   integrationActivityLog.unshift({
     id: `act_${Date.now()}`,

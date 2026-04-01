@@ -28,6 +28,7 @@ import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
+import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence.js";
 
 failFastOnInvalidConfig();
 
@@ -114,6 +115,10 @@ server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
   scheduleNycIngestionJob();
   scheduleNycExtendedIngestionJob();
+  prewarmIntelligenceCache().catch(err => {
+    logger.warn({ err }, "[intelligence-cache] Prewarm failed (non-fatal)");
+  });
+  scheduleIntelligenceRefresh();
 });
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;

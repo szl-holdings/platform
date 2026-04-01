@@ -48,7 +48,7 @@ async function fetchJson(url: string, timeoutMs = 12000): Promise<unknown> {
   }
 }
 
-const DEMO_MORTGAGE_RATES = {
+const FALLBACK_MORTGAGE_RATES = {
   rate30yr: 7.12,
   rate15yr: 6.48,
   rateArm5: 6.35,
@@ -57,7 +57,7 @@ const DEMO_MORTGAGE_RATES = {
   asOf: new Date().toISOString().slice(0, 10),
 };
 
-const DEMO_CENSUS_STATS = [
+const FALLBACK_CENSUS_STATS = [
   { msaCode: "35620", name: "New York-Newark-Jersey City", population: 20140470, medianHouseholdIncome: 82461, medianHomeValue: 519800, ownerOccupancyRate: 50.4, rentalVacancyRate: 4.1, source: "demo" },
   { msaCode: "12420", name: "Austin-Round Rock-Georgetown", population: 2295303, medianHouseholdIncome: 86091, medianHomeValue: 385600, ownerOccupancyRate: 58.2, rentalVacancyRate: 6.8, source: "demo" },
   { msaCode: "33100", name: "Miami-Fort Lauderdale-Pompano Beach", population: 6183099, medianHouseholdIncome: 61834, medianHomeValue: 428100, ownerOccupancyRate: 62.1, rentalVacancyRate: 3.7, source: "demo" },
@@ -65,7 +65,7 @@ const DEMO_CENSUS_STATS = [
   { msaCode: "42660", name: "Seattle-Tacoma-Bellevue", population: 4018762, medianHouseholdIncome: 104978, medianHomeValue: 638900, ownerOccupancyRate: 55.6, rentalVacancyRate: 3.2, source: "demo" },
 ];
 
-const DEMO_HUD_FAIR_MARKET = [
+const FALLBACK_HUD_FAIR_MARKET = [
   { area: "New York, NY MSA", year: 2025, studio: 1900, oneBed: 2180, twoBed: 2520, threeBed: 3180, fourBed: 3750, source: "demo" },
   { area: "Austin, TX MSA", year: 2025, studio: 1180, oneBed: 1380, twoBed: 1700, threeBed: 2320, fourBed: 2710, source: "demo" },
   { area: "Miami, FL MSA", year: 2025, studio: 1540, oneBed: 1720, twoBed: 2120, threeBed: 2980, fourBed: 3560, source: "demo" },
@@ -104,7 +104,7 @@ router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ requir
         });
         return { data: { stats }, source: "live" };
       } catch {
-        const filtered = msaCode ? DEMO_CENSUS_STATS.filter(s => s.msaCode === msaCode) : DEMO_CENSUS_STATS;
+        const filtered = msaCode ? FALLBACK_CENSUS_STATS.filter(s => s.msaCode === msaCode) : FALLBACK_CENSUS_STATS;
         return { data: { stats: filtered }, source: "demo" };
       }
     });
@@ -136,7 +136,7 @@ router.get("/terra/live/hud-fair-market-rents", terraLiveLimit, authMiddleware({
         if (keyAreas.length === 0) throw new Error("No key areas found");
         return { data: { rents: keyAreas.map((a: any) => ({ area: a.area_name, year: a.year, ...a })) }, source: "live" };
       } catch {
-        return { data: { rents: DEMO_HUD_FAIR_MARKET }, source: "demo" };
+        return { data: { rents: FALLBACK_HUD_FAIR_MARKET }, source: "demo" };
       }
     });
 
@@ -181,7 +181,7 @@ router.get("/terra/live/mortgage-rates", terraLiveLimit, authMiddleware({ requir
           source: "live",
         };
       } catch {
-        return { data: DEMO_MORTGAGE_RATES, source: "demo" };
+        return { data: FALLBACK_MORTGAGE_RATES, source: "demo" };
       }
     });
 

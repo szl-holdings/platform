@@ -39,20 +39,6 @@ interface SimulationRun {
   parameters?: Record<string, unknown>;
 }
 
-const DEMO_SIMULATIONS: SimulationRun[] = [
-  {
-    id: 1, name: "Q1 2026 — Credential Stuffing Defense Validation", scenario: "Brute Force & Credential Stuffing", status: "completed", mode: "controlled", outcome: "partial_pass", gapsFound: ["MFA bypass via legacy SSO endpoint", "Rate limiting not applied to /api/auth/login", "No IP reputation check on authentication endpoint"], linkedAssets: ["auth-service-cluster", "admin-portal-sso"], owner: "Morgan Lee", dueDate: "2026-04-05", startedAt: "2026-03-15T09:00:00Z", completedAt: "2026-03-15T14:30:00Z", detectionRate: 72, meanTimeToDetect: 18, coverage: { tested: 8, detected: 6, missed: 2 }, recommendedActions: ["Apply rate limiting to auth endpoint", "Enable IP reputation check", "Patch legacy SSO endpoint"], auditTrail: [{ action: "Simulation authorized by CISO", user: "CISO", at: "2026-03-14T16:00:00Z" }, { action: "Simulation started", user: "Morgan Lee", at: "2026-03-15T09:00:00Z" }, { action: "Completed — gaps logged", user: "System", at: "2026-03-15T14:30:00Z" }]
-  },
-  {
-    id: 2, name: "Q1 2026 — Lateral Movement Detection Test", scenario: "East-West Lateral Movement", status: "completed", mode: "controlled", outcome: "fail", gapsFound: ["No network segmentation between payment and customer-data subnets", "Windows SMB lateral movement not detected by EDR", "Service account token reuse across segments not flagged"], linkedAssets: ["customer-data-db-primary", "payment-api-v3", "aws-eks-prod-cluster"], owner: "Riley Torres", dueDate: "2026-04-10", startedAt: "2026-03-20T10:00:00Z", completedAt: "2026-03-20T16:00:00Z", detectionRate: 34, meanTimeToDetect: 45, coverage: { tested: 9, detected: 3, missed: 6 }, recommendedActions: ["Implement network segmentation between payment and DB subnets", "Tune EDR rules for SMB lateral movement", "Rotate service account tokens quarterly"], auditTrail: [{ action: "Authorized by Security Director", user: "Security Director", at: "2026-03-19T15:00:00Z" }, { action: "Simulation started", user: "Riley Torres", at: "2026-03-20T10:00:00Z" }, { action: "Completed — critical gaps found", user: "System", at: "2026-03-20T16:00:00Z" }]
-  },
-  {
-    id: 3, name: "Q1 2026 — Data Exfiltration Prevention Test", scenario: "Data Exfiltration via HTTP/S", status: "completed", mode: "controlled", outcome: "pass", gapsFound: [], linkedAssets: ["customer-data-db-primary", "prod-api-gateway-01"], owner: "Marcus Webb", dueDate: "2026-03-28", startedAt: "2026-03-25T09:00:00Z", completedAt: "2026-03-25T12:00:00Z", detectionRate: 94, meanTimeToDetect: 4, coverage: { tested: 6, detected: 6, missed: 0 }, recommendedActions: ["Continue current DLP controls", "Extend monitoring to DNS exfiltration patterns"], auditTrail: [{ action: "Authorized", user: "CISO", at: "2026-03-24T14:00:00Z" }, { action: "Completed — all controls held", user: "System", at: "2026-03-25T12:00:00Z" }]
-  },
-  {
-    id: 4, name: "Q2 2026 — Ransomware Defense Validation (Scheduled)", scenario: "Ransomware Propagation Simulation", status: "pending", mode: "controlled", outcome: null, gapsFound: [], linkedAssets: ["endpoint-win-fleet", "customer-data-db-primary"], owner: "Morgan Lee", dueDate: "2026-04-25", startedAt: null, completedAt: null, detectionRate: null, meanTimeToDetect: null, coverage: { tested: 0, detected: 0, missed: 0 }, recommendedActions: [], auditTrail: [{ action: "Simulation scheduled by CISO", user: "CISO", at: "2026-03-28T10:00:00Z" }]
-  },
-];
 
 const SCENARIO_TEMPLATES = [
   "Brute Force & Credential Stuffing",
@@ -88,10 +74,9 @@ export default function SimulationPanelPage() {
   const { data: rawSims, isLoading } = useQuery<SimulationRun[]>({
     queryKey: ["firestorm-simulations"],
     queryFn: () => api.simulations.list() as Promise<SimulationRun[]>,
-    placeholderData: DEMO_SIMULATIONS,
   });
 
-  const simulations: SimulationRun[] = (rawSims && rawSims.length > 0) ? rawSims : DEMO_SIMULATIONS;
+  const simulations: SimulationRun[] = rawSims ?? [];
 
   const createMutation = useMutation({
     mutationFn: (data: typeof form) => api.simulations.create({ name: data.name, mode: "controlled", parameters: { scenario: data.scenario, owner: data.owner, dueDate: data.dueDate, notes: data.notes } }),

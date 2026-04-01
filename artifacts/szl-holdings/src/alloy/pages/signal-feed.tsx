@@ -23,7 +23,7 @@ interface SignalResp {
   meta: { page: number; limit: number; total: number };
 }
 
-const DEMO_SIGNALS: Signal[] = [
+const FALLBACK_SIGNALS: Signal[] = [
   { id: 1, source: "terra", sourceType: "connector", severity: "critical", title: "Pre-foreclosure filing: 234 W 145th St, Manhattan — auction in 11 days", body: "Signal from TERRA connector. Immediate action required — distress opportunity window closing.", status: "new", normalizedScore: "92.3", metadata: { correlationId: "corr-t001", region: "us-east-1" }, receivedAt: new Date(Date.now() - 120000).toISOString(), processedAt: null },
   { id: 2, source: "aegis", sourceType: "monitoring", severity: "critical", title: "Critical CVE-2025-1234 detected in API gateway — CVSS 9.1", body: "Vulnerability detected in production infrastructure. Patch available.", status: "processing", normalizedScore: "95.0", metadata: { correlationId: "corr-a001", region: "us-east-1" }, receivedAt: new Date(Date.now() - 300000).toISOString(), processedAt: null },
   { id: 3, source: "vessels", sourceType: "monitoring", severity: "high", title: "Dark vessel detected: MMSI 123456789 — 18h AIS gap in position feed", body: "Vessel went dark in high-risk corridor. Sanctions screening initiated.", status: "processing", normalizedScore: "78.5", metadata: { correlationId: "corr-v001", region: "eu-west-1" }, receivedAt: new Date(Date.now() - 480000).toISOString(), processedAt: null },
@@ -38,8 +38,8 @@ const DEMO_SIGNALS: Signal[] = [
   { id: 12, source: "alloy", sourceType: "api", severity: "info", title: "Connector timeout: Salesforce API rate limit hit — backoff in progress", body: "Automatic retry initiated. ETA: 60s.", status: "processed", normalizedScore: "15.0", metadata: { correlationId: "corr-al003", region: "us-west-2" }, receivedAt: new Date(Date.now() - 10800000).toISOString(), processedAt: new Date(Date.now() - 10700000).toISOString() },
 ];
 
-const DEMO_SIGNAL_RESP: SignalResp = {
-  data: DEMO_SIGNALS,
+const FALLBACK_SIGNAL_RESP: SignalResp = {
+  data: FALLBACK_SIGNALS,
   meta: { page: 1, limit: 50, total: 12 },
 };
 
@@ -58,9 +58,9 @@ function useSignals(source: string | null, severity: string | null, page: number
         }
         const arr = (resp as unknown as Signal[]) ?? [];
         if (arr.length > 0) return { data: arr, meta: { page: 1, limit: 50, total: arr.length } };
-        return DEMO_SIGNAL_RESP;
+        return FALLBACK_SIGNAL_RESP;
       } catch {
-        let filtered = DEMO_SIGNALS;
+        let filtered = FALLBACK_SIGNALS;
         if (source) filtered = filtered.filter(s => s.source === source);
         if (severity) filtered = filtered.filter(s => s.severity === severity);
         return { data: filtered, meta: { page: 1, limit: 50, total: filtered.length } };

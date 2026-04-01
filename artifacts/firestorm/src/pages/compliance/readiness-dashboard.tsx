@@ -1,29 +1,39 @@
 import { useState, useEffect, useRef } from "react";
-import { Activity, Target, ShieldAlert, BellRing, TrendingUp, ArrowUpRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Activity, Target, ShieldAlert, BellRing, ArrowUpRight, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from "framer-motion";
+import { apiFetch } from "@workspace/shared-ui";
 
-const IS_DEMO = import.meta.env.VITE_DEMO_MODE !== "false";
+interface ReadinessDimension {
+  id: number;
+  name: string;
+  category?: string;
+  currentScore: number;
+  targetScore: number;
+  assessorName?: string;
+  lastAssessedAt?: string;
+}
 
-const mockProgram = { name: "SZL Security Readiness Program", overallScore: 78.4, targetScore: 90, status: "active" };
-const mockDimensions = [
-  { id: 1, name: "Identify", category: "NIST CSF", currentScore: 82, targetScore: 85, assessorName: "J. Chen", lastAssessedAt: "2026-03-01" },
-  { id: 2, name: "Protect", category: "NIST CSF", currentScore: 74, targetScore: 85, assessorName: "M. Rodriguez", lastAssessedAt: "2026-02-28" },
-  { id: 3, name: "Detect", category: "NIST CSF", currentScore: 79, targetScore: 88, assessorName: "S. Park", lastAssessedAt: "2026-03-10" },
-  { id: 4, name: "Respond", category: "NIST CSF", currentScore: 71, targetScore: 85, assessorName: "K. Wilson", lastAssessedAt: "2026-02-20" },
-  { id: 5, name: "Recover", category: "NIST CSF", currentScore: 68, targetScore: 80, assessorName: "A. Thompson", lastAssessedAt: "2026-01-15" },
-  { id: 6, name: "Access Control", category: "ISO 27001", currentScore: 85, targetScore: 90, assessorName: "J. Chen", lastAssessedAt: "2026-03-05" },
-  { id: 7, name: "Operations Security", category: "ISO 27001", currentScore: 77, targetScore: 88, assessorName: "M. Rodriguez", lastAssessedAt: "2026-03-08" },
-  { id: 8, name: "CMMC Level 2", category: "CMMC", currentScore: 72, targetScore: 80, assessorName: "S. Park", lastAssessedAt: "2026-02-14" },
-];
-const mockRisks = [
-  { id: 1, severity: "critical", status: "open" },
-  { id: 2, severity: "critical", status: "mitigating" },
-  { id: 3, severity: "high", status: "open" },
-];
-const mockAlerts = [
-  { id: 1, isRead: false }, { id: 2, isRead: false }, { id: 3, isRead: true },
-];
+interface ReadinessProgram {
+  id: number;
+  name: string;
+  overallScore: number;
+  targetScore: number;
+  status: string;
+}
+
+interface ExecutiveRollup {
+  programCount: number;
+  activeProgramCount: number;
+  dimensionCount: number;
+  overdueMilestoneCount: number;
+  openRiskCount: number;
+  criticalRiskCount: number;
+  unreadAlertCount: number;
+  programs: ReadinessProgram[];
+  recentAlerts: { id: number; isRead: boolean }[];
+}
 
 function useAnimatedCounter(target: number, duration = 1200, decimals = 0) {
   const [count, setCount] = useState(0);
@@ -77,14 +87,43 @@ function DimensionBar({ name, score, target, index }: { name: string; score: num
 }
 
 export default function ReadinessDashboard() {
-  const criticalRisks = IS_DEMO ? mockRisks.filter(r => r.severity === 'critical' && r.status !== 'resolved') : [];
-  const unreadAlerts = IS_DEMO ? mockAlerts.filter(a => !a.isRead) : [];
-  const sortedDimensions = IS_DEMO ? [...mockDimensions].sort((a, b) => b.currentScore - a.currentScore) : [];
-  const overallScore = useAnimatedCounter(IS_DEMO ? mockProgram.overallScore : 0, 1400, 1);
+  const { data: rollup, isLoading } = useQuery<ExecutiveRollup>({
+    queryKey: ["readiness", "executive-rollup"],
+    queryFn: () => apiFetch<ExecutiveRollup>("/readiness/executive-rollup"),
+    retry: 1,
+    staleTime: 60000,
+  });
 
+  const { data: dimensionsRaw = [] } = useQuery<ReadinessDimension[]>({
+    queryKey: ["readiness", "dimensions"],
+    queryFn: async () => {
+      if (!rollup?.programs?.[0]?.id) return [];
+      return apiFetch<ReadinessDimension[]>(`/readiness/programs/${rollup.programs[0].id}/dimensions`);
+    },
+    enabled: !!rollup?.programs?.[0],
+    staleTime: 60000,
+  });
+
+  const activeProgram = rollup?.programs?.[0] ?? null;
+  const overallScore = useAnimatedCounter(activeProgram?.overallScore ?? 0, 1400, 1);
+  const sortedDimensions = [...dimensionsRaw].sort((a, b) => b.currentScore - a.currentScore);
   const chartData = sortedDimensions.map(d => ({ name: d.name.slice(0, 8), score: d.currentScore, target: d.targetScore }));
 
-  if (!IS_DEMO) {
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <header>
+          <h1 className="font-display text-lg font-bold text-orange-50">Readiness Posture</h1>
+          <p className="text-orange-400/50 text-xs mt-0.5">NIST CSF · ISO 27001 · CMMC frameworks</p>
+        </header>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 text-orange-400/50 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!activeProgram) {
     return (
       <div className="space-y-6">
         <header>
@@ -94,7 +133,7 @@ export default function ReadinessDashboard() {
         <div className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-10 flex flex-col items-center justify-center text-center gap-3">
           <Target className="w-8 h-8 text-orange-400/40" />
           <p className="text-orange-50/70 text-sm font-medium">No readiness program configured</p>
-          <p className="text-orange-400/40 text-xs max-w-sm">Connect your compliance data source or enable simulation mode to view readiness scores and dimension performance.</p>
+          <p className="text-orange-400/40 text-xs max-w-sm">Create a readiness program and add dimensions to start tracking your compliance posture across NIST CSF, ISO 27001, and CMMC frameworks.</p>
         </div>
       </div>
     );
@@ -102,10 +141,6 @@ export default function ReadinessDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-orange-500/10 border border-orange-500/20 text-orange-400/80">
-        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
-        Simulation Data — All scores and metrics shown are illustrative. No real compliance assessments are represented.
-      </div>
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
           <h1 className="font-display text-lg font-bold text-orange-50">Readiness Posture</h1>
@@ -114,7 +149,7 @@ export default function ReadinessDashboard() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
           <div className="bg-orange-500/10 border border-orange-500/20 px-4 py-2 rounded-xl text-orange-50 font-medium flex items-center gap-2 text-xs">
             <Activity className="w-3.5 h-3.5 text-orange-400" />
-            <span>{mockProgram.name}</span>
+            <span>{activeProgram.name}</span>
           </div>
         </motion.div>
       </header>
@@ -130,10 +165,10 @@ export default function ReadinessDashboard() {
             <Target className="w-3.5 h-3.5" /> Overall Readiness Score
           </div>
           <div className="text-7xl font-display font-bold text-orange-50 my-4">{overallScore}</div>
-          <p className="text-xs text-orange-400/50">out of {mockProgram.targetScore} target</p>
+          <p className="text-xs text-orange-400/50">out of {activeProgram.targetScore} target</p>
           <div className="w-full grid grid-cols-2 gap-4 mt-6 pt-5 border-t border-orange-500/10">
-            <div><div className="text-xs text-orange-400/40 mb-1">Target</div><div className="text-xl font-bold text-orange-50">{mockProgram.targetScore}</div></div>
-            <div><div className="text-xs text-orange-400/40 mb-1">Status</div><div className="text-xs font-bold flex items-center gap-1 bg-emerald-500/10 text-emerald-400 w-max px-2.5 py-1 rounded-lg"><ArrowUpRight className="w-3.5 h-3.5" /> On Track</div></div>
+            <div><div className="text-xs text-orange-400/40 mb-1">Target</div><div className="text-xl font-bold text-orange-50">{activeProgram.targetScore}</div></div>
+            <div><div className="text-xs text-orange-400/40 mb-1">Status</div><div className="text-xs font-bold flex items-center gap-1 bg-emerald-500/10 text-emerald-400 w-max px-2.5 py-1 rounded-lg"><ArrowUpRight className="w-3.5 h-3.5" /> {activeProgram.status === "active" ? "On Track" : activeProgram.status}</div></div>
           </div>
         </motion.div>
 
@@ -150,19 +185,23 @@ export default function ReadinessDashboard() {
               <span className="flex items-center gap-1.5"><span className="w-0.5 h-3 bg-orange-50/20 inline-block" /> Target</span>
             </div>
           </div>
-          <div className="space-y-3">
-            {sortedDimensions.slice(0, 6).map((d, i) => (
-              <DimensionBar key={d.id} name={d.name} score={d.currentScore} target={d.targetScore} index={i} />
-            ))}
-          </div>
+          {sortedDimensions.length === 0 ? (
+            <div className="flex items-center justify-center py-10 text-orange-400/40 text-xs">No dimensions configured for this program</div>
+          ) : (
+            <div className="space-y-3">
+              {sortedDimensions.slice(0, 6).map((d, i) => (
+                <DimensionBar key={d.id} name={d.name} score={d.currentScore} target={d.targetScore} index={i} />
+              ))}
+            </div>
+          )}
         </motion.div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { delay: 0.25, value: mockDimensions.length, label: "Assessed Dimensions", icon: Target, color: "text-orange-400", bg: "bg-orange-500/10" },
-          { delay: 0.35, value: criticalRisks.length, label: "Critical Open Risks", icon: ShieldAlert, color: "text-red-400", bg: "bg-red-500/10" },
-          { delay: 0.45, value: unreadAlerts.length, label: "Unread Alerts", icon: BellRing, color: "text-amber-400", bg: "bg-amber-500/10" },
+          { delay: 0.25, value: rollup?.dimensionCount ?? 0, label: "Assessed Dimensions", icon: Target, color: "text-orange-400", bg: "bg-orange-500/10" },
+          { delay: 0.35, value: rollup?.criticalRiskCount ?? 0, label: "Critical Open Risks", icon: ShieldAlert, color: "text-red-400", bg: "bg-red-500/10" },
+          { delay: 0.45, value: rollup?.unreadAlertCount ?? 0, label: "Unread Alerts", icon: BellRing, color: "text-amber-400", bg: "bg-amber-500/10" },
         ].map(({ delay, value, label, icon: Icon, color, bg }) => (
           <motion.div
             key={label}
@@ -180,25 +219,27 @@ export default function ReadinessDashboard() {
         ))}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-5"
-      >
-        <h3 className="text-sm font-semibold text-orange-50 mb-4">Score Distribution by Control Domain</h3>
-        <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} barGap={4}>
-              <XAxis dataKey="name" stroke="#f97316" fontSize={9} tick={{ fill: "rgba(251,146,60,0.5)" }} tickLine={false} axisLine={false} />
-              <YAxis stroke="#f97316" fontSize={9} tick={{ fill: "rgba(251,146,60,0.5)" }} tickLine={false} axisLine={false} domain={[0, 100]} />
-              <Tooltip contentStyle={{ backgroundColor: '#09080f', border: '1px solid rgba(249,115,22,0.2)', borderRadius: '8px', fontSize: '11px' }} />
-              <Bar dataKey="score" fill="rgba(239,68,68,0.7)" radius={[3, 3, 0, 0]} name="Score" />
-              <Bar dataKey="target" fill="rgba(249,115,22,0.2)" radius={[3, 3, 0, 0]} name="Target" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
+      {chartData.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-orange-500/5 border border-orange-500/10 rounded-xl p-5"
+        >
+          <h3 className="text-sm font-semibold text-orange-50 mb-4">Score Distribution by Control Domain</h3>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} barGap={4}>
+                <XAxis dataKey="name" stroke="#f97316" fontSize={9} tick={{ fill: "rgba(251,146,60,0.5)" }} tickLine={false} axisLine={false} />
+                <YAxis stroke="#f97316" fontSize={9} tick={{ fill: "rgba(251,146,60,0.5)" }} tickLine={false} axisLine={false} domain={[0, 100]} />
+                <Tooltip contentStyle={{ backgroundColor: '#09080f', border: '1px solid rgba(249,115,22,0.2)', borderRadius: '8px', fontSize: '11px' }} />
+                <Bar dataKey="score" fill="rgba(239,68,68,0.7)" radius={[3, 3, 0, 0]} name="Score" />
+                <Bar dataKey="target" fill="rgba(249,115,22,0.2)" radius={[3, 3, 0, 0]} name="Target" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

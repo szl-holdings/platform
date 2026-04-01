@@ -26,7 +26,7 @@ import {
   insertFirestormWorkflowActionSchema,
   insertFirestormCaseSchema,
 } from "@workspace/db";
-import { DEMO_COMPLIANCE_CONTROLS } from "./readiness.js";
+import { REFERENCE_COMPLIANCE_CONTROLS } from "./readiness.js";
 import { eq, desc, sql, inArray } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
@@ -571,7 +571,7 @@ router.put("/firestorm/vulnerabilities/:id", authMiddleware({ required: true }),
 async function ensureComplianceControlsSeeded(): Promise<void> {
   const existing = await db.select({ id: firestormComplianceControlsTable.id }).from(firestormComplianceControlsTable).limit(1);
   if (existing.length > 0) return;
-  const rows = DEMO_COMPLIANCE_CONTROLS.map(c => ({
+  const rows = REFERENCE_COMPLIANCE_CONTROLS.map(c => ({
     framework: "nist_csf" as const,
     category: c.category,
     controlId: c.controlId,
@@ -884,16 +884,6 @@ async function fetchFsJson(url: string, timeoutMs = 10000): Promise<unknown> {
   } finally { clearTimeout(timer); }
 }
 
-const DEMO_MITRE_TECHNIQUES = [
-  { id: "T1566.001", name: "Spearphishing Attachment", tactic: "Initial Access", platforms: ["Windows", "macOS", "Linux"], subtechnique: true, description: "Adversaries may send spearphishing emails with a malicious attachment.", detection: "Network, Email, Process monitoring", mitigation: "User training, Email filtering, Anti-malware" },
-  { id: "T1059.001", name: "PowerShell", tactic: "Execution", platforms: ["Windows"], subtechnique: true, description: "Adversaries may abuse PowerShell commands and scripts for execution.", detection: "Command-line logging, Script block logging", mitigation: "Constrained Language Mode, Script block logging" },
-  { id: "T1078", name: "Valid Accounts", tactic: "Defense Evasion", platforms: ["Windows", "Azure AD", "SaaS", "Linux", "macOS"], subtechnique: false, description: "Adversaries may obtain and abuse credentials of existing accounts.", detection: "Authentication logs, Account usage auditing", mitigation: "MFA, Privileged account management" },
-  { id: "T1486", name: "Data Encrypted for Impact", tactic: "Impact", platforms: ["Windows", "macOS", "Linux"], subtechnique: false, description: "Adversaries may encrypt data on target systems to interrupt availability.", detection: "File modification monitoring, Backup verification", mitigation: "Offline backups, Immutable backups" },
-  { id: "T1190", name: "Exploit Public-Facing Application", tactic: "Initial Access", platforms: ["Windows", "Linux", "macOS", "Network"], subtechnique: false, description: "Adversaries may attempt to take advantage of a weakness in an Internet-facing computer or program.", detection: "Web application firewall, IDS/IPS", mitigation: "Patch management, Application hardening" },
-  { id: "T1071.001", name: "Web Protocols", tactic: "Command and Control", platforms: ["Windows", "macOS", "Linux"], subtechnique: true, description: "Adversaries may communicate using application layer protocols associated with web traffic.", detection: "Network monitoring, Proxy logs", mitigation: "Network intrusion detection, Traffic analysis" },
-  { id: "T1027", name: "Obfuscated Files or Information", tactic: "Defense Evasion", platforms: ["Windows", "macOS", "Linux", "Network"], subtechnique: false, description: "Adversaries may attempt to make an executable or file difficult to discover or analyze.", detection: "File monitoring, Process monitoring", mitigation: "Anti-virus, Binary analysis" },
-  { id: "T1055", name: "Process Injection", tactic: "Privilege Escalation", platforms: ["Windows", "macOS", "Linux"], subtechnique: false, description: "Adversaries may inject code into processes to evade process-based defenses and elevate privileges.", detection: "Process monitoring, API monitoring", mitigation: "Privileged account management, Behavior monitoring" },
-];
 
 router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
@@ -908,7 +898,7 @@ router.get("/firestorm/live/mitre-attack", firestormLiveLimit, authMiddleware({ 
           const tacticsPhases = t.kill_chain_phases?.map((p: any) => p.phase_name.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())) ?? [];
           return { id: extRef?.external_id ?? "T????", name: t.name, tactic: tacticsPhases[0] ?? "Unknown", tactics: tacticsPhases, platforms: t.x_mitre_platforms ?? [], subtechnique: t.x_mitre_is_subtechnique ?? false, description: t.description?.slice(0, 300)?.replace(/\n/g, " ") ?? "", detection: t.x_mitre_detection?.slice(0, 200)?.replace(/\n/g, " ") ?? "Monitor for suspicious activity", mitigation: "Apply principle of least privilege and monitor for anomalous behavior", version: t.x_mitre_version ?? "1.0", dataSourcesCount: t.x_mitre_data_sources?.length ?? 0 };
         });
-      } catch { return DEMO_MITRE_TECHNIQUES; }
+      } catch { return []; }
     });
     const filtered = tactic ? techniques.filter((t: any) => t.tactic?.toLowerCase().includes(tactic.toLowerCase()) || t.tactics?.some((ta: string) => ta.toLowerCase().includes(tactic.toLowerCase()))) : techniques;
     sendSuccess(res, { source: "MITRE ATT&CK Enterprise Matrix v14", url: "https://attack.mitre.org/", count: filtered.length, techniques: filtered, fetchedAt: new Date().toISOString() });
@@ -980,11 +970,6 @@ router.get("/firestorm/live/threat-news", firestormLiveLimit, authMiddleware({ r
   } catch (err) { handleRouteError(res, err, "Failed to fetch Firestorm threat news"); }
 });
 
-const DEMO_THREAT_INDICATORS = [
-  { id: "TI-001", type: "ip", value: "185.220.101.45", confidence: 95, severity: "high", tags: ["TOR", "APT"], lastSeen: new Date(Date.now() - 3600000).toISOString(), campaigns: ["Operation ShadowNet"] },
-  { id: "TI-002", type: "domain", value: "malware-c2.net", confidence: 88, severity: "critical", tags: ["C2", "RAT"], lastSeen: new Date(Date.now() - 7200000).toISOString(), campaigns: ["Lazarus Group"] },
-  { id: "TI-003", type: "hash", value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", confidence: 100, severity: "critical", tags: ["ransomware", "LockBit"], lastSeen: new Date(Date.now() - 1800000).toISOString(), campaigns: ["LockBit 3.0"] },
-];
 
 router.get("/firestorm/live/threat-indicators", firestormLiveLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
@@ -1005,7 +990,7 @@ router.get("/firestorm/live/threat-indicators", firestormLiveLimit, authMiddlewa
           source: "Abuse.ch URLhaus",
         }));
         return { indicators, liveData: true };
-      } catch { return { indicators: DEMO_THREAT_INDICATORS, liveData: false }; }
+      } catch { return { indicators: [], liveData: false }; }
     });
     let indicators = data.indicators;
     if (type) indicators = indicators.filter((i: any) => i.type === type);

@@ -111,7 +111,7 @@ function scoreEntity(
 } {
   const cfg = ENTITY_SCORING[entityType];
 
-  let rawScore = 50 + Math.random() * 10;
+  let rawScore = 55;
   let confidenceBase = 0.7;
 
   if (entityType === "distress_property") {

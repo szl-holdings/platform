@@ -1,4 +1,4 @@
-import { mockData } from "./mock-data";
+import { apiFetch } from "@workspace/shared-ui";
 import type {
   VesselProfile,
   MaintenanceLog,
@@ -10,12 +10,15 @@ import type {
   AIBriefing,
   PredictiveMaintenance,
   ForecastModule,
+  SanctionsRiskIndicator,
+  ComplianceAlert,
+  Fleet,
 } from "./mock-data";
 
 export interface DataProvider {
   getVessels(): Promise<VesselProfile[]>;
   getVessel(id: number): Promise<VesselProfile | undefined>;
-  getFleets(): Promise<typeof mockData.fleets>;
+  getFleets(): Promise<Fleet[]>;
   getMaintenanceLogs(vesselId?: number): Promise<MaintenanceLog[]>;
   getComplianceCertificates(vesselId?: number): Promise<ComplianceCertificate[]>;
   getPortStateDeficiencies(vesselId?: number): Promise<PortStateDeficiency[]>;
@@ -25,8 +28,8 @@ export interface DataProvider {
   getAIBriefings(): Promise<AIBriefing[]>;
   getPredictiveMaintenanceItems(): Promise<PredictiveMaintenance[]>;
   getForecastModules(): Promise<ForecastModule[]>;
-  getSanctionsRiskIndicators(): Promise<typeof mockData.sanctionsRiskIndicators>;
-  getComplianceAlerts(): Promise<typeof mockData.complianceAlerts>;
+  getSanctionsRiskIndicators(): Promise<SanctionsRiskIndicator[]>;
+  getComplianceAlerts(): Promise<ComplianceAlert[]>;
   getFleetKPIs(): Promise<FleetKPIs>;
 }
 
@@ -49,146 +52,154 @@ export interface FleetKPIs {
   environmentalScore: number;
 }
 
-function delay(ms: number = 50): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+async function safeFetch<T>(fn: () => Promise<T>, emptyVal: T): Promise<T> {
+  try {
+    return await fn();
+  } catch {
+    return emptyVal;
+  }
 }
 
-class MockDataProvider implements DataProvider {
-  async getVessels() {
-    await delay();
-    return mockData.vessels;
+class ApiDataProvider implements DataProvider {
+  async getVessels(): Promise<VesselProfile[]> {
+    return safeFetch(async () => {
+      const raw = await apiFetch<VesselProfile[]>("/vessels");
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getVessel(id: number) {
-    await delay();
-    return mockData.vessels.find(v => v.id === id);
+  async getVessel(id: number): Promise<VesselProfile | undefined> {
+    try {
+      const raw = await apiFetch<VesselProfile>(`/vessels/${id}`);
+      if (raw) return raw;
+    } catch { /* fall through */ }
+    return undefined;
   }
 
-  async getFleets() {
-    await delay();
-    return mockData.fleets;
+  async getFleets(): Promise<Fleet[]> {
+    return safeFetch(async () => {
+      const raw = await apiFetch<Fleet[]>("/vessels/fleets");
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getMaintenanceLogs(vesselId?: number) {
-    await delay();
-    if (vesselId) return mockData.maintenanceLogs.filter(m => m.vesselId === vesselId);
-    return mockData.maintenanceLogs;
+  async getMaintenanceLogs(vesselId?: number): Promise<MaintenanceLog[]> {
+    return safeFetch(async () => {
+      const qs = vesselId ? `?vesselId=${vesselId}` : "";
+      const raw = await apiFetch<MaintenanceLog[]>(`/vessels/maintenance${qs}`);
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getComplianceCertificates(vesselId?: number) {
-    await delay();
-    if (vesselId) return mockData.complianceCertificates.filter(c => c.vesselId === vesselId);
-    return mockData.complianceCertificates;
+  async getComplianceCertificates(vesselId?: number): Promise<ComplianceCertificate[]> {
+    return safeFetch(async () => {
+      const qs = vesselId ? `?vesselId=${vesselId}` : "";
+      const raw = await apiFetch<ComplianceCertificate[]>(`/vessels/certificates${qs}`);
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getPortStateDeficiencies(vesselId?: number) {
-    await delay();
-    if (vesselId) return mockData.portStateDeficiencies.filter(d => d.vesselId === vesselId);
-    return mockData.portStateDeficiencies;
+  async getPortStateDeficiencies(vesselId?: number): Promise<PortStateDeficiency[]> {
+    return safeFetch(async () => {
+      const qs = vesselId ? `?vesselId=${vesselId}` : "";
+      const raw = await apiFetch<PortStateDeficiency[]>(`/vessels/port-state-deficiencies${qs}`);
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getShipmentRecords(vesselId?: number) {
-    await delay();
-    if (vesselId) return mockData.shipmentRecords.filter(s => s.vesselId === vesselId);
-    return mockData.shipmentRecords;
+  async getShipmentRecords(vesselId?: number): Promise<ShipmentRecord[]> {
+    return safeFetch(async () => {
+      const qs = vesselId ? `?vesselId=${vesselId}` : "";
+      const raw = await apiFetch<ShipmentRecord[]>(`/vessels/shipments${qs}`);
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getEventLogs(filters?: { severity?: string; search?: string; vesselId?: number }) {
-    await delay();
-    let logs = [...mockData.eventLogs];
-    if (filters?.severity && filters.severity !== "All") {
-      logs = logs.filter(l => l.severity === filters.severity);
-    }
-    if (filters?.search) {
-      const term = filters.search.toLowerCase();
-      logs = logs.filter(l =>
-        l.message.toLowerCase().includes(term) ||
-        l.vesselName.toLowerCase().includes(term) ||
-        l.details.toLowerCase().includes(term) ||
-        l.category.toLowerCase().includes(term)
-      );
-    }
-    if (filters?.vesselId) {
-      logs = logs.filter(l => l.vesselId === filters.vesselId);
-    }
-    return logs;
+  async getEventLogs(filters?: { severity?: string; search?: string; vesselId?: number }): Promise<EventLog[]> {
+    return safeFetch(async () => {
+      const q = new URLSearchParams();
+      if (filters?.severity && filters.severity !== "All") q.set("severity", filters.severity);
+      if (filters?.vesselId) q.set("vesselId", String(filters.vesselId));
+      if (filters?.search) q.set("search", filters.search);
+      const qs = q.toString();
+      const raw = await apiFetch<EventLog[]>(`/vessels/event-logs${qs ? `?${qs}` : ""}`);
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getEmissionRecords(vesselId?: number) {
-    await delay();
-    if (vesselId) return mockData.emissionRecords.filter(e => e.vesselId === vesselId);
-    return mockData.emissionRecords;
+  async getEmissionRecords(vesselId?: number): Promise<EmissionRecord[]> {
+    return safeFetch(async () => {
+      const qs = vesselId ? `?vesselId=${vesselId}` : "";
+      const raw = await apiFetch<EmissionRecord[]>(`/vessels/emissions${qs}`);
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getAIBriefings() {
-    await delay();
-    return mockData.aiBriefings;
+  async getAIBriefings(): Promise<AIBriefing[]> {
+    return safeFetch(async () => {
+      const raw = await apiFetch<AIBriefing[]>("/vessels/ai-briefings");
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getPredictiveMaintenanceItems() {
-    await delay();
-    return mockData.predictiveMaintenanceItems;
+  async getPredictiveMaintenanceItems(): Promise<PredictiveMaintenance[]> {
+    return safeFetch(async () => {
+      const raw = await apiFetch<PredictiveMaintenance[]>("/vessels/predictive-maintenance");
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getForecastModules() {
-    await delay();
-    return mockData.forecastModules;
+  async getForecastModules(): Promise<ForecastModule[]> {
+    return safeFetch(async () => {
+      const raw = await apiFetch<ForecastModule[]>("/vessels/forecast-modules");
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getSanctionsRiskIndicators() {
-    await delay();
-    return mockData.sanctionsRiskIndicators;
+  async getSanctionsRiskIndicators(): Promise<SanctionsRiskIndicator[]> {
+    return safeFetch(async () => {
+      const raw = await apiFetch<SanctionsRiskIndicator[]>("/vessels/sanctions-risk");
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
-  async getComplianceAlerts() {
-    await delay();
-    return mockData.complianceAlerts;
+  async getComplianceAlerts(): Promise<ComplianceAlert[]> {
+    return safeFetch(async () => {
+      const raw = await apiFetch<ComplianceAlert[]>("/vessels/compliance-alerts");
+      return Array.isArray(raw) ? raw : [];
+    }, []);
   }
 
   async getFleetKPIs(): Promise<FleetKPIs> {
-    await delay();
-    const v = mockData.vessels;
-    const atSea = v.filter(x => x.status === "at_sea").length;
-    const inPort = v.filter(x => x.status === "in_port").length;
-    const anchored = v.filter(x => x.status === "anchored").length;
-    const maintenance = v.filter(x => x.status === "maintenance").length;
-    const activeVessels = v.filter(x => x.tce > 0);
-    const avgTCE = activeVessels.length > 0 ? Math.round(activeVessels.reduce((s, x) => s + x.tce, 0) / activeVessels.length) : 0;
-    const avgUtil = Math.round(v.reduce((s, x) => s + x.utilization, 0) / v.length * 10) / 10;
-    const ciiCounts: Record<string, number> = {};
-    v.forEach(x => { ciiCounts[x.ciiRating] = (ciiCounts[x.ciiRating] || 0) + 1; });
-    const avgCII = Object.entries(ciiCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "B";
-    const totalCO2 = v.reduce((s, x) => s + x.co2EmissionsDaily, 0);
-    const critLogs = mockData.eventLogs.filter(l => l.severity === "Critical").length;
-    const warnLogs = mockData.eventLogs.filter(l => l.severity === "Warning").length;
-    const expCerts = mockData.complianceCertificates.filter(c => c.daysUntilExpiry <= 30).length;
-    const openDef = mockData.portStateDeficiencies.filter(d => d.status === "Open").length;
-
-    const operationalScore = Math.round(avgUtil * 0.5 + (atSea / v.length) * 50);
-    const complianceScore = Math.max(0, 100 - expCerts * 10 - openDef * 8);
-    const safetyScore = Math.max(0, 100 - critLogs * 12 - warnLogs * 4);
-    const environmentalScore = Math.round(v.filter(x => x.ciiRating === "A" || x.ciiRating === "B").length / v.length * 100);
-    const fleetHealthScore = Math.round((operationalScore + complianceScore + safetyScore + environmentalScore) / 4);
-
-    return {
-      totalVessels: v.length,
-      atSea,
-      inPort,
-      anchored,
-      maintenance,
-      averageTCE: avgTCE,
-      averageUtilization: avgUtil,
-      averageCII: avgCII,
-      totalCO2Today: totalCO2,
-      activeAlerts: critLogs + warnLogs,
-      criticalAlerts: critLogs,
-      fleetHealthScore,
-      operationalScore,
-      complianceScore,
-      safetyScore,
-      environmentalScore,
-    };
+    return safeFetch(async () => {
+      const dashboard = await apiFetch<{ summary: { totalVessels: number; activeExceptions: number }; statusDistribution: Array<{ status: string; count: number }> }>("/vessels/dashboard");
+      if (!dashboard || !dashboard.summary) return {
+        totalVessels: 0, atSea: 0, inPort: 0, anchored: 0, maintenance: 0,
+        averageTCE: 0, averageUtilization: 0, averageCII: "N/A",
+        totalCO2Today: 0, activeAlerts: 0, criticalAlerts: 0,
+        fleetHealthScore: 0, operationalScore: 0, complianceScore: 0, safetyScore: 0, environmentalScore: 0,
+      };
+      const get = (status: string) => dashboard.statusDistribution?.find(d => d.status === status)?.count ?? 0;
+      const totalVessels = dashboard.summary.totalVessels ?? 0;
+      return {
+        totalVessels,
+        atSea: get("at_sea"),
+        inPort: get("in_port"),
+        anchored: get("anchored"),
+        maintenance: get("maintenance"),
+        averageTCE: 0, averageUtilization: 0, averageCII: "B",
+        totalCO2Today: 0,
+        activeAlerts: dashboard.summary.activeExceptions ?? 0,
+        criticalAlerts: 0,
+        fleetHealthScore: 0, operationalScore: 0, complianceScore: 0, safetyScore: 0, environmentalScore: 0,
+      };
+    }, {
+      totalVessels: 0, atSea: 0, inPort: 0, anchored: 0, maintenance: 0,
+      averageTCE: 0, averageUtilization: 0, averageCII: "N/A",
+      totalCO2Today: 0, activeAlerts: 0, criticalAlerts: 0,
+      fleetHealthScore: 0, operationalScore: 0, complianceScore: 0, safetyScore: 0, environmentalScore: 0,
+    });
   }
 }
 
-export const dataProvider: DataProvider = new MockDataProvider();
+export const dataProvider: DataProvider = new ApiDataProvider();

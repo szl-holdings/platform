@@ -71,7 +71,7 @@ const FLAG_MAP: Record<string, string> = {
   "352": "PA", "538": "MH", "636": "LR", "310": "BM", "378": "VG", "376": "TC",
 };
 
-const DEMO_AIS_VESSELS = [
+const FALLBACK_AIS_VESSELS = [
   { mmsi: "211234567", imo: "9876123", name: "ATLANTIC VOYAGER", type: "Cargo", shipTypCode: 70, lat: 51.52, lon: 1.35, speed: 12.4, course: 225, heading: 223, destination: "ROTTERDAM", status: "Under way using engine", navStatus: 0, flag: "DE", length: 225, beam: 32, draft: 11.2, timestamp: new Date(Date.now() - 120000).toISOString(), callsign: "DCAB3" },
   { mmsi: "636092587", imo: "9654321", name: "PACIFIC GUARDIAN", type: "Tanker", shipTypeCode: 80, lat: 1.26, lon: 103.85, speed: 8.2, course: 315, heading: 312, destination: "SINGAPORE", status: "Under way using engine", navStatus: 0, flag: "LR", length: 330, beam: 58, draft: 14.5, timestamp: new Date(Date.now() - 180000).toISOString(), callsign: "A8KL9" },
   { mmsi: "477234100", imo: "9234100", name: "STAR PHOENIX", type: "Container", shipTypeCode: 70, lat: 29.97, lon: 32.56, speed: 14.1, course: 340, heading: 338, destination: "PIRAEUS", status: "Under way using engine", navStatus: 0, flag: "HK", length: 366, beam: 51, draft: 13.8, timestamp: new Date(Date.now() - 90000).toISOString(), callsign: "VRBD7" },
@@ -80,7 +80,7 @@ const DEMO_AIS_VESSELS = [
   { mmsi: "244123456", imo: "9123456", name: "NORTH SEA PIONEER", type: "Tanker", shipTypeCode: 80, lat: 57.7, lon: 1.8, speed: 6.5, course: 180, heading: 178, destination: "ABERDEEN", status: "Under way using engine", navStatus: 0, flag: "NL", length: 274, beam: 46, draft: 12.8, timestamp: new Date(Date.now() - 200000).toISOString(), callsign: "PBHE3" },
 ];
 
-async function fetchDigitrafficAis(): Promise<{ vessels: typeof DEMO_AIS_VESSELS; source: string }> {
+async function fetchDigitrafficAis(): Promise<{ vessels: typeof FALLBACK_AIS_VESSELS; source: string }> {
   try {
     const data = await fetchJson("https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100", 10000) as any;
     const features = data?.features;
@@ -120,7 +120,7 @@ async function fetchDigitrafficAis(): Promise<{ vessels: typeof DEMO_AIS_VESSELS
 
     return { vessels: vessels as any, source: "live-digitraffic" };
   } catch {
-    return { vessels: DEMO_AIS_VESSELS, source: "demo" };
+    return { vessels: FALLBACK_AIS_VESSELS, source: "demo" };
   }
 }
 
@@ -192,7 +192,7 @@ router.get("/vessels/live/ais/combined", vesLiveLimit, authMiddleware({ required
         fetchBarentsWatchAis(),
       ]);
 
-      const dtVessels = digitraffic.status === "fulfilled" ? digitraffic.value.vessels : DEMO_AIS_VESSELS;
+      const dtVessels = digitraffic.status === "fulfilled" ? digitraffic.value.vessels : FALLBACK_AIS_VESSELS;
       const bwVessels = barentswatch.status === "fulfilled" ? barentswatch.value.vessels : [];
       const dtSource = digitraffic.status === "fulfilled" ? digitraffic.value.source : "demo";
       const bwSource = barentswatch.status === "fulfilled" ? barentswatch.value.source : "demo";
@@ -253,7 +253,7 @@ router.get("/vessels/live/vessel-details/:mmsi", vesLiveLimit, authMiddleware({ 
           source: "live-digitraffic",
         };
       } catch {
-        const demo = DEMO_AIS_VESSELS.find(v => v.mmsi === mmsi) ?? DEMO_AIS_VESSELS[0];
+        const demo = FALLBACK_AIS_VESSELS.find(v => v.mmsi === mmsi) ?? FALLBACK_AIS_VESSELS[0];
         return { data: demo, source: "demo" };
       }
     });

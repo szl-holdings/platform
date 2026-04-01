@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { vesselsDomainMockData } from "@/data/mock-data";
 import { usePerformanceMetrics } from "@/hooks/use-vessels-data";
 import { BarChart3, TrendingUp, TrendingDown, Clock, Ship, Activity, Minus, RefreshCw } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
@@ -35,10 +34,7 @@ export default function PerformanceAnalyticsPage() {
     queryFn: () => api.corridors.list(),
     refetchInterval: 120_000,
   });
-  const mockCorridors = vesselsDomainMockData.corridors;
-  const corridors = liveCorridors.length > 0
-    ? liveCorridors
-    : mockCorridors.map((c, i) => ({ ...c, id: String(i + 1) }));
+  const corridors = liveCorridors;
 
   const [view, setView] = useState<"utilization" | "ontime" | "tce" | "routes">("utilization");
 

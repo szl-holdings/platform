@@ -3,6 +3,8 @@ import rateLimit from "express-rate-limit";
 import os from "os";
 import { sendSuccess, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { db, intelligenceCacheTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -15,18 +17,32 @@ const mspLiveRateLimit = rateLimit({
   validate: { xForwardedForHeader: false, ip: false },
 }) as unknown as RequestHandler;
 
-const mspCache = new Map<string, { data: unknown; expiry: number }>();
-function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
-  const cached = mspCache.get(key);
-  if (cached && cached.expiry > Date.now()) return Promise.resolve(cached.data as T);
-  return fetcher().then((data) => {
-    mspCache.set(key, { data, expiry: Date.now() + ttlMs });
+const mspMemCache = new Map<string, { data: unknown; expiresAt: number }>();
+
+async function getCached<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<T> {
+  const mem = mspMemCache.get(key);
+  if (mem && mem.expiresAt > Date.now()) return mem.data as T;
+  const expiresAt = new Date(Date.now() + ttlMs);
+  const dbKey = `msp-${key}`;
+  try {
+    const [row] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, dbKey)).limit(1);
+    if (row && new Date(row.expiresAt) > new Date()) {
+      mspMemCache.set(key, { data: row.data, expiresAt: new Date(row.expiresAt).getTime() });
+      return row.data as T;
+    }
+  } catch { /* DB unavailable — fall through to fetch */ }
+  try {
+    const data = await fetcher();
+    mspMemCache.set(key, { data, expiresAt: expiresAt.getTime() });
+    await db.insert(intelligenceCacheTable).values({ key: dbKey, data: data as Record<string, unknown>, expiresAt, fetchedAt: new Date() })
+      .onConflictDoUpdate({ target: intelligenceCacheTable.key, set: { data: data as Record<string, unknown>, expiresAt, fetchedAt: new Date() } })
+      .catch(() => undefined);
     return data;
-  }).catch(() => {
-    const stale = mspCache.get(key);
+  } catch (err) {
+    const [stale] = await db.select().from(intelligenceCacheTable).where(eq(intelligenceCacheTable.key, dbKey)).limit(1).catch(() => [null]);
     if (stale) return stale.data as T;
-    throw new Error("Data unavailable");
-  });
+    throw err;
+  }
 }
 
 async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
@@ -44,64 +60,30 @@ async function fetchJson(url: string, timeoutMs = 10000): Promise<unknown> {
   }
 }
 
-const DEMO_FEDERAL_CONTRACTS = [
-  { id: "FA8621-24-C-0012", agency: "Department of the Air Force", vendor: "Leidos", description: "Enterprise IT support services and managed security operations center", value: 2340000000, period: "2024-2029", naicsCode: "541519", type: "IDIQ", setAside: "None", placeOfPerformance: "Hampton, VA", fedrampRequired: true, cmmc: "Level 3" },
-  { id: "W52P1J-24-D-0025", agency: "Army Contracting Command", vendor: "SAIC", description: "Cloud migration and managed services for Army enterprise systems", value: 890000000, period: "2024-2028", naicsCode: "541512", type: "Cost-Plus", setAside: "None", placeOfPerformance: "Multiple", fedrampRequired: true, cmmc: "Level 2" },
-  { id: "N00039-24-C-0041", agency: "Department of the Navy", vendor: "General Dynamics IT", description: "Cybersecurity managed services and SIEM operations", value: 456000000, period: "2024-2027", naicsCode: "541519", type: "FFP", setAside: "None", placeOfPerformance: "San Diego, CA", fedrampRequired: true, cmmc: "Level 3" },
-  { id: "GS-35F-0024W", agency: "General Services Administration", vendor: "Booz Allen Hamilton", description: "IT professional services and consulting — 8(a) set-aside", value: 234000000, period: "2024-2029", naicsCode: "541611", type: "GWAC", setAside: "8(a)", placeOfPerformance: "Washington, DC", fedrampRequired: false, cmmc: "Level 1" },
-  { id: "FA7014-23-D-0001", agency: "Department of the Air Force", vendor: "Dell Technologies", description: "Hardware refresh and managed IT lifecycle services", value: 178000000, period: "2023-2027", naicsCode: "334111", type: "BPA", setAside: "HUBZone SB", placeOfPerformance: "CONUS", fedrampRequired: false, cmmc: "Level 2" },
-];
-
-const DEMO_FEDRAMP_PRODUCTS = [
-  { productId: "MS-1084", productName: "Microsoft Azure Government", category: "Infrastructure and Platform as a Service", authorizationType: "Agency ATO", impactLevel: "High", status: "Authorized", cso: "Microsoft", authorizationDate: "2014-05-01", agencies: ["DOD", "IC", "CFO Act Agencies"] },
-  { productId: "GCP-7734", productName: "Google Cloud Platform", category: "Infrastructure and Platform as a Service", authorizationType: "Agency ATO", impactLevel: "High", status: "Authorized", cso: "Google LLC", authorizationDate: "2017-01-01", agencies: ["GSA", "FTC", "USDA"] },
-  { productId: "AWS-0012", productName: "AWS GovCloud (US-East)", category: "Infrastructure as a Service", authorizationType: "Agency ATO", impactLevel: "High", status: "Authorized", cso: "Amazon Web Services", authorizationDate: "2011-06-01", agencies: ["DOD", "DOJ", "HHS", "DHS"] },
-  { productId: "CRW-2341", productName: "CrowdStrike Falcon GovCloud", category: "Security as a Service", authorizationType: "Agency ATO", impactLevel: "Moderate", status: "Authorized", cso: "CrowdStrike", authorizationDate: "2020-09-15", agencies: ["DOD", "DHS CISA"] },
-  { productId: "ZSC-8821", productName: "Zscaler Zero Trust Exchange", category: "Network Security as a Service", authorizationType: "JAB P-ATO", impactLevel: "Moderate", status: "Authorized", cso: "Zscaler", authorizationDate: "2022-03-10", agencies: ["GSA", "CBP", "TSA"] },
-  { productId: "SFD-4512", productName: "Salesforce Government Cloud", category: "Software as a Service", authorizationType: "JAB P-ATO", impactLevel: "Moderate", status: "Authorized", cso: "Salesforce", authorizationDate: "2019-11-01", agencies: ["VA", "HHS", "DOE"] },
-];
-
-const DEMO_CMMC_MATURITY = {
+const REFERENCE_CMMC_MATURITY = {
   level1: { controls: 17, description: "Basic Cyber Hygiene", contractRequirement: "All Federal contractors handling FCI", selfAttestation: true },
   level2: { controls: 110, description: "Advanced Cyber Hygiene — NIST SP 800-171", contractRequirement: "Contractors handling CUI", selfAttestation: false, thirdPartyAssessment: "C3PAO required" },
   level3: { controls: 134, description: "Expert — NIST SP 800-172", contractRequirement: "High priority DoD programs", selfAttestation: false, governmentLed: "DIBCAC assessment required" },
 };
 
-const DEMO_CONTRACT_PIPELINE = [
-  { solicitationId: "W15QKN-25-R-0041", agency: "DISA", title: "Unified Communications as a Service (UCaaS)", estimatedValue: 3200000000, releaseDate: "2025-Q1", type: "RFP", setAside: "None", incumbentExpiresAt: "2025-12-31", fedrampRequired: true, notes: "UCaaS modernization for 1.2M DoD users" },
-  { solicitationId: "N65236-25-R-0012", agency: "Naval Information Warfare Systems Command", title: "Zero Trust Architecture Implementation", estimatedValue: 890000000, releaseDate: "2025-Q2", type: "RFP", setAside: "Small Business Preferred", incumbentExpiresAt: null, fedrampRequired: true, notes: "Pilot covering 15 commands" },
-  { solicitationId: "FA8750-25-R-2241", agency: "Air Force Research Laboratory", title: "AI/ML DevSecOps Platform", estimatedValue: 450000000, releaseDate: "2025-Q1", type: "RFP", setAside: "None", incumbentExpiresAt: null, fedrampRequired: false, notes: "CDAO-aligned AI development environment" },
-  { solicitationId: "GS-00F-0034X", agency: "GSA TTS", title: "Cloud Services for Civilian Agencies (CSCE)", estimatedValue: 12000000000, releaseDate: "2025-Q3", type: "RFI", setAside: "None", incumbentExpiresAt: null, fedrampRequired: true, notes: "Successor to Cloud Smart procurement vehicle" },
-];
-
-const DEMO_MSP_HEALTH = {
-  activeClients: 47,
-  mrrGrowth: 8.4,
-  avgTicketResolutionHours: 2.1,
-  slaCompliance: 99.2,
-  securityIncidentsThisMonth: 3,
-  vulnerabilitiesRemediated: 234,
-  patchComplianceRate: 97.8,
-  backupSuccessRate: 99.9,
-  clientSatisfactionScore: 4.7,
-  contractsExpiring90Days: 4,
-  renewalRate: 94.3,
-};
 
 router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const fedramp = req.query.fedramp === "true";
+    type ContractRecord = { id: string | number; agency: string; vendor: string; description: string; value: number; period: string; naicsCode: string; type: string; setAside: string; placeOfPerformance: string; fedrampRequired: boolean; cmmc: string };
+    type UsaSpendingResult = { Award_ID?: string; internal_id?: string; Awarding_Agency?: string; Recipient_Name?: string; Award_Description?: string; Award_Amount?: number; Start_Date?: string; End_Date?: string; NAICS_Code?: string; Contract_Award_Type?: string; Type_of_Set_Aside?: string; Place_of_Performance_Location_Code?: string };
+    type UsaSpendingResponse = { results?: UsaSpendingResult[] };
     let contracts = await getCached("msp-federal-contracts", 3600000, async () => {
       try {
         const data = await fetchJson(
           "https://api.usaspending.gov/api/v2/search/spending_by_award/?filters={%22award_type_codes%22:[%22A%22,%22B%22,%22C%22,%22D%22],%22naics_codes%22:[%22541519%22,%22541512%22,%22541511%22]}&page=1&limit=10&sort=Award+Amount&order=desc",
           10000,
-        ) as any;
+        ) as UsaSpendingResponse;
         if (data?.results?.length) {
-          return data.results.map((r: any) => ({
-            id: r.Award_ID ?? r.internal_id,
-            agency: r.Awarding_Agency,
-            vendor: r.Recipient_Name,
+          return data.results.map((r): ContractRecord => ({
+            id: r.Award_ID ?? r.internal_id ?? "—",
+            agency: r.Awarding_Agency ?? "—",
+            vendor: r.Recipient_Name ?? "—",
             description: r.Award_Description ?? "IT Services Contract",
             value: r.Award_Amount ?? 0,
             period: `${r.Start_Date?.slice(0, 4) ?? "N/A"}-${r.End_Date?.slice(0, 4) ?? "N/A"}`,
@@ -115,14 +97,14 @@ router.get("/msp/live/contracts", mspLiveRateLimit, authMiddleware({ required: f
         }
         throw new Error("No USAspending data");
       } catch {
-        return DEMO_FEDERAL_CONTRACTS;
+        return [] as ContractRecord[];
       }
-    });
-    if (fedramp) contracts = (contracts as typeof DEMO_FEDERAL_CONTRACTS).filter(c => c.fedrampRequired);
+    }) as ContractRecord[];
+    if (fedramp) contracts = contracts.filter(c => c.fedrampRequired);
     sendSuccess(res, {
       source: "USAspending.gov Federal Contracts API",
       url: "https://api.usaspending.gov/",
-      count: (contracts as any[]).length,
+      count: contracts.length,
       contracts,
       fetchedAt: new Date().toISOString(),
     });
@@ -164,16 +146,16 @@ router.get("/msp/live/fedramp", mspLiveRateLimit, authMiddleware({ required: fal
         if (parsed.length === 0) throw new Error("No valid FedRAMP rows parsed");
         return parsed;
       } catch {
-        return DEMO_FEDRAMP_PRODUCTS;
+        return [];
       }
-    }) as typeof DEMO_FEDRAMP_PRODUCTS;
-    const filtered = impact ? products.filter(p => p.impactLevel?.toLowerCase() === impact.toLowerCase()) : products;
+    });
+    const filtered = impact ? products.filter((p: { impactLevel?: string }) => p.impactLevel?.toLowerCase() === impact.toLowerCase()) : products;
     sendSuccess(res, {
       source: "FedRAMP Marketplace — Authorized Products",
       url: "https://marketplace.fedramp.gov/",
       count: filtered.length,
       products: filtered,
-      cmmc: DEMO_CMMC_MATURITY,
+      cmmc: REFERENCE_CMMC_MATURITY,
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch FedRAMP products"); }
@@ -183,9 +165,10 @@ router.get("/msp/live/pipeline", mspLiveRateLimit, authMiddleware({ required: fa
   try {
     sendSuccess(res, {
       source: "SAM.gov Contract Forecast + MSP Intelligence",
-      count: DEMO_CONTRACT_PIPELINE.length,
-      pipeline: DEMO_CONTRACT_PIPELINE,
-      totalEstimatedValue: DEMO_CONTRACT_PIPELINE.reduce((s, c) => s + c.estimatedValue, 0),
+      note: "Connect SAM.gov API to enable live contract pipeline data.",
+      count: 0,
+      pipeline: [],
+      totalEstimatedValue: 0,
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch MSP contract pipeline"); }
@@ -195,9 +178,9 @@ router.get("/msp/live/health-metrics", mspLiveRateLimit, authMiddleware({ requir
   try {
     sendSuccess(res, {
       source: "ConnectWise PSA Live Integration",
-      note: "Live data requires ConnectWise API key — showing enriched demo data",
-      metrics: DEMO_MSP_HEALTH,
-      status: "DEMO_MODE",
+      note: "ConnectWise API key not configured. Connect your PSA/RMM to enable live metrics.",
+      metrics: null,
+      status: "NOT_CONFIGURED",
       fetchedAt: new Date().toISOString(),
     });
   } catch (err) { handleRouteError(res, err, "Failed to fetch MSP health metrics"); }
@@ -222,7 +205,7 @@ function getCpuPercent(): number {
   const current = getCpuSample();
   if (!cpuSamplePrev) {
     cpuSamplePrev = current;
-    return Math.round(10 + Math.random() * 30);
+    return 0;
   }
   const idleDiff = current.idle - cpuSamplePrev.idle;
   const totalDiff = current.total - cpuSamplePrev.total;

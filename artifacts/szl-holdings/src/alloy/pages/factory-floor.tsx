@@ -46,72 +46,10 @@ interface FactoryFloorData {
   fetchedAt: string;
 }
 
-const DEMO_WORKFLOWS: WorkflowStat[] = [
-  {
-    workflow: { id: 1, name: "Daily ETL Pipeline", description: "Ingests, transforms, and loads daily operational data across all platform connectors.", trigger: "schedule", outputType: "report", requiresApproval: false, runCount: 847, lastRunAt: new Date(Date.now() - 1800000).toISOString(), isActive: true },
-    counts: { running: 1, queued: 0, completed: 22, failed: 1, waiting_approval: 0, canceled: 0 },
-    totalRuns: 24, successRate: 91.7, avgDurationMs: 34200, sparkline: [88, 95, 100, 92, 88, 95, 100],
-    lastRunAt: new Date(Date.now() - 1800000).toISOString(), lastRunState: "running", recentRuns: [],
-  },
-  {
-    workflow: { id: 2, name: "Terra Distress Scanner", description: "Scans NYC property records for distress signals and scores opportunities.", trigger: "schedule", outputType: "report", requiresApproval: false, runCount: 412, lastRunAt: new Date(Date.now() - 3600000).toISOString(), isActive: true },
-    counts: { running: 0, queued: 0, completed: 19, failed: 0, waiting_approval: 0, canceled: 0 },
-    totalRuns: 19, successRate: 100, avgDurationMs: 28400, sparkline: [100, 100, 95, 100, 100, 100, 100],
-    lastRunAt: new Date(Date.now() - 3600000).toISOString(), lastRunState: "completed", recentRuns: [],
-  },
-  {
-    workflow: { id: 3, name: "Vessels AIS Sync", description: "Syncs AIS vessel position data and detects maritime anomalies.", trigger: "schedule", outputType: "alert", requiresApproval: false, runCount: 1203, lastRunAt: new Date(Date.now() - 900000).toISOString(), isActive: true },
-    counts: { running: 2, queued: 1, completed: 18, failed: 2, waiting_approval: 0, canceled: 0 },
-    totalRuns: 23, successRate: 78.3, avgDurationMs: 12800, sparkline: [80, 75, 90, 85, 70, 80, 78],
-    lastRunAt: new Date(Date.now() - 900000).toISOString(), lastRunState: "running", recentRuns: [],
-  },
-  {
-    workflow: { id: 4, name: "Aegis Threat Aggregation", description: "Aggregates threat intelligence feeds and escalates critical findings.", trigger: "schedule", outputType: "alert", requiresApproval: false, runCount: 956, lastRunAt: new Date(Date.now() - 7200000).toISOString(), isActive: true },
-    counts: { running: 0, queued: 0, completed: 21, failed: 1, waiting_approval: 0, canceled: 0 },
-    totalRuns: 22, successRate: 95.5, avgDurationMs: 45600, sparkline: [95, 100, 90, 95, 100, 100, 95],
-    lastRunAt: new Date(Date.now() - 7200000).toISOString(), lastRunState: "completed", recentRuns: [],
-  },
-  {
-    workflow: { id: 5, name: "Client Onboarding Sync", description: "Orchestrates new client provisioning across CRM, billing, and access systems.", trigger: "webhook", outputType: "notification", requiresApproval: true, runCount: 89, lastRunAt: new Date(Date.now() - 14400000).toISOString(), isActive: true },
-    counts: { running: 0, queued: 0, completed: 6, failed: 0, waiting_approval: 2, canceled: 0 },
-    totalRuns: 8, successRate: 100, avgDurationMs: 8900, sparkline: [100, 0, 100, 100, 0, 100, 100],
-    lastRunAt: new Date(Date.now() - 14400000).toISOString(), lastRunState: "waiting_approval", recentRuns: [],
-  },
-  {
-    workflow: { id: 6, name: "Compliance Report Gen", description: "Generates SOC 2 and regulatory compliance evidence packages.", trigger: "schedule", outputType: "document", requiresApproval: true, runCount: 52, lastRunAt: new Date(Date.now() - 86400000).toISOString(), isActive: true },
-    counts: { running: 0, queued: 1, completed: 4, failed: 0, waiting_approval: 1, canceled: 0 },
-    totalRuns: 6, successRate: 100, avgDurationMs: 67300, sparkline: [0, 100, 0, 0, 100, 0, 100],
-    lastRunAt: new Date(Date.now() - 86400000).toISOString(), lastRunState: "completed", recentRuns: [],
-  },
-  {
-    workflow: { id: 7, name: "Lyte Routing Decision", description: "Evaluates incoming incidents and routes to appropriate playbooks.", trigger: "signal", outputType: "action", requiresApproval: false, runCount: 2341, lastRunAt: new Date(Date.now() - 120000).toISOString(), isActive: true },
-    counts: { running: 3, queued: 2, completed: 45, failed: 3, waiting_approval: 0, canceled: 0 },
-    totalRuns: 53, successRate: 84.9, avgDurationMs: 4200, sparkline: [82, 88, 90, 85, 80, 88, 85],
-    lastRunAt: new Date(Date.now() - 120000).toISOString(), lastRunState: "running", recentRuns: [],
-  },
-  {
-    workflow: { id: 8, name: "Revenue Reconciliation", description: "Reconciles subscription revenue across billing, accounting, and CRM systems.", trigger: "schedule", outputType: "report", requiresApproval: false, runCount: 365, lastRunAt: new Date(Date.now() - 43200000).toISOString(), isActive: true },
-    counts: { running: 0, queued: 0, completed: 7, failed: 0, waiting_approval: 0, canceled: 0 },
-    totalRuns: 7, successRate: 100, avgDurationMs: 52100, sparkline: [100, 100, 100, 100, 100, 100, 100],
-    lastRunAt: new Date(Date.now() - 43200000).toISOString(), lastRunState: "completed", recentRuns: [],
-  },
-  {
-    workflow: { id: 9, name: "PRISM Signal Ingest", description: "Processes and normalizes cross-platform intelligence signals from all Alloy connectors.", trigger: "webhook", outputType: "action", requiresApproval: false, runCount: 4892, lastRunAt: new Date(Date.now() - 60000).toISOString(), isActive: true },
-    counts: { running: 4, queued: 3, completed: 67, failed: 2, waiting_approval: 0, canceled: 0 },
-    totalRuns: 76, successRate: 88.2, avgDurationMs: 2100, sparkline: [90, 85, 92, 88, 90, 85, 88],
-    lastRunAt: new Date(Date.now() - 60000).toISOString(), lastRunState: "running", recentRuns: [],
-  },
-  {
-    workflow: { id: 10, name: "CRM Contact Sync", description: "Bidirectional sync of contact and deal data between CRM and downstream systems.", trigger: "schedule", outputType: "none", requiresApproval: false, runCount: 730, lastRunAt: new Date(Date.now() - 21600000).toISOString(), isActive: true },
-    counts: { running: 0, queued: 0, completed: 14, failed: 1, waiting_approval: 0, canceled: 0 },
-    totalRuns: 15, successRate: 93.3, avgDurationMs: 18700, sparkline: [90, 95, 100, 85, 100, 90, 93],
-    lastRunAt: new Date(Date.now() - 21600000).toISOString(), lastRunState: "completed", recentRuns: [],
-  },
-];
 
-const DEMO_DATA: FactoryFloorData = {
-  workflows: DEMO_WORKFLOWS,
-  globalCounts: { running: 10, queued: 7, completed: 223, failed: 10, waiting_approval: 3 },
+const EMPTY_FACTORY_FLOOR: FactoryFloorData = {
+  workflows: [],
+  globalCounts: { running: 0, queued: 0, completed: 0, failed: 0, waiting_approval: 0 },
   fetchedAt: new Date().toISOString(),
 };
 
@@ -122,11 +60,9 @@ function useFactoryFloor() {
       try {
         const resp = await apiFetch<FactoryFloorData | { data: FactoryFloorData }>("/alloy/factory-floor");
         if (resp && typeof resp === "object" && "data" in resp) return resp.data as FactoryFloorData;
-        const result = resp as FactoryFloorData;
-        if (result.workflows && result.workflows.length > 0) return result;
-        return DEMO_DATA;
+        return resp as FactoryFloorData;
       } catch {
-        return DEMO_DATA;
+        return EMPTY_FACTORY_FLOOR;
       }
     },
     refetchInterval: 30000,
