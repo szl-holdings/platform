@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { m } from "framer-motion";
-import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle, AlertTriangle, Download, Loader2 } from "lucide-react";
+import { Shield, Lock, Eye, Activity, Database, Server, CheckCircle, AlertTriangle, Download, Loader2, FileText, Bug, List, ExternalLink } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 async function downloadPDF(template: string, data: Record<string, unknown>, filename: string): Promise<void> {
   const res = await fetch("/api/documents/generate", {
@@ -184,6 +186,126 @@ const reliabilityPrinciples = [
     body: "The platform is built by the people who operate it. There is no gap between the engineering team and the operating responsibility.",
   },
 ];
+
+function DisclosureForm() {
+  const [form, setForm] = useState({ name: "", email: "", severity: "medium", description: "" });
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setState("loading");
+    setError("");
+    try {
+      const res = await fetch(`${BASE}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "security_disclosure",
+          app: "szl-holdings",
+          name: form.name,
+          email: form.email,
+          message: `[Security Disclosure - ${form.severity.toUpperCase()}]\n\n${form.description}`,
+          metadata: { severity: form.severity, source: "trust-center-disclosure-form" },
+        }),
+      });
+      const json = await res.json() as { ok?: boolean; error?: string };
+      if (!res.ok || !json.ok) throw new Error(json.error ?? "Submission failed");
+      setState("done");
+    } catch (err) {
+      setError((err as Error).message);
+      setState("error");
+    }
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%", padding: "0.625rem 0.875rem",
+    background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.1)",
+    borderRadius: "7px", color: "hsl(38,12%,88%)", fontSize: "0.875rem",
+    outline: "none", boxSizing: "border-box",
+  };
+
+  if (state === "done") {
+    return (
+      <div style={{
+        display: "flex", flexDirection: "column" as const, alignItems: "flex-start", justifyContent: "center",
+        padding: "2rem", background: "hsla(152,50%,42%,0.06)", border: "1px solid hsla(152,50%,42%,0.18)",
+        borderRadius: "10px", gap: "0.5rem",
+      }}>
+        <CheckCircle size={20} style={{ color: "#10b981" }} />
+        <div style={{ fontSize: "0.9375rem", fontWeight: 600, color: "hsl(38,12%,92%)" }}>Report received</div>
+        <div style={{ fontSize: "0.875rem", color: "hsl(210,5%,58%)", lineHeight: 1.55 }}>
+          Thank you for the disclosure. We will acknowledge your report within 48 hours at the email you provided.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" as const, gap: "1rem" }}>
+      <h3 style={{ fontSize: "0.9375rem", fontWeight: "700", color: "hsl(38,12%,92%)", marginBottom: "0.25rem" }}>Submit a vulnerability report</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+        <div>
+          <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Name</label>
+          <input
+            style={inputStyle} required value={form.name}
+            onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
+            placeholder="Your name"
+          />
+        </div>
+        <div>
+          <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Email</label>
+          <input
+            style={inputStyle} type="email" required value={form.email}
+            onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
+            placeholder="you@example.com"
+          />
+        </div>
+      </div>
+      <div>
+        <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Severity</label>
+        <select
+          style={{ ...inputStyle, appearance: "none" as const, cursor: "pointer" }}
+          value={form.severity}
+          onChange={(e) => setForm(f => ({ ...f, severity: e.target.value }))}
+        >
+          <option value="critical">Critical — Immediate risk to user data or systems</option>
+          <option value="high">High — Significant security impact</option>
+          <option value="medium">Medium — Moderate risk, no immediate exploitation</option>
+          <option value="low">Low — Minor risk or hardening recommendation</option>
+        </select>
+      </div>
+      <div>
+        <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,52%)", textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: "0.375rem" }}>Description</label>
+        <textarea
+          style={{ ...inputStyle, minHeight: "100px", resize: "vertical" as const, fontFamily: "inherit" }}
+          required value={form.description}
+          onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))}
+          placeholder="Describe the vulnerability: what you found, how to reproduce it, and the potential impact."
+        />
+      </div>
+      {state === "error" && (
+        <div style={{ fontSize: "12px", color: "#ef4444" }}>{error}</div>
+      )}
+      <button
+        type="submit"
+        disabled={state === "loading"}
+        style={{
+          padding: "0.625rem 1.125rem", borderRadius: "7px",
+          background: "hsla(0,0%,100%,0.06)", border: "1px solid hsla(0,0%,100%,0.12)",
+          color: "hsl(38,12%,86%)", fontSize: "0.875rem", fontWeight: 600,
+          cursor: state === "loading" ? "not-allowed" : "pointer",
+          opacity: state === "loading" ? 0.7 : 1, alignSelf: "flex-start" as const,
+        }}
+      >
+        {state === "loading" ? "Submitting..." : "Submit Report"}
+      </button>
+      <p style={{ fontSize: "11.5px", color: "hsl(210,5%,42%)", lineHeight: 1.5 }}>
+        Prefer email? Send directly to <a href="mailto:security@stephenl.dev" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@stephenl.dev</a>. PGP key available on request.
+      </p>
+    </form>
+  );
+}
 
 export default function TrustCenter() {
   const [downloading, setDownloading] = useState(false);
@@ -600,6 +722,218 @@ export default function TrustCenter() {
                 </p>
                 <a href="mailto:contact@stephenl.dev" style={{ fontSize: "0.875rem", color: "hsl(210,55%,52%)", textDecoration: "none" }}>contact@stephenl.dev</a>
               </div>
+            </div>
+          </m.div>
+        </div>
+      </section>
+
+      {/* Platform Status */}
+      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)", borderTop: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <div style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "hsla(152,50%,42%,0.10)", border: "1px solid hsla(152,50%,42%,0.22)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <Activity size={16} style={{ color: "hsl(152,50%,42%)" }} />
+              </div>
+              <h2 style={{ fontSize: "1.1875rem", fontWeight: "700", letterSpacing: "-0.015em", color: "hsl(38,12%,94%)" }}>Platform Status</h2>
+            </div>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: "1.65", maxWidth: "44rem", marginBottom: "1.5rem" }}>
+              Real-time service availability, incident history, and uptime metrics for all SZL platform services are publicly accessible without login.
+            </p>
+            <a
+              href="/status"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "7px",
+                padding: "0.625rem 1.125rem", borderRadius: "7px",
+                background: "hsla(152,50%,42%,0.1)", border: "1px solid hsla(152,50%,42%,0.22)",
+                color: "hsl(152,50%,52%)", fontSize: "0.875rem", fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "hsl(152,50%,52%)" }} />
+              View Platform Status
+              <ExternalLink size={12} />
+            </a>
+          </m.div>
+        </div>
+      </section>
+
+      {/* Subprocessors */}
+      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)", background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.05)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            style={{ marginBottom: "2.5rem" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <div style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "hsla(210,55%,52%,0.10)", border: "1px solid hsla(210,55%,52%,0.22)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <List size={16} style={{ color: "hsl(210,55%,52%)" }} />
+              </div>
+              <h2 style={{ fontSize: "1.1875rem", fontWeight: "700", letterSpacing: "-0.015em", color: "hsl(38,12%,94%)" }}>Subprocessors</h2>
+            </div>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: "1.65", maxWidth: "44rem" }}>
+              SZL Holdings uses the following third-party subprocessors to deliver platform services. All subprocessors are bound by data processing agreements. This list is updated when subprocessors are added or removed.
+            </p>
+          </m.div>
+
+          <div style={{ background: "hsla(0,0%,100%,0.02)", border: "1px solid hsla(0,0%,100%,0.06)", borderRadius: "12px", overflow: "hidden" }}>
+            {[
+              { name: "Replit", purpose: "Cloud infrastructure, compute, and managed database hosting", category: "Infrastructure", location: "United States", dpa: true },
+              { name: "OpenAI", purpose: "AI language model inference for advisory and analysis agents", category: "AI / Inference", location: "United States", dpa: true },
+              { name: "Anthropic", purpose: "AI language model inference for safety-sensitive agent contexts", category: "AI / Inference", location: "United States", dpa: true },
+              { name: "Google Cloud", purpose: "Maps, geocoding, and geospatial data services", category: "Infrastructure / Data", location: "United States", dpa: true },
+              { name: "Stripe", purpose: "Payment processing and billing infrastructure", category: "Payments", location: "United States", dpa: true },
+              { name: "Microsoft Azure", purpose: "Azure Active Directory, tenant provisioning, and enterprise SSO", category: "Identity / Enterprise", location: "United States / EU", dpa: true },
+              { name: "Resend / SendGrid", purpose: "Transactional email delivery for alerts and notifications", category: "Communications", location: "United States", dpa: true },
+            ].map((sp, i, arr) => (
+              <div key={sp.name} style={{
+                display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "1.5rem",
+                padding: "1rem 1.5rem",
+                borderBottom: i < arr.length - 1 ? "1px solid hsla(0,0%,100%,0.04)" : "none",
+                alignItems: "center",
+              }}>
+                <div>
+                  <div style={{ fontSize: "0.9rem", fontWeight: 600, color: "hsl(38,12%,88%)", marginBottom: 2 }}>{sp.name}</div>
+                  <div style={{ fontSize: "0.8125rem", color: "hsl(210,5%,54%)", lineHeight: 1.5 }}>{sp.purpose}</div>
+                </div>
+                <div>
+                  <span style={{ fontSize: "10px", padding: "2px 7px", borderRadius: 4, background: "hsla(0,0%,100%,0.05)", border: "1px solid hsla(0,0%,100%,0.08)", color: "hsl(210,5%,60%)", marginRight: 6 }}>{sp.category}</span>
+                  <span style={{ fontSize: "10px", color: "hsl(210,5%,44%)" }}>{sp.location}</span>
+                </div>
+                <span style={{ fontSize: "10px", fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "hsla(152,50%,42%,0.1)", color: "hsl(152,50%,52%)", border: "1px solid hsla(152,50%,42%,0.2)", whiteSpace: "nowrap" as const }}>DPA Signed</span>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontSize: "12px", color: "hsl(210,5%,40%)", marginTop: "1rem", lineHeight: "1.55" }}>
+            Last updated: April 2026. To request notification of subprocessor changes, contact <a href="mailto:security@stephenl.dev" style={{ color: "hsl(210,55%,52%)", textDecoration: "none" }}>security@stephenl.dev</a>.
+          </p>
+        </div>
+      </section>
+
+      {/* Penetration Testing */}
+      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+            style={{ marginBottom: "2.5rem" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <div style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "hsla(246,55%,62%,0.10)", border: "1px solid hsla(246,55%,62%,0.22)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <FileText size={16} style={{ color: "hsl(246,55%,62%)" }} />
+              </div>
+              <h2 style={{ fontSize: "1.1875rem", fontWeight: "700", letterSpacing: "-0.015em", color: "hsl(38,12%,94%)" }}>Penetration Testing Cadence</h2>
+            </div>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: "1.65", maxWidth: "44rem" }}>
+              SZL Holdings conducts regular adversarial testing across all platform surfaces. Findings are tracked to closure with defined SLA windows by severity.
+            </p>
+          </m.div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1px", background: "hsla(0,0%,100%,0.05)", borderRadius: "12px", overflow: "hidden" }}>
+            {[
+              { cadence: "Quarterly", scope: "Full external penetration test covering all internet-facing API endpoints, authentication flows, and web application surfaces. Conducted using OWASP methodology with manual exploitation attempts." },
+              { cadence: "Monthly", scope: "Automated vulnerability scanning using static analysis, dependency auditing, and DAST against staging environments. Results reviewed within 24 hours; critical findings escalate immediately." },
+              { cadence: "Continuous", scope: "Dependency vulnerability monitoring via automated tooling on every build. CVE-classified findings with CVSS ≥ 7.0 trigger mandatory 48-hour remediation." },
+              { cadence: "Ad hoc", scope: "Firestorm adversary emulation exercises run against internal access controls, agent permission boundaries, and privileged operation gates. Conducted before major releases." },
+            ].map((item) => (
+              <div key={item.cadence} style={{ padding: "1.5rem 1.75rem", background: "hsl(210,12%,5%)" }}>
+                <span style={{ display: "block", fontSize: "11px", fontWeight: "700", letterSpacing: "0.08em", color: "hsl(246,55%,62%)", marginBottom: "0.5rem", textTransform: "uppercase" as const }}>{item.cadence}</span>
+                <p style={{ fontSize: "0.875rem", color: "hsl(210,5%,56%)", lineHeight: "1.62" }}>{item.scope}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: "1.5rem", display: "flex", gap: "2rem", flexWrap: "wrap" }}>
+            {[
+              { label: "Critical (CVSS 9+)", target: "< 24 hours", color: "#ef4444" },
+              { label: "High (CVSS 7–9)", target: "< 48 hours", color: "#f59e0b" },
+              { label: "Medium (CVSS 4–7)", target: "< 14 days", color: "#3b82f6" },
+              { label: "Low (CVSS < 4)", target: "< 90 days", color: "#6b7280" },
+            ].map((sla) => (
+              <div key={sla.label} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: sla.color, display: "block", flexShrink: 0 }} />
+                <span style={{ fontSize: "12px", color: "hsl(210,5%,56%)" }}>{sla.label}: <span style={{ color: "hsl(38,12%,82%)", fontWeight: 600 }}>{sla.target}</span></span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Responsible Disclosure */}
+      <section style={{ paddingTop: "clamp(4rem,7vw,6rem)", paddingBottom: "clamp(4rem,7vw,6rem)", background: "hsla(0,0%,100%,0.015)", borderTop: "1px solid hsla(0,0%,100%,0.05)", borderBottom: "1px solid hsla(0,0%,100%,0.05)" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(1.25rem,5vw,2.5rem)" }}>
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <div style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "hsla(32,65%,52%,0.10)", border: "1px solid hsla(32,65%,52%,0.22)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <Bug size={16} style={{ color: "hsl(32,65%,52%)" }} />
+              </div>
+              <h2 style={{ fontSize: "1.1875rem", fontWeight: "700", letterSpacing: "-0.015em", color: "hsl(38,12%,94%)" }}>Responsible Disclosure</h2>
+            </div>
+            <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,60%)", lineHeight: "1.65", maxWidth: "44rem", marginBottom: "2rem" }}>
+              If you have discovered a security vulnerability in any SZL Holdings platform, we ask that you disclose it to us privately before public disclosure. We commit to acknowledging valid reports within 48 hours, and resolving critical findings within 72 hours.
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "3rem" }}>
+              <div>
+                <h3 style={{ fontSize: "0.9375rem", fontWeight: "700", color: "hsl(38,12%,92%)", marginBottom: "1rem" }}>Our commitments to you</h3>
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.75rem" }}>
+                  {[
+                    "Acknowledge your report within 48 hours",
+                    "Confirm whether the issue is valid within 5 business days",
+                    "Notify you when the vulnerability has been resolved",
+                    "Credit researchers who follow this policy (if desired)",
+                    "Not pursue legal action for good-faith disclosures",
+                  ].map((item) => (
+                    <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem" }}>
+                      <CheckCircle size={13} style={{ color: "#10b981", marginTop: 2, flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.875rem", color: "hsl(210,5%,60%)", lineHeight: 1.55 }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ marginTop: "1.5rem" }}>
+                  <h4 style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,12%,72%)", marginBottom: "0.5rem" }}>In scope</h4>
+                  <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "0.375rem" }}>
+                    {["Authentication bypass", "Privilege escalation", "SQL injection", "XSS (stored)", "SSRF", "Data exposure", "Broken access control"].map(s => (
+                      <span key={s} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: 4, background: "hsla(152,50%,42%,0.08)", border: "1px solid hsla(152,50%,42%,0.15)", color: "hsl(152,50%,52%)" }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <DisclosureForm />
             </div>
           </m.div>
         </div>

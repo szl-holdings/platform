@@ -69,6 +69,7 @@ const CoreCommandPage = lazy(() => import("@/pages/core-command"));
 const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
 const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
 const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
+const StatusPage = lazy(() => import("@/pages/status"));
 const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
 const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
 const PlatformArchitecturePage = lazy(() => import("@/pages/platform-architecture"));
@@ -358,6 +359,9 @@ function App() {
             </Route>
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
+            </Route>
+            <Route path="/status">
+              <Suspense fallback={<PageLoader />}><StatusPage /></Suspense>
             </Route>
             <Route path="/legal/privacy">
               <Suspense fallback={<PageLoader />}><LegalPrivacyPage /></Suspense>

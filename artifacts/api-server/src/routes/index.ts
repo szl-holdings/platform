@@ -73,6 +73,7 @@ import backupRouter from "./backup";
 import demoRequestsRouter from "./demo-requests";
 import contactRouter from "./contact";
 import aegisSocLiveRouter from "./firestorm-live";
+import publicStatusRouter from "./public-status";
 
 const router: IRouter = Router();
 
@@ -266,5 +267,9 @@ router.use(backupRouter);
 
 router.use("/exports", writeLimiter);
 router.use(exportsRouter);
+
+router.use("/public", publicStatusRouter);
+router.use("/admin/status", writeLimiter);
+router.use("/admin/status", publicStatusRouter);
 
 export default router;
