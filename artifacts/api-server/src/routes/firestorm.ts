@@ -1311,6 +1311,20 @@ router.get("/firestorm/hardening-summary", authMiddleware({ required: false }), 
   }
 });
 
+router.post("/firestorm/push-token", authMiddleware({ required: true }), async (req, res) => {
+  try {
+    const { token, platform } = req.body as { token?: string; platform?: string };
+    if (!token || typeof token !== "string") {
+      res.status(400).json({ error: "token is required" });
+      return;
+    }
+    console.log(`[Push] Registered push token for platform=${platform ?? "unknown"}: ${token.slice(0, 20)}...`);
+    sendSuccess(res, { registered: true, platform: platform ?? "unknown" });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to register push token");
+  }
+});
+
 router.post("/firestorm/ingest/syslog", authMiddleware({ required: false }), async (req, res) => {
   try {
     const body = req.body;
