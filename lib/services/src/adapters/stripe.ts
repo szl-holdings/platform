@@ -533,6 +533,170 @@ export class StripeAdapter extends ServiceAdapter {
     };
   }
 
+  async cancelSubscription(
+    subscriptionId: string,
+    options?: { cancelImmediately?: boolean },
+  ): Promise<StripeSubscription | null> {
+    if (!this.isLive) return null;
+
+    const params = new URLSearchParams();
+    if (options?.cancelImmediately) {
+      const data = (await this.stripeRequest(`/subscriptions/${subscriptionId}`, {
+        method: "DELETE",
+      })) as {
+        id: string; customer: string; status: string;
+        current_period_start: number; current_period_end: number;
+        cancel_at_period_end: boolean; canceled_at: number | null;
+        items: { data: Array<{ id: string; price: { id: string; product: string }; quantity: number }> };
+      };
+      return {
+        id: data.id, customerId: data.customer, status: data.status,
+        priceId: data.items.data[0]?.price.id ?? "", productId: data.items.data[0]?.price.product,
+        currentPeriodStart: data.current_period_start, currentPeriodEnd: data.current_period_end,
+        cancelAtPeriodEnd: data.cancel_at_period_end, canceledAt: data.canceled_at ?? undefined,
+        items: data.items.data.map(i => ({ id: i.id, priceId: i.price.id, quantity: i.quantity })),
+      };
+    } else {
+      params.set("cancel_at_period_end", "true");
+      const data = (await this.stripeRequest(`/subscriptions/${subscriptionId}`, {
+        method: "POST",
+        body: params.toString(),
+      })) as {
+        id: string; customer: string; status: string;
+        current_period_start: number; current_period_end: number;
+        cancel_at_period_end: boolean; canceled_at: number | null;
+        items: { data: Array<{ id: string; price: { id: string; product: string }; quantity: number }> };
+      };
+      return {
+        id: data.id, customerId: data.customer, status: data.status,
+        priceId: data.items.data[0]?.price.id ?? "", productId: data.items.data[0]?.price.product,
+        currentPeriodStart: data.current_period_start, currentPeriodEnd: data.current_period_end,
+        cancelAtPeriodEnd: data.cancel_at_period_end, canceledAt: data.canceled_at ?? undefined,
+        items: data.items.data.map(i => ({ id: i.id, priceId: i.price.id, quantity: i.quantity })),
+      };
+    }
+  }
+
+  async updateSubscriptionPlan(subscriptionId: string, newPriceId: string): Promise<StripeSubscription | null> {
+    if (!this.isLive) return null;
+
+    const sub = (await this.stripeRequest(`/subscriptions/${subscriptionId}`)) as {
+      id: string; items: { data: Array<{ id: string }> };
+    };
+
+    const itemId = sub.items.data[0]?.id;
+    if (!itemId) throw new Error("No subscription item found");
+
+    const params = new URLSearchParams();
+    params.set(`items[0][id]`, itemId);
+    params.set(`items[0][price]`, newPriceId);
+    params.set("proration_behavior", "always_invoice");
+
+    const data = (await this.stripeRequest(`/subscriptions/${subscriptionId}`, {
+      method: "POST",
+      body: params.toString(),
+    })) as {
+      id: string; customer: string; status: string;
+      current_period_start: number; current_period_end: number;
+      cancel_at_period_end: boolean; canceled_at: number | null;
+      items: { data: Array<{ id: string; price: { id: string; product: string }; quantity: number }> };
+    };
+
+    return {
+      id: data.id, customerId: data.customer, status: data.status,
+      priceId: data.items.data[0]?.price.id ?? "", productId: data.items.data[0]?.price.product,
+      currentPeriodStart: data.current_period_start, currentPeriodEnd: data.current_period_end,
+      cancelAtPeriodEnd: data.cancel_at_period_end, canceledAt: data.canceled_at ?? undefined,
+      items: data.items.data.map(i => ({ id: i.id, priceId: i.price.id, quantity: i.quantity })),
+    };
+  }
+
+  async getRevenueAnalytics(): Promise<{
+    mrr: number;
+    arr: number;
+    activeSubscriptions: number;
+    trialingSubscriptions: number;
+    pastDueSubscriptions: number;
+    canceledThisMonth: number;
+    churnRate: number;
+    recentInvoices: StripeInvoice[];
+    newSubscriptionsThisMonth: number;
+  }> {
+    if (!this.isLive) {
+      return {
+        mrr: 0, arr: 0,
+        activeSubscriptions: 0, trialingSubscriptions: 0, pastDueSubscriptions: 0,
+        canceledThisMonth: 0, churnRate: 0, recentInvoices: [],
+        newSubscriptionsThisMonth: 0,
+      };
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const monthStart = now - 30 * 24 * 60 * 60;
+
+    const [allSubsData, invoiceData] = await Promise.all([
+      this.stripeRequest("/subscriptions?limit=100&status=all&expand[]=data.items") as Promise<{
+        data: Array<{
+          id: string; status: string; cancel_at_period_end: boolean; canceled_at: number | null;
+          created: number;
+          items: { data: Array<{ price: { unit_amount: number; recurring?: { interval: string } } }> };
+        }>;
+      }>,
+      this.stripeRequest(`/invoices?limit=20&status=paid`) as Promise<{
+        data: Array<{
+          id: string; customer: string; subscription: string | null; amount_paid: number; currency: string;
+          status: string; status_transitions: { paid_at: number | null }; created: number;
+          hosted_invoice_url: string | null; invoice_pdf: string | null;
+        }>;
+      }>,
+    ]);
+
+    let mrr = 0;
+    let activeSubscriptions = 0;
+    let trialingSubscriptions = 0;
+    let pastDueSubscriptions = 0;
+    let canceledThisMonth = 0;
+    let newSubscriptionsThisMonth = 0;
+
+    for (const sub of allSubsData.data) {
+      if (sub.status === "active") {
+        activeSubscriptions++;
+        for (const item of sub.items.data) {
+          const price = item.price;
+          const amount = price.unit_amount ?? 0;
+          const interval = price.recurring?.interval;
+          if (interval === "year") mrr += amount / 12;
+          else if (interval === "month") mrr += amount;
+        }
+        if (sub.created >= monthStart) newSubscriptionsThisMonth++;
+      } else if (sub.status === "trialing") {
+        trialingSubscriptions++;
+        if (sub.created >= monthStart) newSubscriptionsThisMonth++;
+      } else if (sub.status === "past_due") {
+        pastDueSubscriptions++;
+      } else if (sub.status === "canceled" && sub.canceled_at && sub.canceled_at >= monthStart) {
+        canceledThisMonth++;
+      }
+    }
+
+    const totalAtStartOfMonth = activeSubscriptions + canceledThisMonth;
+    const churnRate = totalAtStartOfMonth > 0 ? (canceledThisMonth / totalAtStartOfMonth) * 100 : 0;
+
+    const recentInvoices: StripeInvoice[] = invoiceData.data.map(inv => ({
+      id: inv.id, customerId: inv.customer, subscriptionId: inv.subscription ?? undefined,
+      amount: inv.amount_paid, currency: inv.currency, status: inv.status,
+      paidAt: inv.status_transitions.paid_at ?? undefined, created: inv.created,
+      hostedInvoiceUrl: inv.hosted_invoice_url ?? undefined, invoicePdf: inv.invoice_pdf ?? undefined,
+    }));
+
+    return {
+      mrr: Math.round(mrr), arr: Math.round(mrr * 12),
+      activeSubscriptions, trialingSubscriptions, pastDueSubscriptions,
+      canceledThisMonth, churnRate: Math.round(churnRate * 10) / 10,
+      recentInvoices, newSubscriptionsThisMonth,
+    };
+  }
+
   async verifyWebhookPayload(
     payload: string | Buffer,
     signature: string | undefined,

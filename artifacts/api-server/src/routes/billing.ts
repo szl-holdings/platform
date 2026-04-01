@@ -615,7 +615,7 @@ router.post("/billing/firestorm/enterprise-quote", authMiddleware({ required: fa
   }
 });
 
-router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "superadmin"), async (_req: Request, res: Response) => {
+router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "super_admin"), async (_req: Request, res: Response) => {
   try {
     if (!services.stripe.isLive) {
       sendBadRequest(res, "Stripe must be connected (STRIPE_SECRET_KEY set) to sync plans");
@@ -668,7 +668,171 @@ router.post("/billing/sync-plans", authMiddleware(), requireRole("admin", "super
   }
 });
 
-router.post("/billing/firestorm/invoice", authMiddleware(), requireRole("admin", "superadmin"), async (req: Request, res: Response) => {
+router.post("/billing/cancel-subscription", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { subscriptionId, cancelImmediately } = req.body as {
+      subscriptionId?: string;
+      cancelImmediately?: boolean;
+    };
+
+    if (!subscriptionId) {
+      sendBadRequest(res, "subscriptionId is required");
+      return;
+    }
+
+    if (!services.stripe.isLive) {
+      sendSuccess(res, {
+        status: "canceled",
+        subscriptionId,
+        message: cancelImmediately
+          ? "Subscription canceled immediately (demo mode)"
+          : "Subscription set to cancel at period end (demo mode)",
+      });
+      return;
+    }
+
+    const updated = await services.stripe.cancelSubscription(subscriptionId, { cancelImmediately });
+    if (!updated) {
+      sendNotFound(res, "Subscription");
+      return;
+    }
+
+    await db
+      .update(subscriptionsTable)
+      .set({
+        status: cancelImmediately ? "canceled" : updated.status === "active" ? "active" : "canceled",
+        canceledAt: cancelImmediately ? new Date() : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptionsTable.stripeSubscriptionId, subscriptionId));
+
+    sendSuccess(res, {
+      status: updated.status,
+      cancelAtPeriodEnd: updated.cancelAtPeriodEnd,
+      currentPeriodEnd: updated.currentPeriodEnd,
+      message: cancelImmediately
+        ? "Subscription canceled immediately"
+        : "Subscription will cancel at end of current billing period",
+    });
+  } catch (err) {
+    logger.error({ err }, "Failed to cancel subscription");
+    handleRouteError(res, err, "Failed to cancel subscription");
+  }
+});
+
+router.post("/billing/update-subscription", authMiddleware(), async (req: Request, res: Response) => {
+  try {
+    const { subscriptionId, newPriceId } = req.body as {
+      subscriptionId?: string;
+      newPriceId?: string;
+    };
+
+    if (!subscriptionId || !newPriceId) {
+      sendBadRequest(res, "subscriptionId and newPriceId are required");
+      return;
+    }
+
+    if (!services.stripe.isLive) {
+      sendSuccess(res, {
+        status: "active",
+        subscriptionId,
+        newPriceId,
+        message: "Subscription plan updated (demo mode)",
+      });
+      return;
+    }
+
+    const updated = await services.stripe.updateSubscriptionPlan(subscriptionId, newPriceId);
+    if (!updated) {
+      sendNotFound(res, "Subscription");
+      return;
+    }
+
+    sendSuccess(res, {
+      status: updated.status,
+      priceId: updated.priceId,
+      currentPeriodEnd: updated.currentPeriodEnd,
+      message: "Subscription plan updated with immediate proration",
+    });
+  } catch (err) {
+    logger.error({ err }, "Failed to update subscription");
+    handleRouteError(res, err, "Failed to update subscription");
+  }
+});
+
+router.get("/billing/revenue-analytics", authMiddleware(), requireRole("ops", "analyst", "admin", "super_admin"), async (_req: Request, res: Response) => {
+  try {
+    if (!services.stripe.isLive) {
+      const [subCount, invoiceSum] = await Promise.all([
+        db.select().from(subscriptionsTable),
+        db.select().from(invoicesTable),
+      ]);
+
+      const activeLocal = subCount.filter(s => s.status === "active").length;
+      const trialingLocal = subCount.filter(s => s.status === "trialing").length;
+      const pastDueLocal = subCount.filter(s => s.status === "past_due").length;
+      const canceledLocal = subCount.filter(s => s.status === "canceled").length;
+      const totalRevenue = invoiceSum
+        .filter(i => i.status === "paid")
+        .reduce((sum, i) => sum + parseFloat(String(i.amount)), 0);
+
+      const plans = await db.select().from(billingPlansTable);
+      const planMap = Object.fromEntries(plans.map(p => [p.id, p]));
+
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      let localMrr = 0;
+      for (const sub of subCount.filter(s => s.status === "active")) {
+        const plan = planMap[sub.planId];
+        if (plan?.priceMonthly) localMrr += parseFloat(String(plan.priceMonthly));
+      }
+
+      const newThisMonth = subCount.filter(s => s.createdAt >= monthStart && (s.status === "active" || s.status === "trialing")).length;
+      const canceledThisMonth = subCount.filter(s => s.canceledAt && s.canceledAt >= monthStart).length;
+
+      sendSuccess(res, {
+        source: "database",
+        stripeMode: "mock",
+        mrr: Math.round(localMrr * 100),
+        arr: Math.round(localMrr * 12 * 100),
+        activeSubscriptions: activeLocal,
+        trialingSubscriptions: trialingLocal,
+        pastDueSubscriptions: pastDueLocal,
+        canceledSubscriptions: canceledLocal,
+        canceledThisMonth,
+        newSubscriptionsThisMonth: newThisMonth,
+        churnRate: 0,
+        totalLifetimeRevenue: Math.round(totalRevenue * 100),
+        recentInvoices: [],
+      });
+      return;
+    }
+
+    const analytics = await services.stripe.getRevenueAnalytics();
+    const [subCount, invoiceSum] = await Promise.all([
+      db.select().from(subscriptionsTable),
+      db.select().from(invoicesTable),
+    ]);
+
+    const canceledLocal = subCount.filter(s => s.status === "canceled").length;
+    const totalRevenue = invoiceSum
+      .filter(i => i.status === "paid")
+      .reduce((sum, i) => sum + parseFloat(String(i.amount)), 0);
+
+    sendSuccess(res, {
+      source: "stripe",
+      stripeMode: process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_") ? "live" : "test",
+      ...analytics,
+      canceledSubscriptions: canceledLocal,
+      totalLifetimeRevenue: Math.round(totalRevenue * 100),
+    });
+  } catch (err) {
+    logger.error({ err }, "Failed to get revenue analytics");
+    handleRouteError(res, err, "Failed to get revenue analytics");
+  }
+});
+
+router.post("/billing/firestorm/invoice", authMiddleware(), requireRole("admin", "super_admin"), async (req: Request, res: Response) => {
   try {
     const { customerId, lineItems, dueDate, notes } = req.body as {
       customerId?: string;
