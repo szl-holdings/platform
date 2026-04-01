@@ -1,6 +1,27 @@
 import { parseIntId } from "../utils.js";
 
 export const holdingsTypeDefs = `#graphql
+  type TrustFramework {
+    name: String!
+    status: String!
+    scope: String!
+    expiry: String!
+  }
+
+  type TrustCertification {
+    name: String!
+    date: String!
+    issuer: String!
+  }
+
+  type TrustCenterStatus {
+    lastAuditDate: String!
+    nextReviewDate: String!
+    overallScore: Int!
+    frameworks: [TrustFramework!]!
+    certifications: [TrustCertification!]!
+  }
+
   type HoldingsVenture {
     id: ID!
     slug: String!
@@ -39,6 +60,7 @@ export const holdingsTypeDefs = `#graphql
   }
 
   extend type Query {
+    trustCenter: TrustCenterStatus!
     holdingsVentures(status: String, limit: Int, offset: Int): [HoldingsVenture!]!
     holdingsVenture(id: ID!): HoldingsVenture
     holdingsVentureBySlug(slug: String!): HoldingsVenture
@@ -54,6 +76,24 @@ export const holdingsTypeDefs = `#graphql
 
 export const holdingsResolvers = {
   Query: {
+    trustCenter: () => ({
+      lastAuditDate: "2026-01-15",
+      nextReviewDate: "2026-07-15",
+      overallScore: 94,
+      frameworks: [
+        { name: "ISO 27001", status: "certified", scope: "Information Security Management", expiry: "Dec 2026" },
+        { name: "SOC 2 Type II", status: "certified", scope: "Security, Availability, Confidentiality", expiry: "Mar 2027" },
+        { name: "GDPR", status: "compliant", scope: "EU Data Protection", expiry: "Ongoing" },
+        { name: "FedRAMP", status: "in-progress", scope: "US Federal Cloud", expiry: "Q3 2026" },
+        { name: "ITAR", status: "compliant", scope: "Defense Technology Controls", expiry: "Ongoing" },
+      ],
+      certifications: [
+        { name: "Pentest by Cobalt Strike", date: "Jan 2026", issuer: "Cobalt Strike" },
+        { name: "AWS Security Partner Certified", date: "Nov 2025", issuer: "Amazon Web Services" },
+        { name: "Zero Trust Architecture", date: "Sep 2025", issuer: "CISA" },
+        { name: "DISA STIGs Applied", date: "Dec 2025", issuer: "DISA" },
+      ],
+    }),
     holdingsVentures: async (_: unknown, args: { status?: string; limit?: number; offset?: number }) => {
       try {
         const { db } = await import("@workspace/db");
