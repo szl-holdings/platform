@@ -69,6 +69,7 @@ import scimRouter from "./scim";
 import pushTokensRouter from "./push-tokens";
 import pushNotificationsRouter from "./push-notifications";
 import backupRouter from "./backup";
+import demoRequestsRouter from "./demo-requests";
 
 const router: IRouter = Router();
 
@@ -145,6 +146,8 @@ router.use(intelligenceRouter);
 router.use(aegisIntelRouter);
 router.use(bookingRouter);
 router.use(holdingsRouter);
+router.use("/demo-requests", writeLimiter);
+router.use(demoRequestsRouter);
 router.use(carlotaJoRouter);
 router.use("/observability", readLimiter);
 router.use(observabilityRouter);

@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { logger } from "../lib/logger";
 import {
   db,
   holdingsVenturesTable,
@@ -392,7 +393,7 @@ router.post("/holdings/inquiries", (req, res) => {
           replyTo: email.trim(),
         });
       } catch (emailErr) {
-        console.warn("[holdings] Email send failed (non-blocking):", emailErr);
+        logger.warn({ err: emailErr }, "[holdings] Email send failed (non-blocking)");
       }
     });
   }).catch(err => {

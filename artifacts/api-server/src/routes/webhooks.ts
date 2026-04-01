@@ -1,9 +1,23 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@workspace/db";
 import crypto from "crypto";
+import { z } from "zod";
 import { authMiddleware } from "../middlewares/auth";
-import { sendSuccess, sendBadRequest, sendNotFound, handleRouteError } from "../lib/api-response";
+import { sendSuccess, sendBadRequest, sendNotFound, sendError, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+
+const webhookEndpointSchema = z.object({
+  url: z.string().url("url must be a valid URL"),
+  eventTypes: z.union([z.literal("*"), z.array(z.string())]).optional().default("*"),
+  description: z.string().optional(),
+});
+
+const webhookEndpointUpdateSchema = z.object({
+  url: z.string().url("url must be a valid URL").optional(),
+  eventTypes: z.union([z.literal("*"), z.array(z.string())]).optional(),
+  active: z.boolean().optional(),
+  description: z.string().optional(),
+});
 
 const router: IRouter = Router();
 
@@ -196,24 +210,13 @@ router.get("/webhooks/endpoints", authMiddleware(), async (_req, res) => {
 });
 
 router.post("/webhooks/endpoints", authMiddleware(), async (req: Request, res: Response) => {
+  const parsed = webhookEndpointSchema.safeParse(req.body);
+  if (!parsed.success) {
+    sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
+    return;
+  }
   try {
-    const { url, eventTypes, description } = req.body as {
-      url?: string;
-      eventTypes?: string[] | "*";
-      description?: string;
-    };
-
-    if (!url) {
-      sendBadRequest(res, "url is required");
-      return;
-    }
-
-    try {
-      new URL(url);
-    } catch {
-      sendBadRequest(res, "url must be a valid URL");
-      return;
-    }
+    const { url, eventTypes, description } = parsed.data;
 
     const id = `whe_${Date.now()}_${crypto.randomBytes(6).toString("hex")}`;
     const secret = generateWebhookSecret();
@@ -250,6 +253,11 @@ router.post("/webhooks/endpoints", authMiddleware(), async (req: Request, res: R
 });
 
 router.patch("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, res: Response) => {
+  const parsed = webhookEndpointUpdateSchema.safeParse(req.body);
+  if (!parsed.success) {
+    sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
+    return;
+  }
   try {
     const endpoint = webhookEndpoints.get(req.params.id);
     if (!endpoint) {
@@ -257,12 +265,7 @@ router.patch("/webhooks/endpoints/:id", authMiddleware(), async (req: Request, r
       return;
     }
 
-    const { url, eventTypes, active, description } = req.body as {
-      url?: string;
-      eventTypes?: string[] | "*";
-      active?: boolean;
-      description?: string;
-    };
+    const { url, eventTypes, active, description } = parsed.data;
 
     if (url !== undefined) endpoint.url = url;
     if (eventTypes !== undefined) endpoint.eventTypes = eventTypes;

@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import rateLimit from "express-rate-limit";
+import { z } from "zod";
 import {
   db,
   readinessProgramsTable,
@@ -12,6 +13,25 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, handleRouteError, parsePagination } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+
+const programCreateSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  description: z.string().optional(),
+  status: z.enum(["draft", "active", "completed", "archived"]).optional(),
+  targetScore: z.number().min(0).max(100).optional(),
+  entityType: z.string().optional(),
+  entityId: z.number().int().optional(),
+}).passthrough();
+
+const programUpdateSchema = programCreateSchema.partial();
+
+const milestoneSchema = z.object({
+  name: z.string().min(1, "Name is required").max(200),
+  description: z.string().optional(),
+  status: z.enum(["pending", "in_progress", "completed", "skipped"]).optional(),
+  dueDate: z.string().optional(),
+  programId: z.number().int().optional(),
+}).passthrough();
 
 const router: IRouter = Router();
 
@@ -27,8 +47,10 @@ router.get("/readiness/programs", authMiddleware(), async (req, res) => {
 });
 
 router.post("/readiness/programs", authMiddleware(), async (req, res) => {
+  const parsed = programCreateSchema.safeParse(req.body);
+  if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
-    const [row] = await db.insert(readinessProgramsTable).values(req.body).returning();
+    const [row] = await db.insert(readinessProgramsTable).values(parsed.data).returning();
     sendSuccess(res, row, 201);
   } catch (err) {
     handleRouteError(res, err, "Failed to create program");
@@ -47,9 +69,11 @@ router.get("/readiness/programs/:id", authMiddleware(), async (req, res) => {
 });
 
 router.patch("/readiness/programs/:id", authMiddleware(), async (req, res) => {
+  const parsed = programUpdateSchema.safeParse(req.body);
+  if (!parsed.success) { sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400); return; }
   try {
     const id = parseIdParam(req.params.id);
-    const [row] = await db.update(readinessProgramsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(readinessProgramsTable.id, id)).returning();
+    const [row] = await db.update(readinessProgramsTable).set({ ...parsed.data, updatedAt: new Date() }).where(eq(readinessProgramsTable.id, id)).returning();
     if (!row) { sendNotFound(res, "Program"); return; }
     sendSuccess(res, row);
   } catch (err) {

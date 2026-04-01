@@ -4,6 +4,7 @@ import { eq, and, gt } from "drizzle-orm";
 import type { RoleName } from "@workspace/db";
 import { ROLE_HIERARCHY, isReadOnlyRole, toCanonicalRole } from "@workspace/db";
 import { serverTelemetry } from "@workspace/observability";
+import { logger } from "../lib/logger";
 
 export interface OrgMembership {
   orgId: number;
@@ -130,7 +131,7 @@ export function authMiddleware(options: { required?: boolean } = {}) {
       req.user = user ?? undefined;
       next();
     } catch (err) {
-      req.log?.error({ err }, "Auth middleware error");
+      logger.error({ err }, "Auth middleware error");
       res.status(500).json({ error: "Authentication error" });
     }
   };

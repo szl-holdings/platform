@@ -164,19 +164,21 @@ const opsNavItems = [
   { path: "/ops/rmm", label: "RMM Console", icon: Server },
 ];
 
+const SHOW_EXPERIMENTAL_INTEL = false;
+
 const intelNavPrimary = [
   { path: "/intel/dashboard", label: "Research Dashboard", icon: LayoutDashboard },
   { path: "/intel/projects", label: "Research Projects", icon: FlaskConical },
   { path: "/intel/experiments", label: "Experiments", icon: FlaskConical },
   { path: "/intel/models", label: "Model Registry", icon: Cpu },
-  { path: "/intel/neural-explorer", label: "Neural Explorer", icon: BrainIcon },
+  ...(SHOW_EXPERIMENTAL_INTEL ? [{ path: "/intel/neural-explorer", label: "Neural Explorer", icon: BrainIcon }] : []),
   { path: "/intel/predictions", label: "Predictions", icon: TrendingUp },
   { path: "/intel/insights", label: "AI Insights", icon: Eye },
 ];
 
 const intelCortexNav = [
   { path: "/intel/quipu-command", label: "Quipu Command", icon: Network },
-  { path: "/intel/agent-spawner", label: "Agent Spawner", icon: Plus },
+  ...(SHOW_EXPERIMENTAL_INTEL ? [{ path: "/intel/agent-spawner", label: "Agent Spawner", icon: Plus }] : []),
   { path: "/intel/chasqui-relay", label: "Chasqui Relay", icon: Radio },
   { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
@@ -189,6 +191,7 @@ const intelToolsNav = [
   { path: "/intel/llm-eval", label: "LLM Evaluation", icon: FlaskConical },
   { path: "/intel/gpu-monitoring", label: "GPU Monitor", icon: Cpu },
   { path: "/intel/model-registry", label: "Version Registry", icon: Database },
+  ...(SHOW_EXPERIMENTAL_INTEL ? [{ path: "/intel/neural-explorer", label: "Neural Explorer", icon: BrainIcon }] : []),
 ];
 
 type Module = "security" | "operations" | "intelligence";
@@ -634,13 +637,13 @@ function AppRouter() {
         {/* Intelligence Engine */}
         <Route path="/intel/dashboard" component={IntelDashboard} />
         <Route path="/intel/quipu-command" component={QuipuCommand} />
-        <Route path="/intel/agent-spawner" component={AgentSpawner} />
+        {SHOW_EXPERIMENTAL_INTEL && <Route path="/intel/agent-spawner" component={AgentSpawner} />}
         <Route path="/intel/chasqui-relay" component={ChasquiRelay} />
         <Route path="/intel/dual-mind" component={DualMindMonitor} />
         <Route path="/intel/willaq-umu" component={WillaqUmu} />
         <Route path="/intel/experiments" component={Experiments} />
         <Route path="/intel/models" component={Models} />
-        <Route path="/intel/neural-explorer" component={NeuralExplorer} />
+        {SHOW_EXPERIMENTAL_INTEL && <Route path="/intel/neural-explorer" component={NeuralExplorer} />}
         <Route path="/intel/predictions" component={Predictions} />
         <Route path="/intel/gpu-monitoring" component={GPUMonitoring} />
         <Route path="/intel/llm-eval" component={LLMEvaluation} />

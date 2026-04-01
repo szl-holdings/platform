@@ -1,15 +1,44 @@
 import { useState } from "react";
-import { ChevronRight, Ship } from "lucide-react";
+import { ChevronRight, Ship, AlertCircle } from "lucide-react";
 import { MarketingNav } from "@/components/MarketingNav";
 import { MarketingFooter } from "@/components/MarketingFooter";
 
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE = `${BASE}/api`;
+
 export default function MarketingDemoPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", company: "", email: "", fleet: "", message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/demo-requests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          company: form.company,
+          email: form.email,
+          fleetSize: form.fleet,
+          message: form.message,
+          product: "vessels",
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error || "Submission failed");
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -79,11 +108,18 @@ export default function MarketingDemoPage() {
                     className="w-full bg-[#060e1a] border border-sky-500/15 rounded-lg px-3.5 py-2.5 text-[13px] text-sky-100 placeholder-sky-400/25 focus:outline-none focus:border-sky-500/40 transition-colors resize-none"
                   />
                 </div>
+                {submitError && (
+                  <div className="flex items-center gap-2 text-sm text-red-400/80">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-sky-400 hover:bg-sky-300 text-[#060e1a] font-bold rounded-xl transition-all text-[14px]"
+                  disabled={submitting}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-sky-400 hover:bg-sky-300 text-[#060e1a] font-bold rounded-xl transition-all text-[14px] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Submit request <ChevronRight className="w-4 h-4" />
+                  {submitting ? "Sending..." : <>Submit request <ChevronRight className="w-4 h-4" /></>}
                 </button>
               </form>
             )}

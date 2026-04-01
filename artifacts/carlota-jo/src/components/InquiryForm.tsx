@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, AlertCircle } from "lucide-react";
+
+const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+const API_BASE = `${BASE}/api`;
 
 export default function InquiryForm() {
   const [form, setForm] = useState({
@@ -10,10 +13,33 @@ export default function InquiryForm() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/cms/contact-submissions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          siteId: 4,
+          formKey: "carlota_inquiry",
+          fullName: form.name,
+          email: form.email,
+          message: form.message,
+          metadataJson: { organisation: form.organisation },
+        }),
+      });
+      if (!res.ok) throw new Error("Submission failed");
+      setSubmitted(true);
+    } catch {
+      setSubmitError("Something went wrong. Please email us at inquiries@carlotajo.com");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -125,9 +151,14 @@ export default function InquiryForm() {
                     placeholder="Briefly describe the challenge or decision you are navigating..."
                   />
                 </div>
-                <button type="submit" className="cj-btn-primary">
-                  Submit enquiry
-                  <ArrowRight size={13} />
+                {submitError && (
+                  <div className="flex items-center gap-2 text-[12px] text-red-500/70">
+                    <AlertCircle size={13} />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+                <button type="submit" disabled={submitting} className="cj-btn-primary disabled:opacity-60 disabled:cursor-not-allowed">
+                  {submitting ? "Submitting..." : <>Submit enquiry <ArrowRight size={13} /></>}
                 </button>
                 <p className="text-[11px] text-ink-400/60 font-light">
                   Treated in strict confidence.

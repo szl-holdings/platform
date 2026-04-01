@@ -208,7 +208,7 @@ function scoreEntity(
 
 router.post(
   "/core/recommendations",
-  authMiddleware({ required: false }),
+  authMiddleware({ required: true }),
   async (req, res) => {
     try {
       const {
@@ -294,7 +294,7 @@ router.post(
 
 router.get(
   "/core/recommendations",
-  authMiddleware({ required: false }),
+  authMiddleware({ required: true }),
   async (req, res) => {
     try {
       const limit = Math.min(
