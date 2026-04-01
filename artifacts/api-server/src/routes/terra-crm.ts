@@ -12,8 +12,99 @@ import {
   type InsertTerraLead,
   type InsertTerraDeal,
 } from "@workspace/db";
-import { eq, and, desc, ilike, or, sql } from "drizzle-orm";
+import { eq, and, desc, ilike, or, sql, inArray } from "drizzle-orm";
+import { z } from "zod";
 import { scoreDistressProperty } from "../lib/terra-ai-scoring";
+
+const CreateLeadSchema = z.object({
+  firstName: z.string().min(1, "firstName is required"),
+  lastName: z.string().min(1, "lastName is required"),
+  email: z.string().email().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  type: z.enum(["buyer", "seller", "investor", "both"]).optional(),
+  source: z.string().optional(),
+  stage: z.string().optional(),
+  score: z.number().int().min(0).max(100).optional(),
+  conversionProbability: z.number().min(0).max(1).optional(),
+  ownerName: z.string().optional().nullable(),
+  ownerUserId: z.number().int().optional().nullable(),
+  nextFollowUp: z.string().optional().nullable(),
+  distressPropertyId: z.number().int().optional().nullable(),
+  distressPropertyExternalId: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  tags: z.array(z.string()).optional(),
+  nextAction: z.string().optional(),
+});
+
+const DEAL_STAGES = ["lead","qualified","showing","offer","negotiation","accepted","inspection","financing","under-contract","clear-to-close","closed","lost"] as const;
+const DEAL_TYPES = ["acquisition", "disposition", "refinance", "development"] as const;
+const RISK_LEVELS = ["low", "medium", "high", "critical"] as const;
+
+const CreateDealSchema = z.object({
+  address: z.string().min(1, "address is required"),
+  title: z.string().optional(),
+  leadId: z.union([z.number().int(), z.string()]).optional().nullable(),
+  propertyAddress: z.string().optional().nullable(),
+  borough: z.string().optional().nullable(),
+  county: z.string().optional().nullable(),
+  zipCode: z.string().optional().nullable(),
+  askingPrice: z.number().optional().nullable(),
+  offerPrice: z.number().optional().nullable(),
+  price: z.number().optional().nullable(),
+  arv: z.number().optional().nullable(),
+  probability: z.number().min(0).max(100).optional().nullable(),
+  stage: z.enum(DEAL_STAGES).optional().default("lead"),
+  type: z.enum(DEAL_TYPES).optional().default("acquisition"),
+  riskLevel: z.enum(RISK_LEVELS).optional().default("medium"),
+  closeDate: z.string().optional().nullable(),
+  estimatedCloseDate: z.string().optional().nullable(),
+  nextAction: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  ownerName: z.string().optional().nullable(),
+  ownerUserId: z.number().int().optional().nullable(),
+  clientName: z.string().optional().nullable(),
+  distressPropertyId: z.number().int().optional().nullable(),
+  distressPropertyExternalId: z.string().optional().nullable(),
+});
+
+const SaveOpportunitySchema = z.object({
+  propertyId: z.union([z.string().min(1), z.number()], { message: "propertyId is required" }),
+  note: z.string().optional().nullable(),
+});
+
+const UpdateLeadSchema = z.object({
+  stage: z.string().optional(),
+  score: z.number().int().min(0).max(100).optional(),
+  nextFollowUp: z.string().optional().nullable(),
+  nextAction: z.string().optional(),
+  notes: z.string().optional().nullable(),
+  lastContact: z.string().optional(),
+  addNote: z.string().optional(),
+  timelineEvent: z.string().optional(),
+  timelineType: z.string().optional(),
+});
+
+const ConvertDistressToLeadSchema = z.object({
+  propertyId: z.union([z.string().min(1), z.number()], { message: "propertyId is required" }),
+  ownerName: z.string().optional().nullable(),
+  ownerUserId: z.number().int().optional().nullable(),
+  notes: z.string().optional().nullable(),
+});
+
+const ConvertLeadToDealSchema = z.object({
+  leadId: z.union([z.string().min(1), z.number()], { message: "leadId is required" }),
+  dealTitle: z.string().optional(),
+  stage: z.string().optional(),
+  price: z.number().optional().nullable(),
+  ownerName: z.string().optional().nullable(),
+  ownerUserId: z.number().int().optional().nullable(),
+  notes: z.string().optional().nullable(),
+});
+
+const UpdateDealStageSchema = z.object({
+  stage: z.enum(DEAL_STAGES, { errorMap: () => ({ message: `Invalid stage. Valid: ${DEAL_STAGES.join(", ")}` }) }),
+  notes: z.string().optional(),
+});
 
 const router: IRouter = Router();
 
@@ -40,6 +131,12 @@ async function auditLog(
 function nowStr() {
   return new Date().toISOString().slice(0, 10);
 }
+
+// ─── INTENTIONALLY PUBLIC ROUTES (required: false) ────────────────────────────
+// The following GET routes allow unauthenticated access intentionally — they
+// serve demo/preview data used on the Terra marketing pages and the public
+// dashboard. All mutation routes (POST, PATCH, DELETE) require authentication.
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ─── LEADS ────────────────────────────────────────────────────────────────────
 
@@ -175,13 +272,14 @@ router.get("/terra/crm/leads/:id", authMiddleware({ required: false }), async (r
   } catch (err) { handleRouteError(res, err, "Failed to fetch lead"); }
 });
 
-router.post("/terra/crm/leads", authMiddleware({ required: false }), async (req, res) => {
+router.post("/terra/crm/leads", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body ?? {};
-    if (!body.firstName || !body.lastName) {
-      sendBadRequest(res, "firstName and lastName are required");
+    const parsed = CreateLeadSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
       return;
     }
+    const body = parsed.data;
 
     const externalId = `lead-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const lead: InsertTerraLead = {
@@ -276,34 +374,15 @@ router.get("/terra/pipeline/deals", authMiddleware({ required: false }), async (
   } catch (err) { handleRouteError(res, err, "Failed to fetch deals"); }
 });
 
-router.post("/terra/pipeline/deals", authMiddleware({ required: false }), async (req, res) => {
+router.post("/terra/pipeline/deals", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body ?? {};
-    if (!body.address) {
-      sendBadRequest(res, "address is required");
+    const parsed = CreateDealSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
       return;
     }
-
-    const VALID_STAGES = ["lead","qualified","showing","offer","negotiation","accepted","inspection","financing","under-contract","clear-to-close","closed","lost"];
-    const VALID_TYPES = ["acquisition", "disposition", "refinance", "development"];
-    const VALID_RISK = ["low", "medium", "high", "critical"];
-
-    const stage = body.stage ?? "lead";
-    const type = body.type ?? "acquisition";
-    const riskLevel = body.riskLevel ?? "medium";
-
-    if (!VALID_STAGES.includes(stage)) {
-      res.status(400).json({ error: `Invalid stage. Valid: ${VALID_STAGES.join(", ")}` });
-      return;
-    }
-    if (!VALID_TYPES.includes(type)) {
-      res.status(400).json({ error: `Invalid type. Valid: ${VALID_TYPES.join(", ")}` });
-      return;
-    }
-    if (!VALID_RISK.includes(riskLevel)) {
-      res.status(400).json({ error: `Invalid riskLevel. Valid: ${VALID_RISK.join(", ")}` });
-      return;
-    }
+    const body = parsed.data;
+    const { stage, type, riskLevel } = body;
 
     let resolvedLeadId: number | null = null;
     if (body.leadId) {
@@ -384,14 +463,14 @@ router.post("/terra/pipeline/deals", authMiddleware({ required: false }), async 
 
 // ─── CONVERSION FLOWS ─────────────────────────────────────────────────────────
 
-router.post("/terra/convert/distress-to-lead", authMiddleware({ required: false }), async (req, res) => {
+router.post("/terra/convert/distress-to-lead", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body ?? {};
-    const { propertyId, ownerName, ownerUserId, notes } = body;
-    if (!propertyId) {
-      sendBadRequest(res, "propertyId is required");
+    const parsed = ConvertDistressToLeadSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
       return;
     }
+    const { propertyId, ownerName, ownerUserId, notes } = parsed.data;
 
     // Find the property
     let propRows = await db.select().from(terraDistressPropertiesTable)
@@ -463,14 +542,14 @@ router.post("/terra/convert/distress-to-lead", authMiddleware({ required: false 
   } catch (err) { handleRouteError(res, err, "Failed to convert distress property to lead"); }
 });
 
-router.post("/terra/convert/lead-to-deal", authMiddleware({ required: false }), async (req, res) => {
+router.post("/terra/convert/lead-to-deal", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body ?? {};
-    const { leadId, price, ownerName, notes } = body;
-    if (!leadId) {
-      sendBadRequest(res, "leadId is required");
+    const parsed = ConvertLeadToDealSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
       return;
     }
+    const { leadId, price, ownerName, ownerUserId, notes } = parsed.data;
 
     let leadRows = await db.select().from(terraLeadsTable)
       .where(eq(terraLeadsTable.externalId, String(leadId)))
@@ -524,7 +603,7 @@ router.post("/terra/convert/lead-to-deal", authMiddleware({ required: false }), 
       probability: Math.round(Number(lead.conversionProbability) * 100),
       riskLevel: "medium",
       ownerName: ownerName ?? null,
-      ownerUserId: body.ownerUserId ?? null,
+      ownerUserId: ownerUserId ?? null,
       clientName: `${lead.firstName} ${lead.lastName}`,
       distressPropertyId: lead.distressPropertyId,
       distressPropertyExternalId: lead.distressPropertyExternalId,
@@ -590,7 +669,7 @@ router.get("/terra/opportunities/saved", authMiddleware({ required: false }), as
           .from(terraDealsTable)
           .where(and(
             eq(terraDealsTable.isActive, true),
-            sql`${terraDealsTable.distressPropertyId} = ANY(ARRAY[${sql.raw(propertyDbIds.join(","))}]::int[])`
+            inArray(terraDealsTable.distressPropertyId, propertyDbIds)
           ))
       : [];
 
@@ -626,14 +705,14 @@ router.get("/terra/opportunities/saved", authMiddleware({ required: false }), as
   } catch (err) { handleRouteError(res, err, "Failed to fetch saved opportunities"); }
 });
 
-router.post("/terra/opportunities/save", authMiddleware({ required: false }), async (req, res) => {
+router.post("/terra/opportunities/save", authMiddleware({ required: true }), async (req, res) => {
   try {
-    const body = req.body ?? {};
-    const { propertyId, note } = body;
-    if (!propertyId) {
-      sendBadRequest(res, "propertyId is required");
+    const parsed = SaveOpportunitySchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
       return;
     }
+    const { propertyId, note } = parsed.data;
 
     let propRows = await db.select().from(terraDistressPropertiesTable)
       .where(eq(terraDistressPropertiesTable.externalId, String(propertyId)))
@@ -671,7 +750,7 @@ router.post("/terra/opportunities/save", authMiddleware({ required: false }), as
 
 // ─── AI SCORING ───────────────────────────────────────────────────────────────
 
-router.post("/terra/distress/ai-score", authMiddleware({ required: false }), async (req, res) => {
+router.post("/terra/distress/ai-score", authMiddleware({ required: true }), async (req, res) => {
   try {
     const body = req.body ?? {};
     const { propertyId } = body;
@@ -1024,16 +1103,15 @@ router.get("/terra/investor/opportunities", authMiddleware({ required: false }),
 
 // ─── DEAL PIPELINE STAGE TRANSITION ───────────────────────────────────────────
 
-router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: true }), async (req, res) => {
   try {
     const { id } = req.params;
-    const { stage, notes } = req.body ?? {};
-
-    const VALID_STAGES = ["lead","qualified","showing","offer","negotiation","accepted","inspection","financing","under-contract","clear-to-close","closed","lost"];
-    if (!stage || !VALID_STAGES.includes(stage)) {
-      res.status(400).json({ error: `Invalid stage. Valid: ${VALID_STAGES.join(", ")}` });
+    const parsed = UpdateDealStageSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
       return;
     }
+    const { stage, notes } = parsed.data;
 
     let rows = await db.select().from(terraDealsTable)
       .where(eq(terraDealsTable.externalId, id))
@@ -1106,10 +1184,15 @@ router.patch("/terra/pipeline/deals/:id/stage", authMiddleware({ required: false
 
 // ─── LEAD UPDATE ────────────────────────────────────────────────────────────────
 
-router.patch("/terra/crm/leads/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/terra/crm/leads/:id", authMiddleware({ required: true }), async (req, res) => {
   try {
     const { id } = req.params;
-    const body = req.body ?? {};
+    const parsed = UpdateLeadSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      sendBadRequest(res, parsed.error.errors.map(e => e.message).join(", "));
+      return;
+    }
+    const body = parsed.data;
 
     let rows = await db.select().from(terraLeadsTable)
       .where(eq(terraLeadsTable.externalId, id))

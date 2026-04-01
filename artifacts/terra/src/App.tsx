@@ -8,6 +8,7 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
 import { useAuth } from "@workspace/replit-auth-web";
+import { Toaster } from "@workspace/shared-ui/ui/sonner";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
@@ -180,6 +181,7 @@ function App() {
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
         <AgentCopilot config={beaconConfig} />
+        <Toaster />
       </WouterRouter>
     </QueryClientProvider>
   );

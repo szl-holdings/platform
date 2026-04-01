@@ -340,11 +340,10 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
   res.status(statusCode).json({
     error: isServerError ? "Internal Server Error" : err.message,
-    message: isProduction && isServerError
+    message: isServerError
       ? "An unexpected error occurred. Please try again later."
       : err.message,
     statusCode,
-    ...(isProduction ? {} : { stack: err.stack }),
   });
 });
 

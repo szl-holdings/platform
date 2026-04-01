@@ -99,6 +99,21 @@ export function validateStartupConfig(): ValidationResult {
     } else {
       warnings.push("ALLOY_INTERNAL_TOKEN not set — autonomous agents will receive 401s on internal API calls");
     }
+  } else if (process.env.ALLOY_INTERNAL_TOKEN.length < 32) {
+    if (isProduction) {
+      logger.fatal("ALLOY_INTERNAL_TOKEN is too short (< 32 characters) — refusing to start in production mode");
+      process.exit(1);
+    } else {
+      warnings.push("ALLOY_INTERNAL_TOKEN is too short (< 32 characters) — use a high-entropy token in production");
+    }
+  }
+
+  if (!process.env.OAUTH_STATE_SECRET) {
+    if (isProduction) {
+      errors.push("OAUTH_STATE_SECRET is required in production — OAuth CSRF protection will be disabled");
+    } else {
+      warnings.push("OAUTH_STATE_SECRET not set — OAuth state validation will be skipped");
+    }
   }
 
   if (isDemoMode) {

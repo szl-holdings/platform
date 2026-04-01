@@ -5,6 +5,7 @@ import portfolioData from "@/data/portfolio.json";
 import siteData from "@/data/site.json";
 import { ventures } from "@/data/ventures";
 import { analytics } from "@/lib/analytics";
+import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 
 interface Node {
   id: string;
@@ -349,6 +350,7 @@ export function Constellation() {
   };
 
   return (
+    <SectionErrorBoundary sectionName="Ecosystem Constellation">
     <section id="ecosystem" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-6">
         <m.div
@@ -411,5 +413,6 @@ export function Constellation() {
         </div>
       </div>
     </section>
+    </SectionErrorBoundary>
   );
 }

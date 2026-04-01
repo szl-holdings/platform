@@ -1458,9 +1458,10 @@ router.post("/documents/:id/docusign/send", authMiddleware(), async (req: Reques
 
     // Get embedded signing URL for first signer
     const firstSig = sigs[0];
-    const returnUrl = `${process.env.REPLIT_DEV_DOMAIN
+    const baseOrigin = process.env.REPLIT_DEV_DOMAIN
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : "http://localhost:3000"}/document-engine/signed?docId=${docId}&sigId=${firstSig.id}`;
+      : `http://localhost:${process.env.PORT ?? "3000"}`;
+    const returnUrl = `${baseOrigin}/document-engine/signed?docId=${docId}&sigId=${firstSig.id}`;
 
     const embeddedUrl = await getDocuSignEmbeddedUrl({
       envelopeId,
@@ -1590,9 +1591,10 @@ router.post("/documents/:id/docusign/embed/:sigId", authMiddleware(), async (req
       return sendBadRequest(res, "No DocuSign envelope on this document — send it first");
     }
 
-    const returnUrl = `${process.env.REPLIT_DEV_DOMAIN
+    const signingBaseOrigin = process.env.REPLIT_DEV_DOMAIN
       ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : "http://localhost:3000"}/document-engine/signed?docId=${docId}&sigId=${sigId}`;
+      : `http://localhost:${process.env.PORT ?? "3000"}`;
+    const returnUrl = `${signingBaseOrigin}/document-engine/signed?docId=${docId}&sigId=${sigId}`;
 
     const embeddedUrl = await getDocuSignEmbeddedUrl({
       envelopeId: sig.docuSignEnvelopeId,

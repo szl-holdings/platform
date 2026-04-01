@@ -22,6 +22,34 @@ function useIngestionStats() {
   });
 }
 
+interface IngestionRun {
+  id: number;
+  source: string;
+  status: string;
+  recordsProcessed: number;
+  recordsInserted: number;
+  recordsUpdated: number;
+  recordsSkipped: number;
+  errors: number;
+  startedAt: string;
+  completedAt?: string | null;
+  durationMs?: number | null;
+  errorMessages?: string[] | null;
+}
+
+interface IngestionResult {
+  source?: string;
+  recordsProcessed?: number;
+  recordsInserted?: number;
+  recordsUpdated?: number;
+  recordsSkipped?: number;
+  recordsFailed?: number;
+  alertsGenerated?: number;
+  errors?: number;
+  error?: string;
+  message?: string;
+}
+
 const SOURCE_LABELS: Record<string, { label: string; description: string; color: string }> = {
   nyc_open_data: { label: "NYC Open Data — Core", description: "ACRIS, foreclosure filings, DOF liens, HPD violations", color: "text-blue-400" },
   nyc_open_data_extended: { label: "NYC Open Data — Extended", description: "Rolling Sales, Tax Lien Sale List, HPD Complaints, DOB, 311, ACRIS Parties", color: "text-violet-400" },
@@ -49,16 +77,16 @@ function StatusBadge({ status }: { status: string }) {
 export default function IngestionPage() {
   const { data: stats, isLoading, refetch } = useIngestionStats();
   const [uploading, setUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState<any>(null);
+  const [uploadResult, setUploadResult] = useState<IngestionResult | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [triggeringNyc, setTriggeringNyc] = useState(false);
-  const [nycResult, setNycResult] = useState<any>(null);
+  const [nycResult, setNycResult] = useState<IngestionResult | null>(null);
   const [triggeringExtended, setTriggeringExtended] = useState(false);
-  const [extendedResult, setExtendedResult] = useState<any>(null);
+  const [extendedResult, setExtendedResult] = useState<IngestionResult | null>(null);
   const [expandedRun, setExpandedRun] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const recentRuns: any[] = stats?.recentRuns ?? [];
+  const recentRuns: IngestionRun[] = stats?.recentRuns ?? [];
   const summary = stats?.summary ?? {};
 
   async function handleCsvUpload(e: React.ChangeEvent<HTMLInputElement>) {

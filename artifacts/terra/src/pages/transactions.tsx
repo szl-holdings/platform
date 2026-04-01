@@ -180,14 +180,14 @@ export default function TransactionsPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Active Transactions", value: transactions.filter(t => t.status === "active").length },
-          { label: "Steps Complete", value: transactions.reduce((s, t) => s + t.steps.filter(st => st.status === "complete").length, 0) },
+          { label: "Active Transactions", value: transactions.filter(t => t.status === "active").length, alert: false },
+          { label: "Steps Complete", value: transactions.reduce((s, t) => s + t.steps.filter(st => st.status === "complete").length, 0), alert: false },
           { label: "Overdue Steps", value: transactions.reduce((s, t) => s + t.steps.filter(st => st.status === "overdue").length, 0), alert: true },
           { label: "Risk Flags", value: transactions.reduce((s, t) => s + t.riskFlags.length, 0), alert: true },
         ].map(m => (
-          <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50", (m as any).alert && m.value > 0 ? "border-rose-500/30" : "border-terra-border")}>
+          <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50", m.alert && m.value > 0 ? "border-rose-500/30" : "border-terra-border")}>
             <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
-            <p className={cn("text-2xl font-display font-bold mt-1", (m as any).alert && m.value > 0 ? "text-rose-400" : "text-terra-text")}>{m.value}</p>
+            <p className={cn("text-2xl font-display font-bold mt-1", m.alert && m.value > 0 ? "text-rose-400" : "text-terra-text")}>{m.value}</p>
           </div>
         ))}
       </div>

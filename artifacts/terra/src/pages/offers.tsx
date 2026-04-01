@@ -228,15 +228,18 @@ export default function OffersPage() {
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Total Offers", value: offers.length },
-          { label: "Pending", value: offers.filter(o => o.status === "pending").length },
-          { label: "Broker Queue", value: brokerQueue.length, alert: brokerQueue.length > 0 },
-          { label: "Expiring Soon", value: expiring.length, alert: expiring.length > 0 },
-        ].map(m => (
-          <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50", (m as any).alert && m.value > 0 ? "border-rose-500/30" : "border-terra-border")}>
+        {((() => {
+          const metrics: { label: string; value: number; alert: boolean }[] = [
+            { label: "Total Offers", value: offers.length, alert: false },
+            { label: "Pending", value: offers.filter(o => o.status === "pending").length, alert: false },
+            { label: "Broker Queue", value: brokerQueue.length, alert: brokerQueue.length > 0 },
+            { label: "Expiring Soon", value: expiring.length, alert: expiring.length > 0 },
+          ];
+          return metrics;
+        })()).map(m => (
+          <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50", m.alert && m.value > 0 ? "border-rose-500/30" : "border-terra-border")}>
             <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
-            <p className={cn("text-2xl font-display font-bold mt-1", (m as any).alert && m.value > 0 ? "text-rose-400" : "text-terra-text")}>{m.value}</p>
+            <p className={cn("text-2xl font-display font-bold mt-1", m.alert && m.value > 0 ? "text-rose-400" : "text-terra-text")}>{m.value}</p>
           </div>
         ))}
       </div>

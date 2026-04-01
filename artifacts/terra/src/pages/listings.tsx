@@ -5,6 +5,7 @@ import { listings, type Listing } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar, PropertyDrawer } from "@/components/brokerage-ui";
 import { cn } from "@workspace/shared-ui/utils";
 import { useLocation } from "wouter";
+import { toast } from "sonner";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 const API_BASE = BASE.replace(/\/[^/]+$/, "/api");
@@ -151,13 +152,19 @@ export default function ListingsPage() {
   const [mlsDemoMode, setMlsDemoMode] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE}/terra/mls/listings?limit=1`, { headers: { Accept: "application/json" } })
+    const controller = new AbortController();
+    fetch(`${API_BASE}/terra/mls/listings?limit=1`, { headers: { Accept: "application/json" }, signal: controller.signal })
       .then(r => r.json())
       .then(d => {
         if (d.count != null) setMlsCount(d.count);
         if (d.demoMode != null) setMlsDemoMode(d.demoMode);
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (err?.name === "AbortError") return;
+        console.error("Failed to load MLS listing count:", err);
+        toast.error("Unable to load listing data. Some information may be unavailable.");
+      });
+    return () => controller.abort();
   }, []);
 
   const filtered = listings

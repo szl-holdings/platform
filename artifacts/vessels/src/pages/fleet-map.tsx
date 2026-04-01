@@ -7,6 +7,8 @@ import { useVessels, useFleetExceptions } from "@/hooks/use-vessels-data";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@workspace/shared-ui/ui/badge";
+import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
+import { toast } from "sonner";
 import {
   X, Ship, MapPin, Radio, Navigation, Clock, Filter, ChevronRight,
   AlertTriangle, Anchor, Wrench, Activity, TrendingUp, TrendingDown, Layers, Play, Pause
@@ -356,8 +358,12 @@ function MapboxFleetMap({
           if (!destroyed) setMapError("no-token");
         }
       });
-    }).catch(() => {
-      if (!destroyed) setMapError("load-failed");
+    }).catch((err: unknown) => {
+      console.error("Map library failed to load:", err);
+      if (!destroyed) {
+        setMapError("load-failed");
+        toast.error("Failed to load the map. Please refresh the page.");
+      }
     });
 
     return () => {
@@ -807,14 +813,16 @@ export default function FleetMapPage() {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <MapboxFleetMap
-          filteredVessels={filteredVessels}
-          selectedVessel={selectedVessel}
-          onVesselSelect={handleVesselSelect}
-          token={token}
-          aisVessels={aisVessels}
-          showAis={showAis}
-        />
+        <SectionErrorBoundary sectionName="Fleet Map">
+          <MapboxFleetMap
+            filteredVessels={filteredVessels}
+            selectedVessel={selectedVessel}
+            onVesselSelect={handleVesselSelect}
+            token={token}
+            aisVessels={aisVessels}
+            showAis={showAis}
+          />
+        </SectionErrorBoundary>
 
         {selectedVessel && (
           <VesselSidePanel vessel={selectedVessel} onClose={() => setSelectedVessel(null)} exceptions={fleetExceptions} />

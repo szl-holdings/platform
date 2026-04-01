@@ -8,11 +8,11 @@ import {
   Ship, AlertTriangle, Clock, ArrowRight, User, Anchor, Navigation, Wrench,
   Zap, Filter, CheckCircle, RefreshCw, TrendingDown, Wind
 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@workspace/shared-ui/utils";
 
-const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
+const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   status_change: { label: "Status Change", icon: Ship, color: "text-blue-400" },
   route_deviation: { label: "Route Deviation", icon: Navigation, color: "text-amber-400" },
   eta_drift: { label: "ETA Drift", icon: Clock, color: "text-orange-400" },

@@ -8,6 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/shared-ui/u
 import { ArrowLeft, Ship, MapPin, Package, Navigation, Clock } from "lucide-react";
 import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 
+interface RouteRecord { id: number; originPort?: string; destinationPort?: string; departureAt?: string; arrivalAt?: string; distanceNm?: number; status?: string; waypoints?: { name?: string }[]; }
+interface CargoRecord { id: number; cargoType?: string; quantity?: number; unit?: string; origin?: string; destination?: string; status?: string; }
+interface PositionRecord { id: number; lat?: number; lon?: number; speed?: number; heading?: number; course?: number; recordedAt?: string; source?: string; }
 const statusColors: Record<string, string> = {
   at_sea: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   in_port: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -160,7 +163,7 @@ export default function VesselDetailPage() {
                 <p className="text-xs text-muted-foreground/60 mt-1">Assign routes via the Route Planning page</p>
               </CardContent>
             </Card>
-          ) : routes.map((route: any, i: number) => (
+          ) : (routes as RouteRecord[]).map((route, i) => (
             <Card key={route.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -178,7 +181,7 @@ export default function VesselDetailPage() {
                 </div>
                 {route.waypoints && Array.isArray(route.waypoints) && route.waypoints.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {route.waypoints.map((wp: any, idx: number) => (
+                    {route.waypoints.map((wp, idx) => (
                       <span key={idx} className="text-xs bg-muted px-2 py-0.5 rounded">{wp.name || `WP ${idx + 1}`}</span>
                     ))}
                   </div>
@@ -197,7 +200,7 @@ export default function VesselDetailPage() {
                 <p className="text-xs text-muted-foreground/60 mt-1">Cargo manifests will appear here</p>
               </CardContent>
             </Card>
-          ) : cargo.map((c: any, i: number) => (
+          ) : (cargo as CargoRecord[]).map((c, i) => (
             <Card key={c.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -221,7 +224,7 @@ export default function VesselDetailPage() {
                 <p className="text-xs text-muted-foreground/60 mt-1">Position history will be recorded automatically</p>
               </CardContent>
             </Card>
-          ) : positions.map((pos: any, i: number) => (
+          ) : (positions as PositionRecord[]).map((pos, i) => (
             <Card key={pos.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 animate-fade-in-up stagger-${Math.min(i + 1, 8)}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">

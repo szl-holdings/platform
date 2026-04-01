@@ -277,7 +277,7 @@ export function PropertyDrawer({ listing, onClose }: {
       <p className="text-terra-text-secondary text-sm mb-4">${(listing.price / 1e6).toFixed(2)}M · {listing.dom} DOM</p>
       <div className="flex gap-2 mb-4">
         <StageBadge stage={listing.status} />
-        <RiskBadge level={listing.riskLevel as any} />
+        <RiskBadge level={listing.riskLevel} />
       </div>
       <div className="space-y-2">
         {listing.riskFlags.map((flag, i) => (

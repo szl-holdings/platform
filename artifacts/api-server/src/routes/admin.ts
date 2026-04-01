@@ -524,7 +524,7 @@ adminRouter.get("/admin/users", async (_req, res) => {
           .select({ userId: userRolesTable.userId, roleName: rolesTable.name })
           .from(userRolesTable)
           .innerJoin(rolesTable, eq(userRolesTable.roleId, rolesTable.id))
-          .where(sql`${userRolesTable.userId} = ANY(${sql.raw(`ARRAY[${userIds.join(",")}]`)})`)
+          .where(inArray(userRolesTable.userId, userIds))
       : [];
 
     const roleMap = new Map<number, string[]>();

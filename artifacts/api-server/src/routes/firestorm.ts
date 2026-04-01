@@ -27,7 +27,7 @@ import {
   insertFirestormCaseSchema,
 } from "@workspace/db";
 import { DEMO_COMPLIANCE_CONTROLS } from "./readiness.js";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, inArray } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { broadcastWs, pubsub, FIRESTORM_EVENTS } from "../lib/pubsub-bridge.js";
@@ -1318,7 +1318,7 @@ router.post("/firestorm/push-token", authMiddleware({ required: true }), async (
       res.status(400).json({ error: "token is required" });
       return;
     }
-    console.log(`[Push] Registered push token for platform=${platform ?? "unknown"}: ${token.slice(0, 20)}...`);
+    console.info(`[Push] Registered push token for platform=${platform ?? "unknown"}: ${token.slice(0, 20)}...`);
     sendSuccess(res, { registered: true, platform: platform ?? "unknown" });
   } catch (err) {
     handleRouteError(res, err, "Failed to register push token");
@@ -1427,7 +1427,7 @@ router.get("/firestorm/mitre-detections/:techniqueId", authMiddleware({ required
     const [detection] = await db.select().from(firestormMitreDetectionsTable).where(eq(firestormMitreDetectionsTable.techniqueId, techniqueId));
     if (!detection) { sendNotFound(res, "MITRE detection"); return; }
     const relatedIncidents = detection.relatedIncidentIds?.length
-      ? await db.select().from(firestormIncidentsTable).where(sql`id = ANY(${sql.raw(`ARRAY[${(detection.relatedIncidentIds as number[]).join(",")}]::int[]`)})`)
+      ? await db.select().from(firestormIncidentsTable).where(inArray(firestormIncidentsTable.id, detection.relatedIncidentIds as number[]))
       : [];
     sendSuccess(res, { ...detection, relatedIncidents });
   } catch (err) { handleRouteError(res, err, "Failed to get MITRE detection"); }

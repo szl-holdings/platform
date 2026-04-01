@@ -58,7 +58,7 @@ function Panel({ children, accent, className = "" }: { children: React.ReactNode
   );
 }
 
-function PanelHead({ icon: Icon, title, right, accent }: { icon: any; title: string; right?: React.ReactNode; accent?: string }) {
+function PanelHead({ icon: Icon, title, right, accent }: { icon: React.ElementType; title: string; right?: React.ReactNode; accent?: string }) {
   return (
     <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
       <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function Dashboard() {
     return Object.values(buckets);
   })();
 
-  const narratives = (insightsData as any)?.events?.filter((e: any) => e.type === "narrative_generated") ?? [];
+  const narratives = insightsData?.narratives ?? [];
 
   const metrics = [
     { label: "Urgent Exposures", value: isLoading ? "—" : (summary?.criticalUnresolved ?? criticalSignals.length), color: "#c45a4a", pulse: true },
@@ -138,11 +138,11 @@ export default function Dashboard() {
 
   const queue = [
     ...criticalSignals.slice(0, 4).map(s => ({
-      title: s.title, severity: s.severity, owner: (s.metadata as any)?.affectedFunction ?? "Unassigned",
+      title: s.title, severity: s.severity, owner: (s.metadata?.affectedFunction as string | undefined) ?? "Unassigned",
       time: timeAgo(s.receivedAt ?? s.createdAt), confidence: "high", source: s.source, action: "Investigate",
     })),
     ...highSignals.slice(0, 2).map(s => ({
-      title: s.title, severity: s.severity, owner: (s.metadata as any)?.affectedFunction ?? "Unassigned",
+      title: s.title, severity: s.severity, owner: (s.metadata?.affectedFunction as string | undefined) ?? "Unassigned",
       time: timeAgo(s.receivedAt ?? s.createdAt), confidence: "medium", source: s.source, action: "Review",
     })),
   ];
@@ -353,10 +353,10 @@ export default function Dashboard() {
           <Panel accent="#8b7ac8">
             <PanelHead icon={Eye} title="Intelligence" accent="#8b7ac8" />
             <div className="px-3 py-1">
-              {narratives.slice(0, 3).map((n: any, i: number) => (
+              {narratives.slice(0, 3).map((n, i: number) => (
                 <div key={i} className="py-2" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
-                  <div className="text-[9px] leading-relaxed line-clamp-2" style={{ color: TEXT.secondary }}>{n.summary || n.title || "Intelligence insight pending"}</div>
-                  <div className="text-[7px] font-mono mt-1" style={{ color: "rgba(139,122,200,0.3)" }}>{n.priority ?? "medium"} · {n.timestamp ? timeAgo(n.timestamp) : "recent"}</div>
+                  <div className="text-[9px] leading-relaxed line-clamp-2" style={{ color: TEXT.secondary }}>{n.headline || n.detail || "Intelligence insight pending"}</div>
+                  <div className="text-[7px] font-mono mt-1" style={{ color: "rgba(139,122,200,0.3)" }}>{n.priority ?? "medium"} · recent</div>
                 </div>
               ))}
               {narratives.length === 0 && <div className="text-[9px] py-3" style={{ color: TEXT.muted }}>Intelligence engine processing...</div>}

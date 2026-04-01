@@ -27,12 +27,15 @@ function formatCurrency(n: number) {
   return `$${n.toFixed(0)}`;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipPayloadItem { name: string; value: number | string; color: string; }
+interface ChartTooltipProps { active?: boolean; payload?: TooltipPayloadItem[]; label?: string; }
+
+function CustomTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-terra-bg-tertiary border border-terra-border rounded-lg p-3 shadow-xl">
       <p className="text-xs font-semibold text-terra-text mb-2">{label}</p>
-      {payload.map((item: any) => (
+      {payload.map((item) => (
         <div key={item.name} className="flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
           <span className="text-terra-text-secondary">{item.name}:</span>
@@ -91,13 +94,15 @@ export default function MarketPage() {
   const displayMarketData = liveData?.data?.regions ?? marketData;
   const source = liveData?.data?.source;
 
-  const priceData = displayMarketData.map((m: any) => ({
+  type MarketRow = { region?: string; city?: string; pricePerSqft?: number; medianPricePerSqft?: number; yoyChange?: number; yoyChangePercent?: number; avgCapRate?: number; capRate?: number; vacancyRate?: number; daysOnMarket?: number; };
+  const displayRows = displayMarketData as MarketRow[];
+  const priceData = displayRows.map((m) => ({
     region: (m.region ?? m.city ?? "").split(",")[0],
     "Price/SqFt": m.pricePerSqft ?? m.medianPricePerSqft ?? 0,
     "YoY Change": m.yoyChange ?? m.yoyChangePercent ?? 0,
   }));
 
-  const radarData = displayMarketData.slice(0, 4).map((m: any) => ({
+  const radarData = displayRows.slice(0, 4).map((m) => ({
     region: (m.region ?? m.city ?? "").split(",")[0],
     "Price Growth": Math.max(0, (m.yoyChange ?? 0) * 10),
     "Cap Rate": (m.avgCapRate ?? m.capRate ?? 0) * 10,

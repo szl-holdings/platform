@@ -5,6 +5,7 @@ import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
+import { Toaster } from "@workspace/shared-ui/ui/sonner";
 
 const HomePage = lazy(() => import("@/pages/landing"));
 const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
@@ -338,6 +339,7 @@ function App() {
           </Switch>
         </WouterRouter>
       </LazyMotion>
+      <Toaster />
     </QueryClientProvider>
     </DemoModeProvider>
   );

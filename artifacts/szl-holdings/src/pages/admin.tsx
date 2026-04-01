@@ -224,27 +224,27 @@ function CmsTablePanel({
   queryKey: string[];
   endpoint: string;
   fields: FieldDef[];
-  renderRow: (item: any) => React.ReactNode;
+  renderRow: (item: Record<string, unknown>) => React.ReactNode;
   emptyMessage?: string;
 }) {
   const qc = useQueryClient();
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [form, setForm] = useState<Record<string, string | boolean>>({});
 
   const { data, isLoading } = useQuery({
     queryKey,
-    queryFn: () => apiFetch<any>(endpoint),
+    queryFn: () => apiFetch<unknown>(endpoint),
   });
 
-  const rows: any[] = Array.isArray(data) ? data : (data as any)?.data ?? [];
+  const rows: Record<string, unknown>[] = Array.isArray(data) ? (data as Record<string, unknown>[]) : ((data as { data?: Record<string, unknown>[] } | undefined)?.data ?? []);
 
   const saveMutation = useMutation({
     mutationFn: async (vals: Record<string, unknown>) => {
       if (isNew) {
         return apiFetch(endpoint, { method: "POST", body: JSON.stringify(vals) });
       } else {
-        return apiFetch(`${endpoint}/${(editing as any).id}`, { method: "PATCH", body: JSON.stringify(vals) });
+        return apiFetch(`${endpoint}/${editing?.id}`, { method: "PATCH", body: JSON.stringify(vals) });
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey }); setEditing(null); setIsNew(false); },
@@ -255,17 +255,17 @@ function CmsTablePanel({
     onSuccess: () => qc.invalidateQueries({ queryKey }),
   });
 
-  const openEdit = (item: any) => {
+  const openEdit = (item: Record<string, unknown>) => {
     setIsNew(false);
     setEditing(item);
     const f: Record<string, string | boolean> = {};
-    fields.forEach(fd => { f[fd.key] = (item as any)[fd.key] ?? ""; });
+    fields.forEach(fd => { f[fd.key] = (item[fd.key] as string | boolean) ?? ""; });
     setForm(f);
   };
 
   const openNew = () => {
     setIsNew(true);
-    setEditing({} as any);
+    setEditing({});
     const f: Record<string, string | boolean> = {};
     fields.forEach(fd => { f[fd.key] = fd.type === "boolean" ? false : ""; });
     setForm(f);

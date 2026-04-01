@@ -11,12 +11,14 @@ function formatCurrency(n: number) {
   return `$${n.toFixed(0)}`;
 }
 
-function CustomTooltip({ active, payload, label }: any) {
+interface TooltipItem { name: string; value: number | string; color: string; }
+interface ChartTooltipProps { active?: boolean; payload?: TooltipItem[]; label?: string; }
+function CustomTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-terra-bg-tertiary border border-terra-border rounded-lg p-3 shadow-xl">
       <p className="text-xs font-semibold text-terra-text mb-2">{label}</p>
-      {payload.map((item: any) => (
+      {payload.map((item) => (
         <div key={item.name} className="flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
           <span className="text-terra-text-secondary">{item.name}:</span>

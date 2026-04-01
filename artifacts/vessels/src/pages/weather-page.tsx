@@ -98,18 +98,55 @@ function WeatherSkeleton() {
   );
 }
 
-export default function WeatherPage() {
-  const { data: snapshots = [], isLoading } = useQuery({ queryKey: ["weather"], queryFn: () => api.weather.snapshots() });
-  const { data: routes = [] } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
+interface WeatherSnapshot {
+  id: string | number;
+  location: string;
+  riskLevel: string;
+  description?: string;
+  temperature?: string | number;
+  windSpeed?: string | number;
+  windDirection?: string;
+  waveHeight?: string | number;
+  visibility?: string | number;
+  routeId?: number;
+}
 
-  const { data: marineWeather, isLoading: marineLoading } = useQuery({
+interface RouteItem {
+  id: number;
+  originPort?: string;
+  destinationPort?: string;
+}
+
+interface ForecastHour { time?: string; waveHeight?: number | null; }
+interface MarineWeatherData {
+  source?: string;
+  current?: {
+    waveHeight?: number | null;
+    windWaveHeight?: number | null;
+    swellWaveHeight?: number | null;
+    windSpeed?: number | null;
+    windDirection?: number | null;
+    seaSurfaceTemperature?: number | null;
+    visibility?: number | null;
+  };
+  forecastHours?: ForecastHour[];
+}
+
+export default function WeatherPage() {
+  const { data: rawSnapshots = [], isLoading } = useQuery({ queryKey: ["weather"], queryFn: () => api.weather.snapshots() });
+  const snapshots = rawSnapshots as WeatherSnapshot[];
+  const { data: rawRoutes = [] } = useQuery({ queryKey: ["routes"], queryFn: api.routes.list });
+  const routes = rawRoutes as RouteItem[];
+
+  const { data: rawMarineWeather, isLoading: marineLoading } = useQuery({
     queryKey: ["marine-weather-hormuz"],
     queryFn: () => api.live.marineWeather(26.58, 56.26),
     staleTime: 3600000,
     refetchInterval: 3600000,
   });
+  const marineWeather = rawMarineWeather as MarineWeatherData | undefined;
 
-  const severeCount = snapshots.filter((s: any) => s.riskLevel === "severe" || s.riskLevel === "high").length;
+  const severeCount = snapshots.filter((s) => s.riskLevel === "severe" || s.riskLevel === "high").length;
   const marineIsLive = marineWeather?.source === "live";
 
   return (
@@ -154,7 +191,7 @@ export default function WeatherPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Routes Monitored</p>
-                <p className="text-2xl font-bold font-display mt-1"><AnimatedCounter value={new Set(snapshots.map((s: any) => s.routeId).filter(Boolean)).size} /></p>
+                <p className="text-2xl font-bold font-display mt-1"><AnimatedCounter value={new Set(snapshots.map((s) => s.routeId).filter(Boolean)).size} /></p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-chart-2/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Waves className="w-5 h-5 text-chart-2 animate-wave-float" />
@@ -208,7 +245,7 @@ export default function WeatherPage() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">24-Hour Forecast</p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
-                    {marineWeather.forecastHours.slice(0, 12).map((h: any, i: number) => (
+                    {marineWeather.forecastHours.slice(0, 12).map((h: ForecastHour, i: number) => (
                       <div key={i} className="shrink-0 text-center p-2 rounded bg-muted/30 min-w-[50px]">
                         <p className="text-[9px] text-muted-foreground">{h.time?.slice(11, 16) ?? ""}</p>
                         <p className="text-xs font-medium text-blue-400">{h.waveHeight != null ? `${h.waveHeight.toFixed(1)}m` : "—"}</p>
@@ -241,8 +278,8 @@ export default function WeatherPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {snapshots.map((snap: any, i: number) => {
-            const route = routes.find((r: any) => r.id === snap.routeId);
+          {snapshots.map((snap, i: number) => {
+            const route = routes.find((r) => r.id === snap.routeId);
             const isSevere = snap.riskLevel === "severe" || snap.riskLevel === "high";
             return (
               <Card key={snap.id} className={`bg-card border-border hover:border-primary/20 transition-all duration-300 relative overflow-hidden animate-fade-in-up stagger-${Math.min((i % 6) + 1, 8)} ${riskGlow[snap.riskLevel] || ""}`}>

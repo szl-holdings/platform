@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { toast } from "sonner";
 
 export interface ApiNotification {
   id: number;
@@ -92,7 +93,10 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
           setNotifications(list.map((n) => apiToLive(n, appName)));
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.error("Failed to load notifications:", err);
+        toast.error("Unable to load notifications.");
+      });
     return () => {
       cancelled = true;
     };
@@ -196,14 +200,20 @@ export function useNotificationCenter(appName: string): NotificationCenterState 
     if (id.startsWith("api-")) {
       const numId = parseInt(id.replace("api-", ""), 10);
       if (!isNaN(numId)) {
-        fetch(`/api/notifications/${numId}/read`, { method: "PATCH", credentials: "include" }).catch(() => {});
+        fetch(`/api/notifications/${numId}/read`, { method: "PATCH", credentials: "include" }).catch((err) => {
+          console.error("Failed to mark notification as read:", err);
+          toast.error("Failed to mark notification as read.");
+        });
       }
     }
   }, []);
 
   const markAllRead = useCallback(() => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    fetch("/api/notifications/read-all", { method: "PATCH", credentials: "include" }).catch(() => {});
+    fetch("/api/notifications/read-all", { method: "PATCH", credentials: "include" }).catch((err) => {
+      console.error("Failed to mark all notifications as read:", err);
+      toast.error("Failed to mark all notifications as read.");
+    });
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;

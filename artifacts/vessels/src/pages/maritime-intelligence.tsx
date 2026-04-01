@@ -28,7 +28,12 @@ function AnimatedCounter({ value }: { value: number }) {
   return <>{display}</>;
 }
 
-function VesselMapCanvas({ vessels, chokepoints }: { vessels: any[]; chokepoints: any[] }) {
+interface MapVessel { lat?: number; lon?: number; latitude?: number; longitude?: number; name?: string; mmsi?: string; }
+interface MapChokepoint { lat?: number; lon?: number; name?: string; riskLevel?: string; status?: string; vesselCount?: number; dailyTransits?: number; oilFlowMbpd?: number; }
+interface WeatherRow { region: string; warning?: string; windSpeed?: number; windDirection?: string; waveHeight?: number; seaTemp?: number; visibility?: string; }
+interface SanctionEntity { entity: string; word: string; }
+interface SanctionRow { imo: string; name?: string; status?: string; reason?: string; flag?: string; source?: string; entities?: SanctionEntity[]; aiEnriched?: boolean; }
+function VesselMapCanvas({ vessels, chokepoints }: { vessels: MapVessel[]; chokepoints: MapChokepoint[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -122,7 +127,7 @@ export default function MaritimeIntelligence() {
     },
   });
 
-  const alertChokepoints = chokepoints.filter((c: any) => c.riskLevel !== "normal").length;
+  const alertChokepoints = chokepoints.filter((c) => c.riskLevel !== "normal").length;
 
   return (
     <div className="p-6 space-y-6">
@@ -208,7 +213,7 @@ export default function MaritimeIntelligence() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {chokepoints.map((cp: any) => (
+              {chokepoints.map((cp) => (
                 <div key={cp.name} className={`p-3 rounded-lg border transition-all ${cp.riskLevel === "critical" ? "border-red-500/20 bg-red-500/5" : cp.riskLevel === "warning" ? "border-orange-500/20 bg-orange-500/5" : "border-border bg-background/50"}`}>
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-display font-semibold text-sm">{cp.name}</h4>
@@ -238,7 +243,7 @@ export default function MaritimeIntelligence() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {weather.map((w: any) => (
+                {(weather as WeatherRow[]).map((w) => (
                   <div key={w.region} className={`p-3 rounded-lg border ${w.warning ? "border-amber-500/20 bg-amber-500/5" : "border-border bg-background/50"}`}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-semibold">{w.region}</span>
@@ -264,7 +269,7 @@ export default function MaritimeIntelligence() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {sanctions.map((v: any) => (
+                {(sanctions as SanctionRow[]).map((v) => (
                   <div key={v.imo} className="p-3 rounded-lg border border-red-500/10 bg-red-500/5">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-semibold text-red-400">{v.name}</span>
@@ -294,7 +299,7 @@ export default function MaritimeIntelligence() {
                     </div>
                     {v.entities && v.entities.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {v.entities.map((e: any, idx: number) => (
+                        {v.entities.map((e, idx) => (
                           <span key={idx} className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-300 border border-red-500/15">
                             {e.entity}: {e.word}
                           </span>

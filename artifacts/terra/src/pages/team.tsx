@@ -128,14 +128,14 @@ export default function TeamPage() {
       {/* Brokerage Totals */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total Agents", value: agents.length },
-          { label: "Total Commission MTD", value: formatCurrency(agents.reduce((s, a) => s + a.commissionMTD, 0)) },
-          { label: "Total Closings MTD", value: agents.reduce((s, a) => s + a.closingsThisMonth, 0) },
-          { label: "Coaching Opportunities", value: agents.filter(a => a.conversionRate < 0.35 || a.stalledDeals >= 3 || a.avgDaysToClose > 45).length, alert: true },
+          { label: "Total Agents", value: agents.length, numericValue: agents.length, alert: false },
+          { label: "Total Commission MTD", value: formatCurrency(agents.reduce((s, a) => s + a.commissionMTD, 0)), numericValue: agents.reduce((s, a) => s + a.commissionMTD, 0), alert: false },
+          { label: "Total Closings MTD", value: agents.reduce((s, a) => s + a.closingsThisMonth, 0), numericValue: agents.reduce((s, a) => s + a.closingsThisMonth, 0), alert: false },
+          { label: "Coaching Opportunities", value: agents.filter(a => a.conversionRate < 0.35 || a.stalledDeals >= 3 || a.avgDaysToClose > 45).length, numericValue: agents.filter(a => a.conversionRate < 0.35 || a.stalledDeals >= 3 || a.avgDaysToClose > 45).length, alert: true },
         ].map(m => (
-          <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50", (m as any).alert && m.value > 0 ? "border-amber-500/30" : "border-terra-border")}>
+          <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50", m.alert && m.numericValue > 0 ? "border-amber-500/30" : "border-terra-border")}>
             <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
-            <p className={cn("text-2xl font-display font-bold mt-1", (m as any).alert && m.value > 0 ? "text-amber-400" : "text-terra-text")}>{m.value}</p>
+            <p className={cn("text-2xl font-display font-bold mt-1", m.alert && m.numericValue > 0 ? "text-amber-400" : "text-terra-text")}>{m.value}</p>
           </div>
         ))}
       </div>

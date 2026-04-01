@@ -8,6 +8,7 @@ import { getAiModels, getAiModelById, getModelObservabilitySummary } from "../li
 import { getRegistrySummary } from "../lib/model-registry";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
+type AnthropicMessageParam = { role: "user" | "assistant"; content: string | { type: string; text: string }[] };
 
 const router: IRouter = Router();
 
@@ -66,20 +67,21 @@ async function fetchJson(url: string, timeoutMs = 8000): Promise<unknown> {
 
 async function fetchNvdCves(): Promise<typeof DEMO_CVES> {
   try {
-    const data = await fetchJson(
+    const raw = await fetchJson(
       "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=8&startIndex=0",
       10000,
-    ) as any;
+    );
+    const data = raw as { vulnerabilities?: { cve: { id?: string; descriptions?: { lang: string; value: string }[]; metrics?: { cvssMetricV31?: { cvssData?: { baseScore?: number } }[] }; configurations?: { nodes?: { cpeMatch?: { criteria?: string }[] }[] }[]; published?: string; references?: unknown[] } }[] };
     const items = data?.vulnerabilities;
     if (!Array.isArray(items) || items.length === 0) throw new Error("No NVD data");
-    return items.map((v: any, idx: number) => {
+    return items.map((v, idx: number) => {
       const cve = v.cve;
       const metrics = cve?.metrics?.cvssMetricV31?.[0]?.cvssData;
       const score = metrics?.baseScore ?? (9.0 - idx * 0.5);
       const severity = score >= 9.0 ? "CRITICAL" : score >= 7.0 ? "HIGH" : score >= 4.0 ? "MEDIUM" : "LOW";
       return {
         id: cve?.id ?? `CVE-UNKNOWN-${idx}`,
-        description: cve?.descriptions?.find((d: any) => d.lang === "en")?.value ?? "No description available",
+        description: cve?.descriptions?.find((d) => d.lang === "en")?.value ?? "No description available",
         severity,
         score,
         vendor: cve?.configurations?.[0]?.nodes?.[0]?.cpeMatch?.[0]?.criteria?.split(":")[3] ?? "Various",
@@ -95,13 +97,14 @@ async function fetchNvdCves(): Promise<typeof DEMO_CVES> {
 
 async function fetchRssNews(): Promise<typeof DEMO_NEWS> {
   try {
-    const data = await fetchJson(
+    const raw = await fetchJson(
       "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.feedburner.com%2FTheHackersNews&count=8",
       8000,
-    ) as any;
-    const items = data?.items;
+    );
+    const rssData = raw as { items?: { title?: string; author?: string; link?: string; pubDate?: string }[] };
+    const items = rssData?.items;
     if (!Array.isArray(items) || items.length === 0) throw new Error("No RSS data");
-    return items.map((item: any, idx: number) => ({
+    return items.map((item, idx: number) => ({
       id: `RSS-${idx}`,
       title: item.title ?? "Untitled",
       source: item.author || "The Hacker News",
@@ -130,10 +133,11 @@ async function fetchOpenMeteoMarineWeather(): Promise<typeof DEMO_MARINE_WEATHER
   try {
     const results = await Promise.all(
       regions.map(async (r) => {
-        const data = await fetchJson(
+        const raw = await fetchJson(
           `https://api.open-meteo.com/v1/forecast?latitude=${r.lat}&longitude=${r.lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m&timezone=UTC`,
           6000,
-        ) as any;
+        );
+        const data = raw as { current?: { temperature_2m?: number; wind_speed_10m?: number; wind_direction_10m?: number } };
         const current = data?.current;
         if (!current) throw new Error("No weather data");
         const windSpeed = Math.round(current.wind_speed_10m ?? 15);
@@ -164,17 +168,18 @@ async function fetchOpenMeteoMarineWeather(): Promise<typeof DEMO_MARINE_WEATHER
 
 async function fetchGdeltGeopolitical(): Promise<typeof DEMO_GEO_EVENTS> {
   try {
-    const data = await fetchJson(
+    const raw = await fetchJson(
       "https://api.gdeltproject.org/api/v2/doc/doc?query=cybersecurity%20OR%20maritime%20OR%20sanctions&mode=ArtList&maxrecords=6&format=json&timespan=24h",
       5000,
-    ) as any;
-    const articles = data?.articles;
+    );
+    const gdelt = raw as { articles?: { title?: string; url?: string; socialimage?: string; seendate?: string; sourcecountry?: string; domain?: string }[] };
+    const articles = gdelt?.articles;
     if (!Array.isArray(articles) || articles.length === 0) throw new Error("No GDELT data");
     const categoryMap: Record<string, string> = {
       cyber: "cyber_operations", military: "military", regulation: "regulatory",
       infrastructure: "infrastructure", sanction: "sanctions",
     };
-    return articles.slice(0, 6).map((a: any, idx: number) => {
+    return articles.slice(0, 6).map((a, idx: number) => {
       const titleLower = (a.title ?? "").toLowerCase();
       let cat = "cyber_operations";
       for (const [key, val] of Object.entries(categoryMap)) {
@@ -199,14 +204,16 @@ async function fetchGdeltGeopolitical(): Promise<typeof DEMO_GEO_EVENTS> {
 
 async function fetchLiveMaritimeVessels(): Promise<typeof DEMO_MARITIME_VESSELS> {
   try {
-    const data = await fetchJson(
+    const raw = await fetchJson(
       "https://meri.digitraffic.fi/api/ais/v1/locations/latest?from=0&to=100",
       8000,
-    ) as any;
-    const features = data?.features;
+    );
+    type AisFeature = { properties?: { mmsi?: string | number; sog?: number; cog?: number; heading?: number; navStat?: number; timestampExternal?: number }; geometry?: { coordinates?: [number, number] } };
+    const aisData = raw as { features?: AisFeature[] };
+    const features = aisData?.features;
     if (!Array.isArray(features) || features.length === 0) throw new Error("No AIS data");
     const typeNames = ["Cargo", "Tanker", "Container", "Bulk Carrier", "Passenger", "Fishing"];
-    return features.slice(0, 8).map((f: any, idx: number) => {
+    return features.slice(0, 8).map((f, idx: number) => {
       const props = f.properties ?? {};
       const coords = f.geometry?.coordinates ?? [25.0, 60.0];
       return {
@@ -232,13 +239,15 @@ async function fetchLiveMaritimeVessels(): Promise<typeof DEMO_MARITIME_VESSELS>
 
 async function fetchOtxThreats(): Promise<typeof DEMO_THREATS> {
   try {
-    const data = await fetchJson(
+    const raw = await fetchJson(
       "https://otx.alienvault.com/api/v1/pulses/subscribed?limit=8&page=1",
       8000,
-    ) as any;
-    const pulses = data?.results;
+    );
+    type OtxPulse = { id?: string | number; name?: string; adversary?: string; targeted_countries?: string[]; references?: string[]; tags?: string[]; industries?: string[]; description?: string; created?: string; indicator_count?: number };
+    const otxData = raw as { results?: OtxPulse[] };
+    const pulses = otxData?.results;
     if (!Array.isArray(pulses) || pulses.length === 0) throw new Error("No OTX data");
-    return pulses.map((p: any, idx: number) => {
+    return pulses.map((p, idx: number) => {
       const severityMap = ["critical", "high", "medium", "low"];
       const sev = severityMap[Math.min(idx, 3)];
       return {
@@ -594,7 +603,7 @@ router.post("/intelligence/ai/generate-image", aiRateLimit, authMiddleware({ req
 router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const { sessionId, message, messages, systemPrompt, maxTokens } = req.body;
-    const ownerId = (req as any).user?.id || (req as any).userId;
+    const ownerId = req.user?.id;
     const sid = sessionId || crypto.randomUUID();
 
     if (messages && Array.isArray(messages)) {
@@ -625,8 +634,7 @@ router.post("/intelligence/ai/chat", aiRateLimit, authMiddleware({ required: fal
 
 router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
   try {
-    const rawId = (req as any).user?.id || (req as any).userId;
-    const requesterId: string = Array.isArray(rawId) ? rawId[0] : String(rawId || "");
+    const requesterId: string = String(req.user?.id ?? "");
     const history = services.huggingface.getChatHistory(String(req.params.sessionId), requesterId);
     sendSuccess(res, { sessionId: String(req.params.sessionId), messages: history });
   } catch (err) { handleRouteError(res, err, "Failed to get chat history"); }
@@ -634,8 +642,7 @@ router.get("/intelligence/ai/chat/:sessionId/history", aiRateLimit, authMiddlewa
 
 router.delete("/intelligence/ai/chat/:sessionId", aiRateLimit, authMiddleware({ required: true }), async (req, res) => {
   try {
-    const rawId = (req as any).user?.id || (req as any).userId;
-    const requesterId: string = Array.isArray(rawId) ? rawId[0] : String(rawId || "");
+    const requesterId: string = String(req.user?.id ?? "");
     const cleared = services.huggingface.clearChatSession(String(req.params.sessionId), requesterId);
     if (!cleared) { sendError(res, "Session not found or access denied", 403); return; }
     sendSuccess(res, { sessionId: String(req.params.sessionId), cleared });
@@ -980,13 +987,13 @@ router.get("/intelligence/cisa-kev", intelRateLimit, authMiddleware({ required: 
         });
         clearTimeout(timer);
         if (!res.ok) throw new Error(`CISA HTTP ${res.status}`);
-        const json = await res.json() as { vulnerabilities?: any[]; catalogVersion?: string; dateReleased?: string; count?: number };
+        const json = await res.json() as { vulnerabilities?: { knownRansomwareCampaignUse?: string; [k: string]: unknown }[]; catalogVersion?: string; dateReleased?: string; count?: number };
         return {
           catalogVersion: json.catalogVersion,
           dateReleased: json.dateReleased,
           count: json.count,
           recentVulnerabilities: json.vulnerabilities?.slice(-15).reverse() ?? [],
-          ransomwareKnown: json.vulnerabilities?.filter((v: any) => v.knownRansomwareCampaignUse === "Known")?.slice(-10) ?? [],
+          ransomwareKnown: json.vulnerabilities?.filter((v) => v.knownRansomwareCampaignUse === "Known")?.slice(-10) ?? [],
           source: "live",
         };
       } catch {
@@ -1073,16 +1080,18 @@ router.get("/intelligence/semantic-scholar", intelRateLimit, authMiddleware({ re
     const query = (req.query.q as string) || "machine learning";
     const data = await getCached(`semantic-scholar-${query}`, 1800000, async () => {
       try {
-        const raw = await fetchJson(
+        const rawData = await fetchJson(
           `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=8&fields=title,authors,year,citationCount,abstract,publicationTypes,openAccessPdf`,
           8000,
-        ) as any;
-        const papers = raw?.data;
+        );
+        type ScholarPaper = { paperId?: string; title?: string; authors?: { name?: string }[]; year?: number; citationCount?: number; abstract?: string; openAccessPdf?: { url?: string } };
+        const ssData = rawData as { data?: ScholarPaper[] };
+        const papers = ssData?.data;
         if (!Array.isArray(papers) || papers.length === 0) throw new Error("No papers");
-        return papers.map((p: any) => ({
+        return papers.map((p) => ({
           paperId: p.paperId,
           title: p.title,
-          authors: p.authors?.map((a: any) => a.name).slice(0, 4) ?? [],
+          authors: p.authors?.map((a) => a.name).slice(0, 4) ?? [],
           year: p.year,
           citationCount: p.citationCount ?? 0,
           abstract: p.abstract?.slice(0, 400) ?? "",
@@ -1113,13 +1122,15 @@ router.get("/intelligence/paperswithcode", intelRateLimit, authMiddleware({ requ
     const task = (req.query.task as string) || "image-classification";
     const data = await getCached(`pwc-${task}`, 3600000, async () => {
       try {
-        const raw = await fetchJson(
+        const rawPwc = await fetchJson(
           `https://paperswithcode.com/api/v1/sota/?task=${encodeURIComponent(task)}`,
           8000,
-        ) as any;
-        const results = raw?.results;
+        );
+        type PwcResult = { rank?: number; model_name?: string; paper?: { title?: string; published?: string; url_pdf?: string }; metrics?: { value?: string; type?: string }[]; dataset?: { name?: string } };
+        const pwcData = rawPwc as { results?: PwcResult[] };
+        const results = pwcData?.results;
         if (!Array.isArray(results)) throw new Error("No benchmark data");
-        return results.slice(0, 8).map((r: any) => ({
+        return results.slice(0, 8).map((r) => ({
           rank: r.rank ?? 0,
           model: r.model_name ?? "Unknown",
           paper: r.paper?.title ?? "N/A",
@@ -1161,12 +1172,14 @@ router.get("/intelligence/huggingface-hub", intelRateLimit, authMiddleware({ req
     const limit = Math.min(parseInt(req.query.limit as string) || 8, 20);
     const data = await getCached(`hf-hub-${task}-${limit}`, 1800000, async () => {
       try {
-        const raw = await fetchJson(
+        const rawHf = await fetchJson(
           `https://huggingface.co/api/models?pipeline_tag=${encodeURIComponent(task)}&sort=downloads&limit=${limit}&direction=-1`,
           8000,
-        ) as any;
-        if (!Array.isArray(raw) || raw.length === 0) throw new Error("No HF Hub data");
-        return raw.map((m: any) => ({
+        );
+        type HfModel = { id?: string; modelId?: string; pipeline_tag?: string; downloads?: number; likes?: number; lastModified?: string; tags?: string[]; cardData?: { language?: string } };
+        if (!Array.isArray(rawHf) || rawHf.length === 0) throw new Error("No HF Hub data");
+        const hfModels = rawHf as HfModel[];
+        return hfModels.map((m) => ({
           id: m.id,
           modelId: m.modelId ?? m.id,
           author: m.id?.split("/")?.[0] ?? "unknown",
@@ -1384,7 +1397,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ requi
             model: agent.model,
             max_tokens: maxTokens,
             system: agent.systemPrompt,
-            messages: nonSystem as any,
+            messages: nonSystem as AnthropicMessageParam[],
           });
           for await (const event of streamResp) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
@@ -1395,7 +1408,7 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ requi
           const streamResp = await openai.chat.completions.create({
             model: agent.model,
             max_completion_tokens: maxTokens,
-            messages: [{ role: "system", content: agent.systemPrompt }, ...messages] as any,
+            messages: [{ role: "system" as const, content: agent.systemPrompt }, ...messages] as Parameters<typeof openai.chat.completions.create>[0]["messages"],
             stream: true,
           });
           for await (const chunk of streamResp) {
@@ -1422,14 +1435,14 @@ router.post("/intelligence/ai/domain-agent", aiRateLimit, authMiddleware({ requi
         model: agent.model,
         max_tokens: maxTokens,
         system: agent.systemPrompt,
-        messages: nonSystem as any,
+        messages: nonSystem as AnthropicMessageParam[],
       });
       content = result.content[0]?.type === "text" ? result.content[0].text : "";
     } else {
       const result = await openai.chat.completions.create({
         model: agent.model,
         max_completion_tokens: maxTokens,
-        messages: [{ role: "system", content: agent.systemPrompt }, ...messages] as any,
+        messages: [{ role: "system" as const, content: agent.systemPrompt }, ...messages] as Parameters<typeof openai.chat.completions.create>[0]["messages"],
       });
       content = result.choices[0]?.message?.content ?? "";
     }
@@ -1566,7 +1579,7 @@ router.post("/intelligence/ai/advisory", aiRateLimit, authMiddleware({ required:
       model: "claude-sonnet-4-6",
       max_tokens: 2048,
       system: systemPrompt,
-      messages: messages as any,
+      messages: messages as AnthropicMessageParam[],
     });
 
     for await (const event of stream) {

@@ -200,19 +200,19 @@ export default function AutomationsPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Active Automations", value: automations.filter(a => a.enabled).length },
-          { label: "Total Runs (all time)", value: automations.reduce((s, a) => s + a.runCount, 0) },
-          { label: "Failed Runs", value: failed.length, alert: true },
-          { label: "Pending Retries", value: automations.reduce((s, a) => s + a.pendingRetries, 0), warn: true },
+          { label: "Active Automations", value: automations.filter(a => a.enabled).length, alert: false, warn: false },
+          { label: "Total Runs (all time)", value: automations.reduce((s, a) => s + a.runCount, 0), alert: false, warn: false },
+          { label: "Failed Runs", value: failed.length, alert: true, warn: false },
+          { label: "Pending Retries", value: automations.reduce((s, a) => s + a.pendingRetries, 0), alert: false, warn: true },
         ].map(m => (
           <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50",
-            (m as any).alert && m.value > 0 ? "border-rose-500/30" :
-            (m as any).warn && m.value > 0 ? "border-amber-500/30" : "border-terra-border"
+            m.alert && m.value > 0 ? "border-rose-500/30" :
+            m.warn && m.value > 0 ? "border-amber-500/30" : "border-terra-border"
           )}>
             <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
             <p className={cn("text-2xl font-display font-bold mt-1",
-              (m as any).alert && m.value > 0 ? "text-rose-400" :
-              (m as any).warn && m.value > 0 ? "text-amber-400" : "text-terra-text"
+              m.alert && m.value > 0 ? "text-rose-400" :
+              m.warn && m.value > 0 ? "text-amber-400" : "text-terra-text"
             )}>{m.value}</p>
           </div>
         ))}

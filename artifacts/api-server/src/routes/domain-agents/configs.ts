@@ -366,7 +366,8 @@ function createStaticToolExecutor(appKey: string) {
 function createDomainToolExecutor(domain: string) {
   return async (name: string, args: Record<string, unknown>): Promise<string> => {
     try {
-      const baseUrl = `http://localhost:${process.env["PORT"] || 3000}`;
+      const devDomain = process.env.REPLIT_DEV_DOMAIN;
+      const baseUrl = devDomain ? `https://${devDomain}` : `http://localhost:${process.env["PORT"] || 3000}`;
       const toolRoutes: Record<string, Record<string, string>> = {
         inca: {
           get_experiments: "/api/inca/experiments",

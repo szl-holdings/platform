@@ -406,7 +406,9 @@ router.post("/stephen/booking-requests", async (req, res) => {
   }
 });
 
-const PROXY_BASE = `http://localhost:${process.env.PROXY_PORT || 80}`;
+const PROXY_BASE = process.env.REPLIT_DEV_DOMAIN
+  ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+  : `http://localhost:${process.env.PROXY_PORT || 80}`;
 
 const PLATFORM_HEALTH_URLS: Record<string, string> = {
   "szl-holdings": `${PROXY_BASE}/szl-holdings/`,

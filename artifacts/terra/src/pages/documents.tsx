@@ -138,21 +138,21 @@ export default function DocumentsPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total Documents", value: documents.length },
-          { label: "Complete", value: complete.length, ok: true },
-          { label: "Missing (required)", value: missing.length, alert: true },
-          { label: "Pending Signature", value: pendingSig.length, warn: true },
+          { label: "Total Documents", value: documents.length, ok: false, warn: false, alert: false },
+          { label: "Complete", value: complete.length, ok: true, warn: false, alert: false },
+          { label: "Missing (required)", value: missing.length, ok: false, warn: false, alert: true },
+          { label: "Pending Signature", value: pendingSig.length, ok: false, warn: true, alert: false },
         ].map(m => (
           <div key={m.label} className={cn("rounded-xl border p-4 bg-terra-surface/50",
-            (m as any).alert && m.value > 0 ? "border-rose-500/30" :
-            (m as any).warn && m.value > 0 ? "border-amber-500/30" :
-            (m as any).ok ? "border-emerald-500/20" : "border-terra-border"
+            m.alert && m.value > 0 ? "border-rose-500/30" :
+            m.warn && m.value > 0 ? "border-amber-500/30" :
+            m.ok ? "border-emerald-500/20" : "border-terra-border"
           )}>
             <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">{m.label}</p>
             <p className={cn("text-2xl font-display font-bold mt-1",
-              (m as any).alert && m.value > 0 ? "text-rose-400" :
-              (m as any).warn && m.value > 0 ? "text-amber-400" :
-              (m as any).ok ? "text-emerald-400" : "text-terra-text"
+              m.alert && m.value > 0 ? "text-rose-400" :
+              m.warn && m.value > 0 ? "text-amber-400" :
+              m.ok ? "text-emerald-400" : "text-terra-text"
             )}>{m.value}</p>
           </div>
         ))}

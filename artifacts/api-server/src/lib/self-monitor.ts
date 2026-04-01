@@ -8,7 +8,9 @@ const SIGNAL_COOLDOWN_MS = 10 * 60_000;
 const SIGNAL_MAX_AGE_DAYS = 30;
 const SIGNAL_MAX_COUNT = 200;
 let pruneCounter = 0;
-const HEALTH_URL = "http://localhost:" + (process.env.PORT ?? "3000") + "/api/health/detailed";
+const HEALTH_URL = process.env.REPLIT_DEV_DOMAIN
+  ? `https://${process.env.REPLIT_DEV_DOMAIN}/api/health/detailed`
+  : `http://localhost:${process.env.PORT ?? "3000"}/api/health/detailed`;
 
 interface HealthCheck {
   status: string;

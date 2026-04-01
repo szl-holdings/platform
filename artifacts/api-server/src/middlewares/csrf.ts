@@ -82,6 +82,12 @@ export function csrfMiddleware(req: Request, res: Response, next: NextFunction):
       res.status(415).json({ error: "Unsupported Media Type", message: "GraphQL requests must use Content-Type: application/json." });
       return;
     }
+    const customHeader = req.headers["x-requested-with"] ?? req.headers["x-csrf-token"] ?? req.headers["x-apollo-operation-name"];
+    if (!customHeader) {
+      logger.warn({ path: req.path, method: req.method }, "GraphQL request rejected: missing required custom header");
+      res.status(403).json({ error: "Forbidden", message: "GraphQL requests must include X-Requested-With, X-CSRF-Token, or X-Apollo-Operation-Name header." });
+      return;
+    }
     return next();
   }
 

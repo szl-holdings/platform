@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { toast } from "sonner";
 
 async function downloadPDF(template: string, data: Record<string, unknown>, filename: string): Promise<void> {
   const res = await fetch("/api/documents/generate", {
@@ -142,14 +143,24 @@ export default function InvestorRelationsPage() {
   const [platformUpdates, setPlatformUpdates] = useState<CmsPost[]>([]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/cms/posts?content_type=investor-letter`)
+    const controller = new AbortController();
+    fetch(`${API_BASE}/cms/posts?content_type=investor-letter`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : null)
       .then(json => { if (json?.data) setInvestorLetters(json.data); })
-      .catch(() => {});
-    fetch(`${API_BASE}/cms/posts?content_type=update`)
+      .catch((err) => {
+        if (err?.name === "AbortError") return;
+        console.error("Failed to load investor letters:", err);
+        toast.error("Unable to load investor letters. Please try again later.");
+      });
+    fetch(`${API_BASE}/cms/posts?content_type=update`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : null)
       .then(json => { if (json?.data) setPlatformUpdates(json.data.slice(0, 4)); })
-      .catch(() => {});
+      .catch((err) => {
+        if (err?.name === "AbortError") return;
+        console.error("Failed to load platform updates:", err);
+        toast.error("Unable to load platform updates. Please try again later.");
+      });
+    return () => controller.abort();
   }, []);
 
   usePageMeta({
