@@ -70,8 +70,8 @@ export const PLATFORM_FLAGS = [
     key: "advanced_export_enabled",
     name: "Platform — Advanced Export",
     description: "Enables advanced export options including CSV bulk export, scheduled reports, and API data extracts across all modules.",
-    isEnabled: false,
-    rolloutPercentage: 20,
+    isEnabled: true,
+    rolloutPercentage: 100,
   },
   {
     key: "dynamics365_sync_enabled",

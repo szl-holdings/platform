@@ -15,6 +15,7 @@ import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
 import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
 import { ensureLyteDashboardsTable } from "./lib/lyte-dashboard-migrations";
+import { ensureExportJobsTable } from "./lib/export-migrations";
 import "./lib/terra-nyc-ingestion";
 import { scheduleNycIngestionJob } from "./lib/terra-nyc-ingestion";
 import "./lib/terra-nyc-extended-ingestion";
@@ -75,6 +76,7 @@ providerHealth.startActiveProbes();
 ensureAlloyTables()
   .then(() => ensurePlatformOpsTables())
   .then(() => ensureLyteDashboardsTable())
+  .then(() => ensureExportJobsTable())
   .then(() => knowledgeStore.loadFromDb())
   .then(() => {
     registerDefaultSchedules();

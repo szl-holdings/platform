@@ -42,6 +42,7 @@ const AdminOverviewPage = lazy(() => import("@/pages/admin/overview"));
 const AdminRunViewerPage = lazy(() => import("@/pages/admin/run-viewer"));
 const AdminApprovalQueuePage = lazy(() => import("@/pages/admin/approval-queue"));
 const AdminSeederPage = lazy(() => import("@/pages/admin/seeder"));
+const AdminExportHistoryPage = lazy(() => import("@/pages/admin/export-history"));
 const SignalsPage = lazy(() => import("@/pages/signals-page"));
 const ActionsPage = lazy(() => import("@/pages/actions-page"));
 const ReadinessPage = lazy(() => import("@/pages/readiness-page"));
@@ -112,6 +113,7 @@ function PrivateRouter() {
         <Route path="/admin/runs">{() => <AdminRoute component={AdminRunViewerPage} />}</Route>
         <Route path="/admin/approvals">{() => <AdminRoute component={AdminApprovalQueuePage} />}</Route>
         <Route path="/admin/seeder">{() => <AdminRoute component={AdminSeederPage} />}</Route>
+        <Route path="/admin/exports">{() => <AdminRoute component={AdminExportHistoryPage} />}</Route>
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>

@@ -5,10 +5,10 @@ import {
   db, pool,
   billingPlansTable, subscriptionsTable, invoicesTable, entitlementsTable, usageEventsTable,
   usersTable, rolesTable, userRolesTable, auditEventsTable, featureFlagsTable, webhookEventsTable,
-  platformJobRunsTable, artifactApprovalsTable,
+  platformJobRunsTable, artifactApprovalsTable, exportJobsTable,
 } from "@workspace/db";
 import { seedLyteObservability } from "../lib/lyte-observability-seed";
-import { desc, sql, ilike, or, eq, and, inArray } from "drizzle-orm";
+import { desc, sql, ilike, or, eq, and, inArray, gte, lte } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import { serverTelemetry } from "@workspace/observability";
 import { jobQueue } from "../lib/job-queue";
@@ -573,10 +573,39 @@ adminRouter.get("/admin/audit-log", async (req, res) => {
   try {
     const action = req.query["action"] as string | undefined;
     const search = req.query["search"] as string | undefined;
+    const dateFrom = req.query["dateFrom"] as string | undefined;
+    const dateTo = req.query["dateTo"] as string | undefined;
+    const userFilter = req.query["user"] as string | undefined;
     const limitParam = parseInt(req.query["limit"] as string ?? "50", 10);
     const limit = Math.min(isNaN(limitParam) ? 50 : limitParam, 200);
 
-    let query = db
+    const conditions = [];
+    if (dateFrom) conditions.push(gte(auditEventsTable.createdAt, new Date(dateFrom)));
+    if (dateTo) conditions.push(lte(auditEventsTable.createdAt, new Date(dateTo)));
+    if (action) {
+      conditions.push(ilike(auditEventsTable.action, `%${action}%`));
+    } else if (search) {
+      conditions.push(
+        or(
+          ilike(auditEventsTable.action, `%${search}%`),
+          ilike(auditEventsTable.entityType, `%${search}%`),
+          ilike(usersTable.email, `%${search}%`),
+          ilike(usersTable.displayName, `%${search}%`),
+        )!,
+      );
+    }
+    if (userFilter) {
+      conditions.push(
+        or(
+          ilike(usersTable.email, `%${userFilter}%`),
+          ilike(usersTable.displayName, `%${userFilter}%`),
+        )!,
+      );
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const rows = await db
       .select({
         id: auditEventsTable.id,
         action: auditEventsTable.action,
@@ -592,24 +621,10 @@ adminRouter.get("/admin/audit-log", async (req, res) => {
       })
       .from(auditEventsTable)
       .leftJoin(usersTable, eq(auditEventsTable.userId, usersTable.id))
+      .where(whereClause)
       .orderBy(desc(auditEventsTable.createdAt))
-      .limit(limit)
-      .$dynamic();
+      .limit(limit);
 
-    if (action) {
-      query = query.where(ilike(auditEventsTable.action, `%${action}%`));
-    } else if (search) {
-      query = query.where(
-        or(
-          ilike(auditEventsTable.action, `%${search}%`),
-          ilike(auditEventsTable.entityType, `%${search}%`),
-          ilike(usersTable.email, `%${search}%`),
-          ilike(usersTable.displayName, `%${search}%`),
-        ),
-      );
-    }
-
-    const rows = await query;
     const logs = rows.map((r) => ({
       id: `log_${r.id}`,
       action: r.action,
@@ -624,6 +639,46 @@ adminRouter.get("/admin/audit-log", async (req, res) => {
     res.json({ logs, total: logs.length });
   } catch {
     res.status(500).json({ error: "Failed to fetch audit log" });
+  }
+});
+
+adminRouter.get("/admin/export-history", async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query["page"] as string ?? "1", 10));
+    const limit = Math.min(parseInt(req.query["limit"] as string ?? "50", 10), 200);
+    const offset = (page - 1) * limit;
+
+    const rows = await db
+      .select({
+        id: exportJobsTable.id,
+        exportId: exportJobsTable.exportId,
+        name: exportJobsTable.name,
+        dataSource: exportJobsTable.dataSource,
+        format: exportJobsTable.format,
+        status: exportJobsTable.status,
+        rowCount: exportJobsTable.rowCount,
+        fileSizeBytes: exportJobsTable.fileSizeBytes,
+        downloadToken: exportJobsTable.downloadToken,
+        expiresAt: exportJobsTable.expiresAt,
+        errorMessage: exportJobsTable.errorMessage,
+        scheduleFrequency: exportJobsTable.scheduleFrequency,
+        filterParams: exportJobsTable.filterParams,
+        triggeredByEmail: exportJobsTable.triggeredByEmail,
+        triggeredByName: usersTable.displayName,
+        completedAt: exportJobsTable.completedAt,
+        createdAt: exportJobsTable.createdAt,
+      })
+      .from(exportJobsTable)
+      .leftJoin(usersTable, eq(exportJobsTable.triggeredByUserId, usersTable.id))
+      .orderBy(desc(exportJobsTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(exportJobsTable);
+
+    res.json({ exports: rows, total: count, page, limit });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch export history" });
   }
 });
 

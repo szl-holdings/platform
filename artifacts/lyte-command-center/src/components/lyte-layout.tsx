@@ -6,7 +6,7 @@ import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
-  ChevronRight, Gauge, BarChart3, LayoutDashboard
+  ChevronRight, Gauge, BarChart3, LayoutDashboard, Download
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 
@@ -112,6 +112,7 @@ const ADMIN_NAV = [
   { href: "/admin/runs", label: "Runs", icon: Play },
   { href: "/admin/approvals", label: "Queue", icon: CheckSquare },
   { href: "/admin/audit", label: "Audit", icon: FileText },
+  { href: "/admin/exports", label: "Exports", icon: Download },
   { href: "/admin/seeder", label: "Seeder", icon: Database },
   { href: "/admin/jobs", label: "Jobs", icon: Activity },
 ];

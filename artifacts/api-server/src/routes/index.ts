@@ -37,6 +37,7 @@ import govDataRouter from "./gov-data";
 import terraRouter from "./terra";
 import terraDistressRouter from "./terra-distress";
 import terraBrokerRouter from "./terra-broker";
+import exportsRouter from "./exports";
 import aegisOpsLiveRouter from "./msp-live";
 import aegisOpsRouter from "./msp";
 import terraLiveRouter from "./terra-live";
@@ -262,5 +263,8 @@ router.use(pushNotificationsRouter);
 
 router.use("/admin/backup", writeLimiter);
 router.use(backupRouter);
+
+router.use("/exports", writeLimiter);
+router.use(exportsRouter);
 
 export default router;
