@@ -348,7 +348,8 @@ export async function ingestDobViolations(runId: number): Promise<{ inserted: nu
     const borough = resolveBorough(rec.boro ?? rec.borough ?? "");
     if (!borough) { skipped++; continue; }
 
-    const filingDate = rec.issue_date ? new Date(rec.issue_date).toISOString().split("T")[0]! : new Date().toISOString().split("T")[0]!;
+    const parsedIssueDate = rec.issue_date ? new Date(rec.issue_date) : null;
+    const filingDate = (parsedIssueDate && !isNaN(parsedIssueDate.getTime())) ? parsedIssueDate.toISOString().split("T")[0]! : new Date().toISOString().split("T")[0]!;
     const daysInDistress = Math.ceil((Date.now() - new Date(filingDate).getTime()) / 86400000);
     const externalId = `dob-violation-${rec.isn_dob_bis_viol ?? address.replace(/\s+/g, "-").toLowerCase()}`;
 

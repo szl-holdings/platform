@@ -117,7 +117,21 @@ function getPrimaryProvider(): "sendgrid" | "resend" {
   return "resend";
 }
 
+let _emailProviderWarningLogged = false;
+
+export function hasEmailProviderConfigured(): boolean {
+  return !!(process.env.SENDGRID_API_KEY || process.env.RESEND_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS));
+}
+
 export async function sendEmail(options: EmailOptions): Promise<SendResult> {
+  if (!hasEmailProviderConfigured()) {
+    if (!_emailProviderWarningLogged) {
+      console.warn("[email] No email provider configured (SENDGRID_API_KEY, RESEND_API_KEY, or SMTP credentials). Email delivery skipped.");
+      _emailProviderWarningLogged = true;
+    }
+    return { success: false, error: "No email provider configured" };
+  }
+
   const primary = getPrimaryProvider();
 
   const providers: Array<() => Promise<SendResult>> = primary === "sendgrid"
@@ -138,7 +152,6 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
       return await send();
     } catch (err) {
       lastError = err as Error;
-      console.warn(`[email] Provider failed (${lastError.message}), trying next...`);
     }
   }
 

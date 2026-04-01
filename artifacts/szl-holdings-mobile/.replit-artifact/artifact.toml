@@ -11,7 +11,7 @@ kind = "mobile"
     [[services]]
     name = "expo"
     paths = ["/szl-holdings-mobile/"]
-    localPort = 8083
+    localPort = 8085
 
     [services.development]
     run = "pnpm --filter @workspace/szl-holdings-mobile run dev"
@@ -21,6 +21,6 @@ kind = "mobile"
     run = ["pnpm", "--filter", "@workspace/szl-holdings-mobile", "run", "serve"]
 
     [services.env]
-    PORT = "8083"
+    PORT = "8085"
     BASE_PATH = "/szl-holdings-mobile/"
   

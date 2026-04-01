@@ -1,4 +1,4 @@
-import { sendEmail, INTERNAL_EMAIL } from "./email";
+import { sendEmail, hasEmailProviderConfigured, INTERNAL_EMAIL } from "./email";
 import { logger } from "./logger";
 import type { NotifSeverity } from "./domain-notifications";
 
@@ -119,7 +119,7 @@ export async function dispatchExternalAlert(params: AlertDispatchParams): Promis
     dispatchJobs.push(postToTeams(`[${appName}] ${title}`, message, color));
   }
 
-  if (SEVERITY_THRESHOLD_EMAIL.includes(severity) && INTERNAL_EMAIL) {
+  if (SEVERITY_THRESHOLD_EMAIL.includes(severity) && INTERNAL_EMAIL && hasEmailProviderConfigured()) {
     const alertHtml = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"/><style>
 body{font-family:-apple-system,sans-serif;background:#f5f5f5;margin:0;padding:0}

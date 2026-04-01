@@ -44,6 +44,7 @@ const MAX_BUSINESS_EVENTS = 1000;
 const MAX_ALERTS = 50;
 const MAX_APM_SPANS = 500;
 const MAX_EXTERNAL_CALLS = 200;
+const MAX_REQUESTS = 2000;
 
 export interface ApmSpan {
   route: string;
@@ -90,6 +91,9 @@ export class ServerTelemetryCollector {
     const cutoff = Date.now() - WINDOW_SIZE;
     while (this.requests.length > 0 && this.requests[0].timestamp < cutoff) {
       this.requests.shift();
+    }
+    if (this.requests.length > MAX_REQUESTS) {
+      this.requests.splice(0, this.requests.length - MAX_REQUESTS);
     }
   }
 
