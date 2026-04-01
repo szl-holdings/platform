@@ -17,4 +17,70 @@ title = "carlota-jo-splash"
 id = "SAj2gQkeJlaNHUuYkdln1"
 uri = "file://artifacts/aegis-mobile/assets/images/icon.png"
 type = "image"
-title = "generated_image"
+title = "aegis mobile icon"
+
+[[generated]]
+id = "i5LCIULIYLb53hiOsP6au"
+uri = "file://artifacts/terra-mobile/assets/images/icon.png"
+type = "image"
+title = "terra mobile icon"
+
+[[generated]]
+id = "zeDkwrh0jWp1MofOU4ZBs"
+uri = "file://artifacts/lyte-mobile/assets/images/icon.png"
+type = "image"
+title = "lyte mobile icon"
+
+[[generated]]
+id = "1boX8uT2uq2_YTnCmDiv1"
+uri = "file://artifacts/stephen-mobile/assets/images/icon.png"
+type = "image"
+title = "stephen mobile icon"
+
+[[generated]]
+id = "8XtMoQC4u9OBpaZepBumJ"
+uri = "file://artifacts/szl-holdings-mobile/assets/images/icon.png"
+type = "image"
+title = "szl holdings mobile icon"
+
+[[generated]]
+id = "zhRhjDImKNrFWlu3iHDVW"
+uri = "file://artifacts/vessels-mobile/assets/images/icon.png"
+type = "image"
+title = "vessels mobile icon"
+
+[[generated]]
+id = "Tv3-q9nGDPL7z1i3bvKLi"
+uri = "file://artifacts/aegis-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "aegis splash screen"
+
+[[generated]]
+id = "-RhK4h1mDX5Q3AxFo2lO6"
+uri = "file://artifacts/terra-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "terra splash screen"
+
+[[generated]]
+id = "iR99M_JrH_J4aWS9vg2pY"
+uri = "file://artifacts/lyte-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "lyte splash screen"
+
+[[generated]]
+id = "kbVxzpw-M2RQG2A-kWzuF"
+uri = "file://artifacts/stephen-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "stephen splash screen"
+
+[[generated]]
+id = "UuhhexJXS7bD9r5DfsQD9"
+uri = "file://artifacts/szl-holdings-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "szl holdings splash screen"
+
+[[generated]]
+id = "2l4gnEVImV_teY9nUTFU4"
+uri = "file://artifacts/vessels-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "vessels splash screen"
