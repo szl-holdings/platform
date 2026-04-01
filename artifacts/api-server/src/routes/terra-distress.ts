@@ -112,6 +112,42 @@ router.get("/terra/distress/property/:id", authMiddleware({ required: false }), 
   } catch (err) { handleRouteError(res, err, "Failed to fetch distress property detail"); }
 });
 
+router.get("/terra/distress/nearby", authMiddleware({ required: false }), async (req, res) => {
+  try {
+    const { lat, lng, radiusMiles, limit } = req.query;
+    const latNum = lat ? Number(lat) : NaN;
+    const lngNum = lng ? Number(lng) : NaN;
+    const latitude = !isNaN(latNum) && latNum >= -90 && latNum <= 90 ? latNum : null;
+    const longitude = !isNaN(lngNum) && lngNum >= -180 && lngNum <= 180 ? lngNum : null;
+    const radiusNum = radiusMiles ? Number(radiusMiles) : 2;
+    const lim = !isNaN(Number(limit)) ? Math.min(Math.max(Number(limit), 1), 50) : 10;
+
+    let borough: string | undefined;
+    if (latitude !== null && longitude !== null) {
+      if (latitude > 40.78 && longitude > -73.93) borough = "Bronx";
+      else if (latitude > 40.65 && latitude <= 40.78 && longitude > -73.97 && longitude <= -73.90) borough = "Queens";
+      else if (latitude <= 40.65 && longitude > -73.97) borough = "Brooklyn";
+      else if (longitude <= -74.05) borough = "Staten Island";
+      else borough = "Manhattan";
+    }
+
+    const properties = await searchDistressedProperties({
+      borough,
+      sort: "opportunityScore",
+      limit: lim,
+      offset: 0,
+    });
+
+    sendSuccess(res, {
+      source: "Terra Nearby Distress Engine — GPS Borough Proximity",
+      count: properties.length,
+      properties,
+      searchParams: { lat: latitude, lng: longitude, radiusMiles: !isNaN(radiusNum) ? radiusNum : 2, resolvedBorough: borough ?? "All" },
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (err) { handleRouteError(res, err, "Failed to fetch nearby distress properties"); }
+});
+
 router.get("/terra/distress/alerts", authMiddleware({ required: false }), async (req, res) => {
   try {
     const { borough, type, severity, limit } = req.query;

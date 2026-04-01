@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "Terra",
+    "slug": "terra-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "terra-mobile",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0d0b08"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Terra uses your camera to photograph properties on-site.",
+        "NSLocationWhenInUseUsageDescription": "Terra uses your location to show nearby properties and auto-tag photos.",
+        "NSLocationAlwaysUsageDescription": "Terra uses your location to show nearby properties.",
+        "NSUserNotificationUsageDescription": "Terra sends alerts for new distress properties, watchlist changes, and pipeline updates."
+      }
+    },
+    "android": {
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://replit.com/"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Terra uses your camera to photograph properties on-site."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Terra uses your location to show nearby properties."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#b8943c",
+          "sounds": []
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
