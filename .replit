@@ -34,6 +34,10 @@ args = "test:api"
 task = "workflow.run"
 args = "test:components"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/lyte-mobile: expo"
+
 [[workflows.workflow]]
 name = "artifacts/stephen-mobile: expo"
 author = "agent"
@@ -66,6 +70,15 @@ args = "pnpm test:components"
 
 [workflows.workflow.metadata]
 isValidation = true
+
+[[workflows.workflow]]
+name = "artifacts/lyte-mobile: expo"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/lyte-mobile run dev"
+waitForPort = 8083
 
 [agent]
 stack = "PNPM_WORKSPACE"
