@@ -36,6 +36,17 @@ A premium, command-grade, SZL-branded design system inspired by Palantir Foundry
 ### GraphQL API Layer
 A unified GraphQL API is mounted at `/api/graphql` using Apollo Server v5 with `@as-integrations/express5` and `graphql-ws` for subscriptions. It features 9 domain modules covering all platform areas. A shared client library (`@workspace/graphql-client`) provides Apollo Client integration and typed hooks for all frontends. REST endpoints remain active alongside GraphQL.
 
+### Developer Documentation Portal
+A comprehensive developer documentation portal is available at `/developers` within the SZL Holdings app. It includes:
+- OpenAPI 3.1.0 interactive explorer (links to `/api/docs` Swagger UI)
+- GraphQL playground documentation (links to `/api/graphql`)
+- Authentication guide: Bearer tokens, OAuth 2.0 PKCE, API keys, SCIM tokens, webhook signatures
+- Code samples in JavaScript, Python, and cURL for auth, projects, vessels, and Alloy signals
+- Rate limit documentation (Global, Auth, Read, Write, Webhook Ingest tiers)
+- Error code reference (HTTP status codes + application error codes)
+- Versioning strategy with non-breaking/breaking change policy and deprecation policy
+- The API server's Helmet config was updated from `frameguard: deny` to `frameguard: sameorigin` to allow same-origin embedding
+
 ### Platform Architecture & Features
 The platform comprises 13 applications sharing authentication and design.
 - **Authentication & RBAC:** Middleware manages Replit Auth with an 11-role RBAC system.

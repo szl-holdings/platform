@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { label: "Aegis", href: "/aegis", external: "/firestorm/", section: "Platforms" },
   { label: "Terra", href: "/terra", external: "/terra/", section: "Platforms" },
   { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/", section: "Services" },
+  { label: "Developers", href: "/developers", section: "Platform" },
   { label: "Founder", href: "/founder", section: "Company" },
   { label: "Investors", href: "/investor-relations", section: "Company" },
   { label: "Trust", href: "/trust", section: "Company" },
@@ -27,6 +28,7 @@ const NAV_LINKS_PRIMARY = [
   { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
   { label: "Vessels", href: "/vessels", external: "/vessels/" },
   { label: "Investors", href: "/investor-relations" },
+  { label: "Developers", href: "/developers" },
   { label: "Trust", href: "/trust" },
   { label: "Contact", href: "/contact" },
 ];

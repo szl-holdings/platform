@@ -14,6 +14,7 @@ const SERVICES_LINKS = [
 const COMPANY_LINKS = [
   { label: "Ecosystem", href: "/ecosystem" },
   { label: "Ventures", href: "/ventures" },
+  { label: "Developers", href: "/developers" },
   { label: "Trust", href: "/trust" },
   { label: "Founder", href: "/founder" },
   { label: "Investor Relations", href: "/investor-relations" },

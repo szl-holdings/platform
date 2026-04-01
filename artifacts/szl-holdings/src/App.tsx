@@ -32,6 +32,7 @@ const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboar
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
 const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
 const ScimProvisioningPage = lazy(() => import("@/pages/scim-provisioning"));
+const DevelopersPage = lazy(() => import("@/pages/developers"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -314,6 +315,12 @@ function App() {
             </Route>
             <Route path="/integrations/jira">
               <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
+            </Route>
+            <Route path="/developers">
+              <Suspense fallback={<PageLoader />}><DevelopersPage /></Suspense>
+            </Route>
+            <Route path="/developers/:section">
+              <Suspense fallback={<PageLoader />}><DevelopersPage /></Suspense>
             </Route>
             <Route path="/admin/azure-onboarding">
               <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantOnboardingPage /></Suspense></RequireAuth>

@@ -34,7 +34,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
   hsts: isProduction ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-  frameguard: { action: "deny" },
+  frameguard: { action: "sameorigin" },
 }));
 
 const rawCorsOrigins = process.env.CORS_ORIGINS
