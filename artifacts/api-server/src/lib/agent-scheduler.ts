@@ -41,13 +41,17 @@ export { fetchData, getInternalHeaders, BASE_URL };
 
 function safeSerialize(data: unknown, maxLen: number): string {
   if (data == null) return "null";
-  if (Array.isArray(data)) {
-    const limited = data.slice(0, 20);
-    const s = JSON.stringify(limited);
+  try {
+    if (Array.isArray(data)) {
+      const limited = data.slice(0, 20);
+      const s = JSON.stringify(limited);
+      return s.length > maxLen ? s.slice(0, maxLen) + "..." : s;
+    }
+    const s = JSON.stringify(data);
     return s.length > maxLen ? s.slice(0, maxLen) + "..." : s;
+  } catch {
+    return "[unserializable]";
   }
-  const s = JSON.stringify(data);
-  return s.length > maxLen ? s.slice(0, maxLen) + "..." : s;
 }
 
 export function registerDefaultSchedules() {
