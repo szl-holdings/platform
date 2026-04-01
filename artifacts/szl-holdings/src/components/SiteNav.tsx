@@ -10,7 +10,8 @@ const NAV_LINKS_PRIMARY = [
   { label: "Portfolio", href: "/venture-portfolio" },
   { label: "Design Partners", href: "/design-partners" },
   { label: "Trust", href: "/trust" },
-  { label: "Investors", href: "/investors" },
+  { label: "Investor Story", href: "/investor-story" },
+  { label: "Investor Relations", href: "/investor-relations" },
 ];
 
 const NAV_LINKS_MOBILE = [
@@ -18,7 +19,9 @@ const NAV_LINKS_MOBILE = [
   { label: "Portfolio", href: "/venture-portfolio" },
   { label: "Design Partners", href: "/design-partners" },
   { label: "Trust", href: "/trust" },
-  { label: "Investors", href: "/investors" },
+  { label: "Investor Story", href: "/investor-story" },
+  { label: "Investor Relations", href: "/investor-relations" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function SiteNav() {
@@ -130,8 +133,8 @@ export function SiteNav() {
             );
           })}
           <Link
-            href="/design-partners"
-            onClick={() => handleNavClick("Request Conversation", "/design-partners")}
+            href="/contact"
+            onClick={() => handleNavClick("Contact", "/contact")}
             style={{
               fontSize: "0.8125rem",
               fontWeight: 600,
@@ -146,7 +149,7 @@ export function SiteNav() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
           >
-            Get in touch
+            Contact
           </Link>
         </div>
 

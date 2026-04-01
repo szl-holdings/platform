@@ -1,134 +1,174 @@
-import { m } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { Link } from "wouter";
+import { ArrowRight, Radar, Workflow, Ship, ShieldCheck, Building2, BriefcaseBusiness } from "lucide-react";
+import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
-const VENTURES = [
+const core = [
   {
-    name: "Aegis",
-    type: "Defense & Intelligence Platform",
-    description: "Unified defense and intelligence command. Integrates security operations, managed services, and AI-powered intelligence into a single elite platform.",
-    status: "Live",
-    accent: "hsl(230,80%,65%)",
-    href: "/firestorm/",
+    name: "Lyte",
+    type: "Business Observability Platform",
+    stage: "Core now",
+    href: "/lyte-command-center/",
+    body: "The market-facing software wedge: execution visibility, risk surfacing, ownership clarity, and next action in one command surface.",
   },
   {
     name: "Alloy",
-    type: "Platform / Engine",
-    description: "Intelligence and orchestration engine. Powers workflows, signals, outputs, and human-guided decision support across the ecosystem.",
-    status: "Live",
-    accent: "hsl(214,80%,65%)",
+    type: "Execution Fabric",
+    stage: "Core now",
     href: "/alloy/",
+    body: "The shared engine beneath the product: signals, workflow orchestration, routing, audit trail, and governed action.",
   },
+];
+
+const lanes = [
   {
-    name: "Lyte",
-    type: "SaaS Platform",
-    description: "Business observability platform. Surfaces risk, latency, ownership gaps, and workflow friction before they hit execution.",
-    status: "Live",
-    accent: "hsl(190,90%,55%)",
-    href: "/lyte-command-center/",
-  },
-  {
+    icon: Ship,
     name: "Vessels",
-    type: "SaaS Platform",
-    description: "Maritime command platform. Fleet visibility, voyage performance, and operational exception management in one command layer.",
-    status: "Live",
-    accent: "hsl(205,85%,55%)",
+    type: "Expansion lane",
     href: "/vessels/",
+    body: "A future vertical application for maritime intelligence once the core narrative has earned the right to expand.",
   },
   {
-    name: "Carlota Jo Consulting",
-    type: "Service Brand",
-    description: "High-trust, discreet operational and residence support for principals and organizations with complex, high-touch environments.",
-    status: "Live",
-    accent: "hsl(38,45%,65%)",
+    icon: ShieldCheck,
+    name: "Aegis / Firestorm",
+    type: "Expansion lane",
+    href: "/firestorm/",
+    body: "A command surface for security, incident, and managed operations environments where observability and execution discipline matter.",
+  },
+  {
+    icon: Building2,
+    name: "Terra",
+    type: "Expansion lane",
+    href: "/terra/",
+    body: "A real-estate intelligence lane for markets where ownership complexity, signal fragmentation, and process delay create opportunity.",
+  },
+  {
+    icon: BriefcaseBusiness,
+    name: "Carlota Jo",
+    type: "Services lane",
     href: "/carlota-jo/",
+    body: "A premium advisory and service brand that can produce near-term revenue and high-trust relationships around the platform.",
   },
 ];
 
 export default function VenturesPage() {
   usePageMeta({
-    title: "Ventures — SZL Holdings",
-    description: "SZL Holdings portfolio: Aegis, Alloy, Lyte, Vessels, and Carlota Jo — purpose-built platforms across defense, intelligence, observability, maritime command, and premium services.",
+    title: "Platform Map — SZL Holdings",
+    description:
+      "The focused platform map for SZL Holdings: Lyte and Alloy as the commercial wedge, with additional lanes staged as expansion value.",
     canonical: "https://szlholdings.com/ventures",
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
-      <Navbar />
-      <main className="pt-24">
-        <section style={{ padding: "4rem 0 3rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <m.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <p style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
-                Ventures
-              </p>
-              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: "700", letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: "1.08", marginBottom: "1.25rem" }}>
-                The portfolio.
-              </h1>
-              <p style={{ fontSize: "1rem", lineHeight: "1.7", color: "hsl(210,5%,58%)", maxWidth: "32rem" }}>
-                SZL Holdings is the parent ecosystem behind Aegis, Alloy, Lyte, Vessels, and Carlota Jo. Every entity is built with a defined purpose, a clear role, and zero internal competition.
-              </p>
-            </m.div>
+    <div className="min-h-screen bg-[#070a10] text-white">
+      <SiteNav />
+      <main>
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/45">Platform map</p>
+            <h1 className="mt-4 text-5xl font-semibold tracking-tight text-white md:text-6xl">
+              One core wedge.
+              <br />
+              Multiple future lanes.
+            </h1>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+              The company should not be presented as several equal go-to-market motions at once.
+              Lyte + Alloy is the commercial center. The rest of the ecosystem remains visible as
+              staged expansion value built on the same operating spine.
+            </p>
           </div>
         </section>
 
-        <section style={{ padding: "2rem 0 5rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div className="space-y-3">
-              {VENTURES.map((v, i) => (
-                <m.a
-                  key={v.name}
-                  href={v.href}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.48, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    display: "flex",
-                    gap: "1.25rem",
-                    alignItems: "center",
-                    padding: "1.5rem",
-                    borderRadius: "0.875rem",
-                    background: "hsla(0,0%,100%,0.025)",
-                    border: "1px solid hsla(0,0%,100%,0.06)",
-                    textDecoration: "none",
-                    transition: "all 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)";
-                    (e.currentTarget as HTMLElement).style.borderColor = `${v.accent}25`;
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.025)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.06)";
-                  }}
-                >
-                  <div style={{ width: "4px", borderRadius: "2px", alignSelf: "stretch", background: v.accent, flexShrink: 0, opacity: 0.7 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.375rem" }}>
-                      <p style={{ fontSize: "15px", fontWeight: "700", color: "hsl(38,12%,92%)", letterSpacing: "-0.008em" }}>{v.name}</p>
-                      <span style={{ fontSize: "10px", fontWeight: "500", color: v.accent, letterSpacing: "0.04em" }}>{v.type}</span>
-                      <span style={{
-                        marginLeft: "auto",
-                        fontSize: "10px", fontWeight: "500", padding: "2px 8px", borderRadius: "4px",
-                        background: "hsla(152,50%,42%,0.1)", border: "1px solid hsla(152,50%,42%,0.2)", color: "hsl(152,50%,50%)",
-                      }}>{v.status}</span>
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-100">
+              <Radar className="h-3.5 w-3.5" />
+              Commercial focus
+            </div>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              {core.map((item) => {
+                const Icon = item.name === "Lyte" ? Radar : Workflow;
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-white/20 hover:bg-white/[0.05]"
+                  >
+                    <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-black/20 p-3">
+                      <Icon className="h-5 w-5 text-white/80" />
                     </div>
-                    <p style={{ fontSize: "13px", lineHeight: "1.6", color: "hsl(210,5%,55%)" }}>{v.description}</p>
-                  </div>
-                  <ArrowRight size={14} strokeWidth={2} style={{ color: "hsl(210,5%,38%)", flexShrink: 0 }} />
-                </m.a>
-              ))}
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-xl font-semibold text-white">{item.name}</h2>
+                      <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
+                        {item.stage}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-white/55">{item.type}</p>
+                    <p className="mt-4 text-sm leading-7 text-white/72">{item.body}</p>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Expansion value</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                Lanes that stay visible without diluting the main story
+              </h2>
+            </div>
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {lanes.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-white/20 hover:bg-white/[0.05]"
+                  >
+                    <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-black/20 p-3">
+                      <Icon className="h-5 w-5 text-white/80" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">{item.name}</h3>
+                    <p className="mt-1 text-sm text-white/55">{item.type}</p>
+                    <p className="mt-4 text-sm leading-7 text-white/72">{item.body}</p>
+                  </a>
+                );
+              })}
+            </div>
+
+            <div className="mt-12 rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-8">
+              <h3 className="text-2xl font-semibold tracking-tight text-white">
+                The discipline is sequencing.
+              </h3>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-white/72">
+                Expansion only helps if it reads as earned. Keep the broader map visible, but filter
+                what becomes first-class by proof, buyer clarity, and commercial traction.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/investor-story"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                >
+                  See the investor story
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
+                >
+                  Talk to us
+                </Link>
+              </div>
             </div>
           </div>
         </section>
       </main>
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

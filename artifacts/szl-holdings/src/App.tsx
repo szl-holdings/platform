@@ -12,6 +12,10 @@ const PlatformPage = lazy(() => import("@/pages/platform"));
 const DesignPartnersPage = lazy(() => import("@/pages/design-partners"));
 const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
 const InvestorRelationsPage = lazy(() => import("@/pages/investor-relations"));
+const InvestorStoryPage = lazy(() => import("@/pages/investor-story"));
+const VenturesPage = lazy(() => import("@/pages/ventures"));
+const PortfolioPage = lazy(() => import("@/pages/portfolio"));
+const TrustPage = lazy(() => import("@/pages/trust"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
@@ -135,7 +139,7 @@ function App() {
       <LazyMotion features={domMax} strict>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Switch>
-            {/* 5 public routes */}
+            {/* Public routes */}
             <Route path="/">
               <Suspense fallback={<PageLoader />}><HomePage /></Suspense>
             </Route>
@@ -146,10 +150,25 @@ function App() {
               <Suspense fallback={<PageLoader />}><DesignPartnersPage /></Suspense>
             </Route>
             <Route path="/trust">
-              <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
+              <Suspense fallback={<PageLoader />}><TrustPage /></Suspense>
+            </Route>
+            <Route path="/investor-story">
+              <Suspense fallback={<PageLoader />}><InvestorStoryPage /></Suspense>
+            </Route>
+            <Route path="/investor-relations">
+              <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
             </Route>
             <Route path="/investors">
               <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
+            </Route>
+            <Route path="/ventures">
+              <Suspense fallback={<PageLoader />}><VenturesPage /></Suspense>
+            </Route>
+            <Route path="/portfolio">
+              <Suspense fallback={<PageLoader />}><PortfolioPage /></Suspense>
+            </Route>
+            <Route path="/contact">
+              <Suspense fallback={<PageLoader />}><DesignPartnersPage /></Suspense>
             </Route>
 
             {/* Product pages — accessible but not in primary nav */}
@@ -308,23 +327,11 @@ function App() {
             </Route>
 
             {/* Redirects for old routes */}
-            <Route path="/investor-relations">
-              <Redirect to="/investors" />
-            </Route>
             <Route path="/ir">
-              <Redirect to="/investors" />
-            </Route>
-            <Route path="/contact">
-              <Redirect to="/design-partners" />
+              <Redirect to="/investor-relations" />
             </Route>
             <Route path="/ecosystem">
               <Redirect to="/" />
-            </Route>
-            <Route path="/ventures">
-              <Redirect to="/investors" />
-            </Route>
-            <Route path="/portfolio">
-              <Redirect to="/investors" />
             </Route>
             <Route path="/founder">
               <Redirect to="/" />

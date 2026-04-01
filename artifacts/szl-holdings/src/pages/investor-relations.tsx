@@ -1,257 +1,313 @@
-import { useState } from "react";
-import { m } from "framer-motion";
-import { ArrowRight, CheckCircle, Send } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link } from "wouter";
+import {
+  ArrowRight,
+  Banknote,
+  Landmark,
+  HandCoins,
+  CheckCircle2,
+  Mail,
+  FileText,
+  Workflow,
+  Radar,
+} from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-
-const WEDGE_POINTS = [
+const capitalPaths = [
   {
-    heading: "The wedge is a real problem",
-    body: "Operational risk that lives between systems — approval latency, ownership gaps, workflow friction that compounds into revenue loss — is a problem in every organization above a certain size. Lyte + Alloy addresses it from first principles.",
+    icon: Landmark,
+    title: "Bank / SBA path",
+    body: "Use lender conversations to support working capital, pilot delivery, design-partner execution, and commercialization discipline.",
+    bullets: ["Working capital narrative", "Repayment discipline", "Founder credibility and operating plan"],
   },
   {
-    heading: "The architecture generalizes",
-    body: "The observability and execution accountability architecture powering Lyte + Alloy is the same architecture being extended to Terra (real estate), Vessels (maritime), Aegis (defense), and Carlota Jo (private advisory). The business model and core system are proven before the verticals scale.",
+    icon: HandCoins,
+    title: "Angel / seed path",
+    body: "Use equity conversations to accelerate product proof, customer acquisition, and the commercial maturation of Lyte + Alloy.",
+    bullets: ["Clear wedge story", "Design-partner pipeline", "Product + GTM milestones"],
   },
   {
-    heading: "Expansion is pull, not push",
-    body: "The vertical platforms expand when the architecture proves its value in their domain — not on a predetermined roadmap. Each vertical has a clear operational problem where observability and execution accountability are worth paying for.",
+    icon: Banknote,
+    title: "Design-partner revenue",
+    body: "Treat early customer revenue as strategic capital. A paid pilot or design-partner agreement increases both financing credibility and product truth.",
+    bullets: ["Faster learning loop", "Evidence for future capital", "Lower narrative risk"],
   },
 ];
 
-const EXPANSION_PLATFORMS = [
-  { name: "Terra", domain: "Real estate intelligence", note: "Distress tracking, deal pipeline, market data for serious operators." },
-  { name: "Vessels", domain: "Maritime command", note: "Fleet visibility, voyage performance, operational exceptions." },
-  { name: "Aegis", domain: "Defense & intelligence", note: "SOC command, managed operations, AI-native security." },
-  { name: "Carlota Jo", domain: "Private advisory", note: "High-trust operational support for high-consequence decisions." },
+const materials = [
+  "One-page teaser",
+  "Bank / lender brief",
+  "Angel memo",
+  "Master investor deck",
+  "Design-partner proposal",
+  "Financial model and 90-day plan",
+];
+
+const milestones = [
+  "3–5 serious lender conversations",
+  "20+ target investor conversations",
+  "3–5 design-partner prospects in pipeline",
+  "1–2 paid pilots or structured discovery engagements",
 ];
 
 export default function InvestorRelationsPage() {
-  const [form, setForm] = useState({ email: "" });
-  const [requestSent, setRequestSent] = useState(false);
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   usePageMeta({
-    title: "Investors — SZL Holdings",
-    description: "Focused now. Expandable later. The Lyte + Alloy wedge, the expansion thesis, and how to start a conversation.",
-    canonical: "https://szlholdings.com/investors",
+    title: "Investor Relations — SZL Holdings",
+    description:
+      "Capital and partner materials for SZL Holdings, centered on the Lyte + Alloy raise story.",
+    canonical: "https://szlholdings.com/investor-relations",
   });
 
-  const handleRequest = async (e: React.FormEvent) => {
+  const canSubmit = useMemo(() => email.trim().length > 3, [email]);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!form.email.trim()) return;
-    setError("");
+    if (!canSubmit) return;
     setSubmitting(true);
+    setError("");
     try {
-      const response = await fetch(`${BASE}/api/holdings/inquiries`, {
+      const res = await fetch("/api/holdings/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: "Investor",
-          email: form.email.trim(),
-          subject: "Investor Inquiry",
-          message: `Investor inquiry from ${form.email.trim()}`,
+          intent: "investor",
+          source: "investor_relations",
+          name: company.trim() || "Investor / Capital Inquiry",
+          email: email.trim(),
+          company: company.trim() || undefined,
+          subject: "Capital / Investor Relations Inquiry",
+          message:
+            message.trim() ||
+            `Capital inquiry from ${email.trim()}${company.trim() ? ` (${company.trim()})` : ""}.`,
         }),
       });
-      if (response.status === 201 || response.ok) {
-        setRequestSent(true);
-      } else {
-        setError("Request failed. Email hello@szlholdings.com directly.");
+
+      if (!res.ok) {
+        throw new Error("Request failed");
       }
+
+      setSent(true);
+      setEmail("");
+      setCompany("");
+      setMessage("");
     } catch {
-      setError("Network error. Please check your connection.");
+      setError("Unable to submit right now. Please email hello@szlholdings.com directly.");
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(210,12%,5%)" }}>
+    <div className="min-h-screen bg-[#070a10] text-white">
       <SiteNav />
-      <main id="main-content" role="main" className="pt-24">
-
-        <section style={{ padding: "4rem 0 3rem" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <m.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}>
-              <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "0.75rem" }}>
-                Investors
-              </p>
-              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 700, letterSpacing: "-0.025em", color: "hsl(38,12%,94%)", lineHeight: 1.08, marginBottom: "1.25rem", maxWidth: "28rem" }}>
-                Focused now. Expandable later.
-              </h1>
-              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(210,5%,58%)", maxWidth: "38rem", marginBottom: "2rem" }}>
-                SZL Holdings is built around a focused operating wedge: Lyte + Alloy, delivering business observability and execution accountability to organizations where unreliability is not a recoverable condition. The broader ecosystem — Aegis, Terra, Vessels, Carlota Jo — represents expansion paths built on the same shared architecture.
-              </p>
-              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                <a
-                  href="mailto:hello@szlholdings.com?subject=Investor Inquiry"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.625rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: "hsl(210,12%,6%)", background: "hsl(210,8%,88%)", textDecoration: "none", transition: "all 0.2s ease" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
-                >
-                  Start a conversation <ArrowRight size={13} strokeWidth={2.5} />
-                </a>
-                <a
-                  href="mailto:hello@szlholdings.com"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "0.625rem 1.25rem", borderRadius: "6px", fontSize: "13px", fontWeight: 500, color: "hsl(210,5%,56%)", border: "1px solid hsla(0,0%,100%,0.09)", textDecoration: "none", background: "transparent", transition: "all 0.2s ease" }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(38,12%,88%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.18)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,56%)"; (e.currentTarget as HTMLElement).style.borderColor = "hsla(0,0%,100%,0.09)"; }}
-                >
-                  hello@szlholdings.com
-                </a>
-              </div>
-            </m.div>
+      <main>
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">
+              <FileText className="h-3.5 w-3.5" />
+              Investor relations
+            </div>
+            <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-tight text-white md:text-6xl">
+              Capital materials for a disciplined company narrative.
+            </h1>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
+              SZL Holdings is running a focused capital story around Lyte + Alloy. The objective is
+              to align lenders, investors, and design partners around one commercial wedge, one
+              product narrative, and one execution plan.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+              >
+                Start a conversation
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a
+                href="mailto:hello@szlholdings.com"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
+              >
+                <Mail className="h-4 w-4" />
+                hello@szlholdings.com
+              </a>
+            </div>
           </div>
         </section>
 
-        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.5rem" }}>
-              The Thesis
-            </p>
-            <div style={{ display: "grid", gap: "1rem", maxWidth: "52rem" }}>
-              {WEDGE_POINTS.map((point, i) => (
-                <m.div
-                  key={point.heading}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    padding: "1.5rem",
-                    borderRadius: "10px",
-                    background: "hsla(0,0%,100%,0.025)",
-                    border: "1px solid hsla(0,0%,100%,0.06)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-                    <div style={{ width: "4px", background: "hsl(190,90%,55%)", borderRadius: "2px", flexShrink: 0, marginTop: "3px", height: "auto", alignSelf: "stretch", opacity: 0.6 }} />
-                    <div>
-                      <p style={{ fontSize: "14px", fontWeight: 600, color: "hsl(38,12%,88%)", marginBottom: "0.5rem", letterSpacing: "-0.008em" }}>{point.heading}</p>
-                      <p style={{ fontSize: "13px", lineHeight: 1.65, color: "hsl(210,5%,55%)" }}>{point.body}</p>
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Capital paths</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                Three sources of momentum
+              </h2>
+            </div>
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {capitalPaths.map((path) => {
+                const Icon = path.icon;
+                return (
+                  <div key={path.title} className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+                    <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-black/20 p-3">
+                      <Icon className="h-5 w-5 text-white/80" />
                     </div>
+                    <h3 className="text-lg font-semibold text-white">{path.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-white/72">{path.body}</p>
+                    <ul className="mt-4 space-y-2">
+                      {path.bullets.map((bullet) => (
+                        <li key={bullet} className="flex items-start gap-3 text-sm leading-6 text-white/78">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </m.div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)", background: "hsl(210,12%,6%)" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.5rem" }}>
-              The Expansion Platforms
-            </p>
-            <p style={{ fontSize: "0.9375rem", color: "hsl(210,5%,58%)", lineHeight: 1.65, maxWidth: "36rem", marginBottom: "1.75rem" }}>
-              These platforms aren't ideas on a roadmap — they're built and operating. They represent where the architecture extends as the wedge proves itself.
-            </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {EXPANSION_PLATFORMS.map((p, i) => (
-                <m.div
-                  key={p.name}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.45, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                  style={{
-                    padding: "1.375rem",
-                    borderRadius: "10px",
-                    background: "hsla(0,0%,100%,0.02)",
-                    border: "1px solid hsla(0,0%,100%,0.06)",
-                  }}
-                >
-                  <p style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,88%)", marginBottom: "0.25rem", letterSpacing: "-0.008em" }}>{p.name}</p>
-                  <p style={{ fontSize: "11px", fontWeight: 600, color: "hsl(210,5%,44%)", letterSpacing: "0.04em", marginBottom: "0.625rem", textTransform: "uppercase" }}>{p.domain}</p>
-                  <p style={{ fontSize: "12px", lineHeight: 1.6, color: "hsl(210,5%,50%)" }}>{p.note}</p>
-                </m.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section style={{ padding: "3rem 0", borderTop: "1px solid hsla(0,0%,100%,0.04)" }}>
-          <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
-            <div className="grid lg:grid-cols-2 gap-12">
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
               <div>
-                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.25rem" }}>
-                  The Founder
+                <p className="text-xs uppercase tracking-[0.24em] text-white/45">Available now</p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                  Materials ready for serious conversations
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-white/72">
+                  The package is built to support lender calls, investor meetings, and design-partner
+                  outreach without changing the company story every time the audience changes.
                 </p>
-                <m.div
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ padding: "1.5rem", borderRadius: "12px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}
-                >
-                  <p style={{ fontSize: "14px", fontWeight: 700, color: "hsl(38,12%,90%)", letterSpacing: "-0.008em", marginBottom: "0.25rem" }}>Stephen Lutar</p>
-                  <p style={{ fontSize: "11px", color: "hsl(210,5%,46%)", marginBottom: "0.875rem" }}>Founder & Chief Executive</p>
-                  <p style={{ fontSize: "13px", lineHeight: 1.65, color: "hsl(210,5%,54%)", marginBottom: "1rem" }}>
-                    Builder, operator, and systems architect. Designed and operates the full SZL ecosystem across six platforms. Background in workflow design, command systems, and multi-domain operational intelligence.
-                  </p>
-                  <a
-                    href="/stephen-site/"
-                    style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 600, color: "hsl(190,90%,55%)", textDecoration: "none" }}
-                  >
-                    Full Profile <ArrowRight size={11} strokeWidth={2.5} />
-                  </a>
-                </m.div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {materials.map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/80">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-white/45">Near-term targets</p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                  What progress should look like in the next 90 days
+                </h2>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {milestones.map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm leading-7 text-white/80">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8">
+            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
+                  <Workflow className="h-3.5 w-3.5" />
+                  Request materials
+                </div>
+                <h2 className="mt-6 text-3xl font-semibold tracking-tight text-white">
+                  Send a note and we will route the right package.
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-white/72">
+                  Lenders, investors, and design partners need different slices of the same company
+                  story. This form routes the request into the same operating pipeline as the rest of
+                  the commercial workflow.
+                </p>
+                <div className="mt-6 rounded-2xl border border-amber-300/15 bg-amber-300/10 p-5">
+                  <div className="flex items-start gap-3">
+                    <Radar className="mt-1 h-5 w-5 shrink-0 text-amber-100" />
+                    <p className="text-sm leading-7 text-amber-50/90">
+                      Keep the ask simple: Lyte + Alloy now, expansion lanes later, proof and customer
+                      truth as the filter for everything else.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "hsl(210,5%,42%)", marginBottom: "1.25rem" }}>
-                  Request Materials
-                </p>
-                {requestSent ? (
-                  <div style={{ padding: "1.25rem", borderRadius: "10px", background: "hsla(190,90%,55%,0.07)", border: "1px solid hsla(190,90%,55%,0.2)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                      <CheckCircle size={16} style={{ color: "hsl(190,90%,55%)" }} />
-                      <p style={{ fontSize: "13px", color: "hsl(38,12%,80%)", fontWeight: 500 }}>Request received. We'll follow up within 24 hours.</p>
-                    </div>
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 lg:p-8">
+                {sent ? (
+                  <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/10 p-6">
+                    <p className="text-lg font-semibold text-white">Request received.</p>
+                    <p className="mt-2 text-sm leading-7 text-white/80">
+                      We will follow up with the relevant materials and next step.
+                    </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleRequest}>
-                    <div style={{ display: "flex", gap: "0.625rem" }}>
+                  <form className="space-y-4" onSubmit={onSubmit}>
+                    <div>
+                      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
+                        Email
+                      </label>
                       <input
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         type="email"
-                        value={form.email}
-                        onChange={(e) => setForm({ email: e.target.value })}
-                        placeholder="your@email.com"
                         required
-                        style={{
-                          flex: 1, padding: "0.625rem 0.875rem",
-                          background: "hsla(0,0%,100%,0.04)", border: "1px solid hsla(0,0%,100%,0.09)",
-                          borderRadius: "6px", color: "hsl(38,12%,88%)", fontSize: "13px", outline: "none",
-                        }}
+                        className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
+                        placeholder="you@firm.com"
                       />
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        style={{
-                          padding: "0.625rem 1rem", background: "hsla(0,0%,100%,0.08)",
-                          border: "1px solid hsla(0,0%,100%,0.12)", borderRadius: "6px",
-                          color: "hsl(38,12%,84%)", fontSize: "12px", fontWeight: 600,
-                          cursor: submitting ? "not-allowed" : "pointer",
-                          display: "flex", alignItems: "center", gap: "5px", flexShrink: 0,
-                          transition: "all 0.18s",
-                        }}
-                      >
-                        <Send size={12} />
-                        {submitting ? "…" : "Request"}
-                      </button>
                     </div>
-                    {error && <p style={{ fontSize: "11.5px", color: "hsl(0,72%,65%)", marginTop: "0.4rem" }}>{error}</p>}
-                    {!error && <p style={{ fontSize: "11px", color: "hsl(210,5%,40%)", marginTop: "0.5rem" }}>One-pager and architecture brief.</p>}
+                    <div>
+                      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
+                        Firm or company
+                      </label>
+                      <input
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
+                        placeholder="Optional"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-white/50">
+                        What are you looking for?
+                      </label>
+                      <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        rows={5}
+                        className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-white/25"
+                        placeholder="Bank / SBA conversation, angel materials, design-partner proposal, etc."
+                      />
+                    </div>
+                    {error ? <p className="text-sm text-red-300">{error}</p> : null}
+                    <button
+                      type="submit"
+                      disabled={!canSubmit || submitting}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {submitting ? "Sending..." : "Request materials"}
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
                   </form>
                 )}
               </div>
             </div>
           </div>
         </section>
-
       </main>
       <SiteFooter />
     </div>
