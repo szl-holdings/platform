@@ -71,6 +71,7 @@ import pushNotificationsRouter from "./push-notifications";
 import backupRouter from "./backup";
 import demoRequestsRouter from "./demo-requests";
 import contactRouter from "./contact";
+import aegisSocLiveRouter from "./firestorm-live";
 
 const router: IRouter = Router();
 
@@ -140,6 +141,7 @@ router.use("/vessels/platform", readLimiter);
 router.use(vesselsPlatformRouter);
 router.use(vesselsRouter);
 router.use(aegisSocRouter);
+router.use(aegisSocLiveRouter);
 router.use(lyteRouter);
 router.use(dreamscapeRouter);
 router.use(readinessRouter);

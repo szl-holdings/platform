@@ -143,4 +143,25 @@ export const api = {
     webhook: (payload: any) => apiFetch<any>("/firestorm/ingest/webhook", { method: "POST", body: JSON.stringify(payload) }),
     syslog: (payload: any) => apiFetch<any>("/firestorm/ingest/syslog", { method: "POST", body: JSON.stringify(payload) }),
   },
+  soar: {
+    playbooks: () => apiFetch<any>("/firestorm/soar/playbooks"),
+    execute: (playbookId: string, alertId?: string, context?: any) =>
+      apiFetch<any>("/firestorm/soar/execute", { method: "POST", body: JSON.stringify({ playbookId, alertId, context }) }),
+  },
+  stix: {
+    objects: (type?: string) => apiFetch<any>(`/firestorm/stix/objects${type ? `?type=${type}` : ""}`),
+    export: (objectIds: string[], bundleName?: string) =>
+      apiFetch<any>("/firestorm/stix/export", { method: "POST", body: JSON.stringify({ objectIds, bundleName }) }),
+  },
+  taxii: {
+    feeds: () => apiFetch<any>("/firestorm/taxii/feeds"),
+  },
+  mitre: {
+    coverage: () => apiFetch<any>("/firestorm/mitre/coverage"),
+  },
+  liveData: {
+    threatSummary: () => apiFetch<any>("/firestorm/live/threat-summary"),
+    complianceSummary: () => apiFetch<any>("/firestorm/live/compliance-summary"),
+    assetRisk: () => apiFetch<any>("/firestorm/live/asset-risk"),
+  },
 };

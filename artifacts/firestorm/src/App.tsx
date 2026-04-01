@@ -57,6 +57,8 @@ const ComplianceRisks = lazy(() => import("@/pages/compliance/compliance-risks")
 const VendorRisk = lazy(() => import("@/pages/compliance/vendor-risk"));
 const MilestonesTrends = lazy(() => import("@/pages/compliance/milestones-trends"));
 const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-insights"));
+const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
+const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 
 // ─── Managed Operations pages (from Rosie/MSP) ───────────────────────────────
 const MspDashboard = lazy(() => import("@/pages/msp/dashboard"));
@@ -136,6 +138,8 @@ const securityNavSecondary = [
   { path: "/powerbi", label: "Power BI Analytics", icon: BarChart3 },
   { path: "/sentinel", label: "Sentinel Watch", icon: Search },
   { path: "/watchlists", label: "Watchlists", icon: Target },
+  { path: "/soar-playbooks", label: "SOAR Playbooks", icon: Zap },
+  { path: "/stix-taxii", label: "STIX/TAXII Intel", icon: Link2 },
   { path: "/observability", label: "Observability", icon: Activity },
   { path: "/adversary-emulation", label: "Red Team Exercises", icon: Target },
 ];
@@ -312,7 +316,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
     <>
       {open && <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onClose} aria-hidden="true" />}
       <aside className={cn(
-        "bg-[#0A0D14]/98 border-r border-white/5 flex flex-col h-screen sticky top-0 z-30 transition-transform duration-200",
+        "bg-[#0A0D14]/98 border-r border-white/5 flex flex-col h-screen sticky top-0 z-30 transition-transform duration-200 overflow-hidden",
         "fixed md:relative inset-y-0 left-0 w-60",
         open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
       )} role="navigation" aria-label="Sidebar navigation">
@@ -563,7 +567,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-white/5 space-y-2">
+        <div className="shrink-0 px-4 py-3 border-t border-white/5 space-y-2 bg-[#0A0D14]/98">
           <UserButton showName className="w-full" />
           <div className="flex items-center gap-2 text-[10px] text-white/50">
             <Hexagon className="w-3 h-3" />
@@ -598,6 +602,8 @@ function AppRouter() {
         <Route path="/observability" component={ObservabilityPage} />
         <Route path="/sentinel" component={SentinelDashboard} />
         <Route path="/watchlists" component={Watchlists} />
+        <Route path="/soar-playbooks" component={SoarPlaybooks} />
+        <Route path="/stix-taxii" component={StixTaxii} />
         <Route path="/forensics" component={ForensicsTimeline} />
         <Route path="/xdr-console" component={XDRConsole} />
         <Route path="/threat-hunting" component={ThreatHunting} />

@@ -35,6 +35,7 @@ const INTERNAL_AGENT_USER: AuthenticatedUser = {
   displayName: "Internal Agent",
   email: null,
   roles: ["super_admin"],
+  orgs: [],
 };
 
 function checkInternalToken(req: Request): boolean {

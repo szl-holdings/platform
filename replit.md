@@ -81,6 +81,17 @@ Over 97 tables across 21+ schema files, covering authentication, billing, variou
 ### Aegis — Consolidated Defense & Intelligence Platform
 Aegis (artifact slug `firestorm`, path `/firestorm/`) unifies Security Operations (SOC), Managed Operations (Ops), and Intelligence Engine (Intel) into a single platform with distinct modules and API routes.
 
+**SOC Capabilities (as of latest update):**
+- **SOAR Playbook Engine** (`/soar-playbooks`): 6 pre-built templates (Phishing, Malware, Account Compromise, Ransomware, DDoS, Data Exfil), execution history, analytics (MTTR, automation rate, false positives), conditional logic display. CrowdStrike Falcon Fusion / Palo Alto XSOAR-inspired.
+- **STIX/TAXII Protocol Layer** (`/stix-taxii`): STIX 2.1 object library browser (7 object types), TAXII 2.1 feed management, bundle export. Includes APT29 / Operation Darkwing objects.
+- **Unified XDR Console** (`/xdr-console`): Cross-source telemetry correlation across endpoint, network, identity, and cloud. Operation Darkwing campaign phase timeline, 5 correlated APT29 alerts with MITRE mapping, entity risk scoring.
+- **Threat Intel Feed** (`/threat-feed`): Live NVD/CISA KEV/news feeds with Operation Darkwing APT29 banner overlay. STIX references, IOC tracking, TLP classification.
+- **Sentinel Watch** (`/sentinel`): MITRE ATT&CK v14 detection coverage across 12 tactics, Operation Darkwing live alerts, zone monitoring (5 network zones), Intel feed aggregation (FS-ISAC, CrowdStrike, CISA KEV).
+- **Framework Scorecards** (`/cr/scorecards`): 7 government frameworks — NIST 800-53 Rev 5, NIST CSF 2.0, SOC 2 Type II, CMMC 2.0, FedRAMP Moderate, ISO 27001:2022, NIS2/BSI. Control family drill-down, cross-framework mapping, SSP/POA&M export.
+- **Executive Risk Dashboard** (`/executive-risk`): 8 board-level KPIs, Active Incident banner, Risk Score trend, MTTD/MTTR trend, Risk Register with 5 enterprise risks (inherent/residual scoring), Board Reports library (8 documents including FedRAMP SSP, CMMC readiness, NIS2 notification).
+- **APT Scenario**: Operation Darkwing (APT29 / Cozy Bear / SVR) targeting SZL Holdings — 5 phases: Initial Access (T1566.001) → Credential Harvest (T1003.001) → Lateral Movement (T1021.002) → Data Staging (T1074) → Exfiltration Prevented (T1567.002). This scenario is used consistently across XDR, Sentinel, Threat Feed, STIX, Forensics, and Executive Risk pages.
+- **Auth Bridge**: `authMiddleware.ts` now populates both `req.oidcUser` (legacy) and `req.user` (new) from a single session lookup, resolving the dual-middleware conflict.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth
