@@ -22,21 +22,21 @@ const QUARTERLY_LETTERS = [
     id: "q1-2026",
     title: "Q1 2026 Investor Letter",
     quarter: "Q1 2026",
-    excerpt: "Portfolio ARR crosses $35M. Aegis FedRAMP track opens. Three new enterprise clients for Vessels.",
+    excerpt: "Aegis FedRAMP track opens. Enterprise client expansion across Vessels and Lyte. Platform architecture milestone delivered.",
     date: "March 31, 2026",
   },
   {
     id: "q4-2025",
     title: "Q4 2025 Investor Letter",
     quarter: "Q4 2025",
-    excerpt: "Year in review: $28M ARR, 6 live platforms, Alloy 2.0 convergence, Lyte executive command launch.",
+    excerpt: "Year in review: 6 live platforms, Alloy 2.0 convergence, Lyte executive command launch, mobile platform launch.",
     date: "December 31, 2025",
   },
   {
     id: "q3-2025",
     title: "Q3 2025 Investor Letter",
     quarter: "Q3 2025",
-    excerpt: "Vessels dark vessel detection lead time extended to 34 days. Terra NYC expansion progressing.",
+    excerpt: "Vessels dark vessel detection lead time improvements. Terra NYC expansion progressing. Aegis SOC capabilities expanded.",
     date: "September 30, 2025",
   },
 ];
@@ -51,34 +51,34 @@ const STRATEGIC_PRIORITIES: Array<{
 }> = [
   {
     title: "FedRAMP & Federal Expansion",
-    body: "Aegis is on track for FedRAMP certification Q3 2026. Federal sector represents $40M+ TAM expansion.",
+    body: "Aegis is on the federal readiness track. Defense and intelligence capabilities position the platform for federal sector expansion.",
     color: "#6366f1",
     icon: "shield",
   },
   {
-    title: "Alloy Scenario Model Library",
-    body: "Public launch Q2 2026. First external API offering — creates a new commercial revenue vector.",
+    title: "Alloy Scenario API",
+    body: "External API offering built on the Alloy scenario modeling engine — creates a new commercial revenue vector for enterprise integrations.",
     color: "#8b5cf6",
     icon: "zap",
   },
   {
     title: "Maritime Climate Routing",
-    body: "Vessels climate routing overlay for charter optimization shipping Q3 2026.",
+    body: "Vessels climate routing overlay for charter optimization and route risk intelligence.",
     color: "#3b82f6",
     icon: "anchor",
   },
   {
     title: "Terra National Coverage",
-    body: "Expanding beyond NYC to national distress property coverage. API-first for institutional integrations.",
+    body: "Expanding beyond NYC to national distressed property coverage with API-first architecture for institutional integrations.",
     color: "#4d7c0f",
     icon: "map",
   },
 ];
 
 const CAP_TABLE_ITEMS = [
-  { entity: "Founder & Management", ownership: "74%", color: "#c9a84c" },
-  { entity: "Strategic Investors", ownership: "18%", color: "#8b5cf6" },
-  { entity: "Advisory & Option Pool", ownership: "8%", color: "#3b82f6" },
+  { entity: "Founder & Management", ownership: "Majority", color: "#c9a84c" },
+  { entity: "Strategic Investors", ownership: "Minority", color: "#8b5cf6" },
+  { entity: "Advisory & Option Pool", ownership: "Reserved", color: "#3b82f6" },
 ];
 
 const DOCUMENTS: Array<{ name: string; type: string; icon: FeatherIconName }> = [
