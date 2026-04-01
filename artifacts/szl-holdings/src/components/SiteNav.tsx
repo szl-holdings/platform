@@ -5,32 +5,18 @@ import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { label: "Ecosystem", href: "/ecosystem", section: "Company" },
-  { label: "Architecture", href: "/architecture", section: "Company" },
-  { label: "Integrations", href: "/integrations", section: "Company" },
-  { label: "Alloy", href: "/alloy", section: "Operations" },
-  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/", section: "Platforms" },
-  { label: "Vessels", href: "/vessels", external: "/vessels/", section: "Platforms" },
-  { label: "Aegis", href: "/aegis", external: "/firestorm/", section: "Platforms" },
-  { label: "Terra", href: "/terra", external: "/terra/", section: "Platforms" },
-  { label: "Carlota Jo", href: "/carlota-jo", external: "/carlota-jo/", section: "Services" },
-  { label: "Developers", href: "/developers", section: "Platform" },
-  { label: "Founder", href: "/founder", section: "Company" },
-  { label: "Investors", href: "/investor-relations", section: "Company" },
-  { label: "Trust", href: "/trust", section: "Company" },
-  { label: "Contact", href: "/contact", section: "Company" },
+const NAV_LINKS_PRIMARY = [
+  { label: "Platform", href: "/platform" },
+  { label: "Design Partners", href: "/design-partners" },
+  { label: "Trust", href: "/trust" },
+  { label: "Investors", href: "/investors" },
 ];
 
-const NAV_LINKS_PRIMARY = [
-  { label: "Ecosystem", href: "/ecosystem" },
-  { label: "Alloy", href: "/alloy" },
-  { label: "Lyte", href: "/lyte", external: "/lyte-command-center/" },
-  { label: "Vessels", href: "/vessels", external: "/vessels/" },
-  { label: "Investors", href: "/investor-relations" },
-  { label: "Developers", href: "/developers" },
+const NAV_LINKS_MOBILE = [
+  { label: "Platform", href: "/platform" },
+  { label: "Design Partners", href: "/design-partners" },
   { label: "Trust", href: "/trust" },
-  { label: "Contact", href: "/contact" },
+  { label: "Investors", href: "/investors" },
 ];
 
 export function SiteNav() {
@@ -104,7 +90,6 @@ export function SiteNav() {
         <div className="hidden lg:flex items-center gap-5">
           {NAV_LINKS_PRIMARY.map((link) => {
             const isActive = location === link.href;
-            const isExternal = !!link.external;
             const commonStyle = {
               fontSize: "0.8125rem",
               fontWeight: 500,
@@ -114,20 +99,6 @@ export function SiteNav() {
               position: "relative" as const,
               textDecoration: "none",
             };
-            if (isExternal) {
-              return (
-                <a
-                  key={link.href}
-                  href={link.external}
-                  onClick={() => handleNavClick(link.label, link.href)}
-                  style={commonStyle}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                >
-                  {link.label}
-                </a>
-              );
-            }
             return (
               <Link
                 key={link.href}
@@ -156,6 +127,25 @@ export function SiteNav() {
               </Link>
             );
           })}
+          <Link
+            href="/design-partners"
+            onClick={() => handleNavClick("Request Conversation", "/design-partners")}
+            style={{
+              fontSize: "0.8125rem",
+              fontWeight: 600,
+              fontFamily: "var(--font-body)",
+              color: "hsl(210,12%,6%)",
+              background: "hsl(210,8%,88%)",
+              padding: "0.375rem 0.875rem",
+              borderRadius: "4px",
+              textDecoration: "none",
+              transition: "background 0.2s ease",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(38,15%,96%)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(210,8%,88%)"; }}
+          >
+            Get in touch
+          </Link>
         </div>
 
         <button
@@ -184,55 +174,43 @@ export function SiteNav() {
               borderBottom: "1px solid var(--color-szl-border)",
             }}
           >
-            <div className="px-6 py-6 flex flex-col gap-5">
-              {(["Operations", "Platforms", "Services", "Company"] as const).map((section) => {
-                const sectionLinks = NAV_LINKS.filter(l => l.section === section);
-                if (sectionLinks.length === 0) return null;
-                return (
-                  <div key={section}>
-                    <p style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "0.625rem" }}>
-                      {section}
-                    </p>
-                    <div className="flex flex-col gap-3">
-                      {sectionLinks.map((link) => {
-                        const mobileStyle = {
-                          fontSize: "0.9375rem",
-                          fontWeight: 500 as const,
-                          color: "var(--color-szl-text-secondary)",
-                          transition: "color 0.2s ease",
-                          textDecoration: "none" as const,
-                        };
-                        if (link.external) {
-                          return (
-                            <a
-                              key={link.href}
-                              href={link.external}
-                              onClick={() => handleNavClick(link.label, link.href)}
-                              style={mobileStyle}
-                              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                            >
-                              {link.label}
-                            </a>
-                          );
-                        }
-                        return (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            onClick={() => handleNavClick(link.label, link.href)}
-                            style={mobileStyle}
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                          >
-                            {link.label}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="px-6 py-6 flex flex-col gap-3">
+              {NAV_LINKS_MOBILE.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => handleNavClick(link.label, link.href)}
+                  style={{
+                    fontSize: "0.9375rem",
+                    fontWeight: 500,
+                    color: "var(--color-szl-text-secondary)",
+                    transition: "color 0.2s ease",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <Link
+                href="/design-partners"
+                onClick={() => handleNavClick("Get in touch", "/design-partners")}
+                style={{
+                  marginTop: "0.5rem",
+                  display: "inline-flex",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  color: "hsl(210,12%,6%)",
+                  background: "hsl(210,8%,88%)",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "4px",
+                  textDecoration: "none",
+                  alignSelf: "flex-start",
+                }}
+              >
+                Get in touch
+              </Link>
             </div>
           </m.div>
         )}

@@ -2,86 +2,29 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider, OnboardingWizard, type OnboardingConfig } from "@workspace/shared-ui";
+import { DemoModeProvider, SandboxModeProvider } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
-import { Building2, BarChart3, Globe, TrendingUp, Layers, Shield } from "lucide-react";
-
-const SZL_ONBOARDING_CONFIG: OnboardingConfig = {
-  appId: "szl-holdings",
-  appName: "SZL Holdings",
-  accentColor: "#6366f1",
-  steps: [
-    {
-      id: "welcome",
-      title: "Welcome to SZL Holdings",
-      description: "SZL Holdings is the operating center for a portfolio of AI-native platforms — Terra (real estate), Aegis (security), Lyte (observability), Vessels (maritime), and Alloy (automation).",
-      placement: "center",
-      icon: Building2,
-    },
-    {
-      id: "ecosystem",
-      title: "The SZL Ecosystem",
-      description: "Navigate the full platform ecosystem from this portal. Each platform is purpose-built and intelligence-native, sharing a common data and agent layer through Alloy.",
-      placement: "center",
-      icon: Globe,
-    },
-    {
-      id: "ventures",
-      title: "Portfolio & Ventures",
-      description: "Explore SZL's venture portfolio, investment thesis, and the operating doctrine that guides how we build and operate companies.",
-      placement: "center",
-      icon: TrendingUp,
-    },
-    {
-      id: "kpi-dashboard",
-      title: "KPI Command",
-      description: "The KPI dashboard gives you a real-time view of portfolio performance across all platforms — revenue, growth, adoption, and operational health.",
-      placement: "center",
-      icon: BarChart3,
-    },
-  ],
-  checklist: [
-    { id: "explore-ecosystem", label: "Explore the SZL ecosystem", description: "See all platforms and their connections" },
-    { id: "view-ventures", label: "View the venture portfolio", description: "Review investment thesis and portfolio companies" },
-    { id: "check-kpis", label: "Check portfolio KPIs", description: "Review real-time performance metrics" },
-    { id: "explore-terra", label: "Visit Terra", description: "Real estate intelligence platform" },
-    { id: "explore-aegis", label: "Visit Aegis", description: "Unified defense and intelligence command" },
-  ],
-};
 
 const HomePage = lazy(() => import("@/pages/landing"));
-const EcosystemPage = lazy(() => import("@/pages/ecosystem"));
-const VenturesPage = lazy(() => import("@/pages/ventures"));
-const FounderPage = lazy(() => import("@/pages/founder"));
-const ContactPage = lazy(() => import("@/pages/contact"));
-const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
-const InsightsPage = lazy(() => import("@/pages/insights"));
-const AdminPage = lazy(() => import("@/pages/admin"));
-const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
-const TerraPage = lazy(() => import("@/pages/terra"));
-const TerraPlatformPage = lazy(() => import("@/pages/terra-platform"));
-const TerraListingsPage = lazy(() => import("@/pages/terra-listings"));
-const OwnershipOsPage = lazy(() => import("@/pages/ownership-os"));
-const InvestorRelationsPage = lazy(() => import("@/pages/investor-relations"));
-const CoreCommandPage = lazy(() => import("@/pages/core-command"));
-const ControlPlanePage = lazy(() => import("@/pages/control-plane"));
-const PortfolioOpsPage = lazy(() => import("@/pages/portfolio-ops"));
+const PlatformPage = lazy(() => import("@/pages/platform"));
+const DesignPartnersPage = lazy(() => import("@/pages/design-partners"));
 const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
-const StatusPage = lazy(() => import("@/pages/status"));
-const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
-const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
-const PlatformArchitecturePage = lazy(() => import("@/pages/platform-architecture"));
-const IntegrationsMarketplacePage = lazy(() => import("@/pages/integrations-marketplace"));
+const InvestorRelationsPage = lazy(() => import("@/pages/investor-relations"));
+const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
+const AdminPage = lazy(() => import("@/pages/admin"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
 const TenantBrandingPage = lazy(() => import("@/pages/tenant-branding"));
 const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
 const ScimProvisioningPage = lazy(() => import("@/pages/scim-provisioning"));
-const DevelopersPage = lazy(() => import("@/pages/developers"));
-const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
 const CapitalArsenalPage = lazy(() => import("@/pages/capital-arsenal"));
+const OwnershipOsPage = lazy(() => import("@/pages/ownership-os"));
+const StatusPage = lazy(() => import("@/pages/status"));
+const LegalPrivacyPage = lazy(() => import("@/pages/legal-privacy"));
+const LegalTermsPage = lazy(() => import("@/pages/legal-terms"));
+const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -189,15 +132,24 @@ function App() {
       <LazyMotion features={domMax} strict>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Switch>
+            {/* 5 public routes */}
             <Route path="/">
               <Suspense fallback={<PageLoader />}><HomePage /></Suspense>
             </Route>
-            <Route path="/ecosystem">
-              <Suspense fallback={<PageLoader />}><EcosystemPage /></Suspense>
+            <Route path="/platform">
+              <Suspense fallback={<PageLoader />}><PlatformPage /></Suspense>
             </Route>
-            <Route path="/ventures">
-              <Suspense fallback={<PageLoader />}><VenturesPage /></Suspense>
+            <Route path="/design-partners">
+              <Suspense fallback={<PageLoader />}><DesignPartnersPage /></Suspense>
             </Route>
+            <Route path="/trust">
+              <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
+            </Route>
+            <Route path="/investors">
+              <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
+            </Route>
+
+            {/* Alloy internal routes — accessible but not in public nav */}
             <Route path="/alloy">
               <Suspense fallback={<PageLoader />}><AlloyPage><AlloyFactoryFloor /></AlloyPage></Suspense>
             </Route>
@@ -249,6 +201,8 @@ function App() {
             <Route path="/alloy/documents/:sub">
               <Suspense fallback={<PageLoader />}><AlloyPage><AlloyDocumentEngine /></AlloyPage></Suspense>
             </Route>
+
+            {/* External platform redirects */}
             <Route path="/lyte">
               <ExternalRedirect to="/lyte-command-center/" />
             </Route>
@@ -285,18 +239,14 @@ function App() {
             <Route path="/stephen">
               <ExternalRedirect to="/stephen-site/" />
             </Route>
-            <Route path="/founder">
-              <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>
+            <Route path="/terra">
+              <ExternalRedirect to="/terra/" />
             </Route>
-            <Route path="/contact">
-              <Suspense fallback={<PageLoader />}><ContactPage /></Suspense>
+            <Route path="/terra/demo">
+              <ExternalRedirect to="/terra/dashboard?demo=true" />
             </Route>
-            <Route path="/case-studies">
-              <Suspense fallback={<PageLoader />}><CaseStudiesPage /></Suspense>
-            </Route>
-            <Route path="/insights">
-              <Suspense fallback={<PageLoader />}><InsightsPage /></Suspense>
-            </Route>
+
+            {/* Admin routes — accessible but not in public nav */}
             <Route path="/kpis">
               <RequireAuth><Suspense fallback={<PageLoader />}><KpiDashboardPage /></Suspense></RequireAuth>
             </Route>
@@ -324,42 +274,11 @@ function App() {
             <Route path="/admin/:section">
               <RequireAuth><Suspense fallback={<PageLoader />}><AdminPage /></Suspense></RequireAuth>
             </Route>
-            <Route path="/portfolio">
-              <Redirect to="/ventures" />
-            </Route>
-            <Route path="/terra">
-              <Suspense fallback={<PageLoader />}><TerraPage /></Suspense>
-            </Route>
-            <Route path="/terra/demo">
-              <ExternalRedirect to="/terra/dashboard?demo=true" />
-            </Route>
-            <Route path="/terra/platform">
-              <Suspense fallback={<PageLoader />}><TerraPlatformPage /></Suspense>
-            </Route>
-            <Route path="/terra/listings">
-              <Suspense fallback={<PageLoader />}><TerraListingsPage /></Suspense>
-            </Route>
             <Route path="/ownership">
               <RequireAuth><Suspense fallback={<PageLoader />}><OwnershipOsPage /></Suspense></RequireAuth>
             </Route>
-            <Route path="/investor-relations">
-              <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
-            </Route>
-            <Route path="/ir">
-              <Redirect to="/investor-relations" />
-            </Route>
-            <Route path="/core">
-              <Suspense fallback={<PageLoader />}><CoreCommandPage /></Suspense>
-            </Route>
-            <Route path="/control-plane">
-              <Suspense fallback={<PageLoader />}><ControlPlanePage /></Suspense>
-            </Route>
-            <Route path="/portfolio-ops">
-              <Suspense fallback={<PageLoader />}><PortfolioOpsPage /></Suspense>
-            </Route>
-            <Route path="/trust">
-              <Suspense fallback={<PageLoader />}><TrustCenterPage /></Suspense>
-            </Route>
+
+            {/* Legal / utility routes */}
             <Route path="/status">
               <Suspense fallback={<PageLoader />}><StatusPage /></Suspense>
             </Route>
@@ -372,24 +291,67 @@ function App() {
             <Route path="/accessibility">
               <Suspense fallback={<PageLoader />}><AccessibilityPage /></Suspense>
             </Route>
+
+            {/* Redirects for old routes */}
+            <Route path="/investor-relations">
+              <Redirect to="/investors" />
+            </Route>
+            <Route path="/ir">
+              <Redirect to="/investors" />
+            </Route>
+            <Route path="/contact">
+              <Redirect to="/design-partners" />
+            </Route>
+            <Route path="/ecosystem">
+              <Redirect to="/" />
+            </Route>
+            <Route path="/ventures">
+              <Redirect to="/investors" />
+            </Route>
+            <Route path="/portfolio">
+              <Redirect to="/investors" />
+            </Route>
+            <Route path="/founder">
+              <Redirect to="/" />
+            </Route>
+            <Route path="/case-studies">
+              <Redirect to="/" />
+            </Route>
+            <Route path="/insights">
+              <Redirect to="/" />
+            </Route>
             <Route path="/architecture">
-              <Suspense fallback={<PageLoader />}><PlatformArchitecturePage /></Suspense>
+              <Redirect to="/platform" />
             </Route>
             <Route path="/integrations">
-              <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
+              <Redirect to="/platform" />
             </Route>
-            <Route path="/integrations/salesforce">
-              <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
-            </Route>
-            <Route path="/integrations/jira">
-              <Suspense fallback={<PageLoader />}><IntegrationsMarketplacePage /></Suspense>
+            <Route path="/integrations/:sub">
+              <Redirect to="/platform" />
             </Route>
             <Route path="/developers">
-              <Suspense fallback={<PageLoader />}><DevelopersPage /></Suspense>
+              <Redirect to="/" />
             </Route>
             <Route path="/developers/:section">
-              <Suspense fallback={<PageLoader />}><DevelopersPage /></Suspense>
+              <Redirect to="/" />
             </Route>
+            <Route path="/core">
+              <Redirect to="/" />
+            </Route>
+            <Route path="/control-plane">
+              <Redirect to="/" />
+            </Route>
+            <Route path="/portfolio-ops">
+              <Redirect to="/" />
+            </Route>
+            <Route path="/terra/platform">
+              <Redirect to="/platform" />
+            </Route>
+            <Route path="/terra/listings">
+              <ExternalRedirect to="/terra/" />
+            </Route>
+
+            {/* Catch-all */}
             <Route>
               <Redirect to="/" />
             </Route>
@@ -397,7 +359,6 @@ function App() {
         </WouterRouter>
       </LazyMotion>
       <Toaster />
-      <OnboardingWizard config={SZL_ONBOARDING_CONFIG} />
     </QueryClientProvider>
     </DemoModeProvider>
     </SandboxModeProvider>

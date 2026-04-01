@@ -1,30 +1,18 @@
 import { Link } from "wouter";
 
-const PLATFORMS_LINKS = [
+const SITE_LINKS = [
+  { label: "Platform", href: "/platform" },
+  { label: "Design Partners", href: "/design-partners" },
+  { label: "Trust", href: "/trust" },
+  { label: "Investors", href: "/investors" },
+];
+
+const PLATFORM_LINKS = [
   { label: "Lyte", href: "/lyte-command-center/", desc: "Business Observability" },
   { label: "Vessels", href: "/vessels/", desc: "Maritime Intelligence" },
   { label: "Aegis", href: "/firestorm/", desc: "Defense & Intelligence" },
   { label: "Terra", href: "/terra/", desc: "Real Estate Intelligence" },
-];
-
-const SERVICES_LINKS = [
   { label: "Carlota Jo", href: "/carlota-jo/", desc: "Private Advisory" },
-];
-
-const COMPANY_LINKS = [
-  { label: "Ecosystem", href: "/ecosystem" },
-  { label: "Ventures", href: "/ventures" },
-  { label: "Developers", href: "/developers" },
-  { label: "Trust", href: "/trust" },
-  { label: "Founder", href: "/founder" },
-  { label: "Investor Relations", href: "/investor-relations" },
-  { label: "Insights", href: "/insights" },
-  { label: "Contact", href: "/contact" },
-];
-
-const FOUNDER_LINKS = [
-  { label: "Stephen Lutar", href: "/stephen/" },
-  { label: "Case Studies", href: "/case-studies" },
 ];
 
 const SOCIAL_LINKS = [
@@ -52,7 +40,7 @@ export function SiteFooter() {
   return (
     <footer style={{ borderTop: "1px solid var(--color-szl-border)", background: "hsl(210,12%,4%)", padding: "4rem 0 2.5rem" }}>
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
               <div
@@ -65,14 +53,14 @@ export function SiteFooter() {
                 SZL Holdings
               </span>
             </div>
-            <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.875rem", lineHeight: 1.65, maxWidth: "17rem", marginBottom: "0.75rem" }}>
-              Premium command systems across observability, maritime, cybersecurity, AI, and high-trust operations. Five platforms. One compounding architecture.
+            <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.875rem", lineHeight: 1.65, maxWidth: "18rem", marginBottom: "0.75rem" }}>
+              Operational risk surfaces before it becomes a revenue problem. Lyte + Alloy is the starting point.
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
               Washington, D.C. · London · Singapore
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>
-              inquiries@szlholdings.com
+              hello@szlholdings.com
             </p>
             <div className="flex items-center gap-3 mt-5">
               {SOCIAL_LINKS.map((link) => (
@@ -84,12 +72,8 @@ export function SiteFooter() {
                   aria-label={link.label}
                   title={link.label}
                   style={{
-                    color: "var(--color-szl-text-faint)",
-                    transition: "color 0.2s ease",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "0.25rem",
+                    color: "var(--color-szl-text-faint)", transition: "color 0.2s ease",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0.25rem",
                   }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
@@ -102,67 +86,10 @@ export function SiteFooter() {
 
           <div>
             <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Platforms
+              Site
             </h4>
             <ul className="space-y-2">
-              {PLATFORMS_LINKS.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.2s ease", display: "flex", alignItems: "baseline", gap: "0.375rem" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Services
-            </h4>
-            <ul className="space-y-2 mb-8">
-              {SERVICES_LINKS.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.2s ease", display: "block" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Founder
-            </h4>
-            <ul className="space-y-2">
-              {FOUNDER_LINKS.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.2s ease", display: "block" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Company
-            </h4>
-            <ul className="space-y-2">
-              {COMPANY_LINKS.map((link) => (
+              {SITE_LINKS.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -179,14 +106,22 @@ export function SiteFooter() {
 
           <div>
             <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Contact
+              Platforms
             </h4>
-            <div className="space-y-2" style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.6 }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem" }}>inquiries@szlholdings.com</p>
-              <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>Washington, D.C.</p>
-              <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>London, UK</p>
-              <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>Singapore</p>
-            </div>
+            <ul className="space-y-2">
+              {PLATFORM_LINKS.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.2s ease", display: "block" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
@@ -207,7 +142,7 @@ export function SiteFooter() {
               href="/legal/terms"
               style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textDecoration: "none", transition: "color 0.18s ease" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
             >
               Terms
             </Link>
@@ -219,9 +154,6 @@ export function SiteFooter() {
             >
               Accessibility
             </Link>
-            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}>
-              Structured ventures for modern systems, services, and execution.
-            </p>
           </div>
         </div>
       </div>
