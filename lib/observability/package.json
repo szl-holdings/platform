@@ -12,10 +12,15 @@
     "react": ">=18"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": false }
+    "react": {
+      "optional": false
+    }
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/react": "catalog:"
+  },
+  "dependencies": {
+    "@sentry/react": "^10.47.0"
   }
 }

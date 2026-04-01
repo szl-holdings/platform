@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { configurePlausible } from "@workspace/analytics";
-import { initWebVitals } from "@workspace/observability/react";
+import { initSentry, initWebVitals } from "@workspace/observability/react";
 import { GraphQLProvider } from "@workspace/graphql-client/provider";
 import App from "./App";
 import "./index.css";
@@ -12,10 +12,11 @@ configurePlausible({
   trackLocalhost: false,
 });
 
+initSentry({ appSlug: "lyte", tracesSampleRate: 0.2 });
 initWebVitals("lyte", "/api/");
 
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary appName="Lyte">
+  <ErrorBoundary appName="Lyte" accentColor="#d4a054">
     <GraphQLProvider>
       <App />
     </GraphQLProvider>

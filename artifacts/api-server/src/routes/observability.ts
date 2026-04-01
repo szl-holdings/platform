@@ -198,6 +198,50 @@ router.post("/observability/vitals", (req, res) => {
   res.status(204).end();
 });
 
+router.post("/observability/client-errors", (req, res) => {
+  const body = req.body;
+  if (!body || !body.app) {
+    res.status(400).json({ error: "app is required" });
+    return;
+  }
+
+  serverTelemetry.recordBusinessEvent({
+    type: "client_error",
+    domain: body.app,
+    metadata: {
+      errorId: body.errorId,
+      message: String(body.message || "").slice(0, 500),
+      url: body.url,
+      timestamp: body.timestamp,
+    },
+  });
+
+  console.error(`[ClientError] ${body.app}: ${String(body.message || "").slice(0, 200)} (${body.errorId})`);
+  res.status(204).end();
+});
+
+router.post("/observability/error-feedback", (req, res) => {
+  const body = req.body;
+  if (!body || !body.app) {
+    res.status(400).json({ error: "app is required" });
+    return;
+  }
+
+  serverTelemetry.recordBusinessEvent({
+    type: "error_feedback",
+    domain: body.app,
+    metadata: {
+      errorId: body.errorId,
+      description: String(body.description || "").slice(0, 1000),
+      url: body.url,
+      timestamp: body.timestamp,
+    },
+  });
+
+  console.info(`[ErrorFeedback] ${body.app}: ${String(body.description || "").slice(0, 200)} (${body.errorId})`);
+  res.status(204).end();
+});
+
 router.get("/observability/alerts", authMiddleware(), requireRole("ops", "admin"), (req, res) => {
   const includeResolved = req.query["includeResolved"] === "true";
   const alerts = includeResolved
