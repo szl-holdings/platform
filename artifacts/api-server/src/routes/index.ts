@@ -74,6 +74,7 @@ import demoRequestsRouter from "./demo-requests";
 import contactRouter from "./contact";
 import aegisSocLiveRouter from "./firestorm-live";
 import publicStatusRouter from "./public-status";
+import { feedbackRouter } from "./feedback";
 
 const router: IRouter = Router();
 
@@ -271,5 +272,8 @@ router.use(exportsRouter);
 router.use("/public", publicStatusRouter);
 router.use("/admin/status", writeLimiter);
 router.use("/admin/status", publicStatusRouter);
+
+router.use("/feedback", writeLimiter);
+router.use(feedbackRouter);
 
 export default router;

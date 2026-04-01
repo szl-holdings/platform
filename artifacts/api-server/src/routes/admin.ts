@@ -71,6 +71,7 @@ const VALID_TABLE_NAMES = new Set([
   "readiness_milestones", "readiness_risks", "readiness_alerts",
   "alloy_chat_kb_documents", "alloy_chat_advisories", "alloy_chat_comparisons",
   "azure_tenants", "dataverse_connections",
+  "feedback", "feedback_survey_prefs",
 ]);
 
 const SEED_TABLE_EXPECTATIONS = [

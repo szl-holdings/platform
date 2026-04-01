@@ -54,3 +54,4 @@ export * from "./documents";
 export * from "./scim";
 export * from "./push_tokens";
 export * from "./export_jobs";
+export * from "./feedback";
