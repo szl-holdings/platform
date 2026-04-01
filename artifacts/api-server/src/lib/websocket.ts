@@ -19,7 +19,7 @@ interface SubscribedClient {
   platformRole: string | null;
 }
 
-const MAX_WS_CLIENTS = 500;
+const MAX_WS_CLIENTS = 100;
 const clients = new Map<string, SubscribedClient>();
 let wss: WebSocketServer | null = null;
 
