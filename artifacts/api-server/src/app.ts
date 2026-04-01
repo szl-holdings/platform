@@ -30,12 +30,43 @@ const __dirname = dirname(__filename);
 app.use(correlationMiddleware);
 
 app.use(helmet({
-  contentSecurityPolicy: isProduction ? undefined : false,
+  contentSecurityPolicy: isProduction ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https:"],
+      fontSrc: ["'self'", "data:", "https:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      upgradeInsecureRequests: [],
+    },
+  } : false,
   crossOriginEmbedderPolicy: false,
-  hsts: isProduction ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+  crossOriginOpenerPolicy: { policy: "same-origin" },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  hsts: isProduction ? { maxAge: 63072000, includeSubDomains: true, preload: true } : false,
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   frameguard: { action: "sameorigin" },
+  dnsPrefetchControl: { allow: false },
+  permittedCrossDomainPolicies: { permittedPolicies: "none" },
 }));
+
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()");
+  res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
+  if (isProduction) {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.setHeader("Surrogate-Control", "no-store");
+  }
+  next();
+});
 
 const rawCorsOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(",").map(o => o.trim())
