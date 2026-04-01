@@ -218,7 +218,7 @@ function ModuleSection({
     <div className="pt-1">
       <button
         onClick={onToggle}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-blue-400/40 hover:text-blue-400/70 transition-all w-full"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-blue-400/70 hover:text-blue-300 transition-all w-full"
       >
         <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", expanded && "rotate-90")} />
         {title}
@@ -233,7 +233,7 @@ function ModuleSection({
                   "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
                   isActive
                     ? "bg-blue-500/10 text-blue-300"
-                    : "text-blue-400/40 hover:text-blue-200 hover:bg-blue-500/5"
+                    : "text-blue-400/80 hover:text-blue-200 hover:bg-blue-500/5"
                 )}>
                   {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3.5 bg-blue-400 rounded-r-full" />}
                   <Icon className="w-3 h-3 shrink-0" />
@@ -271,17 +271,17 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navItemColors: Record<Module, { active: string; inactive: string; indicator: string }> = {
     security: {
       active: "bg-red-500/10 text-red-300",
-      inactive: "text-red-400/50 hover:text-red-200 hover:bg-red-500/5",
+      inactive: "text-red-400/80 hover:text-red-200 hover:bg-red-500/5",
       indicator: "bg-red-400",
     },
     operations: {
       active: "bg-blue-500/10 text-blue-300",
-      inactive: "text-blue-400/50 hover:text-blue-200 hover:bg-blue-500/5",
+      inactive: "text-blue-400/80 hover:text-blue-200 hover:bg-blue-500/5",
       indicator: "bg-blue-400",
     },
     intelligence: {
       active: "bg-violet-500/10 text-violet-300",
-      inactive: "text-violet-400/50 hover:text-violet-200 hover:bg-violet-500/5",
+      inactive: "text-violet-400/80 hover:text-violet-200 hover:bg-violet-500/5",
       indicator: "bg-violet-400",
     },
   };
@@ -307,12 +307,12 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   return (
     <>
-      {open && <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onClose} />}
+      {open && <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onClose} aria-hidden="true" />}
       <aside className={cn(
         "bg-[#0A0D14]/98 border-r border-white/5 flex flex-col h-screen sticky top-0 z-30 transition-transform duration-200",
         "fixed md:relative inset-y-0 left-0 w-60",
         open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-      )}>
+      )} role="navigation" aria-label="Sidebar navigation">
         {/* Header */}
         <div className="px-4 py-4 border-b border-white/5">
           <div className="flex items-center gap-2.5">
@@ -344,7 +344,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
                     ? id === "security" ? "bg-red-500/15 text-red-300 border border-red-500/20"
                       : id === "operations" ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
                       : "bg-violet-500/15 text-violet-300 border border-violet-500/20"
-                    : "text-white/25 hover:text-white/50 hover:bg-white/5"
+                    : "text-white/60 hover:text-white/80 hover:bg-white/5"
                 )}
               >
                 <Icon className="w-3 h-3" />
@@ -370,7 +370,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
               <div className="pt-1">
                 <button
                   onClick={() => setComplianceExpanded(!complianceExpanded)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-red-400/40 hover:text-red-400/70 transition-all w-full"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-red-400/70 hover:text-red-300 transition-all w-full"
                 >
                   <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", complianceExpanded && "rotate-90")} />
                   Compliance & Readiness
@@ -384,7 +384,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
                         <Link key={path} href={path}>
                           <div className={cn(
                             "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                            isActive ? "bg-red-500/10 text-red-300" : "text-red-400/40 hover:text-red-200 hover:bg-red-500/5"
+                            isActive ? "bg-red-500/10 text-red-300" : "text-red-400/80 hover:text-red-200 hover:bg-red-500/5"
                           )}>
                             <Icon className="w-3 h-3 shrink-0" />
                             {label}
@@ -438,7 +438,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
               <div className="pt-1">
                 <button
                   onClick={() => setCortexExpanded(!cortexExpanded)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-violet-400/40 hover:text-violet-400/70 transition-all w-full"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-violet-400/70 hover:text-violet-300 transition-all w-full"
                 >
                   <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", cortexExpanded && "rotate-90")} />
                   Agentic Cortex
@@ -451,7 +451,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
                         <Link key={path} href={path}>
                           <div className={cn(
                             "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                            isActive ? "bg-violet-500/10 text-violet-300" : "text-violet-400/40 hover:text-violet-200 hover:bg-violet-500/5"
+                            isActive ? "bg-violet-500/10 text-violet-300" : "text-violet-400/80 hover:text-violet-200 hover:bg-violet-500/5"
                           )}>
                             <Icon className="w-3 h-3 shrink-0" />
                             {label}
@@ -562,7 +562,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         {/* Footer */}
         <div className="px-4 py-3 border-t border-white/5 space-y-2">
           <UserButton showName className="w-full" />
-          <div className="flex items-center gap-2 text-[10px] text-white/20">
+          <div className="flex items-center gap-2 text-[10px] text-white/50">
             <Hexagon className="w-3 h-3" />
             <span className="font-mono">SZL Holdings · Aegis</span>
           </div>
@@ -735,13 +735,13 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <div className="flex-1 flex flex-col overflow-auto min-w-0">
             <div className="h-10 flex items-center px-3 border-b border-white/5 bg-[#0A0D14]/80 md:hidden shrink-0">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-blue-500/10 text-blue-400/50 hover:text-blue-300 transition-colors" aria-label="Toggle navigation">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-blue-500/10 text-blue-400/80 hover:text-blue-300 transition-colors" aria-label={sidebarOpen ? "Close navigation" : "Open navigation"} aria-expanded={sidebarOpen}>
                 <Menu className="w-4 h-4" />
               </button>
-              <span className="text-[10px] font-mono text-blue-400/40 ml-2">Aegis — Unified Defense & Intelligence</span>
+              <span className="text-[10px] font-mono text-blue-400/80 ml-2">Aegis — Unified Defense & Intelligence</span>
               <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
             </div>
-            <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+            <main id="main-content" role="main" className="flex-1 overflow-auto" tabIndex={-1}>
               <AppRouter />
             </main>
           </div>

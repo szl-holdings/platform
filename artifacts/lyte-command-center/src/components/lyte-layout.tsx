@@ -112,13 +112,15 @@ export function LyteLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-full overflow-hidden">
-      {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-10 md:hidden" onClick={() => setSidebarOpen(false)} />}
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
+      {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-10 md:hidden" onClick={() => setSidebarOpen(false)} aria-hidden="true" />}
 
       <aside className={cn(
         "flex flex-col shrink-0 relative z-20 transition-transform duration-200",
         "fixed md:relative inset-y-0 left-0 w-48",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-      )} style={{ background: BG.sidebar, borderRight: `1px solid ${BORDER.subtle}` }}>
+      )} style={{ background: BG.sidebar, borderRight: `1px solid ${BORDER.subtle}` }}
+        role="navigation" aria-label="Sidebar navigation">
 
         <div className="h-12 flex items-center px-3" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
           <div className="flex items-center gap-2">
@@ -207,12 +209,12 @@ export function LyteLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-10 flex items-center justify-between px-3 md:px-4 shrink-0 z-10" style={{ borderBottom: `1px solid ${BORDER.subtle}`, background: BG.header, backdropFilter: "blur(8px)" }}>
+        <header className="h-10 flex items-center justify-between px-3 md:px-4 shrink-0 z-10" role="banner" style={{ borderBottom: `1px solid ${BORDER.subtle}`, background: BG.header, backdropFilter: "blur(8px)" }}>
           <div className="flex items-center gap-2.5 text-[10px] font-mono">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1 rounded hover:bg-white/5 mr-1" style={{ color: TEXT.tertiary }} aria-label="Toggle sidebar">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1 rounded hover:bg-white/5 mr-1" style={{ color: TEXT.secondary }} aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"} aria-expanded={sidebarOpen}>
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            <span className="w-1 h-1 rounded-full animate-pulse hidden sm:block" style={{ background: "#c45a4a" }} />
+            <span className="w-1 h-1 rounded-full animate-pulse hidden sm:block" style={{ background: "#c45a4a" }} aria-hidden="true" />
             <span className="hidden sm:block" style={{ color: "#c45a4a" }}>5 Urgent</span>
             <span className="hidden sm:block" style={{ color: TEXT.muted }}>·</span>
             <span style={{ color: "#c8953c" }}>8 Gaps</span>
@@ -221,9 +223,9 @@ export function LyteLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex items-center gap-2">
             <RealtimeStatusIndicator status={wsStatus} compact />
-            <button className="relative p-1 rounded hover:bg-white/5 transition-colors" style={{ color: TEXT.tertiary }}>
+            <button className="relative p-1 rounded hover:bg-white/5 transition-colors" style={{ color: TEXT.secondary }} aria-label="Notifications">
               <Bell className="w-3.5 h-3.5" />
-              <span className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full animate-pulse" style={{ background: "#d4a054" }} />
+              <span className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full animate-pulse" style={{ background: "#d4a054" }} aria-hidden="true" />
             </button>
             <div className="h-4 w-px" style={{ background: BORDER.subtle }} />
             <div className="flex items-center gap-2">
@@ -235,7 +237,7 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto" style={{ background: BG.main }}>
+        <main id="main-content" className="flex-1 overflow-auto" role="main" style={{ background: BG.main }}>
           <SectionErrorBoundary sectionName="Lyte">
             {children}
           </SectionErrorBoundary>

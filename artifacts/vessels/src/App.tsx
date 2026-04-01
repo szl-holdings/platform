@@ -188,7 +188,7 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
   return (
     <>
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onMobileClose} />
+        <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onMobileClose} aria-hidden="true" />
       )}
     <aside
       className={cn(
@@ -198,6 +198,8 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
         "md:w-14 md:hover:w-52",
         expanded && "md:w-52",
       )}
+      role="navigation"
+      aria-label="Sidebar navigation"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setLegacyExpanded(false); }}
     >
@@ -227,7 +229,7 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
                   expanded ? "gap-2.5 px-3 py-2" : "justify-center px-0 py-2.5",
                   isActive
                     ? "bg-sky-500/10 text-sky-300"
-                    : "text-sky-400/50 hover:text-sky-200 hover:bg-sky-500/5"
+                    : "text-sky-400 hover:text-sky-200 hover:bg-sky-500/5"
                 )}
                 title={!expanded ? label : undefined}
               >
@@ -250,7 +252,7 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
                 <Link key={path} href={path}>
                   <div className={cn(
                     "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
-                    isActive ? "bg-sky-500/10 text-sky-300" : "text-sky-400/30 hover:text-sky-200 hover:bg-sky-500/5"
+                    isActive ? "bg-sky-500/10 text-sky-300" : "text-sky-400 hover:text-sky-200 hover:bg-sky-500/5"
                   )}>
                     <Icon className="w-3.5 h-3.5 shrink-0" />
                     {label}
@@ -280,7 +282,7 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
                         "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
                         isActive
                           ? "bg-sky-500/10 text-sky-300"
-                          : "text-sky-400/30 hover:text-sky-200 hover:bg-sky-500/5"
+                          : "text-sky-400 hover:text-sky-200 hover:bg-sky-500/5"
                       )}>
                         <Icon className="w-3 h-3 shrink-0" />
                         {label}
@@ -465,10 +467,10 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
               <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-sky-500/10 text-sky-400/50 hover:text-sky-300 transition-colors" aria-label="Toggle navigation">
                 <Menu className="w-4 h-4" />
               </button>
-              <span className="text-[10px] font-mono text-sky-400/30 ml-2 uppercase tracking-wider">Vessels Maritime Intelligence</span>
+              <span className="text-[10px] font-mono text-sky-400/80 ml-2 uppercase tracking-wider">Vessels Maritime Intelligence</span>
               <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
             </div>
-            <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
+            <main id="main-content" role="main" className="flex-1 overflow-auto" tabIndex={-1}>
               <DashboardRouter />
             </main>
           </div>

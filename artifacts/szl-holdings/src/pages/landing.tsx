@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ background: "hsl(210,12%,5%)" }}>
       <SiteNav />
-      <main>
+      <main id="main-content" role="main">
         <Hero />
         <FeaturedPlatforms />
         <EcosystemLogic />

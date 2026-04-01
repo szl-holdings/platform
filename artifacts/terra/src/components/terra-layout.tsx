@@ -62,17 +62,20 @@ export function TerraLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-full overflow-hidden">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/70 z-10 md:hidden"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
       <aside className={cn(
         "border-r flex flex-col shrink-0 z-20 transition-transform duration-200",
         "fixed md:relative inset-y-0 left-0 w-52",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-      )} style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,14,0.98)" }}>
+      )} style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,14,0.98)" }}
+        role="navigation" aria-label="Sidebar navigation">
 
         <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
           <div className="flex items-center gap-2.5">
@@ -90,7 +93,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
           <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-2.5 overflow-y-auto">
             {NAV_SECTIONS.map((section) => (
               <div key={section.title}>
-                <p className="text-[9px] font-semibold uppercase tracking-widest mb-1 px-3" style={{ color: "rgba(255,255,255,0.2)" }}>{section.title}</p>
+                <p className="text-[9px] font-semibold uppercase tracking-widest mb-1 px-3" style={{ color: "rgba(255,255,255,0.45)" }}>{section.title}</p>
                 <div className="flex flex-col gap-0.5">
                   {section.items.map((item) => {
                     const isActive = item.href === "/dashboard"
@@ -101,7 +104,7 @@ export function TerraLayout({ children }: { children: ReactNode }) {
                         "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 relative",
                         isActive
                           ? "text-white"
-                          : "text-slate-500 hover:text-slate-200 hover:bg-white/[0.04]"
+                          : "text-slate-400 hover:text-slate-100 hover:bg-white/[0.04]"
                       )} style={{
                         background: isActive ? "rgba(255,255,255,0.06)" : undefined
                       }}>
@@ -144,28 +147,30 @@ export function TerraLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-11 border-b flex items-center justify-between px-4 shrink-0 z-10" style={{ borderColor: "rgba(255,255,255,0.04)", background: "rgba(8,10,14,0.92)", backdropFilter: "blur(8px)" }}>
+        <header className="h-11 border-b flex items-center justify-between px-4 shrink-0 z-10" role="banner" style={{ borderColor: "rgba(255,255,255,0.04)", background: "rgba(8,10,14,0.92)", backdropFilter: "blur(8px)" }}>
           <div className="flex items-center gap-3 text-xs">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors"
-              style={{ color: "rgba(255,255,255,0.4)" }}
-              aria-label="Toggle sidebar"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              aria-expanded={sidebarOpen}
+              aria-controls="terra-sidebar"
             >
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            <span className="w-1.5 h-1.5 rounded-full hidden sm:block" style={{ background: "rgba(45,106,79,0.6)" }} />
-            <span className="hidden sm:block font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Terra · Property Intelligence</span>
+            <span className="w-1.5 h-1.5 rounded-full hidden sm:block" style={{ background: "rgba(45,106,79,0.6)" }} aria-hidden="true" />
+            <span className="hidden sm:block font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>Terra · Property Intelligence</span>
           </div>
           <div className="flex items-center gap-3">
             <RealtimeStatusIndicator status={wsStatus} compact />
-            <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.35)" }}>
+            <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.6)" }} aria-label="Notifications">
               <Bell className="w-3.5 h-3.5" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#f59e0b" }} />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#f59e0b" }} aria-hidden="true" />
             </button>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-5" style={{ background: "#0a0c10" }}>
+        <main id="main-content" className="flex-1 overflow-auto p-4 md:p-5" role="main" style={{ background: "#0a0c10" }}>
           <SectionErrorBoundary sectionName="Terra">
             {children}
           </SectionErrorBoundary>

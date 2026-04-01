@@ -152,6 +152,8 @@ function AppGridIcon({ app, isCurrent }: { app: EcosystemApp; isCurrent: boolean
   return (
     <a
       href={app.path}
+      aria-label={`${app.name}${isCurrent ? " (current)" : ""}`}
+      aria-current={isCurrent ? "page" : undefined}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -1072,6 +1074,8 @@ export function EcosystemNav({
   return (
     <>
       <nav
+        role="banner"
+        aria-label="Global navigation"
         style={{
           position: "sticky",
           top: 0,
@@ -1090,6 +1094,7 @@ export function EcosystemNav({
       >
         <a
           href="/"
+          aria-label="SZL Holdings — home"
           style={{
             display: "flex",
             alignItems: "center",
@@ -1183,6 +1188,7 @@ export function EcosystemNav({
           </div>
           <button
             onClick={() => setShowSearch(true)}
+            aria-label="Search (Ctrl+K)"
             style={{
               display: "flex",
               alignItems: "center",
@@ -1231,6 +1237,9 @@ export function EcosystemNav({
                 setShowNotifications(!showNotifications);
                 setShowAppSwitcher(false);
               }}
+              aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+              aria-expanded={showNotifications}
+              aria-haspopup="dialog"
               style={{
                 position: "relative",
                 width: "34px",
@@ -1295,6 +1304,9 @@ export function EcosystemNav({
                 setShowAppSwitcher(!showAppSwitcher);
                 setShowNotifications(false);
               }}
+              aria-label="Switch application"
+              aria-expanded={showAppSwitcher}
+              aria-haspopup="dialog"
               title="Switch app"
               style={{
                 width: "34px",

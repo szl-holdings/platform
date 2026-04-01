@@ -202,6 +202,32 @@ h1, h2, h3, h4, h5, h6 {
   background: hsl(142, 64%, 52%);
 }
 
+/* ─── Accessibility: Skip to content link ─── */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.625rem 1.25rem;
+  background: hsl(38, 55%, 60%);
+  color: hsl(214, 16%, 4%);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.skip-to-content:focus {
+  top: 1rem;
+}
+
+/* ─── Accessibility: Focus indicators ─── */
+:focus-visible {
+  outline: 2px solid hsl(38, 55%, 60%);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ─── Glassmorphic nav surface ─── */
 .szl-glass {
   background: hsla(214, 14%, 5%, 0.85);

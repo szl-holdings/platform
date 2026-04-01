@@ -33,6 +33,7 @@ const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboa
 const PowerBiConfigPage = lazy(() => import("@/pages/powerbi-config"));
 const ScimProvisioningPage = lazy(() => import("@/pages/scim-provisioning"));
 const DevelopersPage = lazy(() => import("@/pages/developers"));
+const AccessibilityPage = lazy(() => import("@/pages/accessibility"));
 
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -304,6 +305,9 @@ function App() {
             <Route path="/legal/terms">
               <Suspense fallback={<PageLoader />}><LegalTermsPage /></Suspense>
             </Route>
+            <Route path="/accessibility">
+              <Suspense fallback={<PageLoader />}><AccessibilityPage /></Suspense>
+            </Route>
             <Route path="/architecture">
               <Suspense fallback={<PageLoader />}><PlatformArchitecturePage /></Suspense>
             </Route>
@@ -321,18 +325,6 @@ function App() {
             </Route>
             <Route path="/developers/:section">
               <Suspense fallback={<PageLoader />}><DevelopersPage /></Suspense>
-            </Route>
-            <Route path="/admin/azure-onboarding">
-              <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantOnboardingPage /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/azure-tenants">
-              <RequireAuth><Suspense fallback={<PageLoader />}><AzureTenantDashboardPage /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/powerbi">
-              <RequireAuth><Suspense fallback={<PageLoader />}><PowerBiConfigPage /></Suspense></RequireAuth>
-            </Route>
-            <Route path="/admin/scim">
-              <RequireAuth><Suspense fallback={<PageLoader />}><ScimProvisioningPage /></Suspense></RequireAuth>
             </Route>
             <Route>
               <Redirect to="/" />

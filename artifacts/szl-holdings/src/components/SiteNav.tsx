@@ -51,6 +51,8 @@ export function SiteNav() {
   };
 
   return (
+    <>
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
     <m.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -236,5 +238,6 @@ export function SiteNav() {
         )}
       </AnimatePresence>
     </m.nav>
+    </>
   );
 }
