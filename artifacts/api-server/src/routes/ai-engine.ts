@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { logger } from "../lib/logger";
+import { authMiddleware } from "../middlewares/auth";
 import {
   routeModel,
   getRouteConfig,
@@ -251,7 +252,13 @@ router.post("/ai/retrieve", async (req, res) => {
     if (!query) { res.status(400).json({ error: "query required" }); return; }
 
     const k = Math.min(topK || 12, 50);
-    const result = alloyRetrieval.retrieveHybrid(query, null, k);
+    let result;
+    if (method === "keyword") {
+      const chunks = alloyRetrieval.retrieveKeyword(query, k);
+      result = { chunks, query, method: "keyword" as const, totalIndexed: alloyRetrieval.indexedCount, latencyMs: 0 };
+    } else {
+      result = alloyRetrieval.retrieveHybrid(query, null, k);
+    }
     const evidence = alloyRetrieval.toEvidenceItems(result.chunks);
 
     res.json({
@@ -301,7 +308,7 @@ router.post("/ai/tools/preview", async (req, res) => {
   }
 });
 
-router.post("/ai/tools/execute", async (req, res) => {
+router.post("/ai/tools/execute", authMiddleware({ required: true }), async (req, res) => {
   try {
     const { toolName, arguments: args, calledBy } = req.body as {
       toolName?: string;
@@ -350,7 +357,7 @@ router.get("/ai/tools", (_req, res) => {
   });
 });
 
-router.post("/ai/evals/run", async (req, res) => {
+router.post("/ai/evals/run", authMiddleware({ required: true }), async (req, res) => {
   try {
     const { categories, testIds } = req.body as { categories?: string[]; testIds?: string[] };
 
@@ -396,7 +403,7 @@ router.get("/ai/evals/golden-set", (_req, res) => {
   });
 });
 
-router.post("/ai/retrieval/ingest", async (req, res) => {
+router.post("/ai/retrieval/ingest", authMiddleware({ required: true }), async (req, res) => {
   try {
     const { content, source, sourceType, metadata } = req.body as {
       content?: string;

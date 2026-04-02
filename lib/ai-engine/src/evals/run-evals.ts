@@ -135,7 +135,7 @@ export async function runEvals(
     totalTests: results.length,
     passed,
     failed: results.length - passed,
-    passRate: `${((passed / results.length) * 100).toFixed(1)}%`,
+    passRate: results.length > 0 ? `${((passed / results.length) * 100).toFixed(1)}%` : "0.0%",
     byCategory,
     results,
     avgLatencyMs: results.length > 0 ? Math.round(totalLatency / results.length) : 0,

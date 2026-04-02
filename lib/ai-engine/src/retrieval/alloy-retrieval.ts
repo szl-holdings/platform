@@ -43,6 +43,11 @@ function cosineSimilarity(a: number[], b: number[]): number {
 
 export class AlloyRetrievalEngine {
   private chunks: RetrievalChunk[] = [];
+  private static readonly MAX_CHUNKS = 10000;
+
+  get indexedCount(): number {
+    return this.chunks.length;
+  }
 
   ingest(content: string, source: string, sourceType: RetrievalChunk["sourceType"], metadata?: Record<string, unknown>): RetrievalChunk[] {
     const paragraphs = content.split(/\n{2,}/);
@@ -77,6 +82,9 @@ export class AlloyRetrievalEngine {
     }));
 
     this.chunks.push(...newChunks);
+    if (this.chunks.length > AlloyRetrievalEngine.MAX_CHUNKS) {
+      this.chunks.splice(0, this.chunks.length - AlloyRetrievalEngine.MAX_CHUNKS);
+    }
     return newChunks;
   }
 
