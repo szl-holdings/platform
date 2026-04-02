@@ -82,6 +82,7 @@ import { feedbackRouter } from "./feedback";
 import aiEngineRouter from "./ai-engine";
 import analyticsRouter from "./analytics";
 import invitationsRouter from "./invitations";
+import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../middlewares/idempotency";
 
 const router: IRouter = Router();
 
@@ -105,6 +106,11 @@ router.use((req, _res, next) => {
 router.use("/auth", _authLimiter);
 
 router.use("/billing", _writeLimiter);
+router.use("/billing", optionalIdempotencyMiddleware);
+router.use("/billing/checkout", idempotencyMiddleware);
+router.use("/billing/terra/subscribe", idempotencyMiddleware);
+router.use("/billing/cancel-subscription", idempotencyMiddleware);
+router.use("/billing/update-subscription", idempotencyMiddleware);
 router.use("/connectors", _writeLimiter);
 router.use("/notifications", _writeLimiter);
 router.use("/feature-flags", _writeLimiter);
@@ -127,6 +133,7 @@ router.use("/contact", _writeLimiter);
 router.use(healthRouter);
 router.use(healthIntegrationsRouter);
 router.use("/webhooks", _writeLimiter);
+router.use("/webhooks", optionalIdempotencyMiddleware);
 router.use(webhooksRouter);
 router.use(projectsRouter);
 router.use(servicesRouter);
@@ -221,6 +228,9 @@ router.use("/doctrine", _readLimiter);
 router.use(doctrineRouter);
 
 router.use("/alloy", _readLimiter);
+router.use("/alloy/ingest", optionalIdempotencyMiddleware);
+router.use("/alloy/workflows", _writeLimiter);
+router.use("/alloy/workflows", optionalIdempotencyMiddleware);
 router.use(alloyRouter);
 
 router.use("/capital", _writeLimiter);
@@ -289,6 +299,7 @@ router.use("/feedback", writeLimiter);
 router.use(feedbackRouter);
 
 router.use("/ai", _readLimiter);
+router.use("/ai/tools/execute", idempotencyMiddleware);
 router.use(aiEngineRouter);
 
 router.use("/analytics", _writeLimiter);

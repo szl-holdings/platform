@@ -497,4 +497,138 @@ router.get("/health/external-feeds/refresh", async (_req, res) => {
   }
 });
 
+
+// ─── AI Provider Health ──────────────────────────────────────────────────────
+
+router.get("/health/ai", async (_req, res) => {
+  try {
+    const { getRouteConfig, alloyRetrieval } = await import("@workspace/ai-engine");
+    const config = getRouteConfig();
+    const stats = alloyRetrieval.getStats();
+
+    const openaiKey = process.env.OPENAI_API_KEY;
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const hfToken = process.env.HF_TOKEN ?? process.env.HUGGINGFACE_API_KEY;
+    const executionMode = process.env.AI_EXECUTION_MODE ?? "propose_only";
+
+    const providers: Record<string, { status: string; latencyMs?: number; details?: unknown }> = {};
+
+    if (openaiKey) {
+      const start = Date.now();
+      try {
+        const resp = await Promise.race([
+          fetch("https://api.openai.com/v1/models", {
+            headers: { Authorization: `Bearer ${openaiKey}` },
+            signal: AbortSignal.timeout(5000),
+          }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
+        ]) as Response;
+        providers["openai"] = { status: resp.ok ? "healthy" : "degraded", latencyMs: Date.now() - start };
+      } catch {
+        providers["openai"] = { status: "unreachable", latencyMs: Date.now() - start };
+      }
+    } else {
+      providers["openai"] = { status: "unconfigured" };
+    }
+
+    if (anthropicKey) {
+      providers["anthropic"] = { status: "configured", details: { note: "Token present" } };
+    } else {
+      providers["anthropic"] = { status: "unconfigured" };
+    }
+
+    if (geminiKey) {
+      providers["gemini"] = { status: "configured", details: { note: "Token present" } };
+    } else {
+      providers["gemini"] = { status: "unconfigured" };
+    }
+
+    if (hfToken) {
+      providers["huggingface"] = { status: "configured", details: { note: "Token present" } };
+    } else {
+      providers["huggingface"] = { status: "unconfigured" };
+    }
+
+    const anyHealthy = Object.values(providers).some(p => p.status === "healthy" || p.status === "configured");
+
+    res.json({
+      status: anyHealthy ? "operational" : "degraded",
+      degraded: !anyHealthy,
+      providers,
+      executionMode,
+      retrieval: {
+        indexedChunks: stats.totalChunks,
+        withEmbeddings: stats.withEmbeddings,
+        status: stats.totalChunks > 0 ? "indexed" : "empty",
+      },
+      models: config.models,
+      routes: Object.keys(config.routes),
+      checkedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err }, "AI health check failed");
+    res.status(500).json({ status: "error", error: "AI health check failed" });
+  }
+});
+
+// ─── WebSocket Health ────────────────────────────────────────────────────────
+
+router.get("/health/websocket", async (_req, res) => {
+  try {
+    const { getWsStats } = await import("../lib/websocket.js");
+    const stats = getWsStats();
+    res.json({
+      status: "operational",
+      connections: stats.connections ?? 0,
+      channels: stats.channels ?? 0,
+      messagesPerMinute: stats.messagesPerMinute ?? 0,
+      uptime: process.uptime(),
+      checkedAt: new Date().toISOString(),
+    });
+  } catch {
+    res.json({
+      status: "operational",
+      connections: 0,
+      channels: 0,
+      note: "WebSocket stats unavailable — server running",
+      checkedAt: new Date().toISOString(),
+    });
+  }
+});
+
+// ─── Billing Provider Health ─────────────────────────────────────────────────
+
+router.get("/health/billing", async (_req, res) => {
+  try {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      res.json({
+        status: "unconfigured",
+        provider: "stripe",
+        mode: "mock",
+        message: "Stripe not configured — billing is in mock mode",
+        checkedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const { services } = await import("@workspace/services");
+    const { result, latencyMs, error } = await checkWithTimeout(() => services.stripe.testConnection());
+
+    res.json({
+      status: result?.connected ? "healthy" : "degraded",
+      provider: "stripe",
+      mode: result?.mode ?? "unknown",
+      accountId: result?.accountId ?? null,
+      latencyMs,
+      error: error ?? null,
+      checkedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    logger.error({ err }, "Billing health check failed");
+    res.status(500).json({ status: "error", error: "Billing health check failed" });
+  }
+});
+
 export default router;

@@ -5,6 +5,98 @@
  * Platform API for the SZL Holdings DreamStack suite
  * OpenAPI spec version: 0.2.0
  */
+export type AlloyDecisionEvidenceRefsItem = {
+  refId?: string;
+  source?: string;
+  sourceType?: string;
+  content?: string;
+  relevanceScore?: number;
+  timestamp?: string | null;
+  objectId?: string | null;
+};
+
+export type AlloyDecisionRiskLevel =
+  (typeof AlloyDecisionRiskLevel)[keyof typeof AlloyDecisionRiskLevel];
+
+export const AlloyDecisionRiskLevel = {
+  P0: 'P0',
+  P1: 'P1',
+  P2: 'P2',
+  P3: 'P3',
+  P4: 'P4',
+} as const;
+
+export type AlloyDecisionSchemaVersion =
+  (typeof AlloyDecisionSchemaVersion)[keyof typeof AlloyDecisionSchemaVersion];
+
+export const AlloyDecisionSchemaVersion = {
+  '200': '2.0.0',
+} as const;
+
+export type AlloyDecisionStatus = (typeof AlloyDecisionStatus)[keyof typeof AlloyDecisionStatus];
+
+export const AlloyDecisionStatus = {
+  proposed: 'proposed',
+  pending_approval: 'pending_approval',
+  approved: 'approved',
+  rejected: 'rejected',
+  executed: 'executed',
+  expired: 'expired',
+} as const;
+
+export type AlloyDecisionExecutionOutcome =
+  | (typeof AlloyDecisionExecutionOutcome)[keyof typeof AlloyDecisionExecutionOutcome]
+  | null;
+
+export const AlloyDecisionExecutionOutcome = {
+  pending: 'pending',
+  executed: 'executed',
+  failed: 'failed',
+  rejected: 'rejected',
+  expired: 'expired',
+} as const;
+
+/**
+ * Schema-validated Alloy decision object (v2.0.0)
+ */
+export interface AlloyDecision {
+  decisionId: string;
+  workflowId?: string | null;
+  signalIds?: string[];
+  recommendedAction: string;
+  rationaleSummary: string;
+  evidenceRefs: AlloyDecisionEvidenceRefsItem[];
+  /**
+   * @minimum 0
+   * @maximum 1
+   */
+  confidence: number;
+  ownerSuggestion?: string | null;
+  approvalRequired: boolean;
+  riskLevel: AlloyDecisionRiskLevel;
+  fallbackPlan?: string | null;
+  modelRoute: string;
+  schemaVersion: AlloyDecisionSchemaVersion;
+  createdAt: string;
+  status: AlloyDecisionStatus;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  rejectedBy?: string | null;
+  rejectedAt?: string | null;
+  rejectionReason?: string | null;
+  executedAt?: string | null;
+  executionOutcome?: AlloyDecisionExecutionOutcome;
+  rawInput?: string | null;
+  rawOutput?: string | null;
+}
+
+export interface ApprovalPolicy {
+  requiresApproval?: boolean;
+  approverRole?: string;
+  sla?: string;
+  autoExpireHours?: number;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -738,6 +830,310 @@ export interface ReadinessAssessment {
   overallScore?: string | null;
   assessorName?: string | null;
 }
+
+export type DetailedHealthStatusStatus =
+  (typeof DetailedHealthStatusStatus)[keyof typeof DetailedHealthStatusStatus];
+
+export const DetailedHealthStatusStatus = {
+  healthy: 'healthy',
+  warning: 'warning',
+  degraded: 'degraded',
+} as const;
+
+export type DetailedHealthStatusChecks = {
+  [key: string]: {
+    status?: string;
+    latencyMs?: number | null;
+    details?: string | null;
+  };
+};
+
+export type DetailedHealthStatusMemory = {
+  heapUsedMb?: number;
+  heapTotalMb?: number;
+  rssMb?: number;
+};
+
+export interface DetailedHealthStatus {
+  status: DetailedHealthStatusStatus;
+  timestamp: string;
+  uptime: number;
+  version?: string;
+  environment?: string;
+  checks: DetailedHealthStatusChecks;
+  memory?: DetailedHealthStatusMemory;
+}
+
+export type AlertRecordSeverity = (typeof AlertRecordSeverity)[keyof typeof AlertRecordSeverity];
+
+export const AlertRecordSeverity = {
+  warning: 'warning',
+  critical: 'critical',
+} as const;
+
+export type AlertRecordMetadata = { [key: string]: unknown } | null;
+
+export interface AlertRecord {
+  id: string;
+  type: string;
+  message: string;
+  severity: AlertRecordSeverity;
+  triggeredAt: number;
+  resolvedAt?: number | null;
+  resolved: boolean;
+  metadata?: AlertRecordMetadata;
+}
+
+export type BusinessEventCountsEventCounts = { [key: string]: number };
+
+export type BusinessEventCountsEventsByDomain = { [key: string]: number };
+
+export interface BusinessEventCounts {
+  timestamp: string;
+  windowMs: number;
+  eventCounts: BusinessEventCountsEventCounts;
+  eventsByDomain: BusinessEventCountsEventsByDomain;
+  jobFailures: number;
+  workflowCompletions: number;
+}
+
+export type BadRequestResponse = {
+  error?: string;
+  message?: string;
+  statusCode?: number;
+  code?: string;
+};
+
+export type UnauthorizedResponse = {
+  error?: string;
+  statusCode?: number;
+  code?: string;
+};
+
+export type ForbiddenResponse = {
+  error?: string;
+  message?: string;
+  statusCode?: number;
+  code?: string;
+};
+
+export type NotFoundResponse = {
+  error?: string;
+  statusCode?: number;
+  code?: string;
+};
+
+export type ConflictResponse = {
+  error?: string;
+  message?: string;
+  statusCode?: number;
+  code?: string;
+};
+
+export type LivenessCheck200 = {
+  status?: string;
+};
+
+export type AiProviderHealthCheck200Status =
+  (typeof AiProviderHealthCheck200Status)[keyof typeof AiProviderHealthCheck200Status];
+
+export const AiProviderHealthCheck200Status = {
+  operational: 'operational',
+  degraded: 'degraded',
+  error: 'error',
+} as const;
+
+export type AiProviderHealthCheck200Providers = {
+  [key: string]: {
+    status?: string;
+    latencyMs?: number;
+  };
+};
+
+export type AiProviderHealthCheck200Retrieval = { [key: string]: unknown };
+
+export type AiProviderHealthCheck200 = {
+  status?: AiProviderHealthCheck200Status;
+  degraded?: boolean;
+  providers?: AiProviderHealthCheck200Providers;
+  executionMode?: string;
+  retrieval?: AiProviderHealthCheck200Retrieval;
+  checkedAt?: string;
+};
+
+export type WebsocketHealthCheck200 = {
+  status?: string;
+  connections?: number;
+  channels?: number;
+  uptime?: number;
+  checkedAt?: string;
+};
+
+export type BillingHealthCheck200Status =
+  (typeof BillingHealthCheck200Status)[keyof typeof BillingHealthCheck200Status];
+
+export const BillingHealthCheck200Status = {
+  healthy: 'healthy',
+  degraded: 'degraded',
+  unconfigured: 'unconfigured',
+  error: 'error',
+} as const;
+
+export type BillingHealthCheck200 = {
+  status?: BillingHealthCheck200Status;
+  provider?: string;
+  mode?: string;
+  latencyMs?: number;
+  checkedAt?: string;
+};
+
+export type ListDecisionsParams = {
+  /**
+   * @maximum 200
+   */
+  limit?: number;
+  offset?: number;
+  status?: ListDecisionsStatus;
+  riskLevel?: ListDecisionsRiskLevel;
+};
+
+export type ListDecisionsStatus = (typeof ListDecisionsStatus)[keyof typeof ListDecisionsStatus];
+
+export const ListDecisionsStatus = {
+  proposed: 'proposed',
+  pending_approval: 'pending_approval',
+  approved: 'approved',
+  rejected: 'rejected',
+  executed: 'executed',
+  expired: 'expired',
+} as const;
+
+export type ListDecisionsRiskLevel =
+  (typeof ListDecisionsRiskLevel)[keyof typeof ListDecisionsRiskLevel];
+
+export const ListDecisionsRiskLevel = {
+  P0: 'P0',
+  P1: 'P1',
+  P2: 'P2',
+  P3: 'P3',
+  P4: 'P4',
+} as const;
+
+export type ListDecisions200 = {
+  total?: number;
+  offset?: number;
+  limit?: number;
+  decisions?: AlloyDecision[];
+};
+
+export type CreateDecisionBodyRiskLevel =
+  (typeof CreateDecisionBodyRiskLevel)[keyof typeof CreateDecisionBodyRiskLevel];
+
+export const CreateDecisionBodyRiskLevel = {
+  P0: 'P0',
+  P1: 'P1',
+  P2: 'P2',
+  P3: 'P3',
+  P4: 'P4',
+} as const;
+
+export type CreateDecisionBody = {
+  recommendedAction: string;
+  rationaleSummary: string;
+  riskLevel: CreateDecisionBodyRiskLevel;
+  /**
+   * @minimum 0
+   * @maximum 1
+   */
+  confidence?: number;
+  workflowId?: string | null;
+  signalIds?: string[];
+  ownerSuggestion?: string | null;
+  fallbackPlan?: string | null;
+  modelRoute?: string;
+  /** If provided, triggers RAG retrieval to enrich evidenceRefs */
+  rawInput?: string;
+};
+
+export type CreateDecision201 = {
+  decision?: AlloyDecision;
+  approvalPolicy?: ApprovalPolicy;
+  message?: string;
+};
+
+export type GetDecision200 = {
+  decision?: AlloyDecision;
+  approvalPolicy?: ApprovalPolicy;
+};
+
+export type ApproveDecisionBody = {
+  approverName?: string;
+};
+
+export type ApproveDecision200 = {
+  decision?: AlloyDecision;
+  message?: string;
+};
+
+export type RejectDecisionBody = {
+  rejectorName?: string;
+  reason?: string;
+};
+
+export type RejectDecision200 = {
+  decision?: AlloyDecision;
+  message?: string;
+};
+
+export type GetApprovalMatrix200Matrix = { [key: string]: ApprovalPolicy };
+
+export type GetApprovalMatrix200 = {
+  matrix?: GetApprovalMatrix200Matrix;
+  description?: string;
+  executionMode?: string;
+};
+
+export type ListObservabilityApps200ItemStatus =
+  (typeof ListObservabilityApps200ItemStatus)[keyof typeof ListObservabilityApps200ItemStatus];
+
+export const ListObservabilityApps200ItemStatus = {
+  healthy: 'healthy',
+  warning: 'warning',
+  degraded: 'degraded',
+  unknown: 'unknown',
+} as const;
+
+export type ListObservabilityApps200Item = {
+  appSlug?: string;
+  appName?: string;
+  status?: ListObservabilityApps200ItemStatus;
+};
+
+export type GetAppObservability200 = { [key: string]: unknown };
+
+export type GetActiveAlerts200 = {
+  alerts?: AlertRecord[];
+  count?: number;
+  timestamp?: string;
+};
+
+export type RecordWebVitalsBodyRating =
+  (typeof RecordWebVitalsBodyRating)[keyof typeof RecordWebVitalsBodyRating];
+
+export const RecordWebVitalsBodyRating = {
+  good: 'good',
+  'needs-improvement': 'needs-improvement',
+  poor: 'poor',
+} as const;
+
+export type RecordWebVitalsBody = {
+  appSlug: string;
+  /** Metric name (LCP, FID, CLS, FCP, TTFB) */
+  name: string;
+  value: number;
+  rating?: RecordWebVitalsBodyRating;
+  id?: string;
+};
 
 export type LoginBody = {
   credential: string;

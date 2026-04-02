@@ -1,6 +1,17 @@
 import { Router } from "express";
 import { logger } from "../lib/logger";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireRole } from "../middlewares/auth";
+import { sendError, sendNotFound, sendBadRequest } from "../lib/api-response";
+import type { AuthenticatedUser } from "../middlewares/auth";
+import {
+  ensureDecisionTables,
+  insertDecision,
+  updateDecisionStatus,
+  listDecisions,
+  getDecision,
+  appendAuditEntry,
+  listAuditEntries,
+} from "../lib/alloy-decision-store";
 import {
   routeModel,
   getRouteConfig,
@@ -18,20 +29,48 @@ import {
   alloyRetrieval,
   runEvals,
   GOLDEN_SET,
+  createAlloyDecision,
+  getApprovalPolicy,
+  APPROVAL_MATRIX,
   type HFChatMessage,
   type RouteClass,
   type ActionDecision,
   type TriageDecision,
   type ExtractedEntities,
+  type AlloyDecision,
+  type RiskLevel,
 } from "@workspace/ai-engine";
+
+function getOrgId(user?: AuthenticatedUser): number | null {
+  return user?.orgs?.[0]?.orgId ?? null;
+}
+
+function isGlobalAdmin(user?: AuthenticatedUser): boolean {
+  if (!user) return false;
+  return user.roles.includes("super_admin") || user.roles.includes("admin");
+}
 
 const router = Router();
 const auditLog: Array<Record<string, unknown>> = [];
 const MAX_AUDIT_LOG = 500;
 
+ensureDecisionTables().catch(err => logger.warn({ err }, "ensureDecisionTables failed (non-fatal)"));
+
 function writeAudit(entry: Record<string, unknown>): void {
   auditLog.unshift({ ...entry, timestamp: new Date().toISOString() });
   if (auditLog.length > MAX_AUDIT_LOG) auditLog.length = MAX_AUDIT_LOG;
+  appendAuditEntry({
+    decisionId: entry.decisionId as string | undefined,
+    orgId: entry.orgId as number | null | undefined,
+    endpoint: String(entry.endpoint ?? ""),
+    model: entry.model as string | undefined,
+    routeClass: entry.routeClass as string | undefined,
+    confidence: entry.confidence as number | undefined,
+    latencyMs: entry.latencyMs as number | undefined,
+    approverUserId: entry.approverUserId as number | undefined,
+    approverRoles: entry.approverRoles as string[] | undefined,
+    metadata: entry,
+  }).catch(() => {});
 }
 
 router.get("/ai/health", (_req, res) => {
@@ -333,15 +372,18 @@ router.post("/ai/tools/execute", authMiddleware({ required: true }), async (req,
   }
 });
 
-router.get("/ai/audit", authMiddleware({ required: true }), (_req, res) => {
-  const limit = Math.min(parseInt(String(_req.query.limit) || "50", 10), 200);
-  const offset = parseInt(String(_req.query.offset) || "0", 10);
-  res.json({
-    total: auditLog.length,
-    offset,
-    limit,
-    entries: auditLog.slice(offset, offset + limit),
-  });
+router.get("/ai/audit", authMiddleware({ required: true }), async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(String(req.query.limit) || "50", 10), 200);
+    const offset = parseInt(String(req.query.offset) || "0", 10);
+    const orgId = getOrgId(req.user);
+    const admin = isGlobalAdmin(req.user);
+    const result = await listAuditEntries({ limit, offset, orgId, isAdmin: admin });
+    res.json({ total: result.total, offset, limit, entries: result.entries });
+  } catch (err) {
+    logger.error({ err }, "Audit list error");
+    sendError(res, "Failed to list audit entries", 500, "INTERNAL_ERROR");
+  }
 });
 
 router.get("/ai/tools", (_req, res) => {
@@ -419,6 +461,245 @@ router.post("/ai/retrieval/ingest", authMiddleware({ required: true }), async (r
     logger.error({ err }, "AI retrieval ingest error");
     res.status(500).json({ error: "Ingestion failed" });
   }
+});
+
+// ─── Alloy Decision Store ─────────────────────────────────────────────────────
+
+router.get("/ai/decision", authMiddleware({ required: true }), async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(String(req.query.limit) || "50", 10), 200);
+    const offset = parseInt(String(req.query.offset) || "0", 10);
+    const statusFilter = req.query.status as string | undefined;
+    const riskFilter = req.query.riskLevel as string | undefined;
+
+    const orgId = getOrgId(req.user);
+    const admin = isGlobalAdmin(req.user);
+    const result = await listDecisions({ limit, offset, status: statusFilter, riskLevel: riskFilter, orgId, isAdmin: admin });
+    res.json({ total: result.total, offset, limit, decisions: result.decisions });
+  } catch (err) {
+    logger.error({ err }, "Decision list error");
+    sendError(res, "Failed to list decisions", 500, "INTERNAL_ERROR");
+  }
+});
+
+router.post("/ai/decision", authMiddleware({ required: true }), async (req, res) => {
+  try {
+    const {
+      recommendedAction,
+      rationaleSummary,
+      riskLevel,
+      confidence,
+      workflowId,
+      signalIds,
+      evidenceRefs,
+      ownerSuggestion,
+      fallbackPlan,
+      modelRoute,
+      rawInput,
+    } = req.body as Partial<AlloyDecision>;
+
+    if (!recommendedAction || !rationaleSummary || !riskLevel) {
+      sendBadRequest(res, "recommendedAction, rationaleSummary, and riskLevel are required");
+      return;
+    }
+
+    const admin = isGlobalAdmin(req.user);
+    const orgId = getOrgId(req.user);
+    if (!admin && orgId === null) {
+      sendError(res, "User must belong to an organization to create decisions", 403, "NO_ORG");
+      return;
+    }
+
+    const validRiskLevels: RiskLevel[] = ["P0", "P1", "P2", "P3", "P4"];
+    if (!validRiskLevels.includes(riskLevel as RiskLevel)) {
+      sendBadRequest(res, "riskLevel must be P0, P1, P2, P3, or P4");
+      return;
+    }
+
+    const policy = getApprovalPolicy(riskLevel as RiskLevel);
+
+    const retrievalContext = rawInput
+      ? alloyRetrieval.retrieveHybrid(rawInput as string, null, 5)
+      : null;
+
+    const enrichedEvidence = [
+      ...(evidenceRefs || []),
+      ...(retrievalContext?.chunks?.map(c => ({
+        refId: `rag_${c.id}`,
+        source: c.source,
+        sourceType: "retrieval" as const,
+        content: c.content.slice(0, 300),
+        relevanceScore: c.score ?? 0,
+        timestamp: null,
+        objectId: null,
+      })) || []),
+    ];
+
+    const decision = createAlloyDecision({
+      recommendedAction,
+      rationaleSummary,
+      riskLevel: riskLevel as RiskLevel,
+      confidence: confidence ?? 0.5,
+      workflowId: workflowId ?? null,
+      signalIds: signalIds ?? [],
+      evidenceRefs: enrichedEvidence,
+      ownerSuggestion: ownerSuggestion ?? null,
+      fallbackPlan: fallbackPlan ?? (policy.requiresApproval ? `Escalate to ${policy.approverRole} for review` : null),
+      modelRoute: modelRoute ?? "planning",
+      rawInput: rawInput ?? null,
+    });
+
+    await insertDecision(decision, orgId);
+
+    writeAudit({
+      endpoint: "decision/create",
+      decisionId: decision.decisionId,
+      orgId,
+      riskLevel: decision.riskLevel,
+      approvalRequired: decision.approvalRequired,
+      confidence: decision.confidence,
+      status: decision.status,
+    });
+
+    res.status(201).json({
+      decision,
+      approvalPolicy: policy,
+      message: decision.approvalRequired
+        ? `Decision created. ${policy.approverRole} approval required within ${policy.sla}.`
+        : "Decision created and ready for execution.",
+    });
+  } catch (err) {
+    logger.error({ err }, "Decision create error");
+    sendError(res, "Failed to create decision", 500, "INTERNAL_ERROR");
+  }
+});
+
+router.get("/ai/decision/:id", authMiddleware({ required: true }), async (req, res) => {
+  try {
+    const orgId = getOrgId(req.user);
+    const admin = isGlobalAdmin(req.user);
+    const decision = await getDecision(req.params.id, orgId, admin);
+    if (!decision) {
+      sendNotFound(res, "Decision");
+      return;
+    }
+    const policy = getApprovalPolicy(decision.riskLevel);
+    res.json({ decision, approvalPolicy: policy });
+  } catch (err) {
+    logger.error({ err }, "Decision get error");
+    sendError(res, "Failed to get decision", 500, "INTERNAL_ERROR");
+  }
+});
+
+router.post(
+  "/ai/decision/:id/approve",
+  authMiddleware({ required: true }),
+  requireRole("exec", "ops", "admin", "super_admin"),
+  async (req, res) => {
+    try {
+      const orgId = getOrgId(req.user);
+      const admin = isGlobalAdmin(req.user);
+      const decision = await getDecision(req.params.id, orgId, admin);
+      if (!decision) {
+        sendNotFound(res, "Decision");
+        return;
+      }
+      if (decision.status !== "pending_approval" && decision.status !== "proposed") {
+        sendError(res, "Decision is not in a pending state", 409, "WRONG_STATE");
+        return;
+      }
+
+      const userRoles = req.user?.roles ?? [];
+      const isExec = userRoles.includes("exec") || userRoles.includes("admin") || userRoles.includes("super_admin");
+
+      if (decision.riskLevel === "P0" && !isExec) {
+        sendError(res, "P0 decisions require executive-level authorization", 403, "INSUFFICIENT_ROLE");
+        return;
+      }
+
+      const approverName = req.body.approverName || req.user?.displayName || "system";
+      const now = new Date().toISOString();
+      await updateDecisionStatus(decision.decisionId, {
+        status: "approved",
+        approvedBy: approverName,
+        approvedAt: now,
+        executionOutcome: "pending",
+      }, orgId, admin);
+
+      writeAudit({
+        endpoint: "decision/approve",
+        decisionId: decision.decisionId,
+        orgId,
+        approvedBy: approverName,
+        approverUserId: req.user?.id ?? null,
+        approverRoles: userRoles,
+        riskLevel: decision.riskLevel,
+      });
+
+      const updated = await getDecision(decision.decisionId, orgId, admin);
+      res.json({ decision: updated, message: "Decision approved and queued for execution." });
+    } catch (err) {
+      logger.error({ err }, "Decision approve error");
+      sendError(res, "Failed to approve decision", 500, "INTERNAL_ERROR");
+    }
+  },
+);
+
+router.post(
+  "/ai/decision/:id/reject",
+  authMiddleware({ required: true }),
+  requireRole("exec", "ops", "admin", "super_admin"),
+  async (req, res) => {
+    try {
+      const orgId = getOrgId(req.user);
+      const admin = isGlobalAdmin(req.user);
+      const decision = await getDecision(req.params.id, orgId, admin);
+      if (!decision) {
+        sendNotFound(res, "Decision");
+        return;
+      }
+      if (decision.status !== "pending_approval" && decision.status !== "proposed") {
+        sendError(res, "Decision is not in a pending state", 409, "WRONG_STATE");
+        return;
+      }
+
+      const userRoles = req.user?.roles ?? [];
+      const rejectorName = req.body.rejectorName || req.user?.displayName || "system";
+      const now = new Date().toISOString();
+      await updateDecisionStatus(decision.decisionId, {
+        status: "rejected",
+        rejectedBy: rejectorName,
+        rejectedAt: now,
+        rejectionReason: req.body.reason || null,
+        executionOutcome: "rejected",
+      }, orgId, admin);
+
+      writeAudit({
+        endpoint: "decision/reject",
+        decisionId: decision.decisionId,
+        orgId,
+        rejectedBy: rejectorName,
+        rejectorUserId: req.user?.id ?? null,
+        rejectorRoles: userRoles,
+        reason: req.body.reason,
+        riskLevel: decision.riskLevel,
+      });
+
+      const updated = await getDecision(decision.decisionId, orgId, admin);
+      res.json({ decision: updated, message: "Decision rejected." });
+    } catch (err) {
+      logger.error({ err }, "Decision reject error");
+      sendError(res, "Failed to reject decision", 500, "INTERNAL_ERROR");
+    }
+  },
+);
+
+router.get("/ai/approval-matrix", (_req, res) => {
+  res.json({
+    matrix: APPROVAL_MATRIX,
+    description: "Approval requirements and SLAs by risk level",
+    executionMode: process.env.AI_EXECUTION_MODE ?? "propose_only",
+  });
 });
 
 export default router;

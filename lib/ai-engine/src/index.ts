@@ -34,3 +34,15 @@ export { AlloyRetrievalEngine, alloyRetrieval, type RetrievalChunk, type Retriev
 
 export { GOLDEN_SET } from "./evals/golden-set.js";
 export { runEvals, type EvalResult, type EvalReport } from "./evals/run-evals.js";
+
+export {
+  createAlloyDecision,
+  validateAlloyDecision,
+  getApprovalPolicy,
+  mapConfidenceToRisk,
+  APPROVAL_MATRIX,
+  type AlloyDecision,
+  type AlloyDecisionEvidenceRef,
+  type RiskLevel,
+  type DecisionStatus,
+} from "./schemas/alloy-decision.js";

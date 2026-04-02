@@ -243,6 +243,14 @@ export function getConnectedClientCount(): number {
   return clients.size;
 }
 
+export function getWsStats(): { connections: number; channels: number; messagesPerMinute: number } {
+  return {
+    connections: clients.size,
+    channels: Object.keys(WS_CHANNELS).length,
+    messagesPerMinute: 0,
+  };
+}
+
 export const WS_CHANNELS = {
   HEALTH: "health",
   INCIDENTS: "incidents",

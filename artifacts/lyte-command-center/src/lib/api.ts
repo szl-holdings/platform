@@ -269,6 +269,35 @@ export const api = {
     toolPreview: (toolName: string, args?: Record<string, unknown>) =>
       apiFetch<AlloyAIToolPreview>("/ai/tools/preview", { method: "POST", body: JSON.stringify({ toolName, arguments: args }) }),
     audit: (limit?: number) => apiFetch<AlloyAIAuditResult>(`/ai/audit?limit=${limit || 50}`),
+    decisions: (params?: { limit?: number; offset?: number; status?: string; riskLevel?: string }) => {
+      const q = new URLSearchParams();
+      if (params?.limit) q.set("limit", String(params.limit));
+      if (params?.offset) q.set("offset", String(params.offset));
+      if (params?.status) q.set("status", params.status);
+      if (params?.riskLevel) q.set("riskLevel", params.riskLevel);
+      return apiFetch<{ total: number; offset: number; limit: number; decisions: AlloyDecision[] }>(`/ai/decision?${q.toString()}`);
+    },
+    createDecision: (payload: {
+      recommendedAction: string;
+      rationaleSummary: string;
+      riskLevel: "P0" | "P1" | "P2" | "P3" | "P4";
+      confidence?: number;
+      workflowId?: string | null;
+      signalIds?: string[];
+      evidenceRefs?: AlloyEvidenceRef[];
+      ownerSuggestion?: string | null;
+      fallbackPlan?: string | null;
+      modelRoute?: string;
+      rawInput?: string;
+    }) => apiFetch<{ decision: AlloyDecision; approvalPolicy: AlloyApprovalPolicy; message: string }>("/ai/decision", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+    approveDecision: (id: string, approverName?: string) =>
+      apiFetch<{ decision: AlloyDecision; message: string }>(`/ai/decision/${id}/approve`, { method: "POST", body: JSON.stringify({ approverName }) }),
+    rejectDecision: (id: string, reason?: string, rejectorName?: string) =>
+      apiFetch<{ decision: AlloyDecision; message: string }>(`/ai/decision/${id}/reject`, { method: "POST", body: JSON.stringify({ reason, rejectorName }) }),
+    approvalMatrix: () => apiFetch<{ matrix: Record<string, AlloyApprovalPolicy>; description: string; executionMode: string }>("/ai/approval-matrix"),
   },
 };
 
@@ -280,6 +309,8 @@ export interface AlloyAIHealth {
   retrieval: { totalChunks: number; withEmbeddings: number };
   config: Record<string, unknown>;
   auditLogSize: number;
+  degraded?: boolean;
+  degradedReason?: string;
 }
 
 export interface AlloyAIModels {
@@ -369,4 +400,46 @@ export interface AlloyAIAuditResult {
   offset: number;
   limit: number;
   entries: Array<Record<string, unknown>>;
+}
+
+export interface AlloyEvidenceRef {
+  chunkId: string;
+  source: string;
+  excerpt?: string;
+  score?: number;
+}
+
+export interface AlloyDecision {
+  decisionId: string;
+  workflowId: string | null;
+  signalIds: string[];
+  recommendedAction: string;
+  rationaleSummary: string;
+  evidenceRefs: AlloyEvidenceRef[];
+  confidence: number;
+  ownerSuggestion: string | null;
+  approvalRequired: boolean;
+  riskLevel: "P0" | "P1" | "P2" | "P3" | "P4";
+  fallbackPlan: string | null;
+  modelRoute: string;
+  schemaVersion: "2.0.0";
+  status: "proposed" | "pending_approval" | "approved" | "rejected" | "executed" | "failed" | "expired";
+  approvedBy: string | null;
+  approvedAt: string | null;
+  rejectedBy: string | null;
+  rejectedAt: string | null;
+  rejectionReason: string | null;
+  executedAt: string | null;
+  executionOutcome: "pending" | "success" | "failure" | "partial" | "rejected" | null;
+  rawInput: string | null;
+  rawOutput: string | null;
+  createdAt: string;
+}
+
+export interface AlloyApprovalPolicy {
+  requiresApproval: boolean;
+  approverRole: string;
+  sla: string;
+  escalationPath: string[];
+  autoApproveAfterSla: boolean;
 }

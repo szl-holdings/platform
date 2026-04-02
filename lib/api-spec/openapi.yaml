@@ -9,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: ai-engine
+    description: Alloy AI engine — decisions, approvals, audit, retrieval
   - name: projects
     description: Project operations
   - name: auth
@@ -95,6 +97,308 @@ paths:
                 $ref: "#/components/schemas/DetailedHealthStatus"
         "503":
           description: Degraded — one or more dependencies unreachable
+  /health/ai:
+    get:
+      operationId: aiProviderHealthCheck
+      tags: [health]
+      summary: AI provider health
+      description: Returns health status of all AI providers (OpenAI, Anthropic, Gemini, HuggingFace), retrieval index stats, model slot config, and current execution mode
+      responses:
+        "200":
+          description: AI provider health summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [operational, degraded, error]
+                  degraded:
+                    type: boolean
+                  providers:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                        latencyMs:
+                          type: integer
+                  executionMode:
+                    type: string
+                  retrieval:
+                    type: object
+                  checkedAt:
+                    type: string
+                    format: date-time
+  /health/websocket:
+    get:
+      operationId: websocketHealthCheck
+      tags: [health]
+      summary: WebSocket server health
+      description: Returns active connection count, channel count, and uptime
+      responses:
+        "200":
+          description: WebSocket health summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  connections:
+                    type: integer
+                  channels:
+                    type: integer
+                  uptime:
+                    type: number
+                  checkedAt:
+                    type: string
+                    format: date-time
+  /health/billing:
+    get:
+      operationId: billingHealthCheck
+      tags: [health]
+      summary: Billing provider health
+      description: Returns Stripe connectivity status, mode, and latency
+      responses:
+        "200":
+          description: Billing health summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unconfigured, error]
+                  provider:
+                    type: string
+                  mode:
+                    type: string
+                  latencyMs:
+                    type: integer
+                  checkedAt:
+                    type: string
+                    format: date-time
+  /ai/decision:
+    get:
+      operationId: listDecisions
+      tags: [ai-engine]
+      summary: List Alloy decisions
+      description: Returns a paginated list of AlloyDecision objects, optionally filtered by status or risk level
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50, maximum: 200 }
+        - in: query
+          name: offset
+          schema: { type: integer, default: 0 }
+        - in: query
+          name: status
+          schema: { type: string, enum: [proposed, pending_approval, approved, rejected, executed, expired] }
+        - in: query
+          name: riskLevel
+          schema: { type: string, enum: [P0, P1, P2, P3, P4] }
+      responses:
+        "200":
+          description: Paginated decision list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer }
+                  offset: { type: integer }
+                  limit: { type: integer }
+                  decisions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AlloyDecision"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createDecision
+      tags: [ai-engine]
+      summary: Create an Alloy decision
+      description: |
+        Creates a schema-validated AlloyDecision (v2.0.0). P0/P1 decisions are routed for human approval
+        per the approval matrix. rawInput triggers RAG evidence enrichment automatically.
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recommendedAction, rationaleSummary, riskLevel]
+              properties:
+                recommendedAction: { type: string }
+                rationaleSummary: { type: string }
+                riskLevel: { type: string, enum: [P0, P1, P2, P3, P4] }
+                confidence: { type: number, minimum: 0, maximum: 1 }
+                workflowId: { type: string, nullable: true }
+                signalIds: { type: array, items: { type: string } }
+                ownerSuggestion: { type: string, nullable: true }
+                fallbackPlan: { type: string, nullable: true }
+                modelRoute: { type: string }
+                rawInput: { type: string, description: "If provided, triggers RAG retrieval to enrich evidenceRefs" }
+      responses:
+        "201":
+          description: Decision created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decision:
+                    $ref: "#/components/schemas/AlloyDecision"
+                  approvalPolicy:
+                    $ref: "#/components/schemas/ApprovalPolicy"
+                  message: { type: string }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /ai/decision/{id}:
+    get:
+      operationId: getDecision
+      tags: [ai-engine]
+      summary: Get a single Alloy decision
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Decision object with approval policy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decision:
+                    $ref: "#/components/schemas/AlloyDecision"
+                  approvalPolicy:
+                    $ref: "#/components/schemas/ApprovalPolicy"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /ai/decision/{id}/approve:
+    post:
+      operationId: approveDecision
+      tags: [ai-engine]
+      summary: Approve a pending Alloy decision
+      description: |
+        Marks a decision as approved. Requires exec or ops role for P1, exec-only for P0.
+        Records an immutable audit trail entry.
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approverName: { type: string }
+      responses:
+        "200":
+          description: Decision approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decision:
+                    $ref: "#/components/schemas/AlloyDecision"
+                  message: { type: string }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /ai/decision/{id}/reject:
+    post:
+      operationId: rejectDecision
+      tags: [ai-engine]
+      summary: Reject a pending Alloy decision
+      description: Marks a decision as rejected with optional reason. Requires exec or ops role.
+      security:
+        - sessionAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rejectorName: { type: string }
+                reason: { type: string }
+      responses:
+        "200":
+          description: Decision rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decision:
+                    $ref: "#/components/schemas/AlloyDecision"
+                  message: { type: string }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /ai/approval-matrix:
+    get:
+      operationId: getApprovalMatrix
+      tags: [ai-engine]
+      summary: Get decision approval matrix
+      description: Returns the full P0–P4 approval matrix with required roles, SLAs, and the current AI execution mode
+      responses:
+        "200":
+          description: Approval matrix
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matrix:
+                    type: object
+                    additionalProperties:
+                      $ref: "#/components/schemas/ApprovalPolicy"
+                  description: { type: string }
+                  executionMode: { type: string }
   /observability:
     get:
       operationId: listObservabilityApps
@@ -1410,7 +1714,123 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: "Bearer token for authenticated endpoints (roles: admin, user)"
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              message: { type: string }
+              statusCode: { type: integer }
+              code: { type: string }
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              statusCode: { type: integer }
+              code: { type: string }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              message: { type: string }
+              statusCode: { type: integer }
+              code: { type: string }
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              statusCode: { type: integer }
+              code: { type: string }
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              message: { type: string }
+              statusCode: { type: integer }
+              code: { type: string }
   schemas:
+    AlloyDecision:
+      type: object
+      description: Schema-validated Alloy decision object (v2.0.0)
+      required:
+        - decisionId
+        - recommendedAction
+        - rationaleSummary
+        - riskLevel
+        - confidence
+        - evidenceRefs
+        - approvalRequired
+        - modelRoute
+        - schemaVersion
+        - createdAt
+        - status
+      properties:
+        decisionId: { type: string }
+        workflowId: { type: string, nullable: true }
+        signalIds: { type: array, items: { type: string } }
+        recommendedAction: { type: string }
+        rationaleSummary: { type: string }
+        evidenceRefs:
+          type: array
+          items:
+            type: object
+            properties:
+              refId: { type: string }
+              source: { type: string }
+              sourceType: { type: string }
+              content: { type: string }
+              relevanceScore: { type: number }
+              timestamp: { type: string, nullable: true }
+              objectId: { type: string, nullable: true }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        ownerSuggestion: { type: string, nullable: true }
+        approvalRequired: { type: boolean }
+        riskLevel: { type: string, enum: [P0, P1, P2, P3, P4] }
+        fallbackPlan: { type: string, nullable: true }
+        modelRoute: { type: string }
+        schemaVersion: { type: string, enum: ["2.0.0"] }
+        createdAt: { type: string, format: date-time }
+        status: { type: string, enum: [proposed, pending_approval, approved, rejected, executed, expired] }
+        approvedBy: { type: string, nullable: true }
+        approvedAt: { type: string, nullable: true, format: date-time }
+        rejectedBy: { type: string, nullable: true }
+        rejectedAt: { type: string, nullable: true, format: date-time }
+        rejectionReason: { type: string, nullable: true }
+        executedAt: { type: string, nullable: true, format: date-time }
+        executionOutcome: { type: string, nullable: true, enum: [pending, executed, failed, rejected, expired] }
+        rawInput: { type: string, nullable: true }
+        rawOutput: { type: string, nullable: true }
+    ApprovalPolicy:
+      type: object
+      properties:
+        requiresApproval: { type: boolean }
+        approverRole: { type: string }
+        sla: { type: string }
+        autoExpireHours: { type: integer }
     HealthStatus:
       type: object
       properties:

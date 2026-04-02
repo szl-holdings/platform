@@ -16,7 +16,5 @@ export const ConnectorType = {
   notion: 'notion',
   github: 'github',
   shopify: 'shopify',
-  salesforce: 'salesforce',
-  jira: 'jira',
   custom: 'custom',
 } as const;

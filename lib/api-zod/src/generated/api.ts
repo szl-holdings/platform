@@ -16,6 +16,505 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
+ * Returns ok if the server process is alive
+ * @summary Liveness probe
+ */
+export const LivenessCheckResponse = zod.object({
+  status: zod.string().optional(),
+});
+
+/**
+ * Returns structured health status with all dependency checks including database, job queue, and telemetry
+ * @summary Detailed health status
+ */
+export const DetailedHealthCheckResponse = zod.object({
+  status: zod.enum(['healthy', 'warning', 'degraded']),
+  timestamp: zod.date(),
+  uptime: zod.number(),
+  version: zod.string().optional(),
+  environment: zod.string().optional(),
+  checks: zod.record(
+    zod.string(),
+    zod.object({
+      status: zod.string().optional(),
+      latencyMs: zod.number().nullish(),
+      details: zod.string().nullish(),
+    }),
+  ),
+  memory: zod
+    .object({
+      heapUsedMb: zod.number().optional(),
+      heapTotalMb: zod.number().optional(),
+      rssMb: zod.number().optional(),
+    })
+    .optional(),
+});
+
+/**
+ * Returns health status of all AI providers (OpenAI, Anthropic, Gemini, HuggingFace), retrieval index stats, model slot config, and current execution mode
+ * @summary AI provider health
+ */
+export const AiProviderHealthCheckResponse = zod.object({
+  status: zod.enum(['operational', 'degraded', 'error']).optional(),
+  degraded: zod.boolean().optional(),
+  providers: zod
+    .record(
+      zod.string(),
+      zod.object({
+        status: zod.string().optional(),
+        latencyMs: zod.number().optional(),
+      }),
+    )
+    .optional(),
+  executionMode: zod.string().optional(),
+  retrieval: zod.object({}).passthrough().optional(),
+  checkedAt: zod.date().optional(),
+});
+
+/**
+ * Returns active connection count, channel count, and uptime
+ * @summary WebSocket server health
+ */
+export const WebsocketHealthCheckResponse = zod.object({
+  status: zod.string().optional(),
+  connections: zod.number().optional(),
+  channels: zod.number().optional(),
+  uptime: zod.number().optional(),
+  checkedAt: zod.date().optional(),
+});
+
+/**
+ * Returns Stripe connectivity status, mode, and latency
+ * @summary Billing provider health
+ */
+export const BillingHealthCheckResponse = zod.object({
+  status: zod.enum(['healthy', 'degraded', 'unconfigured', 'error']).optional(),
+  provider: zod.string().optional(),
+  mode: zod.string().optional(),
+  latencyMs: zod.number().optional(),
+  checkedAt: zod.date().optional(),
+});
+
+/**
+ * Returns a paginated list of AlloyDecision objects, optionally filtered by status or risk level
+ * @summary List Alloy decisions
+ */
+export const listDecisionsQueryLimitDefault = 50;
+export const listDecisionsQueryLimitMax = 200;
+
+export const listDecisionsQueryOffsetDefault = 0;
+
+export const ListDecisionsQueryParams = zod.object({
+  limit: zod.coerce
+    .number()
+    .max(listDecisionsQueryLimitMax)
+    .default(listDecisionsQueryLimitDefault),
+  offset: zod.coerce.number().default(listDecisionsQueryOffsetDefault),
+  status: zod
+    .enum(['proposed', 'pending_approval', 'approved', 'rejected', 'executed', 'expired'])
+    .optional(),
+  riskLevel: zod.enum(['P0', 'P1', 'P2', 'P3', 'P4']).optional(),
+});
+
+export const listDecisionsResponseDecisionsItemConfidenceMin = 0;
+export const listDecisionsResponseDecisionsItemConfidenceMax = 1;
+
+export const ListDecisionsResponse = zod.object({
+  total: zod.number().optional(),
+  offset: zod.number().optional(),
+  limit: zod.number().optional(),
+  decisions: zod
+    .array(
+      zod
+        .object({
+          decisionId: zod.string(),
+          workflowId: zod.string().nullish(),
+          signalIds: zod.array(zod.string()).optional(),
+          recommendedAction: zod.string(),
+          rationaleSummary: zod.string(),
+          evidenceRefs: zod.array(
+            zod.object({
+              refId: zod.string().optional(),
+              source: zod.string().optional(),
+              sourceType: zod.string().optional(),
+              content: zod.string().optional(),
+              relevanceScore: zod.number().optional(),
+              timestamp: zod.string().nullish(),
+              objectId: zod.string().nullish(),
+            }),
+          ),
+          confidence: zod
+            .number()
+            .min(listDecisionsResponseDecisionsItemConfidenceMin)
+            .max(listDecisionsResponseDecisionsItemConfidenceMax),
+          ownerSuggestion: zod.string().nullish(),
+          approvalRequired: zod.boolean(),
+          riskLevel: zod.enum(['P0', 'P1', 'P2', 'P3', 'P4']),
+          fallbackPlan: zod.string().nullish(),
+          modelRoute: zod.string(),
+          schemaVersion: zod.enum(['2.0.0']),
+          createdAt: zod.date(),
+          status: zod.enum([
+            'proposed',
+            'pending_approval',
+            'approved',
+            'rejected',
+            'executed',
+            'expired',
+          ]),
+          approvedBy: zod.string().nullish(),
+          approvedAt: zod.date().nullish(),
+          rejectedBy: zod.string().nullish(),
+          rejectedAt: zod.date().nullish(),
+          rejectionReason: zod.string().nullish(),
+          executedAt: zod.date().nullish(),
+          executionOutcome: zod
+            .enum(['pending', 'executed', 'failed', 'rejected', 'expired'])
+            .nullish(),
+          rawInput: zod.string().nullish(),
+          rawOutput: zod.string().nullish(),
+        })
+        .describe('Schema-validated Alloy decision object (v2.0.0)'),
+    )
+    .optional(),
+});
+
+/**
+ * Creates a schema-validated AlloyDecision (v2.0.0). P0/P1 decisions are routed for human approval
+per the approval matrix. rawInput triggers RAG evidence enrichment automatically.
+
+ * @summary Create an Alloy decision
+ */
+export const createDecisionBodyConfidenceMin = 0;
+export const createDecisionBodyConfidenceMax = 1;
+
+export const CreateDecisionBody = zod.object({
+  recommendedAction: zod.string(),
+  rationaleSummary: zod.string(),
+  riskLevel: zod.enum(['P0', 'P1', 'P2', 'P3', 'P4']),
+  confidence: zod
+    .number()
+    .min(createDecisionBodyConfidenceMin)
+    .max(createDecisionBodyConfidenceMax)
+    .optional(),
+  workflowId: zod.string().nullish(),
+  signalIds: zod.array(zod.string()).optional(),
+  ownerSuggestion: zod.string().nullish(),
+  fallbackPlan: zod.string().nullish(),
+  modelRoute: zod.string().optional(),
+  rawInput: zod
+    .string()
+    .optional()
+    .describe('If provided, triggers RAG retrieval to enrich evidenceRefs'),
+});
+
+/**
+ * @summary Get a single Alloy decision
+ */
+export const GetDecisionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const getDecisionResponseDecisionConfidenceMin = 0;
+export const getDecisionResponseDecisionConfidenceMax = 1;
+
+export const GetDecisionResponse = zod.object({
+  decision: zod
+    .object({
+      decisionId: zod.string(),
+      workflowId: zod.string().nullish(),
+      signalIds: zod.array(zod.string()).optional(),
+      recommendedAction: zod.string(),
+      rationaleSummary: zod.string(),
+      evidenceRefs: zod.array(
+        zod.object({
+          refId: zod.string().optional(),
+          source: zod.string().optional(),
+          sourceType: zod.string().optional(),
+          content: zod.string().optional(),
+          relevanceScore: zod.number().optional(),
+          timestamp: zod.string().nullish(),
+          objectId: zod.string().nullish(),
+        }),
+      ),
+      confidence: zod
+        .number()
+        .min(getDecisionResponseDecisionConfidenceMin)
+        .max(getDecisionResponseDecisionConfidenceMax),
+      ownerSuggestion: zod.string().nullish(),
+      approvalRequired: zod.boolean(),
+      riskLevel: zod.enum(['P0', 'P1', 'P2', 'P3', 'P4']),
+      fallbackPlan: zod.string().nullish(),
+      modelRoute: zod.string(),
+      schemaVersion: zod.enum(['2.0.0']),
+      createdAt: zod.date(),
+      status: zod.enum([
+        'proposed',
+        'pending_approval',
+        'approved',
+        'rejected',
+        'executed',
+        'expired',
+      ]),
+      approvedBy: zod.string().nullish(),
+      approvedAt: zod.date().nullish(),
+      rejectedBy: zod.string().nullish(),
+      rejectedAt: zod.date().nullish(),
+      rejectionReason: zod.string().nullish(),
+      executedAt: zod.date().nullish(),
+      executionOutcome: zod
+        .enum(['pending', 'executed', 'failed', 'rejected', 'expired'])
+        .nullish(),
+      rawInput: zod.string().nullish(),
+      rawOutput: zod.string().nullish(),
+    })
+    .optional()
+    .describe('Schema-validated Alloy decision object (v2.0.0)'),
+  approvalPolicy: zod
+    .object({
+      requiresApproval: zod.boolean().optional(),
+      approverRole: zod.string().optional(),
+      sla: zod.string().optional(),
+      autoExpireHours: zod.number().optional(),
+    })
+    .optional(),
+});
+
+/**
+ * Marks a decision as approved. Requires exec or ops role for P1, exec-only for P0.
+Records an immutable audit trail entry.
+
+ * @summary Approve a pending Alloy decision
+ */
+export const ApproveDecisionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const ApproveDecisionBody = zod.object({
+  approverName: zod.string().optional(),
+});
+
+export const approveDecisionResponseDecisionConfidenceMin = 0;
+export const approveDecisionResponseDecisionConfidenceMax = 1;
+
+export const ApproveDecisionResponse = zod.object({
+  decision: zod
+    .object({
+      decisionId: zod.string(),
+      workflowId: zod.string().nullish(),
+      signalIds: zod.array(zod.string()).optional(),
+      recommendedAction: zod.string(),
+      rationaleSummary: zod.string(),
+      evidenceRefs: zod.array(
+        zod.object({
+          refId: zod.string().optional(),
+          source: zod.string().optional(),
+          sourceType: zod.string().optional(),
+          content: zod.string().optional(),
+          relevanceScore: zod.number().optional(),
+          timestamp: zod.string().nullish(),
+          objectId: zod.string().nullish(),
+        }),
+      ),
+      confidence: zod
+        .number()
+        .min(approveDecisionResponseDecisionConfidenceMin)
+        .max(approveDecisionResponseDecisionConfidenceMax),
+      ownerSuggestion: zod.string().nullish(),
+      approvalRequired: zod.boolean(),
+      riskLevel: zod.enum(['P0', 'P1', 'P2', 'P3', 'P4']),
+      fallbackPlan: zod.string().nullish(),
+      modelRoute: zod.string(),
+      schemaVersion: zod.enum(['2.0.0']),
+      createdAt: zod.date(),
+      status: zod.enum([
+        'proposed',
+        'pending_approval',
+        'approved',
+        'rejected',
+        'executed',
+        'expired',
+      ]),
+      approvedBy: zod.string().nullish(),
+      approvedAt: zod.date().nullish(),
+      rejectedBy: zod.string().nullish(),
+      rejectedAt: zod.date().nullish(),
+      rejectionReason: zod.string().nullish(),
+      executedAt: zod.date().nullish(),
+      executionOutcome: zod
+        .enum(['pending', 'executed', 'failed', 'rejected', 'expired'])
+        .nullish(),
+      rawInput: zod.string().nullish(),
+      rawOutput: zod.string().nullish(),
+    })
+    .optional()
+    .describe('Schema-validated Alloy decision object (v2.0.0)'),
+  message: zod.string().optional(),
+});
+
+/**
+ * Marks a decision as rejected with optional reason. Requires exec or ops role.
+ * @summary Reject a pending Alloy decision
+ */
+export const RejectDecisionParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const RejectDecisionBody = zod.object({
+  rejectorName: zod.string().optional(),
+  reason: zod.string().optional(),
+});
+
+export const rejectDecisionResponseDecisionConfidenceMin = 0;
+export const rejectDecisionResponseDecisionConfidenceMax = 1;
+
+export const RejectDecisionResponse = zod.object({
+  decision: zod
+    .object({
+      decisionId: zod.string(),
+      workflowId: zod.string().nullish(),
+      signalIds: zod.array(zod.string()).optional(),
+      recommendedAction: zod.string(),
+      rationaleSummary: zod.string(),
+      evidenceRefs: zod.array(
+        zod.object({
+          refId: zod.string().optional(),
+          source: zod.string().optional(),
+          sourceType: zod.string().optional(),
+          content: zod.string().optional(),
+          relevanceScore: zod.number().optional(),
+          timestamp: zod.string().nullish(),
+          objectId: zod.string().nullish(),
+        }),
+      ),
+      confidence: zod
+        .number()
+        .min(rejectDecisionResponseDecisionConfidenceMin)
+        .max(rejectDecisionResponseDecisionConfidenceMax),
+      ownerSuggestion: zod.string().nullish(),
+      approvalRequired: zod.boolean(),
+      riskLevel: zod.enum(['P0', 'P1', 'P2', 'P3', 'P4']),
+      fallbackPlan: zod.string().nullish(),
+      modelRoute: zod.string(),
+      schemaVersion: zod.enum(['2.0.0']),
+      createdAt: zod.date(),
+      status: zod.enum([
+        'proposed',
+        'pending_approval',
+        'approved',
+        'rejected',
+        'executed',
+        'expired',
+      ]),
+      approvedBy: zod.string().nullish(),
+      approvedAt: zod.date().nullish(),
+      rejectedBy: zod.string().nullish(),
+      rejectedAt: zod.date().nullish(),
+      rejectionReason: zod.string().nullish(),
+      executedAt: zod.date().nullish(),
+      executionOutcome: zod
+        .enum(['pending', 'executed', 'failed', 'rejected', 'expired'])
+        .nullish(),
+      rawInput: zod.string().nullish(),
+      rawOutput: zod.string().nullish(),
+    })
+    .optional()
+    .describe('Schema-validated Alloy decision object (v2.0.0)'),
+  message: zod.string().optional(),
+});
+
+/**
+ * Returns the full P0–P4 approval matrix with required roles, SLAs, and the current AI execution mode
+ * @summary Get decision approval matrix
+ */
+export const GetApprovalMatrixResponse = zod.object({
+  matrix: zod
+    .record(
+      zod.string(),
+      zod.object({
+        requiresApproval: zod.boolean().optional(),
+        approverRole: zod.string().optional(),
+        sla: zod.string().optional(),
+        autoExpireHours: zod.number().optional(),
+      }),
+    )
+    .optional(),
+  description: zod.string().optional(),
+  executionMode: zod.string().optional(),
+});
+
+/**
+ * Returns telemetry snapshots for all registered apps. Results are cached for 15 seconds.
+ * @summary List all app observability snapshots
+ */
+export const ListObservabilityAppsResponseItem = zod.object({
+  appSlug: zod.string().optional(),
+  appName: zod.string().optional(),
+  status: zod.enum(['healthy', 'warning', 'degraded', 'unknown']).optional(),
+});
+export const ListObservabilityAppsResponse = zod.array(ListObservabilityAppsResponseItem);
+
+/**
+ * Returns full telemetry snapshot for the specified app. Results are cached for 10 seconds.
+ * @summary Get observability snapshot for a specific app
+ */
+export const GetAppObservabilityParams = zod.object({
+  appSlug: zod.coerce
+    .string()
+    .describe('App identifier slug (e.g. \"rosie\", \"terra\", \"alloy\")'),
+});
+
+export const GetAppObservabilityResponse = zod.object({}).passthrough();
+
+/**
+ * Returns all currently active (unresolved) alerts from the platform alert engine.
+ * @summary Get all active system alerts
+ */
+export const GetActiveAlertsResponse = zod.object({
+  alerts: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        type: zod.string(),
+        message: zod.string(),
+        severity: zod.enum(['warning', 'critical']),
+        triggeredAt: zod.number(),
+        resolvedAt: zod.number().nullish(),
+        resolved: zod.boolean(),
+        metadata: zod.object({}).passthrough().nullish(),
+      }),
+    )
+    .optional(),
+  count: zod.number().optional(),
+  timestamp: zod.date().optional(),
+});
+
+/**
+ * Returns aggregated business event counts across all domains and job failure/success rates.
+ * @summary Get business event counts and domain breakdown
+ */
+export const GetBusinessEventsResponse = zod.object({
+  timestamp: zod.date(),
+  windowMs: zod.number(),
+  eventCounts: zod.record(zod.string(), zod.number()),
+  eventsByDomain: zod.record(zod.string(), zod.number()),
+  jobFailures: zod.number(),
+  workflowCompletions: zod.number(),
+});
+
+/**
+ * Accepts Core Web Vitals measurements (LCP, FID, CLS, FCP, TTFB) from frontend apps.
+ * @summary Record web vital metrics
+ */
+export const RecordWebVitalsBody = zod.object({
+  appSlug: zod.string(),
+  name: zod.string().describe('Metric name (LCP, FID, CLS, FCP, TTFB)'),
+  value: zod.number(),
+  rating: zod.enum(['good', 'needs-improvement', 'poor']).optional(),
+  id: zod.string().optional(),
+});
+
+/**
  * Returns all projects ordered by creation date
  * @summary List all projects
  */

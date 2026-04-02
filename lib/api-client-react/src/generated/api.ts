@@ -18,18 +18,27 @@ import type {
 
 import type {
   ActivityLog,
+  AiProviderHealthCheck200,
+  ApproveDecision200,
+  ApproveDecisionBody,
   Asset,
   AuditEvent,
   AuthUser,
   AuthUserEnvelope,
+  BadRequestResponse,
   BeginBrowserLoginParams,
+  BillingHealthCheck200,
   BillingPlan,
+  BusinessEventCounts,
   CheckoutRequest,
   CheckoutResponse,
+  ConflictResponse,
   Connector,
   CreateConnector,
   CreateCustomerPortal200,
   CreateCustomerPortalBody,
+  CreateDecision201,
+  CreateDecisionBody,
   CreateFeatureFlag,
   CreateNotification,
   CreateProject,
@@ -37,21 +46,31 @@ import type {
   CreateStephenContact,
   CreateStephenContentBlock,
   CreateStephenPortfolioCaseStudy,
+  DetailedHealthStatus,
   DreamscapeProject,
   FeatureFlag,
   FileRecord,
   FirestormAnalytics,
   FirestormCampaign,
   FirestormLead,
+  ForbiddenResponse,
+  GetActiveAlerts200,
+  GetAppObservability200,
+  GetApprovalMatrix200,
   GetAuthProviders200,
+  GetDecision200,
   GetSubscriptionStatusParams,
   HandleBrowserLoginCallbackParams,
   HealthStatus,
   Invoice,
+  ListDecisions200,
+  ListDecisionsParams,
   ListFirestormAnalyticsParams,
   ListNotificationsParams,
+  ListObservabilityApps200Item,
   ListStephenContentBlocksParams,
   ListStripeInvoicesParams,
+  LivenessCheck200,
   Login201,
   LoginBody,
   LogoutSuccess,
@@ -59,9 +78,13 @@ import type {
   LyteProduct,
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess,
+  NotFoundResponse,
   Notification,
   Project,
   ReadinessAssessment,
+  RecordWebVitalsBody,
+  RejectDecision200,
+  RejectDecisionBody,
   Role,
   SessionToken,
   StephenBookingRequest,
@@ -77,6 +100,7 @@ import type {
   StripeProduct,
   Subscription,
   SubscriptionStatusResponse,
+  UnauthorizedResponse,
   UpdateConnector,
   UpdateFeatureFlag,
   UpdateProject,
@@ -84,6 +108,7 @@ import type {
   UpdateStephenPortfolioCaseStudy,
   UserSummary,
   Vessel,
+  WebsocketHealthCheck200,
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -155,6 +180,1207 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Returns ok if the server process is alive
+ * @summary Liveness probe
+ */
+export const getLivenessCheckUrl = () => {
+  return `/api/health/live`;
+};
+
+export const livenessCheck = async (options?: RequestInit): Promise<LivenessCheck200> => {
+  return customFetch<LivenessCheck200>(getLivenessCheckUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getLivenessCheckQueryKey = () => {
+  return [`/api/health/live`] as const;
+};
+
+export const getLivenessCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof livenessCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof livenessCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getLivenessCheckQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof livenessCheck>>> = ({ signal }) =>
+    livenessCheck({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof livenessCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type LivenessCheckQueryResult = NonNullable<Awaited<ReturnType<typeof livenessCheck>>>;
+export type LivenessCheckQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Liveness probe
+ */
+
+export function useLivenessCheck<
+  TData = Awaited<ReturnType<typeof livenessCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof livenessCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getLivenessCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns ready if all critical dependencies are connected
+ * @summary Readiness probe
+ */
+export const getReadinessCheckUrl = () => {
+  return `/api/health/ready`;
+};
+
+export const readinessCheck = async (options?: RequestInit): Promise<void> => {
+  return customFetch<void>(getReadinessCheckUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getReadinessCheckQueryKey = () => {
+  return [`/api/health/ready`] as const;
+};
+
+export const getReadinessCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof readinessCheck>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof readinessCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getReadinessCheckQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof readinessCheck>>> = ({ signal }) =>
+    readinessCheck({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof readinessCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ReadinessCheckQueryResult = NonNullable<Awaited<ReturnType<typeof readinessCheck>>>;
+export type ReadinessCheckQueryError = ErrorType<void>;
+
+/**
+ * @summary Readiness probe
+ */
+
+export function useReadinessCheck<
+  TData = Awaited<ReturnType<typeof readinessCheck>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof readinessCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getReadinessCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns structured health status with all dependency checks including database, job queue, and telemetry
+ * @summary Detailed health status
+ */
+export const getDetailedHealthCheckUrl = () => {
+  return `/api/health/detailed`;
+};
+
+export const detailedHealthCheck = async (options?: RequestInit): Promise<DetailedHealthStatus> => {
+  return customFetch<DetailedHealthStatus>(getDetailedHealthCheckUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getDetailedHealthCheckQueryKey = () => {
+  return [`/api/health/detailed`] as const;
+};
+
+export const getDetailedHealthCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof detailedHealthCheck>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof detailedHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getDetailedHealthCheckQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof detailedHealthCheck>>> = ({ signal }) =>
+    detailedHealthCheck({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof detailedHealthCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type DetailedHealthCheckQueryResult = NonNullable<
+  Awaited<ReturnType<typeof detailedHealthCheck>>
+>;
+export type DetailedHealthCheckQueryError = ErrorType<void>;
+
+/**
+ * @summary Detailed health status
+ */
+
+export function useDetailedHealthCheck<
+  TData = Awaited<ReturnType<typeof detailedHealthCheck>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof detailedHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getDetailedHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns health status of all AI providers (OpenAI, Anthropic, Gemini, HuggingFace), retrieval index stats, model slot config, and current execution mode
+ * @summary AI provider health
+ */
+export const getAiProviderHealthCheckUrl = () => {
+  return `/api/health/ai`;
+};
+
+export const aiProviderHealthCheck = async (
+  options?: RequestInit,
+): Promise<AiProviderHealthCheck200> => {
+  return customFetch<AiProviderHealthCheck200>(getAiProviderHealthCheckUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getAiProviderHealthCheckQueryKey = () => {
+  return [`/api/health/ai`] as const;
+};
+
+export const getAiProviderHealthCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof aiProviderHealthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof aiProviderHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAiProviderHealthCheckQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof aiProviderHealthCheck>>> = ({ signal }) =>
+    aiProviderHealthCheck({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof aiProviderHealthCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type AiProviderHealthCheckQueryResult = NonNullable<
+  Awaited<ReturnType<typeof aiProviderHealthCheck>>
+>;
+export type AiProviderHealthCheckQueryError = ErrorType<unknown>;
+
+/**
+ * @summary AI provider health
+ */
+
+export function useAiProviderHealthCheck<
+  TData = Awaited<ReturnType<typeof aiProviderHealthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof aiProviderHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getAiProviderHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns active connection count, channel count, and uptime
+ * @summary WebSocket server health
+ */
+export const getWebsocketHealthCheckUrl = () => {
+  return `/api/health/websocket`;
+};
+
+export const websocketHealthCheck = async (
+  options?: RequestInit,
+): Promise<WebsocketHealthCheck200> => {
+  return customFetch<WebsocketHealthCheck200>(getWebsocketHealthCheckUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getWebsocketHealthCheckQueryKey = () => {
+  return [`/api/health/websocket`] as const;
+};
+
+export const getWebsocketHealthCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof websocketHealthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof websocketHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getWebsocketHealthCheckQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof websocketHealthCheck>>> = ({ signal }) =>
+    websocketHealthCheck({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof websocketHealthCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type WebsocketHealthCheckQueryResult = NonNullable<
+  Awaited<ReturnType<typeof websocketHealthCheck>>
+>;
+export type WebsocketHealthCheckQueryError = ErrorType<unknown>;
+
+/**
+ * @summary WebSocket server health
+ */
+
+export function useWebsocketHealthCheck<
+  TData = Awaited<ReturnType<typeof websocketHealthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof websocketHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getWebsocketHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns Stripe connectivity status, mode, and latency
+ * @summary Billing provider health
+ */
+export const getBillingHealthCheckUrl = () => {
+  return `/api/health/billing`;
+};
+
+export const billingHealthCheck = async (options?: RequestInit): Promise<BillingHealthCheck200> => {
+  return customFetch<BillingHealthCheck200>(getBillingHealthCheckUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getBillingHealthCheckQueryKey = () => {
+  return [`/api/health/billing`] as const;
+};
+
+export const getBillingHealthCheckQueryOptions = <
+  TData = Awaited<ReturnType<typeof billingHealthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof billingHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getBillingHealthCheckQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof billingHealthCheck>>> = ({ signal }) =>
+    billingHealthCheck({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof billingHealthCheck>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type BillingHealthCheckQueryResult = NonNullable<
+  Awaited<ReturnType<typeof billingHealthCheck>>
+>;
+export type BillingHealthCheckQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Billing provider health
+ */
+
+export function useBillingHealthCheck<
+  TData = Awaited<ReturnType<typeof billingHealthCheck>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof billingHealthCheck>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getBillingHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns a paginated list of AlloyDecision objects, optionally filtered by status or risk level
+ * @summary List Alloy decisions
+ */
+export const getListDecisionsUrl = (params?: ListDecisionsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/ai/decision?${stringifiedParams}`
+    : `/api/ai/decision`;
+};
+
+export const listDecisions = async (
+  params?: ListDecisionsParams,
+  options?: RequestInit,
+): Promise<ListDecisions200> => {
+  return customFetch<ListDecisions200>(getListDecisionsUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListDecisionsQueryKey = (params?: ListDecisionsParams) => {
+  return [`/api/ai/decision`, ...(params ? [params] : [])] as const;
+};
+
+export const getListDecisionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listDecisions>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(
+  params?: ListDecisionsParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listDecisions>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListDecisionsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listDecisions>>> = ({ signal }) =>
+    listDecisions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listDecisions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListDecisionsQueryResult = NonNullable<Awaited<ReturnType<typeof listDecisions>>>;
+export type ListDecisionsQueryError = ErrorType<UnauthorizedResponse>;
+
+/**
+ * @summary List Alloy decisions
+ */
+
+export function useListDecisions<
+  TData = Awaited<ReturnType<typeof listDecisions>>,
+  TError = ErrorType<UnauthorizedResponse>,
+>(
+  params?: ListDecisionsParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof listDecisions>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListDecisionsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Creates a schema-validated AlloyDecision (v2.0.0). P0/P1 decisions are routed for human approval
+per the approval matrix. rawInput triggers RAG evidence enrichment automatically.
+
+ * @summary Create an Alloy decision
+ */
+export const getCreateDecisionUrl = () => {
+  return `/api/ai/decision`;
+};
+
+export const createDecision = async (
+  createDecisionBody: CreateDecisionBody,
+  options?: RequestInit,
+): Promise<CreateDecision201> => {
+  return customFetch<CreateDecision201>(getCreateDecisionUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createDecisionBody),
+  });
+};
+
+export const getCreateDecisionMutationOptions = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createDecision>>,
+    TError,
+    { data: BodyType<CreateDecisionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createDecision>>,
+  TError,
+  { data: BodyType<CreateDecisionBody> },
+  TContext
+> => {
+  const mutationKey = ['createDecision'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createDecision>>,
+    { data: BodyType<CreateDecisionBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createDecision(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateDecisionMutationResult = NonNullable<Awaited<ReturnType<typeof createDecision>>>;
+export type CreateDecisionMutationBody = BodyType<CreateDecisionBody>;
+export type CreateDecisionMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse>;
+
+/**
+ * @summary Create an Alloy decision
+ */
+export const useCreateDecision = <
+  TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createDecision>>,
+    TError,
+    { data: BodyType<CreateDecisionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createDecision>>,
+  TError,
+  { data: BodyType<CreateDecisionBody> },
+  TContext
+> => {
+  return useMutation(getCreateDecisionMutationOptions(options));
+};
+
+/**
+ * @summary Get a single Alloy decision
+ */
+export const getGetDecisionUrl = (id: string) => {
+  return `/api/ai/decision/${id}`;
+};
+
+export const getDecision = async (id: string, options?: RequestInit): Promise<GetDecision200> => {
+  return customFetch<GetDecision200>(getGetDecisionUrl(id), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetDecisionQueryKey = (id: string) => {
+  return [`/api/ai/decision/${id}`] as const;
+};
+
+export const getGetDecisionQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDecision>>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getDecision>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetDecisionQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getDecision>>> = ({ signal }) =>
+    getDecision(id, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getDecision>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetDecisionQueryResult = NonNullable<Awaited<ReturnType<typeof getDecision>>>;
+export type GetDecisionQueryError = ErrorType<UnauthorizedResponse | NotFoundResponse>;
+
+/**
+ * @summary Get a single Alloy decision
+ */
+
+export function useGetDecision<
+  TData = Awaited<ReturnType<typeof getDecision>>,
+  TError = ErrorType<UnauthorizedResponse | NotFoundResponse>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getDecision>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetDecisionQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Marks a decision as approved. Requires exec or ops role for P1, exec-only for P0.
+Records an immutable audit trail entry.
+
+ * @summary Approve a pending Alloy decision
+ */
+export const getApproveDecisionUrl = (id: string) => {
+  return `/api/ai/decision/${id}/approve`;
+};
+
+export const approveDecision = async (
+  id: string,
+  approveDecisionBody: ApproveDecisionBody,
+  options?: RequestInit,
+): Promise<ApproveDecision200> => {
+  return customFetch<ApproveDecision200>(getApproveDecisionUrl(id), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(approveDecisionBody),
+  });
+};
+
+export const getApproveDecisionMutationOptions = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof approveDecision>>,
+    TError,
+    { id: string; data: BodyType<ApproveDecisionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof approveDecision>>,
+  TError,
+  { id: string; data: BodyType<ApproveDecisionBody> },
+  TContext
+> => {
+  const mutationKey = ['approveDecision'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof approveDecision>>,
+    { id: string; data: BodyType<ApproveDecisionBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return approveDecision(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ApproveDecisionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof approveDecision>>
+>;
+export type ApproveDecisionMutationBody = BodyType<ApproveDecisionBody>;
+export type ApproveDecisionMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+>;
+
+/**
+ * @summary Approve a pending Alloy decision
+ */
+export const useApproveDecision = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof approveDecision>>,
+    TError,
+    { id: string; data: BodyType<ApproveDecisionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof approveDecision>>,
+  TError,
+  { id: string; data: BodyType<ApproveDecisionBody> },
+  TContext
+> => {
+  return useMutation(getApproveDecisionMutationOptions(options));
+};
+
+/**
+ * Marks a decision as rejected with optional reason. Requires exec or ops role.
+ * @summary Reject a pending Alloy decision
+ */
+export const getRejectDecisionUrl = (id: string) => {
+  return `/api/ai/decision/${id}/reject`;
+};
+
+export const rejectDecision = async (
+  id: string,
+  rejectDecisionBody: RejectDecisionBody,
+  options?: RequestInit,
+): Promise<RejectDecision200> => {
+  return customFetch<RejectDecision200>(getRejectDecisionUrl(id), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(rejectDecisionBody),
+  });
+};
+
+export const getRejectDecisionMutationOptions = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof rejectDecision>>,
+    TError,
+    { id: string; data: BodyType<RejectDecisionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof rejectDecision>>,
+  TError,
+  { id: string; data: BodyType<RejectDecisionBody> },
+  TContext
+> => {
+  const mutationKey = ['rejectDecision'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof rejectDecision>>,
+    { id: string; data: BodyType<RejectDecisionBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return rejectDecision(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RejectDecisionMutationResult = NonNullable<Awaited<ReturnType<typeof rejectDecision>>>;
+export type RejectDecisionMutationBody = BodyType<RejectDecisionBody>;
+export type RejectDecisionMutationError = ErrorType<
+  UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+>;
+
+/**
+ * @summary Reject a pending Alloy decision
+ */
+export const useRejectDecision = <
+  TError = ErrorType<
+    UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof rejectDecision>>,
+    TError,
+    { id: string; data: BodyType<RejectDecisionBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof rejectDecision>>,
+  TError,
+  { id: string; data: BodyType<RejectDecisionBody> },
+  TContext
+> => {
+  return useMutation(getRejectDecisionMutationOptions(options));
+};
+
+/**
+ * Returns the full P0–P4 approval matrix with required roles, SLAs, and the current AI execution mode
+ * @summary Get decision approval matrix
+ */
+export const getGetApprovalMatrixUrl = () => {
+  return `/api/ai/approval-matrix`;
+};
+
+export const getApprovalMatrix = async (options?: RequestInit): Promise<GetApprovalMatrix200> => {
+  return customFetch<GetApprovalMatrix200>(getGetApprovalMatrixUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetApprovalMatrixQueryKey = () => {
+  return [`/api/ai/approval-matrix`] as const;
+};
+
+export const getGetApprovalMatrixQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApprovalMatrix>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getApprovalMatrix>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetApprovalMatrixQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getApprovalMatrix>>> = ({ signal }) =>
+    getApprovalMatrix({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApprovalMatrix>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetApprovalMatrixQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApprovalMatrix>>
+>;
+export type GetApprovalMatrixQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get decision approval matrix
+ */
+
+export function useGetApprovalMatrix<
+  TData = Awaited<ReturnType<typeof getApprovalMatrix>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getApprovalMatrix>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetApprovalMatrixQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns telemetry snapshots for all registered apps. Results are cached for 15 seconds.
+ * @summary List all app observability snapshots
+ */
+export const getListObservabilityAppsUrl = () => {
+  return `/api/observability`;
+};
+
+export const listObservabilityApps = async (
+  options?: RequestInit,
+): Promise<ListObservabilityApps200Item[]> => {
+  return customFetch<ListObservabilityApps200Item[]>(getListObservabilityAppsUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListObservabilityAppsQueryKey = () => {
+  return [`/api/observability`] as const;
+};
+
+export const getListObservabilityAppsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listObservabilityApps>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listObservabilityApps>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListObservabilityAppsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listObservabilityApps>>> = ({ signal }) =>
+    listObservabilityApps({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listObservabilityApps>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListObservabilityAppsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listObservabilityApps>>
+>;
+export type ListObservabilityAppsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all app observability snapshots
+ */
+
+export function useListObservabilityApps<
+  TData = Awaited<ReturnType<typeof listObservabilityApps>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof listObservabilityApps>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListObservabilityAppsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns full telemetry snapshot for the specified app. Results are cached for 10 seconds.
+ * @summary Get observability snapshot for a specific app
+ */
+export const getGetAppObservabilityUrl = (appSlug: string) => {
+  return `/api/observability/${appSlug}`;
+};
+
+export const getAppObservability = async (
+  appSlug: string,
+  options?: RequestInit,
+): Promise<GetAppObservability200> => {
+  return customFetch<GetAppObservability200>(getGetAppObservabilityUrl(appSlug), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetAppObservabilityQueryKey = (appSlug: string) => {
+  return [`/api/observability/${appSlug}`] as const;
+};
+
+export const getGetAppObservabilityQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAppObservability>>,
+  TError = ErrorType<void>,
+>(
+  appSlug: string,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getAppObservability>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAppObservabilityQueryKey(appSlug);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAppObservability>>> = ({ signal }) =>
+    getAppObservability(appSlug, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, enabled: !!appSlug, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAppObservability>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAppObservabilityQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAppObservability>>
+>;
+export type GetAppObservabilityQueryError = ErrorType<void>;
+
+/**
+ * @summary Get observability snapshot for a specific app
+ */
+
+export function useGetAppObservability<
+  TData = Awaited<ReturnType<typeof getAppObservability>>,
+  TError = ErrorType<void>,
+>(
+  appSlug: string,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof getAppObservability>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAppObservabilityQueryOptions(appSlug, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns all currently active (unresolved) alerts from the platform alert engine.
+ * @summary Get all active system alerts
+ */
+export const getGetActiveAlertsUrl = () => {
+  return `/api/observability/alerts`;
+};
+
+export const getActiveAlerts = async (options?: RequestInit): Promise<GetActiveAlerts200> => {
+  return customFetch<GetActiveAlerts200>(getGetActiveAlertsUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetActiveAlertsQueryKey = () => {
+  return [`/api/observability/alerts`] as const;
+};
+
+export const getGetActiveAlertsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getActiveAlerts>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getActiveAlerts>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetActiveAlertsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getActiveAlerts>>> = ({ signal }) =>
+    getActiveAlerts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getActiveAlerts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetActiveAlertsQueryResult = NonNullable<Awaited<ReturnType<typeof getActiveAlerts>>>;
+export type GetActiveAlertsQueryError = ErrorType<void>;
+
+/**
+ * @summary Get all active system alerts
+ */
+
+export function useGetActiveAlerts<
+  TData = Awaited<ReturnType<typeof getActiveAlerts>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getActiveAlerts>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetActiveAlertsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns aggregated business event counts across all domains and job failure/success rates.
+ * @summary Get business event counts and domain breakdown
+ */
+export const getGetBusinessEventsUrl = () => {
+  return `/api/observability/business-events`;
+};
+
+export const getBusinessEvents = async (options?: RequestInit): Promise<BusinessEventCounts> => {
+  return customFetch<BusinessEventCounts>(getGetBusinessEventsUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetBusinessEventsQueryKey = () => {
+  return [`/api/observability/business-events`] as const;
+};
+
+export const getGetBusinessEventsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBusinessEvents>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getBusinessEvents>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetBusinessEventsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getBusinessEvents>>> = ({ signal }) =>
+    getBusinessEvents({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBusinessEvents>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBusinessEventsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBusinessEvents>>
+>;
+export type GetBusinessEventsQueryError = ErrorType<void>;
+
+/**
+ * @summary Get business event counts and domain breakdown
+ */
+
+export function useGetBusinessEvents<
+  TData = Awaited<ReturnType<typeof getBusinessEvents>>,
+  TError = ErrorType<void>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getBusinessEvents>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBusinessEventsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Accepts Core Web Vitals measurements (LCP, FID, CLS, FCP, TTFB) from frontend apps.
+ * @summary Record web vital metrics
+ */
+export const getRecordWebVitalsUrl = () => {
+  return `/api/observability/vitals`;
+};
+
+export const recordWebVitals = async (
+  recordWebVitalsBody: RecordWebVitalsBody,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getRecordWebVitalsUrl(), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(recordWebVitalsBody),
+  });
+};
+
+export const getRecordWebVitalsMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordWebVitals>>,
+    TError,
+    { data: BodyType<RecordWebVitalsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof recordWebVitals>>,
+  TError,
+  { data: BodyType<RecordWebVitalsBody> },
+  TContext
+> => {
+  const mutationKey = ['recordWebVitals'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof recordWebVitals>>,
+    { data: BodyType<RecordWebVitalsBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return recordWebVitals(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RecordWebVitalsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof recordWebVitals>>
+>;
+export type RecordWebVitalsMutationBody = BodyType<RecordWebVitalsBody>;
+export type RecordWebVitalsMutationError = ErrorType<void>;
+
+/**
+ * @summary Record web vital metrics
+ */
+export const useRecordWebVitals = <TError = ErrorType<void>, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordWebVitals>>,
+    TError,
+    { data: BodyType<RecordWebVitalsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof recordWebVitals>>,
+  TError,
+  { data: BodyType<RecordWebVitalsBody> },
+  TContext
+> => {
+  return useMutation(getRecordWebVitalsMutationOptions(options));
+};
 
 /**
  * Returns all projects ordered by creation date
