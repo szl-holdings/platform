@@ -8,6 +8,15 @@ import {
   ChevronRight, RefreshCw, Crosshair, UserCheck,
   Database, BarChart3, Lock,
 } from "lucide-react";
+import {
+  ConfidenceBand,
+  EvidencePanel,
+  ApprovalBadge,
+  HumanReviewBadge,
+  PriorityBadge,
+  ActionTypeBadge,
+  EnvironmentLabel,
+} from "@workspace/shared-ui";
 
 const BG = { page: "#080c14", surface: "#0c1018", elevated: "#10141e" };
 const BORDER = { subtle: "rgba(255,255,255,0.04)", muted: "rgba(255,255,255,0.07)" };
@@ -36,40 +45,6 @@ function PanelHead({ icon: Icon, title, right, accent }: { icon: React.ElementTy
   );
 }
 
-function ConfidenceMeter({ value, size = "sm" }: { value: number; size?: "sm" | "md" }) {
-  const pct = Math.round(value * 100);
-  const color = pct >= 80 ? "#6b8f71" : pct >= 50 ? "#c8953c" : "#c45a4a";
-  const w = size === "md" ? "w-16" : "w-10";
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className={`${w} h-1.5 rounded-full overflow-hidden`} style={{ background: "rgba(255,255,255,0.05)" }}>
-        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
-      </div>
-      <span className="text-[8px] font-mono" style={{ color }}>{pct}%</span>
-    </div>
-  );
-}
-
-function EvidenceCard({ evidence }: { evidence: Array<{ source: string; sourceType: string; content: string; relevanceScore: number }> }) {
-  if (!evidence?.length) return null;
-  return (
-    <div className="space-y-1.5 mt-2">
-      <div className="text-[8px] uppercase tracking-widest font-mono" style={{ color: TEXT.muted }}>Evidence Sources</div>
-      {evidence.map((e, i) => (
-        <div key={i} className="rounded px-2.5 py-2" style={{ background: BG.elevated, border: `1px solid ${BORDER.subtle}` }}>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[8px] font-mono px-1.5 py-px rounded" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.15)" }}>
-              {e.sourceType}
-            </span>
-            <span className="text-[9px] font-medium" style={{ color: TEXT.secondary }}>{e.source}</span>
-            <ConfidenceMeter value={e.relevanceScore} />
-          </div>
-          <p className="text-[9px] leading-relaxed line-clamp-2" style={{ color: TEXT.tertiary }}>{e.content}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function ModelSlotCard({ slot }: { slot: { model: string; role: string; provider: string } }) {
   const roleColors: Record<string, string> = {
@@ -166,6 +141,7 @@ export default function AlloyIntelligence() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-[13px] font-semibold tracking-tight" style={{ color: TEXT.primary }}>Alloy Intelligence Fabric</h1>
+          <EnvironmentLabel environment="demo" />
           <span className="text-[9px] font-mono px-2 py-px rounded" style={{
             color: health?.status === "configured" ? "#6b8f71" : "#c8953c",
             background: health?.status === "configured" ? "rgba(107,143,113,0.06)" : "rgba(200,149,60,0.06)",
@@ -262,7 +238,7 @@ export default function AlloyIntelligence() {
                         {triageResult.decision.priority}
                       </span>
                       <span className="text-[8px] font-mono uppercase" style={{ color: TEXT.tertiary }}>{triageResult.decision.urgency}</span>
-                      <ConfidenceMeter value={triageResult.decision.confidence} size="md" />
+                      <ConfidenceBand value={triageResult.decision.confidence} size="md" />
                     </div>
                     <p className="text-[10px] leading-relaxed" style={{ color: TEXT.primary }}>{triageResult.decision.summary}</p>
                     <div className="flex items-center gap-2">
@@ -282,7 +258,7 @@ export default function AlloyIntelligence() {
                           <div key={i} className="flex items-center gap-2">
                             <ChevronRight className="w-2.5 h-2.5" style={{ color: TEXT.muted }} />
                             <span className="text-[9px]" style={{ color: TEXT.secondary }}>{a.action}</span>
-                            <ConfidenceMeter value={a.confidence} />
+                            <ConfidenceBand value={a.confidence} />
                           </div>
                         ))}
                       </div>
@@ -326,7 +302,7 @@ export default function AlloyIntelligence() {
                       <span className="text-[9px] font-bold font-mono px-1.5 py-px rounded" style={{ color: actionTypeColors[planResult.plan.actionType] || TEXT.primary, background: `${actionTypeColors[planResult.plan.actionType]}14`, border: `1px solid ${actionTypeColors[planResult.plan.actionType]}2a` }}>
                         {planResult.plan.actionType}
                       </span>
-                      <ConfidenceMeter value={planResult.plan.confidence} size="md" />
+                      <ConfidenceBand value={planResult.plan.confidence} size="md" />
                       {planResult.plan.approvalRequired && (
                         <span className="text-[8px] font-mono px-1.5 py-px rounded" style={{ color: "#c8953c", background: "rgba(200,149,60,0.06)", border: "1px solid rgba(200,149,60,0.12)" }}>
                           {planResult.plan.approvalLevel} approval
@@ -335,7 +311,7 @@ export default function AlloyIntelligence() {
                     </div>
                     <p className="text-[10px] font-medium" style={{ color: TEXT.primary }}>{planResult.plan.action}</p>
                     <p className="text-[9px] leading-relaxed" style={{ color: TEXT.secondary }}>{planResult.plan.reasoning}</p>
-                    <EvidenceCard evidence={planResult.plan.evidence} />
+                    <EvidencePanel evidence={planResult.plan.evidence} collapsible />
                     {planResult.plan.alternatives?.length > 0 && (
                       <div className="space-y-1 pt-1" style={{ borderTop: `1px solid ${BORDER.subtle}` }}>
                         <div className="text-[8px] uppercase tracking-widest" style={{ color: TEXT.muted }}>Alternatives</div>
@@ -343,7 +319,7 @@ export default function AlloyIntelligence() {
                           <div key={i} className="flex items-center gap-2">
                             <ChevronRight className="w-2.5 h-2.5" style={{ color: TEXT.muted }} />
                             <span className="text-[9px]" style={{ color: TEXT.secondary }}>{a.action}</span>
-                            <ConfidenceMeter value={a.confidence} />
+                            <ConfidenceBand value={a.confidence} />
                           </div>
                         ))}
                       </div>
@@ -484,7 +460,7 @@ export default function AlloyIntelligence() {
                   {entry.latencyMs && <span className="text-[7px] font-mono" style={{ color: TEXT.muted }}>{String(entry.latencyMs)}ms</span>}
                   <span className="text-[7px] font-mono ml-auto" style={{ color: TEXT.muted }}>{String(entry.timestamp)}</span>
                 </div>
-                {entry.confidence != null && <ConfidenceMeter value={entry.confidence as number} size="md" />}
+                {entry.confidence != null && <ConfidenceBand value={entry.confidence as number} size="md" />}
               </div>
             )) : (
               <div className="px-3 py-4 text-center">

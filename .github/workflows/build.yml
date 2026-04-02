@@ -1,7 +1,14 @@
 name: Build Check
-on: [push]
+on:
+  push:
+    branches: [master, main]
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check:
+  build-all:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -10,4 +17,19 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @workspace/api-server run build
+      - name: Build API Server
+        run: pnpm --filter @workspace/api-server run build
+      - name: Build SZL Holdings
+        run: pnpm --filter @workspace/szl-holdings run build
+      - name: Build Lyte Command Center
+        run: pnpm --filter @workspace/lyte-command-center run build
+      - name: Build Firestorm (Aegis)
+        run: pnpm --filter @workspace/firestorm run build
+      - name: Build Terra
+        run: pnpm --filter @workspace/terra run build
+      - name: Build Vessels
+        run: pnpm --filter @workspace/vessels run build
+      - name: Build Carlota Jo
+        run: pnpm --filter @workspace/carlota-jo run build
+      - name: Build Stephen Site
+        run: pnpm --filter @workspace/stephen-site run build
