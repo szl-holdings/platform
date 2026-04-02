@@ -17,6 +17,7 @@ import { globalLimiter } from "./middlewares/rate-limiters";
 import { telemetryMiddleware } from "./middlewares/telemetry";
 import { authMiddleware } from "./middlewares/authMiddleware";
 import { csrfMiddleware } from "./middlewares/csrf";
+import { sessionRefreshPolicy } from "./middlewares/session-policy";
 
 const app: Express = express();
 
@@ -156,6 +157,7 @@ app.use(express.json({
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(csrfMiddleware);
 app.use(authMiddleware);
+app.use(sessionRefreshPolicy());
 
 app.get("/api/health", (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();

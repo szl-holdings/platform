@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, boolean, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
@@ -24,7 +24,7 @@ export const orgMembersTable = pgTable("org_members", {
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   role: text("role", { enum: ["owner", "admin", "member", "viewer"] }).notNull().default("member"),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
-});
+}, (t) => [unique("org_members_org_user_uq").on(t.orgId, t.userId)]);
 
 export const organizationMembershipsTable = pgTable("organization_memberships", {
   id: serial("id").primaryKey(),

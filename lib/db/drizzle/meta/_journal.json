@@ -29,6 +29,20 @@
       "when": 1774960000000,
       "tag": "0003_terra_distress_pipeline",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1775020000000,
+      "tag": "0010_org_invitations",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1775030000000,
+      "tag": "0011_org_members_unique_constraint",
+      "breakpoints": true
     }
   ]
 }
