@@ -98,7 +98,7 @@ export function validateAlloyDecision(raw: unknown): { valid: boolean; decision:
 
   return {
     valid: true,
-    decision: obj as AlloyDecision,
+    decision: obj as unknown as AlloyDecision,
     errors: [],
   };
 }

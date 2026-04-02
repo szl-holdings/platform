@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
 import {
   db,
   alloyWorkflowsTable,
@@ -939,9 +939,9 @@ router.get("/alloy/dashboard", authMiddleware(), async (req, res) => {
 
 // ─── Decisions ────────────────────────────────────────────────────────────────
 
-router.get("/decisions", platformAuth, async (req, res) => {
+router.get("/decisions", platformAuth, async (req: Request, res: Response) => {
   try {
-    const { limit = 30, offset = 0 } = parsePagination(req);
+    const { limit = 30, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const status = req.query.status as string | undefined;
 
     const conditions = [];
@@ -957,15 +957,15 @@ router.get("/decisions", platformAuth, async (req, res) => {
       .limit(limit)
       .offset(offset);
 
-    return sendSuccess(res, rows, { count: rows.length });
+    return sendSuccess(res, rows, 200, { count: rows.length });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch decisions");
   }
 });
 
-router.get("/decisions/:id", platformAuth, async (req, res) => {
+router.get("/decisions/:id", platformAuth, async (req: Request, res: Response) => {
   try {
-    const id = parseIdParam(req, res);
+    const id = parseIdParam(req.params.id);
     if (!id) return;
     const [row] = await db.select().from(alloyDecisions).where(eq(alloyDecisions.id, id));
     if (!row) return sendNotFound(res, "Decision not found");
@@ -975,7 +975,7 @@ router.get("/decisions/:id", platformAuth, async (req, res) => {
   }
 });
 
-router.post("/decisions", platformAuth, async (req, res) => {
+router.post("/decisions", platformAuth, async (req: Request, res: Response) => {
   try {
     const { title, summary, verdict, confidence, approvalStatus, evidence, agentId, agentName, modelUsed, workflowRunId } = req.body;
     if (!title) return sendBadRequest(res, "title is required");
@@ -989,9 +989,9 @@ router.post("/decisions", platformAuth, async (req, res) => {
   }
 });
 
-router.post("/decisions/:id/approve", platformAuth, async (req, res) => {
+router.post("/decisions/:id/approve", platformAuth, async (req: Request, res: Response) => {
   try {
-    const id = parseIdParam(req, res);
+    const id = parseIdParam(req.params.id);
     if (!id) return;
     const reviewer = (req as any).platformUser?.name ?? "Operator";
     const [row] = await db.update(alloyDecisions)
@@ -1005,9 +1005,9 @@ router.post("/decisions/:id/approve", platformAuth, async (req, res) => {
   }
 });
 
-router.post("/decisions/:id/reject", platformAuth, async (req, res) => {
+router.post("/decisions/:id/reject", platformAuth, async (req: Request, res: Response) => {
   try {
-    const id = parseIdParam(req, res);
+    const id = parseIdParam(req.params.id);
     if (!id) return;
     const reviewer = (req as any).platformUser?.name ?? "Operator";
     const [row] = await db.update(alloyDecisions)
@@ -1023,9 +1023,9 @@ router.post("/decisions/:id/reject", platformAuth, async (req, res) => {
 
 // ─── Skills ───────────────────────────────────────────────────────────────────
 
-router.get("/skills", platformAuth, async (req, res) => {
+router.get("/skills", platformAuth, async (req: Request, res: Response) => {
   try {
-    const { limit = 50, offset = 0 } = parsePagination(req);
+    const { limit = 50, offset = 0 } = parsePagination(req.query as Record<string, unknown>);
     const category = req.query.category as string | undefined;
     const approvalClass = req.query.approvalClass as string | undefined;
 
@@ -1041,15 +1041,15 @@ router.get("/skills", platformAuth, async (req, res) => {
       .limit(limit)
       .offset(offset);
 
-    return sendSuccess(res, rows, { count: rows.length });
+    return sendSuccess(res, rows, 200, { count: rows.length });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch skills");
   }
 });
 
-router.get("/skills/:id", platformAuth, async (req, res) => {
+router.get("/skills/:id", platformAuth, async (req: Request, res: Response) => {
   try {
-    const id = parseIdParam(req, res);
+    const id = parseIdParam(req.params.id);
     if (!id) return;
     const [row] = await db.select().from(alloySkills).where(eq(alloySkills.id, id));
     if (!row) return sendNotFound(res, "Skill not found");
@@ -1059,7 +1059,7 @@ router.get("/skills/:id", platformAuth, async (req, res) => {
   }
 });
 
-router.post("/skills", platformAuth, async (req, res) => {
+router.post("/skills", platformAuth, async (req: Request, res: Response) => {
   try {
     const { name, slug, version, category, description, approvalClass, isInternal, dryRunSupported, inputSchema, outputSchema, tags } = req.body;
     if (!name || !slug || !category || !description) return sendBadRequest(res, "name, slug, category, description are required");
@@ -1075,9 +1075,9 @@ router.post("/skills", platformAuth, async (req, res) => {
   }
 });
 
-router.patch("/skills/:id", platformAuth, async (req, res) => {
+router.patch("/skills/:id", platformAuth, async (req: Request, res: Response) => {
   try {
-    const id = parseIdParam(req, res);
+    const id = parseIdParam(req.params.id);
     if (!id) return;
     const { isEnabled, description, approvalClass, tags } = req.body;
     const updates: Record<string, unknown> = { updatedAt: new Date() };
@@ -1093,16 +1093,16 @@ router.patch("/skills/:id", platformAuth, async (req, res) => {
   }
 });
 
-router.get("/skills/:id/runs", platformAuth, async (req, res) => {
+router.get("/skills/:id/runs", platformAuth, async (req: Request, res: Response) => {
   try {
-    const id = parseIdParam(req, res);
+    const id = parseIdParam(req.params.id);
     if (!id) return;
-    const { limit = 20 } = parsePagination(req);
+    const { limit = 20 } = parsePagination(req.query as Record<string, unknown>);
     const rows = await db.select().from(alloySkillRuns)
       .where(eq(alloySkillRuns.skillId, id))
       .orderBy(desc(alloySkillRuns.createdAt))
       .limit(limit);
-    return sendSuccess(res, rows, { count: rows.length });
+    return sendSuccess(res, rows, 200, { count: rows.length });
   } catch (err) {
     handleRouteError(res, err, "Failed to fetch skill runs");
   }

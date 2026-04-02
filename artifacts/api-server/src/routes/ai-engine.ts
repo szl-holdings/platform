@@ -578,7 +578,7 @@ router.get("/ai/decision/:id", authMiddleware({ required: true }), async (req, r
   try {
     const orgId = getOrgId(req.user);
     const admin = isGlobalAdmin(req.user);
-    const decision = await getDecision(req.params.id, orgId, admin);
+    const decision = await getDecision(String(req.params.id), orgId, admin);
     if (!decision) {
       sendNotFound(res, "Decision");
       return;
@@ -599,7 +599,7 @@ router.post(
     try {
       const orgId = getOrgId(req.user);
       const admin = isGlobalAdmin(req.user);
-      const decision = await getDecision(req.params.id, orgId, admin);
+      const decision = await getDecision(String(req.params.id), orgId, admin);
       if (!decision) {
         sendNotFound(res, "Decision");
         return;
@@ -653,7 +653,7 @@ router.post(
     try {
       const orgId = getOrgId(req.user);
       const admin = isGlobalAdmin(req.user);
-      const decision = await getDecision(req.params.id, orgId, admin);
+      const decision = await getDecision(String(req.params.id), orgId, admin);
       if (!decision) {
         sendNotFound(res, "Decision");
         return;
