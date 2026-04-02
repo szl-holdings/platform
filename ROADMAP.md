@@ -6,6 +6,36 @@
 
 ---
 
+## Ecosystem Tiering
+
+The SZL ecosystem operates under a formal three-tier investment framework. Every artifact has an assigned tier:
+
+| Tier | Label | Current Assignments |
+|------|-------|-------------------|
+| **1** | Flagship Now | Lyte (web), Alloy (engine), API Server, SZL Holdings (web), Shared Libraries |
+| **2** | Pilot-Adjacent | Vessels (web), Lyte Mobile |
+| **3** | Parked / Staged | Aegis, Terra, Carlota Jo, Stephen Site, all remaining mobile apps |
+
+**The commercial wedge is Lyte + Alloy.** Tier 2 and Tier 3 platforms are built and operational; they advance when commercial traction in Tier 1 earns the right to expand.
+
+See [Tiering Plan](docs/internal/operations/tiering-plan.md) · [System Inventory](docs/internal/operations/system-inventory.md)
+
+---
+
+## Readiness & Environment Standards
+
+All SZL products use the five-level readiness scale defined in the [Readiness Standard](docs/public/readiness-standard.md):
+
+**Concept → Prototype → Functional Alpha → Pilot Ready → Production**
+
+Current state: all web platforms at **Functional Alpha**. All mobile apps at **Prototype**.
+
+Environment labels (Demo / Seeded Data / Pilot / Live) are defined in the [Environment Labeling Standard](docs/public/environment-labeling-standard.md). Every non-Live surface must display its environment label visibly.
+
+See [Readiness Standard](docs/public/readiness-standard.md) · [Environment Labeling Standard](docs/public/environment-labeling-standard.md)
+
+---
+
 ## Current State — v0.1.0 (Functional Alpha)
 
 All five platforms (Lyte, Aegis, Terra, Vessels, Carlota Jo) are feature-complete at the functional alpha stage. The full monorepo — 16 artifacts, shared infrastructure, mobile apps, and documentation — is built and operational.

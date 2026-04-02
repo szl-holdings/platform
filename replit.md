@@ -278,6 +278,14 @@ Playwright E2E tests require running apps and system-level glib/gtk libraries. I
    - **Trust Center Enhancements** (`/trust`): Added 4 new sections to existing page: (1) Platform Status live link, (2) Subprocessors table (7 vendors with DPA status, category, jurisdiction), (3) Penetration Testing Cadence (quarterly/monthly/continuous/ad-hoc schedule + remediation SLAs by CVSS severity), (4) Responsible Disclosure form with severity selector, submits via contact API. Existing compliance, SLA, and vendor docs sections preserved.
    - Footer nav updated to include "Status" link. Status page accessible without authentication.
 
+10. **Baseline Inventory & Ecosystem Tiering** — Task #262 (Phase 0-1):
+   - **System Inventory** (`docs/internal/operations/system-inventory.md`): Complete baseline for all 16 artifacts — name, route, platform, readiness label, environment label, auth status, payments status, analytics status, monitoring status, last build, tier assignment. Single source of truth for operational state.
+   - **Tiering Plan** (`docs/internal/operations/tiering-plan.md`): Formal Tier 1/2/3 assignment for every artifact. Tier 1 (Flagship Now): Lyte, Alloy/API Server, SZL Holdings, Shared Libraries. Tier 2 (Pilot-Adjacent): Vessels (expansion vertical) + Lyte Mobile (sole designated mobile client). Tier 3 (Parked/Staged): Aegis, Terra, Carlota Jo, Stephen Site, SZL Holdings Mobile, and all remaining mobile apps. Includes tier advancement criteria and investment rules.
+   - **Readiness Standard** (`docs/public/readiness-standard.md`): Updated to canonical 5-level scale — Concept → Prototype → Functional Alpha → Pilot Ready → Production. "Public Beta Candidate" intermediate level removed.
+   - **Environment Labeling Standard** (`docs/public/environment-labeling-standard.md`): Confirmed and updated to 4-label model — Live / Pilot / Demo / Seeded Data. "Simulated Data" removed from canonical label table.
+   - **ventures.tsx** (`artifacts/szl-holdings/src/pages/ventures.tsx`): Updated product data to include tier labels and readiness badges rendered in card UI. Tier 1 items show amber readiness chip; Tier 2/3 items show muted readiness chip.
+   - **ROADMAP.md** and **README.md**: Updated to reference tiering plan, system inventory, readiness standard, and environment labeling standard with proper links.
+
 9. **NPS & Contextual Feedback System** — Full in-app feedback collection system:
    - **DB schema** — `lib/db/src/schema/feedback.ts` — `feedback` table (type, score, sentiment, comment, appName, pageUrl, userRole) and `feedback_survey_prefs` table (per-user last survey, snooze, opt-out). Migration: `lib/db/drizzle/0009_feedback_tables.sql`.
    - **API routes** — `artifacts/api-server/src/routes/feedback.ts` — `POST /api/feedback/nps`, `POST /api/feedback/contextual`, `POST /api/feedback/dismiss`, `GET /api/feedback/nps-eligibility`, `GET /api/admin/feedback/analytics`, `GET /api/admin/feedback/list`.

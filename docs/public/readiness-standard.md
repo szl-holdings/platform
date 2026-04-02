@@ -1,6 +1,6 @@
 # SZL Holdings — Product Readiness Standard
 
-**Version**: 1.0
+**Version**: 1.1
 **Effective**: 2026-04-02
 **Owner**: Stephen Lutar, Founder & CEO
 
@@ -20,8 +20,7 @@ This document defines the canonical readiness labels used across all SZL Holding
 | 1 | **Prototype** | Proof of concept exists. Not suitable for any external use. Core architecture may change. | Internal only |
 | 2 | **Functional Alpha** | Core workflows operate end-to-end. Suitable for internal testing and controlled demonstrations. Not production-hardened. | Demo audiences, investors with context |
 | 3 | **Pilot Ready** | Feature-complete for a defined use case. Enterprise controls active (auth, audit, tenant isolation). Suitable for design-partner pilots with known limitations documented. | Design partners, pilot customers |
-| 4 | **Public Beta Candidate** | Pilot-tested with real users. Performance, reliability, and security meet baseline enterprise requirements. Known issues are documented and manageable. | Broader market, early adopters |
-| 5 | **Production** | Fully hardened. SLA-backed. Monitoring, incident response, and support processes in place. | General availability |
+| 4 | **Production** | Fully hardened. SLA-backed. Monitoring, incident response, and support processes in place. | General availability |
 
 ---
 

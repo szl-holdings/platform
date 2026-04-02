@@ -167,7 +167,9 @@ Confirmed Action + Immutable Audit Trail
 
 **Secrets are never committed.** All credentials are managed via environment variable injection. `.env` files are gitignored absolutely.
 
-**Readiness labels are standardized.** Every product uses the [Readiness Standard](docs/public/readiness-standard.md). Every demo environment is labeled per the [Environment Labeling Standard](docs/public/environment-labeling-standard.md). See also: [Canonical Demo Flow](docs/buyer/canonical-demo.md).
+**Readiness labels are standardized.** Every product uses the five-level [Readiness Standard](docs/public/readiness-standard.md) (Concept → Prototype → Functional Alpha → Pilot Ready → Production). Every environment is labeled per the [Environment Labeling Standard](docs/public/environment-labeling-standard.md) (Demo / Seeded Data / Pilot / Live). See also: [Canonical Demo Flow](docs/buyer/canonical-demo.md).
+
+**Ecosystem tiering is formal.** Every artifact is assigned to a tier: Tier 1 (Flagship Now — Lyte, Alloy/API Server, SZL Holdings, Shared Libraries), Tier 2 (Pilot-Adjacent — Vessels and Lyte Mobile), or Tier 3 (Parked/Staged — all remaining, including Aegis, Terra, Carlota Jo, and all other mobile apps). See [Tiering Plan](docs/internal/operations/tiering-plan.md) · [System Inventory](docs/internal/operations/system-inventory.md).
 
 See [Trust Center](docs/trust/trust-center.md) · [Security Posture](docs/trust/security-posture.md) · [SECURITY.md](SECURITY.md)
 
@@ -311,6 +313,10 @@ This is a **pnpm monorepo** with a shared TypeScript foundation. Every frontend 
 | [Changelog](CHANGELOG.md) | Release history and milestone log |
 | [Platform Overview](docs/PLATFORM_OVERVIEW.md) | Polished platform overview for external audiences |
 | [What This Proves](docs/WHAT_THIS_PROVES.md) | Technical proof summary for evaluators and recruiters |
+| [System Inventory](docs/internal/operations/system-inventory.md) | Complete artifact baseline — readiness, tier, auth, payments, monitoring |
+| [Tiering Plan](docs/internal/operations/tiering-plan.md) | Tier 1/2/3 assignments, rules, and investment guidance |
+| [Readiness Standard](docs/public/readiness-standard.md) | Five-level readiness scale with criteria (Concept → Prototype → Functional Alpha → Pilot Ready → Production) |
+| [Environment Labeling Standard](docs/public/environment-labeling-standard.md) | Environment label definitions: Live / Pilot / Demo / Seeded Data |
 
 ---
 

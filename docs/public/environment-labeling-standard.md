@@ -1,6 +1,6 @@
 # SZL Holdings — Environment Labeling Standard
 
-**Version**: 1.0
+**Version**: 1.1
 **Effective**: 2026-04-02
 **Owner**: Stephen Lutar, Founder & CEO
 
@@ -20,7 +20,6 @@ This document defines the canonical environment labels used across all SZL Holdi
 | **Pilot** | Real infrastructure with limited scope. Design-partner data. Actions may have real consequences within the pilot boundary. | Blue indicator. "PILOT" chip in header. |
 | **Demo** | Curated demonstration environment. Data is seeded or simulated. No real-world consequences. | Amber indicator. "DEMO" chip in header. |
 | **Seeded Data** | Real system running with pre-populated test data. Infrastructure is live but data is synthetic. | Amber indicator. "SEEDED DATA" chip in header. |
-| **Simulated Data** | Data is algorithmically generated for demonstration purposes. Does not represent real entities, events, or outcomes. | Amber indicator. "SIMULATED" chip in header. |
 
 ---
 
@@ -28,7 +27,7 @@ This document defines the canonical environment labels used across all SZL Holdi
 
 1. Every UI surface must display an environment label when the environment is anything other than Live.
 2. API responses must include an `X-Environment` header indicating the current environment type.
-3. Demo environments must never imply live data. If a demo uses realistic data patterns, it must be labeled "Simulated Data" or "Seeded Data" explicitly.
+3. Demo environments must never imply live data. If a demo uses realistic data patterns, it must be labeled "Seeded Data" explicitly.
 4. Screenshots and recordings used in sales, marketing, or investor materials must include the environment label as it appears in the product.
 5. The "Live" label should only be used when:
    - Data comes from verified external sources (APIs, feeds, user input)
@@ -43,17 +42,17 @@ This document defines the canonical environment labels used across all SZL Holdi
 ### UI Components
 - Environment label chip: persistent in the application header
 - Never dismissible by the user
-- Color-coded: Live (green), Pilot (blue), Demo/Seeded/Simulated (amber)
+- Color-coded: Live (green), Pilot (blue), Demo/Seeded (amber)
 
 ### API Headers
 ```
-X-Environment: live | pilot | demo | seeded | simulated
-X-Data-Source: live-api | cached | fallback-api-unavailable | seeded | simulated
+X-Environment: live | pilot | demo | seeded
+X-Data-Source: live-api | cached | fallback-api-unavailable | seeded
 ```
 
 ### Reports and Exports
 - Every generated document must include the environment label in the footer
-- PDF exports must watermark with "DEMO" or "SIMULATED" when applicable
+- PDF exports must watermark with "DEMO" or "SEEDED DATA" when applicable
 
 ### Demo Recordings
 - Environment chip must be visible in all screenshots

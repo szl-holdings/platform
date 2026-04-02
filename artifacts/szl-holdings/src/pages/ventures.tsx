@@ -8,14 +8,16 @@ const core = [
   {
     name: "Lyte",
     type: "Business Observability Platform",
-    stage: "Core now",
+    stage: "Tier 1 — Flagship",
+    readiness: "Functional Alpha",
     href: "/lyte-command-center/",
     body: "The market-facing software wedge: execution visibility, risk surfacing, ownership clarity, and next action in one command surface.",
   },
   {
     name: "Alloy",
     type: "Execution Fabric",
-    stage: "Core now",
+    stage: "Tier 1 — Flagship",
+    readiness: "Functional Alpha",
     href: "/alloy/",
     body: "The shared engine beneath the product: signals, workflow orchestration, routing, audit trail, and governed action.",
   },
@@ -25,28 +27,32 @@ const lanes = [
   {
     icon: Ship,
     name: "Vessels",
-    type: "Expansion lane",
+    type: "Tier 2 — Pilot-Adjacent",
+    readiness: "Functional Alpha",
     href: "/vessels/",
     body: "A future vertical application for maritime intelligence once the core narrative has earned the right to expand.",
   },
   {
     icon: ShieldCheck,
-    name: "Aegis / Firestorm",
-    type: "Expansion lane",
+    name: "Aegis",
+    type: "Tier 3 — Staged",
+    readiness: "Functional Alpha",
     href: "/firestorm/",
     body: "A command surface for security, incident, and managed operations environments where observability and execution discipline matter.",
   },
   {
     icon: Building2,
     name: "Terra",
-    type: "Expansion lane",
+    type: "Tier 3 — Staged",
+    readiness: "Functional Alpha",
     href: "/terra/",
     body: "A real-estate intelligence lane for markets where ownership complexity, signal fragmentation, and process delay create opportunity.",
   },
   {
     icon: BriefcaseBusiness,
     name: "Carlota Jo",
-    type: "Services lane",
+    type: "Tier 3 — Staged",
+    readiness: "Functional Alpha",
     href: "/carlota-jo/",
     body: "A premium advisory and service brand that can produce near-term revenue and high-trust relationships around the platform.",
   },
@@ -105,7 +111,10 @@ export default function VenturesPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-white/55">{item.type}</p>
-                    <p className="mt-4 text-sm leading-7 text-white/72">{item.body}</p>
+                    <p className="mt-3 inline-block rounded border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">
+                      {item.readiness}
+                    </p>
+                    <p className="mt-3 text-sm leading-7 text-white/72">{item.body}</p>
                   </a>
                 );
               })}
@@ -135,7 +144,10 @@ export default function VenturesPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-white">{item.name}</h3>
                     <p className="mt-1 text-sm text-white/55">{item.type}</p>
-                    <p className="mt-4 text-sm leading-7 text-white/72">{item.body}</p>
+                    <p className="mt-3 inline-block rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
+                      {item.readiness}
+                    </p>
+                    <p className="mt-3 text-sm leading-7 text-white/72">{item.body}</p>
                   </a>
                 );
               })}
