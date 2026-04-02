@@ -2,8 +2,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API = `${BASE}/api`;
+const API = "/api";
 
 export default function InquiriesPage() {
   const [submitted, setSubmitted] = useState(false);

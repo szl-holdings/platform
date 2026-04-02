@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = BASE_URL.replace(/\/stephen$/, "") + "/api";
+const API_BASE = "/api";
 
 type EcosystemApp = {
   name: string;
