@@ -8,6 +8,12 @@ import {
   RefreshCw, CheckCheck, ArrowUpCircle,
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import {
+  OperationalOwnerChip,
+  OperationalStatusBadge,
+  OperationalRiskBadge,
+  severityToRiskLevel,
+} from "@workspace/shared-ui/operational-primitives";
 
 export type ExceptionSeverity = "critical" | "high" | "watch" | "normal" | "medium" | "low";
 export type ExceptionType = "route_deviation" | "delay_risk" | "port_congestion" | "weather_disruption" | "maintenance_risk" | "fuel_anomaly" | "schedule_variance" | "security_alert";
@@ -241,9 +247,14 @@ function ExceptionCard({
             </div>
           </div>
 
-          <div className="flex items-center gap-4 pt-1 border-t border-sky-500/10 text-[10px] text-sky-400/40">
-            {exc.owner && <span className="flex items-center gap-1"><User className="w-2.5 h-2.5" />{exc.owner}{exc.ownerFunction ? ` · ${exc.ownerFunction}` : ""}</span>}
-            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Detected {new Date(exc.detectedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} UTC</span>
+          <div className="flex items-center gap-4 pt-1 border-t border-sky-500/10">
+            <OperationalOwnerChip
+              owner={exc.owner ? { name: exc.owner, role: exc.ownerFunction ?? undefined } : undefined}
+              size="xs"
+              unassignedLabel="No owner assigned"
+            />
+            <OperationalRiskBadge level={severityToRiskLevel(exc.severity)} size="xs" />
+            <span className="flex items-center gap-1 text-[9px] text-sky-400/40"><Clock className="w-2.5 h-2.5" />Detected {new Date(exc.detectedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} UTC</span>
             <Badge variant="outline" className="text-[9px] text-sky-400/50 border-sky-500/20 ml-auto">{type.label}</Badge>
           </div>
 

@@ -8,12 +8,27 @@ import { Input } from "@workspace/shared-ui/ui/input";
 import { Label } from "@workspace/shared-ui/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/shared-ui/ui/select";
 import { Textarea } from "@workspace/shared-ui/ui/textarea";
-import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2 } from "lucide-react";
+import { Plus, AlertTriangle, Shield, Clock, Users, Trash2, ArrowRight, FileText, Loader2, X, ChevronUp, ChevronDown } from "lucide-react";
 import { CommentThread, ActivityFeed } from "@workspace/shared-ui/collaboration";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useRealtimeChannel } from "@workspace/shared-ui";
 import { ExportButton } from "@workspace/shared-ui/data-export";
+import {
+  OperationalDetailPane,
+  OperationalStatusBadge,
+  OperationalRiskBadge,
+  OperationalOwnerChip,
+  OperationalAuditTimeline,
+  OperationalEvidencePanel,
+  OperationalEscalationPanel,
+  severityToRiskLevel,
+  formatAgo,
+  type OperationalEntity,
+  type AuditHistoryEntry,
+  type EvidenceItem,
+  type EscalationPath,
+} from "@workspace/shared-ui/operational-primitives";
 
 async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<void> {
   const res = await fetch("/api/documents/generate", {
@@ -94,6 +109,144 @@ const severityColors: Record<string, string> = {
 
 interface IncidentPayload { id?: number; severity?: string; status?: string; title?: string; }
 
+function buildIncidentEntity(incident: any): OperationalEntity {
+  const evidence: EvidenceItem[] = [];
+  if (incident.attackTechnique) {
+    evidence.push({
+      id: "att-ck",
+      label: "ATT&CK Technique",
+      value: incident.attackTechnique,
+      source: "MITRE ATT&CK",
+      confidence: 0.9,
+    });
+  }
+  if (incident.severity) {
+    evidence.push({
+      id: "severity",
+      label: "Severity Classification",
+      value: incident.severity.toUpperCase(),
+      source: "Triage System",
+      confidence: incident.severity === "critical" ? 0.97 : incident.severity === "high" ? 0.88 : 0.75,
+    });
+  }
+
+  const auditHistory: AuditHistoryEntry[] = [];
+  if (incident.createdAt) {
+    auditHistory.push({
+      id: "created",
+      action: "Incident detected and opened",
+      actor: "System",
+      actorType: "system",
+      newState: "detection",
+      timestamp: incident.createdAt,
+    });
+  }
+  if (incident.assignedAnalyst) {
+    auditHistory.push({
+      id: "assigned",
+      action: `Assigned to ${incident.assignedAnalyst}`,
+      actor: incident.assignedAnalyst,
+      actorType: "user",
+      previousState: "detection",
+      newState: "triage",
+      timestamp: incident.createdAt,
+      notes: `Analyst assigned for triage`,
+    });
+  }
+  if (incident.status && incident.status !== "detection") {
+    auditHistory.push({
+      id: "status-update",
+      action: `Status advanced to ${incident.status}`,
+      actor: incident.assignedAnalyst ?? "Analyst",
+      actorType: "user",
+      previousState: "triage",
+      newState: incident.status,
+      timestamp: incident.updatedAt ?? incident.createdAt,
+    });
+  }
+  if (incident.resolvedAt) {
+    auditHistory.push({
+      id: "resolved",
+      action: "Incident closed and resolved",
+      actor: incident.assignedAnalyst ?? "System",
+      actorType: "user",
+      previousState: "remediation",
+      newState: "closed",
+      timestamp: incident.resolvedAt,
+    });
+  }
+
+  const escalationPaths: EscalationPath[] = [];
+  if (incident.severity === "critical" && incident.status !== "closed") {
+    escalationPaths.push({
+      id: "l1",
+      level: 1,
+      label: "Critical — Incident Commander",
+      targetRole: "Incident Commander",
+      notifyChannels: ["Slack #incidents-critical", "PagerDuty"],
+      triggeredAt: incident.createdAt,
+      active: true,
+    });
+  }
+
+  return {
+    id: incident.id,
+    title: incident.title,
+    status: incident.status,
+    riskLevel: severityToRiskLevel(incident.severity ?? "low"),
+    riskScore: incident.severity === "critical" ? 0.95 : incident.severity === "high" ? 0.75 : incident.severity === "medium" ? 0.5 : 0.2,
+    owner: incident.assignedAnalyst ? { name: incident.assignedAnalyst, role: "Analyst" } : undefined,
+    nextAction: incident.status === "closed" ? undefined : statusOrder[Math.min(statusOrder.indexOf(incident.status) + 1, statusOrder.length - 1)] ? `Advance to ${statusOrder[Math.min(statusOrder.indexOf(incident.status) + 1, statusOrder.length - 1)]}` : undefined,
+    evidence,
+    rationale: incident.description ?? undefined,
+    auditHistory,
+    escalationPaths,
+    createdAt: incident.createdAt,
+    updatedAt: incident.updatedAt ?? incident.createdAt,
+  };
+}
+
+function IncidentDetailSidePane({ incident, onClose, onUpdate }: {
+  incident: any;
+  onClose: () => void;
+  onUpdate: (id: number, data: any) => void;
+}) {
+  const entity = buildIncidentEntity(incident);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="bg-[#0A0D14] border-l border-white/10 h-full w-full max-w-lg overflow-y-auto shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-5 py-4 border-b border-white/10 sticky top-0 bg-[#0A0D14] z-10 flex items-center justify-between">
+          <div>
+            <p className="text-[9px] font-mono text-red-400/50 uppercase tracking-widest mb-0.5">Incident Detail</p>
+            <h2 className="text-sm font-semibold text-white leading-tight line-clamp-1">{incident.title}</h2>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground transition-colors shrink-0">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-5">
+          <OperationalDetailPane entity={entity}>
+            <div>
+              <p className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.28)" }}>Investigation Thread</p>
+              <CommentThread
+                entityType="incident"
+                entityId={String(incident.id)}
+                title=""
+                collapsible={false}
+              />
+            </div>
+          </OperationalDetailPane>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function IncidentsPage() {
   const qc = useQueryClient();
   const { data: incidents = [], isLoading } = useQuery({ queryKey: ["incidents"], queryFn: api.incidents.list });
@@ -119,8 +272,11 @@ export default function IncidentsPage() {
   }, [wsIncident, qc]);
   const [view, setView] = useState<"list" | "kanban">("list");
   const [selectedIncidentId, setSelectedIncidentId] = useState<number | null>(null);
+  const [detailPaneIncident, setDetailPaneIncident] = useState<any | null>(null);
   const [form, setForm] = useState({ title: "", description: "", severity: "medium", assignedAnalyst: "", attackTechnique: "" });
   const [downloadingIncidentId, setDownloadingIncidentId] = useState<number | null>(null);
+
+  const selectedIncident = detailPaneIncident ?? (selectedIncidentId !== null ? incidents.find((i: any) => i.id === selectedIncidentId) : null);
 
   const createMut = useMutation({
     mutationFn: (data: any) => api.incidents.create(data),
@@ -150,6 +306,14 @@ export default function IncidentsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {selectedIncident && (
+        <IncidentDetailSidePane
+          incident={selectedIncident}
+          onClose={() => { setDetailPaneIncident(null); setSelectedIncidentId(null); }}
+          onUpdate={(id, data) => updateMut.mutate({ id, data })}
+        />
+      )}
+
       {liveAlert && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-lg border animate-pulse" style={{ background: liveAlert.severity === "critical" ? "rgba(239,68,68,0.12)" : "rgba(249,115,22,0.10)", borderColor: liveAlert.severity === "critical" ? "rgba(239,68,68,0.4)" : "rgba(249,115,22,0.3)" }}>
           <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: liveAlert.severity === "critical" ? "#ef4444" : "#f97316" }} />
@@ -252,22 +416,23 @@ export default function IncidentsPage() {
               </div>
               <div className="space-y-2">
                 {incidents.filter((i: any) => i.status === status).map((incident: any) => (
-                  <Card key={incident.id} className={`bg-card border-border hover:border-primary/20 transition-all cursor-pointer ${incident.severity === "critical" ? "ring-1 ring-red-500/10" : ""}`}>
+                  <Card key={incident.id} className={`bg-card border-border hover:border-primary/20 transition-all cursor-pointer ${incident.severity === "critical" ? "ring-1 ring-red-500/10" : ""}`}
+                    onClick={() => setDetailPaneIncident(incident)}>
                     <CardContent className="p-3">
                       <div className="flex items-start justify-between mb-1">
                         <h4 className="text-xs font-semibold line-clamp-2">{incident.title}</h4>
-                        <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => deleteMut.mutate(incident.id)}>
+                        <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={e => { e.stopPropagation(); deleteMut.mutate(incident.id); }}>
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
-                      <Badge variant="outline" className={`text-[10px] ${severityColors[incident.severity]}`}>{incident.severity}</Badge>
-                      {incident.assignedAnalyst && (
-                        <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                          <Users className="w-2.5 h-2.5" /> {incident.assignedAnalyst}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <OperationalRiskBadge level={severityToRiskLevel(incident.severity ?? "low")} size="xs" />
+                        {incident.assignedAnalyst && (
+                          <OperationalOwnerChip owner={{ name: incident.assignedAnalyst, role: "Analyst" }} size="xs" />
+                        )}
+                      </div>
                       {status !== "closed" && (
-                        <Button variant="ghost" size="sm" className="w-full mt-2 h-6 text-[10px]" onClick={() => advanceStatus(incident)}>
+                        <Button variant="ghost" size="sm" className="w-full mt-2 h-6 text-[10px]" onClick={e => { e.stopPropagation(); advanceStatus(incident); }}>
                           Advance <ArrowRight className="w-3 h-3 ml-1" />
                         </Button>
                       )}
@@ -294,67 +459,60 @@ export default function IncidentsPage() {
             </Card>
           ) : (
             incidents.map((incident: any) => (
-              <div key={incident.id}>
-                <Card
-                  className={`bg-card border-border hover:border-primary/20 transition-all duration-300 cursor-pointer ${incident.severity === "critical" && incident.status !== "closed" ? "ring-1 ring-red-500/10" : ""} ${selectedIncidentId === incident.id ? "border-primary/40" : ""}`}
-                  onClick={() => setSelectedIncidentId(selectedIncidentId === incident.id ? null : incident.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-sm">{incident.title}</h3>
-                        </div>
-                        {incident.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{incident.description}</p>}
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                          {incident.assignedAnalyst && <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {incident.assignedAnalyst}</span>}
-                          {incident.attackTechnique && <span className="font-mono bg-muted px-1.5 py-0.5 rounded">{incident.attackTechnique}</span>}
-                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(incident.detectedAt).toLocaleString()}</span>
-                        </div>
+              <Card
+                key={incident.id}
+                className={`bg-card border-border hover:border-primary/20 transition-all duration-300 cursor-pointer ${incident.severity === "critical" && incident.status !== "closed" ? "ring-1 ring-red-500/10" : ""}`}
+                onClick={() => setDetailPaneIncident(incident)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="font-semibold text-sm">{incident.title}</h3>
+                        <OperationalStatusBadge status={incident.status} size="xs" />
+                        <OperationalRiskBadge level={severityToRiskLevel(incident.severity ?? "low")} size="xs" />
                       </div>
-                      <div className="flex items-center gap-2 ml-4" onClick={e => e.stopPropagation()}>
-                        <Badge variant="outline" className={severityColors[incident.severity] || ""}>{incident.severity}</Badge>
-                        <Select value={incident.status} onValueChange={v => {
-                          const updates: any = { status: v };
-                          if (v === "closed") updates.resolvedAt = new Date().toISOString();
-                          updateMut.mutate({ id: incident.id, data: updates });
-                        }}>
-                          <SelectTrigger className="w-36 h-7 text-xs"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {statusOrder.map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-primary"
-                          disabled={downloadingIncidentId === incident.id}
-                          onClick={async () => {
-                            setDownloadingIncidentId(incident.id);
-                            try { await downloadIncidentPDF(incident); } catch { toast.error("PDF generation failed"); } finally { setDownloadingIncidentId(null); }
-                          }}
-                          title="Export Incident Report PDF"
-                        >
-                          {downloadingIncidentId === incident.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => deleteMut.mutate(incident.id)}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
+                      {incident.description && <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{incident.description}</p>}
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                        {incident.assignedAnalyst && (
+                          <OperationalOwnerChip owner={{ name: incident.assignedAnalyst, role: "Analyst" }} size="xs" />
+                        )}
+                        {incident.attackTechnique && <span className="font-mono bg-muted px-1.5 py-0.5 rounded">{incident.attackTechnique}</span>}
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatAgo(incident.detectedAt ?? incident.createdAt)}</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-                {selectedIncidentId === incident.id && (
-                  <div className="ml-4 border-l-2 border-primary/20 pl-4 mt-1">
-                    <CommentThread
-                      entityType="incident"
-                      entityId={String(incident.id)}
-                      title={`${incident.title} — Discussion`}
-                      collapsible={false}
-                    />
+                    <div className="flex items-center gap-2 ml-4" onClick={e => e.stopPropagation()}>
+                      <Select value={incident.status} onValueChange={v => {
+                        const updates: any = { status: v };
+                        if (v === "closed") updates.resolvedAt = new Date().toISOString();
+                        updateMut.mutate({ id: incident.id, data: updates });
+                      }}>
+                        <SelectTrigger className="w-36 h-7 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {statusOrder.map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-primary"
+                        disabled={downloadingIncidentId === incident.id}
+                        onClick={async e => {
+                          e.stopPropagation();
+                          setDownloadingIncidentId(incident.id);
+                          try { await downloadIncidentPDF(incident); } catch { toast.error("PDF generation failed"); } finally { setDownloadingIncidentId(null); }
+                        }}
+                        title="Export Incident Report PDF"
+                      >
+                        {downloadingIncidentId === incident.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={e => { e.stopPropagation(); deleteMut.mutate(incident.id); }}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             ))
           )}
         </div>

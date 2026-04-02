@@ -5,9 +5,16 @@ import { Badge } from "@workspace/shared-ui/ui/badge";
 import {
   ArrowLeft, Ship, MapPin, Navigation, Clock, Wrench, AlertTriangle,
   DollarSign, Activity, TrendingUp, TrendingDown, ChevronRight,
-  Fuel, Shield, Radio, RefreshCw, Package, Globe
+  Fuel, Shield, Radio, RefreshCw, Package, Globe, History
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
+import {
+  OperationalAuditTimeline,
+  OperationalOwnerChip,
+  OperationalStatusBadge,
+  OperationalRiskBadge,
+  type AuditHistoryEntry,
+} from "@workspace/shared-ui/operational-primitives";
 
 const statusConfig: Record<string, { label: string; color: string; dotColor: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dotColor: "#22c55e" },
@@ -49,7 +56,7 @@ export default function VesselDetailEnhancedPage() {
   const [matchLong, paramsLong] = useRoute("/vessels/:id");
   const params = paramsShort ?? paramsLong;
   const vesselId = Number(params?.id);
-  const [tab, setTab] = useState<"overview" | "voyage" | "maintenance" | "portcalls" | "history">("overview");
+  const [tab, setTab] = useState<"overview" | "voyage" | "maintenance" | "portcalls" | "history" | "audit">("overview");
 
   const { detail, isLoading, refetch } = useVesselDetail(vesselId);
 
@@ -83,7 +90,33 @@ export default function VesselDetailEnhancedPage() {
     { id: "maintenance" as const, label: "Maintenance" },
     { id: "portcalls" as const, label: "Port Calls" },
     { id: "history" as const, label: "Voyage History" },
+    { id: "audit" as const, label: "Event History" },
   ];
+
+  const now = new Date().toISOString();
+  const vesselAny = vessel as any;
+  const vesselCreatedAt: string = vesselAny.createdAt ?? now;
+  const vesselUpdatedAt: string = vesselAny.updatedAt ?? vesselCreatedAt;
+
+  const auditEntries: AuditHistoryEntry[] = (() => {
+    const entries: AuditHistoryEntry[] = [];
+    entries.push({ id: "vessel-added", action: "Vessel in fleet registry", actor: "System", actorType: "system", newState: vessel.status, timestamp: vesselCreatedAt });
+    exceptions.forEach((exc: any, i: number) => {
+      entries.push({ id: `exc-${i}`, action: `Exception raised: ${exc.title}`, actor: exc.ownerFunction ?? "Fleet Ops", actorType: "user", newState: "exception_open", notes: exc.description?.slice(0, 80), timestamp: exc.raisedAt ?? exc.detectedAt ?? vesselCreatedAt });
+    });
+    portCalls.slice(0, 5).forEach((pc: any, i: number) => {
+      entries.push({ id: `pc-${i}`, action: `Port call: ${pc.portName}`, actor: "AIS System", actorType: "system", newState: "in_port", notes: pc.purpose ? `Purpose: ${pc.purpose}` : undefined, timestamp: pc.arrivalAt ?? pc.arrivedAt ?? vesselCreatedAt });
+    });
+    if (activeVoyage) {
+      entries.push({ id: "voyage-active", action: `Active voyage: ${activeVoyage.originPort} → ${activeVoyage.destinationPort}`, actor: "Voyage System", actorType: "system", newState: "at_sea", notes: activeVoyage.voyageRef, timestamp: activeVoyage.scheduledDepartureAt ?? vesselCreatedAt });
+    }
+    maintenance.slice(0, 3).forEach((m: any, i: number) => {
+      if (m.status === "in_progress") {
+        entries.push({ id: `maint-${i}`, action: `Maintenance in progress: ${m.component}`, actor: m.technician ?? "Maintenance Ops", actorType: "user", notes: m.description?.slice(0, 60), timestamp: vesselUpdatedAt });
+      }
+    });
+    return entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  })();
 
   const openMaintenance = maintenance.filter(m => m.status !== "completed");
 
@@ -497,6 +530,33 @@ export default function VesselDetailEnhancedPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {tab === "audit" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-semibold text-sky-100">Event History</h3>
+              <p className="text-[10px] text-sky-400/40 mt-0.5">Chronological record of fleet events, exceptions, maintenance, and voyage state changes</p>
+            </div>
+            {sanctions?.knownOwner && (
+              <div className="text-right">
+                <p className="text-[9px] text-sky-400/40 uppercase tracking-wider">Registered Owner</p>
+                <OperationalOwnerChip owner={{ name: sanctions.knownOwner, role: sanctions.knownManager ? `Mgr: ${sanctions.knownManager}` : "Owner" }} size="xs" />
+              </div>
+            )}
+          </div>
+          <div className="bg-[#0a1628]/80 border border-sky-500/10 rounded-xl p-4">
+            {auditEntries.length === 0 ? (
+              <div className="py-8 text-center">
+                <History className="w-8 h-8 text-sky-400/20 mx-auto mb-2" />
+                <p className="text-xs text-sky-400/30">No event history available</p>
+              </div>
+            ) : (
+              <OperationalAuditTimeline entries={auditEntries} />
+            )}
+          </div>
         </div>
       )}
 

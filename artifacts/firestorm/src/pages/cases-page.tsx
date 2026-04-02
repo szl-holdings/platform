@@ -12,6 +12,12 @@ import {
 import { useState, useMemo } from "react";
 import { cn } from "@workspace/shared-ui/utils";
 import { toast } from "sonner";
+import {
+  OperationalAuditTimeline,
+  OperationalOwnerChip,
+  OperationalStatusBadge,
+  type AuditHistoryEntry,
+} from "@workspace/shared-ui/operational-primitives";
 
 interface CaseNote { content: string; author: string; at: string }
 interface EvidenceItem { name: string; type: string; url?: string; addedAt: string }
@@ -160,11 +166,11 @@ function CaseDetailPanel({ caseItem, onClose, onUpdate }: { caseItem: Case; onCl
 
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Assigned Analyst</div>
-              <div className="flex items-center gap-1.5 text-xs text-foreground">
-                <User className="w-3 h-3 text-muted-foreground" />
-                {caseItem.assignedAnalyst ?? <span className="text-muted-foreground/50">Unassigned</span>}
-              </div>
+              <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1.5">Assigned Analyst</div>
+              <OperationalOwnerChip
+                owner={caseItem.assignedAnalyst ? { name: caseItem.assignedAnalyst, role: "Analyst" } : undefined}
+                unassignedLabel="Unassigned"
+              />
             </div>
             <div className="bg-white/5 rounded-lg p-3">
               <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Created</div>
@@ -257,15 +263,15 @@ function CaseDetailPanel({ caseItem, onClose, onUpdate }: { caseItem: Case; onCl
           {(caseItem.auditTrail?.length ?? 0) > 0 && (
             <div>
               <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2">Audit Trail</div>
-              <div className="space-y-1">
-                {[...(caseItem.auditTrail ?? [])].reverse().map((entry, i) => (
-                  <div key={i} className="flex items-start gap-2 text-[10px]">
-                    <span className="text-muted-foreground/50 shrink-0 mt-px">{new Date(entry.at).toLocaleDateString()}</span>
-                    <span className="text-muted-foreground/70">{entry.action}</span>
-                    <span className="text-muted-foreground/50 ml-auto shrink-0">by {entry.user}</span>
-                  </div>
-                ))}
-              </div>
+              <OperationalAuditTimeline
+                entries={[...(caseItem.auditTrail ?? [])].reverse().map((entry, i) => ({
+                  id: String(i),
+                  action: entry.action,
+                  actor: entry.user,
+                  actorType: "user" as const,
+                  timestamp: entry.at,
+                }))}
+              />
             </div>
           )}
         </div>

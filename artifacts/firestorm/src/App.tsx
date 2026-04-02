@@ -80,22 +80,13 @@ const MspServiceDesk = lazy(() => import("@/pages/msp/service-desk"));
 // ─── Intelligence Engine pages (from INCA) ────────────────────────────────────
 const IntelDashboard = lazy(() => import("@/pages/intel/dashboard"));
 const QuipuCommand = lazy(() => import("@/pages/intel/quipu-command"));
-const AgentSpawner = lazy(() => import("@/pages/intel/agent-spawner"));
 const ChasquiRelay = lazy(() => import("@/pages/intel/chasqui-relay"));
 const DualMindMonitor = lazy(() => import("@/pages/intel/dual-mind-monitor"));
 const WillaqUmu = lazy(() => import("@/pages/intel/willaq-umu"));
-const Experiments = lazy(() => import("@/pages/intel/experiments"));
 const Models = lazy(() => import("@/pages/intel/models"));
-const NeuralExplorer = lazy(() => import("@/pages/intel/neural-explorer"));
 const Predictions = lazy(() => import("@/pages/intel/predictions"));
-const GPUMonitoring = lazy(() => import("@/pages/intel/gpu-monitoring"));
-const LLMEvaluation = lazy(() => import("@/pages/intel/llm-evaluation"));
-const Benchmarking = lazy(() => import("@/pages/intel/benchmarking"));
-const ModelRegistry = lazy(() => import("@/pages/intel/model-registry"));
-const EnsembleStudio = lazy(() => import("@/pages/intel/ensemble-studio"));
 const IntelProjects = lazy(() => import("@/pages/intel/projects"));
 const IntelInsights = lazy(() => import("@/pages/intel/insights"));
-const IntelAlertsManagement = lazy(() => import("@/pages/intel/alerts-management"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -172,34 +163,20 @@ const opsNavItems = [
   { path: "/ops/rmm", label: "RMM Console", icon: Server },
 ];
 
-const SHOW_EXPERIMENTAL_INTEL = false;
-
 const intelNavPrimary = [
   { path: "/intel/dashboard", label: "Research Dashboard", icon: LayoutDashboard },
   { path: "/intel/projects", label: "Research Projects", icon: FlaskConical },
-  { path: "/intel/experiments", label: "Experiments", icon: FlaskConical },
   { path: "/intel/models", label: "Model Registry", icon: Cpu },
-  ...(SHOW_EXPERIMENTAL_INTEL ? [{ path: "/intel/neural-explorer", label: "Neural Explorer", icon: BrainIcon }] : []),
   { path: "/intel/predictions", label: "Predictions", icon: TrendingUp },
   { path: "/intel/insights", label: "AI Insights", icon: Eye },
 ];
 
 const intelCortexNav = [
   { path: "/intel/quipu-command", label: "Quipu Command", icon: Network },
-  ...(SHOW_EXPERIMENTAL_INTEL ? [{ path: "/intel/agent-spawner", label: "Agent Spawner", icon: Plus }] : []),
   { path: "/intel/chasqui-relay", label: "Chasqui Relay", icon: Radio },
   { path: "/intel/dual-mind", label: "Dual-Mind Monitor", icon: Sun },
   { path: "/intel/willaq-umu", label: "Willaq Umu Oracle", icon: Eye },
   { path: "/agent-insights", label: "Agent Insights", icon: BrainIcon },
-];
-
-const intelToolsNav = [
-  { path: "/intel/ensemble", label: "Ensemble Studio", icon: Layers },
-  { path: "/intel/benchmarking", label: "Benchmarking Suite", icon: Trophy },
-  { path: "/intel/llm-eval", label: "LLM Evaluation", icon: FlaskConical },
-  { path: "/intel/gpu-monitoring", label: "GPU Monitor", icon: Cpu },
-  { path: "/intel/model-registry", label: "Version Registry", icon: Database },
-  ...(SHOW_EXPERIMENTAL_INTEL ? [{ path: "/intel/neural-explorer", label: "Neural Explorer", icon: BrainIcon }] : []),
 ];
 
 type Module = "security" | "operations" | "intelligence";
@@ -331,7 +308,6 @@ function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () =
   const [socToolsExpanded, setSocToolsExpanded] = useState(false);
   const [complianceExpanded, setComplianceExpanded] = useState(location.startsWith("/cr"));
   const [cortexExpanded, setCortexExpanded] = useState(false);
-  const [intelToolsExpanded, setIntelToolsExpanded] = useState(false);
 
   const navItemColors: Record<Module, { active: string; inactive: string; indicator: string }> = {
     security: {
@@ -527,33 +503,6 @@ function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () =
                   </div>
                 )}
               </div>
-              <div className="pt-1">
-                <button
-                  onClick={() => setIntelToolsExpanded(!intelToolsExpanded)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-violet-400/30 hover:text-violet-400/60 transition-all w-full"
-                >
-                  <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", intelToolsExpanded && "rotate-90")} />
-                  Research Tools
-                </button>
-                {intelToolsExpanded && (
-                  <div className="mt-0.5 space-y-0.5">
-                    {intelToolsNav.map(({ path, label, icon: Icon }) => {
-                      const isActive = location.startsWith(path);
-                      return (
-                        <Link key={path} href={path}>
-                          <div className={cn(
-                            "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                            isActive ? "bg-violet-500/10 text-violet-300" : "text-violet-400/30 hover:text-violet-200 hover:bg-violet-500/5"
-                          )}>
-                            <Icon className="w-3 h-3 shrink-0" />
-                            {label}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
             </>
           )}
         </nav>
@@ -716,22 +665,13 @@ function AppRouter() {
         {/* Intelligence Engine */}
         <Route path="/intel/dashboard" component={IntelDashboard} />
         <Route path="/intel/quipu-command" component={QuipuCommand} />
-        {SHOW_EXPERIMENTAL_INTEL && <Route path="/intel/agent-spawner" component={AgentSpawner} />}
         <Route path="/intel/chasqui-relay" component={ChasquiRelay} />
         <Route path="/intel/dual-mind" component={DualMindMonitor} />
         <Route path="/intel/willaq-umu" component={WillaqUmu} />
-        <Route path="/intel/experiments" component={Experiments} />
         <Route path="/intel/models" component={Models} />
-        {SHOW_EXPERIMENTAL_INTEL && <Route path="/intel/neural-explorer" component={NeuralExplorer} />}
         <Route path="/intel/predictions" component={Predictions} />
-        <Route path="/intel/gpu-monitoring" component={GPUMonitoring} />
-        <Route path="/intel/llm-eval" component={LLMEvaluation} />
-        <Route path="/intel/benchmarking" component={Benchmarking} />
-        <Route path="/intel/model-registry" component={ModelRegistry} />
-        <Route path="/intel/ensemble" component={EnsembleStudio} />
         <Route path="/intel/projects" component={IntelProjects} />
         <Route path="/intel/insights" component={IntelInsights} />
-        <Route path="/intel/alerts" component={IntelAlertsManagement} />
 
         <Route>
           <div className="flex items-center justify-center h-full">
@@ -767,9 +707,9 @@ const aegisCommands: CommandItem[] = [
   { id: "nav-dispatch", label: "Technician Dispatch", icon: "🔧", group: "Managed Operations", action: nav("/ops/dispatch") },
   { id: "nav-intel-dashboard", label: "Intelligence Dashboard", icon: "🧠", group: "Intelligence Engine", action: nav("/intel/dashboard") },
   { id: "nav-quipu", label: "Quipu Command", icon: "🕸️", group: "Intelligence Engine", action: nav("/intel/quipu-command") },
-  { id: "nav-experiments", label: "Experiments", icon: "🧪", group: "Intelligence Engine", action: nav("/intel/experiments") },
-  { id: "nav-models", label: "Model Registry", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
-  { id: "nav-neural", label: "Neural Explorer", icon: "🔬", group: "Intelligence Engine", action: nav("/intel/neural-explorer") },
+  { id: "nav-models", label: "Models", icon: "⚙️", group: "Intelligence Engine", action: nav("/intel/models") },
+  { id: "nav-predictions", label: "Predictions", icon: "📈", group: "Intelligence Engine", action: nav("/intel/predictions") },
+  { id: "nav-intel-insights", label: "Intel Insights", icon: "💡", group: "Intelligence Engine", action: nav("/intel/insights") },
   { id: "app-alloy", label: "Switch to Alloy", icon: "⬡", group: "Switch App", description: "Execution Fabric", action: () => { window.location.href = "/alloy/"; } },
   { id: "app-lyte", label: "Switch to Lyte", icon: "⚡", group: "Switch App", description: "Command Center", action: () => { window.location.href = "/lyte-command-center/"; } },
   { id: "app-vessels", label: "Switch to Vessels", icon: "⚓", group: "Switch App", description: "Maritime Intelligence", action: () => { window.location.href = "/vessels/"; } },
@@ -780,7 +720,7 @@ const aegisShortcuts: KeyboardShortcut[] = [
   { key: "A", description: "Go to Alerts", category: "Security" },
   { key: "T", description: "Go to Threat Intel", category: "Security" },
   { key: "N", description: "Go to NOC Operations", category: "Operations" },
-  { key: "E", description: "Go to Experiments", category: "Intelligence" },
+  { key: "E", description: "Go to Intelligence Dashboard", category: "Intelligence" },
 ];
 
 const MARKETING_ROUTES = ["/", "/home", "/demo"];

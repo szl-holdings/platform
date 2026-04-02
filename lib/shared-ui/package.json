@@ -92,7 +92,8 @@
     "./EcosystemTour": "./src/EcosystemTour.tsx",
     "./agent-insights-widget": "./src/agent-insights-widget.tsx",
     "./core-observability-data": "./src/core-observability-data.ts",
-    "./sandbox-mode": "./src/sandbox-mode.tsx"
+    "./sandbox-mode": "./src/sandbox-mode.tsx",
+    "./operational-primitives": "./src/operational-primitives.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.4",
