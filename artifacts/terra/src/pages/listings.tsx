@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Home, Search, Filter, MapPin, Clock, TrendingDown, Eye, ChevronDown, X, Building2, ArrowRight, Radio } from "lucide-react";

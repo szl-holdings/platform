@@ -9,6 +9,7 @@ import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { useAuth } from "@workspace/replit-auth-web";
+import { Shield } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {

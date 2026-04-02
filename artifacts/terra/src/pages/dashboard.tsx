@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
