@@ -148,7 +148,7 @@ Default: `propose_only` — high-risk tools blocked until mode changes.
 | Aegis | Functional Alpha |
 | Terra | Functional Alpha |
 | Vessels | Functional Alpha |
-| Carlota Jo | Public Beta Candidate |
+| Carlota Jo | Functional Alpha |
 
 ---
 

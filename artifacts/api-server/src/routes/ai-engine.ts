@@ -333,7 +333,7 @@ router.post("/ai/tools/execute", authMiddleware({ required: true }), async (req,
   }
 });
 
-router.get("/ai/audit", (_req, res) => {
+router.get("/ai/audit", authMiddleware({ required: true }), (_req, res) => {
   const limit = Math.min(parseInt(String(_req.query.limit) || "50", 10), 200);
   const offset = parseInt(String(_req.query.offset) || "0", 10);
   res.json({

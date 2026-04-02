@@ -27,13 +27,18 @@ export function validateOwnershipAssignment(obj: unknown): obj is OwnershipAssig
   if (!obj || typeof obj !== "object") return false;
   const o = obj as Record<string, unknown>;
   return (
-    typeof o.assignedOwner === "string" &&
+    typeof o.decisionId === "string" && o.decisionId.length > 0 &&
+    Array.isArray(o.signalIds) &&
+    typeof o.assignedOwner === "string" && o.assignedOwner.length > 0 &&
     typeof o.ownerRole === "string" &&
     typeof o.assignmentReason === "string" &&
     typeof o.confidence === "number" &&
     o.confidence >= 0 && o.confidence <= 1 &&
     Array.isArray(o.alternativeOwners) &&
     Array.isArray(o.escalationPath) &&
-    Array.isArray(o.evidenceRefs)
+    Array.isArray(o.evidenceRefs) &&
+    typeof o.modelRoute === "string" &&
+    o.schemaVersion === "1.0.0" &&
+    typeof o.createdAt === "string"
   );
 }
