@@ -2,319 +2,699 @@ import { m } from "framer-motion";
 import { Link } from "wouter";
 import {
   ArrowRight,
-  Radar,
-  Workflow,
+  ArrowUpRight,
+  ChevronRight,
+  Zap,
+  GitBranch,
   ShieldCheck,
-  Building2,
   Ship,
+  Building2,
   BriefcaseBusiness,
+  Eye,
   CheckCircle2,
+  BarChart3,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
-const proofPoints = [
-  "Focused wedge: Lyte + Alloy",
-  "Shared execution fabric and audit trail",
-  "Enterprise-style command surface and trust posture",
-  "Expansion lanes already prototyped inside the wider SZL ecosystem",
+const PIPELINE = [
+  { label: "Signal", sub: "Lyte detects it", color: "var(--color-lyte)", accentClass: "bg-lyte" },
+  { label: "Interpretation", sub: "Context & priority", color: "var(--color-lyte)", accentClass: "" },
+  { label: "Recommendation", sub: "Alloy proposes action", color: "var(--color-alloy)", accentClass: "" },
+  { label: "Approval", sub: "Human-in-the-loop", color: "var(--color-alloy)", accentClass: "" },
+  { label: "Action", sub: "Alloy executes", color: "var(--color-alloy)", accentClass: "" },
+  { label: "Audit", sub: "Immutable record", color: "hsl(145,62%,40%)", accentClass: "" },
 ];
 
-const customerProblems = [
+const PROBLEMS = [
   {
     title: "Invisible execution risk",
-    body: "Revenue, approvals, handoffs, and ownership drift are usually tracked in disconnected tools. By the time leadership sees the problem, the damage is already real.",
+    body: "Revenue, approvals, handoffs, and ownership drift live in disconnected tools. By the time leadership sees the problem, the damage is done.",
   },
   {
     title: "No command layer",
-    body: "Teams have dashboards, BI, workflow tools, and messaging channels, but not a system that connects signal to decision to confirmed action.",
+    body: "Teams have dashboards, BI, and messaging channels — but not a system that connects signal to decision to confirmed action.",
   },
   {
     title: "AI without accountability",
-    body: "Most AI outputs are not traceable, governed, or tied to execution. That creates noise instead of trust.",
+    body: "Most AI outputs are not traceable, governed, or tied to execution. That creates noise and liability instead of trust and velocity.",
   },
 ];
 
-const lanes = [
+const VERTICALS = [
+  {
+    icon: ShieldCheck,
+    name: "Aegis",
+    domain: "Defense & intelligence",
+    body: "SOC command, XDR, managed security operations — the same observability + execution discipline applied to high-consequence security environments.",
+    accent: "var(--color-aegis)",
+    href: "/solutions/aegis",
+  },
   {
     icon: Ship,
     name: "Vessels",
-    stage: "Expansion lane",
-    body: "A future maritime intelligence application built on the same operating logic once the core wedge is commercially proven.",
-  },
-  {
-    icon: ShieldCheck,
-    name: "Aegis / Firestorm",
-    stage: "Expansion lane",
-    body: "A security and command surface for high-consequence environments where observability and execution discipline matter.",
+    domain: "Maritime intelligence",
+    body: "Fleet visibility, voyage performance, and operational exceptions — business observability for assets underway.",
+    accent: "var(--color-vessels)",
+    href: "/solutions/vessels",
   },
   {
     icon: Building2,
     name: "Terra",
-    stage: "Expansion lane",
-    body: "A real-estate intelligence workflow application for a data-rich, execution-poor operating environment.",
+    domain: "Real estate intelligence",
+    body: "Distress tracking, deal pipeline, and market signal — a data-rich, execution-poor industry that needs a command layer.",
+    accent: "var(--color-terra)",
+    href: "/solutions/terra",
   },
   {
     icon: BriefcaseBusiness,
     name: "Carlota Jo",
-    stage: "Services lane",
-    body: "A premium advisory and services brand that can create near-term revenue and high-trust relationships around the platform.",
+    domain: "Executive advisory",
+    body: "High-trust advisory services around complex operations, capital situations, and organizational execution for principals who need a thought partner.",
+    accent: "var(--color-carlota)",
+    href: "/carlota-jo",
   },
 ];
 
-const targetBuyers = [
-  "Founders and operators who run on spreadsheets, inboxes, and status meetings",
-  "Commercial and operations leaders who need faster visibility into latency and risk",
-  "Teams that want AI-assisted workflow without losing auditability",
+const CATEGORY_TERMS = [
+  "business observability",
+  "decision-grade intelligence",
+  "governed action",
+  "signal-to-decision-to-action",
+  "human-in-the-loop automation",
+  "audit-grade execution",
 ];
 
 export default function HomePage() {
   usePageMeta({
     title: "SZL Holdings — Lyte + Alloy",
     description:
-      "SZL Holdings is building Lyte, a business observability platform, powered by Alloy, its execution fabric and audit layer.",
+      "SZL Holdings is building Lyte, a business observability platform powered by Alloy, its execution fabric and audit layer. Signal to decision to governed action.",
     canonical: "https://szlholdings.com/",
   });
 
   return (
-    <div className="min-h-screen bg-[#070a10] text-white">
+    <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
       <SiteNav />
-      <main>
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">
-              <Radar className="h-3.5 w-3.5" />
-              Focused company narrative
-            </div>
-            <div className="grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
-              <div>
-                <p className="mb-4 text-sm uppercase tracking-[0.28em] text-white/55">
+
+      <main id="main-content" role="main">
+
+        {/* ── Hero ── */}
+        <section
+          className="szl-grid-texture szl-depth-glow-dual"
+          style={{
+            paddingTop: "var(--space-hero-pt)",
+            paddingBottom: "clamp(5rem, 9vw, 7rem)",
+            borderBottom: "1px solid var(--color-szl-border)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.375rem",
+                  border: "1px solid var(--color-lyte-border)",
+                  background: "var(--color-lyte-muted)",
+                  borderRadius: "9999px",
+                  padding: "0.25rem 0.75rem",
+                  marginBottom: "1.75rem",
+                }}
+              >
+                <span className="szl-pulse-cyan" />
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-lyte-light)" }}>
+                  Operating Platform
+                </span>
+              </div>
+            </m.div>
+
+            <div style={{ display: "grid", gap: "clamp(2.5rem, 5vw, 4rem)", alignItems: "end" }} className="lg:grid-cols-[1.3fr_0.7fr]">
+              <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.05 }}>
+                <p style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.20em", color: "var(--color-szl-text-muted)", marginBottom: "1rem", fontFamily: "var(--font-mono)" }}>
                   SZL Holdings
                 </p>
-                <h1 className="max-w-4xl text-5xl font-semibold leading-tight tracking-tight text-white md:text-6xl">
+                <h1
+                  style={{
+                    fontSize: "clamp(2.75rem, 6vw, 4.75rem)",
+                    fontWeight: 600,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1.04,
+                    color: "hsl(38,8%,96%)",
+                    maxWidth: "18ch",
+                    marginBottom: "1.5rem",
+                  }}
+                >
                   Lyte is the product.
                   <br />
-                  Alloy is the engine.
+                  <span style={{ color: "var(--color-lyte)" }}>Alloy</span> is the engine.
                 </h1>
-                <p className="mt-6 max-w-3xl text-lg leading-8 text-white/72">
-                  SZL Holdings is building a focused business observability company. Lyte helps
-                  operators see execution risk, ownership drift, and workflow friction before they
-                  compound. Alloy is the execution fabric beneath it: signals, routing, workflows,
-                  audit trail, and accountable action.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link
-                    href="/investor-story"
-                    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-                  >
-                    See the investor story
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    href="/investor-relations"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
-                  >
-                    Investor relations
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-2 rounded-xl border border-amber-300/20 bg-amber-300/10 px-5 py-3 text-sm font-semibold text-amber-100 transition hover:bg-amber-300/15"
-                  >
-                    Request a meeting
-                  </Link>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-2xl shadow-black/30">
-                <p className="text-xs uppercase tracking-[0.24em] text-white/45">What changed</p>
-                <ul className="mt-4 space-y-3">
-                  {proofPoints.map((point) => (
-                    <li key={point} className="flex items-start gap-3 text-sm leading-6 text-white/80">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6 rounded-2xl border border-cyan-400/15 bg-cyan-400/10 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-cyan-100/75">Raise story</p>
-                  <p className="mt-2 text-sm leading-6 text-cyan-50/85">
-                    Lead with one software wedge now. Present the rest of the ecosystem as expansion
-                    value, not present-tense go-to-market sprawl.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.24em] text-cyan-200/70">Problem</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                Operators are drowning in signal but still blind at decision time.
-              </h2>
-            </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {customerProblems.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
+                <p
+                  style={{
+                    fontSize: "clamp(1rem, 1.8vw, 1.125rem)",
+                    lineHeight: 1.72,
+                    color: "hsl(214,7%,66%)",
+                    maxWidth: "52ch",
+                    marginBottom: "2.25rem",
+                  }}
                 >
-                  <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-white/72">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-              <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-amber-200/70">Core now</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                  Lyte + Alloy is the commercial wedge.
-                </h2>
-                <p className="mt-4 max-w-xl text-sm leading-7 text-white/72">
-                  Lyte is the application layer for business observability. Alloy is the shared
-                  execution, workflow, signal, and audit layer behind it. Together they tell a
-                  tighter story to investors, lenders, and design partners than a broad multi-market
-                  portfolio does.
+                  Business observability for operators who need to see execution risk, ownership
+                  drift, and workflow friction before it compounds — and a governed execution
+                  fabric to act on it without losing auditability.
                 </p>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="rounded-3xl border border-amber-300/15 bg-amber-300/10 p-6">
-                  <div className="mb-4 inline-flex rounded-xl border border-amber-100/15 bg-black/15 p-3">
-                    <Radar className="h-5 w-5 text-amber-100" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-white">Lyte</h3>
-                  <p className="mt-3 text-sm leading-7 text-white/78">
-                    Business observability software for teams that need to see risk, bottlenecks,
-                    ownership gaps, and next actions in one place.
-                  </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <Link href="/platform" className="szl-btn-primary">
+                    See the platform
+                    <ArrowRight size={15} />
+                  </Link>
+                  <Link href="/demo" className="szl-btn-secondary">
+                    Interactive demo
+                  </Link>
+                  <Link href="/contact" className="szl-btn-ghost">
+                    Book a design partner session
+                    <ChevronRight size={14} />
+                  </Link>
                 </div>
-                <div className="rounded-3xl border border-cyan-300/15 bg-cyan-300/10 p-6">
-                  <div className="mb-4 inline-flex rounded-xl border border-cyan-100/15 bg-black/15 p-3">
-                    <Workflow className="h-5 w-5 text-cyan-100" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-white">Alloy</h3>
-                  <p className="mt-3 text-sm leading-7 text-white/78">
-                    Execution fabric for workflow orchestration, signal normalization, routing, and
-                    auditability. The layer that makes the product durable.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+              </m.div>
 
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Buyers</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                Who this is for first
-              </h2>
-            </div>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {targetBuyers.map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-sm leading-7 text-white/78">
-                  {item}
+              <m.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.15 }}
+                className="szl-command-card"
+                style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem, 3vw, 1.75rem)" }}
+              >
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
+                  Signal → Action pipeline
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  {PIPELINE.map((step, i) => (
+                    <div
+                      key={step.label}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        padding: "0.625rem 0.875rem",
+                        background: "hsla(214,12%,8%,0.70)",
+                        border: `1px solid hsla(0,0%,100%,${i === 0 ? "0.10" : "0.04"})`,
+                        borderRadius: "0.375rem",
+                        borderLeft: `2px solid ${step.color}`,
+                      }}
+                    >
+                      <div style={{ width: "18px", height: "18px", borderRadius: "50%", background: step.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.55rem", fontWeight: 700, color: "hsl(214,18%,3%)" }}>{i + 1}</span>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(38,8%,92%)", letterSpacing: "-0.01em" }}>{step.label}</div>
+                        <div style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-muted)", marginTop: "1px" }}>{step.sub}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </m.div>
             </div>
+
+            {/* Category language strip */}
             <m.div
               initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.30 }}
+              style={{ marginTop: "3.5rem", paddingTop: "2rem", borderTop: "1px solid var(--color-szl-border)" }}
             >
-              <Link
-                href="/venture-portfolio"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "5px",
-                  fontSize: "12px", fontWeight: 600, color: "hsl(210,5%,45%)",
-                  textDecoration: "none", letterSpacing: "0.04em",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,65%)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(210,5%,45%)"; }}
-              >
-                View full portfolio <ArrowRight size={12} strokeWidth={2.5} />
-              </Link>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "0.875rem" }}>
+                Category language
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {CATEGORY_TERMS.map((term) => (
+                  <span
+                    key={term}
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.6875rem",
+                      fontWeight: 500,
+                      letterSpacing: "0.06em",
+                      color: "var(--color-szl-text-secondary)",
+                      background: "hsla(0,0%,100%,0.04)",
+                      border: "1px solid var(--color-szl-border)",
+                      borderRadius: "0.25rem",
+                      padding: "0.25rem 0.625rem",
+                    }}
+                  >
+                    {term}
+                  </span>
+                ))}
+              </div>
             </m.div>
           </div>
         </section>
 
-        <section className="border-b border-white/10">
-          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Expansion logic</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                The rest of the ecosystem becomes option value.
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-white/72">
-                These lanes matter, but they should be presented as expansion paths powered by the
-                same underlying operating system rather than as simultaneous day-one go-to-market
-                motions.
+        {/* ── Problem framing ── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45 }}
+            >
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-lyte)", marginBottom: "1rem" }}>
+                The problem
               </p>
-            </div>
+              <h2
+                style={{
+                  fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.025em",
+                  lineHeight: 1.14,
+                  maxWidth: "28ch",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                Operators are drowning in signal but still blind at decision time.
+              </h2>
+              <p style={{ fontSize: "1rem", lineHeight: 1.7, color: "hsl(214,7%,60%)", maxWidth: "50ch" }}>
+                Every team has more data than they can act on. The problem isn't visibility — it's the missing layer between signal and governed action.
+              </p>
+            </m.div>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {lanes.map((lane) => {
-                const Icon = lane.icon;
-                return (
-                  <div key={lane.name} className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                    <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-black/20 p-3">
-                      <Icon className="h-5 w-5 text-white/80" />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold text-white">{lane.name}</h3>
-                      <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
-                        {lane.stage}
-                      </span>
-                    </div>
-                    <p className="mt-3 text-sm leading-7 text-white/72">{lane.body}</p>
+            <div className="szl-grid-3" style={{ marginTop: "3rem" }}>
+              {PROBLEMS.map((item, i) => (
+                <m.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
+                  className="szl-card"
+                  style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                >
+                  <h3 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.75rem" }}>{item.title}</h3>
+                  <p style={{ fontSize: "0.9rem", lineHeight: 1.68, color: "hsl(214,7%,62%)" }}>{item.body}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Lyte + Alloy wedge ── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "clamp(3rem, 6vw, 5rem)", alignItems: "start" }} className="lg:grid-cols-[0.85fr_1.15fr]">
+              <m.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45 }}
+              >
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-accent)", marginBottom: "1rem" }}>
+                  The platform wedge
+                </p>
+                <h2
+                  style={{
+                    fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+                    fontWeight: 600,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.14,
+                    marginBottom: "1.25rem",
+                  }}
+                >
+                  One focused commercial wedge.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,64%)", marginBottom: "2rem" }}>
+                  Lyte is the application layer operators use to see what's happening. Alloy is
+                  the execution and audit fabric beneath it — signals, routing, workflows,
+                  approvals, and immutable records. Together they tell the story: business
+                  observability with governed action.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  <Link
+                    href="/lyte"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      color: "var(--color-lyte-light)",
+                      textDecoration: "none",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Explore Lyte <ArrowRight size={14} />
+                  </Link>
+                  <Link
+                    href="/alloy-fabric"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      color: "var(--color-alloy-light)",
+                      textDecoration: "none",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Explore Alloy <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </m.div>
+
+              <div className="szl-grid-2">
+                <m.div
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: 0.08 }}
+                  className="szl-lyte-card"
+                  style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                >
+                  <div
+                    style={{
+                      width: "40px", height: "40px",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      background: "var(--color-lyte-muted)",
+                      border: "1px solid var(--color-lyte-border)",
+                      borderRadius: "0.5rem",
+                      marginBottom: "1.25rem",
+                    }}
+                  >
+                    <Eye size={18} color="var(--color-lyte)" />
                   </div>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-lyte)", marginBottom: "0.5rem" }}>
+                    Lyte
+                  </p>
+                  <h3 style={{ fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.015em", marginBottom: "0.75rem" }}>Business Observability</h3>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,62%)" }}>
+                    Surface execution risk, ownership drift, approval latency, and workflow
+                    friction before it compounds into a real problem.
+                  </p>
+                </m.div>
+
+                <m.div
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: 0.14 }}
+                  className="szl-alloy-card"
+                  style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                >
+                  <div
+                    style={{
+                      width: "40px", height: "40px",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      background: "var(--color-alloy-muted)",
+                      border: "1px solid var(--color-alloy-border)",
+                      borderRadius: "0.5rem",
+                      marginBottom: "1.25rem",
+                    }}
+                  >
+                    <GitBranch size={18} color="var(--color-alloy-light)" />
+                  </div>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "0.5rem" }}>
+                    Alloy
+                  </p>
+                  <h3 style={{ fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.015em", marginBottom: "0.75rem" }}>Execution Fabric</h3>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,62%)" }}>
+                    Signal normalization, workflow routing, human-in-the-loop approval gates,
+                    and immutable audit trail from action to confirmation.
+                  </p>
+                </m.div>
+
+                {/* Pipeline proof */}
+                <m.div
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: 0.20 }}
+                  className="szl-card"
+                  style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                >
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
+                    How they connect
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "0.375rem" }}>
+                    {["Signal", "→", "Context", "→", "Decision", "→", "Approval", "→", "Action", "→", "Audit"].map((item, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "0.8125rem",
+                          fontWeight: item === "→" ? 400 : 600,
+                          color: item === "→"
+                            ? "var(--color-szl-text-faint)"
+                            : i < 5
+                            ? "var(--color-lyte-light)"
+                            : i > 5 && i < 9
+                            ? "var(--color-alloy-light)"
+                            : "hsl(145,62%,52%)",
+                          letterSpacing: item === "→" ? "0.04em" : "-0.01em",
+                        }}
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.65, color: "hsl(214,7%,55%)", marginTop: "0.75rem" }}>
+                    Every step is logged, attributable, and exportable. Human approval gates before consequential actions. No black-box execution.
+                  </p>
+                </m.div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Who this is for ── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-sm) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
+                Who it's for
+              </p>
+              <h2
+                style={{
+                  fontSize: "clamp(1.5rem, 3.5vw, 2.25rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.022em",
+                  lineHeight: 1.18,
+                  marginBottom: "2.5rem",
+                  maxWidth: "28ch",
+                }}
+              >
+                Built for operators who run on signal, not spreadsheets.
+              </h2>
+            </m.div>
+            <div className="szl-grid-3" style={{ gap: "1rem" }}>
+              {[
+                { who: "Operators & founders", pain: "Running critical workflows across multiple systems without a unified command view." },
+                { who: "Commercial & ops leaders", pain: "Needing faster visibility into approval latency, ownership gaps, and execution risk." },
+                { who: "Teams adopting AI", pain: "Wanting AI-assisted workflow without sacrificing auditability, governance, or human control." },
+              ].map((item, i) => (
+                <m.div
+                  key={item.who}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.07 }}
+                  className="szl-card"
+                  style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
+                    <CheckCircle2 size={15} color="var(--color-lyte)" />
+                    <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, letterSpacing: "-0.01em" }}>{item.who}</h3>
+                  </div>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{item.pain}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Vertical packs as proof ── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
+                Domain expansion
+              </p>
+              <h2
+                style={{
+                  fontSize: "clamp(1.5rem, 3.5vw, 2.25rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.022em",
+                  lineHeight: 1.18,
+                  maxWidth: "28ch",
+                  marginBottom: "0.875rem",
+                }}
+              >
+                Vertical packs extend the core into high-stakes domains.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "hsl(214,7%,60%)", maxWidth: "52ch", marginBottom: "2.75rem" }}>
+                The same Lyte + Alloy operating system — adapted for the specific signal vocabulary,
+                decision models, and audit requirements of each vertical. Not separate products,
+                domain packs built on a shared platform.
+              </p>
+            </m.div>
+
+            <div className="szl-grid-4">
+              {VERTICALS.map((v, i) => {
+                const Icon = v.icon;
+                return (
+                  <m.div
+                    key={v.name}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.07 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)", borderTop: `1px solid ${v.accent}26` }}
+                  >
+                    <div
+                      style={{
+                        width: "36px", height: "36px",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: `${v.accent}14`,
+                        border: `1px solid ${v.accent}22`,
+                        borderRadius: "0.4375rem",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      <Icon size={16} color={v.accent} />
+                    </div>
+                    <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: v.accent, marginBottom: "0.25rem", opacity: 0.85 }}>
+                      {v.domain}
+                    </p>
+                    <h3 style={{ fontSize: "1.0625rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{v.name}</h3>
+                    <p style={{ fontSize: "0.8375rem", lineHeight: 1.65, color: "hsl(214,7%,58%)", marginBottom: "1rem" }}>{v.body}</p>
+                    <Link
+                      href={v.href}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "0.3rem",
+                        fontSize: "0.8125rem", fontWeight: 500, color: v.accent,
+                        textDecoration: "none", opacity: 0.80,
+                        transition: "opacity 0.18s ease",
+                      }}
+                    >
+                      Learn more <ArrowRight size={12} />
+                    </Link>
+                  </m.div>
                 );
               })}
             </div>
           </div>
         </section>
 
-        <section>
-          <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-            <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-8 lg:p-10">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Next step</p>
-              <h2 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-white">
-                Raise and sell the company as one focused wedge, then let expansion earn the right to
-                happen.
-              </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72">
-                Use Lyte + Alloy for the near-term capital narrative, design-partner motion, and
-                website copy. Keep the broader ecosystem visible, but subordinate it to a disciplined
-                sequence.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/ventures"
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
+        {/* ── Trust posture callout ── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-sm) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45 }}
+              className="szl-card szl-grid-cta"
+              style={{
+                borderRadius: "0.875rem",
+                padding: "clamp(2rem, 4vw, 3rem)",
+                gap: "clamp(2rem, 4vw, 3.5rem)",
+                alignItems: "center",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                  <ShieldCheck size={16} color="hsl(145,62%,46%)" />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: "hsl(145,62%,46%)" }}>
+                    Trust Center
+                  </span>
+                </div>
+                <h2
+                  style={{
+                    fontSize: "clamp(1.5rem, 3vw, 2rem)",
+                    fontWeight: 600,
+                    letterSpacing: "-0.022em",
+                    lineHeight: 1.2,
+                    marginBottom: "0.875rem",
+                  }}
                 >
-                  View platform map
+                  Trust is part of the product, not an afterthought.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "55ch" }}>
+                  Security posture, AI governance model, human-in-the-loop approval architecture,
+                  audit trail design, and responsible disclosure — all documented for customer
+                  and capital diligence.
+                </p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>
+                <Link href="/trust" className="szl-btn-secondary" style={{ whiteSpace: "nowrap" }}>
+                  Explore Trust Center <ArrowRight size={14} />
                 </Link>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-                >
-                  Start a conversation
-                  <ArrowRight className="h-4 w-4" />
+                <Link href="/trust/architecture" className="szl-btn-ghost" style={{ justifyContent: "center" }}>
+                  Architecture overview
                 </Link>
               </div>
-            </div>
+            </m.div>
           </div>
         </section>
+
+        {/* ── Conversion CTA ── */}
+        <section style={{ padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45 }}
+              style={{
+                borderRadius: "1rem",
+                padding: "clamp(2.5rem, 5vw, 4rem)",
+                background: "linear-gradient(135deg, hsla(191,30%,6%,0.90) 0%, hsla(228,30%,6%,0.80) 100%)",
+                border: "1px solid hsla(191,92%,44%,0.12)",
+                position: "relative",
+                overflow: "hidden",
+              }}
+              className="szl-grid-texture-sm"
+            >
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-lyte)", marginBottom: "1.25rem" }}>
+                  Next step
+                </p>
+                <h2
+                  style={{
+                    fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
+                    fontWeight: 600,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.12,
+                    marginBottom: "1.25rem",
+                    maxWidth: "28ch",
+                  }}
+                >
+                  Ready to see it applied to your operating environment?
+                </h2>
+                <p style={{ fontSize: "1rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch", marginBottom: "2.25rem" }}>
+                  We work with a limited number of design partners to instrument one high-friction
+                  workflow, measure improvement, and build a replicable operating system.
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem" }}>
+                  <Link href="/contact" className="szl-btn-primary">
+                    Book a design partner session
+                    <ArrowRight size={15} />
+                  </Link>
+                  <Link href="/demo" className="szl-btn-secondary">
+                    See the interactive demo
+                  </Link>
+                  <Link href="/trust" className="szl-btn-ghost">
+                    Explore Trust Center <ArrowUpRight size={13} />
+                  </Link>
+                </div>
+              </div>
+            </m.div>
+          </div>
+        </section>
+
       </main>
       <SiteFooter />
     </div>

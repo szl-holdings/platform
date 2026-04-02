@@ -2,6 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, pool } from "@workspace/db";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
+import { authMiddleware } from "../middlewares/authMiddleware";
 
 const router: IRouter = Router();
 
@@ -108,7 +109,7 @@ router.post("/contact/submit", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/contact/requests", async (req: Request, res: Response) => {
+router.get("/contact/requests", authMiddleware, async (req: Request, res: Response) => {
   try {
     const app = req.query.app as string | undefined;
     const limit = Math.min(100, parseInt(String(req.query.limit ?? "50"), 10) || 50);

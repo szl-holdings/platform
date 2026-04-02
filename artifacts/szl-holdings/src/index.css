@@ -7,52 +7,75 @@
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* ── Depth surface system (5 levels) ── */
-  --color-szl-base:      hsl(214, 16%, 3%);
-  --color-szl-bg:        hsl(214, 14%, 5%);
-  --color-szl-bg-secondary: hsl(214, 12%, 7%);
-  --color-szl-bg-tertiary:  hsl(214, 10%, 9%);
-  --color-szl-surface:   hsla(214, 10%, 11%, 0.80);
-  --color-szl-elevated:  hsla(214, 10%, 14%, 0.90);
-  --color-szl-overlay:   hsla(214, 10%, 18%, 0.95);
+  --color-szl-base:           hsl(214, 18%, 3%);
+  --color-szl-bg:             hsl(214, 16%, 4%);
+  --color-szl-bg-secondary:   hsl(214, 14%, 6%);
+  --color-szl-bg-tertiary:    hsl(214, 12%, 8%);
+  --color-szl-surface:        hsla(214, 12%, 10%, 0.75);
+  --color-szl-elevated:       hsla(214, 10%, 13%, 0.88);
+  --color-szl-overlay:        hsla(214, 10%, 16%, 0.96);
 
-  --color-szl-border:       hsla(0, 0%, 100%, 0.06);
-  --color-szl-border-hover: hsla(0, 0%, 100%, 0.11);
-  --color-szl-border-glow:  hsla(0, 0%, 100%, 0.16);
+  /* ── Border hierarchy ── */
+  --color-szl-border:         hsla(0, 0%, 100%, 0.055);
+  --color-szl-border-hover:   hsla(0, 0%, 100%, 0.10);
+  --color-szl-border-strong:  hsla(0, 0%, 100%, 0.14);
+  --color-szl-border-glow:    hsla(0, 0%, 100%, 0.18);
 
   /* ── Text hierarchy ── */
-  --color-szl-text:           hsl(38, 10%, 94%);
-  --color-szl-text-secondary: hsl(214, 8%, 66%);
-  --color-szl-text-muted:     hsl(214, 6%, 44%);
-  --color-szl-text-faint:     hsl(214, 5%, 32%);
+  --color-szl-text:           hsl(38, 8%, 95%);
+  --color-szl-text-secondary: hsl(214, 7%, 64%);
+  --color-szl-text-muted:     hsl(214, 6%, 42%);
+  --color-szl-text-faint:     hsl(214, 5%, 30%);
 
-  /* ── SZL Holdings brand accent (warm gold / platinum) ── */
-  --color-szl-accent:       hsl(38, 55%, 60%);
-  --color-szl-accent-light: hsl(38, 55%, 72%);
-  --color-szl-accent-muted: hsla(38, 55%, 60%, 0.12);
-  --color-szl-accent-glow:  hsla(38, 55%, 60%, 0.06);
-  --color-szl-platinum:     hsl(210, 8%, 80%);
-  --color-szl-silver:       hsl(210, 6%, 68%);
+  /* ── SZL Holdings parent brand (gold/platinum) ── */
+  --color-szl-accent:         hsl(38, 52%, 58%);
+  --color-szl-accent-light:   hsl(38, 52%, 70%);
+  --color-szl-accent-muted:   hsla(38, 52%, 58%, 0.10);
+  --color-szl-accent-glow:    hsla(38, 52%, 58%, 0.06);
+  --color-szl-platinum:       hsl(210, 8%, 78%);
+  --color-szl-silver:         hsl(210, 6%, 65%);
 
-  /* ── Primary action (deep blue) ── */
-  --color-szl-primary:       hsl(218, 72%, 52%);
-  --color-szl-primary-light: hsl(218, 72%, 62%);
-  --color-szl-primary-muted: hsla(218, 72%, 52%, 0.12);
-  --color-szl-primary-glow:  hsla(218, 72%, 52%, 0.08);
+  /* ── Lyte: electric cyan (primary product accent) ── */
+  --color-lyte:               hsl(191, 92%, 44%);
+  --color-lyte-light:         hsl(191, 92%, 58%);
+  --color-lyte-muted:         hsla(191, 92%, 44%, 0.10);
+  --color-lyte-glow:          hsla(191, 92%, 44%, 0.06);
+  --color-lyte-border:        hsla(191, 92%, 44%, 0.18);
 
-  /* ── Domain accent colors (per-platform) ── */
-  --color-szl-lyte:     hsl(192, 80%, 48%);
-  --color-szl-vessels:  hsl(210, 78%, 44%);
-  --color-szl-alloy:    hsl(222, 68%, 58%);
-  --color-szl-carlota:  hsl(36, 52%, 54%);
-  --color-szl-inca:     hsl(250, 58%, 58%);
-  --color-szl-firestorm: hsl(24, 88%, 52%);
-  --color-szl-rosie:    hsl(356, 70%, 52%);
-  --color-szl-terra:    hsl(140, 56%, 40%);
+  /* ── Alloy: deep indigo (execution fabric support) ── */
+  --color-alloy:              hsl(228, 65%, 54%);
+  --color-alloy-light:        hsl(228, 65%, 66%);
+  --color-alloy-muted:        hsla(228, 65%, 54%, 0.10);
+  --color-alloy-glow:         hsla(228, 65%, 54%, 0.06);
+  --color-alloy-border:       hsla(228, 65%, 54%, 0.18);
+
+  /* ── Domain pack accents (muted by design) ── */
+  --color-aegis:              hsl(222, 60%, 50%);
+  --color-aegis-muted:        hsla(222, 60%, 50%, 0.08);
+  --color-vessels:            hsl(206, 72%, 40%);
+  --color-vessels-muted:      hsla(206, 72%, 40%, 0.08);
+  --color-terra:              hsl(140, 50%, 38%);
+  --color-terra-muted:        hsla(140, 50%, 38%, 0.08);
+  --color-carlota:            hsl(36, 48%, 52%);
+  --color-carlota-muted:      hsla(36, 48%, 52%, 0.08);
+
+  /* ── Primary action ── */
+  --color-szl-primary:        hsl(218, 70%, 52%);
+  --color-szl-primary-light:  hsl(218, 70%, 64%);
+  --color-szl-primary-muted:  hsla(218, 70%, 52%, 0.10);
 
   /* ── Status semantic ── */
-  --color-szl-success: hsl(142, 64%, 42%);
-  --color-szl-warning: hsl(38, 88%, 50%);
-  --color-szl-danger:  hsl(0, 72%, 52%);
+  --color-szl-success:        hsl(145, 62%, 40%);
+  --color-szl-warning:        hsl(40, 90%, 48%);
+  --color-szl-danger:         hsl(2, 70%, 50%);
+
+  /* ── Spacing tokens (premium scale) ── */
+  --space-section-sm:         clamp(4rem, 8vw, 6rem);
+  --space-section-md:         clamp(6rem, 10vw, 9rem);
+  --space-section-lg:         clamp(8rem, 12vw, 12rem);
+  --space-hero-pt:            clamp(7rem, 13vw, 11rem);
+  --space-content-x:          clamp(1.5rem, 5vw, 3rem);
+  --space-card-pad:           clamp(1.25rem, 2.5vw, 2rem);
 }
 
 @layer base {
@@ -63,6 +86,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 16px;
 }
 
 body {
@@ -72,56 +96,98 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 ::selection {
-  background: hsla(38, 55%, 60%, 0.22);
-  color: hsl(38, 10%, 94%);
+  background: hsla(191, 92%, 44%, 0.20);
+  color: hsl(38, 8%, 95%);
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: hsl(214, 14%, 5%); }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: hsl(214, 16%, 4%); }
 ::-webkit-scrollbar-thumb {
-  background: hsla(0, 0%, 100%, 0.08);
+  background: hsla(0, 0%, 100%, 0.07);
   border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover { background: hsla(38, 55%, 60%, 0.28); }
+::-webkit-scrollbar-thumb:hover { background: hsla(191, 92%, 44%, 0.22); }
 
-/* ─── Depth surface cards ─── */
+/* ─── Surface card system ─── */
 .szl-card {
   background: var(--color-szl-surface);
   border: 1px solid var(--color-szl-border);
-  backdrop-filter: blur(8px);
-  transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.20s ease, box-shadow 0.20s ease, background 0.20s ease;
 }
 .szl-card:hover {
   background: var(--color-szl-elevated);
   border-color: var(--color-szl-border-hover);
-  box-shadow: 0 0 0 1px var(--color-szl-border), 0 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 1px hsla(0,0%,100%,0.03), 0 6px 28px rgba(0, 0, 0, 0.42);
+}
+
+/* ─── Premium command card ─── */
+.szl-command-card {
+  background: hsla(214, 12%, 8%, 0.72);
+  border: 1px solid var(--color-szl-border);
+  backdrop-filter: blur(16px);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.szl-command-card:hover {
+  border-color: var(--color-szl-border-hover);
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.50), 0 2px 8px rgba(0, 0, 0, 0.30);
+}
+
+/* ─── Lyte-accented card ─── */
+.szl-lyte-card {
+  background: hsla(191, 20%, 6%, 0.70);
+  border: 1px solid var(--color-lyte-border);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.szl-lyte-card:hover {
+  border-color: hsla(191, 92%, 44%, 0.28);
+  box-shadow: 0 0 24px var(--color-lyte-glow), 0 6px 24px rgba(0, 0, 0, 0.40);
+}
+
+/* ─── Alloy-accented card ─── */
+.szl-alloy-card {
+  background: hsla(228, 20%, 6%, 0.70);
+  border: 1px solid var(--color-alloy-border);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.szl-alloy-card:hover {
+  border-color: hsla(228, 65%, 54%, 0.28);
+  box-shadow: 0 0 24px var(--color-alloy-glow), 0 6px 24px rgba(0, 0, 0, 0.40);
 }
 
 /* ─── Platform card with accent-top glow ─── */
 .platform-card {
   background: var(--color-szl-surface);
   border: 1px solid var(--color-szl-border);
-  border-top: 1px solid rgba(201, 169, 110, 0.20);
-  backdrop-filter: blur(6px);
-  transition: border-color 0.22s ease, box-shadow 0.22s ease;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.20s ease, box-shadow 0.20s ease;
 }
 .platform-card:hover {
   border-color: var(--color-szl-border-hover);
-  border-top-color: rgba(201, 169, 110, 0.40);
-  box-shadow: 0 0 24px rgba(201, 169, 110, 0.06), 0 4px 32px rgba(0, 0, 0, 0.36);
+  box-shadow: 0 0 24px hsla(38, 52%, 58%, 0.05), 0 6px 32px rgba(0, 0, 0, 0.38);
 }
 
 /* ─── Accent rule ─── */
 .szl-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.18) 30%, rgba(201, 169, 110, 0.18) 70%, transparent);
+  background: linear-gradient(90deg, transparent, hsla(38, 52%, 58%, 0.15) 30%, hsla(38, 52%, 58%, 0.15) 70%, transparent);
+}
+
+.szl-rule-lyte {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsla(191, 92%, 44%, 0.20) 30%, hsla(191, 92%, 44%, 0.20) 70%, transparent);
 }
 
 /* ─── Eyebrow label ─── */
@@ -129,36 +195,77 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-szl-accent);
   opacity: 0.85;
 }
 
-/* ─── Glow hover for accent borders ─── */
+.szl-eyebrow-lyte {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-lyte);
+  opacity: 0.85;
+}
+
+.szl-eyebrow-alloy {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-alloy-light);
+  opacity: 0.85;
+}
+
+/* ─── Glow hover effects ─── */
 .szl-glow-accent:hover {
-  box-shadow: 0 0 16px hsla(38, 55%, 60%, 0.12), 0 2px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px hsla(38, 52%, 58%, 0.10), 0 3px 18px rgba(0, 0, 0, 0.32);
 }
 .szl-glow-lyte:hover {
-  box-shadow: 0 0 16px hsla(192, 80%, 48%, 0.14), 0 2px 16px rgba(0, 0, 0, 0.3);
-}
-.szl-glow-vessels:hover {
-  box-shadow: 0 0 16px hsla(210, 78%, 44%, 0.14), 0 2px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px hsla(191, 92%, 44%, 0.12), 0 3px 18px rgba(0, 0, 0, 0.32);
 }
 .szl-glow-alloy:hover {
-  box-shadow: 0 0 16px hsla(222, 68%, 58%, 0.14), 0 2px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px hsla(228, 65%, 54%, 0.12), 0 3px 18px rgba(0, 0, 0, 0.32);
 }
 
 /* ─── Badge system ─── */
 .szl-badge {
-  background: rgba(201, 169, 110, 0.08);
-  border: 1px solid rgba(201, 169, 110, 0.18);
+  background: hsla(38, 52%, 58%, 0.07);
+  border: 1px solid hsla(38, 52%, 58%, 0.16);
   color: var(--color-szl-accent-light);
   font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  padding: 0.25rem 0.625rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.125rem;
+}
+
+.szl-badge-lyte {
+  background: var(--color-lyte-muted);
+  border: 1px solid var(--color-lyte-border);
+  color: var(--color-lyte-light);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.125rem;
+}
+
+.szl-badge-alloy {
+  background: var(--color-alloy-muted);
+  border: 1px solid var(--color-alloy-border);
+  color: var(--color-alloy-light);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
   border-radius: 0.125rem;
 }
 
@@ -191,25 +298,47 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: hsl(142, 64%, 42%);
-  animation: pulse-ring 2s ease-out infinite;
+  background: var(--color-szl-success);
+  animation: pulse-ring 2.2s ease-out infinite;
 }
 .szl-pulse-green::after {
   content: '';
   position: absolute;
   inset: 1px;
   border-radius: 50%;
-  background: hsl(142, 64%, 52%);
+  background: hsl(145, 62%, 52%);
 }
 
-/* ─── Accessibility: Skip to content link ─── */
+.szl-pulse-cyan {
+  position: relative;
+  display: inline-flex;
+  width: 7px;
+  height: 7px;
+}
+.szl-pulse-cyan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--color-lyte);
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+.szl-pulse-cyan::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 50%;
+  background: var(--color-lyte-light);
+}
+
+/* ─── Accessibility: Skip to content ─── */
 .skip-to-content {
   position: absolute;
   top: -100px;
   left: 1rem;
   z-index: 9999;
   padding: 0.625rem 1.25rem;
-  background: hsl(38, 55%, 60%);
+  background: var(--color-lyte);
   color: hsl(214, 16%, 4%);
   font-weight: 700;
   font-size: 0.875rem;
@@ -217,58 +346,134 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   transition: top 0.2s ease;
 }
-.skip-to-content:focus {
-  top: 1rem;
-}
+.skip-to-content:focus { top: 1rem; }
 
 /* ─── Accessibility: Focus indicators ─── */
 :focus-visible {
-  outline: 2px solid hsl(38, 55%, 60%);
+  outline: 2px solid var(--color-lyte);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 /* ─── Glassmorphic nav surface ─── */
 .szl-glass {
-  background: hsla(214, 14%, 5%, 0.85);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  background: hsla(214, 16%, 4%, 0.88);
+  backdrop-filter: blur(24px) saturate(1.15);
+  -webkit-backdrop-filter: blur(24px) saturate(1.15);
   border-bottom: 1px solid var(--color-szl-border);
 }
 
 /* ─── Command grid background texture ─── */
 .szl-grid-texture {
   background-image:
-    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-    linear-gradient(to right, rgba(255,255,255,0.018) 1px, transparent 1px);
-  background-size: 64px 64px;
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 72px 72px;
 }
 
-/* ─── Particle canvas overlay ─── */
-.szl-particle-canvas {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.55;
+.szl-grid-texture-sm {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(to right, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* ─── Radial depth glow ─── */
+/* ─── Radial depth glows ─── */
 .szl-depth-glow-gold {
-  background: radial-gradient(ellipse at 50% 0%, hsla(38, 55%, 60%, 0.07) 0%, transparent 65%);
-}
-.szl-depth-glow-blue {
-  background: radial-gradient(ellipse at 50% 0%, hsla(218, 72%, 52%, 0.07) 0%, transparent 65%);
+  background: radial-gradient(ellipse at 50% 0%, hsla(38, 52%, 58%, 0.06) 0%, transparent 65%);
 }
 .szl-depth-glow-lyte {
-  background: radial-gradient(ellipse at 50% 0%, hsla(192, 80%, 48%, 0.06) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 50% 0%, hsla(191, 92%, 44%, 0.07) 0%, transparent 62%);
 }
-.szl-depth-glow-vessels {
-  background: radial-gradient(ellipse at 50% 0%, hsla(210, 78%, 44%, 0.06) 0%, transparent 60%);
+.szl-depth-glow-alloy {
+  background: radial-gradient(ellipse at 50% 0%, hsla(228, 65%, 54%, 0.06) 0%, transparent 60%);
+}
+.szl-depth-glow-dual {
+  background:
+    radial-gradient(ellipse at 30% 0%, hsla(191, 92%, 44%, 0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 0%, hsla(228, 65%, 54%, 0.04) 0%, transparent 55%);
+}
+
+/* ─── Pipeline diagram ─── */
+.szl-pipeline-node {
+  background: hsla(214, 12%, 9%, 0.80);
+  border: 1px solid var(--color-szl-border-hover);
+  backdrop-filter: blur(8px);
+}
+
+.szl-pipeline-arrow {
+  color: var(--color-szl-text-faint);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+/* ─── CTA button hierarchy ─── */
+.szl-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.375rem;
+  background: var(--color-lyte);
+  color: hsl(214, 18%, 3%);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+  letter-spacing: -0.01em;
+}
+.szl-btn-primary:hover {
+  background: var(--color-lyte-light);
+  box-shadow: 0 0 20px hsla(191, 92%, 44%, 0.25);
+}
+
+.szl-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.375rem;
+  background: transparent;
+  color: var(--color-szl-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-szl-border-hover);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+  letter-spacing: -0.01em;
+}
+.szl-btn-secondary:hover {
+  border-color: var(--color-szl-border-strong);
+  background: hsla(0, 0%, 100%, 0.04);
+}
+
+.szl-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: transparent;
+  color: var(--color-szl-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.18s ease;
+  letter-spacing: -0.01em;
+}
+.szl-btn-ghost:hover {
+  color: var(--color-szl-text);
 }
 
 /* ─── Keyframe animations ─── */
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fade-in {
@@ -276,49 +481,43 @@ h1, h2, h3, h4, h5, h6 {
   to   { opacity: 1; }
 }
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.97); }
+  from { opacity: 0; transform: scale(0.98); }
   to   { opacity: 1; transform: scale(1); }
 }
 @keyframes pulse-ring {
   0%   { transform: scale(0.8); opacity: 0.8; }
-  70%  { transform: scale(2.2); opacity: 0; }
-  100% { transform: scale(2.2); opacity: 0; }
+  70%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
 }
 @keyframes data-pulse {
-  0%, 100% { opacity: 0.3; transform: scaleX(0.95); }
-  50%       { opacity: 1; transform: scaleX(1); }
-}
-@keyframes grid-scan {
-  0%   { transform: translateY(-100%); opacity: 0; }
-  10%  { opacity: 0.6; }
-  90%  { opacity: 0.6; }
-  100% { transform: translateY(100vh); opacity: 0; }
+  0%, 100% { opacity: 0.3; transform: scaleX(0.96); }
+  50%       { opacity: 1;   transform: scaleX(1); }
 }
 @keyframes node-drift {
-  0%, 100% { transform: translateY(0px); opacity: 0.7; }
-  50%       { transform: translateY(-4px); opacity: 1; }
-}
-@keyframes count-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  0%, 100% { transform: translateY(0px);  opacity: 0.65; }
+  50%       { transform: translateY(-3px); opacity: 1; }
 }
 @keyframes border-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(201, 169, 110, 0.1); }
-  50%       { box-shadow: 0 0 20px rgba(201, 169, 110, 0.22); }
+  0%, 100% { box-shadow: 0 0 6px hsla(191, 92%, 44%, 0.08); }
+  50%       { box-shadow: 0 0 18px hsla(191, 92%, 44%, 0.18); }
 }
 @keyframes link-pulse {
-  0%, 100% { opacity: 0.15; }
-  50%       { opacity: 0.55; }
+  0%, 100% { opacity: 0.12; }
+  50%       { opacity: 0.45; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
-.animate-fade-in-up       { animation: fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-fade-in          { animation: fade-in 0.45s ease-out both; }
-.animate-scale-in         { animation: scale-in 0.45s ease-out both; }
-.animate-node-drift       { animation: node-drift 6s ease-in-out infinite; }
-.animate-link-pulse       { animation: link-pulse 4s ease-in-out infinite; }
-.animate-data-pulse       { animation: data-pulse 2.4s ease-in-out infinite; }
-.animate-border-glow      { animation: border-glow 3s ease-in-out infinite; }
-.animate-count-up         { animation: count-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in-up   { animation: fade-in-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in      { animation: fade-in 0.45s ease-out both; }
+.animate-scale-in     { animation: scale-in 0.45s ease-out both; }
+.animate-node-drift   { animation: node-drift 7s ease-in-out infinite; }
+.animate-link-pulse   { animation: link-pulse 4.5s ease-in-out infinite; }
+.animate-data-pulse   { animation: data-pulse 2.6s ease-in-out infinite; }
+.animate-border-glow  { animation: border-glow 3.2s ease-in-out infinite; }
+.animate-spin         { animation: spin 0.8s linear infinite; }
 
 .stagger-1 { animation-delay: 0.06s; }
 .stagger-2 { animation-delay: 0.12s; }
@@ -328,6 +527,23 @@ h1, h2, h3, h4, h5, h6 {
 .stagger-6 { animation-delay: 0.36s; }
 .stagger-7 { animation-delay: 0.42s; }
 .stagger-8 { animation-delay: 0.48s; }
+
+.szl-grid-2 { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+.szl-grid-3 { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+.szl-grid-4 { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+.szl-grid-cta { display: grid; gap: 2rem; grid-template-columns: 1fr; }
+
+@media (min-width: 640px) {
+  .szl-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .szl-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .szl-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .szl-grid-cta { grid-template-columns: 1fr auto; }
+}
+
+@media (min-width: 1024px) {
+  .szl-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .szl-grid-4 { grid-template-columns: repeat(4, 1fr); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
