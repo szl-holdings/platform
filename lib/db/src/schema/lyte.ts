@@ -52,6 +52,7 @@ export const lyteIncidentsTable = pgTable("lyte_incidents", {
   impactArea: text("impact_area"),
   rootCause: text("root_cause"),
   resolution: text("resolution"),
+  metadata: jsonb("metadata"),
   resolvedAt: timestamp("resolved_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

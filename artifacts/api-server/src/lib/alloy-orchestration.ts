@@ -143,10 +143,10 @@ export async function processSignalIntoWorkflow(
       domain: signal.domain,
       triggerId: signal.id,
       triggerType: "signal",
-      status: requiresApproval ? "waiting_approval" : "pending",
+      status: "pending",
       priority,
       requiresApproval,
-      approvalState: requiresApproval ? "pending" : "none",
+      approvalState: "none",
       confidenceScore: signal.confidence,
       steps: steps as unknown as Record<string, unknown>[],
       inputs: { signalId, signalTitle: signal.title, severity: signal.severity },
@@ -167,6 +167,14 @@ export async function processSignalIntoWorkflow(
   });
 
   logger.info({ workflowId: workflow.id, signalId, workflowType }, "Workflow created from signal");
+
+  if (requiresApproval) {
+    await requestApproval(workflow.id, {
+      requestedByUserId: options.actorUserId,
+      reason: `Auto-approval required for ${signal.severity} signal: ${signal.title}`,
+    });
+    logger.info({ workflowId: workflow.id, signalId }, "Approval record created automatically for high/critical signal workflow");
+  }
 
   await db.update(alloySignals)
     .set({ status: "triaged", updatedAt: new Date() })

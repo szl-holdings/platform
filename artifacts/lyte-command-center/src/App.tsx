@@ -47,6 +47,7 @@ const AdminSeederPage = lazy(() => import("@/pages/admin/seeder"));
 const AdminExportHistoryPage = lazy(() => import("@/pages/admin/export-history"));
 const AdminDiagnosticsPage = lazy(() => import("@/pages/admin/diagnostics"));
 const AdminBillingPage = lazy(() => import("@/pages/admin/billing-admin"));
+const OperationalQueue = lazy(() => import("@/pages/operational-queue"));
 const SignalsPage = lazy(() => import("@/pages/signals-page"));
 const ActionsPage = lazy(() => import("@/pages/actions-page"));
 const ReadinessPage = lazy(() => import("@/pages/readiness-page"));
@@ -93,6 +94,7 @@ function PrivateRouter() {
         <Route path="/actions" component={ActionsPage} />
         <Route path="/readiness" component={ReadinessPage} />
         <Route path="/action-queue" component={ActionQueue} />
+        <Route path="/queue" component={OperationalQueue} />
         <Route path="/approvals" component={ApprovalsCenter} />
         <Route path="/ownership" component={OwnershipMap} />
         <Route path="/escalation" component={EscalationCenter} />
@@ -140,6 +142,7 @@ function PrivateRouter() {
 
 const lyteCommands: CommandItem[] = [
   { id: "nav-inbox", label: "Command Inbox", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-queue", label: "Operational Queue", icon: "🗂️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/queue"); } },
   { id: "nav-signals", label: "Signals Feed", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
   { id: "nav-actions", label: "Action Center", icon: "🎯", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/actions"); } },
   { id: "nav-readiness", label: "Readiness Module", icon: "🛡️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/readiness"); } },

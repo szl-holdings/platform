@@ -85,8 +85,8 @@ export const alloyWorkflows = pgTable("alloy_workflows", {
   triggerId: integer("trigger_signal_id").references(() => alloySignals.id),
   triggerType: text("trigger_type", { enum: ["signal", "schedule", "manual", "escalation"] }).notNull().default("signal"),
   status: text("status", {
-    enum: ["pending", "running", "waiting_approval", "approved", "rejected", "completed", "failed", "cancelled"],
-  }).notNull().default("pending"),
+    enum: ["draft", "pending", "running", "waiting_approval", "approved", "rejected", "completed", "failed", "cancelled"],
+  }).notNull().default("draft"),
   priority: text("priority", { enum: ["low", "medium", "high", "critical"] }).notNull().default("medium"),
   ownerId: integer("owner_id").references(() => alloyOwners.id),
   ownerUserId: integer("owner_user_id").references(() => usersTable.id),
