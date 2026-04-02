@@ -58,3 +58,19 @@ export {
 export { NpsSurvey, NpsSurveyOverlay, useNpsSurvey, type NpsSurveyProps, type NpsSurveyOverlayProps } from "./nps-survey";
 export { ContextualFeedback, ContextualFeedbackBar, type ContextualFeedbackProps, type ContextualFeedbackBarProps } from "./contextual-feedback";
 export { PackBanner, PACK_ACCENT_COLORS, type PackBannerProps, type PackVariant } from "./pack-banner";
+export {
+  ConfidenceBand,
+  EvidencePanel,
+  ApprovalBadge,
+  HumanReviewBadge,
+  RiskBadge,
+  PriorityBadge,
+  ActionTypeBadge,
+  EnvironmentLabel,
+  DegradedModeBanner,
+  SafeFallbackState,
+  DecisionCard,
+  AuditTrailDrawer,
+  type EvidenceItem as AlloyEvidenceItem,
+  type DecisionCardProps,
+} from "./alloy-decision-card";

@@ -1,6 +1,6 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, ShieldCheck, Lock, FileCheck2, Eye, Database, Users, ChevronRight } from "lucide-react";
+import { ArrowRight, ShieldCheck, Lock, FileCheck2, Eye, Database, Users, ChevronRight, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -191,6 +191,100 @@ export default function TrustPage() {
                   </m.div>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* Pilot Readiness */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)", marginBottom: "1rem" }}>
+                Readiness
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "1.25rem" }}>
+                Honest product-state boundaries.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "60ch", marginBottom: "3rem" }}>
+                Every product uses standardized readiness labels. We clearly separate current controls
+                from future certification plans, and demo environments from live systems. We do not
+                overclaim certification status or imply production readiness where it is pilot readiness.
+              </p>
+            </m.div>
+            <div className="szl-grid-3" style={{ gap: "1rem" }}>
+              {[
+                { name: "Lyte", label: "Functional Alpha", desc: "Primary commercial wedge. Core workflows operational. Approaching pilot readiness.", icon: CheckCircle2, color: "hsl(145,62%,46%)" },
+                { name: "Alloy", label: "Functional Alpha", desc: "Execution fabric with schema-validated AI decisions, policy-gated tools, eval harness, and audit trail.", icon: CheckCircle2, color: "hsl(145,62%,46%)" },
+                { name: "Aegis / Terra / Vessels", label: "Functional Alpha", desc: "Staged expansion lanes. Functional but secondary to the Lyte + Alloy commercial focus.", icon: Clock, color: "hsl(40,90%,54%)" },
+              ].map((product, i) => {
+                const Icon = product.icon;
+                return (
+                  <m.div key={product.name} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.38, delay: i * 0.07 }} className="szl-card" style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem" }}>
+                      <Icon size={16} color={product.color} />
+                      <span style={{ fontSize: "1rem", fontWeight: 600 }}>{product.name}</span>
+                    </div>
+                    <div style={{ display: "inline-block", fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.06em", color: product.color, background: `${product.color}14`, border: `1px solid ${product.color}2a`, borderRadius: "4px", padding: "0.1875rem 0.5rem", marginBottom: "0.75rem" }}>
+                      {product.label}
+                    </div>
+                    <p style={{ fontSize: "0.8375rem", lineHeight: 1.65, color: "hsl(214,7%,58%)" }}>{product.desc}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Known Gaps */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <AlertCircle size={14} color="hsl(40,90%,54%)" />
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(40,90%,54%)" }}>Known Boundaries</p>
+              </div>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "1.25rem" }}>
+                What we have — and what comes next.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "60ch", marginBottom: "3rem" }}>
+                Transparency about current gaps is part of the trust model. These are disclosed
+                for controlled diligence — not as risks, but as the natural maturation path for
+                a Functional Alpha platform.
+              </p>
+            </m.div>
+            <div className="szl-card" style={{ borderRadius: "0.875rem", overflow: "hidden" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", padding: "0.875rem 1.25rem", borderBottom: "1px solid var(--color-szl-border)", background: "hsla(214,12%,8%,0.60)" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>Area</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>Current state</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-szl-text-muted)" }}>Path forward</span>
+              </div>
+              {[
+                { area: "SOC 2 Type II", current: "Controls implemented, not yet audited", next: "Audit engagement planned for post-pilot" },
+                { area: "Load testing", current: "Functional testing complete, no stress testing yet", next: "Performance baseline before first enterprise pilot" },
+                { area: "Disaster recovery", current: "Database backups and Git history", next: "Formal DR plan with documented RTO/RPO" },
+                { area: "Dedicated inference", current: "Shared HuggingFace API", next: "Evaluate dedicated model serving for pilot customers" },
+                { area: "Monitoring / APM", current: "Health endpoints and structured logging", next: "Full APM integration (Sentry, Datadog, or equivalent)" },
+              ].map((row, i, arr) => (
+                <m.div
+                  key={row.area}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr 1fr",
+                    padding: "0.875rem 1.25rem",
+                    borderBottom: i < arr.length - 1 ? "1px solid var(--color-szl-border)" : "none",
+                    gap: "1rem",
+                    alignItems: "center",
+                  }}
+                >
+                  <span style={{ fontSize: "0.875rem", fontWeight: 500, color: "hsl(38,8%,85%)" }}>{row.area}</span>
+                  <span style={{ fontSize: "0.8375rem", color: "hsl(214,7%,60%)", lineHeight: 1.55 }}>{row.current}</span>
+                  <span style={{ fontSize: "0.8375rem", color: "hsl(40,90%,54%)", lineHeight: 1.55 }}>{row.next}</span>
+                </m.div>
+              ))}
             </div>
           </div>
         </section>

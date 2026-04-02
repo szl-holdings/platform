@@ -93,6 +93,13 @@ Command Inbox. Action Queue. Approvals Center. Ownership Map. Escalation Center.
 
 The orchestration engine that closes the loop. When Lyte surfaces a signal, Alloy routes the action. Workflow engine, human-in-the-loop approval gates, agent coordination, and immutable audit trail — the infrastructure that makes observability and accountability a single system.
 
+**AI Decision Engine:**
+- 9 schema-validated decision types: action, risk, triage, entity extraction, ownership assignment, escalation, approval recommendation, executive summary, resolution summary
+- Evidence-backed retrieval with hybrid search, semantic embeddings (BGE-m3), and reranking (BGE-reranker-v2-m3)
+- Policy-gated tool execution with 9 tools (lookup, create, route, audit) — default mode: `propose_only`
+- Evaluation harness with 25+ golden test cases across 9 categories
+- Immutable audit trail for every AI decision with model route, confidence, latency, and evidence references
+
 ### Expansion Lanes
 
 Once the core wedge is commercially validated, the same operating spine can support:
@@ -117,7 +124,7 @@ Fleet command for maritime operators. Real-time AIS telemetry, voyage economics,
 
 ### Carlota Jo — Private Advisory
 
-**Readiness: Public Beta Candidate**
+**Readiness: Functional Alpha**
 
 Luxury consulting platform for brand strategy, advisory, and client engagement. Web platform plus native mobile client (Expo/React Native). Principal advisory informed by platform-grade intelligence.
 
@@ -152,13 +159,15 @@ Confirmed Action + Immutable Audit Trail
 
 ## Trust
 
-**AI governance is structural, not policy.** Advisory agents cannot execute consequential actions without explicit human confirmation. This is enforced at the Alloy workflow engine level — not just in the UI. Confidence scores and reasoning chains are always visible.
+**AI governance is structural, not policy.** Advisory agents cannot execute consequential actions without explicit human confirmation. This is enforced at the Alloy execution fabric level — not just in the UI. Every tool call is policy-gated, and the default execution mode is `propose_only`.
 
-**Audit trail is a first-class feature.** Every significant action — by a human or an agent — is logged immutably with full attribution, role context, and timestamp. The chain from signal to recommendation to approval to action is permanently traceable.
+**Audit trail is a first-class feature.** Every significant action — by a human or an agent — is logged immutably with full attribution, role context, and timestamp. The chain from signal to recommendation to approval to action is permanently traceable. AI decision audit includes model route, confidence score, latency, and evidence references.
 
-**RBAC is comprehensive.** Six role tiers (`founder_admin`, `admin`, `operator`, `analyst`, `viewer`, `client`), all scoped to organization. API endpoints are access-controlled via middleware.
+**Enterprise identity is active.** Multi-tenant SSO via Azure AD, SCIM 2.0 provisioning, six-tier RBAC hierarchy (`super_admin`, `admin`, `ops`, `analyst`, `viewer`, `executive_viewer`), organization-scoped middleware, and tenant-isolated data access.
 
 **Secrets are never committed.** All credentials are managed via environment variable injection. `.env` files are gitignored absolutely.
+
+**Readiness labels are standardized.** Every product uses the [Readiness Standard](docs/public/readiness-standard.md). Every demo environment is labeled per the [Environment Labeling Standard](docs/public/environment-labeling-standard.md). See also: [Canonical Demo Flow](docs/buyer/canonical-demo.md).
 
 See [Trust Center](docs/trust/trust-center.md) · [Security Posture](docs/trust/security-posture.md) · [SECURITY.md](SECURITY.md)
 
@@ -263,7 +272,7 @@ This is a **pnpm monorepo** with a shared TypeScript foundation. Every frontend 
 | Database | PostgreSQL, Drizzle ORM |
 | Auth | OpenID Connect (PKCE), organization-scoped RBAC |
 | Real-time | WebSocket (HMAC-signed tickets, per-channel ACL) |
-| AI | OpenAI, Anthropic, Google Gemini |
+| AI | HuggingFace Inference (Qwen3-8B, BGE-m3, BGE-reranker-v2-m3), OpenAI, Anthropic |
 | Payments | Stripe (Checkout, Subscriptions, Invoicing, Customer Portal) |
 | Maps | Mapbox GL JS |
 | Mobile | Expo / React Native (iOS and Android) |
@@ -345,19 +354,22 @@ See [Public Mirror Policy](docs/public/public-mirror-policy.md) for the full cur
 ### Phase 1 — Commercial Activation *(in progress)*
 - Revenue activation: Stripe billing live for Vessels, Lyte, Terra, Carlota Jo
 - Design partner onboarding (first paying commercial pilots)
-- Redis session store for production deployments
-- Sentry error tracking integration
+- Alloy AI decision engine: schema-validated decisions, evidence retrieval, policy-gated execution, eval harness
+- Enterprise SSO (Azure AD), SCIM 2.0 provisioning, multi-tenant RBAC — implemented
+- Canonical Lyte + Alloy demo flow documented
 
-### Phase 2 — Enterprise Readiness
-- Enterprise SSO / SCIM 2.0 provisioning
+### Phase 2 — Enterprise Hardening
 - SOC 2 Type II audit preparation
-- OpenAPI developer portal and partner SDK
-- FedRAMP readiness track (Aegis)
+- Full APM integration (Sentry, Datadog, or equivalent)
+- Performance baseline and load testing
+- Formal DR plan with documented RTO/RPO
+- Redis session store for production deployments
 
 ### Phase 3 — Platform Expansion
 - Salesforce AppExchange submission (Lyte connector)
 - Jira Marketplace listing (Alloy workflow integration)
 - Cross-domain signal correlation (Lyte ↔ Aegis ↔ Terra ↔ Vessels)
+- Dedicated model inference serving for enterprise pilots
 - White-label and reseller partner program
 
 *For more detail on near-term milestones, see [CHANGELOG.md](CHANGELOG.md).*
