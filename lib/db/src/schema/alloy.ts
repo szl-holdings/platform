@@ -317,6 +317,85 @@ export const alloyArtifactsRelations = relations(alloyArtifacts, ({ one }) => ({
   ownerUser: one(usersTable, { fields: [alloyArtifacts.ownerUserId], references: [usersTable.id] }),
 }));
 
+// ─── Decision Objects ─────────────────────────────────────────────────────────
+
+export const alloyDecisions = pgTable("alloy_decisions", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  summary: text("summary"),
+  verdict: text("verdict"),
+  confidence: integer("confidence"),
+  approvalStatus: text("approval_status", {
+    enum: ["propose_only", "approval_required", "approved_execute", "blocked_by_policy"],
+  }).notNull().default("propose_only"),
+  evidence: jsonb("evidence").default([]),
+  agentId: text("agent_id"),
+  agentName: text("agent_name"),
+  modelUsed: text("model_used"),
+  workflowRunId: integer("workflow_run_id").references(() => alloyWorkflowRuns.id),
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("alloy_decisions_approval_status_idx").on(t.approvalStatus),
+  index("alloy_decisions_agent_id_idx").on(t.agentId),
+  index("alloy_decisions_created_idx").on(t.createdAt),
+]);
+
+// ─── Skill Registry ───────────────────────────────────────────────────────────
+
+export const alloySkills = pgTable("alloy_skills", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  version: text("version").notNull().default("1.0.0"),
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  approvalClass: text("approval_class", {
+    enum: ["auto", "review", "admin_only"],
+  }).notNull().default("auto"),
+  isInternal: boolean("is_internal").notNull().default(true),
+  isEnabled: boolean("is_enabled").notNull().default(true),
+  dryRunSupported: boolean("dry_run_supported").notNull().default(false),
+  inputSchema: jsonb("input_schema"),
+  outputSchema: jsonb("output_schema"),
+  tags: jsonb("tags").default([]),
+  usageCount: integer("usage_count").notNull().default(0),
+  lastUsedAt: timestamp("last_used_at"),
+  deprecatedAt: timestamp("deprecated_at"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("alloy_skills_slug_version_idx").on(t.slug, t.version),
+  index("alloy_skills_category_idx").on(t.category),
+  index("alloy_skills_approval_class_idx").on(t.approvalClass),
+  index("alloy_skills_enabled_idx").on(t.isEnabled),
+]);
+
+export const alloySkillRuns = pgTable("alloy_skill_runs", {
+  id: serial("id").primaryKey(),
+  skillId: integer("skill_id").references(() => alloySkills.id).notNull(),
+  workflowRunId: integer("workflow_run_id").references(() => alloyWorkflowRuns.id),
+  agentId: text("agent_id"),
+  input: jsonb("input"),
+  output: jsonb("output"),
+  status: text("status", { enum: ["pending", "running", "success", "failed", "dry_run"] }).notNull().default("pending"),
+  durationMs: integer("duration_ms"),
+  errorMessage: text("error_message"),
+  modelUsed: text("model_used"),
+  costCents: integer("cost_cents"),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => [
+  index("alloy_skill_runs_skill_id_idx").on(t.skillId),
+  index("alloy_skill_runs_workflow_run_id_idx").on(t.workflowRunId),
+  index("alloy_skill_runs_created_idx").on(t.createdAt),
+]);
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type AlloySignal = typeof alloySignals.$inferSelect;

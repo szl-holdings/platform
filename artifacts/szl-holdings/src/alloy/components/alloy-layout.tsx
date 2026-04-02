@@ -2,8 +2,9 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
+import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
 
 const COMMAND_LOOP = [
   { phase: "DETECT", color: "#0ea5e9", active: false },
@@ -14,13 +15,20 @@ const COMMAND_LOOP = [
 ];
 
 const NAV = [
-  { href: "/alloy", label: "Factory Floor", icon: LayoutDashboard },
+  { href: "/alloy/home", label: "Workspace Home", icon: Home, badge: "New" },
+  { href: "/alloy", label: "Factory Floor", icon: LayoutDashboard, exact: true },
   { href: "/alloy/runs", label: "Execution History", icon: Activity },
   { href: "/alloy/signals", label: "Signal Feed", icon: Radio },
   { href: "/alloy/workflows", label: "Workflow Orchestration", icon: GitBranch },
   { href: "/alloy/connectors", label: "Connector Mesh", icon: Network },
   { href: "/alloy/governance", label: "Governance & Audit", icon: Shield },
   { href: "/alloy/analytics", label: "Automation Analytics", icon: BarChart2 },
+];
+
+const COMMAND_NAV = [
+  { href: "/alloy/decisions", label: "Decision Objects", icon: Brain, badge: "New" },
+  { href: "/alloy/skills", label: "Skill Registry", icon: Layers, badge: "New" },
+  { href: "/alloy/operator", label: "Operator Control", icon: Shield, badge: "New" },
 ];
 
 const CREATIVE_NAV = [
@@ -34,13 +42,34 @@ const DOCS_NAV = [
   { href: "/alloy/documents", label: "Document Engine", icon: FileText },
 ];
 
-export function AlloyLayout({ children }: { children: ReactNode }) {
+function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
+  href: string; label: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; exact?: boolean; badge?: string; onClick?: () => void;
+}) {
   const [location] = useLocation();
+  const isActive = exact ? (location === href || location === href + "/") : location.startsWith(href);
+  return (
+    <Link href={href} onClick={onClick} className={cn(
+      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
+      isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
+    )} style={{ background: isActive ? "rgba(75,139,219,0.08)" : undefined, color: isActive ? "#4B8BDB" : undefined }}>
+      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
+      <Icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
+      <span className="flex-1">{label}</span>
+      {badge && !isActive && (
+        <span className="text-[8px] font-bold uppercase tracking-widest px-1 py-0.5 rounded" style={{ color: "#4B8BDB", background: "rgba(75,139,219,0.12)" }}>{badge}</span>
+      )}
+    </Link>
+  );
+}
+
+export function AlloyLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("workflow-runs");
+  const { isOpen: cmdOpen, open: openCmd, close: closeCmd } = useCommandBar();
 
   return (
     <div className="flex h-full overflow-hidden">
+      <CommandBar isOpen={cmdOpen} onClose={closeCmd} />
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-10 md:hidden"
@@ -97,77 +126,52 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
         <div className="flex-1 min-h-0 flex flex-col">
           <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-0.5 overflow-y-auto">
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Automation</div>
-            {NAV.map((item) => {
-              const isActive = item.href === "/alloy" ? (location === "/alloy" || location === "/alloy/") : location.startsWith(item.href);
-              return (
-                <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
-                )} style={{ background: isActive ? "rgba(75,139,219,0.08)" : undefined, color: isActive ? "#4B8BDB" : undefined }}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
-                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+            {NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
+
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Intelligence</div>
+            {COMMAND_NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
 
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Creative Workflows</div>
-            {CREATIVE_NAV.map((item) => {
-              const isActive = item.href === "/alloy/creative" ? location === "/alloy/creative" : location.startsWith(item.href);
-              return (
-                <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
-                )} style={{ background: isActive ? "rgba(75,139,219,0.08)" : undefined, color: isActive ? "#4B8BDB" : undefined }}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
-                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+            {CREATIVE_NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
 
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Documents</div>
-            {DOCS_NAV.map((item) => {
-              const isActive = location.startsWith(item.href);
-              return (
-                <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 group relative",
-                  isActive ? "" : "text-slate-400 hover:text-white hover:bg-white/5"
-                )} style={{ background: isActive ? "rgba(75,139,219,0.08)" : undefined, color: isActive ? "#4B8BDB" : undefined }}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "#4B8BDB" }} />}
-                  <item.icon className={cn("w-3.5 h-3.5 shrink-0", !isActive && "text-slate-500 group-hover:text-slate-300")} style={isActive ? { color: "#4B8BDB" } : undefined} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+            {DOCS_NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
           </nav>
 
           <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(75,139,219,0.04)", border: "1px solid rgba(75,139,219,0.08)" }}>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(75,139,219,0.4)" }}>Runtime Health</div>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Connector Mesh</span>
-              <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[9px] font-mono" style={{ color: "#10b981" }}>All healthy</span>
+            <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(75,139,219,0.4)" }}>Runtime Health</div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Connector Mesh</span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span className="text-[9px] font-mono" style={{ color: "#10b981" }}>All healthy</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active runs</span>
+                <span className="text-[9px] font-mono" style={{ color: "#4B8BDB" }}>14 running</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Queue depth</span>
+                <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>8 pending</span>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active runs</span>
-              <span className="text-[9px] font-mono" style={{ color: "#4B8BDB" }}>14 running</span>
+            <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+              <div className="h-full rounded-full" style={{ width: "72%", background: "linear-gradient(90deg, #4B8BDB, #10b981)" }} />
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Queue depth</span>
-              <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>8 pending</span>
+            <div className="flex justify-between mt-0.5">
+              <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Capacity</span>
+              <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>72%</span>
             </div>
-          </div>
-          <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-            <div className="h-full rounded-full" style={{ width: "72%", background: "linear-gradient(90deg, #4B8BDB, #10b981)" }} />
-          </div>
-          <div className="flex justify-between mt-0.5">
-            <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>Capacity</span>
-            <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>72%</span>
-          </div>
           </div>
         </div>
 
@@ -203,6 +207,7 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
             <span className="hidden sm:block" style={{ color: "#ef4444" }}>2 Failed</span>
           </div>
           <div className="flex items-center gap-3">
+            <CommandBarTrigger onClick={openCmd} />
             <RealtimeStatusIndicator status={wsStatus} compact />
             <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.4)" }}>
               <Bell className="w-4 h-4" />

@@ -62,6 +62,10 @@ const AlloyBrandVoice = lazy(() => import("@/alloy/pages/creative/brand-voice"))
 const AlloyContentCalendar = lazy(() => import("@/alloy/pages/creative/content-calendar"));
 const AlloyAIStudio = lazy(() => import("@/alloy/pages/creative/ai-studio"));
 const AlloyDocumentEngine = lazy(() => import("@/alloy/pages/document-engine"));
+const AlloyWorkspaceHome = lazy(() => import("@/alloy/pages/workspace-home"));
+const AlloyDecisionObjects = lazy(() => import("@/alloy/pages/decision-objects"));
+const AlloySkillRegistry = lazy(() => import("@/alloy/pages/skill-registry"));
+const AlloyOperatorControl = lazy(() => import("@/alloy/pages/operator-control-center"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -300,6 +304,18 @@ function App() {
             </Route>
             <Route path="/alloy/documents/:sub">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDocumentEngine /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/home">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyWorkspaceHome /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/decisions">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyDecisionObjects /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/skills">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloySkillRegistry /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/operator">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyOperatorControl /></AlloyAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}

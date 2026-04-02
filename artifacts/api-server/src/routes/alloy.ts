@@ -10,6 +10,9 @@ import {
   featureFlagsTable,
   insertAlloyWorkflowSchema,
   insertAlloySignalSchema,
+  alloyDecisions,
+  alloySkills,
+  alloySkillRuns,
 } from "@workspace/db";
 import { eq, desc, and, sql, inArray, gte, lte } from "drizzle-orm";
 import { authMiddleware, requireRole, parseIdParam, type AuthenticatedUser } from "../middlewares/auth";
@@ -931,6 +934,177 @@ router.get("/alloy/dashboard", authMiddleware(), async (req, res) => {
     });
   } catch (err) {
     handleRouteError(res, err, "Failed to build Alloy dashboard");
+  }
+});
+
+// ─── Decisions ────────────────────────────────────────────────────────────────
+
+router.get("/decisions", platformAuth, async (req, res) => {
+  try {
+    const { limit = 30, offset = 0 } = parsePagination(req);
+    const status = req.query.status as string | undefined;
+
+    const conditions = [];
+    if (status && status !== "all") {
+      conditions.push(eq(alloyDecisions.approvalStatus, status as "propose_only" | "approval_required" | "approved_execute" | "blocked_by_policy"));
+    }
+
+    const rows = await db
+      .select()
+      .from(alloyDecisions)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(alloyDecisions.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return sendSuccess(res, rows, { count: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch decisions");
+  }
+});
+
+router.get("/decisions/:id", platformAuth, async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (!id) return;
+    const [row] = await db.select().from(alloyDecisions).where(eq(alloyDecisions.id, id));
+    if (!row) return sendNotFound(res, "Decision not found");
+    return sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch decision");
+  }
+});
+
+router.post("/decisions", platformAuth, async (req, res) => {
+  try {
+    const { title, summary, verdict, confidence, approvalStatus, evidence, agentId, agentName, modelUsed, workflowRunId } = req.body;
+    if (!title) return sendBadRequest(res, "title is required");
+    const [row] = await db.insert(alloyDecisions).values({
+      title, summary, verdict, confidence, approvalStatus: approvalStatus ?? "propose_only",
+      evidence: evidence ?? [], agentId, agentName, modelUsed, workflowRunId,
+    }).returning();
+    return sendCreated(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create decision");
+  }
+});
+
+router.post("/decisions/:id/approve", platformAuth, async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (!id) return;
+    const reviewer = (req as any).platformUser?.name ?? "Operator";
+    const [row] = await db.update(alloyDecisions)
+      .set({ approvalStatus: "approved_execute", reviewedBy: reviewer, reviewedAt: new Date(), updatedAt: new Date() })
+      .where(eq(alloyDecisions.id, id))
+      .returning();
+    if (!row) return sendNotFound(res, "Decision not found");
+    return sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to approve decision");
+  }
+});
+
+router.post("/decisions/:id/reject", platformAuth, async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (!id) return;
+    const reviewer = (req as any).platformUser?.name ?? "Operator";
+    const [row] = await db.update(alloyDecisions)
+      .set({ approvalStatus: "blocked_by_policy", reviewedBy: reviewer, reviewedAt: new Date(), updatedAt: new Date() })
+      .where(eq(alloyDecisions.id, id))
+      .returning();
+    if (!row) return sendNotFound(res, "Decision not found");
+    return sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to reject decision");
+  }
+});
+
+// ─── Skills ───────────────────────────────────────────────────────────────────
+
+router.get("/skills", platformAuth, async (req, res) => {
+  try {
+    const { limit = 50, offset = 0 } = parsePagination(req);
+    const category = req.query.category as string | undefined;
+    const approvalClass = req.query.approvalClass as string | undefined;
+
+    const conditions = [];
+    if (category) conditions.push(eq(alloySkills.category, category));
+    if (approvalClass) conditions.push(eq(alloySkills.approvalClass, approvalClass as "auto" | "review" | "admin_only"));
+
+    const rows = await db
+      .select()
+      .from(alloySkills)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(alloySkills.usageCount))
+      .limit(limit)
+      .offset(offset);
+
+    return sendSuccess(res, rows, { count: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch skills");
+  }
+});
+
+router.get("/skills/:id", platformAuth, async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (!id) return;
+    const [row] = await db.select().from(alloySkills).where(eq(alloySkills.id, id));
+    if (!row) return sendNotFound(res, "Skill not found");
+    return sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch skill");
+  }
+});
+
+router.post("/skills", platformAuth, async (req, res) => {
+  try {
+    const { name, slug, version, category, description, approvalClass, isInternal, dryRunSupported, inputSchema, outputSchema, tags } = req.body;
+    if (!name || !slug || !category || !description) return sendBadRequest(res, "name, slug, category, description are required");
+    const [row] = await db.insert(alloySkills).values({
+      name, slug, version: version ?? "1.0.0", category, description,
+      approvalClass: approvalClass ?? "auto", isInternal: isInternal ?? true,
+      dryRunSupported: dryRunSupported ?? false, inputSchema, outputSchema,
+      tags: tags ?? [],
+    }).returning();
+    return sendCreated(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to create skill");
+  }
+});
+
+router.patch("/skills/:id", platformAuth, async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (!id) return;
+    const { isEnabled, description, approvalClass, tags } = req.body;
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+    if (isEnabled !== undefined) updates.isEnabled = isEnabled;
+    if (description !== undefined) updates.description = description;
+    if (approvalClass !== undefined) updates.approvalClass = approvalClass;
+    if (tags !== undefined) updates.tags = tags;
+    const [row] = await db.update(alloySkills).set(updates as any).where(eq(alloySkills.id, id)).returning();
+    if (!row) return sendNotFound(res, "Skill not found");
+    return sendSuccess(res, row);
+  } catch (err) {
+    handleRouteError(res, err, "Failed to update skill");
+  }
+});
+
+router.get("/skills/:id/runs", platformAuth, async (req, res) => {
+  try {
+    const id = parseIdParam(req, res);
+    if (!id) return;
+    const { limit = 20 } = parsePagination(req);
+    const rows = await db.select().from(alloySkillRuns)
+      .where(eq(alloySkillRuns.skillId, id))
+      .orderBy(desc(alloySkillRuns.createdAt))
+      .limit(limit);
+    return sendSuccess(res, rows, { count: rows.length });
+  } catch (err) {
+    handleRouteError(res, err, "Failed to fetch skill runs");
   }
 });
 
