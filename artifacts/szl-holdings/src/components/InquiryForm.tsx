@@ -126,8 +126,7 @@ export function InquiryForm({ defaultType = "general", showTypeSelector = true, 
 
     setStatus("submitting");
     try {
-      const basePath = import.meta.env.BASE_URL || "/";
-      const apiBase = basePath.replace(/\/$/, "") + "/api";
+      const apiBase = "/api";
       const res = await fetch(`${apiBase}/cms/contact-submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
