@@ -50,5 +50,11 @@
     "slate": "^0.124.0",
     "slate-react": "^0.124.0",
     "yaml": "^2.8.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "catalog:",
+      "@types/react-dom": "catalog:"
+    }
   }
 }

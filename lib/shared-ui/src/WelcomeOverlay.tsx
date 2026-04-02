@@ -84,14 +84,14 @@ export function WelcomeOverlay({
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${accentColor}15` }}
               >
-                <AppIcon className="w-6 h-6" style={{ color: accentColor } as React.CSSProperties} />
+                {(AppIcon as any)({ className: "w-6 h-6", style: { color: accentColor } })}
               </div>
             ) : (
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${accentColor}15` }}
               >
-                <Sparkles className="w-6 h-6" style={{ color: accentColor } as React.CSSProperties} />
+                <Sparkles className="w-6 h-6" style={{ color: accentColor } as any} />
               </div>
             )}
             <div>
@@ -118,7 +118,7 @@ export function WelcomeOverlay({
                     className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
                     style={{ backgroundColor: `${accentColor}15` }}
                   >
-                    <Icon className="w-3.5 h-3.5" style={{ color: accentColor } as React.CSSProperties} />
+                    {(Icon as any)({ className: "w-3.5 h-3.5", style: { color: accentColor } })}
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-foreground leading-tight">{feature.title}</p>

@@ -82,8 +82,9 @@ export async function logActivityFromRequest(
   description?: string,
   metadata?: unknown,
 ): Promise<void> {
+  const user = (req as any).user;
   return logActivity({
-    userId: req.user?.id ?? null,
+    userId: user?.id ?? null,
     action,
     resource,
     resourceId,
@@ -109,8 +110,9 @@ export function createAuditMiddleware(options: {
     ) {
       const action = req.method.toLowerCase();
       const resource = req.path.split("/").filter(Boolean).slice(0, 2).join("/");
+      const mwUser = (req as any).user;
       logActivity({
-        userId: req.user?.id ?? null,
+        userId: mwUser?.id ?? null,
         action,
         resource,
         resourceId: typeof req.params["id"] === "string" ? req.params["id"] : undefined,

@@ -1765,7 +1765,7 @@ router.get(
   requireRole("admin"),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id!, 10);
+      const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
@@ -1787,7 +1787,7 @@ router.put(
   requireRole("admin"),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id!, 10);
+      const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       const [tenant] = await db.select().from(azureTenantsTable).where(eq(azureTenantsTable.id, id)).limit(1);
@@ -1844,7 +1844,7 @@ router.delete(
   requireRole("admin"),
   async (req: Request, res: Response) => {
     try {
-      const id = parseInt(req.params.id!, 10);
+      const id = parseInt(String(req.params.id), 10);
       if (isNaN(id)) { sendBadRequest(res, "Invalid tenant ID"); return; }
 
       await db.delete(tenantBrandingTable).where(eq(tenantBrandingTable.tenantId, id));
@@ -1861,7 +1861,7 @@ router.get(
   tenantRateLimit,
   async (req: Request, res: Response) => {
     try {
-      const { azureTenantId } = req.params;
+      const azureTenantId = String(req.params.azureTenantId);
       if (!azureTenantId) { sendBadRequest(res, "azureTenantId is required"); return; }
 
       const [tenant] = await db

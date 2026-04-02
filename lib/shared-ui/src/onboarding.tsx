@@ -278,7 +278,7 @@ function StepCard({
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: `${accentColor}18` }}
             >
-              <StepIcon className="w-4.5 h-4.5" style={{ color: accentColor } as React.CSSProperties} />
+              {(StepIcon as any)({ className: "w-4.5 h-4.5", style: { color: accentColor } })}
             </div>
           )}
           <div className="flex-1 min-w-0">
@@ -460,9 +460,9 @@ export function GettingStartedChecklist({
           style={{ background: `${accentColor}18` }}
         >
           {allCompleted ? (
-            <Trophy className="w-3.5 h-3.5" style={{ color: accentColor } as React.CSSProperties} />
+            <Trophy className="w-3.5 h-3.5" style={{ color: accentColor } as any} />
           ) : (
-            <Sparkles className="w-3.5 h-3.5" style={{ color: accentColor } as React.CSSProperties} />
+            <Sparkles className="w-3.5 h-3.5" style={{ color: accentColor } as any} />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -495,7 +495,7 @@ export function GettingStartedChecklist({
             >
               <div className="shrink-0 mt-0.5">
                 {item.completed ? (
-                  <CheckCircle2 className="w-3.5 h-3.5" style={{ color: accentColor } as React.CSSProperties} />
+                  <CheckCircle2 className="w-3.5 h-3.5" style={{ color: accentColor } as any} />
                 ) : (
                   <Circle className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
                 )}
@@ -523,7 +523,7 @@ export function GettingStartedChecklist({
               className="flex items-center gap-2 px-2 py-2 rounded-lg mt-1"
               style={{ background: `${accentColor}10`, border: `1px solid ${accentColor}20` }}
             >
-              <Trophy className="w-3.5 h-3.5 shrink-0" style={{ color: accentColor } as React.CSSProperties} />
+              <Trophy className="w-3.5 h-3.5 shrink-0" style={{ color: accentColor } as any} />
               <span className="text-[11px] font-semibold" style={{ color: accentColor }}>
                 You're all set! 
               </span>

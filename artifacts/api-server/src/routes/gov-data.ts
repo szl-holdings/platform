@@ -236,7 +236,7 @@ router.get("/gov/mitre-attack", govRateLimit, authMiddleware({ required: false }
     }).catch(() => [] as { id: string; name: string; tactic: string; description: string; platforms: string[]; subtechnique: boolean; detection: string; mitigation: string }[]);
     let techniques = data;
     if (tactic) techniques = techniques.filter(t => t.tactic.toLowerCase().includes(tactic.toLowerCase()));
-    if (platform) techniques = techniques.filter(t => t.platforms.some(p => p.toLowerCase().includes(platform.toLowerCase())));
+    if (platform) techniques = techniques.filter(t => t.platforms.some((p: string) => p.toLowerCase().includes(platform.toLowerCase())));
     sendSuccess(res, {
       source: "MITRE ATT&CK Enterprise Matrix",
       url: "https://attack.mitre.org/",
@@ -393,13 +393,13 @@ router.get("/gov/usaspending", govRateLimit, authMiddleware({ required: false })
         setAside: r.Type_of_Set_Aside ?? null,
       }));
     }).catch(() => [] as { awardId: string; recipient: string; amount: number; agency: string; awardType: string; dateSignedStr: string; description: string; naicsCode: string; setAside: string | null }[]);
-    const filtered = agency ? contracts.filter(c => c.agency.toLowerCase().includes(agency.toLowerCase())) : contracts;
-    const afterAmount = minAmount > 0 ? filtered.filter(c => c.amount >= minAmount) : filtered;
+    const filtered = agency ? contracts.filter((c: any) => c.agency.toLowerCase().includes(agency.toLowerCase())) : contracts;
+    const afterAmount = minAmount > 0 ? filtered.filter((c: any) => c.amount >= minAmount) : filtered;
     sendSuccess(res, {
       source: "USASpending.gov Federal Contracts",
       url: "https://www.usaspending.gov/",
       count: afterAmount.length,
-      totalValue: afterAmount.reduce((sum, c) => sum + c.amount, 0),
+      totalValue: afterAmount.reduce((sum: number, c: any) => sum + c.amount, 0),
       contracts: afterAmount,
       filters: { agency, minAmount },
       fetchedAt: new Date().toISOString(),

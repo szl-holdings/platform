@@ -60,7 +60,7 @@ async function ensureStatusTables(): Promise<void> {
 }
 
 ensureStatusTables().catch((err) => {
-  logger.error("Failed to create status tables", { error: err.message });
+  logger.error({ error: err.message }, "Failed to create status tables");
 });
 
 async function recordHealthCheck(): Promise<void> {
@@ -89,7 +89,7 @@ async function recordHealthCheck(): Promise<void> {
       `DELETE FROM platform_status_checks WHERE checked_at < NOW() - INTERVAL '91 days'`
     );
   } catch (err) {
-    logger.warn("Status health check failed", { error: (err as Error).message });
+    logger.warn({ error: (err as Error).message }, "Status health check failed");
   }
 }
 
@@ -183,7 +183,7 @@ router.get("/status", async (_req, res) => {
       incidents,
     });
   } catch (err) {
-    logger.error("Failed to fetch public status", { error: (err as Error).message });
+    logger.error({ error: (err as Error).message }, "Failed to fetch public status");
     res.status(500).json({ error: "Failed to fetch status" });
   }
 });
@@ -202,7 +202,7 @@ router.post("/status/subscribe", async (req, res) => {
     );
     res.json({ ok: true, message: "Subscribed successfully" });
   } catch (err) {
-    logger.error("Status subscription failed", { error: (err as Error).message });
+    logger.error({ error: (err as Error).message }, "Status subscription failed");
     res.status(500).json({ error: "Subscription failed" });
   }
 });
@@ -229,7 +229,7 @@ router.post("/incidents", async (req, res) => {
     );
     res.json({ ok: true, id: incident.id });
   } catch (err) {
-    logger.error("Failed to create incident", { error: (err as Error).message });
+    logger.error({ error: (err as Error).message }, "Failed to create incident");
     res.status(500).json({ error: "Failed to create incident" });
   }
 });
@@ -259,7 +259,7 @@ router.patch("/incidents/:id", async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    logger.error("Failed to update incident", { error: (err as Error).message });
+    logger.error({ error: (err as Error).message }, "Failed to update incident");
     res.status(500).json({ error: "Failed to update incident" });
   }
 });

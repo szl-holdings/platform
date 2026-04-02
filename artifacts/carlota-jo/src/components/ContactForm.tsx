@@ -23,7 +23,7 @@ export default function ContactForm() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-  const featuredTestimonial = testimonialsData[0];
+  const featuredTestimonial = (testimonialsData as Array<{ quote: string; name: string; title: string; company: string }>)[0];
 
   const validate = (): boolean => {
     const newErrors: Partial<FormData> = {};

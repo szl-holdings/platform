@@ -410,7 +410,7 @@ router.get("/intelligence/maritime/weather", intelRateLimit, authMiddleware({ re
   } catch (err) { handleRouteError(res, err, "Failed to fetch marine weather"); }
 });
 
-type SanctionVessel = { name: string; imo: string; flag: string; status: string; reason: string; listedDate: string; source: string; entities: { entity_group: string; word: string; score: number }[]; aiEnriched: boolean };
+type SanctionVessel = { name: string; imo: string; flag: string; status: string; reason: string; listedDate: string; source: string; entities: { entity: string; word: string; score: number; start: number; end: number }[]; aiEnriched: boolean };
 
 async function fetchOfacSdnVessels(): Promise<{ name: string; imo: string; flag: string; status: string; reason: string; listedDate: string; source: string }[]> {
   const controller = new AbortController();

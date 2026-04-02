@@ -17,7 +17,8 @@ export function initSentry(config: SentryConfig) {
   if (sentryInitialized || typeof window === "undefined") return;
   sentryInitialized = true;
 
-  const dsn = config.dsn || import.meta.env?.VITE_SENTRY_DSN;
+  const env = import.meta.env;
+  const dsn = config.dsn || env.VITE_SENTRY_DSN;
   if (!dsn) {
     console.debug(`[${config.appSlug}] Sentry DSN not configured — error tracking in console-only mode`);
     setupGlobalHandlers(config.appSlug);
@@ -26,8 +27,8 @@ export function initSentry(config: SentryConfig) {
 
   Sentry.init({
     dsn,
-    environment: config.environment || import.meta.env?.MODE || "development",
-    release: config.release || `${config.appSlug}@${import.meta.env?.VITE_APP_VERSION || "0.0.0"}`,
+    environment: config.environment || (env as Record<string, string>).MODE || "development",
+    release: config.release || `${config.appSlug}@${env.VITE_APP_VERSION || "0.0.0"}`,
     sampleRate: config.sampleRate ?? 1.0,
     tracesSampleRate: config.tracesSampleRate ?? 0.2,
     replaysSessionSampleRate: config.replaysSessionSampleRate ?? 0.1,
@@ -37,7 +38,7 @@ export function initSentry(config: SentryConfig) {
       Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
     ],
     beforeSend(event) {
-      if (import.meta.env?.DEV) {
+      if ((env as Record<string, unknown>).DEV) {
         console.debug("[Sentry] Would send event:", event.event_id);
       }
       return event;

@@ -34,7 +34,6 @@ export function useRole(): UserRoles & { isLoading: boolean } {
   const { data: roles = [], isLoading } = useQuery<AppRole[]>({
     queryKey: ["user-roles"],
     queryFn: async () => {
-      const base = import.meta.env.BASE_URL ?? "/";
       const apiBase = "/api";
       const res = await fetch(`${apiBase}/auth/roles`, {
         credentials: "include",

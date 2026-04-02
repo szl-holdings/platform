@@ -15,7 +15,7 @@ import type { ExportColumn } from "../lib/export-service";
 import { handleRouteError, sendSuccess, sendError, sendBadRequest } from "../lib/api-response";
 
 interface AuthUser { id: number; role: string; email?: string; displayName?: string }
-interface ExtendedRequest extends Request { user?: AuthUser }
+type ExtendedRequest = Request & { user?: AuthUser }
 
 const router: IRouter = Router();
 

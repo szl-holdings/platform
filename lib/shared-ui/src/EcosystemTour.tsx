@@ -53,6 +53,7 @@ export function EcosystemTour({
       const t = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [dismissed]);
 
   const handleDismiss = React.useCallback(() => {
@@ -115,9 +116,9 @@ export function EcosystemTour({
                 style={{ backgroundColor: `${accentColor}15` }}
               >
                 {Icon ? (
-                  <Icon className="w-3.5 h-3.5" style={{ color: accentColor } as React.CSSProperties} />
+                  (Icon as any)({ className: "w-3.5 h-3.5", style: { color: accentColor } })
                 ) : (
-                  <Sparkles className="w-3.5 h-3.5" style={{ color: accentColor } as React.CSSProperties} />
+                  (Sparkles as any)({ className: "w-3.5 h-3.5", style: { color: accentColor } })
                 )}
               </div>
               <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider">

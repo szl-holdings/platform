@@ -848,7 +848,7 @@ router.post("/lyte/platform/readiness", authMiddleware(), async (req, res) => {
       dueAt: data.dueAt ? new Date(data.dueAt) : null,
       notes: data.notes ?? null,
       metadata: data.metadata ?? null,
-    }).returning();
+    } as any).returning();
 
     await lyteAuditLog("readiness.created", "lyte_readiness", String(item.id), { category: data.category, priority: data.priority }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, item);

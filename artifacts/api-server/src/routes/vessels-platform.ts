@@ -1051,7 +1051,7 @@ router.post("/vessels/platform/readiness", authMiddleware(), async (req, res) =>
       priority: data.priority,
       ownerId: req.user.id ?? null,
       notes: data.notes ?? null,
-    }).returning();
+    } as any).returning();
 
     await vesselAuditLog("readiness.created", "vessel_readiness", String(item.id), { category: data.category, priority: data.priority }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, item);
