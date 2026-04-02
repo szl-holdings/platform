@@ -12,13 +12,122 @@ import {
   workflowRunsTable,
   usersTable,
   orgMembersTable,
+  auditLogsTable,
 } from "@workspace/db";
 import { eq, and, desc, sql, or, gte, lte } from "drizzle-orm";
+import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
 
 const router: IRouter = Router();
+
+const ACTION_PRIORITIES = ["low", "medium", "high", "critical"] as const;
+const ACTION_STATUSES = ["pending", "in_progress", "completed", "deferred", "cancelled", "blocked"] as const;
+const ACTION_TYPES = ["investigation", "remediation", "escalation", "approval", "notification", "playbook", "manual"] as const;
+const SIGNAL_SEVERITIES = ["info", "low", "medium", "high", "critical"] as const;
+const READINESS_CATEGORIES = ["operational", "security", "compliance", "performance", "financial", "technical", "maritime"] as const;
+const READINESS_PRIORITIES = ["low", "medium", "high", "critical"] as const;
+
+const CreateActionSchema = z.object({
+  orgId: z.number().int().optional().default(1),
+  title: z.string().min(1, "title is required"),
+  description: z.string().optional().nullable(),
+  actionType: z.enum(ACTION_TYPES).optional().default("manual"),
+  priority: z.enum(ACTION_PRIORITIES).optional().default("medium"),
+  signalId: z.number().int().optional().nullable(),
+  assignedTo: z.number().int().optional().nullable(),
+  dueAt: z.string().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const UpdateActionStatusSchema = z.object({
+  status: z.enum(ACTION_STATUSES, { errorMap: () => ({ message: `Invalid status. Valid: ${ACTION_STATUSES.join(", ")}` }) }),
+  notes: z.string().optional().nullable(),
+});
+
+const SIGNAL_STATUSES = ["new", "processing", "processed", "failed", "ignored"] as const;
+
+const SignalOverrideSchema = z.object({
+  severity: z.enum(SIGNAL_SEVERITIES).optional(),
+  status: z.enum(SIGNAL_STATUSES).optional(),
+  reason: z.string().optional().nullable(),
+});
+
+const AssignSchema = z.object({
+  assignedTo: z.number().int({ message: "assignedTo must be a valid user ID" }),
+});
+
+const CreateReadinessSchema = z.object({
+  orgId: z.number().int().optional().default(1),
+  category: z.enum(READINESS_CATEGORIES).optional().default("operational"),
+  title: z.string().min(1, "title is required"),
+  description: z.string().optional().nullable(),
+  priority: z.enum(READINESS_PRIORITIES).optional().default("medium"),
+  score: z.number().min(0).max(100).optional().nullable(),
+  targetScore: z.number().min(0).max(100).optional().default(100),
+  dueAt: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const UpdateReadinessSchema = z.object({
+  category: z.enum(READINESS_CATEGORIES).optional(),
+  title: z.string().min(1).optional(),
+  description: z.string().optional().nullable(),
+  priority: z.enum(READINESS_PRIORITIES).optional(),
+  status: z.enum(["not_started", "in_progress", "completed", "blocked", "deferred"]).optional(),
+  score: z.number().min(0).max(100).optional().nullable(),
+  targetScore: z.number().min(0).max(100).optional(),
+  dueAt: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const CreateViewSchema = z.object({
+  orgId: z.number().int().optional().default(1),
+  name: z.string().min(1, "name is required"),
+  description: z.string().optional().nullable(),
+  filters: z.record(z.unknown()).optional().nullable(),
+  columns: z.record(z.unknown()).optional().nullable(),
+  sortBy: z.string().optional().nullable(),
+  isDefault: z.boolean().optional().default(false),
+  isShared: z.boolean().optional().default(false),
+});
+
+const CreateCommentSchema = z.object({
+  content: z.string().trim().min(1, "content is required"),
+  orgId: z.number().int().optional().default(1),
+});
+
+async function lyteAuditLog(
+  actionType: string,
+  entityType: string,
+  entityId?: string,
+  payload?: Record<string, unknown>,
+  actorUserId?: number,
+  ip?: string,
+  before?: Record<string, unknown>,
+  after?: Record<string, unknown>,
+  organizationId?: number
+) {
+  const fullPayload: Record<string, unknown> = {
+    ...(payload ?? {}),
+    ...(ip ? { _ip: ip } : {}),
+    ...(before !== undefined ? { _before: before } : {}),
+    ...(after !== undefined ? { _after: after } : {}),
+  };
+  await db.insert(auditLogsTable).values({
+    actionType,
+    entityType,
+    entityId,
+    payloadJson: fullPayload,
+    actorUserId,
+    organizationId: organizationId ?? null,
+  }).catch((err: unknown) => {
+    console.error("[lyteAuditLog] Failed to write audit log:", actionType, entityType, entityId, err);
+  });
+}
 
 const LYTE_PRODUCT = "lyte";
 
@@ -440,6 +549,7 @@ router.post("/lyte/platform/signals/:id/acknowledge", authMiddleware(), async (r
 
     if (!signal) { sendNotFound(res, "Signal"); return; }
     await trackSignalStateChange(orgId, id, existing.status, "acknowledged", req.user.id ?? null, req.user.displayName ?? "system");
+    await lyteAuditLog("signal.acknowledged", "lyte_signal", String(id), {}, req.user.id ?? undefined, req.ip, { status: existing.status }, { status: "processing" }, orgId);
     sendSuccess(res, signal);
   } catch (err) {
     handleRouteError(res, err, "Failed to acknowledge signal");
@@ -452,8 +562,9 @@ router.post("/lyte/platform/signals/:id/assign", authMiddleware(), async (req, r
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const { assignedTo } = req.body as { assignedTo: number };
-    if (!assignedTo || typeof assignedTo !== "number") { sendBadRequest(res, "assignedTo (number) required"); return; }
+    const parsed = AssignSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "assignedTo (number) required", parsed.error.flatten().fieldErrors); return; }
+    const { assignedTo } = parsed.data;
 
     const [membership] = await db.select({ role: orgMembersTable.role }).from(orgMembersTable).where(
       and(eq(orgMembersTable.orgId, orgId), eq(orgMembersTable.userId, assignedTo))
@@ -474,6 +585,7 @@ router.post("/lyte/platform/signals/:id/assign", authMiddleware(), async (req, r
 
     if (!signal) { sendNotFound(res, "Signal"); return; }
     await trackSignalStateChange(orgId, id, existing.status, "assigned", req.user.id ?? null, req.user.displayName ?? "system", { assignedTo });
+    await lyteAuditLog("signal.assigned", "lyte_signal", String(id), { assignedTo }, req.user.id ?? undefined, req.ip, { status: existing.status }, { status: "processing", assignedTo }, orgId);
     sendSuccess(res, signal);
   } catch (err) {
     handleRouteError(res, err, "Failed to assign signal");
@@ -498,6 +610,7 @@ router.post("/lyte/platform/signals/:id/escalate", authMiddleware(), async (req,
     if (!signal) { sendNotFound(res, "Signal"); return; }
     await trackSignalStateChange(orgId, id, existing.status, "escalated", req.user.id ?? null, req.user.displayName ?? "system", { prevSeverity: existing.severity });
     await triggerAlloyWorkflow(orgId, LYTE_PRODUCT, "signal", id, { action: "escalate", signalId: id, severity: "critical" });
+    await lyteAuditLog("signal.escalated", "lyte_signal", String(id), {}, req.user.id ?? undefined, req.ip, { status: existing.status, severity: existing.severity }, { status: "processing", severity: "critical" }, orgId);
     sendSuccess(res, signal);
   } catch (err) {
     handleRouteError(res, err, "Failed to escalate signal");
@@ -513,7 +626,9 @@ router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), async (req, 
     const [existing] = await db.select({ status: platformSignalsTable.status }).from(platformSignalsTable).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId)));
     if (!existing) { sendNotFound(res, "Signal"); return; }
 
-    const resolution = typeof req.body?.resolution === "string" ? req.body.resolution : null;
+    const resolveBody = z.object({ resolution: z.string().trim().optional().nullable() }).safeParse(req.body);
+    if (!resolveBody.success) { sendBadRequest(res, "Invalid resolve data", resolveBody.error.flatten().fieldErrors); return; }
+    const resolution = resolveBody.data.resolution ?? null;
 
     const [signal] = await db.update(platformSignalsTable).set({
       status: "processed" as any,
@@ -523,6 +638,7 @@ router.post("/lyte/platform/signals/:id/resolve", authMiddleware(), async (req, 
 
     if (!signal) { sendNotFound(res, "Signal"); return; }
     await trackSignalStateChange(orgId, id, existing.status, "resolved", req.user.id ?? null, req.user.displayName ?? "system", { resolution });
+    await lyteAuditLog("signal.resolved", "lyte_signal", String(id), { resolution }, req.user.id ?? undefined, req.ip, { status: existing.status }, { status: "processed" }, orgId);
     sendSuccess(res, signal);
   } catch (err) {
     handleRouteError(res, err, "Failed to resolve signal");
@@ -535,7 +651,9 @@ router.post("/lyte/platform/signals/:id/override", authMiddleware(), async (req,
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const { severity, status, reason } = req.body as { severity?: string; status?: string; reason?: string };
+    const overrideParsed = SignalOverrideSchema.safeParse(req.body);
+    if (!overrideParsed.success) { sendBadRequest(res, "Invalid override data", overrideParsed.error.flatten().fieldErrors); return; }
+    const { severity, status, reason } = overrideParsed.data;
 
     const [existing] = await db.select({ status: platformSignalsTable.status, severity: platformSignalsTable.severity }).from(platformSignalsTable).where(and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId)));
     if (!existing) { sendNotFound(res, "Signal"); return; }
@@ -549,6 +667,7 @@ router.post("/lyte/platform/signals/:id/override", authMiddleware(), async (req,
 
     if (!signal) { sendNotFound(res, "Signal"); return; }
     await trackSignalStateChange(orgId, id, existing.status, newStatus, req.user.id ?? null, req.user.displayName ?? "system", { severity, reason });
+    await lyteAuditLog("signal.overridden", "lyte_signal", String(id), { reason: reason ?? null }, req.user.id ?? undefined, req.ip, { status: existing.status, severity: existing.severity }, { status: newStatus, severity: severity ?? existing.severity }, orgId);
     sendSuccess(res, signal);
   } catch (err) {
     handleRouteError(res, err, "Failed to override signal");
@@ -597,29 +716,29 @@ router.get("/lyte/platform/actions/:id", authMiddleware({ required: false }), as
 
 router.post("/lyte/platform/actions", authMiddleware(), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    const parsed = CreateActionSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid action data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+    const orgId = data.orgId;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-
-    const actionType = (typeof body.actionType === "string" ? body.actionType : "manual") as any;
-    const priority = (typeof body.priority === "string" ? body.priority : "medium") as "low" | "medium" | "high" | "critical";
 
     const [action] = await db.insert(actionsTable).values({
       orgId,
       product: LYTE_PRODUCT,
-      title: body.title as string,
-      description: typeof body.description === "string" ? body.description : null,
-      actionType,
+      title: data.title,
+      description: data.description ?? null,
+      actionType: data.actionType,
       status: "pending",
-      priority,
-      signalId: typeof body.signalId === "number" ? body.signalId : null,
-      assignedTo: typeof body.assignedTo === "number" ? body.assignedTo : null,
+      priority: data.priority,
+      signalId: data.signalId ?? null,
+      assignedTo: data.assignedTo ?? null,
       ownerId: req.user.id ?? null,
-      dueAt: body.dueAt ? new Date(body.dueAt as string) : null,
-      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
-    } as any).returning();
+      dueAt: data.dueAt ? new Date(data.dueAt) : null,
+      metadata: data.metadata ?? null,
+    }).returning();
 
     logLyteEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "action.created", "action", String(action.id));
+    await lyteAuditLog("action.created", "lyte_action", String(action.id), { title: data.title, actionType: data.actionType, priority: data.priority }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, action);
   } catch (err) {
     handleRouteError(res, err, "Failed to create action");
@@ -632,12 +751,16 @@ async function updateActionStatus(req: import("express").Request, res: import("e
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : (typeof req.body?.orgId === "number" ? req.body.orgId : 1);
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const { status, notes } = req.body as { status: string; notes?: string };
-    const actionStatus = status as "pending" | "in_progress" | "completed" | "deferred" | "cancelled" | "blocked";
+    const parsed = UpdateActionStatusSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid action status", parsed.error.flatten().fieldErrors); return; }
+    const { status, notes } = parsed.data;
 
-    const updates: Record<string, unknown> = { status: actionStatus, updatedAt: new Date() };
+    const updates: Record<string, unknown> = { status, updatedAt: new Date() };
     if (status === "completed") updates.completedAt = new Date();
     if (notes) updates.metadata = { notes, updatedBy: req.user.displayName ?? "system" };
+
+    const [beforeAction] = await db.select({ status: actionsTable.status }).from(actionsTable).where(and(eq(actionsTable.id, id), eq(actionsTable.orgId, orgId)));
+    if (!beforeAction) { sendNotFound(res, "Action"); return; }
 
     const [action] = await db.update(actionsTable).set(updates as Partial<typeof actionsTable.$inferInsert>).where(
       and(eq(actionsTable.id, id), eq(actionsTable.orgId, orgId))
@@ -645,6 +768,7 @@ async function updateActionStatus(req: import("express").Request, res: import("e
 
     if (!action) { sendNotFound(res, "Action"); return; }
     logLyteEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", `action.${status}`, "action", String(id));
+    await lyteAuditLog(`action.${status}`, "lyte_action", String(id), { notes: notes ?? null }, req.user.id ?? undefined, req.ip, { status: beforeAction.status }, { status }, orgId);
     sendSuccess(res, action);
   } catch (err) {
     handleRouteError(res, err, "Failed to update action status");
@@ -704,30 +828,29 @@ router.get("/lyte/platform/readiness/:id", authMiddleware({ required: false }), 
 
 router.post("/lyte/platform/readiness", authMiddleware(), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    const parsed = CreateReadinessSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid readiness data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+    const orgId = data.orgId;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-
-    const category = (typeof body.category === "string" ? body.category : "operational") as typeof readinessItemsTable.category._.data;
-    const priority = (typeof body.priority === "string" ? body.priority : "medium") as typeof readinessItemsTable.priority._.data;
-    const score = body.score ? String(body.score) : null;
 
     const [item] = await db.insert(readinessItemsTable).values({
       orgId,
       product: LYTE_PRODUCT,
-      category,
-      title: body.title as string,
-      description: typeof body.description === "string" ? body.description : null,
+      category: data.category,
+      title: data.title,
+      description: data.description ?? null,
       status: "not_started",
-      priority,
-      score,
-      targetScore: body.targetScore ? String(body.targetScore) : "100",
+      priority: data.priority,
+      score: data.score != null ? String(data.score) : null,
+      targetScore: String(data.targetScore),
       ownerId: req.user.id ?? null,
-      dueAt: body.dueAt ? new Date(body.dueAt as string) : null,
-      notes: typeof body.notes === "string" ? body.notes : null,
-      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
+      dueAt: data.dueAt ? new Date(data.dueAt) : null,
+      notes: data.notes ?? null,
+      metadata: data.metadata ?? null,
     }).returning();
 
+    await lyteAuditLog("readiness.created", "lyte_readiness", String(item.id), { category: data.category, priority: data.priority }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, item);
   } catch (err) {
     handleRouteError(res, err, "Failed to create readiness item");
@@ -740,17 +863,29 @@ router.patch("/lyte/platform/readiness/:id", authMiddleware(), async (req, res) 
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const { orgId: _drop, ...safeBody } = req.body as Record<string, unknown>;
-    const updates = { ...safeBody, updatedAt: new Date() };
-    if ((updates as Record<string, unknown>).status === "completed" && !(updates as Record<string, unknown>).completedAt) {
-      (updates as Record<string, unknown>).completedAt = new Date();
-    }
+    const parsed = UpdateReadinessSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid readiness update", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+
+    const [before] = await db.select().from(readinessItemsTable).where(and(eq(readinessItemsTable.id, id), eq(readinessItemsTable.orgId, orgId)));
+    if (!before) { sendNotFound(res, "Readiness item"); return; }
+
+    const updates: Record<string, unknown> = { ...data, updatedAt: new Date() };
+    if (data.score != null) updates.score = String(data.score);
+    if (data.targetScore != null) updates.targetScore = String(data.targetScore);
+    if (data.dueAt) updates.dueAt = new Date(data.dueAt);
+    if (data.status === "completed" && !before.completedAt) updates.completedAt = new Date();
 
     const [item] = await db.update(readinessItemsTable).set(updates as Partial<typeof readinessItemsTable.$inferInsert>).where(
       and(eq(readinessItemsTable.id, id), eq(readinessItemsTable.orgId, orgId))
     ).returning();
 
     if (!item) { sendNotFound(res, "Readiness item"); return; }
+    await lyteAuditLog("readiness.updated", "lyte_readiness", String(id), { changes: Object.keys(data) }, req.user.id ?? undefined, req.ip,
+      { status: before.status, score: before.score, priority: before.priority },
+      { status: item.status, score: item.score, priority: item.priority },
+      orgId
+    );
     sendSuccess(res, item);
   } catch (err) {
     handleRouteError(res, err, "Failed to update readiness item");
@@ -767,6 +902,7 @@ router.delete("/lyte/platform/readiness/:id", authMiddleware(), async (req, res)
       and(eq(readinessItemsTable.id, id), eq(readinessItemsTable.orgId, orgId))
     ).returning();
     if (!item) { sendNotFound(res, "Readiness item"); return; }
+    await lyteAuditLog("readiness.deleted", "lyte_readiness", String(id), { title: item.title }, req.user.id ?? undefined, req.ip, { status: item.status, priority: item.priority }, undefined, orgId);
     sendSuccess(res, { deleted: true, id });
   } catch (err) {
     handleRouteError(res, err, "Failed to delete readiness item");
@@ -807,23 +943,26 @@ router.post("/lyte/platform/views", authMiddleware(), async (req, res) => {
       res.status(403).json({ error: "Feature not available", feature: "lyte_role_views_enabled" });
       return;
     }
-    const body = req.body as Record<string, unknown>;
-    const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    const parsed = CreateViewSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid view data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+    const orgId = data.orgId;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
     const [view] = await db.insert(savedViewsTable).values({
       orgId,
       product: LYTE_PRODUCT,
       userId: req.user.id ?? null,
-      name: body.name as string,
-      description: typeof body.description === "string" ? body.description : null,
-      filters: (body.filters && typeof body.filters === "object") ? body.filters as Record<string, unknown> : null,
-      columns: (body.columns && typeof body.columns === "object") ? body.columns as Record<string, unknown> : null,
-      sortBy: typeof body.sortBy === "string" ? body.sortBy : null,
-      isDefault: Boolean(body.isDefault),
-      isShared: Boolean(body.isShared),
+      name: data.name,
+      description: data.description ?? null,
+      filters: data.filters ?? null,
+      columns: data.columns ?? null,
+      sortBy: data.sortBy ?? null,
+      isDefault: data.isDefault,
+      isShared: data.isShared,
     }).returning();
 
+    await lyteAuditLog("view.created", "lyte_view", String(view.id), { name: view.name, isShared: view.isShared }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, view);
   } catch (err) {
     handleRouteError(res, err, "Failed to create saved view");
@@ -840,6 +979,7 @@ router.delete("/lyte/platform/views/:id", authMiddleware(), async (req, res) => 
       and(eq(savedViewsTable.id, id), eq(savedViewsTable.orgId, orgId))
     ).returning();
     if (!view) { sendNotFound(res, "Saved view"); return; }
+    await lyteAuditLog("view.deleted", "lyte_view", String(id), { name: view.name }, req.user.id ?? undefined, req.ip, { name: view.name, isShared: view.isShared }, undefined, orgId);
     sendSuccess(res, { deleted: true, id });
   } catch (err) {
     handleRouteError(res, err, "Failed to delete saved view");
@@ -865,10 +1005,10 @@ router.get("/lyte/platform/signals/:id/comments", authMiddleware({ required: fal
 router.post("/lyte/platform/signals/:id/comments", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const { content, orgId: rawOrgId } = req.body as { content: string; orgId?: number };
-    const orgId = typeof rawOrgId === "number" ? rawOrgId : 1;
+    const parsed = CreateCommentSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid comment data", parsed.error.flatten().fieldErrors); return; }
+    const { content, orgId } = parsed.data;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-    if (!content?.trim()) { sendBadRequest(res, "content required"); return; }
 
     const [signal] = await db.select({ id: platformSignalsTable.id }).from(platformSignalsTable).where(
       and(eq(platformSignalsTable.id, id), eq(platformSignalsTable.orgId, orgId))
@@ -884,6 +1024,7 @@ router.post("/lyte/platform/signals/:id/comments", authMiddleware(), async (req,
       content: content.trim(),
     }).returning();
 
+    await lyteAuditLog("signal.comment.created", "lyte_signal", String(id), { commentId: comment.id }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, comment);
   } catch (err) {
     handleRouteError(res, err, "Failed to create comment");
@@ -909,10 +1050,10 @@ router.get("/lyte/platform/actions/:id/comments", authMiddleware({ required: fal
 router.post("/lyte/platform/actions/:id/comments", authMiddleware(), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const { content, orgId: rawOrgId } = req.body as { content: string; orgId?: number };
-    const orgId = typeof rawOrgId === "number" ? rawOrgId : 1;
+    const parsed = CreateCommentSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid comment data", parsed.error.flatten().fieldErrors); return; }
+    const { content, orgId } = parsed.data;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-    if (!content?.trim()) { sendBadRequest(res, "content required"); return; }
 
     const [action] = await db.select({ id: actionsTable.id }).from(actionsTable).where(
       and(eq(actionsTable.id, id), eq(actionsTable.orgId, orgId))
@@ -928,6 +1069,7 @@ router.post("/lyte/platform/actions/:id/comments", authMiddleware(), async (req,
       content: content.trim(),
     }).returning();
 
+    await lyteAuditLog("action.comment.created", "lyte_action", String(id), { commentId: comment.id }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, comment);
   } catch (err) {
     handleRouteError(res, err, "Failed to create action comment");

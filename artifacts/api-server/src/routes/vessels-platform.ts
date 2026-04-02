@@ -11,11 +11,162 @@ import {
   eventLogTable,
   workflowsTable,
   workflowRunsTable,
+  auditLogsTable,
 } from "@workspace/db";
 import { eq, and, desc, sql, or } from "drizzle-orm";
+import { z } from "zod";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam, canAccessOrgRecord } from "../middlewares/auth";
 import { isFlagEnabled } from "../lib/platform-flags";
+
+const VESSEL_TYPES = ["container", "tanker", "bulk", "cargo", "passenger", "ro-ro", "lpg", "lng", "chemical", "other"] as const;
+const VESSEL_STATUSES = ["active", "in_port", "at_sea", "anchored", "maintenance", "decommissioned", "off_hire"] as const;
+const VOYAGE_STATUSES = ["planned", "loading", "departed", "at_sea", "arrived", "discharging", "completed", "cancelled", "diverted"] as const;
+
+const CreateVesselSchema = z.object({
+  orgId: z.number().int().optional().default(1),
+  name: z.string().min(1, "name is required"),
+  imo: z.string().optional().nullable(),
+  mmsi: z.string().optional().nullable(),
+  callSign: z.string().optional().nullable(),
+  flag: z.string().optional().nullable(),
+  vesselType: z.enum(VESSEL_TYPES).optional().default("container"),
+  yearBuilt: z.number().int().min(1800).max(new Date().getFullYear() + 2).optional().nullable(),
+  grossTonnage: z.number().optional().nullable(),
+  status: z.enum(VESSEL_STATUSES).optional().default("active"),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const UpdateVesselSchema = z.object({
+  name: z.string().min(1).optional(),
+  imo: z.string().optional().nullable(),
+  mmsi: z.string().optional().nullable(),
+  callSign: z.string().optional().nullable(),
+  flag: z.string().optional().nullable(),
+  vesselType: z.enum(VESSEL_TYPES).optional(),
+  yearBuilt: z.number().int().optional().nullable(),
+  grossTonnage: z.number().optional().nullable(),
+  status: z.enum(VESSEL_STATUSES).optional(),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
+  heading: z.number().min(0).max(360).optional().nullable(),
+  speedOverGround: z.number().min(0).optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const CreateVoyageSchema = z.object({
+  orgId: z.number().int().optional().default(1),
+  vesselId: z.number().int({ message: "vesselId is required" }),
+  voyageNumber: z.string().optional().nullable(),
+  originPortId: z.number().int().optional().nullable(),
+  destinationPortId: z.number().int().optional().nullable(),
+  cargoType: z.string().optional().nullable(),
+  cargoDescription: z.string().optional().nullable(),
+  cargoTonnage: z.number().optional().nullable(),
+  cargoValueUsd: z.number().optional().nullable(),
+  status: z.enum(VOYAGE_STATUSES).optional().default("planned"),
+  scheduledDepartureAt: z.string().optional().nullable(),
+  scheduledArrivalAt: z.string().optional().nullable(),
+  estimatedArrivalAt: z.string().optional().nullable(),
+  distanceNm: z.number().optional().nullable(),
+  revenueUsd: z.number().optional().nullable(),
+  charterRatePerDay: z.number().optional().nullable(),
+  corridorId: z.number().int().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const EXCEPTION_TYPES = ["eta_deviation", "route_deviation", "weather_delay", "port_congestion", "mechanical", "cargo_incident", "security_threat", "regulatory", "commercial", "other"] as const;
+const EXCEPTION_SEVERITIES = ["low", "medium", "high", "critical"] as const;
+const VOYAGE_READINESS_CATEGORIES = ["maritime", "operational", "security", "compliance", "performance", "financial", "technical"] as const;
+const READINESS_PRIORITIES_V = ["low", "medium", "high", "critical"] as const;
+
+const UpdateVoyageSchema = z.object({
+  voyageNumber: z.string().optional().nullable(),
+  originPortId: z.number().int().optional().nullable(),
+  destinationPortId: z.number().int().optional().nullable(),
+  cargoType: z.string().optional().nullable(),
+  cargoDescription: z.string().optional().nullable(),
+  cargoTonnage: z.number().optional().nullable(),
+  cargoValueUsd: z.number().optional().nullable(),
+  status: z.enum(VOYAGE_STATUSES).optional(),
+  scheduledDepartureAt: z.string().optional().nullable(),
+  scheduledArrivalAt: z.string().optional().nullable(),
+  estimatedArrivalAt: z.string().optional().nullable(),
+  actualDepartureAt: z.string().optional().nullable(),
+  actualArrivalAt: z.string().optional().nullable(),
+  distanceNm: z.number().optional().nullable(),
+  revenueUsd: z.number().optional().nullable(),
+  charterRatePerDay: z.number().optional().nullable(),
+  corridorId: z.number().int().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const ExceptionAssignSchema = z.object({
+  assignedTo: z.number().int({ message: "assignedTo must be a valid user ID" }),
+});
+
+const ExceptionEscalateSchema = z.object({
+  reason: z.string().optional().nullable(),
+});
+
+const ExceptionResolveSchema = z.object({
+  resolution: z.string().optional().nullable(),
+});
+
+const CreateExceptionSchema = z.object({
+  orgId: z.number().int().optional().default(1),
+  vesselId: z.number().int().optional().nullable(),
+  voyageId: z.number().int().optional().nullable(),
+  signalId: z.number().int().optional().nullable(),
+  exceptionType: z.enum(EXCEPTION_TYPES).optional().default("other"),
+  severity: z.enum(EXCEPTION_SEVERITIES).optional().default("medium"),
+  title: z.string().min(1, "title is required"),
+  description: z.string().optional().nullable(),
+  valueAtRiskUsd: z.number().optional().nullable(),
+  etaImpactHours: z.number().optional().nullable(),
+  costImpactUsd: z.number().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+const CreateVesselReadinessSchema = z.object({
+  orgId: z.number().int().optional().default(1),
+  category: z.enum(VOYAGE_READINESS_CATEGORIES).optional().default("maritime"),
+  title: z.string().min(1, "title is required"),
+  description: z.string().optional().nullable(),
+  priority: z.enum(READINESS_PRIORITIES_V).optional().default("medium"),
+  notes: z.string().optional().nullable(),
+});
+
+async function vesselAuditLog(
+  actionType: string,
+  entityType: string,
+  entityId?: string,
+  payload?: Record<string, unknown>,
+  actorUserId?: number,
+  ip?: string,
+  before?: Record<string, unknown>,
+  after?: Record<string, unknown>,
+  organizationId?: number
+) {
+  const fullPayload: Record<string, unknown> = {
+    ...(payload ?? {}),
+    ...(ip ? { _ip: ip } : {}),
+    ...(before !== undefined ? { _before: before } : {}),
+    ...(after !== undefined ? { _after: after } : {}),
+  };
+  await db.insert(auditLogsTable).values({
+    actionType,
+    entityType,
+    entityId,
+    payloadJson: fullPayload,
+    actorUserId,
+    organizationId: organizationId ?? null,
+  }).catch((err: unknown) => {
+    console.error("[vesselAuditLog] Failed to write audit log:", actionType, entityType, entityId, err);
+  });
+}
 
 const router: IRouter = Router();
 const VESSELS_PRODUCT = "vessels";
@@ -381,30 +532,30 @@ router.post("/vessels/platform/vessels", authMiddleware(), async (req, res) => {
       res.status(403).json({ error: "Feature not available", feature: "vessels_command_mode_enabled", message: "Vessel command mode is not enabled" });
       return;
     }
-    const body = req.body as Record<string, unknown>;
-    const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    const parsed = CreateVesselSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid vessel data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+    const orgId = data.orgId;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-
-    const vesselType = (typeof body.vesselType === "string" ? body.vesselType : "container") as "container" | "tanker" | "bulk" | "cargo" | "passenger" | "ro-ro" | "lpg" | "lng" | "chemical" | "other";
-    const vesselStatus = (typeof body.status === "string" ? body.status : "active") as "active" | "in_port" | "at_sea" | "anchored" | "maintenance" | "decommissioned" | "off_hire";
 
     const [vessel] = await db.insert(maritimeVesselsTable).values({
       orgId,
-      name: body.name as string,
-      imo: typeof body.imo === "string" ? body.imo : null,
-      mmsi: typeof body.mmsi === "string" ? body.mmsi : null,
-      callSign: typeof body.callSign === "string" ? body.callSign : null,
-      flag: typeof body.flag === "string" ? body.flag : null,
-      vesselType,
-      yearBuilt: typeof body.yearBuilt === "number" ? body.yearBuilt : null,
-      grossTonnage: body.grossTonnage ? String(body.grossTonnage) : null,
-      status: vesselStatus,
-      latitude: body.latitude ? String(body.latitude) : null,
-      longitude: body.longitude ? String(body.longitude) : null,
-      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
+      name: data.name,
+      imo: data.imo ?? null,
+      mmsi: data.mmsi ?? null,
+      callSign: data.callSign ?? null,
+      flag: data.flag ?? null,
+      vesselType: data.vesselType,
+      yearBuilt: data.yearBuilt ?? null,
+      grossTonnage: data.grossTonnage != null ? String(data.grossTonnage) : null,
+      status: data.status,
+      latitude: data.latitude != null ? String(data.latitude) : null,
+      longitude: data.longitude != null ? String(data.longitude) : null,
+      metadata: data.metadata ?? null,
     }).returning();
 
     logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "vessel.created", "maritime_vessel", String(vessel.id));
+    await vesselAuditLog("vessel.created", "maritime_vessel", String(vessel.id), { name: vessel.name, type: vessel.vesselType }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, vessel);
   } catch (err) {
     handleRouteError(res, err, "Failed to create vessel");
@@ -417,12 +568,23 @@ router.patch("/vessels/platform/vessels/:id", authMiddleware(), async (req, res)
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const { orgId: _drop, ...safeBody } = req.body as Record<string, unknown>;
-    const [vessel] = await db.update(maritimeVesselsTable).set({ ...safeBody, updatedAt: new Date() } as Partial<typeof maritimeVesselsTable.$inferInsert>).where(
+    const parsed = UpdateVesselSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid vessel update data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+
+    const updatePayload: Record<string, unknown> = { ...data, updatedAt: new Date() };
+    if (data.latitude != null) updatePayload.latitude = String(data.latitude);
+    if (data.longitude != null) updatePayload.longitude = String(data.longitude);
+    if (data.grossTonnage != null) updatePayload.grossTonnage = String(data.grossTonnage);
+    if (data.heading != null) updatePayload.heading = String(data.heading);
+    if (data.speedOverGround != null) updatePayload.speedOverGround = String(data.speedOverGround);
+
+    const [vessel] = await db.update(maritimeVesselsTable).set(updatePayload as Partial<typeof maritimeVesselsTable.$inferInsert>).where(
       and(eq(maritimeVesselsTable.id, id), eq(maritimeVesselsTable.orgId, orgId))
     ).returning();
 
     if (!vessel) { sendNotFound(res, "Vessel"); return; }
+    await vesselAuditLog("vessel.updated", "maritime_vessel", String(id), { changes: Object.keys(data) }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendSuccess(res, vessel);
   } catch (err) {
     handleRouteError(res, err, "Failed to update vessel");
@@ -485,34 +647,35 @@ router.get("/vessels/platform/voyages/:id", authMiddleware({ required: false }),
 
 router.post("/vessels/platform/voyages", authMiddleware(), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    const parsed = CreateVoyageSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid voyage data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+    const orgId = data.orgId;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-
-    const voyageStatus = (typeof body.status === "string" ? body.status : "planned") as "planned" | "loading" | "departed" | "at_sea" | "arrived" | "discharging" | "completed" | "cancelled" | "diverted";
 
     const [voyage] = await db.insert(voyagesTable).values({
       orgId,
-      vesselId: body.vesselId as number,
-      voyageNumber: typeof body.voyageNumber === "string" ? body.voyageNumber : null,
-      originPortId: typeof body.originPortId === "number" ? body.originPortId : null,
-      destinationPortId: typeof body.destinationPortId === "number" ? body.destinationPortId : null,
-      cargoType: typeof body.cargoType === "string" ? body.cargoType : null,
-      cargoDescription: typeof body.cargoDescription === "string" ? body.cargoDescription : null,
-      cargoTonnage: body.cargoTonnage ? String(body.cargoTonnage) : null,
-      cargoValueUsd: body.cargoValueUsd ? String(body.cargoValueUsd) : null,
-      status: voyageStatus,
-      scheduledDepartureAt: body.scheduledDepartureAt ? new Date(body.scheduledDepartureAt as string) : null,
-      scheduledArrivalAt: body.scheduledArrivalAt ? new Date(body.scheduledArrivalAt as string) : null,
-      estimatedArrivalAt: body.estimatedArrivalAt ? new Date(body.estimatedArrivalAt as string) : null,
-      distanceNm: body.distanceNm ? String(body.distanceNm) : null,
-      revenueUsd: body.revenueUsd ? String(body.revenueUsd) : null,
-      charterRatePerDay: body.charterRatePerDay ? String(body.charterRatePerDay) : null,
-      corridorId: typeof body.corridorId === "number" ? body.corridorId : null,
-      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
+      vesselId: data.vesselId,
+      voyageNumber: data.voyageNumber ?? null,
+      originPortId: data.originPortId ?? null,
+      destinationPortId: data.destinationPortId ?? null,
+      cargoType: data.cargoType ?? null,
+      cargoDescription: data.cargoDescription ?? null,
+      cargoTonnage: data.cargoTonnage != null ? String(data.cargoTonnage) : null,
+      cargoValueUsd: data.cargoValueUsd != null ? String(data.cargoValueUsd) : null,
+      status: data.status,
+      scheduledDepartureAt: data.scheduledDepartureAt ? new Date(data.scheduledDepartureAt) : null,
+      scheduledArrivalAt: data.scheduledArrivalAt ? new Date(data.scheduledArrivalAt) : null,
+      estimatedArrivalAt: data.estimatedArrivalAt ? new Date(data.estimatedArrivalAt) : null,
+      distanceNm: data.distanceNm != null ? String(data.distanceNm) : null,
+      revenueUsd: data.revenueUsd != null ? String(data.revenueUsd) : null,
+      charterRatePerDay: data.charterRatePerDay != null ? String(data.charterRatePerDay) : null,
+      corridorId: data.corridorId ?? null,
+      metadata: data.metadata ?? null,
     }).returning();
 
     logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "voyage.created", "voyage", String(voyage.id));
+    await vesselAuditLog("voyage.created", "voyage", String(voyage.id), { vesselId: data.vesselId, status: data.status }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, voyage);
   } catch (err) {
     handleRouteError(res, err, "Failed to create voyage");
@@ -525,12 +688,39 @@ router.patch("/vessels/platform/voyages/:id", authMiddleware(), async (req, res)
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const { orgId: _drop, ...safeBody } = req.body as Record<string, unknown>;
-    const [voyage] = await db.update(voyagesTable).set({ ...safeBody, updatedAt: new Date() } as Partial<typeof voyagesTable.$inferInsert>).where(
+    const parsed = UpdateVoyageSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid voyage update data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+
+    const [before] = await db.select({ status: voyagesTable.status, estimatedArrivalAt: voyagesTable.estimatedArrivalAt }).from(voyagesTable).where(and(eq(voyagesTable.id, id), eq(voyagesTable.orgId, orgId)));
+    if (!before) { sendNotFound(res, "Voyage"); return; }
+
+    const updatePayload: Record<string, unknown> = { updatedAt: new Date() };
+    if (data.voyageNumber !== undefined) updatePayload.voyageNumber = data.voyageNumber;
+    if (data.originPortId !== undefined) updatePayload.originPortId = data.originPortId;
+    if (data.destinationPortId !== undefined) updatePayload.destinationPortId = data.destinationPortId;
+    if (data.cargoType !== undefined) updatePayload.cargoType = data.cargoType;
+    if (data.cargoDescription !== undefined) updatePayload.cargoDescription = data.cargoDescription;
+    if (data.cargoTonnage !== undefined) updatePayload.cargoTonnage = data.cargoTonnage != null ? String(data.cargoTonnage) : null;
+    if (data.cargoValueUsd !== undefined) updatePayload.cargoValueUsd = data.cargoValueUsd != null ? String(data.cargoValueUsd) : null;
+    if (data.status !== undefined) updatePayload.status = data.status;
+    if (data.scheduledDepartureAt !== undefined) updatePayload.scheduledDepartureAt = data.scheduledDepartureAt ? new Date(data.scheduledDepartureAt) : null;
+    if (data.scheduledArrivalAt !== undefined) updatePayload.scheduledArrivalAt = data.scheduledArrivalAt ? new Date(data.scheduledArrivalAt) : null;
+    if (data.estimatedArrivalAt !== undefined) updatePayload.estimatedArrivalAt = data.estimatedArrivalAt ? new Date(data.estimatedArrivalAt) : null;
+    if (data.actualDepartureAt !== undefined) updatePayload.actualDepartureAt = data.actualDepartureAt ? new Date(data.actualDepartureAt) : null;
+    if (data.actualArrivalAt !== undefined) updatePayload.actualArrivalAt = data.actualArrivalAt ? new Date(data.actualArrivalAt) : null;
+    if (data.distanceNm !== undefined) updatePayload.distanceNm = data.distanceNm != null ? String(data.distanceNm) : null;
+    if (data.revenueUsd !== undefined) updatePayload.revenueUsd = data.revenueUsd != null ? String(data.revenueUsd) : null;
+    if (data.charterRatePerDay !== undefined) updatePayload.charterRatePerDay = data.charterRatePerDay != null ? String(data.charterRatePerDay) : null;
+    if (data.corridorId !== undefined) updatePayload.corridorId = data.corridorId;
+    if (data.metadata !== undefined) updatePayload.metadata = data.metadata;
+
+    const [voyage] = await db.update(voyagesTable).set(updatePayload as Partial<typeof voyagesTable.$inferInsert>).where(
       and(eq(voyagesTable.id, id), eq(voyagesTable.orgId, orgId))
     ).returning();
 
     if (!voyage) { sendNotFound(res, "Voyage"); return; }
+    await vesselAuditLog("voyage.updated", "voyage", String(id), { changes: Object.keys(data).filter(k => data[k as keyof typeof data] !== undefined) }, req.user.id ?? undefined, req.ip, { status: before.status }, { status: voyage.status }, orgId);
     sendSuccess(res, { ...voyage, etaDriftHours: calculateEtaDrift(voyage), economics: computeVoyageEconomics(voyage) });
   } catch (err) {
     handleRouteError(res, err, "Failed to update voyage");
@@ -590,6 +780,9 @@ router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware(), as
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
+    const [before] = await db.select({ status: maritimeExceptionsTable.status }).from(maritimeExceptionsTable).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId)));
+    if (!before) { sendNotFound(res, "Exception"); return; }
+
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "acknowledged",
       acknowledgedAt: new Date(),
@@ -598,6 +791,7 @@ router.post("/vessels/platform/exceptions/:id/acknowledge", authMiddleware(), as
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
     logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.acknowledged", "maritime_exception", String(id));
+    await vesselAuditLog("exception.acknowledged", "maritime_exception", String(id), {}, req.user.id ?? undefined, req.ip, { status: before.status }, { status: "acknowledged" }, orgId);
     sendSuccess(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to acknowledge exception");
@@ -610,8 +804,12 @@ router.post("/vessels/platform/exceptions/:id/assign", authMiddleware(), async (
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const { assignedTo } = req.body as { assignedTo: number };
-    if (!assignedTo || typeof assignedTo !== "number") { sendBadRequest(res, "assignedTo (number) required"); return; }
+    const parsed = ExceptionAssignSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "assignedTo (number) required", parsed.error.flatten().fieldErrors); return; }
+    const { assignedTo } = parsed.data;
+
+    const [beforeExc] = await db.select({ status: maritimeExceptionsTable.status, assignedTo: maritimeExceptionsTable.assignedTo }).from(maritimeExceptionsTable).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId)));
+    if (!beforeExc) { sendNotFound(res, "Exception"); return; }
 
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "assigned",
@@ -621,6 +819,7 @@ router.post("/vessels/platform/exceptions/:id/assign", authMiddleware(), async (
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
     logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.assigned", "maritime_exception", String(id));
+    await vesselAuditLog("exception.assigned", "maritime_exception", String(id), { assignedTo }, req.user.id ?? undefined, req.ip, { status: beforeExc.status, assignedTo: beforeExc.assignedTo }, { status: "assigned", assignedTo }, orgId);
     sendSuccess(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to assign exception");
@@ -633,7 +832,13 @@ router.post("/vessels/platform/exceptions/:id/escalate", authMiddleware(), async
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const reason = typeof req.body?.reason === "string" ? req.body.reason : null;
+    const escalateParsed = ExceptionEscalateSchema.safeParse(req.body);
+    if (!escalateParsed.success) { sendBadRequest(res, "Invalid escalate data", escalateParsed.error.flatten().fieldErrors); return; }
+    const reason = escalateParsed.data.reason ?? null;
+
+    const [beforeEsc] = await db.select({ status: maritimeExceptionsTable.status, severity: maritimeExceptionsTable.severity }).from(maritimeExceptionsTable).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId)));
+    if (!beforeEsc) { sendNotFound(res, "Exception"); return; }
+
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "escalated",
       severity: "critical",
@@ -643,6 +848,7 @@ router.post("/vessels/platform/exceptions/:id/escalate", authMiddleware(), async
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
     logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.escalated", "maritime_exception", String(id));
+    await vesselAuditLog("exception.escalated", "maritime_exception", String(id), { reason }, req.user.id ?? undefined, req.ip, { status: beforeEsc.status, severity: beforeEsc.severity }, { status: "escalated", severity: "critical" }, orgId);
     await triggerAlloyWorkflow(orgId, VESSELS_PRODUCT, "maritime_exception", id, {
       action: "escalate",
       exceptionId: id,
@@ -664,7 +870,13 @@ router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware(), async 
     const orgId = req.query.orgId ? parseInt(req.query.orgId as string, 10) : 1;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
 
-    const resolution = typeof req.body?.resolution === "string" ? req.body.resolution : null;
+    const resolveParsed = ExceptionResolveSchema.safeParse(req.body);
+    if (!resolveParsed.success) { sendBadRequest(res, "Invalid resolve data", resolveParsed.error.flatten().fieldErrors); return; }
+    const resolution = resolveParsed.data.resolution ?? null;
+
+    const [beforeRes] = await db.select({ status: maritimeExceptionsTable.status, severity: maritimeExceptionsTable.severity }).from(maritimeExceptionsTable).where(and(eq(maritimeExceptionsTable.id, id), eq(maritimeExceptionsTable.orgId, orgId)));
+    if (!beforeRes) { sendNotFound(res, "Exception"); return; }
+
     const [exc] = await db.update(maritimeExceptionsTable).set({
       status: "resolved",
       resolvedAt: new Date(),
@@ -674,6 +886,7 @@ router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware(), async 
 
     if (!exc) { sendNotFound(res, "Exception"); return; }
     logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.resolved", "maritime_exception", String(id));
+    await vesselAuditLog("exception.resolved", "maritime_exception", String(id), { resolution }, req.user.id ?? undefined, req.ip, { status: beforeRes.status, severity: beforeRes.severity }, { status: "resolved", resolution }, orgId);
     sendSuccess(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to resolve exception");
@@ -682,31 +895,31 @@ router.post("/vessels/platform/exceptions/:id/resolve", authMiddleware(), async 
 
 router.post("/vessels/platform/exceptions", authMiddleware(), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    const parsed = CreateExceptionSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid exception data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+    const orgId = data.orgId;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-
-    const exceptionType = (typeof body.exceptionType === "string" ? body.exceptionType : "other") as "eta_deviation" | "route_deviation" | "weather_delay" | "port_congestion" | "mechanical" | "cargo_incident" | "security_threat" | "regulatory" | "commercial" | "other";
-    const severity = (typeof body.severity === "string" ? body.severity : "medium") as "low" | "medium" | "high" | "critical";
 
     const [exc] = await db.insert(maritimeExceptionsTable).values({
       orgId,
-      vesselId: typeof body.vesselId === "number" ? body.vesselId : null,
-      voyageId: typeof body.voyageId === "number" ? body.voyageId : null,
-      signalId: typeof body.signalId === "number" ? body.signalId : null,
-      exceptionType,
-      severity,
-      title: body.title as string,
-      description: typeof body.description === "string" ? body.description : null,
+      vesselId: data.vesselId ?? null,
+      voyageId: data.voyageId ?? null,
+      signalId: data.signalId ?? null,
+      exceptionType: data.exceptionType,
+      severity: data.severity,
+      title: data.title,
+      description: data.description ?? null,
       status: "new",
-      valueAtRiskUsd: body.valueAtRiskUsd ? String(body.valueAtRiskUsd) : null,
-      etaImpactHours: body.etaImpactHours ? String(body.etaImpactHours) : null,
-      costImpactUsd: body.costImpactUsd ? String(body.costImpactUsd) : null,
+      valueAtRiskUsd: data.valueAtRiskUsd != null ? String(data.valueAtRiskUsd) : null,
+      etaImpactHours: data.etaImpactHours != null ? String(data.etaImpactHours) : null,
+      costImpactUsd: data.costImpactUsd != null ? String(data.costImpactUsd) : null,
       detectedAt: new Date(),
-      metadata: (body.metadata && typeof body.metadata === "object") ? body.metadata as Record<string, unknown> : null,
+      metadata: data.metadata ?? null,
     }).returning();
 
     logVesselsEvent(orgId, req.user.id ?? null, req.user.displayName ?? "system", "exception.created", "maritime_exception", String(exc.id));
+    await vesselAuditLog("exception.created", "maritime_exception", String(exc.id), { exceptionType: data.exceptionType, severity: data.severity }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, exc);
   } catch (err) {
     handleRouteError(res, err, "Failed to create exception");
@@ -822,25 +1035,25 @@ router.get("/vessels/platform/readiness", authMiddleware({ required: false }), a
 
 router.post("/vessels/platform/readiness", authMiddleware(), async (req, res) => {
   try {
-    const body = req.body as Record<string, unknown>;
-    const orgId = typeof body.orgId === "number" ? body.orgId : 1;
+    const parsed = CreateVesselReadinessSchema.safeParse(req.body);
+    if (!parsed.success) { sendBadRequest(res, "Invalid readiness data", parsed.error.flatten().fieldErrors); return; }
+    const data = parsed.data;
+    const orgId = data.orgId;
     if (!req.user || !canAccessOrgRecord(req.user, orgId)) { res.status(403).json({ error: "Forbidden" }); return; }
-
-    const category = (typeof body.category === "string" ? body.category : "maritime") as typeof readinessItemsTable.category._.data;
-    const priority = (typeof body.priority === "string" ? body.priority : "medium") as typeof readinessItemsTable.priority._.data;
 
     const [item] = await db.insert(readinessItemsTable).values({
       orgId,
       product: VESSELS_PRODUCT,
-      category,
-      title: body.title as string,
-      description: typeof body.description === "string" ? body.description : null,
+      category: data.category,
+      title: data.title,
+      description: data.description ?? null,
       status: "not_started",
-      priority,
+      priority: data.priority,
       ownerId: req.user.id ?? null,
-      notes: typeof body.notes === "string" ? body.notes : null,
+      notes: data.notes ?? null,
     }).returning();
 
+    await vesselAuditLog("readiness.created", "vessel_readiness", String(item.id), { category: data.category, priority: data.priority }, req.user.id ?? undefined, req.ip, undefined, undefined, orgId);
     sendCreated(res, item);
   } catch (err) {
     handleRouteError(res, err, "Failed to create readiness item");

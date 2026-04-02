@@ -1496,7 +1496,7 @@ router.get("/firestorm/live/shodan-ip", authMiddleware({ required: false }), asy
             riskScore: "unknown",
             summary: "No data available for this IP",
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -1506,7 +1506,7 @@ router.get("/firestorm/live/shodan-ip", authMiddleware({ required: false }), asy
       url: `https://internetdb.shodan.io/${ip}`,
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source.startsWith("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),
@@ -1551,7 +1551,7 @@ router.get("/firestorm/live/greynoise-ip", authMiddleware({ required: false }), 
             message: "No classification data available",
             intent: "unknown",
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -1561,7 +1561,7 @@ router.get("/firestorm/live/greynoise-ip", authMiddleware({ required: false }), 
       url: `https://viz.greynoise.io/ip/${ip}`,
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source.startsWith("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),
@@ -1634,7 +1634,7 @@ router.get("/firestorm/live/malware-bazaar", authMiddleware({ required: false })
             fileTypeBreakdown: { exe: 38, xlsx: 22, js: 18, pdf: 12, zip: 10 },
             retrievedAt: new Date().toISOString(),
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -1644,7 +1644,7 @@ router.get("/firestorm/live/malware-bazaar", authMiddleware({ required: false })
       url: "https://bazaar.abuse.ch/",
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source.startsWith("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),
@@ -1731,21 +1731,21 @@ router.get("/firestorm/live/threat-aggregator", authMiddleware({ required: false
             },
             generatedAt: new Date().toISOString(),
           },
-          source: [mb, urlhaus, nvd, cisa].some(Boolean) ? "live" : "demo",
+          source: [mb, urlhaus, nvd, cisa].some(Boolean) ? "live" : "fallback-api-unavailable",
         };
       } catch {
         return {
           data: {
             threatLevel: "moderate",
             feeds: {
-              malwareBazaar: { status: "demo", recentSamplesCount: 100, topMalwareFamilies: [{ family: "AgentTesla", count: 18 }, { family: "AsyncRAT", count: 11 }], recentSamples: [] },
-              urlhaus: { status: "demo", recentUrlsCount: 1840, threatTypes: { malware_download: 1200, phishing: 640 }, recentUrls: [] },
-              nvd: { status: "demo", recentCvesCount: 142, criticalCount: 8, recentCves: [] },
-              cisa: { status: "demo", totalKev: 1127, latestKev: [] },
+              malwareBazaar: { status: "unavailable", recentSamplesCount: 0, topMalwareFamilies: [], recentSamples: [] },
+              urlhaus: { status: "unavailable", recentUrlsCount: 0, threatTypes: {}, recentUrls: [] },
+              nvd: { status: "unavailable", recentCvesCount: 0, criticalCount: 0, recentCves: [] },
+              cisa: { status: "unavailable", totalKev: 0, latestKev: [] },
             },
             generatedAt: new Date().toISOString(),
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -1754,7 +1754,7 @@ router.get("/firestorm/live/threat-aggregator", authMiddleware({ required: false
       source: "Unified Threat Intelligence Aggregator — MalwareBazaar + URLhaus + NVD + CISA KEV",
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source.startsWith("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),

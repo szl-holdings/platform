@@ -53,24 +53,24 @@ const FALLBACK_MORTGAGE_RATES = {
   rate15yr: 6.48,
   rateArm5: 6.35,
   weeklyChange30yr: +0.08,
-  source: "demo",
+  source: "fallback-api-unavailable",
   asOf: new Date().toISOString().slice(0, 10),
 };
 
 const FALLBACK_CENSUS_STATS = [
-  { msaCode: "35620", name: "New York-Newark-Jersey City", population: 20140470, medianHouseholdIncome: 82461, medianHomeValue: 519800, ownerOccupancyRate: 50.4, rentalVacancyRate: 4.1, source: "demo" },
-  { msaCode: "12420", name: "Austin-Round Rock-Georgetown", population: 2295303, medianHouseholdIncome: 86091, medianHomeValue: 385600, ownerOccupancyRate: 58.2, rentalVacancyRate: 6.8, source: "demo" },
-  { msaCode: "33100", name: "Miami-Fort Lauderdale-Pompano Beach", population: 6183099, medianHouseholdIncome: 61834, medianHomeValue: 428100, ownerOccupancyRate: 62.1, rentalVacancyRate: 3.7, source: "demo" },
-  { msaCode: "38060", name: "Phoenix-Mesa-Chandler", population: 5030213, medianHouseholdIncome: 73248, medianHomeValue: 341700, ownerOccupancyRate: 63.8, rentalVacancyRate: 5.9, source: "demo" },
-  { msaCode: "42660", name: "Seattle-Tacoma-Bellevue", population: 4018762, medianHouseholdIncome: 104978, medianHomeValue: 638900, ownerOccupancyRate: 55.6, rentalVacancyRate: 3.2, source: "demo" },
+  { msaCode: "35620", name: "New York-Newark-Jersey City", population: 20140470, medianHouseholdIncome: 82461, medianHomeValue: 519800, ownerOccupancyRate: 50.4, rentalVacancyRate: 4.1, source: "fallback-api-unavailable" },
+  { msaCode: "12420", name: "Austin-Round Rock-Georgetown", population: 2295303, medianHouseholdIncome: 86091, medianHomeValue: 385600, ownerOccupancyRate: 58.2, rentalVacancyRate: 6.8, source: "fallback-api-unavailable" },
+  { msaCode: "33100", name: "Miami-Fort Lauderdale-Pompano Beach", population: 6183099, medianHouseholdIncome: 61834, medianHomeValue: 428100, ownerOccupancyRate: 62.1, rentalVacancyRate: 3.7, source: "fallback-api-unavailable" },
+  { msaCode: "38060", name: "Phoenix-Mesa-Chandler", population: 5030213, medianHouseholdIncome: 73248, medianHomeValue: 341700, ownerOccupancyRate: 63.8, rentalVacancyRate: 5.9, source: "fallback-api-unavailable" },
+  { msaCode: "42660", name: "Seattle-Tacoma-Bellevue", population: 4018762, medianHouseholdIncome: 104978, medianHomeValue: 638900, ownerOccupancyRate: 55.6, rentalVacancyRate: 3.2, source: "fallback-api-unavailable" },
 ];
 
 const FALLBACK_HUD_FAIR_MARKET = [
-  { area: "New York, NY MSA", year: 2025, studio: 1900, oneBed: 2180, twoBed: 2520, threeBed: 3180, fourBed: 3750, source: "demo" },
-  { area: "Austin, TX MSA", year: 2025, studio: 1180, oneBed: 1380, twoBed: 1700, threeBed: 2320, fourBed: 2710, source: "demo" },
-  { area: "Miami, FL MSA", year: 2025, studio: 1540, oneBed: 1720, twoBed: 2120, threeBed: 2980, fourBed: 3560, source: "demo" },
-  { area: "Phoenix, AZ MSA", year: 2025, studio: 1150, oneBed: 1380, twoBed: 1680, threeBed: 2250, fourBed: 2640, source: "demo" },
-  { area: "Seattle, WA MSA", year: 2025, studio: 1620, oneBed: 1890, twoBed: 2310, threeBed: 3120, fourBed: 3740, source: "demo" },
+  { area: "New York, NY MSA", year: 2025, studio: 1900, oneBed: 2180, twoBed: 2520, threeBed: 3180, fourBed: 3750, source: "fallback-api-unavailable" },
+  { area: "Austin, TX MSA", year: 2025, studio: 1180, oneBed: 1380, twoBed: 1700, threeBed: 2320, fourBed: 2710, source: "fallback-api-unavailable" },
+  { area: "Miami, FL MSA", year: 2025, studio: 1540, oneBed: 1720, twoBed: 2120, threeBed: 2980, fourBed: 3560, source: "fallback-api-unavailable" },
+  { area: "Phoenix, AZ MSA", year: 2025, studio: 1150, oneBed: 1380, twoBed: 1680, threeBed: 2250, fourBed: 2640, source: "fallback-api-unavailable" },
+  { area: "Seattle, WA MSA", year: 2025, studio: 1620, oneBed: 1890, twoBed: 2310, threeBed: 3120, fourBed: 3740, source: "fallback-api-unavailable" },
 ];
 
 router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ required: false }), async (req, res) => {
@@ -105,7 +105,7 @@ router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ requir
         return { data: { stats }, source: "live" };
       } catch {
         const filtered = msaCode ? FALLBACK_CENSUS_STATS.filter(s => s.msaCode === msaCode) : FALLBACK_CENSUS_STATS;
-        return { data: { stats: filtered }, source: "demo" };
+        return { data: { stats: filtered }, source: "fallback-api-unavailable" };
       }
     });
 
@@ -116,7 +116,7 @@ router.get("/terra/live/census-housing", terraLiveLimit, authMiddleware({ requir
       count: filtered.length,
       stats: filtered,
       dataSource: result.source,
-      liveData: result.source === "live",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),
@@ -136,7 +136,7 @@ router.get("/terra/live/hud-fair-market-rents", terraLiveLimit, authMiddleware({
         if (keyAreas.length === 0) throw new Error("No key areas found");
         return { data: { rents: keyAreas.map((a: any) => ({ area: a.area_name, year: a.year, ...a })) }, source: "live" };
       } catch {
-        return { data: { rents: FALLBACK_HUD_FAIR_MARKET }, source: "demo" };
+        return { data: { rents: FALLBACK_HUD_FAIR_MARKET }, source: "fallback-api-unavailable" };
       }
     });
 
@@ -146,7 +146,7 @@ router.get("/terra/live/hud-fair-market-rents", terraLiveLimit, authMiddleware({
       count: result.data.rents.length,
       rents: result.data.rents,
       dataSource: result.source,
-      liveData: result.source === "live",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       methodology: "HUD calculates FMRs as the 40th percentile of rents for standard-quality units in each area",
@@ -181,7 +181,7 @@ router.get("/terra/live/mortgage-rates", terraLiveLimit, authMiddleware({ requir
           source: "live",
         };
       } catch {
-        return { data: FALLBACK_MORTGAGE_RATES, source: "demo" };
+        return { data: FALLBACK_MORTGAGE_RATES, source: "fallback-api-unavailable" };
       }
     });
 
@@ -190,7 +190,7 @@ router.get("/terra/live/mortgage-rates", terraLiveLimit, authMiddleware({ requir
       url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
       data: result.data,
       dataSource: result.source,
-      liveData: result.source === "live",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       fetchedAt: new Date().toISOString(),
@@ -237,7 +237,7 @@ router.get("/terra/live/bls-construction", terraLiveLimit, authMiddleware({ requ
               { period: "Dec 2025", employment: 8105000 },
             ],
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -247,7 +247,7 @@ router.get("/terra/live/bls-construction", terraLiveLimit, authMiddleware({ requ
       url: "https://www.bls.gov/",
       data: result.data,
       dataSource: result.source,
-      liveData: result.source === "live",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       significance: "Construction employment is a leading indicator of new housing supply",
@@ -294,7 +294,7 @@ router.get("/terra/live/fema-nri", terraLiveLimit, authMiddleware({ required: fa
         };
         return {
           data: { counties: demoCo[stateAbbr] ?? [{ countyName: `${stateAbbr} County 1`, state: stateAbbr, overallRiskScore: 45.0, riskRating: "Moderate", expectedAnnualLoss: 820000000, socialVulnerability: "Medium", communityResilience: "Medium", primaryHazards: ["Severe Weather"] }] },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -306,7 +306,7 @@ router.get("/terra/live/fema-nri", terraLiveLimit, authMiddleware({ required: fa
       count: result.data.counties.length,
       counties: result.data.counties,
       dataSource: result.source,
-      liveData: result.source === "live",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       methodology: "FEMA NRI composite score combining hazard frequency, social vulnerability, and community resilience",
@@ -468,7 +468,7 @@ router.get("/terra/live/nyc-pluto", terraLiveLimit, authMiddleware({ required: f
               { address: "250 W 77TH ST", zipcode: "10024", block: "1214", lot: "1", buildingClass: "D4", landUse: "Multi-Family Elevator", yearBuilt: 1928, numFloors: 16, residentialUnits: 144, assessedTotal: 6300000, ownerType: "P", zoning: "R9" },
             ],
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -478,7 +478,7 @@ router.get("/terra/live/nyc-pluto", terraLiveLimit, authMiddleware({ required: f
       url: "https://data.cityofnewyork.us/City-Government/Primary-Land-Use-Tax-Lot-Output-PLUTO-/64uk-42ks",
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       description: "Primary Land Use Tax Lot Output — lot-level property characteristics for NYC",
@@ -557,7 +557,7 @@ router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: fal
             qualityScore: 72.4,
             recentComplaints: [],
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -568,7 +568,7 @@ router.get("/terra/live/nyc-311", terraLiveLimit, authMiddleware({ required: fal
       period: "Last 30 days",
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       interpretation: "311 complaint volume and type as neighborhood quality/investment risk signal",
@@ -628,7 +628,7 @@ router.get("/terra/live/census-acs-demographics", terraLiveLimit, authMiddleware
             ownerOccupancyRate: 23.1,
             povertyRate: 14.8,
           },
-          source: "demo",
+          source: "fallback-api-unavailable",
         };
       }
     });
@@ -640,7 +640,7 @@ router.get("/terra/live/census-acs-demographics", terraLiveLimit, authMiddleware
       countyCode: county,
       ...result.data,
       dataSource: result.source,
-      liveData: result.source !== "demo",
+      liveData: result.source.includes("live"),
       cacheAgeSeconds: result.cacheAgeSeconds,
       isStale: result.isStale,
       vintage: "2022",
