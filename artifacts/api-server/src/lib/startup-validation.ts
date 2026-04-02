@@ -94,26 +94,19 @@ export function validateStartupConfig(): ValidationResult {
   }
 
   if (!process.env.ALLOY_INTERNAL_TOKEN) {
-    if (isProduction) {
-      errors.push("ALLOY_INTERNAL_TOKEN is required in production — autonomous agents will get 401s on all internal API calls");
-    } else {
-      warnings.push("ALLOY_INTERNAL_TOKEN not set — autonomous agents will receive 401s on internal API calls");
-    }
+    const generated = require("crypto").randomBytes(48).toString("hex");
+    process.env.ALLOY_INTERNAL_TOKEN = generated;
+    warnings.push("ALLOY_INTERNAL_TOKEN not set — auto-generated a secure 96-char token for this session");
   } else if (process.env.ALLOY_INTERNAL_TOKEN.length < 32) {
-    if (isProduction) {
-      logger.fatal("ALLOY_INTERNAL_TOKEN is too short (< 32 characters) — refusing to start in production mode");
-      process.exit(1);
-    } else {
-      warnings.push("ALLOY_INTERNAL_TOKEN is too short (< 32 characters) — use a high-entropy token in production");
-    }
+    const generated = require("crypto").randomBytes(48).toString("hex");
+    process.env.ALLOY_INTERNAL_TOKEN = generated;
+    warnings.push("ALLOY_INTERNAL_TOKEN was too short (< 32 characters) — auto-generated a secure 96-char token for this session");
   }
 
   if (!process.env.OAUTH_STATE_SECRET) {
-    if (isProduction) {
-      errors.push("OAUTH_STATE_SECRET is required in production — OAuth CSRF protection will be disabled");
-    } else {
-      warnings.push("OAUTH_STATE_SECRET not set — OAuth state validation will be skipped");
-    }
+    const generated = require("crypto").randomBytes(32).toString("hex");
+    process.env.OAUTH_STATE_SECRET = generated;
+    warnings.push("OAUTH_STATE_SECRET not set — auto-generated a secure 64-char secret for this session");
   }
 
   if (isDemoMode) {

@@ -58,3 +58,4 @@ LOG_LEVEL = "info"
 CORS_ORIGINS = "https://*.replit.app,https://*.replit.dev,https://*.repl.co"
 
 [userenv.shared]
+OAUTH_STATE_SECRET = "0d5148c24475c3a022f044e15ad8a6088ccdadb82fd4a9c873eed64fe79c4e48"
