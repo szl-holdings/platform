@@ -5,12 +5,13 @@ import { useAuth } from "@/contexts/auth-context";
 import {
   Ship, AlertTriangle, Clock, Wrench, TrendingUp, TrendingDown,
   ChevronRight, Activity, DollarSign, Fuel, CloudLightning, BarChart3,
-  CheckCircle2, XCircle, Minus, RefreshCw
+  CheckCircle2, XCircle, Minus, RefreshCw, EyeOff, ShieldAlert, Navigation
 } from "lucide-react";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandModeSurface, type CommandModeSignal, useRealtimeChannel } from "@workspace/shared-ui";
 import { useVessels, useFleetExceptions, useVoyages, useMaintenance } from "@/hooks/use-vessels-data";
 import { useQueryClient } from "@tanstack/react-query";
+import { PackBanner } from "@/components/pack-banner";
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   at_sea: { label: "At Sea", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20", dot: "bg-emerald-400" },
@@ -401,6 +402,160 @@ export default function CommandOverviewPage() {
           accentColor="#3b82f6"
           signals={FLEET_SIGNALS}
         />
+      </div>
+
+      <MaritimeIntelligencePanels />
+
+      <div className="pb-2">
+        <PackBanner
+          vertical="Maritime Intelligence Pack"
+          description="Vessels runs on the Lyte + Alloy core — AIS processing, anomaly detection, sanctions screening, and route exception modeling all powered by the same intelligence fabric."
+          accentColor="#0ea5e9"
+        />
+      </div>
+    </div>
+  );
+}
+
+const DARK_VESSEL_DETECTIONS = [
+  { vessel: "Atlantic Pioneer", imo: "9876543", flag: "Panama", lastKnown: "Gulf of Guinea", darkHours: 6, risk: "high" as const, reason: "AIS blackout in high-risk corridor" },
+  { vessel: "Eastern Sun", imo: "8765432", flag: "Marshall Islands", lastKnown: "Strait of Hormuz", darkHours: 3.5, risk: "medium" as const, reason: "Transponder off during STS transfer zone" },
+  { vessel: "Caspian Hawk", imo: "7654321", flag: "Comoros", lastKnown: "Red Sea approach", darkHours: 1.2, risk: "low" as const, reason: "Signal gap consistent with equipment issue" },
+];
+
+const SANCTIONS_FLAGS = [
+  { vessel: "Victory Star", imo: "6543210", flag: "Togo", screen: "OFAC SDN list match — flagged entity in ownership chain", severity: "critical" as const, action: "Escalate to compliance" },
+  { vessel: "Northern Passage", imo: "5432109", flag: "Hong Kong", screen: "EU restrictive measures — indirect connection via cargo recipient", severity: "high" as const, action: "Legal review required" },
+  { vessel: "Pacific Breeze", imo: "4321098", flag: "Cyprus", screen: "Prior call to sanctioned port — Bandar Abbas, 2024", severity: "medium" as const, action: "Due diligence review" },
+];
+
+const ROUTE_EXCEPTIONS = [
+  { vessel: "MV Northern Star", route: "Hamburg → Singapore", deviation: "+34h", type: "Weather routing", impact: "$180K demurrage risk", status: "active" as const },
+  { vessel: "Caspian Venture", route: "Rotterdam → Gulf", deviation: "+8h", type: "Piracy avoidance", impact: "Optional reroute", status: "watch" as const },
+  { vessel: "Atlantic Pioneer", route: "Houston → Rotterdam", deviation: "Unknown", type: "Dark vessel — AIS out", impact: "$2.1M cargo", status: "critical" as const },
+];
+
+function MaritimeIntelligencePanels() {
+  const [activePanel, setActivePanel] = useState<"dark" | "sanctions" | "routes">("dark");
+
+  const riskColors = {
+    critical: { text: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.15)" },
+    high: { text: "#f97316", bg: "rgba(249,115,22,0.08)", border: "rgba(249,115,22,0.15)" },
+    medium: { text: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.15)" },
+    low: { text: "rgba(255,255,255,0.4)", bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.08)" },
+    watch: { text: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.15)" },
+    active: { text: "#f97316", bg: "rgba(249,115,22,0.08)", border: "rgba(249,115,22,0.15)" },
+  };
+
+  return (
+    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(14,165,233,0.10)", background: "rgba(14,165,233,0.015)" }}>
+      <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: "1px solid rgba(14,165,233,0.08)", background: "rgba(14,165,233,0.03)" }}>
+        <Navigation className="w-3.5 h-3.5 text-sky-400/70" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400/70">Maritime Intelligence</span>
+        <span className="text-[8px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ color: "rgba(245,158,11,0.6)", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>Demo Scenario</span>
+        <div className="ml-auto flex items-center gap-1">
+          {([
+            { id: "dark" as const, label: "Dark Vessel", icon: EyeOff },
+            { id: "sanctions" as const, label: "Sanctions", icon: ShieldAlert },
+            { id: "routes" as const, label: "Route Exceptions", icon: Navigation },
+          ]).map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActivePanel(id)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-medium transition-all"
+              style={{
+                background: activePanel === id ? "rgba(14,165,233,0.15)" : "transparent",
+                color: activePanel === id ? "#38bdf8" : "rgba(148,196,222,0.4)",
+                border: activePanel === id ? "1px solid rgba(14,165,233,0.25)" : "1px solid transparent",
+              }}
+            >
+              <Icon className="w-3 h-3" />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4">
+        {activePanel === "dark" && (
+          <div className="space-y-2">
+            <p className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: "rgba(255,255,255,0.2)" }}>
+              AIS Blackout Detection — Vessels with signal gaps in risk corridors
+            </p>
+            {DARK_VESSEL_DETECTIONS.map((d, i) => {
+              const rc = riskColors[d.risk];
+              return (
+                <div key={i} className="flex items-start gap-3 px-3 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <EyeOff className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: rc.text }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[11px] font-medium text-sky-100">{d.vessel}</span>
+                      <span className="text-[9px] font-mono text-sky-400/40">IMO {d.imo}</span>
+                      <span className="text-[9px] text-sky-400/30">· {d.flag}</span>
+                    </div>
+                    <p className="text-[10px] text-sky-400/50">{d.reason}</p>
+                    <p className="text-[9px] text-sky-400/35 mt-0.5">Last known: {d.lastKnown}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[11px] font-mono font-bold" style={{ color: rc.text }}>{d.darkHours}h dark</div>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded font-semibold uppercase" style={{ color: rc.text, background: rc.bg, border: `1px solid ${rc.border}` }}>{d.risk}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {activePanel === "sanctions" && (
+          <div className="space-y-2">
+            <p className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: "rgba(255,255,255,0.2)" }}>
+              Sanctions Screening — Compliance flags requiring action
+            </p>
+            {SANCTIONS_FLAGS.map((s, i) => {
+              const rc = riskColors[s.severity];
+              return (
+                <div key={i} className="flex items-start gap-3 px-3 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <ShieldAlert className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: rc.text }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[11px] font-medium text-sky-100">{s.vessel}</span>
+                      <span className="text-[9px] font-mono text-sky-400/40">IMO {s.imo}</span>
+                      <span className="text-[9px] text-sky-400/30">· {s.flag}</span>
+                    </div>
+                    <p className="text-[10px] text-sky-400/50">{s.screen}</p>
+                    <p className="text-[9px] mt-1 font-medium" style={{ color: rc.text }}>{s.action}</p>
+                  </div>
+                  <span className="text-[8px] px-1.5 py-0.5 rounded font-semibold uppercase shrink-0 mt-0.5" style={{ color: rc.text, background: rc.bg, border: `1px solid ${rc.border}` }}>{s.severity}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {activePanel === "routes" && (
+          <div className="space-y-2">
+            <p className="text-[9px] font-mono uppercase tracking-wider mb-3" style={{ color: "rgba(255,255,255,0.2)" }}>
+              Route Exception Modeling — Deviations from planned voyage parameters
+            </p>
+            {ROUTE_EXCEPTIONS.map((r, i) => {
+              const rc = riskColors[r.status];
+              return (
+                <div key={i} className="flex items-start gap-3 px-3 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <Navigation className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: rc.text }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[11px] font-medium text-sky-100">{r.vessel}</span>
+                      <span className="text-[9px] text-sky-400/40">{r.route}</span>
+                    </div>
+                    <p className="text-[10px] text-sky-400/50">{r.type} · deviation: {r.deviation}</p>
+                    <p className="text-[9px] mt-0.5 font-mono" style={{ color: rc.text }}>{r.impact}</p>
+                  </div>
+                  <span className="text-[8px] px-1.5 py-0.5 rounded font-semibold uppercase shrink-0 mt-0.5" style={{ color: rc.text, background: rc.bg, border: `1px solid ${rc.border}` }}>{r.status}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

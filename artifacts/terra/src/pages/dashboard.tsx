@@ -4,12 +4,14 @@ import { Link } from "wouter";
 import { DataStateBadge, useRealtimeChannel, ActionLoop } from "@workspace/shared-ui";
 import {
   Building2, MapPin, TrendingUp, Users, Activity,
-  ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3
+  ArrowRight, AlertTriangle, Eye, Globe, Map, Shield, BarChart3,
+  ChevronRight, Layers, FileText, CheckCircle
 } from "lucide-react";
 import { brokerageSummary, brokerageDeals, riskSignals, agents } from "@/data/brokerage";
 import { RiskBadge, StageBadge, formatCurrency, AgentAvatar } from "@/components/brokerage-ui";
 import { properties } from "@/data/portfolio";
 import { useMapboxToken } from "@/hooks/use-mapbox-token";
+import { PackBanner } from "@/components/pack-banner";
 
 const PropertyMap = lazy(() => import("@/components/property-map"));
 
@@ -430,6 +432,158 @@ export default function TerraIntelligence() {
           { id: "5", label: "Assign 1240 Broadway price reduction to acquisition team", type: "assign" },
         ]}
       />
+
+      <OwnershipIntelligencePanel />
+
+      <div className="pb-2">
+        <PackBanner
+          vertical="Real Estate Intelligence Pack"
+          description="Terra runs on the Lyte + Alloy core — property distress detection, ownership stack analysis, underwriting workflows, and document diligence all powered by the same intelligence fabric."
+          accentColor="#40856a"
+        />
+      </div>
+    </div>
+  );
+}
+
+const OWNERSHIP_RECORDS = [
+  {
+    address: "847 Park Ave, Queens",
+    type: "Pre-Foreclosure",
+    value: "$2.1M",
+    ownershipStack: [
+      { entity: "Estate of R. Martinez (individual)", role: "Title Holder", flags: ["Probate pending"], risk: "high" as const },
+      { entity: "Chase Mortgage Corp", role: "First Lien", flags: ["Q2 2026 maturity"], risk: "high" as const },
+      { entity: "NYC Dept. of Finance", role: "Tax Authority", flags: ["$12K delinquent"], risk: "medium" as const },
+    ],
+    distressSignals: ["14yr hold", "Q2 2026 debt maturity", "Filing confirmed"],
+    diligenceState: { status: "active" as const, docs: 3, open: 2 },
+  },
+  {
+    address: "1240 Broadway, Manhattan",
+    type: "Commercial",
+    value: "$3.9M",
+    ownershipStack: [
+      { entity: "Midtown RE LLC", role: "Title Holder", flags: ["Identity: Cerberus Capital"], risk: "medium" as const },
+      { entity: "NYCB Commercial Lending", role: "First Lien", flags: ["Performing"], risk: "low" as const },
+    ],
+    distressSignals: ["Listing price down 8%", "47 DOM", "LLC transfer pending"],
+    diligenceState: { status: "watch" as const, docs: 1, open: 1 },
+  },
+  {
+    address: "45 Warren St, Tribeca",
+    type: "Multi-Family",
+    value: "$4.8M",
+    ownershipStack: [
+      { entity: "W.Capital Partners LLC", role: "Title Holder", flags: ["Transfer detected"], risk: "medium" as const },
+      { entity: "Signature Bridge Bank", role: "First Lien", flags: ["Receiver-held"], risk: "high" as const },
+    ],
+    distressSignals: ["LLC transfer detected", "11yr hold", "No active filings"],
+    diligenceState: { status: "pending" as const, docs: 0, open: 0 },
+  },
+];
+
+function OwnershipIntelligencePanel() {
+  const [selected, setSelected] = useState(0);
+  const record = OWNERSHIP_RECORDS[selected];
+
+  const riskColors = {
+    high: { text: "#c0503a", bg: "rgba(192,80,58,0.08)", border: "rgba(192,80,58,0.15)" },
+    medium: { text: "#b8943c", bg: "rgba(184,148,60,0.08)", border: "rgba(184,148,60,0.15)" },
+    low: { text: "#40856a", bg: "rgba(64,133,106,0.08)", border: "rgba(64,133,106,0.15)" },
+  };
+
+  const diligenceColors = {
+    active: { text: "#b8943c", label: "Active Review" },
+    watch: { text: "rgba(255,255,255,0.4)", label: "Watchlist" },
+    pending: { text: "rgba(255,255,255,0.25)", label: "Pending" },
+    complete: { text: "#40856a", label: "Complete" },
+  };
+
+  return (
+    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(64,133,106,0.10)", background: "rgba(64,133,106,0.015)" }}>
+      <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(64,133,106,0.08)", background: "rgba(64,133,106,0.03)" }}>
+        <Layers className="w-3.5 h-3.5" style={{ color: "#40856a" }} />
+        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(64,133,106,0.8)" }}>Ownership Stack Intelligence</span>
+        <span className="text-[8px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ color: "rgba(245,158,11,0.6)", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>Demo Scenario</span>
+        <span className="ml-auto text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>Select a property to drill in</span>
+      </div>
+
+      <div className="flex divide-x" style={{ borderColor: "rgba(64,133,106,0.06)" }}>
+        <div className="w-48 shrink-0 p-2 space-y-0.5 border-r" style={{ borderColor: "rgba(64,133,106,0.06)" }}>
+          {OWNERSHIP_RECORDS.map((rec, i) => (
+            <button
+              key={i}
+              onClick={() => setSelected(i)}
+              className="w-full text-left px-3 py-2 rounded-lg transition-all"
+              style={{
+                background: selected === i ? "rgba(64,133,106,0.10)" : "transparent",
+                border: selected === i ? "1px solid rgba(64,133,106,0.18)" : "1px solid transparent",
+              }}
+            >
+              <p className="text-[10px] font-medium truncate" style={{ color: selected === i ? "#40856a" : "rgba(255,255,255,0.45)" }}>{rec.address.split(",")[0]}</p>
+              <p className="text-[8px] mt-0.5" style={{ color: "rgba(255,255,255,0.2)" }}>{rec.type} · {rec.value}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex-1 p-4 space-y-4">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{record.address}</p>
+              <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>{record.type} · {record.value}</span>
+            </div>
+
+            <div className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Ownership Stack</div>
+            <div className="space-y-1.5">
+              {record.ownershipStack.map((layer, i) => {
+                const rc = riskColors[layer.risk];
+                return (
+                  <div key={i} className="flex items-start gap-2.5 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-[8px] font-bold" style={{ background: rc.bg, color: rc.text, border: `1px solid ${rc.border}` }}>{i + 1}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{layer.entity}</span>
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.3)" }}>{layer.role}</span>
+                      </div>
+                      {layer.flags.map((f, fi) => (
+                        <span key={fi} className="text-[9px] px-1.5 py-0.5 rounded mr-1 mt-1 inline-block" style={{ color: rc.text, background: rc.bg, border: `1px solid ${rc.border}` }}>{f}</span>
+                      ))}
+                    </div>
+                    <span className="text-[8px] uppercase font-semibold shrink-0" style={{ color: rc.text }}>{layer.risk}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Distress Signals</div>
+              <div className="space-y-1">
+                {record.distressSignals.map((s, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full shrink-0" style={{ background: "#b8943c" }} />
+                    <span className="text-[9px]" style={{ color: "rgba(255,255,255,0.4)" }}>{s}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="text-[9px] uppercase tracking-wider font-semibold mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Diligence State</div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <FileText className="w-3.5 h-3.5" style={{ color: diligenceColors[record.diligenceState.status]?.text || "rgba(255,255,255,0.3)" }} />
+                <span className="text-[10px] font-medium" style={{ color: diligenceColors[record.diligenceState.status]?.text || "rgba(255,255,255,0.3)" }}>
+                  {diligenceColors[record.diligenceState.status]?.label}
+                </span>
+              </div>
+              <p className="text-[9px]" style={{ color: "rgba(255,255,255,0.35)" }}>
+                {record.diligenceState.docs} docs uploaded · {record.diligenceState.open} items open
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

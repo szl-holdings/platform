@@ -19,6 +19,7 @@ import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
+import { PackBanner } from "@/components/pack-banner";
 
 // ─── Security Operations pages (from Firestorm) ──────────────────────────────
 const AegisMarketingHome = lazy(() => import("@/pages/aegis-home"));
@@ -386,7 +387,7 @@ function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () =
             </div>
             <div>
               <h1 className="font-display text-sm font-bold text-foreground tracking-tight">Aegis</h1>
-              <p className="text-[9px] text-blue-400/50 font-mono uppercase tracking-[0.12em]">Unified Defense Command</p>
+              <p className="text-[9px] text-blue-400/50 font-mono uppercase tracking-[0.12em]">Security Intelligence Pack</p>
             </div>
           </div>
         </div>
@@ -638,10 +639,11 @@ function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () =
             </div>
           )}
           <UserButton showName className="w-full" />
-          <div className="flex items-center gap-2 text-[10px] text-white/50">
-            <Hexagon className="w-3 h-3" />
-            <span className="font-mono">SZL Holdings · Aegis</span>
-          </div>
+          <PackBanner
+            vertical="Security Intelligence Pack"
+            accentColor="#3b82f6"
+            compact
+          />
         </div>
       </aside>
     </>

@@ -3,6 +3,7 @@ import { Building2, LayoutDashboard, AlertTriangle, Home, ChevronLeft, ChevronRi
 import { cn } from "@workspace/shared-ui/utils";
 import { useState, useEffect } from "react";
 import { UserButton } from "@workspace/shared-ui/UserButton";
+import { PackBanner } from "@/components/pack-banner";
 
 interface NavItem {
   path: string;
@@ -73,7 +74,7 @@ export function Sidebar() {
           {!collapsed && (
             <div>
               <h1 className="font-display text-lg font-bold text-terra-text">Terra</h1>
-              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">Brokerage OS</p>
+              <p className="text-[10px] text-terra-text-muted uppercase tracking-wider">Real Estate Intelligence Pack</p>
             </div>
           )}
         </div>
@@ -136,6 +137,13 @@ export function Sidebar() {
           <Building2 className="w-3 h-3" />
           {!collapsed && <span>SZL Holdings Platform</span>}
         </div>
+        {!collapsed && (
+          <PackBanner
+            vertical="Real Estate Intelligence Pack"
+            accentColor="#40856a"
+            compact
+          />
+        )}
       </div>
     </aside>
   );

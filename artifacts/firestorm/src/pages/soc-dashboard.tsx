@@ -7,8 +7,10 @@ import {
   Shield, Server, Brain, AlertTriangle, Activity, Clock,
   ChevronRight, Zap, Target, Eye, Users, Flame,
   TrendingUp, Bell, Crosshair, Network, Radio,
-  BarChart3, Bug, FileText, Ticket
+  BarChart3, Bug, FileText, Ticket, CheckCircle, Hexagon,
+  GitBranch, Lock, Search, ListChecks, UserCheck
 } from "lucide-react";
+import { PackBanner } from "@/components/pack-banner";
 
 const WORKSPACES = [
   { id: "command" as const, label: "Command", icon: Server, color: "#3b82f6", desc: "Managed Operations" },
@@ -446,6 +448,157 @@ export default function AegisUnifiedOverview() {
           { id: "5", label: "Assign IR lead — INC-2847", type: "assign" },
         ]}
       />
+
+      <GuidedInvestigationWorkflow />
+
+      <div className="pb-2">
+        <PackBanner
+          vertical="Security Intelligence Pack"
+          description="Aegis runs on the Lyte + Alloy core — the same AI orchestration layer, policy engine, and execution fabric powering SZL's enterprise intelligence stack."
+          accentColor="#3b82f6"
+        />
+      </div>
+    </div>
+  );
+}
+
+const INVESTIGATION_STEPS = [
+  {
+    id: "triage",
+    label: "Triage",
+    icon: AlertTriangle,
+    color: "#ef4444",
+    status: "complete" as const,
+    detail: "INC-2847: Lateral movement confirmed — T1021.002. MITRE tactic: Lateral Movement. Confidence: 96.",
+  },
+  {
+    id: "context",
+    label: "Asset & Identity Context",
+    icon: Users,
+    color: "#f97316",
+    status: "complete" as const,
+    detail: "DC-PROD-03 (Northgate managed asset). Owner: K. Chen. Last access: 4m ago. 3 active sessions.",
+  },
+  {
+    id: "containment",
+    label: "AI Containment Recommendation",
+    icon: Brain,
+    color: "#3b82f6",
+    status: "active" as const,
+    detail: "Lyte AI recommends: isolate endpoint, revoke session tokens, quarantine from lateral movement path. HITL required.",
+  },
+  {
+    id: "hitl",
+    label: "HITL Approval",
+    icon: UserCheck,
+    color: "#8b5cf6",
+    status: "pending" as const,
+    detail: "Awaiting analyst approval before executing containment action. Policy: require human sign-off on Tier-1 remediations.",
+  },
+  {
+    id: "policy",
+    label: "Policy & Response Routing",
+    icon: GitBranch,
+    color: "#10b981",
+    status: "pending" as const,
+    detail: "Post-approval: trigger SOAR playbook PB-22 (Lateral Movement Response), update case INC-2847, notify Northgate CISO.",
+  },
+  {
+    id: "audit",
+    label: "Audit Log",
+    icon: Lock,
+    color: "rgba(255,255,255,0.3)",
+    status: "pending" as const,
+    detail: "All actions immutably logged with analyst ID, timestamp, and policy version. SIEM integration active.",
+  },
+];
+
+function GuidedInvestigationWorkflow() {
+  const [expanded, setExpanded] = useState<string | null>("containment");
+
+  return (
+    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.012)" }}>
+      <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", background: "rgba(255,255,255,0.02)" }}>
+        <ListChecks className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
+        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.5)" }}>
+          Guided Investigation — INC-2847
+        </span>
+        <span className="text-[8px] font-mono px-1.5 py-0.5 rounded uppercase tracking-wide" style={{ color: "rgba(245,158,11,0.6)", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.12)" }}>Demo Scenario</span>
+        <span className="ml-auto text-[8px] px-2 py-0.5 rounded font-mono uppercase font-semibold" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>
+          P1 · Awaiting HITL
+        </span>
+      </div>
+      <div className="p-4">
+        <div className="space-y-0">
+          {INVESTIGATION_STEPS.map((step, i) => {
+            const Icon = step.icon;
+            const isExpanded = expanded === step.id;
+            const isActive = step.status === "active";
+            const isComplete = step.status === "complete";
+            const isPending = step.status === "pending";
+
+            return (
+              <div key={step.id} className="relative">
+                {i < INVESTIGATION_STEPS.length - 1 && (
+                  <div
+                    className="absolute left-[13px] top-8 w-[1px] h-full"
+                    style={{ background: isComplete ? `${step.color}30` : "rgba(255,255,255,0.05)" }}
+                  />
+                )}
+                <button
+                  onClick={() => setExpanded(isExpanded ? null : step.id)}
+                  className="w-full flex items-start gap-3 py-2.5 px-1 rounded-lg transition-all hover:bg-white/[0.02] text-left"
+                >
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    style={{
+                      background: isComplete ? `${step.color}20` : isActive ? `${step.color}12` : "rgba(255,255,255,0.04)",
+                      border: `1px solid ${isComplete ? `${step.color}35` : isActive ? `${step.color}25` : "rgba(255,255,255,0.06)"}`,
+                    }}
+                  >
+                    {isComplete ? (
+                      <CheckCircle className="w-3 h-3" style={{ color: step.color }} />
+                    ) : isActive ? (
+                      <Icon className="w-3 h-3 animate-pulse" style={{ color: step.color }} />
+                    ) : (
+                      <Icon className="w-3 h-3" style={{ color: "rgba(255,255,255,0.2)" }} />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-[11px] font-medium"
+                        style={{ color: isComplete ? "rgba(255,255,255,0.7)" : isActive ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)" }}
+                      >
+                        {step.label}
+                      </span>
+                      {isActive && (
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full uppercase font-semibold animate-pulse" style={{ background: `${step.color}15`, color: step.color, border: `1px solid ${step.color}20` }}>
+                          Active
+                        </span>
+                      )}
+                      {isComplete && (
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full uppercase font-semibold" style={{ background: `${step.color}10`, color: `${step.color}80` }}>
+                          Done
+                        </span>
+                      )}
+                    </div>
+                    {isExpanded && (
+                      <p className="text-[10px] mt-1.5 leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        {step.detail}
+                      </p>
+                    )}
+                  </div>
+                  <ChevronRight
+                    className={cn("w-3 h-3 shrink-0 mt-0.5 transition-transform", isExpanded && "rotate-90")}
+                    style={{ color: "rgba(255,255,255,0.15)" }}
+                  />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, Onboardin
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
+import { PackBanner } from "@/components/pack-banner";
 
 const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "vessels",
@@ -266,7 +267,7 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
           {expanded && (
             <div className="flex-1 min-w-0 overflow-hidden">
               <h1 className="font-display text-sm font-semibold text-sky-50 truncate tracking-tight">Vessels</h1>
-              <p className="text-[10px] text-sky-400/40 truncate font-mono uppercase tracking-wider">Maritime Command</p>
+              <p className="text-[10px] text-sky-400/40 truncate font-mono uppercase tracking-wider">Maritime Intelligence Pack</p>
             </div>
           )}
         </div>
@@ -404,9 +405,11 @@ function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobile
         <UserButton showName={expanded} className="w-full" />
         <RoleSelector expanded={expanded} />
         {expanded && (
-          <a href="/alloy" className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg w-full transition-colors hover:bg-sky-500/5" title="Alloy Execution Fabric">
-            <span className="text-[10px] text-sky-400/50 font-medium">⬡ Powered by Alloy</span>
-          </a>
+          <PackBanner
+            vertical="Maritime Intelligence Pack"
+            accentColor="#0ea5e9"
+            compact
+          />
         )}
       </div>
     </aside>

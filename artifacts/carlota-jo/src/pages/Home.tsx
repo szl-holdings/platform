@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
+import { Lock, Layers, Activity, FileText, ArrowRight } from "lucide-react";
 
 function RosaBlock() {
   const { t } = useTranslation();
@@ -272,16 +273,234 @@ function InquiryCard() {
   );
 }
 
+function ServiceLanes() {
+  const lanes = [
+    {
+      num: "01",
+      name: "Strategy & Advisory",
+      desc: "Founder and leadership advisory informed by market data, competitive intelligence, and structured decision frameworks. We surface what matters before it becomes obvious.",
+      signals: ["Competitive landscape modeling", "Market entry sequencing", "Positioning thesis development"],
+    },
+    {
+      num: "02",
+      name: "Operations & Execution",
+      desc: "Transformation, change management, and operating model redesign for organisations moving through growth inflection points. Intelligence-driven, not opinion-driven.",
+      signals: ["Operating model diagnostics", "Change readiness assessments", "Execution sprint architecture"],
+    },
+    {
+      num: "03",
+      name: "Technology & Platforms",
+      desc: "Technology strategy and vendor evaluation with access to institutional-grade intelligence on emerging platforms, AI tooling, and infrastructure decisions.",
+      signals: ["Platform selection support", "AI adoption framing", "Vendor due diligence"],
+    },
+  ];
+
+  return (
+    <section className="py-20 lg:py-28" style={{ borderTop: "1px solid var(--color-stone-200)", background: "var(--color-stone-50)" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mb-14"
+        >
+          <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>Service Lanes</p>
+          <h2 className="font-serif text-3xl lg:text-4xl font-light leading-tight" style={{ color: "var(--color-ink-900)" }}>
+            Three domains.<br />
+            <span style={{ fontStyle: "italic" }}>One operating standard.</span>
+          </h2>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: "var(--color-stone-200)" }}>
+          {lanes.map((lane, i) => (
+            <motion.div
+              key={lane.num}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="p-8"
+              style={{ background: "var(--color-stone-50)" }}
+            >
+              <span className="text-[9px] tracking-[0.28em] uppercase font-medium block mb-5" style={{ color: "var(--color-gold)" }}>{lane.num}</span>
+              <h3 className="font-serif text-xl font-light mb-4" style={{ color: "var(--color-ink-900)" }}>{lane.name}</h3>
+              <p className="text-[13px] font-light leading-relaxed mb-6" style={{ color: "var(--color-ink-500)" }}>{lane.desc}</p>
+              <div className="space-y-2">
+                {lane.signals.map((s) => (
+                  <div key={s} className="flex items-start gap-2.5">
+                    <span className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ background: "var(--color-gold)", opacity: 0.4 }} />
+                    <span className="text-[12px] font-light" style={{ color: "var(--color-ink-400)" }}>{s}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PlatformIntelligence() {
+  const capabilities = [
+    {
+      icon: Activity,
+      title: "Market signal monitoring",
+      desc: "Continuous pattern detection across sectors your business operates in — surfaced as structured briefings, not raw data."
+    },
+    {
+      icon: Layers,
+      title: "Competitive stack analysis",
+      desc: "Positioning and capability mapping of competitors and adjacent players, updated as the market moves."
+    },
+    {
+      icon: FileText,
+      title: "Structured decision support",
+      desc: "Every recommendation is traceable. We document the evidence, the logic, and the alternatives considered."
+    },
+  ];
+
+  return (
+    <section className="py-20 lg:py-28" style={{ background: "var(--color-cream-warm)", borderTop: "1px solid var(--color-stone-200)" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <motion.div
+            className="lg:col-span-5"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>Platform Intelligence</p>
+            <h2 className="font-serif text-3xl lg:text-4xl font-light leading-tight mb-6" style={{ color: "var(--color-ink-900)" }}>
+              Advisory backed by<br />
+              <span style={{ fontStyle: "italic" }}>institutional-grade intelligence.</span>
+            </h2>
+            <p className="text-[14px] font-light leading-relaxed mb-6" style={{ color: "var(--color-ink-500)" }}>
+              Carlota Jo advisory is informed by the same intelligence infrastructure built for enterprise command centres — not instinct alone. Your engagements draw on structured data, pattern detection, and decision-grade analysis.
+            </p>
+            <p className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-400)" }}>
+              This means briefings that arrive with evidence. Recommendations that show their reasoning. And a consulting relationship that gets sharper, not more generic, over time.
+            </p>
+          </motion.div>
+
+          <div className="lg:col-span-7 space-y-0">
+            <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--color-stone-200)" }}>
+              <div className="px-6 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid var(--color-stone-200)", background: "var(--color-stone-50)" }}>
+                <span className="text-[9px] tracking-[0.28em] uppercase font-medium" style={{ color: "var(--color-gold)" }}>Intelligence Capabilities</span>
+              </div>
+              {capabilities.map((cap, i) => (
+                <motion.div
+                  key={cap.title}
+                  initial={{ opacity: 0, x: 8 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                  className="flex items-start gap-5 px-6 py-5"
+                  style={{ borderTop: i > 0 ? "1px solid var(--color-stone-100)" : "none" }}
+                >
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(200,169,106,0.08)", border: "1px solid rgba(200,169,106,0.15)" }}>
+                    <cap.icon className="w-4 h-4" style={{ color: "var(--color-gold)" }} />
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-medium mb-1" style={{ color: "var(--color-ink-700)" }}>{cap.title}</p>
+                    <p className="text-[12.5px] font-light leading-relaxed" style={{ color: "var(--color-ink-400)" }}>{cap.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+              <div className="px-6 py-4 flex items-center gap-2" style={{ borderTop: "1px solid var(--color-stone-100)", background: "var(--color-stone-50)" }}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-gold)", opacity: 0.5 }} />
+                <span className="text-[11px] font-light" style={{ color: "var(--color-ink-400)" }}>
+                  Powered by <span style={{ color: "var(--color-gold)", fontWeight: 500 }}>Lyte</span> + <span style={{ color: "var(--color-gold)", fontWeight: 500 }}>Alloy</span> intelligence infrastructure
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PrivatePortalTeaser() {
+  return (
+    <section className="py-20 lg:py-24" style={{ background: "#1a1714", borderTop: "1px solid rgba(200,169,106,0.08)" }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <motion.div
+            className="lg:col-span-7"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <Lock className="w-3.5 h-3.5" style={{ color: "var(--color-gold)", opacity: 0.6 }} />
+              <span className="text-[10px] tracking-[0.3em] uppercase font-medium" style={{ color: "var(--color-gold)", opacity: 0.6 }}>Client Portal — Private Access</span>
+            </div>
+            <h2 className="font-serif text-3xl lg:text-4xl font-light leading-tight mb-5" style={{ color: "#f5f0e8" }}>
+              Your engagement,<br />
+              <span style={{ fontStyle: "italic", color: "var(--color-gold)" }}>always on record.</span>
+            </h2>
+            <p className="text-[14px] font-light leading-relaxed mb-4" style={{ color: "rgba(245,240,232,0.45)" }}>
+              Active clients access a private portal with their full engagement record — every briefing, recommendation, decision log, and action item in one place.
+            </p>
+            <p className="text-[13px] font-light leading-relaxed" style={{ color: "rgba(245,240,232,0.3)" }}>
+              Portal access is provisioned on engagement. No self-serve signups. Contact us to begin.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="lg:col-span-5"
+            initial={{ opacity: 0, x: 16 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
+            <div className="rounded-2xl border p-6 space-y-3" style={{ borderColor: "rgba(200,169,106,0.12)", background: "rgba(200,169,106,0.04)" }}>
+              {[
+                "Briefing & insight archive",
+                "Recommendation decision log",
+                "Open actions & milestones",
+                "Engagement health summary",
+                "Secure document exchange",
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 py-2" style={{ borderTop: i > 0 ? "1px solid rgba(200,169,106,0.06)" : "none" }}>
+                  <div className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--color-gold)", opacity: 0.35 }} />
+                  <span className="text-[13px] font-light" style={{ color: "rgba(245,240,232,0.5)" }}>{item}</span>
+                </div>
+              ))}
+              <div className="pt-4 mt-2 border-t" style={{ borderColor: "rgba(200,169,106,0.08)" }}>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 text-[12px] font-medium tracking-[0.1em] uppercase transition-opacity hover:opacity-75"
+                  style={{ color: "var(--color-gold)" }}
+                >
+                  Request an engagement <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen" style={{ background: "var(--color-cream-warm)" }}>
       <Header />
       <Hero />
       <Services />
+      <ServiceLanes />
       <RosaBlock />
       <TrustPillars />
+      <PlatformIntelligence />
       <Proof />
       <ProcessStrip />
+      <PrivatePortalTeaser />
       <InquiryCard />
       <Footer />
     </div>
