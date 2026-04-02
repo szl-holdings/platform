@@ -91,6 +91,7 @@ import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";
 import alloyIntegrationsRouter from "./alloy-integrations";
 import alloyVoiceRouter from "./alloy-voice";
+import governanceRouter from "./governance";
 
 const router: IRouter = Router();
 
@@ -260,6 +261,9 @@ router.use(alloyIntegrationsRouter);
 
 router.use("/alloy/voice", _writeLimiter);
 router.use(alloyVoiceRouter);
+
+router.use("/governance", _writeLimiter);
+router.use("/governance", governanceRouter);
 
 router.use("/capital", _writeLimiter);
 router.use(capitalReadinessRouter);

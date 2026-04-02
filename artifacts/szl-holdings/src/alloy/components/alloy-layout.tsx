@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
 
@@ -22,6 +22,7 @@ const NAV = [
   { href: "/alloy/workflows", label: "Workflow Orchestration", icon: GitBranch },
   { href: "/alloy/connectors", label: "Connector Mesh", icon: Network },
   { href: "/alloy/governance", label: "Governance & Audit", icon: Shield },
+  { href: "/alloy/enterprise-governance", label: "Enterprise Governance", icon: Lock },
   { href: "/alloy/analytics", label: "Automation Analytics", icon: BarChart2 },
 ];
 
