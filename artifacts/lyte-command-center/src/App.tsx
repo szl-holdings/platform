@@ -46,6 +46,7 @@ const AdminApprovalQueuePage = lazy(() => import("@/pages/admin/approval-queue")
 const AdminSeederPage = lazy(() => import("@/pages/admin/seeder"));
 const AdminExportHistoryPage = lazy(() => import("@/pages/admin/export-history"));
 const AdminDiagnosticsPage = lazy(() => import("@/pages/admin/diagnostics"));
+const AdminBillingPage = lazy(() => import("@/pages/admin/billing-admin"));
 const SignalsPage = lazy(() => import("@/pages/signals-page"));
 const ActionsPage = lazy(() => import("@/pages/actions-page"));
 const ReadinessPage = lazy(() => import("@/pages/readiness-page"));
@@ -127,6 +128,7 @@ function PrivateRouter() {
         <Route path="/admin/seeder">{() => <AdminRoute component={AdminSeederPage} />}</Route>
         <Route path="/admin/exports">{() => <AdminRoute component={AdminExportHistoryPage} />}</Route>
         <Route path="/admin/diagnostics">{() => <AdminRoute component={AdminDiagnosticsPage} />}</Route>
+        <Route path="/admin/billing">{() => <AdminRoute component={AdminBillingPage} />}</Route>
         <Route path="/pricing" component={PricingPage} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>

@@ -83,6 +83,7 @@ import aiEngineRouter from "./ai-engine";
 import analyticsRouter from "./analytics";
 import invitationsRouter from "./invitations";
 import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../middlewares/idempotency";
+import lyteBillingRouter from "./lyte-billing";
 
 const router: IRouter = Router();
 
@@ -149,6 +150,8 @@ router.use(filesRouter);
 router.use(stephenRouter);
 router.use(contactRouter);
 router.use("/lyte", _readLimiter);
+router.use("/lyte/billing", _writeLimiter);
+router.use(lyteBillingRouter);
 router.use("/lyte", lyteExtendedRouter);
 router.use(lyteObservabilityRouter);
 router.use("/vessels", _readLimiter);

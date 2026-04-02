@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, billingPlansTable, subscriptionsTable, invoicesTable, organizationsTable } from "@workspace/db";
+import { db, billingPlansTable, subscriptionsTable, invoicesTable, organizationsTable, revenueEventsTable } from "@workspace/db";
 import { eq, desc, or } from "drizzle-orm";
 import { sendSuccess, sendNotFound, sendError, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { authMiddleware, requireRole, parseIdParam } from "../middlewares/auth";
@@ -356,10 +356,22 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
             currency: invoice.currency as string,
             status: "paid",
             paidAt: new Date(),
-          });
+          }).onConflictDoNothing();
         } catch (dbErr) {
           logger.warn({ dbErr }, "Invoice may already exist in DB");
         }
+
+        await db.insert(revenueEventsTable).values({
+          eventType: "invoice.paid",
+          product: (invoice.metadata as Record<string, string> | undefined)?.product ?? "platform",
+          customerId: invoice.customer as string | undefined,
+          subscriptionId: invoice.subscription as string | undefined,
+          invoiceId: invoice.id as string | undefined,
+          amount: invoice.amount_paid ? String((invoice.amount_paid as number) / 100) : null,
+          currency: invoice.currency as string ?? "usd",
+          idempotencyKey: `invoice-paid-${event.id}`,
+          metadata: { eventId: event.id },
+        }).onConflictDoNothing();
         break;
       }
 
@@ -374,6 +386,18 @@ router.post("/billing/webhooks", async (req: Request, res: Response) => {
             .set({ status: "past_due", updatedAt: new Date() })
             .where(eq(subscriptionsTable.stripeSubscriptionId, invoice.subscription as string));
         }
+
+        await db.insert(revenueEventsTable).values({
+          eventType: "invoice.payment_failed",
+          product: "platform",
+          customerId: invoice.customer as string | undefined,
+          subscriptionId: invoice.subscription as string | undefined,
+          invoiceId: invoice.id as string | undefined,
+          amount: invoice.amount_due ? String((invoice.amount_due as number) / 100) : null,
+          currency: invoice.currency as string ?? "usd",
+          idempotencyKey: `payment-failed-${event.id}`,
+          metadata: { eventId: event.id },
+        }).onConflictDoNothing();
         break;
       }
 
