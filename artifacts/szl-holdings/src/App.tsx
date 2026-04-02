@@ -2,7 +2,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
-import { DemoModeProvider, SandboxModeProvider } from "@workspace/shared-ui";
+import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type StatusBannerConfig } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
@@ -99,6 +99,13 @@ function RequireAuth({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+const SZL_STATUS_CONFIG = {
+  active: false,
+  level: "maintenance" as const,
+  message: "Scheduled maintenance in progress. Some features may be temporarily unavailable.",
+  link: { label: "Status page", href: "/status" },
+};
+
 function ExternalRedirect({ to }: { to: string }) {
   if (typeof window !== "undefined") {
     window.location.href = to;
@@ -150,6 +157,7 @@ function App() {
     <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
       <LazyMotion features={domMax} strict>
+        <StatusBanner config={SZL_STATUS_CONFIG} dismissible />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Switch>
             {/* ── Public marketing routes ── */}
@@ -434,6 +442,7 @@ function App() {
         </WouterRouter>
       </LazyMotion>
       <Toaster />
+      <CookieBanner privacyUrl="/legal/privacy" accentColor="#d4a054" />
     </QueryClientProvider>
     </DemoModeProvider>
     </SandboxModeProvider>

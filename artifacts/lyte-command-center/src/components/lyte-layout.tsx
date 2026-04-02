@@ -8,7 +8,7 @@ import {
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
   ChevronRight, Gauge, BarChart3, LayoutDashboard, Download
 } from "lucide-react";
-import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
+import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@workspace/shared-ui";
 
 const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "lyte",
@@ -174,6 +174,8 @@ export function LyteLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("lyte-metrics");
   const { replay: replayOnboarding } = useOnboardingState("lyte");
+  const { sandboxActive } = useSandboxMode();
+  const isDemoMode = sandboxActive || new URLSearchParams(window.location.search).get("demo") === "true";
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -297,6 +299,13 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             <span style={{ color: "#c8953c" }}>8 Gaps</span>
             <span className="hidden sm:block" style={{ color: TEXT.muted }}>·</span>
             <span className="hidden sm:block" style={{ color: "#d4a054" }}>$5.03M at risk</span>
+            {isDemoMode && (
+              <span className="hidden sm:flex items-center ml-1 gap-1">
+                <span style={{ color: TEXT.muted }}>·</span>
+                <EnvironmentLabel environment="demo" />
+                <EnvironmentLabel environment="seeded" />
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <RealtimeStatusIndicator status={wsStatus} compact />

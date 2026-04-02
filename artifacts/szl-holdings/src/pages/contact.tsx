@@ -43,17 +43,34 @@ export default function ContactPage() {
   const [form, setForm] = useState<FormState>({ name: "", email: "", org: "", type: "design-partner", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+
+    if (honeypot) return;
+
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const message = form.message.trim();
+
+    if (!name || !email || !message) {
       toast.error("Please fill in all required fields.");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    if (name.length < 2) {
+      toast.error("Please enter your full name.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast.error("Please enter a valid email address.");
       return;
     }
+    if (message.length < 20) {
+      toast.error("Please provide a bit more detail in your message (at least 20 characters).");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch(`${API}/contact/submit`, {
@@ -61,18 +78,22 @@ export default function ContactPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: form.type,
-          name: form.name,
-          email: form.email,
-          company: form.org,
-          message: form.message,
+          name,
+          email,
+          company: form.org.trim(),
+          message,
           app: "szl-holdings",
           metadata: { inquiryType: form.type, source: "szl-holdings-contact-page" },
         }),
       });
-      if (!res.ok) throw new Error("Submission failed");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error ?? "Submission failed");
+      }
       setSubmitted(true);
-    } catch {
-      toast.error("Something went wrong. Please try again or email us directly.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Something went wrong.";
+      toast.error(`${msg} Please try again or email us directly.`);
     } finally {
       setSubmitting(false);
     }
@@ -140,6 +161,16 @@ export default function ContactPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                    <input
+                      type="text"
+                      name="website"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+                      autoComplete="off"
+                    />
                     <div className="szl-grid-2">
                       <div>
                         <label style={labelStyle}>Your name *</label>

@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
-import { SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
+import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner } from "@workspace/shared-ui";
 import { LyteLayout } from "@/components/lyte-layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
@@ -212,6 +212,13 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   return <PrivateApp cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />;
 }
 
+const LYTE_STATUS_CONFIG = {
+  active: false,
+  level: "maintenance" as const,
+  message: "Scheduled maintenance in progress. Some features may be temporarily unavailable.",
+  link: { label: "Status page", href: "https://szlholdings.com/status" },
+};
+
 function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(lyteCommands);
 
@@ -219,8 +226,10 @@ function App() {
     <SandboxModeProvider>
       <QueryClientProvider client={queryClient}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <StatusBanner config={LYTE_STATUS_CONFIG} />
           <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           <AgentCopilot config={beaconConfig} />
+          <CookieBanner privacyUrl="https://szlholdings.com/legal/privacy" accentColor="#d4a054" />
         </WouterRouter>
       </QueryClientProvider>
     </SandboxModeProvider>
