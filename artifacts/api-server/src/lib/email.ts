@@ -257,24 +257,18 @@ export function buildLeadNotificationEmail(inquiry: {
 
 export function buildWelcomeEmail(name: string, email: string): string {
   return szlBrand(`
-    <h2>Welcome to the SZL Ecosystem</h2>
+    <h2>Welcome to SZL Holdings</h2>
     <p>Hello ${name},</p>
-    <p>You're now connected to SZL Holdings — a vertically-integrated technology holding company engineering the convergence of AI, cybersecurity, and maritime intelligence.</p>
-    <p>Here's what you now have access to:</p>
+    <p>You're now connected to SZL Holdings — we build <strong>Lyte</strong>, a business observability platform that surfaces revenue stalls, approval gaps, and ownership drift before they compound.</p>
+    <p>Powered by <strong>Alloy</strong>, our execution fabric that routes signals to accountable action.</p>
     <div class="highlight">
-      <p><strong>Firestorm</strong> — Military-grade cybersecurity simulation &amp; SOC operations</p>
+      <p><strong>Lyte</strong> — Business observability. Surfaces what's stalling, aging, or drifting before it costs you.</p>
     </div>
     <div class="highlight">
-      <p><strong>Vessels</strong> — Full-spectrum maritime domain awareness &amp; AIS intelligence</p>
+      <p><strong>Alloy</strong> — Execution fabric. Workflow orchestration, signal routing, audit trail, and policy-gated action.</p>
     </div>
-    <div class="highlight">
-      <p><strong>INCA</strong> — AI research command center &amp; model governance</p>
-    </div>
-    <div class="highlight">
-      <p><strong>Lyte</strong> — AIOps and MLOps command center for enterprise AI</p>
-    </div>
-    <p>Explore the full ecosystem at your command:</p>
-    <a class="cta" href="${process.env.VITE_APP_URL || "https://szlholdings.com"}">Enter the Ecosystem</a>
+    <p>Explore the platform:</p>
+    <a class="cta" href="${process.env.VITE_APP_URL || "https://szlholdings.com"}">Visit SZL Holdings</a>
   `);
 }
 
