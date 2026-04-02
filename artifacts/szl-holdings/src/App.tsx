@@ -66,6 +66,9 @@ const AlloyWorkspaceHome = lazy(() => import("@/alloy/pages/workspace-home"));
 const AlloyDecisionObjects = lazy(() => import("@/alloy/pages/decision-objects"));
 const AlloySkillRegistry = lazy(() => import("@/alloy/pages/skill-registry"));
 const AlloyOperatorControl = lazy(() => import("@/alloy/pages/operator-control-center"));
+const AlloyResearchMode = lazy(() => import("@/alloy/pages/research-mode"));
+const AlloyArtifactStudio = lazy(() => import("@/alloy/pages/artifact-studio"));
+const AlloyBrowserOperator = lazy(() => import("@/alloy/pages/browser-operator"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -316,6 +319,15 @@ function App() {
             </Route>
             <Route path="/alloy/operator">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyOperatorControl /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/research">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyResearchMode /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/artifacts">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyArtifactStudio /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/browser">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyBrowserOperator /></AlloyAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}

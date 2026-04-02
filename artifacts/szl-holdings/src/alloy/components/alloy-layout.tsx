@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
 
@@ -40,6 +40,12 @@ const CREATIVE_NAV = [
 
 const DOCS_NAV = [
   { href: "/alloy/documents", label: "Document Engine", icon: FileText },
+];
+
+const INTELLIGENCE_NAV = [
+  { href: "/alloy/research", label: "Research Mode", icon: BookOpen },
+  { href: "/alloy/artifacts", label: "Artifact Studio", icon: Layers },
+  { href: "/alloy/browser", label: "Browser Operator", icon: Globe },
 ];
 
 function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
@@ -142,6 +148,11 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
 
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Documents</div>
             {DOCS_NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
+
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(255,255,255,0.25)" }}>Research & Creation</div>
+            {INTELLIGENCE_NAV.map(item => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
           </nav>

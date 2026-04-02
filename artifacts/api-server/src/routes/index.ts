@@ -84,6 +84,7 @@ import analyticsRouter from "./analytics";
 import invitationsRouter from "./invitations";
 import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../middlewares/idempotency";
 import lyteBillingRouter from "./lyte-billing";
+import { alloyResearchRouter } from "./alloy-research";
 
 const router: IRouter = Router();
 
@@ -314,5 +315,9 @@ router.use("/orgs", tenantScope({ required: false }));
 // start with /orgs/... (e.g. /orgs/:orgSlug/invite → /api/orgs/:orgSlug/invite).
 // The middleware above applies rate limiting and tenant context to /orgs/* prefix.
 router.use(invitationsRouter);
+
+router.use("/alloy/research", _writeLimiter);
+router.use("/alloy/browser", _writeLimiter);
+router.use(alloyResearchRouter);
 
 export default router;
