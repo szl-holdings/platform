@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import { services } from "@workspace/services";
 import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
+import { logger } from "../lib/logger";
 import { getAiModels, getAiModelById, getModelObservabilitySummary } from "../lib/ai-model-observability";
 import { getRegistrySummary } from "../lib/model-registry";
 import { openai } from "@workspace/integrations-openai-ai-server";
@@ -352,7 +353,10 @@ async function fetchOtxThreats(): Promise<ThreatItem[]> {
 
 router.get("/intelligence/threats", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("threats", 300000, fetchOtxThreats);
+    const data = await getCached("threats", 300000, fetchOtxThreats).catch((err) => {
+      logger.warn({ err }, "Intelligence /threats: upstream fetch and cache both failed — returning empty array");
+      return [] as ThreatItem[];
+    });
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch threat data"); }
 });
@@ -360,7 +364,10 @@ router.get("/intelligence/threats", intelRateLimit, authMiddleware({ required: f
 router.get("/intelligence/cves", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const severity = req.query.severity as string | undefined;
-    const data = await getCached("cves", 600000, fetchNvdCves);
+    const data = await getCached("cves", 600000, fetchNvdCves).catch((err) => {
+      logger.warn({ err }, "Intelligence /cves: upstream fetch and cache both failed — returning empty array");
+      return [] as CveItem[];
+    });
     const filtered = severity ? data.filter(c => c.severity.toLowerCase() === severity.toLowerCase()) : data;
     sendSuccess(res, filtered);
   } catch (err) { handleRouteError(res, err, "Failed to fetch CVE data"); }
@@ -368,14 +375,20 @@ router.get("/intelligence/cves", intelRateLimit, authMiddleware({ required: fals
 
 router.get("/intelligence/geopolitical", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("geopolitical", 300000, fetchGdeltGeopolitical);
+    const data = await getCached("geopolitical", 300000, fetchGdeltGeopolitical).catch((err) => {
+      logger.warn({ err }, "Intelligence /geopolitical: upstream fetch and cache both failed — returning empty array");
+      return [] as GeoEvent[];
+    });
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch geopolitical events"); }
 });
 
 router.get("/intelligence/maritime/vessels", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("maritime-vessels", 60000, fetchLiveMaritimeVessels);
+    const data = await getCached("maritime-vessels", 60000, fetchLiveMaritimeVessels).catch((err) => {
+      logger.warn({ err }, "Intelligence /maritime/vessels: upstream fetch and cache both failed — returning empty array");
+      return [] as MaritimeVessel[];
+    });
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch maritime data"); }
 });
