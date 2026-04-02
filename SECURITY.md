@@ -89,9 +89,31 @@ The SZL Holdings platform is built with security as a structural concern, not a 
 
 ---
 
+## Security CI Gates
+
+The following automated security checks run on every commit and pull request:
+
+| Gate | Tool | Policy |
+|------|------|--------|
+| Dependency audit | `pnpm audit` | Block on high/critical severity |
+| Secret scan | Pattern-based grep | Block on any detected credentials in source |
+| Lint | ESLint | Block on errors |
+| TypeScript typecheck | `tsc --noEmit` | Block on type errors |
+| Build validation | `pnpm -r build` | Block on build failures |
+
+---
+
 ## Acknowledgements
 
 We appreciate responsible security research. Researchers who report valid vulnerabilities through our responsible disclosure process will be acknowledged in this document (with their permission).
+
+---
+
+## Security Contact
+
+**Email:** security@szlholdings.com  
+**PGP:** Not yet configured — plain email is acceptable  
+**Response SLA:** 48 hours for initial acknowledgement
 
 ---
 

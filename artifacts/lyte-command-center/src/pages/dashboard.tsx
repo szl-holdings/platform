@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
+import { analytics } from "@/lib/analytics";
 import { DataProvenance, ActionLoop, RoleSelector } from "@workspace/shared-ui";
 import type { DataProvenanceInfo } from "@workspace/shared-ui";
 import { Link } from "wouter";
@@ -112,6 +113,13 @@ const RECOMMENDED_ACTIONS = [
 export default function Dashboard() {
   const [activeRole, setActiveRole] = useState("operator");
   const [auditSignal, setAuditSignal] = useState<LyteSignal | null>(null);
+
+  useEffect(() => {
+    const start = Date.now();
+    return () => {
+      analytics.dashboardViewed("main", Date.now() - start);
+    };
+  }, []);
 
   const { data: dashboardData, isLoading: dashLoading, error: dashError, refetch } = useQuery<LyteDashboard>({
     queryKey: ["lyte-dashboard"],

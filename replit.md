@@ -293,6 +293,24 @@ Playwright E2E tests require running apps and system-level glib/gtk libraries. I
    - **ventures.tsx** (`artifacts/szl-holdings/src/pages/ventures.tsx`): Updated product data to include tier labels and readiness badges rendered in card UI. Tier 1 items show amber readiness chip; Tier 2/3 items show muted readiness chip.
    - **ROADMAP.md** and **README.md**: Updated to reference tiering plan, system inventory, readiness standard, and environment labeling standard with proper links.
 
+11. **Phase 10–16 Operations, Security, CI/CD & Launch Readiness** — Operational backbone:
+   - **Incident Response Runbook** — `docs/internal/ops/incident-response-runbook.md` — SEV-1 through SEV-4 severity model, escalation logic, founder on-call procedures, alert categories
+   - **Support Runbook** — `docs/internal/ops/support-runbook.md` — Support channel routing, tiers, escalation path, on-call procedures, communication templates
+   - **Known-Gap Policy & Backup Procedures** — `docs/internal/security/backup-restore.md` — Honest gap register (8 items), backup/restore procedures, diligence disclosure statement
+   - **Release Governance** — `docs/releases/release-governance.md` — CI gates (typecheck, lint, audit, secret scan, build), branch strategy, preview environments, deployment matrix, smoke tests, migration gates, rollback procedures
+   - **Deployment Matrix** — `docs/releases/deployment-matrix.md` — Per-artifact deployment details, environment config, rollback procedures for web, API, and mobile
+   - **Go-Live Sequence** — `docs/internal/ops/go-live-sequence.md` — 8-phase ordered launch checklist with acceptance criteria and go/no-go sign-off table
+   - **Analytics Event Taxonomy** — `docs/internal/analytics/event-taxonomy.md` — Canonical event schema, 30+ events across auth, dashboard, signals, workflow, billing, and AI categories
+   - **Analytics Route** — `artifacts/api-server/src/routes/analytics.ts` — `POST /api/analytics/event` and `GET /api/analytics/summary` endpoints with event allowlist validation
+   - **Analytics Client** — `artifacts/lyte-command-center/src/lib/analytics.ts` — Client-side analytics tracking utility with all core events
+   - **Dashboard Analytics** — Dashboard page instrumented with `dashboard_viewed` event
+   - **Admin Diagnostics Page** — `artifacts/lyte-command-center/src/pages/admin/diagnostics.tsx` — Real-time system health summary at `/admin/diagnostics` consuming `/api/admin/health-dashboard` and `/api/health/detailed`
+   - **Notification Rate Limiting** — `notification-dispatch.ts` updated with per-severity-per-app rate limiting (buckets, window enforcement, suppression logging)
+   - **Trust Center** — v4.0 refresh with analytics governance, CI gates, operational incident readiness, and known-gap policy sections
+   - **Security Posture** — Refreshed with current state including notification rate-limiting, OTel, self-monitor, and CI gate information
+   - **Investor Documents** — `product-readiness.md` updated with full operational readiness table; `data-room-index.md` created as canonical investor data room
+   - **SECURITY.md** — Updated with CI security gates, formal security contact section, PGP disclosure
+
 9. **NPS & Contextual Feedback System** — Full in-app feedback collection system:
    - **DB schema** — `lib/db/src/schema/feedback.ts` — `feedback` table (type, score, sentiment, comment, appName, pageUrl, userRole) and `feedback_survey_prefs` table (per-user last survey, snooze, opt-out). Migration: `lib/db/drizzle/0009_feedback_tables.sql`.
    - **API routes** — `artifacts/api-server/src/routes/feedback.ts` — `POST /api/feedback/nps`, `POST /api/feedback/contextual`, `POST /api/feedback/dismiss`, `GET /api/feedback/nps-eligibility`, `GET /api/admin/feedback/analytics`, `GET /api/admin/feedback/list`.

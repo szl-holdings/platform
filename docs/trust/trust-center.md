@@ -1,6 +1,6 @@
 # SZL Holdings — Trust Center
 
-**Version:** 3.0  
+**Version:** 4.0  
 **Date:** April 2026
 
 ---
@@ -104,19 +104,38 @@ Model versions are logged. Predictions are associated with the model version tha
 - Production and development environments are isolated
 - Rollback is supported at the deployment pipeline level. Every release can be reverted
 
+**CI gates:** Every commit runs typecheck, lint, dependency audit, secret scan, and build validation. Any high or critical vulnerability blocks the build.
+
 **Dependency management:** Dependencies are explicitly versioned. The dependency graph is tracked for known vulnerabilities using automated scanning in the build pipeline.
 
 ---
 
 ## Incident Readiness
 
-**Detection.** Platform observability is instrumented. Service health, latency, error rates, and dependency status are monitored continuously.
+**Detection.** Platform observability is instrumented with OpenTelemetry, Pino structured logging, self-monitoring, and provider health probes. Service health, latency, error rates, and dependency status are monitored continuously.
 
-**Triage.** Incidents are classified by severity. Critical incidents (platform-wide outage or data exposure) trigger immediate principal notification.
+**Triage.** Incidents are classified by severity (SEV-1 through SEV-4). Critical incidents (platform-wide outage or data exposure) trigger immediate principal notification. Full runbook at `docs/internal/ops/incident-response-runbook.md`.
 
 **Containment.** Isolation procedures are documented for each platform. Compromised sessions, exposed credentials, or service degradation have defined containment playbooks.
 
 **Communication.** Material incidents affecting customer-facing services are communicated proactively. Post-incident reviews are conducted within five business days of resolution.
+
+---
+
+## Analytics & Observability
+
+SZL Holdings instruments core product analytics to understand how the platform is used and to detect operational problems early.
+
+**What is tracked:**
+- Core user journey events: login, signup, dashboard views, signal interactions, approval decisions, billing events
+- Full event taxonomy documented at `docs/internal/analytics/event-taxonomy.md`
+
+**What is not tracked:**
+- Personally identifiable information as event properties
+- Vanity metrics (impressions, renders without user intent)
+- Raw API call counts (handled in APM/telemetry, not analytics)
+
+All analytics events are routed through the API server and stored in the platform database. No third-party analytics trackers are in use.
 
 ---
 
@@ -132,6 +151,7 @@ Model versions are logged. Predictions are associated with the model version tha
 - Data at rest is encrypted using AES-256 equivalent standards
 - API endpoints are authenticated. Unauthenticated endpoints expose only public information
 - Dependency vulnerability scanning is automated. Critical vulnerabilities trigger immediate review
+- Notification dispatch is rate-limited per severity tier to prevent alert fatigue
 
 **Third-party services:**
 - All third-party integrations are reviewed before onboarding. API credentials are scoped to the minimum permissions required
@@ -140,8 +160,8 @@ Model versions are logged. Predictions are associated with the model version tha
 
 ## Honesty Notice
 
-*SZL Holdings does not currently hold SOC 2 certification or any formal regulatory compliance status. This document describes our engineering and operational practices as they stand today. We will update this document as compliance certifications are obtained.*
+*SZL Holdings does not currently hold SOC 2 certification or any formal regulatory compliance status. This document describes our engineering and operational practices as they stand today. A known-gap register is maintained at `docs/internal/security/backup-restore.md`. We will update this document as compliance certifications are obtained.*
 
 ---
 
-*See also: [Security Posture](security-posture.md) · [Deployment Model](deployment-model.md) · [Privacy Boundaries](privacy-boundaries.md)*
+*See also: [Security Posture](security-posture.md) · [Deployment Model](deployment-model.md) · [Privacy Boundaries](privacy-boundaries.md) · [Security Policy](../../SECURITY.md)*

@@ -95,17 +95,54 @@ See [SECURITY.md](../../SECURITY.md) for the full responsible disclosure process
 
 ---
 
+## Operational Security Controls
+
+### Notification Rate Limiting
+
+Notification dispatch is rate-limited per app per severity tier to prevent alert fatigue:
+
+| Severity | Max per minute | Behavior when exceeded |
+|----------|---------------|----------------------|
+| Critical | 5 | Suppressed with warning log |
+| Warning | 10 | Suppressed with warning log |
+| Info | 20 | Suppressed with warning log |
+
+### Self-Monitoring
+
+The API server runs an internal self-monitor (`lib/self-monitor.ts`) that polls `/api/health/detailed` every 5 minutes. It raises alerts when:
+- Error rate exceeds 5%
+- P95 latency exceeds 2s
+- Database becomes unreachable
+- Job queue depth exceeds 50
+
+### Provider Health Probes
+
+Active health probes check AI provider reachability (OpenAI, Anthropic, Gemini, HuggingFace) every 2 minutes. Failures are logged and can trigger Slack alerts.
+
+### CI Security Gates
+
+Every commit runs:
+- `pnpm audit --audit-level high` — blocks on high/critical dependencies
+- Secret pattern scan — blocks if credentials detected in source
+- TypeScript typecheck — blocks on type errors
+- ESLint — blocks on lint errors
+- Full build validation — blocks if any artifact fails to build
+
+---
+
 ## Known Gaps (Honest Assessment)
 
-The following items are on the roadmap but not yet implemented:
+The following items are tracked in the known-gap register (`docs/internal/security/backup-restore.md`):
 
 | Gap | Planned Resolution | Timeline |
 |-----|-------------------|----------|
-| Sentry error tracking in production | Phase 2 | Next quarter |
-| Global React ErrorBoundary | Phase 2 | Next quarter |
-| Redis for session store (currently in-memory) | Phase 3 | Revenue activation phase |
-| CORS configuration for production domains | Pre-deploy | Before first commercial deployment |
-| SOC 2 Type II audit | Phase 4 | 12–18 months post-revenue |
-| FedRAMP readiness (Aegis) | Phase 4 | 18–24 months |
+| SOC 2 Type II certification | Initiate after first revenue | 12–18 months post-revenue |
+| Redis for session store (currently in-memory) | Add Redis when scaling beyond single instance | Revenue activation phase |
+| FedRAMP readiness (Aegis) | Begin after DoD/Fed contract engagement | 18–24 months |
+| Automated backup validation (restore testing) | Quarterly restore drill | Next operational cycle |
+| External uptime monitoring | Configure before first enterprise pilot | Pre-commercial launch |
+| Sentry or equivalent error tracking in production | Add Sentry DSN to production environment | Next quarter |
+| Multi-region failover | Architect after first enterprise contract | Post-initial revenue |
+| Formal penetration test | Commission pen test pre-SOC2 | Pre-SOC2 audit |
 
-These gaps are honest and documented. None of them affect the security of the current demonstration environment.
+These gaps are honest and documented. None of them represent active vulnerabilities in the current demonstration environment. The full gap register with planned resolutions is maintained at `docs/internal/security/backup-restore.md`.

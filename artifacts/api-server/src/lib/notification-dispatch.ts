@@ -2,6 +2,31 @@ import { sendEmail, hasEmailProviderConfigured, INTERNAL_EMAIL } from "./email";
 import { logger } from "./logger";
 import type { NotifSeverity } from "./domain-notifications";
 
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_PER_WINDOW: Record<NotifSeverity, number> = {
+  critical: 5,
+  warning: 10,
+  info: 20,
+};
+
+const rateLimitBuckets = new Map<string, { count: number; windowStart: number }>();
+
+function isRateLimited(key: string, severity: NotifSeverity): boolean {
+  const now = Date.now();
+  const bucket = rateLimitBuckets.get(key);
+  if (!bucket || now - bucket.windowStart > RATE_LIMIT_WINDOW_MS) {
+    rateLimitBuckets.set(key, { count: 1, windowStart: now });
+    return false;
+  }
+  const max = RATE_LIMIT_MAX_PER_WINDOW[severity];
+  if (bucket.count >= max) {
+    logger.warn({ key, severity, count: bucket.count, max }, "[notification-dispatch] Rate limit exceeded — suppressing notification");
+    return true;
+  }
+  bucket.count++;
+  return false;
+}
+
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN;
 const SLACK_ALERT_CHANNEL = process.env.SLACK_ALERT_CHANNEL || "#alerts";
@@ -101,6 +126,11 @@ const SEVERITY_THRESHOLD_EMAIL: NotifSeverity[] = ["critical"];
 
 export async function dispatchExternalAlert(params: AlertDispatchParams): Promise<void> {
   const { appName, title, message, severity, actionUrl } = params;
+
+  const rateLimitKey = `${appName}:${severity}`;
+  if (isRateLimited(rateLimitKey, severity)) {
+    return;
+  }
 
   const dispatchJobs: Promise<void>[] = [];
 
