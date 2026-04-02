@@ -15,6 +15,14 @@ Generated: 2026-04-02
 | carlota-jo | PASS | ~19s | vendor-react: 1,284KB, vendor-charts: 358KB |
 | stephen-site | PASS | ~17s | vendor-react: 1,275KB |
 
+## Test Results
+
+| Layer | Files | Tests | Status |
+|-------|-------|-------|--------|
+| API / Integration (Vitest) | 3 | 37 | PASS |
+| Component (Vitest + Testing Library) | 4 | 33 | PASS |
+| E2E Smoke (Playwright) | 7 | 35 | Configured |
+
 ## Bundle Size Issues (P1)
 
 All web apps have vendor-react chunks exceeding 1,200KB (gzipped ~380-395KB). Apps using maps (Terra, Vessels) additionally bundle mapbox-gl at 1,703KB.
@@ -27,7 +35,15 @@ All web apps have vendor-react chunks exceeding 1,200KB (gzipped ~380-395KB). Ap
 
 ## Mobile Apps
 
-Mobile apps are Expo-based and do not produce traditional builds in this environment. They run via Expo dev server. All 7 mobile dev servers are running successfully.
+Mobile apps are Expo-based and do not produce traditional builds in this environment. They run via Expo dev server. All 7 mobile dev servers configured successfully.
+
+## Build Validation Command
+
+```bash
+pnpm build          # typecheck + build all apps
+pnpm run test       # API + component tests
+pnpm run test:e2e   # E2E smoke tests (requires running server)
+```
 
 ## No Build Failures
 
