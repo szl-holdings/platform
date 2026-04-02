@@ -230,6 +230,8 @@ export function buildLeadNotificationEmail(inquiry: {
   company?: string;
   subject: string;
   message: string;
+  intent?: string;
+  source?: string;
 }): string {
   return szlBrand(`
     <h2>New Inquiry Received</h2>
@@ -242,7 +244,11 @@ export function buildLeadNotificationEmail(inquiry: {
       <p class="label" style="margin-top:8px;">Subject</p>
       <p>${inquiry.subject}</p>
       <p class="label" style="margin-top:8px;">Message</p>
-      <p>${inquiry.message.replace(/\n/g, "<br />")}</p>
+      <p>${inquiry.message.replace(/\n/g, "<br />")}</p>${inquiry.intent ? `
+      <p class="label" style="margin-top:8px;">Intent</p>
+      <p>${inquiry.intent}</p>` : ""}${inquiry.source ? `
+      <p class="label" style="margin-top:8px;">Source</p>
+      <p>${inquiry.source}</p>` : ""}
     </div>
     <p>Review and respond in the admin panel or reply directly to this email.</p>
     <a class="cta" href="${process.env.VITE_APP_URL || "https://szlholdings.com"}/admin">Open Admin</a>

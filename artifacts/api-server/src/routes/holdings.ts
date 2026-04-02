@@ -358,7 +358,7 @@ router.get("/holdings/inquiries", authMiddleware(), async (req, res) => {
 });
 
 router.post("/holdings/inquiries", (req, res) => {
-  const { name, email, subject, message, company } = req.body || {};
+  const { name, email, subject, message, company, intent, source } = req.body || {};
   const errors: string[] = [];
   if (!name || typeof name !== "string" || !name.trim()) errors.push("Name is required");
   if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push("Valid email is required");
@@ -369,10 +369,15 @@ router.post("/holdings/inquiries", (req, res) => {
     return;
   }
 
+  const metadata: Record<string, string> = {};
+  if (typeof intent === "string" && intent.trim()) metadata.intent = intent.trim();
+  if (typeof source === "string" && source.trim()) metadata.source = source.trim();
+
   db.insert(holdingsInquiriesTable).values({
     name: name.trim(), email: email.trim(),
     company: typeof company === "string" ? company.trim() : null,
     subject: subject.trim(), message: message.trim(),
+    ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
   }).returning().then(([row]) => {
     res.status(201).json({ success: true, data: row });
     setImmediate(async () => {
@@ -389,6 +394,8 @@ router.post("/holdings/inquiries", (req, res) => {
             name: name.trim(), email: email.trim(),
             company: typeof company === "string" ? company.trim() : undefined,
             subject: subject.trim(), message: message.trim(),
+            intent: typeof intent === "string" ? intent.trim() : undefined,
+            source: typeof source === "string" ? source.trim() : undefined,
           }),
           replyTo: email.trim(),
         });
