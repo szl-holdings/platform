@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useColors } from "@/hooks/useColors";
 import { apiGet, apiPut } from "@/lib/apiClient";
 
@@ -59,11 +60,39 @@ export default function IncidentDetailScreen() {
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const [updating, setUpdating] = useState(false);
+  const [biometricPassed, setBiometricPassed] = useState(Platform.OS === "web");
+  const [biometricChecking, setBiometricChecking] = useState(Platform.OS !== "web");
+
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    (async () => {
+      try {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (!hasHardware || !isEnrolled) { setBiometricPassed(true); setBiometricChecking(false); return; }
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Authenticate to access incident details",
+          cancelLabel: "Cancel",
+          fallbackLabel: "Use Passcode",
+        });
+        if (result.success) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setBiometricPassed(true);
+        } else {
+          router.back();
+        }
+      } catch {
+        router.back();
+      } finally {
+        setBiometricChecking(false);
+      }
+    })();
+  }, []);
 
   const { data: incident, isLoading, error } = useQuery({
     queryKey: ["aegis-incident", id],
     queryFn: () => fetchIncident(id!),
-    enabled: !!id,
+    enabled: !!id && biometricPassed,
   });
 
   const updateMut = useMutation({
@@ -103,6 +132,24 @@ export default function IncidentDetailScreen() {
   const topInsets = insets.top + (Platform.OS === "web" ? 67 : 0);
   const bottomInsets = insets.bottom + (Platform.OS === "web" ? 34 : 0);
   const sevColor = incident ? (SEVERITY_COLORS[incident.severity] ?? colors.amber) : colors.amber;
+
+  if (biometricChecking) {
+    return (
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
+        <Ionicons name="finger-print" size={48} color={colors.amber} />
+        <Text style={{ color: colors.mutedForeground, marginTop: 12, fontFamily: "Inter_400Regular", fontSize: 13 }}>Authenticating…</Text>
+      </View>
+    );
+  }
+
+  if (!biometricPassed) {
+    return (
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
+        <Ionicons name="lock-closed" size={48} color={colors.red} />
+        <Text style={{ color: colors.red, marginTop: 12, fontFamily: "Inter_500Medium" }}>Access Denied</Text>
+      </View>
+    );
+  }
 
   if (isLoading) {
     return (

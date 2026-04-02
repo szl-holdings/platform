@@ -59,33 +59,94 @@ function formatCurrency(n: number) {
   return "$" + n;
 }
 
+const COMP_DATA: Record<string, Array<{ address: string; salePrice: number; daysAgo: number; sqft: number }>> = {
+  "dp-001": [
+    { address: "831 Park Ave, Queens", salePrice: 1980000, daysAgo: 45, sqft: 1820 },
+    { address: "862 Park Ave, Queens", salePrice: 2250000, daysAgo: 88, sqft: 2100 },
+    { address: "801 Park Ave, Queens", salePrice: 1750000, daysAgo: 120, sqft: 1650 },
+  ],
+  "dp-002": [
+    { address: "1220 Broadway", salePrice: 3700000, daysAgo: 32, sqft: 3400 },
+    { address: "1260 Broadway", salePrice: 4100000, daysAgo: 67, sqft: 3800 },
+  ],
+};
+
 function PropertyCard({ property, onPress }: { property: DistressProperty; onPress: () => void }) {
   const colors = useColors();
   const typeColor = TYPE_COLORS[property.distressType] ?? colors.gold;
   const scoreColor = property.opportunityScore >= 80 ? colors.emerald : property.opportunityScore >= 60 ? colors.amber : colors.rose;
+  const [showComps, setShowComps] = useState(false);
+  const comps = COMP_DATA[property.id] ?? [];
+
+  const avgComp = comps.length > 0
+    ? comps.reduce((s, c) => s + c.salePrice, 0) / comps.length
+    : null;
+  const vsAvg = avgComp ? ((property.estimatedValue - avgComp) / avgComp * 100).toFixed(1) : null;
 
   return (
-    <Pressable
-      onPress={() => { Haptics.selectionAsync(); onPress(); }}
-      style={[styles.propertyCard, { borderColor: colors.border, backgroundColor: "rgba(255,255,255,0.02)" }]}
-    >
-      <View style={styles.cardHeader}>
-        <View style={styles.cardLeft}>
-          <Text style={[styles.cardAddress, { color: colors.cream }]} numberOfLines={1}>{property.address}</Text>
-          <Text style={[styles.cardBorough, { color: colors.mutedForeground }]}>{property.borough} · {property.daysInDistress}d in distress</Text>
+    <View style={[styles.propertyCard, { borderColor: colors.border, backgroundColor: "rgba(255,255,255,0.02)" }]}>
+      <Pressable
+        onPress={() => { Haptics.selectionAsync(); onPress(); }}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.cardLeft}>
+            <Text style={[styles.cardAddress, { color: colors.cream }]} numberOfLines={1}>{property.address}</Text>
+            <Text style={[styles.cardBorough, { color: colors.mutedForeground }]}>{property.borough} · {property.daysInDistress}d in distress</Text>
+          </View>
+          <View style={[styles.scoreCircle, { borderColor: scoreColor + "40", backgroundColor: scoreColor + "10" }]}>
+            <Text style={[styles.scoreNum, { color: scoreColor }]}>{property.opportunityScore}</Text>
+          </View>
         </View>
-        <View style={[styles.scoreCircle, { borderColor: scoreColor + "40", backgroundColor: scoreColor + "10" }]}>
-          <Text style={[styles.scoreNum, { color: scoreColor }]}>{property.opportunityScore}</Text>
+        <View style={styles.cardMeta}>
+          <View style={[styles.typeChip, { backgroundColor: typeColor + "15", borderColor: typeColor + "30" }]}>
+            <Text style={[styles.typeText, { color: typeColor }]}>{property.distressType.replace("-", " ")}</Text>
+          </View>
+          <Text style={[styles.cardValue, { color: colors.gold }]}>{formatCurrency(property.estimatedValue)}</Text>
+          {vsAvg && (
+            <View style={[styles.vsAvgChip, { backgroundColor: parseFloat(vsAvg) < 0 ? colors.emerald + "15" : colors.rose + "15" }]}>
+              <Text style={[styles.vsAvgText, { color: parseFloat(vsAvg) < 0 ? colors.emerald : colors.rose }]}>
+                {parseFloat(vsAvg) < 0 ? "↓" : "↑"}{Math.abs(parseFloat(vsAvg))}% vs comps
+              </Text>
+            </View>
+          )}
+          <Text style={[styles.cardOwner, { color: colors.mutedForeground }]} numberOfLines={1}>{property.ownerName}</Text>
         </View>
-      </View>
-      <View style={styles.cardMeta}>
-        <View style={[styles.typeChip, { backgroundColor: typeColor + "15", borderColor: typeColor + "30" }]}>
-          <Text style={[styles.typeText, { color: typeColor }]}>{property.distressType.replace("-", " ")}</Text>
+      </Pressable>
+
+      {comps.length > 0 && (
+        <Pressable
+          onPress={() => { Haptics.selectionAsync(); setShowComps(s => !s); }}
+          style={[styles.compToggle, { borderTopColor: colors.border }]}
+        >
+          <Feather name="bar-chart-2" size={10} color={colors.mutedForeground} />
+          <Text style={[styles.compToggleText, { color: colors.mutedForeground }]}>
+            {showComps ? "Hide" : "Pull"} {comps.length} Comps
+          </Text>
+          <Feather name={showComps ? "chevron-up" : "chevron-down"} size={10} color={colors.mutedForeground} />
+        </Pressable>
+      )}
+
+      {showComps && comps.length > 0 && (
+        <View style={[styles.compList, { borderTopColor: colors.border }]}>
+          <Text style={[styles.compHeader, { color: colors.goldSubtle }]}>RECENT COMPARABLE SALES</Text>
+          {comps.map((comp, i) => (
+            <View key={i} style={[styles.compRow, { borderTopColor: colors.border }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.compAddress, { color: colors.creamDim }]} numberOfLines={1}>{comp.address}</Text>
+                <Text style={[styles.compMeta, { color: colors.mutedForeground }]}>{comp.sqft.toLocaleString()} sqft · {comp.daysAgo}d ago</Text>
+              </View>
+              <Text style={[styles.compPrice, { color: colors.cream }]}>{formatCurrency(comp.salePrice)}</Text>
+            </View>
+          ))}
+          {avgComp && (
+            <View style={[styles.compAvgRow, { backgroundColor: colors.goldDim ?? "rgba(200,169,106,0.08)" }]}>
+              <Text style={[styles.compAvgLabel, { color: colors.goldSubtle }]}>Avg comp sale</Text>
+              <Text style={[styles.compAvgValue, { color: colors.gold }]}>{formatCurrency(Math.round(avgComp))}</Text>
+            </View>
+          )}
         </View>
-        <Text style={[styles.cardValue, { color: colors.gold }]}>{formatCurrency(property.estimatedValue)}</Text>
-        <Text style={[styles.cardOwner, { color: colors.mutedForeground }]} numberOfLines={1}>{property.ownerName}</Text>
-      </View>
-    </Pressable>
+      )}
+    </View>
   );
 }
 
@@ -97,6 +158,8 @@ export default function PropertiesTab() {
   const [selectedType, setSelectedType] = useState("All");
   const [refreshing, setRefreshing] = useState(false);
   const [minScore, setMinScore] = useState(0);
+  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
+  const [isFromCache, setIsFromCache] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -104,14 +167,21 @@ export default function PropertiesTab() {
   const { data, refetch } = useQuery({
     queryKey: ["terra-properties", selectedBorough, selectedType, search],
     queryFn: async () => {
-      const params = new URLSearchParams({ limit: "50" });
-      if (selectedBorough !== "All") params.set("borough", selectedBorough);
-      if (selectedType !== "All") params.set("distressType", selectedType);
-      if (search) params.set("q", search);
-      const res = await fetch(API_BASE + "/terra/distress/search?" + params.toString());
-      if (!res.ok) return null;
-      const json = await res.json();
-      return json.data ?? json;
+      try {
+        const params = new URLSearchParams({ limit: "50" });
+        if (selectedBorough !== "All") params.set("borough", selectedBorough);
+        if (selectedType !== "All") params.set("distressType", selectedType);
+        if (search) params.set("q", search);
+        const res = await fetch(API_BASE + "/terra/distress/search?" + params.toString());
+        if (!res.ok) throw new Error("fetch failed");
+        const json = await res.json();
+        setLastFetchedAt(new Date());
+        setIsFromCache(false);
+        return json.data ?? json;
+      } catch {
+        setIsFromCache(true);
+        return null;
+      }
     },
     retry: 1,
   });
@@ -135,8 +205,27 @@ export default function PropertiesTab() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 12 }]}>
-        <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · DISTRESS ENGINE</Text>
-        <Text style={[styles.title, { color: colors.cream }]}>Properties</Text>
+        <View>
+          <Text style={[styles.eyebrow, { color: colors.goldSubtle }]}>TERRA · DISTRESS ENGINE</Text>
+          <Text style={[styles.title, { color: colors.cream }]}>Properties</Text>
+        </View>
+        <View style={{ alignItems: "flex-end", gap: 3 }}>
+          {isFromCache ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: "rgba(148,163,184,0.1)", borderWidth: 1, borderColor: "rgba(148,163,184,0.2)" }}>
+              <Feather name="wifi-off" size={9} color="#94a3b8" />
+              <Text style={{ fontSize: 9, fontFamily: "Inter_500Medium", color: "#94a3b8" }}>OFFLINE</Text>
+            </View>
+          ) : lastFetchedAt != null ? (
+            <Text style={{ fontSize: 9, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>
+              {(() => {
+                const ms = Date.now() - lastFetchedAt.getTime();
+                if (ms < 60000) return "Live";
+                if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
+                return `${Math.floor(ms / 3600000)}h ago`;
+              })()}
+            </Text>
+          ) : null}
+        </View>
       </View>
 
       <View style={[styles.searchRow, { borderColor: colors.border }]}>
@@ -237,7 +326,7 @@ export default function PropertiesTab() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingBottom: 14 },
+  header: { paddingHorizontal: 20, paddingBottom: 14, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" },
   eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, marginBottom: 4 },
   title: { fontSize: 22, fontFamily: "Inter_600SemiBold", letterSpacing: -0.3 },
   searchRow: { flexDirection: "row", alignItems: "center", gap: 10, marginHorizontal: 20, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, borderWidth: 1, backgroundColor: "rgba(255,255,255,0.02)", marginBottom: 10 },
@@ -265,4 +354,17 @@ const styles = StyleSheet.create({
   cardOwner: { flex: 1, fontSize: 10, fontFamily: "Inter_300Light" },
   emptyState: { alignItems: "center", paddingTop: 60, gap: 12 },
   emptyText: { fontSize: 13, fontFamily: "Inter_300Light" },
+  vsAvgChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
+  vsAvgText: { fontSize: 9, fontFamily: "Inter_500Medium" },
+  compToggle: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 8, paddingHorizontal: 14, borderTopWidth: 1 },
+  compToggleText: { flex: 1, fontSize: 10, fontFamily: "Inter_400Regular" },
+  compList: { paddingHorizontal: 14, paddingBottom: 10, borderTopWidth: 1 },
+  compHeader: { fontSize: 8, fontFamily: "Inter_500Medium", letterSpacing: 1.5, marginVertical: 8 },
+  compRow: { flexDirection: "row", alignItems: "center", paddingVertical: 6, borderTopWidth: 1 },
+  compAddress: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  compMeta: { fontSize: 9, fontFamily: "Inter_300Light" },
+  compPrice: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  compAvgRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 8, paddingVertical: 6, borderRadius: 6, marginTop: 6 },
+  compAvgLabel: { fontSize: 9, fontFamily: "Inter_500Medium", textTransform: "uppercase", letterSpacing: 1 },
+  compAvgValue: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });

@@ -82,7 +82,18 @@ export default function CaptureScreen() {
       if (status !== "granted") { setLocationStatus("denied"); return null; }
       const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       setLocationStatus("ok");
-      return { lat: loc.coords.latitude, lng: loc.coords.longitude };
+      const { latitude, longitude } = loc.coords;
+      if (!propertyAddress) {
+        try {
+          const geocoded = await Location.reverseGeocodeAsync({ latitude, longitude });
+          if (geocoded[0]) {
+            const g = geocoded[0];
+            const parts = [g.streetNumber, g.street, g.city, g.region].filter(Boolean);
+            if (parts.length > 0) setPropertyAddress(parts.join(" "));
+          }
+        } catch { }
+      }
+      return { lat: latitude, lng: longitude };
     } catch {
       setLocationStatus("denied");
       return null;

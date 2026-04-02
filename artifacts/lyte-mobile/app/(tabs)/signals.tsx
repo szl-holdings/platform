@@ -101,6 +101,7 @@ export default function SignalsScreen() {
   const [search, setSearch] = useState("");
   const [platFilter, setPlatFilter] = useState("All");
   const [sevFilter, setSevFilter] = useState<typeof SEVERITIES[number]>("All");
+  const [lastUpdatedAt] = useState<Date>(() => new Date());
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -131,8 +132,20 @@ export default function SignalsScreen() {
         style={[styles.headerGradient, { height: topPad + 130 }]}
       />
       <View style={{ paddingTop: topPad + 16, paddingHorizontal: 16 }}>
-        <Text style={styles.eyebrow}>SIGNALS FEED</Text>
-        <Text style={styles.headerTitle}>Live Signals</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <View>
+            <Text style={styles.eyebrow}>SIGNALS FEED</Text>
+            <Text style={styles.headerTitle}>Live Signals</Text>
+          </View>
+          <Text style={{ fontSize: 9, fontFamily: "Inter_400Regular", color: LYTE_COLORS.textTertiary, marginTop: 6 }}>
+            {(() => {
+              const ms = Date.now() - lastUpdatedAt.getTime();
+              if (ms < 60000) return "Just now";
+              if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
+              return `${Math.floor(ms / 3600000)}h ago`;
+            })()}
+          </Text>
+        </View>
         <View style={styles.statsRow}>
           <Text style={styles.statText}>{filtered.length} signals</Text>
           {critCount > 0 && (

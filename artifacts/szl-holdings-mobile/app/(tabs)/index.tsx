@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,22 @@ import {
   RefreshControl,
   Pressable,
   Platform,
+  Alert,
+  Animated as RNAnimated,
+  PanResponder,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  Easing,
+} from "react-native-reanimated";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
@@ -55,9 +65,9 @@ function useEcosystemHealth() {
 }
 
 function useAlerts() {
-  return useQuery<Alert[]>({
+  return useQuery<HoldingAlert[]>({
     queryKey: ["szl-alerts"],
-    queryFn: () => apiFetch<Alert[]>("/api/holdings/alerts"),
+    queryFn: () => apiFetch<HoldingAlert[]>("/api/holdings/alerts"),
     refetchInterval: 30000,
     retry: 1,
     placeholderData: DEMO_ALERTS,
@@ -82,7 +92,113 @@ const PLATFORM_COLORS: Record<string, string> = {
   carlotaJo: "#f472b6",
 };
 
-const DEMO_ALERTS: Alert[] = [
+interface PendingApproval {
+  id: string;
+  title: string;
+  platform: string;
+  amount?: string;
+  priority: "critical" | "high" | "normal";
+  requestedBy: string;
+  requestedAt: string;
+  retryRequired?: boolean;
+}
+
+const DEMO_APPROVALS: PendingApproval[] = [
+  { id: "ap-1", title: "Emergency Fleet Maintenance Authorization", platform: "Vessels", amount: "$184,000", priority: "critical", requestedBy: "Fleet Ops", requestedAt: new Date(Date.now() - 12 * 60000).toISOString() },
+  { id: "ap-2", title: "Threat Intel Feed Renewal — Q2", platform: "Aegis", amount: "$42,500", priority: "high", requestedBy: "Security", requestedAt: new Date(Date.now() - 45 * 60000).toISOString() },
+  { id: "ap-3", title: "Property Acquisition — Due Diligence Reserve", platform: "Terra", amount: "$750,000", priority: "high", requestedBy: "Acquisitions", requestedAt: new Date(Date.now() - 2 * 3600000).toISOString() },
+];
+
+const PRIORITY_CONFIG = {
+  critical: { color: "#ef4444", label: "CRITICAL" },
+  high: { color: "#f59e0b", label: "HIGH" },
+  normal: { color: "#10b981", label: "NORMAL" },
+};
+
+function SwipeApprovalCard({ approval, onApprove, onDefer }: { approval: PendingApproval; onApprove: () => void; onDefer: () => void }) {
+  const colors = useColors();
+  const translateX = useRef(new RNAnimated.Value(0)).current;
+  const cfg = PRIORITY_CONFIG[approval.priority];
+
+  const panResponder = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dx) > 8,
+    onPanResponderMove: (_, gs) => {
+      translateX.setValue(gs.dx);
+    },
+    onPanResponderRelease: (_, gs) => {
+      if (gs.dx > 80) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        RNAnimated.timing(translateX, { toValue: 400, duration: 250, useNativeDriver: true }).start(onApprove);
+      } else if (gs.dx < -80) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        RNAnimated.timing(translateX, { toValue: -400, duration: 250, useNativeDriver: true }).start(onDefer);
+      } else {
+        RNAnimated.spring(translateX, { toValue: 0, useNativeDriver: true }).start();
+      }
+    },
+  })).current;
+
+  const ms = Date.now() - new Date(approval.requestedAt).getTime();
+  const relTime = ms < 60000 ? "just now" : ms < 3600000 ? `${Math.floor(ms / 60000)}m ago` : `${Math.floor(ms / 3600000)}h ago`;
+
+  const approveOpacity = translateX.interpolate({ inputRange: [0, 60], outputRange: [0, 1], extrapolate: "clamp" });
+  const deferOpacity = translateX.interpolate({ inputRange: [-60, 0], outputRange: [1, 0], extrapolate: "clamp" });
+
+  return (
+    <View style={approvalStyles.wrapper}>
+      <RNAnimated.View style={[approvalStyles.actionBg, { opacity: approveOpacity, left: 0, backgroundColor: "#10b981" }]}>
+        <Feather name="check" size={18} color="#fff" />
+        <Text style={approvalStyles.actionLabel}>APPROVE</Text>
+      </RNAnimated.View>
+      <RNAnimated.View style={[approvalStyles.actionBg, { opacity: deferOpacity, right: 0, backgroundColor: "#64748b" }]}>
+        <Text style={approvalStyles.actionLabel}>DEFER</Text>
+        <Feather name="clock" size={18} color="#fff" />
+      </RNAnimated.View>
+      <RNAnimated.View
+        style={[approvalStyles.card, { backgroundColor: colors.card, borderColor: `${cfg.color}30`, transform: [{ translateX }] }]}
+        {...panResponder.panHandlers}
+      >
+        <View style={approvalStyles.topRow}>
+          <View style={[approvalStyles.priorityBadge, { backgroundColor: `${cfg.color}15`, borderColor: `${cfg.color}30` }]}>
+            <Text style={[approvalStyles.priorityText, { color: cfg.color }]}>{cfg.label}</Text>
+          </View>
+          <Text style={[approvalStyles.platform, { color: colors.mutedForeground }]}>{approval.platform}</Text>
+          <Text style={[approvalStyles.time, { color: colors.mutedForeground }]}>{relTime}</Text>
+        </View>
+        <Text style={[approvalStyles.title, { color: colors.cream }]} numberOfLines={2}>{approval.title}</Text>
+        <View style={approvalStyles.bottomRow}>
+          <Text style={[approvalStyles.requestedBy, { color: colors.mutedForeground }]}>req. {approval.requestedBy}</Text>
+          {approval.amount && <Text style={[approvalStyles.amount, { color: colors.gold }]}>{approval.amount}</Text>}
+        </View>
+        <View style={approvalStyles.swipeHint}>
+          <Feather name="chevron-right" size={10} color={`${cfg.color}60`} />
+          <Text style={[approvalStyles.swipeHintText, { color: colors.mutedForeground }]}>swipe to approve · swipe left to defer</Text>
+          <Feather name="chevron-left" size={10} color={`${colors.mutedForeground}60`} />
+        </View>
+      </RNAnimated.View>
+    </View>
+  );
+}
+
+const approvalStyles = StyleSheet.create({
+  wrapper: { position: "relative", marginBottom: 8, overflow: "hidden", borderRadius: 10 },
+  actionBg: { position: "absolute", top: 0, bottom: 0, width: 120, justifyContent: "center", alignItems: "center", flexDirection: "row", gap: 6, paddingHorizontal: 16 },
+  actionLabel: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#fff", letterSpacing: 1 },
+  card: { borderRadius: 10, borderWidth: 1, padding: 12, gap: 6 },
+  topRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  priorityBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },
+  priorityText: { fontSize: 8, fontFamily: "Inter_600SemiBold", letterSpacing: 0.5 },
+  platform: { flex: 1, fontSize: 10, fontFamily: "Inter_500Medium" },
+  time: { fontSize: 9, fontFamily: "Inter_300Light" },
+  title: { fontSize: 13, fontFamily: "Inter_500Medium", lineHeight: 18 },
+  bottomRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  requestedBy: { fontSize: 10, fontFamily: "Inter_300Light" },
+  amount: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  swipeHint: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
+  swipeHintText: { flex: 1, fontSize: 8, fontFamily: "Inter_400Regular", textAlign: "center" },
+});
+
+const DEMO_ALERTS: HoldingAlert[] = [
   {
     id: "1",
     severity: "critical",
@@ -113,7 +229,7 @@ const DEMO_ALERTS: Alert[] = [
   },
 ];
 
-interface Alert {
+interface HoldingAlert {
   id: string;
   severity: "critical" | "warning" | "info" | "resolved";
   platform: string;
@@ -121,14 +237,14 @@ interface Alert {
   time: string;
 }
 
-const SEVERITY_CONFIG: Record<Alert["severity"], { color: string; icon: FeatherIconName; label: string }> = {
+const SEVERITY_CONFIG: Record<HoldingAlert["severity"], { color: string; icon: FeatherIconName; label: string }> = {
   critical: { color: "#ef4444", icon: "alert-octagon", label: "Critical" },
   warning: { color: "#f59e0b", icon: "alert-triangle", label: "Warning" },
   info: { color: "#3b82f6", icon: "info", label: "Info" },
   resolved: { color: "#10b981", icon: "check-circle", label: "Resolved" },
 };
 
-function AlertRow({ alert }: { alert: Alert }) {
+function AlertRow({ alert }: { alert: HoldingAlert }) {
   const colors = useColors();
   const cfg = SEVERITY_CONFIG[alert.severity];
   const ms = Date.now() - new Date(alert.time).getTime();
@@ -191,7 +307,31 @@ function PlatformStatusCard({
   );
 }
 
-function KpiRow({
+function useAnimatedCounter(target: number, duration = 1200) {
+  const [display, setDisplay] = useState(0);
+  const frameRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!target) return;
+    let start = 0;
+    const startTime = Date.now();
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * target));
+      if (progress < 1) {
+        frameRef.current = setTimeout(tick, 16);
+      }
+    };
+    tick();
+    return () => { if (frameRef.current) clearTimeout(frameRef.current); };
+  }, [target, duration]);
+
+  return display;
+}
+
+function AnimatedKpiRow({
   label,
   value,
   icon,
@@ -203,15 +343,34 @@ function KpiRow({
   color: string;
 }) {
   const colors = useColors();
+  const numVal = typeof value === "number" ? value : null;
+  const animated = useAnimatedCounter(numVal ?? 0);
+
   return (
     <View style={[styles.kpiRow, { borderColor: colors.borderSubtle }]}>
       <View style={[styles.kpiIcon, { backgroundColor: `${color}18` }]}>
         <Feather name={icon} size={14} color={color} />
       </View>
       <Text style={[styles.kpiLabel, { color: colors.mutedForeground }]}>{label}</Text>
-      <Text style={[styles.kpiValue, { color: colors.cream }]}>{value}</Text>
+      <Text style={[styles.kpiValue, { color: colors.cream }]}>
+        {numVal !== null ? animated : value}
+      </Text>
     </View>
   );
+}
+
+function KpiRow({
+  label,
+  value,
+  icon,
+  color,
+}: {
+  label: string;
+  value: string | number;
+  icon: FeatherIconName;
+  color: string;
+}) {
+  return <AnimatedKpiRow label={label} value={value} icon={icon} color={color} />;
 }
 
 export default function CommandScreen() {
@@ -219,6 +378,29 @@ export default function CommandScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>(DEMO_APPROVALS);
+
+  const approveMutation = useMutation({
+    mutationFn: async ({ id, action }: { id: string; action: "approve" | "defer" }) => {
+      await apiFetch(`/api/holdings/approvals/${id}/${action}`, { method: "POST" });
+    },
+    onSuccess: (_data, variables) => {
+      const ap = pendingApprovals.find(a => a.id === variables.id);
+      setPendingApprovals(prev => prev.filter(a => a.id !== variables.id));
+      if (variables.action === "approve" && ap) {
+        Alert.alert("Approved", `"${ap.title}" approved successfully.`);
+      }
+    },
+    onError: (_err, variables) => {
+      const ap = pendingApprovals.find(a => a.id === variables.id);
+      setPendingApprovals(prev =>
+        prev.map(a => a.id === variables.id ? { ...a, retryRequired: true } : a)
+      );
+      if (ap) {
+        Alert.alert("Sync Failed", `"${ap.title}" could not be submitted. Tap to retry.`);
+      }
+    },
+  });
 
   const {
     data: health,
@@ -357,6 +539,29 @@ export default function CommandScreen() {
             ))}
           </View>
         </View>
+
+        {pendingApprovals.length > 0 && (
+          <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
+                PENDING APPROVALS
+              </Text>
+              <View style={[styles.alertCountBadge, { backgroundColor: "rgba(239,68,68,0.12)", borderColor: "rgba(239,68,68,0.2)" }]}>
+                <Text style={[styles.alertCountText, { color: "#ef4444" }]}>
+                  {pendingApprovals.length} required
+                </Text>
+              </View>
+            </View>
+            {pendingApprovals.map((ap) => (
+              <SwipeApprovalCard
+                key={ap.id}
+                approval={ap}
+                onApprove={() => approveMutation.mutate({ id: ap.id, action: "approve" })}
+                onDefer={() => approveMutation.mutate({ id: ap.id, action: "defer" })}
+              />
+            ))}
+          </View>
+        )}
 
         <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
           <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>

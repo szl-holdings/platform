@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -19,12 +19,17 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   withSpring,
+  withRepeat,
+  withSequence,
   Easing,
 } from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 
 import { apiGet } from "@/lib/apiClient";
+
+type IonIconName = ComponentProps<typeof Ionicons>["name"];
 
 interface Incident {
   id: number;
@@ -57,6 +62,117 @@ interface HardeningSummary {
   criticalGaps: number;
 }
 
+const MITRE_PHASES = [
+  { phase: "Recon", icon: "eye-outline" as IonIconName, color: "#64748b", techniques: ["T1595", "T1589"] },
+  { phase: "Weaponize", icon: "construct-outline" as IonIconName, color: "#7c3aed", techniques: ["T1587", "T1584"] },
+  { phase: "Delivery", icon: "mail-outline" as IonIconName, color: "#2563eb", techniques: ["T1566", "T1534"] },
+  { phase: "Exploit", icon: "flash-outline" as IonIconName, color: "#d97706", techniques: ["T1203", "T1190"] },
+  { phase: "Install", icon: "download-outline" as IonIconName, color: "#f59e0b", techniques: ["T1548", "T1543"] },
+  { phase: "C2", icon: "radio-outline" as IonIconName, color: "#dc2626", techniques: ["T1071", "T1573"] },
+  { phase: "Actions", icon: "skull-outline" as IonIconName, color: "#ef4444", techniques: ["T1485", "T1486"] },
+];
+
+const TECHNIQUE_TO_PHASE: Record<string, number> = {
+  T1595: 0, T1589: 0,
+  T1587: 1, T1584: 1,
+  T1566: 2, T1534: 2,
+  T1203: 3, T1190: 3,
+  T1548: 4, T1543: 4,
+  T1071: 5, T1573: 5,
+  T1485: 6, T1486: 6,
+};
+
+function techniqueToPhase(technique?: string | null): number {
+  if (!technique) return -1;
+  const id = technique.split(".")[0];
+  return TECHNIQUE_TO_PHASE[id] ?? -1;
+}
+
+function MitreKillChain({ incident }: { incident?: Incident | null }) {
+  const colors = useColors();
+  const activePhaseIdx = techniqueToPhase(incident?.attackTechnique);
+
+  return (
+    <View style={[styles.mitreCard, { backgroundColor: colors.navyLight, borderColor: colors.border }]}>
+      <View style={styles.mitreHeader}>
+        <Text style={[styles.mitreTitle, { color: colors.foreground, fontFamily: "SpaceGrotesk_600SemiBold" }]}>
+          MITRE ATT&CK Kill Chain
+        </Text>
+        {incident && (
+          <View style={[styles.mitreTechniqueBadge, { backgroundColor: `${colors.amber}20`, borderColor: `${colors.amber}40` }]}>
+            <Text style={[styles.mitreTechText, { color: colors.amber }]}>
+              {incident.attackTechnique ?? "T1566"}
+            </Text>
+          </View>
+        )}
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.mitreScroll}
+      >
+        {MITRE_PHASES.map((phase, i) => {
+          const isActive = i === activePhaseIdx;
+          const isPast = i < activePhaseIdx;
+          const opacity = isPast ? 0.5 : isActive ? 1 : 0.35;
+          return (
+            <View key={phase.phase} style={styles.mitrePhaseWrap}>
+              <View style={[
+                styles.mitrePhaseCard,
+                {
+                  backgroundColor: isActive ? `${phase.color}18` : "transparent",
+                  borderColor: isActive ? `${phase.color}60` : colors.border,
+                  opacity,
+                }
+              ]}>
+                <Ionicons name={phase.icon} size={18} color={phase.color} />
+                <Text style={[styles.miterPhaseName, { color: isActive ? colors.foreground : colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>
+                  {phase.phase}
+                </Text>
+                {phase.techniques.slice(0, 1).map(t => (
+                  <Text key={t} style={[styles.mitreTech, { color: phase.color, fontFamily: "Inter_400Regular" }]}>{t}</Text>
+                ))}
+                {isActive && (
+                  <View style={[styles.mitreActiveDot, { backgroundColor: phase.color }]} />
+                )}
+              </View>
+              {i < MITRE_PHASES.length - 1 && (
+                <View style={[styles.mitreArrow, { opacity: isPast || isActive ? 0.7 : 0.2 }]}>
+                  <Feather name="chevron-right" size={12} color={colors.mutedForeground} />
+                </View>
+              )}
+            </View>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+function SkeletonBlock({ width, height, style }: { width: number | `${number}%`; height: number; style?: object }) {
+  const colors = useColors();
+  const opacity = useSharedValue(0.4);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(withTiming(1, { duration: 800 }), withTiming(0.4, { duration: 800 })),
+      -1
+    );
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View
+      style={[
+        { width, height, borderRadius: 8, backgroundColor: colors.navyLight },
+        animStyle,
+        style,
+      ]}
+    />
+  );
+}
+
 async function fetchIncidents(): Promise<Incident[]> {
   return apiGet<Incident[]>("/api/firestorm/incidents");
 }
@@ -82,8 +198,6 @@ async function fetchHardeningSummary(): Promise<HardeningSummary> {
     return { overallScore: 0, total: 0, implemented: 0, partial: 0, notImplemented: 0, criticalGaps: 0 };
   }
 }
-
-type IonIconName = ComponentProps<typeof Ionicons>["name"];
 
 interface KPICardProps {
   label: string;
@@ -276,10 +390,15 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
 
   const { data: incidents = [], refetch: refetchIncidents, isLoading: incLoading } = useQuery<Incident[]>({
     queryKey: ["aegis-incidents"],
-    queryFn: fetchIncidents,
+    queryFn: async () => {
+      const result = await fetchIncidents();
+      setLastRefreshedAt(new Date());
+      return result;
+    },
   });
 
   const { data: findings = [], refetch: refetchFindings, isLoading: findLoading } = useQuery<Finding[]>({
@@ -338,9 +457,21 @@ export default function DashboardScreen() {
             Threat Dashboard
           </Text>
         </View>
-        <View style={[styles.statusDot, { backgroundColor: colors.emeraldDim, borderColor: colors.emerald }]}>
-          <View style={[styles.statusPulse, { backgroundColor: colors.emerald }]} />
-          <Text style={[styles.statusText, { color: colors.emerald, fontFamily: "Inter_500Medium" }]}>LIVE</Text>
+        <View style={{ alignItems: "flex-end", gap: 4 }}>
+          <View style={[styles.statusDot, { backgroundColor: colors.emeraldDim, borderColor: colors.emerald }]}>
+            <View style={[styles.statusPulse, { backgroundColor: colors.emerald }]} />
+            <Text style={[styles.statusText, { color: colors.emerald, fontFamily: "Inter_500Medium" }]}>LIVE</Text>
+          </View>
+          {!isLoading && (
+            <Text style={{ fontSize: 9, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>
+              {(() => {
+                const ms = Date.now() - lastRefreshedAt.getTime();
+                if (ms < 60000) return "Just now";
+                if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
+                return `${Math.floor(ms / 3600000)}h ago`;
+              })()}
+            </Text>
+          )}
         </View>
       </View>
 
@@ -353,8 +484,14 @@ export default function DashboardScreen() {
         }
       >
         {isLoading ? (
-          <View style={styles.loadingWrap}>
-            <ActivityIndicator color={colors.amber} size="large" />
+          <View style={styles.section}>
+            <View style={{ gap: 12 }}>
+              <View style={styles.kpiGrid}>
+                {[1, 2, 3, 4].map(i => <SkeletonBlock key={i} width="47%" height={90} />)}
+              </View>
+              <SkeletonBlock width="100%" height={120} />
+              <SkeletonBlock width="100%" height={80} />
+            </View>
           </View>
         ) : (
           <>
@@ -448,6 +585,10 @@ export default function DashboardScreen() {
                   ))}
                 </View>
               </View>
+            </View>
+
+            <View style={styles.section}>
+              <MitreKillChain incident={incidents?.[0]} />
             </View>
 
             <View style={styles.section}>
@@ -636,4 +777,16 @@ const styles = StyleSheet.create({
   fwTrack: { flex: 1, height: 4, borderRadius: 2, overflow: "hidden" },
   fwFill: { height: "100%", borderRadius: 2 },
   fwPct: { fontSize: 12, width: 34, textAlign: "right" },
+  mitreCard: { borderRadius: 12, borderWidth: 1, padding: 14, marginBottom: 0 },
+  mitreHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  mitreTitle: { fontSize: 13 },
+  mitreTechniqueBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
+  mitreTechText: { fontSize: 10, fontFamily: "Inter_500Medium", letterSpacing: 0.5 },
+  mitreScroll: { gap: 4, paddingBottom: 4 },
+  mitrePhaseWrap: { flexDirection: "row", alignItems: "center" },
+  mitrePhaseCard: { width: 70, padding: 8, borderRadius: 10, borderWidth: 1, alignItems: "center", gap: 4 },
+  miterPhaseName: { fontSize: 9, textAlign: "center", letterSpacing: 0.5 },
+  mitreTech: { fontSize: 8, letterSpacing: 0.3 },
+  mitreActiveDot: { width: 5, height: 5, borderRadius: 3, marginTop: 2 },
+  mitreArrow: { paddingHorizontal: 2 },
 });

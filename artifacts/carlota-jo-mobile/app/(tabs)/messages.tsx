@@ -23,6 +23,29 @@ interface Message {
   from: "rosa" | "client";
   time: string;
   date?: string;
+  readStatus?: "sent" | "delivered" | "read";
+}
+
+function ReadReceipt({ status }: { status?: "sent" | "delivered" | "read" }) {
+  const colors = useColors();
+  if (!status) return null;
+  const isRead = status === "read";
+  const color = isRead ? colors.gold : colors.mutedForeground;
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 1, marginTop: 2, alignSelf: "flex-end" }}>
+      {status === "sent" ? (
+        <Feather name="check" size={9} color={color} />
+      ) : (
+        <>
+          <Feather name="check" size={9} color={color} />
+          <Feather name="check" size={9} color={color} style={{ marginLeft: -4 }} />
+        </>
+      )}
+      {isRead && (
+        <Text style={{ fontSize: 8, fontFamily: "Inter_300Light", color: colors.gold, marginLeft: 2 }}>Read</Text>
+      )}
+    </View>
+  );
 }
 
 const INITIAL_MESSAGES: Message[] = [
@@ -38,6 +61,7 @@ const INITIAL_MESSAGES: Message[] = [
     body: "Thank you, Rosa. I'll review this afternoon. The Oxfordshire report is the priority — I want to understand the timeline for the vendor changes.",
     from: "client",
     time: "11:23 AM",
+    readStatus: "read",
   },
   {
     id: "3",
@@ -50,6 +74,7 @@ const INITIAL_MESSAGES: Message[] = [
     body: "Perfect. I'd also like to discuss the Mayfair schedule for May — we'll have guests from the 12th.",
     from: "client",
     time: "12:05 PM",
+    readStatus: "read",
   },
   {
     id: "5",
@@ -96,6 +121,7 @@ function MessageBubble({ msg }: { msg: Message }) {
           >
             {msg.time}
           </Text>
+          {isClient && <ReadReceipt status={msg.readStatus} />}
         </View>
       </View>
     </View>
@@ -121,6 +147,7 @@ export default function MessagesScreen() {
       body: draft.trim(),
       from: "client",
       time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+      readStatus: "sent",
     };
     setMessages((prev) => [...prev, newMsg]);
     setDraft("");

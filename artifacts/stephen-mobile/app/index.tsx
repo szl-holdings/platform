@@ -447,19 +447,43 @@ export default function Home() {
       `EMAIL;TYPE=WORK:${PROFILE.email}`,
       `TEL;TYPE=WORK:${PROFILE.phone}`,
       `URL:https://stephenlutar.com`,
+      `URL:${PROFILE.linkedin}`,
       `ADR;TYPE=WORK:;;Washington D.C. Metro;;;;US`,
+      `NOTE:Founder & CEO, SZL Holdings — Maritime Intelligence · Cybersecurity · Real Estate · AI Ops`,
       "END:VCARD",
+    ].join("\n");
+
+    const shareText = [
+      `${PROFILE.name}`,
+      `${PROFILE.title} · ${PROFILE.company}`,
+      "",
+      `Email: ${PROFILE.email}`,
+      `Phone: ${PROFILE.phone}`,
+      `LinkedIn: ${PROFILE.linkedin}`,
+      `Web: https://stephenlutar.com`,
+      "",
+      "SZL Holdings Portfolio:",
+      "• Vessels — Maritime Fleet Intelligence",
+      "• Aegis — Cybersecurity Command",
+      "• Terra — Real Estate Intelligence",
+      "• Lyte — AI Operations Platform",
+      "• Carlota Jo — Private Advisory",
     ].join("\n");
 
     try {
       if (Platform.OS === "web") {
         Alert.alert(
-          "Contact Card",
-          `${PROFILE.name}\n${PROFILE.title} — ${PROFILE.company}\n\n${PROFILE.email}\n${PROFILE.phone}\n${PROFILE.linkedin}`
+          "Stephen Lutar — Founder Card",
+          shareText,
+          [{ text: "Copy to Clipboard", onPress: () => {} }, { text: "Done" }]
         );
         return;
       }
-      await Share.share({ title: `${PROFILE.name} — Founder Card`, message: vCard });
+      await Share.share({
+        title: `${PROFILE.name} — Founder Card`,
+        message: Platform.OS === "ios" ? vCard : shareText,
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch {
       /* ignore cancel */
     }

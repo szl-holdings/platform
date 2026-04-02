@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as LocalAuthentication from "expo-local-authentication";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Platform,
   Pressable,
@@ -11,6 +12,11 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useColors } from "@/hooks/useColors";
@@ -38,14 +44,111 @@ function getStatusStyle(status: string) {
   return { isHighlight: false };
 }
 
+function BiometricGate({ onUnlock, colors }: { onUnlock: () => void; colors: ReturnType<typeof useColors> }) {
+  const insets = useSafeAreaInsets();
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const [authError, setAuthError] = useState("");
+  const [authing, setAuthing] = useState(false);
+  const shakeVal = useSharedValue(0);
+
+  const shakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shakeVal.value }],
+  }));
+
+  const handleAuth = async () => {
+    if (Platform.OS === "web") {
+      onUnlock();
+      return;
+    }
+    setAuthing(true);
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate to access Document Vault",
+        fallbackLabel: "Enter Passcode",
+      });
+      if (result.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        onUnlock();
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        setAuthError("Authentication failed — tap to try again");
+        shakeVal.value = withTiming(0, { duration: 0 });
+        setTimeout(() => {
+          shakeVal.value = withTiming(10, { duration: 60 });
+          setTimeout(() => { shakeVal.value = withTiming(-10, { duration: 60 }); }, 60);
+          setTimeout(() => { shakeVal.value = withTiming(6, { duration: 60 }); }, 120);
+          setTimeout(() => { shakeVal.value = withTiming(0, { duration: 60 }); }, 180);
+        }, 10);
+      }
+    } catch {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setAuthError("Authentication error — tap to try again");
+    }
+    setAuthing(false);
+  };
+
+  return (
+    <View style={[gateStyles.container, { backgroundColor: colors.background, paddingTop: topPad + 40 }]}>
+      <LinearGradient
+        colors={["rgba(200,169,106,0.05)", "transparent"]}
+        style={[gateStyles.gradient, { height: topPad + 100 }]}
+      />
+      <Animated.View style={[gateStyles.content, shakeStyle]}>
+        <View style={[gateStyles.iconWrap, { borderColor: colors.goldBorder, backgroundColor: colors.goldDim }]}>
+          <Feather name="lock" size={28} color={colors.gold} />
+        </View>
+        <Text style={[gateStyles.eyebrow, { color: colors.goldSubtle }]}>DOCUMENT VAULT</Text>
+        <Text style={[gateStyles.title, { color: colors.cream }]}>Secured Access</Text>
+        <Text style={[gateStyles.desc, { color: colors.mutedForeground }]}>
+          Your document vault is protected.{"\n"}Authenticate to continue.
+        </Text>
+        {authError ? (
+          <Text style={[gateStyles.error, { color: "#ef4444" }]}>{authError}</Text>
+        ) : null}
+        <Pressable
+          onPress={handleAuth}
+          disabled={authing}
+          style={({ pressed }) => [
+            gateStyles.authBtn,
+            { backgroundColor: colors.gold, opacity: pressed || authing ? 0.8 : 1 },
+          ]}
+        >
+          <Feather name={Platform.OS === "web" ? "unlock" : "shield"} size={16} color={colors.inkDeep} />
+          <Text style={[gateStyles.authBtnText, { color: colors.inkDeep }]}>
+            {Platform.OS === "web" ? "Open Vault" : "Authenticate"}
+          </Text>
+        </Pressable>
+      </Animated.View>
+    </View>
+  );
+}
+
+const gateStyles = StyleSheet.create({
+  container: { flex: 1, alignItems: "center" },
+  gradient: { position: "absolute", top: 0, left: 0, right: 0 },
+  content: { alignItems: "center", paddingHorizontal: 40 },
+  iconWrap: { width: 72, height: 72, borderRadius: 36, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 24 },
+  eyebrow: { fontSize: 9, fontFamily: "Inter_500Medium", letterSpacing: 3, marginBottom: 8 },
+  title: { fontSize: 28, fontFamily: "CormorantGaramond_400Regular", marginBottom: 12, textAlign: "center" },
+  desc: { fontSize: 13, fontFamily: "Inter_300Light", textAlign: "center", lineHeight: 20, marginBottom: 8 },
+  error: { fontSize: 11, fontFamily: "Inter_400Regular", marginBottom: 8, textAlign: "center" },
+  authBtn: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 0, marginTop: 16 },
+  authBtnText: { fontSize: 12, fontFamily: "Inter_500Medium", letterSpacing: 1.5, textTransform: "uppercase" },
+});
+
 export default function DocumentsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState("All");
   const [refreshing, setRefreshing] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
+
+  if (!unlocked) {
+    return <BiometricGate onUnlock={() => setUnlocked(true)} colors={colors} />;
+  }
 
   const filtered = filter === "All"
     ? DEMO_DOCUMENTS
