@@ -298,6 +298,10 @@ This is a **pnpm monorepo** with a shared TypeScript foundation. Every frontend 
 | [Design Audit](docs/design/design-audit.md) | Visual consistency assessment and recommendations |
 | [Release Notes v0.1.0](docs/releases/v0.1.0.md) | What's in the initial release |
 | [Public Mirror Policy](docs/public/public-mirror-policy.md) | What's published, what's excluded, and why |
+| [Roadmap](ROADMAP.md) | Phase-by-phase product direction (public-safe) |
+| [Changelog](CHANGELOG.md) | Release history and milestone log |
+| [Platform Overview](docs/PLATFORM_OVERVIEW.md) | Polished platform overview for external audiences |
+| [What This Proves](docs/WHAT_THIS_PROVES.md) | Technical proof summary for evaluators and recruiters |
 
 ---
 
@@ -334,12 +338,29 @@ See [Public Mirror Policy](docs/public/public-mirror-policy.md) for the full cur
 
 ---
 
-## Recommended Next Implementation Steps
+## Roadmap
 
-- Replace the SZL Holdings homepage with the focused Lyte + Alloy narrative
-- Rewrite investor-facing pages around one disciplined capital story
-- Reframe the ventures page as a staged platform map rather than equal-present-tense products
-- Keep the wider ecosystem visible, but subordinate it to sequencing, proof, and buyer clarity
+*Public-safe directional roadmap. Specific dates and competitive details are not disclosed.*
+
+### Phase 1 — Commercial Activation *(in progress)*
+- Revenue activation: Stripe billing live for Vessels, Lyte, Terra, Carlota Jo
+- Design partner onboarding (first paying commercial pilots)
+- Redis session store for production deployments
+- Sentry error tracking integration
+
+### Phase 2 — Enterprise Readiness
+- Enterprise SSO / SCIM 2.0 provisioning
+- SOC 2 Type II audit preparation
+- OpenAPI developer portal and partner SDK
+- FedRAMP readiness track (Aegis)
+
+### Phase 3 — Platform Expansion
+- Salesforce AppExchange submission (Lyte connector)
+- Jira Marketplace listing (Alloy workflow integration)
+- Cross-domain signal correlation (Lyte ↔ Aegis ↔ Terra ↔ Vessels)
+- White-label and reseller partner program
+
+*For more detail on near-term milestones, see [CHANGELOG.md](CHANGELOG.md).*
 
 ---
 
@@ -398,4 +419,4 @@ See [Public Mirror Policy](docs/public/public-mirror-policy.md) for the full cur
 
 SZL Holdings is a private operating company. All platforms, intellectual property, and trademarks are owned by SZL Holdings. Stephen Lutar is the founder and sole officer.
 
-**License:** Proprietary. All rights reserved. See [LICENSE.md](LICENSE.md).
+**License:** Proprietary. All rights reserved. See [LICENSE](LICENSE).

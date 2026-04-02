@@ -57,7 +57,7 @@ This is the first formal public release of the SZL Holdings platform ecosystem.
 - Command workspace: MSP operations, client SLA management
 - Intelligence workspace: AI research (INCA), model registry, experiment tracking
 - STIX/TAXII protocol layer
-- FedRAMP readiness track (Phase 4 roadmap)
+- FedRAMP readiness track (Aegis — Phase 2 roadmap)
 
 **Terra — Real Estate Intelligence**
 - NYC distress property data pipeline (multiple public data sources)
@@ -120,4 +120,5 @@ Older releases are documented here as they are published.
 ---
 
 *For security disclosures, see [SECURITY.md](SECURITY.md).*  
-*For the full release strategy, see [docs/releases/release-strategy.md](docs/releases/release-strategy.md).*
+*For the full release strategy, see [docs/releases/release-strategy.md](docs/releases/release-strategy.md).*  
+*For the product roadmap, see [ROADMAP.md](ROADMAP.md).*
