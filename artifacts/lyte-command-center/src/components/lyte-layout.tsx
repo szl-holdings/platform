@@ -107,6 +107,7 @@ const NAV_GROUPS = [
   {
     label: "Alloy Engine",
     items: [
+      { href: "/alloy/intelligence", label: "Intelligence Fabric", icon: Zap },
       { href: "/alloy/canvas", label: "Workflow Canvas", icon: Brain },
       { href: "/alloy/runs", label: "Run Monitor", icon: Activity },
     ],

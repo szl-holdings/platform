@@ -138,24 +138,49 @@ interface ModelChain {
 
 const MODEL_REGISTRY: Record<string, ModelChain> = {
   textGeneration: {
-    primary: "mistralai/Mistral-7B-Instruct-v0.3",
-    secondary: "microsoft/Phi-3-mini-4k-instruct",
-    tertiary: "google/flan-t5-base",
+    primary: process.env["HF_PRIMARY_LLM"] || "Qwen/Qwen3-8B",
+    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
   },
   reasoning: {
-    primary: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-    secondary: "mistralai/Mistral-7B-Instruct-v0.3",
-    tertiary: "google/flan-t5-base",
+    primary: process.env["HF_PRIMARY_LLM"] || "Qwen/Qwen3-8B",
+    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
   },
-  summarization: {
-    primary: "facebook/bart-large-cnn",
-    secondary: "sshleifer/distilbart-cnn-12-6",
-    tertiary: "google/flan-t5-base",
+  planning: {
+    primary: process.env["HF_PRIMARY_LLM"] || "Qwen/Qwen3-8B",
+    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+  },
+  triage: {
+    primary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    secondary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
   },
   classification: {
-    primary: "distilbert-base-uncased-finetuned-sst-2-english",
-    secondary: "cardiffnlp/twitter-roberta-base-sentiment-latest",
-    tertiary: "nlptown/bert-base-multilingual-uncased-sentiment",
+    primary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    secondary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    tertiary: "facebook/bart-large-mnli",
+  },
+  toolCalling: {
+    primary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    secondary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+  },
+  visionUnderstanding: {
+    primary: process.env["HF_VISION_MODEL"] || "Qwen/Qwen2.5-VL-7B-Instruct",
+    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+  },
+  backgroundBatch: {
+    primary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+    secondary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    tertiary: process.env["HF_FALLBACK_LLM"] || "Qwen/Qwen3-0.6B",
+  },
+  summarization: {
+    primary: process.env["HF_SECONDARY_LLM"] || "Qwen/Qwen3-8B",
+    secondary: "facebook/bart-large-cnn",
+    tertiary: "sshleifer/distilbart-cnn-12-6",
   },
   ner: {
     primary: "dslim/bert-base-NER",
@@ -183,9 +208,14 @@ const MODEL_REGISTRY: Record<string, ModelChain> = {
     tertiary: "runwayml/stable-diffusion-v1-5",
   },
   embedding: {
-    primary: "sentence-transformers/all-MiniLM-L6-v2",
-    secondary: "sentence-transformers/paraphrase-MiniLM-L3-v2",
-    tertiary: "sentence-transformers/all-MiniLM-L12-v2",
+    primary: process.env["HF_EMBED_MODEL"] || "BAAI/bge-m3",
+    secondary: "sentence-transformers/all-MiniLM-L6-v2",
+    tertiary: "sentence-transformers/paraphrase-MiniLM-L3-v2",
+  },
+  reranking: {
+    primary: process.env["HF_RERANK_MODEL"] || "BAAI/bge-reranker-v2-m3",
+    secondary: "BAAI/bge-reranker-v2-m3",
+    tertiary: "BAAI/bge-reranker-v2-m3",
   },
   translation: {
     primary: "Helsinki-NLP/opus-mt-en-fr",

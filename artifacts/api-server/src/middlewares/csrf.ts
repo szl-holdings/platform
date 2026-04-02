@@ -38,6 +38,7 @@ function isExempt(path: string): boolean {
   if (EXEMPT_PATHS.has(path)) return true;
   if (path.startsWith("/api/webhooks/")) return true;
   if (path.startsWith("/api-docs")) return true;
+  if (path.startsWith("/api/ai/")) return true;
   return false;
 }
 

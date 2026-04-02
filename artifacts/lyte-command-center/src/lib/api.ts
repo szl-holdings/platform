@@ -252,4 +252,121 @@ export const api = {
     githubTrending: (language?: string) =>
       apiFetch<any>(`/lyte/live/github-trending${language ? `?language=${encodeURIComponent(language)}` : ""}`),
   },
+  ai: {
+    health: () => apiFetch<AlloyAIHealth>("/ai/health"),
+    models: () => apiFetch<AlloyAIModels>("/ai/models"),
+    respond: (messages: Array<{ role: string; content: string }>, routeClass?: string) =>
+      apiFetch<AlloyAIResponse>("/ai/respond", { method: "POST", body: JSON.stringify({ messages, routeClass }) }),
+    triage: (input: string, context?: string) =>
+      apiFetch<AlloyAITriageResult>("/ai/triage", { method: "POST", body: JSON.stringify({ input, context }) }),
+    extract: (input: string) =>
+      apiFetch<AlloyAIExtractResult>("/ai/extract", { method: "POST", body: JSON.stringify({ input }) }),
+    plan: (objective: string, context?: string) =>
+      apiFetch<AlloyAIPlanResult>("/ai/plan", { method: "POST", body: JSON.stringify({ objective, context }) }),
+    retrieve: (query: string, topK?: number) =>
+      apiFetch<AlloyAIRetrievalResult>("/ai/retrieve", { method: "POST", body: JSON.stringify({ query, topK }) }),
+    tools: () => apiFetch<AlloyAIToolsResult>("/ai/tools"),
+    toolPreview: (toolName: string, args?: Record<string, unknown>) =>
+      apiFetch<AlloyAIToolPreview>("/ai/tools/preview", { method: "POST", body: JSON.stringify({ toolName, arguments: args }) }),
+    audit: (limit?: number) => apiFetch<AlloyAIAuditResult>(`/ai/audit?limit=${limit || 50}`),
+  },
 };
+
+export interface AlloyAIHealth {
+  status: string;
+  provider: string;
+  models: Array<{ model: string; role: string; provider: string }>;
+  routes: string[];
+  retrieval: { totalChunks: number; withEmbeddings: number };
+  config: Record<string, unknown>;
+  auditLogSize: number;
+}
+
+export interface AlloyAIModels {
+  slots: Array<{ model: string; role: string; provider: string }>;
+  routes: Record<string, { model: string; role: string; maxTokens: number; temperature: number; structuredOutput: boolean }>;
+  provider: string;
+  tokenConfigured: boolean;
+}
+
+export interface AlloyAIResponse {
+  content: string;
+  model: string;
+  provider: string;
+  usage: { promptTokens: number; completionTokens: number; totalTokens: number } | null;
+  latencyMs: number;
+  finishReason: string;
+}
+
+export interface AlloyAITriageResult {
+  decision: {
+    priority: string;
+    urgency: string;
+    category: string;
+    routeTo: string;
+    routeReason: string;
+    summary: string;
+    keyEntities: Array<{ type: string; value: string; confidence: number }>;
+    suggestedActions: Array<{ action: string; reason: string; confidence: number }>;
+    requiresHumanReview: boolean;
+    confidence: number;
+  };
+  model: string;
+  latencyMs: number;
+}
+
+export interface AlloyAIExtractResult {
+  result: {
+    entities: Array<{ type: string; value: string; confidence: number; context: string }>;
+    relationships: Array<{ from: string; to: string; relationType: string; confidence: number }>;
+    summary: string;
+    confidence: number;
+  };
+  model: string;
+  latencyMs: number;
+}
+
+export interface AlloyAIPlanResult {
+  plan: {
+    action: string;
+    actionType: string;
+    confidence: number;
+    evidence: Array<{ source: string; sourceType: string; content: string; relevanceScore: number }>;
+    impactedOwner: string | null;
+    approvalRequired: boolean;
+    approvalLevel: string;
+    reasoning: string;
+    alternatives: Array<{ action: string; confidence: number; tradeoff: string }>;
+  };
+  model: string;
+  latencyMs: number;
+}
+
+export interface AlloyAIRetrievalResult {
+  chunks: Array<{ id: string; content: string; source: string; sourceType: string; score: number; matchType: string }>;
+  evidence: Array<{ source: string; sourceType: string; content: string; relevanceScore: number }>;
+  query: string;
+  method: string;
+  totalIndexed: number;
+  latencyMs: number;
+}
+
+export interface AlloyAIToolsResult {
+  tools: Array<{ name: string; description: string; policy: { allowed: boolean; requiresApproval: boolean; reason: string } }>;
+  executionMode: string;
+  approvalRequired: boolean;
+}
+
+export interface AlloyAIToolPreview {
+  toolName: string;
+  exists: boolean;
+  policy: { allowed: boolean; requiresApproval: boolean; reason: string };
+  dryRun: boolean;
+}
+
+export interface AlloyAIAuditResult {
+  total: number;
+  offset: number;
+  limit: number;
+  entries: Array<Record<string, unknown>>;
+}

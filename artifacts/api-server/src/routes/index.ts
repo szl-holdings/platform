@@ -78,6 +78,7 @@ import contactRouter from "./contact";
 import aegisSocLiveRouter from "./firestorm-live";
 import publicStatusRouter from "./public-status";
 import { feedbackRouter } from "./feedback";
+import aiEngineRouter from "./ai-engine";
 
 const router: IRouter = Router();
 
@@ -278,5 +279,8 @@ router.use("/admin/status", publicStatusRouter);
 
 router.use("/feedback", writeLimiter);
 router.use(feedbackRouter);
+
+router.use("/ai", _readLimiter);
+router.use(aiEngineRouter);
 
 export default router;
