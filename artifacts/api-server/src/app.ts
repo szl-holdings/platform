@@ -154,7 +154,15 @@ app.use(express.json({
     (req as Request & { rawBody?: Buffer }).rawBody = buf;
   },
 }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.urlencoded({
+  extended: true,
+  limit: "10mb",
+  verify: (req: Request, _res, buf) => {
+    if (!(req as Request & { rawBody?: Buffer }).rawBody) {
+      (req as Request & { rawBody?: Buffer }).rawBody = buf;
+    }
+  },
+}));
 app.use(csrfMiddleware);
 app.use(authMiddleware);
 app.use(sessionRefreshPolicy());

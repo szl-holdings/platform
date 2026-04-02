@@ -85,6 +85,12 @@ import invitationsRouter from "./invitations";
 import { idempotencyMiddleware, optionalIdempotencyMiddleware } from "../middlewares/idempotency";
 import lyteBillingRouter from "./lyte-billing";
 import { alloyResearchRouter } from "./alloy-research";
+import alloyChannelsRouter from "./alloy-channels";
+import alloyEmailRouter from "./alloy-email";
+import alloyMeetingsRouter from "./alloy-meetings";
+import alloyDigestRouter from "./alloy-digest";
+import alloyIntegrationsRouter from "./alloy-integrations";
+import alloyVoiceRouter from "./alloy-voice";
 
 const router: IRouter = Router();
 
@@ -236,6 +242,24 @@ router.use("/alloy/ingest", optionalIdempotencyMiddleware);
 router.use("/alloy/workflows", _writeLimiter);
 router.use("/alloy/workflows", optionalIdempotencyMiddleware);
 router.use(alloyRouter);
+
+router.use("/alloy/channels", _writeLimiter);
+router.use(alloyChannelsRouter);
+
+router.use("/alloy/email", _writeLimiter);
+router.use(alloyEmailRouter);
+
+router.use("/alloy/meetings", _writeLimiter);
+router.use(alloyMeetingsRouter);
+
+router.use("/alloy/digest", _readLimiter);
+router.use(alloyDigestRouter);
+
+router.use("/alloy/integrations", _writeLimiter);
+router.use(alloyIntegrationsRouter);
+
+router.use("/alloy/voice", _writeLimiter);
+router.use(alloyVoiceRouter);
 
 router.use("/capital", _writeLimiter);
 router.use(capitalReadinessRouter);
