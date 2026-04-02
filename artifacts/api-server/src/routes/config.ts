@@ -19,14 +19,14 @@ router.get("/config/mapbox-token", configLimit, (req: Request, res: Response) =>
 
   const token = process.env.MAPBOX_ACCESS_TOKEN;
   if (!token) {
-    res.status(404).json({ error: "Mapbox token not configured" });
+    res.json({ configured: false, token: null, message: "MAPBOX_ACCESS_TOKEN is not set." });
     return;
   }
   if (!token.startsWith("pk.")) {
-    res.status(500).json({ error: "MAPBOX_ACCESS_TOKEN must be a public token (pk.*). Secret tokens (sk.*) must not be exposed to clients." });
+    res.json({ configured: false, token: null, message: "A public Mapbox token (pk.*) is required. The current token is not a public token." });
     return;
   }
-  res.json({ token });
+  res.json({ configured: true, token });
 });
 
 export default router;

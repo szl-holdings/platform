@@ -5,6 +5,7 @@ async function fetchMapboxToken(): Promise<string | null> {
     const res = await fetch("/api/config/mapbox-token", { credentials: "include" });
     if (!res.ok) return null;
     const data = await res.json();
+    if (data.configured === false) return null;
     return data.token ?? null;
   } catch {
     return null;

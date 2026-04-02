@@ -30,6 +30,9 @@ export function createApolloClient(
   const httpLink = new HttpLink({
     uri: httpEndpoint,
     credentials: "include",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+    },
   });
 
   const wsLink = new GraphQLWsLink(

@@ -405,7 +405,10 @@ router.get("/intelligence/maritime/chokepoints", intelRateLimit, authMiddleware(
 
 router.get("/intelligence/maritime/weather", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const data = await getCached("marine-weather", 600000, fetchOpenMeteoMarineWeather);
+    const data = await getCached("marine-weather", 600000, fetchOpenMeteoMarineWeather).catch((err) => {
+      logger.warn({ err }, "Intelligence /maritime/weather: upstream fetch and cache both failed — returning empty array");
+      return [] as MarineWeatherItem[];
+    });
     sendSuccess(res, data);
   } catch (err) { handleRouteError(res, err, "Failed to fetch marine weather"); }
 });
@@ -466,7 +469,10 @@ async function fetchAndEnrichSanctions(): Promise<SanctionVessel[]> {
 }
 router.get("/intelligence/maritime/sanctions", intelRateLimit, authMiddleware({ required: false }), async (_req, res) => {
   try {
-    const enriched = await getCached("sanctions-enriched", 3600000, fetchAndEnrichSanctions);
+    const enriched = await getCached("sanctions-enriched", 3600000, fetchAndEnrichSanctions).catch((err) => {
+      logger.warn({ err }, "Intelligence /maritime/sanctions: upstream fetch and cache both failed — returning empty array");
+      return [] as SanctionVessel[];
+    });
     sendSuccess(res, enriched);
   } catch (err) { handleRouteError(res, err, "Failed to fetch sanctions data"); }
 });
@@ -474,7 +480,10 @@ router.get("/intelligence/maritime/sanctions", intelRateLimit, authMiddleware({ 
 router.get("/intelligence/news", intelRateLimit, authMiddleware({ required: false }), async (req, res) => {
   try {
     const category = req.query.category as string | undefined;
-    const data = await getCached("news", 300000, fetchRssNews);
+    const data = await getCached("news", 300000, fetchRssNews).catch((err) => {
+      logger.warn({ err }, "Intelligence /news: upstream fetch and cache both failed — returning empty array");
+      return [] as NewsItem[];
+    });
     const filtered = category ? data.filter(n => n.category === category) : data;
     sendSuccess(res, filtered);
   } catch (err) { handleRouteError(res, err, "Failed to fetch news"); }
