@@ -42,6 +42,7 @@ const InquiriesPage = lazy(() => import("@/pages/inquiries-command"));
 const AgentsPage = lazy(() => import("@/pages/agents-command"));
 const CaseStudyPage = lazy(() => import("@/pages/case-study"));
 const TerraPerricingPage = lazy(() => import("@/pages/pricing"));
+const LenderReport = lazy(() => import("@/pages/lender-report"));
 
 function PageLoader() {
   return (
@@ -92,6 +93,7 @@ function PrivateRouter() {
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route path="/pricing" component={TerraPerricingPage} />
+        <Route path="/lender-report" component={LenderReport} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

@@ -556,3 +556,29 @@ export type TerraCommercialProperty = typeof terraCommercialPropertiesTable.$inf
 export const insertTerraCommercialCompSchema = createInsertSchema(terraCommercialCompsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertTerraCommercialComp = z.infer<typeof insertTerraCommercialCompSchema>;
 export type TerraCommercialComp = typeof terraCommercialCompsTable.$inferSelect;
+
+export const terraActionItemsTable = pgTable("terra_action_items", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").unique(),
+  propertyId: text("property_id").notNull(),
+  issue: text("issue").notNull(),
+  severity: text("severity", { enum: ["critical", "high", "medium", "low"] }).notNull().default("medium"),
+  ownerName: text("owner_name").notNull(),
+  ownerRole: text("owner_role").notNull(),
+  dueDate: text("due_date"),
+  status: text("status", { enum: ["open", "in_progress", "resolved"] }).notNull().default("open"),
+  recommendedAction: text("recommended_action"),
+  resolvedAt: timestamp("resolved_at"),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (t) => [
+  index("terra_action_property_idx").on(t.propertyId),
+  index("terra_action_status_idx").on(t.status),
+  index("terra_action_severity_idx").on(t.severity),
+  index("terra_action_created_idx").on(t.createdAt),
+]);
+
+export const insertTerraActionItemSchema = createInsertSchema(terraActionItemsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTerraActionItem = z.infer<typeof insertTerraActionItemSchema>;
+export type TerraActionItem = typeof terraActionItemsTable.$inferSelect;

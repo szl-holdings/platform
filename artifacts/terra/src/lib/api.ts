@@ -1,5 +1,34 @@
 const API_BASE = "/api";
 
+export async function gqlFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${API_BASE}/graphql`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ query, variables }),
+  });
+  if (!res.ok) throw new Error(`GraphQL request failed: HTTP ${res.status}`);
+  const json = await res.json() as { data?: T; errors?: { message: string }[] };
+  if (json.errors?.length) throw new Error(json.errors[0].message);
+  return json.data as T;
+}
+
+export interface GqlTerraActionItem {
+  id: string;
+  externalId: string | null;
+  propertyId: string;
+  issue: string;
+  severity: string;
+  ownerName: string;
+  ownerRole: string;
+  dueDate: string | null;
+  status: string;
+  recommendedAction: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,

@@ -5,7 +5,7 @@ import { ReactNode, useState, useCallback } from "react";
 import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
-  Bell, Menu, X, Briefcase, Map, Globe, TrendingUp
+  Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 import { useQuery } from "@tanstack/react-query";
@@ -92,8 +92,9 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    title: "Admin",
+    title: "Reporting",
     items: [
+      { href: "/lender-report", label: "Lender & LP Report", icon: BookOpen },
       { href: "/transactions", label: "Approvals", icon: CheckSquare },
       { href: "/broker-overview", label: "Admin", icon: FileText },
     ],

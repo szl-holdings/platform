@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import {
   db,
-  alloyPoliciesTable,
+  alloyLegacyPoliciesTable,
   modelRoutingPoliciesTable,
   costBudgetsTable,
   costEventsTable,
@@ -35,15 +35,15 @@ router.get("/policies", authMiddleware(), async (req: Request, res: Response) =>
     const conditions = [];
     if (!showAll) {
       const isActive = req.query.isActive !== "false";
-      conditions.push(eq(alloyPoliciesTable.isActive, isActive));
+      conditions.push(eq(alloyLegacyPoliciesTable.isActive, isActive));
     }
-    if (policyType) conditions.push(eq(alloyPoliciesTable.policyType, policyType as any));
+    if (policyType) conditions.push(eq(alloyLegacyPoliciesTable.policyType, policyType as any));
 
     const rows = await db
       .select()
-      .from(alloyPoliciesTable)
+      .from(alloyLegacyPoliciesTable)
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(alloyPoliciesTable.priority))
+      .orderBy(desc(alloyLegacyPoliciesTable.priority))
       .limit(limit)
       .offset(offset);
 
@@ -57,7 +57,7 @@ router.get("/policies/:id", authMiddleware(), async (req: Request, res: Response
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
-    const [row] = await db.select().from(alloyPoliciesTable).where(eq(alloyPoliciesTable.id, id));
+    const [row] = await db.select().from(alloyLegacyPoliciesTable).where(eq(alloyLegacyPoliciesTable.id, id));
     if (!row) return sendNotFound(res, "Policy not found");
     return sendSuccess(res, row);
   } catch (err) {
@@ -70,7 +70,7 @@ router.post("/policies", authMiddleware(), requireRole("super_admin", "admin", "
     const { name, description, policyType, scope, rules, priority, complianceFramework } = req.body;
     if (!name || !policyType) return sendBadRequest(res, "name and policyType are required");
     const orgId = req.user?.orgs?.[0]?.orgId ?? null;
-    const [row] = await db.insert(alloyPoliciesTable).values({
+    const [row] = await db.insert(alloyLegacyPoliciesTable).values({
       orgId,
       name,
       description,
@@ -99,7 +99,7 @@ router.patch("/policies/:id", authMiddleware(), requireRole("super_admin", "admi
     if (isActive !== undefined) updates.isActive = isActive;
     if (priority !== undefined) updates.priority = priority;
     if (scope !== undefined) updates.scope = scope;
-    const [row] = await db.update(alloyPoliciesTable).set(updates as any).where(eq(alloyPoliciesTable.id, id)).returning();
+    const [row] = await db.update(alloyLegacyPoliciesTable).set(updates as any).where(eq(alloyLegacyPoliciesTable.id, id)).returning();
     if (!row) return sendNotFound(res, "Policy not found");
     return sendSuccess(res, row);
   } catch (err) {
@@ -111,7 +111,7 @@ router.delete("/policies/:id", authMiddleware(), requireRole("super_admin", "adm
   try {
     const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
-    const [row] = await db.delete(alloyPoliciesTable).where(eq(alloyPoliciesTable.id, id)).returning();
+    const [row] = await db.delete(alloyLegacyPoliciesTable).where(eq(alloyLegacyPoliciesTable.id, id)).returning();
     if (!row) return sendNotFound(res, "Policy not found");
     return sendNoContent(res);
   } catch (err) {

@@ -10,7 +10,7 @@ export interface OnboardingStep {
   description: string;
   targetSelector?: string;
   placement?: "top" | "bottom" | "left" | "right" | "center";
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   action?: {
     label: string;
     href?: string;
@@ -278,7 +278,7 @@ function StepCard({
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: `${accentColor}18` }}
             >
-              {(StepIcon as any)({ className: "w-4.5 h-4.5", style: { color: accentColor } })}
+              <StepIcon className="w-4.5 h-4.5" style={{ color: accentColor }} />
             </div>
           )}
           <div className="flex-1 min-w-0">

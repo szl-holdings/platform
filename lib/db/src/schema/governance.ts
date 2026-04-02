@@ -1,7 +1,7 @@
 import { pgTable, text, serial, timestamp, integer, numeric, boolean, jsonb, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { organizationsTable } from "./organizations";
 
-export const alloyPoliciesTable = pgTable("alloy_policies", {
+export const alloyLegacyPoliciesTable = pgTable("alloy_policies", {
   id: serial("id").primaryKey(),
   orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
@@ -96,7 +96,7 @@ export const costEventsTable = pgTable("cost_events", {
 export const governanceIncidentsTable = pgTable("governance_incidents", {
   id: serial("id").primaryKey(),
   orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
-  policyId: integer("policy_id").references(() => alloyPoliciesTable.id, { onDelete: "set null" }),
+  policyId: integer("policy_id").references(() => alloyLegacyPoliciesTable.id, { onDelete: "set null" }),
   severity: text("severity", {
     enum: ["critical", "high", "medium", "low", "info"],
   }).notNull().default("medium"),
@@ -121,8 +121,8 @@ export const governanceIncidentsTable = pgTable("governance_incidents", {
   index("gov_incidents_created_idx").on(table.createdAt),
 ]);
 
-export type AlloyPolicy = typeof alloyPoliciesTable.$inferSelect;
-export type InsertAlloyPolicy = typeof alloyPoliciesTable.$inferInsert;
+export type AlloyLegacyPolicy = typeof alloyLegacyPoliciesTable.$inferSelect;
+export type InsertAlloyLegacyPolicy = typeof alloyLegacyPoliciesTable.$inferInsert;
 export type ModelRoutingPolicy = typeof modelRoutingPoliciesTable.$inferSelect;
 export type InsertModelRoutingPolicy = typeof modelRoutingPoliciesTable.$inferInsert;
 export type CostBudget = typeof costBudgetsTable.$inferSelect;

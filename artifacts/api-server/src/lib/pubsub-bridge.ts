@@ -16,6 +16,7 @@ export const FIRESTORM_EVENTS = {
 
 export const TERRA_EVENTS = {
   DEAL_UPDATED: "TERRA_DEAL_UPDATED",
+  ACTION_ITEM_UPDATED: "TERRA_ACTION_ITEM_UPDATED",
 } as const;
 
 export const CARLOTA_EVENTS = {
