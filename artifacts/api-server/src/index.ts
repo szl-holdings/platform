@@ -13,6 +13,7 @@ import { startSelfMonitoring, stopSelfMonitoring } from "./lib/self-monitor";
 import { agentScheduler, registerDefaultSchedules } from "./lib/agent-scheduler";
 import { knowledgeStore } from "./lib/knowledge-store";
 import { ensureAlloyTables } from "./lib/alloy-migrations";
+import { ensureAlloyGovernanceTables } from "./lib/alloy-governance-migrations";
 import { ensurePlatformOpsTables } from "./lib/platform-ops-migrations";
 import { ensureLyteDashboardsTable } from "./lib/lyte-dashboard-migrations";
 import { ensureExportJobsTable } from "./lib/export-migrations";
@@ -76,6 +77,7 @@ startSelfMonitoring();
 import { providerHealth } from "./lib/provider-health";
 providerHealth.startActiveProbes();
 ensureAlloyTables()
+  .then(() => ensureAlloyGovernanceTables())
   .then(() => ensurePlatformOpsTables())
   .then(() => ensureLyteDashboardsTable())
   .then(() => ensureExportJobsTable())

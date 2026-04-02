@@ -70,6 +70,11 @@ const AlloyOperatorControl = lazy(() => import("@/alloy/pages/operator-control-c
 const AlloyResearchMode = lazy(() => import("@/alloy/pages/research-mode"));
 const AlloyArtifactStudio = lazy(() => import("@/alloy/pages/artifact-studio"));
 const AlloyBrowserOperator = lazy(() => import("@/alloy/pages/browser-operator"));
+const AlloyPolicyManager = lazy(() => import("@/alloy/pages/policy-manager"));
+const AlloyAdminAnalytics = lazy(() => import("@/alloy/pages/admin-analytics"));
+const AlloyUsageMetering = lazy(() => import("@/alloy/pages/usage-metering"));
+const AlloyCanonicalDemos = lazy(() => import("@/alloy/pages/canonical-demos"));
+const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -332,6 +337,21 @@ function App() {
             </Route>
             <Route path="/alloy/browser">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyBrowserOperator /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/policies">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyPolicyManager /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/admin-analytics">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyAdminAnalytics /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/usage">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyUsageMetering /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/demos">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyCanonicalDemos /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/pilot">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyPilotOnboarding /></AlloyAppPage></Suspense>
             </Route>
 
             {/* ── External platform redirects ── */}

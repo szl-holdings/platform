@@ -128,6 +128,63 @@ export const alloyAuditLogTable = pgTable("platform_audit_log", {
   index("platform_audit_created_idx").on(table.createdAt),
 ]);
 
+export const alloyPoliciesTable = pgTable("platform_alloy_policies", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  kind: text("kind", { enum: ["approval_matrix", "model_routing", "cost_control", "agent_permission", "compliance_template"] }).notNull(),
+  status: text("status", { enum: ["active", "draft", "archived"] }).notNull().default("draft"),
+  rules: jsonb("rules").notNull().default({}),
+  description: text("description"),
+  createdBy: integer("created_by").references(() => usersTable.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("platform_policies_org_idx").on(table.orgId),
+  index("platform_policies_kind_idx").on(table.kind),
+  index("platform_policies_status_idx").on(table.status),
+]);
+
+export const alloyGovernanceIncidentsTable = pgTable("platform_governance_incidents", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  policyId: integer("policy_id").references(() => alloyPoliciesTable.id, { onDelete: "set null" }),
+  workflowRunId: integer("workflow_run_id").references(() => alloyWorkflowRunsTable.id, { onDelete: "set null" }),
+  severity: text("severity", { enum: ["low", "medium", "high", "critical"] }).notNull().default("medium"),
+  type: text("type", { enum: ["policy_violation", "unexpected_result", "user_override", "cost_threshold", "model_blocked"] }).notNull(),
+  description: text("description").notNull(),
+  resolution: text("resolution"),
+  resolvedBy: integer("resolved_by").references(() => usersTable.id, { onDelete: "set null" }),
+  resolvedAt: timestamp("resolved_at"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("platform_incidents_org_idx").on(table.orgId),
+  index("platform_incidents_policy_idx").on(table.policyId),
+  index("platform_incidents_severity_idx").on(table.severity),
+  index("platform_incidents_created_idx").on(table.createdAt),
+]);
+
+export const alloyUsageEventsTable = pgTable("platform_usage_events", {
+  id: serial("id").primaryKey(),
+  orgId: integer("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+  workflowRunId: integer("workflow_run_id").references(() => alloyWorkflowRunsTable.id, { onDelete: "set null" }),
+  eventType: text("event_type", { enum: ["agent_run", "skill_invocation", "artifact_generated", "browser_task", "model_tokens", "approval_request"] }).notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  model: text("model"),
+  agentId: text("agent_id"),
+  skillSlug: text("skill_slug"),
+  costCents: integer("cost_cents").notNull().default(0),
+  billedAt: timestamp("billed_at"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("platform_usage_org_idx").on(table.orgId),
+  index("platform_usage_event_type_idx").on(table.eventType),
+  index("platform_usage_created_idx").on(table.createdAt),
+]);
+
 export const insertAlloyWorkflowSchema = createInsertSchema(alloyWorkflowsTable).omit({ id: true, createdAt: true, updatedAt: true, runCount: true });
 export type InsertAlloyWorkflowPlatform = z.infer<typeof insertAlloyWorkflowSchema>;
 export type AlloyWorkflowPlatform = typeof alloyWorkflowsTable.$inferSelect;
@@ -151,3 +208,15 @@ export type AlloyApprovalPlatform = typeof alloyApprovalsTable.$inferSelect;
 export const insertAlloyAuditLogSchema = createInsertSchema(alloyAuditLogTable).omit({ id: true, createdAt: true });
 export type InsertAlloyAuditLogPlatform = z.infer<typeof insertAlloyAuditLogSchema>;
 export type AlloyAuditLogPlatform = typeof alloyAuditLogTable.$inferSelect;
+
+export const insertAlloyPolicySchema = createInsertSchema(alloyPoliciesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertAlloyPolicy = z.infer<typeof insertAlloyPolicySchema>;
+export type AlloyPolicy = typeof alloyPoliciesTable.$inferSelect;
+
+export const insertAlloyGovernanceIncidentSchema = createInsertSchema(alloyGovernanceIncidentsTable).omit({ id: true, createdAt: true });
+export type InsertAlloyGovernanceIncident = z.infer<typeof insertAlloyGovernanceIncidentSchema>;
+export type AlloyGovernanceIncident = typeof alloyGovernanceIncidentsTable.$inferSelect;
+
+export const insertAlloyUsageEventSchema = createInsertSchema(alloyUsageEventsTable).omit({ id: true, createdAt: true });
+export type InsertAlloyUsageEvent = z.infer<typeof insertAlloyUsageEventSchema>;
+export type AlloyUsageEvent = typeof alloyUsageEventsTable.$inferSelect;

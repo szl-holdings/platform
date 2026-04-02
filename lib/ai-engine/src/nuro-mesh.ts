@@ -114,15 +114,82 @@ export function routeToAgents(query: string): AgentDefinition[] {
   return AGENT_REGISTRY.filter(a => matched.has(a.domain) && a.id !== "alloy");
 }
 
+async function checkGovernanceEnforce(
+  agent: AgentDefinition,
+  model: string,
+  action: string,
+  orgId: number | null,
+  callerUserId: number | null = null,
+  callerRoles: string[] = [],
+): Promise<{ allowed: boolean; hardBlocked?: boolean; requiresApproval?: boolean; approvalLevel?: string; reason?: string }> {
+  if (!orgId) return { allowed: true };
+  try {
+    const ALLOY_TOKEN = process.env.ALLOY_INTERNAL_TOKEN;
+    const BASE_URL = process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}/api-server`
+      : "http://localhost:8080";
+    const resp = await fetch(`${BASE_URL}/alloy/governance/enforce`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Must match the header name in auth middleware (x-internal-token)
+        ...(ALLOY_TOKEN ? { "x-internal-token": ALLOY_TOKEN } : {}),
+      },
+      // Pass caller's identity so /enforce evaluates agent_permission against
+      // the actual end-user's roles, not the super_admin service principal
+      body: JSON.stringify({ orgId, action, model, agentId: agent.id, callerUserId, callerRoles }),
+    });
+    if (!resp.ok) {
+      // Governance auth failure or endpoint error — fail closed for protected orgs
+      return { allowed: false, reason: `Governance enforcement unavailable (HTTP ${resp.status}) — agent run blocked for safety` };
+    }
+    const data = await resp.json() as { allowed: boolean; hardBlocked?: boolean; requiresApproval?: boolean; approvalLevel?: string; violations?: Array<{ reason: string }> };
+    return {
+      allowed: data.allowed && !data.requiresApproval,
+      hardBlocked: data.hardBlocked,
+      requiresApproval: data.requiresApproval,
+      approvalLevel: data.approvalLevel,
+      reason: data.requiresApproval
+        ? `Requires ${data.approvalLevel ?? "manager"}-level approval before execution`
+        : data.violations?.[0]?.reason,
+    };
+  } catch {
+    // Network error — fail closed for protected orgs to prevent governance bypass
+    return { allowed: false, reason: "Governance enforcement unreachable — agent run blocked for safety" };
+  }
+}
+
 export async function callAgent(
   agent: AgentDefinition,
   query: string,
   context: string,
+  options?: { orgId?: number | null; action?: string; callerUserId?: number | null; callerRoles?: string[] },
 ): Promise<AgentCallResult> {
   const startTime = Date.now();
   let response = "";
   let tokensUsed = 0;
   let success = false;
+
+  // Governance enforcement — check model routing + cost controls before calling
+  const enforcement = await checkGovernanceEnforce(
+    agent,
+    agent.preferredModel,
+    options?.action ?? "agent_run",
+    options?.orgId ?? null,
+    options?.callerUserId ?? null,
+    options?.callerRoles ?? [],
+  );
+  if (!enforcement.allowed) {
+    return {
+      agentId: agent.id,
+      agentName: agent.name,
+      response: `[Blocked by governance policy: ${enforcement.reason ?? "Policy enforcement active"}]`,
+      confidence: 0,
+      tokensUsed: 0,
+      latencyMs: Date.now() - startTime,
+      domain: agent.domain,
+    };
+  }
 
   const fullPrompt = `${agent.systemPrompt}\n\n## Shared Context from Nuro Mesh\n${context}\n\n## Query\n${query}\n\nProvide a focused, expert response from your domain perspective. End with a confidence score (0-100) on a new line in format: CONFIDENCE: [score]`;
 
@@ -277,6 +344,10 @@ export class NuroMeshOrchestrator {
     options: {
       preferredAgents?: string[];
       requireValidation?: boolean;
+      orgId?: number | null;
+      action?: string;
+      callerUserId?: number | null;
+      callerRoles?: string[];
     } = {},
   ): Promise<{
     agentResponses: AgentCallResult[];
@@ -296,8 +367,15 @@ export class NuroMeshOrchestrator {
 
     if (targetAgents.length === 0) targetAgents = [AGENT_REGISTRY.find(a => a.id === "beacon")!];
 
+    // Propagate org context AND caller identity so every agent run passes through
+    // governance enforcement against the actual end-user, not the service principal
     const agentResponses = await Promise.all(
-      targetAgents.map(agent => callAgent(agent, query, context))
+      targetAgents.map(agent => callAgent(agent, query, context, {
+        orgId: options.orgId ?? null,
+        action: options.action ?? "orchestrate",
+        callerUserId: options.callerUserId ?? null,
+        callerRoles: options.callerRoles ?? [],
+      }))
     );
 
     const isHighStakes = options.requireValidation || agentResponses.some(r => {

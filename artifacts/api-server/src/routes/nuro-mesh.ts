@@ -137,12 +137,68 @@ function routeToAgents(query: string): AgentDefinition[] {
   return AGENT_REGISTRY.filter(a => matched.has(a.domain) && a.id !== "alloy");
 }
 
+async function checkGovernance(
+  agent: AgentDefinition,
+  orgId: number | null,
+  callerUserId: number | null,
+  callerRoles: string[],
+  action: string,
+): Promise<{ allowed: boolean; reason?: string }> {
+  if (!orgId) return { allowed: true };
+  try {
+    const ALLOY_TOKEN = process.env.ALLOY_INTERNAL_TOKEN;
+    const BASE_URL = process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}/api-server`
+      : "http://localhost:8080";
+    const resp = await fetch(`${BASE_URL}/alloy/governance/enforce`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(ALLOY_TOKEN ? { "x-internal-token": ALLOY_TOKEN } : {}),
+      },
+      body: JSON.stringify({ orgId, action, model: agent.preferredModel, agentId: agent.id, callerUserId, callerRoles }),
+    });
+    if (!resp.ok) return { allowed: false, reason: `Governance check failed (HTTP ${resp.status})` };
+    const data = await resp.json() as { allowed: boolean; requiresApproval?: boolean; violations?: Array<{ reason: string }> };
+    return {
+      allowed: data.allowed && !data.requiresApproval,
+      reason: data.requiresApproval
+        ? "Requires approval before execution"
+        : data.violations?.[0]?.reason,
+    };
+  } catch {
+    return { allowed: false, reason: "Governance enforcement unreachable — blocked for safety" };
+  }
+}
+
 async function callAgent(
   agent: AgentDefinition,
   query: string,
   context: string,
+  opts?: { orgId?: number | null; callerUserId?: number | null; callerRoles?: string[]; action?: string },
 ): Promise<{ agentId: string; agentName: string; response: string; confidence: number; domain: string }> {
   const startTime = Date.now();
+
+  // Governance enforcement: evaluate per-tenant policies for this agent call
+  if (opts?.orgId) {
+    const enforcement = await checkGovernance(
+      agent,
+      opts.orgId,
+      opts.callerUserId ?? null,
+      opts.callerRoles ?? [],
+      opts.action ?? "agent_run",
+    );
+    if (!enforcement.allowed) {
+      return {
+        agentId: agent.id,
+        agentName: agent.name,
+        response: `[Blocked by governance policy: ${enforcement.reason ?? "Policy enforcement active"}]`,
+        confidence: 0,
+        domain: agent.domain,
+      };
+    }
+  }
+
   let response = "";
   let tokensUsed = 0;
   let success = false;
@@ -294,10 +350,13 @@ async function getSharedContext(): Promise<string> {
 }
 
 nueroMeshRouter.post("/nuro-mesh/orchestrate", meshRateLimit, async (req: Request, res: Response) => {
-  const { query, preferredAgents, requireValidation } = req.body as {
+  const { query, preferredAgents, requireValidation, orgId, callerUserId, callerRoles } = req.body as {
     query: string;
     preferredAgents?: string[];
     requireValidation?: boolean;
+    orgId?: number | null;
+    callerUserId?: number | null;
+    callerRoles?: string[];
   };
 
   if (!query?.trim()) {
@@ -329,7 +388,7 @@ nueroMeshRouter.post("/nuro-mesh/orchestrate", meshRateLimit, async (req: Reques
     const agentResponses = await Promise.all(
       targetAgents.map(agent => {
         res.write(`data: ${JSON.stringify({ type: "agent_start", agentId: agent.id, agentName: agent.name })}\n\n`);
-        return callAgent(agent, query, context);
+        return callAgent(agent, query, context, { orgId, callerUserId, callerRoles, action: "orchestrate" });
       })
     );
 
@@ -608,7 +667,8 @@ nueroMeshRouter.post("/nuro-mesh/advisory/run", meshRateLimit, async (req: Reque
     res.write(`data: ${JSON.stringify({ type: "agent_start", agentId: agent.id, agentName: agent.name })}\n\n`);
 
     const context = await getSharedContext();
-    const result = await callAgent(agent, analysis.prompt, context);
+    // Advisory runs are platform-level (no per-tenant governance context)
+    const result = await callAgent(agent, analysis.prompt, context, { action: "advisory_run" });
 
     const scoreMatch = result.response.match(/score[:\s]+(\d+)/i);
     const score = scoreMatch ? parseInt(scoreMatch[1]!) : result.confidence;
