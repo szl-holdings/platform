@@ -7,31 +7,30 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Platform", href: "/platform" },
+  { label: "Design Partners", href: "/design-partners" },
+  { label: "Trust", href: "/trust" },
+  { label: "Investor Story", href: "/investor-story" },
   {
-    label: "Solutions",
-    href: "/solutions",
+    label: "More",
+    href: "/ventures",
     children: [
-      { label: "Aegis — Defense & Intelligence", href: "/solutions/aegis" },
-      { label: "Vessels — Maritime", href: "/solutions/vessels" },
-      { label: "Terra — Real Estate", href: "/solutions/terra" },
-      { label: "Carlota Jo — Advisory", href: "/carlota-jo" },
+      { label: "Platform Map", href: "/ventures" },
+      { label: "Investor Relations", href: "/investor-relations" },
+      { label: "Demo", href: "/demo" },
+      { label: "Docs", href: "/docs" },
     ],
   },
-  { label: "Trust", href: "/trust" },
-  { label: "Docs", href: "/docs" },
-  { label: "Demo", href: "/demo" },
 ];
 
 const NAV_LINKS_MOBILE = [
   { label: "Platform", href: "/platform" },
-  { label: "Solutions", href: "/solutions" },
-  { label: "Aegis", href: "/solutions/aegis" },
-  { label: "Vessels", href: "/solutions/vessels" },
-  { label: "Terra", href: "/solutions/terra" },
-  { label: "Carlota Jo", href: "/carlota-jo" },
-  { label: "Trust Center", href: "/trust" },
-  { label: "Docs", href: "/docs" },
+  { label: "Design Partners", href: "/design-partners" },
+  { label: "Trust", href: "/trust" },
+  { label: "Investor Story", href: "/investor-story" },
+  { label: "Investor Relations", href: "/investor-relations" },
+  { label: "Platform Map", href: "/ventures" },
   { label: "Demo", href: "/demo" },
+  { label: "Docs", href: "/docs" },
   { label: "Contact", href: "/contact" },
 ];
 

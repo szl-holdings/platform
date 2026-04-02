@@ -94,7 +94,7 @@ export default function InvestorStoryPage() {
       <main>
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#4a90b8]/30 bg-[#4a90b8]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]">
               <Layers3 className="h-3.5 w-3.5" />
               Investor narrative
             </div>
@@ -148,9 +148,9 @@ export default function InvestorStoryPage() {
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-3xl border border-amber-300/15 bg-amber-300/10 p-6">
-                <div className="mb-4 inline-flex rounded-xl border border-amber-100/15 bg-black/20 p-3">
-                  <Radar className="h-5 w-5 text-amber-100" />
+              <div className="rounded-3xl border border-[#d4a054]/25 bg-[#d4a054]/10 p-6">
+                <div className="mb-4 inline-flex rounded-xl border border-[#d4a054]/20 bg-black/20 p-3">
+                  <Radar className="h-5 w-5 text-[#d4a054]" />
                 </div>
                 <h3 className="text-xl font-semibold text-white">Lyte</h3>
                 <p className="mt-3 text-sm leading-7 text-white/78">
@@ -158,9 +158,9 @@ export default function InvestorStoryPage() {
                   drift, operational latency, and next-best action in one place.
                 </p>
               </div>
-              <div className="rounded-3xl border border-cyan-300/15 bg-cyan-300/10 p-6">
-                <div className="mb-4 inline-flex rounded-xl border border-cyan-100/15 bg-black/20 p-3">
-                  <Workflow className="h-5 w-5 text-cyan-100" />
+              <div className="rounded-3xl border border-[#4a90b8]/25 bg-[#4a90b8]/10 p-6">
+                <div className="mb-4 inline-flex rounded-xl border border-[#4a90b8]/20 bg-black/20 p-3">
+                  <Workflow className="h-5 w-5 text-[#4a90b8]" />
                 </div>
                 <h3 className="text-xl font-semibold text-white">Alloy</h3>
                 <p className="mt-3 text-sm leading-7 text-white/78">
@@ -202,7 +202,7 @@ export default function InvestorStoryPage() {
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               {nowThen.map((item) => (
                 <div key={item.label} className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                  <p className="text-xs uppercase tracking-[0.22em] text-cyan-100/65">{item.label}</p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-[#4a90b8]">{item.label}</p>
                   <h3 className="mt-3 text-lg font-semibold text-white">{item.title}</h3>
                   <p className="mt-3 text-sm leading-7 text-white/72">{item.body}</p>
                 </div>
@@ -259,7 +259,7 @@ export default function InvestorStoryPage() {
                   "Make proof, pilot readiness, and buyer clarity the standard for what becomes a first-class surface.",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm leading-6 text-white/80">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
                     <span>{item}</span>
                   </li>
                 ))}

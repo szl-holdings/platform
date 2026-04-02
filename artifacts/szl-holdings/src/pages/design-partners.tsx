@@ -30,7 +30,7 @@ const fit = [
 
 export default function DesignPartnersPage() {
   usePageMeta({
-    title: "Design Partners — SZL Holdings",
+    title: "Design Partners \u2014 SZL Holdings",
     description:
       "Work directly with SZL to shape Lyte + Alloy around a high-friction operating workflow.",
     canonical: "https://szlholdings.com/design-partners",
@@ -42,7 +42,7 @@ export default function DesignPartnersPage() {
       <main>
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/15 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#4a90b8]/20 bg-[#4a90b8]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]">
               <Users className="h-3.5 w-3.5" />
               Design Partner Program
             </div>
@@ -83,7 +83,7 @@ export default function DesignPartnersPage() {
                     key={step.title}
                     className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
                   >
-                    <div className="mb-4 inline-flex rounded-2xl border border-emerald-300/15 bg-emerald-300/10 p-3 text-emerald-100">
+                    <div className="mb-4 inline-flex rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/10 p-3 text-[#d4a054]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <h2 className="text-xl font-semibold text-white">{step.title}</h2>
@@ -104,7 +104,7 @@ export default function DesignPartnersPage() {
               <ul className="mt-5 space-y-3">
                 {fit.map((item) => (
                   <li key={item} className="text-sm leading-7 text-white/78">
-                    • {item}
+                    \u2022 {item}
                   </li>
                 ))}
               </ul>

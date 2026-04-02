@@ -46,10 +46,10 @@ const materials = [
 ];
 
 const milestones = [
-  "3–5 serious lender conversations",
+  "3\u20135 serious lender conversations",
   "20+ target investor conversations",
-  "3–5 design-partner prospects in pipeline",
-  "1–2 paid pilots or structured discovery engagements",
+  "3\u20135 design-partner prospects in pipeline",
+  "1\u20132 paid pilots or structured discovery engagements",
 ];
 
 export default function InvestorRelationsPage() {
@@ -61,7 +61,7 @@ export default function InvestorRelationsPage() {
   const [error, setError] = useState("");
 
   usePageMeta({
-    title: "Investor Relations — SZL Holdings",
+    title: "Investor Relations \u2014 SZL Holdings",
     description:
       "Capital and partner materials for SZL Holdings, centered on the Lyte + Alloy raise story.",
     canonical: "https://szlholdings.com/investor-relations",
@@ -83,7 +83,6 @@ export default function InvestorRelationsPage() {
           source: "investor_relations",
           name: company.trim() || "Investor / Capital Inquiry",
           email: email.trim(),
-          company: company.trim() || undefined,
           subject: "Capital / Investor Relations Inquiry",
           message:
             message.trim() ||
@@ -112,7 +111,7 @@ export default function InvestorRelationsPage() {
       <main>
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8 lg:py-28">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/25 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
               <FileText className="h-3.5 w-3.5" />
               Investor relations
             </div>
@@ -164,7 +163,7 @@ export default function InvestorRelationsPage() {
                     <ul className="mt-4 space-y-2">
                       {path.bullets.map((bullet) => (
                         <li key={bullet} className="flex items-start gap-3 text-sm leading-6 text-white/78">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#d4a054]" />
                           <span>{bullet}</span>
                         </li>
                       ))}
@@ -224,7 +223,7 @@ export default function InvestorRelationsPage() {
           <div className="mx-auto max-w-6xl px-6 py-20 lg:px-8">
             <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#4a90b8]/25 bg-[#4a90b8]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#4a90b8]">
                   <Workflow className="h-3.5 w-3.5" />
                   Request materials
                 </div>
@@ -236,10 +235,10 @@ export default function InvestorRelationsPage() {
                   story. This form routes the request into the same operating pipeline as the rest of
                   the commercial workflow.
                 </p>
-                <div className="mt-6 rounded-2xl border border-amber-300/15 bg-amber-300/10 p-5">
+                <div className="mt-6 rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/10 p-5">
                   <div className="flex items-start gap-3">
-                    <Radar className="mt-1 h-5 w-5 shrink-0 text-amber-100" />
-                    <p className="text-sm leading-7 text-amber-50/90">
+                    <Radar className="mt-1 h-5 w-5 shrink-0 text-[#d4a054]" />
+                    <p className="text-sm leading-7 text-white/80">
                       Keep the ask simple: Lyte + Alloy now, expansion lanes later, proof and customer
                       truth as the filter for everything else.
                     </p>
@@ -249,7 +248,7 @@ export default function InvestorRelationsPage() {
 
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 lg:p-8">
                 {sent ? (
-                  <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/10 p-6">
+                  <div className="rounded-2xl border border-[#d4a054]/20 bg-[#d4a054]/10 p-6">
                     <p className="text-lg font-semibold text-white">Request received.</p>
                     <p className="mt-2 text-sm leading-7 text-white/80">
                       We will follow up with the relevant materials and next step.
@@ -293,7 +292,7 @@ export default function InvestorRelationsPage() {
                         placeholder="Bank / SBA conversation, angel materials, design-partner proposal, etc."
                       />
                     </div>
-                    {error ? <p className="text-sm text-red-300">{error}</p> : null}
+                    {error ? <p className="text-sm text-[#c45a4a]">{error}</p> : null}
                     <button
                       type="submit"
                       disabled={!canSubmit || submitting}

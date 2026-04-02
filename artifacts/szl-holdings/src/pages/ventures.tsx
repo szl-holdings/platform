@@ -8,16 +8,14 @@ const core = [
   {
     name: "Lyte",
     type: "Business Observability Platform",
-    stage: "Tier 1 — Flagship",
-    readiness: "Functional Alpha",
+    stage: "Core now",
     href: "/lyte-command-center/",
     body: "The market-facing software wedge: execution visibility, risk surfacing, ownership clarity, and next action in one command surface.",
   },
   {
     name: "Alloy",
     type: "Execution Fabric",
-    stage: "Tier 1 — Flagship",
-    readiness: "Functional Alpha",
+    stage: "Core now",
     href: "/alloy/",
     body: "The shared engine beneath the product: signals, workflow orchestration, routing, audit trail, and governed action.",
   },
@@ -27,32 +25,28 @@ const lanes = [
   {
     icon: Ship,
     name: "Vessels",
-    type: "Tier 2 — Pilot-Adjacent",
-    readiness: "Functional Alpha",
+    type: "Expansion lane",
     href: "/vessels/",
     body: "A future vertical application for maritime intelligence once the core narrative has earned the right to expand.",
   },
   {
     icon: ShieldCheck,
-    name: "Aegis",
-    type: "Tier 3 — Staged",
-    readiness: "Functional Alpha",
+    name: "Aegis / Firestorm",
+    type: "Expansion lane",
     href: "/firestorm/",
     body: "A command surface for security, incident, and managed operations environments where observability and execution discipline matter.",
   },
   {
     icon: Building2,
     name: "Terra",
-    type: "Tier 3 — Staged",
-    readiness: "Functional Alpha",
+    type: "Expansion lane",
     href: "/terra/",
     body: "A real-estate intelligence lane for markets where ownership complexity, signal fragmentation, and process delay create opportunity.",
   },
   {
     icon: BriefcaseBusiness,
     name: "Carlota Jo",
-    type: "Tier 3 — Staged",
-    readiness: "Functional Alpha",
+    type: "Services lane",
     href: "/carlota-jo/",
     body: "A premium advisory and service brand that can produce near-term revenue and high-trust relationships around the platform.",
   },
@@ -60,7 +54,7 @@ const lanes = [
 
 export default function VenturesPage() {
   usePageMeta({
-    title: "Platform Map — SZL Holdings",
+    title: "Platform Map \u2014 SZL Holdings",
     description:
       "The focused platform map for SZL Holdings: Lyte and Alloy as the commercial wedge, with additional lanes staged as expansion value.",
     canonical: "https://szlholdings.com/ventures",
@@ -88,7 +82,7 @@ export default function VenturesPage() {
 
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-100">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d4a054]/25 bg-[#d4a054]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#d4a054]">
               <Radar className="h-3.5 w-3.5" />
               Commercial focus
             </div>
@@ -111,10 +105,7 @@ export default function VenturesPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-white/55">{item.type}</p>
-                    <p className="mt-3 inline-block rounded border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300/80">
-                      {item.readiness}
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-white/72">{item.body}</p>
+                    <p className="mt-4 text-sm leading-7 text-white/72">{item.body}</p>
                   </a>
                 );
               })}
@@ -144,10 +135,7 @@ export default function VenturesPage() {
                     </div>
                     <h3 className="text-lg font-semibold text-white">{item.name}</h3>
                     <p className="mt-1 text-sm text-white/55">{item.type}</p>
-                    <p className="mt-3 inline-block rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
-                      {item.readiness}
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-white/72">{item.body}</p>
+                    <p className="mt-4 text-sm leading-7 text-white/72">{item.body}</p>
                   </a>
                 );
               })}
