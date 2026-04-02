@@ -11,7 +11,6 @@ import {
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 interface AppObs {
   appSlug: string;
@@ -28,7 +27,7 @@ function useEcosystemObs() {
   return useQuery<{ portfolioScore: number; apps: AppObs[]; timestamp: string }>({
     queryKey: ["analytics-obs"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/observability`);
+      const res = await fetch("/api/observability");
       if (!res.ok) throw new Error("unavailable");
       return res.json();
     },

@@ -10,7 +10,7 @@ import {
 import { cn } from "@workspace/shared-ui/utils";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = BASE.replace(/\/[^/]+$/, "/api");
+const API_BASE = "/api";
 
 function fetchJson(path: string) {
   return fetch(`${API_BASE}${path}`).then(r => r.json()).then(d => d.data ?? d);

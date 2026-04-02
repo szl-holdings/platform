@@ -2,16 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { FileText, Search, Filter, AlertTriangle, User, Clock, Shield, Zap, Download, Calendar, X } from "lucide-react";
 import { useState } from "react";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const r = await fetch(`${BASE}/api${path}`);
+  const r = await fetch(`/api${path}`);
   if (!r.ok) throw new Error(`${r.status}`);
   return r.json();
 }
 
 async function triggerExport(format: "csv" | "pdf", filters: Record<string, string>) {
-  const r = await fetch(`${BASE}/api/exports/audit-log`, {
+  const r = await fetch("/api/exports/audit-log", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ format, ...filters }),

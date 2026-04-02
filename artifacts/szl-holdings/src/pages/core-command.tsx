@@ -29,7 +29,6 @@ function useCountUp(target: number, duration = 1200, enabled = true) {
   return value;
 }
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 interface CoreMetrics {
   terra: {
@@ -285,7 +284,7 @@ export default function CoreCommandCenter() {
   const { data: metrics, isLoading: metricsLoading, refetch } = useQuery<CoreMetrics>({
     queryKey: ["core-metrics"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/core/metrics`);
+      const res = await fetch("/api/core/metrics");
       if (!res.ok) throw new Error("Failed");
       const j = await res.json();
       return j.data;
@@ -296,7 +295,7 @@ export default function CoreCommandCenter() {
   const { data: health, isLoading: healthLoading } = useQuery<CoreHealth>({
     queryKey: ["core-health"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/core/health`);
+      const res = await fetch("/api/core/health");
       if (!res.ok) throw new Error("Failed");
       const j = await res.json();
       return j.data;
@@ -307,7 +306,7 @@ export default function CoreCommandCenter() {
   const { data: recsData, isLoading: recsLoading } = useQuery<{ data: CoreMetrics["alloy"]["recent_recommendations"]; meta: { total: number } }>({
     queryKey: ["core-recs-tab"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/core/recommendations?limit=10`);
+      const res = await fetch("/api/core/recommendations?limit=10");
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
@@ -317,7 +316,7 @@ export default function CoreCommandCenter() {
   const { data: auditData, isLoading: auditLoading } = useQuery<{ data?: unknown[]; items?: unknown[] }>({
     queryKey: ["audit-tab"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/audit?limit=10`);
+      const res = await fetch("/api/audit?limit=10");
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },

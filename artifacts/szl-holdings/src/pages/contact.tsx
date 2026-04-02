@@ -7,8 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API = `${BASE}/api`;
+const API = "/api";
 
 type InquiryType = "design-partner" | "pilot" | "advisory" | "investor" | "general";
 

@@ -16,8 +16,7 @@ import { CapitalReadinessOS } from "@/components/CapitalReadinessOS";
 import { CertificationReadinessOS } from "@/components/CertificationReadinessOS";
 import { CAPITAL_DOCUMENTS, getDocumentsByChannel } from "@/data/capital-arsenal";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API = `${BASE}/api`;
+const API = "/api";
 
 const DEFAULT_PIN = import.meta.env.VITE_ADMIN_PIN ?? "";
 

@@ -8,8 +8,7 @@ import {
 import { Link, useRoute } from "wouter";
 import { cn } from "@/lib/utils";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API = `${BASE}/api`;
+const API = "/api";
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
   const res = await fetch(`${API}${path}`, {

@@ -5,7 +5,7 @@ import { cn } from "@workspace/shared-ui/utils";
 import { DataStateBadge } from "@workspace/shared-ui";
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = BASE.replace(/\/[^/]+$/, "/api");
+const API_BASE = "/api";
 
 async function apiFetch(path: string) {
   const r = await fetch(`${API_BASE}${path}`, { headers: { Accept: "application/json" } });

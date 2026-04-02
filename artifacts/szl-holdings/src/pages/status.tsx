@@ -4,7 +4,6 @@ import { CheckCircle, AlertTriangle, XCircle, Clock, RefreshCw, Bell, ChevronDow
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 interface ServiceStatus {
   id: string;
@@ -233,7 +232,7 @@ export default function StatusPage() {
   const fetchStatus = async (refresh = false) => {
     if (refresh) setRefreshing(true);
     try {
-      const res = await fetch(`${BASE}/api/public/status`);
+      const res = await fetch("/api/public/status");
       if (!res.ok) throw new Error("Failed to load");
       const json = await res.json() as StatusData;
       setData(json);
@@ -256,7 +255,7 @@ export default function StatusPage() {
     setSubState("loading");
     setSubError("");
     try {
-      const res = await fetch(`${BASE}/api/public/status/subscribe`, {
+      const res = await fetch("/api/public/status/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

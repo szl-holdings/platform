@@ -8,8 +8,7 @@ import { DataStateBadge } from "@/components/DataStateBadge";
 import { usePageMeta } from "@/hooks/usePageMeta";
 import { toast } from "sonner";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API_BASE = `${BASE}/api`;
+const API_BASE = "/api";
 
 interface DemoStep {
   id: string;

@@ -104,7 +104,7 @@ const FLAG_STYLES: Record<string, { color: string; label: string }> = {
 };
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API = BASE.replace(/\/[^/]+$/, "/api");
+const API = "/api";
 
 export default function TerraIntelligence() {
   const qc = useQueryClient();

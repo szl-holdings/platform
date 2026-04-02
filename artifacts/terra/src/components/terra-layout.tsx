@@ -65,7 +65,7 @@ const TERRA_ONBOARDING_CONFIG: OnboardingConfig = {
 };
 
 const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API = BASE.replace(/\/[^/]+$/, "/api");
+const API = "/api";
 
 const NAV_SECTIONS = [
   {

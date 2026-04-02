@@ -11,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 const apps = [
   {
@@ -144,7 +143,7 @@ function useEcosystemHealth() {
   return useQuery<ObservabilityResponse>({
     queryKey: ["ecosystem-health"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/observability`);
+      const res = await fetch("/api/observability");
       if (!res.ok) throw new Error("health unavailable");
       return res.json();
     },

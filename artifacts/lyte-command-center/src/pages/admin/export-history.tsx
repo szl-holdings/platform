@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Download, Clock, User, AlertTriangle, CheckCircle, XCircle, Loader, Calendar, Database, FileText, FileSpreadsheet } from "lucide-react";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const r = await fetch(`${BASE}/api${path}`);
+  const r = await fetch(`/api${path}`);
   if (!r.ok) throw new Error(`${r.status}`);
   return r.json();
 }
