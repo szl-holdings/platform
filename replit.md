@@ -1,7 +1,14 @@
 # SZL Holdings Platform
 
 ## Overview
-The SZL Holdings Platform is a pnpm monorepo designed to provide command and intelligence systems across various sectors including maritime, cybersecurity, AI, real estate, and enterprise operations. It integrates five product platforms (Lyte, Vessels, Aegis, Terra, Carlota Jo), a parent company site (SZL Holdings), and a founder identity site (Stephen Lutar). The platform uses a common PostgreSQL database, authentication system, and a command-grade design system to deliver specialized solutions for business observability, maritime intelligence, unified defense, real estate portfolio management, and UHNW residential advisory.
+The SZL Holdings Platform is a pnpm monorepo building **Lyte**, a business observability platform, powered by **Alloy**, its execution fabric and audit layer. The broader ecosystem includes five product platforms (Lyte, Vessels, Aegis, Terra, Carlota Jo), a parent company site (SZL Holdings), and a founder identity site (Stephen Lutar). **Lyte + Alloy is the commercial wedge**; all other platforms are staged expansion lanes. The platform uses a common PostgreSQL database, authentication system, and a command-grade design system.
+
+## Company Narrative (Current)
+- **Lyte** = market-facing software wedge (business observability)
+- **Alloy** = execution fabric / workflow / signal / routing / audit engine
+- **Vessels / Aegis / Terra / Carlota Jo** = staged expansion lanes and option value
+- The public site (SZL Holdings) leads with Lyte + Alloy as the focused capital story
+- Navigation: Platform > Design Partners > Trust > Investor Story > More (Platform Map, IR, Demo, Docs)
 
 ## User Preferences
 I prefer detailed explanations.
