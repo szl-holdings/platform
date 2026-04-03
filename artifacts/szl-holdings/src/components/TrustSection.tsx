@@ -2,24 +2,24 @@ import { m } from "framer-motion";
 
 const credibilityBlocks = [
   {
-    label: "Capital deployed",
-    value: "$180M+",
-    description: "Across six operational technology platforms since 2022.",
+    label: "Architecture philosophy",
+    value: "Signal-first",
+    description: "Lyte and Alloy are designed around the signal-to-action pipeline — not dashboards bolted onto existing workflow tools.",
   },
   {
-    label: "Platforms live",
-    value: "6",
-    description: "Maritime, intelligence, advisory, security, and AI platforms fully operational.",
-  },
-  {
-    label: "Market reach",
-    value: "3 continents",
-    description: "Clients and operations spanning North America, Europe, and Asia-Pacific.",
-  },
-  {
-    label: "Operational model",
+    label: "Execution model",
     value: "Founder-led",
-    description: "Principals with direct operating accountability across every platform.",
+    description: "Stephen Lutar operates directly across every platform. No layers of account management between the founder and the work.",
+  },
+  {
+    label: "Audit posture",
+    value: "Built in",
+    description: "Governance, audit trail, and accountability are core architecture — not compliance add-ons applied retroactively.",
+  },
+  {
+    label: "Design stage",
+    value: "Design-partner",
+    description: "Lyte + Alloy is in active design-partner mode. Purpose-built for operators who want to co-develop the platform with direct founder access.",
   },
 ];
 
@@ -46,7 +46,7 @@ export function TrustSection() {
             textTransform: "uppercase",
             color: "hsl(210,5%,46%)",
             marginBottom: "1rem",
-          }}>Credentials</span>
+          }}>Operating posture</span>
           <h2 style={{
             fontSize: "clamp(1.75rem,3.5vw,2.5rem)",
             fontWeight: "700",
@@ -54,9 +54,9 @@ export function TrustSection() {
             lineHeight: "1.12",
             color: "hsl(38,12%,94%)",
             marginBottom: "0.75rem",
-          }}>Built for enterprise scale</h2>
+          }}>Built differently by design</h2>
           <p style={{ fontSize: "1.0625rem", color: "hsl(210,5%,58%)", lineHeight: "1.65", maxWidth: "36rem" }}>
-            SZL Holdings platforms are designed for organisations where reliability, security, and accountability are non-negotiable.
+            Lyte and Alloy are not built for the demo — they are built for the operator. The architecture reflects that.
           </p>
         </m.div>
 
@@ -88,7 +88,7 @@ export function TrustSection() {
                 marginBottom: "0.75rem",
               }}>{b.label}</p>
               <p style={{
-                fontSize: "clamp(1.75rem,3.5vw,2.25rem)",
+                fontSize: "clamp(1.25rem,2.5vw,1.625rem)",
                 fontWeight: "700",
                 letterSpacing: "-0.025em",
                 lineHeight: "1.1",

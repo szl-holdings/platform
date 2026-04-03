@@ -3,11 +3,8 @@ import {
   ArrowRight,
   Radar,
   Workflow,
-  ShieldCheck,
-  Building2,
-  Ship,
-  BriefcaseBusiness,
   CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -35,30 +32,44 @@ const customerProblems = [
   },
 ];
 
-const lanes = [
+const liveItems = [
   {
-    icon: Ship,
+    name: "Lyte command surface",
+    desc: "Execution risk surfacing, ownership tracking, workflow visibility. Active in design-partner mode.",
+    stage: "Live — design partners",
+  },
+  {
+    name: "Alloy execution fabric",
+    desc: "Signal routing, workflow orchestration, audit trail. The operational layer beneath Lyte.",
+    stage: "Live — design partners",
+  },
+  {
+    name: "Carlota Jo advisory",
+    desc: "Premium advisory and residential operations services. Available for qualified engagements.",
+    stage: "Live — accepting clients",
+  },
+];
+
+const roadmapItems = [
+  {
+    name: "Lyte commercial pilot",
+    desc: "Paid pilot programme for teams ready to instrument one real workflow.",
+    stage: "Opening — 2026",
+  },
+  {
     name: "Vessels",
-    stage: "Expansion lane",
-    body: "A future maritime intelligence application built on the same operating logic once the core wedge is commercially proven.",
+    desc: "Maritime intelligence application on the same operating spine. Prototyped. Not yet market-facing.",
+    stage: "Expansion — post-wedge",
   },
   {
-    icon: ShieldCheck,
     name: "Aegis / Firestorm",
-    stage: "Expansion lane",
-    body: "A security and command surface for high-consequence environments where observability and execution discipline matter.",
+    desc: "Security and command surface for high-consequence environments. Architecture ready, go-to-market later.",
+    stage: "Expansion — post-wedge",
   },
   {
-    icon: Building2,
     name: "Terra",
-    stage: "Expansion lane",
-    body: "A real-estate intelligence workflow application for a data-rich, execution-poor operating environment.",
-  },
-  {
-    icon: BriefcaseBusiness,
-    name: "Carlota Jo",
-    stage: "Services lane",
-    body: "A premium advisory and services brand that can create near-term revenue and high-trust relationships around the platform.",
+    desc: "Real-estate intelligence for markets where process latency and signal fragmentation create opportunity.",
+    stage: "Expansion — post-wedge",
   },
 ];
 
@@ -80,11 +91,12 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#070a10] text-white">
       <SiteNav />
       <main>
+        {/* Hero */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">
               <Radar className="h-3.5 w-3.5" />
-              Focused company narrative
+              Design-partner stage
             </div>
             <div className="grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
               <div>
@@ -104,29 +116,23 @@ export default function HomePage() {
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Link
-                    href="/investor-story"
+                    href="/contact"
                     className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
                   >
-                    See the investor story
+                    Request a design-partner session
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
-                    href="/investor-relations"
+                    href="/investor-story"
                     className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
                   >
-                    Investor relations
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-2 rounded-xl border border-amber-300/20 bg-amber-300/10 px-5 py-3 text-sm font-semibold text-amber-100 transition hover:bg-amber-300/15"
-                  >
-                    Request a meeting
+                    See the investor story
                   </Link>
                 </div>
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-2xl shadow-black/30">
-                <p className="text-xs uppercase tracking-[0.24em] text-white/45">What changed</p>
+                <p className="text-xs uppercase tracking-[0.24em] text-white/45">The focused wedge</p>
                 <ul className="mt-4 space-y-3">
                   {proofPoints.map((point) => (
                     <li key={point} className="flex items-start gap-3 text-sm leading-6 text-white/80">
@@ -136,10 +142,9 @@ export default function HomePage() {
                   ))}
                 </ul>
                 <div className="mt-6 rounded-2xl border border-[#4a90b8]/25 bg-[#4a90b8]/10 p-4">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#4a90b8]">Raise story</p>
+                  <p className="text-xs uppercase tracking-[0.22em] text-[#4a90b8]">Stage</p>
                   <p className="mt-2 text-sm leading-6 text-white/75">
-                    Lead with one software wedge now. Present the rest of the ecosystem as expansion
-                    value, not present-tense go-to-market sprawl.
+                    Design-partner mode. Working directly with operators to validate the command model before a formal go-to-market.
                   </p>
                 </div>
               </div>
@@ -147,6 +152,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Problem */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
             <div className="max-w-2xl">
@@ -169,6 +175,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Core wedge */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
             <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -210,6 +217,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Who it's for */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
             <div className="max-w-2xl">
@@ -228,68 +236,131 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Live vs Roadmap — honest status section */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Expansion logic</p>
+            <div className="max-w-2xl mb-10">
+              <p className="text-xs uppercase tracking-[0.24em] text-white/45">Honest status</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                The rest of the ecosystem becomes option value.
+                What's live. What's next.
               </h2>
-              <p className="mt-4 text-sm leading-7 text-white/72">
-                These lanes matter, but they should be presented as expansion paths powered by the
-                same underlying operating system rather than as simultaneous day-one go-to-market
-                motions.
+              <p className="mt-4 text-sm leading-7 text-white/65">
+                SZL Holdings operates with a focused wedge now and a disciplined expansion sequence later. This is what's real today, and what's on the roadmap.
               </p>
             </div>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {lanes.map((lane) => {
-                const Icon = lane.icon;
-                return (
-                  <div key={lane.name} className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-                    <div className="mb-4 inline-flex rounded-xl border border-white/10 bg-black/20 p-3">
-                      <Icon className="h-5 w-5 text-white/80" />
+            <div className="grid gap-10 lg:grid-cols-2">
+              {/* Live now */}
+              <div>
+                <div className="mb-6 flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Live now</p>
+                </div>
+                <div className="space-y-4">
+                  {liveItems.map((item) => (
+                    <div key={item.name} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-base font-semibold text-white">{item.name}</h3>
+                          <p className="mt-1.5 text-sm leading-6 text-white/60">{item.desc}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300 whitespace-nowrap">
+                          {item.stage}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold text-white">{lane.name}</h3>
-                      <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55">
-                        {lane.stage}
-                      </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* On roadmap */}
+              <div>
+                <div className="mb-6 flex items-center gap-2">
+                  <Clock className="h-3.5 w-3.5 text-white/35" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/45">On the roadmap</p>
+                </div>
+                <div className="space-y-4">
+                  {roadmapItems.map((item) => (
+                    <div key={item.name} className="rounded-2xl border border-white/[0.06] bg-white/[0.01] p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-base font-semibold text-white/70">{item.name}</h3>
+                          <p className="mt-1.5 text-sm leading-6 text-white/40">{item.desc}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40 whitespace-nowrap">
+                          {item.stage}
+                        </span>
+                      </div>
                     </div>
-                    <p className="mt-3 text-sm leading-7 text-white/72">{lane.body}</p>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
+        {/* Founder / company separation */}
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+            <div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-white/45">The company</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                  SZL Holdings
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-white/65 max-w-lg">
+                  A focused technology holding company. The entity that owns, operates, and funds the product platforms. Not itself a product or a brand you sell into — it's the structure beneath the software.
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/45">
+                  Washington D.C. · London · Singapore
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.24em] text-white/45">The founder</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                  Stephen Lutar
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-white/65 max-w-lg">
+                  Founder and operator. Stephen builds and runs the platforms directly — no management layer between him and the work. Design-partner sessions, pilot conversations, and investor calls are all with Stephen personally.
+                </p>
+                <div className="mt-5">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:bg-white/5"
+                  >
+                    Reach Stephen directly
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
         <section>
           <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
             <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-8 lg:p-10">
               <p className="text-xs uppercase tracking-[0.24em] text-white/45">Next step</p>
               <h2 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-white">
-                Raise and sell the company as one focused wedge, then let expansion earn the right to
-                happen.
+                Design-partner sessions are open. One workflow, one founder, real results.
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72">
-                Use Lyte + Alloy for the near-term capital narrative, design-partner motion, and
-                website copy. Keep the broader ecosystem visible, but subordinate it to a disciplined
-                sequence.
+                We work directly with a small number of operators to instrument one workflow end-to-end. If you have a real execution problem worth solving, reach out directly.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
+                >
+                  Request a session
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
                 <Link
                   href="/ventures"
                   className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
                 >
                   View platform map
-                </Link>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-                >
-                  Start a conversation
-                  <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>

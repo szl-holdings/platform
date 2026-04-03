@@ -342,22 +342,22 @@ function ServiceLanes() {
   );
 }
 
-function PlatformIntelligence() {
-  const capabilities = [
+function WorkingStandard() {
+  const standards = [
     {
       icon: Activity,
-      title: "Market signal monitoring",
-      desc: "Continuous pattern detection across sectors your business operates in — surfaced as structured briefings, not raw data."
+      title: "Evidence before opinion",
+      desc: "Every recommendation is grounded in observable fact. Rosa documents the evidence, the logic, and the alternatives considered — not just the conclusion."
     },
     {
       icon: Layers,
-      title: "Competitive stack analysis",
-      desc: "Positioning and capability mapping of competitors and adjacent players, updated as the market moves."
+      title: "Structured over reactive",
+      desc: "Engagements are designed around systems, not responses. The goal is a household or advisory relationship that holds its standard without your constant attention."
     },
     {
       icon: FileText,
-      title: "Structured decision support",
-      desc: "Every recommendation is traceable. We document the evidence, the logic, and the alternatives considered."
+      title: "Transparent record-keeping",
+      desc: "You receive a clear record of every decision, action, and outcome. Nothing is lost between conversations."
     },
   ];
 
@@ -372,27 +372,27 @@ function PlatformIntelligence() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>Platform Intelligence</p>
+            <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-4" style={{ color: "var(--color-gold)" }}>Working Standard</p>
             <h2 className="font-serif text-3xl lg:text-4xl font-light leading-tight mb-6" style={{ color: "var(--color-ink-900)" }}>
-              Advisory backed by<br />
-              <span style={{ fontStyle: "italic" }}>institutional-grade intelligence.</span>
+              Advisory that shows<br />
+              <span style={{ fontStyle: "italic" }}>its reasoning.</span>
             </h2>
             <p className="text-[14px] font-light leading-relaxed mb-6" style={{ color: "var(--color-ink-500)" }}>
-              Carlota Jo advisory is informed by the same intelligence infrastructure built for enterprise command centres — not instinct alone. Your engagements draw on structured data, pattern detection, and decision-grade analysis.
+              Rosa does not operate on instinct alone. Every engagement is structured, documented, and traceable. You should be able to understand exactly why a recommendation was made and what evidence supports it.
             </p>
             <p className="text-[13px] font-light leading-relaxed" style={{ color: "var(--color-ink-400)" }}>
-              This means briefings that arrive with evidence. Recommendations that show their reasoning. And a consulting relationship that gets sharper, not more generic, over time.
+              This means briefings that arrive with context. Recommendations that show their logic. And a relationship that builds compounding knowledge of your environment over time.
             </p>
           </motion.div>
 
           <div className="lg:col-span-7 space-y-0">
             <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "var(--color-stone-200)" }}>
               <div className="px-6 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid var(--color-stone-200)", background: "var(--color-stone-50)" }}>
-                <span className="text-[9px] tracking-[0.28em] uppercase font-medium" style={{ color: "var(--color-gold)" }}>Intelligence Capabilities</span>
+                <span className="text-[9px] tracking-[0.28em] uppercase font-medium" style={{ color: "var(--color-gold)" }}>How Rosa Works</span>
               </div>
-              {capabilities.map((cap, i) => (
+              {standards.map((s, i) => (
                 <motion.div
-                  key={cap.title}
+                  key={s.title}
                   initial={{ opacity: 0, x: 8 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -401,18 +401,18 @@ function PlatformIntelligence() {
                   style={{ borderTop: i > 0 ? "1px solid var(--color-stone-100)" : "none" }}
                 >
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(200,169,106,0.08)", border: "1px solid rgba(200,169,106,0.15)" }}>
-                    <cap.icon className="w-4 h-4" style={{ color: "var(--color-gold)" }} />
+                    <s.icon className="w-4 h-4" style={{ color: "var(--color-gold)" }} />
                   </div>
                   <div>
-                    <p className="text-[13px] font-medium mb-1" style={{ color: "var(--color-ink-700)" }}>{cap.title}</p>
-                    <p className="text-[12.5px] font-light leading-relaxed" style={{ color: "var(--color-ink-400)" }}>{cap.desc}</p>
+                    <p className="text-[13px] font-medium mb-1" style={{ color: "var(--color-ink-700)" }}>{s.title}</p>
+                    <p className="text-[12.5px] font-light leading-relaxed" style={{ color: "var(--color-ink-400)" }}>{s.desc}</p>
                   </div>
                 </motion.div>
               ))}
               <div className="px-6 py-4 flex items-center gap-2" style={{ borderTop: "1px solid var(--color-stone-100)", background: "var(--color-stone-50)" }}>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-gold)", opacity: 0.5 }} />
                 <span className="text-[11px] font-light" style={{ color: "var(--color-ink-400)" }}>
-                  Powered by <span style={{ color: "var(--color-gold)", fontWeight: 500 }}>Lyte</span> + <span style={{ color: "var(--color-gold)", fontWeight: 500 }}>Alloy</span> intelligence infrastructure
+                  Part of the <span style={{ color: "var(--color-gold)", fontWeight: 500 }}>SZL Holdings</span> ecosystem — an advisory practice with a technology spine
                 </span>
               </div>
             </div>
@@ -497,7 +497,7 @@ export default function Home() {
       <ServiceLanes />
       <RosaBlock />
       <TrustPillars />
-      <PlatformIntelligence />
+      <WorkingStandard />
       <Proof />
       <ProcessStrip />
       <PrivatePortalTeaser />

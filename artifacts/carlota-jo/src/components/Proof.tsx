@@ -34,10 +34,10 @@ const testimonials = [
 ];
 
 const socialProofMetrics = [
-  { value: "14+", label: "Countries served" },
-  { value: "94%", label: "Clients engage on subsequent mandates" },
-  { value: "100%", label: "Principal-led. Always." },
+  { value: "4", label: "Continents served" },
+  { value: "100%", label: "Principal-led engagements. Always." },
   { value: "0", label: "Engagements disclosed without consent" },
+  { value: "Senior", label: "Advice from Rosa directly — no associates" },
 ];
 
 const qualities = [
