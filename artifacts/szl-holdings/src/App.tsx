@@ -22,6 +22,17 @@ const TrustPage = lazy(() => import("@/pages/trust"));
 const TrustSecurityPage = lazy(() => import("@/pages/trust-security"));
 const TrustGovernancePage = lazy(() => import("@/pages/trust-governance"));
 const TrustArchitecturePage = lazy(() => import("@/pages/trust-architecture"));
+const TrustAIPage = lazy(() => import("@/pages/trust-ai"));
+const TrustExportsPage = lazy(() => import("@/pages/trust-exports"));
+const TrustOperationsPage = lazy(() => import("@/pages/trust-operations"));
+const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview"));
+const InvestorsArchitecturePage = lazy(() => import("@/pages/investors-architecture"));
+const InvestorsMoatPage = lazy(() => import("@/pages/investors-moat"));
+const InvestorsFounderPage = lazy(() => import("@/pages/investors-founder"));
+const PilotPrismCounselPage = lazy(() => import("@/pages/pilot-prism-counsel"));
+const PilotTerraPage = lazy(() => import("@/pages/pilot-terra"));
+const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
+const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const AdminPage = lazy(() => import("@/pages/admin"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
@@ -486,6 +497,15 @@ function App() {
             <Route path="/trust/architecture">
               <Suspense fallback={<PageLoader />}><TrustArchitecturePage /></Suspense>
             </Route>
+            <Route path="/trust/ai">
+              <Suspense fallback={<PageLoader />}><TrustAIPage /></Suspense>
+            </Route>
+            <Route path="/trust/exports">
+              <Suspense fallback={<PageLoader />}><TrustExportsPage /></Suspense>
+            </Route>
+            <Route path="/trust/operations">
+              <Suspense fallback={<PageLoader />}><TrustOperationsPage /></Suspense>
+            </Route>
             <Route path="/trust">
               <Suspense fallback={<PageLoader />}><TrustPage /></Suspense>
             </Route>
@@ -502,9 +522,36 @@ function App() {
             <Route path="/investor-relations">
               <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
             </Route>
-            <Route path="/investors">
-              <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
+            <Route path="/investors/overview">
+              <Suspense fallback={<PageLoader />}><InvestorsOverviewPage /></Suspense>
             </Route>
+            <Route path="/investors/architecture">
+              <Suspense fallback={<PageLoader />}><InvestorsArchitecturePage /></Suspense>
+            </Route>
+            <Route path="/investors/moat">
+              <Suspense fallback={<PageLoader />}><InvestorsMoatPage /></Suspense>
+            </Route>
+            <Route path="/investors/founder">
+              <Suspense fallback={<PageLoader />}><InvestorsFounderPage /></Suspense>
+            </Route>
+            <Route path="/investors">
+              <Suspense fallback={<PageLoader />}><InvestorsOverviewPage /></Suspense>
+            </Route>
+
+            {/* ── Pilot landing pages ── */}
+            <Route path="/pilot/prism-counsel">
+              <Suspense fallback={<PageLoader />}><PilotPrismCounselPage /></Suspense>
+            </Route>
+            <Route path="/pilot/terra">
+              <Suspense fallback={<PageLoader />}><PilotTerraPage /></Suspense>
+            </Route>
+            <Route path="/pilot/vessels">
+              <Suspense fallback={<PageLoader />}><PilotVesselsPage /></Suspense>
+            </Route>
+            <Route path="/pilot/aegis">
+              <Suspense fallback={<PageLoader />}><PilotAegisPage /></Suspense>
+            </Route>
+
             <Route path="/ventures">
               <Suspense fallback={<PageLoader />}><VenturesPage /></Suspense>
             </Route>
@@ -699,7 +746,7 @@ function App() {
 
             {/* ── Redirects ── */}
             <Route path="/ir">
-              <Redirect to="/investor-relations" />
+              <Redirect to="/investors/overview" />
             </Route>
             <Route path="/ecosystem">
               <Redirect to="/" />
