@@ -6,6 +6,7 @@ import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { CounselLayout } from "@/prism-counsel/components/counsel-layout";
+import { LawyerLifeOSShell } from "@/prism-counsel/components/lawyer-life-os-shell";
 import { NyLayout } from "@/prism-counsel/pages/ny/ny-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 
@@ -104,6 +105,15 @@ const S31ModelMesh = lazy(() => import("@/prism-counsel/pages/s31/model-mesh-adm
 const S31CostTracking = lazy(() => import("@/prism-counsel/pages/s31/cost-tracking-page"));
 const S31ForecastDiff = lazy(() => import("@/prism-counsel/pages/s31/forecast-diff-page"));
 const S31DataProducts = lazy(() => import("@/prism-counsel/pages/s31/data-products-page"));
+
+const S32MorningBrief = lazy(() => import("@/prism-counsel/pages/s32/morning-brief-page"));
+const S32PrepMode = lazy(() => import("@/prism-counsel/pages/s32/prep-mode-page"));
+const S32QuietRisk = lazy(() => import("@/prism-counsel/pages/s32/quiet-risk-page"));
+const S32OpsLite = lazy(() => import("@/prism-counsel/pages/s32/ops-lite-page"));
+const S32NamedWorkflows = lazy(() => import("@/prism-counsel/pages/s32/named-workflows-page"));
+const S32CopilotWorkbenchV2 = lazy(() => import("@/prism-counsel/pages/s32/copilot-workbench-v2"));
+const S32PurviewBridge = lazy(() => import("@/prism-counsel/pages/s32/purview-bridge-page"));
+const S32MatterDeskV2 = lazy(() => import("@/prism-counsel/pages/s32/matter-desk-v2"));
 
 const NyOverview = lazy(() => import("@/prism-counsel/pages/ny/ny-overview"));
 const NyDashboard = lazy(() => import("@/prism-counsel/pages/ny/ny-dashboard"));
@@ -225,6 +235,14 @@ function CounselAppPage({ children }: { children: ReactNode }) {
   );
 }
 
+function LawyerOSAppPage({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ height: "100vh", background: "#080c14" }}>
+      <LawyerLifeOSShell>{children}</LawyerLifeOSShell>
+    </div>
+  );
+}
+
 function NyAppPage({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-col h-screen" style={{ background: "#080c14" }}>
@@ -238,6 +256,10 @@ function NyAppPage({ children }: { children: ReactNode }) {
 function CounselMatterRoute({ params }: { params: { id: string } }) {
   const id = parseInt(params.id ?? "0");
   return <PrismMatterDetail id={id} />;
+}
+
+function S32MatterDeskV2RouteWrapper({ params }: { params: { id: string } }) {
+  return <S32MatterDeskV2 />;
 }
 
 function PageLoader() {
@@ -440,6 +462,38 @@ function App() {
             </Route>
             <Route path="/prism-counsel/forecast-diff">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismForecastDiff /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel Section 32 — Lawyer Life OS routes ── */}
+            <Route path="/prism-counsel/morning-brief">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32MorningBrief /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/prep">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32PrepMode /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/prep/:flow">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32PrepMode /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/quiet-risk">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32QuietRisk /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ops-lite">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32OpsLite /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/workflows">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32NamedWorkflows /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/workflows/:id">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32NamedWorkflows /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/copilot-workbench-v2">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32CopilotWorkbenchV2 /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/purview-bridge">
+              <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32PurviewBridge /></LawyerOSAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/matter-desk-v2/:id">
+              {(params) => <Suspense fallback={<PageLoader />}><LawyerOSAppPage><S32MatterDeskV2RouteWrapper params={params} /></LawyerOSAppPage></Suspense>}
             </Route>
 
             <Route path="/prism-counsel/ny">
