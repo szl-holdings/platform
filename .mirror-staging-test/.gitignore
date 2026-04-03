@@ -1,0 +1,80 @@
+# compiled output
+dist
+tmp
+out-tsc
+*.tsbuildinfo
+.expo
+.expo-shared
+
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Replit internal
+.cache/
+.local/
+.canvas/
+.cursor/
+.github/instructions/
+
+# Attached assets (user-pasted payload dumps)
+attached_assets/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Noisy directories — quarantine from public mirror
+.archive/
+.git-rewrite/
+backups/
+exports/
+scratch/
+temp/
+*.bak
+*.backup
+*.sql.gz
+
+# Internal / non-public content
+social-content/
+spfx-webparts/
+test-results/
+
+# Mirror validation reports (generated)
+scripts/public-mirror/mirror-report.md
+docs/audit/public-mirror-report.md
+
+# Database dumps
+*.dump
+*.pgdump
