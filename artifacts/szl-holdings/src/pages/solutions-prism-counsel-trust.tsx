@@ -145,11 +145,11 @@ export default function SolutionsPrismCounselTrustPage() {
           <p className="text-sm text-slate-400 max-w-xl mx-auto mb-6">
             Every action in PRISM Counsel generates a complete audit record — who did what, when, why, and what informed the decision. Export audit packets for compliance review at any time.
           </p>
-          <Link href="/prism-counsel">
+          <a href="/prism-counsel">
             <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#d4a054]/10 text-[#d4a054] border border-[#d4a054]/20 hover:bg-[#d4a054]/20 transition-colors cursor-pointer">
               Enter PRISM Counsel <ArrowRight className="w-4 h-4" />
             </span>
-          </Link>
+          </a>
         </div>
       </section>
 
