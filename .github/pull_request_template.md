@@ -1,32 +1,30 @@
-## Summary
+## Description
 
-<!-- What does this PR do? Why? -->
+  Brief description of the changes.
 
-## Scope
+  ## Type of Change
 
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Refactor / cleanup
-- [ ] Documentation
-- [ ] Dependency update
-- [ ] CI / infra change
-- [ ] Other: <!-- describe -->
+  - [ ] Bug fix
+  - [ ] New feature
+  - [ ] Breaking change
+  - [ ] Documentation update
+  - [ ] Infrastructure / CI change
 
-## Validation
+  ## Security Checklist
 
-<!-- How was this tested? What should reviewers check? -->
+  - [ ] No secrets, tokens, or credentials in code
+  - [ ] No new `eval()` or dynamic code execution
+  - [ ] Input validation added for new endpoints
+  - [ ] Database queries use parameterized inputs
+  - [ ] No sensitive data logged
 
-- [ ] Ran locally and confirmed expected behavior
-- [ ] Checked for regressions in affected areas
-- [ ] CI passes (lint, typecheck, tests)
+  ## Testing
 
-## Risks / Notes
+  - [ ] TypeScript compiles without errors
+  - [ ] Tested locally
+  - [ ] Relevant documentation updated
 
-<!-- Any breaking changes, migration steps, or things reviewers should be aware of? -->
+  ## Related Issues
 
-## Checklist
-
-- [ ] Code follows project conventions
-- [ ] No debug/test artifacts left in code
-- [ ] PR is scoped to the stated changes (no unrelated diffs)
-- [ ] Linked to any relevant issue or task
+  Closes #
+  
