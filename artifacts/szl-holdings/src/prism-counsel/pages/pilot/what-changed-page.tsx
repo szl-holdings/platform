@@ -56,8 +56,9 @@ export default function WhatChangedPage() {
   const { data } = useWhatChanged({ hours });
   const markRead = useMarkRead();
 
-  const changes = data ?? DEMO_DATA;
-  const isDemo = !data;
+  const hasLiveData = data && data.totalChanges > 0;
+  const changes = hasLiveData ? data : DEMO_DATA;
+  const isDemo = !hasLiveData;
   const categories = changes.categories?.filter((c: any) => c.count > 0) ?? [];
   const allItems = activeFilter
     ? (changes.byType?.[activeFilter] ?? [])

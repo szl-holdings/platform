@@ -47,9 +47,10 @@ export default function TodayPage() {
   const completeAction = useCompleteAction();
   const [deadlineRange, setDeadlineRange] = useState<"3" | "5" | "10">("5");
 
-  const today = data ?? DEMO_TODAY;
-  const isDemo = !data;
-  const risks = risksData?.risks ?? DEMO_TODAY.quietRisks;
+  const hasLiveData = data && (data.changedSinceYesterday > 0 || data.mattersNeedingAttention?.length > 0);
+  const today = hasLiveData ? data : DEMO_TODAY;
+  const isDemo = !hasLiveData;
+  const risks = (risksData?.risks?.length > 0 ? risksData.risks : null) ?? DEMO_TODAY.quietRisks;
 
   const deadlineKey = `next${deadlineRange}Days` as keyof typeof today.deadlines;
   const deadlines = today.deadlines?.[deadlineKey] ?? [];

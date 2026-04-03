@@ -43,6 +43,7 @@ function isExempt(path: string): boolean {
   if (path === "/api/alloy/channels/slack/interactive") return true;
   if (path === "/api/alloy/email/ingest") return true;
   if (path.startsWith("/api/alloy/integrations/webhooks/receive/")) return true;
+  if (path === "/api/mcp" || path.startsWith("/api/mcp/")) return true;
   return false;
 }
 

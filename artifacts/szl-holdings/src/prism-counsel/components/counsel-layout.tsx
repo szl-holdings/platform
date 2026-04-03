@@ -5,7 +5,7 @@ import {
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
   Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug,
   Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap,
-  Sun, Download, CheckSquare, Radio, Server
+  Sun, Inbox, Download, CheckSquare, Radio, Server
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
