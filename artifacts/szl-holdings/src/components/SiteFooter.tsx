@@ -1,18 +1,24 @@
 import { Link } from "wouter";
 
-const SITE_LINKS = [
-  { label: "Platform", href: "/platform" },
-  { label: "Design Partners", href: "/design-partners" },
-  { label: "Trust", href: "/trust" },
-  { label: "Investors", href: "/investors" },
+const PRODUCT_LINKS = [
+  { label: "Lyte — Command Surface", href: "/lyte" },
+  { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
+  { label: "PRISM Counsel", href: "/solutions/prism-counsel" },
+  { label: "Terra", href: "/solutions/terra" },
+  { label: "Vessels", href: "/solutions/vessels" },
+  { label: "Aegis", href: "/solutions/aegis" },
+  { label: "Carlota Jo", href: "/carlota-jo/" },
 ];
 
-const PLATFORM_LINKS = [
-  { label: "Lyte", href: "/lyte-command-center/", desc: "Business Observability" },
-  { label: "Vessels", href: "/vessels/", desc: "Maritime Intelligence" },
-  { label: "Aegis", href: "/firestorm/", desc: "Defense & Intelligence" },
-  { label: "Terra", href: "/terra/", desc: "Real Estate Intelligence" },
-  { label: "Carlota Jo", href: "/carlota-jo/", desc: "Private Advisory" },
+const COMPANY_LINKS = [
+  { label: "Platform Overview", href: "/platform" },
+  { label: "Architecture", href: "/architecture" },
+  { label: "How It Works", href: "/how-it-works" },
+  { label: "Design Partners", href: "/design-partner" },
+  { label: "Investors", href: "/investors" },
+  { label: "Trust Center", href: "/trust" },
+  { label: "Docs", href: "/docs" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const SOCIAL_LINKS = [
@@ -54,7 +60,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.875rem", lineHeight: 1.65, maxWidth: "18rem", marginBottom: "0.75rem" }}>
-              Operational risk surfaces before it becomes a revenue problem. Lyte + Alloy is the starting point.
+              One intelligence and action architecture with distinct vertical operating systems.
             </p>
             <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
               Washington, D.C. · London · Singapore
@@ -86,10 +92,10 @@ export function SiteFooter() {
 
           <div>
             <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Site
+              Products
             </h4>
             <ul className="space-y-2">
-              {SITE_LINKS.map((link) => (
+              {PRODUCT_LINKS.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -106,19 +112,19 @@ export function SiteFooter() {
 
           <div>
             <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Platforms
+              Company
             </h4>
             <ul className="space-y-2">
-              {PLATFORM_LINKS.map((link) => (
+              {COMPANY_LINKS.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
                     style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.2s ease", display: "block" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

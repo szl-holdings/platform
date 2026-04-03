@@ -304,6 +304,9 @@ function App() {
             <Route path="/design-partners">
               <Suspense fallback={<PageLoader />}><DesignPartnersPage /></Suspense>
             </Route>
+            <Route path="/design-partner">
+              <Suspense fallback={<PageLoader />}><DesignPartnersPage /></Suspense>
+            </Route>
             <Route path="/contact">
               <Suspense fallback={<PageLoader />}><ContactPage /></Suspense>
             </Route>
@@ -816,6 +819,9 @@ function App() {
             </Route>
             <Route path="/architecture">
               <Redirect to="/trust/architecture" />
+            </Route>
+            <Route path="/how-it-works">
+              <Redirect to="/platform" />
             </Route>
             <Route path="/integrations">
               <Redirect to="/platform" />
