@@ -46,6 +46,7 @@ const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
 const PilotAegisPage = lazy(() => import("@/pages/pilot-aegis"));
 const KpiDashboardPage = lazy(() => import("@/pages/kpi-dashboard"));
 const AdminPage = lazy(() => import("@/pages/admin"));
+const OpsPage = lazy(() => import("@/pages/ops"));
 const AzureTenantOnboardingPage = lazy(() => import("@/pages/azure-tenant-onboarding"));
 const AzureTenantDashboardPage = lazy(() => import("@/pages/azure-tenant-dashboard"));
 const TenantBrandingPage = lazy(() => import("@/pages/tenant-branding"));
@@ -945,6 +946,17 @@ function App() {
             </Route>
             <Route path="/terra/demo">
               <ExternalRedirect to="/terra/dashboard?demo=true" />
+            </Route>
+
+            {/* ── Internal ops routes (INTERNAL — not publicly linked) ── */}
+            <Route path="/ops">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/ops/:section">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsPage /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/ops/:section/:sub">
+              <RequireAuth><Suspense fallback={<PageLoader />}><OpsPage /></Suspense></RequireAuth>
             </Route>
 
             {/* ── Admin routes ── */}

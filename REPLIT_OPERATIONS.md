@@ -1,0 +1,199 @@
+# Replit Operations Guide
+
+> Operational guide for working within the SZL Holdings Replit workspace. Covers workflow management, environment configuration, debugging, and platform-specific operations.
+
+---
+
+## Overview
+
+The SZL Holdings workspace runs on Replit as a pnpm monorepo. Each artifact is a separate service with its own Replit workflow. The workspace is **not** a production environment — it is the active development environment and internal preview surface.
+
+---
+
+## Workflow Management
+
+### Available Workflows
+
+Each artifact has a dedicated workflow managed by Replit:
+
+| Workflow | Service | Port |
+|----------|---------|------|
+| `artifacts/szl-holdings: web` | SZL Holdings web app | `$PORT` |
+| `artifacts/lyte-command-center: web` | Lyte Command Center | `$PORT` |
+| `artifacts/firestorm: web` | Aegis/Firestorm web | `$PORT` |
+| `artifacts/vessels: web` | Vessels web | `$PORT` |
+| `artifacts/terra: web` | Terra web | `$PORT` |
+| `artifacts/carlota-jo: web` | Carlota Jo web | `$PORT` |
+| `artifacts/stephen-site: web` | Stephen site | `$PORT` |
+| `artifacts/api-server: API Server` | Shared API server | `$PORT` |
+| `artifacts/mockup-sandbox: Component Preview Server` | Design sandbox | `$PORT` |
+| `artifacts/*-mobile: expo` | Expo mobile apps | Expo tunnel |
+
+### Starting / Restarting Workflows
+
+Workflows are managed through the Replit interface. Use the workflow restart mechanism when:
+- Code changes require a server restart
+- Environment variable changes are applied
+- Dependencies are installed or updated
+- A workflow has crashed or become unresponsive
+
+### Port Configuration
+
+**Critical:** All services must bind to the `PORT` environment variable. Never hardcode port numbers in Vite configs or Express servers. The Replit proxy assigns unique ports per artifact.
+
+Vite config example:
+```typescript
+server: {
+  port: parseInt(process.env.PORT || "3000"),
+  host: "0.0.0.0",
+  allowedHosts: true,
+}
+```
+
+---
+
+## Environment Variables
+
+Environment variables are managed through Replit Secrets (not `.env` files). See [ENV_MATRIX.md](ENV_MATRIX.md) for the complete variable reference.
+
+**How to add a secret:**
+1. Open the Replit Secrets panel
+2. Add the variable name and value
+3. Restart relevant workflows after adding secrets
+
+**Critical variables:**
+- `DATABASE_URL` — must be set before any API server start
+- `SESSION_SECRET` — must be a strong random string (≥32 chars)
+- `ADMIN_PIN` — required for CMS admin access
+
+---
+
+## Database Operations
+
+The workspace uses a Replit-managed PostgreSQL database.
+
+**Run migrations:**
+```bash
+pnpm --filter artifacts/api-server db:migrate
+```
+
+**Seed demo data:**
+```bash
+pnpm seed:demo
+```
+
+**Access database (development):**
+```bash
+psql $DATABASE_URL
+```
+
+**Important:** Never run destructive database operations against production. The production database connection string differs from the development one.
+
+---
+
+## Preview Pane
+
+The preview pane in Replit is a proxied iframe. This affects:
+- CORS configuration (requests come from a different origin)
+- Cookie behavior (may require `SameSite=None; Secure`)
+- URL structure (uses path-based routing, not localhost direct access)
+
+The preview pane URL follows: `$REPLIT_DEV_DOMAIN/<artifact-path>/`
+
+When debugging preview issues:
+1. Check that the workflow is running
+2. Verify the server binds to `0.0.0.0:$PORT`
+3. Confirm `allowedHosts: true` in Vite config
+4. Check browser console for CORS errors
+5. Restart the workflow
+
+---
+
+## Debugging Common Issues
+
+### Blank Preview Pane
+1. Is the workflow running? Check workflow status.
+2. Did the server start successfully? Check workflow logs.
+3. Is PORT set correctly? Server must bind to `$PORT`.
+4. Vite: is `server.allowedHosts: true` set?
+
+### Database Connection Failures
+1. Verify `DATABASE_URL` is set in Replit Secrets.
+2. Check that the database is online (Replit PostgreSQL).
+3. Run `pnpm --filter artifacts/api-server db:migrate` to ensure migrations are current.
+
+### TypeScript Errors After Merge
+1. Run `pnpm typecheck` to identify affected packages.
+2. Check `tsconfig.json` project references.
+3. Rebuild affected library packages first: `pnpm --filter './lib/**' build`.
+
+### Expo Mobile Not Loading
+1. Expo apps use a separate tunnel URL (not the Replit proxy).
+2. Check the Expo workflow logs for the tunnel URL.
+3. Ensure `REPLIT_EXPO_DEV_DOMAIN` is set for the app.
+
+---
+
+## Log Access
+
+Workflow logs are accessible through the Replit interface per-workflow. Key things to look for:
+- Startup errors (port conflicts, missing env vars, migration failures)
+- Runtime errors (API errors, database query failures)
+- TypeScript compilation errors
+
+For production logs, see the [deployment skill](docs/deployment.md) and Azure App Service log streams.
+
+---
+
+## Screenshot Generation
+
+Screenshots for documentation and the README are generated by the media capture script:
+
+```bash
+pnpm capture:screens
+```
+
+This script captures all key routes and saves to `docs/media/screenshots/`. Ensure workflows are running before capturing.
+
+See `scripts/media/capture-screenshots.sh` for the full list of routes captured.
+
+---
+
+## Code Quality
+
+```bash
+pnpm lint         # ESLint across all packages
+pnpm typecheck    # TypeScript type checking
+pnpm test         # Unit and integration tests
+pnpm build        # Full production build
+```
+
+QA scripts are in `scripts/qa/`:
+```bash
+node scripts/qa/smoke-routes.js     # Route smoke tests
+node scripts/qa/check-links.js      # Broken link detection
+node scripts/qa/check-metadata.js   # Meta tag validation
+node scripts/qa/check-a11y.js       # Accessibility baseline
+```
+
+---
+
+## Release Process
+
+See [RELEASE_PROCESS.md](RELEASE_PROCESS.md) and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for the full release workflow.
+
+Quick reference:
+1. `pnpm release:prep` — updates CHANGELOG and version
+2. Run [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) manually
+3. Deploy via Azure Bicep templates in `/infra/`
+4. `pnpm release:notes` — generates release summary
+
+---
+
+## Replit-Specific Notes
+
+- **Version control** is managed by Replit automatically (not manual git commits in most cases).
+- **Checkpoint system** — Replit creates checkpoints automatically. If something breaks, rollback is available through the Replit interface.
+- **pnpm only** — The workspace enforces pnpm. Using npm or yarn directly will fail.
+- **Node.js version** — Managed by Replit/Nix. Check `.replit` for the configured runtime.
+- **No Docker** — The Replit environment does not support Docker containers. Use Nix packages for system dependencies.

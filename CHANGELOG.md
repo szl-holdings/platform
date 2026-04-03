@@ -19,6 +19,76 @@ See `/docs/releases/versioning-policy.md` for the full versioning policy.
 
 ---
 
+## [0.1.1] — 2026-04-03
+
+### Workspace Professionalization & Ops Discipline
+
+### Added
+
+**Workspace Documentation**
+- `WORKSPACE_GUIDE.md` — complete guide to all artifacts, public/private classification, how to run, deploy, demo
+- `REPLIT_OPERATIONS.md` — operational guide for the Replit development environment
+- `DEPLOYMENT_READINESS.md` — pre-deployment checklists for public, private, and production deployments
+- `DEMO_GUIDE.md` — demo scripts, audience-specific flows, live vs. staged data guide
+- `ROUTE_INVENTORY.md` — complete route inventory with PUBLIC/PRIVATE/INTERNAL/STAGING flags
+- `ENV_MATRIX.md` — complete environment variable reference for all services and environments
+- `TRUST_CENTER_INDEX.md` — navigational index for all trust and security documentation
+- `ANALYTICS_PLAN.md` — event taxonomy, measurement objectives, funnel tracking
+- `SEO_MAP.md` — all public routes with title, description, and OG tag specifications
+- `EVENT_TAXONOMY.md` — CTA event naming conventions and property reference
+- `QA_SUMMARY.md` — QA scripts overview, quality gates by release type, coverage matrix
+
+**Release & Change Discipline**
+- `RELEASE_PROCESS.md` — release workflow with gate criteria and rollout sequence
+- `RELEASE_CHECKLIST.md` — pre-release sign-off checklist
+- `INCIDENT_RESPONSE.md` — full incident handling workflow with post-mortem template
+- `SUPPORT_MODEL.md` — support tiers, routing matrix, and escalation path
+- `INCIDENT_SEVERITY_MATRIX.md` — SEV1–SEV4 definitions, response times, escalation
+- `BACKUP_AND_RECOVERY.md` — backup strategy, disaster recovery scenarios, RTO/RPO
+
+**Runbooks**
+- `infra/runbooks/RUNBOOK_DEPLOYMENT.md` — step-by-step production deployment
+- `infra/runbooks/RUNBOOK_ROLLBACK.md` — emergency rollback procedures
+- `infra/runbooks/RUNBOOK_SECRETS.md` — secrets rotation and recovery
+- `infra/runbooks/RUNBOOK_DEMO_ENV.md` — demo environment setup and management
+
+**Security & Trust Documentation**
+- `docs/SECRETS_POLICY.md` — secrets handling, classification, rotation policy
+- `docs/ACCESS_CONTROL.md` — RBAC model, multi-tenancy isolation, session management
+- `docs/LOGGING_AND_RETENTION.md` — what is logged, retention schedule, privacy protections
+- `docs/DEPENDENCY_POLICY.md` — dependency vetting, licensing, security audit requirements
+- `docs/ENVIRONMENT_SEPARATION.md` — dev/staging/production isolation documentation
+- `docs/DATA_CLASSIFICATION.md` — Tier 1–4 data classification with handling requirements
+- `docs/THIRD_PARTY_REGISTER.md` — complete register of all third-party services and data access
+
+**Company Reference Documents**
+- `COMPANY_FACT_SHEET.md` — company overview, products, technology stack, differentiation
+- `PRESS_KIT.md` — key messages, boilerplate, founder bio, media assets reference
+- `BRAND_GUIDELINES.md` — color palette, typography, voice, naming conventions, logo usage
+
+**QA Scripts** (`scripts/qa/`)
+- `smoke-routes.js` — HTTP smoke test for all public routes
+- `check-links.js` — broken link detection across public pages
+- `check-metadata.js` — SEO and OG metadata validation
+- `check-a11y.js` — accessibility baseline checks (alt text, labels, ARIA)
+- `check-trust.js` — trust and legal page existence and content checks
+- `check-demo-seed.js` — demo environment seed integrity validation
+
+**Operational Scripts** (`package.json`)
+- `dev` — start all artifact development servers
+- `seed:demo` — reseed demo environment
+- `capture:screens` — regenerate documentation screenshots
+- `qa:routes`, `qa:links`, `qa:a11y`, `qa:trust`, `qa:meta`, `qa:demo` — individual QA checks
+- `qa:site` — full QA suite (routes + links + trust + metadata)
+- `release:prep`, `release:notes` — release preparation helpers
+
+**Internal Ops Surface**
+- `/ops` route scaffolded in SZL Holdings app with sidebar navigation
+- 11 ops sections: overview, releases, qa, content, screenshots, trust, demo-state, env-check, integrations, incidents, checklists
+- Clearly marked as internal, requires authentication, not linked in public navigation
+
+---
+
 ## [0.1.0] — 2026-04-01
 
 ### Platform Release — Initial Public Mirror
