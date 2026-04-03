@@ -4,11 +4,22 @@ import {
   Scale, LayoutDashboard, FolderOpen, TrendingUp, BookOpen,
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
   Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug,
-  Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap
+  Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap,
+  Sun, Download, CheckSquare, Server
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_SECTIONS = [
+  {
+    label: "Daily",
+    items: [
+      { label: "Today", href: "/prism-counsel/today", icon: Sun },
+      { label: "What Changed", href: "/prism-counsel/what-changed", icon: Activity },
+      { label: "Review", href: "/prism-counsel/review-before-send", icon: Eye },
+      { label: "Sign-Off", href: "/prism-counsel/signoff-queue", icon: CheckSquare },
+      { label: "Export", href: "/prism-counsel/word-export", icon: Download },
+    ],
+  },
   {
     label: "Command",
     items: [
@@ -63,6 +74,7 @@ const NAV_SECTIONS = [
       { label: "Model Mesh", href: "/prism-counsel/model-mesh", icon: Zap },
       { label: "Costs", href: "/prism-counsel/costs", icon: DollarSign },
       { label: "Admin", href: "/prism-counsel/admin", icon: Settings },
+      { label: "Pilot Ops", href: "/prism-counsel/pilot-admin", icon: Server },
     ],
   },
 ];
@@ -105,7 +117,7 @@ export function CounselLayout({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               {section.items.map((item) => {
-                const isActive = location === item.href || (item.href !== "/prism-counsel" && location.startsWith(item.href));
+                const isActive = location === item.href || (item.href !== "/prism-counsel" && location.startsWith(item.href + "/"));
                 const Icon = item.icon;
                 return (
                   <Link key={item.href} href={item.href}>

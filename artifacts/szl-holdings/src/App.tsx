@@ -68,6 +68,14 @@ const PrismNoFault = lazy(() => import("@/prism-counsel/pages/no-fault-page"));
 const PrismNYDashboard = lazy(() => import("@/prism-counsel/pages/ny-dashboard-page"));
 const PrismConnectors = lazy(() => import("@/prism-counsel/pages/connectors-page"));
 
+const PilotToday = lazy(() => import("@/prism-counsel/pages/pilot/today-page"));
+const PilotMatterDesk = lazy(() => import("@/prism-counsel/pages/pilot/matter-desk-page"));
+const PilotWhatChanged = lazy(() => import("@/prism-counsel/pages/pilot/what-changed-page"));
+const PilotReviewBeforeSend = lazy(() => import("@/prism-counsel/pages/pilot/review-before-send-page"));
+const PilotSignoffQueue = lazy(() => import("@/prism-counsel/pages/pilot/signoff-queue-page"));
+const PilotWordExport = lazy(() => import("@/prism-counsel/pages/pilot/word-export-page"));
+const PilotAdmin = lazy(() => import("@/prism-counsel/pages/pilot/pilot-admin-page"));
+
 const S31CopilotWorkbench = lazy(() => import("@/prism-counsel/pages/s31/copilot-workbench"));
 const S31WorldlineDashboard = lazy(() => import("@/prism-counsel/pages/s31/worldline-dashboard"));
 const S31PressureGraph = lazy(() => import("@/prism-counsel/pages/s31/pressure-graph-page"));
@@ -344,6 +352,29 @@ function App() {
             </Route>
             <Route path="/prism-counsel/connectors">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismConnectors /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel Pilot Zero routes ── */}
+            <Route path="/prism-counsel/today">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotToday /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/matter-desk/:id">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotMatterDesk /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/what-changed">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotWhatChanged /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/review-before-send">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotReviewBeforeSend /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/signoff-queue">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotSignoffQueue /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/word-export">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotWordExport /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/pilot-admin">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotAdmin /></CounselAppPage></Suspense>
             </Route>
 
             {/* ── PRISM Counsel Section 31 routes ── */}
