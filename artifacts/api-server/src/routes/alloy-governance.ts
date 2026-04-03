@@ -116,7 +116,7 @@ router.get("/alloy/policies", authMiddleware(), async (req, res) => {
 
 router.get("/alloy/policies/:id", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
     const user = req.user as AuthenticatedUser | undefined;
 
@@ -185,7 +185,7 @@ router.post("/alloy/policies", authMiddleware(), requireRole("admin"), async (re
 
 router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");
@@ -234,7 +234,7 @@ router.patch("/alloy/policies/:id", authMiddleware(), requireRole("admin"), asyn
 
 router.delete("/alloy/policies/:id", authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) return sendBadRequest(res, "Invalid policy ID");
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");
@@ -274,7 +274,7 @@ router.delete("/alloy/policies/:id", authMiddleware(), requireRole("admin"), asy
 // Apply a compliance template to a tenant (clone it with orgId set)
 router.post("/alloy/policies/:id/apply", authMiddleware(), requireRole("admin"), async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) return sendBadRequest(res, "Invalid template policy ID");
     const orgId = parseInt(req.body.orgId);
     if (isNaN(orgId)) return sendBadRequest(res, "orgId is required");
@@ -389,7 +389,7 @@ router.post("/alloy/governance/incidents", authMiddleware(), async (req, res) =>
 
 router.patch("/alloy/governance/incidents/:id/resolve", authMiddleware(), async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) return sendBadRequest(res, "Invalid incident ID");
     const user = req.user as AuthenticatedUser | undefined;
     if (!user) return sendForbidden(res, "Authentication required");

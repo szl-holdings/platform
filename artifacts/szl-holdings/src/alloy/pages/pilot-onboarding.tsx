@@ -78,7 +78,7 @@ interface StepState {
 }
 
 function FieldInput({ field, value, onChange }: {
-  field: OnboardingStep["fields"][0];
+  field: NonNullable<OnboardingStep["fields"]>[number];
   value: string;
   onChange: (v: string) => void;
 }) {

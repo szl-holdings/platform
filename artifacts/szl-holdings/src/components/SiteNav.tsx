@@ -6,15 +6,32 @@ import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { label: "Platform", href: "/platform" },
-  { label: "Design Partners", href: "/design-partners" },
+  {
+    label: "Platform",
+    href: "/platform",
+    children: [
+      { label: "Lyte — Command Surface", href: "/lyte" },
+      { label: "Alloy — Execution Fabric", href: "/alloy" },
+      { label: "Platform Overview", href: "/platform" },
+      { label: "Architecture", href: "/trust/architecture" },
+    ],
+  },
+  {
+    label: "Solutions",
+    href: "/solutions",
+    children: [
+      { label: "Aegis — Security & Defense", href: "/solutions/aegis" },
+      { label: "Vessels — Maritime Intelligence", href: "/solutions/vessels" },
+      { label: "Terra — Real Estate Intelligence", href: "/solutions/terra" },
+    ],
+  },
   { label: "Trust", href: "/trust" },
-  { label: "Investor Story", href: "/investor-story" },
+  { label: "Design Partners", href: "/design-partners" },
   {
     label: "More",
     href: "/ventures",
     children: [
-      { label: "Platform Map", href: "/ventures" },
+      { label: "Investor Story", href: "/investor-story" },
       { label: "Investor Relations", href: "/investor-relations" },
       { label: "Demo", href: "/demo" },
       { label: "Docs", href: "/docs" },
@@ -23,12 +40,13 @@ const NAV_ITEMS = [
 ];
 
 const NAV_LINKS_MOBILE = [
+  { label: "Lyte", href: "/lyte" },
+  { label: "Alloy", href: "/alloy" },
   { label: "Platform", href: "/platform" },
-  { label: "Design Partners", href: "/design-partners" },
+  { label: "Solutions", href: "/solutions" },
   { label: "Trust", href: "/trust" },
+  { label: "Design Partners", href: "/design-partners" },
   { label: "Investor Story", href: "/investor-story" },
-  { label: "Investor Relations", href: "/investor-relations" },
-  { label: "Platform Map", href: "/ventures" },
   { label: "Demo", href: "/demo" },
   { label: "Docs", href: "/docs" },
   { label: "Contact", href: "/contact" },

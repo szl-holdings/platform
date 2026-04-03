@@ -152,6 +152,19 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Category statement */}
+        <section className="border-b border-white/10 bg-white/[0.015]">
+          <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm leading-7 text-white/70">
+                Lyte turns fragmented operational signals into governed action.
+                Alloy provides workflow orchestration, approval controls, and audit trace.
+                Domain packs apply the same architecture where consequence is high.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Problem */}
         <section className="border-b border-white/10">
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
@@ -213,6 +226,40 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Vertical packs — prove the core */}
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs uppercase tracking-[0.24em] text-[#8b7ac8]">Domain packs</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                Same architecture. High-consequence domains.
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-white/65">
+                Vertical packs extend the same signal-to-action system into industries where
+                execution latency, fragmented intelligence, and audit requirements make governed
+                automation essential.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              <Link href="/solutions/aegis" className="group block rounded-2xl border border-white/8 bg-white/[0.02] p-6 transition hover:border-white/15 hover:bg-white/[0.04]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#4a90b8]">Aegis</p>
+                <h3 className="mt-2 text-lg font-semibold text-white group-hover:text-white/90">Security & Defense Intelligence</h3>
+                <p className="mt-2 text-sm leading-6 text-white/50">Alert triage, guided investigation, policy routing, and audit-grade response. Built for high-consequence security operations.</p>
+              </Link>
+              <Link href="/solutions/vessels" className="group block rounded-2xl border border-white/8 bg-white/[0.02] p-6 transition hover:border-white/15 hover:bg-white/[0.04]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#4a90b8]">Vessels</p>
+                <h3 className="mt-2 text-lg font-semibold text-white group-hover:text-white/90">Maritime Intelligence</h3>
+                <p className="mt-2 text-sm leading-6 text-white/50">Fleet command, route anomalies, sanctions screening, and voyage economics. Maritime operations with full signal context.</p>
+              </Link>
+              <Link href="/solutions/terra" className="group block rounded-2xl border border-white/8 bg-white/[0.02] p-6 transition hover:border-white/15 hover:bg-white/[0.04]">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#4a90b8]">Terra</p>
+                <h3 className="mt-2 text-lg font-semibold text-white group-hover:text-white/90">Real Estate Intelligence</h3>
+                <p className="mt-2 text-sm leading-6 text-white/50">Distress signals, ownership analysis, underwriting workflows, and pipeline management. Deal intelligence at execution speed.</p>
+              </Link>
             </div>
           </div>
         </section>
@@ -337,6 +384,30 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Why now */}
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+            <div className="max-w-2xl mb-10">
+              <p className="text-xs uppercase tracking-[0.24em] text-[#c8953c]">Why now</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                Dashboards are not enough. AI without governance creates risk.
+              </h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {[
+                "Operational complexity is growing faster than team capacity",
+                "Dashboards show what happened — not what to do next",
+                "AI outputs without traceability create noise, not trust",
+                "Observability must connect to action, not just visualization",
+              ].map((item) => (
+                <div key={item} className="rounded-2xl border border-white/8 bg-white/[0.02] p-5">
+                  <p className="text-sm leading-6 text-white/65">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section>
           <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
@@ -353,14 +424,20 @@ export default function HomePage() {
                   href="/contact"
                   className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
                 >
-                  Request a session
+                  Request a design-partner session
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="/ventures"
+                  href="/trust"
                   className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
                 >
-                  View platform map
+                  Explore the trust center
+                </Link>
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-5 py-3 text-sm font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/5"
+                >
+                  See the demo
                 </Link>
               </div>
             </div>

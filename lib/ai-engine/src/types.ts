@@ -27,6 +27,8 @@ export interface AgentCallResult {
   response: string;
   confidence: number;
   domain: string;
+  tokensUsed?: number;
+  latencyMs?: number;
 }
 
 export interface RAGChunk {
