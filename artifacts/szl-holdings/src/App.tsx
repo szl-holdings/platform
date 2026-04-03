@@ -63,6 +63,13 @@ const SolutionsAegisPage = lazy(() => import("@/pages/solutions-aegis"));
 const SolutionsVesselsPage = lazy(() => import("@/pages/solutions-vessels"));
 const SolutionsTerraPage = lazy(() => import("@/pages/solutions-terra"));
 const DocsPage = lazy(() => import("@/pages/docs"));
+const DocsArchitecturePage = lazy(() => import("@/pages/docs-architecture"));
+const DocsControlPlanePage = lazy(() => import("@/pages/docs-control-plane"));
+const DocsWorldlinePage = lazy(() => import("@/pages/docs-worldline"));
+const DocsProofChainPage = lazy(() => import("@/pages/docs-proof-chain"));
+const DocsModelMeshPage = lazy(() => import("@/pages/docs-model-mesh"));
+const DocsTrustPage = lazy(() => import("@/pages/docs-trust"));
+const DocsGithubPage = lazy(() => import("@/pages/docs-github"));
 
 const SolutionsPrismCounselPage = lazy(() => import("@/pages/solutions-prism-counsel"));
 const SolutionsPrismCounselTrustPage = lazy(() => import("@/pages/solutions-prism-counsel-trust"));
@@ -596,6 +603,27 @@ function App() {
             </Route>
 
             {/* ── Docs hub ── */}
+            <Route path="/docs/architecture">
+              <Suspense fallback={<PageLoader />}><DocsArchitecturePage /></Suspense>
+            </Route>
+            <Route path="/docs/control-plane">
+              <Suspense fallback={<PageLoader />}><DocsControlPlanePage /></Suspense>
+            </Route>
+            <Route path="/docs/worldline">
+              <Suspense fallback={<PageLoader />}><DocsWorldlinePage /></Suspense>
+            </Route>
+            <Route path="/docs/proof-chain">
+              <Suspense fallback={<PageLoader />}><DocsProofChainPage /></Suspense>
+            </Route>
+            <Route path="/docs/model-mesh">
+              <Suspense fallback={<PageLoader />}><DocsModelMeshPage /></Suspense>
+            </Route>
+            <Route path="/docs/trust">
+              <Suspense fallback={<PageLoader />}><DocsTrustPage /></Suspense>
+            </Route>
+            <Route path="/docs/github">
+              <Suspense fallback={<PageLoader />}><DocsGithubPage /></Suspense>
+            </Route>
             <Route path="/docs">
               <Suspense fallback={<PageLoader />}><DocsPage /></Suspense>
             </Route>
