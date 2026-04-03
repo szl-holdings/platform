@@ -19,7 +19,7 @@ The SZL Holdings platform is currently in active pre-commercial development. Sec
 
 ### Responsible Disclosure Process
 
-1. **Email:** Send a detailed report to [security@szlholdings.com](mailto:security@szlholdings.com)
+1. **Email:** Send a detailed report to [security@stephenl.dev](mailto:security@stephenl.dev)
 2. **Subject line:** `[SECURITY] Brief description of the vulnerability`
 3. **Include in your report:**
    - Platform / component affected (Lyte, Aegis, Vessels, Terra, API server, etc.)
@@ -113,7 +113,7 @@ We appreciate responsible security research. Researchers who report valid vulner
 
 ## Security Contact
 
-**Email:** security@szlholdings.com  
+**Email:** security@stephenl.dev  
 **PGP:** Not yet configured — plain email is acceptable  
 **Response SLA:** 48 hours for initial acknowledgement
 

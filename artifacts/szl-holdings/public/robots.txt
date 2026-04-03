@@ -6,3 +6,4 @@ Disallow: /admin
 Disallow: /kpis
 
 Sitemap: https://szlholdings.com/sitemap.xml
+Security: https://szlholdings.com/.well-known/security.txt

@@ -88,6 +88,18 @@ const CompanyPage = lazy(() => import("@/pages/company"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
 
+// Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
+const SecurityPage = lazy(() => import("@/pages/security"));
+const LegalCookiesPage = lazy(() => import("@/pages/legal-cookies"));
+const LegalAcceptableUsePage = lazy(() => import("@/pages/legal-acceptable-use"));
+const LegalSecurityDisclosurePage = lazy(() => import("@/pages/legal-security-disclosure"));
+const ApiPage = lazy(() => import("@/pages/api-page"));
+const InvestorPage = lazy(() => import("@/pages/investor"));
+const PressPage = lazy(() => import("@/pages/press"));
+const BrandPage = lazy(() => import("@/pages/brand"));
+const FaqPage = lazy(() => import("@/pages/faq"));
+const PublicRoadmapPage = lazy(() => import("@/pages/public-roadmap"));
+
 // Standalone premium public product pages
 const PrismCounselPublicPage = lazy(() => import("@/pages/prism-counsel-public"));
 const TerraPublicPage = lazy(() => import("@/pages/terra-public"));
@@ -1092,8 +1104,40 @@ function App() {
             <Route path="/legal/terms">
               <Suspense fallback={<PageLoader />}><LegalTermsPage /></Suspense>
             </Route>
+            <Route path="/legal/cookies">
+              <Suspense fallback={<PageLoader />}><LegalCookiesPage /></Suspense>
+            </Route>
+            <Route path="/legal/acceptable-use">
+              <Suspense fallback={<PageLoader />}><LegalAcceptableUsePage /></Suspense>
+            </Route>
+            <Route path="/legal/security-disclosure">
+              <Suspense fallback={<PageLoader />}><LegalSecurityDisclosurePage /></Suspense>
+            </Route>
             <Route path="/accessibility">
               <Suspense fallback={<PageLoader />}><AccessibilityPage /></Suspense>
+            </Route>
+
+            {/* ── Public infrastructure pages ── */}
+            <Route path="/security">
+              <Suspense fallback={<PageLoader />}><SecurityPage /></Suspense>
+            </Route>
+            <Route path="/api">
+              <Suspense fallback={<PageLoader />}><ApiPage /></Suspense>
+            </Route>
+            <Route path="/investor">
+              <Suspense fallback={<PageLoader />}><InvestorPage /></Suspense>
+            </Route>
+            <Route path="/press">
+              <Suspense fallback={<PageLoader />}><PressPage /></Suspense>
+            </Route>
+            <Route path="/brand">
+              <Suspense fallback={<PageLoader />}><BrandPage /></Suspense>
+            </Route>
+            <Route path="/faq">
+              <Suspense fallback={<PageLoader />}><FaqPage /></Suspense>
+            </Route>
+            <Route path="/roadmap">
+              <Suspense fallback={<PageLoader />}><PublicRoadmapPage /></Suspense>
             </Route>
 
             {/* ── Redirects ── */}
