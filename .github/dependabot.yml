@@ -1,24 +1,79 @@
 version: 2
 
 updates:
+  # Root workspace (covers all pnpm packages in the monorepo)
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
     open-pull-requests-limit: 10
     labels:
       - dependencies
       - automated
     commit-message:
-      prefix: "chore"
+      prefix: "chore(deps)"
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router*"
+          - "@types/react*"
+      vite-build:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vite-*"
+      testing:
+        patterns:
+          - "@playwright/*"
+          - "playwright"
+          - "vitest"
+          - "@vitest/*"
+      typescript:
+        patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
+          - "eslint*"
+      ui-components:
+        patterns:
+          - "@radix-ui/*"
+          - "lucide-react"
+          - "framer-motion"
+          - "tailwindcss"
+          - "@tailwindcss/*"
+      database:
+        patterns:
+          - "drizzle-orm"
+          - "drizzle-kit"
+          - "@neondatabase/*"
+          - "postgres"
+      tanstack:
+        patterns:
+          - "@tanstack/*"
 
+  # GitHub Actions
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "America/New_York"
     open-pull-requests-limit: 5
     labels:
       - github-actions
       - automated
     commit-message:
-      prefix: "chore"
+      prefix: "chore(ci)"
+    groups:
+      github-actions:
+        patterns:
+          - "actions/*"
+          - "github/*"
+          - "treosh/*"
+          - "softprops/*"
+          - "pnpm/*"

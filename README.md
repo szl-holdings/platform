@@ -2,8 +2,14 @@
 
 → [Live Demo](https://szlholdings.com) | [Security](./SECURITY.md) | [Architecture](./docs/architecture/system-overview.md) | [Investor Docs](./docs/investor/platform-thesis.md) | [Trust Center](./docs/trust/trust-center.md)
 
+[![CI](https://github.com/szlholdings/szl-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/ci.yml)
+[![E2E Tests](https://github.com/szlholdings/szl-platform/actions/workflows/e2e.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/e2e.yml)
+[![Lighthouse CI](https://github.com/szlholdings/szl-platform/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/lighthouse.yml)
+[![CodeQL](https://github.com/szlholdings/szl-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/szlholdings/szl-platform/actions/workflows/codeql.yml)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![License](https://img.shields.io/badge/license-proprietary-red)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
+![Node](https://img.shields.io/badge/Node-20.x-green)
 
 > Lyte is the command surface. Alloy is the execution fabric. Domain packs extend the same system into security, maritime, and real estate.
 

@@ -69,8 +69,26 @@ jobs:
         with:
           urls: |
             http://localhost:${{ matrix.app.port }}/
+          configPath: .lighthouserc.json
           uploadArtifacts: true
           artifactName: lighthouse-${{ matrix.app.name }}
           runs: 1
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  lighthouse-gate:
+    name: Lighthouse Gate
+    needs: lighthouse
+    runs-on: ubuntu-latest
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Check all Lighthouse jobs passed
+        run: |
+          if [[ "${{ needs.lighthouse.result }}" != "success" ]]; then
+            echo "One or more Lighthouse audits failed score thresholds"
+            echo "Thresholds: Performance > 80, Accessibility > 90, Best Practices > 90, SEO > 90"
+            exit 1
+          fi
+          echo "All Lighthouse audits passed"

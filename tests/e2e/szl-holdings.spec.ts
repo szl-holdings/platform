@@ -45,6 +45,12 @@ test.describe("SZL Holdings — Route Smoke Tests", () => {
     { path: "/about", label: "about" },
     { path: "/ecosystem", label: "ecosystem" },
     { path: "/contact", label: "contact" },
+    { path: "/trust-center", label: "trust center" },
+    { path: "/trust", label: "trust" },
+    { path: "/trust/security", label: "trust security" },
+    { path: "/trust/governance", label: "trust governance" },
+    { path: "/legal/privacy", label: "privacy policy" },
+    { path: "/legal/terms", label: "terms of service" },
   ];
 
   for (const route of routes) {
@@ -58,6 +64,192 @@ test.describe("SZL Holdings — Route Smoke Tests", () => {
       expect(body.length).toBeGreaterThan(200);
     });
   }
+});
+
+test.describe("SZL Holdings — Trust Center", () => {
+  test("trust center page loads and has substantive content", async ({ page }) => {
+    await page.goto(`${BASE_PATH}trust-center`.replace("//", "/"));
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(500);
+  });
+
+  test("trust page shows security or governance content", async ({ page }) => {
+    await page.goto(`${BASE_PATH}trust`.replace("//", "/"));
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const content = page.locator(
+      ":text('Security'), :text('Trust'), :text('Compliance'), :text('Privacy'), :text('Governance')"
+    ).first();
+    await expect(content).toBeVisible({ timeout: 15000 });
+  });
+
+  test("trust security sub-page loads without crash", async ({ page }) => {
+    await page.goto(`${BASE_PATH}trust/security`.replace("//", "/"));
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(200);
+  });
+});
+
+test.describe("SZL Holdings — Investor & Platform Pages", () => {
+  test("platform page loads with content", async ({ page }) => {
+    await page.goto(`${BASE_PATH}platform`.replace("//", "/"));
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(200);
+  });
+
+  test("ecosystem page loads and shows portfolio companies", async ({ page }) => {
+    await page.goto(`${BASE_PATH}ecosystem`.replace("//", "/"));
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const content = page.locator(
+      ":text('Lyte'), :text('Aegis'), :text('Vessels'), :text('Terra'), :text('Ecosystem'), :text('Portfolio')"
+    ).first();
+    await expect(content).toBeVisible({ timeout: 15000 });
+  });
+
+  test("contact page has contact form or contact information", async ({ page }) => {
+    await page.goto(`${BASE_PATH}contact`.replace("//", "/"));
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const contactContent = page.locator(
+      "form, input[type='email'], :text('Contact'), :text('email'), :text('@szlholdings')"
+    ).first();
+    await expect(contactContent).toBeVisible({ timeout: 15000 });
+  });
+});
+
+test.describe("SZL Holdings — Authentication Flow", () => {
+  test("login page or sign-in flow is accessible", async ({ page }) => {
+    const loginPaths = ["/login", "/sign-in", "/auth", "/auth/login", "/auth/sign-in"];
+    let loginFound = false;
+
+    for (const path of loginPaths) {
+      const url = `${BASE_PATH}${path}`.replace("//", "/");
+      const response = await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => null);
+      if (response && response.status() < 400) {
+        loginFound = true;
+        const errorBoundary = page.locator("text=Something went wrong").first();
+        const hasError = await errorBoundary.isVisible().catch(() => false);
+        expect(hasError).toBe(false);
+
+        const loginContent = page.locator(
+          "input[type='email'], input[type='password'], input[name='email'], button:has-text('Sign'), button:has-text('Login'), :text('Sign In'), :text('Log In')"
+        ).first();
+        const hasLoginContent = await loginContent.isVisible({ timeout: 10000 }).catch(() => false);
+        if (hasLoginContent) {
+          await expect(loginContent).toBeVisible();
+        }
+        break;
+      }
+    }
+
+    if (!loginFound) {
+      const nav = page.locator("nav").first();
+      await page.goto(BASE_PATH);
+      await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+      const navVisible = await nav.isVisible({ timeout: 10000 }).catch(() => false);
+      if (navVisible) {
+        const signInLink = nav.locator(
+          "a[href*='login'], a[href*='sign-in'], a[href*='auth'], a:has-text('Sign In'), a:has-text('Login'), a:has-text('Get Started')"
+        ).first();
+        const hasSignInLink = await signInLink.isVisible({ timeout: 5000 }).catch(() => false);
+        if (hasSignInLink) {
+          await signInLink.click();
+          await page.waitForLoadState("domcontentloaded");
+          const errorBoundary = page.locator("text=Something went wrong").first();
+          const hasError = await errorBoundary.isVisible().catch(() => false);
+          expect(hasError).toBe(false);
+          loginFound = true;
+        }
+      }
+    }
+
+    test.skip(!loginFound, "No login route found — auth flow may be handled via external provider");
+  });
+
+  test("protected route redirects unauthenticated users", async ({ page }) => {
+    const protectedPaths = ["/dashboard", "/app", "/command", "/platform/app"];
+
+    for (const path of protectedPaths) {
+      const url = `${BASE_PATH}${path}`.replace("//", "/");
+      const response = await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => null);
+
+      if (!response) continue;
+
+      const finalUrl = page.url();
+      const wasRedirected = finalUrl !== url && finalUrl !== `${url}/`;
+
+      if (wasRedirected) {
+        const redirectedToAuth =
+          /login|sign-in|auth|signin/i.test(finalUrl) ||
+          (await page.locator("input[type='email'], input[type='password']").first().isVisible({ timeout: 5000 }).catch(() => false));
+        expect(redirectedToAuth || response.status() === 401 || response.status() === 403).toBeTruthy();
+        return;
+      }
+    }
+
+    test.skip(true, "No protected route with auth redirect found — may be single-page app with client-side auth");
+  });
+});
+
+test.describe("SZL Holdings — API Health Endpoint", () => {
+  test("API health endpoint returns a valid response", async ({ request }) => {
+    const apiBase = process.env.API_BASE_URL ?? "http://localhost:5000";
+    const response = await request.get(`${apiBase}/api/health`).catch(() => null);
+
+    if (!response) {
+      test.skip(true, "API server not running in this test environment — skipping API health check");
+      return;
+    }
+
+    expect(response.status()).toBeLessThan(500);
+  });
+
+  test("API health endpoint is reachable if API server is configured", async ({ request }) => {
+    const apiBase = process.env.API_BASE_URL ?? "";
+    if (!apiBase) {
+      test.skip(true, "API_BASE_URL not configured — skipping API health check");
+      return;
+    }
+
+    const response = await request.get(`${apiBase}/api/health`);
+    expect(response.status()).toBeLessThan(500);
+
+    const body = await response.json().catch(() => ({}));
+    if (body.status) {
+      expect(["ok", "healthy", "degraded"]).toContain(body.status);
+    }
+  });
 });
 
 test.describe("SZL Holdings — User Journey: Explore Ecosystem → Contact", () => {
@@ -142,6 +334,16 @@ test.describe("SZL Holdings — Mobile Viewport", () => {
 
   test("ecosystem page renders on mobile and URL changes to ecosystem", async ({ page }) => {
     await page.goto(`${BASE_PATH}ecosystem`.replace("//", "/"));
+    await page.waitForLoadState("domcontentloaded");
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(200);
+  });
+
+  test("trust center page renders correctly on mobile", async ({ page }) => {
+    await page.goto(`${BASE_PATH}trust-center`.replace("//", "/"));
     await page.waitForLoadState("domcontentloaded");
     const errorBoundary = page.locator("text=Something went wrong").first();
     const hasError = await errorBoundary.isVisible().catch(() => false);

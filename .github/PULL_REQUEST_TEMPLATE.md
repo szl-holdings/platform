@@ -13,6 +13,7 @@ _Brief description of what this PR does and why._
 - [ ] Infrastructure — IaC, CI/CD, environment configuration
 - [ ] Design — UI/UX changes
 - [ ] Breaking change — Requires migration or consumer updates
+- [ ] Dependency update — Package upgrades
 
 ---
 
@@ -45,16 +46,44 @@ _Which applications or libraries are affected?_
 
 ---
 
-## Checklist
+## Quality Checklist
 
-- [ ] No secrets or credentials committed
-- [ ] TypeScript types are correct — no `any` without justification
-- [ ] API changes are reflected in OpenAPI spec (`lib/api-spec/`)
-- [ ] Breaking changes documented in CHANGELOG.md
-- [ ] New UI components follow the shared design system (`@workspace/shared-ui`)
+### Code Quality
+- [ ] CI passes locally — lint, typecheck, and unit tests all green
+- [ ] No `any` types without justification and inline comment
+- [ ] No debug artifacts, console.log, or commented-out code left in
+- [ ] PR is scoped to the stated changes — no unrelated diffs
+- [ ] Code follows project conventions (see `.github/instructions/`)
+
+### Testing
+- [ ] New functionality is covered by tests (unit or e2e)
+- [ ] Existing tests pass — no regressions introduced
+- [ ] E2E tests updated if new routes or critical user flows added
+- [ ] Tested manually on at least one browser/viewport
+
+### Security
+- [ ] No secrets, credentials, or tokens committed
+- [ ] No new external API calls without documented auth pattern
+- [ ] New endpoints have RBAC checks applied
 - [ ] Audit trail entries added for consequential actions
-- [ ] RBAC access controls verified for new routes/endpoints
-- [ ] Demo data state explicitly labeled in any new dashboards
+- [ ] Data returned does not include fields not required by the consumer
+
+### API & Data
+- [ ] API changes reflected in OpenAPI spec (`lib/api-spec/`)
+- [ ] Database migrations included if schema changed
+- [ ] Breaking changes documented in CHANGELOG.md
+- [ ] Multi-tenant scoping preserved — all queries include `org_id`
+
+### UI & Accessibility
+- [ ] New UI components follow the shared design system (`@workspace/shared-ui`)
+- [ ] Responsive — tested at mobile viewport (390px)
+- [ ] No accessibility regressions — keyboard navigable, proper ARIA labels
+
+### Documentation
+- [ ] Architecture docs updated if relevant
+- [ ] README updated if scope/setup changed
+- [ ] CHANGELOG entry added for notable changes
+- [ ] CODEOWNERS updated if new areas of ownership introduced
 
 ---
 
@@ -64,20 +93,22 @@ _Describe how this was tested. What scenarios were validated?_
 
 ---
 
-## Security Review
+## Performance Notes
 
-- [ ] No secrets, credentials, or tokens committed
-- [ ] No new external API calls without documented auth pattern
-- [ ] New endpoints have RBAC checks applied
-- [ ] Audit trail entries added for consequential actions
-- [ ] Data returned does not include fields not required by the consumer
+_Any performance implications? (bundle size, DB query count, render cost)_
 
 ---
 
-## Documentation
+## Screenshots / Demo
 
-_Is documentation updated? If not, explain why._
+_For UI changes, include before/after screenshots or a short recording._
 
-- [ ] Architecture docs updated if relevant
-- [ ] README updated if scope/setup changed
-- [ ] CHANGELOG entry added for notable changes
+---
+
+## Linked Issues / Tasks
+
+_Reference any related issues, tasks, or PRs._
+
+- Task: #
+- Issue: #
+- Related PR: #
