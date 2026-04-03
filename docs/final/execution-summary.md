@@ -1,180 +1,192 @@
 # SZL Holdings — Execution Summary
 
-**Task:** Full Public Credibility & Product Readiness — 10-Phase Investor-Grade Hardening  
-**Date:** April 2026  
-**Status:** Complete
+**Task:** Full Public Credibility & Product Readiness — 10-Phase Investor-Grade Hardening
+**Date:** April 2026
+**Status:** Complete (Hardening Pass 2)
 
 ---
 
 ## What Was Done
 
-This execution summary documents all changes made during the 10-phase investor-grade hardening program. Every item below represents a file created, a document written, or a structural improvement made to the SZL Holdings public surface.
+This execution summary documents all changes made during the 10-phase investor-grade hardening program, including the April 2026 hardening pass that upgraded the README, profile README, gitignore, mirror scripts, architecture diagrams, and live screenshots.
 
 ---
 
-## Phase 1: Audit & Canonicalization ✅
+## Phase 1: Audit & Canonicalization
 
-**Files created:**
-- `docs/audit/public-surface-audit.md` — Full workspace audit: what's mirror-safe, what's excluded, noise inventory, content readiness assessment
-- `docs/audit/repo-canonicalization-plan.md` — Canonical repo declaration, configuration standards, private vs. mirrored decision matrix, branch strategy, manual actions required
+- `docs/audit/public-surface-audit.md` — Full workspace audit with exclusion table
+- `docs/audit/repo-canonicalization-plan.md` — Canonical repo strategy and migration steps
 
-**Key decisions:**
+**Decisions:**
 - Canonical flagship repo: `stephenlutar2-hash/szl-holdings-platform`
 - Profile README repo: `stephenlutar2-hash/stephenlutar2-hash`
-- `.local/`, `attached_assets/`, `node_modules/`, `dist/` — always excluded
 
 ---
 
-## Phase 2: Public Mirror Discipline ✅
+## Phase 2: Public Mirror Discipline
 
-**Files created:**
-- `docs/public/public-mirror-policy.md` — Curation rules, inclusion/exclusion tables, update cadence, mirror push checklist
-- `scripts/public-mirror/validate-mirror.sh` — Pre-push validation: checks noisy dirs, secret patterns, internal docs, build artifacts, .gitignore coverage, README currency. Generates `mirror-report.md`. Blocks push on errors.
-- `scripts/public-mirror/detect-noisy-folders.sh` — Quick noisy directory scan script
-
-**`.gitignore` updates:** Existing `.gitignore` already covered primary risk paths (`.env`, `node_modules`, `dist`, `.local/`, `.cache/`, `attached_assets/`). Additional quarantine patterns were added for noisy directories (`.archive/`, `backups/`, `exports/`, `scratch/`, `temp/`, `*.bak`, `*.backup`) and the generated `mirror-report.md`.
-
----
-
-## Phase 3: Flagship Repo Trust Files ✅
-
-**Files created:**
-- `CHANGELOG.md` — Comprehensive release history starting with v0.1.0
-- `SECURITY.md` — Responsible disclosure process, supported versions, scope, security architecture, acknowledgements
-- `CONTRIBUTING.md` — Engineering standards for code quality, architecture, security, and design
-- `LICENSE.md` — Proprietary license notice with permitted/prohibited uses
-- `CODEOWNERS` — Code ownership declaration with path-based routing to `stephenlutar2-hash`
-- `.github/PULL_REQUEST_TEMPLATE.md` — PR template: summary, type, affected artifacts, checklist
-- `.github/ISSUE_TEMPLATE/bug_report.md` — Bug report template
-- `.github/ISSUE_TEMPLATE/feature_request.md` — Feature request template
-- `.github/ISSUE_TEMPLATE/config.yml` — Issue config: disable blank issues, add security email and docs link
-
-**Documentation restructure:**
-- `docs/architecture/system-overview.md` — Full system architecture, monorepo structure, tech stack, design principles
-- `docs/architecture/platform-map.md` — Ecosystem topology, product registry with readiness labels, mobile coverage, shared backbone
-- `docs/architecture/data-flow.md` — Core entity model, per-platform data flows, Alloy execution flow, audit trail schema, database schema organization
-- `docs/trust/trust-center.md` — Updated trust center (access control, AI governance, deployment, privacy, incident readiness)
-- `docs/trust/security-posture.md` — Auth, authorization, data protection, AI security boundaries, known gaps
-- `docs/trust/deployment-model.md` — Replit, Azure, CI/CD, rollback strategy, environment variables
-- `docs/trust/privacy-boundaries.md` — Data classification, PII handling, third-party processors, demo data policy
+- `docs/public/public-mirror-policy.md` — Curation rules, inclusion/exclusion
+- `scripts/public-mirror/prepare-public-mirror.sh` — Full rsync-based mirror staging with exclusions
+- `scripts/public-mirror/validate-public-surface.sh` — Pre-push validation with automated report generation
+- `scripts/public-mirror/detect-noisy-folders.sh` — Quick noisy directory scan
+- `.gitignore` — Comprehensive exclusions: `.archive/`, `.git-rewrite/`, `backups/`, `exports/`, `social-content/`, `spfx-webparts/`, `test-results/`, `.canvas/`, `.cursor/`, `*.sql.gz`, `*.dump`
 
 ---
 
-## Phase 4: Premium README Rewrite ✅
+## Phase 3: Flagship Repo Trust Files
 
-**File updated:** `README.md` — Complete rewrite
+- `CHANGELOG.md` — Release history from v0.1.0
+- `SECURITY.md` — Responsible disclosure, scope, architecture
+- `CONTRIBUTING.md` — Proprietary contribution standards
+- `LICENSE.md` — Proprietary license notice
+- `.github/CODEOWNERS` — Path-based ownership
+- `.github/PULL_REQUEST_TEMPLATE.md` — PR template
+- `.github/ISSUE_TEMPLATE/bug_report.md`, `feature_request.md`, `config.yml`
 
-**Sections:** Platform hierarchy diagram, why this matters, products with readiness labels, architecture at a glance (signal-to-action), trust summary, deployment, screenshots, repository structure, tech stack, documentation map, getting started, public mirror notice, **Start Here tracks** (Investors / Technical Reviewers / Design-Product / Enterprise Buyers), contact.
+**Architecture docs:**
+- `docs/architecture/system-overview.md`
+- `docs/architecture/platform-map.md`
+- `docs/architecture/data-flow.md`
 
----
-
-## Phase 5: GitHub Profile README Package ✅
-
-**Files created:**
-- `profile-readme/README.md` — Founder-grade Stephen Lutar GitHub profile README: positioning, currently building, focus areas, flagship repo link, architecture philosophy, contact
-- `profile-readme/PROFILE_REPO_SETUP.md` — Step-by-step setup instructions for creating the `stephenlutar2-hash/stephenlutar2-hash` repo and populating the profile README
-
----
-
-## Phase 6: Visual Assets (Documentation) ✅
-
-**Screenshots existing in `docs/screenshots/`:**
-- `szl-holdings-home.jpg`
-- `lyte-marketing.jpg`
-- `lyte-prism-pulse.jpg`
-- `aegis-soc-dashboard.jpg`
-- `aegis-marketing.jpg`
-- `terra-marketing.jpg`
-- `vessels-dashboard.jpg`
-- `stephen-site.jpg`
-
-All screenshots are referenced in the updated README.md. Architecture diagrams are documented in text/ASCII format within the architecture docs.
+**Trust docs:**
+- `docs/trust/trust-center.md`
+- `docs/trust/security-posture.md`
+- `docs/trust/deployment-model.md`
+- `docs/trust/privacy-boundaries.md`
 
 ---
 
-## Phase 7: Release Discipline ✅
+## Phase 4: Premium README
 
-**Files created:**
-- `docs/releases/release-strategy.md` — Philosophy, versioning policy, release process (4 steps), cadence, branch strategy
-- `docs/releases/versioning-policy.md` — MAJOR/MINOR/PATCH definitions, special milestones, package version strategy, changelog requirements
-- `docs/releases/release-checklist.md` — Pre-release checklist (code quality, security, documentation, hygiene, platform functionality), execution steps, post-release steps
-- `docs/releases/v0.1.0.md` — v0.1.0 release notes (platform inventory, infrastructure, mobile apps, documentation, known limitations)
-- `scripts/github/create-release.sh` — Script to create a GitHub Release from tag and release notes file
-- `scripts/github/update-repo-metadata.sh` — Script to apply canonical description/topics/homepage to the repo
-- `scripts/github/bootstrap-labels.sh` — Script to create all canonical issue labels
-
----
-
-## Phase 8: GitHub Automation Layer ✅
-
-**Files created:**
-- `ops/github/README.md` — Overview and navigation for the ops directory
-- `ops/github/manual-checklist.md` — Step-by-step manual instructions: repo settings, branch protection, profile README repo creation, profile settings update, release creation, label bootstrapping
-- `ops/github/commands.sh` — GitHub CLI automation (bash): metadata update, topics, release creation, label bootstrapping
-- `ops/github/commands.ps1` — Same automation in PowerShell for Windows environments
-- `ops/github/repo-settings.json` — Canonical repository settings as structured JSON reference
-- `ops/github/profile-values.md` — Exact recommended profile field values for `github.com/settings/profile`
+`README.md` — Complete rewrite with:
+- One-line thesis
+- Platform ecosystem table
+- Why this matters (4 arguments)
+- Architecture diagram (signal → action)
+- Full product summaries (Lyte, Alloy, Aegis, Vessels, Terra, Carlota Jo)
+- Trust summary
+- Deployment and operations
+- Documentation map table
+- Start Here tracks (Investor, Technical, Design/Product, Enterprise Buyer)
+- Public mirror notice
+- Contact
 
 ---
 
-## Phase 9: Design System Audit ✅
+## Phase 5: GitHub Profile README
 
-**Files created:**
-- `docs/design/design-audit.md` — Typography, color system, component inventory, platform-specific findings (Lyte, Aegis, Vessels, Terra), priority recommendations
-- `docs/design/design-system-tokens.md` — Color token definitions, typography scale table, spacing scale, status badge vocabulary, component patterns (card, KPI strip, status badge, empty state, loading skeleton), chart guidelines
-- `docs/design/ui-remediation-plan.md` — Three-phase plan: Foundation (status badge, empty state, loading skeleton), Data Visualization (chart colors, KPI strip), Marketing Surface (hero sections, footer). Effort estimates and acceptance criteria.
-
----
-
-## Phase 10: Investor + Buyer Docs & Readiness Labels ✅
-
-**Investor docs created:**
-- `docs/investor/platform-thesis.md` — Category definition, why now, operating wedge, expansion logic, defensibility
-- `docs/investor/product-readiness.md` — Per-platform readiness assessment with honest labels (Functional Alpha / Public Beta Candidate)
-- `docs/investor/investor-overview.md` — Company summary, investment thesis, what's been built, revenue model, funding use, recommended evaluation path
-- `docs/investor/go-to-market.md` — Entry strategy, target buyer profiles, pricing philosophy, first customer acquisition, competitive positioning, partnership channels
-- `docs/investor/why-now.md` — Three convergent forces: AI quality, enterprise AI governance demand, BI ceiling
-- `docs/investor/problem-opportunity.md` — Problem statement by vertical, market size estimates, why the category hasn't been won
-- `docs/investor/platform-portfolio.md` — Full platform portfolio with capability highlights and strategic position for each
-- `docs/investor/why-team.md` — Founder-led advantage, proof of work, advisory, founder positioning
-- `docs/investor/funding-use-outline.md` — Funding objectives, priority sequence, what funding does not buy
-- `docs/investor/readiness-gaps.md` — Transparent gap inventory with paths and risk levels
-
-**Buyer docs created:**
-- `docs/buyer/executive-overview.md` — C-suite evaluation guide with evaluation process
-- `docs/buyer/solution-brief.md` — Platform-by-platform capability summaries with problem/solution framing
-- `docs/buyer/security-summary.md` — Auth, access control, data protection, AI security, compliance status for procurement
-- `docs/buyer/deployment-options.md` — Three deployment models (Replit, Azure, On-Premises) with specs
-- `docs/buyer/use-cases.md` — 9 concrete use cases across all platforms with expected outcomes
+- `profile-readme/README.md` — Lyte+Alloy focused narrative, architecture philosophy, featured repo
+- `profile-readme/PROFILE_REPO_SETUP.md` — Setup instructions
+- `profile-readme/assets/platform-map.svg` — Architecture visual
+- `profile-readme/assets/ecosystem-map.svg` — Ecosystem visual
 
 ---
 
-## Phase 11: Final Proof Layer ✅
+## Phase 6: Visual Assets
 
-**Files created:**
-- `docs/final/execution-summary.md` — This file
-- `docs/final/what-changed.md` — Full file inventory of everything created/modified
-- `docs/final/manual-actions-remaining.md` — Everything that requires human action on GitHub
-- `docs/final/next-30-days.md` — 30-day action plan post-hardening
+**Live screenshots (captured from running apps):**
+- `docs/media/screenshots/landing-hero.jpg`
+- `docs/media/screenshots/trust-center.jpg`
+- `docs/media/screenshots/lyte-overview.jpg`
+- `docs/media/screenshots/alloy-overview.jpg`
+
+**Architecture diagrams (dark-premium SVG):**
+- `docs/media/diagrams/platform-map.svg`
+- `docs/media/diagrams/ecosystem-map.svg`
+- `docs/media/diagrams/signal-to-action-flow.svg`
+- `docs/media/diagrams/public-mirror-architecture.svg`
+
+**Screenshot pipeline:**
+- `scripts/media/capture-screenshots.sh`
+
+---
+
+## Phase 7: Release Discipline
+
+- `docs/releases/release-strategy.md`
+- `docs/releases/versioning-policy.md`
+- `docs/releases/release-checklist.md`
+- `docs/releases/v0.1.0.md`
+- `scripts/github/create-release.sh`
+- `scripts/github/update-repo-metadata.sh`
+- `scripts/github/bootstrap-labels.sh`
+
+---
+
+## Phase 8: GitHub Automation
+
+- `ops/github/README.md`
+- `ops/github/manual-checklist.md`
+- `ops/github/commands.sh` / `commands.ps1`
+- `ops/github/repo-settings.json`
+- `ops/github/profile-values.md`
+
+---
+
+## Phase 9: Design System
+
+- `docs/design/design-audit.md`
+- `docs/design/design-system-tokens.md`
+- `docs/design/ui-remediation-plan.md`
+
+---
+
+## Phase 10: Investor + Buyer Docs
+
+**Investor (10 documents):**
+- `docs/investor/investor-overview.md`
+- `docs/investor/platform-thesis.md`
+- `docs/investor/product-readiness.md`
+- `docs/investor/problem-opportunity.md`
+- `docs/investor/platform-portfolio.md`
+- `docs/investor/go-to-market.md`
+- `docs/investor/why-now.md`
+- `docs/investor/why-team.md`
+- `docs/investor/funding-use-outline.md`
+- `docs/investor/readiness-gaps.md`
+
+**Buyer (5 documents):**
+- `docs/buyer/executive-overview.md`
+- `docs/buyer/solution-brief.md`
+- `docs/buyer/security-summary.md`
+- `docs/buyer/deployment-options.md`
+- `docs/buyer/use-cases.md`
+
+**Final proof:**
+- `docs/final/execution-summary.md`
+- `docs/final/what-changed.md`
+- `docs/final/manual-actions-remaining.md`
+- `docs/final/next-30-days.md`
+
+---
+
+## Manual GitHub Actions Remaining
+
+See `docs/final/manual-actions-remaining.md` for the full checklist:
+1. Update repo description, topics, homepage URL (~5 min)
+2. Create Release v0.1.0 (~5 min)
+3. Set up profile README repo (~10 min)
+4. Update profile settings (~5 min)
+5. Pin repos and reorder (~3 min)
 
 ---
 
 ## Suggested Commit Messages
 
 ```
-feat: investor-grade platform hardening — 10-phase credibility and readiness build
+feat: investor-grade platform hardening — 10-phase credibility build
 
-- Audit: public surface audit, canonicalization plan, mirror policy
-- Trust files: CHANGELOG, SECURITY, CONTRIBUTING, LICENSE, CODEOWNERS
-- GitHub templates: PR template, bug report, feature request, issue config
-- Architecture docs: system-overview, platform-map, data-flow (new /docs/architecture/)
-- Trust docs: trust-center, security-posture, deployment-model, privacy-boundaries
-- Investor docs: 10 documents covering thesis, readiness, GTM, team, gaps
-- Buyer docs: 5 documents covering executive overview, solution brief, use cases
-- Design audit: audit, tokens, remediation plan
-- Release discipline: strategy, versioning policy, checklist, v0.1.0 notes
-- Profile README: Stephen Lutar founder package + setup instructions
-- GitHub automation: commands.sh, commands.ps1, manual checklist, repo settings
-- Scripts: validate-mirror.sh, detect-noisy-folders.sh, create-release.sh
-- README: premium rewrite with Start Here tracks for 4 evaluator types
+- README: premium rewrite with Start Here tracks
+- Profile README: Lyte+Alloy focused founder package
+- Trust files: SECURITY, CONTRIBUTING, LICENSE, CHANGELOG, CODEOWNERS
+- Architecture docs: system overview, platform map, data flow
+- Trust docs: trust center, security posture, deployment, privacy
+- Investor docs: 10 documents (thesis, readiness, GTM, team, gaps)
+- Buyer docs: 5 documents (overview, solution brief, use cases)
+- Design audit: tokens, audit, remediation plan
+- Release discipline: strategy, versioning, checklist, v0.1.0
+- Mirror scripts: prepare, validate, detect-noisy
+- Visual assets: 4 SVG diagrams, 4 live screenshots
+- GitHub automation: commands, checklist, settings
+- .gitignore: comprehensive public mirror exclusions
 ```

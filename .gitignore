@@ -1,5 +1,3 @@
-# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
-
 # compiled output
 dist
 tmp
@@ -41,17 +39,17 @@ testem.log
 .DS_Store
 Thumbs.db
 
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
-
-# Replit
+# Replit internal
 .cache/
 .local/
+.canvas/
+.cursor/
+.github/instructions/
 
 # Attached assets (user-pasted payload dumps)
 attached_assets/
 
-# Environment files — never commit real secrets
+# Environment files
 .env
 .env.local
 .env.*.local
@@ -59,12 +57,24 @@ attached_assets/
 
 # Noisy directories — quarantine from public mirror
 .archive/
+.git-rewrite/
 backups/
 exports/
 scratch/
 temp/
 *.bak
 *.backup
+*.sql.gz
 
-# Mirror validation reports (generated, not committed)
+# Internal / non-public content
+social-content/
+spfx-webparts/
+test-results/
+
+# Mirror validation reports (generated)
 scripts/public-mirror/mirror-report.md
+docs/audit/public-mirror-report.md
+
+# Database dumps
+*.dump
+*.pgdump

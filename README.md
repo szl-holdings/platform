@@ -1,51 +1,127 @@
-# SZL Holdings — Lyte + Alloy
+# SZL Holdings Platform
 
-**Focused now. Compounding later.**
+> Lyte is the command surface. Alloy is the execution fabric. Domain packs extend the same system into security, maritime, and real estate.
 
-SZL Holdings is building **Lyte**, a business observability platform, powered by **Alloy**, its execution fabric and audit layer.
+---
 
-The broader SZL ecosystem matters, but the near-term company narrative is intentionally tighter:
+## Platform Ecosystem
 
-- **Lyte** = market-facing software wedge
-- **Alloy** = workflow, signal, routing, and audit engine
-- **Vessels / Aegis / Terra / Carlota Jo** = staged expansion lanes and option value
+SZL Holdings builds **governed operational intelligence software**. The core thesis: business observability must connect to action, not just visualization. AI outputs without traceability create noise, not trust. Every decision should have a signal, a routing path, an approval gate, and an audit trail.
 
-This repository contains the broader platform workspace and historical expansion surfaces, but the recommended commercial, investor, and lender story is centered on **Lyte + Alloy**.
+**Lyte** is the flagship product — a business observability platform that surfaces execution risk, ownership drift, and workflow friction before they compound.
 
-## Why the narrative changed
+**Alloy** is the execution fabric beneath it — signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trace.
 
-The previous framing emphasized a multi-platform ecosystem across several markets at once. The stronger narrative for capital formation and customer acquisition is narrower:
+**Domain packs** apply the same architecture where consequence is highest:
+| Pack | Domain | Stage |
+|------|--------|-------|
+| **Aegis** | Security & defense intelligence | Functional alpha |
+| **Vessels** | Maritime fleet command | Functional alpha |
+| **Terra** | Real estate intelligence | Functional alpha |
+| **Carlota Jo** | Premium advisory operations | Live — accepting clients |
 
-1. Lead with one software wedge.
-2. Show one clear execution engine beneath it.
-3. Present the rest of the platform as expansion logic instead of simultaneous go-to-market scope.
+## Why This Matters
 
-## Near-term operating objective
+- Operational complexity is growing faster than team capacity
+- Dashboards show what happened — not what to do next
+- AI outputs without governance create risk, not leverage
+- Observability must connect to action, approval, and audit
 
-Use Lyte + Alloy to win:
+## Architecture at a Glance
 
-- design partners
-- early pilots
-- lender confidence
-- investor clarity
-- customer proof
+```
+Signals ──> Normalization ──> Context Engine ──> Routing
+                                                   │
+                                    ┌──────────────┼──────────────┐
+                                    ▼              ▼              ▼
+                               Auto-Execute   Approval Gate   Human Review
+                                    │              │              │
+                                    └──────────────┼──────────────┘
+                                                   ▼
+                                            Action Execution
+                                                   │
+                                                   ▼
+                                         Immutable Audit Trail
+```
 
-## Expansion logic
+**Stack**: TypeScript, React, Express 5, PostgreSQL, Drizzle ORM, Vite, Expo (mobile), Apollo GraphQL, pnpm monorepo.
 
-Once the core wedge is commercially validated, the same operating spine can support:
+**AI**: HuggingFace Inference (Qwen3-8B primary), evidence-backed hybrid retrieval, 9 schema-validated decision types, policy-gated tool execution.
 
-- **Vessels** — maritime intelligence
-- **Aegis / Firestorm** — security and command workflows
-- **Terra** — real-estate intelligence
-- **Carlota Jo** — premium advisory and service workflows
+**Auth**: OIDC/PKCE, session-based, 11-role RBAC, SCIM 2.0 provisioning, Azure AD multi-tenant SSO.
 
-## Repo notes
+## Products
 
-This GitHub repository is a public mirror of a broader workspace. The active source of truth remains the live Replit workspace.
+### Lyte — Business Observability
+The command surface for operators who need to see risk, bottlenecks, ownership gaps, and next actions in one place. PRISM framework: People, Revenue, Infrastructure, Security, Market. Signal timeline, correlation engine, priority action queue, and execution accountability.
 
-## Recommended next implementation steps
+### Alloy — Execution Fabric
+Workflow orchestration, signal routing, approval matrix, cost controls, governance policies, and audit trail. The layer that makes AI-assisted operations durable and accountable. Enterprise governance dashboard with SOC 2, HIPAA, and financial services compliance templates.
 
-- Replace the SZL Holdings homepage with the focused Lyte + Alloy narrative
-- Rewrite investor-facing pages around one disciplined capital story
-- Reframe the ventures page as a staged platform map rather than equal-present-tense products
-- Keep the wider ecosystem visible, but subordinate it to sequencing, proof, and buyer clarity
+### Aegis — Security & Defense Intelligence
+Unified defense platform consolidating SOC, managed operations, and intelligence engine. SOAR playbook engine, STIX/TAXII protocol support, XDR console, MITRE ATT&CK mapping, threat intelligence feeds.
+
+### Vessels — Maritime Intelligence
+Fleet command, AIS tracking, route anomaly detection, sanctions screening, voyage economics, and dark activity monitoring. Maritime operations with full signal context and exception-based workflows.
+
+### Terra — Real Estate Intelligence
+Distress signal detection, ownership analysis, underwriting workflows, broker scorecards, and pipeline management. Deal intelligence at execution speed with spatial mapping and market data integration.
+
+### Carlota Jo — Premium Advisory
+White-glove advisory operations for UHNW residential clients. Private intake, service lanes, client portal, and structured engagement workflows. Advisory informed by platform intelligence.
+
+## Trust
+
+- **Audit trail**: Every action, approval, and decision is logged with actor attribution
+- **Human-in-the-loop**: Configurable approval gates before consequential actions
+- **AI governance**: Model routing policies, cost controls, and compliance templates
+- **Role-based access**: 11-role RBAC with org-scoped tenant isolation
+- **Evidence-backed decisions**: AI outputs include source citations and confidence scores
+
+See [Trust Center](docs/trust/trust-center.md) and [Security Posture](docs/trust/security-posture.md).
+
+## Deployment & Operations
+
+- **Source of truth**: Replit workspace (active development)
+- **Production target**: Azure (production-ready architecture)
+- **Database**: PostgreSQL with 120+ tables, Drizzle ORM
+- **Observability**: Structured logging (pino), 8-pillar domain-native framework
+- **Mobile**: Expo/React Native apps for Aegis, Vessels, Terra, SZL, Stephen, Carlota Jo
+
+## Documentation Map
+
+| Area | Path |
+|------|------|
+| Architecture overview | [`docs/architecture/system-overview.md`](docs/architecture/system-overview.md) |
+| Platform map | [`docs/architecture/platform-map.md`](docs/architecture/platform-map.md) |
+| Data flow | [`docs/architecture/data-flow.md`](docs/architecture/data-flow.md) |
+| Trust center | [`docs/trust/trust-center.md`](docs/trust/trust-center.md) |
+| Security posture | [`docs/trust/security-posture.md`](docs/trust/security-posture.md) |
+| Platform thesis | [`docs/investor/platform-thesis.md`](docs/investor/platform-thesis.md) |
+| Product readiness | [`docs/investor/product-readiness.md`](docs/investor/product-readiness.md) |
+| Release notes | [`docs/releases/v0.1.0.md`](docs/releases/v0.1.0.md) |
+
+## Start Here
+
+| You are... | Start with |
+|------------|------------|
+| **Investor** | [Platform Thesis](docs/investor/platform-thesis.md) &#8594; [Product Readiness](docs/investor/product-readiness.md) &#8594; [Why Now](docs/investor/why-now.md) |
+| **Technical Reviewer** | [Architecture](docs/architecture/system-overview.md) &#8594; [Data Flow](docs/architecture/data-flow.md) &#8594; [Security](docs/trust/security-posture.md) |
+| **Design/Product** | [Platform Map](docs/architecture/platform-map.md) &#8594; [Trust Center](docs/trust/trust-center.md) |
+| **Enterprise Buyer** | [Trust Center](docs/trust/trust-center.md) &#8594; [Deployment](docs/trust/deployment-model.md) &#8594; [Contact](https://szlholdings.com/contact) |
+
+## Public Mirror Notice
+
+This repository is a curated public mirror of the SZL Holdings platform workspace. The live Replit workspace is the active source of truth. Proprietary modules, internal tooling, and sensitive configuration are intentionally excluded from the public surface.
+
+See [Public Mirror Policy](docs/public/public-mirror-policy.md) for details.
+
+## License
+
+Proprietary. All rights reserved. See [LICENSE.md](LICENSE.md).
+
+## Contact
+
+**Stephen Lutar** — Founder & CEO, SZL Holdings
+- Website: [szlholdings.com](https://szlholdings.com)
+- Design partner inquiries: [szlholdings.com/contact](https://szlholdings.com/contact)
