@@ -28,6 +28,8 @@
     "@szl-holdings/audit": "workspace:*",
     "@szl-holdings/auth": "workspace:*",
     "@szl-holdings/proof-chain": "workspace:*",
+    "@szl-holdings/receipt-graph": "workspace:*",
+    "@szl-holdings/pulse-evals": "workspace:*",
     "@szl-holdings/worldline": "workspace:*",
     "@szl-holdings/config": "workspace:*",
     "@szl-holdings/data-connectors": "workspace:*",

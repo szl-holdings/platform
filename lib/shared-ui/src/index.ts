@@ -31,6 +31,16 @@ export { RealtimeStatusIndicator } from "./realtime-status-indicator";
 export * from "./document-engine";
 export * from "./ontology";
 export { DataProvenance, ActionLoop, RoleSelector } from "./data-provenance";
+export {
+  ReceiptDrawer,
+  ProvenanceBadge,
+  ExecutiveTrustSummaryPanel,
+  ProvenanceViewer,
+  type ReceiptDrawerProps,
+  type ProvenanceBadgeProps,
+  type ExecutiveTrustSummaryPanelProps,
+  type ProvenanceViewerProps,
+} from "./receipt-graph";
 export { LanguageSwitcher, type LanguageSwitcherProps, type SupportedLocale } from "./language-switcher";
 export { ContactModal, useContactModal, type ContactModalProps } from "./contact-modal";
 export {

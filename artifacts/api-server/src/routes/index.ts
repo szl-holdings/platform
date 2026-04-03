@@ -110,6 +110,9 @@ import distributionOsRouter from "./distribution-os";
 import prismBusApiRouter from "./prism-bus-api";
 import forgeRuntimeApiRouter from "./forge-runtime-api";
 import covenantPolicyApiRouter from "./covenant-policy-api";
+import receiptGraphRouter from "./receipt-graph";
+import pulseEvalsRouter from "./pulse-evals";
+import genAITelemetryRouter from "./genai-telemetry";
 
 const router: IRouter = Router();
 
@@ -408,5 +411,17 @@ router.use(forgeRuntimeApiRouter);
 
 router.use("/covenant", _readLimiter);
 router.use(covenantPolicyApiRouter);
+
+router.use("/receipt-graph", _readLimiter);
+router.use("/receipt-graph", _writeLimiter);
+router.use(receiptGraphRouter);
+
+router.use("/pulse-evals", _readLimiter);
+router.use("/pulse-evals", _writeLimiter);
+router.use(pulseEvalsRouter);
+
+router.use("/genai-telemetry", _readLimiter);
+router.use("/genai-telemetry", _writeLimiter);
+router.use(genAITelemetryRouter);
 
 export default router;

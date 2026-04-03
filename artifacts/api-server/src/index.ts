@@ -35,8 +35,11 @@ import { registerGraphQLHandler } from "./app.js";
 import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence.js";
 import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
 import { startPrismJobPoller } from "./services/prism-queue";
+import { registerGenAITelemetryBridge } from "./lib/genai-telemetry-bridge.js";
 
 failFastOnInvalidConfig();
+
+registerGenAITelemetryBridge();
 
 initializeOpenTelemetry({
   serviceName: process.env.OTEL_SERVICE_NAME ?? "szl-api",

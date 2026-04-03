@@ -137,6 +137,7 @@
     "@udecode/plate-common": "^42.0.0",
     "@udecode/plate-core": "^49.0.0",
     "@szl-holdings/observability": "workspace:*",
+    "@szl-holdings/receipt-graph": "workspace:*",
     "@szl-holdings/replit-auth-web": "workspace:*",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",

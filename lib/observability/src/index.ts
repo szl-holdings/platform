@@ -6,3 +6,19 @@ export { doctrineEventBus, seedDoctrineEvents } from "./event-bus.js";
 export type { CorrelatedEventGroup } from "./event-bus.js";
 export { initializeOpenTelemetry, getTracer, getOtelConfig, isOtelInitialized } from "./otel.js";
 export type { OtelConfig, Span } from "./otel.js";
+export { genAITelemetry } from "./genai-telemetry.js";
+export type {
+  GenAISpanKind,
+  GenAISpanStatus,
+  GenAIModelCallSpan,
+  GenAIToolCallSpan,
+  GenAIAgentStepSpan,
+  GenAIRetrievalSpan,
+  GenAIApprovalSpan,
+  GenAIArtifactJobSpan,
+  GenAIExecutionRunSpan,
+  GenAISpan,
+  GenAITelemetrySnapshot,
+  LangfuseTrace,
+  LangfuseObservation,
+} from "./genai-telemetry.js";

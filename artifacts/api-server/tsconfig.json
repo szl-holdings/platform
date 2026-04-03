@@ -33,6 +33,12 @@
     },
     {
       "path": "../../lib/worldline"
+    },
+    {
+      "path": "../../lib/receipt-graph"
+    },
+    {
+      "path": "../../lib/pulse-evals"
     }
   ]
 }
