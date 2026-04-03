@@ -25,10 +25,12 @@ const TrustSecurityPage = lazy(() => import("@/pages/trust-security"));
 const TrustGovernancePage = lazy(() => import("@/pages/trust-governance"));
 const TrustArchitecturePage = lazy(() => import("@/pages/trust-architecture"));
 const TrustAIPage = lazy(() => import("@/pages/trust-ai"));
+const TrustApprovalsPage = lazy(() => import("@/pages/trust-approvals"));
 const TrustExportsPage = lazy(() => import("@/pages/trust-exports"));
 const TrustOperationsPage = lazy(() => import("@/pages/trust-operations"));
 const InvestorsHubPage = lazy(() => import("@/pages/investors-hub"));
 const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview-v2"));
+const ArchitecturePage = lazy(() => import("@/pages/architecture-page"));
 const InvestorsArchitecturePage = lazy(() => import("@/pages/investors-architecture"));
 const InvestorsMoatPage = lazy(() => import("@/pages/investors-moat"));
 const InvestorsRoadmapPage = lazy(() => import("@/pages/investors-roadmap"));
@@ -638,6 +640,9 @@ function App() {
             <Route path="/trust/ai">
               <Suspense fallback={<PageLoader />}><TrustAIPage /></Suspense>
             </Route>
+            <Route path="/trust/approvals">
+              <Suspense fallback={<PageLoader />}><TrustApprovalsPage /></Suspense>
+            </Route>
             <Route path="/trust/exports">
               <Suspense fallback={<PageLoader />}><TrustExportsPage /></Suspense>
             </Route>
@@ -935,7 +940,7 @@ function App() {
               <Redirect to="/" />
             </Route>
             <Route path="/architecture">
-              <Redirect to="/trust/architecture" />
+              <Suspense fallback={<PageLoader />}><ArchitecturePage /></Suspense>
             </Route>
             <Route path="/how-it-works">
               <Suspense fallback={<PageLoader />}><HowItWorksPage /></Suspense>
