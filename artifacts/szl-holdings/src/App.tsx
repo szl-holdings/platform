@@ -26,10 +26,14 @@ const TrustArchitecturePage = lazy(() => import("@/pages/trust-architecture"));
 const TrustAIPage = lazy(() => import("@/pages/trust-ai"));
 const TrustExportsPage = lazy(() => import("@/pages/trust-exports"));
 const TrustOperationsPage = lazy(() => import("@/pages/trust-operations"));
-const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview"));
+const InvestorsHubPage = lazy(() => import("@/pages/investors-hub"));
+const InvestorsOverviewPage = lazy(() => import("@/pages/investors-overview-v2"));
 const InvestorsArchitecturePage = lazy(() => import("@/pages/investors-architecture"));
 const InvestorsMoatPage = lazy(() => import("@/pages/investors-moat"));
-const InvestorsFounderPage = lazy(() => import("@/pages/investors-founder"));
+const InvestorsRoadmapPage = lazy(() => import("@/pages/investors-roadmap"));
+const InvestorsTrustPage = lazy(() => import("@/pages/investors-trust"));
+const InvestorsDataRoomPage = lazy(() => import("@/pages/investors-data-room"));
+const InvestorsFounderPage = lazy(() => import("@/pages/investors-founder-v2"));
 const PilotPrismCounselPage = lazy(() => import("@/pages/pilot-prism-counsel"));
 const PilotTerraPage = lazy(() => import("@/pages/pilot-terra"));
 const PilotVesselsPage = lazy(() => import("@/pages/pilot-vessels"));
@@ -609,11 +613,20 @@ function App() {
             <Route path="/investors/moat">
               <Suspense fallback={<PageLoader />}><InvestorsMoatPage /></Suspense>
             </Route>
+            <Route path="/investors/roadmap">
+              <Suspense fallback={<PageLoader />}><InvestorsRoadmapPage /></Suspense>
+            </Route>
+            <Route path="/investors/trust">
+              <Suspense fallback={<PageLoader />}><InvestorsTrustPage /></Suspense>
+            </Route>
+            <Route path="/investors/data-room">
+              <Suspense fallback={<PageLoader />}><InvestorsDataRoomPage /></Suspense>
+            </Route>
             <Route path="/investors/founder">
               <Suspense fallback={<PageLoader />}><InvestorsFounderPage /></Suspense>
             </Route>
             <Route path="/investors">
-              <Suspense fallback={<PageLoader />}><InvestorsOverviewPage /></Suspense>
+              <Suspense fallback={<PageLoader />}><InvestorsHubPage /></Suspense>
             </Route>
 
             {/* ── Pilot landing pages ── */}
@@ -830,7 +843,7 @@ function App() {
               <Redirect to="/" />
             </Route>
             <Route path="/founder">
-              <Redirect to="/" />
+              <Redirect to="/investors/founder" />
             </Route>
             <Route path="/case-studies">
               <Redirect to="/" />
