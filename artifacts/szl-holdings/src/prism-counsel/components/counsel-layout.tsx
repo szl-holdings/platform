@@ -5,7 +5,7 @@ import {
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
   Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug,
   Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap,
-  Sun, Download, CheckSquare, Server
+  Sun, Download, CheckSquare, Radio, Server
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,9 +49,10 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "Section 31",
+    label: "Legal OS",
     items: [
       { label: "Worldline", href: "/prism-counsel/worldline", icon: Globe },
+      { label: "Signal Forge", href: "/prism-counsel/signal-forge", icon: Radio },
       { label: "Pressure Graph", href: "/prism-counsel/pressure-graph", icon: Activity },
       { label: "Data Products", href: "/prism-counsel/data-products", icon: BarChart3 },
       { label: "Matter Twin", href: "/prism-counsel/matter-twin", icon: Layers },
@@ -75,6 +76,7 @@ const NAV_SECTIONS = [
       { label: "Costs", href: "/prism-counsel/costs", icon: DollarSign },
       { label: "Admin", href: "/prism-counsel/admin", icon: Settings },
       { label: "Pilot Ops", href: "/prism-counsel/pilot-admin", icon: Server },
+      { label: "Observability", href: "/prism-counsel/admin/health", icon: Server },
     ],
   },
 ];

@@ -7,6 +7,7 @@ import { lyteTypeDefs, lyteResolvers } from "./domains/lyte.js";
 import { holdingsTypeDefs, holdingsResolvers } from "./domains/holdings.js";
 import { stephenTypeDefs, stephenResolvers } from "./domains/stephen.js";
 import { carlotaJoTypeDefs, carlotaJoResolvers } from "./domains/carlota-jo.js";
+import { prismCounselTypeDefs, prismCounselResolvers } from "./domains/prism-counsel.js";
 
 const baseTypeDefs = `#graphql
   type Query {
@@ -33,6 +34,7 @@ export const typeDefs = [
   holdingsTypeDefs,
   stephenTypeDefs,
   carlotaJoTypeDefs,
+  prismCounselTypeDefs,
 ];
 
 function mergeResolversSimple(...resolverMaps: Record<string, Record<string, unknown>>[]) {
@@ -71,4 +73,5 @@ export const resolvers = mergeResolversSimple(
   holdingsResolvers as Record<string, Record<string, unknown>>,
   stephenResolvers as Record<string, Record<string, unknown>>,
   carlotaJoResolvers as Record<string, Record<string, unknown>>,
+  prismCounselResolvers as Record<string, Record<string, unknown>>,
 );

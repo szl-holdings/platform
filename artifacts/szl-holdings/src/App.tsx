@@ -67,6 +67,14 @@ const PrismVenueIntel = lazy(() => import("@/prism-counsel/pages/venue-intel-pag
 const PrismNoFault = lazy(() => import("@/prism-counsel/pages/no-fault-page"));
 const PrismNYDashboard = lazy(() => import("@/prism-counsel/pages/ny-dashboard-page"));
 const PrismConnectors = lazy(() => import("@/prism-counsel/pages/connectors-page"));
+const PrismMatterTwin = lazy(() => import("@/prism-counsel/pages/matter-twin-page"));
+const PrismPressureGraph = lazy(() => import("@/prism-counsel/pages/pressure-graph-page"));
+const PrismProofChain = lazy(() => import("@/prism-counsel/pages/proof-chain-page"));
+const PrismWorldline = lazy(() => import("@/prism-counsel/pages/worldline-page"));
+const PrismCopilotWorkbench = lazy(() => import("@/prism-counsel/pages/copilot-workbench-page"));
+const PrismAdminHealth = lazy(() => import("@/prism-counsel/pages/admin-health-page"));
+const PrismSignalForge = lazy(() => import("@/prism-counsel/pages/signal-forge-page"));
+const PrismForecastDiff = lazy(() => import("@/prism-counsel/pages/forecast-diff-page"));
 
 const PilotToday = lazy(() => import("@/prism-counsel/pages/pilot/today-page"));
 const PilotMatterDesk = lazy(() => import("@/prism-counsel/pages/pilot/matter-desk-page"));
@@ -377,13 +385,7 @@ function App() {
               <Suspense fallback={<PageLoader />}><CounselAppPage><PilotAdmin /></CounselAppPage></Suspense>
             </Route>
 
-            {/* ── PRISM Counsel Section 31 routes ── */}
-            <Route path="/prism-counsel/copilot-workbench">
-              <Suspense fallback={<PageLoader />}><CounselAppPage><S31CopilotWorkbench /></CounselAppPage></Suspense>
-            </Route>
-            <Route path="/prism-counsel/worldline">
-              <Suspense fallback={<PageLoader />}><CounselAppPage><S31WorldlineDashboard /></CounselAppPage></Suspense>
-            </Route>
+            {/* ── PRISM Counsel Section 31 routes (flat paths) ── */}
             <Route path="/prism-counsel/pressure-graph">
               <Suspense fallback={<PageLoader />}><CounselAppPage><S31PressureGraph /></CounselAppPage></Suspense>
             </Route>
@@ -399,11 +401,34 @@ function App() {
             <Route path="/prism-counsel/costs">
               <Suspense fallback={<PageLoader />}><CounselAppPage><S31CostTracking /></CounselAppPage></Suspense>
             </Route>
-            <Route path="/prism-counsel/forecast-diff">
-              <Suspense fallback={<PageLoader />}><CounselAppPage><S31ForecastDiff /></CounselAppPage></Suspense>
-            </Route>
             <Route path="/prism-counsel/data-products">
               <Suspense fallback={<PageLoader />}><CounselAppPage><S31DataProducts /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel Legal OS — expanded subsystem routes ── */}
+            <Route path="/prism-counsel/matters/:id/twin">
+              {(params) => <Suspense fallback={<PageLoader />}><CounselAppPage><PrismMatterTwin /></CounselAppPage></Suspense>}
+            </Route>
+            <Route path="/prism-counsel/matters/:id/pressure">
+              {(params) => <Suspense fallback={<PageLoader />}><CounselAppPage><PrismPressureGraph /></CounselAppPage></Suspense>}
+            </Route>
+            <Route path="/prism-counsel/matters/:id/proof-chain">
+              {(params) => <Suspense fallback={<PageLoader />}><CounselAppPage><PrismProofChain /></CounselAppPage></Suspense>}
+            </Route>
+            <Route path="/prism-counsel/worldline">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismWorldline /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/copilot-workbench">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismCopilotWorkbench /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin/health">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismAdminHealth /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/signal-forge">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismSignalForge /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/forecast-diff">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismForecastDiff /></CounselAppPage></Suspense>
             </Route>
 
             <Route path="/prism-counsel/ny">
