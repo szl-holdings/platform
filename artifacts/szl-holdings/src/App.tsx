@@ -113,6 +113,11 @@ const PilotReviewBeforeSend = lazy(() => import("@/prism-counsel/pages/pilot/rev
 const PilotSignoffQueue = lazy(() => import("@/prism-counsel/pages/pilot/signoff-queue-page"));
 const PilotWordExport = lazy(() => import("@/prism-counsel/pages/pilot/word-export-page"));
 const PilotAdmin = lazy(() => import("@/prism-counsel/pages/pilot/pilot-admin-page"));
+const PilotOnePressureBoard = lazy(() => import("@/prism-counsel/pages/pilot/pressure-board-page"));
+const PilotOneFrictionBoard = lazy(() => import("@/prism-counsel/pages/pilot/friction-board-page"));
+const PilotOneCarrierWatch = lazy(() => import("@/prism-counsel/pages/pilot/carrier-watch-page"));
+const PilotOneMovementBoard = lazy(() => import("@/prism-counsel/pages/pilot/movement-board-page"));
+const PilotOneAdmin = lazy(() => import("@/prism-counsel/pages/pilot/pilot-one-admin-page"));
 
 const S31CopilotWorkbench = lazy(() => import("@/prism-counsel/pages/s31/copilot-workbench"));
 const S31WorldlineDashboard = lazy(() => import("@/prism-counsel/pages/s31/worldline-dashboard"));
@@ -454,6 +459,23 @@ function App() {
             </Route>
             <Route path="/prism-counsel/pilot-admin">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PilotAdmin /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel Pilot One — Moat Layer Boards ── */}
+            <Route path="/prism-counsel/pressure-board">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotOnePressureBoard /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/friction-board">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotOneFrictionBoard /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/carrier-watch">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotOneCarrierWatch /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/movement-board">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotOneMovementBoard /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/pilot-one-admin">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PilotOneAdmin /></CounselAppPage></Suspense>
             </Route>
 
             {/* ── PRISM Counsel Section 31 routes (flat paths) ── */}
