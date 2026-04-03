@@ -20,34 +20,34 @@ The enterprise maturity path transforms the SZL Holdings GitHub presence from fo
 ### Milestones
 
 #### Org & Identity
-- [ ] Create `szl-holdings` GitHub organization
-- [ ] Apply org profile: display name, bio, website, email, profile picture
-- [ ] Create `szl-holdings/.github` repo with org profile README
-- [ ] Transfer `szl-holdings-platform` from personal account to org
-- [ ] Update all docs and README links to new org URL
-- [ ] Update personal profile (`stephenlutar2-hash`) to reflect org relationship
-- [ ] Pin flagship repo on org profile
+- [x] Create `szl-holdings` GitHub organization
+- [x] Apply org profile: display name, bio, website, email, profile picture
+- [x] Create `szl-holdings/.github` repo with org profile README
+- [x] Transfer `szl-holdings-platform` from personal account to org
+- [x] Update all docs and README links to new org URL
+- [ ] Update personal profile (`stephenlutar2-hash`) to reflect org relationship *(requires manual update — OAuth lacks write scope)*
+- [ ] Pin flagship repo on org profile *(requires manual UI — no API endpoint)*
 
 #### Repo Governance
-- [ ] Apply canonical description, topics, homepage URL to flagship repo
-- [ ] Enable issues; disable wiki, projects, discussions on flagship
-- [ ] Apply branch protection to `master` (PR required, status checks required, no force push, no deletion)
-- [ ] CODEOWNERS deployed to `.github/CODEOWNERS`
-- [ ] SECURITY.md deployed to root
-- [ ] CONTRIBUTING.md deployed to root
-- [ ] Issue templates: bug report, feature request, security report
-- [ ] PR template updated with security gate section
-- [ ] Release created: `v0.1.0`
-- [ ] Issue labels bootstrapped
+- [x] Apply canonical description, topics, homepage URL to flagship repo
+- [x] Enable issues; disable wiki, projects, discussions on flagship
+- [x] Apply branch protection to `master` (PR required, status checks required, no force push, no deletion)
+- [x] CODEOWNERS deployed to `.github/CODEOWNERS`
+- [x] SECURITY.md deployed to root
+- [x] CONTRIBUTING.md deployed to root
+- [x] Issue templates: bug report, feature request, security report
+- [x] PR template updated with security gate section
+- [x] Release created: `v0.1.0`
+- [x] Issue labels bootstrapped
 
 #### README & Surface
-- [ ] Flagship README updated to premium standard (all required sections)
-- [ ] Org profile README deployed with company statement, platform architecture, demo path
-- [ ] Personal profile README updated with org link
+- [x] Flagship README updated to premium standard (all required sections)
+- [x] Org profile README deployed with company statement, platform architecture, demo path
+- [ ] Personal profile README updated with org link *(requires manual update)*
 - [ ] All archive repos annotated with archived annotation template
 
 #### Actions / CI
-- [ ] All workflows have explicit `permissions` blocks
+- [ ] All workflows have explicit `permissions` blocks *(OAuth lacks `workflow` scope — cannot push workflow files)*
 - [ ] Third-party actions pinned to SHA
 - [ ] CI gate job added as single status check for branch protection
 - [ ] `deploy.yml` clarified (implement real trigger or document as placeholder)
@@ -88,8 +88,8 @@ Phase 1 is complete when:
 - [ ] Verify email domain `@szlholdings.com` (for org member emails)
 
 #### Expanded Security
-- [ ] Enable push protection for secret scanning (org-level)
-  - Navigate to: org Settings → Code security and analysis → Push protection
+- [x] Enable push protection for secret scanning (org-level)
+- [x] Enable vulnerability alerts and automated security fixes
 - [ ] Configure Dependabot version updates (not just security alerts)
   - Update `dependabot.yml` with version update schedules
 - [ ] Schedule quarterly dependency audit
@@ -98,7 +98,7 @@ Phase 1 is complete when:
 - [ ] Add `secret-scan.yml` workflow (Trufflehog or gitleaks on PRs)
 
 #### Access Control
-- [ ] Create formal teams: `platform`, `security`, `docs` (even if single-member)
+- [x] Create formal teams: `platform`, `security` (even if single-member)
 - [ ] Assign repos to teams with explicit permissions
 - [ ] Document onboarding procedure for future contributors
 - [ ] Set member base permissions to `Read` (org settings)
