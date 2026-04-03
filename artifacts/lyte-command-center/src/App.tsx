@@ -12,6 +12,7 @@ import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-u
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { Shield } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
+import { DemoModeProvider } from "@/lib/demo-mode";
 
 const LYTE_ACCENT = LANE_ACCENT_HEX.lyte.primary;
 
@@ -90,6 +91,7 @@ const DemoIntegrations = lazy(() => import("@/pages/demo-integrations"));
 const DemoReports = lazy(() => import("@/pages/demo-reports"));
 const DemoSettings = lazy(() => import("@/pages/demo-settings"));
 const DemoAlerts = lazy(() => import("@/pages/demo-alerts"));
+const DemoLive = lazy(() => import("@/pages/demo-live"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -173,6 +175,7 @@ function PrivateRouter() {
         <Route path="/admin/billing">{() => <AdminRoute component={AdminBillingPage} />}</Route>
         <Route path="/admin/ops">{() => <AdminRoute component={AdminOpsConsolePage} />}</Route>
         <Route path="/pricing" component={PricingPage} />
+        <Route path="/demo-live" component={DemoLive} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
@@ -270,13 +273,15 @@ function App() {
   return (
     <SandboxModeProvider>
       <QueryClientProvider client={queryClient}>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <StatusBanner config={LYTE_STATUS_CONFIG} />
-          <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
-          <AgentCopilot config={beaconConfig} />
-          <McpOverlay domain="lyte" />
-          <CookieBanner privacyUrl="https://szlholdings.com/legal/privacy" accentColor={LYTE_ACCENT} />
-        </WouterRouter>
+        <DemoModeProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <StatusBanner config={LYTE_STATUS_CONFIG} />
+            <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+            <AgentCopilot config={beaconConfig} />
+            <McpOverlay domain="lyte" />
+            <CookieBanner privacyUrl="https://szlholdings.com/legal/privacy" accentColor={LYTE_ACCENT} />
+          </WouterRouter>
+        </DemoModeProvider>
       </QueryClientProvider>
     </SandboxModeProvider>
   );

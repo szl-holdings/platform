@@ -6,9 +6,10 @@ import {
   Zap, Menu, X, ChevronDown, Bell, Settings, Users, Flag, FileText,
   Database, Play, Activity, CheckSquare, Shield, Network, Heart,
   AlertTriangle, Brain, Radio, Workflow, Inbox, Search, UserCheck,
-  ChevronRight, Gauge, BarChart3, LayoutDashboard, Download
+  ChevronRight, Gauge, BarChart3, LayoutDashboard, Download, Clapperboard, Power
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, useSandboxMode, EnvironmentLabel, type OnboardingConfig } from "@szl-holdings/shared-ui";
+import { useDemoMode } from "@/lib/demo-mode";
 
 const LYTE_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "lyte",
@@ -79,7 +80,10 @@ const PRISM_ITEMS = [
 const NAV_GROUPS = [
   {
     label: null,
-    items: [{ href: "/", label: "Exec Command", icon: LayoutDashboard }],
+    items: [
+      { href: "/", label: "Exec Command", icon: LayoutDashboard },
+      { href: "/demo-live", label: "Live Demo", icon: Clapperboard },
+    ],
   },
   {
     label: "Executive",
@@ -151,6 +155,40 @@ function NavItem({ href, icon: Icon, label, isActive, accent, onClick }: { href:
   );
 }
 
+function DemoModeToggle() {
+  const { state, activate, deactivate } = useDemoMode();
+  const isActive = state.active;
+  return (
+    <div className="mx-1.5 mb-1" style={{ borderTop: `1px solid rgba(255,255,255,0.04)`, paddingTop: 6 }}>
+      <button
+        onClick={() => isActive ? deactivate() : activate(state.currentScenario)}
+        className="flex items-center justify-between w-full px-2.5 py-1.5 rounded transition-all text-[9px] font-medium"
+        style={{
+          background: isActive ? "rgba(212,160,84,0.08)" : "rgba(255,255,255,0.02)",
+          border: `1px solid ${isActive ? "rgba(212,160,84,0.2)" : "rgba(255,255,255,0.05)"}`,
+          color: isActive ? "#d4a054" : TEXT.tertiary,
+        }}
+        aria-label={isActive ? "Deactivate demo mode" : "Activate demo mode"}
+        aria-pressed={isActive}
+      >
+        <div className="flex items-center gap-1.5">
+          <Power className="w-2.5 h-2.5" />
+          <span className="font-mono uppercase tracking-wider">Demo Mode</span>
+        </div>
+        <div className="flex items-center gap-1">
+          {isActive && (
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: "#d4a054" }} />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#d4a054" }} />
+            </span>
+          )}
+          <span className="text-[8px] font-mono" style={{ color: isActive ? "#d4a054" : TEXT.muted }}>{isActive ? "ON" : "OFF"}</span>
+        </div>
+      </button>
+    </div>
+  );
+}
+
 function AdminSection({ location }: { location: string }) {
   const [open, setOpen] = useState(false);
   const isInAdmin = location.startsWith("/admin");
@@ -186,6 +224,8 @@ export function LyteLayout({ children }: { children: ReactNode }) {
   const { replay: replayOnboarding } = useOnboardingState("lyte");
   const { sandboxActive } = useSandboxMode();
   const isDemoMode = sandboxActive || new URLSearchParams(window.location.search).get("demo") === "true";
+  const { state: demoState } = useDemoMode();
+  const isLiveDemoActive = demoState.active;
 
   return (
     <div className="flex h-full overflow-hidden">
@@ -243,6 +283,8 @@ export function LyteLayout({ children }: { children: ReactNode }) {
             ))}
             <AdminSection location={location} />
           </nav>
+
+          <DemoModeToggle />
 
           {LYTE_ONBOARDING_CONFIG.checklist && (
             <div className="mx-2 mb-2">
@@ -314,6 +356,16 @@ export function LyteLayout({ children }: { children: ReactNode }) {
                 <span style={{ color: TEXT.muted }}>·</span>
                 <EnvironmentLabel environment="demo" />
                 <EnvironmentLabel environment="seeded" />
+              </span>
+            )}
+            {isLiveDemoActive && (
+              <span className="hidden sm:flex items-center ml-1 gap-1.5">
+                <span style={{ color: TEXT.muted }}>·</span>
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: "#c45a4a" }} />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#c45a4a" }} />
+                </span>
+                <span className="text-[9px] font-mono uppercase tracking-wider" style={{ color: "#c45a4a" }}>Live Demo Running</span>
               </span>
             )}
           </div>
