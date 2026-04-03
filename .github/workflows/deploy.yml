@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify deployment configuration
+        run: |
+          if [ -z "${{ secrets.REPLIT_DEPLOY_TOKEN }}" ]; then
+            echo "::warning::REPLIT_DEPLOY_TOKEN not configured — deployment skipped"
+            echo "Configure this secret in Settings → Environments → production"
+            exit 0
+          fi
+          echo "Deployment configuration verified"
+
+      - name: Trigger Replit deployment
+        if: ${{ secrets.REPLIT_DEPLOY_TOKEN != '' }}
+        run: |
+          echo "Deployment is managed via Replit."
+          echo "This workflow is a placeholder for future automated deployment integration."
+          echo "To deploy: push to Replit workspace or use Replit's built-in deploy."
