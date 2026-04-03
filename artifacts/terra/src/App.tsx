@@ -47,6 +47,11 @@ const AgentsPage = lazy(() => import("@/pages/agents-command"));
 const CaseStudyPage = lazy(() => import("@/pages/case-study"));
 const TerraPerricingPage = lazy(() => import("@/pages/pricing"));
 const LenderReport = lazy(() => import("@/pages/lender-report"));
+const PropertyDesk = lazy(() => import("@/pages/property-desk"));
+const WhatChanged = lazy(() => import("@/pages/what-changed"));
+const DiligencePrep = lazy(() => import("@/pages/diligence-prep"));
+const ReadinessBoard = lazy(() => import("@/pages/readiness-board"));
+const ApprovalReview = lazy(() => import("@/pages/approval-review"));
 
 function PageLoader() {
   return (
@@ -98,6 +103,11 @@ function PrivateRouter() {
         <Route path="/document-engine/:sub" component={DocumentEngine} />
         <Route path="/pricing" component={TerraPerricingPage} />
         <Route path="/lender-report" component={LenderReport} />
+        <Route path="/property-desk" component={PropertyDesk} />
+        <Route path="/what-changed" component={WhatChanged} />
+        <Route path="/diligence-prep" component={DiligencePrep} />
+        <Route path="/readiness-board" component={ReadinessBoard} />
+        <Route path="/approval-review" component={ApprovalReview} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

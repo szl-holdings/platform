@@ -112,6 +112,12 @@ const Predictions = lazy(() => import("@/pages/intel/predictions"));
 const IntelProjects = lazy(() => import("@/pages/intel/projects"));
 const IntelInsights = lazy(() => import("@/pages/intel/insights"));
 
+const ThreatDesk = lazy(() => import("@/pages/threat-desk"));
+const AegisWhatChanged = lazy(() => import("@/pages/aegis-what-changed"));
+const ActionQueue = lazy(() => import("@/pages/action-queue"));
+const IncidentReadinessView = lazy(() => import("@/pages/incident-readiness-view"));
+const GovernanceReview = lazy(() => import("@/pages/governance-review"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -324,6 +330,17 @@ function AegisSidebarContent({ location, onNavigate }: { location: string; onNav
       id: "soc-tools",
       label: "SOC Tools",
       items: securityNavSecondary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+    },
+    {
+      id: "soc-operations",
+      label: "SOC Operations",
+      items: [
+        { id: "threat-desk", label: "Threat Desk", href: "/soc/threat-desk", icon: <Shield className="w-3.5 h-3.5" /> },
+        { id: "what-changed", label: "What Changed", href: "/soc/what-changed", icon: <Activity className="w-3.5 h-3.5" /> },
+        { id: "action-queue", label: "Action Queue", href: "/soc/action-queue", icon: <Zap className="w-3.5 h-3.5" /> },
+        { id: "readiness", label: "Incident Readiness", href: "/soc/readiness", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+        { id: "governance", label: "Governance Review", href: "/soc/governance", icon: <FileText className="w-3.5 h-3.5" /> },
+      ],
     },
     {
       id: "governance",
@@ -593,6 +610,12 @@ function AppRouter() {
         <Route path="/intel/predictions" component={Predictions} />
         <Route path="/intel/projects" component={IntelProjects} />
         <Route path="/intel/insights" component={IntelInsights} />
+
+        <Route path="/soc/threat-desk" component={ThreatDesk} />
+        <Route path="/soc/what-changed" component={AegisWhatChanged} />
+        <Route path="/soc/action-queue" component={ActionQueue} />
+        <Route path="/soc/readiness" component={IncidentReadinessView} />
+        <Route path="/soc/governance" component={GovernanceReview} />
 
         <Route>
           <div className="flex items-center justify-center h-full">

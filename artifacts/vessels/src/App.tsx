@@ -7,7 +7,7 @@ import { UserButton } from "@workspace/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
   BarChart3, ChevronDown, User, ChevronRight, DollarSign, Wrench,
-  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Anchor, Brain, Menu, FileText
+  MapPin, Radio, List, Globe, Navigation, EyeOff, ShieldAlert, Shield, Anchor, Brain, Menu, FileText
 } from "lucide-react";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
@@ -116,6 +116,11 @@ const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
 const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
 const CommandWorkflowsPage = lazy(() => import("@/pages/command-workflows"));
 const DocumentEngine = lazy(() => import("@/pages/document-engine"));
+const VoyageDeskPage = lazy(() => import("@/pages/voyage-desk"));
+const FleetWhatChangedPage = lazy(() => import("@/pages/fleet-what-changed"));
+const ExceptionQueuePage = lazy(() => import("@/pages/exception-queue"));
+const RouteRiskPage = lazy(() => import("@/pages/route-risk"));
+const VesselsApprovalReviewPage = lazy(() => import("@/pages/vessels-approval-review"));
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60000 } },
@@ -254,6 +259,17 @@ function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean;
         href: path,
         icon: <Icon className="w-3.5 h-3.5" />,
       })),
+    },
+    {
+      id: "operations",
+      label: "Operations",
+      items: [
+        { id: "voyage-desk", label: "Voyage Desk", href: "/voyage-desk", icon: <Anchor className="w-3.5 h-3.5" /> },
+        { id: "what-changed", label: "What Changed", href: "/what-changed", icon: <Radio className="w-3.5 h-3.5" /> },
+        { id: "exception-queue", label: "Exceptions", href: "/exception-queue", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
+        { id: "route-risk", label: "Route Risk", href: "/route-risk", icon: <Navigation className="w-3.5 h-3.5" /> },
+        { id: "approval-review", label: "Review & Approval", href: "/approval-review", icon: <Shield className="w-3.5 h-3.5" /> },
+      ]
     },
     {
       id: "admin",
@@ -433,6 +449,11 @@ function DashboardRouter() {
         <Route path="/command-workflows" component={CommandWorkflowsPage} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+        <Route path="/voyage-desk" component={VoyageDeskPage} />
+        <Route path="/what-changed" component={FleetWhatChangedPage} />
+        <Route path="/exception-queue" component={ExceptionQueuePage} />
+        <Route path="/route-risk" component={RouteRiskPage} />
+        <Route path="/approval-review" component={VesselsApprovalReviewPage} />
         <Route>
           <div className="flex items-center justify-center h-full">
             <p className="text-sky-400/40">Page not found</p>
@@ -525,7 +546,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
     location.startsWith("/cyber-threats") || location.startsWith("/incidents") ||
     location.startsWith("/agent-insights") || location.startsWith("/vessels-list") ||
     location.startsWith("/routes") || location.startsWith("/command-workflows") ||
-    location.startsWith("/document-engine");
+    location.startsWith("/document-engine") ||
+    location.startsWith("/voyage-desk") || location.startsWith("/what-changed") ||
+    location.startsWith("/exception-queue") || location.startsWith("/route-risk") ||
+    location.startsWith("/approval-review");
 
   if (isDashboard) {
     return (

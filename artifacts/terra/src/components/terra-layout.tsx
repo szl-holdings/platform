@@ -7,7 +7,8 @@ import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
 import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
-  Bell, Menu, X, Briefcase, Globe, TrendingUp, BookOpen
+  Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
+  Shield, Layers, Radio, Search
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@workspace/shared-ui/design-system";
@@ -63,6 +64,17 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       { id: "deals", href: "/deals", label: "Deals", icon: <TrendingUp className="w-full h-full" /> },
       { id: "leads", href: "/leads", label: "Brokers", icon: <Users className="w-full h-full" /> },
       { id: "listings", href: "/listings", label: "Portfolio", icon: <Briefcase className="w-full h-full" /> },
+    ],
+  },
+  {
+    id: "operations",
+    label: "Operations",
+    items: [
+      { id: "property-desk", href: "/property-desk", label: "Property Desk", icon: <Layers className="w-full h-full" /> },
+      { id: "what-changed", href: "/what-changed", label: "What Changed", icon: <Radio className="w-full h-full" /> },
+      { id: "diligence-prep", href: "/diligence-prep", label: "Diligence Prep", icon: <Search className="w-full h-full" /> },
+      { id: "readiness-board", href: "/readiness-board", label: "Readiness Board", icon: <BarChart3 className="w-full h-full" /> },
+      { id: "approval-review", href: "/approval-review", label: "Review & Approval", icon: <Shield className="w-full h-full" /> },
     ],
   },
   {
