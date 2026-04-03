@@ -60,6 +60,11 @@ const PrismCopilot = lazy(() => import("@/prism-counsel/pages/copilot-page"));
 const PrismParties = lazy(() => import("@/prism-counsel/pages/parties-page"));
 const PrismTrust = lazy(() => import("@/prism-counsel/pages/trust-page"));
 const PrismAdmin = lazy(() => import("@/prism-counsel/pages/admin-page"));
+const PrismWatchlist = lazy(() => import("@/prism-counsel/pages/watchlist-page"));
+const PrismInsurerIntel = lazy(() => import("@/prism-counsel/pages/insurer-intel-page"));
+const PrismVenueIntel = lazy(() => import("@/prism-counsel/pages/venue-intel-page"));
+const PrismNoFault = lazy(() => import("@/prism-counsel/pages/no-fault-page"));
+const PrismNYDashboard = lazy(() => import("@/prism-counsel/pages/ny-dashboard-page"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
@@ -288,6 +293,21 @@ function App() {
             </Route>
             <Route path="/prism-counsel/admin">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismAdmin /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/watchlist">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismWatchlist /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/insurer-intel">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismInsurerIntel /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/venue-intel">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismVenueIntel /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/no-fault">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismNoFault /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismNYDashboard /></CounselAppPage></Suspense>
             </Route>
 
             {/* ── Trust Center ── */}

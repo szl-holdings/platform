@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Scale, LayoutDashboard, FolderOpen, TrendingUp, BookOpen,
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
-  Gavel, Clock, FileText, Users
+  Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const NAV_SECTIONS = [
     label: "Command",
     items: [
       { label: "Dashboard", href: "/prism-counsel", icon: LayoutDashboard },
+      { label: "Watchlist", href: "/prism-counsel/watchlist", icon: Eye },
       { label: "Matters", href: "/prism-counsel/matters", icon: FolderOpen },
       { label: "Forecast", href: "/prism-counsel/forecast", icon: TrendingUp },
     ],
@@ -29,7 +30,16 @@ const NAV_SECTIONS = [
     label: "Intelligence",
     items: [
       { label: "Copilot", href: "/prism-counsel/copilot", icon: MessageSquare },
+      { label: "Insurer Intel", href: "/prism-counsel/insurer-intel", icon: Building2 },
+      { label: "Venue Intel", href: "/prism-counsel/venue-intel", icon: MapPin },
       { label: "Parties", href: "/prism-counsel/parties", icon: Users },
+    ],
+  },
+  {
+    label: "New York",
+    items: [
+      { label: "NY Command", href: "/prism-counsel/ny", icon: Scale },
+      { label: "No-Fault", href: "/prism-counsel/no-fault", icon: AlertTriangle },
     ],
   },
   {
