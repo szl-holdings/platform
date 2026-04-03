@@ -17,6 +17,9 @@ on:
       - 'artifacts/api-server/src/services/prism-*'
       - 'lib/db/src/schema/prism_counsel*'
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: '20'
   PNPM_VERSION: '9'
@@ -27,9 +30,11 @@ jobs:
   lint-and-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d
         with:
           version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
@@ -44,9 +49,11 @@ jobs:
     name: Build API Server
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d
         with:
           version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
@@ -61,9 +68,13 @@ jobs:
     name: Validate Bicep Templates
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: azure/login@v2
+      # azure/login pinned to SHA — verify at github.com/Azure/login/releases
+      - uses: azure/login@a65d910e8af852a8061c627c456678983e180302
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - run: |
@@ -79,9 +90,12 @@ jobs:
     needs: [build, validate-bicep]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: azure/login@v2
+      - uses: azure/login@a65d910e8af852a8061c627c456678983e180302
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - run: |
@@ -98,12 +112,16 @@ jobs:
     needs: deploy-infra
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: azure/login@v2
+      - uses: azure/login@a65d910e8af852a8061c627c456678983e180302
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: azure/docker-login@v2
+      # azure/docker-login pinned to SHA — verify at github.com/Azure/docker-login/releases
+      - uses: azure/docker-login@15c4aadf093404726ab2ff205b2cdd33fa6d054c
         with:
           login-server: ${{ secrets.ACR_LOGIN_SERVER }}
           username: ${{ secrets.ACR_USERNAME }}
@@ -123,9 +141,11 @@ jobs:
     needs: deploy-api
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fe52bf0ad0164d2310b5e4d5d7bfec47b67e3f9d
         with:
           version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
@@ -143,17 +163,19 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-api
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
     steps:
       - run: |
           API_URL="${{ secrets.API_BASE_URL }}"
-          
+
           echo "Testing PRISM Counsel health..."
           curl -sf "${API_URL}/api/prism-counsel/health" | jq .
-          
+
           echo "Testing PRISM Counsel readiness..."
           curl -sf "${API_URL}/api/prism-counsel/readiness" | jq .
-          
+
           echo "Testing PRISM Counsel NY health..."
           curl -sf "${API_URL}/api/prism-counsel/ny/health" | jq .
-          
+
           echo "All smoke tests passed."

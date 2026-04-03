@@ -1,14 +1,18 @@
 # SZL Holdings — GitHub Manual Operations Checklist
 
+> **See also:** The comprehensive enterprise UI checklist is at `docs/github/manual-ui-checklist.md`. It covers org creation, org README, pinned repos, branch protection, Actions settings, secrets, security analysis, domain verification, and the full Phase 1–3 maturity path with exact values and plan tier requirements.
+
 Use this checklist when performing GitHub operations manually through the web interface.
 
 ---
 
 ## 1. Repository Settings — szl-holdings-platform
 
+> **Note:** After org creation (see `docs/github/org-setup-package.md`), this URL changes to `github.com/szl-holdings/szl-holdings-platform`. Update accordingly.
+
 ### Via GitHub Web Interface
 
-1. Navigate to: `https://github.com/stephenlutar2-hash/szl-holdings-platform`
+1. Navigate to: `https://github.com/szl-holdings/szl-holdings-platform`
 2. Click **Settings** tab
 
 **General Settings:**

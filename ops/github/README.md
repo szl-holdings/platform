@@ -1,15 +1,34 @@
 # SZL Holdings — GitHub Operations
 
-This directory contains documentation, scripts, and configuration for managing the `szl-holdings-platform` GitHub repository and the `stephenlutar2-hash` GitHub profile.
+This directory contains operational runbooks, scripts, and configuration for managing the `szl-holdings-platform` GitHub repository and the `stephenlutar2-hash` GitHub profile.
 
 ---
 
-## Directory Contents
+## Primary Reference — docs/github/
+
+The comprehensive governance documentation lives in `docs/github/`:
+
+| Document | Purpose |
+|----------|---------|
+| [org-setup-package.md](../../docs/github/org-setup-package.md) | Org creation, canonical name, profile values, governance model |
+| [pinned-repos-strategy.md](../../docs/github/pinned-repos-strategy.md) | Which repos to pin and in what order |
+| [repo-cleanup-matrix.md](../../docs/github/repo-cleanup-matrix.md) | Full repo classification matrix and naming system |
+| [readme-standard.md](../../docs/github/readme-standard.md) | README standard — required sections, templates |
+| [security-governance-baseline.md](../../docs/github/security-governance-baseline.md) | SECURITY.md, CODEOWNERS, CONTRIBUTING.md templates |
+| [enterprise-rulesets.md](../../docs/github/enterprise-rulesets.md) | Ruleset configs by tier — flagship, docs, experiment |
+| [actions-ci-audit.md](../../docs/github/actions-ci-audit.md) | CI/Actions audit, hardened workflow templates |
+| [gist-policy.md](../../docs/github/gist-policy.md) | Gist acceptable use policy |
+| [manual-ui-checklist.md](../../docs/github/manual-ui-checklist.md) | Complete manual UI checklist with exact values and plan tiers |
+| [enterprise-maturity-path.md](../../docs/github/enterprise-maturity-path.md) | Three-phase maturity path — Phase 1, 2, 3 |
+
+---
+
+## This Directory Contents
 
 | File | Purpose |
 |------|---------|
 | `README.md` | This file — overview and navigation |
-| `manual-checklist.md` | Step-by-step manual instructions for all GitHub operations |
+| `manual-checklist.md` | Step-by-step manual instructions for all GitHub operations (see also: `docs/github/manual-ui-checklist.md` for the full enterprise version) |
 | `wiki-manual-steps.md` | Full wiki enable, publish, and verify checklist |
 | `repo-branding-manual-steps.md` | About text, topics, social preview, positioning steps |
 | `recommended-topics.md` | Topic taxonomy with brand/technical/market rationale |
@@ -22,7 +41,7 @@ This directory contains documentation, scripts, and configuration for managing t
 
 ---
 
-## Primary Operations
+## Start Here
 
 ### Repository Branding
 
@@ -70,6 +89,11 @@ Create the canonical set of issue labels for the repository.
 
 **Quick path:** `commands.sh` (step [5/6])
 
+**Phase 1 execution:** `docs/github/manual-ui-checklist.md` — top to bottom  
+**Org setup:** `docs/github/org-setup-package.md`  
+**Repo governance:** `docs/github/enterprise-rulesets.md`  
+**README updates:** `docs/github/readme-standard.md`
+
 ---
 
 ## GitHub CLI vs Manual
@@ -83,6 +107,7 @@ Most operations can be performed either via the GitHub CLI (`gh`) or manually th
 **GitHub Web Interface:**
 - No authentication setup required
 - See `manual-checklist.md`, `wiki-manual-steps.md`, and `repo-branding-manual-steps.md`
+- See `docs/github/manual-ui-checklist.md` for step-by-step instructions
 
 ---
 

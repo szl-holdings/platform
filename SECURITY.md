@@ -1,5 +1,7 @@
 # Security Policy
 
+→ [Platform Repo](https://github.com/szl-holdings/szl-holdings-platform) | [Architecture](./docs/architecture/system-overview.md) | [Trust Center](./docs/trust/trust-center.md) | [Contact](https://szlholdings.com)
+
 ## Supported Versions
 
 The SZL Holdings platform is currently in active pre-commercial development. Security issues are taken seriously regardless of commercial status.

@@ -6,18 +6,42 @@ Building governed operational intelligence software. Systems where AI-assisted d
 
 ---
 
+## About
+
+I build governed, production-ready command software for organizations that cannot afford silent failures, invisible risk, or unaccountable AI. Every system I build has explicit audit trails, human-in-the-loop controls, and traceable decision paths.
+
+AI outputs without traceability create noise, not trust. Signal → routing → approval gate → audit trail. That's the model.
+
+---
+
 ## Current Build
 
 **SZL Holdings Platform** — 16-artifact pnpm monorepo. TypeScript throughout.
 
+**[Lyte](https://szlholdings.com)** — Business observability platform. Surfaces execution risk, ownership drift, and workflow friction before they compound. PRISM framework: People, Revenue, Infrastructure, Security, Market.
+
+**Alloy** — Execution fabric. Signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. The layer that makes AI-assisted operations durable and accountable.
+
+---
+
+## Platforms
+
+| Platform | Domain |
+|----------|--------|
+| **Aegis** | Security & defense intelligence |
+| **Vessels** | Maritime fleet command |
+| **Terra** | Real estate intelligence |
+| **Carlota Jo** | Premium advisory operations |
+
+---
+
+## Architecture
+
 ```
-Lyte + Alloy                   │  Domain Packs
-─────────────────────────────────────────────────────
-Business observability          │  Aegis    — Security & defense intelligence
-Signal-to-action pipeline       │  Vessels  — Maritime fleet command
-Workflow orchestration          │  Terra    — Real estate intelligence
-Human-in-the-loop gates         │  Carlota Jo — Premium advisory (live)
-Immutable audit trail           │
+Lyte + Alloy                │  Full-Stack TypeScript     │  AI Governance
+Business observability      │  React + Node + PostgreSQL  │  Evidence-backed decisions
+Signal → action pipelines   │  Monorepo discipline        │  Human-in-the-loop gates
+Execution accountability    │  Shared infrastructure      │  Audit-first design
 ```
 
 ---
@@ -48,9 +72,9 @@ HuggingFace Inference · Apollo GraphQL · Vite
 
 ## Featured Repository
 
-**[szl-holdings-platform](https://github.com/stephenlutar2-hash/szl-holdings-platform)**
+**[szl-holdings-platform](https://github.com/szl-holdings/szl-holdings-platform)** — Full platform ecosystem. 16 deployable artifacts, 120+ database tables, TypeScript everywhere.
 
-Full platform ecosystem — all products, shared infrastructure, mobile apps, AI orchestration, and documentation.
+→ **[Live Demo](https://szlholdings.com)** | **[Security Policy](https://github.com/szl-holdings/szl-holdings-platform/blob/master/SECURITY.md)** | **[Architecture](https://github.com/szl-holdings/szl-holdings-platform/tree/master/docs/architecture)**
 
 ---
 
@@ -58,6 +82,6 @@ Full platform ecosystem — all products, shared infrastructure, mobile apps, AI
 
 **LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)  
 **Website:** [szlholdings.com](https://szlholdings.com)  
-**Inquiries:** [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
+**Email:** inquiries@szlholdings.com
 
-*Open to design partner conversations, enterprise evaluation, and investment.*
+*Open to design partner conversations, enterprise evaluation, and investment introductions.*

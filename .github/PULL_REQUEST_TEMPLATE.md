@@ -64,6 +64,16 @@ _Describe how this was tested. What scenarios were validated?_
 
 ---
 
+## Security Review
+
+- [ ] No secrets, credentials, or tokens committed
+- [ ] No new external API calls without documented auth pattern
+- [ ] New endpoints have RBAC checks applied
+- [ ] Audit trail entries added for consequential actions
+- [ ] Data returned does not include fields not required by the consumer
+
+---
+
 ## Documentation
 
 _Is documentation updated? If not, explain why._
