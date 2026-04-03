@@ -23,6 +23,7 @@ const NAV_ITEMS = [
       { label: "Aegis — Security & Defense", href: "/solutions/aegis" },
       { label: "Vessels — Maritime Intelligence", href: "/solutions/vessels" },
       { label: "Terra — Real Estate Intelligence", href: "/solutions/terra" },
+      { label: "PRISM Counsel — Legal Observability", href: "/solutions/prism-counsel" },
     ],
   },
   { label: "Trust", href: "/trust" },

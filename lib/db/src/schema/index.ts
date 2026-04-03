@@ -59,3 +59,4 @@ export * from "./intelligence_cache";
 export * from "./invitations";
 export * from "./revenue_events";
 export * from "./governance";
+export * from "./prism_counsel";

@@ -34,6 +34,7 @@ A premium, SZL-branded design system inspired by Palantir Foundry/Anduril Lattic
 - **SZL Holdings Mobile:** Executive Command + Alloy Orchestration mobile app.
 - **Stephen Lutar:** Near-monochrome, founder identity, with a native mobile app for digital card and portfolio showcase.
 - **Aegis:** Navy/amber/red, Unified Defense & Intelligence Command, consolidating Security Operations, Managed Operations, and Intelligence Engine. Includes a native mobile SOC command center app.
+- **PRISM Counsel:** Legal matter observability vertical — full command center for plaintiff-side litigation teams. 15-table DB schema, 3 demo matters, 12 pages (Dashboard, Matters, Matter Detail with 7 tabs, Forecast, Deadlines, Discovery, Playbooks, Approvals, Copilot, Parties, Trust, Admin). Uses 6-pillar PRISM scoring (Posture, Readiness, Integrity, Strategy, Money, Governance). Routes at `/prism-counsel/*` within SZL Holdings app. Marketing page at `/solutions/prism-counsel`.
 
 ### GraphQL API Layer
 A unified GraphQL API is mounted at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions. It includes 9 domain modules and a shared client library (`@workspace/graphql-client`) for frontends. REST endpoints remain active.

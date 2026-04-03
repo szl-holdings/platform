@@ -5,6 +5,7 @@ import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type StatusBannerConfig } from "@workspace/shared-ui";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
+import { CounselLayout } from "@/prism-counsel/components/counsel-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 
 const HomePage = lazy(() => import("@/pages/landing"));
@@ -44,6 +45,21 @@ const SolutionsAegisPage = lazy(() => import("@/pages/solutions-aegis"));
 const SolutionsVesselsPage = lazy(() => import("@/pages/solutions-vessels"));
 const SolutionsTerraPage = lazy(() => import("@/pages/solutions-terra"));
 const DocsPage = lazy(() => import("@/pages/docs"));
+
+const SolutionsPrismCounselPage = lazy(() => import("@/pages/solutions-prism-counsel"));
+
+const PrismDashboard = lazy(() => import("@/prism-counsel/pages/dashboard"));
+const PrismMattersList = lazy(() => import("@/prism-counsel/pages/matters-list"));
+const PrismMatterDetail = lazy(() => import("@/prism-counsel/pages/matter-detail"));
+const PrismForecast = lazy(() => import("@/prism-counsel/pages/forecast-page"));
+const PrismDeadlines = lazy(() => import("@/prism-counsel/pages/deadlines-page"));
+const PrismDiscovery = lazy(() => import("@/prism-counsel/pages/discovery-page"));
+const PrismPlaybooks = lazy(() => import("@/prism-counsel/pages/playbooks-page"));
+const PrismApprovals = lazy(() => import("@/prism-counsel/pages/approvals-page"));
+const PrismCopilot = lazy(() => import("@/prism-counsel/pages/copilot-page"));
+const PrismParties = lazy(() => import("@/prism-counsel/pages/parties-page"));
+const PrismTrust = lazy(() => import("@/prism-counsel/pages/trust-page"));
+const PrismAdmin = lazy(() => import("@/prism-counsel/pages/admin-page"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
@@ -141,6 +157,21 @@ function AlloyAppPage({ children }: { children: ReactNode }) {
   );
 }
 
+function CounselAppPage({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col h-screen" style={{ background: "#080c14" }}>
+      <div className="flex-1 overflow-hidden">
+        <CounselLayout>{children}</CounselLayout>
+      </div>
+    </div>
+  );
+}
+
+function CounselMatterRoute({ params }: { params: { id: string } }) {
+  const id = parseInt(params.id ?? "0");
+  return <PrismMatterDetail id={id} />;
+}
+
 function PageLoader() {
   return (
     <div
@@ -216,6 +247,47 @@ function App() {
             </Route>
             <Route path="/solutions/terra">
               <Suspense fallback={<PageLoader />}><SolutionsTerraPage /></Suspense>
+            </Route>
+            <Route path="/solutions/prism-counsel">
+              <Suspense fallback={<PageLoader />}><SolutionsPrismCounselPage /></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel app routes ── */}
+            <Route path="/prism-counsel">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismDashboard /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/matters">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismMattersList /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/matters/:id">
+              {(params) => <Suspense fallback={<PageLoader />}><CounselAppPage><CounselMatterRoute params={params} /></CounselAppPage></Suspense>}
+            </Route>
+            <Route path="/prism-counsel/forecast">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismForecast /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/deadlines">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismDeadlines /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/discovery">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismDiscovery /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/playbooks">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismPlaybooks /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/approvals">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismApprovals /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/copilot">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismCopilot /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/parties">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismParties /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/trust">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismTrust /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismAdmin /></CounselAppPage></Suspense>
             </Route>
 
             {/* ── Trust Center ── */}
