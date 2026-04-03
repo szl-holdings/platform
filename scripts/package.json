@@ -7,6 +7,10 @@
     "hello": "tsx ./src/hello.ts",
     "seed": "tsx ./src/seed.ts",
     "seed:canonical": "tsx ./src/seed-szl-canonical.ts",
+    "seed:demo": "tsx ./seed-demo-data.ts",
+    "seed:audit": "tsx ./seed-audit-logs.ts",
+    "seed:pilot": "tsx ./seed-pilot-org.ts",
+    "seed:pilot-data": "tsx ./seed-pilot-data.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

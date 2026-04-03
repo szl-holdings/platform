@@ -1334,4 +1334,78 @@ adminRouter.get("/admin/environment/full", (_req, res) => {
   });
 });
 
+// ─── Admin Impersonation ────────────────────────────────────────────────────
+
+adminRouter.post("/admin/impersonate/:userId", requireRole("admin"), async (req, res) => {
+  try {
+    const { startImpersonation } = await import("../middlewares/session-policy");
+    const targetUserId = parseInt(req.params["userId"] as string, 10);
+    if (isNaN(targetUserId) || targetUserId < 1) {
+      res.status(400).json({ error: "Invalid user ID" });
+      return;
+    }
+    const { reason } = req.body as { reason?: string };
+    const result = await startImpersonation({
+      impersonatorId: req.user!.id,
+      targetUserId,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      reason,
+    });
+    res.status(200).json({
+      token: result.token,
+      expiresAt: result.expiresAt,
+      message: "Impersonation session started. Use the token as a Bearer token.",
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to start impersonation";
+    res.status(403).json({ error: message });
+  }
+});
+
+adminRouter.post("/admin/impersonate/end", requireRole("admin"), async (req, res) => {
+  try {
+    const { endImpersonation } = await import("../middlewares/session-policy");
+    const { impersonationToken } = req.body as { impersonationToken?: string };
+    if (!impersonationToken) {
+      res.status(400).json({ error: "impersonationToken is required" });
+      return;
+    }
+    await endImpersonation({
+      impersonatorId: req.user!.id,
+      impersonationToken,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+    });
+    res.status(200).json({ message: "Impersonation session ended" });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to end impersonation";
+    const status = message.includes("Not authorized") ? 403 : 400;
+    res.status(status).json({ error: message });
+  }
+});
+
+adminRouter.delete("/admin/sessions/:userId", requireRole("admin"), async (req, res) => {
+  try {
+    const { forceTerminateUserSessions } = await import("../middlewares/session-policy");
+    const targetUserId = parseInt(req.params["userId"] as string, 10);
+    if (isNaN(targetUserId) || targetUserId < 1) {
+      res.status(400).json({ error: "Invalid user ID" });
+      return;
+    }
+    const { reason } = req.body as { reason?: string };
+    const result = await forceTerminateUserSessions({
+      adminUserId: req.user!.id,
+      targetUserId,
+      ipAddress: req.ip ?? null,
+      userAgent: req.headers["user-agent"] ?? null,
+      reason,
+    });
+    res.status(200).json({ deletedCount: result.deletedCount, message: "Sessions terminated" });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to terminate sessions";
+    res.status(500).json({ error: message });
+  }
+});
+
 export default adminRouter;

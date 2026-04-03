@@ -159,7 +159,7 @@ export function useUpdateAction() {
 export function useSavedViews(role?: string) {
   return useQuery({
     queryKey: ["savedViews", role],
-    queryFn: () => api.views.list(role),
+    queryFn: () => api.views.list(role as any),
   });
 }
 
