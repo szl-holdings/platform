@@ -9,7 +9,7 @@ import {
 } from "./doctrine-layer";
 import { DemoModeSwitcher } from "./demo-mode";
 import { SandboxToggle } from "./sandbox-mode";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 
 export interface EcosystemApp {
   id: string;

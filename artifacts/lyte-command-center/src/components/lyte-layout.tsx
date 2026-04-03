@@ -88,7 +88,10 @@ const NAV_GROUPS = [
   {
     label: "Executive",
     items: [
+      { href: "/board-mode", label: "Board Mode", icon: LayoutDashboard },
       { href: "/blocker-board", label: "Blocker Board", icon: AlertTriangle },
+      { href: "/bottleneck-heatmap", label: "Bottleneck Heatmap", icon: BarChart3 },
+      { href: "/decision-receipts", label: "Decision Receipts", icon: FileText },
       { href: "/digest", label: "Digest Center", icon: FileText },
       { href: "/approvals", label: "Approvals", icon: CheckSquare },
       { href: "/trust-audit", label: "Trust & Audit", icon: Shield },
@@ -102,6 +105,14 @@ const NAV_GROUPS = [
       { href: "/prism/intelligence", label: "Intelligence", icon: Brain },
       { href: "/prism/signals", label: "Signals Feed", icon: Radio },
       { href: "/prism/motion", label: "Motion", icon: Workflow },
+    ],
+  },
+  {
+    label: "Clarity Engine",
+    items: [
+      { href: "/outcome-loop", label: "Outcome Loop", icon: Activity },
+      { href: "/defer-lane", label: "Defer Lane", icon: Gauge },
+      { href: "/shadow-mode", label: "Shadow Mode", icon: Brain },
     ],
   },
   {

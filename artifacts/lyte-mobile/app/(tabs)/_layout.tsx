@@ -31,7 +31,15 @@ function NativeTabLayout() {
         <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
         <Label>PRISM</Label>
       </NativeTabs.Trigger>
-            <NativeTabs.Trigger name="mcp-tools">
+      <NativeTabs.Trigger name="board-mode">
+        <Icon sf={{ default: "eye", selected: "eye.fill" }} />
+        <Label>Board</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="receipts">
+        <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
+        <Label>Receipts</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="mcp-tools">
         <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
         <Label>Tools</Label>
       </NativeTabs.Trigger>
@@ -132,6 +140,30 @@ function ClassicTabLayout() {
               <SymbolView name="sparkles" tintColor={color} size={22} />
             ) : (
               <MaterialCommunityIcons name="diamond-outline" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="board-mode"
+        options={{
+          title: "Board",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="eye" tintColor={color} size={22} />
+            ) : (
+              <Feather name="eye" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="receipts"
+        options={{
+          title: "Receipts",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="doc.text" tintColor={color} size={22} />
+            ) : (
+              <Feather name="file-text" size={20} color={color} />
             ),
         }}
       />

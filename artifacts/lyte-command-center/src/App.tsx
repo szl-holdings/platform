@@ -100,6 +100,12 @@ const DemoReports = lazy(() => import("@/pages/demo-reports"));
 const DemoSettings = lazy(() => import("@/pages/demo-settings"));
 const DemoAlerts = lazy(() => import("@/pages/demo-alerts"));
 const DemoLive = lazy(() => import("@/pages/demo-live"));
+const BottleneckHeatmap = lazy(() => import("@/pages/bottleneck-heatmap"));
+const BoardMode = lazy(() => import("@/pages/board-mode"));
+const DecisionReceipts = lazy(() => import("@/pages/decision-receipts"));
+const OutcomeLoop = lazy(() => import("@/pages/outcome-loop"));
+const DeferLane = lazy(() => import("@/pages/defer-lane"));
+const ShadowMode = lazy(() => import("@/pages/shadow-mode"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -191,6 +197,12 @@ function PrivateRouter() {
         <Route path="/admin/ops">{() => <AdminRoute component={AdminOpsConsolePage} />}</Route>
         <Route path="/pricing" component={PricingPage} />
         <Route path="/demo-live" component={DemoLive} />
+        <Route path="/bottleneck-heatmap" component={BottleneckHeatmap} />
+        <Route path="/board-mode" component={BoardMode} />
+        <Route path="/decision-receipts" component={DecisionReceipts} />
+        <Route path="/outcome-loop" component={OutcomeLoop} />
+        <Route path="/defer-lane" component={DeferLane} />
+        <Route path="/shadow-mode" component={ShadowMode} />
         <Route>
           <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Page not found</div>
         </Route>
