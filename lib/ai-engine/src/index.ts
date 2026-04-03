@@ -28,7 +28,7 @@ export { type ApprovalRecommendation, validateApprovalRecommendation } from "./s
 export { type ExecutiveSummary, validateExecutiveSummary } from "./schemas/executive-summary.js";
 export { type ResolutionSummary, validateResolutionSummary } from "./schemas/resolution-summary.js";
 
-export { ALLOY_TOOL_DEFINITIONS, executeToolCall, checkToolPolicy, isHighRiskTool, type ToolExecutionResult, type ToolAuditEntry } from "./tools/alloy-tools.js";
+export { ALLOY_TOOL_DEFINITIONS, executeToolCall, checkToolPolicy, isHighRiskTool, getExecutionMode, type ToolExecutionResult, type ToolAuditEntry, type ExecutionMode } from "./tools/alloy-tools.js";
 
 export { AlloyRetrievalEngine, alloyRetrieval, type RetrievalChunk, type RetrievalResult, type ScoredChunk, type RerankResult } from "./retrieval/alloy-retrieval.js";
 

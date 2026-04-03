@@ -1855,6 +1855,7 @@ router.get("/firestorm/tradecraft/decisions", authMiddleware({ required: true })
     const limit = Math.min(parseInt(typeof req.query.limit === "string" ? req.query.limit : "50", 10), 200);
 
     const conditions = [
+      eq(firestormTradecraftDecisionsTable.tenantId, "default"),
       ...(caseId ? [eq(firestormTradecraftDecisionsTable.caseId, caseId)] : []),
       ...(incidentId ? [eq(firestormTradecraftDecisionsTable.incidentId, incidentId)] : []),
       ...(decisionType ? [eq(firestormTradecraftDecisionsTable.decisionType, decisionType as "TriageDecision")] : []),
@@ -1863,7 +1864,7 @@ router.get("/firestorm/tradecraft/decisions", authMiddleware({ required: true })
     const decisions = await db
       .select()
       .from(firestormTradecraftDecisionsTable)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .where(and(...conditions))
       .orderBy(desc(firestormTradecraftDecisionsTable.createdAt))
       .limit(limit);
     sendSuccess(res, decisions);
@@ -1873,7 +1874,10 @@ router.get("/firestorm/tradecraft/decisions", authMiddleware({ required: true })
 router.get("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ required: true }), async (req, res) => {
   try {
     const [decision] = await db.select().from(firestormTradecraftDecisionsTable)
-      .where(sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`);
+      .where(and(
+        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+        eq(firestormTradecraftDecisionsTable.tenantId, "default"),
+      ));
     if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
     sendSuccess(res, decision);
   } catch (err) { handleRouteError(res, err, "Failed to get tradecraft decision"); }
@@ -1905,7 +1909,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
     }
 
     const rawOutput = typeof body.rawOutput === "string" ? body.rawOutput : null;
-    const tenantId = typeof body.tenantId === "string" ? body.tenantId : "default";
+    const tenantId = "default";
     const modelRoute = typeof body.modelRoute === "string" ? body.modelRoute : "unknown";
 
     const validationResult = validateAndBuildDecision(body, body.decisionType as DecisionObjectType, {
@@ -1919,7 +1923,7 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
       await db.insert(firestormTradecraftValidationAuditTable).values({
         auditId: uuid422(),
         decisionType: String(body.decisionType),
-        tenantId: typeof body.tenantId === "string" ? body.tenantId : "default",
+        tenantId: "default",
         caseId: typeof body.caseId === "string" ? body.caseId : null,
         incidentId: typeof body.incidentId === "string" ? body.incidentId : null,
         validationErrors: validationResult.errors as string[],
@@ -2016,10 +2020,59 @@ router.post("/firestorm/tradecraft/decisions", authMiddleware({ required: true }
 router.put("/firestorm/tradecraft/decisions/:objectId", authMiddleware({ required: true }), async (req, res) => {
   try {
     const body = req.body as Record<string, unknown>;
-    const allowedUpdates = insertFirestormTradecraftDecisionSchema.partial().parse(body);
+    const action = typeof body.action === "string" ? body.action : null;
+    const user = req.user;
+
+    if (action === "approve" || action === "reject") {
+      const canApprove = user && (
+        user.roles.includes("admin") ||
+        user.roles.includes("super_admin") ||
+        user.roles.includes("ops")
+      );
+      if (!canApprove) {
+        res.status(403).json({ error: "Forbidden: decision approval requires admin, super_admin, or ops role", code: "INSUFFICIENT_ROLE" });
+        return;
+      }
+      const reviewerName = user.displayName ?? user.email ?? `user:${user.id}`;
+
+      const decisionTenant = "default";
+
+      if (action === "approve") {
+        const [decision] = await db.update(firestormTradecraftDecisionsTable)
+          .set({ approvedBy: reviewerName, approvedAt: new Date(), rejectedBy: null, rejectedAt: null, rejectionReason: null, updatedAt: new Date() })
+          .where(and(
+            sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+            eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant),
+          ))
+          .returning();
+        if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
+        sendSuccess(res, { ...decision, reviewStatus: "approved" });
+        return;
+      }
+
+      const rejectionReason = typeof body.rejectionReason === "string" ? body.rejectionReason : null;
+      const [decision] = await db.update(firestormTradecraftDecisionsTable)
+        .set({ rejectedBy: reviewerName, rejectedAt: new Date(), approvedBy: null, approvedAt: null, rejectionReason, updatedAt: new Date() })
+        .where(and(
+          sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+          eq(firestormTradecraftDecisionsTable.tenantId, decisionTenant),
+        ))
+        .returning();
+      if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
+      sendSuccess(res, { ...decision, reviewStatus: "rejected" });
+      return;
+    }
+
+    const allowedUpdates = insertFirestormTradecraftDecisionSchema
+      .omit({ approvedBy: true, approvedAt: true, rejectedBy: true, rejectedAt: true, rejectionReason: true })
+      .partial()
+      .parse(body);
     const [decision] = await db.update(firestormTradecraftDecisionsTable)
       .set({ ...allowedUpdates, updatedAt: new Date() })
-      .where(sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`)
+      .where(and(
+        sql`${firestormTradecraftDecisionsTable.objectId} = ${req.params.objectId}`,
+        eq(firestormTradecraftDecisionsTable.tenantId, "default"),
+      ))
       .returning();
     if (!decision) { sendNotFound(res, "Tradecraft Decision"); return; }
     sendSuccess(res, decision);

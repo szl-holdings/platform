@@ -425,3 +425,33 @@ export const firestormTradecraftValidationAuditTable = pgTable("firestorm_tradec
 export const insertFirestormValidationAuditSchema = createInsertSchema(firestormTradecraftValidationAuditTable).omit({ id: true, createdAt: true });
 export type InsertFirestormValidationAudit = z.infer<typeof insertFirestormValidationAuditSchema>;
 export type FirestormValidationAudit = typeof firestormTradecraftValidationAuditTable.$inferSelect;
+
+export const firestormToolAuditLogTable = pgTable("firestorm_tool_audit_log", {
+  id: serial("id").primaryKey(),
+  logId: text("log_id").notNull().unique(),
+  toolName: text("tool_name").notNull(),
+  calledBy: text("called_by").notNull().default("alloy"),
+  tenantId: text("tenant_id").notNull().default("default"),
+  executionMode: text("execution_mode", {
+    enum: ["observe_only", "propose_only", "approval_required", "approved_execute"],
+  }).notNull().default("propose_only"),
+  policyChecked: boolean("policy_checked").notNull().default(true),
+  approvalRequired: boolean("approval_required").notNull().default(false),
+  approvalStatus: text("approval_status", {
+    enum: ["approved", "pending", "rejected", "not_required"],
+  }).notNull().default("not_required"),
+  result: text("result", {
+    enum: ["success", "failure", "blocked"],
+  }).notNull(),
+  arguments: jsonb("arguments").$type<Record<string, unknown>>().notNull().default({}),
+  output: jsonb("output").default(null),
+  error: text("error"),
+  relatedDecisionId: text("related_decision_id"),
+  relatedCaseId: text("related_case_id"),
+  relatedIncidentId: text("related_incident_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const insertFirestormToolAuditLogSchema = createInsertSchema(firestormToolAuditLogTable).omit({ id: true, createdAt: true });
+export type InsertFirestormToolAuditLog = z.infer<typeof insertFirestormToolAuditLogSchema>;
+export type FirestormToolAuditLog = typeof firestormToolAuditLogTable.$inferSelect;

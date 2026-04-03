@@ -356,7 +356,9 @@ router.post("/ai/tools/execute", authMiddleware({ required: true }), async (req,
     };
     if (!toolName) { res.status(400).json({ error: "toolName required" }); return; }
 
-    const result = await executeToolCall(toolName, args || {}, calledBy || "api");
+    const user = req.user;
+    const callerIdentity = user ? `${user.displayName ?? user.email ?? `user:${user.id}`}` : (calledBy || "api");
+    const result = await executeToolCall(toolName, args || {}, callerIdentity, { tenantId: "default" });
 
     writeAudit({
       endpoint: "tools/execute",

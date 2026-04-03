@@ -1,7 +1,7 @@
 /**
  * Zero-Trust Product Control Middleware
  *
- * Implements Aegis Phase 1 zero-trust product controls:
+ * Implements Aegis Phase 1–3 zero-trust product controls:
  *
  * 1. Identity-aware routing: every action is user-aware, tenant-aware,
  *    permission-class-gated, and role/org-scoped

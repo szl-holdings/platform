@@ -6,6 +6,10 @@
  * requesting user has exactly one org membership, or when the
  * org slug/id is resolved from the request.
  *
+ * Phase 3 governance: Cross-tenant blocking is enforced here.
+ * Any attempt to access a tenant resource by a user not belonging
+ * to that tenant returns 403 with a logged audit event.
+ *
  * Usage:
  *   router.get("/signals", authMiddleware(), tenantScope(), handler)
  *

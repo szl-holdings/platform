@@ -12,7 +12,7 @@ import {
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
   Database, Trophy, Boxes, GitBranch, Link2, Flame, Menu, X, ChevronDown,
-  Hexagon, Zap, Briefcase
+  Hexagon, Zap, Briefcase, Globe
 } from "lucide-react";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
@@ -71,6 +71,16 @@ const DecisionConsole = lazy(() => import("@/pages/decision-console"));
 const ResponseOrchestration = lazy(() => import("@/pages/response-orchestration"));
 const ExecutiveBoardView = lazy(() => import("@/pages/executive-board-view"));
 
+// ─── Governance & Orchestration (Phase 3) ────────────────────────────────────
+const OperatorAnalytics = lazy(() => import("@/pages/governance/operator-analytics"));
+const IncidentAnalytics = lazy(() => import("@/pages/governance/incident-analytics"));
+const TrustAnalytics = lazy(() => import("@/pages/governance/trust-analytics"));
+const EnterpriseGovernance = lazy(() => import("@/pages/governance/enterprise-governance"));
+const ExecutiveReports = lazy(() => import("@/pages/governance/executive-reports"));
+const IntegrationHub = lazy(() => import("@/pages/governance/integration-hub"));
+const CanonicalDemo = lazy(() => import("@/pages/governance/canonical-demo"));
+const TrustPositioning = lazy(() => import("@/pages/governance/trust-positioning"));
+
 // ─── Managed Operations pages (Aegis Operations/MSP) ─────────────────────────
 const MspDashboard = lazy(() => import("@/pages/msp/dashboard"));
 const MspClients = lazy(() => import("@/pages/msp/clients"));
@@ -118,6 +128,17 @@ const commandSurfacesNav = [
   { path: "/decision-console", label: "Decision Console", icon: ClipboardCheck },
   { path: "/response-orchestration", label: "Response Orchestration", icon: Zap },
   { path: "/executive-board", label: "Executive / Board View", icon: BarChart3 },
+];
+
+const governanceNavItems = [
+  { path: "/gov/operator-analytics", label: "Operator Analytics", icon: Activity },
+  { path: "/gov/incident-analytics", label: "Incident Analytics", icon: BarChart3 },
+  { path: "/gov/trust-analytics", label: "Trust Analytics", icon: Shield },
+  { path: "/gov/governance", label: "Enterprise Governance", icon: Building2 },
+  { path: "/gov/executive-reports", label: "Executive Reports", icon: FileText },
+  { path: "/gov/integrations", label: "Integration Hub", icon: Globe },
+  { path: "/gov/canonical-demo", label: "Canonical Demo", icon: Play },
+  { path: "/gov/trust", label: "Trust & Security", icon: ShieldCheck },
 ];
 
 const securityNavPrimary = [
@@ -323,6 +344,7 @@ function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () =
   }, [location]);
 
   const [socToolsExpanded, setSocToolsExpanded] = useState(false);
+  const [governanceExpanded, setGovernanceExpanded] = useState(location.startsWith("/gov"));
   const [complianceExpanded, setComplianceExpanded] = useState(location.startsWith("/cr"));
   const [cortexExpanded, setCortexExpanded] = useState(false);
 
@@ -446,6 +468,34 @@ function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () =
                 onToggle={() => setSocToolsExpanded(!socToolsExpanded)}
                 location={location}
               />
+              <div className="pt-1">
+                <button
+                  onClick={() => setGovernanceExpanded(!governanceExpanded)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-red-400/70 hover:text-red-300 transition-all w-full"
+                >
+                  <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", governanceExpanded && "rotate-90")} />
+                  Governance & Reporting
+                  {location.startsWith("/gov") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
+                </button>
+                {governanceExpanded && (
+                  <div className="mt-0.5 space-y-0.5">
+                    {governanceNavItems.map(({ path, label, icon: Icon }) => {
+                      const isActive = location.startsWith(path);
+                      return (
+                        <Link key={path} href={path}>
+                          <div className={cn(
+                            "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
+                            isActive ? "bg-amber-500/10 text-amber-300" : "text-red-400/80 hover:text-red-200 hover:bg-red-500/5"
+                          )}>
+                            <Icon className="w-3 h-3 shrink-0" />
+                            {label}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <div className="pt-1">
                 <button
                   onClick={() => setComplianceExpanded(!complianceExpanded)}
@@ -692,6 +742,16 @@ function AppRouter() {
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/document-engine" component={DocumentEngine} />
         <Route path="/document-engine/:sub" component={DocumentEngine} />
+
+        {/* Governance & Reporting (Phase 3) */}
+        <Route path="/gov/operator-analytics" component={OperatorAnalytics} />
+        <Route path="/gov/incident-analytics" component={IncidentAnalytics} />
+        <Route path="/gov/trust-analytics" component={TrustAnalytics} />
+        <Route path="/gov/governance" component={EnterpriseGovernance} />
+        <Route path="/gov/executive-reports" component={ExecutiveReports} />
+        <Route path="/gov/integrations" component={IntegrationHub} />
+        <Route path="/gov/canonical-demo" component={CanonicalDemo} />
+        <Route path="/gov/trust" component={TrustPositioning} />
 
         {/* Managed Operations */}
         <Route path="/ops/dashboard" component={MspDashboard} />

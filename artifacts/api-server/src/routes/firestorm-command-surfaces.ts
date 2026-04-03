@@ -5,6 +5,11 @@
  * Per-route controls: environmentLabel, identityAwareRoute, sessionAwareness,
  * automationGate, dataControls. See docs/internal/aegis/zero-trust-policy-matrix.md.
  *
+ * Phase 3: Approval-aware orchestration is applied via automationGate().
+ * Execution modes: propose_only (analyst), approval_required (containment/isolation),
+ * approved_execute (pre-approved playbook actions). Tool calls write ToolAuditEntry
+ * rows to firestorm_tool_audit_log via lib/ai-engine/src/tools/alloy-tools.ts.
+ *
  * Tenant model: shared-platform SOC (no orgId on schema). Access partitioned by
  * permission class + row-level assignment checks on mutations.
  */
@@ -19,6 +24,7 @@ import {
   firestormComplianceControlsTable,
   firestormRiskScoresTable,
   firestormFindingsTable,
+  firestormToolAuditLogTable,
 } from "@workspace/db";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
@@ -734,6 +740,36 @@ router.get(
       });
     } catch (err) {
       handleRouteError(res, err, "Failed to fetch executive compliance");
+    }
+  },
+);
+
+router.get(
+  "/firestorm/tool-audit-log",
+  authMiddleware(),
+  environmentLabel(),
+  identityAwareRoute({ require: "analyst" }),
+  dataControls({ sensitivity: "CONFIDENTIAL", retention: "COMPLIANCE-7Y" }),
+  async (req, res) => {
+    try {
+      const user = req.user;
+      const isSuperAdmin = user?.roles.includes("super_admin") || user?.roles.includes("admin");
+      let tenantFilter: string | null = null;
+      if (isSuperAdmin) {
+        const tenantParam = typeof req.query.tenantId === "string" ? req.query.tenantId : null;
+        tenantFilter = tenantParam;
+      } else {
+        tenantFilter = "default";
+      }
+      const rows = await db
+        .select()
+        .from(firestormToolAuditLogTable)
+        .where(tenantFilter !== null ? eq(firestormToolAuditLogTable.tenantId, tenantFilter) : undefined)
+        .orderBy(desc(firestormToolAuditLogTable.createdAt))
+        .limit(200);
+      sendSuccess(res, rows);
+    } catch (err) {
+      handleRouteError(res, err, "Failed to fetch tool audit log");
     }
   },
 );

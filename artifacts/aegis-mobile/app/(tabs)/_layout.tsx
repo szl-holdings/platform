@@ -21,13 +21,13 @@ function NativeTabLayout() {
         <Icon sf={{ default: "exclamationmark.triangle", selected: "exclamationmark.triangle.fill" }} />
         <Label>Incidents</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="findings">
-        <Icon sf={{ default: "magnifyingglass.circle", selected: "magnifyingglass.circle.fill" }} />
-        <Label>Findings</Label>
+      <NativeTabs.Trigger name="approvals">
+        <Icon sf={{ default: "checkmark.seal", selected: "checkmark.seal.fill" }} />
+        <Label>Approvals</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="mitre">
-        <Icon sf={{ default: "rectangle.grid.3x2", selected: "rectangle.grid.3x2.fill" }} />
-        <Label>MITRE</Label>
+      <NativeTabs.Trigger name="digest">
+        <Icon sf={{ default: "doc.text", selected: "doc.text.fill" }} />
+        <Label>Digest</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
@@ -94,27 +94,39 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="findings"
+        name="approvals"
         options={{
-          title: "Findings",
+          title: "Approvals",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="magnifyingglass.circle.fill" tintColor={color} size={22} />
+              <SymbolView name="checkmark.seal.fill" tintColor={color} size={22} />
             ) : (
-              <Feather name="search" size={20} color={color} />
+              <Ionicons name="checkmark-circle-outline" size={20} color={color} />
             ),
+        }}
+      />
+      <Tabs.Screen
+        name="digest"
+        options={{
+          title: "Digest",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="doc.text.fill" tintColor={color} size={22} />
+            ) : (
+              <Ionicons name="document-text-outline" size={20} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="findings"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
         name="mitre"
         options={{
-          title: "MITRE",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="rectangle.grid.3x2.fill" tintColor={color} size={22} />
-            ) : (
-              <Feather name="grid" size={20} color={color} />
-            ),
+          href: null,
         }}
       />
       <Tabs.Screen
