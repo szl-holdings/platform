@@ -1,0 +1,86 @@
+{
+  "id": "prismcounselconnector",
+  "name": "Prism Counsel",
+  "description": "Connects Microsoft 365 to Prism Counsel legal matter intelligence platform. Syncs matter documents, communications, and signals for AI-powered analysis.",
+  "version": "1.0.0",
+  "publisher": "SZL Holdings",
+  "publisherUrl": "https://szlholdings.com",
+  "privacyPolicyUrl": "https://szlholdings.com/privacy",
+  "termsOfUseUrl": "https://szlholdings.com/terms",
+  "supportUrl": "https://szlholdings.com/support",
+  "iconUrl": "https://szlholdings.com/icons/prism-counsel-connector.png",
+  "connectorType": "microsoft_365",
+  "authType": "oauth2",
+  "scopes": [
+    "Files.Read.All",
+    "Sites.Read.All",
+    "Mail.Read",
+    "User.Read",
+    "offline_access"
+  ],
+  "appOnlyScopes": [
+    "Files.Read.All",
+    "Sites.Read.All",
+    "ChannelMessage.Read.All",
+    "User.Read.All"
+  ],
+  "dataSync": {
+    "supportedResourceTypes": [
+      {
+        "type": "SharePoint.Documents",
+        "description": "SharePoint document libraries containing matter files",
+        "syncMethod": "delta",
+        "webhookSupported": true,
+        "maxItemsPerSync": 500
+      },
+      {
+        "type": "Exchange.Mail",
+        "description": "Exchange Online mailbox messages (opted-in mailboxes only)",
+        "syncMethod": "delta",
+        "webhookSupported": true,
+        "requiredDelegatedPermissions": ["Mail.Read"]
+      },
+      {
+        "type": "Teams.ChannelMessages",
+        "description": "Teams channel messages in legal team channels (explicit opt-in required)",
+        "syncMethod": "delta",
+        "webhookSupported": true,
+        "requiredAdminConsent": true
+      }
+    ],
+    "neverSyncTypes": [
+      "HR.Documents",
+      "Finance.BillingRecords",
+      "Payroll.Data",
+      "Attorney.PersonalEmail",
+      "LegalHold.Content"
+    ]
+  },
+  "webhooks": {
+    "notificationUrl": "{{PRISM_COUNSEL_API_BASE_URL}}/api/prism-counsel/connectors/graph-notifications",
+    "validationEndpoint": "{{PRISM_COUNSEL_API_BASE_URL}}/api/prism-counsel/connectors/graph-notifications/validate",
+    "subscriptionLifetimeHours": 72,
+    "autoRenewalEnabled": true,
+    "renewalWindowHours": 24
+  },
+  "privacyMapping": {
+    "piiFields": ["sender_email", "recipient_email", "user_display_name"],
+    "piiHandling": "stored_encrypted",
+    "contentRetentionPolicy": "follows_matter_retention"
+  },
+  "aclMapping": {
+    "sharePointGroupToRole": {
+      "LegalTeam-Attorneys": "attorney",
+      "LegalTeam-Paralegals": "paralegal",
+      "LegalTeam-Operators": "operator",
+      "LegalTeam-Analysts": "analyst"
+    },
+    "fallbackRole": "analyst",
+    "privilegeStateFromSensitivityLabel": {
+      "Confidential/AttorneyClient": "attorney_client",
+      "Confidential/WorkProduct": "work_product",
+      "Confidential/Legal": "work_product",
+      "Public": "none"
+    }
+  }
+}

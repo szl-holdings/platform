@@ -1,0 +1,269 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Prism Counsel — Declarative Agent Actions",
+    "description": "Read-only action endpoints for Microsoft 365 Copilot declarative agent integration. These endpoints return advisory matter intelligence only. No write operations are available through this integration.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "{{PRISM_COUNSEL_API_BASE_URL}}/api/prism-counsel/m365-agent",
+      "description": "Prism Counsel M365 agent endpoint"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/matters/summary": {
+      "get": {
+        "operationId": "getMatterSummaries",
+        "summary": "Get matter summaries for the authenticated user",
+        "description": "Returns a list of matter summaries for all matters assigned to the authenticated user, ordered by health score and deadline proximity.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of matters to return (default 10, max 25)",
+            "schema": { "type": "integer", "default": 10, "maximum": 25 }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "Filter matters: 'high_pressure', 'deadline_soon', 'pending_approval', 'all'",
+            "schema": {
+              "type": "string",
+              "enum": ["high_pressure", "deadline_soon", "pending_approval", "all"],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matter summaries",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MatterSummaryList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/matters/{matterId}/summary": {
+      "get": {
+        "operationId": "getMatterDetail",
+        "summary": "Get detailed summary for a specific matter",
+        "description": "Returns the compact matter summary for a specific matter, including health score, top pressure dimensions, deadline count, and open approvals.",
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matter detail summary",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MatterDetail" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deadlines": {
+      "get": {
+        "operationId": "getDeadlines",
+        "summary": "Get upcoming deadlines across all assigned matters",
+        "description": "Returns deadlines sorted by proximity and risk level across all matters assigned to the authenticated user.",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Deadlines due within N days (default 30)",
+            "schema": { "type": "integer", "default": 30, "maximum": 90 }
+          },
+          {
+            "name": "includeOverdue",
+            "in": "query",
+            "description": "Include overdue deadlines (default true)",
+            "schema": { "type": "boolean", "default": true }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deadline list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DeadlineList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/approvals/pending": {
+      "get": {
+        "operationId": "getPendingApprovals",
+        "summary": "Get items pending approval for the authenticated user",
+        "description": "Returns review items and signoff queue entries pending the authenticated attorney's approval.",
+        "responses": {
+          "200": {
+            "description": "Pending approval items",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApprovalList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/matters/search": {
+      "get": {
+        "operationId": "searchMatters",
+        "summary": "Search matters by name, case number, or party name",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MatterSummaryList" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "MatterSummaryList": {
+        "type": "object",
+        "properties": {
+          "matters": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/MatterSummary" }
+          },
+          "totalCount": { "type": "integer" },
+          "asOf": { "type": "string", "format": "date-time" },
+          "advisory": {
+            "type": "string",
+            "description": "Always present: 'This is advisory information from Prism Counsel. All AI outputs require attorney review before use in legal proceedings.'"
+          }
+        }
+      },
+      "MatterSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "caseNumber": { "type": "string" },
+          "status": { "type": "string" },
+          "healthScore": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "highPressureDimensions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "deadlinesOverdue": { "type": "integer" },
+          "deadlinesDueSoon": { "type": "integer" },
+          "pendingApprovals": { "type": "integer" },
+          "documentsAwaitingReview": { "type": "integer" },
+          "lastSnapshotAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "MatterDetail": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "healthScore": { "type": "integer" },
+          "pressureDimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dimension": { "type": "string" },
+                "score": { "type": "number" },
+                "movement": { "type": "string" },
+                "topDrivers": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "deadlines": { "type": "array", "items": { "$ref": "#/components/schemas/DeadlineSummary" } },
+          "openApprovals": { "type": "integer" },
+          "advisory": { "type": "string" }
+        }
+      },
+      "DeadlineList": {
+        "type": "object",
+        "properties": {
+          "deadlines": { "type": "array", "items": { "$ref": "#/components/schemas/DeadlineSummary" } },
+          "overdue": { "type": "integer" },
+          "dueSoon": { "type": "integer" }
+        }
+      },
+      "DeadlineSummary": {
+        "type": "object",
+        "properties": {
+          "matterId": { "type": "integer" },
+          "matterTitle": { "type": "string" },
+          "deadlineType": { "type": "string" },
+          "description": { "type": "string" },
+          "dueDate": { "type": "string", "format": "date" },
+          "daysUntilDue": { "type": "integer" },
+          "status": { "type": "string" },
+          "riskLevel": { "type": "string", "enum": ["critical", "high", "medium", "low"] }
+        }
+      },
+      "ApprovalList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer" },
+                "matterId": { "type": "integer" },
+                "matterTitle": { "type": "string" },
+                "type": { "type": "string" },
+                "title": { "type": "string" },
+                "requestedAt": { "type": "string", "format": "date-time" },
+                "daysOpen": { "type": "integer" }
+              }
+            }
+          },
+          "totalPending": { "type": "integer" },
+          "note": {
+            "type": "string",
+            "description": "Reminder that approval actions must be completed in the Prism Counsel web interface."
+          }
+        }
+      }
+    }
+  }
+}
