@@ -31,11 +31,15 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
           }
         ],
         "NSPrivacyCollectedDataTypes": [],
@@ -98,7 +102,7 @@
       "termsUrl": "https://lyte.ai/terms"
     },
     "updates": {
-      "enabled": true,
+      "enabled": false,
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/lyte-aiops-mobile"
     }

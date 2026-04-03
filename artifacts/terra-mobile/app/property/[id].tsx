@@ -51,39 +51,8 @@ interface PropertyDetail {
   thesis?: string;
   contacts?: PropertyContact[];
   timeline?: PropertyTimeline[];
+  comparables?: Array<{ address: string; distance: string; sold: string; sqft: string; date: string; ppsf: string }>;
 }
-
-const DEMO_PROPERTIES: Record<string, PropertyDetail> = {
-  "dp-001": {
-    id: "dp-001",
-    address: "847 Park Ave",
-    borough: "Queens",
-    distressType: "pre-foreclosure",
-    opportunityScore: 87,
-    estimatedValue: 2100000,
-    ownerName: "Estate of R. Martinez",
-    daysInDistress: 142,
-    confidenceLevel: "high",
-    squareFeet: 3200,
-    yearBuilt: 1984,
-    lotSize: "40x100",
-    zoning: "R6",
-    taxId: "4-0234-56",
-    debt: 1200000,
-    equity: 900000,
-    thesis: "14-year hold by same owner family. Q2 2026 balloon payment on HELOC creating high motivation. Two NODs filed in 2024. Cluster of 4 similar filings in this zip code. Direct outreach to estate attorney recommended.",
-    contacts: [
-      { name: "Maria Torres (estate atty)", phone: "(212) 555-0142", role: "Attorney" },
-      { name: "R. Martinez Jr.", phone: "(718) 555-0198", role: "Heir/Beneficiary" },
-    ],
-    timeline: [
-      { date: "Nov 2024", event: "First NOD filed" },
-      { date: "Jan 2025", event: "Owner contacted for short sale" },
-      { date: "Mar 2025", event: "Second NOD filed" },
-      { date: "Q2 2026", event: "Balloon payment due — CRITICAL" },
-    ],
-  },
-};
 
 function formatCurrency(n: number) {
   if (n >= 1e6) return "$" + (n / 1e6).toFixed(1) + "M";
@@ -104,65 +73,7 @@ export default function PropertyDetail() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [watchlisted, setWatchlisted] = useState(false);
-  const createLeadMutation = useMutation({
-    mutationFn: async () => {
-      const nameParts = (property.ownerName ?? "Unknown Owner").split(" ");
-      const firstName = nameParts[0] ?? "Unknown";
-      const lastName = nameParts.slice(1).join(" ") || "Owner";
-      const res = await fetch(API_BASE + "/terra/crm/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          ownerName: property.ownerName,
-          type: "seller",
-          source: "mobile-detail",
-          stage: "new",
-          score: property.opportunityScore,
-          propertyAddress: property.address + ", " + property.borough,
-          estimatedValue: property.estimatedValue,
-          notes: "Added from Terra Mobile property detail. Distress type: " + property.distressType,
-        }),
-      });
-      if (!res.ok) throw new Error("Failed to create lead: " + res.status);
-      return true;
-    },
-    onSuccess: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
-  });
-
-  const shareReport = async () => {
-    try {
-      await Share.share({
-        title: "Terra Property Report — " + property.address,
-        message: [
-          "Terra Field Intelligence Report",
-          "Address: " + property.address + ", " + property.borough,
-          "Est. Value: " + formatCurrency(property.estimatedValue),
-          "Opportunity Score: " + property.opportunityScore + "/100",
-          "Status: " + property.distressType?.replace(/-/g, " "),
-          "Days in Distress: " + property.daysInDistress,
-          property.thesis ? "AI Thesis: " + property.thesis : "",
-        ].filter(Boolean).join(" | "),
-      });
-    } catch {}
-  };
-
-  const downloadPDF = async () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const reportUrl = API_BASE + "/terra/reports/property/" + property.id + "?format=pdf";
-    await Share.share({
-      url: reportUrl,
-      message: "Terra Property Report — " + property.address,
-    });
-    createLeadMutation.mutate();
-  };
-
-
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom + 20;
-
-  const { data: apiData } = useQuery<PropertyDetail | null>({
+  const { data: apiData, isLoading: propertyLoading } = useQuery<PropertyDetail | null>({
     queryKey: ["terra-property", id],
     queryFn: async () => {
       const res = await fetch(API_BASE + "/terra/distress/property/" + id);
@@ -190,12 +101,96 @@ export default function PropertyDetail() {
         thesis: raw.scoreRationale ?? raw.thesis ?? raw.score_rationale,
         contacts: raw.contacts,
         timeline: raw.timeline,
+        comparables: raw.comparables,
       } as PropertyDetail;
     },
     retry: 1,
   });
 
-  const property: PropertyDetail = apiData ?? DEMO_PROPERTIES[id ?? ""] ?? DEMO_PROPERTIES["dp-001"];
+  const property: PropertyDetail | null = apiData ?? null;
+
+  const createLeadMutation = useMutation({
+    mutationFn: async () => {
+      if (!property) throw new Error("No property data");
+      const nameParts = (property.ownerName ?? "Unknown Owner").split(" ");
+      const firstName = nameParts[0] ?? "Unknown";
+      const lastName = nameParts.slice(1).join(" ") || "Owner";
+      const res = await fetch(API_BASE + "/terra/crm/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          ownerName: property.ownerName,
+          type: "seller",
+          source: "mobile-detail",
+          stage: "new",
+          score: property.opportunityScore,
+          propertyAddress: property.address + ", " + property.borough,
+          estimatedValue: property.estimatedValue,
+          notes: "Added from Terra Mobile property detail. Distress type: " + property.distressType,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create lead: " + res.status);
+      return true;
+    },
+    onSuccess: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
+  });
+
+  const shareReport = async () => {
+    if (!property) return;
+    try {
+      await Share.share({
+        title: "Terra Property Report — " + property.address,
+        message: [
+          "Terra Field Intelligence Report",
+          "Address: " + property.address + ", " + property.borough,
+          "Est. Value: " + formatCurrency(property.estimatedValue),
+          "Opportunity Score: " + property.opportunityScore + "/100",
+          "Status: " + property.distressType?.replace(/-/g, " "),
+          "Days in Distress: " + property.daysInDistress,
+          property.thesis ? "AI Thesis: " + property.thesis : "",
+        ].filter(Boolean).join(" | "),
+      });
+    } catch {}
+  };
+
+  const downloadPDF = async () => {
+    if (!property) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    const reportUrl = API_BASE + "/terra/reports/property/" + property.id + "?format=pdf";
+    await Share.share({
+      url: reportUrl,
+      message: "Terra Property Report — " + property.address,
+    });
+    createLeadMutation.mutate();
+  };
+
+
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom + 20;
+
+  if (propertyLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }]}>
+        <Feather name="loader" size={24} color={colors.mutedForeground} />
+        <Text style={{ color: colors.mutedForeground, marginTop: 12, fontFamily: "Inter_400Regular", fontSize: 13 }}>Loading property…</Text>
+      </View>
+    );
+  }
+
+  if (!property) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }]}>
+        <Feather name="alert-circle" size={24} color={colors.mutedForeground} />
+        <Text style={{ color: colors.mutedForeground, marginTop: 12, fontFamily: "Inter_400Regular", fontSize: 13 }}>Property not found</Text>
+        <Pressable onPress={() => router.back()} style={{ marginTop: 20, paddingHorizontal: 20, paddingVertical: 10, borderWidth: 1, borderColor: colors.border, borderRadius: 8 }}>
+          <Text style={{ color: colors.cream, fontFamily: "Inter_500Medium", fontSize: 13 }}>Go back</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   const typeColor = STATUS_COLORS[property.distressType] ?? colors.gold;
   const scoreColor = property.opportunityScore >= 80 ? colors.emerald : property.opportunityScore >= 60 ? colors.amber : colors.rose;
 
@@ -361,26 +356,33 @@ export default function PropertyDetail() {
         {/* Comparable Sales */}
         <View style={[styles.section, { borderColor: colors.border }]}>
           <Text style={[styles.sectionTitle, { color: colors.goldSubtle }]}>COMPARABLE SALES</Text>
-          {[
-            { address: "831 Park Ave", distance: "0.1 mi", sold: "$2.05M", sqft: "3,100", date: "Nov 2024", ppsf: "$661/sf" },
-            { address: "902 Northern Blvd", distance: "0.3 mi", sold: "$1.85M", sqft: "2,900", date: "Sep 2024", ppsf: "$638/sf" },
-            { address: "764 Union Tpke", distance: "0.5 mi", sold: "$2.25M", sqft: "3,400", date: "Aug 2024", ppsf: "$662/sf" },
-          ].map((comp, i) => (
-            <View key={comp.address} style={[styles.compRow, { borderTopColor: colors.border, borderTopWidth: i > 0 ? 1 : 0 }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.compAddress, { color: colors.cream }]}>{comp.address}</Text>
-                <Text style={[styles.compMeta, { color: colors.mutedForeground }]}>{comp.distance} · {comp.sqft} sf · {comp.date}</Text>
-              </View>
-              <View style={{ alignItems: "flex-end" }}>
-                <Text style={[styles.compPrice, { color: colors.gold }]}>{comp.sold}</Text>
-                <Text style={[styles.compPpsf, { color: colors.mutedForeground }]}>{comp.ppsf}</Text>
-              </View>
+          {(property.comparables ?? []).length === 0 ? (
+            <View style={{ paddingVertical: 18, alignItems: "center" }}>
+              <Feather name="bar-chart-2" size={20} color={colors.mutedForeground} />
+              <Text style={{ color: colors.mutedForeground, fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 6 }}>No comparable sales data available</Text>
             </View>
-          ))}
-          <View style={[styles.marketNote, { backgroundColor: colors.emerald + "08", borderColor: colors.emerald + "20" }]}>
-            <Feather name="trending-up" size={12} color={colors.emerald} />
-            <Text style={[styles.marketNoteText, { color: colors.emerald }]}>Avg comp: $654/sf · Subject: ${property.squareFeet ? Math.round(property.estimatedValue / property.squareFeet) : "N/A"}/sf</Text>
-          </View>
+          ) : (
+            <>
+              {(property.comparables ?? []).map((comp, i) => (
+                <View key={comp.address} style={[styles.compRow, { borderTopColor: colors.border, borderTopWidth: i > 0 ? 1 : 0 }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.compAddress, { color: colors.cream }]}>{comp.address}</Text>
+                    <Text style={[styles.compMeta, { color: colors.mutedForeground }]}>{comp.distance} · {comp.sqft} sf · {comp.date}</Text>
+                  </View>
+                  <View style={{ alignItems: "flex-end" }}>
+                    <Text style={[styles.compPrice, { color: colors.gold }]}>{comp.sold}</Text>
+                    <Text style={[styles.compPpsf, { color: colors.mutedForeground }]}>{comp.ppsf}</Text>
+                  </View>
+                </View>
+              ))}
+              {property.squareFeet && (
+                <View style={[styles.marketNote, { backgroundColor: colors.emerald + "08", borderColor: colors.emerald + "20" }]}>
+                  <Feather name="trending-up" size={12} color={colors.emerald} />
+                  <Text style={[styles.marketNoteText, { color: colors.emerald }]}>Subject: ${Math.round(property.estimatedValue / property.squareFeet)}/sf</Text>
+                </View>
+              )}
+            </>
+          )}
         </View>
 
         <View style={styles.actionGrid}>

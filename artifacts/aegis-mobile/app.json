@@ -3,6 +3,9 @@
     "name": "Aegis",
     "slug": "aegis-mobile",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "aegis",
@@ -10,21 +13,59 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.replit.aegis.mobile"
+      "bundleIdentifier": "com.aegis.soc.mobile",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Aegis uses Face ID for secure SOC operator authentication.",
+        "NSCameraUsageDescription": "Aegis uses your camera to scan QR codes for device enrollment.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
+          }
+        ],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyTracking": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#080B12"
       },
-      "package": "com.replit.aegis.mobile"
+      "package": "com.aegis.soc.mobile",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "web": {
       "bundler": "metro",
       "favicon": "./assets/images/icon.png"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "origin": "https://replit.com/"
+        }
+      ],
+      "expo-font",
       "expo-secure-store",
       [
         "expo-splash-screen",
@@ -38,6 +79,14 @@
         {
           "faceIDPermission": "Allow Aegis to use Face ID for secure biometric authentication."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#6366f1",
+          "sounds": []
+        }
       ]
     ],
     "experiments": {
@@ -47,6 +96,19 @@
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#080B12"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "aegis-mobile"
+      },
+      "supportUrl": "https://aegis.ai/support",
+      "privacyUrl": "https://aegis.ai/privacy",
+      "termsUrl": "https://aegis.ai/terms"
+    },
+    "updates": {
+      "enabled": false,
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/aegis-mobile"
     }
   }
 }

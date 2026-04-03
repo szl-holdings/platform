@@ -34,17 +34,9 @@ const STATUS_LABELS: Record<string, string> = {
   portfolio: "Portfolio",
 };
 
-const DEMO_MARKERS = [
-  { id: "1", address: "847 Park Ave, Queens", status: "distress" as const, score: 87, price: "$2.1M", lat: 40.7580, lng: -73.8303, borough: "Queens" },
-  { id: "2", address: "1240 Broadway, Manhattan", status: "opportunity" as const, score: 74, price: "$3.9M", lat: 40.7549, lng: -73.9890, borough: "Manhattan" },
-  { id: "3", address: "45 Warren St, Tribeca", status: "watchlist" as const, score: 61, price: "$4.8M", lat: 40.7144, lng: -74.0095, borough: "Manhattan" },
-  { id: "4", address: "1890 Adam Powell Blvd", status: "distress" as const, score: 82, price: "$1.6M", lat: 40.8063, lng: -73.9441, borough: "Manhattan" },
-  { id: "5", address: "312 W 23rd St, Chelsea", status: "portfolio" as const, score: 55, price: "$890K", lat: 40.7461, lng: -74.0002, borough: "Manhattan" },
-  { id: "6", address: "95 Eastern Pkwy, Brooklyn", status: "distress" as const, score: 79, price: "$1.2M", lat: 40.6734, lng: -73.9692, borough: "Brooklyn" },
-  { id: "7", address: "2040 Morris Ave, Bronx", status: "opportunity" as const, score: 68, price: "$780K", lat: 40.8448, lng: -73.9141, borough: "Bronx" },
-];
+type Marker = { id: string; address: string; status: "distress" | "opportunity" | "watchlist" | "portfolio"; score: number; price: string; lat: number; lng: number; borough: string };
 
-function MarkerCard({ marker, onPress }: { marker: typeof DEMO_MARKERS[0]; onPress: () => void }) {
+function MarkerCard({ marker, onPress }: { marker: Marker; onPress: () => void }) {
   const colors = useColors();
   const statusColor = STATUS_COLORS[marker.status];
 
@@ -68,10 +60,11 @@ export default function MapTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [selectedMarker, setSelectedMarker] = useState<typeof DEMO_MARKERS[0] | null>(null);
+  const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [nearMeActive, setNearMeActive] = useState(false);
-  const [apiMarkers, setApiMarkers] = useState<typeof DEMO_MARKERS>([]);
+  const [apiMarkers, setApiMarkers] = useState<Marker[]>([]);
+  const [mapApiError, setMapApiError] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -81,7 +74,8 @@ export default function MapTab() {
     queryFn: async () => {
       try {
         const res = await fetch(API_BASE + "/terra/distress/search?limit=20");
-        if (!res.ok) return null;
+        if (!res.ok) { setMapApiError(true); return null; }
+        setMapApiError(false);
         const json = await res.json();
         const props = json.data?.properties ?? json.properties ?? [];
         if (props.length > 0) {
@@ -107,12 +101,12 @@ export default function MapTab() {
           setApiMarkers(mapped);
         }
         return json;
-      } catch { return null; }
+      } catch { setMapApiError(true); return null; }
     },
     retry: 1,
   });
 
-  const baseMarkers = apiMarkers.length > 0 ? apiMarkers : DEMO_MARKERS;
+  const baseMarkers = apiMarkers;
   const displayMarkers = baseMarkers.filter(m =>
     !selectedStatus || m.status === selectedStatus
   );
@@ -229,10 +223,12 @@ export default function MapTab() {
         </View>
         <View style={styles.mapOverlay}>
           <Feather name="map" size={32} color="rgba(184,148,60,0.15)" />
-          <Text style={[styles.mapNote, { color: colors.mutedForeground }]}>
-            {nearMeActive
-              ? displayMarkers.length + " properties within 2mi of your location"
-              : displayMarkers.length + " properties · Tap pins to inspect"}
+          <Text style={[styles.mapNote, { color: mapApiError ? colors.rose : colors.mutedForeground }]}>
+            {mapApiError
+              ? "Cannot reach server · Check connection"
+              : nearMeActive
+                ? displayMarkers.length + " properties within 2mi of your location"
+                : displayMarkers.length + " properties · Tap pins to inspect"}
           </Text>
         </View>
       </View>

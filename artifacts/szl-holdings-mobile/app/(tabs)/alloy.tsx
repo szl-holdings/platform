@@ -208,19 +208,6 @@ function ApprovalCard({
   );
 }
 
-const DEMO_RUNS: WorkflowRun[] = [
-  { id: 1042, workflowId: 7, state: "running", startedAt: new Date(Date.now() - 4 * 60000).toISOString(), completedAt: null, errorMessage: null, retryCount: 0, maxRetries: 3, createdAt: new Date(Date.now() - 5 * 60000).toISOString() },
-  { id: 1041, workflowId: 3, state: "queued", startedAt: null, completedAt: null, errorMessage: null, retryCount: 0, maxRetries: 3, createdAt: new Date(Date.now() - 2 * 60000).toISOString() },
-  { id: 1040, workflowId: 5, state: "waiting_approval", startedAt: new Date(Date.now() - 20 * 60000).toISOString(), completedAt: null, errorMessage: null, retryCount: 0, maxRetries: 3, createdAt: new Date(Date.now() - 21 * 60000).toISOString() },
-  { id: 1039, workflowId: 2, state: "completed", startedAt: new Date(Date.now() - 60 * 60000).toISOString(), completedAt: new Date(Date.now() - 48 * 60000).toISOString(), errorMessage: null, retryCount: 0, maxRetries: 3, createdAt: new Date(Date.now() - 61 * 60000).toISOString(), durationMs: 720000 },
-  { id: 1038, workflowId: 8, state: "completed", startedAt: new Date(Date.now() - 120 * 60000).toISOString(), completedAt: new Date(Date.now() - 108 * 60000).toISOString(), errorMessage: null, retryCount: 0, maxRetries: 3, createdAt: new Date(Date.now() - 121 * 60000).toISOString() },
-  { id: 1036, workflowId: 1, state: "failed", startedAt: new Date(Date.now() - 240 * 60000).toISOString(), completedAt: new Date(Date.now() - 234 * 60000).toISOString(), errorMessage: "Connection timeout: upstream provider did not respond", retryCount: 2, maxRetries: 3, createdAt: new Date(Date.now() - 241 * 60000).toISOString() },
-];
-
-const DEMO_APPROVALS: Approval[] = [
-  { id: 1, workflowRunId: 1040, requestedFrom: "admin", status: "pending", expiresAt: new Date(Date.now() + 86400000).toISOString(), createdAt: new Date(Date.now() - 7200000).toISOString() },
-  { id: 2, workflowRunId: 1035, requestedFrom: "compliance", status: "pending", expiresAt: new Date(Date.now() + 172800000).toISOString(), createdAt: new Date(Date.now() - 14400000).toISOString() },
-];
 
 export default function AlloyScreen() {
   const colors = useColors();
@@ -258,17 +245,17 @@ export default function AlloyScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
 
-  const rawRuns = runsError || !runsData
-    ? DEMO_RUNS
-    : Array.isArray(runsData)
-    ? runsData
-    : (runsData as { data: WorkflowRun[] }).data ?? DEMO_RUNS;
+  const rawRuns: WorkflowRun[] = !runsError && runsData
+    ? (Array.isArray(runsData)
+      ? runsData
+      : (runsData as { data: WorkflowRun[] }).data ?? [])
+    : [];
 
-  const rawApprovals = approvalsError || !approvalsData
-    ? DEMO_APPROVALS
-    : Array.isArray(approvalsData)
-    ? approvalsData
-    : (approvalsData as { data: Approval[] }).data ?? DEMO_APPROVALS;
+  const rawApprovals: Approval[] = !approvalsError && approvalsData
+    ? (Array.isArray(approvalsData)
+      ? approvalsData
+      : (approvalsData as { data: Approval[] }).data ?? [])
+    : [];
 
   const pendingApprovals = rawApprovals.filter((a) => a.status === "pending");
 
@@ -399,6 +386,26 @@ export default function AlloyScreen() {
                   <SkeletonLoader key={i} width="100%" height={60} borderRadius={8} />
                 ))}
               </View>
+            ) : runsError ? (
+              <View style={[styles.emptyState, { borderColor: colors.borderSubtle }]}>
+                <ActivityIndicator size="small" color={colors.mutedForeground} style={{ opacity: 0.4 }} />
+                <Text style={[styles.emptyTitle, { color: colors.creamDim }]}>
+                  Cannot reach Alloy
+                </Text>
+                <Text style={[styles.emptyBody, { color: colors.mutedForeground }]}>
+                  Server appears to be offline. Pull to retry.
+                </Text>
+              </View>
+            ) : rawRuns.length === 0 ? (
+              <View style={[styles.emptyState, { borderColor: colors.borderSubtle }]}>
+                <Feather name="git-merge" size={28} color={colors.mutedForeground} style={{ opacity: 0.4 }} />
+                <Text style={[styles.emptyTitle, { color: colors.creamDim }]}>
+                  No workflow runs
+                </Text>
+                <Text style={[styles.emptyBody, { color: colors.mutedForeground }]}>
+                  No runs found in the last 24 hours.
+                </Text>
+              </View>
             ) : (
               <View style={[styles.runList, { borderColor: colors.borderSubtle }]}>
                 {rawRuns.slice(0, 12).map((run) => (
@@ -420,6 +427,16 @@ export default function AlloyScreen() {
                 {[1, 2].map((i) => (
                   <SkeletonLoader key={i} width="100%" height={100} borderRadius={8} />
                 ))}
+              </View>
+            ) : approvalsError ? (
+              <View style={[styles.emptyState, { borderColor: colors.borderSubtle }]}>
+                <ActivityIndicator size="small" color={colors.mutedForeground} style={{ opacity: 0.4 }} />
+                <Text style={[styles.emptyTitle, { color: colors.creamDim }]}>
+                  Approvals unavailable
+                </Text>
+                <Text style={[styles.emptyBody, { color: colors.mutedForeground }]}>
+                  Cannot reach server. Pull down to retry.
+                </Text>
               </View>
             ) : pendingApprovals.length === 0 ? (
               <View style={[styles.emptyState, { borderColor: colors.borderSubtle }]}>

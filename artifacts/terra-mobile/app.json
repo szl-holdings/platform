@@ -3,9 +3,12 @@
     "name": "Terra",
     "slug": "terra-mobile",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "terra-mobile",
+    "scheme": "terra",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
@@ -15,18 +18,48 @@
     },
     "ios": {
       "supportsTablet": false,
+      "bundleIdentifier": "com.terra.realestate.mobile",
+      "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "Terra uses your camera to photograph properties on-site.",
         "NSLocationWhenInUseUsageDescription": "Terra uses your location to show nearby properties and auto-tag photos.",
         "NSLocationAlwaysUsageDescription": "Terra uses your location to show nearby properties.",
-        "NSUserNotificationUsageDescription": "Terra sends alerts for new distress properties, watchlist changes, and pipeline updates."
+        "NSUserNotificationUsageDescription": "Terra sends alerts for new distress properties, watchlist changes, and pipeline updates.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
+          }
+        ],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyTracking": false
       }
     },
     "android": {
+      "package": "com.terra.realestate.mobile",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#0d0b08"
+      },
       "permissions": [
-        "CAMERA",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "android.permission.CAMERA",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE"
       ]
     },
     "web": {
@@ -57,6 +90,7 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/images/icon.png",
           "color": "#b8943c",
           "sounds": []
         }
@@ -65,6 +99,19 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "terra-mobile"
+      },
+      "supportUrl": "https://terra.ai/support",
+      "privacyUrl": "https://terra.ai/privacy",
+      "termsUrl": "https://terra.ai/terms"
+    },
+    "updates": {
+      "enabled": false,
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/terra-mobile"
     }
   }
 }

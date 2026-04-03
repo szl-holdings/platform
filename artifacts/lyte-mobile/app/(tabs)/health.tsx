@@ -32,17 +32,9 @@ function getStatusLabel(status: PlatformHealth["status"]) {
   return map[status] ?? "Unknown";
 }
 
-const ON_CALL_SCHEDULE = [
-  { name: "Alex Kim", role: "Platform Lead", shift: "Apr 2 — Apr 7", color: LYTE_COLORS.electricBlue, initials: "AK", primary: true },
-  { name: "Jordan Lee", role: "Infra On-Call", shift: "Apr 2 — Apr 4", color: LYTE_COLORS.neonGreen, initials: "JL", primary: false },
-  { name: "Sam Rivera", role: "Security On-Call", shift: "Apr 2 — Apr 9", color: LYTE_COLORS.high, initials: "SR", primary: false },
-];
+const ON_CALL_SCHEDULE: Array<{ name: string; role: string; shift: string; color: string; initials: string; primary: boolean }> = [];
 
-const RUNBOOKS = [
-  { id: "rb-001", title: "P0 Incident Response", category: "Incident", steps: 7 },
-  { id: "rb-002", title: "Database Failover Procedure", category: "Infra", steps: 12 },
-  { id: "rb-003", title: "CDN Purge & Rollback", category: "Platform", steps: 5 },
-];
+const RUNBOOKS: Array<{ id: string; title: string; category: string; steps: number }> = [];
 
 function OnCallCard() {
   const [runbookExpanded, setRunbookExpanded] = useState(false);
@@ -101,7 +93,13 @@ function OnCallCard() {
         <Text style={onCallStyles.shift}>Apr 2–7</Text>
       </View>
 
-      {ON_CALL_SCHEDULE.map((person) => {
+      {ON_CALL_SCHEDULE.length === 0 ? (
+        <View style={{ paddingVertical: 12, alignItems: "center" }}>
+          <Text style={{ color: LYTE_COLORS.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+            On-call schedule not configured
+          </Text>
+        </View>
+      ) : ON_CALL_SCHEDULE.map((person) => {
         const paged = pagedPersons.has(person.name);
         return (
           <View key={person.name} style={[onCallStyles.personRow, { borderColor: LYTE_COLORS.border }]}>
@@ -320,7 +318,7 @@ function PlatformCard({ platform }: { platform: PlatformHealth }) {
 
 export default function HealthScreen() {
   const insets = useSafeAreaInsets();
-  const { platforms, reload } = useLyte();
+  const { platforms, reload, isLoading, lastErrors } = useLyte();
   const [refreshing, setRefreshing] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -394,9 +392,28 @@ export default function HealthScreen() {
         <OnCallCard />
 
         <Text style={styles.sectionLabel}>ALL PLATFORMS</Text>
-        <View style={styles.platformList}>
-          {platforms.map(p => <PlatformCard key={p.slug} platform={p} />)}
-        </View>
+        {isLoading ? (
+          <View style={{ gap: 8 }}>
+            {[1, 2, 3, 4].map(i => (
+              <View key={i} style={[styles.platformCard, { height: 64, opacity: 0.4 }]} />
+            ))}
+          </View>
+        ) : lastErrors.some(e => e.endpoint.includes("/api/lyte/health")) ? (
+          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: LYTE_COLORS.surface, borderRadius: 12, borderWidth: 1, borderColor: LYTE_COLORS.border }}>
+            <Feather name="wifi-off" size={24} color={LYTE_COLORS.textTertiary} />
+            <Text style={{ color: LYTE_COLORS.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>Health data unavailable</Text>
+            <Text style={{ color: LYTE_COLORS.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>Cannot reach API server. Pull to retry.</Text>
+          </View>
+        ) : platforms.length === 0 ? (
+          <View style={{ alignItems: "center", padding: 24, gap: 8, backgroundColor: LYTE_COLORS.surface, borderRadius: 12, borderWidth: 1, borderColor: LYTE_COLORS.border }}>
+            <Feather name="server" size={24} color={LYTE_COLORS.textTertiary} />
+            <Text style={{ color: LYTE_COLORS.textSecondary, fontSize: 13, fontFamily: "Inter_500Medium" }}>No platforms configured</Text>
+          </View>
+        ) : (
+          <View style={styles.platformList}>
+            {platforms.map(p => <PlatformCard key={p.slug} platform={p} />)}
+          </View>
+        )}
       </ScrollView>
     </View>
   );

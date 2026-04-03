@@ -125,6 +125,7 @@ interface LyteContextValue {
   actions: LyteAction[];
   platforms: PlatformHealth[];
   isConnected: boolean;
+  isLoading: boolean;
   criticalCount: number;
   activeAlertCount: number;
   lastErrors: FetchError[];
@@ -137,6 +138,7 @@ const LyteContext = createContext<LyteContextValue>({
   actions: [],
   platforms: [],
   isConnected: false,
+  isLoading: true,
   criticalCount: 0,
   activeAlertCount: 0,
   lastErrors: [],
@@ -144,12 +146,12 @@ const LyteContext = createContext<LyteContextValue>({
 });
 
 const BASE_PLATFORMS: PlatformHealth[] = [
-  { name: "Lyte Command Center", slug: "lyte-command-center", status: "healthy", uptime: 99.8, errorRate: 0.3, p95Latency: 180, alertCount: 0, slaCompliance: 99.5 },
-  { name: "Aegis Defense", slug: "firestorm", status: "healthy", uptime: 99.9, errorRate: 0.1, p95Latency: 145, alertCount: 0, slaCompliance: 99.9 },
-  { name: "Vessels Maritime", slug: "vessels", status: "degraded", uptime: 97.2, errorRate: 2.8, p95Latency: 520, alertCount: 3, slaCompliance: 95.1 },
-  { name: "Terra Real Estate", slug: "terra", status: "healthy", uptime: 99.5, errorRate: 0.5, p95Latency: 210, alertCount: 1, slaCompliance: 98.7 },
-  { name: "SZL Holdings", slug: "szl-holdings", status: "healthy", uptime: 99.7, errorRate: 0.2, p95Latency: 165, alertCount: 0, slaCompliance: 99.3 },
-  { name: "API Server", slug: "api-server", status: "healthy", uptime: 99.95, errorRate: 0.05, p95Latency: 85, alertCount: 0, slaCompliance: 99.8 },
+  { name: "Lyte Command Center", slug: "lyte-command-center", status: "unknown", uptime: 0, errorRate: 0, p95Latency: 0, alertCount: 0, slaCompliance: 0 },
+  { name: "Aegis Defense", slug: "firestorm", status: "unknown", uptime: 0, errorRate: 0, p95Latency: 0, alertCount: 0, slaCompliance: 0 },
+  { name: "Vessels Maritime", slug: "vessels", status: "unknown", uptime: 0, errorRate: 0, p95Latency: 0, alertCount: 0, slaCompliance: 0 },
+  { name: "Terra Real Estate", slug: "terra", status: "unknown", uptime: 0, errorRate: 0, p95Latency: 0, alertCount: 0, slaCompliance: 0 },
+  { name: "SZL Holdings", slug: "szl-holdings", status: "unknown", uptime: 0, errorRate: 0, p95Latency: 0, alertCount: 0, slaCompliance: 0 },
+  { name: "API Server", slug: "api-server", status: "unknown", uptime: 0, errorRate: 0, p95Latency: 0, alertCount: 0, slaCompliance: 0 },
 ];
 
 function coerceSeverity(raw?: string): Severity {
@@ -186,6 +188,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
   const [actions, setActions] = useState<LyteAction[]>([]);
   const [platforms, setPlatforms] = useState<PlatformHealth[]>(BASE_PLATFORMS);
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [lastErrors, setLastErrors] = useState<FetchError[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -212,6 +215,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
   );
 
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     const errors: FetchError[] = [];
 
     const [signalsResult, incidentsResult, actionsResult, liveSignalsResult, healthResult] =
@@ -309,6 +313,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
     }
 
     setLastErrors(errors);
+    setIsLoading(false);
   }, [fetchEndpoint]);
 
   const connectWebSocket = useCallback(() => {
@@ -378,7 +383,7 @@ export function LyteProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LyteContext.Provider
-      value={{ signals, incidents, actions, platforms, isConnected, criticalCount, activeAlertCount, lastErrors, reload }}
+      value={{ signals, incidents, actions, platforms, isConnected, isLoading, criticalCount, activeAlertCount, lastErrors, reload }}
     >
       {children}
     </LyteContext.Provider>

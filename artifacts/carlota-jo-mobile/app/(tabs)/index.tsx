@@ -3,6 +3,7 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Platform,
   Pressable,
@@ -13,33 +14,18 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
 
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
 import { NotificationBell } from "@/components/NotificationCenter";
 
-const ENGAGEMENT_STAGES = [
-  { phase: "Discovery Call", status: "complete" as const, dates: "Feb 15, 2026" },
-  { phase: "Needs Assessment", status: "complete" as const, dates: "Feb 22 – Mar 5, 2026" },
-  { phase: "Service Plan", status: "complete" as const, dates: "Mar 8, 2026" },
-  { phase: "Onboarding", status: "active" as const, dates: "Mar 10 – Apr 4, 2026" },
-  { phase: "Active Management", status: "upcoming" as const, dates: "From Apr 7, 2026" },
-];
+const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
 
-const KPI_CARDS = [
-  { label: "Documents", value: "11", sub: "3 awaiting review" },
-  { label: "Unread updates", value: "2", sub: "Last: 3 days ago" },
-  { label: "Messages", value: "1", sub: "From Rosa, Mar 31" },
-  { label: "Next review", value: "Apr 7", sub: "10:00 AM · London" },
-];
-
-const RECENT_ACTIVITY = [
-  { id: 1, type: "document", title: "Monthly Operations Summary shared", time: "Today, 9:41 AM", icon: "file-text" },
-  { id: 2, type: "message", title: "Message from Rosa", time: "Yesterday, 4:12 PM", icon: "message-circle" },
-  { id: 3, type: "update", title: "Oxfordshire Estate condition report ready", time: "Mar 28", icon: "bell" },
-  { id: 4, type: "session", title: "Q2 Review scheduled — Apr 7", time: "Mar 25", icon: "calendar" },
-];
+type EngagementStage = { phase: string; status: "complete" | "active" | "upcoming"; dates: string };
+type KpiCard = { label: string; value: string; sub: string };
+type ActivityItem = { id: number | string; type: string; title: string; time: string; icon: string };
 
 function KpiCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   const colors = useColors();
@@ -140,7 +126,7 @@ function TimelineItem({
   );
 }
 
-function ActivityRow({ item }: { item: (typeof RECENT_ACTIVITY)[0] }) {
+function ActivityRow({ item }: { item: ActivityItem }) {
   const colors = useColors();
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -190,12 +176,28 @@ export default function DashboardScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
 
+  const { data: dashboardData, isLoading: dashLoading, isError: dashError, refetch } = useQuery({
+    queryKey: ["carlota-dashboard"],
+    queryFn: async () => {
+      const res = await fetch(API_BASE + "/carlotajo/dashboard");
+      if (!res.ok) throw new Error("fetch failed");
+      const json = await res.json();
+      return json.data ?? json;
+    },
+    retry: 1,
+  });
+
+  const kpiCards: KpiCard[] = dashboardData?.kpis ?? [];
+  const engagementStages: EngagementStage[] = dashboardData?.engagementStages ?? [];
+  const recentActivity: ActivityItem[] = dashboardData?.recentActivity ?? [];
+  const engagementPhase: string = dashboardData?.currentPhase ?? "Onboarding";
+
   const onRefresh = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
-    await new Promise((r) => setTimeout(r, 1200));
+    await refetch();
     setRefreshing(false);
-  }, []);
+  }, [refetch]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -237,67 +239,99 @@ export default function DashboardScreen() {
             </Text>
           )}
           <Text style={[styles.greetingStatus, { color: colors.mutedForeground }]}>
-            Active engagement · Onboarding phase
+            Active engagement · {engagementPhase}
           </Text>
         </View>
 
-        <View style={styles.kpiGrid}>
-          {KPI_CARDS.map((kpi) => (
-            <View key={kpi.label} style={styles.kpiCol}>
-              <KpiCard {...kpi} />
-            </View>
-          ))}
-        </View>
-
-        <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            ENGAGEMENT TIMELINE
-          </Text>
-          <View style={styles.timeline}>
-            {ENGAGEMENT_STAGES.map((stage, i) => (
-              <TimelineItem
-                key={stage.phase}
-                {...stage}
-                isLast={i === ENGAGEMENT_STAGES.length - 1}
-              />
-            ))}
+        {dashLoading ? (
+          <View style={{ paddingVertical: 24, alignItems: "center" }}>
+            <ActivityIndicator color={colors.gold} />
           </View>
-        </View>
+        ) : (
+          <>
+            {kpiCards.length > 0 && (
+              <View style={styles.kpiGrid}>
+                {kpiCards.map((kpi) => (
+                  <View key={kpi.label} style={styles.kpiCol}>
+                    <KpiCard {...kpi} />
+                  </View>
+                ))}
+              </View>
+            )}
 
-        <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            RECENT ACTIVITY
-          </Text>
-          <View style={[styles.activityList, { borderColor: colors.creamFaint }]}>
-            {RECENT_ACTIVITY.map((item) => (
-              <ActivityRow key={item.id} item={item} />
-            ))}
-          </View>
-        </View>
+            {engagementStages.length > 0 && (
+              <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
+                <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
+                  ENGAGEMENT TIMELINE
+                </Text>
+                <View style={styles.timeline}>
+                  {engagementStages.map((stage, i) => (
+                    <TimelineItem
+                      key={stage.phase}
+                      {...stage}
+                      isLast={i === engagementStages.length - 1}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
 
-        <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
-          <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-            YOUR PROPERTIES
-          </Text>
-          {[
-            { name: "Mayfair Residence", location: "London, W1", status: "Primary — Active" },
-            { name: "Oxfordshire Estate", location: "Oxfordshire, UK", status: "Secondary — Seasonal" },
-          ].map((prop) => (
-            <Pressable key={prop.name}>
-              <View style={[styles.propertyCard, { borderColor: colors.creamFaint }]}>
-                <Text style={[styles.propertyName, { color: "rgba(245,240,232,0.75)" }]}>
-                  {prop.name}
+            {recentActivity.length > 0 && (
+              <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
+                <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
+                  RECENT ACTIVITY
                 </Text>
-                <Text style={[styles.propertyLocation, { color: colors.goldSubtle }]}>
-                  {prop.location}
+                <View style={[styles.activityList, { borderColor: colors.creamFaint }]}>
+                  {recentActivity.map((item) => (
+                    <ActivityRow key={item.id} item={item} />
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {dashError ? (
+              <View style={{ paddingVertical: 32, alignItems: "center", gap: 8 }}>
+                <Feather name="wifi-off" size={24} color={colors.mutedForeground} />
+                <Text style={{ color: colors.mutedForeground, fontSize: 13, fontFamily: "Inter_300Light", marginTop: 4 }}>
+                  Could not reach server
                 </Text>
-                <Text style={[styles.propertyStatus, { color: colors.mutedForeground }]}>
-                  {prop.status}
+                <Pressable onPress={() => refetch()} style={{ marginTop: 4 }}>
+                  <Text style={{ color: colors.gold, fontSize: 12, fontFamily: "Inter_400Regular" }}>Tap to retry</Text>
+                </Pressable>
+              </View>
+            ) : kpiCards.length === 0 && engagementStages.length === 0 && recentActivity.length === 0 && (
+              <View style={{ paddingVertical: 32, alignItems: "center" }}>
+                <Feather name="inbox" size={24} color={colors.mutedForeground} />
+                <Text style={{ color: colors.mutedForeground, fontSize: 13, fontFamily: "Inter_300Light", marginTop: 8 }}>
+                  No engagement data yet
                 </Text>
               </View>
-            </Pressable>
-          ))}
-        </View>
+            )}
+          </>
+        )}
+
+        {(dashboardData?.properties ?? []).length > 0 && (
+          <View style={[styles.section, { borderTopColor: colors.creamFaint }]}>
+            <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
+              YOUR PROPERTIES
+            </Text>
+            {(dashboardData.properties as Array<{ name: string; location: string; status: string }>).map((prop) => (
+              <Pressable key={prop.name}>
+                <View style={[styles.propertyCard, { borderColor: colors.creamFaint }]}>
+                  <Text style={[styles.propertyName, { color: "rgba(245,240,232,0.75)" }]}>
+                    {prop.name}
+                  </Text>
+                  <Text style={[styles.propertyLocation, { color: colors.goldSubtle }]}>
+                    {prop.location}
+                  </Text>
+                  <Text style={[styles.propertyStatus, { color: colors.mutedForeground }]}>
+                    {prop.status}
+                  </Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </View>
   );

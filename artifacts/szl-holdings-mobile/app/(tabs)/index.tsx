@@ -15,7 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -67,10 +67,13 @@ function useEcosystemHealth() {
 function useAlerts() {
   return useQuery<HoldingAlert[]>({
     queryKey: ["szl-alerts"],
-    queryFn: () => apiFetch<HoldingAlert[]>("/api/holdings/alerts"),
+    queryFn: async () => {
+      const raw = await apiFetch<unknown>("/api/observability/alerts");
+      const arr = Array.isArray(raw) ? raw : ((raw as { data?: HoldingAlert[] })?.data ?? []);
+      return arr as HoldingAlert[];
+    },
     refetchInterval: 30000,
     retry: 1,
-    placeholderData: DEMO_ALERTS,
   });
 }
 
@@ -79,6 +82,31 @@ function useKPIs() {
     queryKey: ["szl-kpis"],
     queryFn: () => apiFetch<KPIs>("/api/holdings/kpis"),
     refetchInterval: 60000,
+    retry: 1,
+  });
+}
+
+function usePendingApprovals() {
+  return useQuery<PendingApproval[]>({
+    queryKey: ["szl-pending-approvals"],
+    queryFn: async () => {
+      const raw = await apiFetch<unknown>("/api/approvals?status=pending");
+      const arr = Array.isArray(raw) ? raw : ((raw as { data?: unknown[] })?.data ?? []);
+      return (arr as Array<{
+        id?: number | string; title?: string; actionClass?: string;
+        requestedFrom?: string; status?: string; createdAt?: string; expiresAt?: string;
+        metadata?: Record<string, unknown>;
+      }>).map(r => ({
+        id: String(r.id ?? ""),
+        title: (r.title ?? r.actionClass ?? r.metadata?.["title"] ?? "Approval required") as string,
+        platform: (r.requestedFrom ?? r.metadata?.["platform"] ?? "Holdings") as string,
+        amount: r.metadata?.["amount"] as string | undefined,
+        priority: (r.metadata?.["priority"] ?? "normal") as "critical" | "high" | "normal",
+        requestedBy: (r.requestedFrom ?? "System") as string,
+        requestedAt: r.createdAt ?? new Date().toISOString(),
+      }));
+    },
+    refetchInterval: 30000,
     retry: 1,
   });
 }
@@ -103,11 +131,6 @@ interface PendingApproval {
   retryRequired?: boolean;
 }
 
-const DEMO_APPROVALS: PendingApproval[] = [
-  { id: "ap-1", title: "Emergency Fleet Maintenance Authorization", platform: "Vessels", amount: "$184,000", priority: "critical", requestedBy: "Fleet Ops", requestedAt: new Date(Date.now() - 12 * 60000).toISOString() },
-  { id: "ap-2", title: "Threat Intel Feed Renewal — Q2", platform: "Aegis", amount: "$42,500", priority: "high", requestedBy: "Security", requestedAt: new Date(Date.now() - 45 * 60000).toISOString() },
-  { id: "ap-3", title: "Property Acquisition — Due Diligence Reserve", platform: "Terra", amount: "$750,000", priority: "high", requestedBy: "Acquisitions", requestedAt: new Date(Date.now() - 2 * 3600000).toISOString() },
-];
 
 const PRIORITY_CONFIG = {
   critical: { color: "#ef4444", label: "CRITICAL" },
@@ -198,36 +221,6 @@ const approvalStyles = StyleSheet.create({
   swipeHintText: { flex: 1, fontSize: 8, fontFamily: "Inter_400Regular", textAlign: "center" },
 });
 
-const DEMO_ALERTS: HoldingAlert[] = [
-  {
-    id: "1",
-    severity: "critical",
-    platform: "Aegis",
-    message: "Threat feed ingestion latency exceeding SLA threshold",
-    time: new Date(Date.now() - 8 * 60000).toISOString(),
-  },
-  {
-    id: "2",
-    severity: "warning",
-    platform: "Vessels",
-    message: "AIS provider response time degraded — failover active",
-    time: new Date(Date.now() - 22 * 60000).toISOString(),
-  },
-  {
-    id: "3",
-    severity: "info",
-    platform: "Alloy",
-    message: "Workflow run #1042 requires principal approval",
-    time: new Date(Date.now() - 35 * 60000).toISOString(),
-  },
-  {
-    id: "4",
-    severity: "resolved",
-    platform: "Lyte",
-    message: "Signal pipeline latency normalized — all checks passing",
-    time: new Date(Date.now() - 60 * 60000).toISOString(),
-  },
-];
 
 interface HoldingAlert {
   id: string;
@@ -378,29 +371,7 @@ export default function CommandScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
-  const [pendingApprovals, setPendingApprovals] = useState<PendingApproval[]>(DEMO_APPROVALS);
-
-  const approveMutation = useMutation({
-    mutationFn: async ({ id, action }: { id: string; action: "approve" | "defer" }) => {
-      await apiFetch(`/api/holdings/approvals/${id}/${action}`, { method: "POST" });
-    },
-    onSuccess: (_data, variables) => {
-      const ap = pendingApprovals.find(a => a.id === variables.id);
-      setPendingApprovals(prev => prev.filter(a => a.id !== variables.id));
-      if (variables.action === "approve" && ap) {
-        Alert.alert("Approved", `"${ap.title}" approved successfully.`);
-      }
-    },
-    onError: (_err, variables) => {
-      const ap = pendingApprovals.find(a => a.id === variables.id);
-      setPendingApprovals(prev =>
-        prev.map(a => a.id === variables.id ? { ...a, retryRequired: true } : a)
-      );
-      if (ap) {
-        Alert.alert("Sync Failed", `"${ap.title}" could not be submitted. Tap to retry.`);
-      }
-    },
-  });
+  const qc = useQueryClient();
 
   const {
     data: health,
@@ -408,7 +379,34 @@ export default function CommandScreen() {
     refetch: refetchHealth,
   } = useEcosystemHealth();
   const { data: kpis, isLoading: kpisLoading, refetch: refetchKpis } = useKPIs();
-  const { data: alerts = DEMO_ALERTS, refetch: refetchAlerts } = useAlerts();
+  const { data: alerts = [], isLoading: alertsLoading, isError: alertsError, refetch: refetchAlerts } = useAlerts();
+  const { data: approvalsData = [], isLoading: approvalsLoading, isError: approvalsError, refetch: refetchApprovals } = usePendingApprovals();
+  const [locallyDismissed, setLocallyDismissed] = useState<Set<string>>(new Set());
+  const pendingApprovals: PendingApproval[] = (approvalsData as PendingApproval[]).filter(a => !locallyDismissed.has(a.id));
+
+  const approveMutation = useMutation({
+    mutationFn: async ({ id, action }: { id: string; action: "approve" | "defer" }) => {
+      await apiFetch(`/api/approvals/${id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision: action === "approve" ? "approved" : "rejected", note: action === "defer" ? "Deferred via mobile" : undefined }),
+      });
+    },
+    onSuccess: (_data, variables) => {
+      const ap = pendingApprovals.find(a => a.id === variables.id);
+      setLocallyDismissed(prev => new Set([...prev, variables.id]));
+      qc.invalidateQueries({ queryKey: ["szl-pending-approvals"] });
+      if (variables.action === "approve" && ap) {
+        Alert.alert("Approved", `"${ap.title}" approved successfully.`);
+      }
+    },
+    onError: (_err, variables) => {
+      const ap = pendingApprovals.find(a => a.id === variables.id);
+      if (ap) {
+        Alert.alert("Sync Failed", `"${ap.title}" could not be submitted. Tap to retry.`);
+      }
+    },
+  });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
@@ -416,9 +414,9 @@ export default function CommandScreen() {
   const onRefresh = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
-    await Promise.all([refetchHealth(), refetchKpis(), refetchAlerts()]);
+    await Promise.all([refetchHealth(), refetchKpis(), refetchAlerts(), refetchApprovals()]);
     setRefreshing(false);
-  }, [refetchHealth, refetchKpis, refetchAlerts]);
+  }, [refetchHealth, refetchKpis, refetchAlerts, refetchApprovals]);
 
   const allOnline = health
     ? health.summary.online === health.summary.total
@@ -534,34 +532,72 @@ export default function CommandScreen() {
             )}
           </View>
           <View style={[styles.alertList, { borderColor: colors.borderSubtle }]}>
-            {alerts.map((alert) => (
-              <AlertRow key={alert.id} alert={alert} />
-            ))}
+            {alertsLoading ? (
+              <View style={{ padding: 16, alignItems: "center" }}>
+                <Text style={{ color: colors.mutedForeground, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+                  Loading alerts…
+                </Text>
+              </View>
+            ) : alertsError ? (
+              <View style={{ padding: 16, alignItems: "center", gap: 4 }}>
+                <Feather name="wifi-off" size={16} color={colors.mutedForeground} />
+                <Text style={{ color: colors.mutedForeground, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+                  Alerts unavailable — server offline
+                </Text>
+              </View>
+            ) : alerts.length === 0 ? (
+              <View style={{ padding: 16, alignItems: "center", gap: 4 }}>
+                <Feather name="check-circle" size={16} color="#10b981" />
+                <Text style={{ color: colors.mutedForeground, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+                  No active alerts
+                </Text>
+              </View>
+            ) : (
+              alerts.map((alert) => (
+                <AlertRow key={alert.id} alert={alert} />
+              ))
+            )}
           </View>
         </View>
 
-        {pendingApprovals.length > 0 && (
-          <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
-                PENDING APPROVALS
-              </Text>
+        <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>
+              PENDING APPROVALS
+            </Text>
+            {!approvalsError && !approvalsLoading && pendingApprovals.length > 0 && (
               <View style={[styles.alertCountBadge, { backgroundColor: "rgba(239,68,68,0.12)", borderColor: "rgba(239,68,68,0.2)" }]}>
                 <Text style={[styles.alertCountText, { color: "#ef4444" }]}>
                   {pendingApprovals.length} required
                 </Text>
               </View>
+            )}
+          </View>
+          {approvalsLoading ? (
+            <SkeletonLoader width="100%" height={64} borderRadius={8} />
+          ) : approvalsError ? (
+            <View style={{ paddingVertical: 16, alignItems: "center", gap: 6 }}>
+              <Feather name="wifi-off" size={20} color={colors.mutedForeground} />
+              <Text style={{ color: colors.mutedForeground, fontSize: 12, fontFamily: "Inter_300Light" }}>Cannot reach server</Text>
+              <Pressable onPress={() => refetchApprovals()}>
+                <Text style={{ color: colors.gold, fontSize: 12, fontFamily: "Inter_400Regular" }}>Tap to retry</Text>
+              </Pressable>
             </View>
-            {pendingApprovals.map((ap) => (
+          ) : pendingApprovals.length === 0 ? (
+            <View style={{ paddingVertical: 16, alignItems: "center" }}>
+              <Text style={{ color: colors.mutedForeground, fontSize: 12, fontFamily: "Inter_300Light" }}>No pending approvals</Text>
+            </View>
+          ) : (
+            pendingApprovals.map((ap) => (
               <SwipeApprovalCard
                 key={ap.id}
                 approval={ap}
                 onApprove={() => approveMutation.mutate({ id: ap.id, action: "approve" })}
                 onDefer={() => approveMutation.mutate({ id: ap.id, action: "defer" })}
               />
-            ))}
-          </View>
-        )}
+            ))
+          )}
+        </View>
 
         <View style={[styles.section, { borderTopColor: colors.borderSubtle }]}>
           <Text style={[styles.sectionLabel, { color: colors.goldSubtle }]}>

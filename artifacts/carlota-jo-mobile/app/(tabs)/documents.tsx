@@ -4,6 +4,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState, useCallback, useEffect } from "react";
 import {
+  ActivityIndicator,
   Platform,
   Pressable,
   RefreshControl,
@@ -18,22 +19,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
 
 import { useColors } from "@/hooks/useColors";
 
-const DEMO_DOCUMENTS = [
-  { id: 1, name: "Service plan & scope agreement", date: "Mar 8, 2026", status: "Signed", category: "Governance", size: "2.1 MB" },
-  { id: 2, name: "Mayfair Residence — operational assessment", date: "Mar 5, 2026", status: "Reviewed", category: "Operations", size: "4.7 MB" },
-  { id: 3, name: "Household staff overview & rotas", date: "Mar 3, 2026", status: "Reviewed", category: "Staffing", size: "1.2 MB" },
-  { id: 4, name: "Vendor register — Mayfair (Q1 2026)", date: "Mar 14, 2026", status: "Awaiting review", category: "Vendors", size: "890 KB" },
-  { id: 5, name: "Oxfordshire Estate — condition report", date: "Mar 20, 2026", status: "Awaiting review", category: "Operations", size: "6.3 MB" },
-  { id: 6, name: "Recommended vendor replacements — rationale", date: "Mar 28, 2026", status: "Awaiting review", category: "Vendors", size: "1.8 MB" },
-  { id: 7, name: "Monthly operations summary — March 2026", date: "Mar 31, 2026", status: "New", category: "Reporting", size: "980 KB" },
-  { id: 8, name: "NDA & confidentiality agreement", date: "Feb 20, 2026", status: "Signed", category: "Governance", size: "340 KB" },
-  { id: 9, name: "Onboarding checklist — progress", date: "Mar 15, 2026", status: "Reviewed", category: "Operations", size: "560 KB" },
-  { id: 10, name: "Security & access protocol — Mayfair", date: "Mar 10, 2026", status: "Reviewed", category: "Staffing", size: "420 KB" },
-  { id: 11, name: "Emergency contacts & escalation guide", date: "Mar 8, 2026", status: "Reviewed", category: "Governance", size: "280 KB" },
-];
+const API_BASE = process.env.EXPO_PUBLIC_DOMAIN ? `https://${process.env.EXPO_PUBLIC_DOMAIN}` : "";
+
+type Document = { id: number | string; name: string; date: string; status: string; category: string; size: string };
 
 const CATEGORIES = ["All", "Governance", "Operations", "Staffing", "Vendors", "Reporting"];
 
@@ -146,22 +138,36 @@ export default function DocumentsScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
 
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["carlota-documents"],
+    queryFn: async (): Promise<Document[]> => {
+      const res = await fetch(API_BASE + "/carlotajo/documents");
+      if (!res.ok) throw new Error("fetch failed");
+      const json = await res.json();
+      return json.data ?? json.documents ?? json ?? [];
+    },
+    retry: 1,
+    enabled: unlocked,
+  });
+
+  const documents: Document[] = data ?? [];
+
   if (!unlocked) {
     return <BiometricGate onUnlock={() => setUnlocked(true)} colors={colors} />;
   }
 
   const filtered = filter === "All"
-    ? DEMO_DOCUMENTS
-    : DEMO_DOCUMENTS.filter((d) => d.category === filter);
+    ? documents
+    : documents.filter((d) => d.category === filter);
 
   const onRefresh = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
-    await new Promise((r) => setTimeout(r, 1000));
+    await refetch();
     setRefreshing(false);
-  }, []);
+  }, [refetch]);
 
-  const awaitingCount = DEMO_DOCUMENTS.filter(
+  const awaitingCount = documents.filter(
     (d) => d.status === "Awaiting review" || d.status === "New"
   ).length;
 
@@ -232,6 +238,19 @@ export default function DocumentsScreen() {
           </View>
         </ScrollView>
 
+        {isLoading && (
+          <View style={{ paddingVertical: 40, alignItems: "center" }}>
+            <ActivityIndicator color={colors.gold} />
+            <Text style={[styles.footNote, { color: colors.mutedForeground, marginTop: 12 }]}>Loading documents…</Text>
+          </View>
+        )}
+        {isError && !isLoading && (
+          <View style={{ paddingVertical: 32, alignItems: "center" }}>
+            <Feather name="alert-circle" size={24} color={colors.mutedForeground} />
+            <Text style={[styles.footNote, { color: colors.mutedForeground, marginTop: 8 }]}>Unable to load documents</Text>
+          </View>
+        )}
+        {!isLoading && !isError && (
         <View style={[styles.docList, { borderColor: colors.creamFaint }]}>
           {filtered.map((doc, idx) => {
             const { isHighlight } = getStatusStyle(doc.status);
@@ -298,10 +317,17 @@ export default function DocumentsScreen() {
               </Pressable>
             );
           })}
+          {filtered.length === 0 && (
+            <View style={{ paddingVertical: 24, alignItems: "center" }}>
+              <Feather name="folder" size={20} color={colors.mutedForeground} />
+              <Text style={[styles.footNote, { color: colors.mutedForeground, marginTop: 8 }]}>No documents in this category</Text>
+            </View>
+          )}
         </View>
+        )}
 
         <Text style={[styles.footNote, { color: colors.mutedForeground }]}>
-          {filtered.length} document{filtered.length !== 1 ? "s" : ""} · Showing demo documents
+          {filtered.length} document{filtered.length !== 1 ? "s" : ""}
         </Text>
       </ScrollView>
     </View>

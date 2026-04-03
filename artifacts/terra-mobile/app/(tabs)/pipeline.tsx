@@ -34,15 +34,6 @@ interface Lead {
   score: number;
 }
 
-const DEMO_LEADS: Lead[] = [
-  { id: "lead-001", name: "Martinez Estate", address: "847 Park Ave, Queens", stage: "negotiating", value: 2100000, lastContact: "Today", nextAction: "Send LOI", priority: "high", score: 87 },
-  { id: "lead-002", name: "Midtown RE LLC", address: "1240 Broadway", stage: "analyzing", value: 3900000, lastContact: "2 days ago", nextAction: "Schedule walkthrough", priority: "high", score: 74 },
-  { id: "lead-003", name: "R&B Holding Corp", address: "1890 Adam Powell Blvd", stage: "contacted", value: 1600000, lastContact: "1 week ago", nextAction: "Follow-up call", priority: "medium", score: 82 },
-  { id: "lead-004", name: "J. Williams", address: "95 Eastern Pkwy", stage: "new", value: 1200000, lastContact: "3 days ago", nextAction: "Title review", priority: "medium", score: 79 },
-  { id: "lead-005", name: "First National REO", address: "2040 Morris Ave", stage: "analyzing", value: 780000, lastContact: "Yesterday", nextAction: "Submit offer", priority: "low", score: 68 },
-  { id: "lead-006", name: "Tribeca Partners", address: "45 Warren St", stage: "closed", value: 4800000, lastContact: "2 weeks ago", nextAction: "Post-close follow-up", priority: "low", score: 61 },
-];
-
 const STAGES = ["All", "new", "contacted", "analyzing", "negotiating", "closed"];
 const STAGE_LABELS: Record<string, string> = {
   new: "New",
@@ -121,11 +112,11 @@ export default function PipelineTab() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 + 84 : 90;
 
-  const { data, refetch } = useQuery({
+  const { data, isError: leadsError, refetch } = useQuery({
     queryKey: ["terra-pipeline"],
     queryFn: async () => {
       const res = await fetch(API_BASE + "/terra/crm/leads");
-      if (!res.ok) return null;
+      if (!res.ok) throw new Error("Failed to fetch leads: " + res.status);
       const json = await res.json();
       return json.data ?? json;
     },
@@ -148,7 +139,7 @@ export default function PipelineTab() {
     priority: (r.score != null ? (r.score >= 75 ? "high" : r.score >= 50 ? "medium" : "low") : "medium"),
     score: r.score ?? 50,
   }));
-  const allLeads = apiLeads.length > 0 ? apiLeads : DEMO_LEADS;
+  const allLeads = apiLeads;
   const displayLeads = allLeads.filter(l => selectedStage === "All" || l.stage === selectedStage);
 
   const totalValue = allLeads.reduce((acc, l) => acc + l.value, 0);
@@ -243,7 +234,15 @@ export default function PipelineTab() {
         {displayLeads.map(l => (
           <LeadCard key={l.id} lead={l} onEdit={(lead) => { setSelectedLead(lead); setEditStage(lead.stage); setEditNote(""); setShowEditModal(true); }} />
         ))}
-        {displayLeads.length === 0 && (
+        {leadsError ? (
+          <View style={styles.emptyState}>
+            <Feather name="wifi-off" size={28} color={colors.mutedForeground} />
+            <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>Cannot reach server</Text>
+            <Pressable onPress={() => refetch()} style={{ marginTop: 8 }}>
+              <Text style={{ color: colors.gold, fontSize: 12, fontFamily: "Inter_400Regular" }}>Tap to retry</Text>
+            </Pressable>
+          </View>
+        ) : displayLeads.length === 0 && (
           <View style={styles.emptyState}>
             <Feather name="activity" size={28} color={colors.mutedForeground} />
             <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No leads in this stage</Text>

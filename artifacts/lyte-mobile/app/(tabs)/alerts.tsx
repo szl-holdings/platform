@@ -161,11 +161,7 @@ function AlertCard({
   );
 }
 
-const ON_CALL_SCHEDULE = [
-  { name: "Alex Chen", role: "Primary On-Call", window: "Now – 08:00", status: "active" as const },
-  { name: "Maria Rodriguez", role: "Secondary On-Call", window: "Now – 08:00", status: "standby" as const },
-  { name: "David Park", role: "Primary On-Call", window: "08:00 – 18:00", status: "upcoming" as const },
-];
+const ON_CALL_SCHEDULE: Array<{ name: string; role: string; window: string; status: "active" | "standby" | "upcoming" }> = [];
 
 export default function AlertsScreen() {
   const insets = useSafeAreaInsets();
@@ -232,7 +228,13 @@ export default function AlertsScreen() {
 
         <Text style={styles.sectionLabel}>ON-CALL SCHEDULE</Text>
         <View style={styles.onCallList}>
-          {ON_CALL_SCHEDULE.map((person, i) => (
+          {ON_CALL_SCHEDULE.length === 0 ? (
+            <View style={[styles.onCallCard, { borderColor: LYTE_COLORS.border }]}>
+              <Text style={{ color: LYTE_COLORS.textTertiary, fontSize: 11, fontFamily: "Inter_400Regular" }}>
+                On-call schedule not configured
+              </Text>
+            </View>
+          ) : ON_CALL_SCHEDULE.map((person, i) => (
             <View key={i} style={[styles.onCallCard, { borderColor: person.status === "active" ? LYTE_COLORS.neonGreenLight : LYTE_COLORS.border }]}>
               <View style={[styles.onCallDot, {
                 backgroundColor: person.status === "active" ? LYTE_COLORS.neonGreen : person.status === "standby" ? LYTE_COLORS.medium : LYTE_COLORS.low

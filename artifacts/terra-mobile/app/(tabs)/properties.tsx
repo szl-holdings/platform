@@ -35,16 +35,6 @@ interface DistressProperty {
   confidenceLevel: string;
 }
 
-const DEMO_PROPERTIES: DistressProperty[] = [
-  { id: "dp-001", address: "847 Park Ave", borough: "Queens", distressType: "pre-foreclosure", opportunityScore: 87, estimatedValue: 2100000, ownerName: "Estate of R. Martinez", daysInDistress: 142, confidenceLevel: "high" },
-  { id: "dp-002", address: "1240 Broadway", borough: "Manhattan", distressType: "foreclosure", opportunityScore: 74, estimatedValue: 3900000, ownerName: "Midtown RE LLC", daysInDistress: 89, confidenceLevel: "high" },
-  { id: "dp-003", address: "45 Warren St", borough: "Manhattan", distressType: "tax-lien", opportunityScore: 61, estimatedValue: 4800000, ownerName: "W.Capital Partners LLC", daysInDistress: 54, confidenceLevel: "medium" },
-  { id: "dp-004", address: "1890 Adam Powell Blvd", borough: "Manhattan", distressType: "pre-foreclosure", opportunityScore: 82, estimatedValue: 1600000, ownerName: "R&B Holding Corp", daysInDistress: 201, confidenceLevel: "high" },
-  { id: "dp-005", address: "95 Eastern Pkwy", borough: "Brooklyn", distressType: "auction", opportunityScore: 79, estimatedValue: 1200000, ownerName: "J. Williams", daysInDistress: 37, confidenceLevel: "medium" },
-  { id: "dp-006", address: "2040 Morris Ave", borough: "Bronx", distressType: "reo", opportunityScore: 68, estimatedValue: 780000, ownerName: "First National Bank REO", daysInDistress: 312, confidenceLevel: "high" },
-  { id: "dp-007", address: "312 Forest Ave", borough: "Staten Island", distressType: "tax-lien", opportunityScore: 52, estimatedValue: 650000, ownerName: "T. Greco", daysInDistress: 78, confidenceLevel: "low" },
-];
-
 const TYPE_COLORS: Record<string, string> = {
   "pre-foreclosure": "#b8943c",
   "foreclosure": "#c0503a",
@@ -187,7 +177,7 @@ export default function PropertiesTab() {
   });
 
   const apiProperties: DistressProperty[] = data?.properties ?? [];
-  const displayProperties = (apiProperties.length > 0 ? apiProperties : DEMO_PROPERTIES)
+  const displayProperties = apiProperties
     .filter(p => {
       const matchSearch = !search || p.address.toLowerCase().includes(search.toLowerCase()) || p.ownerName?.toLowerCase().includes(search.toLowerCase());
       const matchBorough = selectedBorough === "All" || p.borough === selectedBorough;
@@ -293,8 +283,8 @@ export default function PropertiesTab() {
 
       <View style={[styles.resultsRow, { borderTopColor: colors.border }]}>
         <Text style={[styles.resultsCount, { color: colors.mutedForeground }]}>{displayProperties.length} properties</Text>
-        <Text style={[styles.resultsMode, { color: apiProperties.length > 0 ? colors.emerald : colors.gold }]}>
-          {apiProperties.length > 0 ? "Live data" : "Demo data"}
+        <Text style={[styles.resultsMode, { color: apiProperties.length > 0 ? colors.emerald : colors.mutedForeground }]}>
+          {apiProperties.length > 0 ? "Live data" : "No API data"}
         </Text>
       </View>
 

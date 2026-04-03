@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Platform,
@@ -30,15 +30,6 @@ interface ScannerCard {
   ownerName: string;
   thesis: string;
 }
-
-const DEMO_CARDS: ScannerCard[] = [
-  { id: "s-001", address: "847 Park Ave, Queens", borough: "Queens", distressType: "Pre-Foreclosure", score: 87, price: "$2.1M", daysListed: 142, ownerName: "Estate of R. Martinez", thesis: "14yr hold, Q2 2026 debt maturity. High motivation, direct outreach recommended." },
-  { id: "s-002", address: "1890 Adam Powell Blvd", borough: "Manhattan", distressType: "Pre-Foreclosure", score: 82, price: "$1.6M", daysListed: 201, ownerName: "R&B Holding Corp", thesis: "Cluster alert: 4 filings in zip 10029, tax lien delinquent. Seller motivated." },
-  { id: "s-003", address: "95 Eastern Pkwy, Brooklyn", borough: "Brooklyn", distressType: "Auction", score: 79, price: "$1.2M", daysListed: 37, ownerName: "J. Williams", thesis: "Auction date approaching. Title clear. Note purchase or direct bid opportunity." },
-  { id: "s-004", address: "2040 Morris Ave, Bronx", borough: "Bronx", distressType: "REO", score: 68, price: "$780K", daysListed: 312, ownerName: "First National Bank", thesis: "Bank-owned 312 days. Strong negotiating position. Below market by 18%." },
-  { id: "s-005", address: "1240 Broadway, Manhattan", borough: "Manhattan", distressType: "Foreclosure", score: 74, price: "$3.9M", daysListed: 89, ownerName: "Midtown RE LLC", thesis: "Commercial listing down 8%. LLC transfer pending. Contact via attorney of record." },
-  { id: "s-006", address: "312 Forest Ave, Staten Island", borough: "Staten Island", distressType: "Tax Lien", score: 52, price: "$650K", daysListed: 78, ownerName: "T. Greco", thesis: "Tax lien delinquent 78 days. Monitor for escalation before outreach." },
-];
 
 const DIST_TYPE_COLORS: Record<string, string> = {
   "Pre-Foreclosure": "#b8943c",
@@ -175,7 +166,7 @@ function SwipeCard({
 export default function ScannerTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const [cards, setCards] = useState(DEMO_CARDS);
+  const [cards, setCards] = useState<ScannerCard[]>([]);
   const [addedCount, setAddedCount] = useState(0);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [apiLoaded, setApiLoaded] = useState(false);
@@ -236,12 +227,36 @@ export default function ScannerTab() {
     setCards(prev => prev.filter(c => c.id !== card.id));
   };
 
-  const resetCards = () => {
-    setCards(DEMO_CARDS);
+  const resetCards = useCallback(async () => {
     setAddedCount(0);
     setDismissedCount(0);
+    setCards([]);
+    setIsLoadingCards(true);
+    try {
+      const res = await fetch(API_BASE + "/terra/distress/search?limit=10&minScore=60&sort=opportunityScore");
+      if (res.ok) {
+        const json = await res.json();
+        const props = json.data?.properties ?? json.properties ?? [];
+        if (props.length > 0) {
+          const mapped: ScannerCard[] = props.slice(0, 10).map((p: { id: string; address: string; borough: string; distressType: string; opportunityScore: number; estimatedValue: number; daysInDistress: number; ownerName: string; thesis: string }) => ({
+            id: p.id ?? String(Math.random()),
+            address: p.address,
+            borough: p.borough,
+            distressType: p.distressType?.replace(/-/g, " ")?.replace(/\b\w/g, (c: string) => c.toUpperCase()) ?? "Distress",
+            score: p.opportunityScore ?? 70,
+            price: p.estimatedValue >= 1e6 ? "$" + (p.estimatedValue / 1e6).toFixed(1) + "M" : "$" + Math.round(p.estimatedValue / 1e3) + "K",
+            daysListed: p.daysInDistress ?? 0,
+            ownerName: p.ownerName ?? "Owner Unknown",
+            thesis: p.thesis ?? "High distress signal detected. Direct owner outreach recommended.",
+          }));
+          setCards(mapped);
+          setApiLoaded(true);
+        }
+      }
+    } catch {}
+    setIsLoadingCards(false);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  };
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -269,8 +284,8 @@ export default function ScannerTab() {
 
       <View style={[styles.dataSourceBadge, { backgroundColor: apiLoaded ? colors.emerald + "10" : colors.gold + "10" }]}>
         <View style={[styles.dataSourceDot, { backgroundColor: apiLoaded ? colors.emerald : colors.gold }]} />
-        <Text style={[styles.dataSourceText, { color: apiLoaded ? colors.emerald : colors.gold }]}>
-          {apiLoaded ? "Live API data" : "Demo properties"}
+        <Text style={[styles.dataSourceText, { color: apiLoaded ? colors.emerald : colors.mutedForeground }]}>
+          {apiLoaded ? "Live API data" : isLoadingCards ? "Loading…" : "No data — pull to refresh"}
         </Text>
       </View>
       <View style={styles.instructions}>

@@ -85,10 +85,7 @@ interface WatchlistAlert {
   time: string;
 }
 
-const DEMO_WATCHLIST_ALERTS: WatchlistAlert[] = [
-  { id: "wa-1", vesselName: "MV Atlantic Pioneer", event: "Entered exclusion zone — Gibraltar Strait", severity: "critical", time: new Date(Date.now() - 4 * 60000).toISOString() },
-  { id: "wa-2", vesselName: "MV Pacific Trader", event: "AIS signal lost — last seen Bay of Biscay", severity: "warning", time: new Date(Date.now() - 18 * 60000).toISOString() },
-];
+const DEMO_WATCHLIST_ALERTS: WatchlistAlert[] = [];
 
 const WATCHLIST_COLORS = { critical: "#ef4444", warning: "#f59e0b", info: "#0ea5e9" };
 
