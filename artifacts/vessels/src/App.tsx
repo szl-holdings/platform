@@ -14,7 +14,8 @@ import { AgentCopilot } from "@szl-holdings/shared-ui/copilot";
 import { helmsmanConfig } from "@szl-holdings/shared-ui/copilot-configs";
 import { cn } from "@szl-holdings/shared-ui/utils";
 import { toAlpha } from "@szl-holdings/shared-ui/utils";
-import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
+import { AuthProvider, useAuth as useVesselsRoleAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
@@ -200,7 +201,7 @@ function DemoModeBanner() {
 }
 
 function RoleSelector({ expanded }: { expanded: boolean }) {
-  const { user, setRole } = useAuth();
+  const { user, setRole } = useVesselsRoleAuth();
   const [open, setOpen] = useState(false);
   const roles: UserRole[] = ["exec", "ops", "compliance", "maintenance"];
 

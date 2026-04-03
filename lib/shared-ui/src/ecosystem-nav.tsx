@@ -9,6 +9,7 @@ import {
 } from "./doctrine-layer";
 import { DemoModeSwitcher } from "./demo-mode";
 import { SandboxToggle } from "./sandbox-mode";
+import { useAuth } from "@workspace/replit-auth-web";
 
 export interface EcosystemApp {
   id: string;
@@ -1028,9 +1029,10 @@ export function EcosystemNav({
   notifications: notificationsProp,
   onNotificationRead,
   onSearch,
-  userName = "Admin",
-  userRole = "Operator",
+  userName: userNameProp,
+  userRole: userRoleProp,
 }: EcosystemNavProps) {
+  const { user, isAuthenticated, login, logout } = useAuth();
   const appData = ECOSYSTEM_APPS.find((a) => a.id === currentAppId);
   const notificationCenter = useNotificationCenter(appData?.name ?? currentAppName);
 
@@ -1344,41 +1346,83 @@ export function EcosystemNav({
             )}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "4px 10px 4px 6px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: "8px",
-              cursor: "default",
-            }}
-          >
-            <div
+          {isAuthenticated && user ? (
+            <button
+              onClick={logout}
+              title={`Signed in as ${user.displayName || user.name || user.username || "User"} — click to sign out`}
               style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "6px",
-                background: `${accentColor}30`,
-                border: `1px solid ${accentColor}50`,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "12px",
-                flexShrink: 0,
+                gap: "8px",
+                padding: "4px 10px 4px 6px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.09)",
+                borderRadius: "8px",
+                cursor: "pointer",
+                transition: "background 0.15s",
               }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.09)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
             >
-              {userName.charAt(0).toUpperCase()}
-            </div>
-            <div style={{ display: "none" }} className="eco-nav-user-info">
-              <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>
-                {userName}
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt=""
+                  style={{ width: "24px", height: "24px", borderRadius: "6px", objectFit: "cover", flexShrink: 0, border: `1px solid ${accentColor}50` }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "6px",
+                    background: `${accentColor}30`,
+                    border: `1px solid ${accentColor}50`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: accentColor,
+                    flexShrink: 0,
+                  }}
+                >
+                  {(user.displayName || user.name || user.username || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div style={{ display: "none" }} className="eco-nav-user-info">
+                <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.8)", lineHeight: 1.2 }}>
+                  {user.displayName || user.name || user.username || "User"}
+                </div>
+                <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>
+                  {user.roles && user.roles.length > 0 ? user.roles[0] : userRoleProp || "Member"}
+                </div>
               </div>
-              <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>{userRole}</div>
-            </div>
-          </div>
+            </button>
+          ) : (
+            <button
+              onClick={login}
+              title="Sign in"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "4px 12px",
+                background: `${accentColor}20`,
+                border: `1px solid ${accentColor}40`,
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: 500,
+                color: accentColor,
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${accentColor}35`; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${accentColor}20`; }}
+            >
+              Sign in
+            </button>
+          )}
         </div>
       </nav>
 

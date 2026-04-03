@@ -863,6 +863,9 @@ importers:
       '@szl-holdings/mcp-client':
         specifier: workspace:*
         version: link:../../lib/mcp-client
+      '@szl-holdings/replit-auth-web':
+        specifier: workspace:*
+        version: link:../../lib/replit-auth-web
       '@szl-holdings/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui

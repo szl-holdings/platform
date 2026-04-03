@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight, ExternalLink } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 
 const navLinks = [
   { name: "Work", href: "/work" },
@@ -88,6 +89,7 @@ export function Navbar() {
             Get in touch
             <ArrowRight size={12} strokeWidth={2.5} />
           </Link>
+          <UserButton />
         </nav>
 
         <button

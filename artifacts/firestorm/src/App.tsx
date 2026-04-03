@@ -6,6 +6,8 @@ import { McpOverlay } from "@szl-holdings/mcp-client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import { useAuth } from "@szl-holdings/replit-auth-web";
+import { RoleGate } from "@szl-holdings/shared-ui";
 import {
   Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3,
   ClipboardCheck, Search, Rss, Layers, Users, ShieldCheck,
@@ -239,6 +241,14 @@ function PageLoader() {
   );
 }
 
+function AccessDenied() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-3 text-center p-8">
+      <Shield className="w-8 h-8" style={{ color: `${AEGIS_ACCENT}60` }} />
+      <p className="text-sm" style={{ color: "#64748b" }}>You do not have permission to access this section.</p>
+    </div>
+  );
+}
 
 function deriveModule(loc: string): Module {
   if (loc.startsWith("/ops/") || loc === "/ops") return "operations";
@@ -586,30 +596,30 @@ function AppRouter() {
         <Route path="/gov/canonical-demo" component={CanonicalDemo} />
         <Route path="/gov/trust" component={TrustPositioning} />
 
-        {/* Managed Operations */}
-        <Route path="/ops/dashboard" component={MspDashboard} />
-        <Route path="/ops/noc" component={MspNOC} />
-        <Route path="/ops/clients" component={MspClients} />
-        <Route path="/ops/tickets" component={MspTickets} />
-        <Route path="/ops/devices" component={MspDevices} />
-        <Route path="/ops/contracts" component={MspContracts} />
-        <Route path="/ops/revenue" component={MspRevenue} />
-        <Route path="/ops/technicians" component={MspTechnicians} />
-        <Route path="/ops/dispatch" component={MspDispatch} />
-        <Route path="/ops/rmm" component={MspRMM} />
-        <Route path="/ops/mrr" component={MspMRR} />
-        <Route path="/ops/service-desk" component={MspServiceDesk} />
+        {/* Managed Operations — requires operator or admin role */}
+        <Route path="/ops/dashboard">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspDashboard /></RoleGate>}</Route>
+        <Route path="/ops/noc">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspNOC /></RoleGate>}</Route>
+        <Route path="/ops/clients">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspClients /></RoleGate>}</Route>
+        <Route path="/ops/tickets">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspTickets /></RoleGate>}</Route>
+        <Route path="/ops/devices">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspDevices /></RoleGate>}</Route>
+        <Route path="/ops/contracts">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspContracts /></RoleGate>}</Route>
+        <Route path="/ops/revenue">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspRevenue /></RoleGate>}</Route>
+        <Route path="/ops/technicians">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspTechnicians /></RoleGate>}</Route>
+        <Route path="/ops/dispatch">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspDispatch /></RoleGate>}</Route>
+        <Route path="/ops/rmm">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspRMM /></RoleGate>}</Route>
+        <Route path="/ops/mrr">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspMRR /></RoleGate>}</Route>
+        <Route path="/ops/service-desk">{() => <RoleGate requires={["operator", "admin"]} fallback={<AccessDenied />}><MspServiceDesk /></RoleGate>}</Route>
 
-        {/* Intelligence Engine */}
-        <Route path="/intel/dashboard" component={IntelDashboard} />
-        <Route path="/intel/quipu-command" component={QuipuCommand} />
-        <Route path="/intel/chasqui-relay" component={ChasquiRelay} />
-        <Route path="/intel/dual-mind" component={DualMindMonitor} />
-        <Route path="/intel/willaq-umu" component={WillaqUmu} />
-        <Route path="/intel/models" component={Models} />
-        <Route path="/intel/predictions" component={Predictions} />
-        <Route path="/intel/projects" component={IntelProjects} />
-        <Route path="/intel/insights" component={IntelInsights} />
+        {/* Intelligence Engine — requires security or admin role */}
+        <Route path="/intel/dashboard">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelDashboard /></RoleGate>}</Route>
+        <Route path="/intel/quipu-command">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><QuipuCommand /></RoleGate>}</Route>
+        <Route path="/intel/chasqui-relay">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><ChasquiRelay /></RoleGate>}</Route>
+        <Route path="/intel/dual-mind">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><DualMindMonitor /></RoleGate>}</Route>
+        <Route path="/intel/willaq-umu">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><WillaqUmu /></RoleGate>}</Route>
+        <Route path="/intel/models">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Models /></RoleGate>}</Route>
+        <Route path="/intel/predictions">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><Predictions /></RoleGate>}</Route>
+        <Route path="/intel/projects">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelProjects /></RoleGate>}</Route>
+        <Route path="/intel/insights">{() => <RoleGate requires={["security", "admin"]} fallback={<AccessDenied />}><IntelInsights /></RoleGate>}</Route>
 
         <Route path="/soc/threat-desk" component={ThreatDesk} />
         <Route path="/soc/what-changed" component={AegisWhatChanged} />
@@ -679,6 +689,10 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
   const [location, navigate] = useLocation();
   const { replay: replayOnboarding } = useOnboardingState("aegis");
+  const { isLoading, isAuthenticated, login } = useAuth();
+
+  const params = new URLSearchParams(window.location.search);
+  const demoMode = params.get("view") === "app" || params.get("demo") === "true";
 
   const normalizedPath = location.replace(/\/+$/, "") || "/";
   const isMarketing = MARKETING_ROUTES.includes(normalizedPath);
@@ -694,6 +708,33 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         <Toaster />
       </Suspense>
     );
+  }
+
+  if (!demoMode) {
+    if (isLoading) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#0A0D14" }}>
+          <div style={{ width: 24, height: 24, border: `2px solid ${AEGIS_ACCENT}30`, borderTopColor: AEGIS_ACCENT, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        </div>
+      );
+    }
+    if (!isAuthenticated) {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", background: "#0A0D14", gap: 24, padding: "0 24px", textAlign: "center" }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${AEGIS_ACCENT}20`, border: `1px solid ${AEGIS_ACCENT}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={AEGIS_ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 600, color: "#e2e8f0", margin: "0 0 8px 0" }}>Sign in to Aegis</h2>
+            <p style={{ fontSize: 14, color: "#64748b", margin: 0, maxWidth: 360 }}>Unified Defense & Intelligence Command requires authentication.</p>
+          </div>
+          <button onClick={login} style={{ padding: "10px 28px", background: `${AEGIS_ACCENT}20`, border: `1px solid ${AEGIS_ACCENT}60`, borderRadius: 8, color: AEGIS_ACCENT, fontSize: 14, fontWeight: 500, cursor: "pointer" }}>
+            Sign in
+          </button>
+          <a href="/firestorm/home" style={{ fontSize: 13, color: "#475569", textDecoration: "none" }}>View product overview →</a>
+        </div>
+      );
+    }
   }
 
   return (

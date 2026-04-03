@@ -75,7 +75,8 @@
     "vite": "catalog:",
     "wouter": "^3.3.5",
     "zod": "catalog:",
-    "@szl-holdings/mcp-client": "workspace:*"
+    "@szl-holdings/mcp-client": "workspace:*",
+    "@szl-holdings/replit-auth-web": "workspace:*"
   },
   "dependencies": {
     "@szl-holdings/graphql-client": "workspace:*",

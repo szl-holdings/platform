@@ -1,9 +1,11 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@szl-holdings/shared-ui/command-palette";
 import { McpOverlay } from "@szl-holdings/mcp-client";
 import { PowerUserProvider, type KeyboardShortcut } from "@szl-holdings/shared-ui/keyboard-shortcuts";
 import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider } from "@szl-holdings/shared-ui";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
+import { useAuth } from "@szl-holdings/replit-auth-web";
 import { BookOpen, Users, Calendar, MessageSquare, FileText, Sparkles } from "lucide-react";
 import { LANE_ACCENT_HEX } from "@szl-holdings/shared-ui/lane-colors";
 
@@ -94,6 +96,37 @@ function PageLoader() {
   );
 }
 
+function PortalAuthGuard({ children }: { children: ReactNode }) {
+  const { isLoading, isAuthenticated, login } = useAuth();
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 20, padding: "0 24px", textAlign: "center" }}>
+        <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${CARLOTA_ACCENT}20`, border: `1px solid ${CARLOTA_ACCENT}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={CARLOTA_ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: "#1a1a1a", margin: "0 0 8px 0" }}>Sign in required</h2>
+          <p style={{ fontSize: 14, color: "#666", margin: 0, maxWidth: 340 }}>Please sign in to access your client portal.</p>
+        </div>
+        <button
+          onClick={login}
+          style={{ padding: "10px 28px", background: CARLOTA_ACCENT, borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 500, cursor: "pointer", border: "none" }}
+        >
+          Sign in
+        </button>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -111,12 +144,12 @@ function Router() {
         <Route path="/legal/privacy" component={LegalPrivacyPage} />
         <Route path="/legal/terms" component={LegalTermsPage} />
 
-        {/* Client Portal */}
-        <Route path="/client-portal" component={ClientPortalOverview} />
-        <Route path="/client-portal/documents" component={ClientPortalDocuments} />
-        <Route path="/client-portal/updates" component={ClientPortalUpdates} />
-        <Route path="/client-portal/messages" component={ClientPortalMessages} />
-        <Route path="/client-portal/settings" component={ClientPortalSettings} />
+        {/* Client Portal — protected routes */}
+        <Route path="/client-portal">{() => <PortalAuthGuard><ClientPortalOverview /></PortalAuthGuard>}</Route>
+        <Route path="/client-portal/documents">{() => <PortalAuthGuard><ClientPortalDocuments /></PortalAuthGuard>}</Route>
+        <Route path="/client-portal/updates">{() => <PortalAuthGuard><ClientPortalUpdates /></PortalAuthGuard>}</Route>
+        <Route path="/client-portal/messages">{() => <PortalAuthGuard><ClientPortalMessages /></PortalAuthGuard>}</Route>
+        <Route path="/client-portal/settings">{() => <PortalAuthGuard><ClientPortalSettings /></PortalAuthGuard>}</Route>
 
         {/* Legacy routes */}
         <Route path="/book" component={BookingFlow} />
@@ -163,6 +196,9 @@ function App() {
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor={CARLOTA_ACCENT}>
           <div style={{ minHeight: "100vh" }}>
+            <div style={{ position: "fixed", top: 12, right: 16, zIndex: 9999 }}>
+              <UserButton />
+            </div>
             <Router />
           </div>
           <CommandPalette

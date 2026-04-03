@@ -4,6 +4,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { analytics } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 
 const NAV_ITEMS = [
   {
@@ -277,6 +278,7 @@ export function SiteNav() {
                   </Link>
                 );
               })}
+              <UserButton />
             </div>
 
             {/* Mobile toggle */}

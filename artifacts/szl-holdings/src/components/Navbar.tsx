@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 
 const navLinks = [
   { label: "Ecosystem", href: "/ecosystem" },
@@ -160,6 +161,7 @@ export function Navbar() {
               </Link>
             );
           })}
+          <UserButton />
         </div>
 
         <button
