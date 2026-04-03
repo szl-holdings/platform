@@ -348,7 +348,7 @@ router.get("/dashboard", authMiddleware(), async (_req, res) => {
   }
 });
 
-router.get("/insights/narratives", authMiddleware(), async (_req, res) => {
+router.get("/insights/narratives", authMiddleware({ required: false }), async (_req, res) => {
   try {
     const signals = await db.select().from(lyteSignalsTable).where(ne(lyteSignalsTable.status, "resolved")).orderBy(desc(lyteSignalsTable.receivedAt)).limit(20);
     const incidents = await db.select().from(lyteIncidentsTable).where(ne(lyteIncidentsTable.status, "closed")).orderBy(desc(lyteIncidentsTable.createdAt)).limit(10);
