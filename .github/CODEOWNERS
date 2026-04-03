@@ -1,22 +1,10 @@
 * @stephenlutar2-hash
-
-artifacts/api-server/ @stephenlutar2-hash
-artifacts/szl-holdings/ @stephenlutar2-hash
-artifacts/lyte-command-center/ @stephenlutar2-hash
-artifacts/firestorm/ @stephenlutar2-hash
-artifacts/terra/ @stephenlutar2-hash
-artifacts/vessels/ @stephenlutar2-hash
-artifacts/carlota-jo/ @stephenlutar2-hash
-artifacts/stephen-site/ @stephenlutar2-hash
-
-artifacts/*-mobile/ @stephenlutar2-hash
-
-lib/ @stephenlutar2-hash
-packages/ @stephenlutar2-hash
-
-lib/ai-engine/ @stephenlutar2-hash
-lib/db/ @stephenlutar2-hash
-lib/shared-ui/ @stephenlutar2-hash
-
-.github/ @stephenlutar2-hash
-docs/ @stephenlutar2-hash
+  /lib/ @stephenlutar2-hash
+  /artifacts/api-server/ @stephenlutar2-hash
+  /SECURITY.md @stephenlutar2-hash
+  /.github/ @stephenlutar2-hash
+  /docs/trust/ @stephenlutar2-hash
+  /scripts/ @stephenlutar2-hash
+  /ops/ @stephenlutar2-hash
+  /infra/ @stephenlutar2-hash
+  
