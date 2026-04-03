@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
+import { McpOverlay } from "@workspace/mcp-client";
 import { UserButton } from "@workspace/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
@@ -616,6 +617,7 @@ function App() {
             </WouterRouter>
           </AuthProvider>
           <AgentCopilot config={helmsmanConfig} />
+          <McpOverlay domain="vessels" />
         </QueryClientProvider>
       </DemoModeProvider>
     </SandboxModeProvider>

@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
 import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
 import { ReactNode, useState } from "react";
-import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign } from "lucide-react";
+import { Zap, Activity, GitBranch, Network, Shield, BarChart2, ChevronRight, Bell, Menu, X, Film, Mic, Calendar, Wand2, Radio, LayoutDashboard, ArrowLeft, FileText, Brain, Layers, Home, BookOpen, Globe, Lock, Play, Star, DollarSign, Store, Code2 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator } from "@workspace/shared-ui";
 import { CommandBar, CommandBarTrigger, useCommandBar } from "./command-bar";
 
@@ -55,6 +55,11 @@ const ENTERPRISE_NAV = [
   { href: "/alloy/usage", label: "Usage Metering", icon: DollarSign, badge: "New" },
   { href: "/alloy/demos", label: "Canonical Demos", icon: Play, badge: "New" },
   { href: "/alloy/pilot", label: "Pilot Onboarding", icon: Star, badge: "New" },
+];
+
+const MCP_NAV = [
+  { href: "/alloy/mcp-store", label: "MCP Marketplace", icon: Store, badge: "New" },
+  { href: "/alloy/mcp-tools", label: "Custom Tool Creator", icon: Code2, badge: "New" },
 ];
 
 function NavItem({ href, label, icon: Icon, exact, badge, onClick }: {
@@ -167,6 +172,11 @@ export function AlloyLayout({ children }: { children: ReactNode }) {
 
             <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(139,92,246,0.6)" }}>Enterprise Governance</div>
             {ENTERPRISE_NAV.map(item => (
+              <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
+            ))}
+
+            <div className="text-[9px] uppercase tracking-widest px-3 mb-1 mt-4 font-medium" style={{ color: "rgba(75,139,219,0.7)" }}>MCP Ecosystem</div>
+            {MCP_NAV.map(item => (
               <NavItem key={item.href} {...item} onClick={() => setSidebarOpen(false)} />
             ))}
           </nav>

@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import mcpRouter from "./mcp";
 import { authLimiter, readLimiter, writeLimiter, SHORT_CACHE, MEDIUM_CACHE } from "../middlewares/rate-limiters";
 const _authLimiter = authLimiter;
 const _readLimiter = readLimiter;
@@ -92,7 +93,6 @@ import prismCounselOpsRouter from "./prism-counsel-ops";
 import prismCounselS31Router from "./prism-counsel-s31";
 import { prismCounselPilotRouter } from "./prism-counsel-pilot";
 import prismCounselCoreRouter from "./prism-counsel-core";
-import mcpRouter from "./mcp";
 import alloyEmailRouter from "./alloy-email";
 import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";

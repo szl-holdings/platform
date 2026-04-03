@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
+import { McpOverlay } from "@workspace/mcp-client";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider } from "@workspace/shared-ui";
 import { BookOpen, Users, Calendar, MessageSquare, FileText, Sparkles } from "lucide-react";
@@ -169,6 +170,7 @@ function App() {
             accentColor="#c8a96a"
           />
           <OnboardingWizard config={CARLOTA_ONBOARDING_CONFIG} />
+          <McpOverlay domain="carlota-jo" />
         </PowerUserProvider>
       </WouterRouter>
     </SandboxModeProvider>

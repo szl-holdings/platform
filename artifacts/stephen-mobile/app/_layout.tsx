@@ -39,6 +39,7 @@ function RootLayoutNav() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="article/[slug]" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="venture/[slug]" options={{ headerShown: false, animation: "slide_from_right" }} />
+      <Stack.Screen name="mcp-tools" options={{ headerShown: false, animation: "slide_from_right" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

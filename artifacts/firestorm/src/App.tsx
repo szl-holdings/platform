@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
+import { McpOverlay } from "@workspace/mcp-client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
@@ -905,6 +906,7 @@ function App() {
             <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           </WouterRouter>
           <AgentCopilot config={sentinelConfig} />
+          <McpOverlay domain="aegis" />
         </QueryClientProvider>
       </DemoModeProvider>
     </SandboxModeProvider>

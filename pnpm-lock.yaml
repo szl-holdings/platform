@@ -549,6 +549,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 'catalog:'
         version: 5.1.4(vite@7.3.1(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@workspace/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       clsx:
         specifier: 'catalog:'
         version: 2.1.1
@@ -869,6 +872,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       '@workspace/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
@@ -1086,6 +1092,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       '@workspace/replit-auth-web':
         specifier: workspace:*
         version: link:../../lib/replit-auth-web
@@ -1750,6 +1759,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       '@workspace/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
@@ -1892,6 +1904,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       framer-motion:
         specifier: 'catalog:'
         version: 12.35.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2089,6 +2104,9 @@ importers:
       '@workspace/analytics':
         specifier: workspace:*
         version: link:../../lib/analytics
+      '@workspace/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
@@ -2430,6 +2448,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/mcp-client':
+        specifier: workspace:*
+        version: link:../../lib/mcp-client
       '@workspace/shared-ui':
         specifier: workspace:*
         version: link:../../lib/shared-ui
@@ -2840,6 +2861,22 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  lib/mcp-client:
+    dependencies:
+      '@tanstack/react-query':
+        specifier: 'catalog:'
+        version: 5.90.21(react@19.1.0)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.545.0(react@19.1.0)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
 
   lib/observability:
     dependencies:

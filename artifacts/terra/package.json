@@ -33,7 +33,8 @@
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
-    "wouter": "^3.3.5"
+    "wouter": "^3.3.5",
+    "@workspace/mcp-client": "workspace:*"
   },
   "dependencies": {
     "@types/mapbox-gl": "^3.5.0",

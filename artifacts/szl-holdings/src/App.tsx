@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type StatusBannerConfig } from "@workspace/shared-ui";
+import { McpOverlay } from "@workspace/mcp-client";
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { CounselLayout } from "@/prism-counsel/components/counsel-layout";
@@ -169,6 +170,8 @@ const AlloyAdminAnalytics = lazy(() => import("@/alloy/pages/admin-analytics"));
 const AlloyUsageMetering = lazy(() => import("@/alloy/pages/usage-metering"));
 const AlloyCanonicalDemos = lazy(() => import("@/alloy/pages/canonical-demos"));
 const AlloyPilotOnboarding = lazy(() => import("@/alloy/pages/pilot-onboarding"));
+const AlloyMcpStore = lazy(() => import("@/alloy/pages/mcp-store"));
+const AlloyMcpToolCreator = lazy(() => import("@/alloy/pages/mcp-tool-creator"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -749,6 +752,12 @@ function App() {
             <Route path="/alloy/pilot">
               <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyPilotOnboarding /></AlloyAppPage></Suspense>
             </Route>
+            <Route path="/alloy/mcp-store">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpStore /></AlloyAppPage></Suspense>
+            </Route>
+            <Route path="/alloy/mcp-tools">
+              <Suspense fallback={<PageLoader />}><AlloyAppPage><AlloyMcpToolCreator /></AlloyAppPage></Suspense>
+            </Route>
 
             {/* ── External platform redirects ── */}
             <Route path="/vessels">
@@ -893,6 +902,7 @@ function App() {
         </WouterRouter>
       </LazyMotion>
       <Toaster />
+      <McpOverlay domain="szl-holdings" />
       <CookieBanner privacyUrl="/legal/privacy" accentColor="#d4a054" />
     </QueryClientProvider>
     </DemoModeProvider>

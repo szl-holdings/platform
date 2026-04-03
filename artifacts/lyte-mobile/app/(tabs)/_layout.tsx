@@ -31,6 +31,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
         <Label>PRISM</Label>
       </NativeTabs.Trigger>
+            <NativeTabs.Trigger name="mcp-tools">
+        <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
+        <Label>Tools</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
         <Icon sf={{ default: "person", selected: "person.fill" }} />
         <Label>Profile</Label>

@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/mcp-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hooks": "./src/hooks.tsx",
+    "./components": "./src/components.tsx",
+    "./store": "./src/McpStoreProvider.tsx",
+    "./mobile": "./src/mobile.tsx"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "catalog:",
+    "lucide-react": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:"
+  }
+}

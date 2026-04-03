@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner, CookieBanner, StatusBanner } from "@workspace/shared-ui";
+import { McpOverlay } from "@workspace/mcp-client";
 import { LyteLayout } from "@/components/lyte-layout";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
@@ -232,6 +233,7 @@ function App() {
           <StatusBanner config={LYTE_STATUS_CONFIG} />
           <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           <AgentCopilot config={beaconConfig} />
+          <McpOverlay domain="lyte" />
           <CookieBanner privacyUrl="https://szlholdings.com/legal/privacy" accentColor="#d4a054" />
         </WouterRouter>
       </QueryClientProvider>

@@ -75,7 +75,8 @@
     "vaul": "^1.1.2",
     "vite": "catalog:",
     "wouter": "^3.3.5",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@workspace/mcp-client": "workspace:*"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

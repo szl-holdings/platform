@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@workspace/shared-ui/ui/toaster";
+import { McpOverlay } from "@workspace/mcp-client";
 import { TooltipProvider } from "@workspace/shared-ui/ui/tooltip";
 
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
@@ -107,6 +108,7 @@ function App() {
           </div>
         </WouterRouter>
         <Toaster />
+        <McpOverlay domain="stephen" />
       </TooltipProvider>
     </QueryClientProvider>
   );

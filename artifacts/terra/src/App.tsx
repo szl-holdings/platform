@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
+import { McpOverlay } from "@workspace/mcp-client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { beaconConfig } from "@workspace/shared-ui/copilot-configs";
@@ -191,6 +192,7 @@ function App() {
           <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           <AgentCopilot config={beaconConfig} />
           <Toaster />
+          <McpOverlay domain="terra" />
         </WouterRouter>
       </QueryClientProvider>
     </SandboxModeProvider>
