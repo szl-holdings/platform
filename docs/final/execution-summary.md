@@ -1,14 +1,14 @@
 # SZL Holdings — Execution Summary
 
-**Task:** Full Public Credibility & Product Readiness — 10-Phase Investor-Grade Hardening
-**Date:** April 2026
-**Status:** Complete (Hardening Pass 2)
+**Task:** Full Public Credibility & Product Readiness — 10-Phase Investor-Grade Hardening  
+**Date:** April 2026  
+**Status:** Complete (All Phases — Polish Pass Final)
 
 ---
 
 ## What Was Done
 
-This execution summary documents all changes made during the 10-phase investor-grade hardening program, including the April 2026 hardening pass that upgraded the README, profile README, gitignore, mirror scripts, architecture diagrams, and live screenshots.
+This execution summary documents all changes made during the 10-phase investor-grade hardening program, including the April 2026 hardening passes that upgraded the README, profile README, gitignore, mirror scripts, architecture diagrams, and live screenshots, and the final polish pass that aligned all public surface files to the payload spec.
 
 ---
 
@@ -26,7 +26,7 @@ This execution summary documents all changes made during the 10-phase investor-g
 ## Phase 2: Public Mirror Discipline
 
 - `docs/public/public-mirror-policy.md` — Curation rules, inclusion/exclusion
-- `scripts/public-mirror/prepare-public-mirror.sh` — Full rsync-based mirror staging with exclusions
+- `scripts/public-mirror/prepare-public-mirror.sh` — Full rsync-based mirror staging with exclusions (`.archive`, `.git-rewrite`, `backups`, `exports`, `test-results` and more)
 - `scripts/public-mirror/validate-public-surface.sh` — Pre-push validation with automated report generation
 - `scripts/public-mirror/detect-noisy-folders.sh` — Quick noisy directory scan
 - `.gitignore` — Comprehensive exclusions: `.archive/`, `.git-rewrite/`, `backups/`, `exports/`, `social-content/`, `spfx-webparts/`, `test-results/`, `.canvas/`, `.cursor/`, `*.sql.gz`, `*.dump`
@@ -64,6 +64,7 @@ This execution summary documents all changes made during the 10-phase investor-g
 - Why this matters (4 arguments)
 - Architecture diagram (signal → action)
 - Full product summaries (Lyte, Alloy, Aegis, Vessels, Terra, Carlota Jo)
+- Inline screenshot images (landing-hero, lyte-overview, alloy-overview, trust-center)
 - Trust summary
 - Deployment and operations
 - Documentation map table
@@ -75,7 +76,7 @@ This execution summary documents all changes made during the 10-phase investor-g
 
 ## Phase 5: GitHub Profile README
 
-- `profile-readme/README.md` — Lyte+Alloy focused narrative, architecture philosophy, featured repo
+- `profile-readme/README.md` — Rewritten with spec-compliant positioning line and explicit section headers: About, Current Build, Platforms, Focus Areas, Featured Repo, Connect
 - `profile-readme/PROFILE_REPO_SETUP.md` — Setup instructions
 - `profile-readme/assets/platform-map.svg` — Architecture visual
 - `profile-readme/assets/ecosystem-map.svg` — Ecosystem visual
@@ -119,7 +120,7 @@ This execution summary documents all changes made during the 10-phase investor-g
 - `ops/github/manual-checklist.md`
 - `ops/github/commands.sh` / `commands.ps1`
 - `ops/github/repo-settings.json`
-- `ops/github/profile-values.md`
+- `ops/github/profile-values.md` — Updated with exact bio, location, and all toggle settings
 
 ---
 
@@ -157,12 +158,13 @@ This execution summary documents all changes made during the 10-phase investor-g
 - `docs/final/what-changed.md`
 - `docs/final/manual-actions-remaining.md`
 - `docs/final/next-30-days.md`
+- `docs/final/next-steps-ranked.md`
 
 ---
 
 ## Manual GitHub Actions Remaining
 
-See `docs/final/manual-actions-remaining.md` for the full checklist:
+All phases are complete. The only remaining items are GitHub UI clicks. See `docs/final/manual-actions-remaining.md` for the full checklist:
 1. Update repo description, topics, homepage URL (~5 min)
 2. Create Release v0.1.0 (~5 min)
 3. Set up profile README repo (~10 min)
@@ -176,8 +178,9 @@ See `docs/final/manual-actions-remaining.md` for the full checklist:
 ```
 feat: investor-grade platform hardening — 10-phase credibility build
 
-- README: premium rewrite with Start Here tracks
-- Profile README: Lyte+Alloy focused founder package
+- README: premium rewrite with Start Here tracks and inline screenshots
+- Profile README: spec-compliant positioning, explicit section headers
+- ops/github/profile-values.md: exact bio, location, all toggle settings
 - Trust files: SECURITY, CONTRIBUTING, LICENSE, CHANGELOG, CODEOWNERS
 - Architecture docs: system overview, platform map, data flow
 - Trust docs: trust center, security posture, deployment, privacy
@@ -185,8 +188,8 @@ feat: investor-grade platform hardening — 10-phase credibility build
 - Buyer docs: 5 documents (overview, solution brief, use cases)
 - Design audit: tokens, audit, remediation plan
 - Release discipline: strategy, versioning, checklist, v0.1.0
-- Mirror scripts: prepare, validate, detect-noisy
-- Visual assets: 4 SVG diagrams, 4 live screenshots
+- Mirror scripts: prepare, validate, detect-noisy (noisy dir exclusions hardened)
+- Visual assets: 4 SVG diagrams, 4 live screenshots (inline in README)
 - GitHub automation: commands, checklist, settings
 - .gitignore: comprehensive public mirror exclusions
 ```

@@ -68,6 +68,11 @@ for dir in "${INCLUDE_DIRS[@]}"; do
       --exclude='dist' \
       --exclude='.expo' \
       --exclude='*.tsbuildinfo' \
+      --exclude='.archive' \
+      --exclude='.git-rewrite' \
+      --exclude='backups' \
+      --exclude='exports' \
+      --exclude='test-results' \
       "$WORKSPACE_ROOT/$dir/" "$MIRROR_DIR/$dir/"
   fi
 done

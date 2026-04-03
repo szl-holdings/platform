@@ -9,13 +9,24 @@ Use these exact values when updating the GitHub profile at `github.com/settings/
 | Field | Value |
 |-------|-------|
 | **Name** | `Stephen Lutar` |
-| **Bio** | `Building premium command-grade platforms — SZL Holdings` |
+| **Bio** | `Founder building Lyte, Alloy, and Vessels at SZL Holdings. Business observability, AI systems, and secure operations.` |
 | **Company** | `@SZLHoldings` or `SZL Holdings` |
-| **Location** | (your actual location) |
+| **Location** | `New York, NY` |
 | **Website** | `https://szlholdings.com` |
 | **LinkedIn** | `linkedin.com/in/stephen-l-279315240` |
 | **Twitter/X** | (if applicable) |
 | **Pronouns** | (if desired) |
+
+---
+
+## Profile Toggles
+
+| Setting | Value |
+|---------|-------|
+| **Display current local time** | ON |
+| **Show achievements** | ON |
+| **Include private contributions in contribution graph** | ON |
+| **Make profile private** | OFF |
 
 ---
 

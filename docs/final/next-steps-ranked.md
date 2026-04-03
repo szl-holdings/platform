@@ -1,75 +1,77 @@
-# Next Steps — Ranked by Impact
+# Next Steps — Terminal Summary
 
-## Completed
-- Flagship README rewritten (premium, investor-grade)
-- Profile README package prepared (Lyte+Alloy focused)
-- Public mirror discipline (scripts, validation, exclusions)
-- Trust surface complete (SECURITY, LICENSE, CONTRIBUTING, CHANGELOG, CODEOWNERS)
-- Architecture, trust, investor, buyer docs (25+ documents)
-- Release discipline (v0.1.0 notes, strategy, checklist)
-- Visual assets (4 SVG diagrams, 4 live screenshots)
-- GitHub automation scripts and manual checklists
-- .gitignore hardened for public mirror
-
-## Next 5 Actions — Ranked by Impact
-
-### 1. Push to GitHub and Create Release v0.1.0
-**Impact:** Highest — nothing is visible until the code reaches GitHub.
-**Effort:** 15 minutes
-**Steps:**
-```bash
-bash scripts/public-mirror/prepare-public-mirror.sh .mirror-staging
-bash scripts/public-mirror/validate-public-surface.sh .mirror-staging
-cd .mirror-staging
-git init && git remote add origin git@github.com:stephenlutar2-hash/szl-holdings-platform.git
-git add -A && git commit -m "feat: investor-grade platform hardening — public credibility build"
-git push -f origin main
 ```
-Then create Release v0.1.0 on GitHub (use `scripts/github/create-release.sh` or GitHub UI).
+=========================================================
+  SZL Holdings — Public Surface Status
+  Date: April 2026
+=========================================================
 
-### 2. Set Up Profile README Repo
-**Impact:** Very high — your GitHub profile is the first thing investors/reviewers see.
-**Effort:** 10 minutes
-**Steps:**
-- Create `stephenlutar2-hash/stephenlutar2-hash` repo on GitHub (public)
-- Copy `profile-readme/README.md` to repo root
-- Copy `profile-readme/assets/` to `assets/`
-- Push to main
-- See `profile-readme/SETUP.md` for full instructions
+COMPLETED
+---------
+  [x] Flagship README — premium rewrite, inline screenshots
+  [x] Profile README — spec-compliant positioning, section headers
+  [x] ops/github/profile-values.md — exact bio, location, toggle settings
+  [x] Public mirror scripts — noisy dir exclusions hardened
+  [x] Trust surface — SECURITY, LICENSE, CONTRIBUTING, CHANGELOG, CODEOWNERS
+  [x] Architecture docs — system overview, platform map, data flow
+  [x] Trust docs — trust center, security posture, deployment, privacy
+  [x] Investor docs — 10 documents (thesis, readiness, GTM, team, gaps)
+  [x] Buyer docs — 5 documents (overview, solution brief, use cases)
+  [x] Release discipline — v0.1.0 notes, strategy, checklist
+  [x] Visual assets — 4 SVG diagrams, 4 live screenshots
+  [x] GitHub automation scripts and manual checklists
+  [x] .gitignore — hardened for public mirror
 
-### 3. Update GitHub Profile Settings
-**Impact:** High — profile fields appear on every GitHub page visit.
-**Effort:** 5 minutes
-**Steps:** Follow `ops/github/profile-values.md` exactly:
-- Name: Stephen Lutar
-- Bio: Founder building Lyte, Alloy, and Vessels at SZL Holdings
-- Company: SZL Holdings
-- Location: New York, NY
-- Enable private contribution visibility and achievements
+PARTIALLY COMPLETE
+------------------
+  [~] GitHub profile settings — values documented, UI click still needed
+  [~] Profile README — written locally, repo creation still needed
+  [~] Release v0.1.0 — notes ready, GitHub publish still needed
+  [~] Repo metadata — script ready, gh auth required
 
-### 4. Pin Repos and Clean Profile
-**Impact:** High — pinned repos are the showcase.
-**Effort:** 5 minutes
-**Steps:**
-- Unpin any archived or weak repos
-- Pin `szl-holdings-platform` as #1
-- Pin `stephenlutar2-hash` if it adds value
-- Maximum 6 pins, strongest first
+BLOCKED BY PERMISSIONS (GitHub UI / gh auth required)
+------------------------------------------------------
+  [ ] Push public mirror to GitHub (requires gh auth login)
+  [ ] Create release v0.1.0 (requires GitHub web UI or gh auth)
+  [ ] Bootstrap issue labels (requires gh auth)
+  [ ] Create profile README repo (requires GitHub web UI)
+  [ ] Apply branch protection rules (requires GitHub web UI)
+  [ ] Set repo description, topics, homepage (requires gh auth or GitHub web UI)
+  [ ] Update profile bio, location, toggles (requires GitHub web UI)
 
-### 5. Capture Additional Screenshots for Aegis/Vessels/Terra
-**Impact:** Medium — strengthens the visual proof layer in the README.
-**Effort:** 15 minutes
-**Steps:**
-- Start Firestorm, Vessels, Terra web apps
-- Capture hero/dashboard screenshots at 1440x900
-- Save to `docs/media/screenshots/`
-- Reference in README.md if desired
+=========================================================
+  NEXT 3 ACTIONS — BY IMPACT
+=========================================================
 
-## Blocked by Permissions
-- GitHub API operations (repo metadata, release creation, label bootstrapping) require `gh auth login` — scripts are ready, just need auth
-- Profile README repo creation requires GitHub web UI
+  1. PUSH TO GITHUB
+     Impact: Highest — nothing is publicly visible until code is on GitHub
+     Time:   ~15 min
+     Steps:
+       bash scripts/public-mirror/prepare-public-mirror.sh .mirror-staging
+       bash scripts/public-mirror/validate-public-surface.sh .mirror-staging
+       cd .mirror-staging
+       git init
+       git remote add origin git@github.com:stephenlutar2-hash/szl-holdings-platform.git
+       git add -A && git commit -m "feat: investor-grade platform hardening"
+       git push -f origin main
+       # Then: create Release v0.1.0 via GitHub UI
 
-## What NOT to Do Next
-- Do not add new products or features right now — focus on polish
-- Do not create more documentation beyond what exists — 25+ docs is sufficient
-- Do not refactor internal architecture — the public surface is the priority
+  2. SET UP PROFILE README REPO
+     Impact: Very high — GitHub profile is the first thing investors see
+     Time:   ~10 min
+     Steps:
+       Create repo github.com/stephenlutar2-hash/stephenlutar2-hash (Public)
+       Copy profile-readme/README.md as README.md
+       Push to main
+
+  3. UPDATE PROFILE SETTINGS + TOGGLES
+     Impact: High — bio/location appear on every GitHub page view
+     Time:   ~5 min
+     Steps:
+       Go to github.com/settings/profile
+       Set bio, location, company per ops/github/profile-values.md
+       Enable: local time display, achievements, private contributions
+       Keep profile public
+
+=========================================================
+```

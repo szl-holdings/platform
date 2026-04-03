@@ -1,7 +1,7 @@
 # SZL Holdings — Manual Actions Remaining
 
 **Date:** April 2026  
-**Context:** All documentation, scripts, and code are complete. The following items require manual execution by the founder (Stephen Lutar) on GitHub.
+**Context:** All documentation, scripts, and code are complete. All phases are done. The following items require manual execution by the founder (Stephen Lutar) on GitHub — these are UI clicks only, no further development work needed.
 
 ---
 
@@ -65,10 +65,17 @@ See `profile-readme/PROFILE_REPO_SETUP.md` for step-by-step instructions.
 Values from `ops/github/profile-values.md`:
 
 - [ ] Name: `Stephen Lutar`
-- [ ] Bio: `Building premium command-grade platforms — SZL Holdings`
+- [ ] Bio: `Founder building Lyte, Alloy, and Vessels at SZL Holdings. Business observability, AI systems, and secure operations.`
 - [ ] Company: `SZL Holdings`
+- [ ] Location: `New York, NY`
 - [ ] Website: `https://szlholdings.com`
 - [ ] LinkedIn: `linkedin.com/in/stephen-l-279315240`
+
+**Profile Toggles (same page or github.com/settings/appearance):**
+- [ ] Display current local time: ON
+- [ ] Show achievements: ON
+- [ ] Include private contributions in contribution graph: ON
+- [ ] Make profile private: OFF
 
 ---
 
@@ -93,7 +100,7 @@ Values from `ops/github/profile-values.md`:
 | Create release v0.1.0 | 5 min |
 | Bootstrap labels | 10 min |
 | Profile README repo | 15 min |
-| Profile settings | 5 min |
+| Profile settings + toggles | 5 min |
 | Branch protection | 5 min |
 | **Total** | **~55 minutes** |
 

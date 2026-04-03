@@ -68,7 +68,7 @@ export default function CopilotWorkbenchPage() {
           {MODES.map(m => {
             const Icon = m.icon;
             return (
-              <button key={m.id} onClick={() => { setActiveMode(m.id); setActiveSessionId(null); setIsDemo(true); }} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left transition-colors ${activeMode === m.id ? "bg-[#8b7ac8]/10 text-[#8b7ac8]" : "text-slate-400 hover:text-slate-300 hover:bg-white/[0.03]"}`}>
+              <button key={m.id} onClick={() => { setActiveMode(m.id); setActiveSessionId(null); }} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-left transition-colors ${activeMode === m.id ? "bg-[#8b7ac8]/10 text-[#8b7ac8]" : "text-slate-400 hover:text-slate-300 hover:bg-white/[0.03]"}`}>
                 <Icon className="w-3.5 h-3.5 shrink-0" />
                 <div>
                   <div className="text-[11px] font-medium">{m.label}</div>

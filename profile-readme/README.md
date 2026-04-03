@@ -2,7 +2,13 @@
 
 **Founder & CEO, SZL Holdings**
 
-Building governed operational intelligence software — where observability connects to action, not just visualization.
+Building premium platforms for business observability, AI orchestration, secure execution, and modern command systems.
+
+---
+
+## About
+
+I build governed operational intelligence software — systems where observability connects to action, not just visualization. AI outputs without traceability create noise, not trust. Every decision should have a signal, a routing path, an approval gate, and an audit trail.
 
 ---
 
@@ -12,7 +18,9 @@ Building governed operational intelligence software — where observability conn
 
 **Alloy** — Execution fabric. Signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. The layer that makes AI-assisted operations durable and accountable.
 
-**Domain packs** extend the same architecture where consequence is highest:
+---
+
+## Platforms
 
 | Platform | Domain |
 |----------|--------|
@@ -34,18 +42,6 @@ Execution accountability    │  Shared infrastructure     │  Audit-first desi
 
 ---
 
-## Architecture Philosophy
-
-Systems over features. Every product in the SZL ecosystem shares one intelligence backbone, one execution fabric, one design system, and one data layer. New verticals compound existing infrastructure — they do not duplicate it.
-
-**Principles:**
-- Explicit over implicit — state, data freshness, and model confidence are always visible
-- Advisory before autonomous — AI outputs are recommendations; humans confirm consequential actions
-- Traceability as a feature — audit trail is an operational tool, not a compliance checkbox
-- Premium restraint — density with clarity, not decoration
-
----
-
 ## Featured Repo
 
 **[szl-holdings-platform](https://github.com/stephenlutar2-hash/szl-holdings-platform)** — Full platform ecosystem. 16 deployable artifacts, 120+ database tables, TypeScript everywhere.
@@ -54,7 +50,7 @@ Systems over features. Every product in the SZL ecosystem shares one intelligenc
 
 ## Connect
 
-**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)
+**LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)  
 **Website:** [szlholdings.com](https://szlholdings.com)
 
 *Open to design partner conversations, enterprise evaluation, and investment.*
