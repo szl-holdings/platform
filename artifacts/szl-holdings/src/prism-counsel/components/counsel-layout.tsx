@@ -6,7 +6,7 @@ import {
   Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug,
   Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap,
   Sun, Inbox, Download, CheckSquare, Radio, Server, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck,
-  ShieldAlert, XCircle
+  ShieldAlert, XCircle, Archive, Lock, RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -86,6 +86,12 @@ const NAV_SECTIONS = [
       { label: "Recovery Ops", href: "/prism-counsel/recovery-ops", icon: ShieldAlert },
       { label: "Settlement Blockers", href: "/prism-counsel/settlement-blockers", icon: XCircle },
       { label: "Recovery Admin", href: "/prism-counsel/admin/recovery", icon: Server },
+      { label: "Purview Bridge", href: "/prism-counsel/admin/purview", icon: Shield },
+      { label: "Quality Gates", href: "/prism-counsel/admin/quality", icon: BarChart3 },
+      { label: "M365 Integration", href: "/prism-counsel/admin/m365", icon: Link2 },
+      { label: "Ops Diagnostics", href: "/prism-counsel/admin/ops-diagnostics", icon: Activity },
+      { label: "Replays", href: "/prism-counsel/admin/replays", icon: RefreshCw },
+      { label: "Model Costs", href: "/prism-counsel/admin/model-costs", icon: DollarSign },
     ],
   },
   {

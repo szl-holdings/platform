@@ -152,6 +152,13 @@ const PrismReviewMetrics = lazy(() => import("@/prism-counsel/pages/review-desk/
 const PrismReviewAdmin = lazy(() => import("@/prism-counsel/pages/review-desk/review-admin-page"));
 const PrismMyReview = lazy(() => import("@/prism-counsel/pages/review-desk/my-review-page"));
 
+const AdminPurviewPage = lazy(() => import("@/prism-counsel/pages/admin-purview-page"));
+const AdminQualityPage = lazy(() => import("@/prism-counsel/pages/admin-quality-page"));
+const AdminOpsDiagnosticsPage = lazy(() => import("@/prism-counsel/pages/admin-ops-diagnostics-page"));
+const AdminReplaysEnhancedPage = lazy(() => import("@/prism-counsel/pages/admin-replays-enhanced-page"));
+const AdminModelCostsEnhancedPage = lazy(() => import("@/prism-counsel/pages/admin-model-costs-enhanced-page"));
+const AdminM365Page = lazy(() => import("@/prism-counsel/pages/admin-m365-page"));
+
 const S32MorningBrief = lazy(() => import("@/prism-counsel/pages/s32/morning-brief-page"));
 const S32PrepMode = lazy(() => import("@/prism-counsel/pages/s32/prep-mode-page"));
 const S32QuietRisk = lazy(() => import("@/prism-counsel/pages/s32/quiet-risk-page"));
@@ -541,6 +548,26 @@ function App() {
             </Route>
             <Route path="/prism-counsel/admin/recovery">
               <Suspense fallback={<PageLoader />}><CounselAppPage><AdminRecoveryPage /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel Pilot Two — Purview Bridge & M365 Admin ── */}
+            <Route path="/prism-counsel/admin/purview">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><AdminPurviewPage /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin/quality">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><AdminQualityPage /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin/ops-diagnostics">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><AdminOpsDiagnosticsPage /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin/replays">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><AdminReplaysEnhancedPage /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin/model-costs">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><AdminModelCostsEnhancedPage /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/admin/m365">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><AdminM365Page /></CounselAppPage></Suspense>
             </Route>
 
             {/* ── PRISM Counsel Section 31 routes (flat paths) ── */}

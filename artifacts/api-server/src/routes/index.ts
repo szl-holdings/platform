@@ -95,6 +95,7 @@ import { prismCounselPilotRouter } from "./prism-counsel-pilot";
 import prismCounselCoreRouter from "./prism-counsel-core";
 import { prismCounselPilotOneRouter } from "./prism-counsel-pilot-one";
 import prismCounselReviewRouter from "./prism-counsel-review";
+import prismCounselPurviewRouter from "./prism-counsel-purview";
 import alloyEmailRouter from "./alloy-email";
 import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";
@@ -377,6 +378,7 @@ router.use("/prism-counsel/s31", prismCounselS31Router);
 router.use("/prism-counsel/pilot", prismCounselPilotRouter);
 router.use("/prism-counsel/pilot-one", prismCounselPilotOneRouter);
 router.use("/prism-counsel", prismCounselReviewRouter);
+router.use("/prism-counsel", prismCounselPurviewRouter);
 router.use(prismCounselNyRouter);
 
 router.use("/mcp", _readLimiter);

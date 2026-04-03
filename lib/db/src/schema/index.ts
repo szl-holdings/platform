@@ -70,3 +70,4 @@ export * from "./prism_counsel_review";
 export * from "./approvals";
 export * from "./proof_chain";
 export * from "./worldline";
+export * from "./prism_counsel_purview";
