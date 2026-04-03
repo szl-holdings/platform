@@ -3,6 +3,9 @@ import { db, pool } from "@szl-holdings/db";
 import { sendSuccess, sendBadRequest, handleRouteError } from "../lib/api-response";
 import { logger } from "../lib/logger";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { contactSubmitSchema, validateBody, validateQuery } from "../lib/validation";
+import { z } from "zod";
+import { publicSubmitLimiter } from "../middlewares/rate-limiters";
 
 const router: IRouter = Router();
 
@@ -32,46 +35,18 @@ ensureContactTable().catch((err) => {
   logger.warn({ err }, "Failed to ensure contact_requests table");
 });
 
-router.post("/contact/submit", async (req: Request, res: Response) => {
+router.post("/contact/submit", publicSubmitLimiter, validateBody(contactSubmitSchema), async (req: Request, res: Response) => {
   try {
-    const {
-      type = "general",
-      app = "unknown",
-      name,
-      email,
-      company,
-      role,
-      message,
-      metadata,
-    } = req.body as {
-      type?: string;
-      app?: string;
-      name: string;
-      email: string;
-      company?: string;
-      role?: string;
-      message?: string;
-      metadata?: Record<string, unknown>;
-    };
-
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      sendBadRequest(res, "Name is required");
-      return;
-    }
-
-    if (!email || typeof email !== "string" || !email.includes("@")) {
-      sendBadRequest(res, "A valid email address is required");
-      return;
-    }
+    const { type, app, name, email, company, role, message, metadata } = req.body as z.infer<typeof contactSubmitSchema>;
 
     const sanitized = {
-      type: String(type).slice(0, 64),
-      app: String(app).slice(0, 64),
-      name: String(name).trim().slice(0, 200),
-      email: String(email).trim().toLowerCase().slice(0, 320),
-      company: company ? String(company).trim().slice(0, 200) : null,
-      role: role ? String(role).trim().slice(0, 200) : null,
-      message: message ? String(message).trim().slice(0, 5000) : null,
+      type: type ?? "general",
+      app: app ?? "unknown",
+      name,
+      email,
+      company: company ?? null,
+      role: role ?? null,
+      message: message ?? null,
       metadata: metadata ?? null,
     };
 
@@ -109,34 +84,45 @@ router.post("/contact/submit", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/contact/requests", authMiddleware, async (req: Request, res: Response) => {
+const contactListQuerySchema = z.object({
+  app: z.string().max(64).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+
+router.get("/contact/requests", authMiddleware, validateQuery(contactListQuerySchema), async (req: Request, res: Response) => {
   try {
-    const app = req.query.app as string | undefined;
-    const limit = Math.min(100, parseInt(String(req.query.limit ?? "50"), 10) || 50);
-    const offset = Math.max(0, parseInt(String(req.query.offset ?? "0"), 10) || 0);
+    const { app, limit, offset } = req.query as unknown as z.infer<typeof contactListQuerySchema>;
 
-    const params: unknown[] = [limit, offset];
-    let whereClause = "";
     if (app) {
-      params.push(app);
-      whereClause = `WHERE app = $${params.length}`;
+      const result = await pool.query(
+        `SELECT * FROM platform_contact_requests WHERE app = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+        [app, limit, offset],
+      );
+      const countResult = await pool.query(
+        `SELECT COUNT(*)::int as total FROM platform_contact_requests WHERE app = $1`,
+        [app],
+      );
+      sendSuccess(res, result.rows, 200, {
+        total: countResult.rows[0]?.total ?? 0,
+        limit,
+        offset,
+      });
+    } else {
+      const result = await pool.query(
+        `SELECT * FROM platform_contact_requests ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+        [limit, offset],
+      );
+      const countResult = await pool.query(
+        `SELECT COUNT(*)::int as total FROM platform_contact_requests`,
+        [],
+      );
+      sendSuccess(res, result.rows, 200, {
+        total: countResult.rows[0]?.total ?? 0,
+        limit,
+        offset,
+      });
     }
-
-    const result = await pool.query(
-      `SELECT * FROM platform_contact_requests ${whereClause} ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
-      params,
-    );
-
-    const countResult = await pool.query(
-      `SELECT COUNT(*)::int as total FROM platform_contact_requests ${whereClause}`,
-      app ? [app] : [],
-    );
-
-    sendSuccess(res, result.rows, 200, {
-      total: countResult.rows[0]?.total ?? 0,
-      limit,
-      offset,
-    });
   } catch (err) {
     handleRouteError(res, err, "Failed to list contact requests");
   }

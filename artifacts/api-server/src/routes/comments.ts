@@ -3,8 +3,31 @@ import { db, commentsTable } from "@szl-holdings/db";
 import { eq, and, desc } from "drizzle-orm";
 import { sendSuccess, sendCreated, sendNotFound, sendBadRequest, sendNoContent, handleRouteError } from "../lib/api-response";
 import { authMiddleware, parseIdParam } from "../middlewares/auth";
+import { validateBody, validateQuery, validateParams } from "../lib/validation";
+import { z } from "zod";
 
 const router: IRouter = Router();
+
+const commentBodySchema = z.object({
+  content: z.string().min(1, "content is required").max(10000).trim(),
+  mentions: z.array(z.string()).optional().default([]),
+  parentId: z.number().int().positive().optional(),
+  authorName: z.string().max(100).trim().optional(),
+});
+
+const activityFeedQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+  entityType: z.string().max(100).optional(),
+});
+
+const entityParamsSchema = z.object({
+  entityType: z.string().min(1).max(100),
+  entityId: z.string().min(1).max(100),
+});
+
+const commentIdParamsSchema = z.object({
+  id: z.string().min(1),
+});
 
 function getInitials(name: string): string {
   return name
@@ -15,10 +38,9 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-router.get("/comments/activity-feed", authMiddleware({ required: false }), async (req, res) => {
+router.get("/comments/activity-feed", authMiddleware({ required: false }), validateQuery(activityFeedQuerySchema), async (req, res) => {
   try {
-    const limit = Math.min(Number(req.query.limit) || 20, 50);
-    const entityType = req.query.entityType as string | undefined;
+    const { limit, entityType } = req.query as unknown as z.infer<typeof activityFeedQuerySchema>;
 
     const whereClause = entityType
       ? and(eq(commentsTable.isDeleted, false), eq(commentsTable.entityType, entityType))
@@ -37,13 +59,9 @@ router.get("/comments/activity-feed", authMiddleware({ required: false }), async
   }
 });
 
-router.get("/comments/:entityType/:entityId", authMiddleware({ required: false }), async (req, res) => {
+router.get("/comments/:entityType/:entityId", authMiddleware({ required: false }), validateParams(entityParamsSchema), async (req, res) => {
   try {
-    const { entityType, entityId } = req.params as Record<string, string>;
-    if (!entityType || !entityId) {
-      sendBadRequest(res, "entityType and entityId are required");
-      return;
-    }
+    const { entityType, entityId } = req.params as z.infer<typeof entityParamsSchema>;
     const comments = await db
       .select()
       .from(commentsTable)
@@ -61,15 +79,10 @@ router.get("/comments/:entityType/:entityId", authMiddleware({ required: false }
   }
 });
 
-router.post("/comments/:entityType/:entityId", authMiddleware({ required: false }), async (req, res) => {
+router.post("/comments/:entityType/:entityId", authMiddleware({ required: false }), validateParams(entityParamsSchema), validateBody(commentBodySchema), async (req, res) => {
   try {
-    const { entityType, entityId } = req.params as Record<string, string>;
-    const { content, mentions, parentId } = req.body;
-
-    if (!content || typeof content !== "string" || content.trim().length === 0) {
-      sendBadRequest(res, "content is required");
-      return;
-    }
+    const { entityType, entityId } = req.params as z.infer<typeof entityParamsSchema>;
+    const { content, mentions, parentId, authorName: bodyAuthorName } = req.body as z.infer<typeof commentBodySchema>;
 
     let authorName = "Anonymous";
     let authorInitials = "AN";
@@ -79,8 +92,8 @@ router.post("/comments/:entityType/:entityId", authMiddleware({ required: false 
       authorId = req.user.id;
       authorName = req.user.displayName;
       authorInitials = getInitials(req.user.displayName);
-    } else if (req.body.authorName) {
-      authorName = String(req.body.authorName).slice(0, 100);
+    } else if (bodyAuthorName) {
+      authorName = bodyAuthorName;
       authorInitials = getInitials(authorName);
     }
 
@@ -92,9 +105,9 @@ router.post("/comments/:entityType/:entityId", authMiddleware({ required: false 
         authorId,
         authorName,
         authorInitials,
-        content: content.trim(),
-        mentions: Array.isArray(mentions) ? mentions : [],
-        parentId: typeof parentId === "number" ? parentId : undefined,
+        content,
+        mentions: mentions ?? [],
+        parentId,
       })
       .returning();
 
@@ -104,15 +117,14 @@ router.post("/comments/:entityType/:entityId", authMiddleware({ required: false 
   }
 });
 
-router.patch("/comments/:id", authMiddleware({ required: false }), async (req, res) => {
+const commentUpdateSchema = z.object({
+  content: z.string().min(1, "content is required").max(10000).trim(),
+});
+
+router.patch("/comments/:id", authMiddleware({ required: false }), validateParams(commentIdParamsSchema), validateBody(commentUpdateSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
-    const { content } = req.body;
-
-    if (!content || typeof content !== "string" || content.trim().length === 0) {
-      sendBadRequest(res, "content is required");
-      return;
-    }
+    const { content } = req.body as z.infer<typeof commentUpdateSchema>;
 
     const [existing] = await db.select().from(commentsTable).where(eq(commentsTable.id, id));
     if (!existing) { sendNotFound(res, "Comment"); return; }
@@ -143,7 +155,7 @@ router.patch("/comments/:id", authMiddleware({ required: false }), async (req, r
   }
 });
 
-router.delete("/comments/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/comments/:id", authMiddleware({ required: false }), validateParams(commentIdParamsSchema), async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [existing] = await db.select().from(commentsTable).where(eq(commentsTable.id, id));

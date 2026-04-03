@@ -1475,13 +1475,18 @@ function FeaturedImageUpload({ value, onChange }: { value: string; onChange: (ur
   );
 }
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+}
+
 function renderMarkdownPreview(content: string): React.ReactNode[] {
   const blocks = content.split(/\n{2,}/).filter(b => b.trim());
   return blocks.map((block, i) => {
     const t = block.trim();
     if (t.startsWith("## ")) return <h2 key={i} className="text-base font-bold text-foreground mt-4 mb-1">{t.slice(3)}</h2>;
     if (t.startsWith("### ")) return <h3 key={i} className="text-sm font-semibold text-foreground mt-3 mb-0.5">{t.slice(4)}</h3>;
-    const inline = t.replace(/\*\*(.+?)\*\*/g, (_m, w: string) => `<strong>${w}</strong>`).replace(/\*(.+?)\*/g, (_m, w: string) => `<em>${w}</em>`);
+    const escaped = escapeHtml(t);
+    const inline = escaped.replace(/\*\*(.+?)\*\*/g, (_m, w: string) => `<strong>${w}</strong>`).replace(/\*(.+?)\*/g, (_m, w: string) => `<em>${w}</em>`);
     return <p key={i} className="text-[13px] text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: inline }} />;
   });
 }

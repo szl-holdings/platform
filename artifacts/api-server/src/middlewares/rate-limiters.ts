@@ -28,10 +28,20 @@ export const globalLimiter = rateLimit({
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isProduction ? 30 : 200,
+  max: isProduction ? 20 : 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many authentication attempts, please try again later." },
+  skipSuccessfulRequests: true,
+}) as unknown as RequestHandler;
+
+export const loginLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isProduction ? 10 : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts from this IP. Please try again in an hour." },
+  skipSuccessfulRequests: true,
 }) as unknown as RequestHandler;
 
 export const writeLimiter = rateLimit({
@@ -44,8 +54,24 @@ export const writeLimiter = rateLimit({
 
 export const readLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isProduction ? 300 : 2000,
+  max: isProduction ? 600 : 2000,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many read requests, please try again later." },
+  message: { error: "Too many requests, please try again later." },
+}) as unknown as RequestHandler;
+
+export const sensitiveWriteLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isProduction ? 30 : 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many sensitive operations from this IP. Please try again later." },
+}) as unknown as RequestHandler;
+
+export const publicSubmitLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: isProduction ? 5 : 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many submissions from this IP. Please try again in an hour." },
 }) as unknown as RequestHandler;

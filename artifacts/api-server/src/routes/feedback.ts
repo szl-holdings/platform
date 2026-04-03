@@ -3,25 +3,16 @@ import { db, pool, feedbackTable, feedbackSurveyPrefsTable } from "@szl-holdings
 import { desc, eq, sql, and, gte, lt } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../middlewares/auth";
 import type { Request, Response } from "express";
+import { feedbackNpsSchema, feedbackContextualSchema, validateBody } from "../lib/validation";
+import { z } from "zod";
 
 const feedbackRouter: IRouter = Router();
 
 feedbackRouter.use("/feedback", authMiddleware({ required: false }));
 
-feedbackRouter.post("/feedback/nps", async (req: Request, res: Response) => {
+feedbackRouter.post("/feedback/nps", validateBody(feedbackNpsSchema), async (req: Request, res: Response) => {
   try {
-    const { score, comment, appName, pageUrl, userRole } = req.body as {
-      score: number;
-      comment?: string;
-      appName?: string;
-      pageUrl?: string;
-      userRole?: string;
-    };
-
-    if (typeof score !== "number" || score < 0 || score > 10) {
-      res.status(400).json({ error: "score must be a number between 0 and 10" });
-      return;
-    }
+    const { score, comment, appName, pageUrl, userRole } = req.body as z.infer<typeof feedbackNpsSchema>;
 
     const userId: number | null = (req as unknown as { user?: { id: number } }).user?.id ?? null;
 
@@ -53,20 +44,9 @@ feedbackRouter.post("/feedback/nps", async (req: Request, res: Response) => {
   }
 });
 
-feedbackRouter.post("/feedback/contextual", async (req: Request, res: Response) => {
+feedbackRouter.post("/feedback/contextual", validateBody(feedbackContextualSchema), async (req: Request, res: Response) => {
   try {
-    const { sentiment, comment, appName, pageUrl, userRole } = req.body as {
-      sentiment: "positive" | "negative" | "neutral";
-      comment?: string;
-      appName?: string;
-      pageUrl?: string;
-      userRole?: string;
-    };
-
-    if (!["positive", "negative", "neutral"].includes(sentiment)) {
-      res.status(400).json({ error: "sentiment must be positive, negative, or neutral" });
-      return;
-    }
+    const { sentiment, comment, appName, pageUrl, userRole } = req.body as z.infer<typeof feedbackContextualSchema>;
 
     const userId: number | null = (req as unknown as { user?: { id: number } }).user?.id ?? null;
 
@@ -89,10 +69,12 @@ feedbackRouter.post("/feedback/contextual", async (req: Request, res: Response) 
   }
 });
 
-feedbackRouter.post("/feedback/dismiss", async (req: Request, res: Response) => {
+const dismissSchema = z.object({ snoozeDays: z.number().int().min(1).max(365).default(7) });
+
+feedbackRouter.post("/feedback/dismiss", validateBody(dismissSchema), async (req: Request, res: Response) => {
   try {
     const userId: number | null = (req as unknown as { user?: { id: number } }).user?.id ?? null;
-    const { snoozeDays = 7 } = req.body as { snoozeDays?: number };
+    const { snoozeDays } = req.body as z.infer<typeof dismissSchema>;
 
     if (userId) {
       const snoozedUntil = new Date(Date.now() + snoozeDays * 24 * 60 * 60 * 1000);

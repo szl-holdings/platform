@@ -20,17 +20,56 @@ If a secret may have been exposed (committed to git, logged, leaked in a bug rep
 
 ## Secret Inventory
 
+> Last updated: 2026-04-03. Review and update this inventory any time a new secret is added to the codebase.
+
+### Database & Core
+
 | Secret | Storage (Dev) | Storage (Prod) | Rotation Frequency |
 |--------|---------------|----------------|-------------------|
 | `DATABASE_URL` | Replit Secrets | Azure Key Vault | Annually + on any exposure |
 | `SESSION_SECRET` | Replit Secrets | Azure Key Vault | Quarterly |
 | `ADMIN_PIN` | Replit Secrets | Azure Key Vault | Quarterly |
+
+### Authentication & Azure AD
+
+| Secret | Storage (Dev) | Storage (Prod) | Rotation Frequency |
+|--------|---------------|----------------|-------------------|
+| `AZURE_AD_CLIENT_SECRET` | Replit Secrets | Azure Key Vault | Annually |
+| `AZURE_AD_CLIENT_ID` | Replit Secrets | Azure Key Vault | On tenant change |
+| `AZURE_AD_TENANT_ID` | Replit Secrets | Azure Key Vault | On tenant change |
+| `OAUTH_CLIENT_SECRET` | — | Azure Key Vault | Annually |
+
+### Azure Services
+
+| Secret | Storage (Dev) | Storage (Prod) | Rotation Frequency |
+|--------|---------------|----------------|-------------------|
+| `AZURE_STORAGE_CONNECTION_STRING` | Replit Secrets | Azure Key Vault | Annually |
+| `AZURE_REDIS_CONNECTION_STRING` | Replit Secrets | Azure Key Vault | Annually |
+| `AZURE_APP_INSIGHTS_CONNECTION_STRING` | Replit Secrets | Azure Key Vault | Annually |
+| `AZURE_DOC_INTEL_KEY` | Replit Secrets | Azure Key Vault | Annually |
+| `AZURE_DOC_INTEL_ENDPOINT` | Replit Secrets | Azure Key Vault | On endpoint change |
+
+### AI / ML APIs
+
+| Secret | Storage (Dev) | Storage (Prod) | Rotation Frequency |
+|--------|---------------|----------------|-------------------|
+| `OPENAI_API_KEY` | Replit Secrets | Azure Key Vault | Annually + on exposure |
+| `ANTHROPIC_API_KEY` | Replit Secrets | Azure Key Vault | Annually + on exposure |
+| `AI_INTEGRATIONS_OPENAI_API_KEY` | Replit Secrets | Azure Key Vault | Annually + on exposure |
+| `HUGGINGFACE_API_KEY` | Replit Secrets | Azure Key Vault | Annually |
+
+### Payment & Integrations
+
+| Secret | Storage (Dev) | Storage (Prod) | Rotation Frequency |
+|--------|---------------|----------------|-------------------|
 | `STRIPE_SECRET_KEY` | Replit Secrets | Azure Key Vault | Annually |
 | `STRIPE_WEBHOOK_SECRET` | Replit Secrets | Azure Key Vault | On Stripe key rotation |
-| `HUGGINGFACE_API_KEY` | Replit Secrets | Azure Key Vault | Annually |
 | `MAPBOX_ACCESS_TOKEN` | Replit Secrets | Azure Key Vault | Annually |
 | `SMTP_PASS` | Replit Secrets | Azure Key Vault | Annually |
-| `OAUTH_CLIENT_SECRET` | — | Azure Key Vault | Annually |
+| `DOCUSIGN_CLIENT_ID` | Replit Secrets | Azure Key Vault | On DocuSign rotation |
+| `DOCUSIGN_PRIVATE_KEY` | Replit Secrets | Azure Key Vault | Annually |
+| `DOCUSIGN_CONNECT_HMAC_KEY` | Replit Secrets | Azure Key Vault | Annually |
+| `DATAVERSE_CLIENT_SECRET` | Replit Secrets | Azure Key Vault | Annually |
 
 ---
 

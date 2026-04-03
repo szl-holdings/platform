@@ -9,6 +9,7 @@ import { sendSuccess, sendError, handleRouteError } from "../lib/api-response";
 import { authMiddleware } from "../middlewares/auth";
 import { openai } from "@szl-holdings/integrations-openai-ai-server";
 import { anthropic } from "@szl-holdings/integrations-anthropic-ai";
+import { assertExternalUrl } from "../lib/ssrf-guard";
 
 const alloyChatRouter: IRouter = Router();
 
@@ -495,6 +496,11 @@ alloyChatRouter.post("/alloy-chat/kb/ingest", aiLimit, authMiddleware({ required
     };
 
     if (!title || !content) { sendError(res, "Title and content are required", 400); return; }
+
+    if (sourceUrl) {
+      const validUrl = await assertExternalUrl(sourceUrl, res);
+      if (!validUrl) return;
+    }
 
     const chunks = chunkText(content, 400);
     const docGroupId = crypto.randomUUID();

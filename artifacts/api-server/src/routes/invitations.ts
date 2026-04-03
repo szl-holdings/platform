@@ -10,16 +10,23 @@
 
 import { Router } from "express";
 import crypto from "crypto";
+import { z } from "zod";
 import { db, orgInvitationsTable, organizationsTable, orgMembersTable, auditEventsTable } from "@szl-holdings/db";
 import { eq, and, gt } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { writeLimiter } from "../middlewares/rate-limiters";
 import { logger } from "../lib/logger";
+import { validateBody } from "../lib/validation";
 import type { Request, Response } from "express";
 
 const router = Router();
 
 const INVITE_TTL = 7 * 24 * 60 * 60 * 1000;
+
+const inviteBodySchema = z.object({
+  email: z.string().email("Valid email is required"),
+  role: z.enum(["admin", "member", "viewer"]).default("member"),
+});
 
 const ORG_ROLE_HIERARCHY: Record<string, number> = { owner: 4, admin: 3, member: 2, viewer: 1 };
 
@@ -91,21 +98,11 @@ router.post(
   "/orgs/:orgSlug/invite",
   writeLimiter,
   authMiddleware(),
+  validateBody(inviteBodySchema),
   async (req, res) => {
     try {
       const orgSlug = req.params["orgSlug"] as string;
-      const { email, role = "member" } = req.body as { email?: string; role?: string };
-
-      if (!email || typeof email !== "string" || !email.includes("@")) {
-        res.status(400).json({ error: "Valid email is required" });
-        return;
-      }
-
-      const validRoles = ["admin", "member", "viewer"];
-      if (!validRoles.includes(role)) {
-        res.status(400).json({ error: `Role must be one of: ${validRoles.join(", ")}` });
-        return;
-      }
+      const { email, role } = req.body as z.infer<typeof inviteBodySchema>;
 
       const org = await resolveOrgAndCheckAdminRole(req, res, orgSlug);
       if (!org) return;

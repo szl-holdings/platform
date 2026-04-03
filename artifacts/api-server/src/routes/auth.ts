@@ -8,17 +8,20 @@ import { logActivity } from "../lib/activity-logger";
 import { createAuthService } from "@szl-holdings/auth";
 import { issueWsTicket } from "../lib/websocket.js";
 import { getSessionToken, getSessionUser } from "../lib/auth";
+import { loginLimiter } from "../middlewares/rate-limiters";
+import { z } from "zod";
+import { validateBody } from "../lib/validation";
 
 const router: IRouter = Router();
 const authService = createAuthService();
 
-router.post("/auth/login", async (req, res) => {
+const loginBodySchema = z.object({
+  credential: z.string().min(1, "credential is required"),
+});
+
+router.post("/auth/login", loginLimiter, validateBody(loginBodySchema), async (req, res) => {
   try {
-    const { credential } = req.body;
-    if (!credential || typeof credential !== "string") {
-      sendBadRequest(res, "credential is required");
-      return;
-    }
+    const { credential } = req.body as z.infer<typeof loginBodySchema>;
 
     const identity = await authService.verifyIdentity(credential);
     if (!identity) {

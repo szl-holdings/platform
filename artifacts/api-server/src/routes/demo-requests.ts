@@ -6,6 +6,8 @@ import { authMiddleware, parseIdParam } from "../middlewares/auth";
 import { sendEmail, buildInquiryAckEmail, buildLeadNotificationEmail, INTERNAL_EMAIL } from "../lib/email";
 import { logger } from "../lib/logger";
 import { desc, sql } from "drizzle-orm";
+import { publicSubmitLimiter } from "../middlewares/rate-limiters";
+import { validateQuery } from "../lib/validation";
 
 const router: IRouter = Router();
 
@@ -18,7 +20,7 @@ const demoRequestSchema = z.object({
   product: z.string().optional().default("vessels"),
 });
 
-router.post("/demo-requests", async (req, res) => {
+router.post("/demo-requests", publicSubmitLimiter, async (req, res) => {
   const parsed = demoRequestSchema.safeParse(req.body);
   if (!parsed.success) {
     sendError(res, parsed.error.errors.map(e => e.message).join(", "), 400);
@@ -73,9 +75,13 @@ router.post("/demo-requests", async (req, res) => {
   }
 });
 
-router.get("/demo-requests", authMiddleware(), async (req, res) => {
+const demoListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+router.get("/demo-requests", authMiddleware(), validateQuery(demoListQuerySchema), async (req, res) => {
   try {
-    const limit = Math.min(100, parseInt(String(req.query.limit ?? "50"), 10) || 50);
+    const { limit } = req.query as unknown as z.infer<typeof demoListQuerySchema>;
     const rows = await db.select().from(holdingsInquiriesTable)
       .orderBy(desc(holdingsInquiriesTable.createdAt))
       .limit(limit);

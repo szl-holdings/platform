@@ -1,5 +1,5 @@
 Contact: mailto:security@stephenl.dev
-Expires: 2027-01-01T00:00:00.000Z
+Expires: 2027-04-01T00:00:00.000Z
 Preferred-Languages: en
 Canonical: https://szlholdings.com/.well-known/security.txt
 Policy: https://szlholdings.com/legal/security-disclosure
