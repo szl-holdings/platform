@@ -8,8 +8,8 @@ concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  e2e:
-    name: E2E Tests / ${{ matrix.app }}
+  e2e-app:
+    name: e2e-app (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -101,3 +101,16 @@ jobs:
           name: playwright-screenshots-${{ matrix.app }}
           path: test-results/**/*.png
           retention-days: 7
+
+  e2e:
+    needs: e2e-app
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all E2E jobs passed
+        run: |
+          if [[ "${{ needs.e2e-app.result }}" != "success" ]]; then
+            echo "One or more E2E jobs failed"
+            exit 1
+          fi
+          echo "All E2E checks passed"

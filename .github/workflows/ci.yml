@@ -8,20 +8,7 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  install:
-    name: Install dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with: { version: 9 }
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-
   lint:
-    name: CI / lint
-    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,8 +20,6 @@ jobs:
       - run: pnpm run lint
 
   typecheck:
-    name: CI / typecheck
-    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,8 +31,6 @@ jobs:
       - run: pnpm run typecheck
 
   test:
-    name: CI / test
-    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -65,8 +48,6 @@ jobs:
           retention-days: 7
 
   build-api:
-    name: CI / build-api
-    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,20 +59,8 @@ jobs:
       - run: pnpm --filter @workspace/api-server run build
 
   build-web:
-    name: CI / build-web (all apps)
-    needs: install
+    name: build-web (all apps)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - "@workspace/szl-holdings"
-          - "@workspace/lyte-command-center"
-          - "@workspace/firestorm"
-          - "@workspace/terra"
-          - "@workspace/vessels"
-          - "@workspace/carlota-jo"
-          - "@workspace/stephen-site"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
@@ -99,22 +68,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter ${{ matrix.app }} run build
-
-  ci-gate:
-    name: CI
-    needs: [lint, typecheck, test, build-api, build-web]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Check all jobs passed
-        run: |
-          if [[ "${{ needs.lint.result }}" != "success" || \
-                "${{ needs.typecheck.result }}" != "success" || \
-                "${{ needs.test.result }}" != "success" || \
-                "${{ needs.build-api.result }}" != "success" || \
-                "${{ needs.build-web.result }}" != "success" ]]; then
-            echo "One or more CI jobs failed"
-            exit 1
-          fi
-          echo "All CI checks passed"
+      - run: pnpm --filter @workspace/szl-holdings run build
+      - run: pnpm --filter @workspace/lyte-command-center run build
+      - run: pnpm --filter @workspace/firestorm run build
+      - run: pnpm --filter @workspace/terra run build
+      - run: pnpm --filter @workspace/vessels run build
+      - run: pnpm --filter @workspace/carlota-jo run build
+      - run: pnpm --filter @workspace/stephen-site run build
