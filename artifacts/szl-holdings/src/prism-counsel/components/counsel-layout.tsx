@@ -5,7 +5,7 @@ import {
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
   Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug,
   Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap,
-  Sun, Inbox, Download, CheckSquare, Radio, Server, Gauge, Waves, Car, Move
+  Sun, Inbox, Download, CheckSquare, Radio, Server, Gauge, Waves, Car, Move, ClipboardList, ClipboardCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +36,15 @@ const NAV_SECTIONS = [
       { label: "Discovery", href: "/prism-counsel/discovery", icon: FileText },
       { label: "Playbooks", href: "/prism-counsel/playbooks", icon: BookOpen },
       { label: "Approvals", href: "/prism-counsel/approvals", icon: Gavel },
+    ],
+  },
+  {
+    label: "Review Desk",
+    items: [
+      { label: "My Review", href: "/prism-counsel/review-desk/my-review", icon: ClipboardCheck },
+      { label: "Review Desk", href: "/prism-counsel/review-desk", icon: ClipboardList },
+      { label: "Review Metrics", href: "/prism-counsel/review-desk/metrics", icon: BarChart3 },
+      { label: "Review Admin", href: "/prism-counsel/review-desk/admin", icon: Settings },
     ],
   },
   {

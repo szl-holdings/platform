@@ -66,3 +66,4 @@ export * from "./prism_counsel_s31";
 export * from "./prism_counsel_pilot";
 export * from "./prism_counsel_omega";
 export * from "./prism_counsel_pilot_one";
+export * from "./prism_counsel_review";

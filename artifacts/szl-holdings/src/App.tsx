@@ -138,6 +138,11 @@ const S31CostTracking = lazy(() => import("@/prism-counsel/pages/s31/cost-tracki
 const S31ForecastDiff = lazy(() => import("@/prism-counsel/pages/s31/forecast-diff-page"));
 const S31DataProducts = lazy(() => import("@/prism-counsel/pages/s31/data-products-page"));
 
+const PrismReviewDesk = lazy(() => import("@/prism-counsel/pages/review-desk/review-desk-page"));
+const PrismReviewMetrics = lazy(() => import("@/prism-counsel/pages/review-desk/review-metrics-page"));
+const PrismReviewAdmin = lazy(() => import("@/prism-counsel/pages/review-desk/review-admin-page"));
+const PrismMyReview = lazy(() => import("@/prism-counsel/pages/review-desk/my-review-page"));
+
 const S32MorningBrief = lazy(() => import("@/prism-counsel/pages/s32/morning-brief-page"));
 const S32PrepMode = lazy(() => import("@/prism-counsel/pages/s32/prep-mode-page"));
 const S32QuietRisk = lazy(() => import("@/prism-counsel/pages/s32/quiet-risk-page"));
@@ -462,6 +467,20 @@ function App() {
             </Route>
             <Route path="/prism-counsel/connectors">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismConnectors /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel Pilot Two — Managed Review Desk ── */}
+            <Route path="/prism-counsel/review-desk">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismReviewDesk /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/review-desk/metrics">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismReviewMetrics /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/review-desk/admin">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismReviewAdmin /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/review-desk/my-review">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismMyReview /></CounselAppPage></Suspense>
             </Route>
 
             {/* ── PRISM Counsel Pilot Zero routes ── */}
