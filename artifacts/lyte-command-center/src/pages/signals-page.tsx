@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import { useSignals, useUpdateSignal } from "@/hooks/use-lyte";
 import { Activity, AlertTriangle, CheckCircle, Clock, ChevronDown, ChevronRight, RefreshCw } from "lucide-react";

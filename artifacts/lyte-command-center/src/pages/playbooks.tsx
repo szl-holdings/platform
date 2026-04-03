@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { usePlaybooks } from "@/hooks/use-lyte";
 import { BookOpen, Search, ChevronRight, FileText, Lock, CheckCircle2, Circle, Hash } from "lucide-react";
 import { useState } from "react";

@@ -1,0 +1,200 @@
+/**
+ * Tenant Scope Middleware
+ *
+ * Enforces org-aware data access on all routes that handle
+ * org-scoped resources. Attaches `req.tenantOrgId` when the
+ * requesting user has exactly one org membership, or when the
+ * org slug/id is resolved from the request.
+ *
+ * Usage:
+ *   router.get("/signals", authMiddleware(), tenantScope(), handler)
+ *
+ * Rules:
+ *   - super_admin / admin users pass through without restriction (platform-wide access)
+ *   - All other users must belong to at least one organization
+ *   - If `req.params.orgSlug` or `req.params.orgId` is present, the
+ *     requesting user must be a member of that specific org
+ *   - Cross-tenant access attempts return 403
+ *
+ * Auth context note:
+ *   The global authMiddleware (authMiddleware.ts) sets req.user with orgs: [] for speed.
+ *   This middleware self-hydrates org memberships from the DB when req.user.orgs is empty,
+ *   ensuring tenant checks are accurate regardless of middleware execution order.
+ */
+
+import type { Request, Response, NextFunction } from "express";
+import { db, orgMembersTable, organizationsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import type { AuthenticatedUser } from "./auth";
+
+declare global {
+  namespace Express {
+    interface Request {
+      tenantOrgId?: number;
+      tenantOrgSlug?: string;
+    }
+  }
+}
+
+const ELEVATED_ROLES = new Set(["super_admin", "admin"]);
+
+function isElevated(user: AuthenticatedUser): boolean {
+  return user.roles.some((r) => ELEVATED_ROLES.has(r));
+}
+
+async function hydrateOrgMemberships(userId: number): Promise<AuthenticatedUser["orgs"]> {
+  const rows = await db
+    .select({
+      orgId: orgMembersTable.orgId,
+      orgSlug: organizationsTable.slug,
+      orgName: organizationsTable.name,
+      role: orgMembersTable.role,
+    })
+    .from(orgMembersTable)
+    .innerJoin(organizationsTable, eq(orgMembersTable.orgId, organizationsTable.id))
+    .where(eq(orgMembersTable.userId, userId));
+
+  return rows.map((m) => ({
+    orgId: m.orgId,
+    orgSlug: m.orgSlug,
+    orgName: m.orgName,
+    role: m.role,
+  }));
+}
+
+/**
+ * Resolves and enforces a single tenant context for the request.
+ *
+ * - If req.user.orgs is empty (global auth hydrated only base fields), re-fetches
+ *   org memberships from the DB to guarantee accurate tenant enforcement regardless
+ *   of middleware execution order.
+ * - Elevated users (super_admin, admin) bypass org membership checks.
+ * - For org-specific routes (orgSlug or orgId in params), the user must
+ *   be a member of that org.
+ * - For general routes, attaches the user's primary org (first in list).
+ * - If no org can be resolved and required=true, returns 403.
+ */
+export function tenantScope(options: { required?: boolean } = {}) {
+  const { required = true } = options;
+
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user;
+
+      if (!user) {
+        if (required) {
+          res.status(401).json({ error: "Authentication required" });
+          return;
+        }
+        next();
+        return;
+      }
+
+      if (isElevated(user)) {
+        next();
+        return;
+      }
+
+      if (user.orgs.length === 0 && !req.isInternalAgent) {
+        const freshOrgs = await hydrateOrgMemberships(user.id);
+        user.orgs = freshOrgs;
+      }
+
+      if (user.orgs.length === 0) {
+        if (required) {
+          res.status(403).json({ error: "No organization membership" });
+          return;
+        }
+        next();
+        return;
+      }
+
+      const paramSlug = req.params["orgSlug"] as string | undefined;
+      const paramId = req.params["orgId"] as string | undefined;
+
+      if (paramSlug) {
+        const membership = user.orgs.find((o) => o.orgSlug === paramSlug);
+        if (!membership) {
+          res.status(403).json({ error: "Access denied: not a member of this organization" });
+          return;
+        }
+        req.tenantOrgId = membership.orgId;
+        req.tenantOrgSlug = membership.orgSlug;
+        next();
+        return;
+      }
+
+      if (paramId) {
+        const id = parseInt(paramId, 10);
+        if (isNaN(id)) {
+          res.status(400).json({ error: "Invalid organization ID" });
+          return;
+        }
+        const membership = user.orgs.find((o) => o.orgId === id);
+        if (!membership) {
+          res.status(403).json({ error: "Access denied: not a member of this organization" });
+          return;
+        }
+        req.tenantOrgId = membership.orgId;
+        req.tenantOrgSlug = membership.orgSlug;
+        next();
+        return;
+      }
+
+      const primary = user.orgs[0];
+      req.tenantOrgId = primary!.orgId;
+      req.tenantOrgSlug = primary!.orgSlug;
+      next();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Tenant scope error";
+      res.status(500).json({ error: message });
+    }
+  };
+}
+
+/**
+ * Verifies that a data record's org_id is accessible by the requesting user.
+ * Call this inside route handlers after loading a record from the DB.
+ *
+ * Returns true if accessible, false if the request should be blocked.
+ *
+ * Example:
+ *   const signal = await db.select()...
+ *   if (!assertTenantAccess(req, res, signal.orgId)) return;
+ */
+export function assertTenantAccess(
+  req: Request,
+  res: Response,
+  recordOrgId: number | null | undefined,
+): boolean {
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ error: "Authentication required" });
+    return false;
+  }
+
+  if (isElevated(user)) return true;
+
+  if (recordOrgId == null) {
+    res.status(403).json({ error: "Record has no organization — access denied" });
+    return false;
+  }
+
+  const isMember = user.orgs.some((o) => o.orgId === recordOrgId);
+  if (!isMember) {
+    res.status(403).json({ error: "Cross-tenant access denied" });
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Returns the set of org IDs the current user can access.
+ * For elevated users, returns null (meaning: all orgs — no filter).
+ * For regular users, returns the Set of their org IDs.
+ */
+export function getUserOrgIds(user: AuthenticatedUser): Set<number> | null {
+  if (isElevated(user)) return null;
+  return new Set(user.orgs.map((o) => o.orgId));
+}

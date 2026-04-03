@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
-const work = [
+const work: { id: string; tag: string; title: string; description: string; metrics: string[]; link?: string }[] = [
   {
     id: "vessels",
     tag: "Maritime Intelligence",
@@ -35,7 +35,7 @@ const work = [
   },
 ];
 
-const operatingIdeas = [
+const operatingIdeas: { id: string; tag: string; title: string; description: string; metrics: string[]; link?: string }[] = [
   {
     id: "obs-layer",
     tag: "Observability",

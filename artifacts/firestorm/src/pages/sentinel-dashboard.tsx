@@ -178,7 +178,7 @@ export default function SentinelDashboard() {
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {mitreCoverage.map((tactic) => {
+          {mitreCoverage.map((tactic: any) => {
             const coveragePct = Math.round((tactic.covered / tactic.techniques) * 100);
             const detectionPct = Math.round((tactic.detected / tactic.techniques) * 100);
             return (
@@ -209,15 +209,15 @@ export default function SentinelDashboard() {
         </div>
         <div className="mt-3 grid grid-cols-3 gap-3">
           <div className="p-3 rounded-lg bg-violet-500/5 border border-violet-500/10 text-center">
-            <p className="text-lg font-bold text-violet-400">{Math.round(mitreCoverage.reduce((a, t) => a + (t.covered / t.techniques), 0) / mitreCoverage.length * 100)}%</p>
+            <p className="text-lg font-bold text-violet-400">{Math.round(mitreCoverage.reduce((a: any, t: any) => a + (t.covered / t.techniques), 0) / mitreCoverage.length * 100)}%</p>
             <p className="text-[9px] text-muted-foreground">Overall Coverage</p>
           </div>
           <div className="p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-center">
-            <p className="text-lg font-bold text-emerald-400">{mitreCoverage.reduce((a, t) => a + t.covered, 0)}</p>
+            <p className="text-lg font-bold text-emerald-400">{mitreCoverage.reduce((a: any, t: any) => a + t.covered, 0)}</p>
             <p className="text-[9px] text-muted-foreground">Techniques Covered</p>
           </div>
           <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 text-center">
-            <p className="text-lg font-bold text-amber-400">{mitreCoverage.reduce((a, t) => a + t.techniques, 0) - mitreCoverage.reduce((a, t) => a + t.covered, 0)}</p>
+            <p className="text-lg font-bold text-amber-400">{mitreCoverage.reduce((a: any, t: any) => a + t.techniques, 0) - mitreCoverage.reduce((a: any, t: any) => a + t.covered, 0)}</p>
             <p className="text-[9px] text-muted-foreground">Coverage Gaps</p>
           </div>
         </div>

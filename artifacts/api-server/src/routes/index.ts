@@ -4,6 +4,7 @@ const _authLimiter = authLimiter;
 const _readLimiter = readLimiter;
 const _writeLimiter = writeLimiter;
 import { adminGuard } from "../middlewares/admin-guard";
+import { tenantScope } from "../middlewares/tenant-scope";
 import documentsRouter from "./documents";
 import healthRouter from "./health";
 import healthIntegrationsRouter from "./health-integrations";
@@ -80,6 +81,7 @@ import publicStatusRouter from "./public-status";
 import { feedbackRouter } from "./feedback";
 import aiEngineRouter from "./ai-engine";
 import analyticsRouter from "./analytics";
+import invitationsRouter from "./invitations";
 
 const router: IRouter = Router();
 
@@ -119,6 +121,7 @@ router.use("/booking", _readLimiter);
 router.use("/holdings/inquiries", _writeLimiter);
 router.use("/holdings", _readLimiter);
 router.use("/audit", _readLimiter);
+router.use("/audit", tenantScope({ required: false }));
 router.use("/contact", _writeLimiter);
 
 router.use(healthRouter);
@@ -166,6 +169,7 @@ router.use("/observability", _readLimiter);
 router.use(observabilityRouter);
 router.use(alloyChatRouter);
 router.use("/jobs", _readLimiter);
+router.use("/jobs", tenantScope({ required: false }));
 router.use(jobsRouter);
 router.use("/nuro-mesh", _readLimiter);
 router.use(nueroMeshRouter);
@@ -207,6 +211,7 @@ router.use(creativeWorkflowsRouter);
 
 router.use(agentTrainingRouter);
 router.use("/comments", _writeLimiter);
+router.use("/comments", tenantScope({ required: false }));
 router.use(commentsRouter);
 router.use("/agent-os", _readLimiter);
 router.use(agentOsRouter);
@@ -259,6 +264,7 @@ router.use(configRouter);
 router.use(apmRouter);
 
 router.use("/documents", _writeLimiter);
+router.use("/documents", tenantScope({ required: false }));
 router.use(documentsRouter);
 
 router.use(scimRouter);
@@ -272,6 +278,7 @@ router.use("/admin/backup", _writeLimiter);
 router.use(backupRouter);
 
 router.use("/exports", writeLimiter);
+router.use("/exports", tenantScope({ required: false }));
 router.use(exportsRouter);
 
 router.use("/public", publicStatusRouter);
@@ -286,5 +293,12 @@ router.use(aiEngineRouter);
 
 router.use("/analytics", _writeLimiter);
 router.use(analyticsRouter);
+
+router.use("/orgs", _writeLimiter);
+router.use("/orgs", tenantScope({ required: false }));
+// invitationsRouter is mounted WITHOUT a path prefix because its routes already
+// start with /orgs/... (e.g. /orgs/:orgSlug/invite → /api/orgs/:orgSlug/invite).
+// The middleware above applies rate limiting and tenant context to /orgs/* prefix.
+router.use(invitationsRouter);
 
 export default router;

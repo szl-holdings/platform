@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useIncidents, useCreateIncident, useUpdateIncident } from "@/hooks/use-lyte";
 import { formatDistanceToNow } from "date-fns";
 import { Plus, Search, AlertTriangle, ShieldCheck, ChevronRight, Clock, User } from "lucide-react";

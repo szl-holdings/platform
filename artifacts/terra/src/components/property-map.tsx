@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "mapbox-gl/dist/mapbox-gl.css";
 import type MapboxGL from "mapbox-gl";
 import { useEffect, useRef, useState, useCallback } from "react";

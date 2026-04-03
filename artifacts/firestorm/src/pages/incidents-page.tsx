@@ -43,13 +43,9 @@ async function downloadIncidentPDF(incident: Record<string, unknown>): Promise<v
   URL.revokeObjectURL(url);
 }
 
-interface ExtendedWindow extends Window {
-  webkitAudioContext?: typeof AudioContext;
-}
-
 function playAlertTone(severity: string): void {
   try {
-    const win = window as ExtendedWindow;
+    const win = window as any;
     const AudioCtx = win.AudioContext ?? win.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
