@@ -102,6 +102,16 @@ The platform comprises 13 applications sharing authentication and design.
   - `PremiumHome.tsx` — Full luxury homepage rebuild with animated gold-dust canvas particles, Cormorant Garamond serif display, split hero with live services panel (stats: 98% retention, 24h SLA), 6-service grid, 5-pillar DiscreetApproach section, Rosa Carlota Jo principal intro, dark ClientExperienceStrip with portal feature cards, SZL platform attribution note, and closing CTA. All sections use Framer Motion `whileInView` animations with proper reduced-motion fallback.
   - App.tsx updated to serve `PremiumHome` as the root `/` route.
 
+### SZL Distribution OS — Content Publishing & Distribution Platform
+22 database tables (`dos_*` prefix), full CRUD API at `/api/distribution-os/*`, public pages, and admin panel. Auth-protected write routes.
+- **DB Schema:** `lib/db/src/schema/distribution-os.ts` — articles, article_versions, newsletters, carousel_projects, carousel_slides, x_posts, campaigns, campaign_links, leads, lead_notes, editorial_pillars, cta_blocks, content_calendar_items, distribution_targets, distribution_runs, publication_urls, author_profiles, site_settings, integration_status, automation_runs, linktree_config, page_views, analytics_events.
+- **API Routes:** `artifacts/api-server/src/routes/distribution-os.ts` — full CRUD with auth middleware on all write operations. Public endpoints: `POST /leads` (lead capture), `POST /analytics/*` (tracking). Read endpoints open for public content.
+- **Public Pages:** `/link-in-bio` (mobile Linktree), `/newsletter` (subscription landing). Existing `/insights` and `/insights/:slug` pages retained.
+- **Admin Panel:** `/admin/distribution/*` with 11 sub-pages (dashboard, articles CMS, newsletters, carousel lab, X studio, leads, campaigns/UTM builder, content calendar, analytics, automations, settings/integrations). All gated with RequireAuth.
+- **Seed Data:** 6 editorial pillars, 1 author profile (Stephen Lutar), 3 campaigns, 12 article drafts, 4 newsletters, 12 calendar items, 10 linktree items, 5 integrations (X, Medium, Substack, LinkedIn, AI Carousels), 12 site settings.
+- **Connected Profiles:** X (`@szlholdings`), Medium (`@stephen_38454`), AI Carousels (connected).
+- **Import:** Always `import { db } from "@szl-holdings/db"` — NOT `@workspace/db`.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

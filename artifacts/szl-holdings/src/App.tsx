@@ -112,6 +112,20 @@ const AegisPublicPage = lazy(() => import("@/pages/aegis-public"));
 const CarlotaJoPublicPage = lazy(() => import("@/pages/carlota-jo-public"));
 
 
+const LinkInBioPage = lazy(() => import("@/pages/link-in-bio"));
+const NewsletterLandingPage = lazy(() => import("@/pages/newsletter-landing"));
+const DistOsDashboard = lazy(() => import("@/pages/distribution-os/admin-dashboard"));
+const DistOsArticles = lazy(() => import("@/pages/distribution-os/articles-cms"));
+const DistOsNewsletters = lazy(() => import("@/pages/distribution-os/newsletters-cms"));
+const DistOsCarouselLab = lazy(() => import("@/pages/distribution-os/carousel-lab"));
+const DistOsXStudio = lazy(() => import("@/pages/distribution-os/x-studio"));
+const DistOsLeads = lazy(() => import("@/pages/distribution-os/leads-page"));
+const DistOsCampaigns = lazy(() => import("@/pages/distribution-os/campaigns-page"));
+const DistOsCalendar = lazy(() => import("@/pages/distribution-os/content-calendar"));
+const DistOsAnalytics = lazy(() => import("@/pages/distribution-os/analytics-dashboard"));
+const DistOsAutomations = lazy(() => import("@/pages/distribution-os/automations-page"));
+const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"));
+
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
 const AlloyExecutionHistory = lazy(() => import("@/alloy/pages/execution-history"));
@@ -755,6 +769,49 @@ function App() {
             </Route>
             <Route path="/terra/listings">
               <ExternalRedirect to="/terra/" />
+            </Route>
+
+            {/* ── Distribution OS: Public Pages ── */}
+            <Route path="/link-in-bio">
+              <Suspense fallback={<PageLoader />}><LinkInBioPage /></Suspense>
+            </Route>
+            <Route path="/newsletter">
+              <Suspense fallback={<PageLoader />}><NewsletterLandingPage /></Suspense>
+            </Route>
+
+            {/* ── Distribution OS: Admin Panel ── */}
+            <Route path="/admin/distribution/articles">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsArticles /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/newsletters">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsNewsletters /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/carousel-lab">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsCarouselLab /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/x-studio">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsXStudio /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/leads">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsLeads /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/campaigns">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsCampaigns /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/calendar">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsCalendar /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/analytics">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAnalytics /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/automations">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsAutomations /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/settings">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSettings /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDashboard /></Suspense></RequireAuth>
             </Route>
 
             {/* Catch-all → 404 */}

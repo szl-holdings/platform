@@ -106,6 +106,7 @@ import alloyGovernanceRouter from "./alloy-governance";
 import approvalsRouter from "./approvals";
 import proofChainRouter from "./proof-chain";
 import worldlineRouter from "./worldline";
+import distributionOsRouter from "./distribution-os";
 
 const router: IRouter = Router();
 
@@ -392,5 +393,8 @@ router.use(proofChainRouter);
 
 router.use("/worldline", _writeLimiter);
 router.use(worldlineRouter);
+
+router.use("/distribution-os", _writeLimiter);
+router.use("/distribution-os", distributionOsRouter);
 
 export default router;
