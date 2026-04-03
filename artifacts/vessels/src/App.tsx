@@ -113,6 +113,9 @@ const CO2EmissionsPage = lazy(() => import("@/pages/co2-emissions"));
 const RiskScoringPage = lazy(() => import("@/pages/risk-scoring"));
 const DarkVesselDetection = lazy(() => import("@/pages/dark-vessel-detection"));
 const SanctionsScreening = lazy(() => import("@/pages/sanctions-screening"));
+const PortCongestion = lazy(() => import("@/pages/port-congestion"));
+const CargoTracking = lazy(() => import("@/pages/cargo-tracking"));
+const AisLiveTracking = lazy(() => import("@/pages/ais-live-tracking"));
 const CyberThreatPanel = lazy(() => import("@/pages/cyber-threat-panel"));
 const IncidentReporting = lazy(() => import("@/pages/incident-reporting"));
 const CommandWorkflowsPage = lazy(() => import("@/pages/command-workflows"));
@@ -147,6 +150,9 @@ const legacyNavItems = [
   { path: "/fleet", label: "Fleet Map", icon: Globe },
   { path: "/exceptions", label: "Exceptions", icon: AlertTriangle },
   { path: "/economics", label: "Voyage Economics", icon: DollarSign },
+  { path: "/port-congestion", label: "Port Congestion", icon: Anchor },
+  { path: "/cargo-tracking", label: "Cargo Tracking", icon: Ship },
+  { path: "/ais-live", label: "AIS Live Tracking", icon: Activity },
   { path: "/commodity-flow", label: "Commodity Flow", icon: BarChart3 },
   { path: "/maintenance", label: "Maintenance", icon: Wrench },
   { path: "/command", label: "Command Mode", icon: Activity },
@@ -443,6 +449,9 @@ function DashboardRouter() {
         <Route path="/risk-scoring" component={RiskScoringPage} />
         <Route path="/dark-vessel-detection" component={DarkVesselDetection} />
         <Route path="/sanctions-screening" component={SanctionsScreening} />
+        <Route path="/port-congestion" component={PortCongestion} />
+        <Route path="/cargo-tracking" component={CargoTracking} />
+        <Route path="/ais-live" component={AisLiveTracking} />
         <Route path="/commodity-flow" component={CommodityFlowIntelligence} />
         <Route path="/cyber-threats" component={CyberThreatPanel} />
         <Route path="/incidents" component={IncidentReporting} />

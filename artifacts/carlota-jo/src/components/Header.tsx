@@ -20,6 +20,7 @@ export default function Header() {
     { label: "Methodology", href: "/methodology" },
     { label: t("nav.whoWeServe"), href: "/who-we-serve" },
     { label: t("nav.howWeWork"), href: "/engagements" },
+    { label: "Begin Engagement", href: "/engage" },
     { label: t("nav.about"), href: "/founder" },
   ];
 

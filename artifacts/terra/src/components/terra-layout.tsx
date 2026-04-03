@@ -8,7 +8,7 @@ import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
   Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen,
-  Shield, Layers, Radio, Search
+  Shield, Layers, Radio, Search, PieChart
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@szl-holdings/shared-ui";
 import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@szl-holdings/shared-ui/design-system";
@@ -81,6 +81,10 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     id: "reporting",
     label: "Reporting",
     items: [
+      { id: "market-analytics", href: "/market-analytics", label: "Market Analytics", icon: <TrendingUp className="w-full h-full" /> },
+      { id: "comparable-sales", href: "/comparable-sales", label: "Comparable Sales", icon: <BarChart3 className="w-full h-full" /> },
+      { id: "portfolio-dashboard", href: "/portfolio-dashboard", label: "Portfolio Dashboard", icon: <PieChart className="w-full h-full" /> },
+      { id: "distress-pipeline", href: "/distress-pipeline", label: "Distress Pipeline", icon: <Activity className="w-full h-full" /> },
       { id: "lender-report", href: "/lender-report", label: "Lender & LP Report", icon: <BookOpen className="w-full h-full" /> },
       { id: "transactions", href: "/transactions", label: "Approvals", icon: <CheckSquare className="w-full h-full" /> },
       { id: "broker-overview", href: "/broker-overview", label: "Admin", icon: <FileText className="w-full h-full" /> },

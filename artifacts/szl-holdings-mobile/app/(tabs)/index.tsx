@@ -25,6 +25,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useAuth } from "@/context/AuthContext";
 import { useColors } from "@/hooks/useColors";
+import { useApiStatus } from "@/hooks/useApiStatus";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
 import { apiFetch } from "@/lib/apiClient";
 
@@ -370,6 +371,7 @@ export default function CommandScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { isOffline, isDegraded } = useApiStatus();
   const [refreshing, setRefreshing] = useState(false);
   const qc = useQueryClient();
 
@@ -435,6 +437,13 @@ export default function CommandScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {(isOffline || isDegraded) && (
+        <View style={{ backgroundColor: isOffline ? "#7f1d1d" : "#78350f", paddingHorizontal: 16, paddingVertical: 8 }}>
+          <Text style={{ color: "#fca5a5", fontSize: 11, fontWeight: "600" }}>
+            {isOffline ? "Offline — portfolio data may be stale" : "Connection degraded — retrying…"}
+          </Text>
+        </View>
+      )}
       <LinearGradient
         colors={["rgba(201,168,76,0.06)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 140 }]}

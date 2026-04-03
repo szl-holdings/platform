@@ -48,6 +48,8 @@ const SentinelDashboard = lazy(() => import("@/pages/sentinel-dashboard"));
 const Watchlists = lazy(() => import("@/pages/watchlists"));
 const ForensicsTimeline = lazy(() => import("@/pages/forensics-timeline"));
 const XDRConsole = lazy(() => import("@/pages/xdr-console"));
+const XDRIncidentWorkbench = lazy(() => import("@/pages/xdr-incident-workbench"));
+const ThreatGraph = lazy(() => import("@/pages/threat-graph"));
 const ThreatHunting = lazy(() => import("@/pages/threat-hunting"));
 const ThreatKillChain = lazy(() => import("@/pages/threat-kill-chain"));
 const IdentityThreat = lazy(() => import("@/pages/identity-threat"));
@@ -172,6 +174,8 @@ const securityNavPrimary = [
 ];
 
 const securityNavSecondary = [
+  { path: "/xdr-workbench", label: "Incident Workbench", icon: Zap },
+  { path: "/threat-graph", label: "Threat Graph", icon: Network },
   { path: "/xdr-console", label: "XDR Console", icon: Layers },
   { path: "/threat-kill-chain", label: "Kill Chain Analysis", icon: Target },
   { path: "/threat-hunting", label: "Threat Hunting", icon: Search },
@@ -565,6 +569,8 @@ function AppRouter() {
         <Route path="/tradecraft" component={TradecraftEnginePage} />
         <Route path="/forensics" component={ForensicsTimeline} />
         <Route path="/xdr-console" component={XDRConsole} />
+        <Route path="/xdr-workbench" component={XDRIncidentWorkbench} />
+        <Route path="/threat-graph" component={ThreatGraph} />
         <Route path="/threat-hunting" component={ThreatHunting} />
         <Route path="/threat-kill-chain" component={ThreatKillChain} />
         <Route path="/identity-threat" component={IdentityThreat} />

@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useApiStatus } from "@/hooks/useApiStatus";
 import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = process.env.EXPO_PUBLIC_DOMAIN
@@ -59,6 +60,7 @@ function MarkerCard({ marker, onPress }: { marker: Marker; onPress: () => void }
 export default function MapTab() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { isOffline, isDegraded } = useApiStatus();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -160,6 +162,13 @@ export default function MapTab() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {(isOffline || isDegraded) && (
+        <View style={{ backgroundColor: isOffline ? "#7f1d1d" : "#78350f", paddingHorizontal: 16, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Text style={{ color: "#fca5a5", fontSize: 11, fontWeight: "600" }}>
+            {isOffline ? "Offline — data may be stale" : "Connection degraded — retrying…"}
+          </Text>
+        </View>
+      )}
       <LinearGradient
         colors={["rgba(184,148,60,0.06)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 120 }]}

@@ -22,6 +22,7 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 const CheckoutSuccess = lazy(() => import("@/pages/checkout-success"));
 const CheckoutCancel = lazy(() => import("@/pages/checkout-cancel"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
+const OperatingPhilosophy = lazy(() => import("@/pages/operating-philosophy"));
 const FinancialResearch = lazy(() => import("@/pages/financial-research"));
 const HackajobProfile = lazy(() => import("@/pages/hackajob-profile"));
 const CareerCommand = lazy(() => import("@/pages/career-command"));
@@ -76,6 +77,7 @@ function Router() {
         <Route path="/checkout/success" component={CheckoutSuccess} />
         <Route path="/checkout/cancel" component={CheckoutCancel} />
         <Route path="/observability" component={ObservabilityPage} />
+        <Route path="/philosophy" component={OperatingPhilosophy} />
         <Route path="/thought-leadership">
           <Redirect to="/writing" />
         </Route>

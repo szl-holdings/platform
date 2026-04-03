@@ -64,6 +64,7 @@ const NAV_ITEMS = [
     highlight: false,
     children: [
       { label: "About SZL Holdings", href: "/company" },
+      { label: "Operating Doctrine", href: "/operating-doctrine" },
       { label: "Founder", href: "/founder" },
       { label: "Design Partners", href: "/design-partner" },
       { label: "Contact", href: "/contact" },

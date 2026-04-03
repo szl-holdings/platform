@@ -38,6 +38,10 @@ const Pipeline = lazy(() => import("@/pages/pipeline"));
 const TerraMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 const CommercialIntelligence = lazy(() => import("@/pages/commercial-intelligence"));
 const MarketIntelligence = lazy(() => import("@/pages/market-intelligence"));
+const MarketAnalytics = lazy(() => import("@/pages/market-analytics"));
+const ComparableSales = lazy(() => import("@/pages/comparable-sales"));
+const PortfolioDashboard = lazy(() => import("@/pages/portfolio-dashboard"));
+const DistressPipeline = lazy(() => import("@/pages/distress-pipeline"));
 const PropertyMapPage = lazy(() => import("@/pages/property-map-page"));
 const PropertyDetail = lazy(() => import("@/pages/property-detail"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
@@ -94,6 +98,10 @@ function PrivateRouter() {
         <Route path="/ingestion" component={Ingestion} />
         <Route path="/commercial" component={CommercialIntelligence} />
         <Route path="/market-intelligence" component={MarketIntelligence} />
+        <Route path="/market-analytics" component={MarketAnalytics} />
+        <Route path="/comparable-sales" component={ComparableSales} />
+        <Route path="/distress-pipeline" component={DistressPipeline} />
+        <Route path="/portfolio-dashboard" component={PortfolioDashboard} />
         <Route path="/investor-mode" component={InvestorMode} />
         <Route path="/pipeline" component={Pipeline} />
         <Route path="/property-map" component={PropertyMapPage} />

@@ -26,6 +26,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
+import { useApiStatus } from "@/hooks/useApiStatus";
 
 import { apiGet } from "@/lib/apiClient";
 
@@ -389,6 +390,7 @@ export default function DashboardScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { isOffline, isDegraded } = useApiStatus();
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
 
@@ -448,6 +450,13 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {(isOffline || isDegraded) && (
+        <View style={{ backgroundColor: isOffline ? "#7f1d1d" : "#78350f", paddingHorizontal: 16, paddingVertical: 8 }}>
+          <Text style={{ color: "#fca5a5", fontSize: 11, fontWeight: "600" }}>
+            {isOffline ? "Offline — threat data may be stale" : "Connection degraded — retrying…"}
+          </Text>
+        </View>
+      )}
       <View style={[styles.header, { paddingTop: topInsets + 16, backgroundColor: colors.background, borderBottomColor: colors.border }]}>
         <View>
           <Text style={[styles.headerEyebrow, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>

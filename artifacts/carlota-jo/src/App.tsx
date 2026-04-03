@@ -79,6 +79,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 const ObservabilityPage = lazy(() => import("@/pages/observability"));
 const AdvisoryIntel = lazy(() => import("@/pages/AdvisoryIntel"));
 const AIAdvisory = lazy(() => import("@/pages/ai-advisory"));
+const EngagementIntake = lazy(() => import("@/pages/engagement-intake"));
 const EngagementWorkflow = lazy(() => import("@/pages/engagement-workflow"));
 const BookingPage = lazy(() => import("@/pages/booking"));
 const ClientIntel = lazy(() => import("@/pages/client-intel"));
@@ -139,6 +140,7 @@ function Router() {
         <Route path="/founder" component={FounderPage} />
         <Route path="/contact" component={ContactPage} />
         <Route path="/approach" component={ApproachPage} />
+        <Route path="/engage" component={EngagementIntake} />
         <Route path="/about" component={AboutPage} />
         <Route path="/inquiries" component={InquiriesPage} />
         <Route path="/legal/privacy" component={LegalPrivacyPage} />

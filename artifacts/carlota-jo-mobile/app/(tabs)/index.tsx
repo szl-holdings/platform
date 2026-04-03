@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
+import { useApiStatus } from "@/hooks/useApiStatus";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
 import { NotificationBell } from "@/components/NotificationCenter";
 
@@ -162,6 +163,7 @@ export default function DashboardScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, isLoading: authLoading } = useAuth();
+  const { isOffline, isDegraded } = useApiStatus();
   const [refreshing, setRefreshing] = useState(false);
 
   const greeting = (() => {
@@ -201,6 +203,13 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {(isOffline || isDegraded) && (
+        <View style={{ backgroundColor: isOffline ? "#7f1d1d" : "#78350f", paddingHorizontal: 16, paddingVertical: 8 }}>
+          <Text style={{ color: "#fca5a5", fontSize: 11, fontWeight: "600" }}>
+            {isOffline ? "Offline — advisory data may be stale" : "Connection degraded — retrying…"}
+          </Text>
+        </View>
+      )}
       <LinearGradient
         colors={["rgba(200,169,106,0.05)", "transparent"]}
         style={[styles.headerGradient, { height: topPad + 120 }]}

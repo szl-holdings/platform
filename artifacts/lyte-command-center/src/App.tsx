@@ -70,8 +70,15 @@ const MetricsExplorer = lazy(() => import("@/pages/metrics-explorer"));
 
 const ServiceTopology = lazy(() => import("@/pages/service-topology"));
 const ErrorBudgetBurn = lazy(() => import("@/pages/error-budget-burn"));
+const LogExplorer = lazy(() => import("@/pages/log-explorer"));
+const AlertManagement = lazy(() => import("@/pages/alert-management"));
+const ExecutiveSummary = lazy(() => import("@/pages/executive-summary"));
 const AlloyWorkflowCanvas = lazy(() => import("@/pages/alloy-workflow-canvas"));
 const AlloyIntelligence = lazy(() => import("@/pages/alloy-intelligence"));
+const AlloyAgentMonitor = lazy(() => import("@/pages/alloy-agent-monitor"));
+const AlloyExecutionTraces = lazy(() => import("@/pages/alloy-execution-traces"));
+const AlloyGovernance = lazy(() => import("@/pages/alloy-governance"));
+const AlloyIntegrationHealth = lazy(() => import("@/pages/alloy-integration-health"));
 const EscalationWorkflow = lazy(() => import("@/pages/escalation-workflow"));
 const CommandInboxLegacy = lazy(() => import("@/pages/action-queue"));
 const PowerBiReport = lazy(() => import("@/pages/powerbi-report"));
@@ -155,10 +162,17 @@ function PrivateRouter() {
         <Route path="/metrics" component={MetricsExplorer} />
         <Route path="/topology" component={ServiceTopology} />
         <Route path="/error-budget" component={ErrorBudgetBurn} />
+        <Route path="/logs" component={LogExplorer} />
+        <Route path="/alert-management" component={AlertManagement} />
+        <Route path="/executive-summary" component={ExecutiveSummary} />
         <Route path="/alloy/canvas" component={AlloyWorkflowCanvas} />
         <Route path="/alloy/runs" component={AlloyWorkflowCanvas} />
         <Route path="/alloy/intelligence" component={AlloyIntelligence} />
         <Route path="/alloy/ai" component={AlloyIntelligence} />
+        <Route path="/alloy/agents" component={AlloyAgentMonitor} />
+        <Route path="/alloy/traces" component={AlloyExecutionTraces} />
+        <Route path="/alloy/governance" component={AlloyGovernance} />
+        <Route path="/alloy/integrations" component={AlloyIntegrationHealth} />
         <Route path="/powerbi" component={PowerBiReport} />
         <Route path="/dashboards" component={DashboardBuilder} />
         <Route path="/apm" component={ApmInstrumentation} />

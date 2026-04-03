@@ -17,6 +17,7 @@ const DesignPartnersPage = lazy(() => import("@/pages/design-partners"));
 const ContactPage = lazy(() => import("@/pages/contact"));
 const TrustCenterPage = lazy(() => import("@/pages/trust-center"));
 const InvestorRelationsPage = lazy(() => import("@/pages/investor-relations"));
+const OperatingDoctrinePage = lazy(() => import("@/pages/operating-doctrine"));
 const InvestorStoryPage = lazy(() => import("@/pages/investor-story"));
 const VenturesPage = lazy(() => import("@/pages/ventures"));
 const PortfolioPage = lazy(() => import("@/pages/portfolio"));
@@ -438,6 +439,9 @@ function App() {
             </Route>
             <Route path="/investor-relations">
               <Suspense fallback={<PageLoader />}><InvestorRelationsPage /></Suspense>
+            </Route>
+            <Route path="/operating-doctrine">
+              <Suspense fallback={<PageLoader />}><OperatingDoctrinePage /></Suspense>
             </Route>
             <Route path="/investors/overview">
               <Suspense fallback={<PageLoader />}><InvestorsOverviewPage /></Suspense>
