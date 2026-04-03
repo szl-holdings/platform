@@ -3,6 +3,14 @@ import { desc, eq, and, like } from "drizzle-orm";
 import type { Request, Response, NextFunction } from "express";
 
 export { activityLogTable, auditEventsTable, auditLogsTable };
+export {
+  writeEnrichedAudit,
+  writeExportAudit,
+  enrichAuditFromRequest,
+  type EnrichedAuditParams,
+  type ExportAuditParams,
+  type AdminActionClass,
+} from "./enriched.js";
 
 export type AuditAction =
   | "create"

@@ -24,6 +24,15 @@
     },
     {
       "path": "../../lib/integrations-gemini-ai"
+    },
+    {
+      "path": "../../lib/approvals"
+    },
+    {
+      "path": "../../lib/proof-chain"
+    },
+    {
+      "path": "../../lib/worldline"
     }
   ]
 }

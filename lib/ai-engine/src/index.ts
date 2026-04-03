@@ -16,6 +16,17 @@ export { RAGPipeline, chunkText } from "./rag-pipeline.js";
 export { DomainAgentRunner, getOrCreateConversation, MAX_TOOL_ROUNDS, type ConversationMessage, type ChatInterface } from "./domain-agent-runner.js";
 
 export { routeModel, getModelSlots, getRouteConfig, type RouteClass, type ModelSlot, type RouteResult } from "./providers/hf-router.js";
+export {
+  routerCall,
+  checkTenantPolicy,
+  getRouterConfig,
+  registerTelemetryHandler,
+  type RouterCallOptions,
+  type RouterCallResult,
+  type ModelRouterTelemetry,
+  type TenantFeatureToggles,
+  type RouterConfig,
+} from "./model-router.js";
 export { chatCompletion, chatCompletionWithFallback, structuredCompletion, type HFChatMessage, type HFToolDef, type HFCompletionResult } from "./providers/hf-client.js";
 
 export { type ActionDecision, type EvidenceItem, type DecisionMetadata, type AuditRecord, ACTION_DECISION_SCHEMA, validateActionDecision, safeFallbackDecision } from "./schemas/action-decision.js";

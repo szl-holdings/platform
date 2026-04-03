@@ -355,6 +355,9 @@ importers:
       '@workspace/api-zod':
         specifier: workspace:*
         version: link:../../lib/api-zod
+      '@workspace/approvals':
+        specifier: workspace:*
+        version: link:../../lib/approvals
       '@workspace/audit':
         specifier: workspace:*
         version: link:../../lib/audit
@@ -382,12 +385,18 @@ importers:
       '@workspace/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@workspace/proof-chain':
+        specifier: workspace:*
+        version: link:../../lib/proof-chain
       '@workspace/services':
         specifier: workspace:*
         version: link:../../lib/services
       '@workspace/workflow-engine':
         specifier: workspace:*
         version: link:../../lib/workflow-engine
+      '@workspace/worldline':
+        specifier: workspace:*
+        version: link:../../lib/worldline
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
@@ -2720,6 +2729,22 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
 
+  lib/approvals:
+    dependencies:
+      '@workspace/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+
   lib/audit:
     dependencies:
       '@workspace/db':
@@ -2890,6 +2915,22 @@ importers:
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
+
+  lib/proof-chain:
+    dependencies:
+      '@workspace/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/replit-auth-web:
     dependencies:
@@ -3090,6 +3131,22 @@ importers:
       pino:
         specifier: ^9
         version: 9.14.0
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+
+  lib/worldline:
+    dependencies:
+      '@workspace/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

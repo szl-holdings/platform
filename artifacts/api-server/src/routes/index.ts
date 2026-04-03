@@ -102,6 +102,9 @@ import alloyIntegrationsRouter from "./alloy-integrations";
 import alloyVoiceRouter from "./alloy-voice";
 import governanceRouter from "./governance";
 import alloyGovernanceRouter from "./alloy-governance";
+import approvalsRouter from "./approvals";
+import proofChainRouter from "./proof-chain";
+import worldlineRouter from "./worldline";
 
 const router: IRouter = Router();
 
@@ -378,5 +381,14 @@ router.use(prismCounselNyRouter);
 
 router.use("/mcp", _readLimiter);
 router.use(mcpRouter);
+
+router.use("/approvals", _writeLimiter);
+router.use(approvalsRouter);
+
+router.use("/proof-chain", _readLimiter);
+router.use(proofChainRouter);
+
+router.use("/worldline", _writeLimiter);
+router.use(worldlineRouter);
 
 export default router;

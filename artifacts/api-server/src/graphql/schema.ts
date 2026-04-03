@@ -9,6 +9,9 @@ import { stephenTypeDefs, stephenResolvers } from "./domains/stephen.js";
 import { carlotaJoTypeDefs, carlotaJoResolvers } from "./domains/carlota-jo.js";
 import { prismCounselTypeDefs, prismCounselResolvers } from "./domains/prism-counsel.js";
 import { prismCounselPilotOneTypeDefs, prismCounselPilotOneResolvers } from "./domains/prism-counsel-pilot-one.js";
+import { directiveTypeDefs } from "./directives.js";
+import { approvalsTypeDefs, approvalsResolvers } from "./domains/approvals.js";
+import { proofChainTypeDefs, proofChainResolvers } from "./domains/proof-chain.js";
 
 const baseTypeDefs = `#graphql
   type Query {
@@ -25,6 +28,7 @@ const baseTypeDefs = `#graphql
 `;
 
 export const typeDefs = [
+  directiveTypeDefs,
   baseTypeDefs,
   authTypeDefs,
   alloyTypeDefs,
@@ -37,6 +41,8 @@ export const typeDefs = [
   carlotaJoTypeDefs,
   prismCounselTypeDefs,
   prismCounselPilotOneTypeDefs,
+  approvalsTypeDefs,
+  proofChainTypeDefs,
 ];
 
 function mergeResolversSimple(...resolverMaps: Record<string, Record<string, unknown>>[]) {
@@ -77,4 +83,6 @@ export const resolvers = mergeResolversSimple(
   carlotaJoResolvers as Record<string, Record<string, unknown>>,
   prismCounselResolvers as Record<string, Record<string, unknown>>,
   prismCounselPilotOneResolvers as Record<string, Record<string, unknown>>,
+  approvalsResolvers as Record<string, Record<string, unknown>>,
+  proofChainResolvers as Record<string, Record<string, unknown>>,
 );

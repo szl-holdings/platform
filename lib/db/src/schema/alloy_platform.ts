@@ -119,13 +119,18 @@ export const alloyAuditLogTable = pgTable("platform_audit_log", {
   before: jsonb("before"),
   after: jsonb("after"),
   correlationId: text("correlation_id"),
+  serviceAttribution: text("service_attribution"),
+  adminActionClass: text("admin_action_class"),
   ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => [
   index("platform_audit_org_idx").on(table.orgId),
   index("platform_audit_action_idx").on(table.action),
   index("platform_audit_created_idx").on(table.createdAt),
+  index("platform_audit_correlation_idx").on(table.correlationId),
+  index("platform_audit_service_idx").on(table.serviceAttribution),
 ]);
 
 export const alloyPoliciesTable = pgTable("platform_alloy_policies", {
