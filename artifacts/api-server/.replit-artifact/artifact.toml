@@ -21,8 +21,8 @@ args = ["pnpm", "--filter", "@workspace/api-server", "run", "build"]
 NODE_ENV = "production"
 
 [services.production.run]
-# we don't run through pnpm to make startup faster in production
-args = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
+# --max-old-space-size caps heap at 1 GB; --expose-gc allows manual GC in the memory monitor
+args = ["node", "--max-old-space-size=1024", "--expose-gc", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
 
 [services.production.run.env]
 PORT = "8080"
