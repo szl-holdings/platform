@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 const API = "/api";
 
-type InquiryType = "design-partner" | "pilot" | "advisory" | "investor" | "general";
+type InquiryType = "demo" | "design-partner" | "general" | "security" | "partner" | "media";
 
 interface FormState {
   name: string;
@@ -20,34 +20,34 @@ interface FormState {
 }
 
 const INQUIRY_TYPES: { value: InquiryType; label: string; desc: string }[] = [
-  { value: "design-partner", label: "Design Partner Session", desc: "Work directly with the founder to instrument one workflow" },
-  { value: "pilot", label: "Pilot Readiness", desc: "Discuss a paid pilot engagement for Lyte + Alloy" },
-  { value: "advisory", label: "Advisory Inquiry", desc: "Engage Carlota Jo for executive advisory support" },
-  { value: "investor", label: "Investor Inquiry", desc: "Capital, strategic partnership, or syndicate interest" },
-  { value: "general", label: "General Inquiry", desc: "Something else — press, partnerships, or other" },
+  { value: "demo", label: "Demo request", desc: "See Lyte + Alloy on a staged workflow" },
+  { value: "design-partner", label: "Design partner", desc: "Work directly with the founder to instrument one real workflow" },
+  { value: "general", label: "General inquiry", desc: "Investors, partnerships, or other conversations" },
+  { value: "partner", label: "Partner / integration", desc: "Technical or commercial partnership discussions" },
+  { value: "media", label: "Media / press", desc: "Press inquiries, media requests, or editorial conversations" },
+  { value: "security", label: "Security disclosure", desc: "Report a vulnerability or security concern responsibly" },
 ];
 
 const WHAT_HAPPENS = [
-  { step: "01", body: "Your message lands directly with the founder — not a sales queue." },
+  { step: "01", body: "Your message lands directly with the founder — not a sales queue or ticketing system." },
   { step: "02", body: "We respond within one business day with next steps or qualifying questions." },
-  { step: "03", body: "If there's a fit, we schedule a call tailored to your situation." },
+  { step: "03", body: "If there's a fit, we schedule a focused call tailored to your situation." },
 ];
 
 export default function ContactPage() {
   usePageMeta({
     title: "Contact — SZL Holdings",
-    description: "Book a design partner session, discuss a pilot, advisory engagement, or investor conversation. Reach out directly.",
+    description: "Demo requests, design partner sessions, general inquiries, media, and security disclosures. All conversations go directly to the founder.",
     canonical: "https://szlholdings.com/contact",
   });
 
-  const [form, setForm] = useState<FormState>({ name: "", email: "", org: "", type: "design-partner", message: "" });
+  const [form, setForm] = useState<FormState>({ name: "", email: "", org: "", type: "demo", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [honeypot, setHoneypot] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (honeypot) return;
 
     const name = form.name.trim();
@@ -67,7 +67,7 @@ export default function ContactPage() {
       return;
     }
     if (message.length < 20) {
-      toast.error("Please provide a bit more detail in your message (at least 20 characters).");
+      toast.error("Please provide a bit more detail (at least 20 characters).");
       return;
     }
 
@@ -93,7 +93,7 @@ export default function ContactPage() {
       setSubmitted(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong.";
-      toast.error(`${msg} Please try again or email us directly.`);
+      toast.error(`${msg} Please try again or email hello@szlholdings.com directly.`);
     } finally {
       setSubmitting(false);
     }
@@ -126,28 +126,40 @@ export default function ContactPage() {
       <SiteNav />
       <main id="main-content" role="main">
 
-        <section className="szl-grid-texture szl-depth-glow-gold" style={{ paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)", borderBottom: "1px solid var(--color-szl-border)" }}>
+        {/* Hero */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", paddingTop: "var(--space-hero-pt)", paddingBottom: "clamp(4rem,8vw,6rem)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <h1 style={{ fontSize: "clamp(2.25rem,5vw,3.75rem)", fontWeight: 600, letterSpacing: "-0.028em", lineHeight: 1.08, maxWidth: "22ch", marginBottom: "1.25rem" }}>
+              <p style={{ fontSize: "0.6875rem", fontFamily: "var(--font-mono)", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", marginBottom: "1.25rem" }}>
+                Contact
+              </p>
+              <h1 style={{ fontSize: "clamp(2rem,4.5vw,3.25rem)", fontWeight: 600, letterSpacing: "-0.026em", lineHeight: 1.1, maxWidth: "22ch", marginBottom: "1.25rem", color: "hsl(38,8%,96%)" }}>
                 Start a conversation.
               </h1>
-              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                Design partner sessions, pilot discussions, advisory engagements, and investor
-                conversations — all land directly with the founder. No sales queue.
+              <p style={{ fontSize: "clamp(1rem,1.8vw,1.125rem)", lineHeight: 1.72, color: "var(--color-szl-text-secondary)", maxWidth: "48ch" }}>
+                Demo requests, design partner sessions, investor conversations, media inquiries, and security disclosures — all land directly with the founder. No sales queue.
               </p>
             </m.div>
           </div>
         </section>
 
-        <section style={{ padding: "var(--space-section-md) 0" }}>
+        {/* Main */}
+        <section style={{ padding: "clamp(3.5rem,7vw,5.5rem) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "start" }} className="lg:grid-cols-[1.1fr_0.9fr]">
 
+              {/* Form */}
               <m.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
                 {submitted ? (
-                  <div className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(2rem,4vw,3rem)", textAlign: "center" }}>
-                    <div style={{ width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center", background: "hsla(145,62%,40%,0.10)", border: "1px solid hsla(145,62%,40%,0.22)", borderRadius: "50%", margin: "0 auto 1.25rem" }}>
+                  <div style={{
+                    borderRadius: "0.875rem", padding: "clamp(2rem,4vw,3rem)", textAlign: "center",
+                    background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.08)",
+                  }}>
+                    <div style={{
+                      width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center",
+                      background: "hsla(145,62%,40%,0.10)", border: "1px solid hsla(145,62%,40%,0.22)",
+                      borderRadius: "50%", margin: "0 auto 1.25rem",
+                    }}>
                       <CheckCircle2 size={22} color="hsl(145,62%,46%)" />
                     </div>
                     <h2 style={{ fontSize: "1.375rem", fontWeight: 600, letterSpacing: "-0.018em", marginBottom: "0.75rem" }}>Message received.</h2>
@@ -248,6 +260,24 @@ export default function ContactPage() {
                       </div>
                     </div>
 
+                    {form.type === "security" && (
+                      <div style={{
+                        padding: "0.875rem 1rem",
+                        borderRadius: "0.5rem",
+                        background: "hsla(40,80%,50%,0.06)",
+                        border: "1px solid hsla(40,80%,50%,0.18)",
+                        display: "flex", alignItems: "flex-start", gap: "0.625rem",
+                      }}>
+                        <Shield size={14} style={{ color: "hsl(40,80%,58%)", marginTop: "2px", flexShrink: 0 }} />
+                        <div>
+                          <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "hsl(40,80%,70%)", marginBottom: "0.25rem" }}>Security disclosure</p>
+                          <p style={{ fontSize: "0.8125rem", lineHeight: 1.58, color: "hsl(214,7%,60%)" }}>
+                            For verified security disclosures, we respond within 24 hours. Please include a description of the vulnerability, steps to reproduce, and your assessment of impact. We do not have a bug bounty program at this stage, but we do credit responsible disclosures.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     <div>
                       <label style={labelStyle}>Tell us more *</label>
                       <textarea
@@ -256,11 +286,23 @@ export default function ContactPage() {
                         value={form.message}
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
                         style={{ ...inputStyle, resize: "vertical", minHeight: "120px" }}
-                        placeholder="What are you working on? What pain are you trying to solve? The more context, the better the conversation."
+                        placeholder={
+                          form.type === "security"
+                            ? "Describe the vulnerability, steps to reproduce, and your impact assessment."
+                            : form.type === "media"
+                            ? "Please include your publication, angle, and deadline if applicable."
+                            : "What are you working on? What pain are you trying to solve? The more context, the better the conversation."
+                        }
                         onFocus={(e) => { (e.target as HTMLTextAreaElement).style.borderColor = "var(--color-lyte)"; }}
                         onBlur={(e) => { (e.target as HTMLTextAreaElement).style.borderColor = "var(--color-szl-border-hover)"; }}
                       />
                     </div>
+
+                    <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,48%)", lineHeight: 1.55 }}>
+                      By submitting this form you agree to our{" "}
+                      <Link href="/legal/privacy" style={{ color: "hsl(214,7%,58%)", textDecoration: "underline" }}>Privacy Policy</Link>.
+                      We don't sell your information or add you to marketing lists.
+                    </p>
 
                     <button
                       type="submit"
@@ -275,14 +317,15 @@ export default function ContactPage() {
                 )}
               </m.div>
 
+              {/* Sidebar */}
               <m.div
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.15 }}
-                style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+                style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}
               >
-                <div className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)" }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1.25rem" }}>
+                <div style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1.25rem" }}>
                     What happens next
                   </p>
                   {WHAT_HAPPENS.map((step, i) => (
@@ -293,16 +336,17 @@ export default function ContactPage() {
                   ))}
                 </div>
 
-                <div className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)" }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
+                <div style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
                     Useful before the call
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     {[
                       { label: "Platform overview", href: "/platform" },
-                      { label: "Interactive demo", href: "/demo" },
+                      { label: "Request a demo", href: "/demo" },
                       { label: "Trust Center", href: "/trust" },
-                      { label: "Investor story", href: "/investor-story" },
+                      { label: "About the company", href: "/company" },
+                      { label: "About the founder", href: "/founder" },
                     ].map((link) => (
                       <Link
                         key={link.href}
@@ -318,13 +362,13 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="szl-card" style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)" }}>
-                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.875rem" }}>
+                <div style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.875rem" }}>
                     Design partner criteria
                   </p>
                   {[
                     "Running critical workflows across multiple systems",
-                    "Willing to be on the call with the founder",
+                    "Willing to be on the call with the founder directly",
                     "Open to measuring outcomes, not just opinions",
                     "Team has real execution pain worth solving now",
                   ].map((item) => (
@@ -333,6 +377,18 @@ export default function ContactPage() {
                       <span style={{ fontSize: "0.875rem", lineHeight: 1.58, color: "hsl(214,7%,62%)" }}>{item}</span>
                     </div>
                   ))}
+                </div>
+
+                <div style={{ borderRadius: "0.875rem", padding: "clamp(1.5rem,3vw,2rem)", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}>
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "0.875rem" }}>
+                    Direct contact
+                  </p>
+                  <p style={{ fontSize: "0.875rem", color: "hsl(214,7%,62%)", marginBottom: "0.375rem" }}>
+                    hello@szlholdings.com
+                  </p>
+                  <p style={{ fontSize: "0.75rem", color: "hsl(214,7%,48%)", lineHeight: 1.55 }}>
+                    Washington, D.C. · London · Singapore
+                  </p>
                 </div>
               </m.div>
             </div>

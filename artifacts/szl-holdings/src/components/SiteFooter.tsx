@@ -1,25 +1,61 @@
 import { Link } from "wouter";
 
-const PRODUCT_LINKS = [
-  { label: "Lyte — Command Surface", href: "/lyte" },
-  { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
-  { label: "PRISM Counsel", href: "/solutions/prism-counsel" },
-  { label: "Terra", href: "/solutions/terra" },
-  { label: "Vessels", href: "/solutions/vessels" },
-  { label: "Aegis", href: "/solutions/aegis" },
-  { label: "Carlota Jo", href: "/carlota-jo/" },
+const FOOTER_COLS = [
+  {
+    heading: "Platform",
+    links: [
+      { label: "Platform Overview", href: "/platform" },
+      { label: "Lyte", href: "/lyte" },
+      { label: "Alloy", href: "/alloy-fabric" },
+      { label: "Architecture", href: "/architecture" },
+    ],
+  },
+  {
+    heading: "Lyte",
+    links: [
+      { label: "Business Observability", href: "/lyte" },
+      { label: "Execution Fabric", href: "/alloy-fabric" },
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "Request Demo", href: "/demo" },
+    ],
+  },
+  {
+    heading: "Trust",
+    links: [
+      { label: "Trust Center", href: "/trust" },
+      { label: "Security", href: "/trust/security" },
+      { label: "Architecture", href: "/architecture" },
+      { label: "AI Governance", href: "/trust/ai" },
+    ],
+  },
+  {
+    heading: "Docs",
+    links: [
+      { label: "Documentation", href: "/docs" },
+      { label: "Control Plane", href: "/docs/control-plane" },
+      { label: "Proof Chain", href: "/docs/proof-chain" },
+      { label: "Model Mesh", href: "/docs/model-mesh" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About SZL Holdings", href: "/company" },
+      { label: "Founder", href: "/founder" },
+      { label: "Design Partners", href: "/design-partner" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
 ];
 
-const COMPANY_LINKS = [
-  { label: "Platform Overview", href: "/platform" },
-  { label: "Architecture", href: "/architecture" },
-  { label: "How It Works", href: "/how-it-works" },
-  { label: "Design Partners", href: "/design-partner" },
-  { label: "Investors", href: "/investors" },
-  { label: "Trust Center", href: "/trust" },
-  { label: "Docs", href: "/docs" },
-  { label: "Contact", href: "/contact" },
+const LEGAL_LINKS = [
+  { label: "Privacy", href: "/legal/privacy" },
+  { label: "Terms", href: "/legal/terms" },
+  { label: "Acceptable Use", href: "/legal/acceptable-use" },
+  { label: "Security Disclosure", href: "/trust/security" },
 ];
+
+const VERSION = "v2026.1";
 
 const SOCIAL_LINKS = [
   {
@@ -40,44 +76,44 @@ const SOCIAL_LINKS = [
       </svg>
     ),
   },
-  {
-    label: "GitHub",
-    href: "https://github.com/szl-holdings",
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-      </svg>
-    ),
-  },
 ];
 
 export function SiteFooter() {
   return (
-    <footer style={{ borderTop: "1px solid var(--color-szl-border)", background: "hsl(210,12%,4%)", padding: "4rem 0 2.5rem" }}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-2.5 mb-4">
+    <footer style={{ borderTop: "1px solid var(--color-szl-border)", background: "hsl(210,12%,4%)", padding: "4rem 0 2rem" }}>
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+
+        {/* Top: Brand + columns */}
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr repeat(5, 1fr)", gap: "2.5rem", marginBottom: "3rem" }} className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-[1.4fr_repeat(5,1fr)]">
+
+          {/* Brand column */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
               <div
-                className="w-8 h-8 flex items-center justify-center rounded-sm"
-                style={{ background: "linear-gradient(135deg, var(--color-szl-accent) 0%, hsla(38, 55%, 45%, 1) 100%)" }}
+                style={{
+                  width: "28px", height: "28px",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  borderRadius: "0.25rem",
+                  background: "linear-gradient(135deg, var(--color-szl-accent) 0%, hsl(38,45%,42%) 100%)",
+                  flexShrink: 0,
+                }}
               >
-                <span style={{ color: "hsl(214, 16%, 4%)", fontWeight: 700, fontSize: "0.6875rem", fontFamily: "var(--font-display)" }}>SZL</span>
+                <span style={{ color: "hsl(214,16%,4%)", fontWeight: 700, fontSize: "0.5625rem", fontFamily: "var(--font-display)" }}>SZL</span>
               </div>
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.9375rem", letterSpacing: "-0.02em" }}>
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.875rem", letterSpacing: "-0.02em" }}>
                 SZL Holdings
               </span>
             </div>
-            <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.875rem", lineHeight: 1.65, maxWidth: "18rem", marginBottom: "0.75rem" }}>
-              One intelligence and action architecture with distinct vertical operating systems.
+            <p style={{ color: "var(--color-szl-text-secondary)", fontSize: "0.8125rem", lineHeight: 1.65, maxWidth: "16rem", marginBottom: "1rem" }}>
+              Business observability with explainable execution. Lyte is the commercial wedge. Alloy is the fabric beneath it.
             </p>
-            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", letterSpacing: "0.04em", marginBottom: "0.2rem" }}>
               Washington, D.C. · London · Singapore
             </p>
-            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
               hello@szlholdings.com
             </p>
-            <div className="flex items-center gap-3 mt-5">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
               {SOCIAL_LINKS.map((link) => (
                 <a
                   key={link.label}
@@ -99,89 +135,73 @@ export function SiteFooter() {
             </div>
           </div>
 
-          <div>
-            <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Products
-            </h4>
-            <ul className="space-y-2">
-              {PRODUCT_LINKS.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.2s ease", display: "block" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{ fontFamily: "var(--font-mono)", fontWeight: 600, color: "var(--color-szl-text)", fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>
-              Company
-            </h4>
-            <ul className="space-y-2">
-              {COMPANY_LINKS.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.2s ease", display: "block" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Nav columns */}
+          {FOOTER_COLS.map((col) => (
+            <div key={col.heading}>
+              <h4 style={{
+                fontFamily: "var(--font-mono)",
+                fontWeight: 600,
+                color: "var(--color-szl-text-faint)",
+                fontSize: "0.5625rem",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                marginBottom: "0.875rem",
+              }}>
+                {col.heading}
+              </h4>
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", transition: "color 0.18s ease", display: "block", textDecoration: "none" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div style={{ paddingTop: "1.5rem", borderTop: "1px solid var(--color-szl-border)", display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)" }}>
-              &copy; {new Date().getFullYear()} SZL Holdings. All rights reserved.
+        {/* Bottom bar */}
+        <div style={{
+          paddingTop: "1.5rem",
+          borderTop: "1px solid var(--color-szl-border)",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "1rem",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", marginRight: "0.5rem" }}>
+              &copy; {new Date().getFullYear()} SZL Holdings
             </p>
-            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", marginTop: "0.25rem", opacity: 0.7 }}>
-              SZL Holdings · Stephen Lutar, Founder &amp; Officer · Proprietary platform ecosystem
+            <span style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>·</span>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.65 }}>
+              Stephen Lutar, Founder
+            </p>
+            <span style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>·</span>
+            <p style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", opacity: 0.5 }}>
+              {VERSION}
             </p>
           </div>
-          <div className="flex items-center gap-4 flex-wrap">
-            <Link
-              href="/legal/privacy"
-              style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textDecoration: "none", transition: "color 0.18s ease" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/legal/terms"
-              style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textDecoration: "none", transition: "color 0.18s ease" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
-            >
-              Terms
-            </Link>
-            <Link
-              href="/accessibility"
-              style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textDecoration: "none", transition: "color 0.18s ease" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
-            >
-              Accessibility
-            </Link>
-            <Link
-              href="/trust"
-              style={{ color: "var(--color-szl-text-faint)", fontSize: "0.75rem", fontFamily: "var(--font-mono)", textDecoration: "none", transition: "color 0.18s ease" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
-            >
-              Trust
-            </Link>
+          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+            {LEGAL_LINKS.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                style={{ color: "var(--color-szl-text-faint)", fontSize: "0.6875rem", fontFamily: "var(--font-mono)", textDecoration: "none", transition: "color 0.18s ease" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-faint)"; }}
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

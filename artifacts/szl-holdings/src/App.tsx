@@ -84,6 +84,9 @@ const SolutionsVesselsTrustPage = lazy(() => import("@/pages/solutions-vessels-t
 const SolutionsAegisTrustPage = lazy(() => import("@/pages/solutions-aegis-trust"));
 const SolutionsLyteTrustPage = lazy(() => import("@/pages/solutions-lyte-trust"));
 const HowItWorksPage = lazy(() => import("@/pages/how-it-works"));
+const CompanyPage = lazy(() => import("@/pages/company"));
+const FounderPage = lazy(() => import("@/pages/founder"));
+const NotFoundPage = lazy(() => import("@/pages/not-found"));
 
 // Standalone premium public product pages
 const PrismCounselPublicPage = lazy(() => import("@/pages/prism-counsel-public"));
@@ -379,6 +382,12 @@ function App() {
             </Route>
             <Route path="/contact">
               <Suspense fallback={<PageLoader />}><ContactPage /></Suspense>
+            </Route>
+            <Route path="/company">
+              <Suspense fallback={<PageLoader />}><CompanyPage /></Suspense>
+            </Route>
+            <Route path="/founder">
+              <Suspense fallback={<PageLoader />}><FounderPage /></Suspense>
             </Route>
 
             {/* ── Product pages — Lyte and Alloy (public marketing) ── */}
@@ -1074,7 +1083,7 @@ function App() {
             <Route path="/ecosystem">
               <Redirect to="/" />
             </Route>
-            <Route path="/founder">
+            <Route path="/founder-legacy">
               <Redirect to="/investors/founder" />
             </Route>
             <Route path="/case-studies">
@@ -1117,9 +1126,9 @@ function App() {
               <ExternalRedirect to="/terra/" />
             </Route>
 
-            {/* Catch-all */}
+            {/* Catch-all → 404 */}
             <Route>
-              <Redirect to="/" />
+              <Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>
             </Route>
           </Switch>
         </WouterRouter>

@@ -7,33 +7,21 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   {
-    label: "Demo",
-    href: "/demo",
-    children: null,
-    highlight: true,
-  },
-  {
     label: "Platform",
     href: "/platform",
     highlight: false,
     children: [
       { label: "Platform Overview", href: "/platform" },
-      { label: "Lyte — Command Surface", href: "/lyte" },
+      { label: "Lyte — Business Observability", href: "/lyte" },
       { label: "Alloy — Execution Fabric", href: "/alloy-fabric" },
-      { label: "How It Works", href: "/how-it-works" },
+      { label: "Architecture", href: "/architecture" },
     ],
   },
   {
-    label: "Products",
-    href: "/solutions",
+    label: "Lyte",
+    href: "/lyte",
     highlight: false,
-    children: [
-      { label: "PRISM Counsel — Legal OS", href: "/solutions/prism-counsel" },
-      { label: "Terra — Real Estate Intelligence", href: "/solutions/terra" },
-      { label: "Vessels — Maritime Intelligence", href: "/solutions/vessels" },
-      { label: "Aegis — Security & Defense", href: "/solutions/aegis" },
-      { label: "Carlota Jo — Private Advisory", href: "/carlota-jo/" },
-    ],
+    children: null,
   },
   {
     label: "Trust",
@@ -41,46 +29,54 @@ const NAV_ITEMS = [
     highlight: false,
     children: [
       { label: "Trust Center", href: "/trust" },
-      { label: "Architecture", href: "/architecture" },
-      { label: "Governance", href: "/trust/governance" },
       { label: "Security", href: "/trust/security" },
+      { label: "Architecture", href: "/architecture" },
       { label: "AI Governance", href: "/trust/ai" },
-      { label: "Export Safety", href: "/trust/exports" },
-      { label: "Operations", href: "/trust/operations" },
+      { label: "Governance", href: "/trust/governance" },
+    ],
+  },
+  {
+    label: "Docs",
+    href: "/docs",
+    highlight: false,
+    children: [
+      { label: "Documentation", href: "/docs" },
+      { label: "Architecture", href: "/docs/architecture" },
+      { label: "Control Plane", href: "/docs/control-plane" },
+      { label: "Proof Chain", href: "/docs/proof-chain" },
     ],
   },
   {
     label: "Company",
-    href: "/investors",
+    href: "/company",
     highlight: false,
     children: [
+      { label: "About SZL Holdings", href: "/company" },
+      { label: "Founder", href: "/founder" },
       { label: "Design Partners", href: "/design-partner" },
-      { label: "Investors", href: "/investors" },
-      { label: "Investor Overview", href: "/investors/overview" },
-      { label: "Moat & Defensibility", href: "/investors/moat" },
-      { label: "Docs", href: "/docs" },
       { label: "Contact", href: "/contact" },
     ],
+  },
+  {
+    label: "Demo",
+    href: "/demo",
+    children: null,
+    highlight: true,
   },
 ];
 
 const NAV_LINKS_MOBILE = [
-  { label: "See a Demo", href: "/demo", primary: true },
+  { label: "Demo", href: "/demo", primary: true },
   { label: "Platform Overview", href: "/platform", primary: false },
   { label: "Lyte", href: "/lyte", primary: false },
   { label: "Alloy", href: "/alloy-fabric", primary: false },
-  { label: "How It Works", href: "/how-it-works", primary: false },
-  { label: "PRISM Counsel", href: "/solutions/prism-counsel", primary: false },
-  { label: "Terra", href: "/solutions/terra", primary: false },
-  { label: "Vessels", href: "/solutions/vessels", primary: false },
-  { label: "Aegis", href: "/solutions/aegis", primary: false },
   { label: "Architecture", href: "/architecture", primary: false },
   { label: "Trust Center", href: "/trust", primary: false },
-  { label: "AI Governance", href: "/trust/ai", primary: false },
-  { label: "Design Partners", href: "/design-partner", primary: false },
-  { label: "Investors", href: "/investors", primary: false },
-  { label: "Investor Overview", href: "/investors/overview", primary: false },
+  { label: "Security", href: "/trust/security", primary: false },
   { label: "Docs", href: "/docs", primary: false },
+  { label: "Company", href: "/company", primary: false },
+  { label: "Founder", href: "/founder", primary: false },
+  { label: "Design Partners", href: "/design-partner", primary: false },
   { label: "Contact", href: "/contact", primary: false },
 ];
 
@@ -146,7 +142,7 @@ export function SiteNav() {
             </Link>
 
             {/* Desktop nav */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }} className="hidden lg:flex">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.125rem" }} className="hidden lg:flex">
               {NAV_ITEMS.map((item) => {
                 const isActive = location === item.href || location.startsWith(item.href + "/");
                 const hasChildren = !!item.children;
@@ -159,7 +155,7 @@ export function SiteNav() {
                       href={item.href}
                       onClick={() => handleNavClick(item.label, item.href)}
                       className="szl-btn-primary"
-                      style={{ padding: "0.375rem 0.875rem", borderRadius: "0.375rem", marginRight: "0.25rem" }}
+                      style={{ padding: "0.375rem 0.875rem", borderRadius: "0.375rem", marginLeft: "0.5rem" }}
                     >
                       {item.label}
                     </Link>
@@ -208,7 +204,7 @@ export function SiteNav() {
                               top: "calc(100% + 4px)",
                               left: "50%",
                               transform: "translateX(-50%)",
-                              minWidth: "220px",
+                              minWidth: "200px",
                               background: "hsl(214,16%,6%)",
                               border: "1px solid var(--color-szl-border-hover)",
                               borderRadius: "0.625rem",
@@ -268,27 +264,6 @@ export function SiteNav() {
                   </Link>
                 );
               })}
-
-              <Link
-                href="/contact"
-                onClick={() => handleNavClick("Contact", "/contact")}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  fontSize: "0.8125rem",
-                  fontWeight: 500,
-                  color: "var(--color-szl-text-secondary)",
-                  textDecoration: "none",
-                  padding: "0.375rem 0.625rem",
-                  borderRadius: "0.375rem",
-                  transition: "color 0.18s ease, background 0.18s ease",
-                  marginLeft: "0.125rem",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text)"; (e.currentTarget as HTMLElement).style.background = "hsla(0,0%,100%,0.04)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "var(--color-szl-text-secondary)"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-              >
-                Contact
-              </Link>
             </div>
 
             {/* Mobile toggle */}
