@@ -6,8 +6,9 @@ import {
   Search, FileText, Tag, ChevronRight, ChevronDown, Plus, Circle,
   Clock, User, Link2, AlertTriangle, Network, Layers, Lightbulb,
   CheckCircle2, XCircle, Minus, ArrowRight, Shield, Eye, Lock,
-  BookOpen, Zap, Activity, Target
+  BookOpen, Zap, Activity, Target, Brain
 } from "lucide-react";
+import { TradecraftPanel, RelatedCasesPanel, EvidenceIndexPanel } from "@/components/tradecraft-panel";
 
 const MOCK_CASE = {
   id: "CASE-0041",
@@ -139,7 +140,7 @@ function formatTimeShort(dateStr: string): string {
 
 export default function InvestigationsBoard() {
   const queryClient = useQueryClient();
-  const [activeSection, setActiveSection] = useState<"timeline" | "entities" | "signals" | "evidence" | "hypotheses" | "actions">("timeline");
+  const [activeSection, setActiveSection] = useState<"timeline" | "entities" | "signals" | "evidence" | "hypotheses" | "actions" | "tradecraft">("timeline");
   const [noteText, setNoteText] = useState("");
   const [selectedCaseIdx, setSelectedCaseIdx] = useState(0);
 
@@ -282,6 +283,7 @@ export default function InvestigationsBoard() {
     { id: "evidence" as const, label: "Evidence", icon: FileText },
     { id: "hypotheses" as const, label: "Hypotheses", icon: Lightbulb },
     { id: "actions" as const, label: "Rec. Actions", icon: Zap },
+    { id: "tradecraft" as const, label: "Tradecraft", icon: Brain },
   ];
 
   return (
@@ -522,6 +524,21 @@ export default function InvestigationsBoard() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {activeSection === "tradecraft" && (
+          <div className="space-y-4">
+            <TradecraftPanel
+              caseId={activeCaseFromLive ? String(activeCaseFromLive.id) : displayCase.id}
+              title="Tradecraft Decisions"
+            />
+            <RelatedCasesPanel
+              caseId={activeCaseFromLive ? String(activeCaseFromLive.id) : displayCase.id}
+            />
+            <EvidenceIndexPanel
+              caseId={activeCaseFromLive ? String(activeCaseFromLive.id) : displayCase.id}
+            />
           </div>
         )}
       </div>

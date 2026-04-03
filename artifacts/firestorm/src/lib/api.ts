@@ -164,6 +164,22 @@ export const api = {
     complianceSummary: () => apiFetch<any>("/firestorm/live/compliance-summary"),
     assetRisk: () => apiFetch<any>("/firestorm/live/asset-risk"),
   },
+  tradecraft: {
+    decisions: (params?: string) => apiFetch<any[]>(`/firestorm/tradecraft/decisions${params ? `?${params}` : ""}`),
+    getDecision: (objectId: string) => apiFetch<any>(`/firestorm/tradecraft/decisions/${objectId}`),
+    createDecision: (data: unknown) => apiFetch<any>("/firestorm/tradecraft/decisions", { method: "POST", body: JSON.stringify(data) }),
+    updateDecision: (objectId: string, data: unknown) => apiFetch<any>(`/firestorm/tradecraft/decisions/${objectId}`, { method: "PUT", body: JSON.stringify(data) }),
+    notebook: (params?: string) => apiFetch<any[]>(`/firestorm/tradecraft/notebook${params ? `?${params}` : ""}`),
+    createNote: (data: unknown) => apiFetch<any>("/firestorm/tradecraft/notebook", { method: "POST", body: JSON.stringify(data) }),
+    updateNote: (noteId: string, data: unknown) => apiFetch<any>(`/firestorm/tradecraft/notebook/${noteId}`, { method: "PUT", body: JSON.stringify(data) }),
+    deleteNote: (noteId: string) => apiFetch<void>(`/firestorm/tradecraft/notebook/${noteId}`, { method: "DELETE" }),
+    caseMemory: (caseId: string) => apiFetch<any>(`/firestorm/tradecraft/case-memory/${caseId}`),
+    createCaseMemory: (data: unknown) => apiFetch<any>("/firestorm/tradecraft/case-memory", { method: "POST", body: JSON.stringify(data) }),
+    updateCaseMemory: (caseId: string, data: unknown) => apiFetch<any>(`/firestorm/tradecraft/case-memory/${caseId}`, { method: "PUT", body: JSON.stringify(data) }),
+    evidenceIndex: (params?: string) => apiFetch<any>(`/firestorm/tradecraft/evidence-index${params ? `?${params}` : ""}`),
+    evidenceQuery: (data: { query: string; caseId?: string; incidentId?: string; sourceTypes?: string[]; maxResults?: number; minRelevance?: number }) =>
+      apiFetch<any>("/firestorm/tradecraft/evidence-index/query", { method: "POST", body: JSON.stringify(data) }),
+  },
   command: {
     posture: () => apiFetch<any>("/firestorm/command/posture"),
     investigations: () => apiFetch<any>("/firestorm/command/investigations"),

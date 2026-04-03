@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronRight, Eye, Shield, UserCheck, Activity,
   Lightbulb, BookOpen, Minus, ArrowRight, RefreshCw, Zap, Users
 } from "lucide-react";
+import { TradecraftPanel, RelatedCasesPanel, EvidenceIndexPanel } from "@/components/tradecraft-panel";
 
 const DECISIONS = [
   {
@@ -441,6 +442,29 @@ export default function DecisionConsole() {
               );
             })()}
           </div>
+
+          {/* Tradecraft Decisions Panel */}
+          {(usingLive && selectedLive) ? (
+            <div className="space-y-3">
+              <TradecraftPanel
+                incidentId={String(selectedLive.id)}
+                title="Tradecraft Analysis"
+                compact
+              />
+              <RelatedCasesPanel incidentId={String(selectedLive.id)} />
+              <EvidenceIndexPanel incidentId={String(selectedLive.id)} />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <TradecraftPanel
+                caseId={selectedMock.caseRef}
+                title="Tradecraft Analysis"
+                compact
+              />
+              <RelatedCasesPanel caseId={selectedMock.caseRef} />
+              <EvidenceIndexPanel caseId={selectedMock.caseRef} />
+            </div>
+          )}
         </div>
       </div>
     </div>

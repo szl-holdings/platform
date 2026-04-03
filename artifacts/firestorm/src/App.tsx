@@ -62,6 +62,7 @@ const MilestonesTrends = lazy(() => import("@/pages/compliance/milestones-trends
 const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-insights"));
 const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
+const TradecraftEnginePage = lazy(() => import("@/pages/tradecraft-engine"));
 
 // ─── Command Surfaces (Phase 1) ───────────────────────────────────────────────
 const CommandHome = lazy(() => import("@/pages/command-home"));
@@ -150,6 +151,7 @@ const securityNavSecondary = [
   { path: "/watchlists", label: "Watchlists", icon: Target },
   { path: "/soar-playbooks", label: "SOAR Playbooks", icon: Zap },
   { path: "/stix-taxii", label: "STIX/TAXII Intel", icon: Link2 },
+  { path: "/tradecraft", label: "Tradecraft Engine", icon: BrainIcon },
   { path: "/observability", label: "Observability", icon: Activity },
   { path: "/adversary-emulation", label: "Red Team Exercises", icon: Target },
 ];
@@ -667,6 +669,7 @@ function AppRouter() {
         <Route path="/watchlists" component={Watchlists} />
         <Route path="/soar-playbooks" component={SoarPlaybooks} />
         <Route path="/stix-taxii" component={StixTaxii} />
+        <Route path="/tradecraft" component={TradecraftEnginePage} />
         <Route path="/forensics" component={ForensicsTimeline} />
         <Route path="/xdr-console" component={XDRConsole} />
         <Route path="/threat-hunting" component={ThreatHunting} />

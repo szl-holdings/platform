@@ -18,6 +18,7 @@ import {
   OperationalStatusBadge,
   type AuditHistoryEntry,
 } from "@workspace/shared-ui/operational-primitives";
+import { TradecraftPanel } from "@/components/tradecraft-panel";
 
 interface CaseNote { content: string; author: string; at: string }
 interface EvidenceItem { name: string; type: string; url?: string; addedAt: string }
@@ -259,6 +260,11 @@ function CaseDetailPanel({ caseItem, onClose, onUpdate }: { caseItem: Case; onCl
               </div>
             </div>
           )}
+
+          <TradecraftPanel
+            caseId={String(caseItem.id)}
+            title="Tradecraft Analysis"
+          />
 
           {(caseItem.auditTrail?.length ?? 0) > 0 && (
             <div>

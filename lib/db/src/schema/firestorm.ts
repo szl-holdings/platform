@@ -316,3 +316,112 @@ export const firestormMitreDetectionsTable = pgTable("firestorm_mitre_detections
 export const insertFirestormMitreDetectionSchema = createInsertSchema(firestormMitreDetectionsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertFirestormMitreDetection = z.infer<typeof insertFirestormMitreDetectionSchema>;
 export type FirestormMitreDetection = typeof firestormMitreDetectionsTable.$inferSelect;
+
+export const firestormTradecraftDecisionsTable = pgTable("firestorm_tradecraft_decisions", {
+  id: serial("id").primaryKey(),
+  objectId: text("object_id").notNull().unique(),
+  tenantId: text("tenant_id").notNull().default("default"),
+  caseId: text("case_id"),
+  incidentId: text("incident_id"),
+  signalId: text("signal_id"),
+  decisionType: text("decision_type", {
+    enum: ["TriageDecision", "IncidentAssessment", "RiskDecision", "EscalationDecision", "ApprovalRecommendation", "ResponsePlan", "ExecutiveBrief", "ControlGapFinding"],
+  }).notNull(),
+  policyClass: text("policy_class").notNull(),
+  schemaVersion: text("schema_version").notNull().default("2.0.0"),
+  summary: text("summary").notNull(),
+  issueStatement: text("issue_statement").notNull(),
+  evidenceRefs: jsonb("evidence_refs").$type<unknown[]>().default([]),
+  evidenceQuality: text("evidence_quality", { enum: ["high", "medium", "low", "insufficient"] }).notNull().default("low"),
+  assumptions: jsonb("assumptions").$type<unknown[]>().default([]),
+  alternatives: jsonb("alternatives").$type<unknown[]>().default([]),
+  confidence: numeric("confidence", { precision: 4, scale: 3 }).notNull().default("0"),
+  confidenceLabel: text("confidence_label", { enum: ["high", "moderate", "low", "insufficient"] }).notNull().default("low"),
+  confidenceStatement: text("confidence_statement"),
+  gapsAndUnknowns: jsonb("gaps_and_unknowns").$type<string[]>().default([]),
+  impactLevel: text("impact_level", { enum: ["critical", "high", "medium", "low", "negligible"] }).notNull().default("medium"),
+  urgency: text("urgency", { enum: ["immediate", "urgent", "standard", "deferred"] }).notNull().default("standard"),
+  recommendedAction: text("recommended_action").notNull(),
+  ownerSuggestion: text("owner_suggestion"),
+  approvalRequired: boolean("approval_required").notNull().default(false),
+  approvalReason: text("approval_reason"),
+  humanReviewRequired: boolean("human_review_required").notNull().default(true),
+  humanReviewReason: text("human_review_reason"),
+  modelRoute: text("model_route").notNull().default("unknown"),
+  rawOutput: text("raw_output"),
+  decisionPayload: jsonb("decision_payload").$type<Record<string, unknown>>().default({}),
+  status: text("status", { enum: ["active", "superseded", "archived"] }).notNull().default("active"),
+  approvedBy: text("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  rejectedBy: text("rejected_by"),
+  rejectedAt: timestamp("rejected_at"),
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFirestormTradecraftDecisionSchema = createInsertSchema(firestormTradecraftDecisionsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormTradecraftDecision = z.infer<typeof insertFirestormTradecraftDecisionSchema>;
+export type FirestormTradecraftDecision = typeof firestormTradecraftDecisionsTable.$inferSelect;
+
+export const firestormCaseMemoryTable = pgTable("firestorm_case_memory", {
+  id: serial("id").primaryKey(),
+  caseId: text("case_id").notNull().unique(),
+  incidentId: text("incident_id"),
+  phase: text("phase", { enum: ["detection", "triage", "investigation", "containment", "eradication", "recovery", "closed"] }).notNull().default("detection"),
+  phaseHistory: jsonb("phase_history").$type<Array<{ phase: string; enteredAt: string; exitedAt: string | null }>>().default([]),
+  decisions: jsonb("decisions").$type<unknown[]>().default([]),
+  evidenceSnapshots: jsonb("evidence_snapshots").$type<unknown[]>().default([]),
+  analystNotes: jsonb("analyst_notes").$type<Array<{ noteId: string; content: string; author: string; noteType: string; createdAt: string }>>().default([]),
+  changeLog: jsonb("change_log").$type<unknown[]>().default([]),
+  summary: jsonb("summary").$type<Record<string, unknown>>().default({}),
+  openedAt: timestamp("opened_at").notNull().defaultNow(),
+  lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),
+  closedAt: timestamp("closed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFirestormCaseMemorySchema = createInsertSchema(firestormCaseMemoryTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormCaseMemory = z.infer<typeof insertFirestormCaseMemorySchema>;
+export type FirestormCaseMemory = typeof firestormCaseMemoryTable.$inferSelect;
+
+export const firestormAnalystNotebookTable = pgTable("firestorm_analyst_notebook", {
+  id: serial("id").primaryKey(),
+  noteId: text("note_id").notNull().unique(),
+  caseId: text("case_id"),
+  incidentId: text("incident_id"),
+  decisionObjectId: text("decision_object_id"),
+  content: text("content").notNull(),
+  author: text("author").notNull(),
+  noteType: text("note_type", { enum: ["observation", "hypothesis", "assumption", "gap", "dissent", "general", "key_judgment", "evidence_note"] }).notNull().default("general"),
+  tags: jsonb("tags").$type<string[]>().default([]),
+  noteReferences: jsonb("note_references").$type<string[]>().default([]),
+  isKey: boolean("is_key").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFirestormAnalystNotebookSchema = createInsertSchema(firestormAnalystNotebookTable).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertFirestormAnalystNote = z.infer<typeof insertFirestormAnalystNotebookSchema>;
+export type FirestormAnalystNote = typeof firestormAnalystNotebookTable.$inferSelect;
+
+export const firestormTradecraftValidationAuditTable = pgTable("firestorm_tradecraft_validation_audit", {
+  id: serial("id").primaryKey(),
+  auditId: text("audit_id").notNull().unique(),
+  decisionType: text("decision_type").notNull(),
+  tenantId: text("tenant_id").notNull().default("default"),
+  caseId: text("case_id"),
+  incidentId: text("incident_id"),
+  validationErrors: jsonb("validation_errors").$type<string[]>().notNull().default([]),
+  rawOutput: text("raw_output"),
+  rawPayload: jsonb("raw_payload").$type<Record<string, unknown>>().notNull().default({}),
+  modelRoute: text("model_route").notNull().default("unknown"),
+  errorClass: text("error_class").notNull().default("schema_validation"),
+  resolved: boolean("resolved").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const insertFirestormValidationAuditSchema = createInsertSchema(firestormTradecraftValidationAuditTable).omit({ id: true, createdAt: true });
+export type InsertFirestormValidationAudit = z.infer<typeof insertFirestormValidationAuditSchema>;
+export type FirestormValidationAudit = typeof firestormTradecraftValidationAuditTable.$inferSelect;
