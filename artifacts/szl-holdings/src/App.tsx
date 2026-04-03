@@ -6,6 +6,7 @@ import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type
 import { useAuth } from "@workspace/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { CounselLayout } from "@/prism-counsel/components/counsel-layout";
+import { NyLayout } from "@/prism-counsel/pages/ny/ny-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
 
 const HomePage = lazy(() => import("@/pages/landing"));
@@ -65,6 +66,20 @@ const PrismInsurerIntel = lazy(() => import("@/prism-counsel/pages/insurer-intel
 const PrismVenueIntel = lazy(() => import("@/prism-counsel/pages/venue-intel-page"));
 const PrismNoFault = lazy(() => import("@/prism-counsel/pages/no-fault-page"));
 const PrismNYDashboard = lazy(() => import("@/prism-counsel/pages/ny-dashboard-page"));
+
+const NyOverview = lazy(() => import("@/prism-counsel/pages/ny/ny-overview"));
+const NyDashboard = lazy(() => import("@/prism-counsel/pages/ny/ny-dashboard"));
+const NyWatchlist = lazy(() => import("@/prism-counsel/pages/ny/ny-watchlist"));
+const NyDeadlines = lazy(() => import("@/prism-counsel/pages/ny/ny-deadlines"));
+const NyNoFault = lazy(() => import("@/prism-counsel/pages/ny/ny-no-fault"));
+const NyCoverage = lazy(() => import("@/prism-counsel/pages/ny/ny-coverage"));
+const NyMediation = lazy(() => import("@/prism-counsel/pages/ny/ny-mediation"));
+const NyForecast = lazy(() => import("@/prism-counsel/pages/ny/ny-forecast"));
+const NyInsurerIntel = lazy(() => import("@/prism-counsel/pages/ny/ny-insurer-intel"));
+const NyVenueIntel = lazy(() => import("@/prism-counsel/pages/ny/ny-venue-intel"));
+const NyCopilot = lazy(() => import("@/prism-counsel/pages/ny/ny-copilot"));
+const NyTrust = lazy(() => import("@/prism-counsel/pages/ny/ny-trust"));
+const NyPlaybooks = lazy(() => import("@/prism-counsel/pages/ny/ny-playbooks"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
@@ -167,6 +182,16 @@ function CounselAppPage({ children }: { children: ReactNode }) {
     <div className="flex flex-col h-screen" style={{ background: "#080c14" }}>
       <div className="flex-1 overflow-hidden">
         <CounselLayout>{children}</CounselLayout>
+      </div>
+    </div>
+  );
+}
+
+function NyAppPage({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col h-screen" style={{ background: "#080c14" }}>
+      <div className="flex-1 overflow-hidden">
+        <NyLayout>{children}</NyLayout>
       </div>
     </div>
   );
@@ -308,6 +333,47 @@ function App() {
             </Route>
             <Route path="/prism-counsel/ny">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismNYDashboard /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel NY Insurance Observability routes ── */}
+            <Route path="/prism-counsel/ny">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyOverview /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/dashboard">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyDashboard /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/watchlist">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyWatchlist /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/deadlines">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyDeadlines /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/no-fault">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyNoFault /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/coverage">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyCoverage /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/mediation">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyMediation /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/forecast">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyForecast /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/insurer-intel">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyInsurerIntel /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/venue-intel">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyVenueIntel /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/copilot">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyCopilot /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/trust">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyTrust /></NyAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/ny/playbooks">
+              <Suspense fallback={<PageLoader />}><NyAppPage><NyPlaybooks /></NyAppPage></Suspense>
             </Route>
 
             {/* ── Trust Center ── */}

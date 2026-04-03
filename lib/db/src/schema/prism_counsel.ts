@@ -12,7 +12,7 @@ export const pcMattersTable = pgTable("pc_matters", {
   stage: text("stage"),
   jurisdiction: text("jurisdiction"),
   courtName: text("court_name"),
-  venueId: integer("venue_id").references(() => pcVenueProfilesTable.id),
+  venueId: integer("venue_id"),
   filingDate: timestamp("filing_date"),
   statOfLimitations: timestamp("stat_of_limitations"),
   healthScore: integer("health_score"),
@@ -122,7 +122,7 @@ export const pcDeadlinesTable = pgTable("pc_deadlines", {
   priority: text("priority", { enum: ["critical", "high", "medium", "low"] }).notNull().default("medium"),
   status: text("status", { enum: ["pending", "completed", "overdue", "waived", "extended"] }).notNull().default("pending"),
   assignedTo: integer("assigned_to"),
-  clockRuleId: integer("clock_rule_id").references(() => pcClockRulesTable.id),
+  clockRuleId: integer("clock_rule_id"),
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -240,150 +240,6 @@ export const pcAuditEventsTable = pgTable("pc_audit_events", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const pcNoFaultClaimsTable = pgTable("pc_no_fault_claims", {
-  id: serial("id").primaryKey(),
-  matterId: integer("matter_id").notNull().references(() => pcMattersTable.id, { onDelete: "cascade" }),
-  claimNumber: text("claim_number").notNull(),
-  carrier: text("carrier").notNull(),
-  claimType: text("claim_type", { enum: ["no_fault_pip", "supplemental_um", "sum", "basic_pip", "optional_pip"] }).notNull(),
-  dateOfLoss: timestamp("date_of_loss").notNull(),
-  noticeDate: timestamp("notice_date"),
-  ackDeadline: timestamp("ack_deadline"),
-  ackStatus: text("ack_status", { enum: ["pending", "acknowledged", "acknowledged_late", "no_response"] }).default("pending"),
-  verificationSent: boolean("verification_sent").default(false),
-  verificationDeadline: timestamp("verification_deadline"),
-  payDenyDeadline: timestamp("pay_deny_deadline"),
-  status: text("status", { enum: ["open", "partial_payment", "paid", "denied", "arbitration", "closed"] }).notNull().default("open"),
-  totalBilled: numeric("total_billed", { precision: 14, scale: 2 }).default("0"),
-  totalPaid: numeric("total_paid", { precision: 14, scale: 2 }).default("0"),
-  totalDenied: numeric("total_denied", { precision: 14, scale: 2 }).default("0"),
-  arbitrationRisk: text("arbitration_risk", { enum: ["low", "medium", "high", "critical"] }).default("low"),
-  pendingBills: integer("pending_bills").default(0),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const pcClockRulesTable = pgTable("pc_clock_rules", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  ruleRef: text("rule_ref"),
-  matterType: text("matter_type").notNull(),
-  triggerEvent: text("trigger_event").notNull(),
-  durationDays: integer("duration_days").notNull(),
-  tollingApplies: boolean("tolling_applies").default(false),
-  description: text("description"),
-  escalationLadder: jsonb("escalation_ladder"),
-  nextAction: text("next_action"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const pcClockEventsTable = pgTable("pc_clock_events", {
-  id: serial("id").primaryKey(),
-  matterId: integer("matter_id").notNull().references(() => pcMattersTable.id, { onDelete: "cascade" }),
-  clockRuleId: integer("clock_rule_id").notNull().references(() => pcClockRulesTable.id),
-  triggerDate: timestamp("trigger_date").notNull(),
-  deadlineDate: timestamp("deadline_date").notNull(),
-  status: text("status", { enum: ["running", "tolled", "completed", "breached", "waived"] }).notNull().default("running"),
-  tolledAt: timestamp("tolled_at"),
-  resumedAt: timestamp("resumed_at"),
-  completedAt: timestamp("completed_at"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const pcVenueProfilesTable = pgTable("pc_venue_profiles", {
-  id: serial("id").primaryKey(),
-  state: text("state").notNull(),
-  county: text("county").notNull(),
-  court: text("court").notNull(),
-  part: text("part"),
-  track: text("track"),
-  avgDaysToTrial: integer("avg_days_to_trial"),
-  avgDaysToMediation: integer("avg_days_to_mediation"),
-  avgDaysNoteOfIssue: integer("avg_days_note_of_issue"),
-  conferenceType: text("conference_type"),
-  adrTendency: text("adr_tendency"),
-  schedulingNotes: text("scheduling_notes"),
-  observedVelocity: text("observed_velocity", { enum: ["fast", "moderate", "slow"] }),
-  staffingGuidance: text("staffing_guidance"),
-  escalationGuidance: text("escalation_guidance"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const pcInsurerProfilesTable = pgTable("pc_insurer_profiles", {
-  id: serial("id").primaryKey(),
-  orgId: integer("org_id").notNull(),
-  carrierName: text("carrier_name").notNull(),
-  region: text("region"),
-  avgResponseDays: integer("avg_response_days"),
-  avgOfferToSettlementRatio: numeric("avg_offer_to_settlement_ratio", { precision: 5, scale: 4 }),
-  denialRate: numeric("denial_rate", { precision: 5, scale: 4 }),
-  mediationWillingness: text("mediation_willingness", { enum: ["low", "moderate", "high"] }),
-  negotiationPosture: text("negotiation_posture"),
-  silenceWindowDays: integer("silence_window_days"),
-  verificationBehavior: text("verification_behavior"),
-  tags: jsonb("tags"),
-  notes: text("notes"),
-  mattersHandled: integer("matters_handled").default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const pcAdjusterProfilesTable = pgTable("pc_adjuster_profiles", {
-  id: serial("id").primaryKey(),
-  orgId: integer("org_id").notNull(),
-  name: text("name").notNull(),
-  carrier: text("carrier").notNull(),
-  region: text("region"),
-  avgResponseDays: integer("avg_response_days"),
-  communicationStyle: text("communication_style"),
-  verificationTendency: text("verification_tendency"),
-  offerPattern: text("offer_pattern"),
-  mattersHandled: integer("matters_handled").default(0),
-  tags: jsonb("tags"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const pcCommunicationWindowsTable = pgTable("pc_communication_windows", {
-  id: serial("id").primaryKey(),
-  matterId: integer("matter_id").notNull().references(() => pcMattersTable.id, { onDelete: "cascade" }),
-  party: text("party").notNull(),
-  lastContact: timestamp("last_contact"),
-  daysSilent: integer("days_silent"),
-  expectedResponse: text("expected_response"),
-  silenceRisk: text("silence_risk", { enum: ["low", "medium", "high", "critical"] }),
-  recommendedAction: text("recommended_action"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const pcDemandPacketsTable = pgTable("pc_demand_packets", {
-  id: serial("id").primaryKey(),
-  matterId: integer("matter_id").notNull().references(() => pcMattersTable.id, { onDelete: "cascade" }),
-  readinessScore: integer("readiness_score"),
-  missingItems: jsonb("missing_items"),
-  completedItems: jsonb("completed_items"),
-  targetDate: timestamp("target_date"),
-  status: text("status", { enum: ["not_started", "in_progress", "blocked", "review", "complete", "sent"] }).notNull().default("not_started"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const pcDemandReadinessSnapshotsTable = pgTable("pc_demand_readiness_snapshots", {
-  id: serial("id").primaryKey(),
-  matterId: integer("matter_id").notNull().references(() => pcMattersTable.id, { onDelete: "cascade" }),
-  score: integer("score").notNull(),
-  missingCount: integer("missing_count").default(0),
-  completedCount: integer("completed_count").default(0),
-  snapshot: jsonb("snapshot"),
-  computedAt: timestamp("computed_at").notNull().defaultNow(),
-});
-
 export const pcWitnessesTable = pgTable("pc_witnesses", {
   id: serial("id").primaryKey(),
   matterId: integer("matter_id").notNull().references(() => pcMattersTable.id, { onDelete: "cascade" }),
@@ -437,19 +293,6 @@ export const pcInconsistencyFlagsTable = pgTable("pc_inconsistency_flags", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const pcDefensibilityScoresTable = pgTable("pc_defensibility_scores", {
-  id: serial("id").primaryKey(),
-  matterId: integer("matter_id").notNull().references(() => pcMattersTable.id, { onDelete: "cascade" }),
-  entityType: text("entity_type").notNull(),
-  entityId: integer("entity_id").notNull(),
-  score: integer("score").notNull(),
-  sourceTraceCount: integer("source_trace_count").default(0),
-  unsupportedClaimCount: integer("unsupported_claim_count").default(0),
-  privilegeRiskCount: integer("privilege_risk_count").default(0),
-  details: jsonb("details"),
-  computedAt: timestamp("computed_at").notNull().defaultNow(),
-});
-
 export const pcExportsTable = pgTable("pc_exports", {
   id: serial("id").primaryKey(),
   matterId: integer("matter_id").references(() => pcMattersTable.id),
@@ -495,16 +338,6 @@ export const pcConnectorSyncRunsTable = pgTable("pc_connector_sync_runs", {
   completedAt: timestamp("completed_at"),
 });
 
-export const pcNyRuleProfilesTable = pgTable("pc_ny_rule_profiles", {
-  id: serial("id").primaryKey(),
-  matterType: text("matter_type").notNull(),
-  ruleSet: text("rule_set").notNull(),
-  rules: jsonb("rules"),
-  effectiveDate: timestamp("effective_date"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
 export const pcPlaybooksTable = pgTable("pc_playbooks", {
   id: serial("id").primaryKey(),
   orgId: integer("org_id").notNull(),
@@ -544,11 +377,6 @@ export const insertDamagesSchema = createInsertSchema(pcDamagesTable);
 export const insertLienSchema = createInsertSchema(pcLiensTable);
 export const insertDeadlineSchema = createInsertSchema(pcDeadlinesTable);
 export const insertForecastSchema = createInsertSchema(pcForecastsTable);
-export const insertNoFaultClaimSchema = createInsertSchema(pcNoFaultClaimsTable);
-export const insertClockRuleSchema = createInsertSchema(pcClockRulesTable);
-export const insertVenueProfileSchema = createInsertSchema(pcVenueProfilesTable);
-export const insertInsurerProfileSchema = createInsertSchema(pcInsurerProfilesTable);
-
 export type PcMatter = typeof pcMattersTable.$inferSelect;
 export type PcParty = typeof pcPartiesTable.$inferSelect;
 export type PcClaim = typeof pcClaimsTable.$inferSelect;
@@ -563,19 +391,10 @@ export type PcCommunication = typeof pcCommunicationsTable.$inferSelect;
 export type PcAiRecommendation = typeof pcAiRecommendationsTable.$inferSelect;
 export type PcApprovalRequest = typeof pcApprovalRequestsTable.$inferSelect;
 export type PcAuditEvent = typeof pcAuditEventsTable.$inferSelect;
-export type PcNoFaultClaim = typeof pcNoFaultClaimsTable.$inferSelect;
-export type PcClockRule = typeof pcClockRulesTable.$inferSelect;
-export type PcClockEvent = typeof pcClockEventsTable.$inferSelect;
-export type PcVenueProfile = typeof pcVenueProfilesTable.$inferSelect;
-export type PcInsurerProfile = typeof pcInsurerProfilesTable.$inferSelect;
-export type PcAdjusterProfile = typeof pcAdjusterProfilesTable.$inferSelect;
-export type PcCommunicationWindow = typeof pcCommunicationWindowsTable.$inferSelect;
-export type PcDemandPacket = typeof pcDemandPacketsTable.$inferSelect;
 export type PcWitness = typeof pcWitnessesTable.$inferSelect;
 export type PcDocumentChunk = typeof pcDocumentChunksTable.$inferSelect;
 export type PcPrivilegeFlag = typeof pcPrivilegeFlagsTable.$inferSelect;
 export type PcInconsistencyFlag = typeof pcInconsistencyFlagsTable.$inferSelect;
-export type PcDefensibilityScore = typeof pcDefensibilityScoresTable.$inferSelect;
 export type PcExport = typeof pcExportsTable.$inferSelect;
 export type PcMatterTag = typeof pcMatterTagsTable.$inferSelect;
 export type PcConnectorAccount = typeof pcConnectorAccountsTable.$inferSelect;
