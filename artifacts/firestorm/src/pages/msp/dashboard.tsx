@@ -269,10 +269,10 @@ function SLABreachPrediction({ tickets }: { tickets: TicketItem[] }) {
 }
 
 function AlertSuppressionPanel() {
-  const suppressedAlerts = [
-    { condition: "Backup completion events", count: 1247, client: "All" },
-    { condition: "SSL renewal confirmations", count: 89, client: "All" },
-    { condition: "Scheduled maintenance windows", count: 342, client: "Meridian Corp" },
+  const suppressionRules = [
+    { condition: "Backup completion events", client: "All" },
+    { condition: "SSL renewal confirmations", client: "All" },
+    { condition: "Scheduled maintenance windows", client: "Per client schedule" },
   ];
   return (
     <div className="rounded-xl border border-border bg-card">
@@ -281,10 +281,10 @@ function AlertSuppressionPanel() {
           <Bell className="w-4 h-4 text-violet-500" />
           Intelligent Alert Suppression
         </h2>
-        <span className="text-[10px] text-emerald-500 font-mono">1,678 suppressed today</span>
+        <span className="text-[10px] text-muted-foreground font-mono">Active rules</span>
       </div>
       <div className="divide-y divide-border">
-        {suppressedAlerts.map((a) => (
+        {suppressionRules.map((a) => (
           <div key={a.condition} className="px-4 py-3 flex items-center gap-4 hover:bg-muted/20 transition-colors">
             <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
               <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
@@ -293,12 +293,11 @@ function AlertSuppressionPanel() {
               <p className="text-sm font-medium truncate">{a.condition}</p>
               <p className="text-xs text-muted-foreground">{a.client}</p>
             </div>
-            <span className="text-sm font-bold text-muted-foreground shrink-0 font-mono">{a.count.toLocaleString()}</span>
           </div>
         ))}
       </div>
       <div className="p-3 border-t border-border">
-        <p className="text-[10px] text-muted-foreground text-center">1,200+ pre-built suppression conditions</p>
+        <p className="text-[10px] text-muted-foreground text-center">Configure suppression rules in alert settings</p>
       </div>
     </div>
   );
@@ -394,8 +393,6 @@ export default function Dashboard() {
     ...(metrics?.devicesCritical ? [{ id: "crit1", severity: "critical", client: "Managed Devices", message: `${metrics.devicesCritical} device${metrics.devicesCritical > 1 ? "s" : ""} in critical state — immediate attention required`, time: "Live" }] : []),
     ...(slaBreachCount > 0 ? [{ id: "sla1", severity: "critical", client: "Service Desk", message: `${slaBreachCount} SLA breach${slaBreachCount > 1 ? "es" : ""} active — escalation required`, time: "Live" }] : []),
     ...(metrics?.expiringContracts ? [{ id: "exp1", severity: "warning", client: "Contracts", message: `${metrics.expiringContracts} contract${metrics.expiringContracts > 1 ? "s" : ""} expiring within 90 days`, time: "Live" }] : []),
-    { id: "back1", severity: "info", client: "Vertex Labs", message: "Backup completed — 2.4TB processed successfully", time: "15 min ago" },
-    { id: "patch1", severity: "info", client: "Atlas Industries", message: "Patch management cycle complete — 198 endpoints updated", time: "2h ago" },
   ];
 
   const summaryMetrics = [
@@ -552,22 +549,29 @@ export default function Dashboard() {
             </span>
           </div>
           <div className="divide-y divide-border">
-            {nocAlerts.map((alert) => {
-              const sev = sevColors[alert.severity] ?? sevColors.info;
-              return (
-                <div key={alert.id} className="px-4 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors">
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sev.dot}`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-medium">{alert.client}</span>
-                      <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full ${sev.badge}`}>{sev.label}</span>
+            {nocAlerts.length === 0 ? (
+              <div className="px-4 py-6 flex items-center gap-2 text-muted-foreground">
+                <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span className="text-xs">All systems nominal — no active alerts</span>
+              </div>
+            ) : (
+              nocAlerts.map((alert) => {
+                const sev = sevColors[alert.severity] ?? sevColors.info;
+                return (
+                  <div key={alert.id} className="px-4 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors">
+                    <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${sev.dot}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-medium">{alert.client}</span>
+                        <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full ${sev.badge}`}>{sev.label}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{alert.message}</p>
+                      <p className="text-[10px] text-muted-foreground/60 mt-1">{alert.time}</p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{alert.message}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-1">{alert.time}</p>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       </div>

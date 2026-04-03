@@ -14,7 +14,7 @@ import {
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { api, type LyteSignal, type LyteDashboard } from "@/lib/api";
+import { api, type LyteSignal, type LyteDashboard, type LyteRecommendation } from "@/lib/api";
 import { severityColors } from "@/lib/business-data";
 import type { SignalSeverity } from "@/lib/business-data";
 
@@ -104,12 +104,6 @@ const PRISM = [
   { key: "M", name: "Motion", icon: Gauge, color: "#4a90b8", href: "/prism/motion", score: 63 },
 ];
 
-const RECOMMENDED_ACTIONS = [
-  { id: "ra1", title: "Escalate Salesforce pipeline stall to VP Sales", severity: "critical", confidence: "high" as const, impact: "$400K", owner: "Revenue Ops", eta: "4h", source: "Salesforce" },
-  { id: "ra2", title: "Approve 14 aged procurement requests", severity: "high", confidence: "high" as const, impact: "$120K/mo", owner: "Finance", eta: "2h", source: "ServiceNow" },
-  { id: "ra3", title: "Assign owner to 8 orphaned delivery processes", severity: "high", confidence: "medium" as const, impact: "SLA risk", owner: "Ops Lead", eta: "1d", source: "Jira" },
-  { id: "ra4", title: "Initiate vendor renewal — $2.1M exposure", severity: "medium", confidence: "high" as const, impact: "$2.1M", owner: "Legal", eta: "3d", source: "Contracts" },
-];
 
 export default function Dashboard() {
   const [activeRole, setActiveRole] = useState("operator");
@@ -138,6 +132,12 @@ export default function Dashboard() {
     queryKey: ["lyte-signals-feed"],
     queryFn: () => api.signals.list(),
     refetchInterval: 30_000,
+  });
+
+  const { data: recommendationsData = [] } = useQuery<LyteRecommendation[]>({
+    queryKey: ["lyte-recommendations"],
+    queryFn: () => api.recommendations.list(),
+    staleTime: 120_000,
   });
 
   const summary = dashboardData?.summary;
@@ -170,11 +170,11 @@ export default function Dashboard() {
 
   const metrics = [
     { label: "Critical Exposures", value: isLoading ? "—" : (summary?.criticalUnresolved ?? criticalSignals.length), color: "#c45a4a", pulse: true, sub: "live" },
-    { label: "Aged Approvals", value: isLoading ? "—" : "14", color: "#c8953c", sub: ">48h" },
-    { label: "Ownership Gaps", value: isLoading ? "—" : "8", color: "#d4a054", sub: "unassigned" },
+    { label: "Aged Approvals", value: isLoading ? "—" : (summary?.agedApprovals != null ? String(summary.agedApprovals) : "—"), color: "#c8953c", sub: ">48h" },
+    { label: "Ownership Gaps", value: isLoading ? "—" : (summary?.ownershipGaps != null ? String(summary.ownershipGaps) : "—"), color: "#d4a054", sub: "unassigned" },
     { label: "Active Signals", value: isLoading ? "—" : (summary?.totalSignals ?? signals.length), color: TEXT.secondary, sub: "total" },
-    { label: "Value at Risk", value: isLoading ? "—" : "$5.03M", color: "#c45a4a", sub: "estimated" },
-    { label: "Decision Latency", value: isLoading ? "—" : "34h", color: "#c8953c", sub: "avg" },
+    { label: "Value at Risk", value: isLoading ? "—" : (summary?.valueAtRisk ?? "—"), color: "#c45a4a", sub: "estimated" },
+    { label: "Decision Latency", value: isLoading ? "—" : (summary?.decisionLatency ?? "—"), color: "#c8953c", sub: "avg" },
   ];
 
   const queue = [
@@ -190,12 +190,7 @@ export default function Dashboard() {
     })),
   ];
 
-  const correlations = [
-    { cluster: "Revenue pipeline stall", entities: ["Salesforce", "Slack"], impact: "$400K", sev: "critical" },
-    { cluster: "Approval bottleneck — procurement", entities: ["ServiceNow", "Workday"], impact: "$120K/mo", sev: "high" },
-    { cluster: "Delivery velocity degradation", entities: ["Jira", "GitHub"], impact: "SLA risk", sev: "high" },
-    { cluster: "Vendor renewal gap", entities: ["Contracts", "Finance"], impact: "$2.1M", sev: "medium" },
-  ];
+  const correlations = dashboardData?.correlations ?? [];
 
   const platforms = [
     { label: "API Server", count: signals.filter(s => s.source.toLowerCase().includes("api") && s.status !== "resolved").length },
@@ -330,34 +325,38 @@ export default function Dashboard() {
             </div>
           </Panel>
 
-          {/* Recommended Actions with confidence */}
+          {/* Recommended Actions */}
           <Panel accent="#8b7ac8">
             <PanelHead icon={Crosshair} title="Recommended Actions" accent="#8b7ac8" right={
               <span className="text-[8px] font-mono" style={{ color: "rgba(139,122,200,0.5)" }}>AI-scored</span>
             } />
             <div className="divide-y" style={{ borderColor: BORDER.subtle }}>
-              {RECOMMENDED_ACTIONS.map((a, i) => (
-                <div key={a.id} className="px-3 py-2 hover:bg-white/[0.015] transition-colors cursor-pointer">
-                  <div className="flex items-start gap-2">
-                    <div className="mt-0.5">
-                      <Dot sev={a.severity} pulse={a.severity === "critical"} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[10px] font-medium line-clamp-1 mb-1" style={{ color: TEXT.primary }}>{a.title}</div>
-                      <div className="flex items-center gap-1.5">
-                        <ImpactBadge impact={a.impact} />
-                        <span className="text-[8px]" style={{ color: TEXT.tertiary }}>{a.owner}</span>
-                        <span style={{ color: TEXT.muted }}>·</span>
-                        <span className="text-[8px] font-mono" style={{ color: TEXT.muted }}>ETA {a.eta}</span>
-                        <ConfidenceBar level={a.confidence} />
-                      </div>
-                    </div>
-                    <button className="shrink-0 text-[8px] px-2 py-px rounded font-mono hover:opacity-80" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.15)" }}>
-                      Approve
-                    </button>
-                  </div>
+              {recommendationsData.length === 0 ? (
+                <div className="px-3 py-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-3 h-3" style={{ color: "#4a90b8" }} />
+                  <span className="text-[10px]" style={{ color: TEXT.secondary }}>No recommendations — connect integrations to generate actions</span>
                 </div>
-              ))}
+              ) : (
+                recommendationsData.slice(0, 4).map((a) => (
+                  <div key={a.id} className="px-3 py-2 hover:bg-white/[0.015] transition-colors cursor-pointer">
+                    <div className="flex items-start gap-2">
+                      <div className="mt-0.5">
+                        <Dot sev={a.category === "critical" ? "critical" : "high"} pulse={a.category === "critical"} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] font-medium line-clamp-1 mb-1" style={{ color: TEXT.primary }}>{a.title}</div>
+                        <div className="flex items-center gap-1.5">
+                          <ImpactBadge impact={a.impact} />
+                          <span className="text-[8px] font-mono capitalize" style={{ color: TEXT.muted }}>{a.effort} effort</span>
+                        </div>
+                      </div>
+                      <button className="shrink-0 text-[8px] px-2 py-px rounded font-mono hover:opacity-80" style={{ color: "#8b7ac8", background: "rgba(139,122,200,0.08)", border: "1px solid rgba(139,122,200,0.15)" }}>
+                        Review
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </Panel>
         </div>
@@ -473,20 +472,27 @@ export default function Dashboard() {
           <Panel accent="#d4a054">
             <PanelHead icon={GitBranch} title="Correlations" accent="#d4a054" />
             <div className="px-3">
-              {correlations.map((c, i) => (
-                <div key={i} className="py-2 cursor-pointer hover:bg-white/[0.01] transition-colors" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Dot sev={c.sev} />
-                    <span className="text-[9px] font-medium truncate flex-1" style={{ color: TEXT.secondary }}>{c.cluster}</span>
-                    <ImpactBadge impact={c.impact} />
-                  </div>
-                  <div className="flex gap-1 ml-3">
-                    {c.entities.map(e => (
-                      <span key={e} className="text-[7px] font-mono px-1 py-px rounded" style={{ color: TEXT.tertiary, background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER.subtle}` }}>{e}</span>
-                    ))}
-                  </div>
+              {correlations.length === 0 ? (
+                <div className="py-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-3 h-3" style={{ color: "#6b8f71" }} />
+                  <span className="text-[9px]" style={{ color: TEXT.secondary }}>No cross-signal correlations detected</span>
                 </div>
-              ))}
+              ) : (
+                correlations.map((c, i) => (
+                  <div key={i} className="py-2 cursor-pointer hover:bg-white/[0.01] transition-colors" style={{ borderBottom: `1px solid ${BORDER.subtle}` }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Dot sev={c.sev} />
+                      <span className="text-[9px] font-medium truncate flex-1" style={{ color: TEXT.secondary }}>{c.cluster}</span>
+                      <ImpactBadge impact={c.impact} />
+                    </div>
+                    <div className="flex gap-1 ml-3">
+                      {c.entities.map(e => (
+                        <span key={e} className="text-[7px] font-mono px-1 py-px rounded" style={{ color: TEXT.tertiary, background: "rgba(255,255,255,0.03)", border: `1px solid ${BORDER.subtle}` }}>{e}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </Panel>
 

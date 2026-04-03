@@ -25,6 +25,24 @@ const imageUpload = multer({
 
 const router: IRouter = Router();
 
+// All CMS mutating operations require authentication and editor/admin role.
+// GET/HEAD/OPTIONS requests may remain accessible without auth (public content reads).
+// Contact form POST is explicitly public (public-facing contact form submission).
+function requireCmsWrite(req: Request, res: Response, next: NextFunction): void {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
+  const user = req.user as { roles?: string[] } | undefined;
+  const roles = user?.roles ?? [];
+  const canWrite = roles.some((r: string) => ["admin", "super_admin", "editor"].includes(r));
+  if (!canWrite) {
+    res.status(403).json({ error: "Insufficient permissions — editor or admin role required" });
+    return;
+  }
+  next();
+}
+
 // ─── Sites ───────────────────────────────────────────────────────────────────
 
 router.get("/cms/sites", async (req, res) => {
@@ -42,7 +60,7 @@ router.get("/cms/sites/:slug", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get site"); }
 });
 
-router.patch("/cms/sites/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/sites/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(sitesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(sitesTable.id, id)).returning();
@@ -85,14 +103,14 @@ router.get("/cms/pages/:id", authMiddleware({ required: false }), async (req, re
   } catch (err) { handleRouteError(res, err, "Failed to get page"); }
 });
 
-router.post("/cms/pages", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/pages", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(pagesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create page"); }
 });
 
-router.patch("/cms/pages/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/pages/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(pagesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(pagesTable.id, id)).returning();
@@ -101,7 +119,7 @@ router.patch("/cms/pages/:id", authMiddleware({ required: false }), async (req, 
   } catch (err) { handleRouteError(res, err, "Failed to update page"); }
 });
 
-router.delete("/cms/pages/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/pages/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(pagesTable).where(eq(pagesTable.id, id));
@@ -121,14 +139,14 @@ router.get("/cms/sections", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list sections"); }
 });
 
-router.post("/cms/sections", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/sections", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(sectionsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create section"); }
 });
 
-router.patch("/cms/sections/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/sections/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(sectionsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(sectionsTable.id, id)).returning();
@@ -137,7 +155,7 @@ router.patch("/cms/sections/:id", authMiddleware({ required: false }), async (re
   } catch (err) { handleRouteError(res, err, "Failed to update section"); }
 });
 
-router.delete("/cms/sections/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/sections/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(sectionsTable).where(eq(sectionsTable.id, id));
@@ -162,14 +180,14 @@ router.get("/cms/ventures/:slug", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get venture"); }
 });
 
-router.post("/cms/ventures", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/ventures", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(venturesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create venture"); }
 });
 
-router.patch("/cms/ventures/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/ventures/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(venturesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(venturesTable.id, id)).returning();
@@ -178,7 +196,7 @@ router.patch("/cms/ventures/:id", authMiddleware({ required: false }), async (re
   } catch (err) { handleRouteError(res, err, "Failed to update venture"); }
 });
 
-router.delete("/cms/ventures/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/ventures/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(venturesTable).where(eq(venturesTable.id, id));
@@ -222,14 +240,14 @@ router.get("/cms/articles/:slug", authMiddleware({ required: false }), async (re
   } catch (err) { handleRouteError(res, err, "Failed to get article"); }
 });
 
-router.post("/cms/articles", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/articles", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(articlesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create article"); }
 });
 
-router.patch("/cms/articles/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/articles/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(articlesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(articlesTable.id, id)).returning();
@@ -238,7 +256,7 @@ router.patch("/cms/articles/:id", authMiddleware({ required: false }), async (re
   } catch (err) { handleRouteError(res, err, "Failed to update article"); }
 });
 
-router.delete("/cms/articles/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/articles/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(articlesTable).where(eq(articlesTable.id, id));
@@ -276,14 +294,14 @@ router.get("/cms/case-studies/:slug", authMiddleware({ required: false }), async
   } catch (err) { handleRouteError(res, err, "Failed to get case study"); }
 });
 
-router.post("/cms/case-studies", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/case-studies", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(caseStudiesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create case study"); }
 });
 
-router.patch("/cms/case-studies/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/case-studies/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(caseStudiesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(caseStudiesTable.id, id)).returning();
@@ -292,7 +310,7 @@ router.patch("/cms/case-studies/:id", authMiddleware({ required: false }), async
   } catch (err) { handleRouteError(res, err, "Failed to update case study"); }
 });
 
-router.delete("/cms/case-studies/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/case-studies/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(caseStudiesTable).where(eq(caseStudiesTable.id, id));
@@ -316,14 +334,14 @@ router.get("/cms/navigation-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list navigation items"); }
 });
 
-router.post("/cms/navigation-items", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/navigation-items", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(navigationItemsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create navigation item"); }
 });
 
-router.patch("/cms/navigation-items/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/navigation-items/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(navigationItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(navigationItemsTable.id, id)).returning();
@@ -332,7 +350,7 @@ router.patch("/cms/navigation-items/:id", authMiddleware({ required: false }), a
   } catch (err) { handleRouteError(res, err, "Failed to update navigation item"); }
 });
 
-router.delete("/cms/navigation-items/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/navigation-items/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(navigationItemsTable).where(eq(navigationItemsTable.id, id));
@@ -352,14 +370,14 @@ router.get("/cms/testimonials", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list testimonials"); }
 });
 
-router.post("/cms/testimonials", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/testimonials", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(testimonialsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create testimonial"); }
 });
 
-router.patch("/cms/testimonials/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/testimonials/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(testimonialsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(testimonialsTable.id, id)).returning();
@@ -368,7 +386,7 @@ router.patch("/cms/testimonials/:id", authMiddleware({ required: false }), async
   } catch (err) { handleRouteError(res, err, "Failed to update testimonial"); }
 });
 
-router.delete("/cms/testimonials/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/testimonials/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(testimonialsTable).where(eq(testimonialsTable.id, id));
@@ -388,14 +406,14 @@ router.get("/cms/faqs", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list FAQs"); }
 });
 
-router.post("/cms/faqs", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/faqs", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(faqsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create FAQ"); }
 });
 
-router.patch("/cms/faqs/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/faqs/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(faqsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(faqsTable.id, id)).returning();
@@ -404,7 +422,7 @@ router.patch("/cms/faqs/:id", authMiddleware({ required: false }), async (req, r
   } catch (err) { handleRouteError(res, err, "Failed to update FAQ"); }
 });
 
-router.delete("/cms/faqs/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/faqs/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(faqsTable).where(eq(faqsTable.id, id));
@@ -424,14 +442,14 @@ router.get("/cms/ctas", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list CTAs"); }
 });
 
-router.post("/cms/ctas", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/ctas", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(ctasTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create CTA"); }
 });
 
-router.patch("/cms/ctas/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/ctas/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(ctasTable).set({ ...req.body, updatedAt: new Date() }).where(eq(ctasTable.id, id)).returning();
@@ -440,7 +458,7 @@ router.patch("/cms/ctas/:id", authMiddleware({ required: false }), async (req, r
   } catch (err) { handleRouteError(res, err, "Failed to update CTA"); }
 });
 
-router.delete("/cms/ctas/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/ctas/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(ctasTable).where(eq(ctasTable.id, id));
@@ -460,14 +478,14 @@ router.get("/cms/roadmap-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list roadmap items"); }
 });
 
-router.post("/cms/roadmap-items", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/roadmap-items", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(roadmapItemsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create roadmap item"); }
 });
 
-router.patch("/cms/roadmap-items/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/roadmap-items/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(roadmapItemsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(roadmapItemsTable.id, id)).returning();
@@ -476,7 +494,7 @@ router.patch("/cms/roadmap-items/:id", authMiddleware({ required: false }), asyn
   } catch (err) { handleRouteError(res, err, "Failed to update roadmap item"); }
 });
 
-router.delete("/cms/roadmap-items/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/roadmap-items/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(roadmapItemsTable).where(eq(roadmapItemsTable.id, id));
@@ -496,14 +514,14 @@ router.get("/cms/services-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list services"); }
 });
 
-router.post("/cms/services-items", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/services-items", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(servicesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create service"); }
 });
 
-router.patch("/cms/services-items/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/services-items/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(servicesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(servicesTable.id, id)).returning();
@@ -512,7 +530,7 @@ router.patch("/cms/services-items/:id", authMiddleware({ required: false }), asy
   } catch (err) { handleRouteError(res, err, "Failed to update service"); }
 });
 
-router.delete("/cms/services-items/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/services-items/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(servicesTable).where(eq(servicesTable.id, id));
@@ -532,7 +550,7 @@ router.get("/cms/features-items", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list features"); }
 });
 
-router.post("/cms/features-items", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/features-items", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(featuresTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -551,7 +569,7 @@ router.get("/cms/use-cases", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list use cases"); }
 });
 
-router.post("/cms/use-cases", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/use-cases", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(useCasesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
@@ -577,14 +595,14 @@ router.get("/cms/updates", authMiddleware({ required: false }), async (req, res)
   } catch (err) { handleRouteError(res, err, "Failed to list updates"); }
 });
 
-router.post("/cms/updates", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/updates", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(updatesTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create update"); }
 });
 
-router.patch("/cms/updates/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/updates/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(updatesTable).set({ ...req.body, updatedAt: new Date() }).where(eq(updatesTable.id, id)).returning();
@@ -602,7 +620,7 @@ router.post("/cms/contact-submissions", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to submit contact form"); }
 });
 
-router.get("/cms/contact-submissions", authMiddleware({ required: false }), async (req, res) => {
+router.get("/cms/contact-submissions", requireCmsWrite, async (req, res) => {
   try {
     const { page, limit, offset } = parsePagination(req.query as Record<string, unknown>);
     const formKey = req.query.form_key as string | undefined;
@@ -616,14 +634,14 @@ router.get("/cms/contact-submissions", authMiddleware({ required: false }), asyn
 
 // ─── Lead Status ──────────────────────────────────────────────────────────────
 
-router.post("/cms/lead-status", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/lead-status", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(leadStatusTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create lead status"); }
 });
 
-router.patch("/cms/lead-status/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/lead-status/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(leadStatusTable).set({ ...req.body, updatedAt: new Date() }).where(eq(leadStatusTable.id, id)).returning();
@@ -652,7 +670,7 @@ router.get("/cms/site-settings/:siteId", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to get site settings"); }
 });
 
-router.post("/cms/site-settings", authMiddleware(), async (req, res) => {
+router.post("/cms/site-settings", requireCmsWrite, async (req, res) => {
     try {
       const { siteId, key, valueJson } = req.body;
       const [existing] = await db.select().from(siteSettingsTable)
@@ -668,7 +686,7 @@ router.post("/cms/site-settings", authMiddleware(), async (req, res) => {
     } catch (err) { handleRouteError(res, err, "Failed to set site setting"); }
   });
 
-  router.put("/cms/site-settings", authMiddleware({ required: false }), async (req, res) => {
+  router.put("/cms/site-settings", requireCmsWrite, async (req, res) => {
   try {
     const { siteId, key, valueJson } = req.body;
     const [existing] = await db.select().from(siteSettingsTable)
@@ -684,7 +702,7 @@ router.post("/cms/site-settings", authMiddleware(), async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to set site setting"); }
 });
 
-router.delete("/cms/site-settings/:id", authMiddleware(), async (req, res) => {
+router.delete("/cms/site-settings/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(siteSettingsTable).where(eq(siteSettingsTable.id, id));
@@ -704,14 +722,14 @@ router.get("/cms/media-assets", async (req, res) => {
   } catch (err) { handleRouteError(res, err, "Failed to list media assets"); }
 });
 
-router.post("/cms/media-assets", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/media-assets", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(mediaAssetsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create media asset"); }
 });
 
-router.delete("/cms/media-assets/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/media-assets/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(mediaAssetsTable).where(eq(mediaAssetsTable.id, id));
@@ -735,14 +753,14 @@ router.get("/cms/downloads", authMiddleware({ required: false }), async (req, re
   } catch (err) { handleRouteError(res, err, "Failed to list downloads"); }
 });
 
-router.post("/cms/downloads", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/downloads", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(downloadsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create download"); }
 });
 
-router.patch("/cms/downloads/:id", authMiddleware({ required: false }), async (req, res) => {
+router.patch("/cms/downloads/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     const [row] = await db.update(downloadsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(downloadsTable.id, id)).returning();
@@ -760,14 +778,14 @@ router.get("/cms/redirects", authMiddleware({ required: false }), async (req, re
   } catch (err) { handleRouteError(res, err, "Failed to list redirects"); }
 });
 
-router.post("/cms/redirects", authMiddleware({ required: false }), async (req, res) => {
+router.post("/cms/redirects", requireCmsWrite, async (req, res) => {
   try {
     const [row] = await db.insert(redirectsTable).values(req.body).returning();
     sendSuccess(res, row, 201);
   } catch (err) { handleRouteError(res, err, "Failed to create redirect"); }
 });
 
-router.delete("/cms/redirects/:id", authMiddleware({ required: false }), async (req, res) => {
+router.delete("/cms/redirects/:id", requireCmsWrite, async (req, res) => {
   try {
     const id = parseIdParam(req.params.id);
     await db.delete(redirectsTable).where(eq(redirectsTable.id, id));

@@ -115,21 +115,23 @@ export default function ContactForm() {
               </p>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="border-t border-stone-200 pt-8 mb-12"
-            >
-              <p className="font-serif text-base text-ink-600 leading-relaxed italic mb-5">
-                "{featuredTestimonial.quote.slice(0, 150)}..."
-              </p>
-              <div>
-                <p className="text-xs font-medium text-ink-900 tracking-wide">{featuredTestimonial.name}</p>
-                <p className="text-[11px] text-ink-500 mt-0.5 font-light">{featuredTestimonial.title}, {featuredTestimonial.company}</p>
-              </div>
-            </motion.div>
+            {featuredTestimonial && (
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="border-t border-stone-200 pt-8 mb-12"
+              >
+                <p className="font-serif text-base text-ink-600 leading-relaxed italic mb-5">
+                  "{featuredTestimonial.quote.slice(0, 150)}..."
+                </p>
+                <div>
+                  <p className="text-xs font-medium text-ink-900 tracking-wide">{featuredTestimonial.name}</p>
+                  <p className="text-[11px] text-ink-500 mt-0.5 font-light">{featuredTestimonial.title}, {featuredTestimonial.company}</p>
+                </div>
+              </motion.div>
+            )}
 
             <motion.div
               initial={{ opacity: 0, y: 14 }}

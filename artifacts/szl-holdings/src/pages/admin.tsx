@@ -18,7 +18,12 @@ import { CAPITAL_DOCUMENTS, getDocumentsByChannel } from "@/data/capital-arsenal
 
 const API = "/api";
 
-const DEFAULT_PIN = import.meta.env.VITE_ADMIN_PIN ?? "";
+// ─── CSRF ─────────────────────────────────────────────────────────────────────
+
+function getCsrfToken(): string {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -39,9 +44,15 @@ interface Service { id: number; siteId: number; slug: string; title: string; sho
 // ─── API helpers ─────────────────────────────────────────────────────────────
 
 async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
+  const method = (opts?.method ?? "GET").toUpperCase();
+  const needsCsrf = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
   const res = await fetch(`${API}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
+    headers: {
+      "Content-Type": "application/json",
+      ...(needsCsrf ? { "x-csrf-token": getCsrfToken() } : {}),
+      ...(opts?.headers || {}),
+    },
     ...opts,
   });
   if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -50,9 +61,15 @@ async function apiFetch<T>(path: string, opts?: RequestInit): Promise<T> {
 }
 
 async function apiFetchAdmin<T>(path: string, opts?: RequestInit): Promise<T> {
+  const method = (opts?.method ?? "GET").toUpperCase();
+  const needsCsrf = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
   const res = await fetch(`${API}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...((opts?.headers as Record<string, string>) || {}) },
+    headers: {
+      "Content-Type": "application/json",
+      ...(needsCsrf ? { "x-csrf-token": getCsrfToken() } : {}),
+      ...((opts?.headers as Record<string, string>) || {}),
+    },
     ...opts,
   });
   if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -64,17 +81,37 @@ async function apiFetchAdmin<T>(path: string, opts?: RequestInit): Promise<T> {
 
 function PinGate({ onUnlock }: { onUnlock: () => void }) {
   const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [show, setShow] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin === DEFAULT_PIN) {
-      onUnlock();
-    } else {
-      setError(true);
-      setPin("");
-      setTimeout(() => setError(false), 2000);
+    if (!pin || verifying) return;
+    setVerifying(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API}/config/verify-admin-pin`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
+        body: JSON.stringify({ pin }),
+      });
+      if (res.ok) {
+        onUnlock();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        if (body?.error === "admin_pin_not_configured") {
+          setError("Admin PIN is not configured on this server.");
+        } else {
+          setError("Incorrect PIN. Try again.");
+        }
+        setPin("");
+      }
+    } catch {
+      setError("Unable to verify PIN. Check your connection.");
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -106,10 +143,11 @@ function PinGate({ onUnlock }: { onUnlock: () => void }) {
           </div>
           {error && (
             <p className="text-xs text-red-500 flex items-center gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5" /> Incorrect PIN. Try again.
+              <AlertCircle className="w-3.5 h-3.5" /> {error}
             </p>
           )}
-          <button type="submit" disabled={!pin} className="w-full py-3 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          <button type="submit" disabled={!pin || verifying} className="w-full py-3 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
+            {verifying && <Loader2 className="w-4 h-4 animate-spin" />}
             Unlock Admin
           </button>
         </form>

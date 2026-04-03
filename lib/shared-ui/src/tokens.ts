@@ -152,7 +152,7 @@ export const colors = {
       accent: "hsl(215 35% 58%)",
       accentMuted: "hsla(210 8% 68% / 0.12)",
       silver: "hsl(210 6% 74%)",
-      alloylTieIn: "hsl(215 35% 58%)",
+      alloyTieIn: "hsl(215 35% 58%)",
       muted: "hsla(210 8% 68% / 0.10)",
       surface: "hsla(210 12% 8% / 0.55)",
     },

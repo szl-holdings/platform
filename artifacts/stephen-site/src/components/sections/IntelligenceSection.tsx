@@ -26,6 +26,7 @@ export function IntelligenceSection() {
   const [ecosystemHealth, setEcosystemHealth] = useState<any[]>([]);
   const [platformStats, setPlatformStats] = useState<any>(null);
   const [techTrends, setTechTrends] = useState<any[]>([]);
+  const [dataError, setDataError] = useState(false);
   const [chatMessages, setChatMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -33,9 +34,13 @@ export function IntelligenceSection() {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    apiFetch<any[]>("/intelligence/ecosystem-health").then(setEcosystemHealth).catch(() => {});
-    apiFetch<any>("/intelligence/platform-stats").then(setPlatformStats).catch(() => {});
-    apiFetch<any[]>("/intelligence/tech-trends").then(setTechTrends).catch(() => {});
+    Promise.allSettled([
+      apiFetch<any[]>("/intelligence/ecosystem-health").then(setEcosystemHealth),
+      apiFetch<any>("/intelligence/platform-stats").then(setPlatformStats),
+      apiFetch<any[]>("/intelligence/tech-trends").then(setTechTrends),
+    ]).then((results) => {
+      if (results.every((r) => r.status === "rejected")) setDataError(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -137,6 +142,12 @@ export function IntelligenceSection() {
             Real-time health monitoring across all SZL Holdings applications and AI-powered insights.
           </p>
         </motion.div>
+
+        {dataError && (
+          <div className="mb-8 text-center text-sm text-muted-foreground py-3 px-4 rounded-lg border border-white/5 bg-white/[0.02]">
+            Live telemetry unavailable — intelligence service offline.
+          </div>
+        )}
 
         {platformStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">

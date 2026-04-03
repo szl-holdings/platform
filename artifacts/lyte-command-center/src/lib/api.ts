@@ -158,7 +158,12 @@ export interface LyteDashboard {
     openActions: number;
     pendingRecommendations: number;
     readinessScore: number;
+    agedApprovals?: number;
+    ownershipGaps?: number;
+    valueAtRisk?: string;
+    decisionLatency?: string;
   };
+  correlations?: Array<{ cluster: string; entities: string[]; impact: string; sev: string }>;
   recentSignals: LyteSignal[];
   fetchedAt: string;
 }
