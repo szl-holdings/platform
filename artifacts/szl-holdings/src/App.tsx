@@ -68,6 +68,16 @@ const PrismNoFault = lazy(() => import("@/prism-counsel/pages/no-fault-page"));
 const PrismNYDashboard = lazy(() => import("@/prism-counsel/pages/ny-dashboard-page"));
 const PrismConnectors = lazy(() => import("@/prism-counsel/pages/connectors-page"));
 
+const S31CopilotWorkbench = lazy(() => import("@/prism-counsel/pages/s31/copilot-workbench"));
+const S31WorldlineDashboard = lazy(() => import("@/prism-counsel/pages/s31/worldline-dashboard"));
+const S31PressureGraph = lazy(() => import("@/prism-counsel/pages/s31/pressure-graph-page"));
+const S31MatterTwin = lazy(() => import("@/prism-counsel/pages/s31/matter-twin-page"));
+const S31ProofChain = lazy(() => import("@/prism-counsel/pages/s31/proof-chain-page"));
+const S31ModelMesh = lazy(() => import("@/prism-counsel/pages/s31/model-mesh-admin"));
+const S31CostTracking = lazy(() => import("@/prism-counsel/pages/s31/cost-tracking-page"));
+const S31ForecastDiff = lazy(() => import("@/prism-counsel/pages/s31/forecast-diff-page"));
+const S31DataProducts = lazy(() => import("@/prism-counsel/pages/s31/data-products-page"));
+
 const NyOverview = lazy(() => import("@/prism-counsel/pages/ny/ny-overview"));
 const NyDashboard = lazy(() => import("@/prism-counsel/pages/ny/ny-dashboard"));
 const NyWatchlist = lazy(() => import("@/prism-counsel/pages/ny/ny-watchlist"));
@@ -335,6 +345,36 @@ function App() {
             <Route path="/prism-counsel/connectors">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismConnectors /></CounselAppPage></Suspense>
             </Route>
+
+            {/* ── PRISM Counsel Section 31 routes ── */}
+            <Route path="/prism-counsel/copilot-workbench">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31CopilotWorkbench /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/worldline">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31WorldlineDashboard /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/pressure-graph">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31PressureGraph /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/matter-twin">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31MatterTwin /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/proof-chain">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31ProofChain /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/model-mesh">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31ModelMesh /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/costs">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31CostTracking /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/forecast-diff">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31ForecastDiff /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/data-products">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><S31DataProducts /></CounselAppPage></Suspense>
+            </Route>
+
             <Route path="/prism-counsel/ny">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismNYDashboard /></CounselAppPage></Suspense>
             </Route>

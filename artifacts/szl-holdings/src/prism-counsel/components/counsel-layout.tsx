@@ -3,7 +3,8 @@ import { Link, useLocation } from "wouter";
 import {
   Scale, LayoutDashboard, FolderOpen, TrendingUp, BookOpen,
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
-  Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug
+  Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug,
+  Brain, Globe, Activity, Layers, Link2, DollarSign, BarChart3, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,9 +31,21 @@ const NAV_SECTIONS = [
     label: "Intelligence",
     items: [
       { label: "Copilot", href: "/prism-counsel/copilot", icon: MessageSquare },
+      { label: "Copilot Workbench", href: "/prism-counsel/copilot-workbench", icon: Brain },
       { label: "Insurer Intel", href: "/prism-counsel/insurer-intel", icon: Building2 },
       { label: "Venue Intel", href: "/prism-counsel/venue-intel", icon: MapPin },
       { label: "Parties", href: "/prism-counsel/parties", icon: Users },
+    ],
+  },
+  {
+    label: "Section 31",
+    items: [
+      { label: "Worldline", href: "/prism-counsel/worldline", icon: Globe },
+      { label: "Pressure Graph", href: "/prism-counsel/pressure-graph", icon: Activity },
+      { label: "Data Products", href: "/prism-counsel/data-products", icon: BarChart3 },
+      { label: "Matter Twin", href: "/prism-counsel/matter-twin", icon: Layers },
+      { label: "Proof Chain", href: "/prism-counsel/proof-chain", icon: Link2 },
+      { label: "Forecast Diff", href: "/prism-counsel/forecast-diff", icon: TrendingUp },
     ],
   },
   {
@@ -47,6 +60,8 @@ const NAV_SECTIONS = [
     items: [
       { label: "Trust", href: "/prism-counsel/trust", icon: Shield },
       { label: "Connectors", href: "/prism-counsel/connectors", icon: Plug },
+      { label: "Model Mesh", href: "/prism-counsel/model-mesh", icon: Zap },
+      { label: "Costs", href: "/prism-counsel/costs", icon: DollarSign },
       { label: "Admin", href: "/prism-counsel/admin", icon: Settings },
     ],
   },

@@ -89,6 +89,7 @@ import { alloyResearchRouter } from "./alloy-research";
 import alloyChannelsRouter from "./alloy-channels";
 import prismCounselNyRouter from "./prism-counsel-ny";
 import prismCounselOpsRouter from "./prism-counsel-ops";
+import prismCounselS31Router from "./prism-counsel-s31";
 import alloyEmailRouter from "./alloy-email";
 import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";
@@ -363,6 +364,7 @@ router.use(alloyResearchRouter);
 router.use("/prism-counsel", _readLimiter);
 router.use("/prism-counsel", _writeLimiter);
 router.use("/prism-counsel", prismCounselOpsRouter);
+router.use("/prism-counsel/s31", prismCounselS31Router);
 router.use(prismCounselNyRouter);
 
 export default router;

@@ -62,3 +62,4 @@ export * from "./governance";
 export * from "./prism_counsel";
 export * from "./prism_counsel_ny";
 export * from "./prism_counsel_ops";
+export * from "./prism_counsel_s31";
