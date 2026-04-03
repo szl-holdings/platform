@@ -10,6 +10,7 @@
     "./animations": "./src/animations.ts",
     "./components": "./src/components.ts",
     "./themes": "./src/themes.ts",
+    "./lane-colors": "./src/lane-colors.ts",
     "./premium-components": "./src/premium-components.ts",
     "./copilot": "./src/copilot.tsx",
     "./copilot-configs": "./src/copilot-configs.ts",

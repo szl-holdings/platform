@@ -5,11 +5,14 @@ import { McpOverlay } from "@workspace/mcp-client";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { OnboardingWizard, type OnboardingConfig, SandboxModeProvider } from "@workspace/shared-ui";
 import { BookOpen, Users, Calendar, MessageSquare, FileText, Sparkles } from "lucide-react";
+import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+
+const CARLOTA_ACCENT = LANE_ACCENT_HEX.carlotaJo.primary;
 
 const CARLOTA_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "carlota-jo",
   appName: "Carlota Jo Consulting",
-  accentColor: "#c8a96a",
+  accentColor: CARLOTA_ACCENT,
   steps: [
     {
       id: "welcome",
@@ -158,7 +161,7 @@ function App() {
   return (
     <SandboxModeProvider>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor="#c8a96a">
+        <PowerUserProvider shortcuts={carlotaShortcuts} appName="Carlota Jo" accentColor={CARLOTA_ACCENT}>
           <div style={{ minHeight: "100vh" }}>
             <Router />
           </div>
@@ -167,7 +170,7 @@ function App() {
             onClose={() => setCmdOpen(false)}
             commands={carlotaCommands}
             appName="Carlota Jo"
-            accentColor="#c8a96a"
+            accentColor={CARLOTA_ACCENT}
           />
           <OnboardingWizard config={CARLOTA_ONBOARDING_CONFIG} />
           <McpOverlay domain="carlota-jo" />

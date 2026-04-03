@@ -12,84 +12,120 @@ export interface KPIItem {
 export interface KPIStripProps {
   items: KPIItem[];
   variant?: "default" | "dark" | "border" | "glass";
-  className?: string;
   accentColor?: string;
+  className?: string;
 }
 
 function TrendIcon({ trend }: { trend: "up" | "down" | "neutral" }) {
-  if (trend === "up") return <span className="text-emerald-500 text-sm">↑</span>;
-  if (trend === "down") return <span className="text-red-500 text-sm">↓</span>;
-  return <span className="text-neutral-400 text-sm">—</span>;
+  if (trend === "up")
+    return (
+      <span style={{ color: "hsl(152 50% 44%)" }} className="text-sm font-medium">
+        ↑
+      </span>
+    );
+  if (trend === "down")
+    return (
+      <span style={{ color: "hsl(0 62% 52%)" }} className="text-sm font-medium">
+        ↓
+      </span>
+    );
+  return (
+    <span style={{ color: "hsl(210 5% 46%)" }} className="text-sm font-medium">
+      —
+    </span>
+  );
 }
 
-export function KPIStrip({ items, variant = "default", className, accentColor }: KPIStripProps) {
+export function KPIStrip({
+  items,
+  variant = "default",
+  accentColor,
+  className,
+}: KPIStripProps) {
   const isDark = variant === "dark" || variant === "glass";
 
+  const gridClass = cn(
+    "grid gap-px rounded-2xl overflow-hidden",
+    items.length === 2 && "grid-cols-2",
+    items.length === 3 && "grid-cols-3",
+    items.length === 4 && "grid-cols-2 sm:grid-cols-4",
+    items.length === 5 && "grid-cols-2 sm:grid-cols-5",
+    items.length > 5 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
+    variant === "border" && "border border-[hsla(0_0%_100%_/_0.08)]",
+    variant === "glass" && "border border-[hsla(0_0%_100%_/_0.08)]"
+  );
+
+  const wrapperStyle: React.CSSProperties =
+    variant === "glass"
+      ? { background: "hsla(210 15% 18% / 0.06)" }
+      : variant === "dark"
+      ? { background: "hsla(0 0% 100% / 0.04)" }
+      : variant === "border"
+      ? {}
+      : { background: "hsla(0 0% 100% / 0.04)" };
+
+  const cellStyle: React.CSSProperties = isDark
+    ? {
+        background: "hsla(210 10% 12% / 0.55)",
+      }
+    : {
+        background: "hsl(0 0% 100%)",
+      };
+
   return (
-    <div
-      className={cn(
-        "grid gap-px rounded-2xl overflow-hidden",
-        items.length === 2 && "grid-cols-2",
-        items.length === 3 && "grid-cols-3",
-        items.length === 4 && "grid-cols-2 sm:grid-cols-4",
-        items.length === 5 && "grid-cols-2 sm:grid-cols-5",
-        items.length > 5 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6",
-        variant === "border" && "border border-neutral-200",
-        variant === "glass" && "border border-white/8",
-        className
-      )}
-      style={{
-        background:
-          variant === "border"
-            ? undefined
-            : variant === "glass"
-            ? "rgba(255,255,255,0.04)"
-            : variant === "dark"
-            ? "#1e293b"
-            : "#e5e7eb",
-      }}
-    >
+    <div className={cn(gridClass, className)} style={wrapperStyle}>
       {items.map((item, i) => (
-        <div
-          key={i}
-          className={cn(
-            "px-6 py-5 text-center",
-            isDark ? "bg-slate-800" : "bg-white"
-          )}
-        >
+        <div key={i} className="px-5 py-4 text-center" style={cellStyle}>
           <div className="flex items-center justify-center gap-1.5 mb-1">
             <p
-              className={cn(
-                "font-bold text-2xl sm:text-3xl",
-                isDark ? "text-white" : "text-neutral-900"
-              )}
+              className="font-semibold text-2xl sm:text-3xl"
+              style={{
+                color: isDark ? "hsl(38 12% 94%)" : "hsl(210 12% 10%)",
+                letterSpacing: "-0.02em",
+                lineHeight: "1.1",
+              }}
             >
               {item.value}
             </p>
             {item.trend && <TrendIcon trend={item.trend} />}
           </div>
           <p
-            className={cn(
-              "text-[11px] font-medium uppercase tracking-wider",
-              isDark ? "text-slate-400" : "text-neutral-400"
-            )}
+            className="text-[11px] font-medium uppercase tracking-wider"
+            style={{
+              color: isDark ? "hsl(210 5% 46%)" : "hsl(210 6% 52%)",
+              letterSpacing: "0.07em",
+            }}
           >
             {item.label}
           </p>
           {item.note && (
-            <p className={cn("text-[10px] mt-0.5", isDark ? "text-slate-500" : "text-neutral-400")}>
+            <p
+              className="text-[10px] mt-0.5"
+              style={{ color: isDark ? "hsl(210 5% 34%)" : "hsl(210 5% 46%)" }}
+            >
               {item.note}
             </p>
           )}
           {item.delta && (
             <p
-              className={cn(
-                "text-[10px] font-semibold mt-0.5",
-                item.trend === "up" ? "text-emerald-500" : item.trend === "down" ? "text-red-500" : "text-neutral-400"
-              )}
+              className="text-[10px] font-semibold mt-0.5"
+              style={{
+                color:
+                  item.trend === "up"
+                    ? "hsl(152 50% 44%)"
+                    : item.trend === "down"
+                    ? "hsl(0 62% 52%)"
+                    : "hsl(210 5% 46%)",
+              }}
             >
               {item.delta}
             </p>
+          )}
+          {accentColor && i === 0 && (
+            <div
+              className="mx-auto mt-2 h-px w-8 rounded-full"
+              style={{ background: `${accentColor}50` }}
+            />
           )}
         </div>
       ))}

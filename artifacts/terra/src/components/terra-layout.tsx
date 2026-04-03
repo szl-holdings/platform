@@ -1,59 +1,33 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@workspace/shared-ui/utils";
+import { toAlpha } from "@workspace/shared-ui/utils";
 import { SectionErrorBoundary } from "@workspace/shared-ui/error-boundary";
-import { ReactNode, useState, useCallback } from "react";
+import { ReactNode, useState } from "react";
+import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
 import {
   Building2, LayoutDashboard, Eye, Activity,
   BarChart3, Users, FileText, CheckSquare,
-  Bell, Menu, X, Briefcase, Map, Globe, TrendingUp, BookOpen
+  Bell, Menu, X, Briefcase, Globe, TrendingUp, BookOpen
 } from "lucide-react";
 import { useRealtimeChannel, RealtimeStatusIndicator, GettingStartedChecklist, OnboardingWizard, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
+import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@workspace/shared-ui/design-system";
 import { useQuery } from "@tanstack/react-query";
+import { colors, spacing } from "@workspace/shared-ui/tokens";
+
+const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
+const SIDEBAR_BG = "#080b0d";
+const HEADER_BG = toAlpha("#080b0d", 0.92);
 
 const TERRA_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "terra",
   appName: "Terra",
-  accentColor: "#40856a",
+  accentColor: TERRA_ACCENT,
   steps: [
-    {
-      id: "welcome",
-      title: "Welcome to Terra",
-      description: "Terra is your real estate intelligence platform — distress detection, deal pipeline, market analytics, and ownership intelligence for institutional-grade property operations.",
-      placement: "center",
-      icon: Building2,
-    },
-    {
-      id: "dashboard",
-      title: "Portfolio Overview",
-      description: "The Overview dashboard gives you a real-time snapshot of your portfolio — active deals, distress signals, market conditions, and KPI performance across all assets.",
-      targetSelector: "a[href='/dashboard']",
-      placement: "right",
-      icon: LayoutDashboard,
-    },
-    {
-      id: "distress-engine",
-      title: "Distress Engine & Watchlists",
-      description: "The Distress Engine continuously scores assets for financial stress indicators — loan maturity risk, NOI compression, cap rate expansion — so you can act before distress becomes default.",
-      targetSelector: "a[href='/distress-engine']",
-      placement: "right",
-      icon: Eye,
-    },
-    {
-      id: "pipeline",
-      title: "Deal Pipeline",
-      description: "Track deals from initial sourcing through closing. Manage offers, approvals, and transaction milestones with full team collaboration and audit trails.",
-      targetSelector: "a[href='/pipeline']",
-      placement: "right",
-      icon: Activity,
-    },
-    {
-      id: "market",
-      title: "Market Intelligence",
-      description: "Benchmark your assets against real-time market data — cap rates, rent trends, transaction comps, and supply/demand signals across every submarket you operate in.",
-      targetSelector: "a[href='/market']",
-      placement: "right",
-      icon: BarChart3,
-    },
+    { id: "welcome", title: "Welcome to Terra", description: "Terra is your real estate intelligence platform — distress detection, deal pipeline, market analytics, and ownership intelligence for institutional-grade property operations.", placement: "center", icon: Building2 },
+    { id: "dashboard", title: "Portfolio Overview", description: "The Overview dashboard gives you a real-time snapshot of your portfolio — active deals, distress signals, market conditions, and KPI performance across all assets.", targetSelector: "a[href='/dashboard']", placement: "right", icon: LayoutDashboard },
+    { id: "distress-engine", title: "Distress Engine & Watchlists", description: "The Distress Engine continuously scores assets for financial stress indicators — loan maturity risk, NOI compression, cap rate expansion — so you can act before distress becomes default.", targetSelector: "a[href='/distress-engine']", placement: "right", icon: Eye },
+    { id: "pipeline", title: "Deal Pipeline", description: "Track deals from initial sourcing through closing. Manage offers, approvals, and transaction milestones with full team collaboration and audit trails.", targetSelector: "a[href='/pipeline']", placement: "right", icon: Activity },
+    { id: "market", title: "Market Intelligence", description: "Benchmark your assets against real-time market data — cap rates, rent trends, transaction comps, and supply/demand signals across every submarket you operate in.", targetSelector: "a[href='/market']", placement: "right", icon: BarChart3 },
   ],
   checklist: [
     { id: "view-overview", label: "Review your portfolio overview", description: "Check active deals and distress signals" },
@@ -64,45 +38,48 @@ const TERRA_ONBOARDING_CONFIG: OnboardingConfig = {
   ],
 };
 
-const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
-const API = "/api";
-
-const NAV_SECTIONS = [
+const NAV_SECTIONS: SidebarNavSection[] = [
   {
-    title: "Core",
+    id: "core",
+    label: "Core",
     items: [
-      { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-      { href: "/distress-engine", label: "Watchlists", icon: Eye },
-      { href: "/market", label: "Market", icon: BarChart3 },
+      { id: "dashboard", href: "/dashboard", label: "Overview", icon: <LayoutDashboard className="w-full h-full" /> },
+      { id: "distress-engine", href: "/distress-engine", label: "Watchlists", icon: <Eye className="w-full h-full" /> },
+      { id: "market", href: "/market", label: "Market", icon: <BarChart3 className="w-full h-full" /> },
     ],
   },
   {
-    title: "Intelligence",
+    id: "intelligence",
+    label: "Intelligence",
     items: [
-      { href: "/pipeline", label: "Pipeline", icon: Activity },
-      { href: "/investor-mode", label: "Ownership", icon: Globe },
+      { id: "pipeline", href: "/pipeline", label: "Pipeline", icon: <Activity className="w-full h-full" /> },
+      { id: "investor-mode", href: "/investor-mode", label: "Ownership", icon: <Globe className="w-full h-full" /> },
     ],
   },
   {
-    title: "Brokerage",
+    id: "brokerage",
+    label: "Brokerage",
     items: [
-      { href: "/deals", label: "Deals", icon: TrendingUp },
-      { href: "/leads", label: "Brokers", icon: Users },
-      { href: "/listings", label: "Portfolio", icon: Briefcase },
+      { id: "deals", href: "/deals", label: "Deals", icon: <TrendingUp className="w-full h-full" /> },
+      { id: "leads", href: "/leads", label: "Brokers", icon: <Users className="w-full h-full" /> },
+      { id: "listings", href: "/listings", label: "Portfolio", icon: <Briefcase className="w-full h-full" /> },
     ],
   },
   {
-    title: "Reporting",
+    id: "reporting",
+    label: "Reporting",
     items: [
-      { href: "/lender-report", label: "Lender & LP Report", icon: BookOpen },
-      { href: "/transactions", label: "Approvals", icon: CheckSquare },
-      { href: "/broker-overview", label: "Admin", icon: FileText },
+      { id: "lender-report", href: "/lender-report", label: "Lender & LP Report", icon: <BookOpen className="w-full h-full" /> },
+      { id: "transactions", href: "/transactions", label: "Approvals", icon: <CheckSquare className="w-full h-full" /> },
+      { id: "broker-overview", href: "/broker-overview", label: "Admin", icon: <FileText className="w-full h-full" /> },
     ],
   },
 ];
 
+const API = "/api";
+
 export function TerraLayout({ children }: { children: ReactNode }) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("terra-signals");
   const { replay: replayOnboarding } = useOnboardingState("terra");
@@ -114,137 +91,146 @@ export function TerraLayout({ children }: { children: ReactNode }) {
     retry: 1,
   });
   const sidebarDataMode = (!apiDown && apiHealth?.dataMode === "live") ? "Live" : "Demo";
-  const sidebarModeColor = sidebarDataMode === "Live" ? "#40856a" : "#9a7840";
+  const sidebarModeColor = sidebarDataMode === "Live" ? TERRA_ACCENT : colors.semantic.warning;
 
-  return (
-    <div className="flex h-full overflow-hidden">
-      <a href="#main-content" className="skip-to-content">Skip to main content</a>
-      {sidebarOpen && (
+  const sidebarHeader = (
+    <div className="h-14 flex items-center px-2">
+      <div className="flex items-center gap-2.5">
         <div
-          className="fixed inset-0 bg-black/70 z-10 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
+          className="p-1.5 rounded-lg"
+          style={{
+            background: toAlpha(TERRA_ACCENT, 0.12),
+            border: `1px solid ${toAlpha(TERRA_ACCENT, 0.22)}`,
+          }}
+        >
+          <Building2 className="w-4 h-4" style={{ color: TERRA_ACCENT }} />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-sm tracking-tight text-white leading-none">Terra</span>
+          <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: colors.text.subtle, fontFamily: "monospace" }}>
+            Property Intelligence
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const sidebarFooter = (
+    <div className="space-y-2">
+      {TERRA_ONBOARDING_CONFIG.checklist && (
+        <GettingStartedChecklist
+          appId={TERRA_ONBOARDING_CONFIG.appId}
+          appName={TERRA_ONBOARDING_CONFIG.appName}
+          items={TERRA_ONBOARDING_CONFIG.checklist}
+          accentColor={TERRA_ACCENT}
+          onReplayTour={replayOnboarding}
+          collapsed
         />
       )}
-      <aside className={cn(
-        "border-r flex flex-col shrink-0 z-20 transition-transform duration-200",
-        "fixed md:relative inset-y-0 left-0 w-52",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-      )} style={{ borderColor: "rgba(255,255,255,0.05)", background: "rgba(8,10,14,0.98)" }}
-        role="navigation" aria-label="Sidebar navigation">
-
-        <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg" style={{ background: "rgba(45,106,79,0.15)", border: "1px solid rgba(45,106,79,0.25)" }}>
-              <Building2 className="w-4 h-4" style={{ color: "#40856a" }} />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-sm tracking-tight text-white leading-none">Terra</span>
-              <span className="text-[9px] uppercase tracking-widest leading-none mt-0.5" style={{ color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>Property Intelligence</span>
-            </div>
-          </div>
+      <div
+        className="rounded-lg p-2.5 space-y-1.5"
+        style={{
+          background: toAlpha(TERRA_ACCENT, 0.04),
+          border: `1px solid ${toAlpha(TERRA_ACCENT, 0.08)}`,
+        }}
+      >
+        <div className="text-[9px] uppercase tracking-widest font-semibold" style={{ color: toAlpha(TERRA_ACCENT, 0.55) }}>
+          System State
         </div>
-
-        <div className="flex-1 min-h-0 flex flex-col">
-          <nav className="flex-1 min-h-0 px-2 py-3 flex flex-col gap-2.5 overflow-y-auto">
-            {NAV_SECTIONS.map((section) => (
-              <div key={section.title}>
-                <p className="text-[9px] font-semibold uppercase tracking-widest mb-1 px-3" style={{ color: "rgba(255,255,255,0.45)" }}>{section.title}</p>
-                <div className="flex flex-col gap-0.5">
-                  {section.items.map((item) => {
-                    const isActive = item.href === "/dashboard"
-                      ? (location === "/dashboard" || location === "/" || location === "")
-                      : location.startsWith(item.href);
-                    return (
-                      <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)} className={cn(
-                        "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 relative",
-                        isActive
-                          ? "text-white"
-                          : "text-slate-400 hover:text-slate-100 hover:bg-white/[0.04]"
-                      )} style={{
-                        background: isActive ? "rgba(255,255,255,0.06)" : undefined
-                      }}>
-                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full" style={{ background: "rgba(255,255,255,0.4)" }} />}
-                        <item.icon className="w-3.5 h-3.5 shrink-0" style={{ color: isActive ? "rgba(255,255,255,0.8)" : undefined }} />
-                        <span>{item.label}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
-
-          {TERRA_ONBOARDING_CONFIG.checklist && (
-            <div className="mx-2 mb-2">
-              <GettingStartedChecklist
-                appId={TERRA_ONBOARDING_CONFIG.appId}
-                appName={TERRA_ONBOARDING_CONFIG.appName}
-                items={TERRA_ONBOARDING_CONFIG.checklist}
-                accentColor={TERRA_ONBOARDING_CONFIG.accentColor}
-                onReplayTour={replayOnboarding}
-                collapsed
-              />
-            </div>
-          )}
-          <div className="shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{ background: "rgba(45,106,79,0.04)", border: "1px solid rgba(45,106,79,0.08)" }}>
-            <div className="text-[9px] uppercase tracking-widest font-semibold mb-2" style={{ color: "rgba(64,133,106,0.5)" }}>System State</div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Data mode</span>
-                <span className="text-[9px] font-mono font-semibold" style={{ color: sidebarModeColor }}>{sidebarDataMode}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Distress signals</span>
-                <span className="text-[9px] font-mono font-semibold" style={{ color: "#f59e0b" }}>3 flagged</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Portfolio value</span>
-                <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>$2.4B</span>
-              </div>
-            </div>
-          </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px]" style={{ color: colors.text.subtle }}>Data mode</span>
+          <span className="text-[9px] font-mono font-semibold" style={{ color: sidebarModeColor }}>
+            {sidebarDataMode}
+          </span>
         </div>
-
-        <div className="p-3 border-t" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          <div className="flex items-center gap-2 text-[9px]" style={{ color: "rgba(255,255,255,0.2)" }}>
-            <Building2 className="w-3 h-3" />
-            <span>SZL Holdings · Real Estate</span>
-          </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px]" style={{ color: colors.text.subtle }}>Distress signals</span>
+          <span className="text-[9px] font-mono font-semibold" style={{ color: colors.semantic.warning }}>
+            3 flagged
+          </span>
         </div>
-      </aside>
+      </div>
+      <div className="flex items-center gap-2" style={{ color: colors.text.subtle }}>
+        <Building2 className="w-3 h-3" />
+        <span className="text-[9px]">SZL Holdings · Real Estate</span>
+      </div>
+    </div>
+  );
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-11 border-b flex items-center justify-between px-4 shrink-0 z-10" role="banner" style={{ borderColor: "rgba(255,255,255,0.04)", background: "rgba(8,10,14,0.92)", backdropFilter: "blur(8px)" }}>
-          <div className="flex items-center gap-3 text-xs">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors"
-              style={{ color: "rgba(255,255,255,0.7)" }}
-              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-              aria-expanded={sidebarOpen}
-              aria-controls="terra-sidebar"
-            >
-              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
-            <span className="w-1.5 h-1.5 rounded-full hidden sm:block" style={{ background: "rgba(45,106,79,0.6)" }} aria-hidden="true" />
-            <span className="hidden sm:block font-mono text-[10px]" style={{ color: "rgba(255,255,255,0.55)" }}>Terra · Property Intelligence</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <RealtimeStatusIndicator status={wsStatus} compact />
-            <button className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors" style={{ color: "rgba(255,255,255,0.6)" }} aria-label="Notifications">
-              <Bell className="w-3.5 h-3.5" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#f59e0b" }} aria-hidden="true" />
-            </button>
-          </div>
-        </header>
-        <main id="main-content" className="flex-1 overflow-auto p-4 md:p-5" role="main" style={{ background: "#0a0c10" }}>
+  const terraTopbar = (
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+          style={{ color: colors.text.muted }}
+          aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          aria-expanded={sidebarOpen}
+        >
+          {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+        </button>
+        <span
+          className="w-1.5 h-1.5 rounded-full hidden sm:block"
+          style={{ background: toAlpha(TERRA_ACCENT, 0.7) }}
+          aria-hidden="true"
+        />
+        <span className="hidden sm:block font-mono text-[10px]" style={{ color: colors.text.muted }}>
+          Terra · Property Intelligence
+        </span>
+      </div>
+      <div className="flex items-center gap-3">
+        <RealtimeStatusIndicator status={wsStatus} compact />
+        <button
+          className="relative p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+          style={{ color: colors.text.muted }}
+          aria-label="Notifications"
+        >
+          <Bell className="w-3.5 h-3.5" />
+          <span
+            className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{ background: colors.semantic.warning }}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+    </div>
+  );
+
+  const terraSidebar = (
+    <SidebarNav
+      sections={NAV_SECTIONS}
+      currentPath={location}
+      accentColor={TERRA_ACCENT}
+      header={sidebarHeader}
+      footer={sidebarFooter}
+      onNavigate={(item) => { if (item.href) navigate(item.href); setSidebarOpen(false); }}
+    />
+  );
+
+  return (
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
+        style={{ background: TERRA_ACCENT, color: "#fff" }}
+      >
+        Skip to main content
+      </a>
+      <SharedDashboardShell
+        sidebar={terraSidebar}
+        topbar={terraTopbar}
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
+        theme={{ sidebarBg: SIDEBAR_BG, pageBg: colors.background.primary, headerBg: HEADER_BG }}
+        accentColor={TERRA_ACCENT}
+      >
+        <main id="main-content" className="flex-1 overflow-auto p-4 md:p-5" role="main" tabIndex={-1}>
           <SectionErrorBoundary sectionName="Terra">
             {children}
           </SectionErrorBoundary>
         </main>
-      </div>
+      </SharedDashboardShell>
       <OnboardingWizard config={TERRA_ONBOARDING_CONFIG} />
-    </div>
+    </>
   );
 }

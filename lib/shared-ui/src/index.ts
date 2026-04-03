@@ -3,6 +3,7 @@ export * from "./animations";
 export * from "./utils";
 export * from "./components";
 export * from "./themes";
+export * from "./lane-colors";
 export * from "./powerbi-embed";
 export * from "./premium-components";
 export * from "./intelligence-philosophy";

@@ -25,6 +25,8 @@ The platform is a pnpm monorepo using Node.js 24 and TypeScript 5.9.
 ### UI/UX Design System
 A premium, SZL-branded design system inspired by Palantir Foundry/Anduril Lattice. Applications feature unique visual identities, dark-first aesthetics (except Carlota Jo), purposeful motion, and sharp corners. Typography includes Space Grotesk, Inter, and JetBrains Mono.
 
+**Omega Phase 1 — Design System Premium Unification (Task #299):** Complete token system with confidence/pressure/reviewState band colors, focus/hover/active interaction states. New shared primitives: `MetricCard`, `WatchlistTable`, `ConfidenceBadge`, `PressureBadge`, `ReviewStateBadge`, `ApprovalStack`, `AuditDrawer`, `EvidenceDrawer`, `ChartContainer`, `ExportPanel`. Updated `DashboardShell` supports theme object (`DashboardShellTheme`) for pack-specific sidebar/header/page background. Updated `SidebarNav` uses design tokens for active state (accent-tinted bg, border). Updated `KPIStrip` uses token HSL values instead of hardcoded slate/neutral classes. `PackBanner` now references token system lane accent colors. `carlotaJoLuxuryTheme` added to themes.ts with full luxury light-mode expression (warm ivory backgrounds, gold text/borders, Cormorant Garamond display font). `LANE_ACCENT_HEX` constants in `lane-colors.ts` provide canonical hex values for apps to import instead of using magic strings.
+
 #### Brand Hierarchy & Visuals
 - **SZL Holdings:** Dark-first, platinum/silver/graphite. Includes the Alloy execution fabric module at `/alloy/*`.
 - **Lyte:** Burnished amber, Business Observability Platform using the PRISM framework. Split architecture for editorial website and operational app.

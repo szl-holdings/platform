@@ -10,6 +10,9 @@ import { CounselLayout } from "@/prism-counsel/components/counsel-layout";
 import { LawyerLifeOSShell } from "@/prism-counsel/components/lawyer-life-os-shell";
 import { NyLayout } from "@/prism-counsel/pages/ny/ny-layout";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
+import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+
+const SZL_ACCENT = LANE_ACCENT_HEX.szl.primary;
 
 const HomePage = lazy(() => import("@/pages/landing"));
 const PlatformPage = lazy(() => import("@/pages/platform"));
@@ -1026,7 +1029,7 @@ function App() {
       </LazyMotion>
       <Toaster />
       <McpOverlay domain="szl-holdings" />
-      <CookieBanner privacyUrl="/legal/privacy" accentColor="#d4a054" />
+      <CookieBanner privacyUrl="/legal/privacy" accentColor={SZL_ACCENT} />
     </QueryClientProvider>
     </DemoModeProvider>
     </SandboxModeProvider>

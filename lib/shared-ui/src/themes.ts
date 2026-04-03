@@ -126,6 +126,37 @@ export const carlotaJoTheme: BrandTheme = {
   },
 };
 
+export const carlotaJoLuxuryTheme = {
+  ...carlotaJoTheme,
+  name: "Carlota Jo — Luxury Expression",
+  luxury: {
+    background: {
+      page: "hsl(38 20% 97%)",
+      surface: "hsl(38 15% 99%)",
+      card: "#ffffff",
+      accent: "hsl(38 28% 94%)",
+    },
+    text: {
+      primary: "hsl(30 10% 14%)",
+      secondary: "hsl(30 8% 36%)",
+      muted: "hsl(30 6% 54%)",
+      gold: "hsl(35 38% 46%)",
+    },
+    border: {
+      DEFAULT: "hsl(35 20% 88%)",
+      subtle: "hsl(35 18% 92%)",
+      gold: "hsla(35 38% 46% / 0.28)",
+    },
+    fontFamily: {
+      display: "'Cormorant Garamond', 'Georgia', serif",
+      body: "'Inter', system-ui, sans-serif",
+    },
+    spacing: {
+      sectionY: "clamp(5rem, 10vh, 9rem)",
+    },
+  },
+} as const;
+
 export const stephenLutarTheme: BrandTheme = {
   name: "Stephen Lutar",
   slug: "stephen",

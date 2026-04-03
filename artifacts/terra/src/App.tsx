@@ -10,7 +10,10 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { TerraLayout } from "@/components/terra-layout";
 import { useAuth } from "@workspace/replit-auth-web";
+import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
 import { Toaster } from "@workspace/shared-ui/ui/sonner";
+
+const TERRA_ACCENT = LANE_ACCENT_HEX.terra.primary;
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60_000, retry: 1 } },
@@ -48,7 +51,7 @@ const LenderReport = lazy(() => import("@/pages/lender-report"));
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(45,106,79,0.2)", borderTopColor: "#40856a" }} />
+      <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(45,106,79,0.2)", borderTopColor: TERRA_ACCENT }} />
     </div>
   );
 }
@@ -123,9 +126,9 @@ const terraShortcuts: KeyboardShortcut[] = [
 
 function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   return (
-    <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor="#40856a">
+    <PowerUserProvider shortcuts={terraShortcuts} appName="Terra" accentColor={TERRA_ACCENT}>
       <div className="flex flex-col h-screen" style={{ background: "#0a0c10" }}>
-        <EcosystemNav currentAppId="terra" currentAppName="Terra — Property Intelligence" accentColor="#40856a" />
+        <EcosystemNav currentAppId="terra" currentAppName="Terra — Property Intelligence" accentColor={TERRA_ACCENT} />
         <SandboxModeBanner />
         <div className="flex-1 overflow-hidden">
           <TerraLayout>
@@ -138,7 +141,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         onClose={() => setCmdOpen(false)}
         commands={terraCommands}
         appName="Terra"
-        accentColor="#40856a"
+        accentColor={TERRA_ACCENT}
       />
     </PowerUserProvider>
   );
@@ -166,7 +169,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   if (isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#0a0c10" }}>
-        <div style={{ width: 22, height: 22, border: "2px solid rgba(45,106,79,0.2)", borderTopColor: "#40856a", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <div style={{ width: 22, height: 22, border: "2px solid rgba(45,106,79,0.2)", borderTopColor: TERRA_ACCENT, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
       </div>
     );
   }

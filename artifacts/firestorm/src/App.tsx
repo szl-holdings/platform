@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
-import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
 import { McpOverlay } from "@workspace/mcp-client";
@@ -8,7 +8,7 @@ import { Toaster } from "@workspace/shared-ui/ui/sonner";
 import { UserButton } from "@workspace/shared-ui/UserButton";
 import {
   Shield, Target, BarChart3, FileText, Activity, AlertTriangle, Bell, Grid3X3,
-  ClipboardCheck, Search, Rss, Layers, Users, ChevronRight, ShieldCheck,
+  ClipboardCheck, Search, Rss, Layers, Users, ShieldCheck,
   Building2, TrendingUp, Brain as BrainIcon, Package, Bug, SlidersHorizontal,
   Play, LayoutDashboard, Ticket, Monitor, DollarSign, Wrench, Server,
   FlaskConical, Cpu, Cpu as CpuIcon, Network, Radio, Plus, Sun, Eye,
@@ -18,9 +18,14 @@ import {
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { sentinelConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
+import { toAlpha } from "@workspace/shared-ui/utils";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { PackBanner } from "@/components/pack-banner";
+import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+import { SidebarNav, type SidebarNavSection, DashboardShell as SharedDashboardShell } from "@workspace/shared-ui/design-system";
+
+const AEGIS_ACCENT = LANE_ACCENT_HEX.aegis.primary;
 
 // ─── Security Operations pages (from Firestorm) ──────────────────────────────
 const AegisMarketingHome = lazy(() => import("@/pages/aegis-home"));
@@ -228,52 +233,6 @@ function PageLoader() {
   );
 }
 
-function ModuleSection({
-  title,
-  items,
-  expanded,
-  onToggle,
-  location,
-}: {
-  title: string;
-  items: { path: string; label: string; icon: typeof Shield }[];
-  expanded: boolean;
-  onToggle: () => void;
-  location: string;
-}) {
-  return (
-    <div className="pt-1">
-      <button
-        onClick={onToggle}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-blue-400/70 hover:text-blue-300 transition-all w-full"
-      >
-        <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", expanded && "rotate-90")} />
-        {title}
-      </button>
-      {expanded && (
-        <div className="mt-0.5 space-y-0.5">
-          {items.map(({ path, label, icon: Icon }) => {
-            const isActive = path === "/" ? location === "/" : location.startsWith(path);
-            return (
-              <Link key={path} href={path}>
-                <div className={cn(
-                  "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                  isActive
-                    ? "bg-blue-500/10 text-blue-300"
-                    : "text-blue-400/80 hover:text-blue-200 hover:bg-blue-500/5"
-                )}>
-                  {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-3.5 bg-blue-400 rounded-r-full" />}
-                  <Icon className="w-3 h-3 shrink-0" />
-                  {label}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function deriveModule(loc: string): Module {
   if (loc.startsWith("/ops/") || loc === "/ops") return "operations";
@@ -284,7 +243,7 @@ function deriveModule(loc: string): Module {
 const AEGIS_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "aegis",
   appName: "Aegis",
-  accentColor: "#3b82f6",
+  accentColor: AEGIS_ACCENT,
   steps: [
     {
       id: "welcome",
@@ -335,355 +294,211 @@ const AEGIS_ONBOARDING_CONFIG: OnboardingConfig = {
   ],
 };
 
-function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () => void; onReplayTour?: () => void }) {
-  const [location] = useLocation();
+const MODULE_ACCENTS: Record<Module, string> = {
+  security: "#ef4444",
+  operations: "#3b82f6",
+  intelligence: "#8b5cf6",
+};
 
+function AegisSidebarContent({ location, onNavigate }: { location: string; onNavigate?: (path: string) => void }) {
   const [activeModule, setActiveModule] = useState<Module>(deriveModule(location));
 
   useEffect(() => {
     setActiveModule(deriveModule(location));
   }, [location]);
 
-  const [socToolsExpanded, setSocToolsExpanded] = useState(false);
-  const [governanceExpanded, setGovernanceExpanded] = useState(location.startsWith("/gov"));
-  const [complianceExpanded, setComplianceExpanded] = useState(location.startsWith("/cr"));
-  const [cortexExpanded, setCortexExpanded] = useState(false);
+  const moduleAccent = MODULE_ACCENTS[activeModule];
 
-  const navItemColors: Record<Module, { active: string; inactive: string; indicator: string }> = {
-    security: {
-      active: "bg-red-500/10 text-red-300",
-      inactive: "text-red-400/80 hover:text-red-200 hover:bg-red-500/5",
-      indicator: "bg-red-400",
+  const securitySections: SidebarNavSection[] = [
+    {
+      id: "command-surfaces",
+      label: "Command Surfaces",
+      items: commandSurfacesNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
-    operations: {
-      active: "bg-blue-500/10 text-blue-300",
-      inactive: "text-blue-400/80 hover:text-blue-200 hover:bg-blue-500/5",
-      indicator: "bg-blue-400",
+    {
+      id: "security-ops",
+      label: "Security Operations",
+      items: securityNavPrimary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
     },
-    intelligence: {
-      active: "bg-violet-500/10 text-violet-300",
-      inactive: "text-violet-400/80 hover:text-violet-200 hover:bg-violet-500/5",
-      indicator: "bg-violet-400",
+    {
+      id: "soc-tools",
+      label: "SOC Tools",
+      items: securityNavSecondary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
     },
-  };
+    {
+      id: "governance",
+      label: "Governance & Reporting",
+      items: governanceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+    },
+    {
+      id: "compliance",
+      label: "Compliance & Readiness",
+      items: complianceNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+    },
+  ];
 
-  const colors = navItemColors[activeModule];
+  const operationsSections: SidebarNavSection[] = [
+    {
+      id: "ops",
+      label: "Managed Operations",
+      items: opsNavItems.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+    },
+  ];
 
-  const renderNavItems = (items: typeof securityNavPrimary) =>
-    items.map(({ path, label, icon: Icon }) => {
-      const isActive = path === "/soc" ? location === "/soc" || location === "/" : location.startsWith(path);
-      return (
-        <Link key={path} href={path}>
-          <div className={cn(
-            "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
-            isActive ? colors.active : colors.inactive
-          )}>
-            {isActive && <div className={cn("absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full", colors.indicator)} />}
-            <Icon className="w-3.5 h-3.5 shrink-0" />
+  const intelligenceSections: SidebarNavSection[] = [
+    {
+      id: "intel",
+      label: "Research & Intelligence",
+      items: intelNavPrimary.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3.5 h-3.5" /> })),
+    },
+    {
+      id: "cortex",
+      label: "Agentic Cortex",
+      items: intelCortexNav.map(({ path, label, icon: Icon }) => ({ id: path, label, href: path, icon: <Icon className="w-3 h-3" /> })),
+    },
+  ];
+
+  const activeSections =
+    activeModule === "security" ? securitySections
+    : activeModule === "operations" ? operationsSections
+    : intelligenceSections;
+
+  const statusWidget = (
+    <div className="rounded-lg px-3 py-3" style={{ background: toAlpha(moduleAccent, 0.04), border: `1px solid ${toAlpha(moduleAccent, 0.10)}` }}>
+      <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: toAlpha(moduleAccent, 0.5) }}>
+        {activeModule === "security" ? "Threat Status" : activeModule === "operations" ? "Ops Status" : "Intel Status"}
+      </div>
+      <div className="space-y-1.5">
+        {activeModule === "security" && (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">Threat level</span>
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-[9px] font-mono text-amber-400">ELEVATED</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">Open incidents</span>
+              <span className="text-[9px] font-mono text-red-400">7 active</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">IOCs tracked</span>
+              <span className="text-[9px] font-mono text-white/40">142 feeds</span>
+            </div>
+          </>
+        )}
+        {activeModule === "operations" && (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">Systems online</span>
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[9px] font-mono text-emerald-400">98.7%</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">Active playbooks</span>
+              <span className="text-[9px] font-mono text-blue-400">14 running</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">Alert queue</span>
+              <span className="text-[9px] font-mono text-white/40">3 pending</span>
+            </div>
+          </>
+        )}
+        {activeModule === "intelligence" && (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">OSINT sources</span>
+              <span className="text-[9px] font-mono text-violet-400">89 active</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">Cortex jobs</span>
+              <span className="text-[9px] font-mono text-violet-400">6 running</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-white/35">Reports ready</span>
+              <span className="text-[9px] font-mono text-white/40">11 queued</span>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  const moduleTabHeader = (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
+          style={{ background: `linear-gradient(135deg, ${toAlpha("#3b82f6", 0.25)}, ${toAlpha("#8b5cf6", 0.20)})` }}>
+          <Hexagon className="w-4 h-4 text-blue-400" />
+        </div>
+        <div>
+          <h1 className="text-sm font-bold text-white tracking-tight">Aegis</h1>
+          <p className="text-[9px] font-mono uppercase tracking-[0.12em]" style={{ color: toAlpha(AEGIS_ACCENT, 0.5) }}>Security Intelligence Pack</p>
+        </div>
+      </div>
+      <div className="flex gap-1">
+        {([
+          { id: "security" as Module, label: "Defense", icon: Shield },
+          { id: "operations" as Module, label: "Command", icon: Server },
+          { id: "intelligence" as Module, label: "Labs", icon: BrainIcon },
+        ] as { id: Module; label: string; icon: typeof Shield }[]).map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveModule(id)}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-[10px] font-semibold transition-all",
+              activeModule === id ? "" : "text-white/60 hover:text-white/80 hover:bg-white/5"
+            )}
+            style={activeModule === id ? {
+              background: toAlpha(MODULE_ACCENTS[id], 0.15),
+              color: id === "security" ? "#fca5a5" : id === "operations" ? "#93c5fd" : "#c4b5fd",
+              border: `1px solid ${toAlpha(MODULE_ACCENTS[id], 0.20)}`,
+            } : {}}
+          >
+            <Icon className="w-3 h-3" />
             {label}
-          </div>
-        </Link>
-      );
-    });
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
+    <SidebarNav
+      sections={activeSections}
+      currentPath={location}
+      accentColor={moduleAccent}
+      onNavigate={(item) => { if (item.href) onNavigate?.(item.href); }}
+      header={moduleTabHeader}
+      footer={statusWidget}
+    />
+  );
+}
+
+function SidebarContent({ onNavigate, onReplayTour }: { onNavigate: (path: string) => void; onReplayTour?: () => void }) {
+  const [location] = useLocation();
+  return (
     <>
-      {open && <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onClose} aria-hidden="true" />}
-      <aside className={cn(
-        "bg-[#0A0D14]/98 border-r border-white/5 flex flex-col h-screen sticky top-0 z-30 transition-transform duration-200 overflow-hidden",
-        "fixed md:relative inset-y-0 left-0 w-60",
-        open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-      )} role="navigation" aria-label="Sidebar navigation">
-        {/* Header */}
-        <div className="px-4 py-4 border-b border-white/5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.25), rgba(139,92,246,0.2))" }}>
-              <Hexagon className="w-4 h-4 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="font-display text-sm font-bold text-foreground tracking-tight">Aegis</h1>
-              <p className="text-[9px] text-blue-400/50 font-mono uppercase tracking-[0.12em]">Security Intelligence Pack</p>
-            </div>
+      <AegisSidebarContent location={location} onNavigate={onNavigate} />
+      <div className="shrink-0 px-4 py-3 space-y-2" style={{ borderTop: `1px solid ${toAlpha("#ffffff", 0.05)}`, background: toAlpha("#0A0D14", 0.98) }}>
+        {AEGIS_ONBOARDING_CONFIG.checklist && (
+          <div className="mb-1">
+            <GettingStartedChecklist
+              appId={AEGIS_ONBOARDING_CONFIG.appId}
+              appName={AEGIS_ONBOARDING_CONFIG.appName}
+              items={AEGIS_ONBOARDING_CONFIG.checklist}
+              accentColor={AEGIS_ONBOARDING_CONFIG.accentColor}
+              onReplayTour={onReplayTour}
+              collapsed
+            />
           </div>
-        </div>
-
-        {/* Module Tabs */}
-        <div className="px-2 py-2 border-b border-white/5">
-          <div className="flex gap-1">
-            {([
-              { id: "security" as Module, label: "Defense", icon: Shield },
-              { id: "operations" as Module, label: "Command", icon: Server },
-              { id: "intelligence" as Module, label: "Labs", icon: BrainIcon },
-            ] as { id: Module; label: string; icon: typeof Shield }[]).map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveModule(id)}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-[10px] font-semibold transition-all",
-                  activeModule === id
-                    ? id === "security" ? "bg-red-500/15 text-red-300 border border-red-500/20"
-                      : id === "operations" ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
-                      : "bg-violet-500/15 text-violet-300 border border-violet-500/20"
-                    : "text-white/60 hover:text-white/80 hover:bg-white/5"
-                )}
-              >
-                <Icon className="w-3 h-3" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Nav Content */}
-        <div className="flex-1 min-h-0 flex flex-col">
-        <nav className="flex-1 min-h-0 px-2 py-2 space-y-0.5 overflow-y-auto">
-          {activeModule === "security" && (
-            <>
-              <div className="px-3 py-1 mt-1">
-                <span className="text-[9px] font-mono uppercase tracking-[0.15em]" style={{ color: "rgba(239,68,68,0.5)" }}>Command Surfaces</span>
-              </div>
-              {commandSurfacesNav.map(({ path, label, icon: Icon }) => {
-                const isActive = location.startsWith(path);
-                return (
-                  <Link key={path} href={path}>
-                    <div className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
-                      isActive ? colors.active : colors.inactive
-                    )}>
-                      {isActive && <div className={cn("absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full", colors.indicator)} />}
-                      <Icon className="w-3.5 h-3.5 shrink-0" />
-                      {label}
-                    </div>
-                  </Link>
-                );
-              })}
-              <div className="px-3 py-1 mt-1">
-                <span className="text-[9px] font-mono uppercase tracking-[0.15em]" style={{ color: "rgba(239,68,68,0.5)" }}>Security Operations</span>
-              </div>
-              {renderNavItems(securityNavPrimary)}
-              <ModuleSection
-                title="SOC Tools"
-                items={securityNavSecondary}
-                expanded={socToolsExpanded}
-                onToggle={() => setSocToolsExpanded(!socToolsExpanded)}
-                location={location}
-              />
-              <div className="pt-1">
-                <button
-                  onClick={() => setGovernanceExpanded(!governanceExpanded)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-red-400/70 hover:text-red-300 transition-all w-full"
-                >
-                  <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", governanceExpanded && "rotate-90")} />
-                  Governance & Reporting
-                  {location.startsWith("/gov") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
-                </button>
-                {governanceExpanded && (
-                  <div className="mt-0.5 space-y-0.5">
-                    {governanceNavItems.map(({ path, label, icon: Icon }) => {
-                      const isActive = location.startsWith(path);
-                      return (
-                        <Link key={path} href={path}>
-                          <div className={cn(
-                            "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                            isActive ? "bg-amber-500/10 text-amber-300" : "text-red-400/80 hover:text-red-200 hover:bg-red-500/5"
-                          )}>
-                            <Icon className="w-3 h-3 shrink-0" />
-                            {label}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-              <div className="pt-1">
-                <button
-                  onClick={() => setComplianceExpanded(!complianceExpanded)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-red-400/70 hover:text-red-300 transition-all w-full"
-                >
-                  <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", complianceExpanded && "rotate-90")} />
-                  Compliance & Readiness
-                  {location.startsWith("/cr") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />}
-                </button>
-                {complianceExpanded && (
-                  <div className="mt-0.5 space-y-0.5">
-                    {complianceNavItems.map(({ path, label, icon: Icon }) => {
-                      const isActive = location.startsWith(path);
-                      return (
-                        <Link key={path} href={path}>
-                          <div className={cn(
-                            "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                            isActive ? "bg-red-500/10 text-red-300" : "text-red-400/80 hover:text-red-200 hover:bg-red-500/5"
-                          )}>
-                            <Icon className="w-3 h-3 shrink-0" />
-                            {label}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          {activeModule === "operations" && (
-            <>
-              {opsNavItems.map(({ path, label, icon: Icon }) => {
-                const isActive = location.startsWith(path);
-                return (
-                  <Link key={path} href={path}>
-                    <div className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
-                      isActive ? "bg-blue-500/10 text-blue-300" : "text-blue-400/50 hover:text-blue-200 hover:bg-blue-500/5"
-                    )}>
-                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-blue-400 rounded-r-full" />}
-                      <Icon className="w-3.5 h-3.5 shrink-0" />
-                      {label}
-                    </div>
-                  </Link>
-                );
-              })}
-            </>
-          )}
-
-          {activeModule === "intelligence" && (
-            <>
-              {intelNavPrimary.map(({ path, label, icon: Icon }) => {
-                const isActive = path === "/intel/dashboard" ? location === "/intel/dashboard" : location.startsWith(path);
-                return (
-                  <Link key={path} href={path}>
-                    <div className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
-                      isActive ? "bg-violet-500/10 text-violet-300" : "text-violet-400/50 hover:text-violet-200 hover:bg-violet-500/5"
-                    )}>
-                      {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-violet-400 rounded-r-full" />}
-                      <Icon className="w-3.5 h-3.5 shrink-0" />
-                      {label}
-                    </div>
-                  </Link>
-                );
-              })}
-              <div className="pt-1">
-                <button
-                  onClick={() => setCortexExpanded(!cortexExpanded)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-mono uppercase tracking-[0.15em] text-violet-400/70 hover:text-violet-300 transition-all w-full"
-                >
-                  <ChevronRight className={cn("w-3 h-3 shrink-0 transition-transform", cortexExpanded && "rotate-90")} />
-                  Agentic Cortex
-                </button>
-                {cortexExpanded && (
-                  <div className="mt-0.5 space-y-0.5">
-                    {intelCortexNav.map(({ path, label, icon: Icon }) => {
-                      const isActive = location.startsWith(path);
-                      return (
-                        <Link key={path} href={path}>
-                          <div className={cn(
-                            "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                            isActive ? "bg-violet-500/10 text-violet-300" : "text-violet-400/80 hover:text-violet-200 hover:bg-violet-500/5"
-                          )}>
-                            <Icon className="w-3 h-3 shrink-0" />
-                            {label}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </nav>
-
-        <div className="mt-auto shrink-0 px-3 py-3 mx-2 mb-2 rounded-lg" style={{
-          background: activeModule === "security" ? "rgba(239,68,68,0.04)" : activeModule === "operations" ? "rgba(59,130,246,0.04)" : "rgba(139,92,246,0.04)",
-          border: `1px solid ${activeModule === "security" ? "rgba(239,68,68,0.1)" : activeModule === "operations" ? "rgba(59,130,246,0.1)" : "rgba(139,92,246,0.1)"}`,
-        }}>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: activeModule === "security" ? "rgba(239,68,68,0.5)" : activeModule === "operations" ? "rgba(59,130,246,0.5)" : "rgba(139,92,246,0.5)" }}>
-            {activeModule === "security" ? "Threat Status" : activeModule === "operations" ? "Ops Status" : "Intel Status"}
-          </div>
-          <div className="space-y-1.5">
-            {activeModule === "security" && (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Threat level</span>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="text-[9px] font-mono text-amber-400">ELEVATED</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Open incidents</span>
-                  <span className="text-[9px] font-mono text-red-400">7 active</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>IOCs tracked</span>
-                  <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>142 feeds</span>
-                </div>
-              </>
-            )}
-            {activeModule === "operations" && (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Systems online</span>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span className="text-[9px] font-mono text-emerald-400">98.7%</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Active playbooks</span>
-                  <span className="text-[9px] font-mono text-blue-400">14 running</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Alert queue</span>
-                  <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>3 pending</span>
-                </div>
-              </>
-            )}
-            {activeModule === "intelligence" && (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>OSINT sources</span>
-                  <span className="text-[9px] font-mono text-violet-400">89 active</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Cortex jobs</span>
-                  <span className="text-[9px] font-mono text-violet-400">6 running</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Reports ready</span>
-                  <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>11 queued</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-        </div>
-
-        {/* Footer */}
-        <div className="shrink-0 px-4 py-3 border-t border-white/5 space-y-2 bg-[#0A0D14]/98">
-          {AEGIS_ONBOARDING_CONFIG.checklist && (
-            <div className="mb-1">
-              <GettingStartedChecklist
-                appId={AEGIS_ONBOARDING_CONFIG.appId}
-                appName={AEGIS_ONBOARDING_CONFIG.appName}
-                items={AEGIS_ONBOARDING_CONFIG.checklist}
-                accentColor={AEGIS_ONBOARDING_CONFIG.accentColor}
-                onReplayTour={onReplayTour}
-                collapsed
-              />
-            </div>
-          )}
-          <UserButton showName className="w-full" />
-          <PackBanner
-            vertical="Security Intelligence Pack"
-            accentColor="#3b82f6"
-            compact
-          />
-        </div>
-      </aside>
+        )}
+        <UserButton showName className="w-full" />
+        <PackBanner vertical="Security Intelligence Pack" accentColor={AEGIS_ACCENT} compact />
+      </div>
     </>
   );
 }
@@ -839,7 +654,7 @@ const MARKETING_ROUTES = ["/", "/home", "/demo"];
 function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { status: wsStatus } = useRealtimeChannel("aegis-incidents");
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const { replay: replayOnboarding } = useOnboardingState("aegis");
 
   const normalizedPath = location.replace(/\/+$/, "") || "/";
@@ -859,35 +674,40 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   }
 
   return (
-    <PowerUserProvider shortcuts={aegisShortcuts} appName="Aegis" accentColor="#3b82f6">
-      <div className="flex flex-col h-screen bg-[#0A0D14]">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-blue-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+    <PowerUserProvider shortcuts={aegisShortcuts} appName="Aegis" accentColor={AEGIS_ACCENT}>
+      <div className="flex flex-col h-screen" style={{ background: "#0A0D14" }}>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium" style={{ background: AEGIS_ACCENT, color: "#fff" }}>
           Skip to main content
         </a>
-        <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Unified Defense & Intelligence" accentColor="#3b82f6" />
+        <EcosystemNav currentAppId="aegis" currentAppName="Aegis — Unified Defense & Intelligence" accentColor={AEGIS_ACCENT} />
         <SandboxModeBanner />
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onReplayTour={replayOnboarding} />
-          <div className="flex-1 flex flex-col overflow-auto min-w-0">
-            <div className="h-10 flex items-center px-3 border-b border-white/5 bg-[#0A0D14]/80 md:hidden shrink-0">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-blue-500/10 text-blue-400/80 hover:text-blue-300 transition-colors" aria-label={sidebarOpen ? "Close navigation" : "Open navigation"} aria-expanded={sidebarOpen}>
+        <SharedDashboardShell
+          sidebar={<SidebarContent onNavigate={(path) => { navigate(path); setSidebarOpen(false); }} onReplayTour={replayOnboarding} />}
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
+          theme={{ sidebarBg: "#0A0D14", pageBg: "#0A0D14", headerBg: toAlpha("#0A0D14", 0.92) }}
+          accentColor={AEGIS_ACCENT}
+          topbar={
+            <div className="flex items-center gap-3 w-full md:hidden">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded transition-colors" style={{ color: toAlpha(AEGIS_ACCENT, 0.8) }} aria-label={sidebarOpen ? "Close navigation" : "Open navigation"} aria-expanded={sidebarOpen}>
                 <Menu className="w-4 h-4" />
               </button>
-              <span className="text-[10px] font-mono text-blue-400/80 ml-2">Aegis — Unified Defense & Intelligence</span>
+              <span className="text-[10px] font-mono ml-2" style={{ color: toAlpha(AEGIS_ACCENT, 0.8) }}>Aegis — Unified Defense & Intelligence</span>
               <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
             </div>
-            <main id="main-content" role="main" className="flex-1 overflow-auto" tabIndex={-1}>
-              <AppRouter />
-            </main>
-          </div>
-        </div>
+          }
+        >
+          <main id="main-content" role="main" className="flex-1 overflow-auto h-full" tabIndex={-1}>
+            <AppRouter />
+          </main>
+        </SharedDashboardShell>
         <Toaster />
         <CommandPalette
           open={cmdOpen}
           onClose={() => setCmdOpen(false)}
           commands={aegisCommands}
           appName="Aegis"
-          accentColor="#3b82f6"
+          accentColor={AEGIS_ACCENT}
         />
         <OnboardingWizard config={AEGIS_ONBOARDING_CONFIG} />
       </div>

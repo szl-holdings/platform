@@ -13,17 +13,23 @@ import { EcosystemNav } from "@workspace/shared-ui/ecosystem-nav";
 import { AgentCopilot } from "@workspace/shared-ui/copilot";
 import { helmsmanConfig } from "@workspace/shared-ui/copilot-configs";
 import { cn } from "@workspace/shared-ui/utils";
+import { toAlpha } from "@workspace/shared-ui/utils";
 import { AuthProvider, useAuth, roleLabels, type UserRole } from "@/contexts/auth-context";
 import { PrivateAppGuard, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig } from "@workspace/shared-ui";
 import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/shared-ui/command-palette";
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { DemoModeProvider, SandboxModeProvider, SandboxModeBanner } from "@workspace/shared-ui";
 import { PackBanner } from "@/components/pack-banner";
+import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+import { SidebarNav, type SidebarNavSection } from "@workspace/shared-ui/design-system";
+import { DashboardShell as SharedDashboardShell } from "@workspace/shared-ui/design-system";
+
+const VESSELS_ACCENT = LANE_ACCENT_HEX.vessels.primaryLight;
 
 const VESSELS_ONBOARDING_CONFIG: OnboardingConfig = {
   appId: "vessels",
   appName: "Vessels",
-  accentColor: "#0ea5e9",
+  accentColor: VESSELS_ACCENT,
   steps: [
     {
       id: "welcome",
@@ -236,187 +242,122 @@ function RoleSelector({ expanded }: { expanded: boolean }) {
   );
 }
 
-function Sidebar({ mobileOpen, onMobileClose }: { mobileOpen?: boolean; onMobileClose?: () => void }) {
-  const [location] = useLocation();
-  const [hovered, setHovered] = useState(false);
-  const [legacyExpanded, setLegacyExpanded] = useState(false);
-  const expanded = hovered || (mobileOpen ?? false);
+function VesselsSidebarContent({ expanded, onMobileClose }: { expanded: boolean; onMobileClose?: () => void }) {
+  const [location, navigate] = useLocation();
 
-  return (
-    <>
-      {mobileOpen && (
-        <div className="fixed inset-0 bg-black/60 z-20 md:hidden" onClick={onMobileClose} aria-hidden="true" />
-      )}
-    <aside
-      className={cn(
-        "bg-[#060e1a]/95 border-r border-sky-500/10 flex flex-col h-screen transition-all duration-200 ease-out z-30",
-        "fixed md:sticky top-0 inset-y-0 left-0",
-        mobileOpen ? "w-52 translate-x-0" : "-translate-x-full md:translate-x-0",
-        "md:w-14 md:hover:w-52",
-        expanded && "md:w-52",
-      )}
-      role="navigation"
-      aria-label="Sidebar navigation"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setLegacyExpanded(false); }}
-    >
-      <Link href="/">
-        <div className="px-3 py-4 border-b border-sky-500/10 flex items-center gap-2.5 overflow-hidden cursor-pointer hover:bg-sky-500/5 transition-colors">
-          <div className="w-8 h-8 rounded-md bg-sky-500/8 border border-sky-500/12 flex items-center justify-center shrink-0">
-            <Ship className="w-4 h-4 text-sky-400 animate-wave-float" />
+  const primarySections: SidebarNavSection[] = [
+    {
+      id: "primary",
+      items: primaryNavItems.map(({ path, label, icon: Icon }) => ({
+        id: path,
+        label,
+        href: path,
+        icon: <Icon className="w-3.5 h-3.5" />,
+      })),
+    },
+    {
+      id: "admin",
+      label: "Admin",
+      items: adminNavItems.map(({ path, label, icon: Icon }) => ({
+        id: path,
+        label,
+        href: path,
+        icon: <Icon className="w-3.5 h-3.5" />,
+      })),
+    },
+    {
+      id: "legacy",
+      label: "More pages",
+      items: legacyNavItems.map(({ path, label, icon: Icon }) => ({
+        id: path,
+        label,
+        href: path,
+        icon: <Icon className="w-3 h-3" />,
+      })),
+    },
+  ];
+
+  const fleetStatusFooter = expanded ? (
+    <div className="space-y-3">
+      <div className="rounded-lg px-3 py-3" style={{ background: toAlpha(VESSELS_ACCENT, 0.04), border: `1px solid ${toAlpha(VESSELS_ACCENT, 0.08)}` }}>
+        <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: toAlpha(VESSELS_ACCENT, 0.5) }}>Fleet Status</div>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-white/35">Vessels tracked</span>
+            <span className="text-[9px] font-mono" style={{ color: VESSELS_ACCENT }}>1,247 live</span>
           </div>
-          {expanded && (
-            <div className="flex-1 min-w-0 overflow-hidden">
-              <h1 className="font-display text-sm font-semibold text-sky-50 truncate tracking-tight">Vessels</h1>
-              <p className="text-[10px] text-sky-400/40 truncate font-mono uppercase tracking-wider">Maritime Intelligence Pack</p>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-white/35">Distress signals</span>
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+              <span className="text-[9px] font-mono text-red-400">2 active</span>
             </div>
-          )}
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-white/35">Zones monitored</span>
+            <span className="text-[9px] font-mono text-white/40">18 regions</span>
+          </div>
+        </div>
+        <div className="mt-2 h-0.5 rounded-full overflow-hidden bg-white/6">
+          <div className="h-full rounded-full" style={{ width: "94%", background: `linear-gradient(90deg, ${VESSELS_ACCENT}, ${toAlpha(VESSELS_ACCENT, 0.6)})` }} />
+        </div>
+        <div className="flex justify-between mt-0.5">
+          <span className="text-[8px] text-white/20">AIS coverage</span>
+          <span className="text-[8px] font-mono text-white/30">94%</span>
+        </div>
+      </div>
+      {VESSELS_ONBOARDING_CONFIG.checklist && (
+        <GettingStartedChecklist
+          appId={VESSELS_ONBOARDING_CONFIG.appId}
+          appName={VESSELS_ONBOARDING_CONFIG.appName}
+          items={VESSELS_ONBOARDING_CONFIG.checklist}
+          accentColor={VESSELS_ONBOARDING_CONFIG.accentColor}
+          collapsed
+        />
+      )}
+      <Link href="/platform">
+        <div className="w-full text-xs font-medium text-center px-3 py-2 rounded-lg cursor-pointer transition-colors" style={{ background: toAlpha(VESSELS_ACCENT, 0.10), color: VESSELS_ACCENT }}>
+          Request demo
         </div>
       </Link>
+      <UserButton showName className="w-full" />
+      <RoleSelector expanded={expanded} />
+      <PackBanner vertical="Maritime Intelligence Pack" accentColor={VESSELS_ACCENT} compact />
+    </div>
+  ) : (
+    <div className="space-y-2">
+      <UserButton className="w-full" />
+      <RoleSelector expanded={false} />
+    </div>
+  );
 
-      <div className="flex-1 min-h-0 flex flex-col">
-      <nav className="flex-1 min-h-0 px-1.5 py-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
-        {primaryNavItems.map(({ path, label, icon: Icon }) => {
-          const isActive = location === path || location.startsWith(path + "/");
-          return (
-            <Link key={path} href={path}>
-              <div
-                className={cn(
-                  "flex items-center rounded-lg transition-all duration-150 cursor-pointer relative",
-                  expanded ? "gap-2.5 px-3 py-2" : "justify-center px-0 py-2.5",
-                  isActive
-                    ? "bg-sky-500/10 text-sky-300"
-                    : "text-sky-400 hover:text-sky-200 hover:bg-sky-500/5"
-                )}
-                title={!expanded ? label : undefined}
-              >
-                {isActive && expanded && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-sky-400 rounded-r-full" />
-                )}
-                <Icon className={cn("shrink-0", expanded ? "w-3.5 h-3.5" : "w-5 h-5")} />
-                {expanded && <span className="text-xs font-medium truncate">{label}</span>}
-              </div>
-            </Link>
-          );
-        })}
-
-        {expanded && (
-          <div className="pt-3">
-            <p className="text-[9px] font-mono text-sky-400/30 uppercase tracking-[0.12em] px-3 mb-1.5">Admin</p>
-            {adminNavItems.map(({ path, label, icon: Icon }) => {
-              const isActive = location === path;
-              return (
-                <Link key={path} href={path}>
-                  <div className={cn(
-                    "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
-                    isActive ? "bg-sky-500/10 text-sky-300" : "text-sky-400 hover:text-sky-200 hover:bg-sky-500/5"
-                  )}>
-                    <Icon className="w-3.5 h-3.5 shrink-0" />
-                    {label}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-
-        {expanded && (
-          <div className="pt-2">
-            <button
-              onClick={() => setLegacyExpanded(!legacyExpanded)}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-sky-400/30 hover:text-sky-300 hover:bg-sky-500/5 transition-all w-full"
-            >
-              <ChevronRight className={cn("w-3.5 h-3.5 shrink-0 transition-transform", legacyExpanded && "rotate-90")} />
-              More pages
-            </button>
-            {legacyExpanded && (
-              <div className="mt-0.5 space-y-0.5">
-                {legacyNavItems.map(({ path, label, icon: Icon }) => {
-                  const isActive = location.startsWith(path);
-                  return (
-                    <Link key={path} href={path}>
-                      <div className={cn(
-                        "flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-150 cursor-pointer relative ml-2",
-                        isActive
-                          ? "bg-sky-500/10 text-sky-300"
-                          : "text-sky-400 hover:text-sky-200 hover:bg-sky-500/5"
-                      )}>
-                        <Icon className="w-3 h-3 shrink-0" />
-                        {label}
-                      </div>
-                    </Link>
-                  );
-                })}
+  return (
+    <SidebarNav
+      sections={primarySections}
+      currentPath={location}
+      accentColor={VESSELS_ACCENT}
+      collapsed={!expanded}
+      onNavigate={(item) => { if (item.href) navigate(item.href); onMobileClose?.(); }}
+      header={
+        <Link href="/">
+          <div className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0" style={{ background: toAlpha(VESSELS_ACCENT, 0.08), border: `1px solid ${toAlpha(VESSELS_ACCENT, 0.12)}` }}>
+              <Ship className="w-4 h-4" style={{ color: VESSELS_ACCENT }} />
+            </div>
+            {expanded && (
+              <div className="flex-1 min-w-0">
+                <h1 className="text-sm font-semibold text-sky-50 truncate tracking-tight">Vessels</h1>
+                <p className="text-[10px] truncate font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_ACCENT, 0.4) }}>Maritime Intelligence Pack</p>
               </div>
             )}
           </div>
-        )}
-      </nav>
-
-      {expanded && (
-        <div className="mt-auto shrink-0 px-3 py-3 mx-1.5 mb-2 rounded-lg" style={{ background: "rgba(14,165,233,0.04)", border: "1px solid rgba(14,165,233,0.08)" }}>
-          <div className="text-[9px] uppercase tracking-widest font-medium mb-2" style={{ color: "rgba(14,165,233,0.4)" }}>Fleet Status</div>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Vessels tracked</span>
-              <span className="text-[9px] font-mono" style={{ color: "#38bdf8" }}>1,247 live</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Distress signals</span>
-              <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                <span className="text-[9px] font-mono text-red-400">2 active</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Zones monitored</span>
-              <span className="text-[9px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>18 regions</span>
-            </div>
-          </div>
-          <div className="mt-2 h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-            <div className="h-full rounded-full" style={{ width: "94%", background: "linear-gradient(90deg, #0ea5e9, #38bdf8)" }} />
-          </div>
-          <div className="flex justify-between mt-0.5">
-            <span className="text-[8px]" style={{ color: "rgba(255,255,255,0.2)" }}>AIS coverage</span>
-            <span className="text-[8px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>94%</span>
-          </div>
-        </div>
-      )}
-      </div>
-
-      {expanded && VESSELS_ONBOARDING_CONFIG.checklist && (
-        <div className="px-1.5 pb-1">
-          <GettingStartedChecklist
-            appId={VESSELS_ONBOARDING_CONFIG.appId}
-            appName={VESSELS_ONBOARDING_CONFIG.appName}
-            items={VESSELS_ONBOARDING_CONFIG.checklist}
-            accentColor={VESSELS_ONBOARDING_CONFIG.accentColor}
-            collapsed
-          />
-        </div>
-      )}
-      <div className="px-1.5 py-3 border-t border-sky-500/10 space-y-2">
-        {expanded && (
-          <Link href="/platform">
-            <div className="w-full text-xs font-medium bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 rounded-lg px-3 py-2 transition-colors text-center cursor-pointer">
-              Request demo
-            </div>
-          </Link>
-        )}
-        <UserButton showName={expanded} className="w-full" />
-        <RoleSelector expanded={expanded} />
-        {expanded && (
-          <PackBanner
-            vertical="Maritime Intelligence Pack"
-            accentColor="#0ea5e9"
-            compact
-          />
-        )}
-      </div>
-    </aside>
-    </>
+        </Link>
+      }
+      footer={fleetStatusFooter}
+    />
   );
 }
+
 
 function DashboardRouter() {
   return (
@@ -520,33 +461,42 @@ const vesselsShortcuts: KeyboardShortcut[] = [
   { key: "C", description: "Go to Command Mode", category: "Navigation" },
 ];
 
-function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
+function VesselsDashboard({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
+  const sidebarExpanded = sidebarHovered || sidebarOpen;
   const { status: wsStatus } = useRealtimeChannel("vessel-positions");
   return (
-    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor="#0ea5e9">
-      <div className="flex flex-col h-screen bg-[#060e1a]">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-sky-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
+    <PowerUserProvider shortcuts={vesselsShortcuts} appName="Vessels" accentColor={VESSELS_ACCENT}>
+      <div className="flex flex-col h-screen" style={{ background: "#060e1a" }}>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium" style={{ background: VESSELS_ACCENT, color: "#fff" }}>
           Skip to main content
         </a>
-        <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor="#0ea5e9" />
+        <EcosystemNav currentAppId="vessels" currentAppName="Vessels Maritime Intelligence" accentColor={VESSELS_ACCENT} />
         <SandboxModeBanner />
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
-          <div className="flex-1 flex flex-col overflow-auto min-w-0">
-            <DemoModeBanner />
-            <div className="h-10 flex items-center px-3 border-b border-sky-500/8 bg-[#060e1a]/80 md:hidden shrink-0">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded hover:bg-sky-500/10 text-sky-400/50 hover:text-sky-300 transition-colors" aria-label="Toggle navigation">
+        <DemoModeBanner />
+        <SharedDashboardShell
+          sidebar={<VesselsSidebarContent expanded={sidebarExpanded} onMobileClose={() => setSidebarOpen(false)} />}
+          mobileOpen={sidebarOpen}
+          onMobileClose={() => setSidebarOpen(false)}
+          sidebarWidth={sidebarExpanded ? "13rem" : "3.5rem"}
+          sidebarEvents={{ onMouseEnter: () => setSidebarHovered(true), onMouseLeave: () => setSidebarHovered(false) }}
+          theme={{ sidebarBg: "#060e1a", pageBg: "#060e1a", headerBg: toAlpha("#060e1a", 0.92) }}
+          accentColor={VESSELS_ACCENT}
+          topbar={
+            <div className="flex items-center gap-3 w-full md:hidden">
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded transition-colors" style={{ color: toAlpha(VESSELS_ACCENT, 0.5) }} aria-label="Toggle navigation">
                 <Menu className="w-4 h-4" />
               </button>
-              <span className="text-[10px] font-mono text-sky-400/80 ml-2 uppercase tracking-wider">Vessels Maritime Intelligence</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider" style={{ color: toAlpha(VESSELS_ACCENT, 0.8) }}>Vessels Maritime Intelligence</span>
               <div className="ml-auto pr-1"><RealtimeStatusIndicator status={wsStatus} compact /></div>
             </div>
-            <main id="main-content" role="main" className="flex-1 overflow-auto" tabIndex={-1}>
-              <DashboardRouter />
-            </main>
-          </div>
-        </div>
+          }
+        >
+          <main id="main-content" role="main" className="flex-1 overflow-auto h-full" tabIndex={-1}>
+            <DashboardRouter />
+          </main>
+        </SharedDashboardShell>
       </div>
       <Toaster />
       <CommandPalette
@@ -554,7 +504,7 @@ function DashboardShell({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen:
         onClose={() => setCmdOpen(false)}
         commands={vesselsCommands}
         appName="Vessels"
-        accentColor="#0ea5e9"
+        accentColor={VESSELS_ACCENT}
       />
       <OnboardingWizard config={VESSELS_ONBOARDING_CONFIG} />
     </PowerUserProvider>
@@ -579,8 +529,8 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
 
   if (isDashboard) {
     return (
-      <PrivateAppGuard appName="Vessels" accentColor="#0ea5e9">
-        <DashboardShell cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
+      <PrivateAppGuard appName="Vessels" accentColor={VESSELS_ACCENT}>
+        <VesselsDashboard cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
       </PrivateAppGuard>
     );
   }

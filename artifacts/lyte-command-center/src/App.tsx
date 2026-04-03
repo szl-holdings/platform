@@ -11,6 +11,9 @@ import { CommandPalette, useCommandPalette, type CommandItem } from "@workspace/
 import { PowerUserProvider, type KeyboardShortcut } from "@workspace/shared-ui/keyboard-shortcuts";
 import { useAuth } from "@workspace/replit-auth-web";
 import { Shield } from "lucide-react";
+import { LANE_ACCENT_HEX } from "@workspace/shared-ui/lane-colors";
+
+const LYTE_ACCENT = LANE_ACCENT_HEX.lyte.primary;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +28,7 @@ const queryClient = new QueryClient({
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full min-h-[200px]">
-      <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(212,160,84,0.25)", borderTopColor: "#d4a054" }} />
+      <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(212,160,84,0.25)", borderTopColor: LYTE_ACCENT }} />
     </div>
   );
 }
@@ -165,9 +168,9 @@ const lyteShortcuts: KeyboardShortcut[] = [
 
 function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v: boolean) => void }) {
   return (
-    <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor="#d4a054">
+    <PowerUserProvider shortcuts={lyteShortcuts} appName="Lyte" accentColor={LYTE_ACCENT}>
       <div className="flex flex-col h-screen bg-[#080c14]">
-        <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor="#d4a054" />
+        <EcosystemNav currentAppId="lyte" currentAppName="Lyte" accentColor={LYTE_ACCENT} />
         <SandboxModeBanner />
         <div className="flex-1 overflow-hidden">
           <LyteLayout>
@@ -180,7 +183,7 @@ function PrivateApp({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
         onClose={() => setCmdOpen(false)}
         commands={lyteCommands}
         appName="Lyte"
-        accentColor="#d4a054"
+        accentColor={LYTE_ACCENT}
       />
     </PowerUserProvider>
   );
@@ -200,7 +203,7 @@ function AppContent({ cmdOpen, setCmdOpen }: { cmdOpen: boolean; setCmdOpen: (v:
   if (isLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#080c14" }}>
-        <div style={{ width: 24, height: 24, border: "2px solid rgba(212,160,84,0.25)", borderTopColor: "#d4a054", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <div style={{ width: 24, height: 24, border: "2px solid rgba(212,160,84,0.25)", borderTopColor: LYTE_ACCENT, borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
       </div>
     );
   }
@@ -234,7 +237,7 @@ function App() {
           <AppContent cmdOpen={cmdOpen} setCmdOpen={setCmdOpen} />
           <AgentCopilot config={beaconConfig} />
           <McpOverlay domain="lyte" />
-          <CookieBanner privacyUrl="https://szlholdings.com/legal/privacy" accentColor="#d4a054" />
+          <CookieBanner privacyUrl="https://szlholdings.com/legal/privacy" accentColor={LYTE_ACCENT} />
         </WouterRouter>
       </QueryClientProvider>
     </SandboxModeProvider>
