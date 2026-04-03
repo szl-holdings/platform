@@ -1,0 +1,20 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "SZL Platform Connector",
+      "versionName": "Spring 2026",
+      "versionNumber": "1.0.0.NEXT",
+      "versionDescription": "Connects Salesforce to the SZL Holdings intelligence platform — pipeline health, signal ingestion, case escalation sync, and bi-directional task/case push.",
+      "definitionFile": "config/project-scratch-def.json"
+    }
+  ],
+  "name": "szl-platform-connector",
+  "namespace": "szlpltfm",
+  "sourceApiVersion": "59.0",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "packageAliases": {
+    "SZL Platform Connector": "0HoXXXXXXXXXXXXXX"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./lib/db"
+    },
+    {
+      "path": "./lib/api-client-react"
+    },
+    {
+      "path": "./lib/api-zod"
+    },
+    {
+      "path": "./lib/services"
+    },
+    {
+      "path": "./lib/shared-ui"
+    },
+    {
+      "path": "./lib/config"
+    },
+    {
+      "path": "./lib/auth"
+    },
+    {
+      "path": "./lib/integrations-openai-ai-server"
+    },
+    {
+      "path": "./lib/integrations-anthropic-ai"
+    },
+    {
+      "path": "./lib/integrations-gemini-ai"
+    },
+    {
+      "path": "./lib/replit-auth-web"
+    },
+    {
+      "path": "./lib/data-connectors"
+    },
+    {
+      "path": "./lib/workflow-engine"
+    },
+    {
+      "path": "./lib/audit"
+    },
+    {
+      "path": "./lib/ai-engine"
+    },
+    {
+      "path": "./lib/analytics"
+    },
+    {
+      "path": "./lib/observability"
+    }
+  ]
+}

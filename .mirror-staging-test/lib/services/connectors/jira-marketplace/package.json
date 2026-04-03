@@ -1,0 +1,10 @@
+{
+  "name": "@szl/jira-marketplace",
+  "version": "1.0.0",
+  "description": "Jira Marketplace Forge app descriptor for SZL Holdings Alloy integration",
+  "private": true,
+  "scripts": {
+    "validate": "node scripts/validate-descriptor.js",
+    "bundle": "node scripts/bundle.js"
+  }
+}

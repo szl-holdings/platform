@@ -113,11 +113,32 @@ If any of the following are found, they must be quarantined (added to `.gitignor
 
 ### Rule 1: Clean Before Push
 
-Run `/scripts/public-mirror/validate-mirror.sh` before any mirror push. The script flags:
-- Noisy directories
-- Potential secret material patterns
-- Internal-only documents
-- Build artifacts that slipped through
+Run the mirror preparation and validation pipeline before any mirror push:
+
+```bash
+# Step 1: Generate surface inventory (workspace content classification)
+# → writes docs/audit/public-surface-inventory.md
+tsx scripts/public-mirror/report-public-surface.ts
+
+# Step 2: Stage the mirror (apply inclusion/exclusion policy → .mirror-staging/)
+tsx scripts/public-mirror/prepare-public-mirror.ts
+
+# Step 3: Validate the staged mirror (pass/fail)
+# → writes docs/audit/public-mirror-report.md
+tsx scripts/public-mirror/validate-public-surface.ts .mirror-staging
+```
+
+**Important:** `report-public-surface.ts` writes the workspace inventory to `docs/audit/public-surface-inventory.md`. `validate-public-surface.ts` writes the validation result to `docs/audit/public-mirror-report.md`. These are separate files with distinct purposes — never overwrite one with the other.
+
+The validation script flags:
+- Excluded directories present in staging (`.archive`, `backups`, `social-content`, etc.)
+- Secret/env file patterns (`.env`, `.env.*` — `.env.example` is explicitly allowed)
+- Hardcoded credentials (API keys, tokens, passwords)
+- Internal-only documents (`docs/internal/` at any path depth)
+- Database dumps (`*.sql.gz`, `*.dump`, `*.pgdump`)
+- Missing required trust files
+
+**`.github/` inclusion note:** The `.github/` directory is included in the public mirror **except** `.github/instructions/` (Replit agent configuration — excluded by mirror scripts). The exclusion is enforced by `EXCLUDE_PATH_SEGMENTS` in `prepare-public-mirror.ts`.
 
 ### Rule 2: README Must Be Current
 
@@ -158,7 +179,9 @@ Minimum cadence: at least once per quarter while the platform is in active devel
 
 Before every mirror push:
 
-- [ ] Run `scripts/public-mirror/validate-mirror.sh` — no failures
+- [ ] Run `tsx scripts/public-mirror/report-public-surface.ts` — review surface inventory
+- [ ] Run `tsx scripts/public-mirror/prepare-public-mirror.ts` — stage mirror
+- [ ] Run `tsx scripts/public-mirror/validate-public-surface.ts .mirror-staging` — no errors
 - [ ] Verify README.md is current and accurate
 - [ ] Verify CHANGELOG.md has been updated
 - [ ] Check `.env.example` is sanitized

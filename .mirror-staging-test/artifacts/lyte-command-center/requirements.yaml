@@ -1,0 +1,17 @@
+packages:
+  "framer-motion": "For premium page transitions and micro-interactions"
+  "recharts": "For executive dashboard charts and analytics visualizations"
+  "date-fns": "For human-readable date formatting across the platform"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility for merging tailwind classes safely"
+  "lucide-react": "Beautiful, consistent iconography"
+
+images:
+  - path: "artifacts/lyte-command-center/public/images/exec-bg.png"
+    description: "Abstract, very subtle dark geometric grid pattern with deep cyan and slate blue glowing atmospheric light leaks, premium executive mood, high tech"
+    aspect_ratio: "16:9"
+
+notes:
+  - App operates in local demo mode using mock data as requested
+  - React Query is used for state management simulating network delay
+  - Fully responsive with mobile sidebar navigation

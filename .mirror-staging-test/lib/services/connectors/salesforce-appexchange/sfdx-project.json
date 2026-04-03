@@ -1,0 +1,20 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "SZL-Holdings-Connector",
+      "versionName": "Release 1.0",
+      "versionNumber": "1.0.0.NEXT",
+      "definitionFile": "config/project-scratch-def.json",
+      "ancestorId": "04t000000000000"
+    }
+  ],
+  "name": "SZL Holdings Platform Connector",
+  "namespace": "szlhldgs",
+  "sourceApiVersion": "59.0",
+  "packageAliases": {
+    "SZL-Holdings-Connector": "0Ho000000000000AAA",
+    "SZL-Holdings-Connector@1.0.0-1": "04t000000000000AAA"
+  }
+}

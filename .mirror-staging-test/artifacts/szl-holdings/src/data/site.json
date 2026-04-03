@@ -1,0 +1,155 @@
+{
+  "company": {
+    "name": "SZL Holdings",
+    "tagline": "Structured ventures. Clear direction.",
+    "description": "A growing portfolio of platforms, advisory capabilities, and operating ideas designed for clarity, scale, and long-term value.",
+    "founded": "2021",
+    "headquarters": "Washington, D.C. · London · Singapore",
+    "email": "inquiries@szlholdings.com"
+  },
+  "nav": {
+    "links": [
+      { "label": "Portfolio", "href": "#portfolio" },
+      { "label": "Insights", "href": "/insights" },
+      { "label": "Leadership", "href": "#leadership" },
+      { "label": "Contact", "href": "#contact" }
+    ],
+    "ctaLabel": "Explore the portfolio"
+  },
+  "hero": {
+    "headline": "Structured ventures for modern",
+    "headlineAccent": "systems, services, and execution.",
+    "subheadline": "SZL Holdings brings together a growing portfolio of platforms, advisory capabilities, and operating ideas designed for clarity, scale, and long-term value.",
+    "badge": "SZL Holdings",
+    "cta": "Explore the portfolio",
+    "ctaSecondary": "View the roadmap",
+    "stats": [
+      { "value": "4+", "label": "Portfolio ventures" },
+      { "value": "3", "label": "Operating lanes" },
+      { "value": "2021", "label": "Founded" },
+      { "value": "Long-term", "label": "Strategic focus" }
+    ]
+  },
+  "portfolioIntro": {
+    "title": "A connected ecosystem, built with intent.",
+    "subtitle": "Each venture within the SZL ecosystem is designed to solve a distinct problem while contributing to a broader operating vision. Together, they form a portfolio shaped by structured thinking, premium execution, and long-term strategic direction."
+  },
+  "ecosystem": {
+    "title": "Ecosystem Architecture",
+    "subtitle": "A unified intelligence fabric connecting operating companies. Shared infrastructure. Structured direction. One operating vision.",
+    "legendLabels": {
+      "live": "Operational",
+      "beta": "Beta",
+      "inDevelopment": "In Development"
+    },
+    "canvasAriaLabel": "Interactive ecosystem visualization showing SZL Holdings connected to portfolio companies"
+  },
+  "portfolio": {
+    "title": "A connected ecosystem, built with intent.",
+    "subtitle": "Each venture within the SZL ecosystem is designed to solve a distinct problem while contributing to a broader operating vision. Together, they form a portfolio shaped by structured thinking, premium execution, and long-term strategic direction.",
+    "filterAllLabel": "All",
+    "visitLabel": "View",
+    "comingSoonLabel": "In Development"
+  },
+  "strategicThesis": {
+    "title": "Why this portfolio exists.",
+    "body": "The most valuable organizations are not built on noise. They are built on structure, visibility, trust, and execution. SZL Holdings exists to develop ventures and service models that reflect that standard, whether through platforms, advisory work, or operating frameworks designed for real-world use."
+  },
+  "milestones": {
+    "title": "Built in phases. Positioned for longevity.",
+    "items": [
+      "Portfolio foundation established",
+      "Core ventures defined",
+      "Product and advisory lanes activated",
+      "Unified ecosystem experience in development",
+      "Next-stage operational and commercial scaling ahead"
+    ]
+  },
+  "developments": {
+    "title": "Current priorities across the ecosystem.",
+    "items": [
+      "Advancing core product architecture",
+      "Standardizing the shared design system",
+      "Expanding premium client and partner pathways",
+      "Strengthening observability, analytics, and commercial readiness"
+    ]
+  },
+  "trust": {
+    "title": "A portfolio grounded in execution.",
+    "items": [
+      "Premium digital product direction",
+      "Secure platform architecture",
+      "Advisory-grade service design",
+      "Ecosystem-wide brand consistency",
+      "Commercial and operational readiness"
+    ]
+  },
+  "finalCta": {
+    "title": "Explore what is being built.",
+    "body": "SZL Holdings is shaping a connected portfolio of platforms, services, and operating systems. Review the ventures, follow the roadmap, or start a strategic conversation.",
+    "primary": "Explore the portfolio",
+    "secondary": "Start a strategic conversation"
+  },
+  "timeline": {
+    "title": "Built in phases. Positioned for longevity.",
+    "subtitle": "From portfolio foundation to a connected ecosystem — the milestones defining SZL Holdings."
+  },
+  "pillars": {
+    "title": "The 6 Lenses of Business Observability",
+    "subtitle": "SZL's proprietary investment and operating philosophy — six lenses that define how we see, measure, and improve every business domain in our portfolio."
+  },
+  "leadership": {
+    "title": "Why this portfolio exists.",
+    "quote": "The most valuable organizations are not built on noise. They are built on structure, visibility, trust, and execution. SZL Holdings exists to develop ventures and service models that reflect that standard.",
+    "attribution": "SZL Holdings",
+    "vision": "We operate at the intersection of platforms, advisory capabilities, and operating ideas designed for clarity, scale, and long-term value. Our thesis is simple: structured ventures with clear direction create durable, compounding value.",
+    "values": [
+      { "title": "Structured thinking", "description": "We build ventures shaped by clear frameworks, premium execution, and long-term strategic direction." },
+      { "title": "Visibility and trust", "description": "Every platform and service model we develop is built around the belief that trust comes from clarity and transparency." },
+      { "title": "Advisory-grade execution", "description": "Our service design reflects the standards we hold across the portfolio — deliberate, considered, and built to last." },
+      { "title": "Long-term value", "description": "We are positioned for longevity, not short-term noise. Each venture contributes to a broader operating vision." }
+    ]
+  },
+  "contact": {
+    "title": "Start a conversation.",
+    "subtitle": "Review the ventures, follow the roadmap, or start a strategic conversation. We respond thoughtfully.",
+    "fields": ["name", "email", "company", "subject", "message"],
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "company": "Organization",
+      "subject": "Subject",
+      "message": "Message"
+    },
+    "placeholders": {
+      "name": "Your name",
+      "email": "your@email.com",
+      "company": "Your organization (optional)",
+      "subject": "Portfolio inquiry, partnership, or conversation",
+      "message": "Tell us how we can connect..."
+    },
+    "submitLabel": "Start a strategic conversation",
+    "submittingLabel": "Sending...",
+    "successMessage": "Your inquiry has been received. We will follow up soon.",
+    "errorMessage": "Something went wrong. Please try again or email us directly at inquiries@szlholdings.com."
+  },
+  "footer": {
+    "sections": {
+      "portfolio": "Portfolio",
+      "company": "Company",
+      "connect": "Connect"
+    },
+    "companyLinks": [
+      { "label": "Portfolio", "href": "#portfolio" },
+      { "label": "Thesis", "href": "#leadership" },
+      { "label": "Roadmap", "href": "/roadmap" },
+      { "label": "Contact", "href": "#contact" }
+    ],
+    "contactUsLabel": "Start a strategic conversation",
+    "rightsReserved": "All rights reserved."
+  },
+  "seo": {
+    "title": "SZL Holdings | Structured Ventures for Modern Systems and Execution",
+    "description": "A premium portfolio of platforms, advisory capabilities, and operating ideas built for clarity, scale, and long-term value."
+  }
+}

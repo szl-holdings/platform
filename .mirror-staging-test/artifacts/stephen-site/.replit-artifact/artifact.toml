@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/stephen/"
+title = "Stephen Lutar"
+version = "1.0.0"
+id = "artifacts/stephen-site"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/stephen/" ]
+localPort = 21130
+
+[services.development]
+run = "pnpm --filter @workspace/stephen-site run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/stephen-site", "run", "build" ]
+publicDir = "artifacts/stephen-site/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21130"
+BASE_PATH = "/stephen/"

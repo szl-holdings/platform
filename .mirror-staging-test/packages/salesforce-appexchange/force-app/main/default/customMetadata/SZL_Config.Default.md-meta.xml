@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Default</label>
+    <protected>false</protected>
+    <values>
+        <field>API_Endpoint__c</field>
+        <value xsi:type="xsd:string">https://api.szlholdings.com</value>
+    </values>
+    <values>
+        <field>Sync_Enabled__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Access_Token__c</field>
+        <value xsi:type="xsd:string">__CONFIGURE_AFTER_OAUTH__</value>
+    </values>
+    <values>
+        <field>Refresh_Token__c</field>
+        <value xsi:type="xsd:string">__CONFIGURE_AFTER_OAUTH__</value>
+    </values>
+    <values>
+        <field>Org_ID__c</field>
+        <value xsi:type="xsd:string">__CONFIGURE_AFTER_OAUTH__</value>
+    </values>
+    <values>
+        <field>Webhook_Secret__c</field>
+        <value xsi:type="xsd:string">__GENERATE_RANDOM_SECRET__</value>
+    </values>
+</CustomMetadata>

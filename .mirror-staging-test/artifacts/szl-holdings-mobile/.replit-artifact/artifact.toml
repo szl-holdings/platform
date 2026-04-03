@@ -1,0 +1,26 @@
+kind = "mobile"
+    previewPath = "/szl-holdings-mobile/"
+    title = "SZL Holdings — Executive Command"
+    version = "1.0.0"
+    id = "artifacts/szl-holdings-mobile"
+
+    [[integratedSkills]]
+    name = "expo"
+    version = "1.0.0"
+
+    [[services]]
+    name = "expo"
+    paths = ["/szl-holdings-mobile/"]
+    localPort = 8085
+
+    [services.development]
+    run = "pnpm --filter @workspace/szl-holdings-mobile run dev"
+
+    [services.production]
+    build = ["pnpm", "--filter", "@workspace/szl-holdings-mobile", "run", "build"]
+    run = ["pnpm", "--filter", "@workspace/szl-holdings-mobile", "run", "serve"]
+
+    [services.env]
+    PORT = "8085"
+    BASE_PATH = "/szl-holdings-mobile/"
+  

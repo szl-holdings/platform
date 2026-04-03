@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>SZL Holdings Insights</title>
+    <link>https://szlholdings.com/insights</link>
+    <description>Perspectives on AI, maritime intelligence, cybersecurity, real estate tech, creative production, and the thesis driving the SZL ecosystem.</description>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 30 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://szlholdings.com/insights/rss.xml" rel="self" type="application/rss+xml"/>
+    <managingEditor>inquiries@szlholdings.com (Stephen Lutar)</managingEditor>
+    <webMaster>inquiries@szlholdings.com (SZL Holdings)</webMaster>
+    <copyright>2026 SZL Holdings. All rights reserved.</copyright>
+    <category>Technology</category>
+    <ttl>60</ttl>
+
+    <item>
+      <title>State of the Ecosystem: 2026 Annual Letter</title>
+      <link>https://szlholdings.com/insights/state-of-the-ecosystem-2026</link>
+      <description>Five years into building SZL Holdings, we have crossed thresholds that demand honesty — both about what we got right and where the harder work remains. This is that accounting.</description>
+      <author>inquiries@szlholdings.com (Stephen Lutar)</author>
+      <category>Annual Letter</category>
+      <pubDate>Mon, 30 Mar 2026 00:00:00 +0000</pubDate>
+      <guid isPermaLink="true">https://szlholdings.com/insights/state-of-the-ecosystem-2026</guid>
+    </item>
+
+    <item>
+      <title>Dark Vessel Activity Is Up 340% — Here's What AI Can See That Humans Can't</title>
+      <link>https://szlholdings.com/insights/dark-vessel-activity-maritime-ai</link>
+      <description>Since 2022, the number of vessels going dark has increased by 340%. AI-native maritime intelligence is the only system that can see what traditional oversight cannot.</description>
+      <author>inquiries@szlholdings.com (Stephen Lutar)</author>
+      <category>Maritime Intelligence</category>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <guid isPermaLink="true">https://szlholdings.com/insights/dark-vessel-activity-maritime-ai</guid>
+    </item>
+
+    <item>
+      <title>Why Continuous Adversarial Simulation Is the New Baseline for Enterprise Security</title>
+      <link>https://szlholdings.com/insights/continuous-red-team-the-new-baseline</link>
+      <description>The traditional annual penetration test is a snapshot of your security posture at a single moment in time. The adversary is testing your defenses continuously.</description>
+      <author>inquiries@szlholdings.com (Stephen Lutar)</author>
+      <category>Cybersecurity</category>
+      <pubDate>Sat, 28 Feb 2026 00:00:00 +0000</pubDate>
+      <guid isPermaLink="true">https://szlholdings.com/insights/continuous-red-team-the-new-baseline</guid>
+    </item>
+
+    <item>
+      <title>LLM Evaluation Is the Missing Infrastructure Layer of the AI Era</title>
+      <link>https://szlholdings.com/insights/llm-evaluation-the-missing-infrastructure</link>
+      <description>Every enterprise deploying AI at scale is flying partially blind. Benchmark scores tell you almost nothing about how a model performs on your proprietary data.</description>
+      <author>inquiries@szlholdings.com (Stephen Lutar)</author>
+      <category>AI/ML</category>
+      <pubDate>Tue, 10 Feb 2026 00:00:00 +0000</pubDate>
+      <guid isPermaLink="true">https://szlholdings.com/insights/llm-evaluation-the-missing-infrastructure</guid>
+    </item>
+
+    <item>
+      <title>Climate Risk Is the Next Pricing Crisis in Commercial Real Estate</title>
+      <link>https://szlholdings.com/insights/climate-risk-commercial-real-estate</link>
+      <description>The commercial real estate industry is approaching a climate risk reckoning. Insurance is being withdrawn from coastal markets faster than pricing models can adjust.</description>
+      <author>inquiries@szlholdings.com (Stephen Lutar)</author>
+      <category>Real Estate</category>
+      <pubDate>Thu, 22 Jan 2026 00:00:00 +0000</pubDate>
+      <guid isPermaLink="true">https://szlholdings.com/insights/climate-risk-commercial-real-estate</guid>
+    </item>
+
+    <item>
+      <title>The Creative Production Stack Is Being Rebuilt From Scratch</title>
+      <link>https://szlholdings.com/insights/ai-native-creative-production</link>
+      <description>The next decade will rebuild cloud-based creative production workflows with AI-native architecture. The platforms that own this transition will capture a market the prior generation of SaaS was never designed to serve.</description>
+      <author>inquiries@szlholdings.com (Stephen Lutar)</author>
+      <category>Creative Tech</category>
+      <pubDate>Thu, 08 Jan 2026 00:00:00 +0000</pubDate>
+      <guid isPermaLink="true">https://szlholdings.com/insights/ai-native-creative-production</guid>
+    </item>
+
+    <item>
+      <title>The AIOps Autonomy Gap: Why Detection Without Remediation Is Half a Solution</title>
+      <link>https://szlholdings.com/insights/aiops-autonomy-gap</link>
+      <description>The first generation of AIOps platforms solved the signal problem. The problem is that better detection without autonomous remediation is only half a solution.</description>
+      <author>inquiries@szlholdings.com (Stephen Lutar)</author>
+      <category>Operations</category>
+      <pubDate>Mon, 15 Dec 2025 00:00:00 +0000</pubDate>
+      <guid isPermaLink="true">https://szlholdings.com/insights/aiops-autonomy-gap</guid>
+    </item>
+
+  </channel>
+</rss>

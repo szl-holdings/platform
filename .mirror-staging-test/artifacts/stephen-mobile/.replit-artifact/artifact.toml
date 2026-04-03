@@ -1,0 +1,25 @@
+kind = "mobile"
+  previewPath = "/stephen-mobile/"
+  title = "Stephen — Personal Command"
+  version = "1.0.0"
+  id = "artifacts/stephen-mobile"
+
+  [[integratedSkills]]
+  name = "expo"
+  version = "1.0.0"
+
+  [[services]]
+  name = "expo"
+  paths = ["/stephen-mobile/"]
+  localPort = 8086
+
+  [services.development]
+  run = "pnpm --filter @workspace/stephen-mobile run dev"
+
+  [services.production]
+  build = ["pnpm", "--filter", "@workspace/stephen-mobile", "run", "build"]
+  run = ["pnpm", "--filter", "@workspace/stephen-mobile", "run", "serve"]
+
+  [services.env]
+  PORT = "8086"
+  BASE_PATH = "/stephen-mobile/"
