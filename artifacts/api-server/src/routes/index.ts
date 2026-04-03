@@ -88,6 +88,7 @@ import lyteBillingRouter from "./lyte-billing";
 import { alloyResearchRouter } from "./alloy-research";
 import alloyChannelsRouter from "./alloy-channels";
 import prismCounselNyRouter from "./prism-counsel-ny";
+import prismCounselOpsRouter from "./prism-counsel-ops";
 import alloyEmailRouter from "./alloy-email";
 import alloyMeetingsRouter from "./alloy-meetings";
 import alloyDigestRouter from "./alloy-digest";
@@ -359,8 +360,9 @@ router.use("/alloy/research", _writeLimiter);
 router.use("/alloy/browser", _writeLimiter);
 router.use(alloyResearchRouter);
 
-router.use("/prism-counsel/ny", _readLimiter);
-router.use("/prism-counsel/ny", _writeLimiter);
+router.use("/prism-counsel", _readLimiter);
+router.use("/prism-counsel", _writeLimiter);
+router.use("/prism-counsel", prismCounselOpsRouter);
 router.use(prismCounselNyRouter);
 
 export default router;

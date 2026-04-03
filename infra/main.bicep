@@ -182,6 +182,33 @@ resource acrPullRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   }
 }
 
+module serviceBus 'modules/servicebus.bicep' = {
+  name: 'serviceBusDeploy'
+  params: {
+    baseName: baseName
+    location: location
+    sku: 'Standard'
+  }
+}
+
+module docIntelligence 'modules/docintell.bicep' = {
+  name: 'docIntelligenceDeploy'
+  params: {
+    baseName: baseName
+    location: location
+    sku: 'S0'
+  }
+}
+
+module prismBlobStorage 'modules/blobstorage.bicep' = {
+  name: 'prismBlobStorageDeploy'
+  params: {
+    baseName: baseName
+    location: location
+    sku: 'Standard_ZRS'
+  }
+}
+
 module alerting 'modules/alerting.bicep' = {
   name: 'alertingDeploy'
   params: {
@@ -244,3 +271,6 @@ output appInsightsConnectionString string = appInsights.properties.ConnectionStr
 output pgServerFqdn string = postgres.outputs.fqdn
 output redisFqdn string = '${redisName}.redis.cache.windows.net'
 output logAnalyticsWorkspaceId string = logAnalytics.id
+output serviceBusConnectionString string = serviceBus.outputs.connectionString
+output docIntelligenceEndpoint string = docIntelligence.outputs.endpoint
+output prismBlobEndpoint string = prismBlobStorage.outputs.primaryBlobEndpoint

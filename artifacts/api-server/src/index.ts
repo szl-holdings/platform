@@ -32,6 +32,8 @@ import { seedDreamscapeData } from "./lib/seed-dreamscape";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
 import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence.js";
+import { registerAllPrismJobHandlers } from "./services/prism-job-handlers";
+import { startPrismJobPoller } from "./services/prism-queue";
 
 failFastOnInvalidConfig();
 
@@ -117,6 +119,9 @@ seedDreamscapeData().catch(err => {
   logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
 });
 
+registerAllPrismJobHandlers();
+const prismPoller = startPrismJobPoller(5000);
+
 server.listen(port, "0.0.0.0", () => {
   logger.info({ port, host: "0.0.0.0" }, "Server listening");
   scheduleNycIngestionJob();
@@ -154,6 +159,7 @@ async function shutdown(signal: string) {
   stopSelfMonitoring();
   providerHealth.stopActiveProbes();
   agentScheduler.stop();
+  clearInterval(prismPoller);
 
   try {
     await jobQueue.shutdown();
