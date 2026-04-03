@@ -79,6 +79,13 @@ const SolutionsAegisTrustPage = lazy(() => import("@/pages/solutions-aegis-trust
 const SolutionsLyteTrustPage = lazy(() => import("@/pages/solutions-lyte-trust"));
 const HowItWorksPage = lazy(() => import("@/pages/how-it-works"));
 
+// Standalone premium public product pages
+const PrismCounselPublicPage = lazy(() => import("@/pages/prism-counsel-public"));
+const TerraPublicPage = lazy(() => import("@/pages/terra-public"));
+const VesselsPublicPage = lazy(() => import("@/pages/vessels-public"));
+const AegisPublicPage = lazy(() => import("@/pages/aegis-public"));
+const CarlotaJoPublicPage = lazy(() => import("@/pages/carlota-jo-public"));
+
 const PrismDashboard = lazy(() => import("@/prism-counsel/pages/dashboard"));
 const PrismMattersList = lazy(() => import("@/prism-counsel/pages/matters-list"));
 const PrismMatterDetail = lazy(() => import("@/prism-counsel/pages/matter-detail"));
@@ -383,6 +390,23 @@ function App() {
             </Route>
             <Route path="/solutions/prism-counsel">
               <Suspense fallback={<PageLoader />}><SolutionsPrismCounselPage /></Suspense>
+            </Route>
+
+            {/* ── Standalone premium public product pages ── */}
+            <Route path="/prism-counsel-public">
+              <Suspense fallback={<PageLoader />}><PrismCounselPublicPage /></Suspense>
+            </Route>
+            <Route path="/terra-public">
+              <Suspense fallback={<PageLoader />}><TerraPublicPage /></Suspense>
+            </Route>
+            <Route path="/vessels-public">
+              <Suspense fallback={<PageLoader />}><VesselsPublicPage /></Suspense>
+            </Route>
+            <Route path="/aegis-public">
+              <Suspense fallback={<PageLoader />}><AegisPublicPage /></Suspense>
+            </Route>
+            <Route path="/carlota-jo-public">
+              <Suspense fallback={<PageLoader />}><CarlotaJoPublicPage /></Suspense>
             </Route>
 
             {/* ── PRISM Counsel app routes ── */}
