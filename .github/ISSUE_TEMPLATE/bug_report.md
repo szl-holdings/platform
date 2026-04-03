@@ -1,68 +1,39 @@
 ---
-name: Bug Report
-about: Report a defect or unexpected behavior in the SZL Holdings platform
-title: '[BUG] '
-labels: bug
-assignees: stephenlutar2-hash
----
+  name: Bug Report
+  about: Report a bug or unexpected behavior
+  title: "[BUG] "
+  labels: bug
+  assignees: stephenlutar2-hash
+  ---
 
-## Platform / Component
+  ## Description
 
-_Which platform or component exhibits this behavior?_
+  A clear description of the bug.
 
-- [ ] Lyte — Business Observability
-- [ ] Aegis — Defense & Intelligence
-- [ ] Terra — Real Estate Intelligence
-- [ ] Vessels — Maritime Intelligence
-- [ ] Carlota Jo — Advisory
-- [ ] SZL Holdings — Corporate
-- [ ] Stephen Lutar — Founder Site
-- [ ] API Server
-- [ ] Mobile App (specify which)
-- [ ] Shared Library / Infrastructure
+  ## Steps to Reproduce
 
----
+  1. 
+  2. 
+  3. 
 
-## Describe the Bug
+  ## Expected Behavior
 
-_A clear and concise description of what the bug is._
 
----
 
-## Steps to Reproduce
+  ## Actual Behavior
 
-1.
-2.
-3.
 
----
 
-## Expected Behavior
+  ## Environment
 
-_What should have happened?_
+  - App: (e.g., SZL Holdings, Lyte Command Center, Vessels)
+  - Browser/Device: 
+  - OS: 
 
----
+  ## Screenshots
 
-## Actual Behavior
+  If applicable, add screenshots.
 
-_What actually happened?_
+  ## Additional Context
 
----
-
-## Environment
-
-- **Browser / OS:** (e.g., Chrome 122 on macOS 14)
-- **Deployment type:** (Replit dev / Replit published / Azure)
-- **User role at time of issue:** (e.g., admin, operator, analyst)
-
----
-
-## Screenshots / Logs
-
-_If applicable, add screenshots or log excerpts._
-
----
-
-## Additional Context
-
-_Any other context about the problem._
+  
