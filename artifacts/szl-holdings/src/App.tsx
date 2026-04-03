@@ -84,6 +84,9 @@ const HowItWorksPage = lazy(() => import("@/pages/how-it-works"));
 const CompanyPage = lazy(() => import("@/pages/company"));
 const FounderPage = lazy(() => import("@/pages/founder"));
 const NotFoundPage = lazy(() => import("@/pages/not-found"));
+const CaseStudiesPage = lazy(() => import("@/pages/case-studies"));
+const InsightsPage = lazy(() => import("@/pages/insights"));
+const InsightsArticlePage = lazy(() => import("@/pages/insights-article"));
 
 // Public infrastructure pages (trust center, legal baseline, API, investor, press, brand, faq, roadmap)
 const SecurityPage = lazy(() => import("@/pages/security"));
@@ -708,10 +711,13 @@ function App() {
               <Redirect to="/investors/founder" />
             </Route>
             <Route path="/case-studies">
-              <Redirect to="/" />
+              <Suspense fallback={<PageLoader />}><CaseStudiesPage /></Suspense>
+            </Route>
+            <Route path="/insights/:slug">
+              <Suspense fallback={<PageLoader />}><InsightsArticlePage /></Suspense>
             </Route>
             <Route path="/insights">
-              <Redirect to="/" />
+              <Suspense fallback={<PageLoader />}><InsightsPage /></Suspense>
             </Route>
             <Route path="/architecture">
               <Suspense fallback={<PageLoader />}><ArchitecturePage /></Suspense>

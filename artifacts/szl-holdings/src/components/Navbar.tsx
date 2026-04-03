@@ -33,22 +33,44 @@ export function Navbar() {
   };
 
   return (
-    <m.nav
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-350 ${
-        scrolled
-          ? "backdrop-blur-xl border-b shadow-[0_1px_28px_hsla(0,0%,0%,0.42)]"
-          : "bg-transparent"
-      }`}
-      style={{
-        background: scrolled ? "hsla(210,12%,5%,0.92)" : "transparent",
-        borderBottom: scrolled ? "1px solid hsla(0,0%,100%,0.07)" : "none",
-        ...fontStyle,
-      }}
-    >
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-10 h-[60px] flex items-center justify-between">
+    <>
+      <a
+        href="#main-content"
+        className="skip-to-content"
+        style={{
+          position: "absolute", left: "-9999px", top: "auto", width: "1px", height: "1px", overflow: "hidden",
+          zIndex: 9999, background: "hsl(192,72%,48%)", color: "#000", padding: "0.5rem 1rem",
+          fontSize: "0.875rem", fontWeight: 600, borderRadius: "0 0 0.25rem 0.25rem",
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.left = "0";
+          e.currentTarget.style.width = "auto";
+          e.currentTarget.style.height = "auto";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.left = "-9999px";
+          e.currentTarget.style.width = "1px";
+          e.currentTarget.style.height = "1px";
+        }}
+      >
+        Skip to main content
+      </a>
+      <m.nav
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-350 ${
+          scrolled
+            ? "backdrop-blur-xl border-b shadow-[0_1px_28px_hsla(0,0%,0%,0.42)]"
+            : "bg-transparent"
+        }`}
+        style={{
+          background: scrolled ? "hsla(210,12%,5%,0.92)" : "transparent",
+          borderBottom: scrolled ? "1px solid hsla(0,0%,100%,0.07)" : "none",
+          ...fontStyle,
+        }}
+      >
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-10 h-[60px] flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group" aria-label="SZL Holdings">
           <div className="w-7 h-7 flex items-center justify-center relative overflow-hidden"
             style={{
@@ -216,6 +238,7 @@ export function Navbar() {
           </m.div>
         )}
       </AnimatePresence>
-    </m.nav>
+      </m.nav>
+    </>
   );
 }

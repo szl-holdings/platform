@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
 import { m } from "framer-motion";
 import { ArrowRight, Clock, Calendar, Tag, Rss, ChevronRight } from "lucide-react";
@@ -17,12 +17,44 @@ const CATEGORY_COLORS: Record<string, string> = {
   "Operations": "text-indigo-700 bg-indigo-50 border-indigo-200",
 };
 
+const INSIGHTS_LD = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "Insights — SZL Holdings",
+  "description": "Analysis, perspectives, and annual letters from SZL Holdings — covering AI/ML, cybersecurity, maritime intelligence, real estate, operations, and creative tech.",
+  "url": "https://szlholdings.com/insights",
+  "author": {
+    "@type": "Person",
+    "name": "Stephen Lutar",
+    "jobTitle": "Founder & Managing Partner, SZL Holdings"
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "SZL Holdings", "item": "https://szlholdings.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Insights", "item": "https://szlholdings.com/insights" }
+    ]
+  }
+};
+
 export default function InsightsPage() {
   usePageMeta({
-    title: "Insights — SZL Holdings",
-    description: "Analysis, perspectives, and annual letters from SZL Holdings — covering AI/ML, cybersecurity, maritime intelligence, real estate, operations, and creative tech.",
+    title: "Insights — SZL Holdings | Business Observability & Enterprise AI Analysis",
+    description: "Founder-written analysis on business observability, AI operations, maritime intelligence, cybersecurity, and enterprise architecture — from SZL Holdings.",
     canonical: "https://szlholdings.com/insights",
   });
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "insights-ld";
+    script.textContent = JSON.stringify(INSIGHTS_LD);
+    document.head.appendChild(script);
+    return () => {
+      const el = document.getElementById("insights-ld");
+      if (el) el.remove();
+    };
+  }, []);
 
   const [activeCategory, setActiveCategory] = useState("All");
   const [, navigate] = useLocation();
@@ -40,7 +72,7 @@ export default function InsightsPage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="pt-24">
+      <main id="main-content" className="pt-24">
         <section className="bg-white border-b border-szl-border">
           <div className="max-w-6xl mx-auto px-6 py-16">
             <m.div

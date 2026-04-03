@@ -47,6 +47,17 @@ const NAV_ITEMS = [
     ],
   },
   {
+    label: "Resources",
+    href: "/insights",
+    highlight: false,
+    children: [
+      { label: "Insights & Articles", href: "/insights" },
+      { label: "Case Studies", href: "/case-studies" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Public Roadmap", href: "/roadmap" },
+    ],
+  },
+  {
     label: "Company",
     href: "/company",
     highlight: false,
@@ -74,6 +85,8 @@ const NAV_LINKS_MOBILE = [
   { label: "Trust Center", href: "/trust", primary: false },
   { label: "Security", href: "/trust/security", primary: false },
   { label: "Docs", href: "/docs", primary: false },
+  { label: "Insights", href: "/insights", primary: false },
+  { label: "Case Studies", href: "/case-studies", primary: false },
   { label: "Company", href: "/company", primary: false },
   { label: "Founder", href: "/founder", primary: false },
   { label: "Design Partners", href: "/design-partner", primary: false },

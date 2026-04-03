@@ -3,15 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>SZL Holdings — Lyte Business Observability & Alloy Execution Fabric</title>
-    <meta name="description" content="SZL Holdings builds Lyte, a business observability platform that surfaces revenue stalls, approval gaps, and ownership drift before they compound — powered by Alloy, the execution fabric underneath." />
-    <meta name="keywords" content="SZL Holdings, Lyte, business observability, Alloy, execution fabric, workflow automation, enterprise software, operations intelligence" />
+    <title>SZL Holdings — Business Observability & Execution Intelligence</title>
+    <meta name="description" content="SZL Holdings builds Lyte, the business observability platform that surfaces revenue stalls, approval gaps, and ownership drift before they compound — and Alloy, the execution fabric that routes governed action with a full audit trail." />
+    <meta name="keywords" content="SZL Holdings, Lyte, business observability, Alloy, execution fabric, workflow automation, enterprise software, operations intelligence, AI operations, enterprise AI governance" />
     <meta name="author" content="SZL Holdings" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://szlholdings.com/" />
+    <meta name="theme-color" content="#080c14" />
 
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="SZL Holdings — Lyte Business Observability" />
+    <meta property="og:title" content="SZL Holdings — Business Observability & Execution Intelligence" />
     <meta property="og:description" content="Lyte makes the invisible visible — before it costs you. Business observability powered by Alloy, the execution fabric that routes signals to accountable action." />
     <meta property="og:url" content="https://szlholdings.com/" />
     <meta property="og:site_name" content="SZL Holdings" />
@@ -21,14 +23,16 @@
     <meta property="og:image:alt" content="SZL Holdings — Lyte Business Observability Platform" />
     <meta property="og:locale" content="en_US" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="SZL Holdings — Lyte Business Observability" />
+    <meta name="twitter:title" content="SZL Holdings — Business Observability & Execution Intelligence" />
     <meta name="twitter:description" content="Lyte surfaces revenue stalls, approval gaps, and ownership drift before they compound. Powered by Alloy, the execution fabric underneath." />
     <meta name="twitter:image" content="https://szlholdings.com/opengraph.jpg" />
     <meta name="twitter:image:alt" content="SZL Holdings — Lyte Business Observability Platform" />
     <meta name="twitter:site" content="@szlholdings" />
     <meta name="twitter:creator" content="@szlholdings" />
 
+    <!-- Organization JSON-LD -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -37,45 +41,108 @@
       "url": "https://szlholdings.com",
       "logo": "https://szlholdings.com/opengraph.jpg",
       "description": "SZL Holdings builds Lyte, a business observability platform, and Alloy, the execution fabric powering accountable workflow routing across enterprise operations.",
-      "foundingDate": "2020",
+      "foundingDate": "2021",
       "founder": {
         "@type": "Person",
         "name": "Stephen Lutar",
-        "url": "https://szlholdings.com/stephen-site/"
+        "jobTitle": "Founder & Managing Partner",
+        "url": "https://szlholdings.com/founder"
       },
-      "knowsAbout": ["Business Observability", "Execution Fabric", "Workflow Automation", "Enterprise Operations", "Signal Intelligence"],
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Washington",
+        "addressRegion": "DC",
+        "addressCountry": "US"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/company/szlholdings",
+        "https://x.com/szlholdings"
+      ],
+      "knowsAbout": ["Business Observability", "Execution Fabric", "Workflow Automation", "Enterprise Operations", "Signal Intelligence", "AI Governance"],
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "SZL Holdings Platform",
         "itemListElement": [
-          {"@type": "SoftwareApplication", "name": "Lyte", "applicationCategory": "BusinessApplication", "description": "Business observability platform — surfaces revenue stalls, approval gaps, and ownership drift before they compound"},
-          {"@type": "SoftwareApplication", "name": "Alloy", "applicationCategory": "BusinessApplication", "description": "Execution fabric — workflow orchestration, signal routing, audit trail, and policy-gated action"}
+          {"@type": "SoftwareApplication", "name": "Lyte", "applicationCategory": "BusinessApplication", "description": "Business observability platform — surfaces revenue stalls, approval gaps, and ownership drift before they compound", "url": "https://szlholdings.com/lyte"},
+          {"@type": "SoftwareApplication", "name": "Alloy", "applicationCategory": "BusinessApplication", "description": "Execution fabric — workflow orchestration, signal routing, audit trail, and policy-gated action", "url": "https://szlholdings.com/alloy-fabric"}
         ]
       }
     }
     </script>
 
+    <!-- WebSite JSON-LD with SearchAction -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "ItemList",
-      "name": "SZL Holdings Platform Portfolio",
-      "description": "Core platform and expansion lanes built by SZL Holdings",
-      "url": "https://szlholdings.com/",
-      "numberOfItems": 4,
+      "@type": "WebSite",
+      "name": "SZL Holdings",
+      "url": "https://szlholdings.com",
+      "description": "Business observability and execution intelligence platform. Lyte surfaces what's stuck, at risk, and about to break — Alloy routes the governed action.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "SZL Holdings"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://szlholdings.com/insights?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- BreadcrumbList for homepage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Lyte — Business Observability", "url": "https://szlholdings.com/lyte-command-center/"},
-        {"@type": "ListItem", "position": 2, "name": "Alloy — Execution Fabric", "url": "https://szlholdings.com/szl-holdings/alloy-fabric"},
-        {"@type": "ListItem", "position": 3, "name": "SZL Holdings — Platform Map", "url": "https://szlholdings.com/szl-holdings/platform"},
-        {"@type": "ListItem", "position": 4, "name": "Design Partners Program", "url": "https://szlholdings.com/szl-holdings/design-partners"}
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "SZL Holdings",
+          "item": "https://szlholdings.com/"
+        }
       ]
     }
     </script>
 
     <link rel="icon" type="image/svg+xml" href="/og-preview.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Preconnect for font performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Font with display=swap for better LCP/CLS -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Inline critical CSS for above-the-fold -->
+    <style>
+      html { scroll-behavior: smooth; }
+      body { margin: 0; background: hsl(214,16%,4%); }
+      #root { min-height: 100vh; }
+      .skip-to-content {
+        position: absolute;
+        left: -9999px;
+        top: 1rem;
+        z-index: 9999;
+        padding: 0.5rem 1rem;
+        background: hsl(192,72%,48%);
+        color: hsl(214,18%,4%);
+        font-weight: 600;
+        font-size: 0.875rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+      }
+      .skip-to-content:focus {
+        left: 1rem;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

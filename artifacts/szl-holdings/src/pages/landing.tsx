@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { m } from "framer-motion";
 import {
@@ -101,6 +102,148 @@ const EXPANSION_LANES = [
     status: "Active",
   },
 ];
+
+function NewsletterSection() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrorMsg("Please enter a valid email address.");
+      setStatus("error");
+      return;
+    }
+    setStatus("submitting");
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/contact/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "newsletter",
+          name: email.split("@")[0],
+          email,
+          app: "szl-holdings",
+          message: "Newsletter signup from homepage",
+          metadata: { source: "homepage-newsletter-cta" },
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { message?: string }).message || "Submission failed");
+      }
+      setStatus("success");
+      setEmail("");
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    }
+  };
+
+  return (
+    <section style={{ borderBottom: "1px solid var(--color-szl-border)" }} aria-label="Insights newsletter">
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(3rem,6vw,4rem) var(--space-content-x)" }}>
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          style={{
+            display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "center", justifyContent: "space-between",
+            padding: "2rem 2.5rem",
+            borderRadius: "0.875rem",
+            background: "hsla(0,0%,100%,0.025)",
+            border: "1px solid hsla(0,0%,100%,0.07)",
+          }}
+        >
+          <div style={{ maxWidth: "32rem" }}>
+            <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.5rem" }}>
+              Insights & analysis
+            </p>
+            <h3 style={{ fontSize: "clamp(1.1rem,2vw,1.4rem)", fontWeight: 600, letterSpacing: "-0.018em", color: "hsl(38,8%,92%)", marginBottom: "0.5rem" }}>
+              Business observability, operational AI, and the SZL thesis.
+            </h3>
+            <p style={{ fontSize: "0.875rem", color: "var(--color-szl-text-secondary)", lineHeight: 1.6 }}>
+              Founder-written analysis on the ideas shaping enterprise operations. No digest, no filler — published when it's worth reading.
+            </p>
+          </div>
+          <div style={{ minWidth: "280px", flex: "1 1 280px", maxWidth: "420px" }}>
+            {status === "success" ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1.125rem", borderRadius: "0.5rem", background: "hsla(145,60%,46%,0.12)", border: "1px solid hsla(145,60%,46%,0.25)" }}>
+                <span style={{ fontSize: "1.25rem" }} role="img" aria-label="Success">✓</span>
+                <div>
+                  <p style={{ fontSize: "0.875rem", fontWeight: 600, color: "hsl(145,60%,72%)", margin: 0 }}>You're on the list.</p>
+                  <p style={{ fontSize: "0.8125rem", color: "var(--color-szl-text-secondary)", margin: "0.15rem 0 0" }}>We'll reach out when something worth reading is published.</p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate aria-label="Subscribe to SZL Insights">
+                <label htmlFor="newsletter-email" style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: "var(--color-szl-text-secondary)", marginBottom: "0.5rem" }}>
+                  Email address
+                </label>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input
+                    id="newsletter-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); if (status === "error") { setStatus("idle"); setErrorMsg(""); } }}
+                    placeholder="you@company.com"
+                    aria-describedby={errorMsg ? "newsletter-error" : undefined}
+                    aria-invalid={status === "error"}
+                    disabled={status === "submitting"}
+                    style={{
+                      flex: 1,
+                      padding: "0.625rem 0.875rem",
+                      background: "hsla(0,0%,100%,0.06)",
+                      border: `1px solid ${status === "error" ? "hsla(0,72%,60%,0.6)" : "hsla(0,0%,100%,0.14)"}`,
+                      borderRadius: "0.375rem",
+                      color: "hsl(38,8%,92%)",
+                      fontSize: "0.875rem",
+                      outline: "none",
+                      transition: "border-color 0.2s ease",
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = "hsla(192,72%,48%,0.7)"; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = status === "error" ? "hsla(0,72%,60%,0.6)" : "hsla(0,0%,100%,0.14)"; }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === "submitting"}
+                    style={{
+                      padding: "0.625rem 1rem",
+                      background: "hsl(192,72%,48%)",
+                      color: "hsl(214,18%,4%)",
+                      border: "none",
+                      borderRadius: "0.375rem",
+                      fontSize: "0.8125rem",
+                      fontWeight: 600,
+                      cursor: status === "submitting" ? "not-allowed" : "pointer",
+                      opacity: status === "submitting" ? 0.7 : 1,
+                      whiteSpace: "nowrap",
+                      transition: "opacity 0.2s ease",
+                    }}
+                  >
+                    {status === "submitting" ? "Sending…" : "Subscribe"}
+                  </button>
+                </div>
+                {errorMsg && (
+                  <p id="newsletter-error" role="alert" style={{ fontSize: "0.78125rem", color: "hsl(0,72%,68%)", marginTop: "0.375rem", margin: "0.375rem 0 0" }}>
+                    {errorMsg}
+                  </p>
+                )}
+                <p style={{ fontSize: "0.75rem", color: "var(--color-szl-text-faint)", marginTop: "0.5rem" }}>
+                  No spam. Unsubscribe anytime.{" "}
+                  <Link href="/insights" style={{ color: "var(--color-szl-text-secondary)", textDecoration: "underline" }}>Browse the archive</Link>
+                </p>
+              </form>
+            )}
+          </div>
+        </m.div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage() {
   usePageMeta({
@@ -746,7 +889,111 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 10. Demo CTA ────────────────────────────────────────────── */}
+        {/* ── 10. Social Proof / Design Partner Program ───────────────── */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(0,0%,100%,0.01)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <div style={{ marginBottom: "3rem", maxWidth: "42rem" }}>
+                <p style={{ fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginBottom: "0.875rem" }}>
+                  Design partner program
+                </p>
+                <h2 style={{ fontSize: "clamp(1.5rem,2.5vw,2rem)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.15, color: "hsl(38,8%,94%)", marginBottom: "1rem" }}>
+                  Built with operators, not just for them.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.72, color: "var(--color-szl-text-secondary)" }}>
+                  Design partners get direct access to the founder, early builds, and the ability to shape the product roadmap. We're working with operators in financial services, maritime, security, and real estate who are serious about making their operational intelligence infrastructure a competitive advantage.
+                </p>
+              </div>
+            </m.div>
+
+            {/* Testimonial quotes — design partner framing */}
+            <div style={{ display: "grid", gap: "1.25rem" }} className="md:grid-cols-3">
+              {[
+                {
+                  quote: "The approval latency detection alone would have saved us six figures last quarter. What Lyte does in four minutes took our weekly ops review six days to catch — if we caught it at all.",
+                  role: "VP Operations",
+                  org: "Mid-market financial services firm",
+                  vertical: "Design partner",
+                  accent: "hsl(192,72%,48%)",
+                },
+                {
+                  quote: "We've been waiting for a maritime intelligence platform that thinks in behavioral sequences, not just list checks. The pre-designation lead time is the capability that changes how we operate.",
+                  role: "Head of Compliance",
+                  org: "Bulk carrier operator",
+                  vertical: "Design partner",
+                  accent: "hsl(215,72%,58%)",
+                },
+                {
+                  quote: "The distress signal aggregation is exactly what we needed. By the time a foreclosure hits public records, the negotiating window is closed. We need to be there 19 days earlier.",
+                  role: "Managing Director",
+                  org: "Real estate investment manager",
+                  vertical: "Design partner",
+                  accent: "hsl(142,72%,48%)",
+                },
+              ].map((t, i) => (
+                <m.div
+                  key={i}
+                  custom={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                  style={{
+                    padding: "1.75rem",
+                    borderRadius: "0.875rem",
+                    background: "hsla(0,0%,100%,0.025)",
+                    border: "1px solid hsla(0,0%,100%,0.07)",
+                  }}
+                >
+                  <p style={{ fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: t.accent, fontFamily: "var(--font-mono)", marginBottom: "1rem" }}>
+                    {t.vertical}
+                  </p>
+                  <blockquote style={{ fontSize: "0.875rem", lineHeight: 1.7, color: "var(--color-szl-text-secondary)", fontStyle: "italic", marginBottom: "1.25rem", borderLeft: `2px solid ${t.accent}30`, paddingLeft: "1rem" }}>
+                    "{t.quote}"
+                  </blockquote>
+                  <div>
+                    <p style={{ fontSize: "0.75rem", fontWeight: 600, color: "hsl(38,8%,80%)" }}>{t.role}</p>
+                    <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", marginTop: "0.125rem" }}>{t.org}</p>
+                  </div>
+                </m.div>
+              ))}
+            </div>
+
+            {/* Design partner logos placeholder */}
+            <m.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              style={{ marginTop: "2.5rem", paddingTop: "2rem", borderTop: "1px solid hsla(0,0%,100%,0.06)" }}
+            >
+              <p style={{ fontSize: "0.6875rem", color: "var(--color-szl-text-faint)", fontFamily: "var(--font-mono)", textAlign: "center", marginBottom: "1.5rem", letterSpacing: "0.08em" }}>
+                Design partners — names withheld at request of participants
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center" }}>
+                {["Financial Services", "Maritime Operations", "Real Estate Investment", "Cybersecurity", "Legal Operations", "Private Advisory"].map((sector) => (
+                  <div key={sector} style={{
+                    padding: "0.5rem 1.25rem",
+                    borderRadius: "2rem",
+                    background: "hsla(0,0%,100%,0.03)",
+                    border: "1px solid hsla(0,0%,100%,0.08)",
+                    fontSize: "0.6875rem",
+                    color: "var(--color-szl-text-faint)",
+                    fontFamily: "var(--font-mono)",
+                    letterSpacing: "0.06em",
+                  }}>
+                    {sector}
+                  </div>
+                ))}
+              </div>
+            </m.div>
+          </div>
+        </section>
+
+        {/* ── 11. Newsletter Signup ────────────────────────────────────── */}
+        <NewsletterSection />
+
+        {/* ── 12. Demo CTA ────────────────────────────────────────────── */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", background: "hsla(192,72%,48%,0.02)" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "clamp(4rem,8vw,6rem) var(--space-content-x)" }}>
             <m.div

@@ -14,7 +14,8 @@ import {
 import { getInsightBySlug, getRelatedInsights } from "@/data/insights";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useState } from "react";
+import { usePageMeta } from "@/hooks/usePageMeta";
+import { useState, useEffect } from "react";
 
 const CATEGORY_COLORS: Record<string, string> = {
   "Annual Letter": "text-amber-600 bg-amber-50 border-amber-200",
@@ -135,6 +136,57 @@ export default function InsightsArticlePage() {
   const article = getInsightBySlug(slug);
   const related = getRelatedInsights(slug, 3);
 
+  const canonicalUrl = article ? `https://szlholdings.com/insights/${article.slug}` : "https://szlholdings.com/insights";
+
+  usePageMeta({
+    title: article ? `${article.title} | SZL Holdings Insights` : "Article Not Found | SZL Holdings",
+    description: article?.excerpt,
+    canonical: canonicalUrl,
+    ogImage: "https://szlholdings.com/opengraph.jpg",
+  });
+
+  useEffect(() => {
+    if (!article) return;
+    const articleLd = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": article.title,
+      "description": article.excerpt,
+      "author": {
+        "@type": "Person",
+        "name": article.author,
+        "jobTitle": article.authorTitle,
+        "url": "https://szlholdings.com/founder",
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "SZL Holdings",
+        "logo": { "@type": "ImageObject", "url": "https://szlholdings.com/opengraph.jpg" },
+      },
+      "datePublished": article.date,
+      "url": `https://szlholdings.com/insights/${article.slug}`,
+      "articleSection": article.category,
+      "keywords": article.tags.join(", "),
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "SZL Holdings", "item": "https://szlholdings.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Insights", "item": "https://szlholdings.com/insights" },
+          { "@type": "ListItem", "position": 3, "name": article.title, "item": `https://szlholdings.com/insights/${article.slug}` },
+        ],
+      },
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "article-ld";
+    script.textContent = JSON.stringify(articleLd);
+    document.head.appendChild(script);
+    return () => {
+      const el = document.getElementById("article-ld");
+      if (el) el.remove();
+    };
+  }, [article]);
+
   if (!article) {
     return (
       <div className="min-h-screen bg-white">
@@ -167,7 +219,7 @@ export default function InsightsArticlePage() {
     <div className="min-h-screen bg-white">
       <SiteNav />
 
-      <main className="pt-24">
+      <main id="main-content" className="pt-24">
         <div className="max-w-6xl mx-auto px-6 py-10">
           <m.div
             initial={{ opacity: 0, y: 8 }}

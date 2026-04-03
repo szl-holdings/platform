@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { Plus, Minus, ArrowRight, HelpCircle } from "lucide-react";
@@ -156,6 +156,28 @@ export default function FaqPage() {
     description: "Frequently asked questions about SZL Holdings, Lyte + Alloy, platform architecture, security, investment, and legal topics.",
     canonical: "https://szlholdings.com/faq",
   });
+
+  useEffect(() => {
+    const allQA = FAQ_GROUPS.flatMap(g => g.questions);
+    const faqLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": allQA.map(({ q, a }) => ({
+        "@type": "Question",
+        "name": q,
+        "acceptedAnswer": { "@type": "Answer", "text": a },
+      })),
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "faq-ld";
+    script.textContent = JSON.stringify(faqLd);
+    document.head.appendChild(script);
+    return () => {
+      const el = document.getElementById("faq-ld");
+      if (el) el.remove();
+    };
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>

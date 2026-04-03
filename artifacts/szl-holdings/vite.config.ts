@@ -3,9 +3,53 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import fs from "fs";
 
 const port = Number(process.env.PORT) || 3000;
 const basePath = process.env.BASE_PATH || "/";
+
+const libRoot = path.resolve(import.meta.dirname, "../../lib");
+
+interface AliasEntry {
+  find: string | RegExp;
+  replacement: string;
+}
+
+function buildWorkspaceAliases(): AliasEntry[] {
+  const aliases: AliasEntry[] = [];
+  if (!fs.existsSync(libRoot)) return aliases;
+
+  const libDirs = fs.readdirSync(libRoot, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+
+  for (const dir of libDirs) {
+    const pkgPath = path.join(libRoot, dir, "package.json");
+    if (!fs.existsSync(pkgPath)) continue;
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      if (!pkg.name || !pkg.exports) continue;
+
+      for (const [exportKey, exportValue] of Object.entries(pkg.exports)) {
+        if (typeof exportValue !== "string") continue;
+        const aliasKey = exportKey === "."
+          ? pkg.name
+          : `${pkg.name}/${exportKey.replace(/^\.\//, "")}`;
+        const aliasValue = path.join(libRoot, dir, exportValue);
+        const escapedKey = aliasKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        aliases.push({
+          find: new RegExp(`^${escapedKey}$`),
+          replacement: aliasValue,
+        });
+      }
+    } catch {
+      // skip
+    }
+  }
+  return aliases;
+}
+
+const workspaceAliases = buildWorkspaceAliases();
 
 export default defineConfig({
   base: basePath,
@@ -28,15 +72,16 @@ export default defineConfig({
       : []),
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(import.meta.dirname, "src"),
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(import.meta.dirname, "src") },
+      ...workspaceAliases,
+    ],
     dedupe: ["react", "react-dom"],
   },
   root: path.resolve(import.meta.dirname),
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
-      sourcemap: "hidden",
+    sourcemap: "hidden",
     emptyOutDir: true,
     cssCodeSplit: true,
     rollupOptions: {
@@ -61,7 +106,7 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {
-      strict: true,
+      strict: false,
       deny: ["**/.*"],
     },
   },

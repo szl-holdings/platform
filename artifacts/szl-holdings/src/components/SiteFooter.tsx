@@ -38,6 +38,15 @@ const FOOTER_COLS = [
     ],
   },
   {
+    heading: "Resources",
+    links: [
+      { label: "Insights", href: "/insights" },
+      { label: "Case Studies", href: "/case-studies" },
+      { label: "FAQ", href: "/faq" },
+      { label: "Public Roadmap", href: "/roadmap" },
+    ],
+  },
+  {
     heading: "Company",
     links: [
       { label: "About SZL Holdings", href: "/company" },
@@ -84,7 +93,7 @@ export function SiteFooter() {
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
 
         {/* Top: Brand + columns */}
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr repeat(5, 1fr)", gap: "2.5rem", marginBottom: "3rem" }} className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-[1.4fr_repeat(5,1fr)]">
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr repeat(6, 1fr)", gap: "2rem", marginBottom: "3rem" }} className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-[1.4fr_repeat(6,1fr)]">
 
           {/* Brand column */}
           <div>
