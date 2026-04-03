@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/toaster";
 import { McpOverlay } from "@szl-holdings/mcp-client";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { TooltipProvider } from "@szl-holdings/shared-ui/ui/tooltip";
 
 const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
@@ -100,6 +101,7 @@ function App() {
   }
 
   return (
+    <PrismBusProvider domain="stephen">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
@@ -113,6 +115,7 @@ function App() {
         <McpOverlay domain="stephen" />
       </TooltipProvider>
     </QueryClientProvider>
+    </PrismBusProvider>
   );
 }
 

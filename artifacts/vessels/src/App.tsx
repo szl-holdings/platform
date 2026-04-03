@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { McpOverlay } from "@szl-holdings/mcp-client";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
 import {
   Ship, AlertTriangle, Activity, LayoutDashboard, WifiOff,
@@ -592,6 +593,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(vesselsCommands);
 
   return (
+    <PrismBusProvider domain="vessels">
     <SandboxModeProvider>
       <DemoModeProvider>
         <QueryClientProvider client={queryClient}>
@@ -605,6 +607,7 @@ function App() {
         </QueryClientProvider>
       </DemoModeProvider>
     </SandboxModeProvider>
+    </PrismBusProvider>
   );
 }
 

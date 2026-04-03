@@ -171,6 +171,10 @@ importers:
         version: 4.1.2(@types/node@25.3.5)(@vitest/ui@4.1.2)(happy-dom@20.8.9)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   artifacts/aegis-mobile:
+    dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -352,12 +356,18 @@ importers:
       '@szl-holdings/config':
         specifier: workspace:*
         version: link:../../lib/config
+      '@szl-holdings/covenant-policy':
+        specifier: workspace:*
+        version: link:../../lib/covenant-policy
       '@szl-holdings/data-connectors':
         specifier: workspace:*
         version: link:../../lib/data-connectors
       '@szl-holdings/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@szl-holdings/forge-runtime':
+        specifier: workspace:*
+        version: link:../../lib/forge-runtime
       '@szl-holdings/integrations-anthropic-ai':
         specifier: workspace:*
         version: link:../../lib/integrations-anthropic-ai
@@ -370,6 +380,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       '@szl-holdings/proof-chain':
         specifier: workspace:*
         version: link:../../lib/proof-chain
@@ -515,6 +528,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       '@szl-holdings/replit-auth-web':
         specifier: workspace:*
         version: link:../../lib/replit-auth-web
@@ -594,6 +610,9 @@ importers:
 
   artifacts/carlota-jo-mobile:
     dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       expo-device:
         specifier: ^55.0.10
         version: 55.0.10(expo@54.0.33)
@@ -757,6 +776,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
@@ -980,6 +1002,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
@@ -1187,6 +1212,10 @@ importers:
         version: 3.25.76
 
   artifacts/lyte-mobile:
+    dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -1502,6 +1531,10 @@ importers:
         version: 3.25.76
 
   artifacts/stephen-mobile:
+    dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -1647,6 +1680,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       i18next:
         specifier: ^26.0.3
         version: 26.0.3(typescript@5.9.3)
@@ -1867,6 +1903,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       '@szl-holdings/replit-auth-web':
         specifier: workspace:*
         version: link:../../lib/replit-auth-web
@@ -1958,6 +1997,9 @@ importers:
 
   artifacts/szl-holdings-mobile:
     dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       graphql:
         specifier: ^16.13.2
         version: 16.13.2
@@ -2088,6 +2130,9 @@ importers:
       '@szl-holdings/graphql-client':
         specifier: workspace:*
         version: link:../../lib/graphql-client
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       '@types/mapbox-gl':
         specifier: ^3.5.0
         version: 3.5.0
@@ -2173,6 +2218,9 @@ importers:
 
   artifacts/terra-mobile:
     dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       expo-device:
         specifier: ^8.0.10
         version: 8.0.10(expo@54.0.33)
@@ -2339,6 +2387,9 @@ importers:
       '@szl-holdings/observability':
         specifier: workspace:*
         version: link:../../lib/observability
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
       '@szl-holdings/services':
         specifier: workspace:*
         version: link:../../lib/services
@@ -2549,6 +2600,10 @@ importers:
         version: 3.25.76
 
   artifacts/vessels-mobile:
+    dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../../lib/prism-bus
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -2788,6 +2843,22 @@ importers:
         specifier: 'catalog:'
         version: 25.3.5
 
+  lib/covenant-policy:
+    dependencies:
+      '@szl-holdings/approvals':
+        specifier: workspace:*
+        version: link:../approvals
+      '@szl-holdings/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../prism-bus
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+
   lib/data-connectors:
     dependencies:
       '@szl-holdings/services':
@@ -2822,6 +2893,19 @@ importers:
       drizzle-kit:
         specifier: ^0.31.9
         version: 0.31.9
+
+  lib/forge-runtime:
+    dependencies:
+      '@szl-holdings/prism-bus':
+        specifier: workspace:*
+        version: link:../prism-bus
+      '@szl-holdings/workflow-engine':
+        specifier: workspace:*
+        version: link:../workflow-engine
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
 
   lib/graphql-client:
     dependencies:
@@ -2920,6 +3004,19 @@ importers:
       '@sentry/react':
         specifier: ^10.47.0
         version: 10.47.0(react@19.1.0)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.3.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+
+  lib/prism-bus:
+    dependencies:
+      '@szl-holdings/mcp-client':
+        specifier: workspace:*
+        version: link:../mcp-client
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

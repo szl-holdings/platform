@@ -61,7 +61,10 @@
     "react": "catalog:",
     "swagger-ui-express": "^5.0.1",
     "ws": "^8.20.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@szl-holdings/prism-bus": "workspace:*",
+    "@szl-holdings/forge-runtime": "workspace:*",
+    "@szl-holdings/covenant-policy": "workspace:*"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",

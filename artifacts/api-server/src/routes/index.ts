@@ -107,6 +107,9 @@ import approvalsRouter from "./approvals";
 import proofChainRouter from "./proof-chain";
 import worldlineRouter from "./worldline";
 import distributionOsRouter from "./distribution-os";
+import prismBusApiRouter from "./prism-bus-api";
+import forgeRuntimeApiRouter from "./forge-runtime-api";
+import covenantPolicyApiRouter from "./covenant-policy-api";
 
 const router: IRouter = Router();
 
@@ -396,5 +399,14 @@ router.use(worldlineRouter);
 
 router.use("/distribution-os", _writeLimiter);
 router.use("/distribution-os", distributionOsRouter);
+
+router.use("/prism-bus", _readLimiter);
+router.use(prismBusApiRouter);
+
+router.use("/forge", _writeLimiter);
+router.use(forgeRuntimeApiRouter);
+
+router.use("/covenant", _readLimiter);
+router.use(covenantPolicyApiRouter);
 
 export default router;

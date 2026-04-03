@@ -1,0 +1,29 @@
+{
+  "name": "@szl-holdings/forge-runtime",
+  "version": "0.0.0",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szl-holdings/szl-holdings-platform.git",
+    "directory": "lib/forge-runtime"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./runtime": "./src/runtime.ts",
+    "./sandbox": "./src/sandbox.ts",
+    "./evidence": "./src/evidence.ts",
+    "./timeline": "./src/timeline.ts"
+  },
+  "dependencies": {
+    "@szl-holdings/prism-bus": "workspace:*",
+    "@szl-holdings/workflow-engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}

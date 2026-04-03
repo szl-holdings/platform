@@ -85,6 +85,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@szl-holdings/graphql-client": "workspace:*",
     "@szl-holdings/observability": "workspace:*",
-    "@szl-holdings/services": "workspace:*"
+    "@szl-holdings/services": "workspace:*",
+    "@szl-holdings/prism-bus": "workspace:*"
   }
 }

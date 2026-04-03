@@ -56,5 +56,8 @@
     "zod": "catalog:",
     "eventemitter3": "^5.0.1",
     "zod-validation-error": "^3.4.0"
+  },
+  "dependencies": {
+    "@szl-holdings/prism-bus": "workspace:*"
   }
 }

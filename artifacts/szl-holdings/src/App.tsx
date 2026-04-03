@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LazyMotion, domMax } from "framer-motion";
 import { DemoModeProvider, SandboxModeProvider, CookieBanner, StatusBanner, type StatusBannerConfig } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { useAuth } from "@szl-holdings/replit-auth-web";
 import { AlloyLayout } from "@/alloy/components/alloy-layout";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
@@ -252,6 +253,7 @@ function PageLoader() {
 
 function App() {
   return (
+    <PrismBusProvider domain="szl-holdings">
     <SandboxModeProvider>
     <DemoModeProvider>
     <QueryClientProvider client={queryClient}>
@@ -835,6 +837,7 @@ function App() {
     </QueryClientProvider>
     </DemoModeProvider>
     </SandboxModeProvider>
+    </PrismBusProvider>
   );
 }
 

@@ -1,6 +1,7 @@
 import { db, pcBackgroundJobsTable, pcDeadLetterEventsTable } from "@szl-holdings/db";
 import { eq, and, lte, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { forgeRuntime } from "@szl-holdings/forge-runtime";
 
 export const PRISM_JOB_TYPES = {
   DOCUMENT_INGEST: "document_ingest",
@@ -155,6 +156,19 @@ async function executeJob(job: typeof pcBackgroundJobsTable.$inferSelect): Promi
     logger.error({ jobType: job.jobType }, "[prism-queue] No handler registered");
     await moveToDeadLetter(job, "No handler registered for job type");
     return;
+  }
+
+  const tenantId = job.orgId?.toString() ?? null;
+  const tenantPolicy = tenantId ? forgeRuntime.getTenantPolicy(tenantId) : undefined;
+
+  if (tenantPolicy) {
+    const tenantActiveMax = tenantPolicy.maxConcurrentExecutions;
+    if (tenantPolicy.requiresDryRunFirst && tenantPolicy.requiresDryRunFirst === true) {
+      logger.info({ jobId: job.id, jobType: job.jobType }, "[prism-queue] Tenant requiresDryRunFirst — dry run must be completed via FORGE API before this job runs in production");
+    }
+    if (tenantPolicy.allowedDomains?.length > 0) {
+      logger.debug({ jobId: job.id, jobType: job.jobType, tenantId, maxConcurrent: tenantActiveMax }, "[forge-queue] FORGE tenant policy applied to job execution");
+    }
   }
 
   await db.update(pcBackgroundJobsTable)

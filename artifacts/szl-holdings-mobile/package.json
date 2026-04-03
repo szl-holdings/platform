@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "graphql": "^16.13.2",
-    "urql": "^5.0.1"
+    "urql": "^5.0.1",
+    "@szl-holdings/prism-bus": "workspace:*"
   }
 }

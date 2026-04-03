@@ -18,6 +18,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/context/AuthContext";
 import { LyteProvider } from "@/context/LyteContext";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 
 SystemUI.setBackgroundColorAsync("#070c14");
 SplashScreen.preventAutoHideAsync();
@@ -57,6 +58,7 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) return null;
 
   return (
+    <PrismBusProvider domain="lyte">
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
@@ -73,5 +75,6 @@ export default function RootLayout() {
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
+    </PrismBusProvider>
   );
 }

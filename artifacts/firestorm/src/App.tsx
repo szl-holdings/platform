@@ -3,6 +3,7 @@ import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { EcosystemNav } from "@szl-holdings/shared-ui/ecosystem-nav";
 import { DemoModeProvider, useRealtimeChannel, RealtimeStatusIndicator, OnboardingWizard, GettingStartedChecklist, useOnboardingState, type OnboardingConfig, SandboxModeProvider, SandboxModeBanner } from "@szl-holdings/shared-ui";
 import { McpOverlay } from "@szl-holdings/mcp-client";
+import { PrismBusProvider } from "@szl-holdings/prism-bus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@szl-holdings/shared-ui/ui/sonner";
 import { UserButton } from "@szl-holdings/shared-ui/UserButton";
@@ -789,6 +790,7 @@ function App() {
   const { open: cmdOpen, setOpen: setCmdOpen } = useCommandPalette(aegisCommands);
 
   return (
+    <PrismBusProvider domain="aegis">
     <SandboxModeProvider>
       <DemoModeProvider>
         <QueryClientProvider client={queryClient}>
@@ -800,6 +802,7 @@ function App() {
         </QueryClientProvider>
       </DemoModeProvider>
     </SandboxModeProvider>
+    </PrismBusProvider>
   );
 }
 

@@ -52,5 +52,8 @@
     "react-native-web": "^0.21.0",
     "typescript": "~5.9.2",
     "zod": "catalog:"
+  },
+  "dependencies": {
+    "@szl-holdings/prism-bus": "workspace:*"
   }
 }
