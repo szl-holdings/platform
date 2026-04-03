@@ -1,56 +1,63 @@
 # Stephen Lutar
 
-**Founder & CEO, SZL Holdings**
+**Founder & CEO — SZL Holdings**
 
-Building premium platforms for business observability, AI orchestration, secure execution, and modern command systems.
-
----
-
-## About
-
-I build governed operational intelligence software — systems where observability connects to action, not just visualization. AI outputs without traceability create noise, not trust. Every decision should have a signal, a routing path, an approval gate, and an audit trail.
+Building governed operational intelligence software. Systems where AI-assisted decisions require human accountability, and where observability connects to action — not just visualization.
 
 ---
 
 ## Current Build
 
-**Lyte** — Business observability platform. Surfaces execution risk, ownership drift, and workflow friction before they compound. PRISM framework: People, Revenue, Infrastructure, Security, Market.
-
-**Alloy** — Execution fabric. Signal normalization, workflow orchestration, approval controls, human-in-the-loop gates, and immutable audit trail. The layer that makes AI-assisted operations durable and accountable.
-
----
-
-## Platforms
-
-| Platform | Domain |
-|----------|--------|
-| **Aegis** | Security & defense intelligence |
-| **Vessels** | Maritime fleet command |
-| **Terra** | Real estate intelligence |
-| **Carlota Jo** | Premium advisory operations |
-
----
-
-## Focus Areas
+**SZL Holdings Platform** — 16-artifact pnpm monorepo. TypeScript throughout.
 
 ```
-Lyte + Alloy                │  Architecture              │  AI Governance
-Business observability      │  Full-stack TypeScript      │  Evidence-backed decisions
-Signal → action pipelines   │  Monorepo discipline       │  Human-in-the-loop gates
-Execution accountability    │  Shared infrastructure     │  Audit-first design
+Lyte + Alloy                   │  Domain Packs
+─────────────────────────────────────────────────────
+Business observability          │  Aegis    — Security & defense intelligence
+Signal-to-action pipeline       │  Vessels  — Maritime fleet command
+Workflow orchestration          │  Terra    — Real estate intelligence
+Human-in-the-loop gates         │  Carlota Jo — Premium advisory (live)
+Immutable audit trail           │
 ```
 
 ---
 
-## Featured Repo
+## Architecture Principles
 
-**[szl-holdings-platform](https://github.com/stephenlutar2-hash/szl-holdings-platform)** — Full platform ecosystem. 16 deployable artifacts, 120+ database tables, TypeScript everywhere.
+**AI governance by design.** Advisory agents cannot execute consequential actions without explicit human confirmation. Enforced at the workflow layer — not just the UI.
+
+**Evidence-backed decisions.** Every AI recommendation includes source citations, confidence scores, and retrieval provenance. No opaque outputs.
+
+**Explicit over implicit.** Platform state is always visible. No silent fallbacks. Failures surface, not hide.
+
+**Shared fabric, domain specialization.** Lyte and Alloy are not product-specific — they are platform infrastructure. Domain packs are structured applications built on the same foundation.
+
+---
+
+## Stack
+
+```
+TypeScript · React · Express · PostgreSQL · Drizzle ORM
+pnpm monorepo · Expo / React Native · Azure · OIDC/PKCE
+HuggingFace Inference · Apollo GraphQL · Vite
+```
+
+16 deployable artifacts · 120+ database tables · 7 web apps · 7 mobile apps
+
+---
+
+## Featured Repository
+
+**[szl-holdings-platform](https://github.com/stephenlutar2-hash/szl-holdings-platform)**
+
+Full platform ecosystem — all products, shared infrastructure, mobile apps, AI orchestration, and documentation.
 
 ---
 
 ## Connect
 
 **LinkedIn:** [linkedin.com/in/stephen-l-279315240](https://linkedin.com/in/stephen-l-279315240)  
-**Website:** [szlholdings.com](https://szlholdings.com)
+**Website:** [szlholdings.com](https://szlholdings.com)  
+**Inquiries:** [inquiries@szlholdings.com](mailto:inquiries@szlholdings.com)
 
 *Open to design partner conversations, enterprise evaluation, and investment.*

@@ -15,28 +15,26 @@ Use this checklist when performing GitHub operations manually through the web in
 
 - [ ] **Description:** Set to:
   ```
-  Platform ecosystem for business observability, AI orchestration, maritime intelligence, and secure execution — built by Stephen Lutar.
+  Governed operational intelligence software — Lyte · Alloy · Aegis · Vessels · Terra
   ```
 - [ ] **Website:** Set to: `https://szlholdings.com`
-- [ ] **Topics:** Add all of the following:
+- [ ] **Topics:** Add all of the following (see `ops/github/recommended-topics.md` for rationale):
+  - `szl-holdings`
+  - `lyte`
+  - `alloy`
+  - `business-observability`
+  - `ai-orchestration`
+  - `secure-operations`
+  - `enterprise-platform`
   - `typescript`
   - `react`
-  - `nodejs`
-  - `postgresql`
-  - `drizzle-orm`
-  - `expo`
-  - `monorepo`
-  - `pnpm`
   - `azure`
-  - `ai-orchestration`
-  - `business-observability`
-  - `maritime-intelligence`
-  - `saas`
+  - `vessels`
 
 **Feature Settings (under General):**
 - [ ] Issues: ✅ Enabled
 - [ ] Projects: ❌ Disabled
-- [ ] Wiki: ❌ Disabled
+- [ ] Wiki: ✅ Enabled (required for wiki documentation layer — see `ops/github/wiki-manual-steps.md`)
 - [ ] Discussions: ❌ Disabled
 - [ ] Packages: ❌ Disabled
 
@@ -121,15 +119,41 @@ Delete any default labels that don't fit. Create the following:
 
 ---
 
-## 7. Verify Completed State
+## 7. Wiki Setup
+
+See `ops/github/wiki-manual-steps.md` for the complete wiki setup workflow.
+
+Summary:
+1. Enable wiki in repository Settings → Features → Wikis
+2. Create first page through GitHub UI to initialize wiki repo
+3. Clone wiki repo: `git clone https://github.com/stephenlutar2-hash/szl-holdings-platform.wiki.git ../szl-holdings-platform.wiki`
+4. Run wiki sync pipeline: validate → export → commit
+5. Verify sidebar, footer, and image rendering
+
+---
+
+## 8. Social Preview Upload
+
+See `scripts/github/update-social-preview-guide.md`.
+
+1. Go to: Settings → Social preview → Edit
+2. Upload `docs/media/social-preview/repo-social-preview.png`
+3. Verify with a test share
+
+---
+
+## 9. Verify Completed State
 
 After all steps above:
 
-- [ ] Repository description is set
-- [ ] Topics are added
+- [ ] Repository description is set (new canonical description)
+- [ ] Topics are added (11 recommended topics from `recommended-topics.md`)
 - [ ] Homepage URL is set
 - [ ] Branch protection is applied to `master`
 - [ ] Profile README repository exists and is populated
 - [ ] GitHub profile settings are updated
 - [ ] v0.1.0 release is published
 - [ ] Issue labels are bootstrapped
+- [ ] Wiki is enabled and published (12 pages + sidebar + footer)
+- [ ] Social preview image is uploaded
+- [ ] README links to wiki pages are valid

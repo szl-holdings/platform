@@ -15,19 +15,19 @@ echo "================================================================"
 echo ""
 
 # Verify authentication
-echo "[1/6] Verifying GitHub CLI authentication..."
+echo "[1/7] Verifying GitHub CLI authentication..."
 gh auth status || { echo "ERROR: Not authenticated. Run: gh auth login"; exit 1; }
 echo ""
 
 # =============================================================================
-# Repository Description and Homepage
+# Repository Description, Homepage, and Features
 # =============================================================================
-echo "[2/6] Updating repository metadata..."
+echo "[2/7] Updating repository metadata..."
 gh repo edit "$REPO" \
-  --description "Platform ecosystem for business observability, AI orchestration, maritime intelligence, and secure execution — built by Stephen Lutar." \
+  --description "Governed operational intelligence software — Lyte · Alloy · Aegis · Vessels · Terra" \
   --homepage "https://szlholdings.com" \
   --enable-issues \
-  --disable-wiki \
+  --enable-wiki \
   --disable-projects
 
 echo "  ✓ Description, homepage, and feature settings updated"
@@ -36,48 +36,62 @@ echo ""
 # =============================================================================
 # Repository Topics
 # =============================================================================
-echo "[3/6] Setting repository topics..."
+echo "[3/7] Setting repository topics..."
+
+# Remove old topics first (via API since gh CLI doesn't support topic removal cleanly)
+# Topics are replaced wholesale by the update-topics.ts script
+# Here we add the new canonical set
+
 gh repo edit "$REPO" \
+  --add-topic szl-holdings \
+  --add-topic lyte \
+  --add-topic alloy \
+  --add-topic business-observability \
+  --add-topic ai-orchestration \
+  --add-topic secure-operations \
+  --add-topic enterprise-platform \
   --add-topic typescript \
   --add-topic react \
-  --add-topic nodejs \
-  --add-topic postgresql \
-  --add-topic drizzle-orm \
-  --add-topic expo \
-  --add-topic monorepo \
-  --add-topic pnpm \
   --add-topic azure \
-  --add-topic ai-orchestration \
-  --add-topic business-observability \
-  --add-topic maritime-intelligence \
-  --add-topic saas
+  --add-topic vessels
 
 echo "  ✓ Topics set"
+echo "  NOTE: Use scripts/github/update-topics.ts for atomic topic replacement"
+echo ""
+
+# =============================================================================
+# Enable Wiki (required before first wiki sync)
+# =============================================================================
+echo "[4/7] Wiki status..."
+echo "  Wiki is enabled via the repo edit above (--enable-wiki)"
+echo "  First-time wiki setup requires manual steps:"
+echo "  1. Go to: https://github.com/$REPO/wiki"
+echo "  2. Create the first page manually (GitHub requires this to initialize the wiki repo)"
+echo "  3. Clone: git clone https://github.com/$REPO.wiki.git ../szl-holdings-platform.wiki"
+echo "  4. Run: npx tsx scripts/wiki/prepare-wiki-pages.ts"
+echo "  5. Run: npx tsx scripts/wiki/export-docs-to-wiki.ts"
+echo "  6. Run: bash scripts/wiki/wiki-commit.sh \"Initial wiki publish\""
+echo "  See: ops/github/wiki-manual-steps.md"
 echo ""
 
 # =============================================================================
 # Create Release v0.1.0
 # =============================================================================
-echo "[4/6] Creating release v0.1.0..."
+echo "[5/7] Creating release v0.1.0..."
 gh release create v0.1.0 \
   --repo "$REPO" \
   --title "v0.1.0 — Initial Public Platform Release" \
   --notes-file "docs/releases/v0.1.0.md" \
-  --latest
+  --latest 2>/dev/null || echo "  NOTE: Release v0.1.0 may already exist"
 
-echo "  ✓ Release v0.1.0 created"
+echo "  ✓ Release v0.1.0 done"
 echo ""
 
 # =============================================================================
 # Bootstrap Issue Labels
 # =============================================================================
-echo "[5/6] Bootstrapping issue labels..."
+echo "[6/7] Bootstrapping issue labels..."
 
-# Delete default labels that don't fit (optional — comment out if you want to keep them)
-# gh label delete "good first issue" --repo "$REPO" --yes 2>/dev/null || true
-# gh label delete "help wanted" --repo "$REPO" --yes 2>/dev/null || true
-
-# Create canonical labels
 gh label create "lyte" --color "0ea5e9" --description "Lyte Business Observability platform" --repo "$REPO" --force
 gh label create "aegis" --color "ef4444" --description "Aegis Defense & Intelligence platform" --repo "$REPO" --force
 gh label create "vessels" --color "06b6d4" --description "Vessels Maritime Intelligence platform" --repo "$REPO" --force
@@ -98,19 +112,23 @@ echo ""
 # =============================================================================
 # Summary
 # =============================================================================
-echo "[6/6] Verification..."
+echo "[7/7] Verification..."
 echo ""
-echo "  Repository: https://github.com/$REPO"
-echo "  Releases:   https://github.com/$REPO/releases"
-echo "  Labels:     https://github.com/$REPO/labels"
+echo "  Repository:    https://github.com/$REPO"
+echo "  Releases:      https://github.com/$REPO/releases"
+echo "  Labels:        https://github.com/$REPO/labels"
+echo "  Wiki:          https://github.com/$REPO/wiki"
 echo ""
 echo "================================================================"
 echo "  COMPLETE — Verify the above URLs in your browser"
 echo "================================================================"
 echo ""
 echo "Manual steps remaining:"
-echo "  1. Create profile README repo: github.com/new → name: $USERNAME"
-echo "  2. Add profile README content from: profile-readme/README.md"
-echo "  3. Update GitHub profile settings: github.com/settings/profile"
-echo "  4. Set branch protection rules: github.com/$REPO/settings/branches"
+echo "  1. Update profile settings:       github.com/settings/profile"
+echo "  2. Create profile README repo:    github.com/new → name: $USERNAME"
+echo "  3. Add profile README content:    profile-readme/README.md"
+echo "  4. Set branch protection rules:   github.com/$REPO/settings/branches"
+echo "  5. Upload social preview:         github.com/$REPO/settings (see social-preview-spec.md)"
+echo "  6. Publish wiki pages:            ops/github/wiki-manual-steps.md"
+echo "  7. Apply topics (atomic):         GITHUB_TOKEN=<token> npx tsx scripts/github/update-topics.ts"
 echo ""

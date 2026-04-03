@@ -6,6 +6,9 @@ contact_links:
   - name: Enterprise Evaluation Inquiry
     url: mailto:inquiries@szlholdings.com
     about: "For enterprise access, investor data room, or partnership inquiries."
-  - name: Platform Documentation
+  - name: Platform Wiki & Documentation
+    url: https://github.com/stephenlutar2-hash/szl-holdings-platform/wiki
+    about: "Architecture, trust, buyer use cases, investor overview, FAQ, and glossary."
+  - name: In-Repo Documentation
     url: https://github.com/stephenlutar2-hash/szl-holdings-platform/tree/master/docs
     about: "Full documentation for architecture, trust, investor materials, and deployment."
