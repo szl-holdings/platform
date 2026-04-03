@@ -63,6 +63,13 @@ const ReadinessAIInsights = lazy(() => import("@/pages/compliance/readiness-ai-i
 const SoarPlaybooks = lazy(() => import("@/pages/soar-playbooks"));
 const StixTaxii = lazy(() => import("@/pages/stix-taxii"));
 
+// ─── Command Surfaces (Phase 1) ───────────────────────────────────────────────
+const CommandHome = lazy(() => import("@/pages/command-home"));
+const InvestigationsBoard = lazy(() => import("@/pages/investigations-board"));
+const DecisionConsole = lazy(() => import("@/pages/decision-console"));
+const ResponseOrchestration = lazy(() => import("@/pages/response-orchestration"));
+const ExecutiveBoardView = lazy(() => import("@/pages/executive-board-view"));
+
 // ─── Managed Operations pages (Aegis Operations/MSP) ─────────────────────────
 const MspDashboard = lazy(() => import("@/pages/msp/dashboard"));
 const MspClients = lazy(() => import("@/pages/msp/clients"));
@@ -103,6 +110,14 @@ const queryClient = new QueryClient({
 });
 
 // ─── Navigation definitions ───────────────────────────────────────────────────
+
+const commandSurfacesNav = [
+  { path: "/command-home", label: "Command Home", icon: LayoutDashboard },
+  { path: "/investigations", label: "Investigations Board", icon: Search },
+  { path: "/decision-console", label: "Decision Console", icon: ClipboardCheck },
+  { path: "/response-orchestration", label: "Response Orchestration", icon: Zap },
+  { path: "/executive-board", label: "Executive / Board View", icon: BarChart3 },
+];
 
 const securityNavPrimary = [
   { path: "/soc", label: "SOC Overview", icon: Activity },
@@ -400,6 +415,27 @@ function Sidebar({ open, onClose, onReplayTour }: { open: boolean; onClose: () =
         <nav className="flex-1 min-h-0 px-2 py-2 space-y-0.5 overflow-y-auto">
           {activeModule === "security" && (
             <>
+              <div className="px-3 py-1 mt-1">
+                <span className="text-[9px] font-mono uppercase tracking-[0.15em]" style={{ color: "rgba(239,68,68,0.5)" }}>Command Surfaces</span>
+              </div>
+              {commandSurfacesNav.map(({ path, label, icon: Icon }) => {
+                const isActive = location.startsWith(path);
+                return (
+                  <Link key={path} href={path}>
+                    <div className={cn(
+                      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer relative",
+                      isActive ? colors.active : colors.inactive
+                    )}>
+                      {isActive && <div className={cn("absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-r-full", colors.indicator)} />}
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      {label}
+                    </div>
+                  </Link>
+                );
+              })}
+              <div className="px-3 py-1 mt-1">
+                <span className="text-[9px] font-mono uppercase tracking-[0.15em]" style={{ color: "rgba(239,68,68,0.5)" }}>Security Operations</span>
+              </div>
               {renderNavItems(securityNavPrimary)}
               <ModuleSection
                 title="SOC Tools"
@@ -606,6 +642,12 @@ function AppRouter() {
         {/* Aegis Home & Enterprise */}
         <Route path="/home" component={AegisMarketingHome} />
         <Route path="/demo" component={EnterpriseDemo} />
+        {/* Command Surfaces (Phase 1) */}
+        <Route path="/command-home" component={CommandHome} />
+        <Route path="/investigations" component={InvestigationsBoard} />
+        <Route path="/decision-console" component={DecisionConsole} />
+        <Route path="/response-orchestration" component={ResponseOrchestration} />
+        <Route path="/executive-board" component={ExecutiveBoardView} />
         {/* Security Operations */}
         <Route path="/soc" component={SOCDashboard} />
         <Route path="/" component={AegisMarketingHome} />
@@ -690,6 +732,11 @@ function nav(path: string) {
 }
 
 const aegisCommands: CommandItem[] = [
+  { id: "nav-command-home", label: "Command Home", icon: "🏠", group: "Command Surfaces", keywords: ["home", "dashboard", "command", "operator"], action: nav("/command-home") },
+  { id: "nav-investigations", label: "Investigations Board", icon: "🔍", group: "Command Surfaces", keywords: ["investigation", "case", "timeline", "entities"], action: nav("/investigations") },
+  { id: "nav-decision-console", label: "Decision Console", icon: "📋", group: "Command Surfaces", keywords: ["decision", "confidence", "evidence", "approve"], action: nav("/decision-console") },
+  { id: "nav-response-orchestration", label: "Response Orchestration", icon: "⚡", group: "Command Surfaces", keywords: ["playbook", "response", "orchestration", "containment"], action: nav("/response-orchestration") },
+  { id: "nav-executive-board", label: "Executive / Board View", icon: "📊", group: "Command Surfaces", keywords: ["executive", "board", "posture", "ciso"], action: nav("/executive-board") },
   { id: "nav-soc", label: "SOC Overview", icon: "🛡️", group: "Security Operations", keywords: ["dashboard", "home", "soc"], action: nav("/soc") },
   { id: "nav-incidents", label: "Incidents", icon: "🚨", group: "Security Operations", action: nav("/incidents") },
   { id: "nav-alerts", label: "Alerts", icon: "🔔", group: "Security Operations", action: nav("/alerts") },

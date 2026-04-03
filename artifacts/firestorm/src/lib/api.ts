@@ -164,4 +164,32 @@ export const api = {
     complianceSummary: () => apiFetch<any>("/firestorm/live/compliance-summary"),
     assetRisk: () => apiFetch<any>("/firestorm/live/asset-risk"),
   },
+  command: {
+    posture: () => apiFetch<any>("/firestorm/command/posture"),
+    investigations: () => apiFetch<any>("/firestorm/command/investigations"),
+    addNote: (note: string, caseId?: number) =>
+      apiFetch<any>("/firestorm/command/investigations", { method: "POST", body: JSON.stringify({ type: "note", content: note, caseId }) }),
+    decisions: () => apiFetch<any>("/firestorm/command/decisions"),
+    approveDecision: (id: string, note: string, stepUpToken: string) =>
+      apiFetch<any>(`/firestorm/command/decisions/${id}/approve`, {
+        method: "POST",
+        body: JSON.stringify({ approvalNote: note }),
+        headers: { "X-Step-Up-Token": stepUpToken },
+      }),
+    playbooks: () => apiFetch<any>("/firestorm/command/response/playbooks"),
+    executePlaybook: (actionType: string, targetId: string, stepUpToken: string, notes?: string) =>
+      apiFetch<any>("/firestorm/command/response/execute", {
+        method: "POST",
+        body: JSON.stringify({ actionType, targetId, notes }),
+        headers: { "X-Step-Up-Token": stepUpToken },
+      }),
+    contain: (containmentType: string, assetId: string, justification: string, stepUpToken: string) =>
+      apiFetch<any>("/firestorm/command/response/contain", {
+        method: "POST",
+        body: JSON.stringify({ containmentType, assetId, justification }),
+        headers: { "X-Step-Up-Token": stepUpToken },
+      }),
+    executivePosture: () => apiFetch<any>("/firestorm/command/executive/posture"),
+    executiveCompliance: () => apiFetch<any>("/firestorm/command/executive/compliance"),
+  },
 };
