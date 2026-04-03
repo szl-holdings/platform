@@ -1,56 +1,27 @@
 ---
-name: Feature Request
-about: Suggest a capability improvement or new feature for the SZL Holdings platform
-title: '[FEATURE] '
-labels: enhancement
-assignees: stephenlutar2-hash
----
+  name: Feature Request
+  about: Suggest a new feature or improvement
+  title: "[FEATURE] "
+  labels: enhancement
+  assignees: stephenlutar2-hash
+  ---
 
-## Platform / Component
+  ## Summary
 
-_Which platform or component would this feature affect?_
+  A clear description of the feature.
 
-- [ ] Lyte — Business Observability
-- [ ] Aegis — Defense & Intelligence
-- [ ] Terra — Real Estate Intelligence
-- [ ] Vessels — Maritime Intelligence
-- [ ] Carlota Jo — Advisory
-- [ ] SZL Holdings — Corporate
-- [ ] API Server / Shared Infrastructure
-- [ ] New platform / vertical
+  ## Problem
 
----
+  What problem does this solve?
 
-## Problem Statement
+  ## Proposed Solution
 
-_What problem does this feature solve? Describe the operational need._
+  How should it work?
 
----
+  ## Alternatives Considered
 
-## Proposed Solution
+  Any alternative approaches?
 
-_Describe what you'd like to see built. Be as specific as you can._
+  ## Additional Context
 
----
-
-## User / Role Context
-
-_Who would benefit from this feature? What role are they in?_
-
----
-
-## Priority Assessment
-
-_Why is this important? What's the cost of not having it?_
-
----
-
-## Alternatives Considered
-
-_What workarounds or alternative approaches exist today?_
-
----
-
-## Additional Context
-
-_Architecture notes, design sketches, or external references._
+  
