@@ -1,9 +1,13 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Building2, CheckCircle2, Shield, FileText, Eye, Lock, Database, Zap, AlertTriangle, Map, BarChart3 } from "lucide-react";
+import {
+  ArrowRight, Building2, CheckCircle2, Shield, FileText, Eye, Lock, Database,
+  Zap, AlertTriangle, Map, BarChart3, Clock, Users, Layers
+} from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { AlloyOperatingLoopDiagram } from "@/components/diagrams/AlloyOperatingLoopDiagram";
 
 const WORKFLOW_STEPS = [
   {
@@ -59,17 +63,68 @@ const TRUST_CONTROLS = [
   "No autonomous execution — every recommended action requires explicit approval",
 ];
 
+const ALLOY_INHERITED = [
+  {
+    capability: "Approval Gates",
+    description: "Acquisition decisions, diligence completions, and material portfolio actions require explicit human approval through Alloy's HITL gate before execution.",
+  },
+  {
+    capability: "Signal Normalization",
+    description: "PLUTO records, FEMA flood data, lien records, and permit data normalized into a consistent schema before evaluation — regardless of source format or update cadence.",
+  },
+  {
+    capability: "Workflow Routing",
+    description: "Diligence tasks, approval requests, and deal escalations routed to the right team member with context, deadline, and authority scope structured for immediate action.",
+  },
+  {
+    capability: "Immutable Audit Trail",
+    description: "Every deal decision — from distress flag to LP export — logged with actor attribution and authorization basis, exportable for LP review or regulatory compliance.",
+  },
+  {
+    capability: "Connector Mesh",
+    description: "Terra integrates with deal platforms, LP portals, and regulatory databases through Alloy's connector layer — output goes where the deal team already works.",
+  },
+  {
+    capability: "Explainability",
+    description: "Why was this property flagged as distressed? Why was this flood risk scored at this level? Every evaluation is traceable to its public data source and scoring criteria.",
+  },
+];
+
+const UNIQUE_TO_TERRA = [
+  "Property Twin — live multi-signal model of ownership, liens, permits, distress, and market context per asset",
+  "NYC PLUTO integration for authoritative land use and zoning data",
+  "FEMA NFHL flood zone scoring with base flood elevation and risk context",
+  "Public lien and permit record integration from county and municipal sources",
+  "Distress signal detection: tax delinquency, foreclosure filings, code violations, and ownership gaps",
+  "LP-ready diligence export with data provenance and approval record intact",
+];
+
 export default function TerraPublicPage() {
   usePageMeta({
     title: "Terra — Property Twin & Real Estate Intelligence | SZL Holdings",
     description: "Terra turns fragmented property signals into governed deal intelligence. Property Twin, distress detection, FEMA flood risk, diligence workflow, and LP-ready export.",
-    canonical: "https://szlholdings.com/terra-public",
+    canonical: "https://szlholdings.com/products/terra",
   });
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
       <SiteNav />
       <main id="main-content" role="main">
+
+        {/* Maturity banner */}
+        <div style={{ background: "hsla(140,50%,38%,0.07)", borderBottom: "1px solid hsla(140,50%,38%,0.18)", padding: "0.75rem var(--space-content-x)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Clock size={13} color="hsl(140,50%,48%)" />
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(140,50%,48%)" }}>
+                Design Partner Stage
+              </span>
+            </div>
+            <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,60%)", lineHeight: 1.5 }}>
+              Terra is in active design partner engagements with real estate operators and investors. Architecture and core capabilities are established. We are not in general availability. If this fits, let's talk.
+            </span>
+          </div>
+        </div>
 
         {/* Hero */}
         <section
@@ -130,11 +185,11 @@ export default function TerraPublicPage() {
                   From distress detection to LP-ready diligence export — with human approval at every material decision point.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                  <Link href="/demo" className="szl-btn-primary">
-                    See the flagship workflow <ArrowRight size={15} />
+                  <Link href="/contact" className="szl-btn-primary">
+                    Request a design partner conversation <ArrowRight size={15} />
                   </Link>
-                  <Link href="/contact" className="szl-btn-secondary">
-                    Request controlled access
+                  <Link href="/demo" className="szl-btn-secondary">
+                    See the flagship workflow
                   </Link>
                 </div>
               </m.div>
@@ -171,12 +226,52 @@ export default function TerraPublicPage() {
           </div>
         </section>
 
+        {/* Lane definition */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "start" }} className="lg:grid-cols-2">
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>Lane Definition</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "1.25rem" }}>
+                  Why real estate. Why this architecture.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.25rem" }}>
+                  Real estate is a domain rich in public data and poor in execution structure. Operators work from spreadsheets and manual data pulls while critical signals — distress, liens, flood risk — sit in disconnected systems. Terra applies Alloy's operating loop to the deal lifecycle: turning public data into a structured Property Twin, routing diligence actions through governed workflows, and producing LP-ready output with full provenance.
+                </p>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
+                  The architecture directly mirrors PRISM Counsel: a live structured object per asset (Property Twin, parallel to Matter Twin), signal enrichment from authoritative public sources, governed workflow routing through Alloy, and a diligence audit trail designed for external review.
+                </p>
+              </m.div>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>Target Users</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                  {[
+                    { role: "Acquisitions Team", scope: "Distress signal detection, property diligence workflow, deal approval routing" },
+                    { role: "Asset Manager", scope: "Portfolio-level distress monitoring, lease expiration tracking, deferred maintenance signals" },
+                    { role: "Portfolio Manager", scope: "Cross-portfolio friction visibility, diligence status, capital allocation decision support" },
+                    { role: "LP / Investor Relations", scope: "Diligence package export, property analysis reports, audit trail for LP review" },
+                    { role: "Compliance / Legal", scope: "Lien and permit status, source-attributed data provenance, regulatory audit trail" },
+                  ].map((user, i) => (
+                    <div key={i} style={{ padding: "0.875rem 1rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                        <Users size={11} color="hsl(140,50%,48%)" />
+                        <p style={{ fontSize: "12px", fontWeight: 700, color: "hsl(38,12%,82%)" }}>{user.role}</p>
+                      </div>
+                      <p style={{ fontSize: "11px", lineHeight: 1.55, color: "hsl(214,7%,50%)" }}>{user.scope}</p>
+                    </div>
+                  ))}
+                </div>
+              </m.div>
+            </div>
+          </div>
+        </section>
+
         {/* Workflow */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>
-                Flagship Workflow
+                Sample Use Case
               </p>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
                 From Property Twin to LP-ready export — governed end to end.
@@ -233,6 +328,44 @@ export default function TerraPublicPage() {
           </div>
         </section>
 
+        {/* Alloy inheritance */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>
+                What Terra Inherits from Alloy
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
+                The execution fabric is inherited. Terra brings real estate-specific intelligence.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                Terra does not rebuild what Alloy already provides. Every capability below comes from the shared platform — the same infrastructure governing PRISM Counsel, Vessels, Aegis, and Carlota Jo.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">
+              {ALLOY_INHERITED.map((item, i) => (
+                <m.div
+                  key={item.capability}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.06 }}
+                  style={{ padding: "1.25rem", borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                    <Layers size={13} color="hsl(140,50%,48%)" style={{ flexShrink: 0 }} />
+                    <h3 style={{ fontSize: "0.875rem", fontWeight: 700, letterSpacing: "-0.010em", color: "hsl(38,8%,88%)" }}>{item.capability}</h3>
+                  </div>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)" }}>{item.description}</p>
+                </m.div>
+              ))}
+            </div>
+            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <AlloyOperatingLoopDiagram compact />
+            </m.div>
+          </div>
+        </section>
+
         {/* Signal sources */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
@@ -265,7 +398,29 @@ export default function TerraPublicPage() {
           </div>
         </section>
 
-        {/* Trust + CTA */}
+        {/* What's unique */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>
+                What's Unique to Terra
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2.5rem" }}>
+                Real estate-specific capabilities built on the shared platform.
+              </h2>
+            </m.div>
+            <div style={{ display: "grid", gap: "0.75rem" }} className="lg:grid-cols-2">
+              {UNIQUE_TO_TERRA.map((item, i) => (
+                <m.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "1rem 1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+                  <Building2 size={13} color="hsl(140,50%,48%)" style={{ marginTop: "2px", flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "hsl(214,7%,64%)" }}>{item}</span>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Trust */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
@@ -287,19 +442,72 @@ export default function TerraPublicPage() {
           </div>
         </section>
 
+        {/* Maturity state */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(140,50%,48%)", marginBottom: "1rem" }}>
+                Maturity & Path to Pilot
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.25rem" }}>
+                Design partner stage. Honest about it.
+              </h2>
+            </m.div>
+            <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3">
+              {[
+                {
+                  label: "Architecture",
+                  status: "Established",
+                  statusColor: "hsl(142,60%,46%)",
+                  description: "Property Twin model, PLUTO/FEMA/Census integration schema, Alloy connector design, and LP-ready export structure are defined.",
+                },
+                {
+                  label: "Core Capabilities",
+                  status: "In Development",
+                  statusColor: "hsl(40,85%,55%)",
+                  description: "Property Twin assembly, distress signal detection, diligence workflow routing, and LP export are in active development.",
+                },
+                {
+                  label: "General Availability",
+                  status: "Not Yet",
+                  statusColor: "hsl(214,7%,50%)",
+                  description: "Terra is not in general availability. We are working with a small number of real estate operators and investors in structured design partner engagements.",
+                },
+              ].map((item, i) => (
+                <m.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.07 }}
+                  style={{ padding: "1.375rem", borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                    <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, color: "hsl(38,8%,88%)" }}>{item.label}</h3>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, color: item.statusColor, letterSpacing: "0.08em", textTransform: "uppercase", background: `${item.statusColor}18`, padding: "2px 6px", borderRadius: "4px", border: `1px solid ${item.statusColor}30` }}>
+                      {item.status}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.65, color: "hsl(214,7%,58%)" }}>{item.description}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section style={{ padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} style={{ borderRadius: "1rem", padding: "clamp(2.5rem,5vw,4rem)", gap: "2.5rem", alignItems: "center", background: "hsla(140,50%,38%,0.05)", border: "1px solid hsla(140,50%,38%,0.16)" }} className="szl-grid-cta">
               <div>
                 <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "0.875rem" }}>
-                  Ready to put a command layer on your real estate operations?
+                  The right fit for your real estate operations?
                 </h2>
                 <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
-                  We work with operators and investors to instrument Terra against their actual portfolio — real properties, real signals, real diligence workflows — in a focused design partner engagement.
+                  We work with real estate operators and investors in focused design partner engagements — real properties, real signals, real diligence workflows. If this fits, reach out.
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>
-                <Link href="/contact" className="szl-btn-primary">Request controlled access <ArrowRight size={14} /></Link>
+                <Link href="/contact" className="szl-btn-primary">Start a conversation <ArrowRight size={14} /></Link>
                 <Link href="/demo" className="szl-btn-secondary" style={{ textAlign: "center" }}>See the flagship workflow</Link>
               </div>
             </m.div>

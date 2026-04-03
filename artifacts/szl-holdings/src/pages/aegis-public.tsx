@@ -1,9 +1,13 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, ShieldCheck, CheckCircle2, Shield, FileText, Eye, Lock, Database, AlertTriangle, Zap, Server, Users } from "lucide-react";
+import {
+  ArrowRight, ShieldCheck, CheckCircle2, Shield, FileText, Eye, Lock,
+  Database, AlertTriangle, Zap, Server, Users, Clock, Layers, GitBranch
+} from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { AlloyOperatingLoopDiagram } from "@/components/diagrams/AlloyOperatingLoopDiagram";
 
 const WORKFLOW_STEPS = [
   {
@@ -58,17 +62,68 @@ const TRUST_CONTROLS = [
   "Evidence capture — before/after state, rationale, and authorization basis for every action taken",
 ];
 
+const ALLOY_INHERITED = [
+  {
+    capability: "Approval Gates",
+    description: "Every remediation action — patching, isolation, privilege revocation — requires analyst approval through Alloy's HITL gate before execution. No autonomous remediation.",
+  },
+  {
+    capability: "Signal Normalization",
+    description: "CVE feeds, KEV data, identity telemetry, and endpoint signals normalized into a consistent schema before evaluation — regardless of source format or ingestion rate.",
+  },
+  {
+    capability: "Workflow Routing",
+    description: "Findings, incidents, and remediation tasks routed to the right analyst with playbook context, SLA deadline, and escalation path already structured.",
+  },
+  {
+    capability: "Immutable Audit Trail",
+    description: "Every investigation step, response decision, and evidence review logged with analyst attribution and authorization basis — exportable for SOC 2, ISO 27001, or board review.",
+  },
+  {
+    capability: "Connector Mesh",
+    description: "Aegis integrates with SIEM, EDR, SOAR, and identity platforms through Alloy's connector layer — execution happens in existing tools without disruption.",
+  },
+  {
+    capability: "Explainability",
+    description: "Why was this CVE scored at this severity? Why was this incident escalated? Every evaluation is traceable to its data source and scoring criteria.",
+  },
+];
+
+const UNIQUE_TO_AEGIS = [
+  "Threat Twin — live multi-signal model of CVE exposure, identity anomalies, and active incidents mapped to your environment",
+  "CISA KEV urgency scoring applied to your actual stack — not generic vulnerability data",
+  "NIST NVD CVSS context enrichment with asset criticality and blast radius calculation",
+  "XDR signal normalization across endpoint, network, identity, and cloud layers",
+  "SOC analyst workflow management with assignment, SLA tracking, and escalation ladders",
+  "Compliance-ready evidence capture for SOC 2, ISO 27001, and NIST CSF audit requirements",
+];
+
 export default function AegisPublicPage() {
   usePageMeta({
     title: "Aegis — Threat Twin & Security Operations Command | SZL Holdings",
     description: "Aegis gives security teams a command layer above their threat exposure. Threat Twin, CISA KEV scoring, NIST NVD context, incident routing, and compliance-ready audit trail.",
-    canonical: "https://szlholdings.com/aegis-public",
+    canonical: "https://szlholdings.com/products/aegis",
   });
 
   return (
     <div style={{ minHeight: "100vh", background: "hsl(214,16%,4%)", color: "hsl(38,8%,95%)" }}>
       <SiteNav />
       <main id="main-content" role="main">
+
+        {/* Maturity banner */}
+        <div style={{ background: "hsla(222,60%,50%,0.07)", borderBottom: "1px solid hsla(222,60%,50%,0.18)", padding: "0.75rem var(--space-content-x)" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Clock size={13} color="hsl(222,60%,62%)" />
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "hsl(222,60%,62%)" }}>
+                In Development
+              </span>
+            </div>
+            <span style={{ fontSize: "0.8125rem", color: "hsl(214,7%,60%)", lineHeight: 1.5 }}>
+              Aegis is in active development. Architecture is established and core capabilities are being built. We are not in general availability. If this fits your security operations environment, we want to have a direct conversation.
+            </span>
+          </div>
+        </div>
 
         {/* Hero */}
         <section
@@ -104,8 +159,8 @@ export default function AegisPublicPage() {
                   Built for environments where CISA KEV urgency is real, where compliance traceability is non-negotiable, and where no action can be autonomous.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                  <Link href="/demo" className="szl-btn-primary">See the flagship workflow <ArrowRight size={15} /></Link>
-                  <Link href="/contact" className="szl-btn-secondary">Request controlled access</Link>
+                  <Link href="/contact" className="szl-btn-primary">Request a design partner conversation <ArrowRight size={15} /></Link>
+                  <Link href="/demo" className="szl-btn-secondary">See the flagship workflow</Link>
                 </div>
               </m.div>
 
@@ -136,12 +191,52 @@ export default function AegisPublicPage() {
           </div>
         </section>
 
+        {/* Lane definition & strategic rationale */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "start" }} className="lg:grid-cols-2">
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,62%)", marginBottom: "1rem" }}>Lane Definition</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "1.25rem" }}>
+                  Why security operations. Why this architecture.
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "46ch", marginBottom: "1.25rem" }}>
+                  Security operations is a domain drowning in signal volume and starved for structured action. The typical SIEM gives analysts raw alerts. The typical SOAR automates without sufficient human judgment. Aegis applies Alloy's governed operating loop to the security workflow — so analysts act on context, not noise, and every action has a traceable record.
+                </p>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,54%)", maxWidth: "46ch" }}>
+                  The architecture mirrors PRISM Counsel's operating model: a structured threat object (Threat Twin), signal enrichment from authoritative intelligence sources, governed response routing through Alloy, and a compliance-ready audit footprint for every security decision.
+                </p>
+              </m.div>
+              <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: 0.08 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,62%)", marginBottom: "1rem" }}>Target Users</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                  {[
+                    { role: "SOC Lead / Director", scope: "Analyst workload management, incident queue oversight, SLA tracking, board-level posture reporting" },
+                    { role: "SOC Analyst (T2/T3)", scope: "Structured investigation workflow, context-rich finding triage, governed response action queue" },
+                    { role: "CISO / VP Security", scope: "Portfolio exposure posture, compliance audit readiness, governance deviation reporting" },
+                    { role: "Compliance Officer", scope: "SOC 2, ISO 27001, NIST CSF evidence trail, audit export, control coverage visibility" },
+                    { role: "Incident Response Lead", scope: "Threat Twin context, response action governance, post-incident audit record" },
+                  ].map((user, i) => (
+                    <div key={i} style={{ padding: "0.875rem 1rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                        <Users size={11} color="hsl(222,60%,62%)" />
+                        <p style={{ fontSize: "12px", fontWeight: 700, color: "hsl(38,12%,82%)" }}>{user.role}</p>
+                      </div>
+                      <p style={{ fontSize: "11px", lineHeight: 1.55, color: "hsl(214,7%,50%)" }}>{user.scope}</p>
+                    </div>
+                  ))}
+                </div>
+              </m.div>
+            </div>
+          </div>
+        </section>
+
         {/* Workflow */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
               <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,62%)", marginBottom: "1rem" }}>
-                Flagship Workflow
+                Sample Use Case
               </p>
               <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
                 From Threat Twin to compliance record — every step traced.
@@ -185,7 +280,45 @@ export default function AegisPublicPage() {
           </div>
         </section>
 
-        {/* Signal sources */}
+        {/* Alloy inheritance */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,62%)", marginBottom: "1rem" }}>
+                What Aegis Inherits from Alloy
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "32ch", marginBottom: "1.25rem" }}>
+                The execution fabric comes with every lane. Aegis builds on top of it.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                Aegis does not rebuild what Alloy already provides. Every capability below is inherited from the shared platform — the same infrastructure governing PRISM Counsel, Vessels, Terra, and Carlota Jo.
+              </p>
+            </m.div>
+            <div style={{ display: "grid", gap: "1rem", marginBottom: "2.5rem" }} className="lg:grid-cols-3 md:grid-cols-2">
+              {ALLOY_INHERITED.map((item, i) => (
+                <m.div
+                  key={item.capability}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.06 }}
+                  style={{ padding: "1.25rem", borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
+                    <Layers size={13} color="hsl(222,60%,62%)" style={{ flexShrink: 0 }} />
+                    <h3 style={{ fontSize: "0.875rem", fontWeight: 700, letterSpacing: "-0.010em", color: "hsl(38,8%,88%)" }}>{item.capability}</h3>
+                  </div>
+                  <p style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "hsl(214,7%,58%)" }}>{item.description}</p>
+                </m.div>
+              ))}
+            </div>
+            <m.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <AlloyOperatingLoopDiagram compact />
+            </m.div>
+          </div>
+        </section>
+
+        {/* Signal sources + unique */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <div style={{ display: "grid", gap: "clamp(3rem,6vw,5rem)", alignItems: "start" }} className="lg:grid-cols-2">
@@ -213,6 +346,28 @@ export default function AegisPublicPage() {
           </div>
         </section>
 
+        {/* What's unique to Aegis */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,62%)", marginBottom: "1rem" }}>
+                What's Unique to Aegis
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "28ch", marginBottom: "2.5rem" }}>
+                Security-specific capabilities built on the shared platform.
+              </h2>
+            </m.div>
+            <div style={{ display: "grid", gap: "0.75rem" }} className="lg:grid-cols-2">
+              {UNIQUE_TO_AEGIS.map((item, i) => (
+                <m.div key={i} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", padding: "1rem 1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}>
+                  <ShieldCheck size={13} color="hsl(222,60%,62%)" style={{ marginTop: "2px", flexShrink: 0 }} />
+                  <span style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "hsl(214,7%,64%)" }}>{item}</span>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Trust */}
         <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
@@ -231,16 +386,73 @@ export default function AegisPublicPage() {
           </div>
         </section>
 
+        {/* Maturity state */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(222,60%,62%)", marginBottom: "1rem" }}>
+                Maturity & Path to Pilot
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.25rem" }}>
+                In development. Honest about it.
+              </h2>
+            </m.div>
+            <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3">
+              {[
+                {
+                  label: "Architecture",
+                  status: "Established",
+                  statusColor: "hsl(142,60%,46%)",
+                  description: "Threat Twin model, signal integration schema, Alloy connector design, and compliance audit trail structure are defined.",
+                },
+                {
+                  label: "Core Capabilities",
+                  status: "In Development",
+                  statusColor: "hsl(40,85%,55%)",
+                  description: "CISA KEV integration, NIST NVD enrichment, XDR normalization, and Alloy-gated analyst workflow are in active development.",
+                },
+                {
+                  label: "General Availability",
+                  status: "Not Yet",
+                  statusColor: "hsl(214,7%,50%)",
+                  description: "Aegis is not in general availability. We are evaluating design partner fit with a small number of security-sensitive organizations.",
+                },
+              ].map((item, i) => (
+                <m.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.38, delay: i * 0.07 }}
+                  style={{ padding: "1.375rem", borderRadius: "0.75rem", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.07)" }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                    <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, color: "hsl(38,8%,88%)" }}>{item.label}</h3>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 700, color: item.statusColor, letterSpacing: "0.08em", textTransform: "uppercase", background: `${item.statusColor}18`, padding: "2px 6px", borderRadius: "4px", border: `1px solid ${item.statusColor}30` }}>
+                      {item.status}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.65, color: "hsl(214,7%,58%)" }}>{item.description}</p>
+                </m.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section style={{ padding: "var(--space-section-md) 0" }}>
           <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
             <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} style={{ borderRadius: "1rem", padding: "clamp(2.5rem,5vw,4rem)", gap: "2.5rem", alignItems: "center", background: "hsla(222,60%,50%,0.05)", border: "1px solid hsla(222,60%,50%,0.16)" }} className="szl-grid-cta">
               <div>
-                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "0.875rem" }}>Ready to put a command layer above your security operations?</h2>
-                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>Aegis is currently in pilot with security teams in high-consequence operating environments. We run focused engagements against your actual threat exposure — real CVEs, real identity signals, real compliance requirements.</p>
+                <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, marginBottom: "0.875rem" }}>
+                  The right fit for your security operations?
+                </h2>
+                <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,62%)", maxWidth: "48ch" }}>
+                  Aegis is appropriate for security teams operating in high-consequence environments where compliance traceability is mandatory and analyst judgment cannot be bypassed. If that describes your environment, let's have a direct conversation.
+                </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", flexShrink: 0 }}>
-                <Link href="/contact" className="szl-btn-primary">Request controlled access <ArrowRight size={14} /></Link>
+                <Link href="/contact" className="szl-btn-primary">Start a conversation <ArrowRight size={14} /></Link>
                 <Link href="/demo" className="szl-btn-secondary" style={{ textAlign: "center" }}>See the flagship workflow</Link>
               </div>
             </m.div>

@@ -1,9 +1,71 @@
 import { m } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, GitBranch, Layers, CheckSquare, FileText, AlertOctagon, Workflow, Shield, Zap, Lock, Download, RefreshCw } from "lucide-react";
+import {
+  ArrowRight, GitBranch, Layers, CheckSquare, FileText, AlertOctagon,
+  Workflow, Shield, Zap, Lock, Download, RefreshCw, Database, Filter,
+  BarChart3, Network, BookOpen, Puzzle
+} from "lucide-react";
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { usePageMeta } from "@/hooks/usePageMeta";
+import { AlloyOperatingLoopDiagram } from "@/components/diagrams/AlloyOperatingLoopDiagram";
+
+const OPERATING_LOOP = [
+  {
+    phase: "Ingestion",
+    step: "01",
+    icon: Database,
+    description: "Alloy receives structured signal feeds from all connected packs and integrations — PRISM Counsel, Terra, Vessels, Aegis, Carlota Jo, and external data sources. Every signal enters the pipeline with source attribution, timestamp, and context metadata intact.",
+  },
+  {
+    phase: "Normalization",
+    step: "02",
+    icon: Filter,
+    description: "Raw signals are normalized into a consistent schema — typed, de-duplicated, and enriched with entity resolution. Signals from different packs using different schemas are reconciled into a single structured format before evaluation begins.",
+  },
+  {
+    phase: "Evaluation",
+    step: "03",
+    icon: BarChart3,
+    description: "Each normalized signal is evaluated against configurable criteria — severity thresholds, SLA proximity, asset criticality, and cross-pack blast radius. Evaluation logic is auditable and explainable: every score has a traceable rationale.",
+  },
+  {
+    phase: "Recommendation",
+    step: "04",
+    icon: Layers,
+    description: "Evaluated signals are scored, ranked, and assembled into prioritized action recommendations. Recommendation factors include severity, velocity, ownership gap, and portfolio-level impact. The action queue updates continuously as new signals arrive and conditions change.",
+  },
+  {
+    phase: "Routing",
+    step: "05",
+    icon: Network,
+    description: "Ranked signals are routed to the right actor — with role-based assignment, escalation paths, and channel context already structured. Every routing decision is logged with the routing key, the assignee, and the authority basis.",
+  },
+  {
+    phase: "Workflow Execution",
+    step: "06",
+    icon: GitBranch,
+    description: "Consequential actions pass through human approval gates before execution. Alloy tracks SLAs, escalates stalled approvals, and verifies that actions taken match actions authorized. Nothing executes without confirmation.",
+  },
+  {
+    phase: "Audit Preservation",
+    step: "07",
+    icon: FileText,
+    description: "Every stage — ingestion, evaluation, routing, approval, execution — is logged in an immutable audit record. The record is structured, attributed to real actors, and exportable for compliance, capital review, or customer diligence.",
+  },
+  {
+    phase: "Explainability",
+    step: "08",
+    icon: BookOpen,
+    description: "Every signal evaluation, routing decision, and action outcome is explainable — who scored it, what criteria applied, what alternative paths existed, and why the chosen path was taken. No black boxes in a consequential workflow.",
+  },
+  {
+    phase: "Extensibility",
+    step: "09",
+    icon: Puzzle,
+    description: "Alloy is designed to extend — new packs plug in via the connector mesh, new evaluation criteria can be configured without code changes, and new workflow types can be registered against existing approval infrastructure.",
+  },
+];
 
 const CAPABILITIES = [
   {
@@ -67,21 +129,31 @@ const AUDIT_FIELDS = [
 ];
 
 const PIPELINE_STEPS = [
-  { step: "Receive", desc: "Signal arrives from Lyte or direct integration" },
-  { step: "Classify", desc: "Priority, severity, blast radius, routing key" },
+  { step: "Ingest", desc: "Signal enters from pack or integration" },
+  { step: "Normalize", desc: "Schema reconciled, entity resolved" },
+  { step: "Evaluate", desc: "Severity, blast radius, SLA proximity" },
+  { step: "Recommend", desc: "Priority scored, action proposed" },
   { step: "Route", desc: "Right person, right context, right channel" },
   { step: "Gate", desc: "Human approval for consequential actions" },
   { step: "Execute", desc: "Confirmed action with authorization logged" },
   { step: "Verify", desc: "Outcome tracked, exceptions escalated" },
-  { step: "Export", desc: "Controlled output with redaction and write-back log" },
   { step: "Audit", desc: "Immutable record created and attributable" },
+];
+
+const EXPANSION_LANES = [
+  { name: "Lyte", desc: "Cross-pack executive command surfaces signals into Alloy for governed portfolio-level action routing." },
+  { name: "PRISM Counsel", desc: "Legal workflow approvals, settlement decisions, and compliance filings run through Alloy approval gates." },
+  { name: "Terra", desc: "Acquisition decisions, diligence approvals, and LP-ready exports governed through Alloy action chains." },
+  { name: "Vessels", desc: "Rerouting decisions, port notifications, and regulatory filings routed with human approval and full audit record." },
+  { name: "Aegis", desc: "Security incident response, remediation actions, and compliance evidence governed through analyst-gated workflows." },
+  { name: "Carlota Jo", desc: "Intake authorizations, service milestone confirmations, and delivery approvals structured through Alloy." },
 ];
 
 export default function AlloyPage() {
   usePageMeta({
     title: "Alloy — Execution Fabric & Action Spine | SZL Holdings",
-    description: "Alloy is the execution fabric beneath every SZL Holdings product. Approvals, workflows, orchestration, audit trail, and governed export and write-back controls.",
-    canonical: "https://szlholdings.com/alloy-fabric",
+    description: "Alloy is the execution fabric beneath every SZL Holdings product. Ingestion, normalization, evaluation, ranking, routing, workflow execution, audit preservation, explainability, and extensibility.",
+    canonical: "https://szlholdings.com/platform/alloy",
   });
 
   return (
@@ -128,7 +200,7 @@ export default function AlloyPage() {
                     marginBottom: "0.875rem",
                   }}
                 >
-                  Alloy is the execution fabric beneath every SZL Holdings product. When Lyte or any pack surfaces a signal, Alloy routes it through structured workflows — with human approval gates for consequential decisions, governed export and write-back controls, and an immutable audit trail for everything that follows.
+                  Alloy is the execution fabric beneath every SZL Holdings product. Every signal — from Lyte, from any pack, or from any integration — enters Alloy's operating loop: ingestion, normalization, evaluation, ranking, routing, governed execution, and immutable audit preservation.
                 </p>
                 <p
                   style={{
@@ -139,7 +211,7 @@ export default function AlloyPage() {
                     marginBottom: "2.25rem",
                   }}
                 >
-                  Signal to confirmed action. No black boxes. No autonomous execution without approval.
+                  Signal to confirmed action. No black boxes. No autonomous execution without approval. Full explainability at every stage.
                 </p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                   <Link href="/demo" className="szl-btn-primary">
@@ -159,7 +231,7 @@ export default function AlloyPage() {
                 style={{ borderRadius: "0.875rem", padding: "clamp(1.25rem,3vw,1.75rem)" }}
               >
                 <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.10em", textTransform: "uppercase", color: "var(--color-szl-text-muted)", marginBottom: "1rem" }}>
-                  Alloy's role in every pipeline
+                  Alloy's full pipeline
                 </p>
                 {PIPELINE_STEPS.map((item, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: i < PIPELINE_STEPS.length - 1 ? "0.5rem" : 0 }}>
@@ -173,6 +245,99 @@ export default function AlloyPage() {
                   </div>
                 ))}
               </m.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Operating loop diagram */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                The Operating Loop
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "34ch", marginBottom: "1.25rem" }}>
+                Every signal follows the same governed path — from ingestion to audit record.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                No stage is skipped. No signal bypasses evaluation or routing. Human approval gates are structural — not configurable away. The loop is the same for a legal approval, a security remediation, and a maritime rerouting decision.
+              </p>
+            </m.div>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
+              <AlloyOperatingLoopDiagram />
+            </m.div>
+          </div>
+        </section>
+
+        {/* Operating loop — detailed phases */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Each Phase
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "3rem" }}>
+                Nine phases. Every consequential action covered.
+              </h2>
+            </m.div>
+            <div style={{ display: "grid", gap: "1rem" }} className="lg:grid-cols-3 md:grid-cols-2">
+              {OPERATING_LOOP.map((phase, i) => {
+                const Icon = phase.icon;
+                return (
+                  <m.div
+                    key={phase.phase}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.38, delay: i * 0.05 }}
+                    className="szl-card"
+                    style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.875rem" }}>
+                      <div style={{ width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "6px", flexShrink: 0 }}>
+                        <Icon size={14} color="var(--color-alloy-light)" />
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.5625rem", fontWeight: 600, color: "var(--color-alloy-light)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{phase.step}</div>
+                        <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, letterSpacing: "-0.012em", color: "hsl(38,8%,88%)" }}>{phase.phase}</h3>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: "0.875rem", lineHeight: 1.68, color: "hsl(214,7%,60%)" }}>{phase.description}</p>
+                  </m.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Relationship to Lyte and expansion lanes */}
+        <section style={{ borderBottom: "1px solid var(--color-szl-border)", padding: "var(--space-section-md) 0" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 var(--space-content-x)" }}>
+            <m.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-alloy-light)", marginBottom: "1rem" }}>
+                Alloy Across the Portfolio
+              </p>
+              <h2 style={{ fontSize: "clamp(1.5rem,3.5vw,2.25rem)", fontWeight: 600, letterSpacing: "-0.022em", lineHeight: 1.18, maxWidth: "30ch", marginBottom: "1.25rem" }}>
+                One execution fabric. Every pack inherits it.
+              </h2>
+              <p style={{ fontSize: "0.9375rem", lineHeight: 1.70, color: "hsl(214,7%,58%)", maxWidth: "52ch", marginBottom: "2.5rem" }}>
+                Alloy is not built once per pack. It is the shared execution infrastructure that every pack — and every new lane — inherits. When a new vertical joins the platform, it gets Alloy's full approval, audit, routing, and governance stack from day one.
+              </p>
+            </m.div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {EXPANSION_LANES.map((lane, i) => (
+                <m.div
+                  key={lane.name}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.36, delay: i * 0.06 }}
+                  style={{ display: "flex", alignItems: "flex-start", gap: "1.25rem", padding: "1rem 1.25rem", borderRadius: "8px", background: "hsla(0,0%,100%,0.025)", border: "1px solid hsla(0,0%,100%,0.06)" }}
+                >
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-alloy-light)", minWidth: "110px", paddingTop: "1px" }}>{lane.name}</span>
+                  <p style={{ fontSize: "0.875rem", lineHeight: 1.6, color: "hsl(214,7%,60%)" }}>{lane.desc}</p>
+                </m.div>
+              ))}
             </div>
           </div>
         </section>
@@ -201,16 +366,7 @@ export default function AlloyPage() {
                     className="szl-card"
                     style={{ borderRadius: "0.75rem", padding: "var(--space-card-pad)" }}
                   >
-                    <div
-                      style={{
-                        width: "36px", height: "36px",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        background: "var(--color-alloy-muted)",
-                        border: "1px solid var(--color-alloy-border)",
-                        borderRadius: "0.4375rem",
-                        marginBottom: "1rem",
-                      }}
-                    >
+                    <div style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-alloy-muted)", border: "1px solid var(--color-alloy-border)", borderRadius: "0.4375rem", marginBottom: "1rem" }}>
                       <Icon size={16} color="var(--color-alloy-light)" />
                     </div>
                     <h3 style={{ fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.012em", marginBottom: "0.625rem" }}>{cap.title}</h3>

@@ -391,6 +391,9 @@ function App() {
             </Route>
 
             {/* ── Product pages — Lyte and Alloy (public marketing) ── */}
+            <Route path="/products/lyte">
+              <Suspense fallback={<PageLoader />}><LytePage /></Suspense>
+            </Route>
             <Route path="/lyte">
               <Suspense fallback={<PageLoader />}><LytePage /></Suspense>
             </Route>
@@ -402,6 +405,9 @@ function App() {
             </Route>
             <Route path="/lyte/app">
               <ExternalRedirect to="/lyte-command-center/" />
+            </Route>
+            <Route path="/platform/alloy">
+              <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>
             </Route>
             <Route path="/alloy-fabric">
               <Suspense fallback={<PageLoader />}><AlloyPublicPage /></Suspense>
@@ -439,7 +445,21 @@ function App() {
               <Suspense fallback={<PageLoader />}><SolutionsPrismCounselPage /></Suspense>
             </Route>
 
-            {/* ── Standalone premium public product pages ── */}
+            {/* ── Standalone premium public product pages — canonical routes ── */}
+            <Route path="/products/vessels">
+              <Suspense fallback={<PageLoader />}><VesselsPublicPage /></Suspense>
+            </Route>
+            <Route path="/products/aegis">
+              <Suspense fallback={<PageLoader />}><AegisPublicPage /></Suspense>
+            </Route>
+            <Route path="/products/terra">
+              <Suspense fallback={<PageLoader />}><TerraPublicPage /></Suspense>
+            </Route>
+            <Route path="/services/carlota-jo">
+              <Suspense fallback={<PageLoader />}><CarlotaJoPublicPage /></Suspense>
+            </Route>
+
+            {/* ── Standalone premium public product pages — legacy routes ── */}
             <Route path="/prism-counsel-public">
               <Suspense fallback={<PageLoader />}><PrismCounselPublicPage /></Suspense>
             </Route>
