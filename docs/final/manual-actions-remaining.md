@@ -1,7 +1,7 @@
 # SZL Holdings — Manual Actions Remaining
 
-**Date:** April 2026  
-**Context:** All documentation, scripts, and code are complete. All phases are done. The following items require manual execution by the founder (Stephen Lutar) on GitHub — these are UI clicks only, no further development work needed.
+**Date:** April 2026 (Updated — Phase 3 Complete)  
+**Context:** All documentation, scripts, code, screenshots, and media pipeline are complete. Phase 3 is done. The following items require manual execution by the founder (Stephen Lutar) on GitHub — these are UI clicks only, no further development work needed.
 
 ---
 
@@ -121,3 +121,77 @@ gh auth login
 ```
 
 Profile repo creation and profile settings still require manual steps (GitHub CLI does not support profile README repo creation directly).
+
+---
+
+## Phase 3 Additions — New Actions
+
+These actions were identified or created during Phase 3 of the GitHub overhaul.
+
+### Upload Social Preview Image
+
+1. Go to: `https://github.com/stephenlutar2-hash/szl-holdings-platform/settings`
+2. Scroll to **Social preview**
+3. Upload: `docs/media/social-preview/org-social-preview.jpg`
+4. Verify preview renders
+
+*Estimated time: 2 minutes*
+
+---
+
+### Push Wiki Seed Pages
+
+See `docs/final/wiki-launch-checklist.md` for full steps.
+
+```bash
+git clone https://github.com/stephenlutar2-hash/szl-holdings-platform.wiki.git wiki-staging
+cd wiki-staging
+cp /path/to/docs/wiki/*.md .
+mkdir -p assets && cp /path/to/docs/wiki/assets/* assets/
+git add -A && git commit -m "feat: wiki seed"
+git push origin master
+```
+
+*Estimated time: 15 minutes*
+
+---
+
+### Create GitHub Organization
+
+See `docs/final/org-launch-checklist.md` for full steps.
+
+1. Go to: `https://github.com/organizations/plan`
+2. Create org: `szl-holdings`
+3. Upload avatar, create `.github` profile repo, pin flagship repo
+
+*Estimated time: 45–60 minutes*
+
+---
+
+### Create GitHub Stars Lists
+
+See `docs/final/stars-system-summary.md` for full list recommendations.
+
+1. Go to: `https://github.com/stars`
+2. Create 5 lists: Observability & Ops, AI Systems, Maritime, TypeScript Platform, Security Ops
+3. Star 5+ repos per list
+
+*Estimated time: 30 minutes*
+
+---
+
+## Updated Total Estimated Time
+
+| Action | Time |
+|--------|------|
+| Repository settings + topics | 15 min |
+| Create release v0.1.0 | 5 min |
+| Bootstrap labels | 10 min |
+| Profile README repo | 15 min |
+| Profile settings + toggles | 5 min |
+| Branch protection | 5 min |
+| Upload social preview | 2 min |
+| Enable wiki + push seed | 15 min |
+| Create GitHub org | 45 min |
+| Create stars lists | 30 min |
+| **Total** | **~2.5 hours** |

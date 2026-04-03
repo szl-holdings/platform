@@ -3,7 +3,7 @@
 ```
 =========================================================
   SZL Holdings — Public Surface Status
-  Date: April 2026
+  Date: April 2026 (Phase 3 Complete)
 =========================================================
 
 COMPLETED
@@ -18,9 +18,16 @@ COMPLETED
   [x] Investor docs — 10 documents (thesis, readiness, GTM, team, gaps)
   [x] Buyer docs — 5 documents (overview, solution brief, use cases)
   [x] Release discipline — v0.1.0 notes, strategy, checklist
-  [x] Visual assets — 4 SVG diagrams, 4 live screenshots
+  [x] Visual assets — 4 SVG diagrams + 6 live screenshots (all products)
   [x] GitHub automation scripts and manual checklists
   [x] .gitignore — hardened for public mirror
+  [x] Media pipeline — capture-screenshots.ts, optimize-images.ts, generate-wiki-gallery.ts
+  [x] Diagram generation — generate-diagrams.ts + ecosystem-map + signal-to-action-flow
+  [x] Wiki gallery — Screenshots-and-Demos.md auto-generated from wiki/assets
+  [x] Image placement plan — docs/wiki/image-placement-plan.md
+  [x] Final execution pack — wiki-branding-summary, before/after, 5 checklists
+  [x] Stars system — 5 curated lists with seed repos and cadence rules
+  [x] Design audit — docs/design/design-audit.md, ui-remediation-plan.md
 
 PARTIALLY COMPLETE
 ------------------
@@ -28,6 +35,7 @@ PARTIALLY COMPLETE
   [~] Profile README — written locally, repo creation still needed
   [~] Release v0.1.0 — notes ready, GitHub publish still needed
   [~] Repo metadata — script ready, gh auth required
+  [~] Social preview — candidate selected, upload still needed
 
 BLOCKED BY PERMISSIONS (GitHub UI / gh auth required)
 ------------------------------------------------------
@@ -38,9 +46,12 @@ BLOCKED BY PERMISSIONS (GitHub UI / gh auth required)
   [ ] Apply branch protection rules (requires GitHub web UI)
   [ ] Set repo description, topics, homepage (requires gh auth or GitHub web UI)
   [ ] Update profile bio, location, toggles (requires GitHub web UI)
+  [ ] Upload social preview image (requires GitHub web UI)
+  [ ] Enable wiki + push wiki seed (requires gh auth + wiki push)
+  [ ] Create GitHub org (requires GitHub web UI)
 
 =========================================================
-  NEXT 3 ACTIONS — BY IMPACT
+  TOP 5 NEXT ACTIONS — BY IMPACT
 =========================================================
 
   1. PUSH TO GITHUB
@@ -52,26 +63,44 @@ BLOCKED BY PERMISSIONS (GitHub UI / gh auth required)
        cd .mirror-staging
        git init
        git remote add origin git@github.com:stephenlutar2-hash/szl-holdings-platform.git
-       git add -A && git commit -m "feat: investor-grade platform hardening"
+       git add -A && git commit -m "feat: 3-phase investor-grade platform hardening"
        git push -f origin main
-       # Then: create Release v0.1.0 via GitHub UI
 
   2. SET UP PROFILE README REPO
-     Impact: Very high — GitHub profile is the first thing investors see
+     Impact: Very high — GitHub profile is first thing investors see
      Time:   ~10 min
      Steps:
        Create repo github.com/stephenlutar2-hash/stephenlutar2-hash (Public)
        Copy profile-readme/README.md as README.md
        Push to main
+       See: docs/final/personal-profile-checklist.md
 
-  3. UPDATE PROFILE SETTINGS + TOGGLES
-     Impact: High — bio/location appear on every GitHub page view
-     Time:   ~5 min
+  3. CREATE RELEASE v0.1.0 + APPLY REPO METADATA
+     Impact: High — release signals maturity; topics improve discoverability
+     Time:   ~10 min
+     Steps:
+       gh auth login
+       bash scripts/github/create-release.sh v0.1.0
+       bash scripts/github/update-repo-metadata.sh
+       # Or manually via GitHub UI
+
+  4. UPLOAD SOCIAL PREVIEW + ENABLE WIKI
+     Impact: High — social preview shows on every share; wiki shows depth
+     Time:   ~20 min
+     Steps:
+       Upload docs/media/social-preview/org-social-preview.jpg
+       Enable wiki in repo settings
+       Push docs/wiki/ content to wiki repo
+       See: docs/final/wiki-launch-checklist.md
+
+  5. UPDATE PROFILE SETTINGS + CREATE ORG
+     Impact: High — bio/location on every page; org signals company maturity
+     Time:   ~45 min
      Steps:
        Go to github.com/settings/profile
        Set bio, location, company per ops/github/profile-values.md
-       Enable: local time display, achievements, private contributions
-       Keep profile public
+       Create org: szl-holdings (or szlholdings)
+       See: docs/final/org-launch-checklist.md
 
 =========================================================
 ```

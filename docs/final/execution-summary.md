@@ -1,14 +1,54 @@
 # SZL Holdings — Execution Summary
 
-**Task:** Full Public Credibility & Product Readiness — 10-Phase Investor-Grade Hardening  
+**Task:** Full Public Credibility & Product Readiness — 3-Phase GitHub Overhaul  
 **Date:** April 2026  
-**Status:** Complete (All Phases — Polish Pass Final)
+**Status:** Complete — Phase 3 (Screenshots, Media Pipeline & Final Output)
 
 ---
 
 ## What Was Done
 
-This execution summary documents all changes made during the 10-phase investor-grade hardening program, including the April 2026 hardening passes that upgraded the README, profile README, gitignore, mirror scripts, architecture diagrams, and live screenshots, and the final polish pass that aligned all public surface files to the payload spec.
+This execution summary documents all changes made during the full GitHub overhaul program (Phases 1–3). Phase 1 established documentation, trust files, and foundational materials. Phase 2 added investor/buyer docs, wiki seed, profile README, and design system. Phase 3 completed the media pipeline, live screenshots across all products, diagram generation scripts, and the full execution pack.
+
+---
+
+## Phase 3: Screenshots, Media Pipeline & Final Output (April 2026)
+
+**Media pipeline scripts:**
+- `scripts/media/capture-screenshots.ts` — Playwright-based screenshot capture for all products
+- `scripts/media/optimize-images.ts` — Resize, crop, compress for all surfaces
+- `scripts/media/generate-wiki-gallery.ts` — Auto-generate gallery markdown from wiki/assets
+- `scripts/media/generate-diagrams.ts` — Programmatic SVG diagram generation
+
+**Live screenshots captured (6 new):**
+- `docs/media/screenshots/landing-hero-new.jpg` — SZL Holdings landing (1440×900)
+- `docs/media/screenshots/lyte-overview-new.jpg` — Lyte marketing (1440×900)
+- `docs/media/screenshots/aegis-landing.jpg` — Aegis defense intelligence (1440×900)
+- `docs/media/screenshots/vessels-landing.jpg` — Vessels fleet command (1440×900)
+- `docs/media/screenshots/terra-landing.jpg` — Terra real estate (1440×900)
+- `docs/media/screenshots/mobile-narrow-hero.jpg` — Mobile responsive (390×844)
+
+**Asset distribution:**
+- `docs/wiki/assets/` — 6 screenshots + diagrams for wiki gallery
+- `profile-readme/assets/` — Landing hero + Lyte screenshot
+- `docs/media/social-preview/` — Org social preview candidate
+
+**Diagram specs:**
+- `docs/media/diagrams/ecosystem-map.md` — Ecosystem map spec
+- `docs/media/diagrams/signal-to-action-flow.md` — Architecture flow spec
+
+**Wiki gallery:**
+- `docs/wiki/Screenshots-and-Demos.md` — Auto-generated gallery page
+- `docs/wiki/image-placement-plan.md` — Image placement strategy
+
+**Final execution pack:**
+- `docs/final/wiki-branding-summary.md` — Wiki seed status, screenshots, social preview, topics, remaining actions
+- `docs/final/before-after-public-surface.md` — Before/after comparison
+- `docs/final/org-launch-checklist.md` — Org creation and setup checklist
+- `docs/final/personal-profile-checklist.md` — Profile setup checklist
+- `docs/final/flagship-repo-checklist.md` — Flagship repo configuration checklist
+- `docs/final/wiki-launch-checklist.md` — Wiki enable and seed checklist
+- `docs/final/stars-system-summary.md` — Stars lists strategy
 
 ---
 
