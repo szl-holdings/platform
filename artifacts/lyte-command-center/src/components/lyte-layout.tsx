@@ -79,33 +79,15 @@ const PRISM_ITEMS = [
 const NAV_GROUPS = [
   {
     label: null,
-    items: [{ href: "/dashboard", label: "Dashboard", icon: Gauge }],
+    items: [{ href: "/", label: "Exec Command", icon: LayoutDashboard }],
   },
   {
-    label: "Command",
+    label: "Executive",
     items: [
-      { href: "/signals", label: "Signals", icon: Radio },
-      { href: "/alerts", label: "Alerts", icon: AlertTriangle },
-      { href: "/priorities", label: "Priorities", icon: CheckSquare },
-      { href: "/exceptions", label: "Exceptions", icon: AlertTriangle },
-      { href: "/recommendations", label: "Recommendations", icon: Brain },
-    ],
-  },
-  {
-    label: "Operations",
-    items: [
-      { href: "/workflows", label: "Workflows", icon: Workflow },
-      { href: "/runs", label: "Run History", icon: Activity },
-      { href: "/readiness", label: "Readiness", icon: Shield },
-      { href: "/integrations", label: "Integrations", icon: Network },
-    ],
-  },
-  {
-    label: "Intelligence",
-    items: [
-      { href: "/reports", label: "Reports", icon: BarChart3 },
-      { href: "/audit", label: "Audit Trail", icon: FileText },
-      { href: "/settings", label: "Settings", icon: Settings },
+      { href: "/blocker-board", label: "Blocker Board", icon: AlertTriangle },
+      { href: "/digest", label: "Digest Center", icon: FileText },
+      { href: "/approvals", label: "Approvals", icon: CheckSquare },
+      { href: "/trust-audit", label: "Trust & Audit", icon: Shield },
     ],
   },
   {
@@ -116,6 +98,27 @@ const NAV_GROUPS = [
       { href: "/prism/intelligence", label: "Intelligence", icon: Brain },
       { href: "/prism/signals", label: "Signals Feed", icon: Radio },
       { href: "/prism/motion", label: "Motion", icon: Workflow },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { href: "/inbox", label: "Inbox", icon: Inbox },
+      { href: "/explorer", label: "Explorer", icon: Search },
+      { href: "/topology", label: "Topology", icon: Network },
+      { href: "/ownership", label: "Ownership", icon: Users },
+      { href: "/workflows", label: "Workflows", icon: Workflow },
+      { href: "/readiness", label: "Readiness", icon: Shield },
+    ],
+  },
+  {
+    label: "Alloy Engine",
+    items: [
+      { href: "/alloy/actions", label: "Action Queue", icon: Activity },
+      { href: "/alloy/templates", label: "Templates", icon: Workflow },
+      { href: "/alloy/gates", label: "Write-Back Gates", icon: CheckSquare },
+      { href: "/alloy/intelligence", label: "Intelligence Fabric", icon: Zap },
+      { href: "/alloy/canvas", label: "Workflow Canvas", icon: Brain },
     ],
   },
 ];

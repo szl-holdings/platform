@@ -33,6 +33,13 @@ function PageLoader() {
   );
 }
 
+const ExecutiveCommand = lazy(() => import("@/pages/executive-command"));
+const BlockerBoard = lazy(() => import("@/pages/blocker-board"));
+const DigestCenter = lazy(() => import("@/pages/digest-center"));
+const TrustAudit = lazy(() => import("@/pages/trust-audit"));
+const AlloyActionConsole = lazy(() => import("@/pages/alloy-action-console"));
+const AlloyWorkflowTemplates = lazy(() => import("@/pages/alloy-workflow-templates"));
+const AlloyWriteBack = lazy(() => import("@/pages/alloy-write-back"));
 const CommandInbox = lazy(() => import("@/pages/command-inbox"));
 const ApprovalsCenter = lazy(() => import("@/pages/approvals-center"));
 const OwnershipMap = lazy(() => import("@/pages/ownership-map-new"));
@@ -104,8 +111,15 @@ function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={DemoDashboard} />
+        <Route path="/" component={ExecutiveCommand} />
+        <Route path="/overview" component={Dashboard} />
         <Route path="/dashboard" component={DemoDashboard} />
+        <Route path="/blocker-board" component={BlockerBoard} />
+        <Route path="/digest" component={DigestCenter} />
+        <Route path="/trust-audit" component={TrustAudit} />
+        <Route path="/alloy/actions" component={AlloyActionConsole} />
+        <Route path="/alloy/templates" component={AlloyWorkflowTemplates} />
+        <Route path="/alloy/gates" component={AlloyWriteBack} />
         <Route path="/signals" component={DemoSignals} />
         <Route path="/alerts" component={DemoAlerts} />
         <Route path="/priorities" component={DemoPriorities} />
@@ -166,16 +180,17 @@ function PrivateRouter() {
 }
 
 const lyteCommands: CommandItem[] = [
-  { id: "nav-inbox", label: "Command Inbox", icon: "⚡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
-  { id: "nav-queue", label: "Operational Queue", icon: "🗂️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/queue"); } },
+  { id: "nav-exec", label: "Executive Command", icon: "⚡", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/"); } },
+  { id: "nav-blockers", label: "Blocker Board", icon: "🚫", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/blocker-board"); } },
+  { id: "nav-digest", label: "Digest Center", icon: "📄", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/digest"); } },
+  { id: "nav-approvals", label: "Approvals", icon: "✅", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/approvals"); } },
+  { id: "nav-trust", label: "Trust & Audit", icon: "🛡️", group: "Executive", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/trust-audit"); } },
+  { id: "nav-inbox", label: "Command Inbox", icon: "📥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/inbox"); } },
   { id: "nav-signals", label: "Signals Feed", icon: "📡", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/signals"); } },
-  { id: "nav-actions", label: "Action Center", icon: "🎯", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/actions"); } },
-  { id: "nav-readiness", label: "Readiness Module", icon: "🛡️", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/readiness"); } },
-  { id: "nav-approvals", label: "Approvals Center", icon: "✅", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/approvals"); } },
   { id: "nav-ownership", label: "Ownership Map", icon: "👥", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/ownership"); } },
-  { id: "nav-escalation", label: "Escalation Center", icon: "🚨", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/escalation"); } },
-  { id: "nav-intervention", label: "Intervention Workspace", icon: "🔧", group: "Navigation", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/intervention"); } },
-  { id: "nav-powerbi", label: "Power BI Operational KPIs", icon: "📊", group: "Analytics", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/powerbi"); } },
+  { id: "nav-alloy-actions", label: "Alloy Action Queue", icon: "⚙️", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/actions"); } },
+  { id: "nav-alloy-templates", label: "Alloy Workflow Templates", icon: "🔄", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/templates"); } },
+  { id: "nav-alloy-gates", label: "Write-Back Gates", icon: "🔒", group: "Alloy", action: () => { window.location.href = window.location.pathname.replace(/\/[^/]*$/, "/alloy/gates"); } },
 ];
 
 const lyteShortcuts: KeyboardShortcut[] = [

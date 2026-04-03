@@ -87,6 +87,21 @@ The platform comprises 13 applications sharing authentication and design.
 - **NPS & Contextual Feedback System:** Full in-app feedback collection system with DB schema, API routes, shared UI components, and admin dashboard.
 - **MCP Server (Task #297):** Model Context Protocol server at `/api/mcp` exposing 20 tools, 4 resources, and 5 prompt templates. Implements MCP spec 2024-11-05 via HTTP+SSE transport. Domain tools: `vessels_fleet_status`, `vessels_weather_risk`, `firestorm_threat_scan`, `firestorm_compliance_check`, `terra_property_search`, `terra_market_signals`, `lyte_health_check`, `lyte_executive_summary`, `inca_experiment_status`. Platform tools: `alloy_launch_workflow`, `alloy_workflow_status`, `alloy_create_artifact`, `alloy_research`, `alloy_decision_status`, `alloy_approve_decision`, `alloy_skill_list`, `alloy_skill_invoke`. Data tools: `query_holdings_ecosystem`, `query_audit_log`, `query_notifications`. Resources: platform schema, agent system prompts, skill catalog, workflow templates. Prompt templates: `research_brief`, `threat_assessment`, `property_analysis`, `fleet_report`, `executive_digest`. All invocations are audit-logged, approval-class-enforced, and respect tenant isolation. SSE transport at `/api/mcp/sse`. Health check at `/api/mcp/health`.
 
+### Omega Phase 3 — Executive Polish & Premium Views (Task #302)
+- **Lyte Command Center — Executive Layer:** 7 new pages added to `/lyte-command-center/src/pages/`:
+  - `executive-command.tsx` — Portfolio health pack cards (Revenue Velocity, Approval Overwatch, Ownership Pressure, Trust Integrity), Pressure Board, Movement Board, live Approval Overwatch table, cross-pack aggregate KPIs.
+  - `blocker-board.tsx` — Cross-portfolio blocker tracking with status, severity, owner, and linked pack columns; unblock action UI.
+  - `digest-center.tsx` — Digest inbox with filter controls, daily/weekly digest cards, and inline expansion.
+  - `alloy-action-console.tsx` — Action queue table with retry/cancel/approve inline actions, status filters, and action detail drawers.
+  - `alloy-workflow-templates.tsx` — Template library with category filter, preview cards, and launch confirmation.
+  - `alloy-write-back.tsx` — Write-back gate controls, export gate toggles, and gate configuration panel.
+  - (Trust & Audit — pre-existing page wired to sidebar)
+  - Sidebar `lyte-layout.tsx` updated with **Executive** section (Blocker Board, Digest Center, Approvals, Trust & Audit) and expanded **Alloy Engine** section (Action Console, Templates, Write-Back Gates).
+  - Command palette updated to include all new Executive and Alloy routes with grouped navigation.
+- **Carlota Jo — Luxury Rebuild:**
+  - `PremiumHome.tsx` — Full luxury homepage rebuild with animated gold-dust canvas particles, Cormorant Garamond serif display, split hero with live services panel (stats: 98% retention, 24h SLA), 6-service grid, 5-pillar DiscreetApproach section, Rosa Carlota Jo principal intro, dark ClientExperienceStrip with portal feature cards, SZL platform attribution note, and closing CTA. All sections use Framer Motion `whileInView` animations with proper reduced-motion fallback.
+  - App.tsx updated to serve `PremiumHome` as the root `/` route.
+
 ## External Dependencies
 - **Database:** PostgreSQL
 - **Authentication:** Replit Auth

@@ -52,7 +52,7 @@ const CARLOTA_ONBOARDING_CONFIG: OnboardingConfig = {
   ],
 };
 
-const Home = lazy(() => import("@/pages/Home"));
+const Home = lazy(() => import("@/pages/PremiumHome"));
 const ServicesPage = lazy(() => import("@/pages/Services"));
 const ApproachPage = lazy(() => import("@/pages/Approach"));
 const AboutPage = lazy(() => import("@/pages/About"));
