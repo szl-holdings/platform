@@ -66,6 +66,7 @@ const PrismInsurerIntel = lazy(() => import("@/prism-counsel/pages/insurer-intel
 const PrismVenueIntel = lazy(() => import("@/prism-counsel/pages/venue-intel-page"));
 const PrismNoFault = lazy(() => import("@/prism-counsel/pages/no-fault-page"));
 const PrismNYDashboard = lazy(() => import("@/prism-counsel/pages/ny-dashboard-page"));
+const PrismConnectors = lazy(() => import("@/prism-counsel/pages/connectors-page"));
 
 const NyOverview = lazy(() => import("@/prism-counsel/pages/ny/ny-overview"));
 const NyDashboard = lazy(() => import("@/prism-counsel/pages/ny/ny-dashboard"));
@@ -330,6 +331,9 @@ function App() {
             </Route>
             <Route path="/prism-counsel/no-fault">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismNoFault /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/connectors">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><PrismConnectors /></CounselAppPage></Suspense>
             </Route>
             <Route path="/prism-counsel/ny">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismNYDashboard /></CounselAppPage></Suspense>

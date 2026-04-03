@@ -1,17 +1,29 @@
-import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { Clock, AlertTriangle, Wifi, WifiOff, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { DEMO_MATTERS } from "../data/demo-matters";
+import { usePrismMatters } from "../hooks/use-prism-api";
 
 export default function DeadlinesPage() {
+  const mattersQ = usePrismMatters();
+  const isLive = Array.isArray(mattersQ.data) && mattersQ.data.length > 0;
+
   const allDeadlines = DEMO_MATTERS.flatMap(m =>
     (m.deadlines || []).map(d => ({ ...d, matterTitle: m.title, matterId: m.id, caseNumber: m.caseNumber }))
   ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <div className="p-6 max-w-[1000px] mx-auto space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-100">Deadlines</h1>
-        <p className="text-xs text-slate-500 mt-0.5">{allDeadlines.length} deadlines across all active matters</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-100">Deadlines</h1>
+          <p className="text-xs text-slate-500 mt-0.5">{allDeadlines.length} deadlines across all active matters</p>
+        </div>
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${
+          isLive ? "bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20" : "bg-slate-500/10 text-slate-500 border border-white/[0.06]"
+        }`}>
+          {mattersQ.isLoading ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : isLive ? <Wifi className="w-2.5 h-2.5" /> : <WifiOff className="w-2.5 h-2.5" />}
+          {mattersQ.isLoading ? "LOADING" : isLive ? "LIVE" : "DEMO"}
+        </span>
       </div>
 
       <div className="space-y-2">

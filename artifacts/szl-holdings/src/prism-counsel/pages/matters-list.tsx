@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Search, Filter, ArrowRight, Scale } from "lucide-react";
+import { Search, Filter, ArrowRight, Wifi, WifiOff, Loader2 } from "lucide-react";
 import { DEMO_MATTERS } from "../data/demo-matters";
+import { usePrismMatters } from "../hooks/use-prism-api";
 
 const STATUS_COLORS: Record<string, string> = {
   intake: "bg-slate-500/10 text-slate-400",
@@ -16,8 +17,44 @@ const STATUS_COLORS: Record<string, string> = {
 export default function MattersListPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const mattersQ = usePrismMatters();
 
-  const filtered = DEMO_MATTERS.filter(m => {
+  const isLive = Array.isArray(mattersQ.data) && mattersQ.data.length > 0;
+  const isLoading = mattersQ.isLoading;
+
+  const allMatters = isLive
+    ? mattersQ.data!.map(m => ({
+        id: m.id,
+        title: m.title,
+        caseNumber: m.caseNumber,
+        matterType: m.matterType,
+        status: m.status,
+        stage: m.status,
+        jurisdiction: m.jurisdiction ?? "",
+        courtName: m.courtName ?? "",
+        healthScore: m.healthScore ?? 0,
+        settlementLow: Number(m.settlementLow ?? 0),
+        settlementMid: Number(m.settlementMid ?? 0),
+        settlementHigh: Number(m.settlementHigh ?? 0),
+        totalDamages: 0,
+        totalLiens: 0,
+        assignedAttorney: m.assignedAttorney ?? "",
+        assignedParalegal: m.assignedParalegal ?? "",
+        filingDate: m.filingDate ?? "",
+        statOfLimitations: "",
+        parties: [] as any[],
+        claims: [] as any[],
+        offers: [] as any[],
+        medicalTimeline: [] as any[],
+        damages: [] as any[],
+        liens: [] as any[],
+        deadlines: [] as any[],
+        readinessScores: {} as Record<string, number>,
+        recommendations: [] as any[],
+      }))
+    : DEMO_MATTERS;
+
+  const filtered = allMatters.filter(m => {
     if (search && !m.title.toLowerCase().includes(search.toLowerCase()) && !m.caseNumber?.toLowerCase().includes(search.toLowerCase())) return false;
     if (statusFilter !== "all" && m.status !== statusFilter) return false;
     return true;
@@ -25,9 +62,17 @@ export default function MattersListPage() {
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-100">Matters</h1>
-        <p className="text-xs text-slate-500 mt-0.5">{DEMO_MATTERS.length} active matters across all practice areas</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-100">Matters</h1>
+          <p className="text-xs text-slate-500 mt-0.5">{allMatters.length} active matters across all practice areas</p>
+        </div>
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${
+          isLive ? "bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20" : "bg-slate-500/10 text-slate-500 border border-white/[0.06]"
+        }`}>
+          {isLoading ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : isLive ? <Wifi className="w-2.5 h-2.5" /> : <WifiOff className="w-2.5 h-2.5" />}
+          {isLoading ? "LOADING" : isLive ? "LIVE" : "DEMO"}
+        </span>
       </div>
 
       <div className="flex items-center gap-3">
@@ -66,7 +111,7 @@ export default function MattersListPage() {
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold"
                     style={{
-                      background: m.healthScore >= 70 ? "#4a90b8" + "15" : m.healthScore >= 50 ? "#d4a054" + "15" : "#c45a4a" + "15",
+                      background: m.healthScore >= 70 ? "#4a90b815" : m.healthScore >= 50 ? "#d4a05415" : "#c45a4a15",
                       color: m.healthScore >= 70 ? "#4a90b8" : m.healthScore >= 50 ? "#d4a054" : "#c45a4a",
                     }}
                   >
@@ -84,12 +129,14 @@ export default function MattersListPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <div className="text-xs font-mono text-slate-300">
-                      ${(m.settlementMid / 1000).toFixed(0)}K
+                  {m.settlementMid > 0 && (
+                    <div className="text-right">
+                      <div className="text-xs font-mono text-slate-300">
+                        ${(m.settlementMid / 1000).toFixed(0)}K
+                      </div>
+                      <div className="text-[10px] text-slate-500">mid forecast</div>
                     </div>
-                    <div className="text-[10px] text-slate-500">mid forecast</div>
-                  </div>
+                  )}
                   <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${STATUS_COLORS[m.status] || "bg-slate-500/10 text-slate-400"}`}>
                     {m.status.replace("_", " ").toUpperCase()}
                   </span>
@@ -99,20 +146,23 @@ export default function MattersListPage() {
 
               <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/[0.04]">
                 <div className="text-[10px] text-slate-500">
-                  <span className="text-slate-400">{m.assignedAttorney}</span> · {(m.damages || []).length} damages items · {(m.liens || []).length} liens
+                  {m.assignedAttorney && <><span className="text-slate-400">{m.assignedAttorney}</span> · </>}
+                  {m.damages.length} damages items · {m.liens.length} liens
                 </div>
                 <div className="flex-1" />
-                <div className="flex items-center gap-2">
-                  {Object.entries(m.readinessScores).slice(0, 6).map(([k, v]) => {
-                    const color = v >= 75 ? "#4a90b8" : v >= 50 ? "#d4a054" : "#c45a4a";
-                    return (
-                      <div key={k} className="flex items-center gap-1">
-                        <div className="w-1 h-3 rounded-full" style={{ background: color }} />
-                        <span className="text-[9px] font-mono" style={{ color }}>{v}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+                {Object.keys(m.readinessScores).length > 0 && (
+                  <div className="flex items-center gap-2">
+                    {Object.entries(m.readinessScores).slice(0, 6).map(([k, v]) => {
+                      const color = v >= 75 ? "#4a90b8" : v >= 50 ? "#d4a054" : "#c45a4a";
+                      return (
+                        <div key={k} className="flex items-center gap-1">
+                          <div className="w-1 h-3 rounded-full" style={{ background: color }} />
+                          <span className="text-[9px] font-mono" style={{ color }}>{v}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </Link>

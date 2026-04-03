@@ -1,17 +1,44 @@
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { TrendingUp, ArrowUpRight, ArrowDownRight, Minus, Wifi, WifiOff, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { DEMO_MATTERS } from "../data/demo-matters";
+import { usePrismMatters } from "../hooks/use-prism-api";
 
 export default function ForecastPage() {
+  const mattersQ = usePrismMatters();
+  const isLive = Array.isArray(mattersQ.data) && mattersQ.data.length > 0;
+
+  const displayMatters = isLive
+    ? mattersQ.data!.map(m => ({
+        id: m.id,
+        title: m.title,
+        caseNumber: m.caseNumber,
+        status: m.status,
+        healthScore: m.healthScore ?? 0,
+        settlementLow: Number(m.settlementLow ?? 0),
+        settlementMid: Number(m.settlementMid ?? 0),
+        settlementHigh: Number(m.settlementHigh ?? 0),
+        totalDamages: 0,
+        offers: [] as { type: string; amount: number; source: string; date: string }[],
+      }))
+    : DEMO_MATTERS;
+
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-100">Forecast Center</h1>
-        <p className="text-xs text-slate-500 mt-0.5">Settlement range forecasting and matter trajectory analysis</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-100">Forecast Center</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Settlement range forecasting and matter trajectory analysis</p>
+        </div>
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium ${
+          isLive ? "bg-[#4a90b8]/10 text-[#4a90b8] border border-[#4a90b8]/20" : "bg-slate-500/10 text-slate-500 border border-white/[0.06]"
+        }`}>
+          {mattersQ.isLoading ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : isLive ? <Wifi className="w-2.5 h-2.5" /> : <WifiOff className="w-2.5 h-2.5" />}
+          {mattersQ.isLoading ? "LOADING" : isLive ? "LIVE" : "DEMO"}
+        </span>
       </div>
 
       <div className="space-y-3">
-        {DEMO_MATTERS.map(m => (
+        {displayMatters.map(m => (
           <div key={m.id} className="rounded-lg border border-white/[0.06] p-4" style={{ background: "#0c1220" }}>
             <div className="flex items-center justify-between mb-3">
               <Link href={`/prism-counsel/matters/${m.id}`}>
@@ -22,14 +49,20 @@ export default function ForecastPage() {
             <div className="grid grid-cols-4 gap-4">
               <div>
                 <div className="text-[10px] text-slate-500 uppercase mb-1">Settlement Range</div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-slate-400">${(m.settlementLow / 1000).toFixed(0)}K</span>
-                  <div className="flex-1 h-2 bg-white/[0.06] rounded-full">
-                    <div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #d4a054, #4a90b8)", width: "80%", opacity: 0.5 }} />
-                  </div>
-                  <span className="text-xs font-mono text-slate-400">${(m.settlementHigh / 1000).toFixed(0)}K</span>
-                </div>
-                <div className="text-center text-xs font-mono text-[#d4a054] mt-1">${(m.settlementMid / 1000).toFixed(0)}K mid</div>
+                {m.settlementHigh > 0 ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-slate-400">${(m.settlementLow / 1000).toFixed(0)}K</span>
+                      <div className="flex-1 h-2 bg-white/[0.06] rounded-full">
+                        <div className="h-full rounded-full" style={{ background: "linear-gradient(90deg, #d4a054, #4a90b8)", width: "80%", opacity: 0.5 }} />
+                      </div>
+                      <span className="text-xs font-mono text-slate-400">${(m.settlementHigh / 1000).toFixed(0)}K</span>
+                    </div>
+                    <div className="text-center text-xs font-mono text-[#d4a054] mt-1">${(m.settlementMid / 1000).toFixed(0)}K mid</div>
+                  </>
+                ) : (
+                  <div className="text-xs text-slate-500">No forecast</div>
+                )}
               </div>
               <div>
                 <div className="text-[10px] text-slate-500 uppercase mb-1">Total Exposure</div>

@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Scale, LayoutDashboard, FolderOpen, TrendingUp, BookOpen,
   MessageSquare, Shield, Settings, ChevronLeft, ChevronRight,
-  Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle
+  Gavel, Clock, FileText, Users, Eye, Building2, MapPin, AlertTriangle, Plug
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,7 @@ const NAV_SECTIONS = [
     label: "System",
     items: [
       { label: "Trust", href: "/prism-counsel/trust", icon: Shield },
+      { label: "Connectors", href: "/prism-counsel/connectors", icon: Plug },
       { label: "Admin", href: "/prism-counsel/admin", icon: Settings },
     ],
   },
