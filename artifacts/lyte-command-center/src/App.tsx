@@ -58,7 +58,7 @@ const ReadinessPage = lazy(() => import("@/pages/readiness-page"));
 const LyteMarketingLanding = lazy(() => import("@/pages/marketing-landing"));
 const PrismDashboard = lazy(() => import("@/pages/prism-dashboard"));
 const MetricsExplorer = lazy(() => import("@/pages/metrics-explorer"));
-const AlertConfig = lazy(() => import("@/pages/alert-config"));
+
 const ServiceTopology = lazy(() => import("@/pages/service-topology"));
 const ErrorBudgetBurn = lazy(() => import("@/pages/error-budget-burn"));
 const AlloyWorkflowCanvas = lazy(() => import("@/pages/alloy-workflow-canvas"));
@@ -70,6 +70,18 @@ const DashboardBuilder = lazy(() => import("@/pages/dashboard-builder"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const ApmInstrumentation = lazy(() => import("@/pages/apm-instrumentation"));
 const PricingPage = lazy(() => import("@/pages/pricing"));
+const DemoDashboard = lazy(() => import("@/pages/demo-dashboard"));
+const DemoSignals = lazy(() => import("@/pages/demo-signals"));
+const DemoPriorities = lazy(() => import("@/pages/demo-priorities"));
+const DemoWorkflows = lazy(() => import("@/pages/demo-workflows"));
+const DemoRecommendations = lazy(() => import("@/pages/demo-recommendations"));
+const DemoAudit = lazy(() => import("@/pages/demo-audit"));
+const DemoExceptions = lazy(() => import("@/pages/demo-exceptions"));
+const DemoReadiness = lazy(() => import("@/pages/demo-readiness"));
+const DemoIntegrations = lazy(() => import("@/pages/demo-integrations"));
+const DemoReports = lazy(() => import("@/pages/demo-reports"));
+const DemoSettings = lazy(() => import("@/pages/demo-settings"));
+const DemoAlerts = lazy(() => import("@/pages/demo-alerts"));
 
 const ADMIN_ROLES = ["admin", "super_admin", "ops"];
 
@@ -92,11 +104,22 @@ function PrivateRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={DemoDashboard} />
+        <Route path="/dashboard" component={DemoDashboard} />
+        <Route path="/signals" component={DemoSignals} />
+        <Route path="/alerts" component={DemoAlerts} />
+        <Route path="/priorities" component={DemoPriorities} />
+        <Route path="/workflows" component={DemoWorkflows} />
+        <Route path="/runs" component={DemoWorkflows} />
+        <Route path="/recommendations" component={DemoRecommendations} />
+        <Route path="/audit" component={DemoAudit} />
+        <Route path="/exceptions" component={DemoExceptions} />
+        <Route path="/readiness" component={DemoReadiness} />
+        <Route path="/integrations" component={DemoIntegrations} />
+        <Route path="/reports" component={DemoReports} />
+        <Route path="/settings" component={DemoSettings} />
         <Route path="/inbox" component={CommandInbox} />
-        <Route path="/signals" component={SignalsPage} />
         <Route path="/actions" component={ActionsPage} />
-        <Route path="/readiness" component={ReadinessPage} />
         <Route path="/action-queue" component={ActionQueue} />
         <Route path="/queue" component={OperationalQueue} />
         <Route path="/approvals" component={ApprovalsCenter} />
@@ -109,12 +132,10 @@ function PrivateRouter() {
         <Route path="/prism/pulse" component={PrismDashboard} />
         <Route path="/prism/risk" component={PrismDashboard} />
         <Route path="/prism/intelligence" component={PrismDashboard} />
-        <Route path="/prism/signals" component={SignalsPage} />
+        <Route path="/prism/signals" component={DemoSignals} />
         <Route path="/prism/motion" component={ActionsPage} />
-        <Route path="/explorer" component={SignalsPage} />
-        <Route path="/workflows" component={EscalationWorkflow} />
+        <Route path="/explorer" component={DemoSignals} />
         <Route path="/metrics" component={MetricsExplorer} />
-        <Route path="/alerts" component={AlertConfig} />
         <Route path="/topology" component={ServiceTopology} />
         <Route path="/error-budget" component={ErrorBudgetBurn} />
         <Route path="/alloy/canvas" component={AlloyWorkflowCanvas} />
