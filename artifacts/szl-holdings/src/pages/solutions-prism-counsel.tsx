@@ -42,9 +42,9 @@ export default function SolutionsPrismCounselPage() {
               NY Litigation Command
             </span>
           </Link>
-          <Link href="/prism-counsel/trust">
+          <Link href="/solutions/prism-counsel/trust">
             <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-white/[0.04] text-slate-300 border border-white/[0.08] hover:bg-white/[0.08] transition-colors cursor-pointer">
-              Trust Center
+              Trust & Governance
             </span>
           </Link>
         </div>

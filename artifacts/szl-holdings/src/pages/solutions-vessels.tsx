@@ -49,6 +49,7 @@ export default function SolutionsVesselsPage() {
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
                 <Link href="/contact" className="szl-btn-primary">Request a walkthrough <ArrowRight size={15} /></Link>
+                <Link href="/solutions/vessels/trust" className="szl-btn-secondary">Trust & Governance</Link>
                 <Link href="/solutions" className="szl-btn-secondary">All solutions</Link>
               </div>
             </m.div>

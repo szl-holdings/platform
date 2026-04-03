@@ -60,6 +60,12 @@ const SolutionsTerraPage = lazy(() => import("@/pages/solutions-terra"));
 const DocsPage = lazy(() => import("@/pages/docs"));
 
 const SolutionsPrismCounselPage = lazy(() => import("@/pages/solutions-prism-counsel"));
+const SolutionsPrismCounselTrustPage = lazy(() => import("@/pages/solutions-prism-counsel-trust"));
+const SolutionsTerraTrustPage = lazy(() => import("@/pages/solutions-terra-trust"));
+const SolutionsVesselsTrustPage = lazy(() => import("@/pages/solutions-vessels-trust"));
+const SolutionsAegisTrustPage = lazy(() => import("@/pages/solutions-aegis-trust"));
+const SolutionsLyteTrustPage = lazy(() => import("@/pages/solutions-lyte-trust"));
+const HowItWorksPage = lazy(() => import("@/pages/how-it-works"));
 
 const PrismDashboard = lazy(() => import("@/prism-counsel/pages/dashboard"));
 const PrismMattersList = lazy(() => import("@/prism-counsel/pages/matters-list"));
@@ -331,6 +337,21 @@ function App() {
             {/* ── Solutions hub and verticals ── */}
             <Route path="/solutions">
               <Suspense fallback={<PageLoader />}><SolutionsPage /></Suspense>
+            </Route>
+            <Route path="/solutions/prism-counsel/trust">
+              <Suspense fallback={<PageLoader />}><SolutionsPrismCounselTrustPage /></Suspense>
+            </Route>
+            <Route path="/solutions/terra/trust">
+              <Suspense fallback={<PageLoader />}><SolutionsTerraTrustPage /></Suspense>
+            </Route>
+            <Route path="/solutions/vessels/trust">
+              <Suspense fallback={<PageLoader />}><SolutionsVesselsTrustPage /></Suspense>
+            </Route>
+            <Route path="/solutions/aegis/trust">
+              <Suspense fallback={<PageLoader />}><SolutionsAegisTrustPage /></Suspense>
+            </Route>
+            <Route path="/solutions/lyte/trust">
+              <Suspense fallback={<PageLoader />}><SolutionsLyteTrustPage /></Suspense>
             </Route>
             <Route path="/solutions/aegis">
               <Suspense fallback={<PageLoader />}><SolutionsAegisPage /></Suspense>
@@ -821,7 +842,7 @@ function App() {
               <Redirect to="/trust/architecture" />
             </Route>
             <Route path="/how-it-works">
-              <Redirect to="/platform" />
+              <Suspense fallback={<PageLoader />}><HowItWorksPage /></Suspense>
             </Route>
             <Route path="/integrations">
               <Redirect to="/platform" />

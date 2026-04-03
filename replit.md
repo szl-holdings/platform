@@ -44,6 +44,8 @@ A premium, SZL-branded design system inspired by Palantir Foundry/Anduril Lattic
 - **Investor Data Room:** `/investors/overview`, `/investors/architecture`, `/investors/moat`, `/investors/founder`. Replaces old `/investor-relations` as `/investors` default. Added to More dropdown.
 - **Pilot Landing Pages:** `/pilot/prism-counsel`, `/pilot/terra`, `/pilot/vessels`, `/pilot/aegis`. Each includes flagship workflow, required integrations, 30/60/90 day outcomes, trust governance summary.
 - **SiteNav Updated:** Trust dropdown now shows all 6 trust pages. More dropdown shows investor pages, pilot programs, demo, and docs.
+- **Pack Trust Pages:** `/solutions/prism-counsel/trust`, `/solutions/terra/trust`, `/solutions/vessels/trust`, `/solutions/aegis/trust`, `/solutions/lyte/trust`. Each covers governance controls, verified data sources, and domain-specific compliance posture.
+- **How It Works Page:** `/how-it-works` — six-layer stack walkthrough (Signal Ingestion → Intelligence → State Observation → Decision Surface → Governed Execution → Proof & Audit), four vertical mappings, differentiators.
 
 ### GraphQL API Layer
 A unified GraphQL API is mounted at `/api/graphql` using Apollo Server v5 and `graphql-ws` for subscriptions. It includes 9 domain modules and a shared client library (`@workspace/graphql-client`) for frontends. REST endpoints remain active.
