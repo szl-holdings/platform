@@ -1,0 +1,71 @@
+name: Publish Ruby gems to GitHub Packages
+
+# Template workflow — activate when Ruby gems are added.
+# See docs/github/packages/rubygems/SETUP.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      gem_path:
+        description: 'Path to Ruby gem directory (e.g. lib/ruby/szl-holdings-core)'
+        required: true
+      gemspec_name:
+        description: 'Gemspec filename without .gemspec extension'
+        required: true
+      version:
+        description: 'Version to publish (e.g. 1.0.0)'
+        required: true
+
+jobs:
+  publish:
+    name: RubyGems publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Set version from input
+        run: echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+
+      - name: Configure GitHub Packages credentials
+        run: |
+          mkdir -p ~/.gem
+          cat > ~/.gem/credentials << EOF
+          ---
+          :github: Bearer ${{ secrets.GITHUB_TOKEN }}
+          EOF
+          chmod 0600 ~/.gem/credentials
+
+      - name: Build gem
+        run: |
+          GEMSPEC="${{ github.event.inputs.gemspec_name }}"
+          cd "${{ github.event.inputs.gem_path }}"
+          sed -i "s/spec.version.*=.*/spec.version = \"${{ env.RELEASE_VERSION }}\"/" "${GEMSPEC}.gemspec"
+          gem build "${GEMSPEC}.gemspec"
+
+      - name: Push to GitHub Packages
+        run: |
+          cd "${{ github.event.inputs.gem_path }}"
+          for gem_file in *.gem; do
+            gem push --key github \
+              --host https://rubygems.pkg.github.com/szl-holdings \
+              "$gem_file"
+          done
+        env:
+          GEM_HOST_API_KEY: "Bearer ${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Summary
+        run: |
+          echo "## RubyGems Publish Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Published gem(s) to GitHub Packages" >> $GITHUB_STEP_SUMMARY
+          echo "Registry: \`https://rubygems.pkg.github.com/szl-holdings\`" >> $GITHUB_STEP_SUMMARY
