@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 const CARLOTA_PATH = process.env.CARLOTA_BASE_PATH ?? "/carlota-jo";
 
-test.describe("Carlota Jo Consulting", () => {
+test.describe("Carlota Jo — Smoke Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(CARLOTA_PATH);
   });
@@ -36,5 +36,127 @@ test.describe("Carlota Jo Consulting", () => {
     await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
     const body = await page.content();
     expect(body.length).toBeGreaterThan(500);
+  });
+});
+
+test.describe("Carlota Jo — Route Smoke Tests", () => {
+  const routes = [
+    { path: "", label: "home" },
+    { path: "/about", label: "about" },
+    { path: "/approach", label: "approach" },
+    { path: "/booking", label: "booking" },
+    { path: "/contact", label: "contact" },
+    { path: "/founder", label: "founder" },
+  ];
+
+  for (const route of routes) {
+    test(`${route.label} route loads without crash`, async ({ page }) => {
+      await page.goto(`${CARLOTA_PATH}${route.path}`);
+      await page.waitForLoadState("domcontentloaded");
+      const errorBoundary = page.locator("text=Something went wrong").first();
+      const hasError = await errorBoundary.isVisible().catch(() => false);
+      expect(hasError).toBe(false);
+      const body = await page.content();
+      expect(body.length).toBeGreaterThan(200);
+    });
+  }
+});
+
+test.describe("Carlota Jo — User Journey: Browse Services → Start Booking → View Contact", () => {
+  test("user navigates to booking via nav and Practice Area step 1 is visible", async ({ page }) => {
+    await page.goto(CARLOTA_PATH);
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const nav = page.locator("nav").first();
+    await expect(nav).toBeVisible({ timeout: 15000 });
+
+    const bookingLink = nav.locator(
+      "a[href*='book'], a:has-text('Book'), a:has-text('Schedule'), a:has-text('Consult')"
+    ).first();
+    await expect(bookingLink).toBeVisible({ timeout: 10000 });
+    await bookingLink.click();
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const practiceAreaStep = page.locator(":text('Practice Area')").first();
+    await expect(practiceAreaStep).toBeVisible({ timeout: 15000 });
+  });
+
+  test("booking flow shows multi-step progression indicator (Engagement, Schedule, Details)", async ({ page }) => {
+    await page.goto(`${CARLOTA_PATH}/booking`);
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const stepIndicator = page.locator(
+      ":text('Engagement'), :text('Schedule'), :text('Details')"
+    ).first();
+    await expect(stepIndicator).toBeVisible({ timeout: 15000 });
+  });
+
+  test("booking flow step 1 shows selectable service option cards", async ({ page }) => {
+    await page.goto(`${CARLOTA_PATH}/booking`);
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    const practiceAreaStep = page.locator(":text('Practice Area')").first();
+    await expect(practiceAreaStep).toBeVisible({ timeout: 15000 });
+
+    const serviceOptions = page.locator("button, [role='radio'], [role='option'], label[for]");
+    const count = await serviceOptions.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test("user navigates from booking to contact via nav", async ({ page }) => {
+    await page.goto(`${CARLOTA_PATH}/booking`);
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const nav = page.locator("nav").first();
+    await expect(nav).toBeVisible({ timeout: 15000 });
+
+    const contactLink = nav.locator("a[href*='contact'], a:has-text('Contact')").first();
+    await expect(contactLink).toBeVisible({ timeout: 10000 });
+    await contactLink.click();
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+
+    await expect(page).toHaveURL(/contact/i);
+    const body = await page.content();
+    expect(body.length).toBeGreaterThan(500);
+  });
+});
+
+test.describe("Carlota Jo — Mobile Viewport", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("homepage renders correctly on mobile", async ({ page }) => {
+    await page.goto(CARLOTA_PATH);
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+    const body = page.locator("body");
+    await expect(body).toBeVisible();
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+  });
+
+  test("booking page renders on mobile with Practice Area step visible", async ({ page }) => {
+    await page.goto(`${CARLOTA_PATH}/booking`);
+    await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => null);
+    const errorBoundary = page.locator("text=Something went wrong").first();
+    const hasError = await errorBoundary.isVisible().catch(() => false);
+    expect(hasError).toBe(false);
+    const practiceAreaStep = page.locator(":text('Practice Area')").first();
+    await expect(practiceAreaStep).toBeVisible({ timeout: 15000 });
   });
 });

@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   e2e:
-    name: E2E Tests / e2e
+    name: E2E Tests / ${{ matrix.app }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -68,8 +68,8 @@ jobs:
           serve ${{ matrix.dist }} -l ${{ matrix.port }} &
           sleep 3
         shell: bash
-      - name: Run E2E smoke test for ${{ matrix.app }}
-        run: pnpm exec playwright test tests/e2e/${{ matrix.spec }}
+      - name: Run E2E tests for ${{ matrix.app }}
+        run: pnpm exec playwright test tests/e2e/${{ matrix.spec }} --project=chromium
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:${{ matrix.port }}
@@ -80,9 +80,24 @@ jobs:
           VESSELS_BASE_PATH: /
           CARLOTA_BASE_PATH: /
           STEPHEN_BASE_PATH: /
-      - uses: actions/upload-artifact@v4
-        if: failure()
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: playwright-report-${{ matrix.app }}
           path: playwright-report/
+          retention-days: 14
+      - name: Upload traces on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces-${{ matrix.app }}
+          path: test-results/
+          retention-days: 7
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots-${{ matrix.app }}
+          path: test-results/**/*.png
           retention-days: 7
