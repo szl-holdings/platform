@@ -167,25 +167,63 @@ app.use(csrfMiddleware);
 app.use(authMiddleware);
 app.use(sessionRefreshPolicy());
 
-app.get("/api/health", (_req: Request, res: Response) => {
+app.get("/api/health", async (_req: Request, res: Response) => {
   const memUsage = process.memoryUsage();
   const dbUrl = process.env.DATABASE_URL;
-  res.json({
-    status: "healthy",
+  const uptimeSeconds = Math.floor(process.uptime());
+
+  // Check database connectivity
+  let dbStatus: "ok" | "degraded" | "not_configured" = dbUrl ? "ok" : "not_configured";
+  let dbLatencyMs: number | null = null;
+  if (dbUrl) {
+    const dbStart = Date.now();
+    try {
+      const { db } = await import("@workspace/db");
+      const { sql } = await import("drizzle-orm");
+      await Promise.race([
+        db.execute(sql`SELECT 1`),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
+      ]);
+      dbLatencyMs = Date.now() - dbStart;
+    } catch {
+      dbStatus = "degraded";
+      dbLatencyMs = Date.now() - dbStart;
+    }
+  }
+
+  // Check job queue
+  let queueStatus: "ok" | "backpressure" | "unavailable" = "unavailable";
+  let queueDepth = 0;
+  try {
+    const { jobQueue } = await import("./lib/job-queue.js");
+    const stats = jobQueue.getStats();
+    queueDepth = stats.pending + stats.running;
+    queueStatus = queueDepth > 50 ? "backpressure" : "ok";
+  } catch { /* job queue may not be initialized yet */ }
+
+  const overallStatus = dbStatus === "degraded" ? "degraded" : "healthy";
+
+  res.status(overallStatus === "healthy" ? 200 : 503).json({
+    status: overallStatus,
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
+    uptime: uptimeSeconds,
+    uptime_human: `${Math.floor(uptimeSeconds / 3600)}h ${Math.floor((uptimeSeconds % 3600) / 60)}m ${uptimeSeconds % 60}s`,
     version: process.env.npm_package_version || "0.0.0",
     environment: process.env.NODE_ENV || "development",
-    memory: {
-      heapUsed: memUsage.heapUsed,
-      heapTotal: memUsage.heapTotal,
-      rss: memUsage.rss,
-      external: memUsage.external,
-    },
     node: process.version,
+    memory: {
+      heapUsedMb: Math.round(memUsage.heapUsed / 1024 / 1024),
+      heapTotalMb: Math.round(memUsage.heapTotal / 1024 / 1024),
+      rssMb: Math.round(memUsage.rss / 1024 / 1024),
+      heapUsedPct: Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100),
+    },
     services: {
-      database: dbUrl ? "configured" : "not_configured",
-      server: "ok",
+      server: { status: "ok" },
+      database: { status: dbStatus, latencyMs: dbLatencyMs },
+      job_queue: { status: queueStatus, depth: queueDepth },
+      storage: { status: process.env.OBJECT_STORAGE_BUCKET_ID ? "configured" : "demo" },
+      auth: { status: process.env.SESSION_SECRET ? "configured" : "missing_secret" },
+      ai: { status: (process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || process.env.OPENAI_API_KEY) ? "configured" : "not_configured" },
     },
   });
 });

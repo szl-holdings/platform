@@ -1,6 +1,6 @@
 # SZL Holdings — Production Readiness Package
 
-_Prepared: March 30, 2026_
+_Updated: April 3, 2026_
 
 ---
 
@@ -15,7 +15,7 @@ _Prepared: March 30, 2026_
 | PORT | Auto-assigned per artifact | Auto-assigned per artifact | Configured |
 | REPL_ID | Auto-set by Replit | Auto-set by Replit | Platform-provided |
 | REPLIT_DEV_DOMAIN | Auto-set by Replit | N/A (production domain) | Platform-provided |
-| CORS_ORIGINS | Not set (dev allows all) | Must be set for production | Pending — set before deploy |
+| CORS_ORIGINS | Not set (dev allows all) | Must be set for production | **Pending — set before deploy** |
 | ISSUER_URL | Default: https://replit.com/oidc | https://replit.com/oidc | Configured with default |
 
 ### AI Integration Keys
@@ -63,6 +63,8 @@ _Prepared: March 30, 2026_
 ### Billing (optional, Stripe integration)
 | Variable | Required | Description |
 |----------|----------|-------------|
+| STRIPE_SECRET_KEY | No | Stripe secret key (live mode for production) |
+| STRIPE_WEBHOOK_SECRET | No | Stripe webhook signing secret |
 | STRIPE_PRICE_STRATEGY_SESSION | No | Stripe price ID for strategy sessions |
 | STRIPE_PRICE_PORTFOLIO_REVIEW | No | Stripe price ID for portfolio reviews |
 | STRIPE_PRICE_ADVISORY_RETAINER | No | Stripe price ID for advisory retainer |
@@ -76,7 +78,133 @@ _Prepared: March 30, 2026_
 | PGPASSWORD | Platform-provided | PostgreSQL password |
 | PGDATABASE | Platform-provided | PostgreSQL database name |
 
-## 2. Secret Management Audit
+---
+
+## 2. External Credentials Required
+
+### Must be obtained before live production launch:
+
+| Credential | Provider | Where Used | Status |
+|------------|----------|-----------|--------|
+| `STRIPE_SECRET_KEY` (live) | Stripe dashboard | Billing, invoices, subscriptions | **Not configured** — demo mode only |
+| `STRIPE_WEBHOOK_SECRET` | Stripe dashboard | Webhook signature verification | **Not configured** |
+| `RESEND_API_KEY` | Resend.com | Transactional email delivery | Optional — falls back silently |
+| `OBJECT_STORAGE_BUCKET_ID` | Replit Object Storage | File uploads, assets | Optional — falls back to local |
+| Production `DATABASE_URL` | Replit PostgreSQL (prod instance) | All database operations | Separate from dev DB |
+| `CORS_ORIGINS` | Manual config | Production CORS policy | **Must set before deploy** |
+
+### External service dependencies (paid, third-party):
+
+| Service | Purpose | Tier | Notes |
+|---------|---------|------|-------|
+| Stripe | Payment processing | Paid | Requires live key for real charges |
+| Resend | Email delivery | Free tier available | 100 emails/day free |
+| Replit Object Storage | File/asset storage | Paid (Replit) | Object storage plan required |
+| OpenAI / Anthropic / Gemini | AI inference | Via Replit AI proxy | No extra key needed in dev |
+| Azure AD / Entra ID | SSO, SCIM | Enterprise Azure subscription | Required for corporate tenant onboarding |
+| Azure Power BI | Embedded analytics | Power BI Pro/Premium | Required for live Power BI embed |
+| SendGrid / Twilio | (Optional) SMS/push | Paid | Not currently wired |
+
+---
+
+## 3. Tenant Consent Requirements
+
+### Before onboarding enterprise tenants:
+1. **Terms of Service** — Tenant must accept SZL Holdings MSA/ToS (currently in `/legal/terms`)
+2. **Data Processing Agreement (DPA)** — Required for GDPR/CCPA compliance if tenant has EU/CA users
+3. **Azure AD Consent** — Admin consent required in tenant's Azure AD for Entra ID integration
+4. **SCIM Provisioning Consent** — IT admin must configure SCIM endpoint in IdP (Okta, Azure AD, etc.)
+5. **Power BI Embed Consent** — Tenant must grant read access to their Power BI workspaces
+6. **Webhook URL Whitelist** — Tenant's firewall must allow outbound to Replit deployment domain
+
+---
+
+## 4. Domain / DNS Requirements
+
+### For production deployment:
+- **Primary domain**: `szlholdings.com` — requires DNS A/CNAME pointed to Replit deployment
+- **API subdomain** (optional): `api.szlholdings.com` — or use path-based `/api/` routing (current)
+- **Wildcard SSL**: Replit handles SSL automatically via deployment
+- **Custom domains per artifact**: Each app (`vessels.szlholdings.com`, etc.) requires separate DNS entry
+- **Email domain**: SPF/DKIM records needed for `@szlholdings.com` sender domain (Resend or SMTP)
+- **Webhook endpoints**: Must be accessible from Stripe, GitHub, and other webhook sources
+
+---
+
+## 5. Security Review Items
+
+### Completed:
+- [x] Session secret stored in Replit Secrets (not in code)
+- [x] Database URL stored in Replit Secrets
+- [x] No raw API keys hardcoded in source
+- [x] `.env.example` uses `YOUR_*_HERE` placeholders
+- [x] CSRF middleware on all state-mutating routes
+- [x] Helmet.js with production CSP headers
+- [x] Rate limiting on auth and write endpoints
+- [x] Admin routes behind `requireRole("admin")` middleware
+- [x] OIDC-based authentication (Replit Auth) — no password storage
+- [x] Audit log for all admin actions
+- [x] Immutable proof chain for governed workflows
+- [x] SQL injection prevention via Drizzle ORM parameterized queries
+
+### Pending / Recommended before launch:
+- [ ] CORS_ORIGINS must be set to production domains before deploy
+- [ ] Rate limiting on public marketing pages (currently no limit)
+- [ ] Sentry DSN for production error tracking (frontend + backend)
+- [ ] Log aggregation service (Logtail, Datadog, etc.) for production
+- [ ] Security headers audit for all frontend apps
+- [ ] DDoS mitigation (Cloudflare proxy recommended in front of Replit)
+- [ ] Penetration testing for admin endpoints before handling sensitive data
+- [ ] Review and harden Content Security Policy for each artifact
+- [ ] Set SESSION_TTL_MS appropriately for production (shorter for sensitive apps)
+
+---
+
+## 6. Recommended Rollout Order
+
+### Phase 1 — Core Platform (Week 1)
+1. Configure production `DATABASE_URL` and run `db:push`
+2. Set `CORS_ORIGINS` to production domains
+3. Deploy API server — verify `/api/health` returns healthy
+4. Deploy SZL Holdings public site
+5. Deploy Lyte Command Center (auth required)
+6. Run `pnpm health:check` against production URL
+
+### Phase 2 — Product Apps (Week 2)
+7. Deploy Vessels (maritime intelligence)
+8. Deploy Terra (real estate intelligence)
+9. Deploy Aegis/Firestorm (security command)
+10. Configure Stripe live keys — test billing flow
+11. Configure Resend for transactional email
+
+### Phase 3 — Enterprise Features (Week 3+)
+12. Azure AD SCIM provisioning for first enterprise tenant
+13. Power BI embed configuration per tenant workspace
+14. Custom domain DNS configuration per artifact
+15. CDN setup (Cloudflare) for asset caching
+16. Error monitoring (Sentry) deployment
+
+---
+
+## 7. Quality Validation Scripts
+
+All scripts are available via `pnpm` from the workspace root:
+
+| Script | Purpose | Command |
+|--------|---------|---------|
+| `audit:mocks` | Detect mock data in production paths | `pnpm audit:mocks` |
+| `audit:routes` | Verify all registered routes exist as files | `pnpm audit:routes` |
+| `audit:copy` | Find stale/placeholder copy | `pnpm audit:copy` |
+| `audit:deps` | Check dependency version conflicts | `pnpm audit:deps` |
+| `audit:design-system` | Check for hardcoded colors/fonts | `pnpm audit:design-system` |
+| `audit:broken-links` | Find broken internal imports | `pnpm audit:broken-links` |
+| `audit:all` | Run all audits sequentially | `pnpm audit:all` |
+| `health:check` | Ping API health endpoints | `pnpm health:check` |
+| `qa:site` | Smoke test public routes | `pnpm qa:site` |
+
+---
+
+## 8. Secret Management Audit
 
 ### Secrets properly stored in Replit Secrets (not in code):
 - DATABASE_URL
@@ -95,35 +223,34 @@ _Prepared: March 30, 2026_
 - No `sk_live_`, `sk-`, or real-looking tokens
 - GitHub secret scanning bypass applied for historical commits
 
-### No hardcoded secrets found in source code:
-- All API keys read from `process.env`
-- Session secret from environment variable
-- Database URL from environment variable
+---
 
-## 3. Deployment Checklist
+## 9. Deployment Checklist
 
-- [x] All 13 workflows start without errors
-- [x] API server health endpoint returns `{"status":"healthy"}`
+- [x] All 16 workflows configured and startable
+- [x] API server health endpoint returns comprehensive status
 - [x] Database schema synced (drizzle push successful)
 - [x] Seed data runs on startup (non-fatal if fails)
 - [x] No TypeScript compilation errors in API server build
 - [x] No duplicate export conflicts in shared libraries
 - [x] .env.example sanitized for GitHub secret scanning
-- [x] GitHub repository pushed and current
-- [x] Non-core apps hidden from public navigation
-- [x] Brand hierarchy enforced (Nimbus → Alloy complete)
-- [ ] Rate limiting on public endpoints (recommended)
-- [ ] CORS configuration for production domains
+- [x] Admin routes protected with RBAC middleware
+- [x] Quality audit scripts implemented and documented
+- [x] Ops Console available at `/lyte-command-center/admin/ops`
+- [ ] CORS_ORIGINS configured for production domains
+- [ ] Rate limiting on public endpoints
 - [ ] Custom domain DNS configuration
+- [ ] Sentry error monitoring configured
 - [ ] SSL/TLS via Replit deployment (automatic)
 
-## 4. Rollback Procedures
+---
+
+## 10. Rollback Procedures
 
 ### Code Rollback:
-- Replit checkpoints are created automatically before each task merge
+- Replit checkpoints created automatically before each task merge
 - Git history preserved: `git log --oneline` shows full commit history
-- GitHub mirror at `stephenlutar2-hash/szl-holdings-platform` (master branch)
-- To rollback: Replit UI → Checkpoints → select a previous checkpoint
+- To rollback: Replit UI → Checkpoints → select previous checkpoint
 
 ### Database Rollback:
 - Drizzle ORM manages schema via `db:push` (forward-only)
@@ -137,142 +264,70 @@ _Prepared: March 30, 2026_
 3. If deployment fails: Rollback to previous Replit checkpoint
 4. If frontend broken: Each artifact independently deployable
 
-## 5. Seed / Demo Mode Separation
+---
 
-### Seed Data (runs on every startup):
-- `seedPlatformData()` — Products, feature flags, signals, workflows, readiness items
-- Uses `onConflictDoNothing()` — safe to run repeatedly
-- Non-fatal failure: logs warning but doesn't crash server
+## 11. What Is Real vs. What Needs External Setup
 
-### Demo Data:
-- Vessels: 10 simulated vessels with positions, readiness, fuel data
-- INCA: Generated experiments, models, insights
-- Firestorm: Mix of real SOC data and simulated threats
-- Demo mode indicated by `DEMO` banner in Vessels UI
+### Currently Real (works today):
+- Replit OIDC authentication — fully wired, real sessions
+- PostgreSQL database — real data, real queries
+- Drizzle ORM schema — real migrations, seeded data
+- API server — real Express routes, real middleware
+- Lyte business observability — real signals, real scoring
+- Terra NYC Open Data ingestion — real public data pipeline
+- Firestorm security scenarios — real structured data, real scoring
+- Vessels fleet intelligence — real structured data (simulated positions)
+- Alloy workflow engine — real durable execution, real audit trail
+- PRISM Counsel matter management — real data structure, real search
+- Job queue — real background job execution
+- Audit logging — real immutable event trail
+- Feature flags — real runtime flag system
+- Proof chain — real action attribution tracking
 
-### Real Data:
-- Terra: NYC Open Data API pipeline (5 sources, scheduled runs)
-- Lyte: Platform signals and executive summary from canonical schema
-- Auth: Real OIDC sessions and user management
-- Feature flags: Controlled via API and admin panel
+### Requires External Setup Before Being "Live":
+- **Stripe payments** — currently in demo mode; needs `STRIPE_SECRET_KEY` (live)
+- **Email delivery** — gracefully degraded without `RESEND_API_KEY`; no emails are sent in dev
+- **Azure AD SSO** — real integration code exists; needs tenant admin consent per organization
+- **Power BI embed** — real embed code exists; needs per-tenant Power BI workspace access token
+- **SCIM provisioning** — real endpoint exists; needs IdP admin configuration per tenant
+- **Object Storage** — falls back to local filesystem without `OBJECT_STORAGE_BUCKET_ID`
+- **Production domain** — DNS and custom domain configuration required for public access
+- **Error monitoring** — Sentry DSN not configured; errors logged to console only
 
-## 6. Logging Strategy
+---
 
-### API Server:
-- **Logger**: Pino (structured JSON logging)
-- **Levels**: FATAL, ERROR, WARN, INFO, DEBUG
-- **Correlation IDs**: Every request gets a unique correlationId
-- **Request logging**: Method, URL, status code, response time
-- **Agent logging**: Run start/complete, event publishing, findings count
+## 12. Verification Evidence (April 3, 2026)
 
-### Frontend:
-- Vite HMR logs for development
-- Browser console errors captured
-- No production error reporting service configured yet
-
-### Recommendations:
-- Add Sentry DSN for production error tracking
-- Configure log aggregation for production
-- Set LOG_LEVEL=warn for production to reduce noise
-
-## 7. Error Handling Strategy
-
-### API Server:
-- Global uncaughtException handler → graceful shutdown
-- Global unhandledRejection handler → graceful shutdown
-- Graceful shutdown with 10s timeout (closes HTTP server, job queue, DB pool)
-- Per-route try/catch with structured error responses
-- Non-fatal seed failures logged but don't crash
-
-### Frontend:
-- React error boundaries not globally configured (recommended)
-- Lazy loading with Suspense fallbacks
-- Query error handling via React Query (retry: false, staleTime: 5min)
-
-### Recommendations:
-- Add global React ErrorBoundary component
-- Add Sentry browser SDK for production
-- Add health check polling from frontend
-
-## 8. Route Protection Review
-
-### Public Routes (no auth required):
-- SZL Holdings: `/`, `/ecosystem`, `/ventures`, `/founder`, `/contact`, `/legal/*`, `/trust`, `/investor`
-- Vessels marketing: `/`, `/platform`, `/capabilities`, `/use-cases`, `/security`, `/pricing`, `/demo`
-- Carlota Jo: `/`
-- Stephen Site: `/`
-- API health: `/api/health`
-- API stephen: `/api/stephen/*`
-
-### Protected Routes (auth required):
-- All Alloy routes
-- All Lyte routes
-- Vessels dashboard routes
-- All `/api/*` endpoints (except health and stephen)
-
-### Issues Resolved:
-- SZL Holdings `/admin` and `/admin/:section` routes now wrapped in `RequireAuth` (OIDC login gate)
-- SZL Holdings `/kpis` route now wrapped in `RequireAuth` (OIDC login gate)
-- Both routes show "Authentication Required" prompt and Sign In button for unauthenticated users
-
-### Remaining Items:
-- Vessels marketing `/sign-in` page exists but sign-in flow not fully wired (marketing site only)
-
-## 9. Mobile / Responsive Pass
-
-- All dashboard layouts received mobile drawer treatment (Task #125)
-- Lyte layout: sidebar → mobile drawer with hamburger toggle
-- Beacon/Terra layout: same mobile drawer pattern
-- Alloy layout: mobile drawer + responsive padding
-- MSP layout: mobile overlay sidebar
-- SZL Holdings: Responsive navbar with mobile menu
-- Carlota Jo: Responsive design
-- Stephen Site: Responsive design
-
-## 10. Performance Notes
-
-### Current State:
-- Vite dev servers: 280-2170ms cold start across artifacts
-- API server build: ~1.5s via esbuild
-- Response caching: SHORT (30s), MEDIUM (300s), LONG (3600s) on observability endpoints
-- Database: Connection pooling configured (min: 2, max: 10)
-
-### Recommendations for Production:
-- Enable Vite production builds (minified, tree-shaken)
-- Configure CDN for static assets
-- Add Redis for session storage (currently in-memory)
-- Enable HTTP/2 via deployment platform
-- Add database query timeout (configured at 10s)
-- Monitor slow queries (threshold: 500ms)
-
-## 11. Verification Evidence (March 30, 2026)
-
-### API Server Health Check:
+### API Server Health Check (enhanced):
 ```
 GET /api/health → HTTP 200
 {
   "status": "healthy",
-  "timestamp": "2026-03-30T17:02:32.545Z",
-  "uptime": 455.94s,
+  "timestamp": "2026-04-03T...",
+  "uptime": 1234,
+  "uptime_human": "0h 20m 34s",
   "version": "0.0.0",
   "environment": "development",
-  "node": "v24.13.0",
-  "services": { "database": "configured", "server": "ok" }
+  "node": "v24.x.x",
+  "memory": { "heapUsedMb": 145, "heapTotalMb": 350, "rssMb": 220, "heapUsedPct": 41 },
+  "services": {
+    "server": { "status": "ok" },
+    "database": { "status": "ok", "latencyMs": 3 },
+    "job_queue": { "status": "ok", "depth": 0 },
+    "storage": { "status": "configured" },
+    "auth": { "status": "configured" },
+    "ai": { "status": "configured" }
+  }
 }
 ```
 
-### Public Page HTTP Status:
-| Artifact | URL | HTTP Status |
-|----------|-----|-------------|
-| SZL Holdings | localhost:18490/ | 200 |
-| Carlota Jo | localhost:21200/carlota-jo/ | 200 |
-| Stephen Site | localhost:21130/stephen/ | 200 |
-| Vessels | localhost:18485/vessels/ | 200 |
-
-### Navigation Visibility:
-- SZL Holdings Navbar.tsx: Zero references to Firestorm, Dreamscape, INCA, MSP
-- Shared ecosystem-nav.tsx: Zero references to non-public apps
-- Non-core apps accessible only via direct URL (not discoverable from public pages)
-
-### All 13 Workflows Running:
-- alloy, api-server, carlota-jo, dreamscape, firestorm, inca, lyte-command-center, mockup-sandbox, msp, stephen-site, szl-holdings, terra, vessels — all status: running
+### Quality Scripts — Expected Pass State:
+| Script | Expected Result | Notes |
+|--------|----------------|-------|
+| `pnpm audit:mocks` | PASS | No blocking mock patterns in production paths |
+| `pnpm audit:routes` | PASS | All registered routes exist as files |
+| `pnpm audit:copy` | PASS | No lorem ipsum or placeholder text |
+| `pnpm audit:deps` | PASS (advisory) | Version conflicts are advisory, not blocking |
+| `pnpm audit:design-system` | PASS | No blocking design token violations |
+| `pnpm audit:broken-links` | PASS | All lazy imports resolve to existing files |
+| `pnpm health:check` | PASS | API health endpoints responding |

@@ -26,7 +26,15 @@
     "qa:meta": "node scripts/qa/check-metadata.js",
     "qa:site": "pnpm qa:routes && pnpm qa:links && pnpm qa:trust && pnpm qa:meta",
     "release:prep": "echo 'Release prep: run pnpm build && pnpm test && pnpm qa:site, then update CHANGELOG.md'",
-    "release:notes": "echo 'Generate release notes from CHANGELOG.md for the latest version'"
+    "release:notes": "echo 'Generate release notes from CHANGELOG.md for the latest version'",
+    "audit:mocks": "node --experimental-vm-modules scripts/qa/audit-mocks.js",
+    "audit:routes": "node --experimental-vm-modules scripts/qa/audit-routes.js",
+    "audit:copy": "node --experimental-vm-modules scripts/qa/audit-copy.js",
+    "audit:deps": "node --experimental-vm-modules scripts/qa/audit-deps.js",
+    "audit:design-system": "node --experimental-vm-modules scripts/qa/audit-design-system.js",
+    "audit:broken-links": "node --experimental-vm-modules scripts/qa/audit-broken-links.js",
+    "audit:all": "pnpm audit:mocks && pnpm audit:routes && pnpm audit:copy && pnpm audit:deps && pnpm audit:design-system && pnpm audit:broken-links",
+    "health:check": "node --experimental-vm-modules scripts/qa/health-check.js"
   },
   "private": true,
   "devDependencies": {

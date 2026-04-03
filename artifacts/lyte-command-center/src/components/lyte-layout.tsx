@@ -124,6 +124,7 @@ const NAV_GROUPS = [
 ];
 
 const ADMIN_NAV = [
+  { href: "/admin/ops", label: "Ops Console", icon: Network },
   { href: "/admin/overview", label: "System", icon: Settings },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/flags", label: "Flags", icon: Flag },
