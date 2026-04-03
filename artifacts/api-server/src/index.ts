@@ -122,8 +122,8 @@ seedDreamscapeData().catch(err => {
 registerAllPrismJobHandlers();
 const prismPoller = startPrismJobPoller(5000);
 
-const HEAP_WARN_THRESHOLD = 0.85;
-const HEAP_CRITICAL_THRESHOLD = 0.95;
+const HEAP_WARN_THRESHOLD = 0.88;
+const HEAP_CRITICAL_THRESHOLD = 0.97;
 const memoryMonitor = setInterval(() => {
   const { heapUsed, heapTotal } = process.memoryUsage();
   const ratio = heapUsed / heapTotal;

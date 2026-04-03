@@ -41,7 +41,7 @@ export default function FounderPage() {
             >
               <div className="lg:col-span-7">
                 <p className="text-[11px] font-medium tracking-[0.35em] uppercase mb-6" style={{ color: "var(--color-gold)" }}>
-                  Rosa Lutar
+                  Carlota Jo
                 </p>
                 <h1 className="font-serif font-light leading-[1.1] mb-8" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--color-ink-900)" }}>
                   The trusted operator
@@ -228,7 +228,7 @@ export default function FounderPage() {
                 "The standard is not what's expected. It's what's deserved."
               </p>
               <p className="text-xs tracking-wide mb-8 mt-4" style={{ color: "var(--color-stone-400)" }}>
-                Rosa accepts a limited number of new clients each year. All enquiries handled with complete confidentiality.
+                Carlota Jo accepts a limited number of new clients each year. All enquiries handled with complete confidentiality.
               </p>
               <Link
                 href="/contact"

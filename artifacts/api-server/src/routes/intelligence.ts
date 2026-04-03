@@ -125,6 +125,29 @@ function preseedCache<T>(key: string, data: T, ttlMs: number): void {
   }
 }
 
+preseedCache<ThreatItem[]>("threats", [
+  { id: "DEMO-1", type: "apt", name: "Storm-0558 Phishing Campaign", severity: "critical", source: "SZL Intel (demo)", country: "CN", targetSector: "Government", description: "Advanced persistent threat targeting government and defense email infrastructure via forged authentication tokens.", lat: 39.9, lon: 116.4, timestamp: new Date(Date.now() - 3600000).toISOString(), indicators: 42 },
+  { id: "DEMO-2", type: "malware", name: "BlackCat Ransomware Variant", severity: "high", source: "SZL Intel (demo)", country: "RU", targetSector: "Critical Infrastructure", description: "New ransomware variant targeting OT/ICS environments with double-extortion model and 72-hour payment demands.", lat: 55.7, lon: 37.6, timestamp: new Date(Date.now() - 7200000).toISOString(), indicators: 28 },
+  { id: "DEMO-3", type: "apt", name: "Lazarus Group — Financial Sector", severity: "high", source: "SZL Intel (demo)", country: "KP", targetSector: "Financial Services", description: "State-sponsored group targeting SWIFT network participants and cryptocurrency exchanges.", lat: 39.0, lon: 125.7, timestamp: new Date(Date.now() - 10800000).toISOString(), indicators: 67 },
+  { id: "DEMO-4", type: "malware", name: "PlugX RAT Distribution", severity: "medium", source: "SZL Intel (demo)", country: "CN", targetSector: "Manufacturing", description: "Remote access trojan distributed via spear-phishing targeting supply chain vendors.", lat: 31.2, lon: 121.5, timestamp: new Date(Date.now() - 14400000).toISOString(), indicators: 15 },
+], 300000);
+
+preseedCache<GeoEvent[]>("geopolitical", [
+  { id: "GEO-DEMO-1", title: "Sanctions Package Extended — Russia Energy Sector", region: "Russia", severity: "high", category: "sanctions", timestamp: new Date(Date.now() - 1800000).toISOString(), source: "SZL Intel (demo)", impact: "EU extends energy sanctions — additional 47 entities listed under Russia SDN" },
+  { id: "GEO-DEMO-2", title: "South China Sea Patrol Incident — Taiwan Strait", region: "CN", severity: "critical", category: "military", timestamp: new Date(Date.now() - 3600000).toISOString(), source: "SZL Intel (demo)", impact: "PLAN naval exercises reported within 12nm — maritime routing advisories issued" },
+  { id: "GEO-DEMO-3", title: "Critical Infrastructure Cyber Directive — CISA Advisory", region: "US", severity: "high", category: "cyber_operations", timestamp: new Date(Date.now() - 5400000).toISOString(), source: "SZL Intel (demo)", impact: "CISA AA24 advisory — water treatment and energy sector vulnerabilities actively exploited" },
+  { id: "GEO-DEMO-4", title: "Red Sea Shipping Rerouting — Suez Disruption", region: "YE", severity: "high", category: "infrastructure", timestamp: new Date(Date.now() - 7200000).toISOString(), source: "SZL Intel (demo)", impact: "Houthi drone activity forces 85% of container traffic to Cape of Good Hope routing" },
+  { id: "GEO-DEMO-5", title: "G7 AI Governance Framework — Export Controls Update", region: "Global", severity: "medium", category: "regulatory", timestamp: new Date(Date.now() - 9000000).toISOString(), source: "SZL Intel (demo)", impact: "G7 nations align on semiconductor and AI model export licensing requirements" },
+], 600000);
+
+preseedCache<MaritimeVessel[]>("maritime-vessels", [
+  { mmsi: "636091402", name: "NORDIC CROWN", type: "Container", lat: 51.9, lon: 4.1, speed: 12.4, course: 270, heading: 268, destination: "Rotterdam", status: "Under way using engine", flag: "LR", length: 294, timestamp: new Date().toISOString() },
+  { mmsi: "477213600", name: "OCEAN PIONEER", type: "Tanker", lat: 25.1, lon: 56.3, speed: 8.7, course: 315, heading: 312, destination: "Abu Dhabi", status: "Under way using engine", flag: "HK", length: 330, timestamp: new Date().toISOString() },
+  { mmsi: "563087700", name: "BERGE SUMMIT", type: "Bulk Carrier", lat: 1.3, lon: 104.0, speed: 14.1, course: 90, heading: 88, destination: "Singapore", status: "Under way using engine", flag: "SG", length: 289, timestamp: new Date().toISOString() },
+  { mmsi: "257026500", name: "SOLVIKEN", type: "Cargo", lat: 58.9, lon: 5.7, speed: 11.2, course: 180, heading: 182, destination: "Stavanger", status: "Under way using engine", flag: "NO", length: 180, timestamp: new Date().toISOString() },
+  { mmsi: "548531000", name: "PACIFIC EXPLORER", type: "Container", lat: 22.3, lon: 114.2, speed: 16.8, course: 45, heading: 44, destination: "Hong Kong", status: "Under way using engine", flag: "MH", length: 368, timestamp: new Date().toISOString() },
+], 120000);
+
 const intelRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,

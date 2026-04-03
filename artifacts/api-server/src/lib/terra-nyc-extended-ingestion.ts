@@ -50,7 +50,11 @@ async function sodaFetch(url: string): Promise<unknown[]> {
       headers: { Accept: "application/json" },
     });
     if (!res.ok) {
-      logger.warn({ status: res.status, url }, "NYC Open Data extended fetch failed");
+      if (res.status === 400 || res.status === 403) {
+        logger.warn({ status: res.status, url }, "NYC Open Data extended source unavailable (400/403) — skipping source, continuing with others");
+      } else {
+        logger.warn({ status: res.status, url }, "NYC Open Data extended fetch failed — skipping source");
+      }
       return [];
     }
     return (await res.json()) as unknown[];

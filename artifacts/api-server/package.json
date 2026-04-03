@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
     "build": "node ./build.mjs",
-    "start": "node --max-old-space-size=1024 --expose-gc --enable-source-maps ./dist/index.mjs",
+    "start": "node --max-old-space-size=2048 --expose-gc --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed:terra": "tsx src/scripts/seed-terra-distress.ts",
     "seed:ecosystem": "tsx src/scripts/seed-ecosystem.ts"

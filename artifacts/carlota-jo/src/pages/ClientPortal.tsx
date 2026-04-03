@@ -598,10 +598,10 @@ export function ClientPortalUpdates() {
 }
 
 const DEMO_MESSAGES = [
-  { id: 1, senderName: "Rosa Lutar", fromRosa: true, body: "Good morning — the March summary is now in your Documents. I've flagged the Oxfordshire items clearly, and the vendor replacement recommendations are in a separate document so you can review them at your convenience. Looking forward to our April 7 session.", createdAt: "2026-03-31" },
-  { id: 2, senderName: "You", fromRosa: false, body: "Rosa — thank you for the update on the Oxfordshire visit. Are the two urgent maintenance items something you can arrange directly, or do you need my authorisation first? Happy for you to proceed if it's within the agreed threshold.", createdAt: "2026-03-29" },
-  { id: 3, senderName: "Rosa Lutar", fromRosa: true, body: "Both items are within the agreed £5,000 threshold, so I can proceed directly. I'll confirm the specialist and arrange access. I'll include the quotes and confirmation in the March summary so you have a full record.", createdAt: "2026-03-29" },
-  { id: 4, senderName: "Rosa Lutar", fromRosa: true, body: "Just returned from Oxfordshire. The estate is in generally good condition — no surprises from the winter. I've identified four maintenance items for the summer opening, two of which I'd recommend addressing before the end of April. Condition report will be ready by the 25th.", createdAt: "2026-03-22" },
+  { id: 1, senderName: "Carlota Jo", fromRosa: true, body: "Good morning — the March summary is now in your Documents. I've flagged the Oxfordshire items clearly, and the vendor replacement recommendations are in a separate document so you can review them at your convenience. Looking forward to our April 7 session.", createdAt: "2026-03-31" },
+  { id: 2, senderName: "You", fromRosa: false, body: "Thank you for the update on the Oxfordshire visit. Are the two urgent maintenance items something you can arrange directly, or do you need my authorisation first? Happy for you to proceed if it's within the agreed threshold.", createdAt: "2026-03-29" },
+  { id: 3, senderName: "Carlota Jo", fromRosa: true, body: "Both items are within the agreed £5,000 threshold, so I can proceed directly. I'll confirm the specialist and arrange access. I'll include the quotes and confirmation in the March summary so you have a full record.", createdAt: "2026-03-29" },
+  { id: 4, senderName: "Carlota Jo", fromRosa: true, body: "Just returned from Oxfordshire. The estate is in generally good condition — no surprises from the winter. I've identified four maintenance items for the summer opening, two of which I'd recommend addressing before the end of April. Condition report will be ready by the 25th.", createdAt: "2026-03-22" },
 ];
 
 type MessageRow = { id: number; senderName?: string; senderUserId?: number; fromRosa?: boolean; body?: string; content?: string; bodyRichtext?: string; subject?: string; direction?: string; createdAt: string };
@@ -642,18 +642,18 @@ export function ClientPortalMessages() {
           Messages
         </h1>
         <p className="text-[13px] font-light mt-1" style={{ color: "rgba(245,240,232,0.35)" }}>
-          Private correspondence with Rosa
+          Private correspondence with Carlota Jo
         </p>
         {isDemo && (
           <p className="text-[10px] mt-1 font-light" style={{ color: "rgba(200,169,106,0.4)" }}>
-            Showing demo messages — your private correspondence with Rosa will appear here once your engagement begins.
+            Showing demo messages — your private correspondence with Carlota Jo will appear here once your engagement begins.
           </p>
         )}
       </div>
       <div className="space-y-3.5 mb-6">
         {(messages as MessageRow[]).map((msg, i) => {
           const isFromRosa = msg.fromRosa !== undefined ? msg.fromRosa : !msg.senderUserId;
-          const senderLabel = isFromRosa ? (msg.senderName ?? "Rosa Lutar") : (msg.senderName ?? "You");
+          const senderLabel = isFromRosa ? (msg.senderName ?? "Carlota Jo") : (msg.senderName ?? "You");
           const dateStr = msg.createdAt ? new Date(msg.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—";
           const body = msg.body ?? msg.bodyRichtext ?? msg.content ?? "";
           return (
