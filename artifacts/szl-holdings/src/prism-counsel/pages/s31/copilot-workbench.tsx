@@ -7,6 +7,7 @@ const MODES = [
   { id: "communications", label: "Comms", icon: MessageSquare, description: "Insurer communications, silence windows" },
   { id: "document", label: "Document", icon: FileText, description: "Extraction, contradictions, chronology" },
   { id: "strategy", label: "Strategy", icon: TrendingUp, description: "Leverage, readiness, settlement posture" },
+  { id: "portfolio", label: "Portfolio", icon: Brain, description: "Portfolio pressure, digests, movement opportunities, intervention leverage" },
   { id: "ops", label: "Ops", icon: Settings, description: "Connector health, sync lag, system diagnostics" },
 ] as const;
 
@@ -107,7 +108,20 @@ export default function CopilotWorkbenchPage() {
           ))}
           {templates.filter((t: any) => t.mode === activeMode).length === 0 && (
             <>
-              {["What changed in the last 7 days?", "What is missing before mediation?", "Show actions requiring approval"].map(q => (
+              {(activeMode === "portfolio" ? [
+                "Which matters need partner action today?",
+                "Show me all critical pressure matters and why",
+                "What are my highest movement opportunities this week?",
+                "Where is the review backlog blocking exports?",
+                "Which carrier is causing the most drag this week?",
+                "What lien issues are blocking settlement?",
+                "Generate a high-pressure digest for today",
+                "Which teams are underperforming on throughput?",
+              ] : [
+                "What changed in the last 7 days?",
+                "What is missing before mediation?",
+                "Show actions requiring approval",
+              ]).map(q => (
                 <button key={q} onClick={() => setInput(q)} className="w-full text-left px-2 py-1.5 text-[10px] text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] rounded transition-colors">{q}</button>
               ))}
             </>

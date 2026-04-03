@@ -159,6 +159,20 @@ const AdminOpsDiagnosticsPage = lazy(() => import("@/prism-counsel/pages/admin-o
 const AdminReplaysEnhancedPage = lazy(() => import("@/prism-counsel/pages/admin-replays-enhanced-page"));
 const AdminModelCostsEnhancedPage = lazy(() => import("@/prism-counsel/pages/admin-model-costs-enhanced-page"));
 const AdminM365Page = lazy(() => import("@/prism-counsel/pages/admin-m365-page"));
+const P2PortfolioOverview = lazy(() => import("@/prism-counsel/pages/p2/portfolio-overview-page"));
+const P2PressureBoard = lazy(() => import("@/prism-counsel/pages/p2/pressure-board-page"));
+const P2FrictionBoard = lazy(() => import("@/prism-counsel/pages/p2/friction-board-page"));
+const P2ReviewBacklog = lazy(() => import("@/prism-counsel/pages/p2/review-backlog-board-page"));
+const P2ApprovalBottleneck = lazy(() => import("@/prism-counsel/pages/p2/approval-bottleneck-board-page"));
+const P2RecoveryLien = lazy(() => import("@/prism-counsel/pages/p2/recovery-lien-board-page"));
+const P2InsurerPressure = lazy(() => import("@/prism-counsel/pages/p2/insurer-pressure-board-page"));
+const P2MovementOpportunity = lazy(() => import("@/prism-counsel/pages/p2/movement-opportunity-board-page"));
+const P2QuietRisk = lazy(() => import("@/prism-counsel/pages/p2/quiet-risk-board-page"));
+const P2TeamThroughput = lazy(() => import("@/prism-counsel/pages/p2/team-throughput-board-page"));
+const P2PortfolioDigests = lazy(() => import("@/prism-counsel/pages/p2/portfolio-digests-page"));
+const P2PortfolioForecast = lazy(() => import("@/prism-counsel/pages/p2/portfolio-forecast-page"));
+const P2PartnerLifeOs = lazy(() => import("@/prism-counsel/pages/p2/partner-life-os-page"));
+const P2AdminPortfolio = lazy(() => import("@/prism-counsel/pages/p2/admin-portfolio-page"));
 
 const S32MorningBrief = lazy(() => import("@/prism-counsel/pages/s32/morning-brief-page"));
 const S32PrepMode = lazy(() => import("@/prism-counsel/pages/s32/prep-mode-page"));
@@ -615,6 +629,50 @@ function App() {
             </Route>
             <Route path="/prism-counsel/forecast-diff">
               <Suspense fallback={<PageLoader />}><CounselAppPage><PrismForecastDiff /></CounselAppPage></Suspense>
+            </Route>
+
+            {/* ── PRISM Counsel Pilot Two — Portfolio Console routes ── */}
+            <Route path="/prism-counsel/portfolio">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2PortfolioOverview /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/pressure-board">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2PressureBoard /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/friction-board">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2FrictionBoard /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/review-backlog">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2ReviewBacklog /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/approval-bottleneck">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2ApprovalBottleneck /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/recovery-lien">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2RecoveryLien /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/insurer-pressure">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2InsurerPressure /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/movement-opportunity">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2MovementOpportunity /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/quiet-risk">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2QuietRisk /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/throughput">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2TeamThroughput /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/digests">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2PortfolioDigests /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/forecast">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2PortfolioForecast /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/partner-view">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2PartnerLifeOs /></CounselAppPage></Suspense>
+            </Route>
+            <Route path="/prism-counsel/portfolio/admin">
+              <Suspense fallback={<PageLoader />}><CounselAppPage><P2AdminPortfolio /></CounselAppPage></Suspense>
             </Route>
 
             {/* ── PRISM Counsel Section 32 — Lawyer Life OS routes ── */}
