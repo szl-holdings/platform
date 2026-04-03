@@ -29,6 +29,7 @@ import { initializeOpenTelemetry } from "@szl-holdings/observability";
 import { seedTerraDemo } from "./lib/terra-seed";
 import { seedMspData } from "./lib/seed-msp";
 import { seedDreamscapeData } from "./lib/seed-dreamscape";
+import { seedDosData } from "./lib/seed-dos";
 import { buildGraphQLMiddleware } from "./graphql/index.js";
 import { registerGraphQLHandler } from "./app.js";
 import { prewarmIntelligenceCache, scheduleIntelligenceRefresh } from "./routes/intelligence.js";
@@ -117,6 +118,10 @@ seedMspData().catch(err => {
 
 seedDreamscapeData().catch(err => {
   logger.warn({ err }, "[seed-dreamscape] Creative Workflows seed failed (non-fatal)");
+});
+
+seedDosData().catch(err => {
+  logger.warn({ err }, "[dos-seed] Distribution OS seed failed (non-fatal)");
 });
 
 registerAllPrismJobHandlers();

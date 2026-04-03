@@ -1,4 +1,6 @@
 import { Router, Request, Response } from "express";
+import { z } from "zod";
+import { computeLeadScore } from "../lib/lead-scoring";
 import {
   db,
   dosArticlesTable, dosArticleVersionsTable, dosNewslettersTable,
@@ -140,7 +142,7 @@ router.post("/x-posts/:id/queue", requireAuth, async (req: Request, res: Respons
   res.json(post);
 });
 
-router.get("/campaigns", async (_req: Request, res: Response) => {
+router.get("/campaigns", requireAuth, async (_req: Request, res: Response) => {
   const campaigns = await db.select().from(dosCampaignsTable).orderBy(desc(dosCampaignsTable.createdAt)).limit(100);
   res.json(campaigns);
 });
@@ -156,7 +158,7 @@ router.patch("/campaigns/:id", requireAuth, async (req: Request, res: Response) 
   res.json(c);
 });
 
-router.get("/campaigns/:id/links", async (req: Request, res: Response) => {
+router.get("/campaigns/:id/links", requireAuth, async (req: Request, res: Response) => {
   const links = await db.select().from(dosCampaignLinksTable).where(eq(dosCampaignLinksTable.campaignId, Number(req.params.id)));
   res.json(links);
 });
@@ -174,35 +176,96 @@ router.post("/campaigns/:id/links", requireAuth, async (req: Request, res: Respo
   res.status(201).json(link);
 });
 
-router.get("/leads", async (req: Request, res: Response) => {
+// ─── Zod schemas for admin write paths ───────────────────────────────────────
+
+const LeadCreateSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  company: z.string().optional(),
+  stage: z.string().optional(),
+  source: z.string().optional(),
+  medium: z.string().optional(),
+  campaign: z.string().optional(),
+  landingPage: z.string().optional(),
+  budget: z.string().optional(),
+  message: z.string().optional(),
+  interestArea: z.string().optional(),
+  visitCount: z.number().int().optional(),
+  ctaAfterCarousel: z.boolean().optional(),
+});
+
+const LinktreeItemSchema = z.object({
+  label: z.string().min(1),
+  destination: z.string().url("Destination must be a valid URL"),
+  campaignTag: z.string().optional(),
+  contentTag: z.string().optional(),
+  sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+});
+
+const SettingWriteSchema = z.object({
+  key: z.string().min(1),
+  value: z.string(),
+  category: z.string().optional(),
+  label: z.string().optional(),
+});
+
+// ─── Lead routes ─────────────────────────────────────────────────────────────
+
+router.get("/leads", requireAuth, async (req: Request, res: Response) => {
   const stage = req.query.stage as string | undefined;
-  let query = db.select().from(dosLeadsTable).orderBy(desc(dosLeadsTable.createdAt)).limit(100);
-  if (stage) {
-    const leads = await db.select().from(dosLeadsTable).where(eq(dosLeadsTable.stage, stage)).orderBy(desc(dosLeadsTable.createdAt)).limit(100);
-    return res.json(leads);
-  }
-  const leads = await query;
+  const campaign = req.query.campaign as string | undefined;
+  const period = req.query.period as string | undefined;
+
+  const conditions = [];
+  if (stage) conditions.push(eq(dosLeadsTable.stage, stage));
+  if (campaign) conditions.push(eq(dosLeadsTable.campaign, campaign));
+  if (period === "weekly") conditions.push(gte(dosLeadsTable.createdAt, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)));
+  else if (period === "monthly") conditions.push(gte(dosLeadsTable.createdAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)));
+
+  const leads = conditions.length > 0
+    ? await db.select().from(dosLeadsTable).where(and(...conditions)).orderBy(desc(dosLeadsTable.createdAt)).limit(200)
+    : await db.select().from(dosLeadsTable).orderBy(desc(dosLeadsTable.createdAt)).limit(200);
   res.json(leads);
 });
 
 router.post("/leads", async (req: Request, res: Response) => {
-  let score = 0;
-  const { email, budget, message, source } = req.body;
-  if (email && !email.includes("gmail") && !email.includes("yahoo") && !email.includes("hotmail")) score += 20;
-  if (budget) score += 15;
-  if (source === "offer-page") score += 15;
-  if (message && message.length > 50) score += 5;
-  const [lead] = await db.insert(dosLeadsTable).values({ ...req.body, score }).returning();
+  const parsed = LeadCreateSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
+  const data = parsed.data;
+  const score = computeLeadScore(data);
+  const [lead] = await db.insert(dosLeadsTable).values({ ...data, score }).returning();
   res.status(201).json(lead);
 });
 
 router.patch("/leads/:id", requireAuth, async (req: Request, res: Response) => {
-  const [lead] = await db.update(dosLeadsTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosLeadsTable.id, Number(req.params.id))).returning();
-  if (!lead) return res.status(404).json({ error: "Lead not found" });
+  const [existing] = await db.select().from(dosLeadsTable).where(eq(dosLeadsTable.id, Number(req.params.id)));
+  if (!existing) return res.status(404).json({ error: "Lead not found" });
+
+  const merged = { ...existing, ...req.body };
+  const score = computeLeadScore({
+    email: merged.email,
+    budget: merged.budget,
+    source: merged.source,
+    medium: merged.medium,
+    landingPage: merged.landingPage,
+    message: merged.message,
+    visitCount: merged.visitCount,
+    ctaAfterCarousel: merged.ctaAfterCarousel,
+    interestArea: merged.interestArea,
+  });
+  const [lead] = await db.update(dosLeadsTable).set({ ...req.body, score, updatedAt: new Date() }).where(eq(dosLeadsTable.id, Number(req.params.id))).returning();
   res.json(lead);
 });
 
-router.get("/leads/:id/notes", async (req: Request, res: Response) => {
+router.delete("/leads/:id", requireAuth, async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  await db.delete(dosLeadNotesTable).where(eq(dosLeadNotesTable.leadId, id));
+  await db.delete(dosLeadsTable).where(eq(dosLeadsTable.id, id));
+  res.json({ success: true });
+});
+
+router.get("/leads/:id/notes", requireAuth, async (req: Request, res: Response) => {
   const notes = await db.select().from(dosLeadNotesTable).where(eq(dosLeadNotesTable.leadId, Number(req.params.id))).orderBy(desc(dosLeadNotesTable.createdAt));
   res.json(notes);
 });
@@ -264,13 +327,15 @@ router.patch("/distribution/:id", requireAuth, async (req: Request, res: Respons
   res.json(t);
 });
 
-router.get("/settings", async (_req: Request, res: Response) => {
+router.get("/settings", requireAuth, async (_req: Request, res: Response) => {
   const settings = await db.select().from(dosSiteSettingsTable).orderBy(asc(dosSiteSettingsTable.category));
   res.json(settings);
 });
 
 router.post("/settings", requireAuth, async (req: Request, res: Response) => {
-  const [s] = await db.insert(dosSiteSettingsTable).values(req.body).returning();
+  const parsed = SettingWriteSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
+  const [s] = await db.insert(dosSiteSettingsTable).values(parsed.data).returning();
   res.status(201).json(s);
 });
 
@@ -280,13 +345,19 @@ router.patch("/settings/:key", requireAuth, async (req: Request, res: Response) 
   res.json(s);
 });
 
-router.get("/integrations", async (_req: Request, res: Response) => {
+router.get("/integrations", requireAuth, async (_req: Request, res: Response) => {
   const integrations = await db.select().from(dosIntegrationStatusTable).orderBy(asc(dosIntegrationStatusTable.provider));
   res.json(integrations);
 });
 
 router.post("/integrations/retry/:provider", requireAuth, async (req: Request, res: Response) => {
   const [i] = await db.update(dosIntegrationStatusTable).set({ status: "disconnected", lastError: null, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.provider, req.params.provider)).returning();
+  if (!i) return res.status(404).json({ error: "Integration not found" });
+  res.json(i);
+});
+
+router.patch("/integrations/:id", requireAuth, async (req: Request, res: Response) => {
+  const [i] = await db.update(dosIntegrationStatusTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosIntegrationStatusTable.id, Number(req.params.id))).returning();
   if (!i) return res.status(404).json({ error: "Integration not found" });
   res.json(i);
 });
@@ -302,13 +373,33 @@ router.post("/authors", requireAuth, async (req: Request, res: Response) => {
 });
 
 router.get("/linktree", async (_req: Request, res: Response) => {
+  // Public endpoint — active items only
   const items = await db.select().from(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.isActive, true)).orderBy(asc(dosLinktreeConfigTable.sortOrder));
   res.json(items);
 });
 
+router.get("/linktree/admin", requireAuth, async (_req: Request, res: Response) => {
+  // Admin endpoint — all items including inactive
+  const items = await db.select().from(dosLinktreeConfigTable).orderBy(asc(dosLinktreeConfigTable.sortOrder));
+  res.json(items);
+});
+
 router.post("/linktree", requireAuth, async (req: Request, res: Response) => {
-  const [item] = await db.insert(dosLinktreeConfigTable).values(req.body).returning();
+  const parsed = LinktreeItemSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Validation failed", details: parsed.error.flatten() });
+  const [item] = await db.insert(dosLinktreeConfigTable).values(parsed.data).returning();
   res.status(201).json(item);
+});
+
+router.patch("/linktree/:id", requireAuth, async (req: Request, res: Response) => {
+  const [item] = await db.update(dosLinktreeConfigTable).set({ ...req.body, updatedAt: new Date() }).where(eq(dosLinktreeConfigTable.id, Number(req.params.id))).returning();
+  if (!item) return res.status(404).json({ error: "Linktree item not found" });
+  res.json(item);
+});
+
+router.delete("/linktree/:id", requireAuth, async (req: Request, res: Response) => {
+  await db.delete(dosLinktreeConfigTable).where(eq(dosLinktreeConfigTable.id, Number(req.params.id)));
+  res.json({ success: true });
 });
 
 router.get("/automation-runs", async (_req: Request, res: Response) => {
@@ -502,19 +593,40 @@ router.post("/analytics/pageview", async (req: Request, res: Response) => {
   res.status(201).json(pv);
 });
 
-router.get("/analytics/dashboard", async (_req: Request, res: Response) => {
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+router.get("/analytics/dashboard", requireAuth, async (req: Request, res: Response) => {
+  const period = req.query.period === "monthly" ? "monthly" : "weekly";
+  const windowMs = period === "monthly" ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+  const windowStart = new Date(Date.now() - windowMs);
 
-  const [pvCount] = await db.select({ count: count() }).from(dosPageViewsTable).where(gte(dosPageViewsTable.createdAt, weekAgo));
-  const [leadCount] = await db.select({ count: count() }).from(dosLeadsTable).where(gte(dosLeadsTable.createdAt, weekAgo));
+  const [pvCount] = await db.select({ count: count() }).from(dosPageViewsTable).where(gte(dosPageViewsTable.createdAt, windowStart));
+  const [leadCount] = await db.select({ count: count() }).from(dosLeadsTable).where(gte(dosLeadsTable.createdAt, windowStart));
   const [articleCount] = await db.select({ count: count() }).from(dosArticlesTable).where(eq(dosArticlesTable.status, "published"));
   const [xQueued] = await db.select({ count: count() }).from(dosXPostsTable).where(eq(dosXPostsTable.status, "queued"));
   const [xSent] = await db.select({ count: count() }).from(dosXPostsTable).where(eq(dosXPostsTable.status, "sent"));
   const [xFailed] = await db.select({ count: count() }).from(dosXPostsTable).where(eq(dosXPostsTable.status, "failed"));
   const [nlReady] = await db.select({ count: count() }).from(dosNewslettersTable).where(eq(dosNewslettersTable.status, "approved"));
-  const [autoRuns] = await db.select({ count: count() }).from(dosAutomationRunsTable).where(and(gte(dosAutomationRunsTable.createdAt, weekAgo), eq(dosAutomationRunsTable.status, "completed")));
+  const [autoRuns] = await db.select({ count: count() }).from(dosAutomationRunsTable).where(and(gte(dosAutomationRunsTable.createdAt, windowStart), eq(dosAutomationRunsTable.status, "completed")));
+
+  // Marketing OS specific stats
+  const [followupCount] = await db.select({ count: count() }).from(dosLeadsTable).where(eq(dosLeadsTable.stage, "needs-followup"));
+
+  // Top campaign by total clicks
+  const campaigns = await db.select().from(dosCampaignsTable).orderBy(desc(dosCampaignsTable.totalClicks)).limit(1);
+  const topCampaign = campaigns[0]?.name || null;
+
+  // Top page from page views
+  const pageViews = await db.select().from(dosPageViewsTable).where(gte(dosPageViewsTable.createdAt, windowStart)).limit(500);
+  const pathCounts: Record<string, number> = {};
+  pageViews.forEach(pv => { pathCounts[pv.path] = (pathCounts[pv.path] || 0) + 1; });
+  const topPageEntry = Object.entries(pathCounts).sort((a, b) => b[1] - a[1])[0];
+  const topPage = topPageEntry?.[0] || null;
+
+  // Automations health
+  const failedAutos = await db.select({ count: count() }).from(dosAutomationRunsTable).where(and(gte(dosAutomationRunsTable.createdAt, windowStart), eq(dosAutomationRunsTable.status, "failed")));
+  const automationsHealth = (failedAutos[0]?.count ?? 0) > 0 ? "Degraded" : "Healthy";
 
   res.json({
+    period,
     visitsThisWeek: pvCount?.count ?? 0,
     leadsThisWeek: leadCount?.count ?? 0,
     publishedArticles: articleCount?.count ?? 0,
@@ -523,7 +635,143 @@ router.get("/analytics/dashboard", async (_req: Request, res: Response) => {
     xFailed: xFailed?.count ?? 0,
     newslettersReady: nlReady?.count ?? 0,
     automationsCompletedThisWeek: autoRuns?.count ?? 0,
+    leadsNeedingFollowup: followupCount?.count ?? 0,
+    topCampaign,
+    topPage,
+    contentGenerated: articleCount?.count ?? 0,
+    automationsHealth,
   });
+});
+
+router.delete("/campaigns/:id", requireAuth, async (req: Request, res: Response) => {
+  await db.delete(dosCampaignsTable).where(eq(dosCampaignsTable.id, Number(req.params.id)));
+  res.json({ success: true });
+});
+
+// ─── Seed data ────────────────────────────────────────────────────────────────
+
+router.post("/seed", requireAuth, async (_req: Request, res: Response) => {
+  const results: Record<string, unknown> = {};
+
+  // Seed 3 campaigns (idempotent: skip if slugs exist)
+  const existingCampaigns = await db.select().from(dosCampaignsTable);
+  const existingSlugs = new Set(existingCampaigns.map(c => c.slug));
+
+  const seedCampaigns = [
+    { name: "Founder LinkedIn Spring 2025", slug: "founder-linkedin-spring-2025", description: "Founder-led content campaign on LinkedIn targeting enterprise operators and MSP buyers.", status: "active" as const, owner: "Stephen", totalClicks: 142, totalConversions: 8 },
+    { name: "Newsletter — Weekly Brief Launch", slug: "newsletter-weekly-brief-launch", description: "Campaign to grow newsletter subscriber base via bio links, X, and Substack cross-posts.", status: "active" as const, owner: "Stephen", totalClicks: 87, totalConversions: 23 },
+    { name: "Lyte Product Launch Q2", slug: "lyte-product-launch-q2", description: "Campaign for Lyte product awareness targeting SMB IT teams and MSPs.", status: "draft" as const, owner: "Stephen", totalClicks: 0, totalConversions: 0 },
+  ];
+
+  const createdCampaigns: Record<string, number> = {};
+  for (const cam of seedCampaigns) {
+    if (!existingSlugs.has(cam.slug)) {
+      const [c] = await db.insert(dosCampaignsTable).values(cam).returning();
+      createdCampaigns[cam.slug] = c.id;
+    } else {
+      const existing = existingCampaigns.find(c => c.slug === cam.slug);
+      if (existing) createdCampaigns[cam.slug] = existing.id;
+    }
+  }
+  results.campaigns = Object.keys(createdCampaigns).length;
+
+  // Seed campaign links for first campaign
+  const linkedinCamId = createdCampaigns["founder-linkedin-spring-2025"];
+  if (linkedinCamId) {
+    const existingLinks = await db.select().from(dosCampaignLinksTable).where(eq(dosCampaignLinksTable.campaignId, linkedinCamId));
+    if (existingLinks.length === 0) {
+      await db.insert(dosCampaignLinksTable).values([
+        { campaignId: linkedinCamId, name: "LinkedIn Bio Link", source: "linkedin", medium: "bio-link", campaign: "founder-linkedin-spring-2025", destination: "https://szlholdings.com", fullUrl: "https://szlholdings.com?utm_source=linkedin&utm_medium=bio-link&utm_campaign=founder-linkedin-spring-2025", clicks: 89, conversions: 4 },
+        { campaignId: linkedinCamId, name: "Carousel CTA — Lyte", source: "linkedin", medium: "social", campaign: "founder-linkedin-spring-2025", content: "carousel-lyte-ops", destination: "https://szlholdings.com/lyte", fullUrl: "https://szlholdings.com/lyte?utm_source=linkedin&utm_medium=social&utm_campaign=founder-linkedin-spring-2025&utm_content=carousel-lyte-ops", clicks: 53, conversions: 4 },
+      ]);
+    }
+  }
+
+  // Seed 3 leads (idempotent: skip if emails exist)
+  const existingLeads = await db.select().from(dosLeadsTable);
+  const existingEmails = new Set(existingLeads.map(l => l.email));
+
+  const seedLeads = [
+    {
+      name: "Marcus Hendricks",
+      email: "marcus@hendricksmsp.com",
+      company: "Hendricks MSP",
+      role: "CEO",
+      interestArea: "Lyte — AI Ops Platform",
+      budget: "$2k–5k/mo",
+      message: "We've been struggling to scale our NOC operations with our current tooling. Your Lyte platform looks like exactly what we need. Would love to set up a call to discuss pricing and onboarding.",
+      source: "linkedin",
+      medium: "social",
+      campaign: "founder-linkedin-spring-2025",
+      landingPage: "/lyte",
+      stage: "warm" as const,
+      score: 65,
+      consent: true,
+    },
+    {
+      name: "Priya Sharma",
+      email: "priya@techscale.io",
+      company: "TechScale IO",
+      role: "VP of Engineering",
+      interestArea: "Alloy — Automation Platform",
+      budget: "$5k–15k/mo",
+      message: "Reached out from your newsletter. We're building internal automation tooling and evaluating partners. Enterprise email, proper budget, and we're serious buyers.",
+      source: "newsletter",
+      medium: "email",
+      campaign: "newsletter-weekly-brief-launch",
+      landingPage: "/newsletter",
+      stage: "qualified" as const,
+      score: 80,
+      consent: true,
+    },
+    {
+      name: "Daniel Torres",
+      email: "d.torres@gmail.com",
+      company: null,
+      role: null,
+      interestArea: "General Inquiry",
+      budget: null,
+      message: "Hi, just curious about what SZL Holdings does. Saw you on LinkedIn.",
+      source: "linkedin",
+      medium: "social",
+      campaign: "founder-linkedin-spring-2025",
+      landingPage: "/",
+      stage: "new" as const,
+      score: 5,
+      consent: true,
+    },
+  ];
+
+  let leadsCreated = 0;
+  for (const lead of seedLeads) {
+    if (!existingEmails.has(lead.email)) {
+      await db.insert(dosLeadsTable).values(lead);
+      leadsCreated++;
+    }
+  }
+  results.leads = leadsCreated;
+
+  // Seed integration status records
+  const existingIntegrations = await db.select().from(dosIntegrationStatusTable);
+  const existingProviders = new Set(existingIntegrations.map(i => i.provider));
+  const integrationProviders = [
+    { provider: "x", authMode: "oauth2" as const, status: "disconnected" as const },
+    { provider: "substack", authMode: "api-key" as const, status: "mock" as const },
+    { provider: "medium", authMode: "api-key" as const, status: "disconnected" as const },
+    { provider: "linkedin", authMode: "oauth2" as const, status: "disconnected" as const },
+    { provider: "linktree", authMode: "manual" as const, status: "disconnected" as const },
+    { provider: "email", authMode: "api-key" as const, status: "disconnected" as const },
+  ];
+  let intCreated = 0;
+  for (const int of integrationProviders) {
+    if (!existingProviders.has(int.provider)) {
+      await db.insert(dosIntegrationStatusTable).values(int);
+      intCreated++;
+    }
+  }
+  results.integrations = intCreated;
+
+  res.json({ success: true, seeded: results });
 });
 
 router.get("/articles/published/list", async (_req: Request, res: Response) => {

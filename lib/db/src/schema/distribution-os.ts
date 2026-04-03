@@ -246,6 +246,9 @@ export const dosLeadsTable = pgTable("dos_leads", {
   stage: text("stage", { enum: ["new", "qualified", "warm", "needs-followup", "proposal-candidate", "closed-won", "closed-lost"] }).notNull().default("new"),
   score: integer("score").notNull().default(0),
   tags: jsonb("tags").$type<string[]>().default([]),
+  owner: text("owner"),
+  nextFollowUp: timestamp("next_follow_up"),
+  lastAction: text("last_action"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [

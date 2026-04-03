@@ -125,6 +125,7 @@ const DistOsCalendar = lazy(() => import("@/pages/distribution-os/content-calend
 const DistOsAnalytics = lazy(() => import("@/pages/distribution-os/analytics-dashboard"));
 const DistOsAutomations = lazy(() => import("@/pages/distribution-os/automations-page"));
 const DistOsSettings = lazy(() => import("@/pages/distribution-os/settings-page"));
+const DistOsReports = lazy(() => import("@/pages/distribution-os/reports-page"));
 
 const VenturePortfolioPage = lazy(() => import("@/pages/venture-portfolio"));
 const AlloyFactoryFloor = lazy(() => import("@/alloy/pages/factory-floor"));
@@ -809,6 +810,9 @@ function App() {
             </Route>
             <Route path="/admin/distribution/settings">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsSettings /></Suspense></RequireAuth>
+            </Route>
+            <Route path="/admin/distribution/reports">
+              <RequireAuth><Suspense fallback={<PageLoader />}><DistOsReports /></Suspense></RequireAuth>
             </Route>
             <Route path="/admin/distribution">
               <RequireAuth><Suspense fallback={<PageLoader />}><DistOsDashboard /></Suspense></RequireAuth>
